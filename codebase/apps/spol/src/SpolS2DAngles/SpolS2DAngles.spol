@@ -1,0 +1,182 @@
+/**********************************************************************
+ * TDRP params for SpolS2DAngles
+ **********************************************************************/
+
+//======================================================================
+//
+// SpolS2DAngles reads angles from the TS-7800, listens for a client, 
+//   and writes the angles to the client.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// reg_with_procmap ////////////////////////
+//
+// Register with procmap.
+// Type: boolean
+//
+
+reg_with_procmap = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "spol";
+
+///////////// run_as_daemon ///////////////////////////
+//
+// Run as a daemon process.
+// Type: boolean
+//
+
+run_as_daemon = FALSE;
+
+///////////// sleep_msecs_on_start ////////////////////
+//
+// Time to sleep before accessing data and serial ports (msecs).
+// Allows the computer to boot fully before starting the app.
+// Type: int
+//
+
+sleep_msecs_on_start = 5000;
+
+//======================================================================
+//
+// READING ANGLES from TS-7800.
+//
+//======================================================================
+ 
+///////////// pc104_available /////////////////////////
+//
+// Is there a pc104 available on this host.
+// If false, we will simulate the pc104 instead.
+// Type: boolean
+//
+
+pc104_available = TRUE;
+
+///////////// azimuth_offset_deg //////////////////////
+//
+// Offset for azimuth (deg).
+// This value will be ADDED to the azimuth read from the PC104.
+// Type: double
+//
+
+azimuth_offset_deg = 0.0;
+
+///////////// elevation_offset_deg ////////////////////
+//
+// Offset for elevation (deg).
+// This value will be ADDED to the elevation read from the PC104.
+// Type: double
+//
+
+elevation_offset_deg = 0.0;
+
+//======================================================================
+//
+// ANGLE DISPLAY.
+//
+//======================================================================
+ 
+///////////// displays_available //////////////////////
+//
+// Are there display units available on this host.
+// If false, we will simulate the display instead.
+// Type: boolean
+//
+
+displays_available = TRUE;
+
+///////////// display_type ////////////////////////////
+//
+// Type of display units for angles.
+// The displays are from Matrix Orbital. The lab displays are type 
+//   LCD2041, a back-lit green character-only LCD. The units at SPOL are 
+//   of type GLK24064R, a blue LCD for both characters and gtraphics.
+//
+// Type: enum
+// Options:
+//     LCD2041
+//     GLK24064R
+//
+
+display_type = GLK24064R;
+
+///////////// el_serial_device ////////////////////////
+//
+// Serial device for elevation angle readout.
+// Elevation data is written to this serial device.
+// Type: string
+//
+
+el_serial_device = "/dev/ttts4";
+
+///////////// az_serial_device ////////////////////////
+//
+// Serial device for azimuth angle readout.
+// Azimuth data is written to this serial device.
+// Type: string
+//
+
+az_serial_device = "/dev/ttyS1";
+
+///////////// angle_display_frequency_hz //////////////
+//
+// Frequency at which angles are written to the displays (hz).
+// The displays will be updated at this rate.
+// Type: double
+//
+
+angle_display_frequency_hz = 5;
+
+///////////// show_angles_on_both_displays ////////////
+//
+// Option to show both az and el on both displays.
+// Useful if one display is not working - you can see all angles on each 
+//   display. Date and time will not be shown.
+// Type: boolean
+//
+
+show_angles_on_both_displays = FALSE;
+
+//======================================================================
+//
+// SERVER DETAILS.
+//
+//======================================================================
+ 
+///////////// server_port /////////////////////////////
+//
+// Port to listen on.
+// A client that needs angles will connect to this port. Can only handle 
+//   a single client.
+// Type: int
+//
+
+server_port = 15000;
+

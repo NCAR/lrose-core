@@ -1,0 +1,437 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MrmsGribIngest
+ *
+ */
+
+commentdef {
+  p_header = "MrmsGribIngest parameters";
+  p_text = "MrmsGribIngest reads individual height layer files for the MRMS radar mosaic, and compiles them into a single MDV file\n";
+}
+
+commentdef {
+  p_header = "PROGRAM CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Instance";
+  p_help = "Process instance for registration with process mapper";
+} instance;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Interval for procmap registration";
+  p_help = "Set to a high value if processing takes a long time. This will prevent the auto_restarter from killing and restarting the app.";
+} procmap_register_interval_secs;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode for reading in data";
+  p_help = "In REALTIME mode, the program waits for a new input file. We can either scan an input directory for new files, or monitor the latest_data_info. In FILELIST mode, the list of files to be read are provided on the command line.";
+} mode;
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Input directory";
+  p_help = "Directory which contains input grib2 files. Does not apply to FILELIST mode.";
+} input_dir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file name extension";
+  p_help = "Input file extensions will be checked against this string. Not used in FILELIST mode";
+} input_extension;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file substring check.";
+  p_help = "Input files will be checked against this string.  Not used in FILELIST mode.";
+} input_substring;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "If TRUE, watch input_dir for change in _latest_data_info. If FALSE, scan input_dir for new files.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {             
+  p_default = 300;
+  p_descr = "Max age of input data files (sec)";
+  p_help = "REALTIME mode only";
+} max_realtime_data_age;
+
+paramdef int {             
+  p_default = 5;
+  p_descr = "Max recursion depth for directory search.";
+  p_help = "REALTIME mode only. If latest_data_info_avail is FALSE we search for incoming files. This is the max directory depth for the recursion.";
+} max_recursion_depth;
+
+paramdef boolean {             
+  p_default = TRUE;
+  p_descr = "If TRUE, only the latest file will be processed.";
+  p_help = "REALTIME mode only.";
+} latest_file_only;
+
+paramdef int {             
+  p_default = 5;
+  p_descr = "How often to check for new data (secs).";
+  p_help = "REALTIME mode only, if latest_data_info_avail = FALSE.";
+} data_check_interval_secs;
+
+paramdef int {             
+  p_default = 5;
+  p_descr = "How long since the latest file changed (secs).";
+  p_help = "REALTIME mode only. Wait for files to be quiescent before assuming they are complete.";
+} data_file_quiescence_secs;
+
+paramdef int {             
+  p_default = 33;
+  p_max = 122;
+  p_descr = "Ideal number of height levels for a valid volume.";
+  p_help = "A volume is divided into grib2 files, one for each height level. This is the expected number of height levels for in a volume. A volume is considered complete when the data time changes.";
+} ideal_n_ht_levels_for_volume;
+
+paramdef int {             
+  p_default = 30;
+  p_min = 1;
+  p_descr = "Minimum number of height levels for a valid volume.";
+  p_help = "A volume is divided into grib2 files, one for each height level. This is the minimum number of height levels for a volume to be considered valid.";
+} min_n_ht_levels_for_volume;
+
+commentdef {
+  p_header = "RENAME FIELDS";
+  p_text = "Option to change the field names";
+}
+
+paramdef boolean {             
+  p_default = TRUE;
+  p_descr = "If TRUE, fields will be renamed as specified in field_rename array.";
+} rename_fields;
+
+typedef struct {
+  string grib_name;
+  string output_name;
+} field_rename_t;
+
+paramdef struct field_rename_t {
+  p_default = {
+    { "MREF_GPML", "DBZ" }
+  };
+  p_descr = "Rename field before writing out.";
+  p_help = "Only those fields that match the specified grib_name will be renamed.";
+} field_rename[];
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::/tmp/mdv/mrms";
+  p_descr = "Url for writing mdv files.";
+} output_url;
+
+paramdef string {
+  p_default = "Converted to MDV with MrmsGribIngest.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "NOAA MRMS radar mosaic.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "NOAA MRMS mosaic of NEXRAD radars.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+typedef enum {
+  ENCODING_INT8 = 1,
+  ENCODING_INT16 = 2,
+  ENCODING_FLOAT32 = 5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT16;
+  p_descr = "File encoding type, when all fields are written.";
+  p_descr = "Applies when specify_output_fields is FALSE. If specify_output_fields is true, the encoding type is specified in output_fields[].";
+} output_encoding;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE, we constrain the grid to lie within the specified bounding box.";
+  p_help = "The MRMS GRIB data grid is on a lat-lon projection. We can specify a lat-lon bounding box, and constrain the output MDV data to within that box.";
+} set_output_bounding_box;
+
+typedef struct {
+  double min_lat;
+  double min_lon;
+  double max_lat;
+  double max_lon;
+} bounding_box_t;
+
+paramdef struct bounding_box_t {
+  p_default = { -90, -180, 90, 180 };
+  p_descr = "Bounding box for output data grid.";
+  p_help = "See 'set_output_bounding_box'";
+} output_bounding_box;
+
+paramdef int {             
+  p_default = 120;
+  p_descr = "Min time between output files (secs).";
+  p_help = "If data arrives faster than this rate, data sets will be discarded until the minimum time has elapsed.";
+} min_time_between_output_files_in_secs;
+
+commentdef {
+  p_header = "REMAPPING GRID PROJECTION ON OUTPUT";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to remap output grid in x,y.";
+  p_help = "If true, set the remap parameters below.";
+} remap_output_grid;
+
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_MERCATOR =  4,
+  PROJ_POLAR_STEREO = 5,
+  PROJ_FLAT = 8,
+  PROJ_OBLIQUE_STEREO = 12,
+  PROJ_TRANS_MERCATOR = 15,
+  PROJ_ALBERS = 16,
+  PROJ_LAMBERT_AZIM = 17,
+  PROJ_VERT_PERSP = 18
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_FLAT;
+  p_descr = "Projection for remapping in x,y. See projection param below.";
+  p_help =
+  "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
+  "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
+  "\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n"
+  "\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n"
+  "\tPROJ_MERCATOR: Mercator - EW orientation\n"
+  "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
+  "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
+  "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
+  "\tPROJ_ALBERS: Albers Equal Area Conic\n"
+  "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
+} remap_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
+  p_descr = "Grid parameters for remapping in x,y.";
+  p_help = "Units in km, except for LATLON, which is in degrees.";
+} remap_grid;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid rotation.";
+  p_help = "This applies only to PROJ_FLAT projections.";
+} remap_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin latitude.";
+  p_help = "This applies to all projections except LATLON.";
+} remap_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin longitude.";
+  p_help = "This applies to all projections except LATLON.";
+} remap_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 1.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} remap_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 2.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} remap_lat2;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Central scale for remapped projections.";
+  p_help = "This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR projections.";
+} remap_central_scale;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped tangent latitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO only.";
+} remap_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped tangent longitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
+} remap_tangent_lon;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
+  p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
+} remap_pole_is_north;
+
+paramdef double {
+  p_default = 35786;
+  p_descr = "Radius of perspective point (km).";
+  p_help = "This applies to VERT_PERSP.";
+} remap_persp_radius;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped false northing correction.";
+  p_help = "Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude";
+} remap_false_northing;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped false easting correction.";
+  p_help = "Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.";
+} remap_false_easting;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Do you want to specify an offset origin using lat/lon instead of false_northing and false_easting?";
+  p_help = "If true, set remap_offset_origin_latitude and remap_offset_origin_longitude.";
+} remap_set_offset_origin;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Latitude of offset origin.";
+  p_help = "See remap_set_offset_origin.";
+} remap_offset_origin_latitude;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Longitude of offset origin.";
+  p_help = "See remap_set_offset_origin.";
+} remap_offset_origin_longitude;
+
+commentdef {
+  p_header = "PRINT OPTIONS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE print a summary.";
+} print_summary;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE print a variable list.";
+} print_var_list;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE print the sections.";
+} print_sections;
+
+commentdef {
+  p_header = "PRINT SECTIONS PARAMETERS";
+  p_text = "Parameters only used with -printSec or debug > 1\n. For each grib message prints the sections defined below.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE prints the Indicator Section.";
+} print_sec_is;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "If TRUE prints the Identification Section.";
+} print_sec_ids;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE prints the Local Use Section (if present).";
+} print_sec_lus;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "If TRUE prints the Grid Definition Section.";
+} print_sec_gds;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "If TRUE prints the Product Definition Section.";
+} print_sec_pds;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE prints the Data Representation Section.";
+} print_sec_drs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE prints the Bit-map Section.";
+} print_sec_bms;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE prints the Data Section.";
+} print_sec_ds;
+

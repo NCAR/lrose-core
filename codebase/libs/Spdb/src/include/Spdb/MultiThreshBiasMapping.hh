@@ -1,0 +1,142 @@
+/**
+ * @file MultiThreshBiasMapping.hh
+ * @brief Mapping from lead seconds to bias and to threshold for all gen times
+ * @class MultiThreshBiasMapping
+ * @brief Mapping from lead seconds to bias and to threshold for all gen times
+ *
+ * Stored to SPDB by gen time, contains XML mappings from lead seconds to
+ * bias, and from lead seconds to threshold
+ */
+
+# ifndef    MultiThreshBiasMapping_hh
+# define    MultiThreshBiasMapping_hh
+
+#include <rapformats/MultiThresholdsBiasMapping.hh>
+class DsSpdb;
+class FieldThresh;
+
+//----------------------------------------------------------------
+class MultiThreshBiasMapping : public MultiThresholdsBiasMapping
+{
+public:
+
+  /**
+   * Empty
+   */
+  MultiThreshBiasMapping(void);
+
+  /**
+   * URL, but no other info (for reading only)
+   *
+   * @param[in] spdb  The url
+   */
+  MultiThreshBiasMapping(const std::string &spdb);
+
+  /**
+   * @param[in] spdb  The URL
+   * @param[in] ltHours  The lead times
+   * @param[in] fields  The fields
+   *
+   * Thresholds not known
+   */
+  MultiThreshBiasMapping(const std::string &spdb,
+			 const std::vector<double> &ltHours,
+			 const std::vector<std::string> &fields);
+
+  /**
+   * Destructor
+   */
+  virtual ~MultiThreshBiasMapping(void);
+  
+  /**
+   * Read the newest data whose time is less than input, back to a maximum
+   *
+   * @param[in] t  Upper time limit
+   * @param[in] maxSecondsBack  Look back [t-maxSecondsBack,t)
+   * @param[in] maxSecondsBeforeColdstart  If data is read in, change that
+   *                                       data to coldstart values if the
+   *                                       generating time is older than
+   *                                       this value compared to input t
+   * @param[in]  coldstartThresh  The coldstart field/threshold pairs
+   *
+   * @return true if successful and state is filled in
+   */
+  bool readFirstBefore(const time_t &t, int maxSecondsBack,
+		       int maxSecondsBeforeColdstart,
+		       const std::vector<FieldThresh> &coldstartThresh);
+
+  /**
+   * Read the newest data whose time is in the range specified
+   *
+   * @param[in] t0  Lower time limit
+   * @param[in] t1  Upper time limit
+   *
+   * @return true if successful and state is filled in
+   */
+  bool readNewestInRange(const time_t &t0, const time_t &t1);
+
+  /**
+   * Read the data within a range closest in time to a target time
+   *
+   * @param[in] target  The target time
+   * @param[in] t0  Lower time limit
+   * @param[in] t1  Upper time limit
+   *
+   * @return true if successful and state is filled in
+   */
+  bool readClosestToTargetInRange(const time_t &target, const time_t &t0,
+				  const time_t &t1);
+
+  /**
+   * Read the newes data that has the same hour/min/second as the input 
+   * generation time either an exact match, or back some number of days
+   * @param[in] gt  The generation time
+   * @param[in] maxDaysBack
+   * @return true if successful and state is filled in
+   */
+  bool readExactPreviousOrCurrent(const time_t &gt, int maxDaysBack);
+
+  /**
+   * Read the newest data that has the same hour/min/second as the input 
+   * generation time back a minimum of 1 day and a maximum of maxDaysBack
+   *
+   * @param[in] gt  The generation time
+   * @param[in] maxDaysBack
+   * @return true if successful and state is filled in
+   */
+  bool readExactPrevious(const time_t &gt, int maxDaysBack);
+
+  /**
+   * Write state to SPDB at time t
+   * @param[in] t
+   * @return true if successful
+   */
+  bool write(const time_t &t);
+
+  /**
+   * @return the times that are in the range of inputs 
+   * @param[in] t0 Earliest time
+   * @param[in] t1 Latest time
+   */
+  std::vector<time_t> timesInRange(const time_t &t0, const time_t &t1) const;
+  
+  /**
+   * Read from SPDB into state, at a time
+   * @param[in] time
+   * @return true if successful
+   */
+  bool read(const time_t &time);
+
+protected:
+private:  
+
+  /**
+   * SPDB location
+   */
+  std::string _url;
+
+  bool _load(DsSpdb &s, bool fieldsAndLeadsSet=true);
+
+};
+
+# endif

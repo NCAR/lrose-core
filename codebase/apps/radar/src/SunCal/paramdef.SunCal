@@ -1,0 +1,627 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for SunCal
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2006
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SunCal analyses data from tsarchive time series files taken during sun scans.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILELIST_INPUT,
+  TS_FMQ_INPUT, 
+  TS_REALTIME_DIR_INPUT,
+  MOMENTS_REALTIME_INPUT,
+  MOMENTS_ARCHIVE_INPUT,
+  MOMENTS_FILELIST_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FILELIST_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "\n\nTS_FMQ_INPUT: the application will read the time series from a file message queue and process the pulses as they come in. \n\nTS_FILE_INPUT: the application will process all the files specified on the command line. \n\nTS_REALTIME_DIR_INPUT: the application will watch the input directory for new files, and will process those files as they arrive. This mode is suitable for automated operation. \n\nMOMENTS_REALTIME_INPUT: watch the input directory for new moments files, and process each volume as it arrives. \n\nMOMENTS_ARCHIVE_INPUT: will process the moments files in the input directory, between the start and end times. \n\nMOMENTS_FILELIST_INPUT: will process the moments files listed on the command line. ";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+paramdef string {
+  p_default = "/tmp/data/time_series/suncal";
+  p_descr = "Directory to watch for incoming files.";
+  p_help = "Applies to TS_REALTIME_DIR_INPUT mode only. This is the directory path for sunscan time series files. As files arrive in the directory, the application will read them in and process them.";
+} input_dir;
+
+paramdef string {
+  p_default = "2012 06 01 00 00 00";
+  p_descr = "Specify the start time for the files in archive mode.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'. Applies to MOMENTS_ARCHIVE_INPUT mode.";
+} archive_start_time;
+
+paramdef string {
+  p_default = "2012 06 02 00 00 00";
+  p_descr = "Specify the end time for the files in archive mode.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'. Applies to MOMENTS_ARCHIVE_INPUT mode.";
+} archive_end_time;
+
+paramdef int {
+  p_default = 128;
+  p_descr = "Number of pulse samples in a beam.";
+} n_samples;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Start gate for analysis.";
+} start_gate;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of gates for analysis.";
+} n_gates;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Does this system transmit alternating H and V pulses.";
+  p_help = "In some dual-polarization radars, the transmitter toggles between H and V transmit. Although this does not affect sun measurements directly, it does affect how the data is handled in the receiver chain.";
+} alternating_mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Does the receiver path switch between each pulse.";
+  p_help = "In some alternating mode radars, the receiver chain switches between pulses. This is done to create a co-polar and cross-polar receiver system which is more stable for ZDR. If this is set to TRUE, then the receiver is assumed to switch and the data for each channel is gathered accordingly. NOTE - this only applies in alternating mode.";
+} switching_receiver;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to invert H/V flag in pulse data.";
+  p_help = "Only applies to alternating dual polarization mode. Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the data has the opposite sense, set this to true.";
+} invert_hv_flag;
+
+commentdef {
+  p_header = "FIELD NAMES FOR MOMENTS FILES";
+  p_text = "Names of specified fields in the moments files.";
+};
+
+typedef struct {
+  string DBMHC;
+  string DBMVC;
+  string DBMHX;
+  string DBMVX;
+  string ZDR;
+  string PHIDP;
+  string RHOHV;
+  string NCP;
+  string LAG1_HC_DB;
+  string LAG1_HC_PHASE;
+  string LAG1_VC_DB;
+  string LAG1_VC_PHASE;
+  string RVVHH0_DB;
+  string RVVHH0_PHASE;
+} moments_field_names_t;
+
+paramdef struct moments_field_names_t {
+  p_default = {
+    DBMHC = "DBMHC",
+    DBMVC = "DBMVC",
+    DBMHX = "DBMHX",
+    DBMVX = "DBMVX",
+    ZDR = "ZDR",
+    PHIDP = "PHIDP",
+    RHOHV = "RHOHV",
+    NCP = "NCP",
+    LAG1_HC_DB = "LAG1_HC_DB",
+    LAG1_HC_PHASE = "LAG1_HC_PHASE",
+    LAG1_VC_DB = "LAG1_VC_DB",
+    LAG1_VC_PHASE = "LAG1_VC_PHASE",
+    RVVHH0_DB = "RVVHH0_DB",
+    RVVHH0_PHASE = "RVVHH0_PHASE"
+  };
+} moments_field_names;
+
+commentdef {
+  p_header = "VOLUME IDENTIFICATION OPTIONS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Scan mode is RHI instead of SECTOR.";
+  p_help = "Set to TRUE if the scan is in RHI mode and the RHI flag is not set in the pulse headers.";
+} scan_mode_rhi;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to identify individual sun volumes for the analysis.";
+  p_help = "If false, all of the input data will be analyzed together. If true, the program will identify individual sun scans for analysis by monitoring the antenna elevation angle for a decrease which indicates that the volume is restarting. You have the option of including more than 1 volume in the analysis - see n_volumes_for_analysis.";
+} analyze_individual_volumes;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of consecutive volumes to be combined for each analysis. The program will go through all of the data grouping the volumes accordingly.";
+  p_help = "Applies if analyze_individual_volumes is true.";
+} n_volumes_for_analysis;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Minimum number of consecutive volumes to be included in the analysis.";
+  p_help = "The program checks for the number of available volumes. If it exceeds this number, the analysis is performed. If not, the data will be ignored.";
+} min_n_volumes_for_analysis;
+
+paramdef int {
+  p_default = 100;
+  p_descr = "Min number of beams per volume volume.";
+} min_beams_per_volume;
+
+paramdef int {
+  p_default = 20000;
+  p_descr = "Max number of beams per volume volume.";
+} max_beams_per_volume;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to identify end of volumes by elevation change.";
+  p_help = "If true, the antenna elevation will be checked. If it changes by a significant amount, an end of volume is likely. See 'elev_change_for_end_of_volume'. If false, the volume number will be checked for changes.";
+} check_for_elevation_change;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Minimum delta elevation to indicate end of volume (deg).";
+  p_help = "At the end of a volume, the elevation angle will be reset to the starting angle. When this happens the program can detect the end of volume by the rapid change in elevation angle. This is the minimum angular change to signal and end of volume.";
+} elev_change_for_end_of_volume;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Volume starts at lowest elevation angle and moves upwards.";
+  p_help = "If false, volume starts at top and moves downwards.";
+} volume_starts_at_bottom;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Max time gap within a volume (secs).";
+  p_help = "If the time between pulses exceeds this value, the current analysis will be terminated and a new analysis begun.";
+} max_time_gap_within_volume;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Max error in pointing angle for valid data (deg).";
+  p_help = "We discard data when the pointing angle differs from the commanded fixed angle by greater than this amount.";
+} max_pointing_angle_error_deg;
+
+commentdef {
+  p_header = "RADAR NAME AND LOCATION";
+};
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Name of radar";
+} radar_name;
+
+paramdef string {
+  p_default = "MARSHALL";
+  p_descr = "Site of radar";
+} radar_site;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read the latitude and longitude from the time series data.";
+  p_help = "If false, the values specified in this file will be used.";
+} get_location_from_data;
+
+paramdef double {
+  p_default = 39.950199;
+  p_descr = "Latitude of radar location (deg).";
+  p_help = "North is positive, South is negative.";
+} radar_lat;
+
+paramdef double {
+  p_default = -105.195099;
+  p_descr = "Longitude of radar location (deg).";
+  p_help = "East is positive, West is negative.";
+} radar_lon;
+
+paramdef double {
+  p_default = 1.742;
+  p_descr = "Altitude of radar (km).";
+} radar_alt_km;
+
+commentdef {
+  p_header = "FIXED TARGET LOCATION";
+  p_text = "Optionally you can perform the analysis for a fixed target location, instead of the moving sun.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to analyze the grid based on a fixed target location.";
+  p_help = "This location is used instead of computing the location of the sun. This is useful for calibration using a target such as a sphere.";
+} specify_fixed_target_location;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Elevation angle for target (deg).";
+  p_help = "See 'specify_fixed_target_location'.";
+} target_elevation;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Azimuth angle for target (deg).";
+  p_help = "See 'specify_fixed_target_location'.";
+} target_azimuth;
+
+commentdef {
+  p_header = "GRID DETAILS";
+};
+
+paramdef double {
+  p_default = -5.0;
+  p_descr = "Min azimiuth for the grid (deg).";
+} grid_min_az;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Max azimiuth for the grid (deg).";
+} grid_max_az;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Resolution of regular grid in azimuth (deg).";
+} grid_delta_az;
+
+paramdef double {
+  p_default = -2.0;
+  p_descr = "Min elevation for the grid (deg).";
+} grid_min_el;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Max elevation for the grid (deg).";
+} grid_max_el;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Resolution of regular grid in elevation (deg).";
+} grid_delta_el;
+
+commentdef {
+  p_header = "NOISE CORRECTION";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to subtract noise from powers.";
+  p_help = "If true, the noise power is subtracted from the received power.";
+} correct_powers_for_noise;
+
+typedef enum {
+  GET_NOISE_FROM_CAL_FILE,
+  GET_NOISE_FROM_TIME_SERIES,
+  COMPUTE_MEAN_NOISE,
+  COMPUTE_MIN_NOISE
+} noise_method_t;
+
+paramdef enum noise_method_t {
+  p_default = GET_NOISE_FROM_CAL_FILE;
+  p_descr = "Method for determining the noise, if noise correction is needed.";
+  p_help = "GET_NOISE_FROM_CAL_FILE: read the noise values from the XML file specified in the parameter 'cal_xml_file_path'. GET_NOISE_FROM_TIME_SERIES: some data streams have noise values in the time series. - e.g. SIGMET tsarchive. COMPUTE_MEAN_NOISE: compute the mean noise from data which is away from the sun. See 'min_angle_offset_for_noise_power. COMPUTE_MN_NOISE: compute the minimum noise from data which is away from the sun. See 'min_angle_offset_for_noise_power. ";
+} noise_method;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Min angle from sun center for noise power (deg).";
+  p_help = "The noise will be computed as the mean of power from beams outside this angular offset.";
+} min_angle_offset_for_noise_power;
+
+paramdef string {
+  p_default = "./spol_cal.xml";
+  p_descr = "Path for XML calibration file.";
+  p_help = "At a minimum, the calibration file should contain noiseDbm values for each channel.";
+} cal_xml_file_path;
+
+commentdef {
+  p_header = "INTERFERENCE REMOVAL FOR SUN CENTROID";
+  p_text = "Option to set a maximum sun power, so that we can filter out high power values which affect the computation of the sun centroid.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set a maximum acceptable power value.";
+  p_help = "If true, powers above this value will be set to -120 dBm.";
+} set_max_sun_power;
+
+paramdef double {
+  p_default = -60;
+  p_descr = "Max valid sun power value (dBm).";
+  p_help = "See 'set_max_power'.";
+} max_valid_sun_power_dbm;
+
+commentdef {
+  p_header = "COMPUTING CORRELATION OVER THE SUN DISK";
+};
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Solid angle for computing mean correlation over sun disk (deg).";
+  p_help = "The mean correlation will be computed using grid points within this angle.";
+} max_solid_angle_for_mean_correlation;
+
+commentdef {
+  p_header = "CROSS-POLAR POWER ANALYSIS";
+};
+
+paramdef double {
+  p_default = 8.0;
+  p_descr = "Power of sun edge relative to the peak (dB).";
+  p_help = "The sun position is computed using the power at each point. Only powers within this margin of the peak power are used in the computations.";
+} sun_edge_below_peak_db;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Number of ratios computed for S1S2.";
+  p_help = "Each ratio is computed for a different solid angle.";
+} n_s1s2_ratios_computed;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Min solid angle over which to compute S1S2 mean (deg).";
+  p_help = "This is the min angle for computing S1S2. The angle is centered on the sun, and the mean ratio is computed over the entire angle. For example, if set to 1.0, all points in the grid within 0.5 degrees of the sun centroid will be used.";
+} min_solid_angle_for_s1s2;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Delta solid angle over which to compute S1S2 mean (deg).";
+  p_help = "A number of ratios are computed for a range of solid angles. This is the delta between each solid angle.";
+} delta_solid_angle_for_s1s2;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Solid angle for computing ZDR bias (deg).";
+} solid_angle_for_zdr_bias;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Number of grid points used to compute ratios using ranked powers.";
+  p_help = "In this method, the points in the grids are ranked, and a mean is computed using the top npoints_power_ranking points, after dropping the tops few points. See npoints_dropped_ranking";
+} npoints_power_ranking;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute cross polar power ratio from side-lobe clutter.";
+  p_help = "If true, xpol ratio will be computed using data from specified gates. This is only applicable in alternating mode with the transmitter running.";
+} compute_cross_polar_power_ratio;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Start gate for cross-polar analysis.";
+} cross_polar_start_gate;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of gates for cross-polar analysis.";
+} cross_polar_n_gates;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Minimum SNR for cross-polar analysis (dB).";
+} cross_polar_min_snr;
+
+paramdef double {
+  p_default = 60.0;
+  p_descr = "Maximum SNR for cross-polar analysis (dB).";
+} cross_polar_max_snr;
+
+paramdef double {
+  p_default = -10;
+  p_descr = "Minimum valid Vx/Hx ratio (dB).";
+  p_help = "Sometimes, odd data leads to inappropriate ratios. This puts limits on the ratios to be used in the analysis.";
+} cross_polar_min_valid_ratio_db;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Maximum valid Vx/Hx ratio (dB).";
+  p_help = "Sometimes, odd data leads to inappropriate ratios. This puts limits on the ratios to be used in the analysis.";
+} cross_polar_max_valid_ratio_db;
+
+paramdef double {
+  p_default = 0.97;
+  p_descr = "Minimum valid Vx-Hx correlation (dB).";
+  p_help = "Sometimes, odd data leads to inappropriate ratios. This sets a minimum value for the correlation between vx and hx.";
+} cross_polar_min_rho_vx_hx;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Min angle offset from sun center for cross polar ratio (deg).";
+  p_help = "The ratio will be computed from beams outside this anglular offset.";
+} min_angle_offset_for_cross_pol_ratio;
+
+commentdef {
+  p_header = "OPTION TO RETRIEVE XPOL RATIO from SPDB";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read the cross-polar ratio from SPDB.";
+  p_help = "We can compute the x-polar ratio using the AltCpCompute app, which stores the results in SPDB. So, in addition to computing it from the sun scan data itself, we can retrieve the results from AltCpCompute and add that to the output for comparison purposes.";
+} read_xpol_ratio_from_spdb;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use the the cross-polar ratio from SPDB instead of that computed from the solar.";
+  p_help = "With S1S2 from the solar, and the xpol ratio, we can compute ZDR bias. This option allows us to use the ratio retrieved from SPDB instead of the value computed from the solar scan itself.";
+} use_xpol_ratio_from_spdb;
+
+paramdef string {
+  p_default = "spdb/xpol_ratio";
+  p_descr = "URL for reading x-polar ratio from SPDB.";
+  p_help = "See 'get_xpol_ratio_from_spdb'.";
+} xpol_ratio_spdb_url;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of station for xpol ratio data.";
+  p_help = "If empty, we will use the closest data in time.";
+} xpol_ratio_radar_name;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding xpol ratio (secs).";
+  p_help = "We search for the xpol ratio result closest in time to the radar volume. This is the search margin on either side of the sunscan time.";
+} xpol_ratio_search_margin_secs;
+
+commentdef {
+  p_header = "OPTION TO RETRIEVE SITE TEMP from SPDB";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read the site ambient temperature from SPDB.";
+  p_help = "It can be useful to check for dependency between the solar data, xpol ratio and temperature. This gives you the option of retrieving the temperature from SPDB and including it in the analysis.";
+} read_site_temp_from_spdb;
+
+paramdef string {
+  p_default = "spdb/temperature";
+  p_descr = "URL for reading temperature data from SPDB.";
+  p_help = "See 'get_temperature_from_spdb'.";
+} site_temp_spdb_url;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of station for site temp data.";
+  p_help = "If empty, we will use the closest data in time.";
+} site_temp_station_name;
+
+paramdef int {
+  p_default = -1;
+  p_descr = "Data type instead of station name.";
+  p_help = "If this is -1, site_temp_station_name is used. If not -1, this value is used instead of specifying the station name";
+} site_temp_data_type;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding site temp data (secs).";
+  p_help = "We search for the temperature closest in time to the radar volume. This is the search margin on either side of the sunscan time.";
+} site_temp_search_margin_secs;
+
+commentdef {
+  p_header = "TEST PULSE ANALYSIS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to analyze the test pulse powers.";
+  p_help = "If true, we will compute the test pulse for each channel, and write out results.";
+} compute_test_pulse_powers;
+
+paramdef double {
+  p_default = 147.5;
+  p_descr = "Range to start of test pulse (km).";
+  p_help = "This delimits the test pulse gates in the moments.";
+} test_pulse_min_range_km;
+
+paramdef double {
+  p_default = 147.8;
+  p_descr = "Range to end of test pulse (km).";
+  p_help = "This delimits the test pulse gates in the moments.";
+} test_pulse_max_range_km;
+
+commentdef {
+  p_header = "TRANSMITTER POWERS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute the mean xmit power for each channel.";
+  p_help = "This depends on having the measured transmitter power in the time series.";
+} compute_mean_transmit_powers;
+
+commentdef {
+  p_header = "OUTPUT TEXT RESULTS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out text files.";
+  p_help = "If false, the output fill be written to stdout.";
+} write_text_files;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output text files.";
+  p_help = "The results will be written to sub-directories named from the cal time.";
+} text_output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to append results to global file.";
+} append_to_global_results_file;
+
+paramdef string {
+  p_default = "SunCal.global_results.txt";
+  p_descr = "Name for global output file.";
+} global_file_name;
+
+commentdef {
+  p_header = "OUTPUT RESULTS TO MDV FILES";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out grids to MDV files.";
+} write_mdv_files;
+
+paramdef string {
+  p_default = "./mdv";
+  p_descr = "URL for output MDV files.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: mdvp:://host::dir.";
+} mdv_output_url;
+
+commentdef {
+  p_header = "OUTPUT SUMMARY RESULTS TO SPDB XML";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out summary results to SPDB.";
+  p_help = "The summary will be in XML, stored in SPDB. It can then be retrieved for plotting or other purposes.";
+} write_summary_to_spdb;
+
+paramdef string {
+  p_default = "./spdb";
+  p_descr = "URL for SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} spdb_output_url;
+

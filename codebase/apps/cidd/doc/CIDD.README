@@ -1,0 +1,90 @@
+# CIDD's README
+#
+# This directory is set up to help people use CIDD on their
+# Workstations. This directory contains a "STANDARD" setup
+# and configuration files. This configuration is set up for ARCHIVAL
+# use. Please do not clutter this directory with extraneous
+# files. Recursive copy this directory to one of your own, and modify
+# your own copies, instead.
+#
+#  General requirements to run CIDD and associated programs at RAP:
+#  An NFS mount to /tools/rap  and /tools/rap/bin.  
+#    This is where the executables, map overlays and colorscales live.
+#    Stand alone systems are discouraged. 
+#  A Unix Kernel compilied with the shared memory extensions.
+#
+#  Almost everyone within RAP is set up this way, already.
+#  Very little disk space is required. All data is/can be accessed from
+#  remote systems directly. 
+#         
+#
+#  For offsite use, CIDD
+#
+#  Note that CIDD has a variety of related applications with which
+# it interoperates. They are: RDI, PRDS, EXPT, EXPRT, POS_REPORT, SNOW_GRAPH
+# CIDD2SKEWT, and TITAN's TIME_HIST. Data servers are compatible with TITAN.
+# A utility 'notify_cidd' is used for real-time operation, which forces
+# cidd to update all gridded data.
+#
+# -F. Hage.  Feb 1994.
+# Last Update:  9/12/94 - F. Hage
+
+HOW TO RUN CIDD ON ANOTHER MACHINE:
+1. Recursive Copy this directory to one, under your own home.
+2. cd to it.
+3. Make sure the soft link to /tools/rap/maps is correct (ls -l maps).
+4. run start_cidd.
+5. run kill_cidd afterwards to make sure everything dies.
+
+
+Related Applications and their Files:
+
+1. CIDD.
+
+   A. data.info:  Determines which fields and data sources are available from 
+        CIDD's menus. 
+   B. wind.info:  Determines which data fields will be represented by wind 
+	vectors.
+   C. overlays.info:  Determines which map overlays are loaded, on by default,
+   	and their initial colors. Note that these files are in the same format
+	as the product files that prds and exprt are compatible with.
+   D. .cidd_defaults:  Contains many start up parameters, such as window sizes,
+       what all the other files used are named, where to find colorscales,
+       and many other parameters which control basic functionality and
+       capabilities. Its named _DOT_cidd_defaults for a reason; Only 
+       experienced users should change these parameters. Dot files normally 
+       don't appear in plain ls directory llstings.
+
+   E. COLORSCALES:  Each field in data.info specifies a colorscale file.
+                    Standard ones live in /tools/rap/colorscales. If you need
+                    a non-standard one, copy one to your local directory and
+                    modify it.  Cidd looks in the local directory first for 
+	            the files.
+   F. MAP FILES:    Each overlay file listed in overlays.info must be 
+	            availible.
+
+2. PRODUCT SELECTOR: (awps2prds & prds)
+
+   A. awps2prds.defaults :  Holds parameters for the conversion filter from 
+        product server format to PRDS's format.
+   B. prds.conf :   Deterimines which products are available, and their 
+	timeouts, etc.
+   C. prds_maps:    Contains a static list of overlays. WARNING: These files 
+	have a local origin. CIDD must be set to the same origin. 
+   D. prds_in_pipe:  This is a temporary file used to communicate between prds
+	& awps2prds.
+   E. roman_simplex.binf: Used for stroked fonts.
+   F. prod.tmp:     The file used to directly import symbolic products.
+   G. prod.data:    A File used to archive products which were written to 
+	prod.tmp.
+
+
+3. EXPRT.
+   A. exprt.conf:  Determines which products can be manually exported and 
+	their parameters.
+
+
+4. POS_REPORT: A simple positional locator and reporting system.
+
+   A. pos_report.defaults:  Contains the list of origins, window, defaults, 
+	etc.

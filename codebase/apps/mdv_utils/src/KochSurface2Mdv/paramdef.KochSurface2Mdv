@@ -1,0 +1,149 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "KochSurface2Mdv is a small conversion utility that\n"
+  "reads KochSurface data netcdf files and writes MDV files. Data are\n"
+  "expected to be on a lambert conformal grid.\n"
+  "Each file must pertain to only one data time.\n\n"
+  "Niles Oien May 2004.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::./mdv";
+  p_descr = "Output MDV url, of form mdvp:://host.domain:[port]:dir/dir ";
+  p_help = "Data are written here.";
+} output_url;
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+  
+
+paramdef long {
+  p_descr = "How long the data are valid, seconds.";
+  p_help = "Depends on input frequency.";
+  p_default = 600;
+} Expiry;
+ 
+paramdef string {
+  p_descr = "Names of the input fields we want.";
+  p_help = "Can be ascertained with ncdump -h";
+  p_default = { "u", "v", "p", "t", "td", "vv", "rh", "msl", "tad", "th", "the", "ps", "vor", "mr", "mrc", "div", "tha", "mra", "spd", "css", "vis", "fwx", "hi", "tgd" };
+} fieldNames[];
+ 
+
+paramdef boolean
+{
+  p_descr = "Remap output fileds";
+  p_help = "Remaps output to projection and grid specified below.";
+  p_default = false;
+} remap_output;
+
+typedef enum {
+  PROJ_LATLON		= 0,
+  PROJ_LAMBERT_CONF	= 3,
+  PROJ_FLAT		= 8
+} projection_t;
+
+typedef struct {
+  projection_t type;
+  double rotation;
+  double origin_lat;
+  double origin_lon;
+  double ref_lat_1;
+  double ref_lat_2;
+} projection_info_t;
+
+paramdef struct projection_info_t {
+  p_descr = "This is the user defined projection";
+  p_help = "userProjection is the output projection definition. The statellite "
+           "and model input grid are remapped by userProjection as they are read. "
+           "The choice of projections are PROJ_LATLON, PROJ_LAMBERT_CONF and "
+           "PROJ_FLAT. PROJ_LATLON is a latitude/longitude projection, and if "
+           "it is chosen the remaining parameters can be ignored. PROJ_FLAT is "
+           "a flat projection, and if it is chosen the parameters rotation, "
+           "origin_lat, origin_lon must be set. PROJ_LAMBERT_CONF is a Lambert "
+           "conformal projection, and if it is chosen the parameters origin_lat, "
+           "origin_lon, ref_lat_1 and ref_lat_2 must be set.";
+  p_default = {PROJ_LAMBERT_CONF, 0.0, 25.0, -95.0, 25.0, 25.0};
+} out_projection_info; 
+  
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_info_t;
+
+paramdef struct grid_info_t {
+  p_descr = "This is the user defined grid";
+  p_help = "userGrid is the output grid definition. The statellite and model"
+  "input grid are remapped by userGrid as they are read.";
+  p_default = {301, 225, -3332.142334, -588.890442, 20.318001, 20.318001};
+} out_grid_info; 
+

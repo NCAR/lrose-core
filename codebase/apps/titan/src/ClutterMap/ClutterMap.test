@@ -1,0 +1,325 @@
+/**********************************************************************
+ * TDRP params for ClutterMap
+ **********************************************************************/
+
+//======================================================================
+//
+// ClutterMap computes a clutter map from a series of MDV files. It 
+//   considers the persistence of reflectivify, and if available uses 
+//   velocity and width data to constrain the points considered. Outputs 
+//   are the clutter flag, mean reflectivity, and if requested mean 
+//   velocity and width for the clutter points.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+// Modes and trigger mechanism.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each data volume as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// trigger_interval ////////////////////////
+//
+// Interval for trigger - secs.
+// For trigger, this is the interval between trigger events. In REALTIME 
+//   mode, a trigger always occurs on the hour, and at constant intervals 
+//   thereafter. In ARCHIVE mode the trigger starts at start_time and at 
+//   constant intervals thereafter.
+// Type: int
+//
+
+trigger_interval = 86400;
+
+///////////// lookback_duration ///////////////////////
+//
+// Lookback duration (secs).
+// The program reads all data in this period and uses it to compute the 
+//   statistics.
+// Type: int
+//
+
+lookback_duration = 20000000;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input radar data.
+// Input data is in MDV format, and must contain a reflectivity field. 
+//   The statistics are computed using the reflectivity data. The geometry 
+//   of the input files must be constant.
+// Type: string
+//
+
+input_url = "mdv/test/long_prt";
+
+///////////// dbz_field_name //////////////////////////
+//
+// Name of dBZ field in input MDV files.
+// Type: string
+//
+
+dbz_field_name = "DBZ";
+
+///////////// vel_field_name //////////////////////////
+//
+// Name of vel field in input MDV files, if available.
+// Type: string
+//
+
+vel_field_name = "VEL";
+
+///////////// width_field_name ////////////////////////
+//
+// Name of spectrum width field in input MDV files, if available.
+// Type: string
+//
+
+width_field_name = "SPW";
+
+///////////// min_v_level /////////////////////////////
+//
+// Min vertical level for clutter map (km or deg).
+// Only data above this vlevel will be considered.
+// Type: double
+//
+
+min_v_level = 0.4;
+
+///////////// max_v_level /////////////////////////////
+//
+// Max vertical level for clutter map (km or deg).
+// Only data below this vlevel will be considered.
+// Type: double
+//
+
+max_v_level = 0.6;
+
+//======================================================================
+//
+// CLUTTER DETECTION.
+//
+//======================================================================
+ 
+///////////// min_data_times //////////////////////////
+//
+// Minimum number of data times for computing clutter.
+// If fewer data files are found, clutter is not computed.
+// Type: int
+//
+
+min_data_times = 10;
+
+///////////// threshold_method ////////////////////////
+//
+// Thresholding method.
+// If DBZ, only grid cells with reflectivity above min_dbz will be 
+//   included in the compuations. If SNR, min_snr will be the criteria.
+//
+// Type: enum
+// Options:
+//     DBZ_THRESHOLD
+//     SNR_THRESHOLD
+//
+
+threshold_method = SNR_THRESHOLD;
+
+///////////// min_dbz /////////////////////////////////
+//
+// Low DBZ threshold.
+// For threshold_method = DBZ_THRESHOLD. Only data exceeding this 
+//   threshold will be included in the computations.
+// Type: double
+//
+
+min_dbz = 10;
+
+///////////// min_snr /////////////////////////////////
+//
+// Low SNR threshold.
+// For threshold_method = SNR_THRESHOLD. Only data exceeding this 
+//   threshold will be included in the computations.
+// Type: double
+//
+
+min_snr = 5;
+
+///////////// noise_dbz_at_1km ////////////////////////
+//
+// Noise value expressed as dBZ at 1 km range.
+// Used for computing the SNR grid.
+// Type: double
+//
+
+noise_dbz_at_1km = -39.15;
+
+///////////// clutter_dbz_margin //////////////////////
+//
+// Margin for determining the max_dbz.
+// Clutter is identified at points which have dbz above the specified 
+//   SNR and less than a maximum value. Initially the max value is set 
+//   high. Then for each iteration the max dbz is set to the previous mean 
+//   plus this margin. The margin should be large enough to take care of 
+//   the variability in the clutter dbz.
+// Type: double
+//
+
+clutter_dbz_margin = 5;
+
+///////////// use_vel_data ////////////////////////////
+//
+// Is velocity data available?.
+// Set to true if velocity data is available in the MDV files and you 
+//   want to use the velocity data in computing the clutter map.
+// Type: boolean
+//
+
+use_vel_data = TRUE;
+
+///////////// max_abs_vel /////////////////////////////
+//
+// Max absolute velocity for clutter (m/s).
+// Set if use_vel_data is true.
+// Type: double
+//
+
+max_abs_vel = 2;
+
+///////////// use_width_data //////////////////////////
+//
+// Is width data available?.
+// Set to true if width data is available in the MDV files and you want 
+//   to use the width data in computing the clutter map.
+// Type: boolean
+//
+
+use_width_data = TRUE;
+
+///////////// max_width ///////////////////////////////
+//
+// Max spectrum width for clutter (m/s).
+// Set if use_width_data is true.
+// Type: double
+//
+
+max_width = 3;
+
+///////////// min_clutter_time_fraction ///////////////
+//
+// Min time fraction for clutter conditions to be met.
+// Clutter will be identified at a point only if the various conditions 
+//   are met for at least this fraction of the time.
+// Type: double
+//
+
+min_clutter_time_fraction = 0.6;
+
+///////////// n_iterations ////////////////////////////
+//
+// Number of iterations to improve clutter detection.
+// The algorithm moves through the data for a number of iterations, 
+//   imrpoving the estimate each time.
+// Type: int
+//
+
+n_iterations = 3;
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output directory.
+// The clutter statistics are output to this directory in MDV format.
+// Type: string
+//
+
+output_url = "mdv/clutter";
+
+///////////// output_encoding_type ////////////////////
+//
+// Set encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_ASIS
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding_type = ENCODING_FLOAT32;
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "Clutter map data.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_source = "Computed by ClutterMap.";
+

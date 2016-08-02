@@ -1,0 +1,482 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for AcTrack2Symprod
+//
+// Niles Oien, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// Jan 2000
+//
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef
+{
+  p_header = "DEBUGGING";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = DEBUG_OFF;
+} debug;
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string
+{
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean
+{
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef
+{
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int
+{
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5451;
+} port;
+  
+paramdef int
+{
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Product time validity and expiration
+
+commentdef
+{
+  p_header = "PRODUCT TIME VALIDITY AND EXPIRATION";
+};
+
+paramdef int
+{
+  p_default = 300;
+  p_min = 0;
+  p_descr = "Product validity period (secs).";
+  p_help = "The track product will be set valid from the request time to the request time plus this period. After that it will be considered expired.";
+} valid_secs;
+
+//////////////////////////////////////////////////////////
+// Product spatial validity
+
+commentdef
+{
+  p_header = "PRODUCT SPATIAL VALIDITY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to only include stations within the lat-lon bounding box.";
+  p_help = "Only accept stations for which the position is inside the bounding box. Note: this will be overridden if the client specifies horizontal limits.";
+} useBoundingBox;
+
+typedef struct {
+  float min_lat;
+  float min_lon;
+  float max_lat;
+  float max_lon;
+} bounding_box_t;
+
+paramdef struct bounding_box_t {
+  p_default = { -90.0, -180.0, 90.0, 180.0 };
+  p_descr = "If useBoundingBox is true, only stations within this box will be included in the product list.";
+  p_help = "To span the international date line, specify a continuous interval using positive longitudes which exceed 180 or negative longitudes which are less than -180. For example, min_lon = 80 and max_lon = 240 will span between 80E and 120W across the Pacific.";
+} bounding_box;
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef
+{
+  p_header = "RENDERING PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "display GA aircraft flag";
+  p_help = "If TRUE, all aircraft, including GA aircraft, will be displayed.  If FALSE, GA aircraft won't be displayed.  For this purporse, a GA aircraft is assumed to be any aircraft with a number somewhere in the first 3 characters of its callsign.";
+  p_default = TRUE;
+} display_ga;
+
+paramdef int
+{
+  p_default = 1;
+  p_min = 1;
+  p_descr = "Width of polylines";
+} polyline_width;
+
+paramdef boolean
+{
+  p_descr = "Plot the arrow for direction";
+  p_help = "If TRUE, an arrow will be added to the end of the polyline to indicate the direction of travel of the aircraft.\n";
+  p_default = FALSE;
+} plot_dirn_arrow;
+
+paramdef double
+{
+  p_default = 2.0;
+  p_min = 0.0;
+  p_descr = "Length of head of dirn arrow (km)";
+} dirn_arrow_head_len;
+
+paramdef boolean
+{
+  p_descr = "Option to check space between icons.";
+  p_help = "If TRUE, the distance between consecutive icons will be computed.";
+  p_default = FALSE;
+} sparse_icons;
+
+paramdef double
+{
+  p_default = 1.0;
+  p_min = 0.0;
+  p_descr = "Minimum distance between sparse icons (km).";
+  p_help = "Applicable if sparse_icons is TRUE. Icon rendering will be limited so that this minimum distance is exceeded bewteen consecutive icons.";
+} sparse_icons_min_distance;
+
+///////////////////////////////////////////////////////////////////////////
+// props for track before current time
+
+commentdef
+{
+  p_header = "Track before current time.";
+};
+
+paramdef int
+{
+  p_descr = "number of seconds of before track";
+  p_help = "Number of seconds of track information to display before the current position.";
+  p_default = 0;
+} before_secs;
+
+paramdef boolean
+{
+  p_descr = "display before icon flag";
+  p_help = "If TRUE, the before icon (described in the before_icon parameter) is displayed at each aircraft position before the current position.\n";
+  p_default = TRUE;
+} display_before_icon;
+
+paramdef int
+{
+  p_default = {{1, 0, 0, 0, 1},
+	       {0, 1, 0, 1, 0},
+	       {0, 0, 1, 0, 0},
+	       {0, 1, 0, 1, 0},
+	       {1, 0, 0, 0, 1}};
+  p_descr = "before icon";
+  p_help = "Array defining the icon to be used for the before positions.  The icon is a bit-mapped square icon.  You put 1's in the positions of the icon where the bit should be displayed, and 0's in the positions that are not a part of the icon.  You may want to look at an example parameter file to see how this is done.";
+} before_icon[][];
+
+paramdef string
+{
+  p_descr = "before icon color";
+  p_help = "Name of X color to be used when rendering the before icon(s).";
+  p_default = "yellow";
+} before_icon_color;
+
+paramdef boolean
+{
+  p_descr = "display before polyline flag";
+  p_help = "If TRUE, the before positions will be connected with a polyline.";
+  p_default = FALSE;
+} display_before_polyline;
+
+paramdef string
+{
+  p_descr = "before polyline color";
+  p_help = "Name of X color to be used when rendering the before polyline.";
+  p_default = "yellow";
+} before_polyline_color;
+
+///////////////////////////////////////////////////////////////////////////
+// props for track at current time
+
+commentdef
+{
+  p_header = "Track at current time.";
+};
+
+paramdef boolean
+{
+  p_descr = "display current icon flag";
+  p_help = "If TRUE, the current icon (described in the current_icon parameter) is displayed at the current position.\n";
+  p_default = TRUE;
+} display_current_icon;
+
+paramdef int
+{
+  p_default = {{0, 0, 1, 0, 0},
+	       {0, 1, 0, 1, 0},
+	       {1, 0, 0, 0, 1},
+	       {0, 1, 0, 1, 0},
+	       {0, 0, 1, 0, 0}};
+  p_descr = "current icon";
+  p_help = "Array defining the icon to be used for the current position.  The icon is a bit-mapped square icon.  You put 1's in the positions of the icon where the bit should be displayed, and 0's in the positions that are not a part of the icon.  You may want to look at an example parameter file to see how this is done.";
+} current_icon[][];
+
+paramdef string
+{
+  p_descr = "current icon color";
+  p_help = "Name of X color to be used when rendering the current icon.";
+  p_default = "yellow";
+} current_icon_color;
+
+paramdef boolean
+{
+  p_descr = "display label flag";
+  p_help = "If TRUE, the callsign of the aircraft will be displayed by the current position icon (or where the current position icon would be if it isn't being displayed.";
+  p_default = FALSE;
+} display_label;
+
+paramdef string
+{
+  p_descr = "label color";
+  p_help = "Name of the X color to be used when rendering the aircraft label.";
+  p_default = "yellow";
+} label_color;
+
+paramdef string
+{
+  p_descr = "label font";
+  p_help = "Suggested X font to use for rendering label.";
+  p_default = "8x13";
+} label_font;
+
+paramdef enum label_horiz_align_t
+{
+  p_descr = "label horizontal alignment";
+  p_help = "Desired horizontal alignment for the label.";
+  p_options = { HORIZ_ALIGN_LEFT,
+                HORIZ_ALIGN_CENTER,
+                HORIZ_ALIGN_RIGHT };
+  p_default = HORIZ_ALIGN_CENTER;
+} label_horiz_align;
+
+paramdef enum label_vert_align_t
+{
+  p_descr = "label vertical alignment";
+  p_help = "Desired vertical alignment for the label.";
+  p_options = { VERT_ALIGN_TOP,
+                VERT_ALIGN_CENTER,
+                VERT_ALIGN_BOTTOM };
+  p_default = VERT_ALIGN_CENTER;
+} label_vert_align;
+
+paramdef struct label_offset_t
+{
+  p_descr = "label offset";
+  p_help = "Pixel offsets for label rendering.  The label is rendered at the given offsets from the current position location.  A positive x_offset moves the label to the right; a positive y_offset moves the label up.";
+  p_field_name = { x_offset, y_offset };
+  p_field_type = { int, int };
+} label_offset;
+
+///////////////////////////////////////////////////////////////////////////
+// props for track after current time
+
+commentdef
+{
+  p_header = "Track after current time.";
+};
+
+paramdef int
+{
+  p_descr = "number of seconds of after track";
+  p_help = "Number of seconds of track information to display after the current position.  Of course, when displaying realtime aircraft data, there will be no track information after the current position, so this value will be ignored.";
+  p_default = 0;
+} after_secs;
+
+paramdef boolean
+{
+  p_descr = "display after icon flag";
+  p_help = "If TRUE, the after icon (described in the after_icon parameter) is displayed at each aircraft position after the current position.\n";
+  p_default = TRUE;
+} display_after_icon;
+
+paramdef int
+{
+  p_default = {{0, 0, 1, 0, 0},
+	       {0, 0, 1, 0, 0},
+	       {1, 1, 1, 1, 1},
+	       {0, 0, 1, 0, 0},
+	       {0, 0, 1, 0, 0}};
+  p_descr = "after icon";
+  p_help = "Array defining the icon to be used for the after positions.  The icon is a bit-mapped square icon.  You put 1's in the positions of the icon where the bit should be displayed, and 0's in the positions that are not a part of the icon.  You may want to look at an example parameter file to see how this is done.";
+} after_icon[][];
+
+paramdef string
+{
+  p_descr = "after icon color";
+  p_help = "Name of X color to be used when rendering the after icon(s).";
+  p_default = "yellow";
+} after_icon_color;
+
+paramdef boolean
+{
+  p_descr = "display after polyline flag";
+  p_help = "If TRUE, the after positions will be connected with a polyline.";
+  p_default = FALSE;
+} display_after_polyline;
+
+paramdef string
+{
+  p_descr = "after polyline color";
+  p_help = "Name of X color to be used when rendering the after polyline.";
+  p_default = "yellow";
+} after_polyline_color;
+
+///////////////////////////////////////////////////////////////////////////
+// Altitude display parameters
+
+commentdef
+{
+  p_header = "Altitude display.";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to set color based on altitude field.";
+  p_help = "If TRUE, this option overrides the other color options and sets the color based on the aircraft altitude. The colors used are set in the altitude_color array.";
+  p_default = FALSE;
+} color_by_altitude;
+
+paramdef struct altitude_color_scale
+{
+  p_descr = "Color scale for altitude data - only used if color_by_altitude is TRUE";
+  p_help = "This is an array of entries, each of which has min_val, max_val and color for each altitude range selected. Altitude units are meters. If the true altitude is outside this range the color will default to the color which would have been used if color_by_altitude were FALSE.";
+  p_field_name = { min_val, max_val, color };
+  p_field_type = { double, double, char* };
+} altitude_color_scale[];
+
+paramdef boolean
+{
+  p_descr = "Option to plot altitude as text instead of icon.";
+  p_help = "If TRUE, the altitude value is plotted at the aircraft position instead of the icon. The altitude_font is used.";
+  p_default = FALSE;
+} plot_altitude_text;
+
+paramdef string
+{
+  p_descr = "altitude font";
+  p_help = "Suggested X font to use for rendering altitude.";
+  p_default = "6x10";
+} altitude_font;
+
+///////////////////////////////////////////////////////////////////////////
+// Specify callsigns
+
+commentdef
+{
+  p_header = "Specify callsigns to be displayed.";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to specify callsigns to be displayed.";
+  p_help = "If TRUE, only the specified callsigns will be displayed. If FALSE, all callsigns will be displayed.";
+  p_default = FALSE;
+} specify_callsigns;
+
+paramdef string
+{
+  p_descr = "List of callsigns to be displayed";
+  p_help = "See 'specify_callsigns' parameter above.";
+  p_default = { "aircraft1", "aircraft2", "aircraft3" };
+} callsign_list[];
+
+///////////////////////////////////////////////////////////////////////////
+// Color by airfraft callsign
+
+commentdef
+{
+  p_header = "Set color by callsign.";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to set color based on airfraft callsign.";
+  p_help = "If TRUE, the track for a recognized callsign will be colored accordingly.";
+  p_default = FALSE;
+} color_by_callsign;
+
+typedef struct {
+  string callsign;
+  string color;
+} callsign_color_t;
+
+paramdef struct callsign_color_t
+{
+  p_descr = "Color table lookup for aircraft callsigns.";
+  p_help = "See 'color_by_callsign'.";
+  p_default = { { "ZJRA", "orange" }, { "47RE", "cyan" } };
+} callsign_colors[];
+
+

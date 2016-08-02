@@ -1,0 +1,359 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for DsrGrabber
+//
+//  Mike Dixon, RAP, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  Oct 2007
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DsrGrabber program";
+  p_text = "DsrGrabber reads an input FMQ containing radar data, and writes out summary data in various ASCII formats.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to monitor the input data stream.";
+  p_help = "If TRUE, a line will be printed to stderr for each beam received.";
+} monitor_input;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "cp2_s";
+  p_descr = "Name of radar";
+  p_help = "Used in labelling file name.";
+} radar_name;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  FILE_INPUT, FMQ_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = FMQ_INPUT;
+  p_descr = "Input mode - files or DsRadar FMQ.";
+  p_help = "If FMQ_INPUT, the application will read the beam data from a file message queue. If FILE_INPUT, the application will process beams in a set of files.";
+} input_mode;
+
+paramdef string {
+  p_descr = "Input URL for S-band data via FMQ";
+  p_default = "fmq/Iq2Dsr_s";
+} input_fmq_url;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_input;
+
+commentdef {
+  p_header = "OUTPUT FILES";
+}
+
+typedef enum {
+  TIMESTAMP_VOL_START, TIMESTAMP_VOL_MID, TIMESTAMP_VOL_END
+} timestamp_t;
+  
+paramdef enum timestamp_t
+{
+  p_default = TIMESTAMP_VOL_START;
+  p_descr = "Timestamping files";
+  p_help = "Timestamp to start, middle or end of volume.";
+} timestamp;
+
+paramdef int {
+  p_default = 200;
+  p_descr = "Minimum number of beams in a volume.";
+  p_help = "If fewer beams are found in a volume, it is ignored.";
+} min_beams_per_vol;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Maximum number of beams in a volume.";
+  p_help = "Normally a file is saved at the end of each volume. However, if an end-of-volume flag is not detected, the file will be written when this number of beams has been received.";
+} max_beams_per_vol;
+
+commentdef {
+  p_header = "STATS DETAILS";
+  p_text = "Stats are computed over a range of gates, for specified fields.";
+};
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Start gate for analysis.";
+} start_gate;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of gates for analysis.";
+} n_gates;
+
+commentdef {
+  p_header = "FIELD INFORMATION";
+  p_text = "Translate fields from DSR input to UDP output.";
+}
+
+paramdef string {
+  p_default = {
+    "DBMHC", "DBMVC"
+  };
+  p_descr = "Array of fields for which stats are computed.";
+} stats_fields[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute a difference field.";
+  p_help = "At least 2 fields must be defined in stats_fields.";
+} compute_differences;
+
+paramdef string {
+  p_default = "DBMHC";
+  p_descr = "Field name for first field in computing diff.";
+} first_field_for_diff;
+
+paramdef string {
+  p_default = "DBMVC";
+  p_descr = "Field name for second field in computing diff.";
+} second_field_for_diff;
+
+commentdef {
+  p_header = "BEAMS OUTPUT FILES";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write beams line-by-line to a beam file.";
+} write_beam_files;
+
+paramdef string {
+  p_default = "./output/beams";
+  p_descr = "Output directory for beams files.";
+  p_help = "Output file names will be time stamped.";
+} beams_output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write the number of lines at the start of each beams file.";
+  p_help = "See beams_nlines_label.";
+} write_nlines_at_start_of_beam_files;
+
+paramdef string {
+  p_default = "npoints = ";
+  p_descr = "Label at start of beam file, showing number of lines in the file.";
+  p_help = "See write_nlines_at_start_of_beam_files.";
+} beams_nlines_label;
+
+paramdef string {
+  p_default = "beams";
+  p_descr = "File name extension for beam files.";
+} beam_file_ext;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write _latest_data_info for beam files.";
+} write_ldata_info_for_beam_files;
+
+commentdef {
+  p_header = "GRID OUTPUT FILES";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write regular grid files.";
+} write_grid_files;
+
+paramdef string {
+  p_default = "./output/grid";
+  p_descr = "Output directory for grid files.";
+  p_help = "Output file names will be time stamped.";
+} grid_output_dir;
+
+paramdef string {
+  p_default = "grid";
+  p_descr = "File name extension for grid files.";
+} grid_file_ext;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write the number of elevations and azimuths at the start of each grid file.";
+  p_help = "See beams_nlines_label.";
+} write_dimensions_at_start_of_grid_files;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Label for azimuths at start of grid file.";
+  p_help = "Followed by 'min_az delta_az n_az'.";
+} grid_azimuths_label;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Label for elevation at start of grid file.";
+  p_help = "Followed by 'min_el delta_el n_el'.";
+} grid_elevations_label;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Label for sunprops at start of grid file.";
+  p_help = "Followed by 'az_offset el_offset max_power quadratic_fit_power'.";
+} sunprops_label;
+
+commentdef {
+  p_header = "GRID INFORMATION";
+  p_text = "Applies to regular grid output option.";
+}
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min elevation for regular grid (deg).";
+} grid_min_el;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Max elevation for regular grid (deg).";
+} grid_max_el;
+
+paramdef double {
+  p_default = -20.0;
+  p_descr = "Min azimuth for regular grid (deg).";
+} grid_min_az;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Max azimuth for regular grid (deg).";
+} grid_max_az;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Delta elevation for regular grid (deg).";
+} grid_delta_el;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Delta azimuth for regular grid (deg).";
+} grid_delta_az;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Max error for interpolating onto grid in elevation (deg).";
+  p_help = "We perform bi-linear interpolation onto the regular grid. This is the max difference, in elevation, for a point to be used in determining the interpolated value at  a grid location."; 
+} grid_el_max_diff;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Max error for interpolating onto grid in azimuth (deg).";
+  p_help = "We perform bi-linear interpolation onto the regular grid. This is the max difference, in azimuth, for a point to be used in determining the interpolated value at  a grid location."; 
+} grid_az_max_diff;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write _latest_data_info for grid files.";
+} write_ldata_info_for_grid_files;
+
+commentdef {
+  p_header = "SUNSCAN mode";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute az/el angles relative to the sun position.";
+  p_help = "If TRUE, the application computes the sun position for the beam time, and then computes the az and el relative to the sun position.";
+} compute_sun_relative_angles;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to only save data when close to the sun.";
+  p_help = "If TRUE, the program will only consider beams which are close in angle to the sun.";
+} only_save_when_close_to_sun;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Max az error relative to the sun (deg).";
+  p_help = "See only_save_when_close_to_sun.";
+} max_sun_az_error;
+
+paramdef double {
+  p_default = 1.5;
+  p_descr = "Max el error relative to the sun (deg).";
+  p_help = "See only_save_when_close_to_sun.";
+} max_sun_el_error;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute sun properties.";
+  p_help = "The following sun properties are computed for each field: (a) max power, (b) max power from parabolic fit, (c) offsets of measured centroid relative to theoretical sun position.";
+} compute_sun_properties;
+
+paramdef double {
+  p_default = 8.0;
+  p_descr = "Power of sun edge relative to the peak (dB).";
+  p_help = "The sun position is computed using the power at each point. Only powers within this margin of the peak power are used in the computation of the centroid.";
+} sun_edge_below_peak_db;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write files with sun properties.";
+} write_sunprops_files;
+
+paramdef string {
+  p_default = "./output/sunprops";
+  p_descr = "Output directory for sun properties files.";
+  p_help = "Output file names will be time stamped.";
+} sunprops_output_dir;
+
+paramdef string {
+  p_default = "sunprops";
+  p_descr = "File name extension for sun properties files.";
+} sunprops_file_ext;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write _latest_data_info for sunprop files.";
+} write_ldata_info_for_sunprops_files;
+
+commentdef {
+  p_header = "RADAR LOCATION";
+  p_text = "Used for computing sun position.";
+};
+
+paramdef double {
+  p_default = 39.950199;
+  p_descr = "Latiitude of radar location (deg).";
+  p_help = "North is positive, South is negative.";
+} radar_lat;
+
+paramdef double {
+  p_default = -105.195099;
+  p_descr = "Longitude of radar location (deg).";
+  p_help = "East is positive, West is negative.";
+} radar_lon;
+
+paramdef double {
+  p_default = 1.742;
+  p_descr = "Altitude of radar (km).";
+} radar_alt_km;
+
+

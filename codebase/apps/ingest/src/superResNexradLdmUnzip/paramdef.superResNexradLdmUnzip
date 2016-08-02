@@ -1,0 +1,164 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "The NEXRAD level II super resolution data are\n"
+	"typically delivered by LDM in multiple files. These\n"
+	"files have a simple header followed by the actual\n"
+	"data which must be uncompressed using the bunzip2\n"
+	"protocol. This program reads these files as they\n"
+	"arrive, does the necessary uncompression and then\n"
+	"appends the output from these multiple input files\n"
+	"to a single output file per volume. Once a volume\n"
+	"is complete, a _latest_data_info file is written to the\n"
+	"output directory. For the input files a naming convention\n"
+	"similar to /d2/ldmData/nexrad/NOP3/YYYYMMDD/HHMMSS_NNy_Vxx.BZIP2\n"
+	"is fgollowed, where :\n"
+	"NN is the message number for this scan,\n"
+	"xx is version number:\n"
+        "   Version 01: Legacy Message 1: Evansville (KVWX)\n"
+        "   Version 02: Message 31: Legacy resolution (Super-Res\n"
+	"               Generation disabled)\n"
+	"   Version 03: Message 31: Super-Resolution\n"
+	"   Version 04: Message 31: Recombined Super-Res\n"
+	"and y is E(end of volume), S (volume start), or I(intermediate)\n\n"
+	"Thanks to Jason Craig for implementing this naming convention.\n"
+	"Output files are named YYYYMMDD_hhmmss.nexDat\n"
+	"Niles Oien February 2008";
+}
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Determines how much printing to do while running.";
+  p_help = "Set as appropriate. FALSE means only report serious errors.";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to print az, el info from message type 31";
+  p_help = "Set as appropriate.";
+} debug31;
+
+paramdef string {
+  p_default = "/some/dir";
+  p_descr = "Directory under which the LDM dumps files using a\n"
+	"20080208/033159_35_I_V04.BZIP2 file naming convention.";
+  p_help = "The date stamped directory should not be included\n"	
+	"in this path, ie. if you have files named as :\n\n"
+	"/d2/ldmData/nexrad/NOP3/20080208/033159_35_I_V04.BZIP2\n\n"
+	"then this should be set to \n"
+	"/d2/ldmData/nexrad/NOP3\n"
+	"that is, it should not be set to\n"
+	"/d2/ldmData/nexrad/NOP3/20080208";
+} inDir;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Time, seconds, we should wait for a new file before\n"
+	"giving up and restarting the scan.";
+  p_help = "Set as appropriate. Default is 30 minutes.";
+} timeoutSecs;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Time, seconds, we should wait before skipping a file\n"
+  "if the next file in sequence is present. This started happening in\n"
+  "September 2010 with a new build of the NOAA software.";
+  p_help = "Set as appropriate. Default is 30 seconds.";
+} skipSecs;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/some/dir";
+  p_descr = "Directory under which preprocessed super res\n"
+	"nexrad level two data will be written.";
+  p_help = "Set as appropriate.";
+} outDir;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to delete older input files.";
+  p_help = "It's good to do this if at all possible. It means we\n"
+	"have to scan fewer files on input.";
+} deleteFiles;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Maximum age for files, seconds.";
+  p_help = "Files older than this will not be considered and may\n"
+	"be deleted if deleteFiles is TRUE.";
+} maxFileAgeSec;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of seconds to sleep after processing a volume.";
+  p_help = "Avoids hammering the system.";
+} sleepSec;
+
+typedef struct {
+	boolean writeToSocket;
+	int socketNum;
+} socket_t;
+
+paramdef struct socket_t {
+  p_default = { FALSE, 4500 };
+  p_descr = "Option to write output data to a socket as\n"
+            "well as to file.";
+  p_help = "Allows user to get beams as they come in rather\n"
+           "than having to wait for the whole volume to accrue.";
+} socketOutput;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to write output files.";
+  p_help = "Almost always do this. Only reason not to is that\n"
+	"socket based output has been selected.";
+} outputFiles;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to only send headers and message type 31.";
+  p_help = "That's all you need to send to write MDV files.";
+} checkMsgType;
+
+typedef struct {
+	boolean checkFilenameTime;
+	int maxTimeDiffSecs;
+} check_t;
+
+paramdef struct check_t {
+  p_default = { FALSE, 86400 };
+  p_descr = "Option to check the time indicated by the data file name\n"
+  "against wallclock time.";
+  p_help = "Default is not to do this, since one may run on archived\n"
+  "files - but in realtime it may avoid badly timestamped data.";
+} checkFileTime;

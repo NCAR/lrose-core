@@ -1,0 +1,6 @@
+.deps
+StormInitClimatology
+__makefile.template
+makefile
+makefile.am
+makefile.in

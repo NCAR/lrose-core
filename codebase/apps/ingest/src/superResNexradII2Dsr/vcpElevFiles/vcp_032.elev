@@ -1,0 +1,10 @@
+#
+# Lookup for elevation angle mapping for vcp 32 
+# for superResNexradII2Dsr application Niles Oien Feb 2008
+#
+0 1 0.5
+1 2 1.5
+2 3 2.5
+3 4 3.5
+4 5 4.5
+

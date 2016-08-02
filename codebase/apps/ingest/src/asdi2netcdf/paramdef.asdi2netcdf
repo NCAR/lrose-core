@@ -1,0 +1,182 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "asdi2netcdf reads the Aircraft Situation Display to \n"
+	"Industry (ASDI) data from a socket or from archive rawAscii\n"
+	"files. The data are then saved to either ASCII or netcdf or both.\n"
+	"There are two ASCII output types of which only one can be selected at a time.\n"
+	"RawASCII saves the full raw ASCII text to hourly output files.\n"
+	"ParsedASCII saves aircraft position reports in a simple space\n"
+	"seperated format.";
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed.";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME_FILE, REALTIME_STREAM};
+  p_default = REALTIME_STREAM;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in three modes, archive, realtime from files and realtime from streams. In realtime from file mode, the conversion is performed for each input file as it becomes available. In realtime from stream mode, the input data are read from a stream (see the hostname and port parameters below). In archive mode, the file list is obtained from the command line with the -f switch.";
+} mode;
+      
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "/raw/Input";
+  p_descr = "Input directory - top level. Set to the\n"
+            "the directory in which the input files appear."
+            "Used in realtime file mode only.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef string {
+  p_default = "128.117.200.202";
+  p_descr = "Host name for realtime stream mode.";
+  p_help = "Set to the machine which is producing the input stream.";
+} hostname;
+
+paramdef int {
+  p_default = 10018;
+  p_descr = "Port number for realtime stream mode.";
+  p_help = "Set to the port which is producing the input stream.";
+} port;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to only accept data for a certain region.";
+  p_help = "Region is defined below.";
+} applyRegion;
+
+typedef struct {
+	double latMin;
+	double lonMin;
+	double latMax;
+	double lonMax;
+} region_t;
+
+paramdef struct region_t {
+  p_default = {20.0, -160.0, 60.0, -70.0};
+  p_private = FALSE;
+  p_descr = "Limits to apply on lat,lon region to save.";
+  p_help = "Used only if applyRegion is TRUE.";
+} region;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to only accept data for flight IDs";
+  p_help = "If TRUE, the string flightName must appear somewhere in the flightID. IE if flightName = UAL, only united flights are saved.";
+} applyFlightName;
+
+paramdef string {
+  p_default = "UAL";
+  p_descr = "Must match part of the flightID to save.";
+  p_help = "Used only if applyFlightName is TRUE.";
+} flightName;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to not save General Aviation Aircraft";
+  p_help = "If TRUE, Flight IDs that are Tailnumbers will be removed.";
+} limitGA;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to save data in NetCDF format.";
+} saveNCDF;
+
+paramdef string {
+  p_default = "/some/directory/structure";
+  p_descr = "Directory for output NetCDF data.";
+} OutNCDFdir;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Number of minutes between NetCDF write outs.";
+  p_help = "Intervals start at the top of the hour.\n"
+           "Recommended values: 5, 10, 15, 30, or 60 minutes";
+} minsWrite;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to save the raw data in ASCII format.";
+  p_help = "Use only saveRawASCII or saveParsedASCII not both!.";
+} saveRawASCII;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to save the parsed data in ASCII format. "
+	    "Save SPDB must also be on for saveParsedASCII.";
+  p_help = "Use only saveRawASCII or saveParsedASCII not both!.";
+} saveParsedASCII;
+
+paramdef string {
+  p_default = "/some/directory/structure";
+  p_descr = "Directory for output ASCII data.";
+} OutASCIIdir;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to use the year and month specified in the\n"
+	"param file.";
+  p_help = "May be useful for reading old files in archived mode.\n"
+	"Note: If reading files outputed by this program with saveRawASCII\n"
+	"the date will be determined from the defualt filename, YYYYMMDD_HH.asd";
+} dateSpecified;
+
+paramdef int {
+  p_default = 2004;
+  p_descr = "Year to use if dateSpecified is true.";
+} year;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Month to use, 1 to 12, if dateSpecified is true.";
+} month;

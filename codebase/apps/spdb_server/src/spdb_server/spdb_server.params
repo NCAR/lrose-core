@@ -1,0 +1,82 @@
+/****************************************************
+ * TDRP params for spdb_server
+ ****************************************************/
+
+/*
+ * debug level.
+ * Debug level: DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS, DEBUG_ROUTINES,
+ *   DEBUG_ALL.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS,
+ *   DEBUG_ROUTINES, DEBUG_ALL.
+ */
+debug = DEBUG_ALL;
+
+/*
+ * malloc debug level.
+ * 0 = none, 1 = corruption checking, 2 = record all malloc blocks
+ *   and checks, 3 = printout of all mallocs, etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 2;
+
+/*
+ * database directory.
+ * Directory containing SPDB database.
+ *
+ * Type: string
+ * Default: "." 
+ */
+database_dir = "./database";
+
+/*
+ * product label.
+ *
+ * Type: string
+ * Default: "TEST PRODUCT" 
+ */
+product_label = "TEST SNOW GAUGE DATA";
+
+/*
+ * product id.
+ * Number which uniquely identifies a product.
+ *
+ * Type: long
+ * Default: 10000 
+ */
+product_id = 10099;
+
+/*
+ * output port.
+ * Port number to use for output.
+ *
+ * Type: long
+ * Default: 62000 
+ */
+port = 62001;
+
+/*
+ * servmap subtype.
+ * Server mapper subtype for this server. The type is always Spdb.
+ *
+ * Type: string
+ * Default: "Spdb" 
+ */
+servmap_subtype = "Spdb";
+
+/*
+ * servmap instance.
+ * Server mapper instance for this server. The type is always Spdb.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+servmap_instance = "Test";
+
+

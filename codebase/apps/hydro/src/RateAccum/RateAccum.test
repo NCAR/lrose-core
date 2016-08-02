@@ -1,0 +1,379 @@
+/**********************************************************************
+ * TDRP params for RateAccum
+ **********************************************************************/
+
+//======================================================================
+//
+// RateAccum calculates accumulated precipitation depth from rate data 
+//   in MDV format. The 2-D precipitation fields are written out to MDV 
+//   files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+// Modes and trigger mechanism.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+//
+// Program may be run in two modes, archive, and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// trigger /////////////////////////////////
+//
+// Trigger mechanism. REALTIME mode only.
+//
+// TIME_TRIGGER: the program is triggered at constant time intervals - 
+//   see time_trigger_interval. FILE_TRIGGER: the program watches the 
+//   first input_dir and triggers based on data in that directory.
+//
+//
+// Type: enum
+// Options:
+//     TIME_TRIGGER
+//     FILE_TRIGGER
+//
+
+trigger = TIME_TRIGGER;
+
+///////////// time_trigger_interval ///////////////////
+//
+// Interval for TIME_TRIGGER - secs.
+//
+// For TIME_TRIGGER, this is the interval between trigger events. In 
+//   REALTIME mode, a time trigger always occurs on the hour, and at 
+//   constant intervals thereafter. In ARCHIVE mode the trigger starts at 
+//   start_time and at constant intervals thereafter.
+//
+// Minimum val: 0
+//
+// Type: int
+//
+
+time_trigger_interval = 300;
+
+///////////// trigger_time_margin /////////////////////
+//
+// Max time diff for searching for files relative to the trigger time - 
+//   secs.
+//
+// When matching files up with the trigger time, the difference between 
+//   the trigger time and file time must be less than this margin. This 
+//   value is also used as the max age of the latest data info file when 
+//   in REALTIME mode with FILE_TRIGGER.
+//
+// Minimum val: 0
+//
+// Type: int
+//
+
+trigger_time_margin = 600;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+//
+// Input data is in MDV format, and contains precip rate(s).
+//
+//
+// Type: string
+//
+
+input_dir = "./input";
+
+///////////// field_names /////////////////////////////
+//
+// Names of rate field(s) in input MDV files, and corresponding names 
+//   for output fields.
+//
+// You must specify at least 1 field.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string rate_name;
+//      string accum_name;
+//   }
+//
+// 1D array - variable length.
+//
+
+field_names = {
+  {
+    rate_name = "rate1",
+    accum_name = "accum1"
+  }
+  ,
+  {
+    rate_name = "rate2",
+    accum_name = "accum2"
+  }
+};
+
+///////////// max_vol_duration ////////////////////////
+//
+// Maximum allowed input volume duration (secs).
+//
+// If a volume exceeds this duration, it will be set to the median 
+//   duration instead.
+//
+//
+// Type: int
+//
+
+max_vol_duration = 900;
+
+//======================================================================
+//
+// ACCUMULATION METHOD.
+//
+//======================================================================
+ 
+///////////// accum_method ////////////////////////////
+//
+// Accumulation method.
+//
+
+// RUNNING_ACCUM: perform a running accumulation over a given period 
+//   prior to the trigger time.
+//  
+// ACCUM_FROM_TIME_OF_DAY: perform an accumulation from a given time of 
+//   day until the trigger time. When the selected time of day is reached, 
+//   the accumulation starts again at zero. The time of day is stored in 
+//   an array, so that multiple restarts may be set for each day.
+//
+// TOTAL_ACCUM: accumulate for the entire period, output result at the 
+//   end of the period. ARCHIVE mode only.
+//
+//
+// Type: enum
+// Options:
+//     RUNNING_ACCUM
+//     ACCUM_FROM_TIME_OF_DAY
+//     TOTAL_ACCUM
+//
+
+accum_method = RUNNING_ACCUM;
+
+//======================================================================
+//
+// RUNNING ACCUMULATION.
+//
+//======================================================================
+ 
+///////////// running_accums //////////////////////////
+//
+// Control for running accumulations.
+//
+// Specify the durations in ascending order, and the associated URL for 
+//   the output MDV files.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int period_secs;
+//      string output_url;
+//   }
+//
+// 1D array - variable length.
+//
+
+running_accums = {
+  {
+    period_secs = 3600,
+    output_url = "running_accum_1hr"
+  }
+  ,
+  {
+    period_secs = 7200,
+    output_url = "running_accum_2hr"
+  }
+  ,
+  {
+    period_secs = 10400,
+    output_url = "running_accum_3hr"
+  }
+};
+
+//======================================================================
+//
+// TIME OF DAY ACCUMULATION.
+//
+//======================================================================
+ 
+///////////// restart_time_of_day /////////////////////
+//
+// The times in the day (UCT/GMT) at which accumulation restart occurs.
+//
+// For ACCUM_FROM_TIME_OF_DAY method only. The program cycles through 
+//   the times of day, zeroing out the accumulation at each specified 
+//   time.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+// 1D array - variable length.
+//
+
+restart_time_of_day = {
+  {
+    hour = 0,
+    min = 0,
+    sec = 0
+  }
+};
+
+///////////// tod_accum_output_url ////////////////////
+//
+// URL for output data fpr time-of-day accumulation.
+//
+// An mdv url is of the form mdvp:://hostname:port:dir.
+//
+//
+// Type: string
+//
+
+tod_accum_output_url = "./tod_accum";
+
+//======================================================================
+//
+// TOTAL ACCUMULATION.
+//
+//======================================================================
+ 
+///////////// total_accum_output_url //////////////////
+//
+// URL for output data fpr time-of-day accumulation.
+//
+// An mdv url is of the form mdvp:://hostname:port:dir.
+//
+//
+// Type: string
+//
+
+total_accum_output_url = "./total_accum";
+
+//======================================================================
+//
+// DATA LIMITS.
+//
+//======================================================================
+ 
+///////////// max_precip_depth ////////////////////////
+//
+// Max precip depth (mm).
+//
+// Depths greater than this will be truncated at this value.
+//
+//
+// Type: double
+//
+
+max_precip_depth = 9999;
+
+///////////// min_precip_depth ////////////////////////
+//
+// Min precip depth (mm).
+//
+// Values less than this will be set to missing.
+//
+//
+// Type: double
+//
+
+min_precip_depth = 0.1;
+
+//======================================================================
+//
+// FILE LABEL DETAILS.
+//
+//======================================================================
+ 
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+//
+// This is placed in the MDV master header for documentation purposes.
+//
+//
+// Type: string
+//
+
+data_set_name = "Precipitation accumulation.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+//
+// This is placed in the MDV master header for documentation purposes.
+//
+//
+// Type: string
+//
+
+data_set_source = "Computed by RateAccum, accumulating rate over time to give depth.";
+

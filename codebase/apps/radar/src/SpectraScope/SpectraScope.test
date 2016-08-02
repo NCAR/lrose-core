@@ -1,0 +1,619 @@
+/**********************************************************************
+ * TDRP params for SpectraScope
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: SpectraScope.
+//
+// SpectraScope displays radar spectra from SPDB or FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "kftg";
+
+//======================================================================
+//
+// GETTING CLICK-POINT INFO FROM CIDD.
+//
+//======================================================================
+ 
+///////////// cidd_shmem_key //////////////////////////
+//
+// The shared memory key for the CIDD coordinate struct.
+// When the user clicks in the CIDD main window, the coordinate struct 
+//   is updated with the location and time. The time value is used to 
+//   drive SpectraScope in REALTIME mode.
+// Type: int
+//
+
+cidd_shmem_key = 62100;
+
+///////////// max_search_angle_error //////////////////
+//
+// Max angular error when searching for spectra close to the click point 
+//   (deg).
+// When the user clicks in CIDD, the (x) location is saved. From this, 
+//   the elevation, elevation and range of the click point can be 
+//   determined. The data base is then searched for spectra from a beam 
+//   close to this. This parameter gives the max angular error allowable 
+//   in this search.
+// Type: double
+//
+
+max_search_angle_error = 10;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Mode for reading the data.
+// In SPDB mode, SpectraScope watches the CIDD shared memory for updates 
+//   of click points from the user. When a new click is detected, a query 
+//   is made to the SPDB data base for spectra in a time interval ending 
+//   with the click time. In FMQ mode, SpectraScope reads the latest time 
+//   series data from an FMQ - File Message Queue. It continually updates 
+//   as new data is available in the FMQ.
+//
+// Type: enum
+// Options:
+//     INPUT_SPDB
+//     INPUT_FMQ
+//
+
+input_mode = INPUT_SPDB;
+
+///////////// spectra_spdb_url ////////////////////////
+//
+// URL for input SPDB data.
+// Spectra data is stored in SPDB format at this URL.
+// Type: string
+//
+
+spectra_spdb_url = "spdbp:://localhost::spdb/spectra/kftg";
+
+///////////// search_interval_secs ////////////////////
+//
+// Length of search interval when reading data (secs).
+// The search will end at the end time of the CIDD data, and will start 
+//   search_interval_secs before that.
+// Type: int
+//
+
+search_interval_secs = 300;
+
+///////////// spectra_fmq_url /////////////////////////
+//
+// URL for data to be read from File Message Queue.
+// This can be on a remote host.
+// Type: string
+//
+
+spectra_fmq_url = "fmqp:://cp2cloud::fmq/spectra";
+
+///////////// seek_to_start_of_fmq ////////////////////
+//
+// Option to seek to the start of the input FMQ.
+// If FALSE, the program will seek to the end of the fmq and only read 
+//   in new data. If TRUE, it will start reading from the beginning of the 
+//   FMQ.
+// Type: boolean
+//
+
+seek_to_start_of_fmq = FALSE;
+
+///////////// fmq_read_delay_msecs ////////////////////
+//
+// Delay between reads to the input FMQ (millisecs).
+// Delaying the read operation allows you to manage the bandwidth usage. 
+//   An increase in delay decreases the bandwidth needed. Set to 0 for no 
+//   delay.
+// Type: int
+//
+
+fmq_read_delay_msecs = 1000;
+
+//======================================================================
+//
+// FFT WINDOW.
+//
+//======================================================================
+ 
+///////////// window //////////////////////////////////
+//
+// Window to be applied to time series before computing spectra.
+//
+// Type: enum
+// Options:
+//     WINDOW_RECT
+//     WINDOW_VONHANN
+//     WINDOW_BLACKMAN
+//
+
+window = WINDOW_BLACKMAN;
+
+///////////// tpss_notch_width ////////////////////////
+//
+// Width of notch for computing TPSS.
+// TPSS - Time Series Power Periodicity - is computed as the 
+//   sum-sq-power within a notch around DC divided by the power-sq in the 
+//   rest of the spectrum of the time series power.
+// Type: int
+//
+
+tpss_notch_width = 3;
+
+//======================================================================
+//
+// WINDOW SIZE AT STARTUP.
+//
+//======================================================================
+ 
+///////////// window_x ////////////////////////////////
+//
+// The startup x location for the main window.
+// Type: int
+//
+
+window_x = 900;
+
+///////////// window_y ////////////////////////////////
+//
+// The startup y location for the main window.
+// Type: int
+//
+
+window_y = 250;
+
+///////////// window_height ///////////////////////////
+//
+// The startup height for the window.
+// Type: int
+//
+
+window_height = 900;
+
+///////////// window_width ////////////////////////////
+//
+// The startup width for the window.
+// Type: int
+//
+
+window_width = 600;
+
+///////////// window_border ///////////////////////////
+//
+// The border width for the main window.
+// Type: int
+//
+
+window_border = 1;
+
+//======================================================================
+//
+// MARGINS.
+//
+//======================================================================
+ 
+///////////// top_margin //////////////////////////////
+//
+// Height of top margin (pixels).
+// Type: int
+//
+
+top_margin = 80;
+
+///////////// bottom_margin ///////////////////////////
+//
+// Width of bottom margin (pixels).
+// Type: int
+//
+
+bottom_margin = 30;
+
+///////////// left_margin /////////////////////////////
+//
+// Width of left margin (pixels).
+// Type: int
+//
+
+left_margin = 20;
+
+///////////// right_margin ////////////////////////////
+//
+// Width of right margin (pixels).
+// Type: int
+//
+
+right_margin = 50;
+
+///////////// subplot_top_margin //////////////////////
+//
+// Height of top margin of each subplot (pixels).
+// Type: int
+//
+
+subplot_top_margin = 30;
+
+//======================================================================
+//
+// PLOT DETAILS.
+//
+//======================================================================
+ 
+///////////// window_label ////////////////////////////
+//
+// Label for window border.
+// This label will normally appear in the top border of the display 
+//   window.
+// Type: string
+//
+
+window_label = "RADAR GATE DATA";
+
+///////////// plot_ascope_power ///////////////////////
+//
+// Plot the power as a function of range, as in an A-Scope.
+// Type: boolean
+//
+
+plot_ascope_power = TRUE;
+
+///////////// plot_doppler_spectrum ///////////////////
+//
+// Include doppler spectrum plot.
+// Type: boolean
+//
+
+plot_doppler_spectrum = TRUE;
+
+///////////// plot_filtered_doppler_spectrum //////////
+//
+// Include filtered doppler spectrum plot.
+// This will be plotted in the same panel as the doppler spectrum.
+// Type: boolean
+//
+
+plot_filtered_doppler_spectrum = TRUE;
+
+///////////// plot_power_time_series //////////////////
+//
+// Include time series power plot.
+// Type: boolean
+//
+
+plot_power_time_series = TRUE;
+
+///////////// autoscale_power_time_series /////////////
+//
+// Compute scale of power time series from data.
+// If FALSE, ts_power_min_db and ts_power_max_db will be used.
+// Type: boolean
+//
+
+autoscale_power_time_series = TRUE;
+
+///////////// plot_power_real_spectrum ////////////////
+//
+// Include plot of spectrum of real time series power.
+// This will be plotted in the same panel as the power time series.
+// Type: boolean
+//
+
+plot_power_real_spectrum = FALSE;
+
+///////////// plot_phase_time_series //////////////////
+//
+// Include plot of time series phase.
+// Type: boolean
+//
+
+plot_phase_time_series = TRUE;
+
+///////////// autoscale_phase_time_series /////////////
+//
+// Compute scale of phase time series from data.
+// If FALSE, -180 and +180 will be used.
+// Type: boolean
+//
+
+autoscale_phase_time_series = TRUE;
+
+///////////// plot_pulse_to_pulse_phase_diff //////////
+//
+// Include pulse-to-pulse phase difference plot.
+// Type: boolean
+//
+
+plot_pulse_to_pulse_phase_diff = TRUE;
+
+///////////// plot_iq_time_series /////////////////////
+//
+// Include iq time series.
+// Type: boolean
+//
+
+plot_iq_time_series = TRUE;
+
+///////////// plot_regression_filtered_spectrum ///////
+//
+// Include regression-filtered spectrum plot.
+// This will be plotted in the same panel as the doppler spectrum.
+// Type: boolean
+//
+
+plot_regression_filtered_spectrum = TRUE;
+
+///////////// regression_polynomial_order /////////////
+//
+// Order of polynomial for regression filtering.
+// Type: int
+//
+
+regression_polynomial_order = 5;
+
+///////////// regression_interp_across_notch //////////
+//
+// For regression filter - should we interpolate across the notch?.
+// The regression filter applies quite a deep notch around 0 m/s. This 
+//   option allows you to interpolate across the notch.
+// Type: boolean
+//
+
+regression_interp_across_notch = TRUE;
+
+//======================================================================
+//
+// DATA Y-SCALE RANGES.
+//
+//======================================================================
+ 
+///////////// ascope_power_min_db /////////////////////
+//
+// Min value of ascope power (dBm).
+// Type: double
+//
+
+ascope_power_min_db = -120;
+
+///////////// ascope_power_max_db /////////////////////
+//
+// Max value of ascope power (dBm).
+// Type: double
+//
+
+ascope_power_max_db = -40;
+
+///////////// doppler_spec_min_db /////////////////////
+//
+// Min value of doppler spectrum power (dBm).
+// Type: double
+//
+
+doppler_spec_min_db = -120;
+
+///////////// doppler_spec_max_db /////////////////////
+//
+// Max value of doppler spectrum power (dBm).
+// Type: double
+//
+
+doppler_spec_max_db = -30;
+
+///////////// ts_power_min_db /////////////////////////
+//
+// Min value of time series power (dBm).
+// Type: double
+//
+
+ts_power_min_db = -120;
+
+///////////// ts_power_max_db /////////////////////////
+//
+// Max value of time series power (dBm).
+// Type: double
+//
+
+ts_power_max_db = -30;
+
+//======================================================================
+//
+// COLORS.
+//
+//======================================================================
+ 
+///////////// foreground_color ////////////////////////
+//
+// Color of the foreground in the display.
+// Type: string
+//
+
+foreground_color = "white";
+
+///////////// background_color ////////////////////////
+//
+// Color of the background in the display.
+// Type: string
+//
+
+background_color = "black";
+
+///////////// grid_line_color /////////////////////////
+//
+// Color for grid lines on plot.
+// Type: string
+//
+
+grid_line_color = "gray20";
+
+///////////// ascope_power_color //////////////////////
+//
+// Color of the plot of power in ascope mode.
+// Type: string
+//
+
+ascope_power_color = "yellow";
+
+///////////// doppler_spec_color //////////////////////
+//
+// Color of the plot of doppler spectrum.
+// Type: string
+//
+
+doppler_spec_color = "red";
+
+///////////// filtered_doppler_spec_color /////////////
+//
+// Color of the plot of filtered doppler spectrum.
+// Type: string
+//
+
+filtered_doppler_spec_color = "pink";
+
+///////////// regression_filtered_spec_color //////////
+//
+// Color of the plot of regression-filtered spectrum.
+// Type: string
+//
+
+regression_filtered_spec_color = "orange";
+
+///////////// ts_power_color //////////////////////////
+//
+// Color of the plot of time series power.
+// Type: string
+//
+
+ts_power_color = "green";
+
+///////////// real_power_spec_color ///////////////////
+//
+// Color of the plot of spectrum of real power.
+// Type: string
+//
+
+real_power_spec_color = "cyan";
+
+///////////// ts_phase_color //////////////////////////
+//
+// Color of the plot of time series phase.
+// Type: string
+//
+
+ts_phase_color = "orange";
+
+///////////// phase_diff_color ////////////////////////
+//
+// Color of the plot of pulse-to-pulse phase difference.
+// Type: string
+//
+
+phase_diff_color = "goldenrod";
+
+///////////// I_color /////////////////////////////////
+//
+// Color of I time series.
+// Type: string
+//
+
+I_color = "yellow";
+
+///////////// I_polynomial_color //////////////////////
+//
+// Color of polynomial fit to I time series.
+// Type: string
+//
+
+I_polynomial_color = "orange";
+
+///////////// Q_color /////////////////////////////////
+//
+// Color of Q time series.
+// Type: string
+//
+
+Q_color = "magenta";
+
+///////////// Q_polynomial_color //////////////////////
+//
+// Color of polynomial fit to Q time series.
+// Type: string
+//
+
+Q_polynomial_color = "red";
+
+///////////// noise_level_color ///////////////////////
+//
+// Color of line showing noise level.
+// Type: string
+//
+
+noise_level_color = "brown";
+
+///////////// range_line_color ////////////////////////
+//
+// Color of line showing current range.
+// Type: string
+//
+
+range_line_color = "blue";
+
+//======================================================================
+//
+// FONTS.
+//
+//======================================================================
+ 
+///////////// font_name ///////////////////////////////
+//
+// Name of font for the text on the display.
+// Type: string
+//
+
+font_name = "6x13";
+
+//======================================================================
+//
+// LINES.
+//
+//======================================================================
+ 
+///////////// plot_line_width /////////////////////////
+//
+// The width of the lines used for the plot traces.
+// Type: int
+//
+
+plot_line_width = 2;
+

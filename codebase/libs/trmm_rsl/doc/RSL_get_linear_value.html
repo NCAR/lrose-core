@@ -1,0 +1,31 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_linear_value</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>float RSL_get_linear_value(<a href=RSL_volume_struct.html>Volume</a> *v, float srange, float azimuth, float elev, float limit);</b>
+
+<p>
+<hr>
+
+<h3>Description</h3>
+Find a linearly interpolated value in the Volume, <b>v</b>, at the polar coordinate specification (srange, azimuth, elev). The four surrounding data values that are azimuthally within +/- <b>limit</b> degrees are used for the interpolation. <b>Limit</b> is measured in degrees. <b>Srange</b> is the slant range in KM. <b>Azimuth</b> and <b>elev</b> are measured in degrees.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a valid floating point number is returned. Note, the value could be BADVAL. 
+<hr>
+
+<h3>See also</h3>
+<a href="RSL_get_value.html">RSL_get_value</a> 
+<hr>Author: <a href=dennis.flanigan.html>Dennis Flanigan, Jr.</a> 
+</body>

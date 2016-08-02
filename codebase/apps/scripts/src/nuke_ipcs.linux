@@ -1,0 +1,19 @@
+#! /bin/csh -f
+############################################################################
+#
+# This script removes any shared memory segments or semaphores
+#
+
+set segs =  ` ipcs -m | awk ' {print $1 } ' `
+
+foreach seg ($segs)
+  echo "Removing segment $seg"
+  ipcrm shm  $seg
+end
+
+set sems =  ` ipcs -s | awk ' {print $1 } ' `
+
+foreach sem ($sems)
+  echo "Removing semaphore $sem"
+  ipcrm sem  $sem
+end

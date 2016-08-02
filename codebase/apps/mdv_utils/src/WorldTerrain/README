@@ -1,0 +1,9 @@
+
+I used this to generate a terrain MDV file that
+covered the whole world. All the USGS data must
+be resident on disk to do this.
+
+For a good, well documented example of how to
+run this, see the AfghanistanTerrain script.
+
+Niles Oien October 2001.

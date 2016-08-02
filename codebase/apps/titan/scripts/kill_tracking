@@ -1,0 +1,12 @@
+#! /bin/csh
+
+#
+# kill tracking processes
+#
+
+snuff track_server precip_map storm_ident
+sleep 5
+snuff storm_track
+
+
+

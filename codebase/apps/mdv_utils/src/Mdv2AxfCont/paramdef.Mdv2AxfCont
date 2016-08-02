@@ -1,0 +1,275 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+typedef enum {
+  TRIGGER_ASYNC, TRIGGER_SYNC
+} trigger_t;
+
+paramdef enum trigger_t {
+  p_descr = "Trigger mode - synchronous or asynchronous";
+  p_help = "TRIGGER_ASYNC == process input data as they appear, ie. use latest_data_info\n"
+        "TRIGGER_SYNC == strobe input at regular intervals.\n"
+        "Data are actually timestamped with processing time in TRIGGER_SYNC case.";
+  p_default = TRIGGER_ASYNC;
+} TriggerMode;
+
+paramdef int {
+  p_descr = "Time interval in TimeTrigger mode, seconds.";
+  p_help = "Default is 6 minutes. TRIGGER_SYNC mode only. ";
+  p_default = 360;
+} TriggerTimeInterval;
+
+paramdef int {
+  p_descr = "Time to look back in TimeTrigger mode, seconds.";
+  p_help = "Default is 12 minutes. TRIGGER_SYNC mode only.\n"
+	"Should be be greater than or equal to TriggerTimeInterval.";
+  p_default = 720;
+} TriggerTimeLookBack;
+
+paramdef string {
+  p_descr = "Input URL";
+  p_help = "Set to the URL for the input MDV files";
+  p_default = "./";
+} InMdvURL;
+
+paramdef string {
+  p_descr = "Output axf directory";
+  p_help = "Set to the name of the output axf directory";
+  p_default = "./";
+} OutDir;
+
+paramdef string {
+  p_descr = "Each output file is copied to this file\n"
+            "when it is written";
+  p_help = "For Olympics 2000, this should probably be something like :\n"
+           "ncaifs:/aifs/dev/wwrp/products/anc/loopfiles/ANC_CONT_FORECAST_latest\n"
+	   "Files in this dir are then named : \n"
+	   "ANC_CONT_FORECAST_latest_1.axf to ANC_CONT_FORECAST_latest_N.axf\n"
+	   "Where N is specified by NumLatestFiles";
+  p_default = "ANC_CONT_latest";
+} LatestFileName;
+
+paramdef int {
+  p_descr = "Number of latest files to store.";
+  p_help = "Set to cover an hour or so.";
+  p_default = 6;
+} NumLatestFiles;
+
+paramdef string {
+  p_descr = "Instance to check into procmap with";
+  p_help = "Set as appropriate";
+  p_default = "primary";
+} Instance;
+
+paramdef boolean {
+  p_descr = "Set to true to pass values above the threshold.";
+  p_help = "If set to false, values below the threshold are passed.";
+  p_default = { true };
+} ThreshAbove;
+
+paramdef float {
+  p_descr = "Set to the value to threshold at.";
+  p_help = "Values (above | below) this, inclusive, are accepted if"
+	" ThreshAbove is (true | false)";
+  p_default = { 0.67 };
+} Thresh;
+
+paramdef boolean {
+  p_descr = "Set to true to use field number rather than name";
+  p_help = "Useful for the adjoint files which have no short field name.";
+  p_default = { false };
+} UseFieldNumber;
+
+paramdef int {
+  p_descr = "Number of desired field in MDV file";
+  p_help = "The PrintMdv utility may help in getting this.";
+  p_default = { 0 };
+} FieldNumber;
+
+paramdef string {
+  p_descr = "Names of desired field in the MDV file";
+  p_help = "These are used for output even if FieldNumber is\n"
+           "used to specify which fields are used.";
+  p_default = { "Forecast" };
+} FieldName;
+
+paramdef string {
+  p_descr = "Units for output axf file.";
+  p_help = "Set to the units appropriate for the MDV field.";
+  p_default = { "m/s" };
+} Units;
+
+paramdef int {
+  p_descr = "Maximum age for file to be considered valid";
+  p_help = "In realtime mode only";
+  p_default = 3600;
+} RealtimeMaxAge;
+
+paramdef string {
+  p_descr = "Variable name for the output files.";
+  p_help = "Output files are named\n"
+	   "ANC_CONT_YYYYMMDDhhmmss_<VarName>.axf\n"
+	   " eg ANC_CONT_20001103123000_Forecast.axf\n";
+  p_default = { "Forecast" };
+} VarName;
+
+paramdef boolean {
+  p_descr = "Flag to set if doing compositing.";
+  p_help = "If set, composite is done between\n"
+	   "CompositeMin and CompositeMax. Set plane number to 0.";
+  p_default = { "FALSE" };
+} DoComposite;
+
+paramdef float {
+  p_descr = "Minimum height to composite. Same units as MDV file.";
+  p_help = "Only used if DoComposite is true.";
+  p_default = { "0.0" };
+} CompositeMin;
+
+paramdef float {
+  p_descr = "Maximum height to composite. Same units as MDV file.";
+  p_help = "Only used if DoComposite is true.";
+  p_default = { "100000.0" };
+} CompositeMax;
+
+
+paramdef boolean {
+  p_descr = "Flag to set if data are to be remapped onto another grid.";
+  p_help = "If set, data are remapped onto the grid specified below.";
+  p_default = { "FALSE" };
+} DoGridRemap;
+
+
+/////////// Grid parameters.
+commentdef {
+  p_header = " ------------ GRID PARAMETERS --------\n"
+  		"The output grid, if DoGridRemap is TRUE.\n"
+		"Otherwise the grid is take from the input file(s).";
+
+}
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-1000.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-1000.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} grid_rotation;
+
+typedef enum {
+  FLAT, LATLON
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT, LATLON and LAMBERT";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in X";
+  p_min = {1};
+  p_default = { 100 };
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in Y";
+  p_min = {1};
+  p_default = {100};
+} grid_ny;
+
+paramdef int { 
+  p_descr = "Number of vertical levels in the output grid or to be composited.";
+  p_help = "See also grid_minz";
+  p_min = {1};
+  p_default = { 1 };
+} grid_nz;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in X";
+  p_default = {1.0};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in Y";
+  p_default = {1.0};
+} grid_dy;
+
+paramdef float {
+  p_descr = "Change in altitude between vertical levels of the output grid";
+  p_help = "Applicable only when grid_nz > 1";
+  p_default = { 1.0};
+} grid_dz;
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_miny;
+
+
+
+commentdef {
+  p_header = "------ End of grid parameters. ";
+}
+
+paramdef boolean {
+  p_descr = "To do clumping or not.";
+  p_help = "If set to TRUE then storms with less than\n"
+	   "MinClumpPixels will be removed.";
+  p_default = FALSE;
+} Clump;
+
+paramdef int {
+  p_descr = "Clump threshold, in pixels.";
+  p_help = "If Clump is TRUE then storms with less than\n"
+	   "MinClumpPixels will be removed.";
+  p_default = 10;
+} MinClumpPixels;
+
+
+
+
+
+
+

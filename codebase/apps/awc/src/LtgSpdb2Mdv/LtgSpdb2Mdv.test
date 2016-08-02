@@ -1,0 +1,350 @@
+/**********************************************************************
+ * TDRP params for LtgSpdb2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: LtgSpdb2Mdv.
+//
+// LtgSpdb2Mdv reads SPDB lightning stroke data, computes a rate grid 
+//   and stores this out in Mdv format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program either (a) if use_spdb_ldata_info is 
+//   false, creates an output file every trigger_interval seconds, or (b) 
+//   if use_spdb_ldata_info is true, waits for the latest data info to 
+//   update and then creates an output file. In the latter case (b), if no 
+//   new data arrives within the trigger interval, the program runs 
+//   anyway. In ARCHIVE mode, it creates an output file every 
+//   trigger_interval seconds between the start time and the end time.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input SPDB data.
+// Ltg stroke data is stored in SPDB format.
+// Type: string
+//
+
+input_url = "spdbp:://venus::spdb/ltg";
+
+///////////// spdb_ltg_id /////////////////////////////
+//
+// SPDB product id for the lightning data.
+// Type: int
+//
+
+spdb_ltg_id = 200;
+
+///////////// watch_latest_data_info //////////////////
+//
+// Option to use the arrival of spdb ltg data as a trigger.
+// If this is set, an output MDV file will be created whenever the 
+//   latest_data_info file in the database_dir changes. This option is 
+//   only in effect for REALTIME mode.
+// Type: boolean
+//
+
+watch_latest_data_info = TRUE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Maximum valid age in seconds for realtime input data.
+// This option is only in effect for REALTIME mode. Data must be younger 
+//   than max_valid_age to be used.
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// trigger_interval ////////////////////////
+//
+// Interval at which processing is triggered.
+// Number of seconds between grid creations. In ARCHIVE mode determines 
+//   output grid frequency. In REALTIME mode if no new data arrives within 
+//   this interval, a grid is produced.
+// Minimum val: 5
+// Type: int
+//
+
+trigger_interval = 600;
+
+///////////// processing_delay ////////////////////////
+//
+// processing delay in seconds.
+// The number of seconds to wait before processing an input file. This 
+//   delay allows activity on the file to finish before we start reading 
+//   it.
+// Minimum val: 0
+// Type: int
+//
+
+processing_delay = 0;
+
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+//======================================================================
+ 
+///////////// rate_compute_period /////////////////////
+//
+// Period of time over which the rate is computed - secs.
+// Data for this period is retrieved from the data base for use in 
+//   computing the rate.
+// Type: int
+//
+
+rate_compute_period = 3600;
+
+///////////// realtime_data_lag_time //////////////////
+//
+// Realtime input data lag time (secs).
+// Number of seconds between data receipt and grid generation.  This is 
+//   the time between the data generation and the valid time. This 
+//   parameter is only used in REALTIME_MODE.
+// Minimum val: 0
+// Type: int
+//
+
+realtime_data_lag_time = 0;
+
+///////////// ltg_radius //////////////////////////////
+//
+// Lightning effect radius in grid units.
+// Size of area affected by a single lightning strike.  If set to 0, 
+//   only the grid square in which the lightning strike occurred will 
+//   include the strike.  If set higher, any grid square whose center lies 
+//   in the circle of the given radius from the center of the grid square 
+//   in which the strike occurred will be affected by the strike (its 
+//   total will be incremented).
+// Minimum val: 0
+// Type: int
+//
+
+ltg_radius = 3;
+
+///////////// polarity_flag ///////////////////////////
+//
+// Polarity flag.
+// Indicates the polarity of the lightning strikes to be included in the 
+//   resulting grids.
+//
+// Type: enum
+// Options:
+//     POLAR_POS
+//     POLAR_NEG
+//     POLAR_BOTH
+//
+
+polarity_flag = POLAR_BOTH;
+
+///////////// min_amplitude ///////////////////////////
+//
+// minimum amplitude.
+// Minimum amplitude for strikes to be included in the resulting grids. 
+//   If less than zero, no minimum amplitude is used.
+// Type: int
+//
+
+min_amplitude = -1;
+
+///////////// max_amplitude ///////////////////////////
+//
+// maximum amplitude.
+// Maximum amplitude for strikes to be included in the resulting grids. 
+//   If less than zero, no maximum amplitude is used.
+// Type: int
+//
+
+max_amplitude = -1;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for output data.
+// Mdv data will be written to this URL.
+// Type: string
+//
+
+output_url = "./mdv/ltg";
+
+///////////// time_stamp_flag /////////////////////////
+//
+// Flag indicating how to compute the output data time.
+// If BEGIN_TIME, the centroid_time is set to the start time of the 
+//   input data. Similarly, for END_TIME the centroid is set to the end 
+//   time and MID_TIME the average time.
+//
+// Type: enum
+// Options:
+//     BEGIN_TIME
+//     MID_TIME
+//     END_TIME
+//
+
+time_stamp_flag = END_TIME;
+
+///////////// output_projection ///////////////////////
+//
+// Projection for Mdv output data.
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_FLAT
+//
+
+output_projection = PROJ_LATLON;
+
+///////////// output_grid /////////////////////////////
+//
+// Grid parameters for output file.
+// These params apply to all projection types.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+output_grid = { 320, 440, 117, 20, 0.025, 0.0225 };
+
+///////////// grid_origin_lat /////////////////////////
+//
+// Output grid origin latitude.
+// This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+grid_origin_lat = 0;
+
+///////////// grid_origin_lon /////////////////////////
+//
+// Output grid origin longitude.
+// This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+grid_origin_lon = 0;
+
+///////////// grid_lat1 ///////////////////////////////
+//
+// Output grid reference latitude 1.
+// This applies only to PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+grid_lat1 = 20;
+
+///////////// grid_lat2 ///////////////////////////////
+//
+// Output grid reference latitude 2.
+// This applies only to PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+grid_lat2 = 60;
+
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_info = "This MDV file was created by LtgSpdb2Mdv.";
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "Lightning rate grid.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_source = "US National ltg network.";
+
+///////////// rate_field_name_long ////////////////////
+//
+// Long field name for rate grid.
+// This is placed in the MDV field header.
+// Type: string
+//
+
+rate_field_name_long = "Gridded Lightning Data";
+
+///////////// rate_field_name /////////////////////////
+//
+// Field name for rate grid.
+// This is placed in the MDV field header.
+// Type: string
+//
+
+rate_field_name = "Ltg_Strikes";

@@ -1,0 +1,21 @@
+#! /bin/csh
+
+#
+# kill if running
+#
+
+kill_tracking
+
+#
+# start storm tracking processes
+#
+
+track_server -params $TITAN_HOME/params/track_server.test & 
+storm_ident -params $TITAN_HOME/params/storm_ident.test & 
+precip_map -params $TITAN_HOME/params/precip_map.test &
+
+
+
+
+
+

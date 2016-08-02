@@ -1,0 +1,6 @@
+.deps
+MdvModel2Vil
+__makefile.template
+makefile
+makefile.am
+makefile.in

@@ -1,0 +1,16 @@
+#! /bin/csh
+
+#
+# Renew the param file
+#
+# Usage: rener_params app_name instance
+#
+
+$1 -params $1.$2 -print_params > junk
+
+if ($status == 0) then
+  /bin/mv junk $1.$2
+endif
+
+
+

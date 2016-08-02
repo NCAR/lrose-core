@@ -1,0 +1,37 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_uf_to_radar</h1>
+
+
+<h1>RSL_uf_to_radar_fp</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b><br>
+<b><a href=RSL_radar_struct.html>Radar</a> *RSL_uf_to_radar(char *infile);</b> <br>
+<b><a href=RSL_radar_struct.html>Radar</a> *RSL_uf_to_radar_fp(FILE *fp);</b> 
+<hr>
+
+<h3>Description</h3>
+Read a UF (Universal Format) file and return a pointer to the structure <b>Radar</b>. The input file is specified by the string <b>infile</b>. <b>RSL_uf_to_radar</b> calls <b>RSL_uf_to_radar_fp</b> which is provided as a means of constructing filter programs -- reading stdio, for instance. If <b>infile</b> is NULL, then <b>stdin</b> is used. <b>RSL_uf_to_radar_fp</b> checks the UF magic information to ensure that a valid UF file is being read. The input file may be compressed. If the data is compressed, it is passed through the GNU <b>gunzip</b> filter. Thus, compressed data can be any format that <b>gzip</b> understands. It can handle true UF files, as well as, UF files with 2 and 4 byte Fortran record delimeters. These routines work on big and little endian machines, provided that the input UF file is in big endian format. <a href=RSL_radar_to_uf.html>RSL_radar_to_uf</a> creates UF files in big endian format when run on either big or little endian machines; by definition UF files are in big endian format. 
+
+<p>The radar structure is, essentially, an array of Volumes. The number and type of volumes allocated is automatically determined from the input UF file. No UF library needed; the UF code is part of RSL. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, RSL_uf_to_radar returns a pointer to the structure <b>Radar</b>. Otherwise, NULL is returned and errno is set. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_anyformat_to_radar.html>RSL_anyformat_to_radar</a>, <a href=RSL_radar_to_uf.html>RSL_radar_to_uf</a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a>. 
+</body>

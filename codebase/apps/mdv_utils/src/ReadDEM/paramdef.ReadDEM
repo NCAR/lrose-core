@@ -1,0 +1,127 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+paramdef string {
+  p_default = "W100N90";
+  p_private = FALSE;
+  p_descr = "Single string value";
+  p_help = "Base name for input file.";
+} BaseName;
+             
+
+paramdef string {
+  p_default = "Terrain.mdv";
+  p_private = FALSE;
+  p_descr = "Single string value";
+  p_help = "Name of output MDV file.";
+} OutName;
+             
+paramdef int {
+  p_default = 0; 
+  p_private = FALSE;
+  p_descr = "Single int value";
+  p_help = "Debug messages or not.";
+} debug;
+                      
+
+paramdef int {
+  p_default = 0; 
+  p_private = FALSE;
+  p_descr = "Single int value";
+  p_help = "Flat earth or not. If not, LatLon";
+} flat;
+                      
+paramdef int {
+  p_default = 0; 
+  p_private = FALSE;
+  p_descr = "Single int value";
+  p_help = "Use bad value if outside of DEM grid. If not, fail.";
+} AllowOutsideDEM;
+
+
+
+paramdef int {
+  p_default = 150; 
+  p_private = FALSE;
+  p_descr = "Single int value";
+  p_help = "Size in X direction";
+} Nx;
+
+paramdef int {
+  p_default = 150; 
+  p_private = FALSE;
+  p_descr = "Single int value";
+  p_help = "Size in Y direction";
+} Ny;
+                      
+
+
+paramdef float {
+  p_default = 0.03;
+  p_private = FALSE;
+  p_descr = "Single float value";
+  p_help = "Pixels size in x.";
+} dx;
+                      
+paramdef float {
+  p_default = 0.03;
+  p_private = FALSE;
+  p_descr = "Single float value";
+  p_help = "Pixel size in y.";
+} dy;
+                      
+paramdef float {
+  p_default = 40.5;
+  p_private = FALSE;
+  p_descr = "Single float value";
+  p_help = "Lower left corner if latlon, center if flat earth.";
+} lat_origin;
+                      
+paramdef float {
+  p_default = -75.0;
+  p_private = FALSE;
+  p_descr = "Single float value";
+  p_help = "Lower left corner if latlon, center if flat earth.";
+} lon_origin;
+                      
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "Single bool value";
+  p_help = "(If TRUE substitue Missing values (typically sea) with SubstituteMissingValue";
+} SubstituteMissing;
+                      
+paramdef float {
+  p_default = 0.0;
+  p_private = FALSE;
+  p_descr = "Single float value";
+  p_help = "Value to put in for missing values, if SubstituteMissing is TRUE.";
+} SubstituteMissingValue;
+                      
+         
+
+
+
+

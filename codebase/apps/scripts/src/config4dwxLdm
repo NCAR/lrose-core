@@ -1,0 +1,145 @@
+#!/bin/csh
+#-----------------------------------------------------------------------------
+# $Id: config4dwxLdm,v 1.16 2011/10/27 23:02:15 becky Exp $
+# $Source: /cvs/apps/scripts/src/config4dwxLdm,v $
+#-----------------------------------------------------------------------------
+# This script will install user-level LDM files (aka local configuration).
+# It assumes that the root-level LDM install has already been done.
+
+# added on by Becky Ruttenberg, Oct 27 2011
+#package4dwxLdm <RANGE> should be run on build machine, results in
+#forDelivery directory then copied to install location on install
+#machine.  Updates to config4dwxLdm include:
+#  -> remove the compiling of nids, check that its exe exists
+#  -> cd to the correct places to a) make soft links b) gunzip/untar
+#  -> swap order of tar options to get tar -xzf
+#  -> comment out the automatic install of crontab
+
+#-----------------------------------------------------------------------------
+# 
+ 
+# figure out where our install directory is located 
+#
+set ldmhome="/home/ldm"
+set install_script=$0
+set install_dir=`dirname $install_script`
+if ( "$install_dir" == "." ) then
+   set install_dir=`pwd`
+endif
+
+# make sure we have something to install
+#
+set mcidas_file=`basename $install_dir/ldm-mcidas*.tar.gz`
+set gempak_file=`basename $install_dir/gempak*linux64.tar.gz`
+
+foreach fn ( $install_dir/etc/ldmMgr $install_dir/exe/nids/ucnids \
+             $install_dir/$mcidas_file $install_dir/$gempak_file )
+   if (!(-e $fn)) then
+      echo ERROR : missing $fn 
+      exit 1
+   endif
+end
+
+#-----------------------------------------------------------------------------
+# copy files/directories from $install_dir to $ldmhome 
+#
+if (!(-d $ldmhome/etc)) then
+   mkdir -p $ldmhome/etc
+endif
+cp $install_dir/etc/* $ldmhome/etc
+
+if (!(-d $ldmhome/exe/nids)) then
+   mkdir -p $ldmhome/exe/nids
+endif
+echo INFO: copying files 
+cp $install_dir/exe/nids/* $ldmhome/exe/nids
+
+cp $install_dir/$mcidas_file $ldmhome
+cp $install_dir/$gempak_file $ldmhome 
+ 
+#-----------------------------------------------------------------------------
+# Get the .cshrc in place
+#
+cp -v $install_dir/etc/DotCshrc.ldm $ldmhome/.cshrc
+source $ldmhome/.cshrc
+rehash
+
+if (!(-e $ldmhome/data)) then
+  mkdir -p $ldmhome/data
+endif
+
+
+#
+# Create the data dirs, which are links under /raid
+#
+cd $ldmhome/data
+
+echo INFO: creating directories 
+foreach dir ( /raid/ext_obs/ldm \
+         /raid/ext_obs/ldm/gempak \
+	 /raid/ext_obs/ldm/gini \
+	 /raid/ext_obs/ldm/radar \
+	 /raid/ext_obs/ldm/poly ) 
+
+  mkdir -p $dir
+  ln -s -f $dir
+
+end
+
+#
+# Then create the data dirs.
+#
+if (!(-e $ldmhome/data/ldm/nids/uc/nids)) then
+  mkdir -p $ldmhome/data/ldm/nids/uc/nids
+endif
+
+foreach subDir (logs  ship  surface  syn  upperair profiler)
+ if (!(-e $ldmhome/data/ldm/gempak/$subDir)) then
+  mkdir -p  $ldmhome/data/ldm/gempak/$subDir
+ endif
+end
+
+cd $ldmhome
+
+#
+# Then install the decoders. Check for presence of nids executable
+# (compiled on build machine)
+#
+if (!(-e ./exe/nids/ucnids )) then
+  echo ERROR : $ldmhome/exe/nids/ucnids not found.
+  exit 1 
+endif
+
+# 
+# Then the mcidas stuff. Not certain at this point if we
+# need this but I'll put it in anyway.
+#
+if (!(-e $mcidas_file )) then
+  echo ERROR : $ldmhome/$mcidas_file does not exist
+  exit 1
+endif
+echo INFO: unzipping/untarring $mcidas_file
+tar -xzf $mcidas_file
+
+#
+# Finally, the gempak decoders.
+#
+if (!(-e $gempak_file)) then
+  echo ERROR : $ldmhome/$gempak_file does not exist
+  exit 1
+endif
+echo INFO: unzipping/untarring $gempak_file
+tar -xzf $gempak_file
+
+echo INFO: making gempak softlinks 
+ln -s -f $ldmhome/GEMPAK5.*/os/linux64/bin /home/ldm/decoders
+ln -s -f $ldmhome/GEMPAK5.* /home/ldm/gempak
+
+#------------------------------------------------------------------------------
+# Comment out the install the crontab so that ldm may be started in a
+# controlled environment
+#
+echo INFO: install crontab by running:  crontab $ldmhome/etc/crontab.ldm
+##crontab $ldmhome/etc/crontab.ldm
+
+exit 0

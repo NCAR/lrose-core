@@ -1,0 +1,196 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.file_repeat_day
+ *
+ */
+
+commentdef {
+  p_header = "Program file_repeat_day";
+  p_text = "This program provides a mechanism to simulate the arrival of files which are named by time and in a dated directory. As as example, you can copy the GTS files from an archived day into a simulated realtime directory. The files are placed in a directory for the current day. As an option you can modify date information in the files.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string
+{
+  p_descr = "Process instance for procmap.";
+  p_help = "This program uses this instance when registering with the process mapper.";
+  p_default = "Test";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory.";
+  p_help = "For files of type HHMMSS (see FilenameType below) and/or InputDataFromCompleteMonth is true, if the input files are stored in the relevant date subdirectory of this directory. For other types the input files are stored in this directory.";
+} InDir;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Specified Day";	
+} InDay;
+       
+paramdef int {
+  p_default = 1;
+  p_descr = "Specified Month";
+} InMonth;
+   
+paramdef int {
+  p_default = 2000;
+  p_descr = "Specified Year";
+} InYear;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Input data includes files from a complete month (day 01 to day 31).";
+  p_help = "In this case, InDir points to the directory containing the complete month. From the current time, the day of the month is computed. and the simulated data for that day is selected. If the data for that day is not available, the closest available day of the month is used. The data is assumed be be stored as YYYYMMDD/HHMMSS.ext.";
+} RepeatMonth;
+
+typedef enum {
+  HHMMSS,
+  YYYYMMDDHHMM,
+  YYYYMMDDHHMMSS,
+  MMDD_HHMM,
+  XMMDDHH_MM,
+  NNNYYYYMMDDHHMM,
+  YYYY_MM_DD_HHMM,
+  XYYYYMMDD_HHMMSS,
+  XYYYYMMDD_HHMMSSZ,
+  PRE_YYYYMMDDhhmmss_POST,
+  PRE_hh_YYYYMMDDhhmmss_POST,
+  SDIR_PRE_YYYYMMDDHHMMSS,
+  SDIR_PRE_YYYYMMDDhhmmss_POST,
+  SDIR_PRE_YYYYMMDD_HHMM_POST,
+  RENAME_NO_TIME,
+  MOD_TIME
+} FilenameType_t;
+
+paramdef enum FilenameType_t {
+  p_default = HHMMSS;
+  p_descr = "Naming convention for input files.";
+  p_help = "File are named as follows:\n"
+           "\tHHMMSS: hhmmss.ext\n"
+           "\tYYYYMMDDHHMM: YYYYMMDDhhmm.ext\n"
+           "\tYYYYMMDDHHMMSS: <FilePrefix>YYYYMMDDhhmmss.ext\n"
+           "\tMMDD_HHMM: MMDD_hhmm.ext\n"
+           "\tXMMDDHH_MM: <FilePrefix>MMDDhh.mm\n"
+           "\tNNNYYYYMMDDHHMM: nnnYYYYMMDDhhmm.ext\n"
+           "\tYYYY_MM_DD_HHMM: YYYY-MM-DD_HHMM\n"
+           "\tXYYYYMMDD_HHMMSS: <FilePrefix>YYYYMMDD_hhmmss.ext\n"
+           "\tXYYYYMMDD_HHMMSSZ: <FilePrefix>YYYYMMDD_hhmmss...\n"
+           "\tPRE_YYYYMMDDhhmmss_POST: <FilePrefix>YYYYMMDDhhmmss...\n"
+           "\tPRE_hh_YYYYMMDDhhmmss_POST: <FilePrefix>hh-YYYYMMDDhhmmss...\n"
+           "\tSDIR_PRE_YYYYMMDDHHMMSS: YYYYMMDD/<FilePrefix>YYYYMMDDHHMMSS.ext\n"
+           "\tSDIR_PRE_YYYYMMDDhhmmss_POST: YYYYMMDD/<FilePrefix>YYYYMMDDhhmmss...\n"
+           "\tSDIR_PRE_YYYYMMDD_HHMM_POST: YYYYMMDD/<FilePrefix>YYYYMMDD_hhmm...\n"
+           "\tRENAME_NO_TIME: <FilePrefix>YYYYMMDDHHMMSS.ext rename to OutFile\n"
+           "\tMOD_TIME: use input file names, trigger based on modify time\n";
+} FilenameType;
+
+paramdef string {
+  p_default = "gts";
+  p_descr = "Extension for files.";
+} FileExtension;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Prefix for files";
+  p_help = "Only used for the following FilenameTypes:\n"
+           "\tYYYYMMDDHHMMSS\n"
+           "\tXMMDDHH_MM\n"
+           "\tXYYYYMMDD_HHMMSS\n"
+           "\tXYYYYMMDD_HHMMSSZ\n"
+           "\tPRE_YYYYMMDDhhmmss_POST\n"
+           "\tPRE_hh_YYYYMMDDhhmmss_POST\n"
+           "\tSDIR_PRE_YYYYMMDDHHMMSS\n"
+           "\tSDIR_PRE_YYYYMMDD_HHMM_POST\n"
+           "\tSDIR_PRE_YYYYMMDDhhmmss_POST\n"
+           "\tRENAME_NO_TIME\n";
+} FilePrefix;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Additional text exists between the date and FileExtension (only valid for FilenameType=YYYY_MM_DD_HHMM). For example YYYY-MM-DD_HHMM.keepthis.ext";
+} FilePreservePreExtension;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Suffix for files (only required and valid for FilenameType=XYYYYMMDD_HHMMSSZ). Defines what the Z is, ie for files named 20050624_235802_base.prd set FilePrefix to an empty srting, set FileSuffix to _base and FileExtension to prd";
+} FileSuffix;
+
+commentdef {
+  p_header = "DATA TIMING";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Multiple files exist for one input (data) time, Serve the multiple files.";
+} MultipleFilesForOneTime;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Only valid if MultipleFilesForOneTime = TRUE. The number of sleep seconds between the multiple files with the same data-time.";
+} SleepSecsBetweenFilesForOneDataTime;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Output directory.";
+} OutDir;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Output filename, only required and valid for type RENAME_NO_TIME";
+} OutFile;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override day/time fields in text files.";
+  p_help = "If true, the program will search for strings of the types ddhhmm or hhmmssZ. The day 'dd' will be constrained to be the day of the month on which the input data was received. The day will be overwritten with the current day.";
+} OverwriteDay;
+   
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write _latest_data_info or not";
+} WriteLData;

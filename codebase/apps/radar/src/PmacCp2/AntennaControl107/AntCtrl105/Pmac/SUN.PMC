@@ -1,0 +1,28 @@
+p52&1a
+&2a
+#include "spoldefm.h"
+close
+open prog 210
+clear
+delete gather
+ &1
+ a(azl)
+ frax(a)
+ i5=1
+ TA(1000)TS(300)
+ while (2>1)
+ f(azv)
+ a(azl)
+ a(azr)
+  endwhile
+ close
+ open prog211
+ ;this is the same program # as elstep
+ 
+ clear
+ TA(1000)TS(100)
+ while (2>1)
+ b(p52)
+ endwhile
+ close
+

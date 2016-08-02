@@ -1,0 +1,310 @@
+/**********************************************************************
+ * TDRP params for FixRadxPointing
+ **********************************************************************/
+
+//======================================================================
+//
+// Adjusts the elevation and azimuth angles in a Radx file, based on 
+//   specified pointing errors.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This application registers with procmap. This is the instance used 
+//   for registration.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+// Files will be searched for in this directory.
+// Type: string
+//
+
+input_dir = ".";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+// Only data less old than this will be used.
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//
+
+output_format = OUTPUT_FORMAT_UF;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = CLASSIC;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+// If false, data will be byte-swapped as appropriate on output.
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+// Applies to netCDF and Dorade. UF does not support compression.
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+// Type: int
+//
+
+compression_level = 5;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+// Files will be written to this directory.
+// Type: string
+//
+
+output_dir = "$(HOME)/downloads/smartr/fixed";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//
+
+output_filename_mode = END_TIME_ONLY;
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+// Path will be output_dir/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+// Type: boolean
+//
+
+write_individual_sweeps = FALSE;
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+
+//======================================================================
+//
+// GEOREFERENCE CORRECTION DETAILS.
+//
+//======================================================================
+ 
+///////////// georef_mode /////////////////////////////
+//
+// Mode for specifying georeference corrections.
+// TILT_VECTOR mode: supply the tilt angle and azimuth. ROLL_PITCH: 
+//   supply the roll and pitch angles. Supply heading in both modes.
+//
+// Type: enum
+// Options:
+//     GEOREF_TILT_VECTOR
+//     GEOREF_ROLL_PITCH
+//
+
+georef_mode = GEOREF_TILT_VECTOR;
+// georef_mode = GEOREF_ROLL_PITCH;
+
+///////////// platform_heading_deg ////////////////////
+//
+// Heading of platform, in degrees True North.
+// Applies to both TILT_VECTOR and ROLL_PITCH modes. This is the angle 
+//   between TN and the longitudinal axis of the platform.
+// Type: double
+//
+
+platform_heading_deg = 0;
+
+///////////// platform_pitch_deg //////////////////////
+//
+// Pitch of the platform, in degrees.
+// Applies to ROLL_PITCH mode. This is the angle between the true 
+//   horizontal plane and the longitudinal axis of the platform.
+// Type: double
+//
+
+platform_pitch_deg = 0;
+
+///////////// platform_roll_deg ///////////////////////
+//
+// Roll of the platform, in degrees.
+// Applies to ROLL_PITCH mode. This is the angle between the true 
+//   vertical plane and the lateral (wing) axis of the platform.
+// Type: double
+//
+
+platform_roll_deg = 0;
+
+///////////// platform_tilt_amount_deg ////////////////
+//
+// Angle of tilt of platform vertical axis, in degrees.
+// Applies to TILT_VECTOR mode. This is the angle between the vertical 
+//   axis of the platform and the true vertical axis.
+// Type: double
+//
+
+platform_tilt_amount_deg = 1;
+
+///////////// platform_tilt_direction_deg /////////////
+//
+// Direction of tilt, in degrees.
+// Applies to TILT_VECTOR mode. This is the angle between the platform 
+//   heading, or north, and the vertical plane in which the tilted vector 
+//   lies, clockwise. See also tilt_direction_is_relative_to_north.
+// Type: double
+//
+
+platform_tilt_direction_deg = 285;
+
+///////////// tilt_direction_is_relative_to_north /////
+//
+// If true, platform_tilt_direction is relative to true north.
+// If false, platform_tilt_direction is relative to the longitudinal 
+//   axis of the platform. The difference between these is the heading of 
+//   the platform relative to true north.
+// Type: boolean
+//
+
+tilt_direction_is_relative_to_north = TRUE;
+

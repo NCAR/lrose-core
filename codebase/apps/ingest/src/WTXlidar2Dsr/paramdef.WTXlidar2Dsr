@@ -1,0 +1,199 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+
+commentdef {
+  p_header = "WTXlidar2Dsr is the successor to Windtracer2Dsr, it reads\n"
+  "the WTX Lockheed Martin lidar data and writes the beams to an FMQ.\n\n"
+  "The following fields are always sent :\n"
+  " VEL : velocity\n"
+  " SNR : Signal-to-noise ratio\n"
+  " SW : Spectral Width \n"
+  " BACK : Backscatter\n"
+  "If the fields are absent in the input file, the data values\n"
+  "are set to missing in the output, but the fields are still present."
+  "Niles Oien December 2010.";
+}
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} msgLog_dir;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+
+paramdef char* {
+  p_descr = "output fmq url";
+  p_help = "Path for FMQ output data.";
+  p_default = {"fmqp:://localhost::./fmq.dsLidar"};
+} output_fmq_url;
+ 
+paramdef long {
+  p_default = {2000000};
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} output_fmq_size;
+ 
+paramdef long {
+  p_default = {3600};
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+commentdef {
+  p_header = "LIDAR PARAMETERS";
+}
+
+
+typedef struct {
+	int lidarNumber;
+	string Name;
+	double lat;
+	double lon;
+	double alt;
+} lidarID_t;
+
+paramdef struct lidarID_t {   
+  p_descr = "Description of this lidar.";
+  p_help = "lat/lon info is not in the input files.";
+  p_default = {42, "TestLidar",  42.0, -95.0, 1.02 };
+} lidarID;
+
+paramdef int {
+  p_descr = "How many beams to process before sending radar header message.";
+  p_help = "The default should be OK.\n";
+  p_default = 60;
+} beamsPerMessage;
+ 
+paramdef int {
+  p_descr = "After sending the radar header message, delay for this\n"
+	"many seconds.";
+  p_help = "The intent is to allows Dsr2Vol some catchup time.\n";
+  p_default = 0;
+} delaySecs;
+
+paramdef int {
+  p_descr = "After finishing a file, delay for this\n"
+	"many seconds.";
+  p_help = "The intent is to allows Dsr2Vol some catchup time.\n";
+  p_default = 0;
+} fileDelaySecs;
+
+paramdef int {
+  p_descr = "After sending a beam, delay for this\n"
+	"many milli seconds.";
+  p_help = "The intent is to allows Dsr2Vol some catchup time.\n";
+  p_default = 5;
+} msDelayPostBeam;
+
+paramdef double {
+  p_descr = "Nominal horizontal beam width, degrees.";
+  p_help = "The default should be OK.\n";
+  p_default = 1.0;
+} horizBeamWidth;
+ 
+paramdef double {
+  p_descr = "Nominal vertical beam width, degrees.";
+  p_help = "The default should be OK.\n";
+  p_default = 0.1;
+} vertBeamWidth;
+ 
+paramdef long {
+  p_default = {0};
+  p_descr = "Time offset, seconds.";
+  p_help = "The Lidar data are typically referenced according to\n"
+	"local time, while UTC is desired for output. This parameter\n"
+	"is added to the input time to obtain the output time.";
+} time_offset;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use the current time. The\n"
+  "time_offset is still added.";
+  p_help = "This is intended for use in archive mode to simulate\n"
+  "realtime operations.";
+} useRealTime;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to take the time from the filename rather than\n"
+	"reading it from the file itself. May make it easier\n"
+	"to compare input to output.\n"
+	"The time_offset is still added to the time that\n"
+	"is obtained. The filename format is taken to be\n"
+	"in the convention YYYYMMDD_hhmmss_base.prd,\n"
+	"ie.  20020722_231017_base.prd and if it is not then\n"
+	"the data time will be used. The time offset is still added.";
+  p_help = "Set if desired.";
+} timeFromFilename;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use the lidar's filtered fields rather than\n"
+            "the raw fields.";
+  p_help = "Set as desired.";
+} filtered;

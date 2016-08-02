@@ -1,0 +1,218 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions OpticalFlow
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Oct 2005
+//
+
+commentdef {
+  p_header = "OpticalFlow performs optical flow tracking on MDV fields separated in time. The objective is to estimate the 2D velocity of the field. Output is the original tracked field, plus the U,V components of the velocity.";
+  p_text = "The optical flow code was provided courtesy of Alan Seed of the Australian Bureau or Meteorology.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "mdv/input";
+  p_descr = "URL for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set vertical level limits.";
+  p_help = "The tracking is performed on a composite (maximum value transform) made up from a number of layers in the input data. If you set vertical limits, the composite will be created using the data between the limits. If you do not set the limits, all of the layers will be used to create the composite.";
+} set_vlevel_limits;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Lower plane vlevel limit.";
+  p_help = "The units of the vlevel will be determined from the input file.";
+} lower_vlevel;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Upper plane vlevel limit.";
+  p_help = "The units of the vlevel will be determined from the input file.";
+} upper_vlevel;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Name of the field to be tracked.";
+  p_help = "This field must exist in the input files.";
+} tracking_field_name;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Maximum time allowed between input files used for tracking (secs).";
+  p_help = "A pair of data files are required for tracking. It does not make sense to try to compute tracking between files which are too far apart in time.";
+} max_time_between_files;
+
+paramdef int {
+  p_default = 240;
+  p_descr = "Minimum time allowed between input files used for tracking (secs).";
+  p_help = "A pair of data files are required for tracking. If files are too close together in time, the tracking algorithm will not work well.";
+} min_time_between_files;
+
+commentdef {
+  p_header = "OPTICAL FLOW ALGORITHM PARAMETERS";
+}
+
+paramdef double {
+  p_default = 0.5;
+  p_min = 0.1;
+  p_max = 0.9;
+  p_descr = "Scale factor for tracking resolution levels.";
+} scale_factor;
+
+paramdef int {
+  p_default = 100;
+  p_descr = "Maximum numer of tracking resolution levels.";
+} max_levels;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Blur operation kernel size.";
+} window_size;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Number of blur iterations at each resolution.";
+} n_iterations;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Controls polygon expansion.";
+} polygon_neighborhood;
+
+paramdef double {
+  p_default = 1.1;
+  p_descr = "Controls polygon expansion.";
+} polygon_sigma;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use previous vectors to seed latest time step.";
+  p_help = "If true, we use the previously determined vectors to seed the current time step. If false, the vectors are determined from scratch.";
+} seed_with_previous_vectors;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Only track points with values above this threshold.";
+  p_help = "All other points will be regarded as background.";
+} tracking_threshold;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to interpolate tracking vectors in regions of no data.";
+  p_help = "If true, we interpolate between areas with valid data.";
+} interp_over_missing_areas;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Sample spacing for interpolation algorithm.";
+} interp_spacing;
+
+paramdef double {
+  p_default = 0.05;
+  p_descr = "Fraction of points in sample square required for valid interpolation.";
+} min_frac_bins_for_avg;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Power term in inverse distance weighting interpolation low-res pass.";
+} idw_low_res_pwr;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Power term in inverse distance weighting interpolation high-res pass.";
+} idw_high_res_pwr;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdv/optical_flow";
+  p_descr = "Output URL.";
+  p_help = "Output data is written to this URL.";
+} output_url;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write the composite field, used to compute the Optical Flow vectors, to the output file.";
+} write_composite_field_to_output;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to copy input fields unchanged to the output file.";
+  p_text = "These fields are copied unchanged from the input file to the output file, in addition to the fields produced by the OpticalFlow algorithm. This is a way of consolidating the output data set.";
+} copy_input_fields_to_output;
+
+typedef struct {
+  string input_name; 
+  string output_name;
+} copy_field_t;
+
+paramdef struct copy_field_t {
+  p_default = {
+    {
+      input_name = "DBZ",
+      output_name = "DBZ"
+    }
+    ,
+    {
+      input_name = "VEL",
+      output_name = "VEL"
+    }
+  };
+  p_descr = "These fields are copied through unchanged to the output file.";
+  p_help = "You can change the name of the field on output.";
+} copy_fields[];
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Set encoding type.";
+} output_encoding_type;
+

@@ -1,0 +1,180 @@
+/**********************************************************************
+ * TDRP params for ac_ingest
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: long
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME_MODE, the aircraft data is read in from the serial 
+//   connection. In TEST_MODE, aircraft data is generated for testing 
+//   purposes.
+//
+// Type: enum
+// Options:
+//   TEST_MODE, REALTIME_MODE
+//
+//
+
+mode = REALTIME_MODE;
+
+///////////// input_device ////////////////////////////
+//
+// Input serial port: COM 2.
+// Name of serial device for input data.
+// Type: string
+//
+
+input_device = "/dev/ttyS0";
+
+///////////// baud_rate ///////////////////////////////
+//
+// Baud rate.
+// Baud rate for incoming serial data port.
+//
+// Type: enum
+// Options:
+//   BAUD_300, BAUD_1200, BAUD_2400, BAUD_4800, BAUD_9600, BAUD_19200, BAUD_38400
+//
+//
+
+baud_rate = BAUD_9600;
+
+///////////// archive_dir_path ////////////////////////
+//
+// Archive directory path.
+// Arcvive files are written to this directory.
+// Type: string
+//
+
+archive_dir_path = "output/ascii";
+
+///////////// realtime_file_path //////////////////////
+//
+// Realtime file path.
+// The realtime data is written to this path.
+// Type: string
+//
+
+realtime_file_path = "output/ascii/realtime";
+
+///////////// data_interval ///////////////////////////
+//
+// Data store interval (secs).
+// Time between data store - this is used to keep the data file size 
+//   reasonable.
+// Minimum val: 1
+// Maximum val: 3600
+// Type: long
+//
+
+data_interval = 1;
+
+///////////// use_spdb ////////////////////////////////
+//
+// Option to store data using spdb.
+// Data will be stored in SPDB - symbolic products data base.
+// Type: boolean
+//
+
+use_spdb = TRUE;
+
+///////////// single_database /////////////////////////
+//
+// Option to store all aircraft data in a single data-base.
+// If TRUE, all data is stored in a single data-base directory, db_dir, 
+//   regardless of callsign. The chunk type is comuted by hashing the 
+//   callsign. If FALSE, each callsign has a separate data-base directory, 
+//   computed as db_dir/callsign.
+// Type: boolean
+//
+
+single_database = TRUE;
+
+///////////// db_dir //////////////////////////////////
+//
+// Data base directory.
+// The path to the data base directory. See single_database for 
+//   computing the directory.
+// Type: string
+//
+
+db_dir = "output/spdb";
+
+///////////// callsigns ///////////////////////////////
+//
+// Callsign array.
+// Array of valid callsigns.
+// Type: string
+// 1D array - variable length.
+//
+
+callsigns = { "309P", "178Y" };
+
+///////////// valid_period ////////////////////////////
+//
+// Valid period (secs).
+// Time period over which the position is valid.
+// Minimum val: 1
+// Type: long
+//
+
+valid_period = 120;
+
+///////////// test_aircraft ///////////////////////////
+//
+// Details of aircraft for TEST_MODE.
+// The test aircraft have a starting location, speed (knots) and 
+//   altitude (ft). They wander randomly around. If they go further that 
+//   100 km from their starting location they are brought back to the 
+//   start.
+//
+// Type: struct
+//   typedef struct {
+//      double start_lat;
+//      double start_lon;
+//      double altitude;
+//      double speed;
+//      string callsign;
+//   }
+//
+// 1D array - variable length.
+//
+
+test_aircraft = {
+  { 0, 0, 0, 0, "not_set"}
+};
+

@@ -1,0 +1,543 @@
+/****************************************************
+ * TDRP params for storm_ident
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA, DEBUG_VERBOSE.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Operating mode.
+ * In realtime mode, storm_ident waits for a new input file. In
+ *   archive mode, it moves through the files between the times set
+ *   by the user.
+ *
+ * Type: enum
+ * Default: ARCHIVE 
+ * Legal values: ARCHIVE, REALTIME.
+ */
+mode = ARCHIVE;
+
+/*
+ * Option to run tracking.
+ * If this is set, storm_ident will communicate with storm_track.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+tracking = FALSE;
+
+/*
+ * Option to start storm_track automatically.
+ * If this is set, storm_track will be started from within storm_ident.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+start_storm_track = FALSE;
+
+/*
+ * Command line for starting storm_track.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+storm_track_command_line = "storm_track -params /space/dixon/titan/motr/params/storm_track.test";
+
+/*
+ * Shared mem key.
+ * This key is used for shared memory communication with storm_track
+ *   and the track_server.
+ *
+ * Type: long
+ * Default: 44000 
+ * Min value: 10000 
+ */
+shmem_key = 44000;
+
+/*
+ * Radar data directory - input.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+rdata_dir = "/space/dixon/titan/motr/cdata";
+
+/*
+ * Radar data files extension.
+ *
+ * Type: string
+ * Default: "dob" 
+ */
+rdata_file_ext = "dob";
+
+/*
+ * Storms data directory - output.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+storm_data_dir = "/space/dixon/titan/motr/storms1";
+
+/*
+ * Input grid projection.
+ * This is the projection of the input radar data.
+ *
+ * Type: enum
+ * Default: PROJ_FLAT 
+ * Legal values: PROJ_FLAT, PROJ_LATLON.
+ */
+projection = PROJ_FLAT;
+
+/*
+ * dBZ field.
+ * Field number in radar data for dBZ values.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ */
+dbz_field = 0;
+
+/*
+ * Vel field.
+ * Field number in radar data for velocity values.
+ *
+ * Type: long
+ * Default: 1 
+ * Min value: 0 
+ */
+vel_field = 1;
+
+/*
+ * Flag to indicate if velocity data is available.
+ * If this is set, velocity data is available in the vel_field.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+vel_available = TRUE;
+
+/*
+ * Lower dBZ threshold.
+ * Storms reflectivity must exceed this threshold.
+ *
+ * Type: double
+ * Default: 35 
+ * Min value: -30 
+ * Max value: 180 
+ */
+low_dbz_threshold = 35;
+
+/*
+ * Upper dBZ threshold.
+ * Storms reflectivity must not exceed this threshold.
+ *
+ * Type: double
+ * Default: 80 
+ * Min value: -30 
+ * Max value: 180 
+ */
+high_dbz_threshold = 80;
+
+/*
+ * Storm base threshold (km).
+ * Storms identification is only performed above this threshold.
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 25 
+ */
+base_threshold = 3;
+
+/*
+ * Storm top threshold (km).
+ * Storms identification is only performed below this threshold.
+ *
+ * Type: double
+ * Default: 25 
+ * Min value: 0 
+ * Max value: 25 
+ */
+top_threshold = 20;
+
+/*
+ * Minimum storm size (km2 or km3 depending on data).
+ * Storms must exceed this size. If the data is 2D, the size is in
+ *   km2 units; if the data is 3D, the size is in km3. This parameter
+ *   used to be called volume_threshold.
+ *
+ * Type: double
+ * Default: 30 
+ * Min value: 0 
+ */
+min_storm_size = 30;
+
+/*
+ * Maximum storm size (km2 or km3 depending on data).
+ * Storms must not exceed this size. If the data is 2D, the size is
+ *   in km2; if the data is 3D, the size is in km3. This parameter used
+ *   to be called volume_limit.
+ *
+ * Type: double
+ * Default: 1e+09 
+ * Min value: 1 
+ */
+max_storm_size = 5000000;
+
+/*
+ * Option to check for storm range limits.
+ * If the storm is at the limit of radar range, a flag is set.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_range_limits = TRUE;
+
+/*
+ * Option to check for second trip.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_second_trip = TRUE;
+
+/*
+ * Second trip detection vertical aspect threshold.
+ * If the vertical aspect ratio exceeds this value, the storm is
+ *   flagged as second-trip, provided the orientation is aligned
+ *   with the storm azimuth from the radar.
+ *
+ * Type: double
+ * Default: 4 
+ * Min value: 1 
+ * Max value: 20 
+ */
+sectrip_vert_aspect = 4;
+
+/*
+ * Second trip detection horizontal aspect threshold.
+ * If the horizontal aspect ratio (based on the ellipse) exceeds
+ *   this value, the storm is flagged as second-trip, provided the
+ *   orientation is aligned with the storm azimuth from the radar.
+ *
+ * Type: double
+ * Default: 4 
+ * Min value: 1 
+ * Max value: 20 
+ */
+sectrip_horiz_aspect = 4;
+
+/*
+ * Allowable second trip orientation error.
+ * For a storm to be flagged as second-trip, the orientation must
+ *   be aligned with the storm azimuth from the radar, within this
+ *   allowable error.
+ *
+ * Type: double
+ * Default: 10 
+ * Min value: 1 
+ * Max value: 90 
+ */
+sectrip_orientation_error = 10;
+
+/*
+ * Hail reflectivity threshold.
+ * The threshold between rain and hail (dBZ).
+ *
+ * Type: double
+ * Default: 55 
+ * Min value: 40 
+ * Max value: 70 
+ */
+hail_dbz_threshold = 50;
+
+/*
+ * Z-R parameters.
+ * Parameters in Z-R relationship. As defaults use 200.0, 1.6.
+ *
+ * Type: struct
+ */
+ZR = {
+  500, /* coeff:double */
+  1.3  /* expon:double */
+};
+
+/*
+ * Z-M parameters.
+ * Parameters in Z-M relationship. As defaults use 20300.0, 1.67.
+ *
+ * Type: struct
+ */
+ZM = {
+  20300, /* coeff:double */
+  1.67  /* expon:double */
+};
+
+/*
+ * Dbz histogram interval.
+ * Reflectivity interval for histogram computations related
+ *   to the reflectivity distribution.
+ *
+ * Type: double
+ * Default: 3 
+ * Min value: 1 
+ * Max value: 10 
+ */
+dbz_hist_interval = 3;
+
+/*
+ * Option to store runs in storm file.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+store_storm_runs = TRUE;
+
+/*
+ * Option to store projected area runs in storm file.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+store_proj_runs = TRUE;
+
+/*
+ * Option to create verification files.
+ * If this is set, verification files will be stored in verify_dir.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+create_verification_files = FALSE;
+
+/*
+ * Verify data directory - output.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+verify_dir = "/space/dixon/titan/motr/verify";
+
+/*
+ * Option to check morphology.
+ * If this is set, morphology will be used for storm definition.
+ *   A check is performed on storm morphology to reduce apparent
+ *   mergers. The technique is as follows: 1. Compute euclidean
+ *   distance (ed) of each point from edge of storm clump 2. Compute
+ *   reflectivity excess above threshold, and divide by morphology_refl_divisor
+ *   (in dbz/km). 3. Add ed to refl excess, to get interest map 4. Threshold
+ *   interest map using morphology_erosion_threshold (in km).
+ *   5. Erode points which do not exceed the threshold, and which
+ *   are not adjacent to a point which exceeds the threshold.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_morphology = FALSE;
+
+/*
+ * Option to create morphology files.
+ * If this is set, morphology files will be stored in verify_dir.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+create_morphology_files = FALSE;
+
+/*
+ * Morphology data directory - debugging.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+morphology_dir = "/space/dixon/titan/motr/morphology";
+
+/*
+ * Erosion threshold for morphology check (km).
+ * Threshold to which morphology erosion is performed.
+ *
+ * Type: double
+ * Default: 5 
+ * Min value: 0 
+ * Max value: 100 
+ */
+morphology_erosion_threshold = 5;
+
+/*
+ * Erosion threshold for morphology check (dbz/km).
+ * The morphology field is obtained by adding the euclidean distance
+ *   to storm edge (km) to the reflectivity excess (above threshold)
+ *   divided by this value (dbz/km).
+ *
+ * Type: double
+ * Default: 10 
+ * Min value: 0.1 
+ * Max value: 100 
+ */
+morphology_refl_divisor = 10;
+
+/*
+ * Option to check tops.
+ * If this is active, areas with radar tops below the threshold
+ *   will be removed from the data prior to storm identification.
+ *   The margin allows you to account for tilted storms, leaving
+ *   a margin around the area to be removed.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_tops = TRUE;
+
+/*
+ * Option to create tops files.
+ * If this is set, tops files will be stored in verify_dir.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+create_tops_files = FALSE;
+
+/*
+ * Radar tops data directory - debugging.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+tops_dir = "/space/dixon/titan/motr/tops";
+
+/*
+ * Minimum radar tops (km).
+ * Minimum radar tops for valid radar data.
+ *
+ * Type: double
+ * Default: 4.5 
+ * Min value: 0 
+ * Max value: 25 
+ */
+min_radar_tops = 4.5;
+
+/*
+ * Margin placed on min_tops field (km).
+ * This takes into account the fact that some storms may be tilted.
+ *
+ * Type: double
+ * Default: 1.5 
+ * Min value: 0 
+ * Max value: 10 
+ */
+tops_edge_margin = 1.5;
+
+/*
+ * Factor to convert velocity field to m/s.
+ * This is included in case the velocity is not in m/s.
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0 
+ */
+vel_to_m_per_sec_scale = 1;
+
+/*
+ * Max missing data gap (secs).
+ * In archive mode, if reftime is set on the command line, storm_ident
+ *   searches backwards from the reftime for data files with no time
+ *   gaps exceeding max_missing_data_gap (secs), to search for
+ *   the files for analysis. If starttime and endtime are set, these
+ *   are used instead. In realtime mode, if auto_restart is false,
+ *   storm_ident looks back from latest data time for the first gap
+ *   exceeding max_missing_data_gap. Files since this gap are
+ *   processed.
+ *
+ * Type: double
+ * Default: 3600 
+ * Min value: 1 
+ */
+max_missing_data_gap = 3600;
+
+/*
+ * Max valid age of input files in realtime mode (secs).
+ * This the max valid age for an incoming file. The program will
+ *   wait for a data file more recent than this.
+ *
+ * Type: double
+ * Default: 360 
+ * Min value: 1 
+ */
+max_realtime_valid_age = 360;
+
+/*
+ * Auto-restart option.
+ * If set, the program restarts at restart_time (GMT), copying
+ *   rome data so that tracks will have some history. This ensures
+ *   that the storm and track files will not grow too big.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+auto_restart = FALSE;
+
+/*
+ * The time in the day (UCT/GMT) at which restart occurs.
+ * The program will check for the passing of this time. Once data
+ *   beyond this time is found, restart will occur.
+.
+ *
+ * Type: struct
+ */
+restart_time = {
+  0, /* hour:long */
+  0  /* min:long */
+};
+
+/*
+ * The period copied to the new file on restart (secs).
+ * On restart, the program copies some of the previous file, to
+ *   provide history for storm_track. This is the duration of that
+ *   data.
+ *
+ * Type: long
+ * Default: 3600 
+ * Min value: 1 
+ */
+restart_overlap_period = 3600;
+
+/*
+ * Cleanup on restart option.
+ * If set, the program will delete old storm files on restart.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+remove_old_files_on_restart = FALSE;
+
+

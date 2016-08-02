@@ -1,0 +1,189 @@
+
+commentdef {
+  p_header = "The intent of this program is to read a Titan database,\n"
+	"determine those storms which are considered significant using\n"
+	"longevity and storm area criteria, and write out the lat/lon\n"
+	"at which these storms initiated to an SPDB database. Archive\n"
+	"mode is automatically invoked if the -start and -end\n"
+	"options are invoked.\n\n"
+        "Niles, August 2002.";
+}
+
+paramdef enum triggerMode_t {
+  p_options = { TRIGGER_ARCHIVE, TRIGGER_INTERVAL, TRIGGER_LDATAINFO };
+  p_default = { TRIGGER_LDATAINFO };
+  p_descr = "Decide how the program is triggered.";
+  p_help = "The program can be triggered in one of three ways.\n\n"
+        " (1) TRIGGER_ARCHIVE - the program is run in archive mode\n"
+        "     on existing data. The start and end times are determined\n"
+        "     on the command line with -start and -end in the usual way.\n"
+        "     Specifying these argumnets automatically invokes this mode."
+        "     The time step is determined by the timeStep parameter.\n\n"
+        " (2) TRIGGER_INTERVAL - the program wakes up at regular intervals and\n"
+        "     runs. These intervals are determined by the timeStep parameter."
+        "     This enables the program to run in realtime on a machine remote\n"
+        "     from where the data are.\n\n"
+        " (3) TRIGGER_LDATAINFO - the program triggers directly from\n"
+        "     the titan output. This has the advantage that the program\n"
+        "     is triggered directly by Titan; but it does mean that it must\n"
+        "     run on the same machine as the Titan system (since DsInputPath\n"
+        "     is inherrently a local device at the time of writing).";
+} triggerMode;
+
+
+paramdef string {
+  p_descr = "Directory to trigger from if triggerMode is TRIGGER_LDATAINFO.";
+  p_help = "Note that the data are not read from here - this is used\n"
+	"soley for triggering. Data are always read from titanUrl."; 
+  p_default = {"/Some/Directory/Structure"};
+} triggerDir;
+
+ paramdef long {
+  p_descr = "Maximum valid age if triggerMode is TRIGGER_LDATAINFO, seconds.\n";
+  p_help =  "The default should be fine.";
+  p_default = 1800;
+} maxValidAge;
+
+paramdef string {
+  p_descr = "Input titan URL";
+  p_help = "Program reads these data as input."; 
+  p_default = {"titanp:://localhost::titan/input"};
+} titanUrl;
+ 
+paramdef string {
+  p_descr = "Output SPDB URL";
+  p_help = "Locations at which storms initiated are written here\n"
+	"as GenPt structures with the dbz_max data."; 
+  p_default = {"spdbp:://localhost::spdb/StormInitLoc"};
+} outUrl;
+
+
+paramdef boolean {
+  p_descr = "Set to print more messages as data are processed.";
+  p_help = "Can usually be FALSE"; 
+  p_default = FALSE;
+} debug;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+commentdef {
+  p_header = " STORM THRESHOLDS - determine which storms are significant.";
+}
+
+paramdef long {
+  p_descr = "Temporal threshold, secs.";
+  p_help =  "Storm must be in Titan for this time before its\n"
+            "area will be considered.";
+  p_default = 1800;
+} temporalThreshold;
+
+paramdef double {
+  p_descr = "Spatial threshold, square kilometers.";
+  p_help =  "Storm must pass the temporalThreshold and have exceeded\n"
+	"this area threshold to be considered significant.";
+  p_default = 100.0;
+} areaThreshold;
+
+
+paramdef boolean {
+  p_descr = "Option to follow merged storms into their children.";
+  p_help = "Defaults to TRUE"; 
+  p_default = TRUE;
+} recurseOnParents;
+
+paramdef long {
+  p_descr = "Valid time for output GenPts, secs.";
+  p_help =  "Output is considered valid for this time.";
+  p_default = 3600;
+} maxValidTime;
+
+paramdef long {
+  p_descr = "Trigger interval, seconds.";
+  p_help =  "Program triggers to run at these intervals in realtime mode.";
+  p_default = 600;
+} time_trigger_interval;
+
+paramdef long {
+  p_descr = "Time to look back, seconds, realtime mode.";
+  p_help =  "Program looks back from now by this time to get\n"
+	"data interval. Set to more than time_trigger_interval. This\n"
+	"interval should be long enough to allow for the fact\n"
+	"that the program will have to track back to the storm init\n"
+	"point within this interval.";
+  p_default = 43200;
+} lookback_time;
+
+
+commentdef {
+  p_header = "Below are parameters which allow the user to specify\n"
+	"that storm initialization points are only to be saved out if\n"
+	"they are close enough to specified radar locations.\n\n"
+	"The idea is that some storms will pass through the\n"
+	"region without initiating in the region. Since\n"
+	"these storms are picked up by titan upon their entry\n"
+	"into the region, rather than upon their initiation by\n"
+	"a physical process, these are not storms we want to study.\n"
+	"Only considering storms that initiate within the region,\n"
+	"ie. close to a radar, avoids this problem. The exclusion\n"
+	"process is optional and is only done if the boolean\n"
+	"apply_closeness_criteria (below) is set.";
+}
+
+paramdef boolean {
+  p_descr = "Option to apply a check to the initiation points\n"
+	"to be sure that they are close to a radar.";
+  p_help =  "Default is not to do this.";
+  p_default = FALSE;
+} apply_closeness_criteria;
+
+
+typedef struct {
+    double lat;
+    double lon;
+    double max_dist;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_descr = "List of radar locations and maximum distances (Km)\n"
+	"allowable from the radars for storm initiation points to\n"
+	"be considered valid.";
+  p_help =  "Relevant only if apply_closeness_criteria is TRUE.";
+  p_default = {
+		{41.608333, -88.090833, 200.0},
+		{41.358888, -85.7,      200.0}
+              };
+} radar_locations[];
+
+commentdef {
+  p_header = "The options below allow you to apply a bounding\n"
+	"box to the input - ie. only detect storm initiation\n"
+	"within a limitied range of latitude and longitude. This\n"
+	"may be useful in post analysis runs.";
+}
+
+
+paramdef boolean {
+  p_descr = "Option to only detect initiations within a bounded box.";
+  p_help =  "Default is not to do this.";
+  p_default = FALSE;
+} apply_bounding_box;
+
+typedef struct {
+    double min_lat;
+    double min_lon;
+    double max_lat;
+    double max_lon;
+} bounding_box_t;
+
+paramdef struct bounding_box_t {
+  p_descr = "Limited region of interest, probably for post-analysis.";
+  p_help =  "Relevant only if apply_bounding_box is TRUE.";
+  p_default = {40.0, -90.0, 42.0, -88.0 };
+} bounding_box;
+
+
+

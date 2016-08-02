@@ -1,0 +1,18 @@
+# -*- python -*-
+#
+#
+
+Import('env')
+
+sources  = ['main.cpp','Parameters.cpp'];
+
+progNode  = env.Program('doradeinfo',source = sources,
+                        CPPPATH=[env.forayInc,env.netcdfInc],
+                        LIBPATH=[env.forayLib,env.netcdfLib],
+                        LIBS=[env.forayLIBS,env.netcdfLIBS])
+
+localInstallNode = env.Install(env.installLocalBin ,progNode);
+
+env.Default([progNode,localInstallNode])
+env.Install(env.installBin,progNode);
+

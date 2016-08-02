@@ -1,0 +1,33 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_lassen_to_radar</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;<br>
+<a href=RSL_radar_struct.html>Radar</a> *RSL_lassen_to_radar(char *infile);</b> 
+<hr>
+
+<h3>Description</h3>
+Reads a LASSEN (data from Darwin Austrailia) file and returns a pointer to the structure <i>Radar</i>. The input file is specified by the string <i>infile</i>. If <i>infile</i> is NULL, then stdin is read. The input file may be compressed. If the data is compressed, it is passed through the GNU <b>gunzip</b> filter. Thus, compressed data can be any format that <b>gzip</b> understands.
+
+<p>The radar structure is, essentially, an array of Volumes. These volumes represent the reflectivity, velocity and spectrum width fields. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, lassen_to_radar returns a pointer to the structure <b>Radar</b>. Otherwise, NULL is returned and errno is set. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_anyformat_to_radar.html>RSL_anyformat_to_radar</a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a>. 
+</body>

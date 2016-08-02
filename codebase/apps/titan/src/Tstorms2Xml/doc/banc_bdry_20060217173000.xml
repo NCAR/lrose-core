@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<wxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML" version="1.01"
+	xsi:schemaLocation="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML/wxml.1.01.xsd">
+<head>
+	<product concise-name="line" operational-mode="experimental">
+		<system>banc</system>
+		<title>Autonowcaster Boundary</title>
+                <description>B08FDP ANC boundary</description>
+		<category>analysis</category>
+		<creation-date refresh-frequency="PT10M">2006-02-17T17:35:00</creation-date>
+	</product>
+	<data-source>
+		<radar name="Tianjin" type="NEXRAD" latitude="39.20" longitude="117.30" />
+	</data-source>
+	<product-source>
+		<more-information>
+			http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/info.html
+		</more-information>
+		<production-center>Bureau of Meteorology
+			<sub-center>Research Centre</sub-center>
+		</production-center>
+		<disclaimer>http://www.bom.gov.au/other/disclaimer.shtml</disclaimer>
+		<credit>http://www.bom.gov.au</credit>
+		<credit-logo>http://www.bom.gov.au/images/bom_logo.gif</credit-logo>
+	</product-source>
+</head>
+<nowcast-data>
+	<time-layout time-coordinate="UTC">
+		<start-valid-time>2006-02-17T17:30:00</start-valid-time>
+		<end-valid-time>2006-02-17T17:30:00</end-valid-time>
+	</time-layout>
+	<event ID="00001">
+		<case>
+			<time>2006-02-17T17:30:00</time>
+			<location>
+				<polyline>
+					<moving-point type="vertex">
+						<latitude>39.67</latitude>
+						<longitude>115.71</longitude>
+						<cartesian_motion>
+							<u_motion units="m s-1">-5.7</u_motion>
+							<v_motion units="m s-1">2.1</v_motion>
+						</cartesian_motion>
+					</moving-point>
+					<moving-point type="vertex">
+						<latitude>39.49</latitude>
+						<longitude>115.62</longitude>
+						<cartesian_motion>
+							<u_motion units="m s-1">-5.8</u_motion>
+							<v_motion units="m s-1">1.9</v_motion>
+						</cartesian_motion>
+					</moving-point>
+					<moving-point type="vertex">
+						<latitude>39.29</latitude>
+						<longitude>115.59</longitude>
+						<cartesian_motion>
+							<u_motion units="m s-1">-5.8</u_motion>
+							<v_motion units="m s-1">1.7</v_motion>
+						</cartesian_motion>
+					</moving-point>
+					<moving-point type="vertex">
+						<latitude>39.10</latitude>
+						<longitude>115.60</longitude>
+						<cartesian_motion>
+							<u_motion units="m s-1">-5.8</u_motion>
+							<v_motion units="m s-1">1.5</v_motion>
+						</cartesian_motion>
+					</moving-point>
+					<moving-point type="vertex">
+						<latitude>38.98</latitude>
+						<longitude>115.62</longitude>
+						<cartesian_motion>
+							<u_motion units="m s-1">-5.7</u_motion>
+							<v_motion units="m s-1">1.3</v_motion>
+						</cartesian_motion>
+					</moving-point>
+					<moving-point type="vertex">
+						<latitude>38.87</latitude>
+						<longitude>115.64</longitude>
+						<cartesian_motion>
+							<u_motion units="m s-1">-5.7</u_motion>
+							<v_motion units="m s-1">1.2</v_motion>
+						</cartesian_motion>
+					</moving-point>
+				</polyline>
+			</location>
+		</case>
+	</event>
+</nowcast-data>
+</wxml>

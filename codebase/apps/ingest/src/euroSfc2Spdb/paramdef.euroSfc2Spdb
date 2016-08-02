@@ -1,0 +1,105 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "Small program to convert european surface"
+	"data from netCDF to SPDB for Tammy Weckwerthe. Niles Oien.";
+} 
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME.";
+} mode;
+
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Instance";
+  p_help = "Process instance for registration with process mapper";
+} instance;
+
+
+commentdef {
+  p_header = "Input data";
+} 
+
+paramdef char* {
+  p_default = {"./latest.data"};
+  p_descr = "File path of surface input data.";
+  p_help = "This is the directory in which input files are"
+	"in realtime mode.";
+} inputPath;
+
+
+paramdef long {
+  p_default = 900;
+  p_descr = "Maximum age for files, realtime mode, seconds";
+  p_help = "Default is 15 minutes. ";
+} max_realtime_valid_age;
+
+
+commentdef {
+  p_header = "Output SPDB Data";
+} 
+
+paramdef char* {
+  p_default = { "./out" };
+  p_descr = "Output DsSpdb destination.";
+  p_help = "METAR format SPDB data will be written to this destination.";
+} outputUrl;
+
+commentdef {
+  p_header = "Program parameters";
+} 
+
+paramdef long {
+  p_default = 1800;
+  p_descr = "Expire time delta, seconds.";
+  p_help = "Expiry time is validity time plus expire delta.";
+} expireDelta;
+
+typedef struct {
+	double minLat;
+	double minLon;
+	double maxLat;
+	double maxLon;
+} bb_t;
+
+paramdef struct bb_t {
+  p_default = {-90.0, -360.0, 90.0, 360.0 };
+  p_descr = "Limits on lat, lon";
+  p_help = "May prevent output from becoming too verbose";
+} boundingBox;

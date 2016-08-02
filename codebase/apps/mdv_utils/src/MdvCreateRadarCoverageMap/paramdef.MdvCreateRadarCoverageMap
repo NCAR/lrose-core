@@ -1,0 +1,197 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvCreateRadarCoverageMap
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvCreateRadarCoverageMap.
+ */
+
+
+commentdef
+{
+  p_header = "MdvCreateRadarCoverageMap";
+  p_text = "This program reads a merged radar file created by MdvMerge2 and "
+           "creates a radar coverage map by searching the master header info "
+           "string for the specified radar strings.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "If true, verbose debug messages will be printed.";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data at the "
+           "input_url.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_help = "This is the URL for a dataset created by MdvMerge2. ";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef string
+{
+  p_descr = "Input field name";
+  p_help = "This is the name of one of the fields in the input URL. "
+           "This field will be used to define the projection for the "
+           "output file.";
+  p_default = "DBZ";
+} input_field_name;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/output";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+  p_text = "Parameters controlling how the algorithm works.";
+};
+
+typedef struct
+{
+  string radar_string;
+  double lat;
+  double lon;
+  double max_range_km;
+  int map_value;
+} radar_info_t;
+
+paramdef struct radar_info_t
+{
+  p_descr = "Information aobut the radars in the merged file.";
+  p_help = "\tradar_string - The string used to identify this radar in the info field.\n"
+           "\tlat - Radar latitude.\n"
+           "\tlon - Radar longitude.\n"
+           "\tmax_range_km - The maximum range of the radar. "
+           "\tmap_value - The coverage map value to use for this radar. "
+           "Must be between 1 and 255.\n\n"
+           "The application will go through this list in the order given and, if the "
+           "radar string is found in the master header info string, the area of the "
+           "grid covered by a max_range_km ring around the given lat/lon location will "
+           "be filled with the given map_value. "
+           "Because we go in order, if a radar in the list overlaps with a previous "
+           "radar then the latter radar's map value will overwrite the earlier radar's "
+           "value. "
+           "0 is used as the missing data value and is put in any grid square not "
+           "covered by a radar.";
+  p_default = {};
+} radar_info[];

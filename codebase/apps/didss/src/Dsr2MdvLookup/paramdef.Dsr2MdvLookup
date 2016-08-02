@@ -1,0 +1,138 @@
+/*********************************************************
+ * parameter definitions for gen_polar2mvd_lookup
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 1993
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef enum geom_type {
+  p_options = {CART_GEOM, PPI_GEOM, POLAR_GEOM};
+  p_default = {CART_GEOM};
+  p_descr = "Geometry type for MDV grid.";
+  p_help = "There are 3 geometry types: CART_GEOM - Cartesian volume grid (km x km x km) (default), PPI_GEOM - Cartesian ppi grid (deg x km x km), and POLAR_GEOM - polar grid [el x az x gate] (deg x deg x km).";
+} geom_type;
+
+paramdef char* {
+  p_default = {"polar2mdv_lookup"};
+  p_descr = "File path for lookup table - output.";
+  p_help = "The generated lookup table file has this file path.";
+} lookup_table_path;
+
+paramdef double {
+  p_default = {0.5};
+  p_min = {-10.0};
+  p_max = {180.0};
+  p_descr = "Target elevation array (deg)";
+  p_help = "Array of target radar elevations. The actual elevation data is rounded to the values in this array.";
+} elev_target[];
+
+paramdef long {
+  p_default = {360};
+  p_min = {10};
+  p_max = {36000};
+  p_descr = "Number of radar beam azimuths in the azimuth array.";
+  p_help = "This is the expected number of radar azimuths. See also start_azimuth and delta_azimuth";
+} nazimuths;
+
+paramdef double {
+  p_default = {0.0};
+  p_min = {-360.0};
+  p_max = {360.0};
+  p_descr = "Azimuth of first entry in azimith array (deg).";
+  p_help = "The azimuths in the array are determined using this start value and the delta_azimuth. See also nazimuths and delta_azimuth.";
+} start_azimuth;
+
+paramdef double {
+  p_default = {1.0};
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_descr = "Delta azimuth between entries in the azimith array (deg).";
+  p_help = "The azimuths in the array are determined using the start_azimuth value and this delta_azimuth value. See also nazimuths and start_azimuth.";
+} delta_azimuth;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to use irregular azimuth array.";
+  p_help = "This option allows the user to set up an irregular azimuth array instead of the regular one using nazimuths, start_azimuth and delta_azimuth. If set, the file specified by azimuth_table_file is read in to create the irregular azimuth array.";
+} use_azimuth_table;
+
+paramdef char* {
+  p_default = {"azimuth_table"};
+  p_descr = "File path for irregular azimuth table - input.";
+  p_help = "The scan strategy for an irregular azimuth pattern in stored in this file. See also use_azimuth_table.";
+} azimuth_table_path;
+
+paramdef double {
+  p_default = {1.0};
+  p_min = {0.0001};
+  p_max = {90.0};
+  p_descr = "Radar beam-width.";
+  p_help = "The beam-width specifies how far to spread the influence of the data from the target elevations.";
+} beam_width;
+
+paramdef long {
+  p_default = {500};
+  p_min = {1};
+  p_max = {100000};
+  p_descr = "Number of gates along a radial.";
+  p_help = "polar2mdv only supports constant gate spacing.";
+} ngates;
+
+paramdef double {
+  p_default = {0.1};
+  p_min = {-100.0};
+  p_max = {10000.0};
+  p_descr = "Range to center of first gate (km).";
+} start_range;
+
+paramdef double {
+  p_default = {0.1};
+  p_min = {0.0};
+  p_max = {100.0};
+  p_descr = "Distance between centers of adjacent gates (km).";
+  p_help = "Polar2mdv only supports constant gate spacing.";
+} gate_spacing;
+
+paramdef struct radar_location {
+  p_descr = "Radar location.";
+  p_help = "Lat and lon in degrees, altitude in km MSL.";
+  p_field_type = {double, double, double};
+  p_field_name = {latitude, longitude, altitude};
+} radar_location;
+
+paramdef struct output_grid {
+  p_descr = "MDV output grid parameters.";
+  p_help = "For CART_GEOM, all fields are used. For PPI_GEOM, nelevations (from elevation array) overrides nz. For POLAR_GEOM, nelevations overrides nz, nazimuths overrides ny, start_azimuth overrides miny, delta_azimuth overrides dy, ngates overrides nx, start_range overrides minx and gate_spacing overrides dx.";
+  p_field_type = {double, double, double,
+		  long, long, long,
+		  double, double, double,
+		  double, double, double};
+  p_field_name = {origin_lat, origin_lon, rotation,
+		  nx, ny, nz,
+		  minx, miny, minz,
+		  dx, dy, dz};
+} output_grid;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to extend the data below the lowest PPI.";
+  p_help = "If set, data from the lowest PPI is used to populate all points below that PPI in the grid. Only applies to CART_GEOM";
+} extend_below;
+

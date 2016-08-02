@@ -1,0 +1,4 @@
+This application depends on the paramdef for the Refract and RefractCalib
+applications.  If you update either paramdef file, copy them here and do
+the appropriate updates, also.
+

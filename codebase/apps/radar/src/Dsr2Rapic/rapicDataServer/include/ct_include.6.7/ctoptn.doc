@@ -1,0 +1,169 @@
+/*
+ *      OFFICIAL NOTIFICATION: the following CONFIDENTIAL and PROPRIETARY 
+ * 	property legend shall not be removed from this source code module 
+ * 	for any reason.
+ *
+ *	This program is the CONFIDENTIAL and PROPRIETARY property 
+ *	of FairCom(R) Corporation. Any unauthorized use, reproduction or
+ *	transfer of this computer program is strictly prohibited.
+ *
+ *      Copyright (c) 1984 - 1997 FairCom Corporation.
+ *	This is an unpublished work, and is subject to limited distribution and
+ *	restricted disclosure only. ALL RIGHTS RESERVED.
+ *
+ *			RESTRICTED RIGHTS LEGEND
+ *	Use, duplication, or disclosure by the Government is subject to
+ *	restrictions set forth in subparagraph (c)(1)(ii) of the Rights in
+ * 	Technical Data and Computer Software clause at DFARS 252.227-7013.
+ *	FairCom Corporation, 4006 West Broadway, Columbia, MO 65203.
+ *
+ *	c-tree PLUS(tm)	Version 6.7
+ *			Release A2
+ *			August 1, 1997
+ */
+
+
+/*
+ *	compile time options:	The CTOPTN.H header determines the fundamental
+ *				characteristics of the c-tree data structures 
+ *				and disk I/O model. Each implementation
+ *				environment has its own version.
+ */
+
+		/* Configuration Option Definitions */
+
+/* ***   SELECT ONE OPTION FROM EACH OF THE FOLLOWING CATEGORIES   *** */
+
+/* CATGEORY I: 	disk I/O model						*/
+/*		If FPUTFGET is selected, use non-zero file		*/
+/*		size extensions to ensure directory 			*/
+/*		updates are forced to disk.				*/
+
+/*	FPUTFGET  	MULTIUSER-NONSERVER: disable c-tree buffering	*/
+/*	NOTFORCE  	SINGLE USER OR SERVER APP: buffering is active	*/
+
+
+/* CATEGORY II:  resource support					*/
+
+/*	RESOURCE  	support for resources is enabled		*/
+/*	NO_RESOURCE	    "       "	   "   " disabled		*/
+
+
+/* CATEGORY III: batch retrieval support				*/
+
+/*	CTBATCH  	support for batch retrieval is enabled		*/
+/*	NO_BATCH	    "    "    "       "      " disabled		*/
+
+
+/* CATEGORY IV:  superfile support					*/
+
+/*	CTSUPER  	support for superfiles is enabled		*/
+/*	NO_SUPER	    "    "      "       " disabled		*/
+
+
+/* CATEGORY V:   internal integer format				*/
+
+/*	LOW_HIGH  	internal integer format LSB to MSB		*/
+/*	HIGH_LOW	    "       "	   "	MSB to LSB		*/
+
+
+/* CATEGORY VI: variable length data record support			*/
+
+/*	VARLDATA  	support variable length data records		*/
+/*	NO_VARLD  	no variable length support			*/
+
+
+/* CATEGORY VII: conversion character for input to short integer	*/
+
+/*	PERC_H		use %h:  (K & R standard)			*/
+/*	PERC_D		use %d:  works for all 8 and 16 bit compilers	*/
+/*	PERC_HD		use %hd: used most commonly in 32 bit compilers	*/
+
+
+/* CATEGORY VIII: key compression / variable length key support		*/
+
+/*	VARLKEYS	support key compression				*/
+/*	NO_VARLK	no key compression				*/
+
+
+/* CATEGORY IX: parameter file routines					*/
+
+/*	PARMFILE	allow use of parameter files			*/
+/*	NO_PARMF	disable parameter file input routines		*/
+
+
+/* CATEGORY X: r-tree required special features in c-tree		*/
+
+/*	RTREE		enable r-tree features				*/
+/*	NO_RTREE	disable r-tree features				*/
+
+
+/* CATEGORY XI: ISAM support						*/
+
+/*	CTS_ISAM	ISAM functionality supported			*/
+/*	NO_ISAM		ISAM functionality disabled			*/
+
+
+/* CATEGORY XII: operational mode					*/
+
+/*	CTBOUND		applications bound to c-tree PLUS library	*/
+/*	NO_BOUND	applications linked to Server Interface		*/
+
+
+/* CATEGORY XIII: prototype support					*/
+
+/*	PROTOTYPE	function prototypes supported			*/
+/*	NO_PROTOTYPE	function prototypes not supported		*/
+
+
+/* CATEGORY XIV: one byte length delimited strings			*/
+
+/*	ctPASCALst	CT_PSTRING and CT_FPSTRING are Pascal strings	*/
+/*			ctPASCALst is used by the FairCom Servers	*/
+/*	NOPASCALst	one byte length prefix included in length count	*/
+/*			NOPASCALst was default for Release A23 and before*/
+
+
+/* CATEGORY XV: uniform format for c-tree binary data			*/
+
+/*	UNIFRMAT	permits HIGH_LOW machines to produce c-tree	*/
+/*			files compatible with LOW_HIGH machines		*/
+/*	NO_UNIFM	no special binary conversions performed		*/
+
+/* CATEGORY XVI: No Global Variables Support			        */
+
+/*	ctNOGLOBALS	Places all c-tree global variables in an allocated*/
+			structure (giving more DGROUP space in DOS)       */
+
+
+
+/* CATEGORY XVII: Local and Server File support.		        */
+/*****************************************************************************
+LOCAL & Server File Support -
+'#define ctLOCLIB' - support single entry point LOCAL c-tree library that
+                     can be linked with a c-tree client library for local and
+                     FairCom server file access.
+^****************************************************************************/
+
+/* CATEGORY XVIII: ISAM Context Support.		                    */  
+/*****************************************************************************
+ISAM Context Support -
+'#define ctICONTEXT' - support multiple record contexts. Activate this define
+                       if you wish to activate c-tree record context support.
+                       This permits an application to maintain more than one 
+                       current ISAM position in a single instance of an file.
+^****************************************************************************/
+
+/*****************************************************************************
+Maximum c-tree files -
+'#define ctMAXFIL' - is used to set the maximum number of c-tree files
+that will be opened at any one time. This number must be large enough to
+cover both index and data files. Remember that each index member counts as 
+a separate one. The default is 50. Feel free to increase this number if you 
+need to. Be sure to recompile all of the c-tree modules if any one of the 
+settings in this file are changed.
+#define 	ctMAXFIL 50 
+^****************************************************************************/
+
+/*	end of ctoptn.d		*/
+

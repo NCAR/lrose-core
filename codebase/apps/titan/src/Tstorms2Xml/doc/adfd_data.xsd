@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <xsd:include schemaLocation="location.xsd" />
+    <xsd:include schemaLocation="time_layout.xsd" />
+    <xsd:include schemaLocation="parameters.xsd" />
+	<xsd:include schemaLocation="definitions.xsd" />
+    
+	<xsd:complexType name="dataType">
+        <xsd:sequence>           
+            <xsd:element name="location" type="locationType" minOccurs="1" maxOccurs="unbounded" /> 
+            <xsd:element name="time-layout" type="time-layoutElementType" minOccurs="1" maxOccurs="unbounded" />  
+            <xsd:element name="parameters" type="parametersType" minOccurs="1" maxOccurs="unbounded" />
+			<xsd:element name="conversion-definitions" type="conversion-definitionsType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="categorical-definitions" type="categorical-definitionsType" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>          
+          
+ </xsd:schema>

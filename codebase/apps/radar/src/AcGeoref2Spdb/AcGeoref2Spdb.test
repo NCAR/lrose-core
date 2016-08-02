@@ -1,0 +1,403 @@
+/**********************************************************************
+ * TDRP params for AcGeoref2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// AcGeoref2Spdb reads aircraft georeference data (posn, attitude, 
+//   motion etc) from IWRF time series and netcdf files, and writes the 
+//   data to SPDB.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// reg_with_procmap ////////////////////////
+//
+// Register with procmap.
+//
+//
+// Type: boolean
+//
+
+reg_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Reading the input data.
+//
+// CFRADIAL: read CfRadial files.
+//
+// IWRF_FILE: read the georeference packets from files containing IWRF 
+//   time series.
+//
+// IWRF_FMQ: read the georeference packets from an FMQ containing IWRF 
+//   time series.
+//
+// RAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.
+//
+//
+// Type: enum
+// Options:
+//     CFRADIAL
+//     IWRF_FILE
+//     IWRF_FMQ
+//     RAF_NETCDF
+//
+
+input_mode = RAF_NETCDF;
+
+///////////// input_fmq_name //////////////////////////
+//
+// FMQ name. For IWRF_FMQ only.
+//
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+//
+//
+// Type: string
+//
+
+input_fmq_name = "/tmp/fmq/ts";
+
+///////////// seek_to_end_of_input ////////////////////
+//
+// Option to seek to the end of the input FMQ.
+//
+// If TRUE, the program will seek to the end of the fmq and only read in 
+//   new data. If FALSE, it will start reading from the beginning of the 
+//   FMQ.
+//
+//
+// Type: boolean
+//
+
+seek_to_end_of_input = TRUE;
+
+//======================================================================
+//
+// AIRCRAFT CALL SIGN.
+//
+// For IWRF and CFRADIAL data.
+//
+//======================================================================
+ 
+///////////// aircraft_callsign ///////////////////////
+//
+// Callsign of aircraft.
+//
+// Used for IWRF data. The RAF data includes the callsign in the file.
+//
+//
+// Type: string
+//
+
+aircraft_callsign = "N677F";
+
+//======================================================================
+//
+// CFRADIAL DATA.
+//
+//======================================================================
+ 
+///////////// cfradial_field_name /////////////////////
+//
+// Field name for reading in CfRadial file.
+//
+// We need to read in at least 1 field for a valid read operation.
+//
+//
+// Type: string
+//
+
+cfradial_field_name = "DBZ";
+
+//======================================================================
+//
+// NETCDF DATA.
+//
+// Set the NetCDF variable names for the fields to be read in. If a 
+//   field is not available. set the name to an empty string.
+//
+//======================================================================
+ 
+///////////// nc_varname_altitude_msl /////////////////
+//
+// Netcdf variable name for altitude_msl.
+//
+//
+// Type: string
+//
+
+nc_varname_altitude_msl = "ALT";
+
+///////////// nc_varname_altitude_pres ////////////////
+//
+// Netcdf variable name for pressure altitude.
+//
+//
+// Type: string
+//
+
+nc_varname_altitude_pres = "PALT_A";
+
+///////////// nc_varname_ew_velocity //////////////////
+//
+// Netcdf variable name for ew_velocity.
+//
+//
+// Type: string
+//
+
+nc_varname_ew_velocity = "VEWC";
+
+///////////// nc_varname_ns_velocity //////////////////
+//
+// Netcdf variable name for ns_velocity.
+//
+//
+// Type: string
+//
+
+nc_varname_ns_velocity = "VNSC";
+
+///////////// nc_varname_vert_velocity ////////////////
+//
+// Netcdf variable name for vert_velocity.
+//
+//
+// Type: string
+//
+
+nc_varname_vert_velocity = "VSPD";
+
+///////////// nc_varname_ew_wind //////////////////////
+//
+// Netcdf variable name for ew_wind.
+//
+//
+// Type: string
+//
+
+nc_varname_ew_wind = "UIC";
+
+///////////// nc_varname_ns_wind //////////////////////
+//
+// Netcdf variable name for ns_wind.
+//
+//
+// Type: string
+//
+
+nc_varname_ns_wind = "VIC";
+
+///////////// nc_varname_vert_wind ////////////////////
+//
+// Netcdf variable name for vert_wind.
+//
+//
+// Type: string
+//
+
+nc_varname_vert_wind = "WIC";
+
+///////////// nc_varname_heading //////////////////////
+//
+// Netcdf variable name for heading.
+//
+//
+// Type: string
+//
+
+nc_varname_heading = "THDG";
+
+///////////// nc_varname_drift_angle //////////////////
+//
+// Netcdf variable name for drift_angle.
+//
+//
+// Type: string
+//
+
+nc_varname_drift_angle = "DRFTA";
+
+///////////// nc_varname_track ////////////////////////
+//
+// Netcdf variable name for track_angle.
+//
+//
+// Type: string
+//
+
+nc_varname_track = "TKAT";
+
+///////////// nc_varname_roll /////////////////////////
+//
+// Netcdf variable name for roll.
+//
+//
+// Type: string
+//
+
+nc_varname_roll = "ROLL";
+
+///////////// nc_varname_pitch ////////////////////////
+//
+// Netcdf variable name for pitch.
+//
+//
+// Type: string
+//
+
+nc_varname_pitch = "PITCH";
+
+///////////// nc_varname_temperature //////////////////
+//
+// Netcdf variable name for ambient temperature.
+//
+//
+// Type: string
+//
+
+nc_varname_temperature = "AT_A";
+
+///////////// nc_varname_pressure /////////////////////
+//
+// Netcdf variable name for ambient static pressure.
+//
+//
+// Type: string
+//
+
+nc_varname_pressure = "PSXC";
+
+///////////// nc_varname_rh ///////////////////////////
+//
+// Netcdf variable name for rh.
+//
+//
+// Type: string
+//
+
+nc_varname_rh = "RHUM";
+
+///////////// nc_varname_angle_of_attack //////////////
+//
+// Netcdf variable name for angle_of_attack.
+//
+//
+// Type: string
+//
+
+nc_varname_angle_of_attack = "ATTACK";
+
+///////////// nc_varname_indicated_airspeed ///////////
+//
+// Netcdf variable name for indicated airspeed.
+//
+//
+// Type: string
+//
+
+nc_varname_indicated_airspeed = "CAS_A";
+
+///////////// nc_varname_true_airspeed ////////////////
+//
+// Netcdf variable name for true_airspeed.
+//
+//
+// Type: string
+//
+
+nc_varname_true_airspeed = "TAS_A";
+
+///////////// nc_varname_normal_accel /////////////////
+//
+// Netcdf variable name for normal acceleration.
+//
+//
+// Type: string
+//
+
+nc_varname_normal_accel = "BNORMA";
+
+///////////// nc_varname_lateral_accel ////////////////
+//
+// Netcdf variable name for lateral acceleration.
+//
+//
+// Type: string
+//
+
+nc_varname_lateral_accel = "BLATA";
+
+///////////// nc_varname_longitudinal_accel ///////////
+//
+// Netcdf variable name for longitudinal acceleration.
+//
+//
+// Type: string
+//
+
+nc_varname_longitudinal_accel = "BLONGA";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_spdb_url /////////////////////////
+//
+// Output SPDB URL for georef data.
+//
+// The format is spdbp::params//host:port:dir. Normally params is an 
+//   empty string, and port is an empty string, so that the default 
+//   behavior will occur.
+//
+//
+// Type: string
+//
+
+output_spdb_url = "/tmp/spdb/ac_georef";
+

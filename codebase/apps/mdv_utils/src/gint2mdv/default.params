@@ -1,0 +1,141 @@
+/****************************************************
+ * TDRP params for gint2mdv
+ ****************************************************/
+
+/*
+ * Option to print debugging messages.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+debug = FALSE;
+
+/*
+ * Option to check if parameters are set.
+ * If this is true, a check will be made on which parameters is set.
+ *   A report will be generated for those params which are using the
+ *   defaults.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_params = FALSE;
+
+/*
+ * Option to print parameters.
+ * If this is true, used parameters will be printed at the beginning
+ *   of the run.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+print_params = FALSE;
+
+/*
+ * Input File Name (GINT format).
+ * Name of GINT file to convert to MDV format.
+ *
+ * Type: string
+ */
+infile_name = " ";
+
+/*
+ * Output File Name (MDV format).
+ * Name of MDV file which has been converted from GINT format.
+ *
+ * Type: string
+ */
+outfile_name = " ";
+
+/*
+ * Data Source.
+ * Data Source (ie. NIDS/LOT).
+ *
+ * Type: string
+ * Default: "NIDS/LOT" 
+ */
+data_source = "NIDS/LOT";
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Output Encoding Type.
+ * 0 - None (data written as unsigned char), 1 - URL 8bit encoding.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 1 
+ */
+output_encoding_type = 0;
+
+/*
+ * Data Collection Type.
+ * Options are: 0 - Measured, 1 - Extrapolated, 2 - Forecast, 3 -
+ *   Synthesis, 4 - Mixed.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 4 
+ */
+collection_type = 0;
+
+/*
+ * Projection Type.
+ * Options are: -1-Native, 0-Lat/Lon, 1-Artcc, 2-Stereographic,
+ *   3-Lambert conformal, 4-Mercator 5-Polar stereo, 6-Polar
+ *   stereo elliptic, 7-Cylindrical equidist, 8-Flat (cartesian),
+ *   9-Shperical.
+ *
+ * Type: long
+ * Default: -2 
+ * Min value: -2 
+ * Max value: 9 
+ */
+projection_type = -2;
+
+/*
+ * Vertical Type.
+ * Options are: 0-Unknown, 1-Surface, 2-sigma-p, 3-Pressure
+ *   , 4-Z (constant Altitude) 5-sigma-z , 6-theta , 7-Mixed , 8-Elevation,
+ *   9-Composite.
+ *
+ * Type: long
+ * Default: 4 
+ * Min value: 0 
+ * Max value: 11 
+ */
+vertical_type = 4;
+
+/*
+ * Origin Latitude.
+ * Origin Latitude (if different than what is in gint header).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -90 
+ * Max value: 90 
+ */
+origin_latitude = 0;
+
+/*
+ * Origin Longitude.
+ * Origin Longitude (if different than what is in gint header).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -180 
+ * Max value: 180 
+ */
+origin_longitude = 0;

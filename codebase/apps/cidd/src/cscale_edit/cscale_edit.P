@@ -1,0 +1,6 @@
+;GIL-3
+(
+	:interfaces             (write.G read.G linear.G cscale_edit.G )
+	:actions                ()
+	:root_window            nil
+)

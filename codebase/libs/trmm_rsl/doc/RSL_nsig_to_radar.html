@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (X11; I; Linux 2.0.20 i586) [Netscape]">
+</HEAD>
+<BODY>
+
+<P><A HREF="index.html"><IMG SRC="rsl.gif" HEIGHT=100 WIDTH=100></A><A HREF="index.html">
+</A>
+<HR></P>
+
+<H1>RSL_nsig_to_radar</H1>
+
+<P>
+<HR></P>
+
+<H3>Synopsis</H3>
+
+<P><B>#include &quot;rsl.h&quot; <BR>
+<A HREF="RSL_radar_struct.html">Radar</A> *RSL_nsig_to_radar(char *infile);</B>
+<BR>
+<B><A HREF="RSL_radar_struct.html">Radar</A> *RSL_nsig2_to_radar(char *infile);</B>
+
+<HR></P>
+
+<H3>Description</H3>
+
+<P>Reads a new SIGMET (aka nsig) file and returns a pointer to the structure
+<I>Radar</I>. The input file is specified by the string <I>infile</I>.
+If <I>infile</I> is NULL, then stdin is read. The input file may be compressed.
+If the data is compressed, it is passed through the GNU <B>gunzip</B> filter.
+Thus, compressed data can be any format that <B>gzip</B> understands. Two
+versions of SIGMET&nbsp;files exist: Version 1 files, and Version 2 files.
+RSL_nsig_to_radar is used to read version 1 files, and, RSL_nsig2_to_radar
+is used to read version 2 files.</P>
+
+<P>The radar structure is, essentially, an array of Volumes. The number
+and type of volumes allocated is automatically determined from the input
+nsig file. 
+<HR></P>
+
+<H3>Return value</H3>
+
+<P>Upon successful completion, RSL_nsig_to_radar returns a pointer to the
+structure <B>Radar</B>. Otherwise, NULL is returned and errno is set. 
+<HR></P>
+
+<H3>See also</H3>
+
+<P><A HREF="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar </A>
+<HR></P>
+
+<P>Author: Paul Kucera.</P>
+
+</BODY>
+</HTML>

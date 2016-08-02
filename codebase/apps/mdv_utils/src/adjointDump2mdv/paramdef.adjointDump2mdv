@@ -1,0 +1,207 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "Read binary floating point dump, write mdv. If the\n"
+	" file has a name like 20080328_030000_20080328_083000.dump\n"
+	"then the first time in the filname is taken to be a generation\n"
+	"time and the second time is a valid time and the files\n"
+	"are written in forecast mode. If the file follows a\n"
+	"20080328_083000.dump naming convention then the time\n"
+	"in the filename is taken as the valid time and the mdv file\n"
+	"is written in non-forecast mode.\n\n"
+	"Niles Oien Jan 2008.";
+}
+
+paramdef string {
+  p_default = "/Some/Input/Dir";
+  p_descr = "Input directory for realtime data.";
+  p_help = "Files are processed as they pop up here.";
+} inDir;
+
+paramdef string {
+  p_default = "mdvp:://localhost::./test";
+  p_descr = "Output URL.";
+  p_help = "MDV data are written here.";
+} outUrl;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In\n"
+	"realtime mode, the conversion is performed for each input\n"
+	"file as it becomes available. In archive mode, the file\n"
+	"list is obtained from the command line.";
+} mode;
+  
+
+typedef enum {
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON, OUTPUT_PROJ_LAMBERT
+} output_projection_t;
+
+paramdef enum output_projection_t {
+  p_default = OUTPUT_PROJ_LATLON;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT: (x,y) Cartesian data in km from a given origin\n"
+	"typical of local radar data. LATLON - lat/lon grid with\n"
+	"constant grid spacing (Mercator). LAMBERT - Lambert\n"
+	"Conformal projection.";
+} projection;
+
+typedef struct {
+	double latOrig;
+	double lonOrig;
+	int nx;
+	int ny;
+	double lambertLat1;
+	double lambertLat2;
+	double flatRotation;
+	double dx;
+	double dy;
+	double minx;
+	double miny;
+} grid_t;
+
+paramdef struct grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "For OUTPUT_PROJ_LATLON, minx, miny, dx and dy are in degrees. Otherwise they are in km.";
+  p_default = { 40.5, -90.5, 20, 20, 40.5, 60.5, 0.0, 1, 1, -10, -10};
+} grid;
+
+typedef enum {
+  OUTPUT_VERT_Z, OUTPUT_VERT_PRESSURE, OUTPUT_VERT_SIGMA_P, OUTPUT_VERT_SIGMA_Z
+} output_vert_t;
+
+paramdef enum output_vert_t {
+  p_default = OUTPUT_VERT_Z;
+  p_descr = "Vertical co-ordinate system for 3D fields.";
+  p_help = "Set as appropriate.";
+} output_vert;
+
+paramdef double {
+  p_descr = "Vertical levels for 3D.";
+  p_help = "Set as appropriate.";
+  p_default = { 1, 2, 3, 4, 5 };
+} vlevels[];
+
+
+typedef struct {
+	string name;
+	string longName;
+	string units;
+	int nz;
+        boolean outputInMdv;
+	int numTrailingBytes;
+} field_t;
+
+paramdef struct field_t {
+  p_descr = "MDV field names for the fields in the same order\n"
+	"they are in in the dump file.";
+  p_help = "Set as appropriate. ALL fields in the dump MUST\n"
+	"be listed here, even if you don't really need them\n"
+	"in the MDV output.";
+  p_default = { { "uwind", "East-west wind", "m/s", 30, TRUE, 8},
+  { "vwind", "North-south wind", "m/s", 30, TRUE, 8},
+  { "wwind", "Vertical wind", "m/s", 30, TRUE, 8},
+  { "ltemp", "ltemp", "deg", 30, TRUE, 8},
+  { "qr", "qr", "g/m3", 30, TRUE, 8},
+  { "qt", "qt", "g/kg", 30, TRUE, 8},
+  { "rh", "Relative humidity", "%", 30, TRUE, 8},
+  { "div", "Divergance", "m/s/km", 30, TRUE, 8},
+  { "usurf", "Surface east-west wind", "m/s", 1, TRUE, 8},
+  { "vsurf", "Surface north-south wind", "m/s", 1, TRUE, 8},
+  { "tsurf", "Surface temp", "deg", 1, TRUE, 8},
+  { "divsurf", "Surface divergance", "m/s/km", 1, TRUE, 8},
+  { "udual", "dual doppler U", "m/s", 30, TRUE, 8},
+  { "vdual", "dual doppler V", "m/s", 30, TRUE, 8},
+  { "Tracer", "Tracer", "dBZ", 30, TRUE, 8},
+  { "urs_01", "urs_01", "m/s", 15, TRUE, 8},
+  { "urs_02", "urs_02", "m/s", 15, TRUE, 8},
+  { "urs_03", "urs_03", "m/s", 15, TRUE, 8},
+  { "urs_04", "urs_04", "m/s", 15, TRUE, 8},
+  { "rs__01", "rs__01", "m/s", 15, TRUE, 8},
+  { "rs__02", "rs__02", "m/s", 15, TRUE, 8},
+  { "rs__03", "rs__03", "m/s", 15, TRUE, 8},
+  { "rs__04", "rs__04", "m/s", 15, TRUE, 8},
+  { "TM", "TM", "K", 30, TRUE, 8},
+  { "qc", "qc", "g/kg", 30, TRUE, 8},
+  { "temp", "temp", "deg", 30, TRUE, 4} };
+} fields[];
+
+typedef struct {
+	double min;
+	double max;
+} range_t;
+
+paramdef struct range_t {
+  p_descr = "Accepted range for data values, all fields.";
+  p_help = "Data outside this range considered to be bad/missing";
+   p_default = { -999, 999 };
+} range;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Delete option.";
+  p_help = "If set, input files will be deleted when we're done with them.";
+} deleteInput;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to byte swap data after reading.";
+  p_help = "Default is not to do this.";
+} byteSwap;
+
+paramdef int
+{
+  p_default = 4;
+  p_descr = "Number of bytes to skip before reading data.";
+  p_help = "Default is set for Fortran PGF90 input.";
+} skipBytesAtStart;

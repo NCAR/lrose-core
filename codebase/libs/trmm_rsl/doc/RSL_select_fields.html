@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY>
+
+<P><A HREF="index.html"><IMG SRC="rsl.gif" HEIGHT=100 WIDTH=100></A><A HREF="index.html">
+</A>
+<HR></P>
+
+<P><BR>
+</P>
+
+<H1>RSL_select_fields</H1>
+
+<P>
+<HR></P>
+
+<H3>Synopsis</H3>
+
+<P><B>#include &quot;rsl.h&quot;<BR>
+void RSL_select_fields(char *field_type, [char *field_type...], NULL);</B><BR>
+
+<HR></P>
+
+<H3>Description</H3>
+
+<P>Call this routine prior to any ingest routine and only the field types
+specified will be ingested. The drastically reduces memory requirements,
+especially if you're only interesed in one field type. Lassen, for instance,
+can have more than 5 field types which collectively can occupy an enormous
+amount of memory. By default, all field types are ingested. field_type
+is not case sensitive. Specify NULL as the last argument. This signals
+this routine when to stop parsing the field types.</P>
+
+<P>The list of possible field types is: &quot;all&quot;, &quot;none&quot;,
+&quot;dz&quot;, &quot;vr&quot; &quot;cz&quot;, &quot;zt&quot;, &quot;dr&quot;,
+&quot;lr&quot;, &quot;zd&quot;, &quot;dm&quot;, &quot;rh&quot;, &quot;ph&quot;,
+&quot;xz&quot;, &quot;cd&quot;, &quot;mz&quot;, &quot;md&quot;, &quot;ze&quot;,
+&quot;ve&quot;, &quot;kd&quot;, &quot;ti&quot;.</P>
+
+<P>Action or side-effects: A second call to this function over-rides any
+previous settings. In other words, multiple calls are not additive. So,
+to get both DZ and VR volumes, use:<BR>
+RSL_select_fields(&quot;dz&quot;, &quot;vr&quot;, NULL); -- Read both DZ
+and VR.<BR>
+and not:<BR>
+RSL_select_fields(&quot;dz&quot;, NULL); -- Read only DZ.<BR>
+RSL_select_fields(&quot;vr&quot;, NULL); -- Read only VR, no DZ.</P>
+
+<P><BR>
+
+<HR></P>
+
+<H3>Return value</H3>
+
+<P>Upon successful completion, RSL_select_fields silently sets a hidden
+array that RSL_anyformat_to_radar accesses for memory allocation.<BR>
+
+<HR></P>
+
+<H3>See also</H3>
+
+<P><A HREF="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</A>.<BR>
+
+<HR>Author: <A HREF="john.merritt.html">John H. Merritt</A>. </P>
+
+</BODY>
+</HTML>

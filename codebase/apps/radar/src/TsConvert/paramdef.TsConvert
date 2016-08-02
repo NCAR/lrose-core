@@ -1,0 +1,89 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions TsConvert
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// April 2011
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsConvert reads IWRF time series files, converts the packing, and writes the files to a different location.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "OUTPUT LOCATION";
+};
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Directory for output files.";
+} output_dir;
+
+commentdef {
+  p_header = "MODIFY IQ DATA PACKING";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to modify the binary packing for the IQ data.";
+  p_help = "If true, the packing will be changed to output_packing.";
+} modify_packing;
+
+typedef enum {
+  PACKING_FL32,
+  PACKING_SCALED_SI16,
+  PACKING_DBM_PHASE_SI16,
+  PACKING_SIGMET_FL16
+} output_packing_t;
+
+paramdef enum output_packing_t {
+  p_default = PACKING_FL32;
+  p_descr = "Packing of the IQ data in the output files";
+  p_help = "FL32: 32-bit floating point. SCALED_SI16: scaled signed 16-bit integers. DBM_PHASE_SI16: signed 16-bit integers representing power in dBM and phase in deg. SIGMET_SI16: Sigmet 16-bit floating point packing as in the RVP8.";
+} output_packing;
+
+commentdef {
+  p_header = "COMPUTE HCR GEOREFERENCE DETAILS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute HCR rotation and tilt.";
+  p_help = "If true, the these angles will be computed from the HCR antenna drive angles.";
+} compute_hcr_rotation_and_tilt;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute HCR elevation and azimuth.";
+  p_help = "If true, the these angles will be computed from the HCR georeference data.";
+} compute_hcr_elevation_and_azimuth;
+
+

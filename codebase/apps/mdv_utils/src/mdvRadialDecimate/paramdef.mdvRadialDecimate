@@ -1,0 +1,132 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "mdvRadialDecimate decimates a polar mdv file for display.\n"
+             "This is done typically for display purposes. The\n"
+	     "DsMdvServer can do this on the fly, however, this\n"
+	     "program allows direct control of how much\n"
+	     "averaging should be done along a beam and\n"
+	     "how much should be done across beams (azimuthally).\n"
+	     "Also it allows min or max to be taken instead of mean.\n"
+	     "This is a project need.\n"
+	     "Niles Oien February 2010.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Derived satellite fields are written here."; 
+  p_default = {"mdvp:://localhost::mdv/grad"};
+} OutUrl;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+typedef struct {
+	int numBeams;
+	int nGates;
+	double gateSpacingKm;
+	double firstGateRangeKm;
+} outGrid_t;
+
+paramdef struct outGrid_t {
+  p_descr = "Parameters of output grid.";
+  p_help = "Default is numBeams=360 (beam spacing 1 deg) with 600\n"
+  "gates at 0.5 Km (300 Km range) starting right at the sensor.\n "
+  "Note that numBeams is number of beams in a full circle, 360 deg.";
+  p_default = {360, 600, 0.5, 0.0 };
+} outGrid;
+
+typedef struct {
+	double averagingSpaceAlongBeamKm;
+	double averagingAzimuthAngleDeg;
+} avSpace_t;
+
+
+paramdef struct avSpace_t {
+  p_descr = "Parameters of polar space to do processing over,\n"
+  "delta in azimuth and range.";
+  p_help = "Note that these are plus/minus parameters, so that\n"
+  "averaging is done from current minus delta to current plus\n"
+  "delta. That is, if averagingSpaceAlongBeamKm = 2.5 then\n"
+  "averaging will be done over the current gate minus 2.5Km to\n"
+  "the current gate plus 2.5Km for a total of 5Km";
+  p_default = { 2.5, 1.5 };
+} avSpace;
+
+
+typedef enum {
+  METHOD_AVERAGE, METHOD_MAX, METHOD_MIN
+} method_t;
+
+paramdef enum method_t {
+  p_default = METHOD_AVERAGE;
+  p_descr = "Which option to use when getting output.";
+  p_help = "Average => Do averaging over averaging space,\n"
+  "other options are max or min.";
+} method;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "Set this option to prevent overwrite of bad/missing data.";
+  p_help = "By default, since spatial averaging is being done there\n"
+  "will be points in the output data that will have a valid value\n"
+  "while for the corresponding point in the input data the value was\n"
+  "bad or missing, ie. blobs of data expand. Setting this to TRUE stops\n"
+  "this from happening.";
+} noBlobExpansion;   

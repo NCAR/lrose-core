@@ -1,0 +1,156 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//
+// 
+//
+
+commentdef {
+  p_header = "DrawFmq2MaskMdv is a program that allows a CIDD user to\n"
+  "draw a polygon with the draw tool and use that to mask out data.\n"
+  "The program can erase all points inside the polygon, or all\n"
+  "points outside the polygon, depending on what label is written to\n"
+  "the FMQ.\n"
+  "By default the data are masked out on all vertical\n"
+  "levels, but the user can elect to set limits either on the level numbers\n"
+  "or on the actual level values.\n\nNiles Oien September 2003.\n\n"
+  "NOTE : IT IS ADVISABLE TO MAKE A COPY OF THE MDV DATA AND RUN THIS\n"
+  "DRAW & MASK TOOL ON THAT COPY OF THE DATA RATHER THAN RUNNING\n"
+  "THIS PROGRAM ON THE ORIGINAL DATA. It is possible for one wrong click\n"
+  "with the draw tool to ruin a whole dataset, so keep a backup.";
+}
+
+
+paramdef string {
+  p_descr = "Process instance";
+  p_descr = "This is used by the process mapper, procmap";
+  p_default = {"generic"};      
+} instance;       
+
+paramdef string {
+  p_descr = "Input URL for Draw fmq ";
+  p_default = {"fmqp:://localhost::draw.fmq"};
+} draw_fmq_url;
+
+paramdef boolean {
+  p_descr = "Debug messaging option";
+  p_default = {FALSE};
+} debug;
+
+paramdef string {
+  p_descr = "Label indicating that points outside the polygon should be\n"
+  "erased.";
+  p_default = {"eraseOutside"};
+} eraseOutsideLabel;
+
+paramdef string {
+  p_descr = "Label indicating that points inside the polygon should be\n"
+  "erased.";
+  p_default = {"eraseInside"};
+} eraseInsideLabel;
+
+
+paramdef string {
+  p_descr = "Input MDV data are read from here.";
+  p_default = {"mdvp:://localhost::some/dir/structure"};
+} InUrl;
+
+paramdef string {
+  p_descr = "Output MDV data are written here.";
+  p_default = {"mdvp:://localhost::some/other/dir/structure"};
+} OutUrl;
+
+
+paramdef string {
+  p_descr = "Field name to process.";
+  p_default = {"DBZ"};
+} fieldName;
+
+paramdef boolean {
+  p_descr = "Option to set level number limits. By default,\n"
+  "all levels are processed. Setting this to TRUE means that\n"
+  "the polygon correction is only applied to the levels between\n"
+  "bottomLevelNum and topLevelNum inclusive.";
+  p_default = FALSE;
+} levelNumLimitSet;
+
+
+paramdef int {
+  p_descr = "Lower level number limit ( relevant only if\n"
+  "levelNumLimitSet is TRUE).";
+  p_default = 0;
+} bottomLevelNum;
+
+paramdef int {
+  p_descr = "Upper level number limit ( relevant only if\n"
+  "levelNumLimitSet is TRUE).";
+  p_default = 0;
+} topLevelNum;
+
+
+paramdef boolean {
+  p_descr = "Option to set level limits. By default,\n"
+  "all levels are processed. Setting this to TRUE means that\n"
+  "the polygon correction is only applied to the levels between\n"
+  "bottomLevel and topLevel inclusive. Similar to levelNumLimitSet,\n"
+  "but this deals with actual levels rather than level numbers.";
+  p_default = FALSE;
+} levelLimitSet;
+
+
+paramdef double {
+  p_descr = "Lower level limit ( relevant only if\n"
+  "levelLimitSet is TRUE).";
+  p_default = 0.0;
+} bottomLevel;
+
+paramdef double {
+  p_descr = "Upper level limit ( relevant only if\n"
+  "levelLimitSet is TRUE).";
+  p_default = 0.0;
+} topLevel;
+
+typedef enum {
+  USE_MISSING_DATA_VALUE,
+  USE_BAD_DATA_VALUE,
+  USE_SPECIFIED_DATA_VALUE
+} mask_value_type_t;
+
+paramdef enum mask_value_type_t {
+  p_descr = "Specifies what value to use in masking";
+  p_help = "\tUSE_MISSING_DATA_VALUE - the masked grid values are set to "
+           "the missing data value in the data.\n"
+           "\tUSE_BAD_DATA_VALUE - the masked grid values are set to the "
+           "bad data value in the data. "
+           "Note that this is often the same as the missing data value, it "
+           "depends on the dataset.\n"
+           "\tUSE_SPECIFIED_DATA_VALUE - the masked grid values are set to "
+           "the data value specified in the mask_value parameter.\n";
+  p_default = USE_MISSING_DATA_VALUE;
+} mask_value_type;
+
+paramdef double {
+  p_descr = "The data value to use for the masked values when mask_value_type "
+            "is set to USE_SPECIFIED_DATA_VALUE.";
+  p_default = 0.0;
+} mask_value;

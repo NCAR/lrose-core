@@ -1,0 +1,339 @@
+/*********************************************************
+ * parameter definitions for InputWatcher
+ */
+
+commentdef {
+  p_header = "InputWatcher program";
+  p_text = "InputWatcher watches for new data arriving in a directory. It optionally registers the latest time with the DataMapper, optionally copies the file to a file named with the modify time, and optionally runs a script.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "INPUT DATA";
+} 
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Directory for input data.";
+  p_help = "This directory is watched for new files. NOTE: if the directory does not start with a . or /, it will be relative to $DATA_DIR or $RAP_DATA_DIR.";
+} input_dir;
+
+paramdef int {
+  p_default = 2;
+  p_min = 1;
+  p_descr = "Sleep time between checking directory for input - secs.";
+  p_help = "If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory.";
+} wait_between_checks;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "File quiescence when checking for files - secs.";
+  p_help = "This allows you to make sure that a file coming from a remote machine is complete before reading it.";
+} file_quiescence;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Maximum valid age for files, seconds";
+  p_help = "Default is 900 secs (15 minutes).";
+} max_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is _latest_data_info file available?";
+  p_help = "If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
+} latest_data_info_avail;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to only use the latest file.";
+  p_help = "If TRUE, processes only the latest file on startup. If FALSE, processes all files within the max_valid_age. This only applies to startup, when a number of files could be available for processing.";
+} latest_file_only;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to skip past files that have been queued.";
+  p_help = "If TRUE, processes only the latest file available when the queued list is queried. This allows the process to skip intermediate files and catch up if it is falling behind. Normally this would be FALSE to prevent missing data, but there are circumstance in which it is preferable to miss data and catch up.";
+} skip_to_latest_file;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to recurse to subdirectories while looking for new files.";
+  p_help = "If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use."; 
+} search_recursively;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Maximum age of directory for recursive search.";
+  p_help = "Only applies search_recursively is TRUE. If set to -1, no age test is used and all directories will be scanned.";
+} max_dir_age;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Maximum depth for recursive directory scan.";
+  p_help = "Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
+} max_recursion_depth;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Follow directory and file links.";
+  p_help = "If FALSE, we will not consider files or directories that are symbolic links.";
+} follow_links;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use inotify in realtime mode without latest_data_info.";
+  p_help = "If TRUE, uses inotify instead of scanning the directory for new files. This is more efficient.";
+} use_inotify;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} search_ext;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name sub-string.";
+  p_help = "If set, only files with names containing this sub-string will be processed.";
+} search_substr;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to save latest time for each read.";
+  p_help = "If TRUE, the latest read info will be saved out in a file to preserve state in case the application dies. On restart, the latest read info will be read in to re-initialize the application, so that data already read will not be read again.";
+} save_latest_read_time;
+
+commentdef {
+  p_header = "CALL SCRIPT WHEN NEW DATA ARRIVES";
+} 
+
+typedef enum {
+  SCRIPT_WITH_ORDERED_ARGS,
+  SCRIPT_WITH_COMMAND_LINE_OPTIONS,
+  SCRIPT_WITH_COMMAND_LINE_OPTIONS_DOUBLE_DASH
+} script_style_t;
+
+paramdef enum script_style_t {
+  p_default = SCRIPT_WITH_COMMAND_LINE_OPTIONS;
+  p_descr = "Type of script to call.";
+  p_help = "\tSCRIPT_WITH_ORDERED_ARGS - Call a script with an "
+           "ordered list of arguments.\n"
+           "\tSCRIPT_WITH_COMMAND_LINE_OPTIONS - Precedes each "
+           "argument with a '-arg' style command line argument, "
+           "so that order is not longer important, and extra "
+           "args can be added without causing problems for client scripts.\n"
+           "\tSCRIPT_WITH_COMMAND_LINE_OPTIONS_DOUBLE_DASH - "
+           "Same as SCRIPT_WITH_COMMAND_LINE_OPTIONS except that the "
+           "the args are preceded by a double-dash rather than "
+           "a single dash for use with languages like Python.\n";
+} script_style;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to spawn a script when a new file is detected.";
+  p_help = "If TRUE, the script 'data_arrived_script' will be called. "
+           "The arguments will depend on the script_style parameter.\n"
+           "\nFor SCRIPT_WITH_ORDERED_ARGS, the args are in the following "
+           "order:\n"
+           "  input_file_path, file_modify_time.\n"
+           "\nFor SCRIPT_WITH_COMMAND_LINE_OPTIONS, the following command line args will be included, in no particular order:\n"
+           "  -input_file_path\n"
+           "  -file_modify_time\n"
+           "and each arg will be followed by its respective value.\n\n"
+           "\nFor SCRIPT_WITH_COMMAND_LINE_OPTIONS_DOUBLE_DASH, the following command line args will be included, in no particular order:\n"
+           "  --input_file_path\n"
+           "  --file_modify_time\n"
+           "and each arg will be followed by its respective value.\n\n";
+} call_data_arrived_script;
+
+paramdef string {
+  p_default = "test_script.pl";
+  p_descr = "Name of script to call if call_script is true";
+  p_help = "The script will be called with the args specified in the 'call_data_arrived_script parameter'.";
+} data_arrived_script;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option include arguments to the data_arrived_script.";
+} include_arrived_script_args;
+
+paramdef string {
+  p_default = {};
+  p_descr = "Array of strings that will make up the list of arguments to be called with script";
+} arrived_script_args[];
+      
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run script in background.";
+  p_help = "If TRUE, the script will be run in the background. Therefore, the system call will return immediately. If FALSE, InputWatcher will register with procmap while waiting for the script to complete.";
+} run_script_in_background;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to terminate script if it hangs.";
+  p_help = "If TRUE, the script will be killed if it does not return within 'script_max_run_secs'.";
+} terminate_script_if_hung;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Max time allowed for script - secs.";
+  p_help = "If 'terminate_script_if_hung' is TRUE, the script will be killed if it does not complete withing this number of secs.";
+} script_max_run_secs;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Register interval for procmap - secs";
+  p_help = "If the script takes longer than 60 secs to complete, you will need to set this to a higher value to avoid the process being killed and restarted by the auto_restarter.";
+} procmap_register_interval;
+
+
+commentdef {
+  p_header = "CALL SCRIPT WHEN DATA IS LATE";
+} 
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to spawn a script when data is late.";
+  p_help = "If TRUE, the script 'data_late_script' will be called when data has not arrived within the last 'data_late_secs'. The call to the script will be repeated every 'data_late_secs' until data arrives.\n"
+    "The arguments will depend on the script_style parameter.\n"
+    "\nFor SCRIPT_WITH_ORDERED_ARGS, the args are in the following order:\n  input_dir, data_late_secs, unix_time.\n"
+    "\nFor SCRIPT_WITH_COMMAND_LINE_OPTIONS, the following command line args will be included, in no particular order:\n"
+    "  -input_dir\n"
+    "  -data_late_secs\n"
+    "  -unix_time\n"
+    "and each arg will be followed by its respective value.\n\n";
+} call_data_late_script;
+
+paramdef string {
+  p_default = "test_script";
+  p_descr = "Name of script to call if call_data_late_script is true";
+  p_help = "The script will be called with the args specified in the 'call_data_late_script' parameter.";
+} data_late_script;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option include arguments to the data_late_script.";
+} include_late_script_args;
+
+paramdef string {
+  p_default = {};
+  p_descr = "Array of strings that will make up the list of arguments to be called with data late script";
+} late_script_args[];
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Max data interval before it is considered late - secs.";
+  p_help = "If data has not arrived within this interval, and call_data_late_script is true, the data late script is called.";
+} data_late_secs;
+
+commentdef {
+  p_header = "COPY THE FILE, OPTIONALLY TO TIME-STAMPED FILE";
+} 
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to copy to a file with name based on the time.";
+  p_help = "If TRUE, the file will be copied to a file, in the directory 'output_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'.";
+} copy_to_time_stamped_file;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to make a copy of the file using its original name.";
+  p_help = "If TRUE, the file will be copied to a directory 'copy_dir/yyyymmdd/original_file_name', i.e. preserving the original file name. 'copy_to_time_stamped_file' takes precedence, and overrides this option.";
+} copy_using_original_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to remove yyyymmdd directory when copy_using_original_name is set to true.";
+  p_help = "If TRUE, the file will be copied to a directory 'copy_dir/original_file_name'.";
+} without_date_directory;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory for file copies.";
+} copy_dir;
+
+paramdef string {
+  p_default = "copy";
+  p_descr = "File extension of file copy.";
+  p_help = "If empty, no extension will be added.";
+} copy_ext;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to add the day into the file name.";
+  p_help = "If TRUE, he path will be: 'copy_dir/yyyymmdd/yyyymmdd_hhmmss.copy_ext'.";
+} add_day_to_filename;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to remove the file after the copy is complete.";
+  p_help = "It is not wise to use this if you are also calling a script which uses the file, since it could be removed before the script reads it.";
+} remove_after_copy;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Uncompress a compressed file after the copy, if required.";
+} uncompress_after_copy;
+
+commentdef {
+  p_header = "WRITE LATEST_DATA_INFO FILE";
+} 
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to write _latest_data_info file when new data arrives.";
+  p_help = "If TRUE, when a new data arrives, a _latest_data_info file will be written into the directory. This will be automatically set to FALSE if latest_data_info_avail is TRUE.";
+} write_latest_data_info_file;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Set the data type.";
+  p_help = "If not set, the DIDSS system will attempt to determine the data type from the file path.";
+} data_type;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write _latest_data_info file to a proxy directory.";
+  p_help = "Normally the _latest_data_info is written to the data directory. However, it is possible that the input directory is write-protected. In such cases, you need to write the _latest_data_info to a proxy directory. The _latest_data_info files will point to the data directory.";
+} write_latest_data_info_to_proxy_dir;
+
+paramdef string {
+  p_default = "./proxy";
+  p_descr = "Proxy directory for _latest_data_info.";
+  p_help = "See 'write_latest_data_info_to_proxy_dir'.";
+} latest_data_info_proxy_dir;
+
+commentdef {
+  p_header = "REGISTER WITH DATA_MAPPER";
+} 
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to register the data set with the DataMapper.";
+  p_help = "If TRUE, when a new data arrives, that info will be used to register with the DataMapper on the local machine. Not needed if write_latest_data_info_file is set to TRUE because when the latest_data_info is written the DataMapper will be notified. Uses the data_type, if set.";
+} register_with_datamapper;
+
+
+
+

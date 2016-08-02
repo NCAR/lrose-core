@@ -1,0 +1,124 @@
+/****************************************************
+ * TDRP params for mcidas2mdv
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_NORM;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 2;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Operational mode.
+ * Realtime mode - waits for new data; archive mode runs on file
+ *   list.
+ *
+ * Type: enum
+ * Default: REALTIME 
+ * Legal values: REALTIME, ARCHIVE.
+ */
+mode = ARCHIVE;
+
+/*
+ * Input file extension.
+ *
+ * Type: string
+ * Default: "area" 
+ */
+input_file_ext = "area";
+
+/*
+ * Input directory.
+ * Path of input directory - realtime mode only.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+input_dir = "null";
+
+/*
+ * Output file extension.
+ *
+ * Type: string
+ * Default: "mdv" 
+ */
+output_file_ext = "mdv";
+
+/*
+ * Output directory.
+ * Path of output directory.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+output_dir = "/space/dixon/rap/apps/mdv_utils/src/mcidas2mdv/test/vis/mdv";
+
+/*
+ * Max age of input data.
+ * For realtime only - max age of input data for it to be valid.
+ *
+ * Type: long
+ * Default: 300 
+ * Min value: 60 
+ */
+max_input_data_age = 300;
+
+/*
+ * Field name.
+ *
+ * Type: string
+ * Default: "Vis" 
+ */
+field_name = "VIS";
+
+/*
+ * Field units.
+ *
+ * Type: string
+ * Default: "Counts" 
+ */
+field_units = "Counts";
+
+/*
+ * Grid params for output data.
+ *
+ * Type: struct
+ */
+output_grid = {
+  -104.5, /* origin_lon:double */
+  40.0,   /* origin_lat:double */
+  -320.0, /* minx:double */
+  -320.0, /* miny:double */
+  0.75, /* dx:double */
+  0.75, /* dy:double */
+  880, /* nx:long */
+  880  /* ny:long */
+};
+
+

@@ -1,0 +1,119 @@
+/****************************************************
+ * TDRP params for wmi_ac_recover
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_NORM;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Tape name.
+ * Name of tape device.
+ *
+ * Type: string
+ * Default: "/dev/nst0" 
+ */
+tape_name = "/dev/nst0";
+
+/*
+ * Aircraft callsign - tail number.
+ *
+ * Type: string
+ * Default: "131MP" 
+ */
+callsign = "300HP";
+
+/*
+ * Acquisition table file path.
+ *
+ * Type: string
+ * Default: "acqtbl" 
+ */
+acqtbl_file_path = "parc96_acqtbl";
+
+/*
+ * Acquisition table file path.
+ *
+ * Type: string
+ * Default: "cvars" 
+ */
+cvars_file_path = "parc96_cvars";
+
+/*
+ * Acquisition table file path.
+ *
+ * Type: string
+ * Default: "fcoeff" 
+ */
+fcoeff_file_path = "parc96_fcoeff";
+
+/*
+ * Archive directory path.
+ * Arcvive files are written to this directory.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+archive_dir_path = "none";
+
+/*
+ * Data store interval (secs).
+ * Time between data store - this is used to keep the data file size
+ *   reasonable.
+ *
+ * Type: long
+ * Default: 1 
+ * Min value: 1 
+ * Max value: 3600 
+ */
+data_interval = 1;
+
+/*
+ * Option to store data using spdb.
+ * Data will be stored in SPDB - symbolic products data base.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+use_spdb = TRUE;
+
+/*
+ * Data base directory.
+ * The path to the data base directory. AC posn data will be stored
+ *   in subdirectories named after the aircraft callsign.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+db_dir = "none";
+
+/*
+ * Valid period (secs).
+ * Time period over which the position is valid.
+ *
+ * Type: long
+ * Default: 120 
+ * Min value: 1 
+ */
+valid_period = 120;
+
+

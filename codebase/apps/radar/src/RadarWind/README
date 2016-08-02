@@ -1,0 +1,146 @@
+
+
+
+CAUTION: NOT OPERATIONAL.
+
+Funding for this project ended before the project was completed.
+Everything here is based on my test setup.
+
+Before using this operationally, someone will have to:
+  Modify all Makefile assumptions.
+  Modify all scripts to use more general assumptions on directories, etc.
+  Do much more extensive testing.
+  *** See the notes on "to do" at the start of RadarWind.cc,
+  where there is more documentation on needed future work.
+  *** Review all sections of code marked with "xxx".
+
+
+That said, RadarWind.cc does fulfill the main project
+requirements.  It creates a gridded wind field from an arbitrary
+number of input radar files, and writes the output to a CF
+compliant Netcdf file.
+
+For more documentation, see:
+  RadarWind.cc     # the main program
+  mkwind.sh        # runs RadarWind.cc for Eldora data
+  mkchill.sh       # runs RadarWind.cc for CSU-Chill data
+
+Typical usage (See below for detailed examples):
+  mkwind.sh or mkchill.sh   # Run RadarWind.cc.
+  mkplotvec.sh              # Make wind vector plots
+  mkplotplan.sh             # Make plan view color-scale plots
+  mkplotdim.sh              # Plot errors by dimension
+
+
+
+
+
+==========
+
+Examples for mkwind.sh:
+
+
+Simple tests with testMode = alpha.
+All of the following should have mean abs err < 1.e-14.
+See wind.log: statAbsDiffw,statAbsDiffv,statAbsDiffu: mean.
+Each takes about 1 sec.
+
+#            nnbr forceOk useEigen zgrid      ygrid      xgrid      testMode      syn:W,V,U  radFiles  baseW     detailSPec  outDir
+
+# Test W=0,V=0,U=1 (m/s), using synthetic locations.
+rm -rf /d1/steves/tda/tdwind
+./mkwind.sh  10   n       n        0,20,1.0   0,20,1.0   0,20,1.0    alpha        0,0,1      0,0       0         3,1,-7,0.1  /d1/steves/tda/tdwind
+
+# Test W=0,V=1,U=0 (m/s): as above, with syn=0,1,0
+# Test W=0,V=1,U=1 (m/s): as above, with syn=0,1,1
+# Test W=1,V=1,U=1 (m/s): as above, with syn=1,1,1 and baseW=1
+
+
+# Test W=0,V=0,U=1 (m/s), using radar file locations.
+#   As above, with testMode=beta and syn=0,0,1
+
+
+# Test Beltrami flow.
+# The cellMat grid is based on the extents found in the radar files.
+# Mean abs error < 2.2.
+# See wind.log: statAbsDiffw,statAbsDiffv,statAbsDiffu: mean.
+# It takes about 2 minutes.
+
+rm -rf /d1/steves/tda/tdwind
+#            nnbr forceOk useEigen zgrid      ygrid      xgrid      testMode      syn:W,V,U  radFiles  baseW     detailSPec  outDir
+
+./mkwind.sh  10    n      y        1.0        1.0        1.0        zetaBeltrami  0,0,0      0,0       0         3,1,-7,0.1  /d1/steves/tda/tdwind
+
+# Test Beltrami on a smaller region:
+#   As above, with ygrid=-20,20,1.0 and xgrid=-20,20,1.0
+
+
+# Operational run.
+# The cellMat grid is based on the extents found in the radar files.
+#   As above, with testMode=zeta and ygrid=1.0 and xgrid=1.0
+
+
+==========
+
+Examples for mkchill.sh:
+
+# Operational run of CSU-Chill.
+# The mkchill.sh script specifies:  -fileList csu.chill.files
+# and that file contains the names of 4 CSU-Chill files.
+# The cellMat grid is based on the extents found in the radar files.
+# In this case the log statistics for diffs are all NaNs,
+# since there is no verification data.
+# It takes about 2.5 minutes.
+rm -rf /d1/steves/tda/tdchill
+time ./mkchill.sh  20        5.0     2.0     2.0         zeta           0,0,0     0,0       0                5,20,30,0.1  /d1/steves/tda/tdchill
+
+
+
+
+==========
+
+Examples for mkplotvec.sh
+
+# Some of the plots will be empty if there was no verification data.
+
+#               ndim zlims   ylims   xlims   lyr  voff uoff   oriLat oriLon scales   outdir                 outtag
+
+./mkplotvec.sh  2    0,8     -20,20  -20,20  3    10   10     16.5   148.0  0.2,0.2  /d1/steves/tda/tdwind  plotAll.2d.lev03
+wc /d1/steves/tda/tdwind/plotAll.2d.lev03.data
+
+(cd /d1/steves/tda/tdwind; gnuplot plotAll.2d.lev03.true.cmd; gnuplot plotAll.2d.lev03.calc.cmd; gnuplot plotAll.2d.lev03.diff.cmd;)
+
+display /d1/steves/tda/tdwind/{*.true.png,*.calc.png,*.diff.png}
+
+
+
+==========
+
+Examples for mkplotplan.sh
+
+#               layer fmt  outdir                 outtag
+./mkplotplan.sh 3     png  /d1/steves/tda/tdwind  plan
+
+display /d1/steves/tda/tdwind/plan.true.*.png
+display /d1/steves/tda/tdwind/plan.calc.*.png
+display /d1/steves/tda/tdwind/plan.diff.*.png
+
+display /d1/steves/tda/tdwind/plan.nbr.elev20.png
+display /d1/steves/tda/tdwind/plan.nbr.elev02.png
+display /d1/steves/tda/tdwind/plan.nbr.dist.png
+display /d1/steves/tda/tdwind/plan.cond.num.png
+
+
+
+
+==========
+
+Examples for mkplotdim.sh
+
+#               layer fmt  outdir                 outtag
+./mkplotdim.sh  3     png  /d1/steves/tda/tdwind  plotDim3
+./mkplotdim.sh  all   png  /d1/steves/tda/tdwind  plotDimAll
+
+display  /d1/steves/tda/tdwind/plotDim3.{u,v,w}.png
+display  /d1/steves/tda/tdwind/plotDimAll.{u,v,w}.png
+

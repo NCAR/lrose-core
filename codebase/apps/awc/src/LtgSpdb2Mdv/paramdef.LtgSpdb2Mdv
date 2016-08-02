@@ -1,0 +1,436 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions LtgSpdb2Mdv
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2000
+//
+
+commentdef {
+  p_header = "Program name: LtgSpdb2Mdv";
+  p_text = "LtgSpdb2Mdv reads SPDB lightning stroke data, computes a rate grid and stores this out in Mdv format.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, TIME_LIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program either "
+           "(a) if use_spdb_ldata_info is false, creates an output file "
+           "every trigger_interval seconds, or "
+           "(b) if use_spdb_ldata_info is true, waits for the latest data "
+           "info to update and then creates an output file. "
+           "In the latter case (b), if no new data arrives within the trigger "
+           "interval, the program runs anyway.\n"
+           "In ARCHIVE mode, it creates an output file every trigger_interval "
+           "seconds between the start time and the end time.\n"
+           "In TIME_LIST mode, it creates an output file for every data "
+           "time in the trigger_url between the start and end times.\n";
+} mode;
+
+paramdef string {
+  p_default = "spdb/ltg";
+  p_descr = "URL for triggering in TIME_LIST mode.";
+} trigger_url;
+
+paramdef string {
+  p_default = "";
+  p_descr = "URL for triggering in REALTIME mode.";
+  p_help = "If set to an empty string, input_url is used.";
+} realtime_trigger_url;
+
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "spdb/ltg";
+  p_descr = "URL for input SPDB data.";
+  p_help = "Ltg stroke data is stored in SPDB format.";
+} input_url;
+
+paramdef int {
+  p_default = 200;
+  p_descr = "SPDB product id for the lightning data";
+  p_help = "Use 200 for regular RAL lightning data.\n"
+           "Use 204 for TRMM lightning group data.\n"
+           "Use 60 for GenPt data. "
+           "Note that when using GenPt data only the \"ltg\" location is "
+           "known so the amplitude is assumed to be 0.\n"
+           "Other specialized lightning formats may have different numbers.\n";
+} spdb_ltg_id;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use the arrival of spdb ltg data as a trigger.";
+  p_help = "If this is set, an output MDV file will be created whenever the latest_data_info file in the database_dir changes. This option is only in effect for REALTIME mode.";
+} watch_latest_data_info;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Maximum valid age in seconds for realtime input data.";
+  p_help = "This option is only in effect for REALTIME mode. Data must be younger than max_valid_age to be used.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 300;
+  p_min = 5;
+  p_descr = "Interval at which processing is triggered.";
+  p_help = "Number of seconds between grid creations. In ARCHIVE mode determines output grid frequency. In REALTIME mode if no new data arrives within this interval, a grid is produced.";
+} trigger_interval;
+
+paramdef int {
+  p_min = 0;
+  p_default = 0;
+  p_descr = "processing delay in seconds";
+  p_help = "The number of seconds to wait before processing an input file. This delay allows activity on the file to finish before we start reading it.";
+} processing_delay;
+
+commentdef {
+  p_header = "ALGORITHM PARAMETERS";
+}
+
+paramdef int {
+  p_descr = "Number of seconds prior to the trigger time used for gathering "
+            "ltg data.";
+  p_help = "Data for this period is retrieved from the data base for use in computing the rate.";
+  p_default = 300;
+} rate_compute_period;
+
+paramdef int {
+  p_descr = "Number of seconds after the trigger time used for gathering "
+            "ltg data.";
+  p_help = "This should generally be set to 0 for realtime data.";
+  p_default = 0;
+} rate_extend_period;
+
+paramdef int {
+  p_descr = "Realtime input data lag time (secs)";
+  p_help = "Number of seconds between data receipt and grid generation.  This is the time between the data generation and the valid time. This parameter is only used in REALTIME_MODE.";
+  p_min = 0;
+  p_default = 0;
+} realtime_data_lag_time;
+
+paramdef int
+{
+  p_descr = "Lightning effect radius in grid units";
+  p_help = "Size of area affected by a single lightning strike.  If set to 0, only the grid square in which the lightning strike occurred will include the strike.  If set higher, any grid square whose center lies in the circle of the given radius from the center of the grid square in which the strike occurred will be affected by the strike (its total will be incremented).";
+  p_min = 0;
+  p_default = 0;
+} ltg_radius;
+
+typedef enum {
+  POLAR_POS, POLAR_NEG, POLAR_BOTH
+} polarity_flag_t;
+
+paramdef enum polarity_flag_t
+{
+  p_descr = "Polarity flag";
+  p_help = "Indicates the polarity of the lightning strikes to be included in the resulting grids.";
+  p_default = POLAR_BOTH;
+} polarity_flag;
+
+paramdef int
+{
+  p_descr = "minimum amplitude";
+  p_help = "Minimum amplitude for strikes to be included in the resulting grids. If less than zero, no minimum amplitude is used.";
+  p_default = -1;
+} min_amplitude;
+
+paramdef int
+{
+  p_descr = "maximum amplitude";
+  p_help = "Maximum amplitude for strikes to be included in the resulting grids. If less than zero, no maximum amplitude is used.";
+  p_default = -1;
+} max_amplitude;
+
+commentdef {
+  p_header = "OUTPUT FILE";
+}
+
+paramdef string
+{
+  p_default = "mdv/ltg";
+  p_descr = "URL for output data.";
+  p_help = "Mdv data will be written to this URL.";
+} output_url;
+
+typedef enum {
+  BEGIN_TIME, MID_TIME, END_TIME
+} time_stamp_flag_t;
+
+paramdef enum time_stamp_flag_t {
+  p_descr = "Flag indicating how to compute the output data time.";
+  p_help = "If BEGIN_TIME, the centroid_time is set to the start time of the input data. Similarly, for END_TIME the centroid is set to the end time and MID_TIME the average time.";
+  p_default = END_TIME;
+} time_stamp_flag;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Flag indicating whether to create an output file if no "
+            "strikes were found in the current time period.";
+} create_empty_files;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Flag indicating whether to flag grid squares with no lightning "
+            "strikes as missing. "
+            "If set to false, grid squares with no lightning strikes will have "
+            "a data value of 0.0.";
+} use_missing_for_no_strikes;
+
+paramdef string {
+  p_default = "This MDV file was created by LtgSpdb2Mdv.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "Lightning rate grid.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "US National ltg network.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4, 
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_ZLIB;
+  p_descr = "Output file compression type.";
+} compression_type;
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Output file encoding type.";
+} encoding_type;
+
+typedef struct {
+  boolean SpecifyScaling;
+  double scale;
+  double bias;
+} Scaling_info_t;
+
+paramdef struct Scaling_info_t {
+  p_descr = "Options for user defined scale and bias.";
+  p_help = "Only applies if ENCODING type is INT8 or INT16.\n"
+           "If SpecifyScaling is true then the following scale "
+           "and bias values will be used. If false rounded dynamic scaling "
+           "is applied.";
+  p_default = {FALSE, 0.50, -32.0};
+} output_scaling_info;
+
+
+commentdef {
+  p_header = "OUTPUT GRID";
+}
+
+typedef enum {
+  PROJ_LATLON = 0, PROJ_LAMBERT_CONF = 3, PROJ_FLAT = 8
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_LATLON;
+  p_descr = "Projection for Mdv output data.";
+} output_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+  p_default = {2560, 2880, -129.0, 14.23, 0.025791324, 0.017193469};
+  p_descr = "Grid parameters for output file.";
+  p_help = "These params apply to all projection types.";
+} output_grid;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Output grid origin latitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.";
+} grid_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Output grid origin longitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.";
+} grid_origin_lon;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Output grid reference latitude 1.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} grid_lat1;
+
+paramdef double {
+  p_default = 60.0;
+  p_descr = "Output grid reference latitude 2.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} grid_lat2;
+
+commentdef {
+  p_header = "RATE FIELD";
+}
+
+paramdef string {
+  p_default = "Gridded Lightning Data";
+  p_descr = "Long field name for rate grid.";
+  p_help = "This is placed in the MDV field header.";
+} rate_field_name_long;
+
+paramdef string {
+  p_default = "Ltg_Strikes";
+  p_descr = "Field name for rate grid.";
+  p_help = "This is placed in the MDV field header.";
+} rate_field_name;
+
+commentdef {
+  p_header = "DISTANCE FIELD";
+}
+
+paramdef boolean
+{
+  p_descr = "Add shorest distance to strike field";
+  p_help = "This controls the addition of lightning strike distance field. "
+    "The field contains the distance to the closest strike from each "
+    "grid point. The units are kilometers.";
+  p_default = false;
+} add_distance_field;
+
+paramdef string {
+  p_default = "Distance to lightning strike";
+  p_descr = "Long field name for distance grid.";
+  p_help = "This is placed in the MDV field header.";
+} distance_field_name_long;
+
+paramdef string {
+  p_default = "Ltg_Distance";
+  p_descr = "Field name for distance grid.";
+  p_help = "This is placed in the MDV field header.";
+} distance_field_name;
+
+paramdef double {
+  p_default = 50.0;
+  p_descr = "Maximum radius/distance to lightning strike.";
+  p_help = "The units are kilometers.";
+} max_strike_radius;
+
+commentdef {
+  p_header = "DERIVED FIELD";
+}
+
+paramdef boolean
+{
+  p_descr = "Add field derived from the rate data";
+  p_help = "This allows you to create a field which interprets the lightning data rate as a different physical quantity. For example, you might interpret rate as radar reflectivity, DBZ.";
+  p_default = false;
+} add_derived_field;
+
+typedef struct
+{
+  long num_strikes;
+  double ltg_value;
+} ltg_factor_t;
+
+paramdef struct ltg_factor_t
+{
+  p_descr = "lightning factor table";
+  p_help = "This table gives the step function used to derive "
+           "values from the lightning rate. When assigning a data value, the "
+           "program will step through this table in order and assign the "
+           "value for the first entry where the actual number of strikes is "
+           ">= to num_strikes but < num_strikes for the next entry.";
+  p_default = { { 0,  0.0 },
+                { 1, 20.0 },
+                { 2, 40.0 },
+                { 3, 50.0 } };
+} ltg_factors[];
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for derived data.";
+} derived_field_name;
+
+paramdef string {
+  p_default = "Radar reflectivity";
+  p_descr = "Long field name for derived data.";
+} derived_field_name_long;
+
+paramdef string {
+  p_default = "dBZ";
+  p_descr = "Units for derived data.";
+} derived_field_units;
+

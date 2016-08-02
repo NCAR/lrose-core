@@ -1,0 +1,119 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for wsiMetarIngest
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * June 1999
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef int {
+  p_default = 0;
+  p_min = 0;
+  p_max = 3;
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "WSI DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Name of WSI server host.";
+  p_help = "This program connects to the WSI server and reads the METAR data from a TCP/IP port.";
+} wsi_host;
+
+paramdef int {
+  p_default = 10031;
+  p_descr = "FOS stream port on wsi_host.";
+} wsi_port;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read stdin instead of connecting to the wsi host.";
+  p_help = "This is a debugging option. It allows you to read from a file by redirecting to stdin.";
+} read_stdin;
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Size of input buffer.";
+  p_help = "The data is read in chunks of this size. If you make this too large, (a) it may delay processing of a given radar and (b) the program may not register sufficiently often with procmap.";	
+} input_buffer_size;
+
+commentdef {
+  p_header = "METAR DATA FILE OUTPUT.";
+}
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Interval at which output files are created (secs).";
+  p_help = "The program reads the incoming data and stores it in a temporary file. At regular intervals, the file is renamed - see output_dir_path.";
+} output_interval;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flag for discarding 0-length files.";
+  p_help = "If TRUE, output files will be ignored if they are empty. If FALSE, files will be output even if empty.";
+} discard_zero_length_files;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Name of output directory.";
+  p_help =
+    "The output files will be stored in this level directory.\n"
+    "The file path is computed as follows:\n"
+    "\t output_dir_path/yyyymmdd/hhmmss.ext\n";
+} output_dir_path;
+
+paramdef string {
+  p_default = "metar";
+  p_descr = "Extension for output file.";
+  p_help = "See output_dir_path.";
+} output_file_ext;
+

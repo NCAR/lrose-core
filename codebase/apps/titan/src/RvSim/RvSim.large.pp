@@ -1,0 +1,414 @@
+/**********************************************************************
+ * TDRP params for RvSim
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: RvSim.
+//
+// RvSim simulates raw IQ data with multiple trips and writes it to a 
+//   netCDF file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "large.pp";
+
+//======================================================================
+//
+// GATE-BY_GATE POWER,VEL,WIDTH.
+//
+//======================================================================
+ 
+///////////// data_mode ///////////////////////////////
+//
+// How data is generated.
+// If SPECIFY_DATA, use trip 1 and 2 moments as specified in gate_data[] 
+//   array. If RANDOM_DATA, randomly generate power, velocity and width 
+//   data.
+//
+// Type: enum
+// Options:
+//     SPECIFY_DATA
+//     RANDOM_DATA
+//
+
+data_mode = RANDOM_DATA;
+
+///////////// gate_data ///////////////////////////////
+//
+// The length of this array specifies the number of gates.
+//
+// Type: struct
+//   typedef struct {
+//      double trip1_dbm;
+//      double trip1_vel;
+//      double trip1_width;
+//      double trip2_dbm;
+//      double trip2_vel;
+//      double trip2_width;
+//   }
+//
+// 1D array - variable length.
+//
+
+gate_data = {
+  { 2.073e-07, 3.283, 5.771, 3.571e-09, -17.01, 5.044},
+  { -33, 10, 2, -43, 7, 2},
+  { -43, 10, 2, -33, -7, 2},
+  { -33, 10, 2, -53, -7, 2},
+  { -53, 10, 2, -33, -7, 2}
+};
+
+///////////// nsamples ////////////////////////////////
+//
+// Number of samples per beam.
+// Type: int
+//
+
+nsamples = 64;
+
+///////////// nbeams //////////////////////////////////
+//
+// Number of beams in generated data.
+// Only used for RANDOM_DATA. For SPECIFY_DATA, nbeams is 1.
+// Type: int
+//
+
+nbeams = 360;
+
+///////////// ngates //////////////////////////////////
+//
+// Number of gates in generated data.
+// Only used for RANDOM_DATA. For SPECIFY_DATA, ngates is 1.
+// Type: int
+//
+
+ngates = 1000;
+
+///////////// random_dbm1_low /////////////////////////
+//
+// Low limit of trip1 power (dbm).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_dbm1_low = -90;
+
+///////////// random_dbm1_high ////////////////////////
+//
+// High limit of trip1 power (dbm).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_dbm1_high = -30;
+
+///////////// random_dbm_diff_low /////////////////////
+//
+// Low limit of power diff (trip1 - trip2) (dbm).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_dbm_diff_low = 0;
+
+///////////// random_dbm_diff_high ////////////////////
+//
+// high limit of power diff (trip1 - trip2) (dbm).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_dbm_diff_high = 50;
+
+///////////// random_vel1_low /////////////////////////
+//
+// Low limit of trip1 velocity (m/s).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_vel1_low = -20;
+
+///////////// random_vel1_high ////////////////////////
+//
+// High limit of trip1 velocity (m/s).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_vel1_high = 20;
+
+///////////// random_vel2_low /////////////////////////
+//
+// Low limit of trip1 velocity (m/s).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_vel2_low = -20;
+
+///////////// random_vel2_high ////////////////////////
+//
+// High limit of trip1 velocity (m/s).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_vel2_high = 20;
+
+///////////// random_width1_low ///////////////////////
+//
+// Low limit of trip1 width (m/s).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_width1_low = 0.2;
+
+///////////// random_width1_high //////////////////////
+//
+// High limit of trip1 width (m/s).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_width1_high = 6;
+
+///////////// random_width2_low ///////////////////////
+//
+// Low limit of trip2 width (m/s).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_width2_low = 1.5;
+
+///////////// random_width2_high //////////////////////
+//
+// High limit of trip2 width (m/s).
+// RANDOM_DATA only.
+// Type: double
+//
+
+random_width2_high = 4.5;
+
+///////////// use_exponential /////////////////////////
+//
+// Option to simulate noise with the exponential function.
+// If FALSE a smooth gaussian is produced. If TRUE, the data is 
+//   exponentially disctibuted about the the gaussian.
+// Type: boolean
+//
+
+use_exponential = TRUE;
+
+///////////// exponential_lambda //////////////////////
+//
+// Mean of exponential distribution.
+// Type: double
+//
+
+exponential_lambda = 0.5;
+
+///////////// force_zero_phase ////////////////////////
+//
+// Option to force the phase to 0.
+// This has the effect of generating only real parts.
+// Type: boolean
+//
+
+force_zero_phase = FALSE;
+
+///////////// apply_phase_codes ///////////////////////
+//
+// Apply phase codes to the IQ data.
+// Type: boolean
+//
+
+apply_phase_codes = TRUE;
+
+///////////// trip1_phase_index ///////////////////////
+//
+// Index of phase shift for first pulse in file.
+// The pulses repeat their phases on a 32-phase cycle. In the program we 
+//   compute the phase table. This is the index into that table of the 
+//   first pulse in the file. This therefore applies to trip1. The 
+//   transmitted phase of other pulses are determined by their position in 
+//   the array of pulses in the file.
+// Type: int
+//
+
+trip1_phase_index = 10;
+
+///////////// negate_phase_codes //////////////////////
+//
+// Option to multiple phase codes by -1.
+// In some data sets the phase codes are negated. Set this to true for 
+//   such data cases.
+// Type: boolean
+//
+
+negate_phase_codes = TRUE;
+
+//======================================================================
+//
+// RADAR AND SCAN DETAILS.
+//
+//======================================================================
+ 
+///////////// wavelength //////////////////////////////
+//
+// The wavelength of the radar (cm).
+// Type: double
+//
+
+wavelength = 10;
+
+///////////// prt /////////////////////////////////////
+//
+// The PRT of the data (miscro-secs).
+// Type: int
+//
+
+prt = 1000;
+
+///////////// start_gate //////////////////////////////
+//
+// The start gate number in the data set.
+// Type: int
+//
+
+start_gate = 1;
+
+///////////// start_az ////////////////////////////////
+//
+// The starting azimuith for the data (deg).
+// Type: double
+//
+
+start_az = 30;
+
+///////////// delta_az ////////////////////////////////
+//
+// The delta azimuth between samples (deg).
+// Type: double
+//
+
+delta_az = 0.01;
+
+///////////// elevation ///////////////////////////////
+//
+// The elevation angle of the data (deg).
+// Type: double
+//
+
+elevation = 0.5;
+
+///////////// receiver_noise //////////////////////////
+//
+// Receiver noise (watts).
+// Type: double
+//
+
+receiver_noise = 0;
+
+//======================================================================
+//
+// TRUTH DATA OPTIONS.
+//
+//======================================================================
+ 
+///////////// truth_method ////////////////////////////
+//
+// Specifies how truth data is determined.
+// THEORETICAL_TRUTH: the theoretical values of p, v amd w used to 
+//   simulate the spectra. PP_TRUTH: the pulse-pair estimates of the 
+//   moments. FFT_TRUTH - the spectral estimates of the moments.
+//
+// Type: enum
+// Options:
+//     THEORETICAL_TRUTH
+//     FFT_TRUTH
+//     PP_TRUTH
+//
+
+truth_method = PP_TRUTH;
+
+//======================================================================
+//
+// OUTPUT FILE.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory for NetCDF files.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// output_file_name ////////////////////////
+//
+// Name of output file.
+// Type: string
+//
+
+output_file_name = "large.pp.nc";
+
+///////////// write_ldata_info_file ///////////////////
+//
+// Option to write _latest_data_info file in output dir.
+// If TRUE, _latest_data_info is written to the output directory.
+// Type: boolean
+//
+
+write_ldata_info_file = FALSE;
+
+///////////// write_spectra_files /////////////////////
+//
+// Option to write various gate spectra to ASCII files.
+// If true, spectra are written to files in directory 
+//   spectra_output_dir.
+// Type: boolean
+//
+
+write_spectra_files = FALSE;
+
+///////////// spectra_output_dir //////////////////////
+//
+// Spectra file directory.
+// See 'write_spectra_files.
+// Type: string
+//
+
+spectra_output_dir = "../RvDealias/spectra";
+

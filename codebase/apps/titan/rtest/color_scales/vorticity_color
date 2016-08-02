@@ -1,0 +1,22 @@
+# colorscale for vorticity
+
+# Mike Dixon, April 1991
+
+-0.1		-0.05		DarkSlateBlue
+-0.05 		-0.01 		NavyBlue
+-0.01		-0.005 		Blue
+-0.005		-0.001		MediumBlue
+-0.001		-0.0005		SkyBlue
+-0.0005		-0.0001 	DarkGreen
+-0.0001		-0.00005	ForestGreen
+-0.00005	-0.00001	YellowGreen
+-0.00001	0.00001		Gold
+0.00001		0.00005		Yellow
+0.00005		0.0001		Coral
+0.0001		0.0005		Orange
+0.0005		0.001		MediumVioletRed
+0.001		0.005		OrangeRed
+0.005		0.01		Red
+0.01		0.05		Gray
+0.05		0.1		Wheat
+

@@ -1,0 +1,55 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2001 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Program(RAP) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2001/11/19 23:31:42 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for area_compute
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 1998
+ */
+
+/*
+ * area_compute is a small TDRP demonstration program.
+ *
+ * The program allows the user to compute the area of
+ * a geometric shape of a given size.
+ *
+ * The result is printed to a file.
+ */
+
+//////////////////////////////////////////////////////////
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print debugging messages";
+} debug;
+
+typedef enum {
+  SQUARE, CIRCLE, EQ_TRIANGLE
+} shape_t ;
+
+paramdef enum shape_t {
+  p_default = SQUARE;
+  p_descr = "Shape type.";
+  p_help = "The program will compute the area of a square,"
+  "circle or equilateral triangle.";
+} shape;
+
+paramdef float {
+  p_default = 1.0;
+  p_min = 0.0;
+  p_descr = "Size of the shape.";
+} size;
+
+paramdef char* {
+  p_default = "./area_compute.out";
+  p_descr = "The path of the file to which the output is written.";
+  p_help = "The directory which contains this path must exist.";
+} output_path;
+

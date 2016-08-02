@@ -1,0 +1,124 @@
+/*********************************************************
+ * parameter definitions for Tstorms2Shapefile
+ *
+ * Terri L. Betancourt, RAP, NCAR
+ *
+ * June 2003
+ */
+
+commentdef {
+  p_header = "Tstorms2Shapfile program";
+  p_text = "Tstorms2Shapefile reads native TITAN data files, "
+           "converts the data into ESRI shapefile format";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME. In REALTIME mode, the analysis is performed for each volume scan as it becomes available. In ARCHIVE mode, all of the scans in a series of track files are processed.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "titan/storms";
+  p_descr = "Directory for input TITAN storm data.";
+  p_help = "If this path is not absolute (starts with /) or relative (starts with .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.";
+} input_dir;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Max valid age of input data in realtime mode (secs).";
+  p_help = "REALTIME mode only. This the max valid age for input data. In REALTIME mode, the program will wait for data more recent than this.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+typedef enum {
+  FLAT, LATLON
+} proj_t;
+
+paramdef enum proj_t {
+  p_default = FLAT;
+  p_descr = "Output projection";
+  p_help = "Specify the output coordinates of the storms.  FLAT indicates cartesian coordinates (in km) from the origin.";
+} output_projection;
+
+typedef struct {
+  double  latitude;
+  double  longitude;
+  double  altitude;
+} origin_t;
+
+paramdef struct origin_t {
+  p_descr = "Latitude, Longitude, Altidude of origin";
+  p_help = "Used only if output_projection is FLAT.";
+  p_default = { 39.787, -104.546, 0.0 };
+} origin;
+
+paramdef long {
+  p_default = 0;
+  p_descr = "Forecast lead times (min).";
+  p_help = "List of lead times for generating forecast shapefiles. "
+           "Use a lead time of zero to capture storm detections";
+} forecast_lead_time[];
+
+paramdef char* {
+  p_default = {"./shapefile"};
+  p_descr = "Input directory";
+  p_help = "Directory for writting output shapefile";
+} output_dir;
+
+paramdef char* {
+  p_default = {"storms"};
+  p_descr = "Base filename for shapefile";
+  p_help = "Shapefile extensions will automatically be added "
+           "to the base filename based on data and forecast lead times.\n"
+           "NOTE: Shapefiles of the same name will be overwritten!";
+} shapefile_basename;
+
+typedef enum {
+  DATETIME_AS_DIRECTORY, DATETIME_IN_FILENAME
+} datetime_structure_t;
+  
+paramdef enum datetime_structure_t
+{
+  p_default = DATETIME_AS_DIRECTORY;
+  p_descr = "Option for locating date/time specification";
+  p_help = "DATETIME_AS_DIRECTORY will create date/time subdirectories "
+           "under the output_dir parameter location.  Shapefiles will "
+           "use basename only \n"
+           "DATETIME_IN_FILENAME will place all shapefiles in the output_dir "
+           "parameter location.  Dates and times will be concatenated onto "
+           "the shapefile basename.";
+} datetime_structure;
+

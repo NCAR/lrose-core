@@ -1,0 +1,41 @@
+/* clump.h - structures related to clumps */
+
+#ifndef CLUMP_H
+#define CLUMP_H
+
+#define CLUMP_INCR 1024          /* increment for realloc of clump_array */
+#define MAX_STACK 16384		/* initial max stack size */
+#define NORTH_INTERVAL 0     /* used for overlapping intervals */
+#define NULL_ID 0		        /* clump ids should be initialized to this value */
+#define OV_BEGIN 0		      /* index for overlap array */
+#define OV_END 1		        /* index for overlap array */
+#define OVERLAP_DIM 2		 /* outer dimension of overlap array*/
+#define SOUTH_INTERVAL 1     /* used for overlapping intervals */
+#define STACK_INCR 4096		 /* increment for realloc of stack */
+
+typedef struct clump
+{
+  int id; 	            /* clump identification number */
+  int num_pts;	       /* number of points in clump */
+  short bb_x;	        /* x coordinate of upper left corner of bounding box */
+  short bb_y;           /* y coordinate of upper left corner of bounding box */
+  short bb_xdim;     /* width of bounding box */
+  short bb_ydim;     /* height of bounding box */
+} Clump;
+
+typedef struct interval
+{
+  int id;			/* clump id */
+  short overlaps[OVERLAP_DIM][2]; /* overlaps[i][0] - index of begin overlap, overlaps[i][1] - index of end overlap */
+  short row;		    /* row index of interval */
+  short begin;		    /* interval begins in this column */
+  short end;		     /* interval ends in this column */
+} Interval;
+
+typedef struct row_hdr /* row header */
+{
+  int size;			/* size of the intervals array below */
+  Interval *intervals;	  /* array of intervals (pointers allocated later) */
+} Row_hdr;
+
+#endif

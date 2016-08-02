@@ -1,0 +1,10 @@
+#! /bin/csh
+
+#
+# start the tape to simulate the radar data stream
+#
+
+rdata_to_socket -params $TITAN_HOME/params/rdata_to_socket.test -summary 360 &
+
+
+

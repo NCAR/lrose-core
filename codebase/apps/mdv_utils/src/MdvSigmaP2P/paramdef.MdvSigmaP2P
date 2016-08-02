@@ -1,0 +1,111 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions MdvSigmaP2Pres
+//
+// Yan Chen, RAL, NCAR
+//
+// Sept. 2008
+//
+
+commentdef {
+  p_header = "Program name: MdvSigmaP2P";
+  p_text = "MdvSigmaP2P converts Mdv files in Sigma P levels to pressure levels.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug message will be printed appropriately.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/GLOBAL";
+  p_descr = "URL directory for input data.";
+} input_url_dir;
+
+paramdef string {
+  p_default = "1985 01 01 00 00 00";
+  p_descr = "Start date time string.";
+  p_help = "Start date time for data requested. Format is YYYY MM DD HH MM SS";
+} start_date_time;
+
+paramdef string {
+  p_default = "1986 01 01 00 00 00";
+  p_descr = "End date time string.";
+  p_help = "End date time for data request. Format is YYYY MM DD HH MM SS";
+} end_date_time;
+
+paramdef string {
+  p_default = { "Temp", "U", "V" };
+  p_descr = "Fields to be convertered - short names.";
+  p_help = "If this list is empty, all 3D fields will be converted.";
+} fields_to_convert[];
+
+paramdef double {
+  p_default = { 1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100, 50 };
+  p_descr = "Array of output pressure levels (mb).";
+} pressure_levels[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag indicating whether copy the lowest non-missing data down to the lowest level";
+} copy_lowest_downwards;
+
+paramdef string {
+  p_default = "pressure";
+  p_descr = "Short name for absolute pressure field in Mdv file.";
+} pressure_field;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flag indicating wheather to convert geopotential height.";
+} convert_geopot_ht;
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/GLOBAL_GEOPOT_HT";
+  p_descr = "Url to Geopotential height data.- Geopotential height is constant in Sigma P levels.";
+  p_help = "Not used if convert_geopot_ht is FALSE.";
+} geopot_ht_url;
+
+paramdef string {
+  p_default = "z";
+  p_descr = "Short name for geopotential height.";
+} geopot_ht_field;
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/GLOBAL_PRESSURE";
+  p_descr = "URL directory for output data.";
+} output_url_dir;
+

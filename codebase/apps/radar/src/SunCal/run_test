@@ -1,0 +1,3 @@
+#! /bin/csh
+
+SunCal -params SunCal.test -nsamples 512 -gate 50 -ngates 500 -f ~/data/time_series/tsarchive/spol/sunscan/20060726/20060726_* -debug

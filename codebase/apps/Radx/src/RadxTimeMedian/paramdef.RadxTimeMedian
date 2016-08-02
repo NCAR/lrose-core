@@ -1,0 +1,73 @@
+/**********************************************************
+ * paramdef.RadxTimeMedian
+ *
+ * This file contains the TDRP parameter definitions for setting the median through time
+ * of input dataset. 
+ * 
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+commentdef
+{
+  p_header = "RadxTimeMedian";
+  p_text = "Parameters for setting time median of one input field.\n"
+    "Note that this works only in ARCHIVE or FILELIST modes, with one input field, and gives its output only after the"
+    " last input is processed.";
+};
+
+
+paramdef string
+{
+  p_descr = "input field name";
+  p_help = "name of field to take median of from input";
+  p_default = "unknown";
+} input_field;
+
+paramdef string
+{
+  p_descr = "output field name";
+  p_help = "name to give output median field";
+  p_default = "median";
+} output_field;
+
+paramdef double
+{
+  p_descr = "minimum bin value";
+  p_help = "The median is in bins from min to max in increments of delta";
+  p_default = -100;
+} min_bin;
+
+paramdef double
+{
+  p_descr = "maximum bin value";
+  p_help = "The median is in bins from min to max in increments of delta";
+  p_default = 100;
+} max_bin;
+
+paramdef double
+{
+  p_descr = "delta bin value";
+  p_help = "The median is in bins from min to max in increments of delta";
+  p_default = 100;
+} delta_bin;
+
+paramdef double
+{
+  p_descr = "Fixed storage elevation values";
+  p_help = "List of target elevation angles (the angles seem to wobble a lot). Inputs are mapped to one of these using tolerance params";
+  p_default = {};
+} fixedElevations[];
+
+paramdef double
+{
+  p_descr = "azimumth tolerance";
+  p_help = "allowed degrees difference between azimuth values from different volumese to be considered part of the same ray";
+  p_default = 0.1;
+} azToleranceDegrees;
+
+paramdef double
+{
+  p_descr = "elevation tolerance";
+  p_help = "allowed degrees difference between elevation values from different volumese to be considered part of the same ray";
+  p_default = 0.1;
+} elevToleranceDegrees;

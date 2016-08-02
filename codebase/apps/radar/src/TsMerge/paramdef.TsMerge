@@ -1,0 +1,94 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions TsMerge
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// April 2007
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsMerge reads raw time-series data from 2 sets of files, one for clutter and one for weather. It merges them on a beam-by-beam basis. The intention is to provide a merged data set for which the clutter and weather components are known.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "DATA INPUT PARAMS";
+};
+
+paramdef double {
+  p_default = 215.0;
+  p_descr = "Start azimuth of clutter (deg).";
+} clutter_start_az;
+
+paramdef double {
+  p_default = 330.0;
+  p_descr = "Start azimuth of weather (deg).";
+} weather_start_az;
+
+paramdef double {
+  p_default = 180.0;
+  p_descr = "Width of sector (deg).";
+} sector_width;
+
+paramdef double {
+  p_default = 15.0;
+  p_descr = "Simulated antenna speed (deg/s).";
+} antenna_speed;
+
+paramdef int {
+  p_default = 0;
+ p_min = 0;
+  p_descr = "Reduction in clutter power (dB).";
+  p_help = "The power in the clutter data is reduced by this amount before merging with the weather data. Clutter power can only be reduced, not increased.";
+} clutter_reduction_db;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory for time series files.";
+} output_dir;
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} date_time_t;
+
+paramdef struct date_time_t {
+  p_default = { 2007, 01, 01, 00, 00, 00 };
+  p_descr = "Time for output data,";
+  p_help = "The time series data will be time-stamped starting at this time.";
+} output_time;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Time between output files (secs).";
+  p_help = "Three output files are produced: (1) the clutter file, (2) the weatehr file and (3) the merged file. The time stamps for these three files are separted by this amount of time.";
+} output_time_delta;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Elevation angle for output data (deg).";
+} output_elevation;
+

@@ -1,0 +1,550 @@
+/**********************************************************************
+ * TDRP params for DsrGrabber
+ **********************************************************************/
+
+//======================================================================
+//
+// DsrGrabber program.
+//
+// DsrGrabber reads an input FMQ containing radar data, and writes out 
+//   summary data in various ASCII formats.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// monitor_input ///////////////////////////
+//
+// Option to monitor the input data stream.
+// If TRUE, a line will be printed to stderr for each beam received.
+// Type: boolean
+//
+
+monitor_input = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// radar_name //////////////////////////////
+//
+// Name of radar.
+// Used in labelling file name.
+// Type: string
+//
+
+radar_name = "cp2_s";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or DsRadar FMQ.
+// If FMQ_INPUT, the application will read the beam data from a file 
+//   message queue. If FILE_INPUT, the application will process beams in a 
+//   set of files.
+//
+// Type: enum
+// Options:
+//     FILE_INPUT
+//     FMQ_INPUT
+//
+
+input_mode = FMQ_INPUT;
+
+///////////// input_fmq_url ///////////////////////////
+//
+// Input URL for S-band data via FMQ.
+// Type: string
+//
+
+input_fmq_url = "$(DATA_DIR)/fmq/Iq2DsrOps_s";
+
+///////////// seek_to_end_of_input ////////////////////
+//
+// Option to seek to the end of the input FMQ.
+// If TRUE, the program will seek to the end of the fmq and only read in 
+//   new data. If FALSE, it will start reading from the beginning of the 
+//   FMQ.
+// Type: boolean
+//
+
+seek_to_end_of_input = FALSE;
+
+//======================================================================
+//
+// OUTPUT FILES.
+//
+//======================================================================
+ 
+///////////// timestamp ///////////////////////////////
+//
+// Timestamping files.
+// Timestamp to start, middle or end of volume.
+//
+// Type: enum
+// Options:
+//     TIMESTAMP_VOL_START
+//     TIMESTAMP_VOL_MID
+//     TIMESTAMP_VOL_END
+//
+
+timestamp = TIMESTAMP_VOL_START;
+
+///////////// min_beams_per_vol ///////////////////////
+//
+// Minimum number of beams in a volume.
+// If fewer beams are found in a volume, it is ignored.
+// Type: int
+//
+
+min_beams_per_vol = 200;
+
+///////////// max_beams_per_vol ///////////////////////
+//
+// Maximum number of beams in a volume.
+// Normally a file is saved at the end of each volume. However, if an 
+//   end-of-volume flag is not detected, the file will be written when 
+//   this number of beams has been received.
+// Type: int
+//
+
+max_beams_per_vol = 7200;
+
+//======================================================================
+//
+// STATS DETAILS.
+//
+// Stats are computed over a range of gates, for specified fields.
+//
+//======================================================================
+ 
+///////////// start_gate //////////////////////////////
+//
+// Start gate for analysis.
+// Type: int
+//
+
+start_gate = 400;
+
+///////////// n_gates /////////////////////////////////
+//
+// Number of gates for analysis.
+// Type: int
+//
+
+n_gates = 500;
+
+//======================================================================
+//
+// FIELD INFORMATION.
+//
+// Translate fields from DSR input to UDP output.
+//
+//======================================================================
+ 
+///////////// stats_fields ////////////////////////////
+//
+// Array of fields for which stats are computed.
+// Type: string
+// 1D array - variable length.
+//
+
+stats_fields = { "DBMHC", "DBMVC" };
+
+///////////// compute_differences /////////////////////
+//
+// Option to compute a difference field.
+// At least 2 fields must be defined in stats_fields.
+// Type: boolean
+//
+
+compute_differences = TRUE;
+
+///////////// first_field_for_diff ////////////////////
+//
+// Field name for first field in computing diff.
+// Type: string
+//
+
+first_field_for_diff = "DBMHC";
+
+///////////// second_field_for_diff ///////////////////
+//
+// Field name for second field in computing diff.
+// Type: string
+//
+
+second_field_for_diff = "DBMVC";
+
+//======================================================================
+//
+// BEAMS OUTPUT FILES.
+//
+//======================================================================
+ 
+///////////// write_beam_files ////////////////////////
+//
+// Option to write beams line-by-line to a beam file.
+// Type: boolean
+//
+
+write_beam_files = TRUE;
+
+///////////// beams_output_dir ////////////////////////
+//
+// Output directory for beams files.
+// Output file names will be time stamped.
+// Type: string
+//
+
+beams_output_dir = "$(DATA_DIR)/junk/cp2_s";
+
+///////////// write_nlines_at_start_of_beam_files /////
+//
+// Option to write the number of lines at the start of each beams file.
+// See beams_nlines_label.
+// Type: boolean
+//
+
+write_nlines_at_start_of_beam_files = TRUE;
+
+///////////// beams_nlines_label //////////////////////
+//
+// Label at start of beam file, showing number of lines in the file.
+// See write_nlines_at_start_of_beam_files.
+// Type: string
+//
+
+beams_nlines_label = "npoints = ";
+
+///////////// beam_file_ext ///////////////////////////
+//
+// File name extension for beam files.
+// Type: string
+//
+
+beam_file_ext = "beams";
+
+///////////// write_ldata_info_for_beam_files /////////
+//
+// Option to write _latest_data_info for beam files.
+// Type: boolean
+//
+
+write_ldata_info_for_beam_files = FALSE;
+
+//======================================================================
+//
+// GRID OUTPUT FILES.
+//
+//======================================================================
+ 
+///////////// write_grid_files ////////////////////////
+//
+// Option to write regular grid files.
+// Type: boolean
+//
+
+write_grid_files = TRUE;
+
+///////////// grid_output_dir /////////////////////////
+//
+// Output directory for grid files.
+// Output file names will be time stamped.
+// Type: string
+//
+
+grid_output_dir = "$(DATA_DIR)/junk/cp2_s";
+
+///////////// grid_file_ext ///////////////////////////
+//
+// File name extension for grid files.
+// Type: string
+//
+
+grid_file_ext = "grid";
+
+///////////// write_dimensions_at_start_of_grid_files /
+//
+// Option to write the number of elevations and azimuths at the start of 
+//   each grid file.
+// See beams_nlines_label.
+// Type: boolean
+//
+
+write_dimensions_at_start_of_grid_files = TRUE;
+
+///////////// grid_azimuths_label /////////////////////
+//
+// Label for azimuths at start of grid file.
+// Followed by 'min_az delta_az n_az'.
+// Type: string
+//
+
+grid_azimuths_label = "";
+
+///////////// grid_elevations_label ///////////////////
+//
+// Label for elevation at start of grid file.
+// Followed by 'min_el delta_el n_el'.
+// Type: string
+//
+
+grid_elevations_label = "";
+
+///////////// sunprops_label //////////////////////////
+//
+// Label for sunprops at start of grid file.
+// Followed by 'az_offset el_offset max_power quadratic_fit_power'.
+// Type: string
+//
+
+sunprops_label = "";
+
+//======================================================================
+//
+// GRID INFORMATION.
+//
+// Applies to regular grid output option.
+//
+//======================================================================
+ 
+///////////// grid_min_el /////////////////////////////
+//
+// Min elevation for regular grid (deg).
+// Type: double
+//
+
+grid_min_el = -3.0;
+
+///////////// grid_max_el /////////////////////////////
+//
+// Max elevation for regular grid (deg).
+// Type: double
+//
+
+grid_max_el = 3.0;
+
+///////////// grid_min_az /////////////////////////////
+//
+// Min azimuth for regular grid (deg).
+// Type: double
+//
+
+grid_min_az = 310;
+
+///////////// grid_max_az /////////////////////////////
+//
+// Max azimuth for regular grid (deg).
+// Type: double
+//
+
+grid_max_az = 359;
+
+///////////// grid_delta_el ///////////////////////////
+//
+// Delta elevation for regular grid (deg).
+// Type: double
+//
+
+grid_delta_el = 0.1;
+
+///////////// grid_delta_az ///////////////////////////
+//
+// Delta azimuth for regular grid (deg).
+// Type: double
+//
+
+grid_delta_az = 0.1;
+
+///////////// grid_el_max_diff ////////////////////////
+//
+// Max error for interpolating onto grid in elevation (deg).
+// We perform bi-linear interpolation onto the regular grid. This is the 
+//   max difference, in elevation, for a point to be used in determining 
+//   the interpolated value at  a grid location.
+// Type: double
+//
+
+grid_el_max_diff = 0.25;
+
+///////////// grid_az_max_diff ////////////////////////
+//
+// Max error for interpolating onto grid in azimuth (deg).
+// We perform bi-linear interpolation onto the regular grid. This is the 
+//   max difference, in azimuth, for a point to be used in determining the 
+//   interpolated value at  a grid location.
+// Type: double
+//
+
+grid_az_max_diff = 0.25;
+
+///////////// write_ldata_info_for_grid_files /////////
+//
+// Option to write _latest_data_info for grid files.
+// Type: boolean
+//
+
+write_ldata_info_for_grid_files = FALSE;
+
+//======================================================================
+//
+// SUNSCAN mode.
+//
+//======================================================================
+ 
+///////////// compute_sun_relative_angles /////////////
+//
+// Option to compute az/el angles relative to the sun position.
+// If TRUE, the application computes the sun position for the beam time, 
+//   and then computes the az and el relative to the sun position.
+// Type: boolean
+//
+
+compute_sun_relative_angles = FALSE;
+
+///////////// only_save_when_close_to_sun /////////////
+//
+// Option to only save data when close to the sun.
+// If TRUE, the program will only consider beams which are close in 
+//   angle to the sun.
+// Type: boolean
+//
+
+only_save_when_close_to_sun = FALSE;
+
+///////////// max_sun_az_error ////////////////////////
+//
+// Max az error relative to the sun (deg).
+// See only_save_when_close_to_sun.
+// Type: double
+//
+
+max_sun_az_error = 5;
+
+///////////// max_sun_el_error ////////////////////////
+//
+// Max el error relative to the sun (deg).
+// See only_save_when_close_to_sun.
+// Type: double
+//
+
+max_sun_el_error = 2;
+
+///////////// compute_sun_properties //////////////////
+//
+// Option to compute sun properties.
+// The following sun properties are computed for each field: (a) max 
+//   power, (b) max power from parabolic fit, (c) offsets of measured 
+//   centroid relative to theoretical sun position.
+// Type: boolean
+//
+
+compute_sun_properties = FALSE;
+
+///////////// sun_edge_below_peak_db //////////////////
+//
+// Power of sun edge relative to the peak (dB).
+// The sun position is computed using the power at each point. Only 
+//   powers within this margin of the peak power are used in the 
+//   computation of the centroid.
+// Type: double
+//
+
+sun_edge_below_peak_db = 8;
+
+///////////// write_sunprops_files ////////////////////
+//
+// Option to write files with sun properties.
+// Type: boolean
+//
+
+write_sunprops_files = FALSE;
+
+///////////// sunprops_output_dir /////////////////////
+//
+// Output directory for sun properties files.
+// Output file names will be time stamped.
+// Type: string
+//
+
+sunprops_output_dir = "$(DATA_DIR)/junk/cp2_s";
+
+///////////// sunprops_file_ext ///////////////////////
+//
+// File name extension for sun properties files.
+// Type: string
+//
+
+sunprops_file_ext = "sunprops";
+
+///////////// write_ldata_info_for_sunprops_files /////
+//
+// Option to write _latest_data_info for sunprop files.
+// Type: boolean
+//
+
+write_ldata_info_for_sunprops_files = FALSE;
+
+//======================================================================
+//
+// RADAR LOCATION.
+//
+// Used for computing sun position.
+//
+//======================================================================
+ 
+///////////// radar_lat ///////////////////////////////
+//
+// Latiitude of radar location (deg).
+// North is positive, South is negative.
+// Type: double
+//
+
+radar_lat = -27.6692;
+
+///////////// radar_lon ///////////////////////////////
+//
+// Longitude of radar location (deg).
+// East is positive, West is negative.
+// Type: double
+//
+
+radar_lon = 152.862;
+
+///////////// radar_alt_km ////////////////////////////
+//
+// Altitude of radar (km).
+// Type: double
+//
+
+radar_alt_km = 0.168;
+

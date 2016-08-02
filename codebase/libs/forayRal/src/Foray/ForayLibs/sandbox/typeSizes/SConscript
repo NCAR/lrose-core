@@ -1,0 +1,12 @@
+# -*- python -*-
+#
+#
+
+
+sources  = ['main.cpp'];
+
+progNode  = env.Program('typeSizes',source = sources)
+
+env.Default([progNode])
+
+

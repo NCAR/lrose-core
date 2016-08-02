@@ -1,0 +1,206 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for SynopObsIngest
+ *
+ */
+
+commentdef {
+  p_header = "SynopObsIngest reads SYNOP OBS records from ASCII files, decodes them, converts them to station_report_t format and writes them to an SPDB data base.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In this mode it is optional to watch for a latest_data_info file. In ARCHIVE mode, it processes all of the data files in the input directory between the start and end times set on the command line. In FILELIST mode, it processes all of the files in the list specified on the command line. In FILELIST mode paths must be fully qualified with respect to the date and time - so if each date has a separate subdirectory the date part of the path must be included.";
+} mode;
+
+commentdef {
+  p_header = "STATION LOCATIONS FROM FILE";
+};
+
+paramdef string {
+  p_default = "./syworld.tbl";
+  p_descr = "Path to station location file";
+  p_help = "Since the SYNOP reports do not contain lat/lon information, we must determine this from a separate file.\nThe C format to be read is as follows:\n\t%4s %6d %35s %2s %5d %6d %5d\nfor the following fields:\n\ticaoName stationId longName countryCode lat*100 lon*100 htM";
+} station_location_path;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./raw/obs";
+  p_descr = "Input directory";
+  p_help = "Directory where input data files can be found.";
+} input_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, only checks input_dir for subdirs of the form YYYYMMDD";
+  p_help = "Only in REALTIME mode with latest_data_info_avail FALSE.";
+} strict_subdir_check;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, check file name contains specified sub-string.";
+  p_help = "See file_match_string.";
+} file_name_check;
+
+paramdef string {
+  p_default = "SHP";
+  p_descr = "Input filename match string";
+  p_help = "Files must contain this string to be processed";
+} file_match_string;
+
+//////////////////////////////////////////////////////////
+// Station selection
+
+commentdef {
+  p_header = "STATION SELECTION";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to check that OBS is within a bounding box.";
+} check_bounding_box;
+
+typedef struct {
+  double min_lat;
+  double max_lat;
+  double min_lon;
+  double max_lon;
+} bbox_t;
+
+paramdef struct bbox_t {
+  p_default = { -90.0, 90.0, -180.0, 180.0 };
+  p_descr = "Bounding box to check if check_bounding_box is TRUE.";
+  p_help = "Only obs which fall inside this box will be stored.";
+} bounding_box;
+
+//////////////////////////////////////////////////////////
+// Data output
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to store decoded OBS.";
+  p_help = "If TRUE, decoded OBS will be written to decoded_output_url.";
+} write_decoded_obs;
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/obs";
+  p_descr = "Output URL for decoded obs.";
+  p_help = "See the DIDSS docs for details on URL usage.";
+} decoded_output_url;
+
+typedef enum
+{
+  COMPRESSION_NONE,
+  COMPRESSION_GZIP,
+  COMPRESSION_BZIP2
+} compression_t;
+
+paramdef enum compression_t {
+  p_default = COMPRESSION_NONE;
+  p_descr = "Option to compress the decoded OBS.";
+  p_help = "Set desired output compression. Compression should only be done for data in which the individual chunks are large.";
+} decoded_compression;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to store ASCII OBS.";
+  p_help = "If TRUE, ascii OBS will be written to ascii_output_url.";
+} write_ascii_obs;
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/ascii_obs";
+  p_descr = "Output URL for ASCII obs.";
+  p_help = "See the DIDSS docs for details on URL usage.";
+} ascii_output_url;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Expire time in seconds for each obs";
+  p_help = "This value will be added to the obs time to determine the expire time for the obs";
+} expire_seconds;
+
+typedef enum
+{
+  STATION_REPORT,
+  REPORT_PLUS_FULL_XML,
+  XML_ONLY,
+} output_report_type_t;
+
+paramdef enum output_report_type_t
+{
+  p_descr = "Type of station report to put in the output SPDB database";
+  p_default = STATION_REPORT;
+} output_report_type;
+

@@ -1,0 +1,94 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions EventMan
+//
+// F Hage, 
+// Sept 2005 
+//
+
+commentdef {
+  p_header = "Program name: EventMan";
+  p_text = "Event Manager manages weather event descriptions and files";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+
+paramdef string {
+  p_default = "Generic";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+	p_default = FALSE;
+	p_descr = "Use Local times, rather than UTC for all times";
+} use_localtime;
+
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./event_list";
+  p_descr = "Name of RAL format Event List.";
+  p_help = "Works in conjunction with CIDD and Janitor.";
+} event_list_file;
+
+paramdef string {
+  p_default = "konqueror http://www.ral.ucar.edu/CIDD/EventMan.html";
+  p_descr = "This command is executed whenever the help button is pressed";
+} help_command;
+
+paramdef string {
+  p_default = "notify_cidd 61500 ";
+  p_descr = "The notify CIDD command minus the command and optional argument.";
+  p_help = "Should read 'notify_cidd key_number '";
+} command_string;
+
+paramdef string {
+  p_default = "postmaster@localhost";
+  p_descr = "Default user to e-mail info to.";
+} mail_to;
+
+paramdef string {
+  p_default = "mail";
+  p_descr = "Name of a script used to mail info with.";
+} mail_script;
+

@@ -1,0 +1,6 @@
+.deps
+Tstorms2Symprod
+__makefile.template
+makefile
+makefile.am
+makefile.in

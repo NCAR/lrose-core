@@ -1,0 +1,50 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Small program to read ASCII file of tarrain\n"
+	"data and reformat to MDV. Format of the data (from David\n"
+	"Hahn) is an ASCII header :\n"
+	"ncols         7703\n"
+	"nrows         6019\n"
+	"xllcorner     -77.098402631451\n"
+	"yllcorner     38.829905474877\n"
+	"cellsize      9.2040185777627e-006\n"
+	"NODATA_value  -9999\n\n"
+	"Followed by the data, also in ASCII.\n\nNiles Oien June 2005.";
+}
+
+paramdef string {
+  p_descr = "Input data file.";
+  p_help = "Data are timestamped with time program is run.";
+  p_default = "dem_1m_a1_2925_geo.txt";
+} inFileName;
+
+paramdef string {
+  p_descr = "Name of output MDV terrain file.";
+  p_help = "Do not use standard YYYYMMDD/hhmmss.mdv naming convention\n"
+	"for terrain. Field name is 'Elevation'."; 
+  p_default = "./DARPAterrain.mdv";
+} outFileName;
+ 

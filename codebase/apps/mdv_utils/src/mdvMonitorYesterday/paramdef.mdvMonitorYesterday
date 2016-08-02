@@ -1,0 +1,80 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Program designed to be driven by cron to monitor\n"
+	"MDV data for bad/missing values. Niles Oien December 2007.";
+
+}
+
+paramdef string {
+  p_descr = "URL to monitor.";
+  p_help = "Program monitors data from here, daily."; 
+  p_default = {"mdvp:://shield-vdras::/transfer/algsys/vdras/adjoint"};
+} url;
+ 
+paramdef string {
+  p_descr = "Name of field to check";
+  p_help = "Set as appropriate. In later relesases - if any - this may be an array."; 
+  p_default = {"uwind"};
+} fieldName;
+
+paramdef double {
+  p_descr = "Maxmimum percent bad to accept before considering data to be bad";
+  p_help = "Set as appripriate"; 
+  p_default = 50.0;
+} percentBadThreshold;
+
+paramdef string {
+  p_descr = "List of emails to send summaries to.";
+  p_help = "Set as appropriate"; 
+  p_default = { "oien@starinst.org", "copeland@starinst.org", "hahnd@starinst.org", "sunj@ucar.edu" };
+} subscribers[];
+            
+paramdef boolean {
+  p_descr = "Determines if anything is sent if all data are OK";
+  p_help = "Set as appropriate."; 
+  p_default = FALSE;
+} sendEmailIfAllWell;
+
+paramdef string {
+  p_descr = "Temporary file.";
+  p_help = "Used to compose email. Make sure this is unique if multiple\n"
+	"instances run."; 
+  p_default = {"/tmp/email"};
+} tmpFile;
+
+paramdef string {
+  p_descr = "Email subject.";
+  p_help = "Subject for emails."; 
+  p_default = {"Shield VDRAS data monitoring"};
+} subject;
+
+paramdef int {
+  p_descr = "Time offset, seconds.";
+  p_help = "Added to the current time to get the end and start times.\n"
+	"May be good in the event of monitoring model forecast data."; 
+  p_default = 0;
+} timeOffset;
+

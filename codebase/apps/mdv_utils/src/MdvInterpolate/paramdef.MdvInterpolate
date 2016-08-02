@@ -1,0 +1,281 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvInterpolate
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvInterpolate.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  INTERVAL_REALTIME,
+  INTERVAL_ARCHIVE
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In INTERVAL_REALTIME mode, the program is triggered at regular "
+           "intervals as defined in the interval_realtime_trigger parameter.\n"
+           "In INTERVAL_ARCHIVE mode, the program is triggered at regular "
+           "intervals between the start and end times indicated in the "
+           "interval_archive_trigger parameter.\n";
+  p_default = "INTERVAL_REALTIME";
+} trigger_mode;
+
+typedef struct
+{
+  int interval_secs;
+  int interval_start_secs;
+} interval_realtime_trigger_t;
+
+paramdef struct interval_realtime_trigger_t
+{
+  p_descr = "Trigger information used when using the INTERVAL_REALTIME trigger";
+  p_help = "\ninterval_secs is the number of seconds between each trigger "
+           "time, starting with the indicated start time.\n"
+           "\ninterval_start_secs is the number of seconds after the hour "
+           "to start the intervals. "
+           "This number should be an even divisor of 3600, otherwise the "
+           "triggering will be different for each hour and might not be "
+           "consistent if the process is restarted.\n";
+  p_default = { 300, 0 };
+} interval_realtime_trigger;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+  int interval_secs;
+} interval_archive_trigger_t;
+
+paramdef struct interval_archive_trigger_t
+{
+  p_descr = "Trigger information used when using the INTERVAL_ARCHIVE trigger";
+  p_help = "\nstart_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "\nend_time specifies the archive end time in any format "
+           "recognized by the DateTime class.\n"
+           "\ninterval_secs is the number of seconds between each trigger "
+           "time, starting with the indicated start time.\n";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00",
+                300 };
+} interval_archive_trigger;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "The output is an SPDB polygon database so the URL must "
+           "use the SPDB protocol.";
+  p_default = "spdbp:://localhost::mdv/output";
+} output_url;
+
+
+/***********************************************************************
+ * Input dataset parameters.
+ */
+
+commentdef
+{
+  p_header = "INPUT DATASET PARAMETERS";
+};
+
+typedef enum
+{
+  GENPT_SPDB_DATASET
+} input_dataset_type_t;
+
+paramdef enum input_dataset_type_t
+{
+  p_descr = "Type of input dataset";
+  p_help = "\tGENPT_SPDB_DATASET - The input data comes from a Generic "
+           "Point SPDB dataset. "
+           "The dataset details are given in the genpt_spdb_dataset_params "
+           "parameter.\n";
+  p_default = GENPT_SPDB_DATASET;
+} input_dataset_type;
+
+typedef struct
+{
+  string spdb_url;
+  string data_field_name;
+} genpt_spdb_dataset_params_t;
+
+paramdef struct genpt_spdb_dataset_params_t
+{
+  p_descr = "Parameters describing the input dataset when input_dataset_type "
+            "is set to GENPT_SPDB_DATASET.";
+  p_default = { "spdbp:://localhost::spdb/genpt",
+                "data" };
+} genpt_spdb_dataset_params;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef int
+{
+  p_descr = "Number of seconds before the trigger time to begin "
+            "retrieving the input data points";
+  p_help = "This value is subtracted from the trigger time to get the "
+           "input data begin time.";
+  p_default = 300;
+} input_begin_secs;
+
+paramdef int
+{
+  p_descr = "Number of seconds after the trigger time to end "
+            "retrieving the input data points";
+  p_help = "This value is added to the trigger time to get the "
+           "input data end time.";
+  p_default = 0;
+} input_end_secs;
+
+typedef enum
+{
+  PROJ_LATLON,
+  PROJ_FLAT,
+  PROJ_LC
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  int nx;
+  int ny;
+  double dx;
+  double dy;
+  double minx;
+  double miny;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} output_proj_t;
+
+paramdef struct output_proj_t
+{
+  p_descr = "Output projection specification";
+  p_help = "\tproj_type - Type of projection to use on output.\n"
+           "\tnx - Number of grid spaces in the X direction.\n"
+           "\tny - Number of grid spaces in the Y direction.\n"
+           "\tdx - Grid resolution in the X direction. "
+           "This value must be specified in the appropriate units for "
+           "the chosen projection type.\n"
+           "\tdy - Grid resolution in the Y direction. "
+           "This value must be specified in the appropriate units for "
+           "the chosen projection type.\n"
+           "\tminx - X location of the center of the lower-left hand "
+           "grid square. "
+           "This value must be specified in the appropriate units for "
+           "the chosen projection type.\n"
+           "\tminy - Y location of the center of the lower-left hand "
+           "grid square. "
+           "This value must be specified in the appropriate units for "
+           "the chosen projection type.\n"
+           "\torigin_lat - Latitude of the grid origin. "
+           "Used only if proj_type is set to PROJ_FLAT or PROJ_LC.\n"
+           "\torigin_lon - Longitude of the grid origin. "
+           "Used only if proj_type is set to PROJ_FLAT or PROJ_LC.\n"
+           "\trotation - Grid rotation. "
+           "Used only if proj_type is set to PROJ_FLAT.\n"
+           "\tlat1 - First latitude reference. "
+           "Used only if proj_type is set to PROJ_LC.\n"
+           "\tlat2 - Second latitude reference. "
+           "Used only if proj_type is set to PROJ_LC.\n";
+  p_default = { PROJ_LATLON,
+                1232, 966,
+                0.025242, 0.018068,
+                -98.281067, 31.497101,
+                0.0, 0.0, 0.0, 0.0, 0.0 };
+} output_proj;
+
+typedef enum
+{
+  NATURAL_NEIGHBOR_INTERP
+} interpolation_type_t;
+
+paramdef enum interpolation_type_t
+{
+  p_descr = "Type of interpolation to perform";
+  p_help = "\tNATURAL_NEIGHBOR_INTERP - Use natural neighbor interpolation.\n";
+  p_default = NATURAL_NEIGHBOR_INTERP;
+} interpolation_type;
+
+           

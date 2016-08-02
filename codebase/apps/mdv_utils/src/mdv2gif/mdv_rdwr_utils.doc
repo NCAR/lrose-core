@@ -1,0 +1,307 @@
+#########################################################
+# mdv_rdwr_utils.doc                                    #
+#                                                       #
+# Documentation for the mdv_rdwr_utils utility          #
+#                                                       #
+# This utility provides tools with which mdv files can  #
+# be read and with which mdv files can be created for a #
+# set of data                                           #
+#                                                       #
+# Also see the test programs:                           #
+#   mdv_rdwr_utils_read_test.c                          #
+#   mdv_rdwr_utils_write_test.c                         #
+#                                                       #
+# Written by J.F. Stuart and P.J.M. Visser              #
+#########################################################
+
+The utility uses the existing MDV libraries, and provide
+user friendly functions to extract data from a MDV file, 
+or to create MDV headers and convert a data field(s) into
+the format needed for a MDV file.
+
+1. Include Directories
+
+The following header(s) need to be included into the source
+file from where the MDV file will be read or written:
+
+#include "mdv_rdwr_utils.h"
+
+2. Data Structures of MDV Files
+
+The structures used in a MDV file is described in the mdv_file.h
+file.  A structure is used in these utilities which consists of
+all the necessary pieces of an mdv file.  This structure is called
+MDV_handle_t, and its utilities and declaration is contained in
+the file mdv_handle.h.  The structure mainly consists of the
+following pieces:
+
+- A Master Header called master_header: This header serves as an
+"index" into the rest of the file.  This header needs to be
+set up first because from it space will be allocated for the
+rest of the file.  It needs to be manipulated if a MDV
+file is created.
+
+- A pointer to a Field Header called *fld_hdrs: This header serves
+as an index into all the fields contained in the file. This header 
+needs to be manipulated if a MDV file is created.
+
+- A pointer to a Vlevel Header called *vlv_hdrs: This header serves
+as an index into the vertical co-ordinate system used for every
+field.  This header needs to be manipulated if a MDV file is
+created.
+
+- A Pointer to a Chunk Header called *chunk_hdrs: This header
+serves as an index into any chunks that might be contained in an
+MDV file.  The MDV write utility at this stage does not support
+the writing of any chunk data, but the read utility does suppport
+the reading of chunk data.  This header need not be manipulated 
+if a MDV file is created.
+
+- Pointers to all the different chunks contained in a MDV file
+called **chunk data. The first dimention contain the field 
+number, the second dimention contain the number of pieces
+in a chunk.  When a MDV file is created these pointers are NULL.
+
+- Pointers to all the fields in the mdv files called ***field_plane.
+These are three dimentional pointers.  The first dimention contain the
+field number, the second dimention contain the vertical dimention 
+of each field.  The third dimention contain the horizontal dimentions,
+thus the xdimention times the ydimention.  These fields need to be
+in byte format. 
+
+Various other elements are included in this structure, but knowledge
+of them are not needed for the use of this utility.
+
+3. Data structure of the mdv_rdwr_utils
+
+The data structure of this utility consists of a structure called
+mdv_float_handle. This structure consists of elements used for
+the writing of MDV files or for holding information from reading
+MDV files.  The elements are:
+
+- mdv: This element is of the MDV_handle_t type described above.
+
+- float ***f_array: This is a three dimentional array containing
+floats.  The first dimention contain the field number, the second
+dimention contain the vertical dimention.  The second dimention
+contain the horizontal dimentions, both x and y, row by row with 
+the xdimention making up the columns.
+
+- ui08 ***c_array: This is a three dimentional byte array equivalent to the 
+above mentioned float array. 
+
+- char filename[100]: This is a character array containing the 
+filename of the mdv file to be created.  
+
+- char pathname[100]: This is a character array containing the path
+to the directory containing the mdv files.
+
+- char year[3], month[3], day[3], hour[3], min[3], sec[3]: These 
+character arrays contain the date information needed for the 
+creation of the mdv filenames.
+
+- date_time_t dtime:  This is a structure containg information
+on the time in terms of unix time etc.
+
+4. Reading MDV files
+
+The read utilities fill the MDV structure with all the information 
+in the MDV  file, but also extract the byte as well as float
+arrays containing the actual data in the MDV file for easy
+user-friendly access of the data.
+
+NOTE: See the mdv_rdwr_utils_read_test.c program for an example
+
+Steps for reading MDV files:
+
+- Create an instance of the mdv_float_handle. 
+  ex: mdv_float_handle mdv_f;
+
+- Initialize the MDV handle.  For this use the MDV library 
+utility MDV_init_handle().  Pass as the parameter the 
+address of the mdv_float_handle element containing the 
+MDV_handle_t called mdv.
+  ex: MDV_init_handle(&mdv_f.mdv);
+
+- Use the MDV library utility MDV_read_all().  Pass as
+the parameters first the address of the mdv_float_handle
+element containing the MDV_handle_t called mdv.  The second 
+parameter is the character array containing the full name 
+of the mdv file to be read.  The third parameter should be
+'MDV_INT8'.
+  ex:if(MDV_read_all(&mdv_f.mdv,fname,MDV_INT8))
+     {
+       fprintf(stderr, "ERROR - readmdv\n");
+       fprintf(stderr, "Cannot read mdv file %s\n",fname);
+       perror(fname);
+       exit(-1);
+     }
+
+- Use the mdv_rdwr_utility alloc_arrays() to 
+allocate the space for the float and byte arrays.  The
+parameter is the addres of the mdv_float_handle instance.
+  ex: alloc_arrays(&mdv_f);
+
+- Use the mdv_rdwr_utility fill_float_array() to fill in the
+data of the float and byte arrays from the mdv files.  The 
+parameter is the addres of the mdv_float_handle instance.
+  ex: fill_float_array(&mdv_f);
+
+- Now use the data of the float array or alternatively the byte array
+for your application.
+
+- Free up the memory for the float and the character arrays
+containing the data after usage.  Use the mdv_rdwr_utils library function
+free_float_handle() with parameter the address of the 
+mdv_float_handle element.
+  ex free_float_handle(&mdv_fout);
+
+5. Writing MDV files
+
+The write utilities sets up the appropriate headers for 
+your specific data.  The data to be written into a MDV
+file needs to be float arrays for every field, such as
+described by the f_array element of the mdv_float_handle
+type.  The file is then written into the appropriate 
+directory.
+
+NOTE: See the mdv_rdwr_utils_write_test.c program for an example.
+
+- Create an instance of the mdv_float_handle. 
+  ex: mdv_float_handle mdv_fout;
+
+- Set up the filename and the date characters for the MDV file
+  ex: strncpy(mdv_fout.year, yearstring);
+
+- Set up the date and time in unix time, and fill in the
+dtime structure.  This date and time should constitute
+the time the last data was received/created.
+  ex: mdv_fout.dtime.year = atoi(mdv_fout.year);
+      if(mdv_fout.dtime.year < 1900)
+      {
+        if(mdv_fout.dtime.year < 70)
+        {
+          mdv_fout.dtime.year += 2000;
+        }
+        else
+        {
+          mdv_fout.dtime.year += 1900;
+        }
+     }
+     mdv_fout.dtime.month = atoi(mdv_fout.month); 
+     mdv_fout.dtome.day = etc. etc. etc.
+     .....
+     ....
+     uconvert_to_utime(&mdv_fout.dtime);
+
+- Set the directory under which the mdv file direvtories 
+should be written.  
+  ex: sprintf(dirout,"cdata");
+
+- Initialize the MDV handle.  For this use the MDV library 
+utility MDV_init_handle().  Pass as the parameter the 
+address of the mdv_float_handle element containing the 
+MDV_handle_t called mdv.
+  ex: MDV_init_handle(&mdv_fout.mdv);
+     
+- Fill in the master header.  For this see the mdv_file.h
+file for a description of the master_hdr element of the
+MDV_handle_t instance called mdv. Assign all the relevant
+elements of the master header. Take care to set the number 
+of chunks to 0.  ex: mdv_fout.mdv.master_hdr.n_chunks = 0;
+
+-  Allocate the MDV arrays.  Use the MDV library utility 
+MDV_alloc_handle_arrays() for this.  The first parameter
+is the addres of the mdv_float_handle element containing
+the MDV_handle_t called mdv.  The second parameter is
+the master header element containg the number of fields, 
+the third parameter is the master header element containing
+the maximum number of vertical levels. The fourth parameter
+is the master header element containing the number of
+chunks.
+  ex: MDV_alloc_handle_arrays(&mdv_fout.mdv, 
+        mdv_fout.mdv.master_hdr.n_fields,
+        mdv_fout.mdv.master_hdr.max_nz,
+        mdv_fout.mdv.master_hdr.n_chunks);
+
+- Set the time of the header using the mdv_rdwr_utils
+utility Set_header_Time(). The first parameter is the address
+of the mdv_float_handle element.  The second parameter is 
+the time in seconds that the start time of the data differs
+from the end time.
+  ex: Set_Header_Time(&mdv_fout,  1800); //1800 sec = 1/2hour.
+
+- Fill in the Field headers.  A header for every field must 
+be set up.  See the file mdv_file.h for a description of the 
+field headers.  First create a pointer to the field header.
+Then initialize the field header with the MDV library function
+MDV_init_field_header() with parameter the pointer to the field
+header.
+  ex: for(ifield = 0; ifield < n_fields; ifield++) {
+        MDV_field_header_t *fhdr = mdv_fout.mdv.fld_hdrs + 1;
+        MDV_init_field_header(fhdr);
+        fhdr->nx = 200;
+        ........... etc. etc. etc
+      }
+
+- Fill in the vlevel headers.  A header for every vlevel must 
+be set up.  See the file mdv_file.h for a description of the 
+vlevel headers.  First create a pointer to the vlevel header.
+Then initialize the vlevel header with the MDV library function
+MDV_init_vlevel_header() with parameter the pointer to the vlevel
+header. Note: This is usually done inside the loop of the field headers
+  ex: for(ifield = 0; ifield < n_fields; ifield++) {
+        ..
+        ..
+        MDV_vlevel_header_t * vhdr = mdv_fout.mdv.vlv_hdrs + 1;
+        MDV_init_vlevel_header(vhdr);
+        vhdr->vlevel_type[0] = MDV_VERT_TYPE_Z;
+        .............. etc. etc. etc.
+      }
+
+- Allocate the memory needed by the f_array and c_array to hold
+the data to be written to the mdv file.  Use the mdv_rdwr_utils
+library function alloc_arrays() with parameter the addres of the 
+mdv_float_handle element;
+  ex: alloc_arrays(&mdv_fout);
+
+- Fill the f_array field with the data to be written to a MDV 
+file.  This data must be float values of the data you want to
+write into an mdv file.
+  ex: for(ifield = 0; ifield < mdv_fout.mdv.master_hdr.nfields; ifield++)
+      {
+        for(z = 0; z < 20; z++)
+        {
+          for(y = 0;  y < 200; y++)
+          {
+            for(x = 0; x < 200; x++)
+            {
+              mdv_fout.f_array[ifield][z][y*200 + x] = 
+                      data[ifield][z][y*200 + x];
+            }
+          }
+        }
+      }
+
+- Convert the float array into a byte array by using the 
+mdv_rdwr_utils library function float2byte() with parameter
+the address of the mdv_float_handle element. The float 
+values will be scaled from 0 - 255 from the smallest to the
+largest value.
+
+- Write the completed volume to MDV file.  Use the mdv_rdwr_utils
+library function Write_Complete_Vol().  The first parameter is
+the address of the mdv_float_handle element.   The second
+parameter is the character array containing the name of the 
+directory under which the date directories containing the mdv files
+will be written.
+  ex: Write_Complete_Vol(&mdv_fout, dirout);
+
+- Free up the memory for the float and the character arrays
+containing the data.  Use the mdv_rdwr_utils library function
+free_float_handle() with parameter the address of the 
+mdv_float_handle element.
+  ex free_float_handle(&mdv_fout);
+
+- The mdv files can now be used in applications such as TITAN 
+ans the CIDD display systems.

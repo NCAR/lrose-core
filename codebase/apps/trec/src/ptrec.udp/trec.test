@@ -1,0 +1,609 @@
+/****************************************************
+ * TDRP params for trec
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_NORM, DEBUG_EXTRA,
+ *   DEBUG_VERBOSE.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * This is used by the process mapper, procmap.
+ *
+ * Type: string
+ * Default: "test" 
+ */
+instance = "test";
+
+/*
+ * udp port.
+ *
+ * Type: long
+ * Default: 54321 
+ * Min value: 0 
+ * Max value: 100000000 
+ */
+udp_port = 54321;
+
+/*
+ * Udp packet format.
+ * NCAR and LL have different udp packet formats.
+ *
+ * Type: enum
+ * Default: NCAR_UDP 
+ * Legal values: LL_UDP, NCAR_UDP.
+ */
+udp_pkt_format = NCAR_UDP;
+
+/*
+ * option to print beam summary.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+print_summary = FALSE;
+
+/*
+ * Beam interval for summary prints.
+ *
+ * Type: long
+ * Default: 90 
+ * Min value: 1 
+ */
+summary_interval = 90;
+
+/*
+ * option to print beam header.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+print_header = FALSE;
+
+/*
+ * Beam interval for header prints.
+ *
+ * Type: long
+ * Default: 360 
+ * Min value: 1 
+ */
+header_interval = 360;
+
+/*
+ * Input data time correction (secs).
+ * This allows you to correct for time errors in the input data stream.
+ *   Pos values add to the input time, and vice versa.
+ *
+ * Type: long
+ * Default: 0 
+ */
+time_correction = -86400;
+
+/*
+ *
+ * Type: double
+ * Default: 0.05 
+ * Min value: 0 
+ * Max value: 10 
+ */
+read_delay = 0.05;
+
+/*
+ * number of fields in the data.
+ *
+ * Type: long
+ * Default: 4 
+ * Min value: 0 
+ * Max value: 20 
+ */
+nfields_raw = 4;
+
+/*
+ * number of gates dropped at start of beam buffer to correct for
+ *   range errors.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 20 
+ */
+ngates_dropped_start = 0;
+
+/*
+ * pos of vel in moments data.
+ *
+ * Type: long
+ * Default: 3 
+ * Min value: 0 
+ * Max value: 10 
+ */
+vel_field_pos = 3;
+
+/*
+ * pos of dbz in moments data.
+ *
+ * Type: long
+ * Default: 2 
+ * Min value: 0 
+ * Max value: 10 
+ */
+dbz_field_pos = 2;
+
+/*
+ * pos of flags in moments data.
+ *
+ * Type: long
+ * Default: 4 
+ * Min value: 0 
+ * Max value: 10 
+ */
+flg_field_pos = 4;
+
+/*
+ * range gate spacing.
+ *
+ * Type: double
+ * Default: 0.225 
+ * Min value: 0 
+ * Max value: 10 
+ */
+gate_spacing = 0.250;
+
+/*
+ * number of gates expected.
+ *
+ * Type: long
+ * Default: 664 
+ * Min value: 1 
+ * Max value: 10000 
+ */
+ngates = 600;
+
+/*
+ * option for analytical functions.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+anal_fun = FALSE;
+
+/*
+ * max target elevation.
+ *
+ * Type: double
+ * Default: 5 
+ * Min value: 0 
+ * Max value: 100 
+ */
+el_max = 5;
+
+/*
+ * maximum number of elevation angles to read.
+ *
+ * Type: long
+ * Default: 4 
+ * Min value: 1 
+ * Max value: 90 
+ */
+nel = 2;
+
+/*
+ * maximum number of azimuths in PPI.
+ *
+ * Type: long
+ * Default: 420 
+ * Min value: 90 
+ * Max value: 500 
+ */
+max_naz = 420;
+
+/*
+ * maximum dbz value to trec.
+ *
+ * Type: double
+ * Default: 75 
+ * Min value: 0 
+ * Max value: 1000 
+ */
+dbz_max = 75;
+
+/*
+ *
+ * Type: double
+ * Default: 0.25 
+ * Min value: 0 
+ * Max value: 10 
+ */
+fract = 1.0;
+
+/*
+ * fraction of second trip flags allowed.
+ *
+ * Type: double
+ * Default: 0.2 
+ * Min value: 0 
+ * Max value: 10 
+ */
+fractst = 1.0;
+
+/*
+ * Radar latitude (decimal degrees).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -90 
+ * Max value: 90 
+ */
+radar_lat = 39.787;
+
+/*
+ * Radar longitude (decimal degrees).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -180 
+ * Max value: 180 
+ */
+radar_lon = -104.546;
+
+/*
+ * radar altitude (in km).
+ *
+ * Type: double
+ * Default: 1.71 
+ * Min value: 0 
+ * Max value: 100 
+ */
+radar_altitude = 1.71;
+
+/*
+ * min x coordinate of analysis grid, wrt radar.
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -1000 
+ * Max value: 1000 
+ */
+grid_min_x = -105.0;
+
+/*
+ * min y coordinate of analysis grid.
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -1000 
+ * Max value: 1000 
+ */
+grid_min_y = -105.0;
+
+/*
+ * min z coordinate of analysis grid.
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 100 
+ */
+grid_min_z = 0;
+
+/*
+ * grid spacing in x direction (km).
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0.01 
+ * Max value: 20 
+ */
+grid_del_x = 3.0;
+
+/*
+ * grid spacing in y direction (km).
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0.01 
+ * Max value: 20 
+ */
+grid_del_y = 3.0;
+
+/*
+ * grid spacing in z direction (km).
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0.01 
+ * Max value: 5 
+ */
+grid_del_z = 0.5;
+
+/*
+ * number of grid points in x direction (km).
+ *
+ * Type: long
+ * Default: 80 
+ * Min value: 1 
+ * Max value: 1000 
+ */
+grid_nx = 72;
+
+/*
+ * number of grid points in y direction (km).
+ *
+ * Type: long
+ * Default: 80 
+ * Min value: 1 
+ * Max value: 1000 
+ */
+grid_ny = 72;
+
+/*
+ * number of grid points in z direction (km).
+ *
+ * Type: long
+ * Default: 7 
+ * Min value: 1 
+ * Max value: 20 
+ */
+grid_nz = 7;
+
+/*
+ * bad data value.
+ *
+ * Type: long
+ * Default: -32768 
+ * Min value: -100000 
+ * Max value: 100000 
+ */
+bad = -32768;
+
+/*
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+local_files = TRUE;
+
+/*
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+remote_files = FALSE;
+
+/*
+ * target machine name for the output files.
+ *
+ * Type: string
+ * Default: "" 
+ */
+target_machine_name = "none";
+
+/*
+ * local dir of output files.
+ *
+ * Type: string
+ * Default: "." 
+ */
+local_dir = "$(TREC_DIR)/data";
+
+/*
+ * remote dir of output files.
+ *
+ * Type: string
+ * Default: "." 
+ */
+remote_dir = ".";
+
+/*
+ * type of transfer of output files.
+ *
+ * Type: string
+ * Default: "cp" 
+ */
+trans_type = "cp";
+
+/*
+ * suffix of output files.
+ *
+ * Type: string
+ * Default: ".trec" 
+ */
+file_suffix = ".trec";
+
+/*
+ *
+ * Type: string
+ * Default: "" 
+ */
+remote_user = "awdl";
+
+/*
+ *
+ * Type: long
+ * Default: 3 
+ * Min value: 0 
+ * Max value: 100 
+ */
+rng_skip = 3;
+
+/*
+ * size of correlation boxes (in km).
+ *
+ * Type: double
+ * Default: 7 
+ * Min value: 0 
+ * Max value: 100 
+ */
+box_size = 10.0;
+
+/*
+ * space bewteen correlation boxes (in km).
+ *
+ * Type: double
+ * Default: 4 
+ * Min value: 0 
+ * Max value: 100 
+ */
+box_spacing = 4;
+
+/*
+ *
+ * Type: double
+ * Default: 10 
+ * Min value: 0 
+ * Max value: 100 
+ */
+max_vel = 10;
+
+/*
+ *
+ * Type: double
+ * Default: 4 
+ * Min value: 0 
+ * Max value: 100 
+ */
+vel_rad = 15.0;
+
+/*
+ *
+ * Type: double
+ * Default: 0.3 
+ * Min value: 0 
+ * Max value: 10 
+ */
+cor_min_thr = 0.3;
+
+/*
+ *
+ * Type: double
+ * Default: 0.9 
+ * Min value: 0 
+ * Max value: 100 
+ */
+cor_max_thr = 0.9;
+
+/*
+ *
+ * Type: double
+ * Default: 20 
+ * Min value: 0 
+ * Max value: 1000 
+ */
+var_thr = 3;
+
+/*
+ * max difference allowed between the measured Doppler velocity
+ *   and the TREC radial velocity.
+ *
+ * Type: double
+ * Default: 3 
+ * Min value: 0 
+ * Max value: 100 
+ */
+vel_dif_thr = 5;
+
+/*
+ *
+ * Type: double
+ * Default: 2 
+ * Min value: 0 
+ * Max value: 100 
+ */
+dif_mean_thr = 2;
+
+/*
+ *
+ * Type: double
+ * Default: 0.5 
+ * Min value: 0 
+ * Max value: 10 
+ */
+mag_thr = 0.5;
+
+/*
+ * radius of influence to use when interpolating vectors to a Cartesian
+ *   grid.
+ *
+ * Type: double
+ * Default: 10 
+ * Min value: 0 
+ * Max value: 100 
+ */
+horz_rad = 15;
+
+/*
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0 
+ * Max value: 100 
+ */
+vert_rad = 1;
+
+/*
+ * constraint used during the interpolation process specifying
+ *   the minimum number of vectors influencing a grid point.
+ *
+ * Type: long
+ * Default: 12 
+ * Min value: 0 
+ * Max value: 100 
+ */
+num_vectors = 6;
+
+/*
+ * constraint used during the interpolation process specifying
+ *   the minimum number of quadrants that must have data values in
+ *   them; Trec does a 2d interpolation, so max number of quadrants
+ *   is 4.
+ *
+ * Type: long
+ * Default: 4 
+ * Min value: 0 
+ * Max value: 4 
+ */
+num_oct = 4;
+
+/*
+ *
+ * Type: long
+ * Default: 1 
+ * Min value: 0 
+ * Max value: 100 
+ */
+track_fld = 1;
+
+/*
+ *
+ * Type: long
+ * Default: 3 
+ * Min value: 0 
+ * Max value: 100 
+ */
+delta = 3;
+
+/*
+ *
+ * Type: double
+ * Default: 2 
+ * Min value: 0 
+ * Max value: 100 
+ */
+despike_dif = 2;
+
+/*
+ *
+ * Type: long
+ * Default: 5 
+ * Min value: 0 
+ * Max value: 100 
+ */
+cntmin = 5;
+
+

@@ -1,0 +1,68 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "realLidarStats is a program to read a raw REAL lidar file and\n"
+	"write statistical files - one on a beam-by-beam basis, the other\n"
+	"for the whole file. The lines in the beam-by-beam file are\n"
+	"as follows :\n"
+	"unixTime year month day hour min sec numGood min mean max az el\n"
+	"\n\nNiles Oien January 2007";
+
+}
+
+paramdef double {
+  p_descr = "Minimum value acceptable as a valid number.";
+  p_help = "Values less than this are treated as bad/missing."; 
+  p_default = 0.0;
+} minQcVal;
+ 
+paramdef double {
+  p_descr = "Maximum value acceptable as a valid number.";
+  p_help = "Values greater than this are treated as bad/missing."; 
+  p_default = 5000.0;
+} maxQcVal;
+
+paramdef double {
+  p_descr = "Start range, in Km";
+  p_help = "Set as appropriate"; 
+  p_default = 0.5;
+} startRange;
+
+paramdef double {
+  p_descr = "Start range, in Km";
+  p_help = "Set as appropriate"; 
+  p_default = 6;
+} endRange;
+
+typedef struct {
+	boolean doCheck;
+	int maxNumDaysDiff;
+} timeCheck_t;
+
+paramdef struct timeCheck_t {
+  p_descr = "Option to check data times against current time.";
+  p_help = "Set as appropriate."; 
+  p_default = {FALSE, 30};
+} timeCheck;

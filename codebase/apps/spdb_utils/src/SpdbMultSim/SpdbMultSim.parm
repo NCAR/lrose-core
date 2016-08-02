@@ -1,0 +1,67 @@
+/**********************************************************************
+ * TDRP params for SpdbMultSim
+ **********************************************************************/
+
+//======================================================================
+//
+// SpdbMultSim PARAM FILE.
+//
+// Parameter files for SpdbMultSim.  This program reads any set of spdb 
+//   databases between a range of times, then outputs to a second set of 
+//   spdb databases, simulating realtime.  The order of outputs is the 
+//   same as that given by the times in the database, i.e. the oldest data 
+//   amongst all databases is always the next output.
+//
+//======================================================================
+ 
+///////////// element /////////////////////////////////
+//
+// each string is an spdb url.  Data is read from the first url and 
+//   written to the second url.
+//
+// Type: struct
+//   typedef struct {
+//      string in_url;
+//      string out_url;
+//   }
+//
+// 1D array - variable length.
+//
+
+element = {
+{ "spdbp:://garden::test/spdb/colide/ftg/tracked",
+  "spdbp:://garden::test/spdb/colide/ftg/tracked_2"
+},
+{ "spdbp:://garden::test/spdb/colide/tdwr/tracked",
+  "spdbp:://garden::test/spdb/colide/tdwr/tracked_2"
+}
+};
+
+///////////// speedup /////////////////////////////////
+//
+// percentage to speed up from realtime rate (1.0 =realtime, 2.0=twice 
+//   realtime, etc.).
+// Minimum val: 0.1
+// Type: double
+//
+
+speedup = 100.0;
+
+///////////// time0 ///////////////////////////////////
+//
+// minimum year/month/day/hour/min/sec.
+// Type: double
+// 1D array - fixed length - 6 elements.
+//
+
+time0 = { 2001, 7, 8, 22, 0, 0 };
+
+///////////// time1 ///////////////////////////////////
+//
+// maximum year/month/day/hour/min/sec.
+// Type: double
+// 1D array - fixed length - 6 elements.
+//
+
+time1 = { 2001, 7, 8, 23, 59, 59 };
+

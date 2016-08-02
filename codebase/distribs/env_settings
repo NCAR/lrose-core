@@ -1,0 +1,36 @@
+# Set environment variables for the RAP Makefile system
+#
+# Usage : 'cd' to the 'root' directory of the distribution (one below this file)
+# Then enter: 'source distribs/env_settings'
+#
+# After this, one can move around the library and application trees to
+# build or work  things individually.
+#
+setenv RAP_DIR `pwd`
+setenv RAP_MAKE_INC_DIR $RAP_DIR/make_include
+setenv RAP_MAKE_BIN_DIR $RAP_DIR/make_bin
+setenv RAP_INC_DIR $RAP_DIR/include
+setenv RAP_LIB_DIR $RAP_DIR/lib
+setenv RAP_BIN_DIR $RAP_DIR/bin
+setenv RAP_MAN_DIR $RAP_DIR/man
+setenv RAP_DOC_DIR $RAP_DIR/doc
+setenv RAP_DEBUG_LIB_DIR $RAP_DIR/debug_lib
+setenv RAP_PROFILE_LIB_DIR $RAP_DIR/profile_lib
+setenv RAP_SHARED_INC_DIR $RAP_DIR/include
+setenv RAP_SHARED_LIB_DIR $RAP_DIR/lib
+setenv RAP_SHARED_BIN_DIR $RAP_DIR/bin
+setenv RAP_SHARED_MAN_DIR $RAP_DIR/man
+setenv RAP_SHARED_DOC_DIR $RAP_DIR/doc
+setenv RAP_INST_LIB_DIR $RAP_DIR/lib
+setenv RAP_INST_BIN_DIR $RAP_DIR/bin
+set path = ($RAP_BIN_DIR $path)
+
+set os_type = `uname`
+if ($os_type == "Linux") then
+setenv HOST_OS LINUX_IL6
+else if ($os_type == "SunOS") then
+setenv HOST_OS SUNOS4
+else if ($os_type == "IRIX") then
+setenv HOST_OS IRIX5
+endif    
+                                                   

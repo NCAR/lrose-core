@@ -1,0 +1,338 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// paramter definitions AccessA2Mdv
+//
+// George McCabe, RAP, NCAR
+// Based on param def by Gary Cunning
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// February 2012
+//
+
+commentdef {
+  p_header = "Program name: AccessA2Mdv";
+  p_text = "";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+/***********************************************************************
+ * Process control parameters.
+ */
+
+commentdef
+{
+  p_header = "PROCESS CONTROL PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+paramdef enum mode_t {
+  p_options = {REALTIME, REALTIME_DIR, FILELIST};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "\tREALTIME - In REALTIME mode, files are processed as they "
+           "are received, as indicated by the latest_data_info file in "
+           "the input directory. "
+           "In REALTIME mode, the LDATA_FMQ_ACTIVE environment "
+           "variable must be set to \"true\" if the raw files might "
+           "be received more quickly than AsapGdcp2Mdv can process them.\n"
+           "\tREALTIME_DIR - In REALTIME_DIR mode, files are processed "
+           "as they are written to the input directory. "
+           "In this case new files are recognized by creating a directory "
+           "listing so there is no need for a latest_data_info file in "
+           "the input directory to trigger processing. "
+           "The input_substring parameter is used to indicate which files "
+           "in the input directory should be processed when running in "
+           "REALTIME_DIR mode.\n"
+           "\tFILELIST - In FILELIST mode, the files listed on the "
+           "command line using "
+           "the -f command line option are processed and then rucIngest "
+           "exits. "
+           "FILELIST mode is automatically invoked by -f option on the "
+           "command line and if the FILELIST mode is specified, the -f "
+           "option is required on the command line.\n";
+} mode;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef int {
+  p_desc = "Inputfile data dimensions";
+  p_help = "2 or 3 accepted ";
+  p_default = "3";
+} inputDimension;
+
+paramdef string {
+  p_default = {"./"};
+  p_descr = "Input directory";
+  p_help = "Directory which contains input files. "
+           "Used only if files are not specified on the command line. ";
+} inputDir;
+
+paramdef long {             
+  p_default = 10800;
+  p_descr = "Max age (in seconds) of input data";
+  p_help = "Used only if files are not specified on the command line";
+} maxInputDataAge;
+
+paramdef string {
+  p_default = "nc";
+  p_descr = "Substring contained in the filenames of all files to be "
+            "processed from the input directory when running in "
+            "REALTIME_DIR mode.";
+} inputSubstring;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "URL to use for storing results.";
+  p_default = "mdvp:://localhost::mdv/model/access_a";
+} outputUrl;
+
+
+/***********************************************************************
+ * netcdf dimensions and variables.
+ */
+
+commentdef
+{
+  p_header = "NETCDF DIMENSIONS AND VARIABLES";
+};
+
+paramdef string {
+  p_default = "lat";
+  p_descr = "name for netCDF dimension for latitude.";
+} netcdf_dim_n_lat;
+
+paramdef string {
+  p_default = "lon";
+  p_descr = "name for netCDF dimension for longitude.";
+} netcdf_dim_n_lon;
+
+paramdef string {
+  p_default = "lvl";
+  p_descr = "name for netCDF dimension for level.";
+} netcdf_dim_n_lvl;
+
+paramdef string {
+  p_default = "time";
+  p_descr = "name for netCDF dimension for time.";
+} netcdf_dim_n_time;
+
+paramdef string {
+  p_default = "base_date";
+  p_descr = "name for netCDF variable for base date in epoch.";
+} netcdf_var_base_date;
+
+paramdef string {
+  p_default = "base_time";
+  p_descr = "name for netCDF variable for base time in epoch.";
+} netcdf_var_base_time;
+
+paramdef string {
+  p_default = "time";
+  p_descr = "name for netCDF variable for time offset from start of day.";
+} netcdf_var_time_offset;
+
+paramdef string {
+  p_default = "lat";
+  p_descr = "name for netCDF variable for latitude.";
+} netcdf_var_latitude;
+
+paramdef string {
+  p_default = "lon";
+  p_descr = "name for netCDF variable for longitude.";
+} netcdf_var_longitude;
+
+paramdef string {
+  p_default = "source";
+  p_descr = "name for netCDF global attribute for source.";
+} netcdf_gattr_source;
+
+paramdef string {
+  p_default = "modl_vrsn";
+  p_descr = "name for netCDF global attribute for model version.";
+} netcdf_gattr_version;
+
+paramdef string {
+  p_default = "scale_factor";
+  p_descr = "name for netCDF variable attribute for scale.";
+} netcdf_vattr_scale;
+
+paramdef string {
+  p_default = "add_offset";
+  p_descr = "name for netCDF variable attribute for offset.";
+} netcdf_vattr_offset;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Round forecast hour data to nearest integer";
+  p_help = "If true, round forecast hour";
+} roundForcHrs;
+
+/***********************************************************************
+ * output fields
+ */
+
+typedef struct {
+  string nc_var_name;
+  string mdv_short_name;
+  string mdv_long_name;
+  string units;
+  double data_scale;
+  double data_offset;
+} field_t;
+
+commentdef
+{
+  p_header = "OUTPUT FIELDS";
+};
+
+paramdef struct field_t {
+  p_default = { 
+    { "zonal_wnd", "zonal wind", "zonal wind", "m s-1", 1, 0},
+    { "merid_wnd", "merid wind", "meridional wind", "m s-1", 1, 0},
+    { "air_temp", "air temp", "air temperature", "K", 1, 0},
+    { "spec_hum", "spec hum", "specific humidity", "kg kg-1", 1, 0},
+    { "vertical_wnd", "vert wind", "vertical wind", "m s-1", 1, 0},
+    { "geop_ht", "geop ht", "geopotential height", "m", 1, 0},
+    { "clwc", "clwc", "cloud specific liquid water content", "kg kg-1", 1, 0},
+    { "ciwc", "ciwc", "cloud specific ice water content", "kg kg-1", 1, 0}
+ };
+  p_descr = "Details for each field.";
+  p_help = "The data_scale and data_offset are applied to the data dataset, to scale the data appropriately and allow you to change units. If set to 1.0 and 0.0 respectively, no transformation will occur. The grid parameters are also set individually for each data set. Use -contents to list contents of file or results of 'ncdump -h' on input file.  NOTE: data_scale and data_offset are only used if isPacked is set to false.";
+} output_fields[];
+
+paramdef boolean
+{
+  p_descr = "remap flag";
+  p_help = "Remap flag.";
+  p_default = false;
+} remap;
+
+paramdef boolean
+{
+  p_descr = "Allow flip flag";
+  p_help = "Allows reversal of latitude values";
+  p_default = "true";
+} allowFlip;
+
+
+/***********************************************************************
+ * Output encoding and compression parameters.
+ */
+commentdef {
+  p_header = "OUTPUT ENCODING AND COMPRESSION";
+}
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Set output encoding type.";
+} output_encoding_type;
+
+typedef enum {
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4,
+  COMPRESSION_GZIP =  5,
+  COMPRESSION_GZIP_VOL = 6
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_NONE;
+  p_descr = "Set output compression type.";
+  p_help = "See <toolsa/compress> for details on the compression types.";
+} output_compression_type;
+
+paramdef string {
+  p_default = "ACCESS-A";
+  p_descr = "Name of data set.";
+  p_help = "Appears in Mdv master header.";
+} data_set_name;
+
+paramdef string {
+  p_default = "Bureau of Meteorology, Australia";
+  p_descr = "Source of data.";
+  p_help = "Appears in Mdv master header.";
+} data_set_source;
+
+commentdef {
+  p_header = "OUTPUT TIME STAMPING";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Offset added to image time to get valid time (secs)";
+  p_help = "";
+} valid_time_offset;
+
+typedef enum {
+  TIME_FROM_FNAME,
+  TIME_FROM_NC_VAR 
+} time_source_t;
+
+paramdef enum time_source_t {
+  p_desc = "Source for time in the output";
+  p_help = "TIME_FROM_FNAME uses the file name to construct time, and "
+           "TIME_FROM_NC_VAR uses netcdf_var_base_date/time from file.";
+  p_default = TIME_FROM_FNAME;
+} time_source;

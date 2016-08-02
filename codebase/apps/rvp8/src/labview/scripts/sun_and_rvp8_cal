@@ -1,0 +1,18 @@
+#! /bin/csh
+
+
+echo "******* STARTING ***********" 
+date 
+echo "****************************" 
+
+# next launch labview to run an rvp8 cal program
+
+echo Launching labview to run RunCalDummyLoads.vi
+cd ~/labview_work
+labview -launch RunCalDummyLoads.vi 
+
+echo "******* DONE ***************"
+echo "****************************"
+
+end
+

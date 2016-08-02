@@ -1,0 +1,85 @@
+/**********************************************************************
+ * TDRP params for ProdParams
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_NORM;
+
+///////////// prod_info ///////////////////////////////
+//
+// product information array.
+// The fields in the structure are as follows:
+//   menu_label: label to be used for the product in menu.
+//   url: for retrieving the data.
+//   data_type: data type used when querying the SPDB data server
+//     (set to 0 to retrieve all data regardless of type).
+//   url: url for the data.
+//   retrieval_type: how to retrieve data. Choose from:
+//     RETRIEVE_CLOSEST: single entry with valid time closest to the
+//       requested time, within time_margin seconds;
+//     RETRIEVE_FIRST_BEFORE: single entry with valid time at or before 
+//   the
+//       requested time, within time_margin seconds;
+//     RETRIEVE_FIRST_AFTER: single entry with valid time at or after 
+//   the
+//       requested time, within time_margin seconds;
+//     RETRIEVE_INTERVAL: all entries valid in interval time_margin secs
+//       on either side of requested time;
+//     RETRIEVE_VALID: all entries valid at requested time.
+//   time_margin: seconds - see retrieval type.
+//   expire_secs: expire product after this time. If set to -1, the 
+//   expire
+//     time in the product is used.
+//   realtime_past_secs: how many seconds of past data to retrieve
+//     when switching into realtime mode.
+//   select_list_flag: indicates whether the individual product times
+//     should appear in the right-hand side of the GUI. This should
+//     be set to FALSE for products with many instances (e.g. 
+//   lightning);
+//   overwrite_flag - should old instances of this product will be 
+//   deleted
+//     when new instances with the same data_type arrive.
+//
+// Type: struct
+//   typedef struct {
+//      string menu_label;
+//      string url;
+//      int data_type;
+//      retrieval_type_t retrieval_type;
+//      int time_margin;
+//      int expire_secs;
+//      int realtime_past_secs;
+//      boolean select_list_flag;
+//      boolean overwrite_flag;
+//      int realtime_range_extend;
+//      boolean make_unique;
+//   }
+//
+// 1D array - variable length.
+//
+
+prod_info = {
+  {
+    menu_label = "Tstorms",
+    url = "spdbp:Tstorms2Symprod:test//localhost:20000:spdb/tstorms_xml",
+    data_type = 0,
+    retrieval_type = RETRIEVE_FIRST_BEFORE,
+    time_margin = 600,
+    interval_before = 600,
+    interval_after = 600,
+    use_frame_time = FALSE,
+    expire_secs = 600,
+    select_list_flag = FALSE,
+    make_unique = TRUE
+  }
+};

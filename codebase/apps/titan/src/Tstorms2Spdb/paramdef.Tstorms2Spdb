@@ -1,0 +1,70 @@
+/*********************************************************
+ * parameter definitions for Tstorms2Symprod
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * March 2002
+ */
+
+commentdef {
+  p_header = "Tstorms2Symprod program";
+  p_text = "Tstorms2Symprod reads native TITAN data files, converts the data into rapformats/tstorm_spdb.h style structs and writes the data out to SPDB.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME. In REALTIME mode, the analysis is performed for each volume scan as it becomes available. In ARCHIVE mode, all of the scans in a series of track files are processed.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "titan/storms";
+  p_descr = "Directory for input TITAN storm data.";
+  p_help = "If this path is not absolute (starts with /) or relative (starts with .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.";
+} input_dir;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Max valid age of input data in realtime mode (secs).";
+  p_help = "REALTIME mode only. This the max valid age for input data. In REALTIME mode, the program will wait for data more recent than this.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "spdb/tstorms";
+  p_descr = "URL for output SPDB data.";
+} output_url;
+

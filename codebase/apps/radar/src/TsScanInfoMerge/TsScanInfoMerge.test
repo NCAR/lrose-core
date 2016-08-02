@@ -1,0 +1,144 @@
+/**********************************************************************
+ * TDRP params for TsScanInfoMerge
+ **********************************************************************/
+
+//======================================================================
+//
+// TsScanInfoMerge reads time-series data from 2 file message queues, a 
+//   master and a slave. The master queue contains metadata not available 
+//   in the slave. The slave queue is missing angle and scan meta data, 
+//   and perhaps time. The program synchronizes the two queues based on 
+//   either (a) the pulse sequence number in the pulse headers or (b) the 
+//   times in the pulse headers. It then copies information from the 
+//   master to the slave. It writes out the updated slave queue, and 
+//   optionally also echoes the master queue to an output queue.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = TRUE;
+
+//======================================================================
+//
+// FMQ INPUT - file message queues.
+//
+//======================================================================
+ 
+///////////// master_input_fmq_name ///////////////////
+//
+// Name for input master FMQ.
+// Type: string
+//
+
+master_input_fmq_name = "$(DATA_DIR)/fmq/ts/shmem_hiq_10300";
+
+///////////// slave_input_fmq_name ////////////////////
+//
+// Name for input slave FMQ.
+// Type: string
+//
+
+slave_input_fmq_name = "$(DATA_DIR)/fmq/ts/shmem_high_10100";
+
+///////////// start_reading_at_fmq_start //////////////
+//
+// Option to start reading at beginning of input FMQs.
+// Normally, we start reading at the end of the queues. For debugging, 
+//   however, it is sometimes helpful to start at the beginning of the 
+//   queues.
+// Type: boolean
+//
+
+start_reading_at_fmq_start = FALSE;
+
+//======================================================================
+//
+// FMQ OUTPUT for merged data.
+//
+//======================================================================
+ 
+///////////// output_fmq_name /////////////////////////
+//
+// Name for output FMQ.
+// Type: string
+//
+
+output_fmq_name = "$(DATA_DIR)/fmq/ts/shmem_high_final_20100";
+
+///////////// n_pulses_per_message ////////////////////
+//
+// Number of pulses per output message.
+// The actual number will sometimes be 1 less than this, because an info 
+//   data part may will be written once in a while.
+// Type: int
+//
+
+n_pulses_per_message = 200;
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+
+//======================================================================
+//
+// SYNCHRONIZATION MODE.
+//
+//======================================================================
+ 
+///////////// sync_mode ///////////////////////////////
+//
+// Method for synchronizing the queues.
+// NUMBERS: match pulse sequence numbers, TIME: sync based on time. The 
+//   angle info will be interpolated based on time.
+//
+// Type: enum
+// Options:
+//     SYNC_USING_NUMBERS
+//     SYNC_USING_TIME
+//
+
+sync_mode = SYNC_USING_TIME;
+

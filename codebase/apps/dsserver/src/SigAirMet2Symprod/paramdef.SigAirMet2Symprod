@@ -1,0 +1,979 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+*//////////////////////////////////////////////////////////
+// parameter definitions for SigAirMet2Symprod
+//
+// Niles Oien, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// February 2003
+//
+
+
+commentdef {
+  p_header = "SigAirMet2Symprod is a typical 2Symprod translator.\n"
+    "The only slight variation is that some of the plotting\n"
+    "parameters are determined by attempting a wildcard match of\n"
+    "a string defined in the param file with the weather string\n"
+    "in the SigAirMet structure. Order is important in the definition\n"
+    "of the wildcard strings - the first wildcard sting to match\n"
+    "is the one that defines the parameters used. Thus, making the\n"
+    "last wildcard a simple star (as in the default) makes the last\n"
+    "set of parameters a catch-all set that will be used if all\n"
+    "other wildcard matches have failed.\n\nNiles Oien February 2003.";
+}
+
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { DEBUG_OFF };
+} debug;
+
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string {
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean {
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef {
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int {
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5469;
+} port;
+  
+paramdef int {
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int {
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// What type of data to render with this param file
+
+commentdef {
+  p_header = "WHAT DATA TYPE TO PLOT PARAMETERS";
+};
+
+typedef enum {
+  PLOT_SIGMETS,
+  PLOT_AIRMETS,
+  PLOT_ALL
+} plot_data_group_t;
+
+paramdef enum plot_data_group_t {
+  p_descr = "What type (group) of data to plot from this param file.";
+  p_help = "If you use PLOT_ALL, the server will plot both SIGMETs and AIRMETs.";
+  p_default = PLOT_SIGMETS;
+} plotDataGroup;
+
+//////////////////////////////////////////////////////////
+// Text Rendering
+
+commentdef {
+  p_header = "TEXT RENDERING PARAMETERS";
+};
+
+paramdef string {
+  p_descr = "Text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} text_background_color;
+
+paramdef string {
+  p_descr = "Font name.";
+  p_default = "";
+} font_name;
+
+typedef struct {
+  int x;
+  int y;
+} text_offset_t;
+
+paramdef struct text_offset_t {
+  p_descr = "Pixel offset values for starting the text";
+  p_default = { 0, 0 };
+} text_offset;
+
+typedef enum {
+  VERT_ALIGN_TOP,
+  VERT_ALIGN_CENTER,
+  VERT_ALIGN_BOTTOM
+} vert_align_t;
+
+paramdef enum vert_align_t {
+  p_descr = "Vertical alignment label text.";
+  p_help = "Does not apply if forecast and outlook labels are active.";
+  p_default = VERT_ALIGN_CENTER;
+} text_vert_align;
+
+typedef enum {
+  HORIZ_ALIGN_LEFT,
+  HORIZ_ALIGN_CENTER,
+  HORIZ_ALIGN_RIGHT
+} horiz_align_t;
+
+paramdef enum horiz_align_t {
+  p_descr = "Horizontal alignment for label text.";
+  p_help = "Does not apply if forecast and outlook labels are active.";
+  p_default = HORIZ_ALIGN_CENTER;
+} text_horiz_align;
+
+paramdef int {
+  p_descr = "Size of font to use for text";
+  p_default = 0;
+} text_font_size;
+
+typedef enum {
+  TEXT_NORM,
+  TEXT_BOLD,
+  TEXT_ITALICS,
+  TEXT_SUBSCRIPT,
+  TEXT_SUPERSCRIPT,
+  TEXT_UNDERLINE,
+  TEXT_STRIKETHROUGH
+} font_style_t;
+
+paramdef enum font_style_t {
+  p_descr = "Font style for the text";
+  p_default = TEXT_NORM;
+} text_font_style;
+
+paramdef int {
+  p_descr = "Length of a message line before text line is broken\n"
+	"(effectively given a carriage return).";
+  p_help = "Program will break line at first space after\n"
+	 "this many characters.";
+  p_default = 32;
+} plotTextLineLen;
+
+paramdef int {
+  p_descr = "Vertical line spacing, pixels.";
+  p_help = "Optionally, the user may choose to plot various text "
+        "parameters. The selected plotting elements are then draw vertically "
+        "above each other on the display, separated by plot_text_line_offset "
+        "pixels in the vertical. If this is negative then the column of "
+        "numbers will ascend rather than descend on the display.";
+  p_default = 10;
+} plot_text_line_offset;
+
+paramdef boolean {
+  p_descr = "Option to print the name of the FIR for polygons which are the FIR boundary, not the actual SIGMET boundary. This occurs when the SIGMET polygon cannot be decoded";
+  p_help = "Default is to do this.";
+  p_default = TRUE;
+} plotPolygonIsFirBoundary_PrintFirName;
+
+paramdef string {
+  p_descr = "Text to be used for UNKNOWN weather type\n";
+  p_help = "If the weather type is UNKNOWN, it will be converted to this string for display.";
+  p_default = "UNKNOWN";
+} unknown_wx_text;
+
+//////////////////////////////////////////////////////////
+// Polygon Rendering
+
+commentdef {
+  p_header = "POLYGON RENDERING PARAMETERS";
+};
+
+paramdef int {
+  p_descr = "Icon line width";
+  p_help = "Used for icons.";
+  p_default = 1;
+} line_width;
+
+paramdef boolean {
+  p_descr = "Option to only plot a SIG/AIRMET if it has a polygon\n"
+	"associated with it.";
+  p_help = "A ploygon is defined as at least 2 points.";
+  p_default = TRUE;
+} requirePolygon;
+
+typedef enum {
+  LINETYPE_SOLID,
+  LINETYPE_DASH,
+  LINETYPE_DOT_DASH
+} line_type_t;
+
+paramdef enum line_type_t {
+  p_descr = "polygon line type";
+  p_help = "Line type suggested for the polygons.";
+  p_default = LINETYPE_SOLID;
+} polygon_line_type;
+
+paramdef enum line_type_t {
+  p_descr = "forecast polygon line type";
+  p_help = "Line type suggested for the forecast polygons.";
+  p_default = LINETYPE_DOT_DASH;
+} forecast_line_type;
+
+paramdef enum line_type_t {
+  p_descr = "outlook polygon line type";
+  p_help = "Line type suggested for the outlook polygons.";
+  p_default = LINETYPE_DOT_DASH;
+} outlook_line_type;
+
+paramdef enum line_type_t {
+  p_descr = "polygon line type to use for polygons which are the FIR boundary, not the actual SIGMET boundary. This occurs when the SIGMET polygon cannot be decoded";
+  p_help = "Default is to set this type of polygon to a different linetype than the polygon_line_type";
+  p_default = LINETYPE_DASH;
+} fir_polygon_line_type;
+
+paramdef int {
+  p_descr = "polygon line width";
+  p_help = "Line width for polygon.";
+  p_default = 1;
+} polygon_line_width;
+
+typedef enum {
+  CAPSTYLE_BUTT,
+  CAPSTYLE_NOT_LAST,
+  CAPSTYLE_PROJECTING,
+  CAPSTYLE_ROUND 
+} capstyle_t;
+
+paramdef enum capstyle_t {
+  p_descr = "polygon capstyle";
+  p_help = "Capstyle suggested for using on the polygon.";
+  p_default = CAPSTYLE_BUTT;
+} polygon_capstyle;
+
+
+typedef enum { 
+  JOINSTYLE_BEVEL,
+  JOINSTYLE_MITER,
+  JOINSTYLE_ROUND
+} joinstyle_t;
+
+paramdef enum joinstyle_t {
+  p_descr = "polygon joinstyle";
+  p_help = "Joinstyle suggested for using on the polygon.";
+  p_default = JOINSTYLE_BEVEL;
+} polygon_joinstyle;
+
+commentdef {
+  p_header = "ICON RENDERING PARAMETERS";
+};
+
+typedef enum {
+  ALWAYS_ON,
+  ALWAYS_OFF,
+  ON_IF_NO_POLYGON,
+} draw_icon_t;
+
+typedef enum {
+  DO_NOT_SCALE,
+  DO_SCALE,
+  NO_SCALE_IF_NO_POLYGON,
+} client_scale_icon_t;
+
+commentdef {
+  p_header = "SIGMET ITEM DEFINITIONS";
+};
+
+typedef struct {
+
+  string  WxWildcard;
+  boolean plotID;
+  boolean plotWx;
+  boolean plotFlightLevels;
+  boolean plotSource;
+  boolean plotTimes;
+  boolean plotText;
+  boolean renderPolygonSpokes;
+  boolean renderPolygon;   
+  boolean renderForecasts;
+  boolean renderOutlooks;
+  draw_icon_t renderIcon;
+  string iconName;
+  string iconNameSouth;
+  float iconScale;
+  client_scale_icon_t allowClientScaling;
+  string mainColor;
+  string forecastColor;
+  string outlookColor;
+  boolean includeHiddenPolygon;   
+
+} sigmet_item_t;
+
+paramdef struct sigmet_item_t {
+
+  p_descr = "Defines for how to render the SigAirMets based on\n"
+    "a wildcarding with the weather string.";
+
+  p_help = "WxWildCard is a string to separate out weather types, see the\n"
+    "   SigAirMet2Spdb param file for the possible weather types.\n" 
+    "plotID: plot the ID?\n"
+    "plotWx: plot the weather type string?\n"
+    "plotFlightLevels: plot the flight levels?\n"
+    "plotSource: plot the source station string?\n"
+    "plotTimes: plot the start and expire times?\n"
+    "plotText: plot the raw text?\n"
+    "renderPolygonSpokes: plot the polygon spokes?\n"
+    "renderPolygon: plot the polygon?\n"
+    "renderForecasts: plot the forecasts if they exist?\n"
+    "renderOutlooks: plot the outlooks if they exist?\n"
+    "renderIcon: plot the icon?\n"
+    "iconName: name of icon to plot, must be defined in icon_defs below\n"
+    "iconNameSouth: icon name for Southern Hemisphere, if different from main icon.\n"
+    "  Set to empty string if the same icon is used everywhere.\n"
+    "iconScale: scaling factor to apply to the icon, if scaling is allowed\n"
+    "allowClientScaling: allow the client to scale or resize the icon?\n"
+    "mainColor: color for text, icons, polygons\n"
+    "forecastColor: color for forecast components\n"
+    "outlookColor: color for outlook components\n"
+    "includeHiddenPolygon: send a polygon marked as hidden, for mouse-over?\n";
+
+  p_default = {
+    {
+      WxWildcard = "VA*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = TRUE,
+      renderOutlooks = TRUE,
+      renderIcon = ALWAYS_ON,
+      iconName = "va_icon",
+      iconNameSouth = "",
+      iconScale = 1.0,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "magenta",
+      forecastColor = "magenta",
+      outlookColor = "magenta",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "TC",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = TRUE,
+      renderOutlooks = TRUE,
+      renderIcon = ALWAYS_ON,
+      iconName = "tc_icon",
+      iconNameSouth = "tc_icon_south",
+      iconScale = 0.5,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "yellow",
+      forecastColor = "gray",
+      outlookColor = "gray",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*TS*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = TRUE,
+      renderOutlooks = TRUE,
+      renderIcon = ALWAYS_ON,
+      iconName = "convective_icon",
+      iconNameSouth = "",
+      iconScale = 0.25,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "red",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*CB*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = TRUE,
+      renderOutlooks = TRUE,
+      renderIcon = ALWAYS_ON,
+      iconName = "convective_icon",
+      iconNameSouth = "",
+      iconScale = 0.25,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "red",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*TURB*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = FALSE,
+      renderForecasts = TRUE,
+      renderOutlooks = TRUE,
+      renderIcon = ALWAYS_ON,
+      iconName = "turb_icon",
+      iconNameSouth = "",
+      iconScale = 0.5,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "green",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*IC*",
+      plotID = TRUE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = TRUE,
+      renderOutlooks = TRUE,
+      renderIcon = ALWAYS_ON,
+      iconName = "icing_icon",
+      iconNameSouth = "",
+      iconScale = 0.5,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "cyan",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*DS*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = TRUE,
+      renderOutlooks = TRUE,
+      renderIcon = ALWAYS_ON,
+      iconName = "ds_icon",
+      iconNameSouth = "",
+      iconScale = 0.5,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "tan",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*SS*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = TRUE,
+      renderOutlooks = TRUE,
+      renderIcon = ALWAYS_ON,
+      iconName = "ds_icon",
+      iconNameSouth = "",
+      iconScale = 0.5,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "tan",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "MTN OBSC*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = FALSE,
+      renderOutlooks = FALSE,
+      renderIcon = ALWAYS_ON,
+      iconName = "mtn_obsc_icon",
+      iconNameSouth = "",
+      iconScale = 1,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "white",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*VIS*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = FALSE,
+      renderOutlooks = FALSE,
+      renderIcon = ALWAYS_ON,
+      iconName = "ifr_icon",
+      iconNameSouth = "",
+      iconScale = 1,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "white",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*RDOACT*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = FALSE,
+      renderForecasts = TRUE,
+      renderOutlooks = TRUE,
+      renderIcon = ALWAYS_ON,
+      iconName = "rdoact_icon",
+      iconNameSouth = "",
+      iconScale = 0.5,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "red",
+      forecastColor = "red",
+      outlookColor = "red",
+      includeHiddenPolygon = false
+    }
+,
+    {
+      WxWildcard = "*CLD*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = FALSE,
+      renderOutlooks = FALSE,
+      renderIcon = ALWAYS_ON,
+      iconName = "overcast_icon",
+      iconNameSouth = "",
+      iconScale = 1,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "white",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "IFR",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = FALSE,
+      renderOutlooks = FALSE,
+      renderIcon = ALWAYS_ON,
+      iconName = "ifr_icon",
+      iconNameSouth = "",
+      iconScale = 1,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "white",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*TS*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = TRUE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = FALSE,
+      renderOutlooks = FALSE,
+      renderIcon = ALWAYS_ON,
+      iconName = "convective_icon",
+      iconNameSouth = "",
+      iconScale = 1,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "red",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*ICE*",
+      plotID = FALSE,
+      plotWx = FALSE,
+      plotFlightLevels = FALSE,
+      plotSource = FALSE,
+      plotTimes = FALSE,
+      plotText = FALSE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = FALSE,
+      renderOutlooks = FALSE,
+      renderIcon = ALWAYS_ON,
+      iconName = "icing_icon",
+      iconNameSouth = "",
+      iconScale = 1,
+      allowClientScaling = DO_NOT_SCALE,
+      mainColor = "cyan",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+    ,
+    {
+      WxWildcard = "*",
+      plotID = TRUE,
+      plotWx = TRUE,
+      plotFlightLevels = TRUE,
+      plotSource = TRUE,
+      plotTimes = TRUE,
+      plotText = TRUE,
+      renderPolygonSpokes = FALSE,
+      renderPolygon = TRUE,
+      renderForecasts = TRUE,
+      renderOutlooks = TRUE,
+      renderIcon = ON_IF_NO_POLYGON,
+      iconName = "unknown",
+      iconNameSouth = "",
+      iconScale = 1,
+      allowClientScaling = NO_SCALE_IF_NO_POLYGON,
+      mainColor = "orange",
+      forecastColor = "",
+      outlookColor = "",
+      includeHiddenPolygon = false
+    }
+  };
+
+} sigmet_items[];
+
+
+//////////////////////////////////////////////////////////
+// ICON Definitions
+
+commentdef {
+  p_header = "ICON DEFINITIONS";
+};
+
+typedef struct {
+  string icon_name;
+  string icon_points;
+} icon_defs_t;
+
+paramdef struct icon_defs_t {
+
+  p_descr = "Definitions for all of the icons used by the server.";
+
+  p_help = "The icon_points string contains the points used to define the "
+           "icon in a space delimited string like the following:\n"
+           "\t\"x1 y1 x2 y2 .... xn yn\"\n"
+           "Use the value 32767 for both X and Y to indicate a pen up.\n"
+	   "The turb_icon is the standard turbulence symbol.\n" 
+	   "The convective_icon is the standard convective symbol.\n"
+	   "The icing_icon is the standard icing symbol.\n"
+	   "The tc_icon is the standard tropical cyclone symbol.\n"
+	   "The va_icon is an icon for volcanic ash.\n"
+	   "The ds_icon is the standard icon for duststorms\n"
+	   "The mtw_icon is an icon for mountain waves\n"
+	   "The mtn_obsc_icon is the standard icon for mountain obscuration\n"
+	   "The gr_icon is the standard icon for GR\n"
+	   "The unknown is a question mark.\n";
+
+  p_default = {
+    {
+      icon_name = "turb_icon",
+      icon_points = "-10 0 0 20 10 0 32767 32767 -10 -10 0 10 10 -10 32767 32767 -20 -10 -10 -10 32767 32767 -5 -10 5 -10 32767 32767 10 -10 20 -10"
+    }
+    ,
+    {
+      icon_name = "convective_icon",
+      icon_points = "0 0 15 15 -9 15 -9 -15 32767 32767 0 0 15 -15 32767 32767 15 -15 8 -15 32767 32767 15 -15 15 -9"
+    }
+    ,
+    {
+      icon_name = "icing_icon",
+      icon_points = "0 0 0 -18 32767 32767 3 0 3 -18 32767 32767 -9 6 -9 0 -6 -3 -3 -6 6 -6 9 -3 12 0 12 6"
+    }
+    ,
+    {
+      icon_name = "tc_icon",
+      icon_points = "0 8  1 8  4 7  5 6  6 5  7 4  8 1  8 0  8 -1  7 -4  6 -5  5 -6  4 -7  1 -8  0 -8  -1 -8  -4 -7  -5 -6  -6 -5  -7 -4  -8 -1  -8 0  -8 1  -7 4  -6 5  -5 6  -4 7  -1 8  0 8  32767 32767  -8 0  -8 1  -7 5  -6 7  -3 11  1 14  5 16 32767 32767 8 0  8 -1  7 -5  6 -7  3 -11  -1 -14  -5 -16 32767 32767  0 7  1 7  3 6  5 5  6 3  7 1  7 0  7 -1  6 -3  5 -5  3 -6  1 -7  0 -7  -1 -7  -3 -6  -5 -5  -6 -3  -7 -1  -7 0  -7 1  -6 3  -5 5  -3 6  -1 7  0 7  32767 32767  -7 0  -7 1  -6 4  -5 7  -4 8  -3 9  0 12  1 13  3 14  5 15  32767 32767  7 0  7 -1  6 -4  5 -7  4 -8  3 -9  0 -12  -1 -13  -3 -14  -5 -15 "
+    }
+    ,
+    {
+      icon_name = "tc_icon_south",
+      icon_points = "0 8  1 8  4 7  5 6  6 5  7 4  8 1  8 0  8 -1  7 -4  6 -5  5 -6  4 -7  1 -8  0 -8  -1 -8  -4 -7  -5 -6  -6 -5  -7 -4  -8 -1  -8 0  -8 1  -7 4  -6 5  -5 6  -4 7  -1 8  0 8  32767 32767  8 0  8 1  7 5  6 7  3 11  -1 14  -5 16 32767 32767 -8 0  -8 -1  -7 -5  -6 -7  -3 -11  1 -14  5 -16  32767 32767  0 7  1 7  3 6  5 5  6 3  7 1  7 0  7 -1  6 -3  5 -5  3 -6  1 -7  0 -7  -1 -7  -3 -6  -5 -5  -6 -3  -7 -1  -7 0  -7 1  -6 3  -5 5  -3 6  -1 7  0 7  32767 32767  7 0  7 1  6 4  5 7  4 8  3 9  0 12  -1 13  -3 14  -5 15  32767 32767  -7 0  -7 -1  -6 -4  -5 -7  -4 -8  -3 -9  0 -12  1 -13  3 -14  5 -15 "
+    }
+    ,
+    {
+      icon_name = "va_icon",
+      icon_points = "0 0  1 0  -1 0  0 0  0 -1  0 1  32767 32767  4 0  16 0  8 20  -8 20  -16 0  -4 0  32767 32767  4 1  15 1  7 19  -7 19  -15 1  -4 1  32767 32767  2 22  8 28  32767 32767  3 22  9 28  32767 32767  -2 22  -8 28  32767 32767  -3 22  -9 28  132767 32767  0 22  0 28 32767 32767  1 22  1 28 32767 32767  -1 22  -1 28 32767 32767"
+    }
+    ,
+    {
+      icon_name = "ds_icon",
+      icon_points = "-6 6, -3 3, 0 0, 3 0, 6 3, 9 6, 9 9, 6 12, 3 15, 0 18, -3 21, -3 24, 0 27, 3 30, 6 30, 9 27, 12 24, 32767 32767, -8 17, 15 17, 32767 32767, -8 13 15 13, 32767 32767, 13 21, 18 15, 13 9"
+    }
+    ,
+    {
+      icon_name = "mtw_icon",
+      icon_points = "0 0, 9 21, 18 0, 32767 32767, 17 12, 17 15, 20 18, 23 18, 26 15, 26 12, 29 9, 32 9, 35 12, 35 18"
+    }
+    ,
+    {
+      icon_name = "ifr_icon",
+      icon_points = "0 0, -3 3, -3 21, 0 24, 32767 32767, 15 24, 18 21, 18 3, 15 0, 32767 32767, -3 18, 18 18 32767 32767, -3 12, 18 12 32767 32767, -3 6, 18 6"
+    }
+    ,
+    {
+      icon_name = "mtn_obsc_icon",
+      icon_points = "0 0, 15 30, 30 0, 0 0, 32767 32767, 0 15, 30 15, 32767 32767, 0 30, 30 30, 32767 32767"
+    }
+    ,
+    {
+      icon_name = "gr_icon",
+      icon_points = "0 0, -6 12, 6 12, 0 0, 32767 32767, -6 15, 0 24, 6 15, -6 15, 32767 32767"
+    }
+    ,
+    {
+      icon_name = "overcast_icon",
+      icon_points = "0 10,  4 9,  6 8,  8 6,  9 4,  10 0,  9 -4,  8 -6,  6 -8,  4 -9,  0 -10,  -4 -9,  -6 -8,  -8 -6,  -9 -4,  -10 0,  -9 4,  -8 6,  -6 8,  -4 9,  0  10, 32767 32767, "
+      "-4 9, 4 9,  32767 32767, "
+      "-6 8, 6 8,  32767 32767, "
+      "-7 7, 7 7,  32767 32767, "
+      "-8 6, 8 6,  32767 32767, "
+      "-8 5, 8 5,  32767 32767, "
+      "-9 4, 9 4,  32767 32767, "
+      "-9 3, 9 3,  32767 32767, "
+      "-9 2, 9 2,  32767 32767, "
+      "-10 1, 10 1,  32767 32767, "
+      "-10 0, 10 0,  32767 32767, "
+      "-10 -1, 10 -1,  32767 32767, "
+      "-9 -2, 9 -2,  32767 32767, "
+      "-9 -3, 9 -3,  32767 32767, "
+      "-9 -4, 9 -4,  32767 32767, "
+      "-8 -5, 8 -5,  32767 32767, "
+      "-8 -6, 8 -6,  32767 32767, "
+      "-7 -7, 7 -7,  32767 32767, "
+      "-6 -8, 6 -8,  32767 32767, "
+      "-4 -9, 4 -9,  32767 32767 "
+    }
+,
+{
+      icon_name = "rdoact_icon",
+      icon_points = "-9 11 -8 11 32767 32767 7 11 8 11 32767 32767 -10 10 -7 10 32767 32767 6 10 9 10 32767 32767 -11 9 -6 9 32767 32767 5 9 10 9 32767 32767 -11 8 -6 8 32767 32767 5 8 10 8 32767 32767 -12 7 -5 7 32767 32767 4 7 11 7 32767 32767 -13 6 -5 6 32767 32767 4 6 12 6 32767 32767 -13 5 -4 5 32767 32767 3 5 11 5 32767 32767 -13 4 -3 4 32767 32767 2 4 12 4 32767 32767 -14 3 -3 3 32767 32767 2 3 13 3 32767 32767 -14 2 -4 2 32767 32767 3 2 13 2 32767 32767 -14 1 -5 1 32767 32767 4 1 13 1 32767 32767 -3 -5 2 -5 32767 32767 -3 -6 2 -6 32767 32767 -4 -7 3 -7 32767 32767 -4 -8 3 -8 32767 32767 -5 -9 4 -9 32767 32767 -5 -10 4 -10 32767 32767 -6 -11 5 -11 32767 32767 -7 -12 6 -12 32767 32767 -7 -13 6 -13 32767 32767 -4 -14 3 -14 32767 32767 -1 2 0 2 32767 32767  -2 1 1 1 32767 32767 -3 0 2 0 32767 32767 -3 -1 2 -1 32767 32767 2 -2 1 -2 32767 32767 -1 -3 0 -3 32767 32767"
+}
+    ,
+    {
+      icon_name = "unknown",
+      icon_points = "-6 6 -6 8 -4 10 -2 12 2 12 4 10 6 8 8 4 4 2 2 0 0 0 0 -5 32767 32767 -2 -10 0 -10 0 -12 -2 -12 -2 -10"
+    }
+  }
+} icon_defs[];
+  
+commentdef {
+  p_header = "FORECAST AND OUTLOOK DETAILS";
+};
+
+paramdef int {
+  p_descr = "Length of forecast arrow head length, in pixels.";
+  p_default = 20;
+} forecast_arrow_head_len_pixels;
+
+paramdef double {
+  p_descr = "Half angle of forecast arrow head (deg).";
+  p_default = 15.0;
+} forecast_arrow_head_half_angle;
+
+paramdef int {
+  p_descr = "Length of outlook arrow head length, in pixels.";
+  p_default = 20;
+} outlook_arrow_head_len_pixels;
+
+paramdef double {
+  p_descr = "Half angle of outlook arrow head (deg).";
+  p_default = 15.0;
+} outlook_arrow_head_half_angle;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Render time for forecasts and outlooks.";
+  p_help = "If true, times are rendered next to forecasts and outlooks. The observed time is also rendered if a forecast and/or outlook exists.";
+} render_forecast_and_outlook_times;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Label times for forecasts and outlooks.";
+  p_help = "If true, the label OBS, FCST and OTLK will be placed next to the times for the forecasts and outlooks. Only active if 'render_forecast_and_outlook_times' is true.";
+} label_forecast_and_outlook_times;
+
+commentdef {
+  p_header = "HIDDEN TEXT and POLYGONS";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to activate hidden text.";
+  p_help = "If true, the full sigmet or airmet message will be sent to the client, marked as hidden text. This text may then be used by the client for any purpose, such as pop-up text in response to a mouse event near the product location.";
+} activate_hidden_text;
+
+paramdef int {
+  p_descr = "X offset for hidden text (pixels).";
+  p_default = 0;
+} hidden_text_x_offset;
+
+paramdef int {
+  p_descr = "Y offset for hidden text (pixels).";
+  p_default = 0;
+} hidden_text_y_offset;
+
+paramdef int {
+  p_descr = "Font size for hidden text (pixels).";
+  p_default = 10;
+} hidden_text_font_size;
+
+paramdef enum vert_align_t {
+  p_descr = "Vertical alignment hidden text.";
+  p_default = VERT_ALIGN_CENTER;
+} hidden_text_vert_align;
+
+paramdef enum horiz_align_t {
+  p_descr = "Horizontal alignment for hidden text.";
+  p_default = HORIZ_ALIGN_CENTER;
+} hidden_text_horiz_align;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use SIGMET product color.";
+  p_default = "";
+} hidden_text_foreground_color;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} hidden_text_background_color;
+
+paramdef double {
+  p_descr = "Alpha value for hidden polygons.";
+  p_help = "1.0 = solid, 0.0 = completely transparent.";
+  p_default = 0.4;
+} hidden_polygons_alpha_value;
+

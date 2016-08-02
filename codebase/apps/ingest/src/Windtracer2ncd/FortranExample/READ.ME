@@ -1,0 +1,18 @@
+
+In this directory is a sample Fortran program that can be
+used to read lidar data in netcdf format (written by the
+Windtracer2ncd program). In addition to the UCAR-specific
+Makefile, there is a small script called "Builder" which 
+should build the executable. Users outside of UCAR will
+have to edit this script so that it points to where the
+netcdf library can be found.
+
+The netcdf library is currently available from UniData.
+
+The program consists of a Fortran main module (readWindtracer.f)
+which is where users should look. This module makes calls to
+the routines defined in readNetcdf.cc which call the netcdf
+routines that actually read the data. All readWindtracer.f
+does is to read some sample data and print it out.
+
+Niles Oien, oien@ucar.edu February 2004

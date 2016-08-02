@@ -1,0 +1,80 @@
+/****************************************************
+ * TDRP params for ppi2comp
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Operational mode.
+ * Realtime mode - waits for new data; archive mode runs on file
+ *   list.
+ *
+ * Type: enum
+ * Default: REALTIME 
+ * Legal values: REALTIME, ARCHIVE.
+ */
+mode = ARCHIVE;
+
+/*
+ * Input ppis.
+ * This lists the details of the ppi files which will be used as input.
+ *   The min and max ranges are in km. The max_valid_age is in secs.
+ *   The first ppi in the list will be used as a data-driven trigger.
+ *
+ * Type: struct
+ * Array elem size: 32 bytes
+ * Array has no max number of elements
+ */
+input = {
+  {    
+    "$(TITAN_HOME)/lotb", /* dir:string */
+    0.0, /* min_range:double */
+    300.0, /* max_range:double */
+    0 /* max_valid_age:long */
+  },{    
+    "$(TITAN_HOME)/lota", /* dir:string */
+    40.0, /* min_range:double */
+    300.0, /* max_range:double */
+    450 /* max_valid_age:long */
+  }
+};
+
+/*
+ * Output file extension.
+ *
+ * Type: string
+ * Default: "mdv" 
+ */
+output_file_ext = "mdv";
+
+/*
+ * Output directory.
+ * Path of output directory.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+output_dir = "$(TITAN_HOME)/comp";
+
+

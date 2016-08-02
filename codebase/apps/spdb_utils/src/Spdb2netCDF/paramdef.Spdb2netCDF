@@ -1,0 +1,175 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Spdb2netCDF
+ *
+ * This file contains the TDRP parameter definitions for
+ * Spdb2netCDF.
+ */
+
+
+commentdef
+{
+  p_header = "Spdb2netCDF";
+  p_text = "This program reads SPDB data and converts it to CF-compliant "
+           "netCDF format.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "If true, verbose debug messages will be printed.";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  REALTIME_INTERVAL,
+  ARCHIVE_INTERVAL
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In REALTIME_INTERVAL mode, the program triggers at regular "
+           "intervals.\n"
+           "In ARCHIVE_INTERVAL mode, the program processes intervals of "
+           "data from the past.\n";
+  p_default = REALTIME_INTERVAL;
+} trigger_mode;
+
+paramdef int
+{
+  p_descr = "The data processing interval in seconds.";
+  p_default = 3600;
+} interval_secs;
+
+paramdef int
+{
+  p_descr = "The number of seconds after the hour to start the "
+            "intervals.";
+  p_help = "Used only if trigger_mode is set to REALTIME_INTERVAL. "
+           "If trigger_mode is set to ARCHIVE_INTERVAL, the start "
+           "time specified on the command line controls where the "
+           "intervals start.";
+  p_default = 0;
+} start_secs;
+
+paramdef int
+{
+  p_descr = "The number of seconds to delay processing of the data in "
+            "realtime mode.";
+  p_help = "For example, if you want to process hourly intervals of "
+           "data at 15 minutes after the hour (so process 0:00-1:00 "
+           "at 1:15, 1:00-2:00 at 2:15, etc), you would set "
+           "interval_secs to 3600, start_secs to 0 and delay_secs to "
+           "900.\n"
+           "Used only if trigger_mode is set to REALTIME_INTERVAL.\n";
+  p_default = 900;
+} delay_secs;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_help = "The URL for the input dataset. "
+           "Currently Spdb2netCDF can only handle METAR databases.";
+  p_default = "spdbp:://localhost::spdb/metars";
+} input_url;
+
+paramdef string
+{
+  p_descr = "Name of the feature being processed.";
+  p_help = "This string will be used in the file names and as the file_format "
+           "global attribute in the netCDF file.";
+  p_default = "WxObs";
+} feature_name;
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = "netcdf/metars";
+} output_dir;
+
+paramdef boolean
+{
+  p_descr = "ldata_info flag";
+  p_help = "If true, ldata_info will be written.";
+  p_default = false;
+} write_ldata;
+

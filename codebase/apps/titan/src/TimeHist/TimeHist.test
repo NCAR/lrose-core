@@ -1,0 +1,390 @@
+#################################################################
+#  Example parameters file for TimeHist
+#
+#  2005/09/15 22:01:07 UTC
+#################################################################
+
+###########
+# debugging
+#
+
+TimeHist.x_sync: false
+TimeHist.debug: false
+TimeHist.instance: ops
+
+#
+# main windows
+# Are they active?
+# Which one should plot on top, which on bottom?
+# Raise priority of 1 is on top, 4 on bottom
+#
+
+TimeHist.thist_active: true
+TimeHist.timeht_active: true
+TimeHist.rdist_active: true
+TimeHist.union_active: true
+
+TimeHist.thist_raise_priority: 1
+TimeHist.timeht_raise_priority: 3
+TimeHist.rdist_raise_priority: 4
+TimeHist.union_raise_priority: 2
+
+# Setup up union mode window
+
+TimeHist.union_mode: hail #! options are hail, floats
+
+#
+# realtime_only mode makes certain time-related buttons inoperable
+#
+
+TimeHist.realtime_only: false #! options are true, false
+
+#
+# archive_only mode makes certain time-related buttons inoperable
+# resets to archive time instead of now
+#
+
+TimeHist.archive_only: false #! options are true, yes, false or no
+
+#
+# mouse double-click control
+#
+
+TimeHist.double_click_delay: 0.3
+
+#
+# time loop has base interval, upon which other actions are
+# based (secs). 
+
+TimeHist.base_timer_interval: 0.15
+
+#
+# time delay at start to let things get started in order - secs
+
+TimeHist.startup_timer_interval: 5
+
+#
+# communication with rview, which starts up this program
+#
+
+TimeHist.track_shmem_key: 46200
+
+#
+# storm track data:
+#   server mapper for track server
+#   max message len for track data
+#   interval (secs) at which data is checked
+#
+
+TimeHist.servmap_host1: local
+TimeHist.servmap_host2: none
+TimeHist.max_message_len: 30000
+TimeHist.track_check_interval: 5.0
+
+#
+# case tracks
+#
+
+TimeHist.use_case_tracks: true
+TimeHist.case_tracks_file_path: $(TITAN_HOME)/params/case_tracks.9798
+
+#
+# partial tracks
+#
+
+TimeHist.partial_track_past_period: 20.0
+TimeHist.partial_track_future_period: 60.0
+
+#
+# startup plotting options
+#
+
+TimeHist.plot_thist_vol: true
+TimeHist.plot_thist_area: true
+TimeHist.plot_thist_pflux: true
+TimeHist.plot_thist_mass: true
+TimeHist.plot_thist_vil: true
+TimeHist.plot_thist_forecast: false #! options: false, limited, all
+TimeHist.plot_thist_fit: false
+
+TimeHist.timeht_mode: maxz          #! options: maxz, meanz, mass or vort
+TimeHist.timeht_centroids: limited  #! options: false, limited, all
+TimeHist.timeht_htmaxz: all         #! options: false, limited, all
+
+TimeHist.rdist_mode: vol            #! options: vol, area
+TimeHist.rdist_flipped: true
+
+# individual union fields can true or false
+
+TimeHist.plot_union_0: true
+TimeHist.plot_union_1: true
+TimeHist.plot_union_2: true
+TimeHist.plot_union_3: true
+TimeHist.plot_union_fit: false
+TimeHist.plot_union_log: false
+
+#
+# output for copies
+#
+
+TimeHist.ps_prologue_file: $(TITAN_HOME)/prologues/postscript
+TimeHist.output_file: $(TITAN_HOME)/output/TimeHist.ps
+TimeHist.ps_printer: jet
+TimeHist.print_command: lpr -h -P
+
+#
+# color scales
+#
+
+TimeHist.colorscale_dir: $(TITAN_HOME)/color_scales
+
+TimeHist.x_dbz_color_scale: dbz_color
+TimeHist.x_vorticity_color_scale: vorticity_color
+TimeHist.x_percent_color_scale: percent_color
+
+TimeHist.ps_dbz_color_scale: short_dbz_gray
+TimeHist.ps_vorticity_color_scale: vorticity_gray
+TimeHist.ps_percent_color_scale: short_percent_gray
+
+#
+# X window geometry
+#
+
+TimeHist.x_min_width: 300
+TimeHist.x_min_height: 250
+TimeHist.x_tscale_min_height: 50
+TimeHist.x_max_button_width: 80
+
+TimeHist.x_tscale_x: 0
+TimeHist.x_tscale_y: 895
+TimeHist.x_tscale_width: 900
+TimeHist.x_tscale_height: 95
+
+TimeHist.x_thist_x: 910
+TimeHist.x_thist_y: 95
+TimeHist.x_thist_width: 355
+TimeHist.x_thist_height: 280
+
+TimeHist.x_timeht_x: 910
+TimeHist.x_timeht_y: 400
+TimeHist.x_timeht_width: 355
+TimeHist.x_timeht_height: 285
+TimeHist.x_timeht_scale_width: 80
+
+TimeHist.x_rdist_x: 910
+TimeHist.x_rdist_y: 710
+TimeHist.x_rdist_width: 355
+TimeHist.x_rdist_height: 280
+TimeHist.x_rdist_scale_width: 50
+
+TimeHist.x_union_x: 910
+TimeHist.x_union_y: 710
+TimeHist.x_union_width: 355
+TimeHist.x_union_height: 280
+
+TimeHist.x_help_x: 500
+TimeHist.x_help_y: 450
+TimeHist.x_help_width: 500
+TimeHist.x_help_height: 400
+TimeHist.x_help_min_height: 150
+
+#
+# margins and clearances  - pixels
+#
+
+TimeHist.x_xaxis_margin: 25
+
+TimeHist.x_tscale_yaxis_margin: 0
+TimeHist.x_thist_yaxis_margin: 20
+TimeHist.x_timeht_yaxis_margin: 30
+TimeHist.x_rdist_yaxis_margin: 30
+TimeHist.x_union_yaxis_margin: 35
+
+TimeHist.x_top_margin: 22
+TimeHist.x_xaxis_endmargin: 40
+TimeHist.x_yaxis_endmargin: 10
+TimeHist.x_tick_length: 6
+TimeHist.x_header_clearance: 5
+
+TimeHist.x_text_margin: 8
+
+#
+# X scale dimensions. The scale element height is the height of each
+# color block in the scale window.
+#
+
+TimeHist.x_max_scale_element_ht: 20
+TimeHist.x_scale_element_width: 20
+
+#
+# X line widths - pixels
+#
+
+TimeHist.x_current_time_line_width: 3
+TimeHist.x_tick_line_width: 0
+TimeHist.x_divider_line_width: 0
+TimeHist.x_main_border_width: 5
+TimeHist.x_sub_border_width: 1
+TimeHist.x_crosshair_line_width: 1
+
+#
+# X fonts
+#
+
+TimeHist.x_text_font: 8x13
+TimeHist.x_button_font: 8x13
+TimeHist.x_title_font: 8x13
+TimeHist.x_scale_font: 6x10
+TimeHist.x_ticklabel_font: 6x10
+TimeHist.x_header_font: 8x13
+
+#
+# X colors
+#
+
+TimeHist.x_foreground: white
+TimeHist.x_background: black
+
+TimeHist.x_thist_vol_color: gray80
+TimeHist.x_thist_area_color: cyan
+TimeHist.x_thist_pflux_color: green
+TimeHist.x_thist_mass_color: magenta
+TimeHist.x_thist_vil_color: yellow
+TimeHist.x_thist_forecast_color: red
+
+TimeHist.x_union_0_color: yellow
+TimeHist.x_union_1_color: cyan
+TimeHist.x_union_2_color: green
+TimeHist.x_union_3_color: magenta
+
+TimeHist.x_ht_maxdbz_color: blue
+TimeHist.x_top_base_color: yellow
+TimeHist.x_ht_centroid_color: green
+TimeHist.x_ht_refl_centroid_color: cyan
+
+TimeHist.x_tick_color: yellow
+TimeHist.x_ticklabel_color: yellow
+
+TimeHist.x_text_color: yellow
+TimeHist.x_header_color: yellow
+TimeHist.x_titletext_color: gray
+TimeHist.x_buttontext_color: red
+TimeHist.x_scaletext_color: gray
+TimeHist.x_crosshair_color: red
+
+TimeHist.x_divider_color: CadetBlue
+TimeHist.x_border_color: CadetBlue
+TimeHist.x_hlight_background: mediumblue
+
+#
+# Postscript COPIES
+# =================
+#
+
+TimeHist.draw_copy_title: true
+
+#
+# postscript scale - all dimensions in inches, so scale up by
+# 72 from points to inches
+#
+
+TimeHist.ps_unitscale: 72
+
+#
+# postscript page details
+#
+
+TimeHist.ps_page_length: 11.0
+TimeHist.ps_page_width: 8.5
+TimeHist.ps_length_margin: 0.7
+TimeHist.ps_width_margin: 0.7
+TimeHist.ps_text_margin: 1.0
+
+#
+# print width - the max width of the postscript output
+#
+
+TimeHist.ps_print_width: 8.0
+
+#
+# limits to be placed on the print width
+#
+
+TimeHist.ps_max_print_width: 11.0
+TimeHist.ps_min_print_width: 2.0
+
+#
+# postscript plot sizes and relevant dimensions - the plot sizes
+# refer to the main plot area. The scale element height is the height of each
+# block in the scale, and the scale width is the width of the scale window
+#
+
+TimeHist.ps_plot_width: 8.0
+TimeHist.ps_plot_height: 6.0
+TimeHist.ps_max_scale_element_ht: 0.4
+TimeHist.ps_scale_element_width: 0.3
+TimeHist.ps_timeht_scale_width: 1.0
+TimeHist.ps_rdist_scale_width: 1.0
+TimeHist.ps_title_height: 0.5
+
+#
+# margins and clearances in inches
+#
+
+TimeHist.ps_xaxis_margin: 0.3
+
+TimeHist.ps_tscale_yaxis_margin: 0.5
+TimeHist.ps_thist_yaxis_margin: 0.35
+TimeHist.ps_timeht_yaxis_margin: 0.4
+TimeHist.ps_rdist_yaxis_margin: 0.4
+TimeHist.ps_union_yaxis_margin: 0
+
+TimeHist.ps_top_margin: 0.35
+TimeHist.ps_xaxis_endmargin: .3
+TimeHist.ps_yaxis_endmargin: .05
+TimeHist.ps_tick_length: 0.06
+TimeHist.ps_header_clearance: 0.05
+TimeHist.ps_plot_to_scale_margin: 0.25
+TimeHist.ps_title_to_plot_margin: 0.2
+
+
+#
+# postscript line widths
+#
+
+TimeHist.ps_border_line_width: 1.0
+TimeHist.ps_divider_line_width: 0.0
+TimeHist.ps_tick_line_width: 1.0
+TimeHist.ps_crosshair_line_width: 1.0
+
+#
+# postscript linestyles
+#
+
+TimeHist.ps_thist_vol_linestyle: 1.0 100.0 0.0
+TimeHist.ps_thist_area_linestyle: 1.0 1.0 1.0
+TimeHist.ps_thist_pflux_linestyle: 1.0 3.0 1.0
+TimeHist.ps_thist_mass_linestyle: 1.0 5.0 2.0
+TimeHist.ps_thist_vil_linestyle: 1.0 10.0 4.0
+TimeHist.ps_thist_forecast_linestyle: 1.0 100.0 0.0
+
+TimeHist.ps_union_0_linestyle: 1.0 100.0 0.0
+TimeHist.ps_union_1_linestyle: 1.0 1.0 1.0
+TimeHist.ps_union_2_linestyle: 1.0 3.0 1.0
+TimeHist.ps_union_3_linestyle: 1.0 5.0 2.0
+
+TimeHist.ps_ht_maxdbz_linestyle: 1.0 100.0 0.0
+TimeHist.ps_top_base_linestyle: 1.0 100.0 0.0
+TimeHist.ps_ht_centroid_linestyle: 1.0 4.0 2.0
+TimeHist.ps_ht_refl_centroid_linestyle: 1.0 8.0 4.0
+
+#
+# postscript font name and sizes
+#
+
+TimeHist.ps_fontname: Helvetica
+TimeHist.ps_title_fontsize: 14
+TimeHist.ps_scale_fontsize: 10
+TimeHist.ps_ticklabel_fontsize: 10
+TimeHist.ps_header_fontsize: 12
+

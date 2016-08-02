@@ -1,0 +1,391 @@
+/****************************************************
+ * TDRP params for VerifyGrid
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed with the appropriate
+ *   level of detail.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_VERBOSE.
+ */
+debug = DEBUG_NORM;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+*/
+instance = "Test";
+
+
+/*
+ * Operation mode.
+ * Program may be run in two modes, archive and realtime. In realtime
+ *   mode, the analysis is performed for each volume scan as it becomes
+ *   available. In archiv mode, the file list is obtained from the
+ *   command line.
+ *
+ * Type: enum
+ * Default: ARCHIVE 
+ * Legal values: ARCHIVE, REALTIME.
+ */
+mode = ARCHIVE;
+
+/*
+ * Max age of input data.
+ * For realtime only - max age of input data for it to be valid.
+ *
+ * Type: long
+ * Default: 300 
+ * Min value: 0 
+*/
+max_realtime_valid_age = 300;
+
+/*
+ * Directory for forecast grid files.
+ * The files in this directory are sampled to get the data for this
+ *   program.
+ *
+ * Type: string
+ * Default: "." 
+ */
+
+forecast_dir = "./forecast";
+
+/*
+ * Method of operation.
+ * Methods are (1) CONT - contingency table analysis for a grid,
+ *   with text output. (2) REGION method, in which contingency data
+ *   for a series of circular areas is computed and printed to stdout.
+ *   (3) STATS analysis, printing stats to stdout and an xgraph output
+ *   option. (4) REGRESSION method - data pairs for plotting with
+ *   ascii_to_xgraph, output to stdout.
+ *
+ * Type: enum
+ * Default: GRID_CONT_METHOD 
+ * Legal values: GRID_CONT_METHOD, REGION_CONT_METHOD,
+ *   STATS_METHOD, REGRESSION_METHOD.
+ */
+method = GRID_CONT_METHOD;
+
+/*
+ * Forecast lead time (secs).
+ * Number of seconds by which the forecast lies in the future.
+ *
+ * Type: long
+ * Default: 0 
+ */
+forecast_lead_time = 7200;
+
+/*
+ * Forecast field number.
+ * Field number of forecast data in cartesian grid (0-based).
+ *
+ * Type: long
+ * Default: 0 
+ */
+forecast_field = 0;
+
+/*
+ * Forecast plane height (km).
+ * This is the height of the forecast data to be used. The closest
+ *   available plane will be selected. Set to -1 to select composite
+ *   (column-max) data.
+ *
+ * Type: double
+ * Default: 1 
+ */
+forecast_ht = 1;
+
+/*
+ * Lower value for forecast level.
+ * Only include forecast data above this value in the contingecy
+ *   table analysis.
+ *
+ * Type: double
+ * Default: 0 
+ */
+forecast_level_lower = 39.0;
+
+/*
+ * Upper value for forecast level.
+ * Only include forecast data below this value in the contingecy
+ *   table analysis.
+ *
+ * Type: double
+ * Default: 100 
+ */
+forecast_level_upper = 100000;
+
+/*
+ * Truth data directory.
+ * Directory for dobson cartesian radar data files - truth.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+truth_data_dir = "./truth";
+
+/*
+ * Truth field number.
+ * Field number of truth data in cartesian grid (0-based).
+ *
+ * Type: long
+ * Default: 0 
+ */
+truth_field = 0;
+
+/*
+ * Truth plane height (km).
+ * This is the height of the truth data to be used. The closest available
+ *   plane will be selected. Set to -1 to select composite (column-max)
+ *   data.
+ *
+ * Type: double
+ * Default: 1 
+ */
+truth_ht = 1;
+
+/*
+ * Lower value for truth level.
+ * Only include truth data above this value in the contingecy table
+ *   analysis.
+ *
+ * Type: double
+ * Default: 0 
+ */
+truth_level_lower = 39.0;
+
+/*
+ * Upper value for truth level.
+ * Only include truth data below this value in the contingecy table
+ *   analysis.
+ *
+ * Type: double
+ * Default: 100 
+ */
+truth_level_upper = 1000;
+
+/*
+ * Time margin (secs).
+ * Margin around actual file time used when determining time match.
+ *
+ * Type: long
+ * Default: 180 
+ */
+file_time_margin = 240;
+
+/*
+ * Option to use the specified grid for the analysis.
+ * If set, the grid specified by the 'specified_grid' param is
+ *   used for evaluation. Otherwise the native data grid is used.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+use_specified_grid = FALSE;
+
+/*
+ * Grid parameters.
+ * The grid params for the regression method.
+ *
+ * Type: struct
+ */
+specified_grid = {
+  0, /* origin_lat:double */
+  0, /* origin_lon:double */
+  1830, /* nx:long */
+  918, /* ny:long */
+  -129.981, /* minx:double */
+  20.018, /* miny:double */
+  0.038239, /* dx:double */
+  0.035933  /* dy:double */
+};
+
+/*
+ * Option to load up the specified grid with means instead of nearest
+ *   neighbor values.
+ * If set, the value stored at each grid location is the mean of the
+ *   native points which fall within that grid block. Otherwise
+ *   the nearest neighbor is used to load the grid.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+load_means_in_specified_grid = FALSE;
+
+/*
+ * Option to check range from radar.
+ * If set, the range from the radar is checked. Only points at less
+ *   than the maximum range are used.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_range = FALSE;
+
+/*
+ * Max range (km).
+ * Max. range (km) for analysis - data beyond this is ignored.
+ *
+ * Type: double
+ * Default: 150 
+ */
+max_range = 230;
+
+/*
+ * GRID_CONT_METHOD only. Option to use a relaxed algorithm to
+ *   compute the contingencies.
+ * If set, a relaxed algorithm is used. This means that surrounding
+ *   points are used in determining the contingency values. The
+ *   contingency_search_margin governs the search limits. See
+ *   the code for details.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+relaxed_contingency = TRUE;
+
+/*
+ * GRID_CONT_METHOD only. Search margin (grid units).
+ * Number of adjacent grids searched for contingency match. See
+ *   relaxed_contingency.
+ *
+ * Type: long
+ * Default: 0 
+ */
+relaxed_margin = 2;
+
+/*
+ * GRID_CONT_METHOD only. Option to output scan-by-scan contingency
+ *   data to named dir.
+ * If set, the contingency table data computed for each scan will
+ *   be output to a file in the named directory. The file name will
+ *   comprise the date and the specified file extension.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+output_scan_cont = FALSE;
+
+/*
+ * Dir path for scan-by-scan contingency data.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+scan_cont_dir = "./cont_data";
+
+/*
+ * Extension for scan-by-scan contingency data.
+ *
+ * Type: string
+ * Default: "cont" 
+ */
+scan_cont_ext = "cont";
+
+/*
+ * GRID_CONT_METHOD only. Projection type for intermediate
+ *   grid file.
+ * Projection type to put in intermediate grid file so it can be
+ *   displayed. See output_intermediate_grids parameter.
+ *
+ * Type: enum
+ * Default: PROJ_FLAT 
+ * Legal values: PROJ_FLAT, PROJ_LATLON.
+ */
+projection = PROJ_LATLON;
+
+/*
+ * GRID_CONT_METHOD only. Option to output intermediate grids
+ *   to an MDV file.
+ * If set, the intermediate grids are output in an MDV file. The
+ *   intermediate grids are the truth and forecast grids mapped
+ *   onto the specified contingency grid and set to 1 if the input
+ *   grid is between the specified limits, 0 otherwise. The intermediate
+ *   grids will only be output if this is set and use_native_grid
+ *   and relaxed_contingency are both FALSE and you are in CONT method.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+output_intermediate_grids = FALSE;
+
+/*
+ * Intermediate grid output directory.
+ * The directory to be used for intermediate grids. Only used if
+ *   output_intermediate_grids is TRUE. The files in this directory
+ *   are named YYYYMMDD/hhmmss.mdv using the centroid time of the
+ *   truth file as the time used in naming the file.
+ *
+ * Type: string
+ * Default: "." 
+ */
+intermediate_dir = "./diag";
+
+/*
+ * REGION_CONT_METHOD only. Details of circular regions.
+ * In REGION_CONT_METHOD, statistics are computed for a series
+ *   of circular regions. The region is centered on the given lat
+ *   and lon point, with the radius as given in km. The percent coverage
+ *   for an event is also given per region.
+ *
+ * Type: struct
+ * Array elem size: 36 bytes
+ * Array has no max number of elements
+ */
+
+regions = {
+  {"C_Stn",      32.357,  -106.380,  8.0, 1.2},
+  {"Post",       32.372,  -106.488,  8.0, 1.2},
+  {"Northrup",   32.900,  -106.420,  8.0, 1.2},
+  {"Ninnenger",  32.900,  -106.130,  8.0, 1.2},
+  {"LBTS",       33.800,  -106.683,  8.0, 1.2},
+  {"Duquette",   33.626,  -106.476,  8.0, 1.2}
+};
+
+/*
+ * REGRESSION_METHOD only. Min regression data value.
+ * Only points with data above this value are included in the regresion
+ *   analysis.
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: -1000 
+ * Max value: 1000 
+ */
+min_regression_val = 0.5;
+
+/*
+ * STATS_METHOD only. Histogram parameters.
+ * The params for the histogram in stats method.
+ *
+ * Type: struct
+ */
+hist = {
+  10, /* n_intervals:long */
+  5, /* low_limit:double */
+  20  /* interval_size:double */
+};
+
+
+
+

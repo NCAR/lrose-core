@@ -1,0 +1,153 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.wxhazards_spdb2symprod
+ *
+ * This file contains the TDRP parameter definitions for
+ * wxhazards_spdb2symprod.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_ERRORS,
+  DEBUG_MSGS,
+  DEBUG_ROUTINES,
+  DEBUG_ALL
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "debug level";
+  p_default = DEBUG_OFF;
+} debug;
+
+
+/***********************************************************************
+ * Input parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT PARAMETERS";
+}
+
+paramdef string
+{
+  p_descr = "database directory";
+  p_help = "Directory containing SPDB database.";
+  p_default = ".";
+} database_dir;
+
+paramdef string
+{
+  p_descr = "product label";
+  p_help = "The product label used in the SPDB database to uniquely identify "
+           "this product.";
+  p_default = "Weather Hazards";
+} product_label;
+
+paramdef long
+{
+  p_descr = "product id";
+  p_help = "Number which uniquely identifies this product in the SPDB "
+           "database.";
+  p_default = 10000;
+} product_id;
+
+/***********************************************************************
+ * Output parameters
+ */
+
+commentdef
+{
+  p_header = "OUTPUT PARAMETERS";
+}
+
+paramdef long
+{
+  p_descr = "port";
+  p_help = "Server port number.";
+  p_default = 62020;
+} port;
+
+paramdef string
+{
+  p_descr = "servmap type";
+  p_help = "Server mapper type for this server.";
+  p_default = "Spdb";
+} servmap_type;
+
+paramdef string
+{
+  p_descr = "servmap subtype";
+  p_help = "Server mapper subtype for this server.  The type is always Spdb.";
+  p_default = "Symprod";
+} servmap_subtype;
+
+paramdef string
+{
+  p_descr = "servmap instance";
+  p_help = "Server mapper instance for this server.  The type is always Spdb.";
+  p_default = "Test";
+} servmap_instance;
+
+paramdef boolean
+{
+  p_descr = "realtime available flag";
+  p_help = "Flag indicating if realtime data is available from this server.";
+  p_default = true;
+} realtime_avail;
+
+/***********************************************************************
+ * Plotting choices
+ */
+
+commentdef
+{
+  p_header = "PLOTTING CHOICES";
+}
+
+paramdef string
+{
+  p_descr = "Convective region hazard color.";
+  p_default = "red";
+} conv_region_color;
+
+paramdef long
+{
+  p_descr = "Convective region hazard line width.";
+  p_min = 1;
+  p_default = 1;
+} conv_region_line_width;

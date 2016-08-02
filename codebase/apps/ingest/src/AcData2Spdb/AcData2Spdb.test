@@ -1,0 +1,594 @@
+/**********************************************************************
+ * TDRP params for AcData2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// AcData2Spdb reads aircraft data from an ASCII string and stores it in 
+//   Spdb.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// 	REALTIME: files are read and processed as they arrive in the 
+//   input_dir. 
+// 	ARCHIVE: files between the start and end times are read in and 
+//   processed. 
+// 	FILELIST: files listed on the command line are read in and 
+//   processed. 
+// 	SERIAL: the aircraft data is read in from the serial connection. 
+// 	TCP: reads data from a TCP server. 
+// 	SIM: aircraft data is generated for simulation putposes.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//     SERIAL
+//     TCP
+//     SIM
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// FILE-BASED MODES.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Directory where input data files can be found.
+// Type: string
+//
+
+input_dir = "./raw/acdata";
+
+///////////// latest_data_info_avail //////////////////
+//
+// Set to true if there is a latest_data_info file available in the 
+//   input directory.
+// REALTIME mode only.
+// Type: boolean
+//
+
+latest_data_info_avail = TRUE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// strict_dir_scan /////////////////////////
+//
+// When set, only checks input_dir for subdirs of the form YYYYMMDD.
+// Only in REALTIME mode with latest_data_info_avail FALSE.
+// Type: boolean
+//
+
+strict_dir_scan = FALSE;
+
+///////////// file_name_substr ////////////////////////
+//
+// Input filename match sub-string.
+// If not empty, file names must contain this string to be processed.
+// Type: string
+//
+
+file_name_substr = "";
+
+//======================================================================
+//
+// SERIAL TTY MODE.
+//
+//======================================================================
+ 
+///////////// input_device ////////////////////////////
+//
+// Name of input serial port device.
+// Normally /dev/ttyS0 (COM1) or /dev/ttyS1 (COM2). Check that you set 
+//   the permissions on the serial device to rw-rw-rw-, (666), so that we 
+//   have read-write permissions for the port.
+// Type: string
+//
+
+input_device = "/dev/ttyS1";
+
+///////////// baud_rate ///////////////////////////////
+//
+// Baud rate.
+// Baud rate for incoming serial data port.
+//
+// Type: enum
+// Options:
+//     BAUD_300
+//     BAUD_1200
+//     BAUD_2400
+//     BAUD_4800
+//     BAUD_9600
+//     BAUD_19200
+//     BAUD_38400
+//
+
+baud_rate = BAUD_9600;
+
+///////////// data_is_7_bit ///////////////////////////
+//
+// Flag for 7-bit data.
+// Set TRUE for 7-bit data, FALSE for 8-bit data.
+// Type: boolean
+//
+
+data_is_7_bit = FALSE;
+
+///////////// two_stop_bits ///////////////////////////
+//
+// Flag for two stop bits.
+// If TRUE, 2 stop bits. If FALSE, 1 stop bit.
+// Type: boolean
+//
+
+two_stop_bits = FALSE;
+
+///////////// enable_parity ///////////////////////////
+//
+// Flag for enabling parity checking.
+// If TRUE, parity generation is enabled for outgoing characters, and 
+//   checking enabled for incoming characters. If FALSE, parity generation 
+//   and checking is off.
+// Type: boolean
+//
+
+enable_parity = FALSE;
+
+///////////// odd_parity //////////////////////////////
+//
+// Flag for parity type.
+// If TRUE, odd parity. If FALSE, even parity. Only applies if 
+//   enableParity is TRUE.
+// Type: boolean
+//
+
+odd_parity = FALSE;
+
+//======================================================================
+//
+// TCP MODE.
+//
+//======================================================================
+ 
+///////////// tcp_server_host_name ////////////////////
+//
+// Name of TCP server host.
+// For connection TCP. The name of the host for the TCP server.
+// Type: string
+//
+
+tcp_server_host_name = "192.168.1.1";
+
+///////////// tcp_server_port /////////////////////////
+//
+// TCP server port number.
+// For connection TCP. The number of the port for the TCP server.
+// Type: int
+//
+
+tcp_server_port = 2003;
+
+///////////// send_tcp_handshake //////////////////////
+//
+// Option to send TCP handshake sequence to the server to trigger the 
+//   data flow.
+// If true, a sequence of bytes will be sent to the server to trigger 
+//   the data flow. See 'tcp_handshape_bytes'.
+// Type: boolean
+//
+
+send_tcp_handshake = FALSE;
+
+///////////// tcp_handshake_bytes /////////////////////
+//
+// List of bytes to be sent to server for handshaking.
+// This array of decimal integers is interpreted as a sequence of 
+//   individual bytes which are to be sent to the server to trigger the 
+//   data flow.
+// Type: int
+// 1D array - variable length.
+//
+
+tcp_handshake_bytes = { 13, 10 };
+
+//======================================================================
+//
+// SIMULATION MODE.
+//
+//======================================================================
+ 
+///////////// sim_aircraft ////////////////////////////
+//
+// Details of aircraft for SIM mode.
+// The test aircraft have a starting location, speed (knots) and 
+//   altitude (ft). They wander randomly around. If they go further that 
+//   100 km from their starting location they are brought back to the 
+//   start. right_burn and left_burn indicate whether the burners should 
+//   be on or off. ejectable_interval indicates the time beteen ejectable 
+//   flares - set to -1 for no ejectables. burn_in_place_interval 
+//   indicates the time between starting burn_in_place flares - set to -1 
+//   for no burn_in_place flares. n_bip_at_a_time indictes the number of 
+//   burn_in_place flares to start at a time.
+//
+// Type: struct
+//   typedef struct {
+//      string callsign;
+//      double start_lat;
+//      double start_lon;
+//      double altitude;
+//      double speed;
+//      boolean right_burn;
+//      boolean left_burn;
+//      double ejectable_interval;
+//      int burn_in_place_interval;
+//      int n_bip_at_a_time;
+//   }
+//
+// 1D array - variable length.
+//
+
+sim_aircraft = {
+  { "JRA", -27.43, 28.87, 9500, 150, TRUE, TRUE, -1, -1, 0},
+  { "JRB", -28.57, 28.86, 10500, 250, FALSE, FALSE, 10, -1, 0},
+  { "CAN", -28.19, 27.76, 11500, 150, FALSE, FALSE, -1, 60, 2}
+};
+
+//======================================================================
+//
+// INPUT FORMAT.
+//
+// The original system used a fixed-length preformatted string. The 
+//   newer system uses a comma-delimited string. The program automatically 
+//   determines which type of input string is being used.
+//
+//======================================================================
+ 
+///////////// input_format ////////////////////////////
+//
+// Data input format.
+// 	AUTOMATIC_FORMAT - The program automatically determine the data 
+//   format. This can only be done if the data is in one of the following 
+//   formats:
+// 		COMMA_DELIMITED_FORMAT
+// 		LONG_FIXED_STRING_FORMAT
+// 		WMI_LONG_STRING_FORMAT
+// 		WMI_STRING_FORMAT
+// 	COMMA_DELIMITED_FORMAT - The fields in the data are delimited by 
+//   commas. The line begins with the following fields:
+// 		call sign
+// 		year
+// 		month
+// 		day
+// 		hour
+// 		minute
+// 		second
+// 		latitude
+// 		longitude
+// 		altitude
+// These fields are followed by the optional fields specified in the 
+//   optional_field_names parameter.
+// 	LONG_FIXED_STRING_FORMAT - The data is in a white-space delimited 
+//   format. The fields appear in the following order:
+// 		hour
+// 		minute
+// 		second
+// 		pressure
+// 		temperature
+// 		dew point
+// 		wind speed
+// 		wind direction
+// 		longitude
+// 		latitude
+// 		altitude
+// 		king lwc
+// 		fssp conc
+// 		rosemount volts
+// Since the call sign isn't specified in the data, the first call sign 
+//   in the callsigns parameter is used as the call sign for this data. If 
+//   the callsigns parameter is empty, the resulting AC position record 
+//   won't have a call sign associated with it.
+// 	WMI_LONG_STRING_FORMAT - The data is in the WMI long string format. 
+//   In this format, the data is all in a long line with no delimiters 
+//   with the following fields:
+// 		call sign
+// 		latitude * 10000
+// 		longitude * 10000
+// 		tas
+// 		GPS altitude * 100
+// 		pressure altitude
+// 		tdry * 10
+// 		lwjw * 100
+// 		dew point * 10
+// 		fssp
+// 		burn in place
+// 		number of burn in place
+// 		ejectable
+// 		number of ejectable
+// 		left burn
+// 		right burn
+// 		ice hopper
+// 		GPS time string
+// 		GPS var
+// 		GPS error
+// 		GPS warn
+// 	WMI_STRING_FORMAT - The data is received in the old WMI string 
+//   format. In this format, the data is all in a long line with no 
+//   delimiters with the following fields:
+// 		call sign
+// 		latitude
+// 		longitude
+// 		tas
+// 		GPS altitude
+// 		pressure altitude
+// 		tdry
+// 		lwjw
+// 		???
+// 		number of burn in place
+// 		number of ejectable
+// 		right burn
+// 		left burn
+// 		???
+// 		burn in place
+// 		ejectable
+// 		GPS hour
+// 		GPS minute
+// 		GPS second
+// 		GPS var
+// 		GPS error
+// 		airnav warn
+// 	SEA_M300_FORMAT - This data is in white-space delimited files and 
+//   contains the following fields:
+// 		time in hh:mm:ss format
+// 		date in m/dd/yyyy format
+// 		latitude
+// 		longitude
+// 		altitude in feet
+// 		altitude in meters
+// 		temperature
+// 		relative humidity
+// 		CN concentration
+// 		CCN concentration
+// 		CCNSS
+// 		CCN flag
+// 		PCASP
+// 		P1 - P15
+// 		SPPRng
+// 		SPP
+// 		SPPLWC
+// 		KPLWC
+// 		mean dia
+// 		MVD
+// 		EffRad
+// 		standard deviation
+// 		disp
+// 		2DCshad
+// 		2DPshad
+// 		S1 - S20
+// 	POLCAST2_FORMAT - This data is in white-space delimited files and 
+//   contains the following fields:
+// 		tail number
+// 		year
+// 		month
+// 		day
+// 		hour
+// 		minute
+// 		second
+// 		latitude (deg)
+// 		longitude (deg)
+// 		altitude (m)
+// 		ground speed (knots)
+// 		flare voltage (volts).
+//
+// Type: enum
+// Options:
+//     AUTOMATIC_FORMAT
+//     COMMA_DELIMITED_FORMAT
+//     LONG_FIXED_STRING_FORMAT
+//     WMI_LONG_STRING_FORMAT
+//     WMI_STRING_FORMAT
+//     SEA_M300_FORMAT
+//     CSV_GPS_FORMAT
+//     POLCAST2_FORMAT
+//
+
+input_format = AUTOMATIC_FORMAT;
+
+///////////// optional_field_names ////////////////////
+//
+// Array of variable fields following fixed fields.
+// Used for comma-delimited format only. The comma-delimited format has 
+//   10 fixed fields: callsign, year, month, day, hour, min, sec, lat, 
+//   lon, alt. These are followed by optional fields. This array specifies 
+//   the optional field list.
+//
+// Type: enum
+// Options:
+//     GS
+//     TAS
+//     TEMP
+//     DEW_PT
+//     LW
+//     ERROR_FLAGS
+//     R_BURN
+//     L_BURN
+//     BURN_IN_PLACE
+//     EJECTABLE
+//     N_BURN_IN_PLACE
+//     N_EJECTABLE
+// 1D array - variable length.
+//
+
+optional_field_names = { GS, TAS, TEMP, DEW_PT };
+
+//======================================================================
+//
+// DATA QUALIFICATION.
+//
+//======================================================================
+ 
+///////////// change_lat_sign /////////////////////////
+//
+// Change the latitude sign.
+// Use if southern latitudes are positive.
+// Type: boolean
+//
+
+change_lat_sign = FALSE;
+
+///////////// burn_in_place_time //////////////////////
+//
+// Nominal burn time for burn-in-place flares (secs).
+// It is assumed that all burn-in-place flares will burn for this length 
+//   of time. The program will keep track of how many flares are burning 
+//   on each aircraft, and store that number in SPDB.
+// Type: int
+//
+
+burn_in_place_time = 240;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// check_callsigns /////////////////////////
+//
+// Option to check callsigns.
+// If TRUE, only aircraft in the callsigns array are stored. If FALSE, 
+//   data from all aircraft is stored.
+// Type: boolean
+//
+
+check_callsigns = FALSE;
+
+///////////// callsigns ///////////////////////////////
+//
+// Callsign array.
+// Array of valid callsigns.
+// Type: string
+// 1D array - variable length.
+//
+
+callsigns = { "UND" };
+
+///////////// output_url //////////////////////////////
+//
+// Output SPDB URL.
+// This is the path to the output data directory. You can use full URL 
+//   sytnax and optionally put the data to a remote machine.
+// Type: string
+//
+
+output_url = "$(RAP_DATA_DIR)/spdb/ac_posn";
+
+///////////// valid_period ////////////////////////////
+//
+// Valid period (secs).
+// Time period over which the aircraft position is considered valid.
+// Minimum val: 1
+// Type: int
+//
+
+valid_period = 120;
+
+///////////// output_ascii ////////////////////////////
+//
+// Option to output ASCII to separate SPDB data base.
+// If TRUE, the incoming data strings will be stored as ASCII in a 
+//   separate SPDB dir.
+// Type: boolean
+//
+
+output_ascii = FALSE;
+
+///////////// ascii_url ///////////////////////////////
+//
+// ASCII SPDB URL.
+// Use if 'output_ascii' is TRUE.
+// Type: string
+//
+
+ascii_url = "$(RAP_DATA_DIR)/spdb/ascii_ac_posn";
+
+///////////// output_interval /////////////////////////
+//
+// Interval at which the data is written to the data base (secs).
+// This prevents extremely rapid updates to the data base.
+// Type: int
+//
+
+output_interval = 2;
+
+//======================================================================
+//
+// ECHO DATA LINES.
+//
+//======================================================================
+ 
+///////////// echo ////////////////////////////////////
+//
+// Option to echo incoming data string.
+// If TRUE, the incoming strings are echoed to stdout.
+// Type: boolean
+//
+
+echo = FALSE;
+
+///////////// new_line_on_echo ////////////////////////
+//
+// Option to add new line to echo output.
+// If FALSE, carriage return is used instead of new line.
+// Type: boolean
+//
+
+new_line_on_echo = TRUE;
+

@@ -1,0 +1,367 @@
+/**********************************************************************
+ * TDRP params for GamicVol2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// GamicVol2Dsr reads volume files in GAMIC format, and reformats the 
+//   contents into a DsRadar FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In SIMULATE mode, the program moves repeatedly through 
+//   the file list, creating output files with times set to now. This is 
+//   useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// FILE DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "$(HOME)/data/gamic";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// RADAR PARAMS.
+//
+//======================================================================
+ 
+///////////// radar ///////////////////////////////////
+//
+// Default radar params. If you set a parameter to -9999, or an empty 
+//   string, the value in the data stream will be used. If you set the 
+//   parameter to some other value, this will override the value in the 
+//   data.
+// ========== Radar params ==========
+// 	
+// polarization: polarization type
+// altitude: km
+// latitude: degrees
+// longitude: degrees
+// radar_constant: dB
+// xmit_peak_pwr: watts
+// receiver_mds: dBm
+// receiver_gain: dB
+// antenna_gain: dB
+// system_gain: dB
+// 	.
+//
+// Type: struct
+//   typedef struct {
+//      int radar_id;
+//      string radar_name;
+//      polar_t polarization;
+//        Options:
+//          POL_HORIZ
+//          POL_VERT
+//          POL_RIGHT_CIRC
+//          POL_ELLIPTICAL
+//          POL_LEFT_CIRC
+//          POL_DUAL
+//          POL_DUAL_HV_ALT
+//          POL_DUAL_HV_SIM
+//      double altitude;
+//      double latitude;
+//      double longitude;
+//      double radar_constant;
+//      double xmit_peak_pwr;
+//      double receiver_mds;
+//      double receiver_gain;
+//      double antenna_gain;
+//      double system_gain;
+//   }
+//
+//
+
+radar = {
+    radar_id = 0,
+    radar_name = "",
+    polarization = POL_HORIZ,
+    altitude = -9999,
+    latitude = -9999,
+    longitude = -9999,
+    radar_constant = -9999,
+    xmit_peak_pwr = -9999,
+    receiver_mds = -9999,
+    receiver_gain = -9999,
+    antenna_gain = -9999,
+    system_gain = -9999
+};
+
+///////////// short_pulse_width_us ////////////////////
+//
+// Short pulse width (us).
+// Applicable if longPulseFlag is false.
+// Type: double
+//
+
+short_pulse_width_us = 1;
+
+///////////// long_pulse_width_us /////////////////////
+//
+// Long pulse width (us).
+// Applicable if longPulseFlag is true.
+// Type: double
+//
+
+long_pulse_width_us = 4;
+
+//======================================================================
+//
+// OUTPUT FIELDS.
+//
+// Only the following fields will included in the output. If the field 
+//   is not in the input file, it will be left out.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Field info.
+// List of fields to be output if available in the input data. 
+//   pos_in_file is the index of the field in the file. This is 0-based. 
+//   If this exceeds the available data in the file a WARNING will be 
+//   generated and the field will be ignored. The field_type parameter is 
+//   used to scale the field accordingly. DBZ fields are scaled between 
+//   minDBZ and maxDBZ. VEL is scaled between -nyquist and + nyquist. 
+//   WIDTH is scaled between 0 and nyquist.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string units;
+//      field_type_t ftype;
+//        Options:
+//          DBZ_TYPE
+//          VEL_TYPE
+//          WIDTH_TYPE
+//      int pos_in_file;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    name = "DBZ",
+    units = "dBZ",
+    ftype = DBZ_TYPE,
+    pos_in_file = 0
+  }
+  ,
+  {
+    name = "DBZU",
+    units = "dBZ",
+    ftype = DBZ_TYPE,
+    pos_in_file = 1
+  }
+  ,
+  {
+    name = "VEL",
+    units = "m/s",
+    ftype = VEL_TYPE,
+    pos_in_file = 2
+  }
+  ,
+  {
+    name = "WIDTH",
+    units = "m/s",
+    ftype = WIDTH_TYPE,
+    pos_in_file = 3
+  }
+};
+
+//======================================================================
+//
+// FILTERING OPTIONS.
+//
+//======================================================================
+ 
+///////////// remap_to_constant_gate_spacing //////////
+//
+// For data with variable gate spacing in the volume.
+// If set, the data will be remapped to a constant gate spacing.
+// Type: boolean
+//
+
+remap_to_constant_gate_spacing = FALSE;
+
+///////////// constant_gate_spacing_km ////////////////
+//
+// Specified constant gate spacing - km.
+// See 'remap_to_constant_gate_spacing' above.
+// Type: double
+//
+
+constant_gate_spacing_km = 0.25;
+
+///////////// set_ngates_out //////////////////////////
+//
+// Options to set number of output gates.
+// If true, number of output gates is set to ngates_out. Data is either 
+//   truncated or filled with missing as appropriate.
+// Type: boolean
+//
+
+set_ngates_out = FALSE;
+
+///////////// ngates_out //////////////////////////////
+//
+// Number of output gates, if set_ngates_out is true.
+// See set_ngates_out.
+// Type: int
+//
+
+ngates_out = 1000;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for DsRadar data via FMQ.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::fmq/gamic";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 100000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 1000;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// beam_wait_msecs /////////////////////////
+//
+// Wait per beam (milli-secs).
+// Type: int
+//
+
+beam_wait_msecs = 0;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+// Type: boolean
+//
+
+write_blocking = TRUE;
+
+///////////// time_correction /////////////////////////
+//
+// time correction (secs).
+// Seconds added to the data time, if it was incorrect.
+// Type: int
+//
+
+time_correction = 0;
+

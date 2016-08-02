@@ -1,0 +1,331 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.stratiform_filter
+ *
+ * This file contains the TDRP parameter definitions for
+ * stratiform_filter.
+ */
+
+
+commentdef
+{
+  p_header = "stratiform_filter attempts to filter the stratiform regions from radar data stored in an MDV file.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters helpful in debugging problems with the process.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process registration
+ */
+
+commentdef
+{
+  p_header = "PROCESS REGISTRATION PARAMETERS";
+  p_text = "Parameters for registering process information.";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Operational parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS OPERATIONS PARAMETERS";
+  p_text = "Parameters for controlling process operations (e.g. "
+           "realtime vs. archive mode).";
+};
+
+typedef enum
+{
+  REALTIME_MODE,
+  ARCHIVE_MODE
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "process mode";
+  p_default = REALTIME_MODE;
+} mode;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_help = "RAP URL that describes the location of the input data.\n"
+           "For data on local disk, this can just be the directory "
+           "containing the input MDV files.  "
+           "For data retrieved from a server, it is the URL for the "
+           "server.  A server URL looks like the following:\n"
+           "\tmdvp:://host:port:directory_path\n"
+           "This URL specifies a DsMdvServer process running on the "
+           "specified host and using the specified port.  "
+           "The data would reside on the specified host under "
+           "$RAP_DATRA_DIR/directory_path.";
+  p_default = "mdvp:://host:port:directory_path";
+} input_url;
+
+paramdef long
+{
+  p_descr = "maximum valid age for a realtime file";
+  p_help = "The maximum valid age, in seconds, for a realtime file. "
+           "In REALTIME_MODE, the process will only process files which "
+           "are younger than this age.  In ARCHIVE_MODE, this parameter "
+           "is ignored.";
+  p_default = 3600;
+  p_min = 0;
+} max_valid_age;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "RAP URL that describes the location where the output should "
+           "be written.\n"
+           "For data on local disk, this can just be the directory "
+           "containing the input MDV files.  "
+           "For data retrieved from a server, it is the URL for the "
+           "server.  A server URL looks like the following:\n"
+           "\tmdvp:://host:port:directory_path\n"
+           "This URL specifies a DsMdvServer process running on the "
+           "specified host and using the specified port.  "
+           "The data would reside on the specified host under "
+           "$RAP_DATRA_DIR/directory_path.";
+  p_default = "mdvp:://host:port:directory_path";
+} output_url;
+
+paramdef string
+{
+  p_descr = "Field name for input data in convective regions.";
+  p_help = "The input data is filtered to only include the convective parts.";
+  p_default = "conv partitioned data";
+  // p_default = "dbz_convective";
+} field_name_for_convective_input_data;
+
+paramdef string
+{
+  p_descr = "Field name for the partition flag.";
+  p_help = "0: missing; 1: stratiform; 2: convective.";
+  p_default = "conv partition";
+  // p_default = "partition_flag";
+} field_name_for_partition_flag;
+
+paramdef string
+{
+  p_descr = "Field name for the background mean.";
+  p_help = "This is the mean reflectivity in the background template.";
+  p_default = "conv means";
+  // p_default = "dbz_background";
+} field_name_for_background_mean;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to add the input field to the output "
+            "file.";
+  p_help = "If the input data is composited, the output field will be the "
+           "composited field.";
+  p_default = false;
+} include_input_field;
+
+paramdef boolean
+{
+  p_descr = "Write excess and threshold fields to output file";
+  p_help = "These may be useful for understanding what the algorithm is doing. The excess field is (input_dbz - background_dbz). The threshold field is computed using the value_diff_func (see below) with the input_dbz as the argument.";
+  p_default = false;
+} include_debug_fields;
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+  p_text = "Parameters defining how the algorithm will work.\n"
+           "This program is an implementation of the stratiform "
+           "identification algorithm described by Steiner, etal in "
+           "\"Climatological Characterization of "
+           "Three-Dimensional Storm Structure from Operation Radar "
+           "and Rain Guage Data\" in "
+           "the Journal of Applied Meteorology, Sept. 1995, vol. 34, "
+           "pp. 1983-1990.";
+};
+
+paramdef long
+{
+  p_descr = "field number to use for algorithm";
+  p_help = "The algorithm will only be run on this field.";
+  p_min = 0;
+  p_default = 0;
+} field_num;
+
+paramdef boolean
+{
+  p_descr = "To composite the input data or not.";
+  p_help = "If TRUE a composite is done between lower_comp_vlevel "
+           "and upper_comp_vlevel - if FALSE then the level specified "
+           "by level_num is used.";
+  p_default = false;
+} do_composite;
+
+paramdef long
+{
+  p_descr = "level number to use for algorithm if do_composite is FALSE";
+  p_help = "The algorithm will only be run on this level.  For reflectivity, "
+           "this level should be below the 0 degree C level.";
+  p_min = 0;
+  p_default = 0;
+} level_num;
+
+paramdef float
+{
+  p_descr = "lower vlevel for compositing if do_composite is TRUE";
+  p_help = "Use the right units.";
+  p_default = -1.0;
+} lower_comp_vlevel;
+
+paramdef float
+{
+  p_descr = "upper vlevel for compositing if do_composite is TRUE";
+  p_help = "Use the right units.";
+  p_default = 100000.0;
+} upper_comp_vlevel;
+
+paramdef boolean
+{
+  p_descr = "Set to true for data such as Radar were convection is defined by "
+            "increasing data values. Choose false for data such as satellite IR "
+            "were convection is defined by decreasing data values.";
+  p_default = true;
+} data_increasing;
+
+paramdef double
+{
+  p_descr = "convective center min/max data value";
+  p_help = "Any grid point with a value greater than or equal to this value "
+           "(less than or equal to if data_increasing flag is set to false) "
+           "will automatically be considered a convective center.  This is "
+           "used in criteria 1 for determining convective centers in the "
+           "algorithm.";
+  p_default = 40.0;
+} conv_center_min;
+
+paramdef double
+{
+  p_descr = "Minimum dbz for analysis";
+  p_help = "Any values less than this are ignored when computing the background.";
+  p_default = 10.0;
+} background_min_dbz;
+
+paramdef double
+{
+  p_descr = "background radius in grid units";
+  p_help = "The radius of the circle used to calculate the mean background "
+           "value at each point in the grid.";
+  p_min = 0.0;
+  p_default = 11.0;
+} background_radius;
+
+paramdef struct value_diff_func_t
+{
+  p_descr = "value difference function definition";
+  p_help = "This parameter defines the function to be used to see if a "
+           "possible convective center satisfies the peakedness criteria. "
+           "This function is a continuous function.  Difference values for "
+           "mean background values not given in the function definition "
+           "will be calculated by linearly interpolating between the "
+           "surrounding given points.  Value before the minimum and after "
+           "the maximum defined are considered to remain constant.  In this "
+           "array, the function must be defined with the values for the "
+           "mean_bkgnd_value field strictly increasing.  The default values "
+           "for this parameter mirror the function given in figure 7 in the "
+           "above referenced paper.";
+  p_field_name = { mean_bkgnd_value,
+                   value_difference };
+  p_field_type = { double,         /* mean_bkgnd_value */
+                   double };       /* value_difference */
+  p_default = { { 0.0, 10.0 },
+                { 10.0, 9.44 },
+                { 20.0, 7.78 },
+                { 30.0, 5.0 },
+                { 40.0, 1.11 },
+                { 42.43, 0.0 } };
+} value_diff_func[];
+
+paramdef struct conv_area_radius_func_t
+{
+  p_descr = "convective area radius function definition";
+  p_help = "This parameter defines the function to be used to calculate "
+           "the convective area radius.  This function is taken as a step "
+           "function where mean_bkgnd_value gives the beginning of the step "
+           "and conv_radius gives the radius value, in grid squares, used "
+           "at that step.  conv_radius retains the first function value "
+           "before the "
+           "first step and retains the last value forever on the last step. "
+           "In this array, the steps must be given in ascending order of the "
+           "mean_bkgnd_value.  The default values for this parameter mirror "
+           "the function given in figure 6(b) in the above referenced paper.";
+  p_field_name = { mean_bkgnd_value,
+                   conv_radius };
+  p_field_type = { double,           /* mean_bkgnd_value */
+                   double };         /* conv_radius */
+  p_default = { {  0.0, 1.0},
+                { 25.0, 2.0},
+                { 30.0, 3.0},
+                { 35.0, 4.0},
+                { 40.0, 5.0} };
+} conv_area_radius_func[];

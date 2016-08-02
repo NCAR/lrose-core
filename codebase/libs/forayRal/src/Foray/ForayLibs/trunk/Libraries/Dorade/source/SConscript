@@ -1,0 +1,34 @@
+# -*- python -*-
+#
+#
+
+
+Import('env')
+
+sources  = ['Dorade.cpp','DoradeFile.cpp','DoradeFileName.cpp','DoradeFile_WriteMethods.cpp','DoradeFortranBinary.cpp',
+            'DoradeBlock.cpp','DoradeBlockUnknown.cpp',
+            'DoradeBlockAsib.cpp','DoradeBlockCelv.cpp','DoradeBlockCfac.cpp','DoradeBlockCsfd.cpp',
+            'DoradeBlockCspd.cpp','DoradeBlockFrad.cpp','DoradeBlockFrib.cpp','DoradeBlockIndf.cpp',
+            'DoradeBlockNdds.cpp','DoradeBlockNull.cpp','DoradeBlockParm.cpp','DoradeBlockRadd.cpp',
+            'DoradeBlockRdat.cpp','DoradeBlockRktb.cpp','DoradeBlockRyib.cpp','DoradeBlockSitu.cpp',
+            'DoradeBlockSswb.cpp','DoradeBlockSwib.cpp','DoradeBlockTime.cpp','DoradeBlockVold.cpp',
+            'DoradeBlockWave.cpp','DoradeBlockXstf.cpp']
+         
+
+hFiles   = ['Dorade.h','DoradeFile.h','DoradeFileName.h','DoradeFortranBinary.h',
+            'DoradeBlock.h','DoradeBlockUnknown.h',
+            'DoradeBlockAsib.h','DoradeBlockCelv.h','DoradeBlockCfac.h','DoradeBlockCsfd.h',
+            'DoradeBlockCspd.h','DoradeBlockFrad.h','DoradeBlockFrib.h','DoradeBlockIndf.h',
+            'DoradeBlockNdds.h','DoradeBlockNull.h','DoradeBlockParm.h','DoradeBlockRadd.h',
+            'DoradeBlockRdat.h','DoradeBlockRktb.h','DoradeBlockRyib.h','DoradeBlockSitu.h',
+            'DoradeBlockSswb.h','DoradeBlockSwib.h','DoradeBlockTime.h','DoradeBlockVold.h',
+            'DoradeBlockWave.h','DoradeBlockXstf.h']
+
+libNode  = env.Library('dorade',source = sources, CPPPATH=[env.installLocalInc]);
+
+localInstallLibNode = env.Install(env.installLocalLib ,libNode);
+localInstallIncNode = env.Install(env.installLocalInc ,hFiles);
+
+env.Default([libNode,localInstallLibNode,localInstallIncNode])
+env.Install(env.installLib,libNode);
+env.Install(env.installInc,hFiles);

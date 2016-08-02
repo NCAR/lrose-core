@@ -1,0 +1,97 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvUV2SpdDir reads U and V component winds and\n"
+	"produces speed and direction fields which are written\n"
+	"to another URL.\n\nNiles Oien June 2005.";
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Derived fields are written here."; 
+  p_default = {"mdvp:://localhost::mdv/output"};
+} OutUrl;
+
+paramdef string {
+  p_descr = "Input U component field name.";
+  p_help = "Use PrintMdv to ascertain. Output fields are speed and dir."; 
+  p_default = {"uwind"};
+} UfieldName;
+
+paramdef string {
+  p_descr = "Input V component field name.";
+  p_help = "Use PrintMdv to ascertain. Output fields are speed and dir."; 
+  p_default = {"vwind"};
+} VfieldName;
+
+paramdef double {
+  p_descr = "Factor to apply to input wind speeds to convert them\n"
+	"to meters per second.";
+  p_help = "Always applied, but default value has no effect."; 
+  p_default = 1.0;
+} conversionFactor;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Option to write output in forecast mode.";
+  p_help = "Defaults to FALSE";
+} forecastMode;   
+

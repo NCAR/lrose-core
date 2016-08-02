@@ -1,0 +1,324 @@
+/**********************************************************************
+ * TDRP params for TrecGauge2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail. For DEBUG_LOG, the output is in the form of one line per 
+//   calibration time, suitable for reading into other applications.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_LOG
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// trec_input_url //////////////////////////
+//
+// URL for input TREC grid files.
+// The files in this URL are sampled to get the data for this program.
+// Type: string
+//
+
+trec_input_url = "mdvp:://localhost::/home/dixon/data/zv/mdv/ctrec/ftg";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input trec data.
+// For realtime only - max age of trec data for it to be valid.
+// Minimum val: 0
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+///////////// dbz_label ///////////////////////////////
+//
+// File label for dbz field.
+// This is used to determine the field position in the data file.
+// Type: string
+//
+
+dbz_label = "dbz";
+
+///////////// u_label /////////////////////////////////
+//
+// File label for u field.
+// This is used to determine the field position in the data file.
+// Type: string
+//
+
+u_label = "U comp";
+
+///////////// v_label /////////////////////////////////
+//
+// File label for v field.
+// This is used to determine the field position in the data file.
+// Type: string
+//
+
+v_label = "V comp";
+
+///////////// physical_gauge_input_url ////////////////
+//
+// URL for input gauge data.
+// URL form: spdbp:[transformation]:[paramfile]//host:[port]:dir
+//  OR /dir OR ./dir OR dir (relative to RAP_DATA_DIR).
+// Type: string
+//
+
+physical_gauge_input_url = "spdbp:://localhost::/home/dixon/data/zv/spdb/asos/den";
+
+//======================================================================
+//
+// ANALYSIS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// treat_missing_as_low ////////////////////
+//
+// Treat Missing data cells as low reflectivity for averages.
+//  Turning this on may improve the accuracy of the mean reflectivity 
+//   calc.
+// Type: boolean
+//
+
+treat_missing_as_low = FALSE;
+
+///////////// missing_dbz_value ///////////////////////
+//
+// Reflectivity value to use for dbZ averaging in missing data cells.
+// See the treat_missing_as_low control flag.
+// Type: float
+//
+
+missing_dbz_value = -40;
+
+///////////// motion //////////////////////////////////
+//
+// Procedure for computing motion.
+// The motion may be computed in the following ways: (a) using the trec 
+//   vectors only, (b) computing the mean wind as a weighted average of 
+//   trec and the gauge-measured wind, or (c) setting the motion to zero.
+//
+// Type: enum
+// Options:
+//     TREC_ONLY_MOTION
+//     MEAN_WIND_MOTION
+//     ZERO_MOTION
+//
+
+motion = TREC_ONLY_MOTION;
+
+///////////// trec_motion_method //////////////////////
+//
+// Procedure for computing average trec motion.
+// SPATIAL_AVERAGE: average motion is computed upwind of the gauge. 
+//   TEMPORAL_AVERAGE: motion is computed at the gauge going back in time.
+//
+// Type: enum
+// Options:
+//     SPATIAL_AVERAGE
+//     TEMPORAL_AVERAGE
+//
+
+trec_motion_method = SPATIAL_AVERAGE;
+
+///////////// gauge_wind_averaging_period /////////////
+//
+// Period for computing the mean gauge wind (secs).
+// If motion is MEAN_WIND, this is the time period over which the 
+//   gauge-measured wind is computed.
+// Type: int
+//
+
+gauge_wind_averaging_period = 1800;
+
+///////////// trec_motion_averaging_period ////////////
+//
+// Period for computing the mean trec motion (secs).
+// Applies if trec_motion_method is TEMPORAL_AVERAGE.
+// Type: int
+//
+
+trec_motion_averaging_period = 1800;
+
+///////////// gauges //////////////////////////////////
+//
+// Gauge parameters.
+// Parameters for each gauge in the array. The lat and lon specify the 
+//   gauge position. The weights are used only if motion is set to 
+//   MEAN_WIND. In that case, the weight values are those applied to the 
+//   trec and gauge wind in ordre to compute the mean wind. Also specified 
+//   are the kernel sizes for averaging reflectivity and velocity. To 
+//   compute the velocity vector at a gauge, the velocity data in the trec 
+//   grid is averaged over a square kernel of size vel_kernel_size. 
+//   Similarly for dbz.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      double lat;
+//      double lon;
+//      double trec_weight;
+//      double gauge_weight;
+//      int vel_kernel_size;
+//      int dbz_kernel_size;
+//   }
+//
+// 1D array - variable length.
+//
+
+gauges = {
+  {
+    name = "DIA1",
+    lat = 39.8321,
+    lon = -104.724,
+    trec_weight = 0.25,
+    gauge_weight = 0.75,
+    vel_kernel_size = 10,
+    dbz_kernel_size = 10
+  }
+  ,
+  {
+    name = "BRI1",
+    lat = 39.9714,
+    lon = -104.681,
+    trec_weight = 0.5,
+    gauge_weight = 0.5,
+    vel_kernel_size = 10,
+    dbz_kernel_size = 10
+  }
+  ,
+  {
+    name = "PLT1",
+    lat = 39.8821,
+    lon = -104.724,
+    trec_weight = 0.5,
+    gauge_weight = 0.5,
+    vel_kernel_size = 10,
+    dbz_kernel_size = 10
+  }
+  ,
+  {
+    name = "CHL1",
+    lat = 39.8821,
+    lon = -104.724,
+    trec_weight = 0.5,
+    gauge_weight = 0.5,
+    vel_kernel_size = 10,
+    dbz_kernel_size = 10
+  }
+  ,
+  {
+    name = "MAR1",
+    lat = 39.9321,
+    lon = -105.182,
+    trec_weight = 0.5,
+    gauge_weight = 0.5,
+    vel_kernel_size = 10,
+    dbz_kernel_size = 10
+  }
+};
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// List of destinations for SPDB output grid files.
+// URL form: spdbp:[transformation]:[paramfile]//host:[port]:dir
+//  OR /dir OR ./dir OR dir (relative to RAP_DATA_DIR).
+// Type: string
+//
+
+output_url = "/tmp/junk/spdb/trec_gauge";
+
+///////////// n_forecasts /////////////////////////////
+//
+// Number of forecast times.
+// This is the number of times for which dbz data is computed for each 
+//   gauge. Trec has computed the (u,v) vector components around each 
+//   gauge. Moving upstream against this vector allows us to sample the 
+//   reflectivity values which should appear over the gauge at each 
+//   forecast time.
+// Minimum val: 1
+// Type: int
+//
+
+n_forecasts = 10;
+
+///////////// forecast_delta_time /////////////////////
+//
+// Time between forecast points (secs).
+// This is the time spacing between forecast times. First forecast time 
+//   is at 0 secs.
+// Minimum val: 1
+// Type: int
+//
+
+forecast_delta_time = 300;
+
+///////////// product_valid_period ////////////////////
+//
+// Valid period for product (secs).
+// All SPDB products have an expire time. The valid_period is used to 
+//   compute the expire time, by adding it to the data time.
+// Minimum val: 1
+// Type: int
+//
+
+product_valid_period = 300;
+

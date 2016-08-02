@@ -1,0 +1,136 @@
+/////////////////////////////////////////////
+//
+// _janitor - configure the janitor program.
+//
+// This is a "safety" version of a _janitor
+// file - it effectively turns the janitor
+// off, so that if the janitor is started
+// erroneously no damage will be done.
+//
+// All the keywords are present - users may
+// wish to use this as a template file to
+// edit to configure the janitor for themselves.
+//
+// Niles Oien, December 1998.
+//
+//
+/////////////////////////////////////////////
+//
+// The following two lines effectively stop
+// the janitor in its tracks.
+//
+recurse=FALSE;  // Do not recurse below this directory.
+process=FALSE;  // Do not process this directory.
+//
+// Enable deletion for this directory. This is not 
+// the default.
+//
+delete_files=TRUE;
+//
+// Write a _janitor_Report file in this directory only
+// (this parameter does not recurse).
+//
+report=TRUE;
+//
+// Enable empty directory deletion.
+// This is not the default.
+//
+RemoveEmptyDirs=TRUE;
+//
+// Insist that filenames must contain the data time
+// (see the web page for filename formats).
+//
+date_format=TRUE;
+//
+// Turn on file compression. Users of systems that do not
+// decompress on the fly (Juneau?) may not want this.
+//
+compress=TRUE;
+//
+// Do not require that files have a certain extension.
+//
+check_ext=FALSE;
+//
+// If we were requiring a certain extension, here is how to
+// specify it.
+//
+ext=".mdv";
+//
+// Specify the command used to zip files,
+// with a carat replacing the filename.
+// To use compress rather than gzip, specify 
+//com_str="compress -f ^";
+//
+com_str="gzip -f ^";
+//
+// Specify the extension that compressed
+// files will have once the above command is 
+// used to zip them. To use compress rather than
+// gzip, specify
+//compressed_ext=".Z";
+//
+compressed_ext=".gz";
+//
+// Specify the maximum time since file access
+// before the janitor will compress a file,
+// in seconds.
+//
+max_age=86400; // One day.
+//
+// Specify the maximum time since file modification
+// before the janitor will delete a file,
+// in seconds.
+//
+max_mod_age=604800; // Seven days.
+//
+// The janitor will sleep for sleep_factor times
+// the compression time after compressing a file
+// to avoid hogging the CPU.
+//
+sleep_factor=10;
+//
+// Specify the disk_use_threshold that the
+// percentage disk use must exceed before
+// the allowable time since modification
+// before deletion is decreased.
+//
+disk_use_threshold=100; // ie. do not reduce allowed age.
+//
+// By what factor do we decrease the
+// allowable age - the decrase is done by
+// linear interpolation (see the janitor web page).
+//
+max_mod_age_factor=1.0; // ie. do not reduce allowed age.
+//
+// Set the level of verbosity. Leave this alone
+// unless you REALLY want verbose output.
+// The three options are all commented out here
+// so that the command line settings determine verbosity
+// (default is DEBUG_OFF).
+//
+//debug=DEBUG_OFF;
+//debug=DEBUG_NORM;
+//debug=DEBUG_VERBOSE;
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

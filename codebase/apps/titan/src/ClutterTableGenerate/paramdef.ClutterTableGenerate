@@ -1,0 +1,65 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions ClutterTableGenerate
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Dec 2000
+//
+
+commentdef {
+  p_header = "Program name: ClutterTableGenerate";
+  p_text = "ClutterTableGenerate creates a clutter table from an Mdv file containing median DBZ clutter values.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/mdv/clutter/median.mdv";
+  p_descr = "Path for median clutter data.";
+  p_help = "This path points to the file containing the median DBZ data.";
+} median_clutter_path;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/tables/dsr2mdv.lookup";
+  p_descr = "Path for Dsr2Mdv lookup table.";
+  p_help = "This file is created by Dsr2MdvLookup.";
+} dsr2mdv_lookup_path;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/tables/clutter.table";
+  p_descr = "Path for table produced by this program.";
+} clutter_table_path;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for dbz data in median clutter file.";
+} dbz_field_name;
+
+paramdef float {
+  p_default = 5.0;
+  p_descr = "Margin above median data before weather signal is assumed to exceed clutter.";
+  p_help = "When applying the clutter table, clutter is removed only if the weatehr signal does not exceed the clutter by this margin.";
+} dbz_margin;
+
+paramdef float {
+  p_default = 10.0;
+  p_descr = "Clutter threshold - dBZ.";
+  p_help = "Only points with median values exceeding this threshold will be considered as possible clutter.";
+} dbz_threshold;
+

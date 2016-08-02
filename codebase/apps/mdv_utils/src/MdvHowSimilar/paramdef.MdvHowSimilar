@@ -1,0 +1,120 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+////////////////////////////////////////////////////////////////////
+// paramter definitions MdvHowSimilar
+//
+// Paul Prestopnik, RAP, NCAR
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// September 2015
+//
+commentdef {
+
+p_header = "MdvHowSimilar is a simple program that compares two files and displays statistical\n"
+         "differences between the two files in a well structured/defined format to make it easy\n"
+         "for parsing by other programs.  It is used by the ACES (Automated Comparison and Evaluation\n"
+         "System) developed by the Inflight Icing Group.\n\n"
+         "If you are not part of the IFI group, please consult with someone on that project before\n"
+         "making changes to this application that affect the structure of its output.\n\n";
+         
+
+}
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+typedef enum {
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE,
+  DEBUG_GARRULOUS
+} debug_t;
+ 
+paramdef enum debug_t
+{
+  p_default = DEBUG_VERBOSE;
+  p_descr = "Debug option";
+  p_help = "The options are DEBUG_OFF, DEBUG_NORM and DEBUG_VERBOSE. "
+	"If set, debug messages will be printed appropriately";
+} debug;
+
+typedef struct {
+  string field_name;
+  double significant_difference;
+  double rms_sig_diff;
+} field_comparison_info_t;
+
+
+paramdef struct field_comparison_info_t {
+  p_descr = "Define which fields to be compared and how the comparison is done.";
+  p_help = "Significant_differences - If the difference between a paired point in the two files is less than this, it is considered the \"same\""
+           "rms_sig_diff is used to determine if overall differences in a vertical level are significant.";
+  p_default = {
+  {"SLD", .01, .1},
+  {"ICE_SEV", .01, .1}
+  };
+  } field_comparison_info[];
+
+
+  
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_FLOAT32;
+  p_descr = "Set encoding type.";
+} encoding_type;
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4,
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_RLE;
+  p_descr = "Set compression type.";
+} compression_type;
+

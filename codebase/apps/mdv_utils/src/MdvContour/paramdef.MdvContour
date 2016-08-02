@@ -1,0 +1,267 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvContour
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvContour.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  FILE_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+	   "In FILE_LIST mode, the files listed on the command line using "
+           "the -f command line option are processed and then Mdv2Grib "
+           "exits. "
+           "FILE_LIST mode is automatically invoked by -f option on the "
+           "command line and if the FILE_LIST mode is specified, the -f "
+           "option is required on the command line.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "URL to use when using a LATEST_DATA trigger";
+  p_default = "mdvp:://localhost::./mdv/ruc";
+} latest_data_trigger;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the URL to use to get the available data times.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "Input URL.";
+  p_help = "The input must use the MDV protocol";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "The output is an SPDB polygon database so the URL must "
+           "use the SPDB protocol.";
+  p_default = "spdbp:://localhost::spdb/contours";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef struct
+{
+  string mdv_field_name;
+  int mdv_field_num;
+} input_field_t;
+
+paramdef struct input_field_t
+{
+  p_descr = "Input field specification.";
+  p_help = "If mdv_field_name is \"\", then the mdv_field_num field "
+           "is used to specify the input field. "
+           "Otherwise, the mdv_field_name field is used to specify "
+           "the input field and must exactly match either the field_name or "
+           "the field_name_long in the field header.";
+  p_default = { "radar/ltg", 0 };
+} input_field;
+
+typedef enum
+{
+  SIMPLE_BOUNDARY_CONTOUR_ALG
+} contour_alg_type_t;
+
+paramdef enum contour_alg_type_t
+{
+  p_descr = "Type of algorithm to use for contouring";
+  p_default = SIMPLE_BOUNDARY_CONTOUR_ALG;
+} contour_alg_type;
+
+typedef struct
+{
+  int min_overlap;
+  int min_num_poly_pts;
+} simple_bdry_alg_params_t;
+
+paramdef struct simple_bdry_alg_params_t
+{
+  p_descr = "Parameters used with the simple boundary contouring algorithm";
+  p_help = "Only used if contour_alg_type is set to "
+           "SIMPLE_BOUNDARY_CONTOUR_ALG.\n"
+           "\tmin_overlap - controls the minimum amount of overlap "
+           "required to form a clump. "
+           "If min_overlap is +n, then the intervals must overlap by n "
+           "grid positions. "
+           "If min_overlap is 0, the intervals 'overlap' if their corners "
+           "touch diagonally. "
+           "If min_overlap is -n, the intervals are considered to overlap "
+           "if there is a gap of n grid positions or less between them.\n"
+           "\tmin_num_poly_pts - minimum number of points for a polyline "
+           "to be considered.\n";
+  p_default = { 1, 10 };
+} simple_bdry_alg_params;
+
+paramdef boolean
+{
+  p_descr = "Smooth contours flag";
+  p_default = FALSE;
+} smooth_contours;
+
+typedef enum
+{
+  DOUGLAS_PEUCKER_SMOOTHER,
+  BINARY_SMOOTHER
+} smoother_type_t;
+
+paramdef enum smoother_type_t
+{
+  p_descr = "Smoothing algorithm to use on the contours";
+  p_help = "Used only if smooth_contours is set to TRUE.\n"
+           "\tDOUGLAS_PEUCKER_SMOOTHER - Smooth the contours using the "
+           "Douglas-Peucker smoothing algorithm. "
+           "This algorithm smooths the contours by removing some of the "
+           "original vertices.\n"
+           "\tBINARY_SMOOTHER - Smooth the contours simply by removing "
+           "every other point until the contour has no more than the "
+           "maximum number of points specified.\n";
+  p_default = DOUGLAS_PEUCKER_SMOOTHER;
+} smoother_type;
+
+typedef struct
+{
+  double epsilon;
+} douglas_peucker_params_t;
+
+paramdef struct douglas_peucker_params_t
+{
+  p_descr = "Parameters for the Douglas-Peucker smoothing algorithm";
+  p_help = "Used only if smooth_contours is set to true and "
+           "smoother_type is set to DOUGLAS_PEUCKER_SMOOTHER.\n"
+           "\tepsilon - this value controls how smooth the final "
+           "polylines will be."
+           "The larger this number, the fewer points you will have in "
+           "the final polyline. "
+           "Within the algorithm, this is a distance value and our "
+           "polylines are specified in lat/lon, so this is in degrees "
+           "and can be thought of as the maximum distance allowed "
+           "between the vertices in the final polylines.\n";
+  p_default = { 0.05 };
+} douglas_peucker_params;
+
+typedef struct
+{
+  int max_num_pts;
+} binary_params_t;
+
+paramdef struct binary_params_t
+{
+  p_descr = "Parameters for the Binary smoothing algorithm";
+  p_help = "Used only if smooth_contours is set to true and "
+           "smoother_type is set to BINARY_SMOOTHER.\n"
+           "\tmax_num_pts - The maximum number of points that can be "
+           "left in each contour after being smoothed.\n";
+  p_default = { 100 };
+} binary_params;
+
+paramdef double
+{
+  p_descr = "Contour level for the data";
+  p_default = 3.5;
+} contour_level;

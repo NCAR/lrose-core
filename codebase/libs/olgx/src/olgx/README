@@ -1,0 +1,34 @@
+What Is OLGX:
+------------
+The olgx (OpenLook Graphics for X11) library is currently used by olwm
+(OpenLook Window Manager) and will be used by the XView library in
+a future release.  Olgx is an X11 drawing engine for 2-D and 3-D objects
+which is based upon xlib rather than a toolkit.  This needs to be built before
+olwm can be built.
+
+A document describing te olgx api can be found in the doc directory.
+It is called olgx_api.{txt, ps}.
+
+Future Directions for OLGX:
+--------------------------
+Although the content of the library may change in the future, the
+API (Application Programmer's Interface) should remain stable.
+
+Reporting Bugs:
+--------------
+For reporting bugs, please see the bug_report file in the olwm source directory.
+Bugs can be reported to comp.windows.openlook, but we would prefer
+to have them go to xviewbugs@Eng.Sun.COM in the format provided
+by the bug_report file.  Please direct questions about usage or
+topics of general interest to the comp.windows.openlook news group.
+
+If you do not have an email connection, bug reports may be faxed to
+(415) 969-9131 or telexed to 3729639 SUN UR.  Please put
+        Atten:  XView Bugs M/S 14-01
+on the cover sheet of the fax or telex.  Bug reports may also be
+mailed to:
+        Sun Microsystems
+        Atten:  XView Bugs M/S 14-01
+        2550 Garcia Ave.
+        Mountain View, CA 94043
+        USA

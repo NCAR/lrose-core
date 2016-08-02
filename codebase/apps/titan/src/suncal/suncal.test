@@ -1,0 +1,65 @@
+/**********************************************************************
+ * TDRP params for suncal
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: long
+//
+
+malloc_debug_level = 0;
+
+///////////// station_pos /////////////////////////////
+//
+// Origin.
+// The origin about which the bearings were taken.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+station_pos = { 40.0, -105.0 };
+
+///////////// delta_t /////////////////////////////////
+//
+// Delta time (secs).
+// Delta time for table computations.
+// Type: long
+//
+
+delta_t = 3600;
+
+///////////// n_blank_lines ///////////////////////////
+//
+// Number of blank lines between printed lines.
+// suncal inserts these lines in the printout to format it to suit the 
+//   user.
+// Type: long
+//
+
+n_blank_lines = 0;
+

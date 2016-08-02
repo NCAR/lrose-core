@@ -1,0 +1,950 @@
+/**********************************************************************
+ * TDRP params for SpectraPlot
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: SpectraPlot.
+//
+// SpectraPlot displays radar spectra from SPDB or FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "sband";
+
+///////////// staggered_mode //////////////////////////
+//
+// Uses routines in stag_plot.cc, instead of spectra_plot.cc.
+// Type: boolean
+//
+
+staggered_mode = FALSE;
+
+//======================================================================
+//
+// GETTING CLICK-POINT INFO FROM CIDD.
+//
+//======================================================================
+ 
+///////////// cidd_shmem_key //////////////////////////
+//
+// The shared memory key for the CIDD coordinate struct.
+// When the user clicks in the CIDD main window, the coordinate struct 
+//   is updated with the location and time. The time value is used to 
+//   drive SpectraPlot in REALTIME mode.
+// Type: int
+//
+
+cidd_shmem_key = 81500;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// time_series_data_dir ////////////////////
+//
+// Directory for time series data.
+// This should be in IWRF format files, stored in daily subdirectories.
+// Type: string
+//
+
+time_series_data_dir = "/scr/mgen/operator/data.mgen/time_series/sband/save";
+
+//======================================================================
+//
+// BEAM SAMPLING.
+//
+//======================================================================
+ 
+///////////// n_samples ///////////////////////////////
+//
+// Number of samples (pulses) per dwell.
+// Type: int
+//
+
+n_samples = 256;
+
+///////////// indexed_beams ///////////////////////////
+//
+// Index the beams on even centers?.
+// If false, the pulses are formed into beams sequentially, with no 
+//   overlap.
+// Type: boolean
+//
+
+indexed_beams = TRUE;
+
+///////////// indexed_resolution_az ///////////////////
+//
+// Dwell width in azimuth (deg).
+// Applies to PPI mode.
+// Type: double
+//
+
+indexed_resolution_az = 1;
+
+///////////// indexed_resolution_el ///////////////////
+//
+// Dwell width in elevation (deg).
+// Applies to RHI mode.
+// Type: double
+//
+
+indexed_resolution_el = 0.5;
+
+///////////// invert_hv_flag //////////////////////////
+//
+// Option to invert the sense of the HV flag in alternating mode.
+// In alternating dual-pol mode, the HV flag indicates whether the pulse 
+//   is horizontally or vertically polarized. Normally 1 indicates H and 0 
+//   V. This parameter allows you to invert the sense of the flag, so that 
+//   1 is interpreted as V and 0 as H.
+// Type: boolean
+//
+
+invert_hv_flag = FALSE;
+
+///////////// prt_is_for_previous_interval ////////////
+//
+// Does the PRT in the pulse header refer to the previous time 
+//   interval?.
+// If TRUE, the PRT in the pulse header refers to the time from the 
+//   PREVIOUS pulse to THIS pulse. If FALSE, the PRT in the header refers 
+//   to the time from THIS pulse to the NEXT pulse.
+// Type: boolean
+//
+
+prt_is_for_previous_interval = TRUE;
+
+///////////// check_for_missing_pulses ////////////////
+//
+// Option to check for missing pulses in the time series.
+// If missing pulses are found, the beam formed by those pulses will be 
+//   discarded.
+// Type: boolean
+//
+
+check_for_missing_pulses = TRUE;
+
+//======================================================================
+//
+// OVERRIDING RADAR PARAMETERS.
+//
+// Some radar parameters may be included in the time series data. This 
+//   section allows you to optionally override some of those values.
+//
+//======================================================================
+ 
+///////////// override_radar_name /////////////////////
+//
+// Option to override the radar name.
+// If true, the name in this file will be used. If not, the name in the 
+//   time series data will be used.
+// Type: boolean
+//
+
+override_radar_name = FALSE;
+
+///////////// radar_name //////////////////////////////
+//
+// Name of the radar.
+// See 'override_radar_name'.
+// Type: string
+//
+
+radar_name = "SPOL";
+
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_latitude_deg = 39.9321;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_longitude_deg = -105.182;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+// See override_radar_location.
+// Type: double
+//
+
+radar_altitude_meters = 1742;
+
+///////////// override_gate_geometry //////////////////
+//
+// Option to override the gate geometry.
+// If true, the gate_spacing and start_range in the time series data is 
+//   overridden by the parameters in this file.
+// Type: boolean
+//
+
+override_gate_geometry = FALSE;
+
+///////////// gate_spacing_meters /////////////////////
+//
+// Gate spacing (meters).
+// See override_gate_geometry.
+// Type: double
+//
+
+gate_spacing_meters = 150;
+
+///////////// start_range_meters //////////////////////
+//
+// Start range (meters).
+// See override_gate_geometry.
+// Type: double
+//
+
+start_range_meters = 150;
+
+///////////// override_radar_wavelength ///////////////
+//
+// Option to override the radar wavelength.
+// If true, the radar wavelength in this file will be used. If not, the 
+//   wavelength in the time series data will be used if available.
+// Type: boolean
+//
+
+override_radar_wavelength = FALSE;
+
+///////////// radar_wavelength_cm /////////////////////
+//
+// Radar wavelength (cm).
+// See override_radar_wavelength.
+// Type: double
+//
+
+radar_wavelength_cm = 10;
+
+//======================================================================
+//
+// RADAR CALIBRATION.
+//
+//======================================================================
+ 
+///////////// cal_file_path ///////////////////////////
+//
+// File name for XML calibration file.
+// Type: string
+//
+
+cal_file_path = "$(PROJ_DIR)/mgen/params/sband_cal.xml";
+
+///////////// use_cal_from_time_series ////////////////
+//
+// Option to override cal in time series data.
+// If false, the cal information in the time series data will be used. 
+//   If true, the cal info in the param file will be used.
+// Type: boolean
+//
+
+use_cal_from_time_series = FALSE;
+
+//======================================================================
+//
+// FFT WINDOW.
+//
+//======================================================================
+ 
+///////////// window //////////////////////////////////
+//
+// Window to be applied to time series before computing spectra.
+//
+// Type: enum
+// Options:
+//     WINDOW_RECT
+//     WINDOW_VONHANN
+//     WINDOW_BLACKMAN
+//
+
+window = WINDOW_VONHANN;
+
+///////////// tpss_notch_width ////////////////////////
+//
+// Width of notch for computing TPSS.
+// TPSS - Time Series Power Periodicity - is computed as the 
+//   sum-sq-power within a notch around DC divided by the power-sq in the 
+//   rest of the spectrum of the time series power.
+// Type: int
+//
+
+tpss_notch_width = 3;
+
+//======================================================================
+//
+// WINDOW SIZE AT STARTUP.
+//
+//======================================================================
+ 
+///////////// window_x ////////////////////////////////
+//
+// The startup x location for the main window.
+// Type: int
+//
+
+window_x = 900;
+
+///////////// window_y ////////////////////////////////
+//
+// The startup y location for the main window.
+// Type: int
+//
+
+window_y = 250;
+
+///////////// window_height ///////////////////////////
+//
+// The startup height for the window.
+// Type: int
+//
+
+window_height = 900;
+
+///////////// window_width ////////////////////////////
+//
+// The startup width for the window.
+// Type: int
+//
+
+window_width = 600;
+
+///////////// window_border ///////////////////////////
+//
+// The border width for the main window.
+// Type: int
+//
+
+window_border = 1;
+
+//======================================================================
+//
+// MARGINS.
+//
+//======================================================================
+ 
+///////////// top_margin //////////////////////////////
+//
+// Height of top margin (pixels).
+// Type: int
+//
+
+top_margin = 70;
+
+///////////// bottom_margin ///////////////////////////
+//
+// Width of bottom margin (pixels).
+// Type: int
+//
+
+bottom_margin = 30;
+
+///////////// left_margin /////////////////////////////
+//
+// Width of left margin (pixels).
+// Type: int
+//
+
+left_margin = 20;
+
+///////////// right_margin ////////////////////////////
+//
+// Width of right margin (pixels).
+// Type: int
+//
+
+right_margin = 50;
+
+///////////// subplot_top_margin //////////////////////
+//
+// Height of top margin of each subplot (pixels).
+// Type: int
+//
+
+subplot_top_margin = 30;
+
+//======================================================================
+//
+// PLOT DETAILS.
+//
+//======================================================================
+ 
+///////////// window_label ////////////////////////////
+//
+// Label for window border.
+// This label will normally appear in the top border of the display 
+//   window.
+// Type: string
+//
+
+window_label = "RADAR GATE DATA";
+
+///////////// plot_ascope_power ///////////////////////
+//
+// Plot the power as a function of range, as in an A-Scope.
+// Type: boolean
+//
+
+plot_ascope_power = TRUE;
+
+///////////// plot_location_text //////////////////////
+//
+// Option to plot text showing elevation, azimuth etc.
+// Type: boolean
+//
+
+plot_location_text = TRUE;
+
+///////////// plot_moments_text ///////////////////////
+//
+// Option to plot text showing moments values.
+// Type: boolean
+//
+
+plot_moments_text = TRUE;
+
+///////////// plot_clutter_text ///////////////////////
+//
+// Option to plot text showing clutter properties.
+// Type: boolean
+//
+
+plot_clutter_text = TRUE;
+
+///////////// plot_power_spectrum /////////////////////
+//
+// Plot power spectrum.
+// This includes the filtered spectra.
+// Type: boolean
+//
+
+plot_power_spectrum = TRUE;
+
+///////////// plot_power_spectrum_for_next_gate ///////
+//
+// Plot spectrum for next gate.
+// This is overlaid on spectrum for selected gate. If this is active, it 
+//   will be plotted instead of the regression filtered spectrum.
+// Type: boolean
+//
+
+plot_power_spectrum_for_next_gate = FALSE;
+
+///////////// autoscale_power_spectrum ////////////////
+//
+// Compute scale of power spectrum from data.
+// If FALSE, power_spec_min_db and power_spec_max_db will be used.
+// Type: boolean
+//
+
+autoscale_power_spectrum = TRUE;
+
+///////////// plot_power_time_series //////////////////
+//
+// Include time series power plot.
+// Type: boolean
+//
+
+plot_power_time_series = TRUE;
+
+///////////// autoscale_power_time_series /////////////
+//
+// Compute scale of power time series from data.
+// If FALSE, ts_power_min_db and ts_power_max_db will be used.
+// Type: boolean
+//
+
+autoscale_power_time_series = TRUE;
+
+///////////// plot_real_power_spectrum_over_time_series 
+//
+// Include plot of spectrum of real time series power.
+// This will be plotted in the same panel as the power time series.
+// Type: boolean
+//
+
+plot_real_power_spectrum_over_time_series = FALSE;
+
+///////////// plot_adaptive_filtered_spectrum /////////
+//
+// Include adaptive-filtered spectrum plot.
+// This will be plotted in the same panel as the power spectrum.
+// Type: boolean
+//
+
+plot_adaptive_filtered_spectrum = TRUE;
+
+///////////// plot_regression_filtered_spectrum ///////
+//
+// Include regression-filtered spectrum plot.
+// This will be plotted in the same panel as the power spectrum.
+// Type: boolean
+//
+
+plot_regression_filtered_spectrum = TRUE;
+
+///////////// regression_polynomial_order /////////////
+//
+// Order of polynomial for regression filtering.
+// Type: int
+//
+
+regression_polynomial_order = 5;
+
+///////////// regression_interp_across_notch //////////
+//
+// For regression filter - should we interpolate across the notch?.
+// The regression filter applies quite a deep notch around 0 m/s. This 
+//   option allows you to interpolate across the notch.
+// Type: boolean
+//
+
+regression_interp_across_notch = TRUE;
+
+///////////// plot_phase_time_series //////////////////
+//
+// Include plot of time series phase.
+// Type: boolean
+//
+
+plot_phase_time_series = TRUE;
+
+///////////// autoscale_phase_time_series /////////////
+//
+// Compute scale of phase time series from data.
+// If FALSE, -180 and +180 will be used.
+// Type: boolean
+//
+
+autoscale_phase_time_series = TRUE;
+
+///////////// plot_pulse_to_pulse_phase_diff //////////
+//
+// Include pulse-to-pulse phase difference plot.
+// Type: boolean
+//
+
+plot_pulse_to_pulse_phase_diff = FALSE;
+
+///////////// plot_cumulative_phase_diff //////////////
+//
+// Include cumulative phase difference plot.
+// Type: boolean
+//
+
+plot_cumulative_phase_diff = FALSE;
+
+///////////// plot_fft_phase_diff /////////////////////
+//
+// Include plot of fft phase.
+// Type: boolean
+//
+
+plot_fft_phase_diff = FALSE;
+
+///////////// plot_iq_time_series /////////////////////
+//
+// Include iq time series.
+// Type: boolean
+//
+
+plot_iq_time_series = TRUE;
+
+///////////// plot_polyfit_time_series ////////////////
+//
+// Plot polynolial fit to time series on top of iq time series.
+// Type: boolean
+//
+
+plot_polyfit_time_series = FALSE;
+
+///////////// plot_residual_time_series ///////////////
+//
+// Plot time series residuals after de-trending and/or polygon fit.
+// Type: boolean
+//
+
+plot_residual_time_series = FALSE;
+
+///////////// plot_residual_phase /////////////////////
+//
+// Plot phase of time series residuals after polygon fit.
+// Type: boolean
+//
+
+plot_residual_phase = FALSE;
+
+///////////// use_order_1_fit_time_series_for_adaptive_filter 
+//
+// Option to use order-1 polynomial-filtered time series for adaptive 
+//   clutter filtering.
+// This takes precedence over the detrended time series option.
+// Type: boolean
+//
+
+use_order_1_fit_time_series_for_adaptive_filter = FALSE;
+
+///////////// use_detrended_time_series_for_adaptive_filter 
+//
+// Option to use detrended time series for adaptive clutter filtering.
+// Only applies if order-1 option is false.
+// Type: boolean
+//
+
+use_detrended_time_series_for_adaptive_filter = FALSE;
+
+///////////// plot_staggered_half_spectra /////////////
+//
+// Plot spectrum of each half of the staggered time series.
+// Type: boolean
+//
+
+plot_staggered_half_spectra = FALSE;
+
+///////////// plot_iq_phasor //////////////////////////
+//
+// Plot phasor diagram of IQ time series.
+// Type: boolean
+//
+
+plot_iq_phasor = FALSE;
+
+//======================================================================
+//
+// DATA Y-SCALE RANGES.
+//
+//======================================================================
+ 
+///////////// ascope_power_min_db /////////////////////
+//
+// Min value of ascope power (dBm).
+// Type: double
+//
+
+ascope_power_min_db = -120;
+
+///////////// ascope_power_max_db /////////////////////
+//
+// Max value of ascope power (dBm).
+// Type: double
+//
+
+ascope_power_max_db = -40;
+
+///////////// power_spec_min_db ///////////////////////
+//
+// Min value of power spectrum power (dBm).
+// Type: double
+//
+
+power_spec_min_db = -120;
+
+///////////// power_spec_max_db ///////////////////////
+//
+// Max value of power spectrum power (dBm).
+// Type: double
+//
+
+power_spec_max_db = -30;
+
+///////////// ts_power_min_db /////////////////////////
+//
+// Min value of time series power (dBm).
+// Type: double
+//
+
+ts_power_min_db = -120;
+
+///////////// ts_power_max_db /////////////////////////
+//
+// Max value of time series power (dBm).
+// Type: double
+//
+
+ts_power_max_db = -30;
+
+//======================================================================
+//
+// COLORS.
+//
+//======================================================================
+ 
+///////////// foreground_color ////////////////////////
+//
+// Color of the foreground in the display.
+// Type: string
+//
+
+foreground_color = "white";
+
+///////////// background_color ////////////////////////
+//
+// Color of the background in the display.
+// Type: string
+//
+
+background_color = "black";
+
+///////////// grid_line_color /////////////////////////
+//
+// Color for grid lines on plot.
+// Type: string
+//
+
+grid_line_color = "gray20";
+
+///////////// ascope_power_color //////////////////////
+//
+// Color of the plot of power in ascope mode.
+// Type: string
+//
+
+ascope_power_color = "yellow";
+
+///////////// power_spec_color ////////////////////////
+//
+// Color of the plot of power spectrum.
+// Type: string
+//
+
+power_spec_color = "red";
+
+///////////// adaptive_filtered_spec_color ////////////
+//
+// Color of the plot of filtered power spectrum.
+// Type: string
+//
+
+adaptive_filtered_spec_color = "pink";
+
+///////////// regression_filtered_spec_color //////////
+//
+// Color of the plot of regression-filtered spectrum.
+// Type: string
+//
+
+regression_filtered_spec_color = "orange";
+
+///////////// ts_power_color //////////////////////////
+//
+// Color of the plot of time series power.
+// Type: string
+//
+
+ts_power_color = "green";
+
+///////////// power_real_spec_color ///////////////////
+//
+// Color of the plot of spectrum of real power.
+// Type: string
+//
+
+power_real_spec_color = "cyan";
+
+///////////// ts_phase_color //////////////////////////
+//
+// Color of the plot of time series phase.
+// Type: string
+//
+
+ts_phase_color = "orange";
+
+///////////// ts_residual_color ///////////////////////
+//
+// Color of the plot of residual time series phase.
+// Type: string
+//
+
+ts_residual_color = "brown";
+
+///////////// phase_diff_color ////////////////////////
+//
+// Color of the plot of pulse-to-pulse phase difference.
+// Type: string
+//
+
+phase_diff_color = "yellow";
+
+///////////// cumulative_phase_diff_color /////////////
+//
+// Color of the plot of cumulative phase difference.
+// Type: string
+//
+
+cumulative_phase_diff_color = "pink";
+
+///////////// fft_phase_color /////////////////////////
+//
+// Color of the plot of fft phase.
+// Type: string
+//
+
+fft_phase_color = "magenta";
+
+///////////// fft_phase_diff_color ////////////////////
+//
+// Color of the plot of fft phase difference.
+// Type: string
+//
+
+fft_phase_diff_color = "green";
+
+///////////// I_color /////////////////////////////////
+//
+// Color of I time series.
+// Type: string
+//
+
+I_color = "white";
+
+///////////// I_polynomial_color //////////////////////
+//
+// Color of polynomial fit to I time series.
+// Type: string
+//
+
+I_polynomial_color = "gray";
+
+///////////// Q_color /////////////////////////////////
+//
+// Color of Q time series.
+// Type: string
+//
+
+Q_color = "magenta";
+
+///////////// Q_polynomial_color //////////////////////
+//
+// Color of polynomial fit to Q time series.
+// Type: string
+//
+
+Q_polynomial_color = "red";
+
+///////////// detrended_ts_color //////////////////////
+//
+// Color of detrended time series color.
+// Type: string
+//
+
+detrended_ts_color = "cyan";
+
+///////////// short_prt_color /////////////////////////
+//
+// Color of short prt spectrum in staggered prt half-spectrum plot.
+// Type: string
+//
+
+short_prt_color = "green";
+
+///////////// long_prt_color //////////////////////////
+//
+// Color of long prt spectrum in staggered prt half-spectrum plot.
+// Type: string
+//
+
+long_prt_color = "yellow";
+
+///////////// noise_level_color ///////////////////////
+//
+// Color of line showing noise level.
+// Type: string
+//
+
+noise_level_color = "brown";
+
+///////////// range_line_color ////////////////////////
+//
+// Color of line showing current range.
+// Type: string
+//
+
+range_line_color = "magenta";
+
+///////////// iq_phasor_color /////////////////////////
+//
+// Color of IQ phasor diagram.
+// Type: string
+//
+
+iq_phasor_color = "white";
+
+//======================================================================
+//
+// FONTS.
+//
+//======================================================================
+ 
+///////////// font_name ///////////////////////////////
+//
+// Name of font for the text on the display.
+// Type: string
+//
+
+font_name = "6x13";
+
+//======================================================================
+//
+// LINES.
+//
+//======================================================================
+ 
+///////////// plot_line_width /////////////////////////
+//
+// The width of the lines used for the plot traces.
+// Type: int
+//
+
+plot_line_width = 2;
+

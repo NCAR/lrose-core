@@ -1,0 +1,273 @@
+/*********************************************************
+ * parameter definitions for ChillSdbServer
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * May 2007
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "ChillSdbServer reads data from a DsRadar queue, in NCAR/RAL format, reformats it into CHILL SDB (Standard Data Buffer) format, and serves it out via TCP.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress the use of threads. Set no_threads to TRUE for this type of debugging.";
+} no_threads;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting. If an empty instance name is provided, the server automatically uses the port number as its instance name";
+} instance;
+
+commentdef {
+  p_header = "FMQ INPUT";
+};
+
+paramdef string {
+  p_default = "fmqp:://localhost::fmq/spol";
+  p_descr = "URL for input FMQ data.";
+  p_help = "This server reads radar moments from a DsRadar FMQ. This is the URL of the input data.";
+} input_fmq_url;
+
+commentdef {
+  p_header = "INPUT/OUTPUT FIELD NAMES";
+  p_text = "These parameters specify the field names which match the fields expected by the CHILL SDB beam format. If the field does not exist in the input stream, it will be ignored. For fields which you know are not present you can set the strings to empty.";
+};
+
+paramdef string {
+  p_default = "DBZ";
+} DBZ_name;
+
+paramdef string {
+  p_default = "VEL";
+} VEL_name;
+
+paramdef string {
+  p_default = "WIDTH";
+} WIDTH_name;
+
+paramdef string {
+  p_default = "NCP";
+} NCP_name;
+
+paramdef string {
+  p_default = "ZDR";
+} ZDR_name;
+
+paramdef string {
+  p_default = "PHIDP";
+} PHIDP_name;
+
+paramdef string {
+  p_default = "RHOHV";
+} RHOHV_name;
+
+paramdef string {
+  p_default = "LDRH";
+} LDRH_name;
+
+paramdef string {
+  p_default = "LDRV";
+} LDRV_name;
+
+paramdef string {
+  p_default = "KDP";
+} KDP_name;
+
+paramdef string {
+  p_default = "DBZc";
+  p_descr = "DBZ corrected for attenuation, using KDP";
+} DBZc_name;
+
+paramdef string {
+  p_default = "ZDRc";
+  p_descr = "ZDR corrected for attenuation, using KDP";
+} ZDRc_name;
+
+paramdef string {
+  p_default = "PHIDPf";
+  p_descr = "PHIDP filtered and smoothed for computing KDP";
+} PHIDPf_name;
+
+paramdef string {
+  p_default = "AVG_H_MAG";
+  p_descr = "AVG H IQ magnitude";
+  p_help = "DSR field name for magnitude of average IQ, H channel";
+} AVG_H_MAG_name;
+
+paramdef string {
+  p_default = "AVG_H_PHASE";
+  p_descr = "AVG H IQ phase";
+  p_help = "DSR field name for phase of average IQ, H channel";
+} AVG_H_PHASE_name;
+
+paramdef string {
+  p_default = "AVG_V_MAG";
+  p_descr = "AVG V IQ magnitude";
+  p_help = "DSR field name for magnitude of average IQ, V channel";
+} AVG_V_MAG_name;
+
+paramdef string {
+  p_default = "AVG_V_PHASE";
+  p_descr = "AVG V IQ phase";
+  p_help = "DSR field name for phase of average IQ, V channel";
+} AVG_V_PHASE_name;
+
+paramdef string {
+  p_default = "LAG0_HC";
+  p_descr = "Lag0 HC power";
+  p_help = "DSR field name for lag0 (power) H co-polar";
+} LAG0_HC_name;
+
+paramdef string {
+  p_default = "LAG0_VC";
+  p_descr = "Lag0 VC power";
+  p_help = "DSR field name for lag0 (power) V co-polar";
+} LAG0_VC_name;
+
+paramdef string {
+  p_default = "LAG0_HX";
+  p_descr = "Lag0 HX power";
+  p_help = "DSR field name for lag0 (power) H cross-polar";
+} LAG0_HX_name;
+
+paramdef string {
+  p_default = "LAG0_VX";
+  p_descr = "Lag0 VX power";
+  p_help = "DSR field name for lag0 (power) V cross-polar";
+} LAG0_VX_name;
+
+paramdef string {
+  p_default = "LAG1_HC_MAG";
+  p_descr = "Lag1 HC magnitude";
+  p_help = "DSR field name for lag1 H co-polar magnitude (dB)";
+} LAG1_HC_MAG_name;
+
+paramdef string {
+  p_default = "LAG1_HC_PHASE";
+  p_descr = "Lag1 HC phase";
+  p_help = "DSR field name for lag1 H co-polar phase (deg)";
+} LAG1_HC_PHASE_name;
+
+paramdef string {
+  p_default = "LAG1_VC_MAG";
+  p_descr = "Lag1 VC magnitude";
+  p_help = "DSR field name for lag1 V co-polar magnitude (dB)";
+} LAG1_VC_MAG_name;
+
+paramdef string {
+  p_default = "LAG1_VC_PVASE";
+  p_descr = "Lag1 VC phase";
+  p_help = "DSR field name for lag1 V co-polar phase (deg)";
+} LAG1_VC_PHASE_name;
+
+paramdef string {
+  p_default = "LAG2_HC_MAG";
+  p_descr = "Lag2 HC magnitude";
+  p_help = "DSR field name for lag2 H co-polar magnitude (dB)";
+} LAG2_HC_MAG_name;
+
+paramdef string {
+  p_default = "LAG2_HC_PHASE";
+  p_descr = "Lag2 HC phase";
+  p_help = "DSR field name for lag2 H co-polar phase (deg)";
+} LAG2_HC_PHASE_name;
+
+paramdef string {
+  p_default = "LAG2_VC_MAG";
+  p_descr = "Lag2 VC magnitude";
+  p_help = "DSR field name for lag2 V co-polar magnitude (dB)";
+} LAG2_VC_MAG_name;
+
+paramdef string {
+  p_default = "LAG2_VC_PVASE";
+  p_descr = "Lag2 VC phase";
+  p_help = "DSR field name for lag2 V co-polar phase (deg)";
+} LAG2_VC_PHASE_name;
+
+paramdef string {
+  p_default = "LAG0_HV_MAG";
+  p_descr = "Lag0 HV magnitude";
+  p_help = "DSR field name for lag0 HV magnitude (dB)";
+} LAG0_HV_MAG_name;
+
+paramdef string {
+  p_default = "LAG0_HV_PHASE";
+  p_descr = "Lag0 HV phase";
+  p_help = "DSR field name for lag0 HV phase (deg)";
+} LAG0_HV_PHASE_name;
+
+paramdef string {
+  p_default = "RHOHV_HCX";
+  p_descr = "RHOHV HC to VX";
+  p_help = "DSR field name for H co-pol to cross-pol correlation";
+} RHOHV_HCX_name;
+
+paramdef string {
+  p_default = "RHOHV_VCX";
+  p_descr = "RHOHV VC to HX";
+  p_help = "DSR field name for V co-pol to cross-pol correlation";
+} RHOHV_VCX_name;
+
+commentdef {
+  p_header = "POLARIZATION SETTING";
+};
+
+typedef enum {
+  POL_MODE_H,
+  POL_MODE_V,
+  POL_MODE_VH,
+  POL_MODE_VHS
+} polarization_mode_t;
+
+paramdef enum polarization_mode_t {
+  p_default = POL_MODE_VH;
+  p_descr = "Polarization mode for output fields.";
+  p_help = "Downstream clients infer which fields are set from the polarization mode. H: H only. V: V only. VH: fast alternating mode. VHS: simulataneous mode.";
+} polarization_mode;
+
+commentdef {
+  p_header = "SERVER OUTPUT";
+};
+
+paramdef int {
+  p_default = 2111;
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+} port;
+  
+paramdef int {
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+    "produce to handle client requests.  If the maximum is reached, "
+    "new clients will be ignored until the number of clients drops below "
+    "this limit.";
+  p_default = 32;
+} max_clients;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Wait between beams (msecs).";
+  p_help = "Optional wait between beams, in milliseconds. This can be useful when a server is trying to catch up with a data stream and is therefore flooding the client with data.";
+} beam_wait_msecs;
+  

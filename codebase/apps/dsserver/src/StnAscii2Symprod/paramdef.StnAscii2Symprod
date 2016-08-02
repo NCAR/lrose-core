@@ -1,0 +1,398 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for StnAscii2Symprod
+//
+// Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// March 2007
+
+
+commentdef {
+  p_header = "StnAscii2Symprod is designed to serve out ASCII data associated with a measurement station. Examples are TAF and METAR. The location of the station is looked up in the station_location file. The product is presented as an ICON with associated text. Hidden text for mouse-over operations is supported.";
+}
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { DEBUG_OFF };
+} debug;
+
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string {
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean {
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef {
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int {
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5481;
+} port;
+  
+paramdef int {
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int {
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Station selection
+
+commentdef {
+  p_header = "STATION SELECTION";
+};
+
+paramdef string {
+  p_default = "world_arp.loc";
+  p_descr = "Path to station location file";
+  p_help = "Since the station ASCII reports do not contain lat/lon information, we must determine this from a separate file. The station location file should contain a four letter station identification followed by the latitude and longitude for each station to be processed. Stations not in this file will be ignored.";
+} station_location_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the acceptedStations list (below)";
+  p_help = "Only accept stations in this list.";
+} useAcceptedStationsList;
+
+paramdef string {
+  p_default = {
+    "RCTP", "RCFG", "RCSS", "RCGM", "RCNO", "RCQC", "RCBS"
+  };
+  p_descr = "List of accepted station IDs";
+  p_help = "If a station is not on this list, it is not stored.";
+} acceptedStations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the rejectedStations list (below)";
+  p_help = "Reject stations in this list.";
+} useRejectedStationsList;
+
+paramdef string {
+  p_default = {
+    "RCFN", "RCAY", "RCQS", "RCFS","RCMT"
+  };
+  p_descr = "List of rejected station IDs";
+  p_help = "If a station is not on this list, it is not stored.";
+} rejectedStations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to decimate metar density spatially. Only applicable if the bounding box option is specified in the param file, or the client specifies the horizontal limits in the request.";
+  p_help = "If active, an imaginary grid will be constructed for the bounding box. The number of grids in each direction will be specified by decimate_n_lat and decimate_n_lon. Only one METAR product will be created for each rectangle in the grid.";
+} decimate_spatially;
+
+paramdef int {
+  p_default = 25;
+  p_descr = "If decimation is active, the bounding box is divided into this number of sub-boxes in the latitude direction.";
+  p_help = "See decimate_spatially.";
+} decimate_n_lat;
+
+paramdef int {
+  p_default = 25;
+  p_descr = "If decimation is active, the bounding box is divided into this number of sub-boxes in the longitude direction.";
+  p_help = "See decimate_spatially.";
+} decimate_n_lon;
+
+paramdef string {
+  p_default = {
+    "RCTP", "RCSS", "RCKH"
+  };
+  p_descr = "List of required stations when decimating.";
+  p_help = "If a station is in this list, it will always be displayed.";
+} decimate_required_stations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to only include stations within the lat-lon bounding box.";
+  p_help = "Only accept stations for which the position is inside the bounding box. Note: this will be overridden if the client specifies horizontal limits.";
+} useBoundingBox;
+
+typedef struct {
+  float min_lat;
+  float min_lon;
+  float max_lat;
+  float max_lon;
+} bounding_box_t;
+
+paramdef struct bounding_box_t {
+  p_default = { -90.0, -180.0, 90.0, 180.0 };
+  p_descr = "If useBoundingBox is true, only stations within this box will be included in the product list.";
+  p_help = "To span the international date line, specify a continuous interval using positive longitudes which exceed 180 or negative longitudes which are less than -180. For example, min_lon = 80 and max_lon = 240 will span between 80E and 120W across the Pacific.";
+} bounding_box;
+
+//////////////////////////////////////////////////////////
+// ICON rendering
+
+commentdef {
+  p_header = "ICON";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to plot icon.";
+  p_help = "Icon will be plotted as a stroked icon - a series of lines making a shape. The points included in the icon appear in the parameter icon_points.";
+} plot_icon;
+
+typedef struct {
+  int x;
+  int y;
+} icon_point_t;
+
+paramdef struct icon_point_t {
+  p_default = {
+    { -5, -5},
+    { 5, -5},
+    { 5, 5},
+    { -5, 5},
+    { -5, -5}
+  };
+  p_descr = "List of points for plotting ICON.";
+  p_help = "The X,Y values are in pixel units. Use -999 to indicate a pen-up action."; 
+} icon_points[];
+
+paramdef string {
+  p_descr = "Stroked icon line color.";
+  p_default = "white";
+} icon_color;
+
+paramdef int {
+  p_descr = "Stroked icon line width (pixels).";
+  p_default = 1;
+} icon_line_width;
+
+paramdef double {
+  p_descr = "Scale of icon.";
+  p_help = "Allows you to make the icon larger or smaller without re-defining the entire icon.";
+  p_default = 1.0;
+} icon_scale;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Allows the client to scale the icon depending on zoom state.";
+  p_help = "If false, the icon will always be the specified size.";
+} icon_allow_client_scaling;
+
+//////////////////////////////////////////////////////////
+// Text Rendering
+
+commentdef {
+  p_header = "NORMAL TEXT";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to plot normal text.";
+} plot_normal_text;
+
+paramdef string {
+  p_descr = "Text foreground color.";
+  p_default = "white";
+} normal_text_foreground_color;
+
+paramdef string {
+  p_descr = "Text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} normal_text_background_color;
+
+paramdef string {
+  p_descr = "Font name.";
+  p_default = "fixed";
+} normal_text_font_name;
+
+paramdef int {
+  p_descr = "Size of font to use for text";
+  p_default = 7;
+} normal_text_font_size;
+
+typedef enum {
+  TEXT_NORM,
+  TEXT_BOLD,
+  TEXT_ITALICS,
+  TEXT_SUBSCRIPT,
+  TEXT_SUPERSCRIPT,
+  TEXT_UNDERLINE,
+  TEXT_STRIKETHROUGH
+} font_style_t;
+
+paramdef enum font_style_t {
+  p_descr = "Font style for the text";
+  p_default = TEXT_NORM;
+} normal_text_font_style;
+
+typedef struct {
+  int x;
+  int y;
+} text_offset_t;
+
+paramdef struct text_offset_t {
+  p_descr = "Pixel offset values for starting the text";
+  p_default = { 0, 0 };
+} normal_text_offset;
+
+typedef enum {
+  VERT_ALIGN_TOP,
+  VERT_ALIGN_CENTER,
+  VERT_ALIGN_BOTTOM
+} vert_align_t;
+
+paramdef enum vert_align_t {
+  p_descr = "Vertical alignment label text.";
+  p_help = "Does not apply if forecast and outlook labels are active.";
+  p_default = VERT_ALIGN_CENTER;
+} normal_text_vert_align;
+
+typedef enum {
+  HORIZ_ALIGN_LEFT,
+  HORIZ_ALIGN_CENTER,
+  HORIZ_ALIGN_RIGHT
+} horiz_align_t;
+
+paramdef enum horiz_align_t {
+  p_descr = "Horizontal alignment for label text.";
+  p_help = "Does not apply if forecast and outlook labels are active.";
+  p_default = HORIZ_ALIGN_CENTER;
+} normal_text_horiz_align;
+
+paramdef int {
+  p_descr = "Length of a message line before text line is broken\n"
+    "(effectively given a carriage return).";
+  p_help = "Program will break line at first space after\n"
+    "this many characters.";
+  p_default = 32;
+} normal_text_line_len;
+
+paramdef int {
+  p_descr = "Vertical line spacing, pixels.";
+  p_help = "Optionally, the user may choose to plot various text "
+        "parameters. The selected plotting elements are then draw vertically "
+        "above each other on the display, separated by plot_text_line_offset "
+        "pixels in the vertical. If this is negative then the column of "
+        "numbers will ascend rather than descend on the display.";
+  p_default = 10;
+} normal_text_line_offset;
+
+commentdef {
+  p_header = "HIDDEN TEXT";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to activate hidden text.";
+  p_help = "If true, the ASCII message will be sent to the client, marked as hidden text. This text may then be used by the client for any purpose, such as pop-up text in response to a mouse event near the product location.";
+} activate_hidden_text;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use SIGMET product color.";
+  p_default = "white";
+} hidden_text_foreground_color;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} hidden_text_background_color;
+
+paramdef string {
+  p_descr = "Font name.";
+  p_default = "fixed";
+} hidden_text_font_name;
+
+paramdef int {
+  p_descr = "Font size for hidden text (pixels).";
+  p_default = 10;
+} hidden_text_font_size;
+
+paramdef enum font_style_t {
+  p_descr = "Font style for the hidden text";
+  p_default = TEXT_NORM;
+} hidden_text_font_style;
+
+paramdef struct text_offset_t {
+  p_descr = "Pixel offset values for starting the text";
+  p_default = { 0, 0 };
+} hidden_text_offset;
+
+paramdef enum vert_align_t {
+  p_descr = "Vertical alignment hidden text.";
+  p_default = VERT_ALIGN_CENTER;
+} hidden_text_vert_align;
+
+paramdef enum horiz_align_t {
+  p_descr = "Horizontal alignment for hidden text.";
+  p_default = HORIZ_ALIGN_CENTER;
+} hidden_text_horiz_align;
+
+

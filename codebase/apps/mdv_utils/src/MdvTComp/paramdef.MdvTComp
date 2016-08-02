@@ -1,0 +1,189 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions MdvTComp
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// June 2002
+//
+
+commentdef {
+  p_header = "Program name: MdvTComp";
+  p_text = "MdvTComp performs a temporal composite process on Mdv data. It uses files from the past to create a composite. The usage is 'MdvTComp -params params_file'.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "mdv/input";
+  p_descr = "URL for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set plane vlevel limits";
+  p_help = "Mutually exclusive with set_plane_num_limits.";
+} set_vlevel_limits;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Lower plane vlevel limit.";
+} lower_vlevel;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Upper plane vlevel limit.";
+} upper_vlevel;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option for creating vertical composite before time composite.";
+} vert_composite;
+
+commentdef {
+  p_header = "COMPOSITE DETAILS";
+}
+
+typedef enum {
+  MAXIMUM, AVERAGE
+} composite_t;
+
+paramdef enum composite_t {
+  p_default = MAXIMUM;
+  p_descr = "Composite type";
+  p_help = "composite_type=MAXIMUM or AVERAGE.  At each point either the maximum or average is accumulated.  Default = MAXIMUM";
+} composite_type;
+
+paramdef int {
+  p_default = 1800;
+  p_help = "Composite period - secs.";
+  p_descr = "Files from this period in the past will be used for forming the time composite.";
+} composite_period;
+
+paramdef int {
+  p_default = 0;
+  p_help = "Mininimum delta time between images in composite - secs.";
+  p_descr = "This allows you to force the images in the composite to be spaced by some minimum time. For example, the files may be at 5 minute spacing, but you may wish to ignore every second file and only composite every 10 minutes. In this case, set this parameter to say 8 minutes (480 secs) to force the spacing to longer than 5 minutes.";
+} min_delta_time;
+
+typedef struct {
+  string name;
+  boolean constrain_values;
+  double min_value;
+  double max_value;
+  boolean reset_missing;
+  double missing_fill_value;
+} field_t;
+
+paramdef struct field_t {
+  p_default = {
+    { "DBZ", true, -5, 10, true, -5 }
+  };
+  p_descr = "Details of fields to be included in composite. Only specified fields will be included in the time composite. If constrain_values is true, you specify the min and max values to be composited. Values outside these limits will be ignoreed and set to missin. If reset_missing is true, missing values will be set to missing_fill_value after the composite has been created.";
+} fields[];
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdv/smoothed";
+  p_descr = "Output URL.";
+  p_help = "Output data is written to this URL.";
+} output_url;
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_FLOAT32;
+  p_descr = "Set encoding type.";
+} output_encoding_type;
+
+typedef enum {
+  SYNCH_OUTPUT_TO_TRIGGER,
+  SYNCH_OUTPUT_TO_COMPOSITE,
+  SYNCH_OUTPUT_TO_LIST
+} output_t;
+  
+paramdef enum output_t
+{
+  p_default = SYNCH_OUTPUT_TO_TRIGGER;
+  p_descr = "Frequency of output";
+  p_help = "Output is synchronized either to the triggering (one output per trigger), to the composite period (one output per composite period), or to a particular list of hour/minute/seconds. The default is SYNCH_OUTPUT_TO_TRIGGER";
+} output_frequency;
+
+typedef struct
+{
+  int hour;
+  int minute;
+  int second;
+} Hms_t;
+
+paramdef struct Hms_t
+{
+  p_default = {};
+  p_descr = "Hour,Minute,Second list";
+  p_help = "If output_frequency=SYNCH_OUTPUT_TO_LIST, this list is used to define the particular times at which output is generated.  In all other cases, this param is ignored";
+} output_times[];
+

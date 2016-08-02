@@ -1,0 +1,51 @@
+/*********************************************************
+ * parameter definitions for Alenia2Udp
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 1997
+ */
+
+paramdef enum debug {
+  p_options = {DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance.";
+  p_help = " ";
+} instance;
+
+paramdef long {
+  p_default = {5002};
+  p_descr = "Output port for UDP packets.";
+} output_udp_port;
+
+paramdef char* {
+  p_default = {"128.117.197.255"};
+  p_descr = "Broadcast address for UDP output.";
+} output_udp_address;
+
+paramdef long {
+  p_default = {50};
+  p_descr = "Beam wait interval (msecs).";
+  p_help = "Process will sleep between beams for this period.";
+} beam_wait_msecs;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option for automatic repeat through data.";
+  p_help = "If set, program will cycle through the data.";
+} auto_repeat;
+

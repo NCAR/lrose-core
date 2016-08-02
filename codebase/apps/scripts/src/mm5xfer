@@ -1,0 +1,219 @@
+#!/bin/sh --
+# mm5xfer: monitor MM5 data status file and transfer MM5 data files.
+# Tres Hofmeister <tres@rap.ucar.edu>  Fri Mar  5 17:25:10 MST 1999
+# CVS: $Id: mm5xfer,v 1.1 1999/03/17 23:18:31 tres Exp $
+
+# Modify these variables as appropriate.
+rhost=tres@nob			# Host receiving data files, or user@host.
+rdir=/tmp			# Directory on remote host.
+rtmpdir=$rdir/tmp		# Remote temporary directory.
+rtime=30			# Remote command/copy timeout.
+statfile=_latest_data_info	# Data status file.
+interval=2			# Status file polling interval.
+tmpdir=${TMPDIR:=/tmp}		# Local temporary directory.
+
+PATH=/bin:/usr/bin:/usr/ucb; export PATH
+
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Shell functions.
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+# rcopy: send a file to a remote host using rcp(1), with timeout.
+rcopy () {
+    # Arguments.
+    timeout=$1			# Timeout, in seconds.
+    file=$2			# File to send.
+    remote=$3			# Target host, host:dir, or user@host:dir
+
+    # Temporary file for rcp output.  The date stamp is appended to
+    # help with overlapping calls to the function, which are hopefully
+    # at least one second apart.
+    rcpout=/$tmpdir/rcp-output.$$`date +%S`
+
+    # Run the command.
+    # error=`rcp $file $remote 2>&1 &`
+    rcp $file $remote >$rcpout 2>&1 &
+
+    # Grab the process ID.
+    pid=$!
+
+    # Watch for the process to exit until we time out.
+    while [ "$timeout" -gt 0 ]
+    do
+	sleep 1
+	if kill -0 $pid >/dev/null 2>&1; then
+	    # The rcp process is still running; decrement the timeout.
+	    timeout=`expr $timeout - 1`
+	else
+	    exited=1
+	    break
+	fi
+    done
+
+    # Kill the process if it is still running.
+    if [ "$exited" ]; then
+	error=`cat $rcpout`
+	if [ "$error" ]; then
+	    echo "rcp: $error" >&2
+	    return=1	# Failure.
+	else
+	    return=0	# Success.
+	fi
+    else
+	if kill -9 $pid >/dev/null 2>&1; then
+	    echo "rcp: timeout, process $pid killed" >&2
+	    return=1	# Failure.
+	else
+	    echo "rcp: timeout, but failed to kill process $pid" >&2
+	    return=1	# Failure.
+	fi
+    fi
+
+    # Clean up and return.
+    rm $rcpout
+    return $return
+}
+
+# rshell: run a command on a remote host using rsh(1), with timeout.
+rshell () {
+    # Arguments.
+    timeout=$1; shift		# Timeout, in seconds.
+    remote=$1; shift		# Remote host or user@host pair.
+    rcmd="$@"			# Everything else is the remote command.
+
+    # Temporary file for shell standard output.  The date stamp is
+    # appended to help with overlapping calls to the function, which
+    # are hopefully at least one second apart.
+    rshout=/$tmpdir/rsh-stdout.$$`date +%S`
+
+    # Temporary file for shell error output.
+    rsherr=/$tmpdir/rsh-stderr.$$`date +%S`
+
+    # Check if a specific remote user was specified.
+    if echo "$remote" | egrep "@" >/dev/null 2>&1; then
+	set `echo $remote | sed 's/@/ /'`
+	cmdstr="rsh -l $1 $2 $rcmd"
+    else
+	cmdstr="rsh $remote $rcmd"
+    fi
+
+    # Run the command, saving STDOUT to a file, STDERR in $error.
+    # error=`$cmdstr 2>&1 1>$tmp &`
+    $cmdstr 1>$rshout 2>$rsherr &
+
+    # Grab the process ID.
+    pid=$!
+
+    # Watch for the process to exit until we time out.
+    while [ "$timeout" -gt 0 ]
+    do
+	sleep 1
+	if kill -0 $pid >/dev/null 2>&1; then
+	    # The rsh process is still running; decrement the timeout.
+	    timeout=`expr $timeout - 1`
+	else
+	    exited=1
+	    break
+	fi
+    done
+
+    # Kill the process if it is still running.
+    if [ "$exited" ]; then
+	error=`cat $rsherr`
+	if [ "$error" ]; then
+	    echo "rsh: $error" >&2
+	    return=1	# Failure.
+	else
+	    # Print whatever output we had from the remote system.
+	    cat $rshout; 
+	    return=0	# Success.
+	fi
+    else
+	if kill -9 $pid >/dev/null 2>&1; then
+	    echo "rsh: timeout, process $pid killed" >&2
+	    return=1	# Failure.
+	else
+	    echo "rsh: timeout, but failed to kill process $pid" >&2
+	    return=1	# Failure.
+	fi
+    fi
+
+    # Clean up and return.
+    rm $rshout $rsherr
+    return $return
+}
+
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Main loop: loop indefinitely.
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+# Remove temporary files on exit.
+trap "rm -f $rshout $rsherr $rcpout; echo; exit" 1 2 3 15
+
+while :
+do
+    if [ -f $statfile ]; then
+	datafile=`sed -n 3p $statfile`	# Grab the third line.
+	# echo datafile: $datafile
+
+	if [ "$datafile" ]; then
+	    if [ -f "$datafile" ]; then
+		stamp=`date +%H:%M:%S`
+		echo -n "$stamp: Copying $datafile to $rhost:$rdir ... "
+
+		# Copying to "$rdir/." ensures an error if the remote
+		# directory doesn't exist.
+		if rcopy $rtime $datafile $rhost:$rdir/.; then
+		    echo "done"
+		    stamp=`date +%H:%M:%S`
+		    echo -n "$stamp: Copying status file to $rhost:$rdir ... "
+
+		    if rcopy $rtime $statfile $rhost:$rtmpdir/.; then
+			echo "done"
+
+			if rshell $rtime $rhost mv $rtmpdir/$statfile $rdir; then
+			    # Is it safe to remove the status file in all cases?
+			    rm $statfile
+			else
+			    echo "Error: mv $statfile: remote shell failure" >&2
+			fi
+
+		    else
+			echo "Error: $statfile: remote copy failure" >&2
+		    fi
+
+		else
+		    echo "Error: $datafile: remote copy failure" >&2
+		fi
+
+	    else
+		echo "Error: $datafile not found" >&2
+	    fi
+
+	else
+	    echo "Error: status file: no (or invalid) data file found" >&2
+	fi
+
+    else
+	: echo "No new data, sleeping..."
+    fi
+    sleep $interval
+done
+
+exit 0
+
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Miscellaneous information.
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+# MM5 data status file name: _latest_data_info
+
+# Status file format:
+# Line 0: -1 YYYY MM DD HH MM SS
+# Line 1: ignore
+# Line 2: file name			# This is the only line of interest.
+# Line 3: ignore
+# Line 4: ignore

@@ -1,0 +1,310 @@
+/**********************************************************************
+ * TDRP params for TsPrint
+ **********************************************************************/
+
+//======================================================================
+//
+// TsPrint reads radar time series data from an FMQ, and prints in 
+//   various ways.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// reg_with_procmap ////////////////////////
+//
+// Register with procmap.
+// Type: boolean
+//
+
+reg_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// RUN mode.
+//
+//======================================================================
+ 
+///////////// run_mode ////////////////////////////////
+//
+// Run mode.
+// PRINT_MODE: print power, averaged over a number of gates, data to the 
+//   screen, a line at a time. ASCOPE_MODE: print data for a range of 
+//   gates to the screen. CAL_MODE: average the powers for a number of 
+//   gates, and write out in a file suitable for calibration. SERVER_MODE: 
+//   listen on a port, and when a connection is established read an 
+//   incoming set of commands in XML, average power over gates, and 
+//   respond to the client in XML.
+//
+// Type: enum
+// Options:
+//     PRINT_MODE
+//     ASCOPE_MODE
+//     CAL_MODE
+//     SERVER_MODE
+//
+
+run_mode = PRINT_MODE;
+
+//======================================================================
+//
+// PRINT DETAILS.
+//
+//======================================================================
+ 
+///////////// label_interval //////////////////////////
+//
+// Labels will be printed at this number of lines.
+// Type: int
+//
+
+label_interval = 30;
+
+///////////// once_only ///////////////////////////////
+//
+// Just write one data set, then quit.
+// Type: boolean
+//
+
+once_only = FALSE;
+
+///////////// print_all_headers ///////////////////////
+//
+// Print all meta-data headers as they are read.
+// Type: boolean
+//
+
+print_all_headers = FALSE;
+
+///////////// print_all_pulses ////////////////////////
+//
+// Print all pulses as they are read.
+// Type: boolean
+//
+
+print_all_pulses = FALSE;
+
+///////////// print_info_on_change ////////////////////
+//
+// Print ops info in full whenever it changes changes.
+// Type: boolean
+//
+
+print_info_on_change = FALSE;
+
+///////////// print_hv_flag ///////////////////////////
+//
+// Print HV flag for each pulse, comma-delimited.
+// Type: boolean
+//
+
+print_hv_flag = FALSE;
+
+///////////// print_iq_data ///////////////////////////
+//
+// Print IQ data.
+// Uses the stored packing, unless print_iq_data_as_floats is true, in 
+//   which case it prints it as floats.
+// Type: boolean
+//
+
+print_iq_data = FALSE;
+
+//======================================================================
+//
+// SERVER MODE.
+//
+// In server mode, the program listens for a client. When a client 
+//   connects, it reads commands in XML, computes powers based on those 
+//   commands, and then responds in XML.
+//
+//======================================================================
+ 
+///////////// server_port /////////////////////////////
+//
+// Labels will be printed at this number of lines.
+// Type: int
+//
+
+server_port = 30;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or time series API.
+// If TS_FMQ_INPUT, the application will read the time series from a 
+//   file message queue and process the pulses as they come in. If 
+//   TS_FILE_INPUT, the application will process all the files specified 
+//   on the command line.
+//
+// Type: enum
+// Options:
+//     TS_FILE_INPUT
+//     TS_FMQ_INPUT
+//
+
+input_mode = TS_FILE_INPUT;
+
+///////////// input_fmq_name //////////////////////////
+//
+// FMQ name. For TS_FMQ_INPUT only.
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+// Type: string
+//
+
+input_fmq_name = "/tmp/fmq/ts";
+
+///////////// seek_to_end_of_input ////////////////////
+//
+// Option to seek to the end of the input FMQ.
+// If TRUE, the program will seek to the end of the fmq and only read in 
+//   new data. If FALSE, it will start reading from the beginning of the 
+//   FMQ.
+// Type: boolean
+//
+
+seek_to_end_of_input = TRUE;
+
+///////////// invert_hv_flag //////////////////////////
+//
+// Option to invert H/V flag in pulse data.
+// Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the 
+//   data has the opposite sense, set this to true.
+// Type: boolean
+//
+
+invert_hv_flag = FALSE;
+
+///////////// fast_alternating ////////////////////////
+//
+// Radar is in fast-alternating mode.
+// Type: boolean
+//
+
+fast_alternating = FALSE;
+
+//======================================================================
+//
+// AVERAGING.
+//
+//======================================================================
+ 
+///////////// n_samples ///////////////////////////////
+//
+// Number of pulse samples in a beam.
+// Type: int
+//
+
+n_samples = 128;
+
+///////////// start_gate //////////////////////////////
+//
+// Start gate for analysis.
+// Type: int
+//
+
+start_gate = 500;
+
+///////////// n_gates /////////////////////////////////
+//
+// Number of gates for analysis.
+// Type: int
+//
+
+n_gates = 10;
+
+//======================================================================
+//
+// TESTING the PACKING.
+//
+//======================================================================
+ 
+///////////// change_packing //////////////////////////
+//
+// Changing the packing for testing purposes.
+// Type: boolean
+//
+
+change_packing = FALSE;
+
+///////////// packing_type ////////////////////////////
+//
+// Packing of the IQ data for test printing.
+// FL32: 32-bit floating point. COUNTS_UI16: scaled unsigned 16-bit 
+//   integers, as is typical of IQ data directly from an A2D. SCALED_SI16: 
+//   scaled signed 16-bit integers. DBM_PHASE_SI16: signed 16-bit integers 
+//   representing power in dBM and phase in deg. SIGMET_SI16: Sigmet 
+//   16-bit floating point packing as in the RVP8.
+//
+// Type: enum
+// Options:
+//     PACKING_FL32
+//     PACKING_SCALED_SI16
+//     PACKING_DBM_PHASE_SI16
+//     PACKING_SIGMET_FL16
+//
+
+packing_type = PACKING_DBM_PHASE_SI16;
+// packing_type = PACKING_FL32;
+// packing_type = PACKING_SIGMET_FL16;
+// packing_type = PACKING_SCALED_SI16;
+
+///////////// packing_scale ///////////////////////////
+//
+// Scaling factor for packed IQ data.
+// This applies to the following packing types: COUNTS_UI16, 
+//   SCALED_SI16, DBM_PHASE_SI16.
+
+// For COUNTS_UI16: volts = scaled unsigned_int * scale + offset.
+
+// For SCALED_SI16: volts = scaled signed_int * scale + offset.
+
+// For DBM_PHASE_SI16: dbm = scaled signed_int * scale + offset.
+// Type: double
+//
+
+packing_scale = 0.005;
+
+///////////// packing_offset //////////////////////////
+//
+// Offset for packed IQ data.
+// See test_scale.
+// Type: double
+//
+
+packing_offset = 0.0;
+

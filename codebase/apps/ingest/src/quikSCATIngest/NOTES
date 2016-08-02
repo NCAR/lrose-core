@@ -1,0 +1,130 @@
+10/6/06
+gfs data:
+
+print_mdv -full /d2/kayl/cvs/data/apps/ingest/src/quikSCATIngest/mdv_gfs/20061005/g_120000/f_00000000.mdv |less
+   time_begin: 10/5/06 12:00:00
+   minx, miny: 0, -90
+   max_nx, max_ny: 720, 361
+   dx, dy: 0.5
+   maxx, mzxy: 360, 90
+
+quikSCAT mdv data:
+print_mdv -full /d2/kayl/cvs/data/apps/ingest/src/quikSCATIngest/mdv_test_background/20061006/084219.mdv | less
+   time_begin: 10/6/06 08:35:14, time_end: 10/6/06 08:49:25, time_centroid: 10/6/06 08:42:19
+   windSp, windDir rainFlag, nsolFlag minx, miny: -100, -15
+   u, v minx, miny: 0, -90
+   swath appearing around lon: 60W to 40W (or -60 to -40) and lat: 45 to 25
+
+CIDD param file
+   projection_type: LAT_LON
+   origin_lon:           221.0
+   origin_lat:            25.0
+
+   domain_limit_min_x:  -100
+   domain_limit_max_x:   -30
+   domain_limit_min_y:   -15
+   domain_limit_max_y:    35
+
+changed to:
+
+   domain_limit_min_x:     0 - try -180  - chnage back to 0
+   domain_limit_max_x:   360
+   domain_limit_min_y:   -90
+   domain_limit_max_y:    90
+
+need to set projection in param file so that it falls within 0 to 360 for the lon (x).
+Then in code, need to normalize longitude - need lon value betw 0 and 360. Do this by hand.
+
+In CIDD - want plain ole gfs (u and v from those mdv files), want runs that have no 
+background data included, so it has only one swath (no background in param file and lookback time is very short - zero) - this would display a single swath and would not stack them up.
+Also want gfs with quikSCAT on top and multiple swaths
+
+SO will have to run 2-3 days in order to see older swaths time out.
+
+calculate windSp and windDir for gfs files - do this in the create field.
+
+
+
+
+
+
+projection:
+
+from Rob Wade?? or Cathy Kessinger:
+lat limits: 15 South to 35 North
+lon limits: 100 West to 30 West
+
+-15 south to 35 north
+total of 50 degrees, 0.25 dx gives 200 nx
+100 West to 75 west? just one swath?
+or 100 West to 30 West would be a total of 70, a 0.25 dx gives 280 for nx
+grid size 50x70.
+
+* base writer class - some kind of addInfo method that is implemented by the subclass - and a method to actually write the data
+* derive from that an spdbwriter class - spdb specific stuff here
+* derive from that a GenPtSpdbWriter class - this class will contain a GenPt object - a local variable - each line will be a GenPt instance/object
+(Nancy's example is a SndgSpdb but mine will be a GenPt) - GenPt specific stuff here.
+
+paramdef will specify what type of output - SpdbGenPt at this point - enum that has one value at this point - will add mdv later and possibly station report.
+
+AsciiReader object:
+
+AsciiReader(debug)
+
+bool openFile(path) - calls fopen, returns true on success, first calls closeFile() if _asciiFile != 0
+quikSCATObs getNextObs() - STRparse on the tokens, calls _setObsTime, etc., etc., instantiates quikSCATObs and returns that object.
+
+quikSCATIngest _processData() first calls openFile() and then calls getNextObs()
+
+quikSCATIngest:
+init() gives me a _reader (AsciiReader) object and a _writer object
+run() calls _processData() which then calls _reader->openFile(path) and _reader->getNextObs()
+getNextObs() parses the tokens and calls the quikSCATObs setter methods and then returns the quikSCATObs object.
+application area:
+
+~/cvs/apps/ingest/src/quikSCATIngest
+
+test area:
+
+~/cvs/test/apps/ingest/src/quikSCATIngest/run_test
+
+data area:
+
+~/cvs/data/apps/ingest/src/quikSCATIngest/raw/ascii/
+
+
+run_test:
+
+~/cvs/test/apps/ingest/src/quikSCATIngest/run_test
+
+/home/kayl/cvs/apps/ingest/src/quikSCATIngest/quikSCATIngest -params quikSCATIngest.params -f /home/kayl/cvs/data/apps/ingest/src/quikSCATIngest/raw/ascii/20060129.1222.scat
+
+
+GenPt2Symprod - get that.
+GenPtField2Symprod - might try that.
+
+Can run 'XSpdbQuery &' on the data.
+
+Now - put into mdv
+
+use CIDD param file for projection info - use lat/lon as GOMEX projection - use 0.2 for dx and dy
+
+I will have an mdv writer - collect data for an entire file - send data in same way as spdb data - inside writer,
+first create mdv field that is all missing data, as each point comes in, use lat/lon2array index -> this gives me i
+and if i is negative, it is outside of my grid. If that happens, print out a debug statement. Create 2 fields (or even
+4 fields) of wind speed and wind direction. Otherwise at that location - get that array index, put the speed and direction.
+
+Finish inputfile, one mdv file for each input quikSCAT input file. So, when I get thru the input file, call method that writeData.
+
+MdvWriter object, keep a start time and an end time. If time is less than or greater than - then I reset start and/or end time. Can init them to TIME::NEVER. This keeps the time range for the whole file. Time centroid can be the average of the two - to average two time fields - take start time divided by 2 plus end time divided by 2 to get average.
+
+Pjg object has a latlon2arrayIndex() method - every time you get a point - call this method.
+
+
+Set to TRUE: flag to initialize data to missing value - in constructor.
+
+add another parameter for projection info  typedef enum - proj_type_t (lat/lon or FLAT) - then struct where I define the actual - 1st piece is proj_type, then nx/ny,dx/dy,minx/miny,rotation (needed for flat but not lat/lon) - send all this into constructor of mdvWriter object so that it can instantiate a projection object.  - this leads to a field object - MdvxField Object - this is a pointer. DsMdvx object is used to write the file and I can add a field to it w/ the addField method() - DsMdvx object takes ownership of the field ptr so I can not delete it but I can reset it to zero - and should reset it to zero. - add a deletion in destructor  - create field object in init() - in init() set it all to missing data.
+
+
+MdvxPjg projection - projection.initFlat() or initLatlon()
+

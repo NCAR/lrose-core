@@ -1,0 +1,15 @@
+#! /usr/bin/perl
+
+#
+# rm_wspace
+#
+# replaces any contiguous whitespace with a single space
+#
+
+while (<>) {
+
+  s/\r/\n/g;
+  print;
+
+}
+

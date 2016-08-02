@@ -1,0 +1,52 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Parameter definitions for TsFmq2Tcp application
+//
+//  Mike Dixon, RAP, NCAR, Boulder, CO, 80307, USA
+//  Feb 2009
+//
+////////////////////////////////////////////////////////////////////////////////
+commentdef {
+  p_header = "TsFmq2Tcp listens for clients. When a client connects, it spawns a child to handle the client. The child opens the time-series FMQ, reads a message at a time from the FMQ and writes this data, unchanged, to the client in a continuous stream.";
+}
+
+paramdef string {
+  p_descr = "Process instance";
+  p_descr = "This is used to register with the process mapper, procmap";
+  p_default = "test";
+} instance;  
+  
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef int {
+  p_default = 12000;
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+} port;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Max number of clients supported.";
+} max_clients;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress the use of
+ threads. Set no_threads to TRUE for this type of debugging.";
+} no_threads;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "Path of FMQ.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} fmq_path;
+

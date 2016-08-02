@@ -1,0 +1,51 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions AcPosnAscii2Spdb
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 1999
+//
+
+commentdef {
+  p_header = "Program name: AcPosnAscii2Spdb";
+  p_text = "AcPosnAscii2Spdb converts ascii ac_posn data into SPDB format. The usage is 'AcPosnAscii2Spdb -params params_file'.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef int {
+  p_default = 0;
+  p_min = 0;
+  p_max = 3;
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/ascii/ac_posn";
+  p_descr = "Name of input data directory.";
+  p_help = "ASCII AC_POSN data files are stored in this directory.";
+} input_data_dir;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/spdb/ac_posn";
+  p_descr = "Name of output data directory.";
+  p_help = "SPDB AC_POSN data files are stored in this directory.";
+} output_data_dir;
+

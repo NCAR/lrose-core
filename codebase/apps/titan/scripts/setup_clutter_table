@@ -1,0 +1,31 @@
+#! /bin/csh
+
+#
+# set up clutter table
+#
+
+#
+# first, copy cart files to clutter directory
+#
+
+echo Copying cartesian files to clutter directory ...
+
+cp $TITAN_HOME/cdata/19900710/17*.dob $TITAN_HOME/clutter
+cp $TITAN_HOME/cdata/19900710/18*.dob $TITAN_HOME/clutter
+cp $TITAN_HOME/cdata/19900710/19*.dob $TITAN_HOME/clutter
+
+#
+# run clutter compute program
+#
+
+echo Computing median clutter values ...
+
+clutter_compute -params $TITAN_HOME/params/clutter_compute.test -debug
+
+#
+# run clutter table generation program
+#
+
+echo Creating clutter table ...
+
+clutter_table_generate -params $TITAN_HOME/params/clutter_table_generate.test

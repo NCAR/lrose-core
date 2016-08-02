@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.0b5aGold (X11; I; Linux 1.3.91 i586) [Netscape]">
+</HEAD>
+<BODY>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+<H1>RSL_hdf_to_radar<BR>
+RSL_hdf_to_radar_unQC</H1>
+
+<P>
+<HR></P>
+
+<H3>Synopsis</H3>
+
+<P><B>#include &quot;rsl.h&quot; <BR>
+<A HREF="RSL_radar_struct.html">Radar</A> *RSL_hdf_to_radar(char *infile);</B>
+<BR>
+<B><A HREF="RSL_radar_struct.html">Radar</A> *RSL_hdf_to_radar_unQC(char
+*infile);</B> 
+<HR></P>
+
+<H3>Description</H3>
+
+<P>Reads an HDF file and returns a pointer to the structure <I>Radar</I>.
+The input file is specified by the string <I>infile</I>. If <I>infile</I>
+is NULL, then no action is taken. This is different from other ingest routines
+where stdin is read. HDF files cannot be stdin, because they require seeking..
+The input file may <B>not</B> be compressed.</P>
+
+<P><B>RSL_hdf_to_radar_unQC</B> differs from <B>RSL_hdf_to_radar</B> in
+that both DZ (original uncorrected reflectivity) and CZ (corrected) volumes
+are extracted from the HDF&nbsp;file. Normally, <B>RSL_hdf_to_radar</B>
+returns CZ only. Call one or the other, for ingest efficiency.</P>
+
+<P>The radar structure is, essentially, an array of Volumes. The number
+and type of volumes allocated is automatically determined from the input
+HDF file. 
+<HR></P>
+
+<H3>Return value</H3>
+
+<P>Upon successful completion, <B>RSL_hdf_to_radar</B> returns a pointer
+to the structure <B>Radar</B>. Otherwise, NULL is returned and errno is
+set. 
+<HR></P>
+
+<H3>See also</H3>
+
+<P><A HREF="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar </A>
+<HR></P>
+
+<P>Author: <A HREF="mike.kolander.html">Mike Kolander</A>.</P>
+
+</BODY>
+</HTML>

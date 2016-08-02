@@ -1,0 +1,6 @@
+.deps
+CsuSounding2Spdb
+__makefile.template
+makefile
+makefile.am
+makefile.in

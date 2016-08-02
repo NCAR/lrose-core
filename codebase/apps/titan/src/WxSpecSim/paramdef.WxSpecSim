@@ -1,0 +1,164 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions WxSpecSim
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Dec 2006
+
+commentdef {
+  p_header = "Program name: WxSpecSim";
+  p_text = "WxSpecSim simulates raw IQ data.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "GATE-BY_GATE POWER,VEL,WIDTH";
+}
+
+typedef enum {
+  SPECIFY_DATA, RANDOM_DATA
+} data_mode_t;
+
+paramdef enum data_mode_t {
+  p_default = SPECIFY_DATA;
+  p_descr = "How data is generated.";
+  p_help = "If SPECIFY_DATA, use moments as specified in gate_data[] array. If RANDOM_DATA, randomly generate power, velocity and width data.";
+} data_mode;
+
+typedef struct {
+  double dbm;
+  double vel;
+  double width;
+} gate_data_t;
+
+paramdef struct gate_data_t {
+  p_default = {
+    { -33, 10.0, 3.0 }
+  };
+  p_desription = "The moments data for each gate.";
+  p_help = "The length of this array specifies the number of gates.";
+} gate_data[];
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Number of samples per beam.";
+} nsamples;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of gates of generated data.";
+  p_help = "Only used for RANDOM_DATA. For SPECIFY_DATA, ngates is length of the gate_data array.";
+} ngates;
+
+paramdef double {
+  p_default = -90;
+  p_descr = "Low limit of power (dbm).";
+  p_help = "RANDOM_DATA only.";
+} random_dbm_low;
+
+paramdef double {
+  p_default = -30;
+  p_descr = "High limit of power (dbm).";
+  p_help = "RANDOM_DATA only.";
+} random_dbm_high;
+
+paramdef double {
+  p_default = -20;
+  p_descr = "Low limit of velocity (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_vel_low;
+
+paramdef double {
+  p_default = 20;
+  p_descr = "High limit of velocity (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_vel_high;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Low limit of width (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_width_low;
+
+paramdef double {
+  p_default = 6.0;
+  p_descr = "High limit of width (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_width_high;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to simulate noise with the exponential function.";
+  p_help = "If FALSE a smooth gaussian is produced. If TRUE, the data is exponentially disctibuted about the the gaussian.";
+} use_exponential;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Mean of exponential distribution.";
+} exponential_lambda;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the phase to 0.";
+  p_help = "This has the effect of generating only real parts.";
+} force_zero_phase;
+
+commentdef {
+  p_header = "RADAR DETAILS.";
+}
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "The wavelength of the radar (cm)";
+} wavelength;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "The PRT of the data (miscro-secs)";
+} prt;
+
+paramdef double {
+  p_default = 1.0e-6;
+  p_descr = "Receiver noise (watts)";
+} receiver_noise;
+
+commentdef {
+  p_header = "TRUTH DATA OPTIONS.";
+}
+
+typedef enum {
+  THEORETICAL_TRUTH, FFT_TRUTH, PP_TRUTH
+} truth_method_t;
+
+paramdef enum truth_method_t {
+  p_default = THEORETICAL_TRUTH;
+  p_descr = "Specifies how truth data is determined.";
+  p_help = "THEORETICAL_TRUTH: the theoretical values of p, v amd w used to simulate the spectra. PP_TRUTH: the pulse-pair estimates of the moments. FFT_TRUTH - the spectral estimates of the moments.";
+} truth_method;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write various gate spectra to ASCII files.";
+  p_help = "If true, spectra are written to files in directory spectra_output_dir.";
+} write_spectra_files;
+
+paramdef string {
+  p_default = "./spectra";
+  p_descr = "Spectra file directory.";
+  p_help = "See 'write_spectra_files.";
+} spectra_output_dir;
+

@@ -1,0 +1,232 @@
+#!/usr/bin/perl --
+#
+# This is a small script that ingests
+# MDV satellite data as pushed from RAP.
+# Data files are initially named YYYYMMDD_HHMMSS.mdv,
+# after this script they are named YYYYMMDD/HHMMSS.mdv
+#
+# Originally by Tom Saxen, modified by Niles Oien
+# to write a _latest_data_info file.
+#
+use Getopt::Std qw( getopts );
+use Getopt::Long;
+use File::stat;
+
+
+#
+# Get the needed RAP libraries
+#
+
+use Env qw(RAP_LIB_DIR);
+use Env qw(RAP_SHARED_LIB_DIR);
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+use Toolsa;
+use Time::Local;
+
+# Get the program basename.
+($prog = $0) =~ s|.*/||;
+
+# Unbuffer output.
+$| = 1;
+
+
+$opt_instance = "test";            # Procmap instance
+#$opt_sleep_secs = 15;
+
+$usage =
+    "Usage: $prog [options]\n" .
+    "Options:\n" .
+    "   -help                : Print usage\n" .
+    "   -instance <instance> : Process instance for procmap (default = $opt_instance)\n" .
+    "   -d <dir>             : Directory location to monitor\n" .
+    "   -debug               : Print debug messages\n";
+
+
+#
+# Get the arguments from the command line
+#
+
+$result = &GetOptions('help',
+                      'instance=s',
+                      'd=s',
+                      'debug');
+
+if ($result == 0 ||
+    $opt_help)
+{
+    print $usage;
+    exit 0;
+}
+
+$debug = 1 if defined $opt_debug;   # Print debug messages.
+
+$input_dir = $opt_d;
+
+#
+# Initialize process monitoring
+#
+
+&Toolsa::PMU_auto_init($prog, $opt_instance, 120);
+
+#
+# Set up signal handlers so we unregister from the process mapper
+# when we quit
+#
+
+$SIG{INT} = \&tidy_and_exit;
+$SIG{KILL} = \&tidy_and_exit;
+$SIG{HUP} = \&tidy_and_exit;
+$SIG{TERM} = \&tidy_and_exit;
+
+
+# Miscellaneous variables.
+$ldir = $input_dir;             # Local data directory.
+$interval = 30;                 # Data directory polling interval.
+$time = 0;
+
+# Verify the local directory.
+die "$ldir: no such file or directory" unless -d $ldir;
+
+
+# Monitor the data directory for new files.
+#
+while () {
+
+    # Get the directory's modification time.
+    ($mtime = (stat($ldir))[$ST_MTIME]) || die "stat: $!";
+    $time = time;
+
+    &Toolsa::PMU_force_register("Checking data directory");
+    
+        opendir(DIR, $ldir) || die "Can't open directory $ldir";
+
+        # Skip the current and parent directory entries.
+        @files = grep(!/^\.\.?$/, readdir(DIR));
+        closedir(DIR);
+
+        # Exclude subdirectories.
+        @files = grep(!-d, @files);
+
+        # Exclude everything but data files, which have
+        # filenames ending with the string "mdv".
+        @files = grep(/mdv/, @files);
+
+        # Look for new files.  We'll always send what's lying around
+        # initially.
+        #grep($mark{$_}++, @old_files);
+        #@new_files = grep(!$mark{$_}, @files);
+
+        # Copy the files to a local directory, renaming them.
+        #&retrieve(*new_files);
+        &retrieve(*files);
+
+        # Prepare for the next iteration of the loop.
+        $old_mtime = $mtime;
+        @old_files = @files;
+        #undef %mark;
+        #undef @new_files;
+
+    sleep($interval);
+
+}
+
+
+
+# Pull the list of files to the local directory.
+sub retrieve {
+    local(*files) = @_;
+
+    foreach $rfile (@files) {
+
+        &Toolsa::PMU_force_register("Moving file $rfile");
+
+        #... Wait til the file hasn't been changed for 5 minutes
+        
+        $file_done = (-M "$ldir/$rfile" < 0.0004)? 0: 1;
+        until ($file_done) {
+           sleep 5;
+           &Toolsa::PMU_force_register("Checking for size changes $rfile");
+           $file_done = 1 if (-M "$ldir/$rfile" > 0.00005);
+           # Reset the start time of the script, for testing file ages
+           $^T = time;
+        }
+
+        # New file pathname.
+        $rfile_date = substr( $rfile, 0, 8);
+#
+# If date is before 1970 assume 1900 date, add a century.
+#
+	if ($rfile_date < 19700000){
+	    $rfile_date = $rfile_date + 1000000;
+	}
+        $rfile_hhmm = substr( $rfile, 9, 10);
+        $rfile_ext  = substr( $rfile, 19,3);
+
+        # Create the temporary directory.
+        mkdir("$ldir/$rfile_date", 0775) || die "mkdir: $ldir/$rfile_date: $!"
+            unless -d "$ldir/$rfile_date";
+
+        $newfile = $ldir . "/" . $rfile_date . "/" . $rfile_hhmm . $rfile_ext;
+        ((system("/bin/mv $ldir/$rfile $newfile") >> 8) == 0)
+            || warn "system: mv: $ldir/$rfile: error";
+
+	#
+        # Write the  _latest_data_info file.
+        #
+
+	$year = substr( $rfile, 0, 4); $month = substr( $rfile, 4, ,2);
+	$day = substr( $rfile, 6, 2);  $hour = substr( $rfile, 9,2);
+	$min = substr( $rfile, 11,2);  $sec = substr( $rfile,13,2);
+	if ($year < 1970){
+	    $year = $year + 100;
+	}
+
+	$utime = timegm($sec, $min, $hour, $day, $month-1, $year);
+
+	open SAVEOUT, ">&STDOUT";
+#
+# Use the LdataInformer program to register with the data mapper.
+#
+
+	$dmapTime = substr( $rfile, 0, 14);
+	@args = ("LdataInformer", "-t", $dmapTime, "-d", $ldir);
+
+	system ( args ) == 0
+	    or print "Failed to register with the data mapper.\n";
+
+
+	$OutFile = ">".$ldir . "/_latest_data_info";
+
+#
+# Remove earlier editions to ensure an update if
+# we are writing to a cross mount.
+#
+	system("/bin/rm -f ", $OutFile);
+
+	open STDOUT, $OutFile;
+	print $utime . " " . $year . " " . $month . " " . $day . " " . $hour . " " . $min . " " . $sec . "\n";
+        print "mdv\nnone\nnone\n0\n";
+	close STDOUT;
+
+	open STDOUT,">&SAVEOUT";
+
+
+    }
+}
+
+#
+# Exit in a "tidy" fashion
+#
+
+sub tidy_and_exit
+{
+    my $signame = shift;
+    &Toolsa::PMU_auto_unregister();
+    die "Exiting on signal SIG$signame";
+}
+
+
+
+
+

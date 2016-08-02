@@ -1,0 +1,2 @@
+
+SConscript(['foray01/SConscript', 'foray02/SConscript']);

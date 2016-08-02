@@ -1,0 +1,149 @@
+/**********************************************************************
+ * TDRP params for Airep2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// Program Airep2Spdb.
+//
+// This program reads airep data from ascii input files and stores it in 
+//   spdb format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance for procmap.
+// This program uses this instance when registering with the process 
+//   mapper.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operational mode.
+// Realtime mode - waits for new data; archive mode runs on single file.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data - REALTIME mode.
+// For realtime only - max age of input data for it to be valid. If the 
+//   latest_data_info file is older than this, the program waits for new 
+//   data.
+// Minimum val: 0
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Path for directory to the input lightning files.
+// Type: string
+//
+
+input_dir = "./input";
+
+///////////// st_location_path ////////////////////////
+//
+// Path to station location file.
+// The station location file should contain a station identification 
+//   followed by the latitude and longitude for each station that should 
+//   be added to the airep SPDB.
+// Type: string
+//
+
+st_location_path = "./world_arp_vhf_wpt.loc";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_decoded_spdb //////////////////////
+//
+// Save decoded data out in Spdb.
+// If true, data will be written to decoded_spdb_url.
+// Type: boolean
+//
+
+write_decoded_spdb = TRUE;
+
+///////////// decoded_spdb_url ////////////////////////
+//
+// Spdb URL for decoded airep data.
+// The name of the directory which will be used as the destination for 
+//   the SPDB data.
+// Type: string
+//
+
+decoded_spdb_url = "spdb/airep";
+
+///////////// write_ascii_spdb ////////////////////////
+//
+// Save ascii data out in Spdb.
+// If true, data will be written to ascii_spdb_url.
+// Type: boolean
+//
+
+write_ascii_spdb = TRUE;
+
+///////////// ascii_spdb_url //////////////////////////
+//
+// Spdb URL for ASCII airep data.
+// The name of the directory which will be used as the destination for 
+//   the SPDB data.
+// Type: string
+//
+
+ascii_spdb_url = "spdb/ascii_airep";
+
+///////////// expire_secs /////////////////////////////
+//
+// Data expire period - seconds.
+// In the SPDB data base, the data is set as expired after this period.
+// Type: int
+//
+
+expire_secs = 21600;
+

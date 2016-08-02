@@ -1,0 +1,71 @@
+#! /usr/bin/perl
+
+#
+# script to cleanup ipcs
+#
+
+#	
+# get the current ipc list
+#
+
+open(IPCLIST, "ipcs |");
+
+{
+    
+    $shm_mode = 0;
+    $sem_mode = 0;
+    $msg_mode = 0;
+    
+    while ($line = <IPCLIST>) {
+
+	$id = 0;
+	$doit = 0;
+	chop($line);
+	
+#	if ($line =~ /Shared Memory Segments/) {
+	if ($line =~ /egment/) {
+	    
+	    $shm_mode = 1;
+	    $sem_mode = 0;
+	    $msg_mode = 0;
+	    
+#	} elsif ($line =~ /Semaphore Arrays/) {
+	} elsif ($line =~ /maphor/) {
+	    
+	    $shm_mode = 0;
+	    $sem_mode = 1;
+	    $msg_mode = 0;
+	    
+#	} elsif ($line =~ /Message Queues/) {
+	} elsif ($line =~ /essage/) {
+	    
+	    $shm_mode = 0;
+	    $sem_mode = 0;
+	    $msg_mode = 1;
+	    
+	} elsif ($line =~ /^key/) {
+	    
+	} else {
+	    
+	    ($key, $id, $owner, $perms) = split(/ /, $line);
+	    $doit = 1;
+	    
+	}
+	
+	if ($doit == 1) {
+	    if ($shm_mode == 1) {
+		print "-------->>> ipcrm shm $id", "\n";
+		system("ipcrm shm $id");
+	    } elsif ($sem_mode == 1) {
+		print "-------->>> ipcrm sem $id", "\n";
+		system("ipcrm sem $id");
+	    } elsif ($msg_mode == 1) {
+		print "-------->>> ipcrm msg $id", "\n";
+		system("ipcrm msg $id");
+	    }
+	    
+	}
+
+    }
+
+}

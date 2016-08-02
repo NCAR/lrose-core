@@ -1,0 +1,494 @@
+/**********************************************************************
+ * TDRP params for ./Grib2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// Grib2Mdv PARAMETER FILE.
+//
+// Grib2Mdv creates MDV and/or SPDB data from RUC2 data files.  RUC2 
+//   data files are described on the Web at
+
+//        http://maps.fsl.noaa.gov/ruc2.tpb.html.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Instance.
+// Process instance for registration with process mapper.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// runOnOldRuc40File ///////////////////////
+//
+// Flag to indicate that the input files are from the old RUC2 40km data.
+// If set, the program will recognize the water vapor mixing ratio 
+//   (WVMR) field. In the old GRIB files WVMR's field code is 185, which 
+//   conflicts with the GRIB standard. The field code 185 is supposed to 
+//   represent Turbulence SIGMET/AIRMET. Note that humidity mixing ratio 
+//   supercedes WVMR in the latest RUC output.
+// Type: boolean
+//
+
+runOnOldRuc40File = TRUE;
+
+//======================================================================
+//
+// INPUT DATA PARAMETERS.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Directory which contains input RUC 2 files. Used only if files are 
+//   not specified on the command line.
+// Type: string
+//
+
+input_dir = "/raven_data1/cunning/raw/ruc/hybrid/f03/20010815";
+
+///////////// input_suffix ////////////////////////////
+//
+// Input file suffix.
+// Input file suffixes will be checked against this string. Used only if 
+//   files are not specified on the command line.
+// Type: string
+//
+
+input_suffix = ".RUCb.grb";
+
+///////////// max_input_data_age //////////////////////
+//
+// Max age (in seconds) of input data.
+// Used only if files are not specified on the command line.
+// Minimum val: 60
+// Type: long
+//
+
+max_input_data_age = 10800;
+
+//======================================================================
+//
+// MDV OUTPUT PARAMETERS.
+//
+//======================================================================
+ 
+///////////// write_forecast //////////////////////////
+//
+// Write mdv files in a forecast directory structure.
+// If this is true, mdv files will be written in the rap forecast 
+//   directory structure.  Note that if write_non_forecast is also set to 
+//   true, two mdv files will be written.
+// Type: boolean
+//
+
+write_forecast = FALSE;
+
+///////////// forecast_mdv_url ////////////////////////
+//
+// Url for mdv files in forecast structure.
+// Type: string
+//
+
+forecast_mdv_url = "mdvp:://localhost::./mdv";
+
+///////////// write_non_forecast //////////////////////
+//
+// Write mdv files in a non-forecast directory structure.
+// If this is true, mdv files will be written in the regular 
+//   (non-forecast) rap directory structure.  Note that if write_forecast 
+//   is also set to true, two mdv files will be written.  Note also that 
+//   this option allows for overwriting files, since the forecast time 
+//   will be used as the data time in this case.  This is a temporary 
+//   option to allow for easier display of the data.
+// Type: boolean
+//
+
+write_non_forecast = TRUE;
+
+///////////// non_forecast_mdv_url ////////////////////
+//
+// Url for mdv files in non-forecast structure.
+// Type: string
+//
+
+non_forecast_mdv_url = "mdv/rucTest_20km_b";
+
+///////////// non_forecast_timestamp //////////////////
+//
+// This parameter allows user to timestamp non-forecast mdv files based 
+//   on the model's run time or the forecast time.
+// The choices are TIMESTAMP_GEN_TIME and TIMESTAMP_FCAST_TIME.
+//
+// Type: enum
+// Options:
+//     TIMESTAMP_GEN_TIME
+//     TIMESTAMP_FCAST_TIME
+//
+
+non_forecast_timestamp = TIMESTAMP_FCAST_TIME;
+
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_info = "This MDV file was created by RUC 2.";
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "RUC 2 model output.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_source = "RUC 2 output.";
+
+///////////// mdv_proj_type ///////////////////////////
+//
+// Projection type for the output mdv files.
+//
+// Type: enum
+// Options:
+//     OUTPUT_PROJ_FLAT
+//     OUTPUT_PROJ_LATLON
+//     OUTPUT_PROJ_LAMBERT_CONF
+//     OUTPUT_PROJ_NATIVE
+//
+
+//mdv_proj_type = OUTPUT_PROJ_NATIVE;
+mdv_proj_type = OUTPUT_PROJ_LATLON;
+
+///////////// output_origin ///////////////////////////
+//
+// Origin of output grid.
+// Used with OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT_CONF.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+output_origin = { 40, -104 };
+
+///////////// output_rotation /////////////////////////
+//
+// rotation of output grid.
+// Used with OUTPUT_PROJ_FLAT only.
+// Type: float
+//
+
+output_rotation = 0;
+
+///////////// output_parallel /////////////////////////
+//
+// Standard parallels of output projection.
+// Used with OUTPUT_PROJ_LAMBERT_CONF only.
+//
+// Type: struct
+//   typedef struct {
+//      double lat1;
+//      double lat2;
+//   }
+//
+//
+
+output_parallel = { 25, 25 };
+
+///////////// output_grid /////////////////////////////
+//
+// Output grid parameters.
+// The grid params for the output grid.  Note that the units of minz and 
+//   dz will depend on the type of output levels selected.  If natural 
+//   levels are selected, the units will in level numbers, and the value 
+//   of dz will be overridden.  Note also that if the output grid is 
+//   lat/lon, the units of minx, miny, dx and dy are in degrees; otherwise 
+//   they are in km.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      int nz;
+//      double minx;
+//      double miny;
+//      double minz;
+//      double dx;
+//      double dy;
+//      double dz;
+//   }
+//
+//
+
+// 20 km lat/lon grid parameters
+//output_grid = {
+//    nx = 366,
+//    ny = 184,
+//    nz = 50,
+//    minx = -130,
+//    miny = 20,
+//    minz = 0.0,
+//    dx = 0.191195,
+//    dy = 0.191195,
+//    dz = 1
+//};
+
+// 40 km lat/lon grid parameters
+output_grid = {
+    nx = 183,
+   ny = 92,
+    nz = 50,
+    minx = -130,
+    miny = 20,
+    minz = 0.0,
+    dx = 0.38239,
+    dy = 0.38239,
+    dz = 1
+};
+
+///////////// output_fields ///////////////////////////
+//
+// List of output fields, which are descibed by the field parameter, 
+//   vertical level type and output units. The list of GRIB parameters 
+//   are:
+// PRESSURE=1                        PRESSURE_TENDENCY=3
+// GEOPOTENTIAL_HEIGHT=7             CLOUD_HEIGHT=8
+// TEMPERATURE=11                    POTENTIAL_TEMPERATURE=13
+// EQUIVALENT_POTENTIAL_TEMP=14      DEW_POINT_TEMPERATURE=17
+// DEW_POINT_DEPRESSION=18           VISIBILITY=20 
+// U_WIND=33                         V_WIND=34
+// VERTICAL_VELOCITY=39              SPECIFIC_HUMIDITY=512
+// RELATIVE_HUMIDITY=52              HUMIDITY_MIXING_RATIO=53
+// PRECIPITABLE_WATER=54             PRECIPITATION_RATE=59
+// TOTAL_PRECIPITATION=61            LARGE_SCALE_PRECIPITATION=62
+// CONVECTIVE_PRECIPITATION=63       WATER_EQIV_ACCUM_SNOW_DEPTH=65
+// SNOW_DEPTH=66                     LOW_CLOUD_COVER=73
+// MED_CLOUD_COVER=74                HIGH_CLOUD_COVER=75 
+// BEST_LIFTED_INDEX=77              ALBEDO=84
+// SOIL_TEMPERATURE=85               SOIL_MOISTURE_CONTENT=86
+// SNOW_MELT=99                      SHORTWAVE_RAD_AT_SURFACE=111
+// LONGWAVE_RAD_AT_SURFACE=112       SHORTWAVE_RAD_AT_TOP=113
+// LONGWAVE_RAD_AT_TOP=114           LATENT_HEAT_FLUX=121
+// SENSIBLE_HEAT_FLUX=122            MEAN_SEA_LEVEL_PRESS_SAR=128
+// MEAN_SEA_LEVEL_PRESS_MAPS=129     SURFACE_LIFTED_INDEX=131
+// HORZ_MOISTURE_CONVERGENCE=135     CATEGORICAL_RAIN=140
+// CATEGORICAL_FREEZING_RAIN=141     CATEGORICAL_ICE_PELLETS=142
+// CATEGORICAL_SNOW=143              VOL_SOIL_MOISTURE_CONTENT=144
+// POTENTIAL_VORTICITY=149           CLOUD_WATER=153
+// CONVECTIVE_INHIBITION=156         CONVEC_AVIAL_POT_ENERGY=157
+// TURBULENT_KINETIC_ENERGY=158      RAIN_WATER_MIXING_RATIO=170
+// SNOW_MIXING_RATIO=171             MOMENTUM_FLUX=172
+// ICE_MIXING_RATIO=178              GRAUPEL_MIXING_RATIO=179
+// WATER_VAPOR_MIXING_RATIO=185      ICING_SIGMET_AIRMET=186
+// LIGHTNING=187                     RATE_WATER_CANOPY2GROUND=188
+// VIRTUAL_POTENTIAL_TEMP=189        STORM_RELATIVE_HELICITY=190
+// U_STORM_MOTION=196                V_STORM_MOTION=197
+// NUM_CONCEN_ICE_PARTICLES=198      DIRECT_EVAPORATION_BARE_SOIL=199
+// DOWN_SHORTWAVE_RAD_FLUX=204       DOWN_LONGWAVE_RAD_FLUX=205
+// UP_SHORTWAVE_RAD_FLUX=211         UP_LONGWAVE_RAD_FLUX=212
+// PBL_HEIGHT=221                    PLANT_CANOPY_SURFACE_WATER=223
+// SOIL_TYPE=224                     VEGETATION_TYPE=225
+// SNOW_PHASE_CHANGE_HEAT_FLUX=229   BASEFLOW_GRDWATER_RUNOFF=234
+// STORM_SURFACE_RUNOFF=235          SNOW_TEMPERATURE=239
+// DRAG_COEFFICIENT=253              GUST_WIND_SPEED=255
+
+
+// The list of available vertical levels are:
+// GROUND_OR_WATER_SURFACE=1      CLOUD_BASE_LEVEL=2
+// CLOUD_TOP_LEVEL=3              LEVEL_OF_0_DEGREE_ISOTHERM=4
+// MAXIMUM_WIND_LEVEL=6           TROPOPAUSE=7
+// ISOBARIC=100                   MEAN_SEA_LEVEL=102
+// SPECF_HEIGHT_ABOVE_GROUND=105  HYBRID=109
+// DEPTH_BELOW_SURFACE=111
+// LAYER_BETWEEN_TWO_DEPTHS_BELOW_SURFACE=112
+// LAYER_BETWEEN_TWO_LEVELS_AT_SPECIFIED_PRESSURES=116
+// ENTIRE_ATMOSPHERE=200          HIGHEST_TROPO_FREEZE_LEVEL=204
+// CONVECTIVE_CLOUD_TOP_LEVEL=243 MAXIMUM_EPOT_LEVEL=246
+// EQUILIBRIUM_LEVEL=247
+
+
+// The list of unit conversions are:
+// NO_CHANGE            -- no change to units
+// MPS_TO_KNOTS         -- convert m/s to knots
+// M_TO_KM              -- convert meters to kilometers
+// M_TO_100FT           -- convert meters to 100's of feet, fligh levels
+// PASCALS_TO_MBAR      -- convert pascals to millibars
+// KELVIN_TO_CELSIUS    -- convert degrees kelvin to to degrees celcius
+// KGPKG_TO_GPKG        -- convert kilogram per kilogram to gram
+//                         per kilogram
+// PERCENT_TO_FRACTION  -- convert percentage to fraction, values
+//                         between 0 and 1
+
+
+// The intgers following each GRIB field and vertical type are the 
+//   actual values used in the GRIB files. They are present to provide a 
+//   reference for the GRIB and RUC documentation. For a more detailed 
+//   description of the GRIB fields and types of vertical levels see the 
+//   listings at http://maps.fsl.noaa.gov/ruc2gribtable.html. For a 
+//   description of the GRIB file format see the documentation at 
+//   http://www.wmo.ch/web/www/reports/Guide-binary-2.html.
+//
+// Type: struct
+//   typedef struct {
+//      param_id_t param_id;
+//        Options:
+//          PRESSURE
+//          PRESSURE_TENDENCY
+//          GEOPOTENTIAL_HEIGHT
+//          CLOUD_HEIGHT
+//          TEMPERATURE
+//          POTENTIAL_TEMPERATURE
+//          EQUIVALENT_POTENTIAL_TEMP
+//          DEW_POINT_TEMPERATURE
+//          DEW_POINT_DEPRESSION
+//          VISIBILITY
+//          U_WIND
+//          V_WIND
+//          VERTICAL_VELOCITY
+//          SPECIFIC_HUMIDITY
+//          RELATIVE_HUMIDITY
+//          HUMIDITY_MIXING_RATIO
+//          PRECIPITABLE_WATER
+//          PRECIPITATION_RATE
+//          TOTAL_PRECIPITATION
+//          LARGE_SCALE_PRECIPITATION
+//          CONVECTIVE_PRECIPITATION
+//          WATER_EQIV_ACCUM_SNOW_DEPTH
+//          SNOW_DEPTH
+//          LOW_CLOUD_COVER
+//          MED_CLOUD_COVER
+//          HIGH_CLOUD_COVER
+//          BEST_LIFTED_INDEX
+//          ALBEDO
+//          SOIL_TEMPERATURE
+//          SOIL_MOISTURE_CONTENT
+//          SNOW_MELT
+//          SHORTWAVE_RAD_AT_SURFACE
+//          LONGWAVE_RAD_AT_SURFACE
+//          SHORTWAVE_RAD_AT_TOP
+//          LONGWAVE_RAD_AT_TOP
+//          LATENT_HEAT_FLUX
+//          SENSIBLE_HEAT_FLUX
+//          MEAN_SEA_LEVEL_PRESS_SAR
+//          MEAN_SEA_LEVEL_PRESS_MAPS
+//          SURFACE_LIFTED_INDEX
+//          HORZ_MOISTURE_CONVERGENCE
+//          CATEGORICAL_RAIN
+//          CATEGORICAL_FREEZING_RAIN
+//          CATEGORICAL_ICE_PELLETS
+//          CATEGORICAL_SNOW
+//          VOL_SOIL_MOISTURE_CONTENT
+//          POTENTIAL_VORTICITY
+//          CLOUD_WATER
+//          CONVECTIVE_INHIBITION
+//          CONVEC_AVIAL_POT_ENERGY
+//          TURBULENT_KINETIC_ENERGY
+//          RAIN_WATER_MIXING_RATIO
+//          SNOW_MIXING_RATIO
+//          MOMENTUM_FLUX
+//          ICE_MIXING_RATIO
+//          GRAUPEL_MIXING_RATIO
+//          WATER_VAPOR_MIXING_RATIO
+//          ICING_SIGMET_AIRMET
+//          LIGHTNING
+//          RATE_WATER_CANOPY2GROUND
+//          VIRTUAL_POTENTIAL_TEMP
+//          STORM_RELATIVE_HELICITY
+//          U_STORM_MOTION
+//          V_STORM_MOTION
+//          NUM_CONCEN_ICE_PARTICLES
+//          DIRECT_EVAPORATION_BARE_SOIL
+//          DOWN_SHORTWAVE_RAD_FLUX
+//          DOWN_LONGWAVE_RAD_FLUX
+//          UP_SHORTWAVE_RAD_FLUX
+//          UP_LONGWAVE_RAD_FLUX
+//          PBL_HEIGHT
+//          PLANT_CANOPY_SURFACE_WATER
+//          SOIL_TYPE
+//          VEGETATION_TYPE
+//          SNOW_PHASE_CHANGE_HEAT_FLUX
+//          BASEFLOW_GRDWATER_RUNOFF
+//          STORM_SURFACE_RUNOFF
+//          SNOW_TEMPERATURE
+//          DRAG_COEFFICIENT
+//          GUST_WIND_SPEED
+//      level_id_t level_id;
+//        Options:
+//          GROUND_OR_WATER_SURFACE
+//          CLOUD_BASE_LEVEL
+//          CLOUD_TOP_LEVEL
+//          LEVEL_OF_0_DEGREE_ISOTHERM
+//          MAXIMUM_WIND_LEVEL
+//          TROPOPAUSE
+//          ISOBARIC
+//          MEAN_SEA_LEVEL
+//          SPECF_HEIGHT_ABOVE_GROUND
+//          HYBRID
+//          DEPTH_BELOW_SURFACE
+//          LAYER_BETWEEN_TWO_DEPTHS_BELOW_SURFACE
+//          LAYER_BETWEEN_TWO_LEVELS_AT_SPECIFIED_PRESSURES
+//          ENTIRE_ATMOSPHERE
+//          HIGHEST_TROPO_FREEZE_LEVEL
+//          CONVECTIVE_CLOUD_TOP_LEVEL
+//          MAXIMUM_EPOT_LEVEL
+//          EQUILIBRIUM_LEVEL
+//      out_units_t out_units;
+//        Options:
+//          NO_CHANGE
+//          MPS_TO_KNOTS
+//          M_TO_KM
+//          M_TO_100FT
+//          PASCALS_TO_MBAR
+//          KELVIN_TO_CELSIUS
+//          KGPKG_TO_GPKG
+//          PERCENT_TO_FRACTION
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+{U_WIND, HYBRID, NO_CHANGE},
+{V_WIND, HYBRID, NO_CHANGE},
+{GEOPOTENTIAL_HEIGHT, HYBRID, NO_CHANGE},
+{CONVEC_AVIAL_POT_ENERGY, GROUND_OR_WATER_SURFACE, NO_CHANGE},
+{CONVECTIVE_INHIBITION, GROUND_OR_WATER_SURFACE, NO_CHANGE},
+{PRESSURE, HYBRID, PASCALS_TO_MBAR},
+{WATER_VAPOR_MIXING_RATIO, HYBRID, KGPKG_TO_GPKG},
+{VIRTUAL_POTENTIAL_TEMP, HYBRID, KELVIN_TO_CELSIUS},
+{VERTICAL_VELOCITY, HYBRID, PASCALS_TO_MBAR}
+};
+

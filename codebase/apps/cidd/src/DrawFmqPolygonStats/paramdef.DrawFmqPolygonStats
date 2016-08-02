@@ -1,0 +1,349 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.DrawFmqPolygonStats
+ *
+ * This file contains the TDRP parameter definitions for
+ * DrawFmqPolygonStats
+ */
+
+
+commentdef
+{
+  p_header = "DrawFmqPolygonStats";
+  p_text = "This program works with CIDD to allow the user to enter a polygon "
+           "that is then used to calculate some statistics in the defined "
+           "fields.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_EXTRA,
+  DEBUG_VERBOSE
+} debug_level_t;
+
+paramdef enum debug_level_t
+{
+  p_descr = "Debug level";
+  p_default = DEBUG_OFF;
+} debug_level;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Input/output parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT PARAMETERS";
+};
+
+typedef enum
+{
+  INPUT_DRAW_FMQ,
+  INPUT_GEN_POLY_SPDB
+} input_type_t;
+
+paramdef enum input_type_t
+{
+  p_descr = "Type of program input";
+  p_help = "\tINPUT_DRAW_FMQ - The input comes from a CIDD draw fmq.\n"
+           "\tINPUT_GEN_POLY_SPDB - The input comes from a GenPoly polygon "
+           "statistics SPDB database. "
+           "This is used to regenerate statistics for previously entered "
+           "polygons.\n";
+  p_default = INPUT_DRAW_FMQ;
+} input_type;
+
+paramdef string
+{
+  p_descr = "URL for the CIDD drawing FMQ";
+  p_help = "Must match the FMQ URL specified in the dexport_info parameter "
+           "in the associated CIDD parameter file.\n"
+           "Used only if input_type is set to INPUT_DRAW_FMQ.";
+  p_default = "fmqp:://localhost::fmq/poly_stats";
+} cidd_draw_fmq;
+
+paramdef string
+{
+  p_descr = "URL for the input GenPoly SPDB database";
+  p_help = "Used only if input_type is set to INPUT_GEN_POLY.";
+  p_default = "spdbp:://localhost::spdb/polygon_stats_orig";
+} input_gen_poly_url;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use the same polygon for all "
+            "vertical levels.";
+  p_help = "If true, the entered polygon will be applied to all elevation "
+           "angles for that radar volume. "
+           "In this case, the user-entered polygon ID number will be used "
+           "for the polygon at the lowest elevation angle and this number "
+           "will be incremented for the polygons at higher elevation angles. "
+           "The polygon may be changed by entering another polygon with "
+           "the same ID number.\n"
+           "If false, the user must enter a different polygon at each "
+           "elevation angle of the data.\n"
+           "Used only if input_type is set to INPUT_DRAW_FMQ. "
+           "If input type is INPUT_GEN_POLY_SPDB then each polygon in the "
+           "SPDB database will be applied only to the elevation angle for "
+           "that polygon. ";
+  p_default = false;
+} apply_polygon_to_all_elevations;
+
+paramdef string
+{
+  p_descr = "Reprocessing start time";
+  p_help = "Used only if input_type is set to INPUT_GEN_POLY.";
+  p_default = "2008 2 2 0 0 0";
+} start_time;
+
+paramdef string
+{
+  p_descr = "Reprocessing end time";
+  p_help = "Used only if input_type is set to INPUT_GEN_POLY.";
+  p_default = "2008 2 3 0 0 0";
+} end_time;
+
+paramdef string
+{
+  p_descr = "URL for the MDV grids used to calculate the statistics.";
+  p_help = "These grids must be PPI grids.";
+  p_default = "mdvp:://localhost::mdv/data";
+} input_mdv_url;
+
+paramdef long
+{
+  p_descr = "Search margin, in seconds, for the input MDV data files.";
+  p_default = 600;
+} mdv_search_margin;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use field names or field numbers "
+            "to identify the fields in the input MDV files.";
+  p_help = "All fields must be identified in the same manner.";
+  p_default = true;
+} use_mdv_field_names;
+
+paramdef string
+{
+  p_descr = "URL for the GenPoly SPDB database that will contain the "
+            "entered polygon and the associated statistics.";
+  p_default = "spdbp:://localhost::spdb/poly_stats";
+} output_spdb_url;
+
+typedef struct
+{
+  string field_name;
+  int field_num;
+  boolean is_log;
+} stat_fields_t;
+
+paramdef struct stat_fields_t
+{
+  p_descr = "Statistics will be calculated for each of these fields.";
+  p_help = "\tfield_name - The name of the field as it appears in the MDV "
+           "file. "
+           "Used only if use_mdv_field_names is set to true.\n"
+           "\tfield_num - The 0-based index of the field in the MDV file. "
+           "Used only if use_mdv_field_names is set to false.\n"
+           "\tis_log - Flag indicating whether this is a dBz value. "
+           "If true, the statistics will be calculated on the inverse log "
+           "of the data values.\n";
+  p_default = { { "RHO", 0, false } };
+} stat_fields[];
+
+typedef struct
+{
+  string field_name;
+  int field_num;
+} dbz_fields_t;
+
+paramdef struct dbz_fields_t
+{
+  p_descr = "Dbz field to use in calculating the statistics on the ZDR field.";
+  p_help = "Statistics will be calculated on this field as well, so it "
+           "shouldn't be included in the stat_fields list.";
+  p_default = { "DBZ", 0 };
+} dbz_field;
+
+paramdef struct dbz_fields_t
+{
+  p_descr = "Zdr field";
+  p_help = "The dbz_field will be used to separate the ZDR values into "
+           "their horizontal and vertical components for statistics "
+           "calculations. "
+           "The output will include statistics for the horizontal components "
+           "(the dbz_field), the veritcal components and ZDR itself.";
+  p_default = { "ZDR", 0 };
+} zdr_field;
+
+typedef enum
+{
+  THRESH_GREATER_THAN,
+  THRESH_GREATER_THAN_OR_EQUAL,
+  THRESH_LESS_THAN,
+  THRESH_LESS_THAN_OR_EQUAL,
+  THRESH_EQUAL,
+  THRESH_NOT_EQUAL
+} thresh_compare_t;
+
+typedef struct
+{
+  string field_name;
+  int field_num;
+  thresh_compare_t comparison;
+  double value;
+} threshold_field_info_t;
+
+paramdef struct threshold_field_info_t
+{
+  p_descr = "Fields to use for thresholding.";
+  p_help = "This field must be in the MDV file with the statistics fields.\n"
+           "\tfield_name - The name of the field as it appears in the MDV "
+           "file. "
+           "Used only if use_mdv_field_names is set to true.\n"
+           "\tfield_num - The 0-based index of the field in the MDV file. "
+           "Used only if use_mdv_field_names is set to false.\n"
+           "\tcomparison - Comparison to use on the threshold field. "
+           "For example, if this is set to THRESH_GREATER_THAN, then the "
+           "statistics will only be calculated using the statistic field "
+           "values with in the polygon where the threshold field value is "
+           "greater than the specified threshold value.\n"
+           "\tvalue - Value to use for thresholding.\n"
+           "Note that data values where the threshold field is missing "
+           "will not be included in the calculated statistics.\n";
+  p_default = { { "DBZ", 0, THRESH_GREATER_THAN_OR_EQUAL, 10.0 } };
+} threshold_fields[];
+
+paramdef struct threshold_field_info_t
+{
+  p_descr = "List of threshold fields to use when calculating the drop size "
+            "statistics.";
+  p_help = "The grid values must satisfy the threhsold_field_info criteria "
+           "along with all of these criteria in order to be included in the "
+           "drop size statistic calculations.";
+  p_default = { { "RHOHV", 0, THRESH_GREATER_THAN_OR_EQUAL, 0.95 } };
+} dropsize_thresh_fields[];
+
+paramdef double
+{
+  p_descr = "Minimum ZDR value used when calculating dropsize statistics.";
+  p_help = "If the ZDR value is greater than this value, then this value "
+           "will be used in the calculations instead.";
+  p_default = 0.0;
+} min_dropsize_zdr;
+
+paramdef double
+{
+  p_descr = "Maximum ZDR value used when calculating dropsize statistics.";
+  p_help = "If the ZDR value is greater than this value, then this value "
+           "will be used in the calculations instead.";
+  p_default = 4.0;
+} max_dropsize_zdr;
+
+
+/***********************************************************************
+ * Discrete field statistics
+ */
+
+commentdef
+{
+  p_header = "DISCRETE FIELD STATISTICS";
+};
+
+typedef struct
+{
+  string field_name;
+  int field_num;
+} discrete_fields_t;
+
+paramdef struct discrete_fields_t
+{
+  p_descr = "List of discrete fields to process. "
+            "These fields will have mode and a percentage of each discrete "
+            "value calculated and included in the SPDB database. "
+            "They will also be included in the histogram output if that is "
+            "requested.";
+  p_help = "\tfield_name - The name of the field as it appears in the MDV "
+           "file. "
+           "Used only if use_mdv_field_names is set to true.\n"
+           "\tfield_num - The 0-based index of the field in the MDV file. "
+           "Used only if use_mdv_field_names is set to false.\n";
+  p_default = { { "PID", 0 } };
+} discrete_fields[];
+
+
+/***********************************************************************
+ * Histogram parameters
+ */
+
+commentdef
+{
+  p_header = "HISTOGRAM PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to write the polygon histograms to "
+            "a file.";
+  p_default = false;
+} write_histogram_file;
+
+paramdef string
+{
+  p_descr = "Full path for the histogram file.";
+  p_help = "Used only if write_histogram_file is set to true.";
+  p_default = "./histograms.txt";
+} histogram_file_path;

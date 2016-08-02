@@ -1,0 +1,168 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "An updated version of mdv_repeat_day that can work\n"
+	"across URL's and handle forecast MDV data.\n\nNiles Oien June 2005\n\n"
+	"The basic idea here is that the input is one day's worth of\n"
+	"archived MDV data, and this day is replayed again and again\n"
+	"in realtime. This can be useful for simulations for testing\n"
+	"downstream processing, demos, etc.";
+
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_ON, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef int {
+  p_min = 0;
+  p_default = 60; 
+  p_private = FALSE;
+  p_descr = "Time to delay between checking input data to see if\n"
+	"any of it is current enough to write, seconds.";
+  p_help = "Time to sleep between checks.";
+} Delay;     
+               
+paramdef string {
+  p_default = ".";
+  p_private = FALSE;
+  p_descr = "URL where we find the single day of MDV data to replay.";
+  p_help = "Input data source.";
+} InUrl;
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+} date_t;
+
+paramdef struct date_t {
+  p_descr = "Date to replay again and again from input URL.";
+  p_help = "Data are replayed for this date.";
+  p_default = { 2005, 01, 25 };
+} date;
+
+paramdef string {
+  p_default = ".";
+  p_private = FALSE;
+  p_descr = "Place to write data to.";
+  p_help = "Output URL.";
+} OutUrl;
+
+paramdef string {
+  p_default = "primary";
+  p_private = FALSE;
+  p_descr = "Single string value";
+  p_help = "ProcMap instance.";
+} instance;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "Option to write data in forecast mode. Do this if\n"
+	"you have forecast data. If your input files have\n"
+	"names like 20040501/g_160000/f_00014400.mdv then set\n"
+	"this to TRUE, if the input data files have names\n"
+	"like 20040501/203245.mdv then set this to FALSE";
+  p_help = "Useful for model data.";
+} forecastMode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "Option to try to catch up on startup, ie. if the\n"
+	"program is started at 23:00 then all data for the day\n"
+	"up to that time will be processed.";
+  p_help = "Generally best not to do this since data will be written\n"
+	"out very fast during the startup phase which may break downstream\n"
+	"processing. If you chose to do this you may want to set fileWriteDelay\n"
+	"to be non-zero so that downstream processing can catch up.";
+} catchUpOnStartup;
+
+paramdef int {
+  p_default = 0;
+  p_private = FALSE;
+  p_descr = "Number of seconds to delay after writing MDV output.";
+  p_help = "May be useful for realtime simulations, especially if\n"
+	"catchUpOnStartup is TRUE. May also be useful if processing\n"
+	"forecast model data, since otherwise all the valid times for\n"
+	"a given gen time will be written out in very rapid succession.\n"
+	"Of course, that may be what happens in the actual realtime system,\n"
+	"so that may be desireable.";
+} fileWriteDelay;
+
+paramdef int {
+  p_default = 0;
+  p_private = FALSE;
+  p_descr = "Simulated realtime delay, seconds.";
+  p_help = "If set to 900 seconds == 15 minutes then data timestamped\n"
+	"at, say, 23:00 will not be written until 23:15 at the earliest.\n\n"
+	"Note that the realtimeDelay can be made negative if\n"
+	"for some reason you want to simulate data coming in\n"
+	"a little too early - unfortunately unlikely in actual\n"
+	"realtime systems (otherwise Niles would patent it).";
+} realtimeDelay;
+
+
+typedef struct {
+  boolean moveOrigin;
+  double newLat;
+  double newLon;
+} moveOrigin_t;
+  
+paramdef struct moveOrigin_t {
+
+  p_default = { FALSE, 41, -97.0 };
+  p_private = FALSE;
+  p_descr = "Allows user to move the origin.";
+  p_help = "With this, one day's worth of radar data can be\n"
+           "moved all over the place to simulate multiple\n"
+           "radars.";
+} moveOrigin;
+
+typedef struct {
+  boolean addTimeOffset;
+  int timeOffset;
+} addTimeOffset_t;
+  
+paramdef struct addTimeOffset_t {
+
+  p_default = { FALSE, 0 };
+  p_private = FALSE;
+  p_descr = "Allows user to adjust the data time somewhat before output.";
+  p_help = "Default is not to do this. Specifying a time offset of\n"
+           "300 seconds (5 minutes) means that the input files\n"
+           "083000.mdv will appear as 082500.mdv on output.";
+} addTimeOffset;
+
+
+

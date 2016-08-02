@@ -1,0 +1,36 @@
+/*********************************************************
+ * parameter definitions
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Jan 1996
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to print file";
+} print_file;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to add projected area runs";
+} add_proj_runs;
+
+
+

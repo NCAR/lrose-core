@@ -1,0 +1,16 @@
+# -*- python -*-
+#
+#
+
+env  = Environment(options=buildOptions, CCFLAGS='-g', LDFLAGS='-g', LINKFLAGS='-g');
+
+sources  = ['main.cpp'];
+
+env.ParseConfig('python-config --cflags')
+env.ParseConfig('python-config --ldflags')
+
+progNode  = env.Program('go',source = sources)
+
+env.Default([progNode,localInstallNode])
+
+

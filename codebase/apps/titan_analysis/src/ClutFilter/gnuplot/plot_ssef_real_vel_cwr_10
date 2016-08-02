@@ -1,0 +1,6 @@
+set title "VELOCITY, SSEF using real spectra, CWR 10 dB"
+set xlabel "Vel truth (m/s)" 
+set ylabel "Vel filtered (m/s)"
+set xrange [-30:30]
+set yrange [-30:30]
+plot 'ssef_real_cwr_10.out' using 4:13 title ''

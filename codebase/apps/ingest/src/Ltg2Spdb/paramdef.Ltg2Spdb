@@ -1,0 +1,357 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for Ltg2Spdb
+ *
+ * Mike Dixon, RAL, NCAR, Boulder, CO, USA
+ *
+ * Sept 2005
+ *
+ */
+
+commentdef {
+  p_header = "Ltg2Spdb reads LTG records from ASCII files, converts them to LTG_strike_t format (rapformats library) and stores them in SPDB. The input format is variable and controlled by the param file.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In this mode it is optional to watch for a latest_data_info file. In ARCHIVE mode, it processes all of the data files in the input directory between the start and end times set on the command line. In FILELIST mode, it processes all of the files in the list specified on the command line. In FILELIST mode paths must be fully qualified with respect to the date and time - so if each date has a separate subdirectory the date part of the path must be included.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./raw/ltg";
+  p_descr = "Input directory";
+  p_help = "Directory where input data files can be found.";
+} input_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, only checks input_dir for subdirs of the form YYYYMMDD";
+  p_help = "Only in REALTIME mode with latest_data_info_avail FALSE.";
+} strict_subdir_check;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, check file name contains specified sub-string.";
+  p_help = "See file_match_string.";
+} file_name_check;
+
+paramdef string {
+  p_default = "ltg";
+  p_descr = "Input filename match string";
+  p_help = "Files must contain this string to be processed";
+} file_match_string;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to check that LTG strike is within a bounding box.";
+} checkBoundingBox;
+
+typedef struct {
+  double min_lat;
+  double max_lat;
+  double min_lon;
+  double max_lon;
+} bbox_t;
+
+paramdef struct bbox_t {
+  p_default = { -90.0, 90.0, -180.0, 180.0 };
+  p_descr = "Bounding box to check if checkBoundingBox is TRUE.";
+  p_help = "Only data which falls inside this box will be stored.";
+} boundingBox;
+
+commentdef {
+  p_header = "INPUT FORMAT.";
+}
+
+typedef enum {
+  FORMAT_1,
+  FORMAT_2,
+  FORMAT_3,
+  FORMAT_4,
+  UALF_LF_1,
+  UALF_LF_1B,
+  BOM_AXF,
+  WWLDN,
+  WWLLN,
+  NAPLN,
+  NLDN_BINARY,
+  AOAWS_NETCDF,
+  KSC
+} input_format_t;
+
+paramdef enum input_format_t {
+  p_default = FORMAT_1;
+  p_descr = "Input format type";
+  p_help = "A number of formats are supported. The input is one line per strike, space-delimited ASCII.\n\n"
+  "FORMAT_1:\n"
+  "  10 fields:\n"
+  "    year month day hour min sec lat lon amplitude type\n\n"
+  "FORMAT_2:\n"
+  "  11 fields:\n"
+  "    year month day hour min sec lat lon alt_km amplitude type\n\n"
+  "FORMAT_3:\n"
+  "  10 fields:\n"
+  "    month/day/year hour:min:sec lat lon Ka C/G, where\n"
+  "    sec is a float (not an int) and C/G is either 0 or 1.\n\n"
+  "FORMAT_4:\n"
+  "  6 fields : unixTime,lat,lon,amp,dummy,cg (cg=0 => cloud-ground 1 => could-cloud)\n\n"
+  "  UALF_LF_1: Universal ASCII Ltg Format, Low Freq (LF), version 1:\n"
+  "  25 fields:\n"
+  "  version# year month day hour min sec nanosec lat lon amplitude multiplicity n_sensors degress_of_freedom ellipse_angle semi_major_axis semi_minor_axis chi_sq rise_time peak_to_zero_time max_rate_of_rise cloud_flag angle_flag signal_flag timing_flag\n\n"
+  "UALF_LF_1B: Universal ASCII Ltg Format, Low Freq (LF), version 1B:\n"
+  "  25 fields:\n"
+  "  version# year-month-day hour:min:decimal_secs*10-3 nanosec lat lon amplitude multiplicity n_sensors degress_of_freedom ellipse_angle semi_major_axis semi_minor_axis chi_sq rise_time peak_to_zero_time max_rate_of_rise cloud_flag angle_flag signal_flag timing_flag\n\n"
+  "  Notes:\n"
+  "    (a) lat and lon in decimal degrees\n"
+  "    (b) amplitude is peak current in kA, optinally with sign to indicate polarity\n"
+  "    (c) type: G - cloud-to-ground, C - cloud-to-cloud, U - unknown\n"
+  "    (d) alt_km is altitude in km MSL\n"
+  "    (e) multiplicity: stroke_data = 0\n" 
+  "    (f) n_sensors - participating in solution\n" 
+  "    (g) degrees_of_freedom - when optimizing location\n" 
+  "    (h) ellipse_angle - as a clockwise bearing from true N\n" 
+  "    (i) semi_major_axis - length of ellipse in km\n" 
+  "    (j) semi_minor_axis - width of ellipse in km\n" 
+  "    (k) chi_sq - value from location optimization\n" 
+  "    (l) rise_time - of the waveform in microsecs\n" 
+  "    (m) peak_to_zero_time - of the waveform in microsecs\n" 
+  "    (n) max_rate_of_rize - of the waveform in kA/microsec\n" 
+  "    (o) cloud_flag: 0 for cloud-to-ground and 1 for cloud-to-cloud\n"
+  "    (p) angle_flag: angle data used for posn, 0(no) or 1(yes)\n"
+  "    (q) signal_flag: signal data used for posn, 0(no) or 1(yes)\n"
+  "    (r) timing_flag: timing data used for posn, 0(no) or 1(yes)\n\n"
+  "BOM_AXF: Australian Bureau of Meteorology AXF format:\n"
+  "  \"yyyymmddhhmmss\",lat,lon,amplitude\n"
+  "  e.g. \"20071029004920\",-39.769972,157.216649,-34.4\n\n"
+  "WWLDN: World Wide Lightning Data Network:\n"
+  "  7 fields:\n"
+  "    date time milliseconds latN lonE residual N\n"
+  "    (a) date in format YYYY/MM/DD\n"
+  "    (b) time in format HH:MM:SS\n"
+  "    (c) time millisec\n"
+  "    (d) residual is roughly the location error in seconds\n"
+  "    (e) N is the number of stations for the flash location (minimum = 5)\n"
+  "  Note: milliseconds, residual and N values not stored in database\n"
+  "\n"
+  "WWLLN: World Wide Lightning Location Network, comma-delimited:\n"
+  "  7 fields:\n"
+  "    date,time.microsecs, latN, lonE, residual, N\n"
+  "    (a) date in format YYYY/MM/DD\n"
+  "    (b) time in format HH:MM:SS\n"
+  "    (c) time microsecs\n"
+  "    (d) residual is roughly the location error in seconds\n"
+  "    (e) N is the number of stations for the flash location (minimum = 5)\n"
+  "\n"
+  "NAPLN: North American Precision Lightning Network, comma-delimited:\n"
+  "  7 fields:\n"
+  "    2011-08-26T00:58:37.916,46.4984573,-111.7280142,-15.9,0.5,0.25,-20\n"
+  "    YYYY-MM-DDTHH:MM:SS.microsecs, lat, lon, amplitude,\n"
+  "    semi_major_axis, semi_minor_axis, ellipse_angle\n"
+  "\n"
+  "NLDN_BINARY: US National Lightning Network (Vaisala) Binary format:\n"
+  "  7 fields:\n"
+  "    2011-08-26T00:58:37.916,46.4984573,-111.7280142,-15.9,0.5,0.25,-20\n"
+  "    YYYY-MM-DDTHH:MM:SS.microsecs, lat, lon, amplitude,\n"
+  "    semi_major_axis, semi_minor_axis, ellipse_angle\n"
+  "\n"
+  "AOAWS_NETCDF: NetCDF format used by CWB.\n"
+  "  Expected field names are defined in params below\n"
+  "\n"
+  "KSC:  Kennedy Space Center\n"
+  " 7 fields:\n"
+  "   julianDay utcTime xcoordinate ycoordinatae zcoordinate event type\n"
+  "   (a) format of UTC time: HH:MM:SS:ssssss( or hour:minute:seconds:microseconds)\n"
+  "   (b) x-coordinate in meters from KSC ldar longitude -80.642633\n"
+  "   (c) y-coordinate in meters from KSC ldar latitude 28.538486\n"
+  "   (d) z-coordinate in meters from KSC ldar\n"
+  "   (e) Event type is two strings composed of 'LDAR EVENT', '4DLSS EVENT', 'GGLSS EVENT', or 'CAL EVENT' \n"
+  "\n";  
+} input_format;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "spdb/ltg";
+  p_descr = "Output URL for decoded metars.";
+  p_help = "Example of full URL: spdbp:://localhost::spdb/ltg. If the dir does not start with . or / it is stored relative to $DATA_DIR.";
+} output_url;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Expire time in seconds for each strike";
+} expire_seconds;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Buffering period, seconds.";
+  p_help = "Setting to one second effectively disables buffering.";
+} bufferingPeriod;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE, data write will be forced at end of each file.";
+} flush_buffer_per_file;
+
+typedef enum {
+  PUT_OVER, PUT_ADD, PUT_ADD_UNIQUE, PUT_ONCE
+} put_mode_t;
+
+paramdef enum put_mode_t {
+  p_default = PUT_OVER;
+  p_descr = "Put mode for SPDB data base.";
+  p_help =
+  "PUT_OVER - new data will overwrite a previously-stored data for the same time. PUT_ADD: a chunk will be added to the list of chunks stored at a given valid_time. PUT_ADD_UNIQUE: a chunk will be added to the list of data stored at a given valid_time, provided identical data has not already been added. PUT_ONCE: you can only put data for a given time once. Trying to put at the same valid_time again will generate an error. ";
+} put_mode;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Sleep time after writing, millisecs.";
+  p_help = "Use to prevent data distribution problems.";
+} delay_after_write;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Sleep time before processing file, secs.";
+  p_help = "Use to prevent data being processed prematurely.";
+} delay_before_processing;
+
+typedef struct {
+	boolean check;
+ 	double maxDist;
+        boolean time_millisec;
+	int maxTime;
+	int maxFlashDuration;
+	int maxCount;
+} dup_t;
+
+paramdef struct dup_t {
+  p_default = { FALSE, 1.0, FALSE, 1, 200, 100 };
+  p_descr = "Option to filter out near duplicate types and\n"
+            "parameters to do so.";
+  p_help = "Set check to TRUE to perform this check. It is "
+  "assumed that the strokes come in in temporal order. If "
+  "time_millisec is set to TRUE, then maxTime and maxFlashDuration "
+  "are assumed to be in milliseconds. If time_millisec is FALSE "
+  "then maxTime and maxFlashDuration are assumed to be in seconds. "
+  "If a stroke is spatially within maxDist (Km), and temporally "
+  "within maxTime (seconds or milliseconds) of the previous stroke, "
+  "and the number of strokes is less than or equal to maxCount, "
+  "and the flash duration is less than or equal to the maxFlashDuration, "
+  "then the stroke will be seen as a near duplicate and will be rejected.\n";
+} duplicates;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply duplicates check to cg strikes only, not cc.";
+  p_help = "May be useful.";
+} dup_check_cg_only;
+
+paramdef string {
+  p_default = "lat";
+  p_descr = "Variable name for latitude in netcdf input files.";
+  p_help = "Ignored unless input_format is AOAWS_NETCDF.";
+} netcdf_lat_var;
+
+paramdef string {
+  p_default = "lon";
+  p_descr = "Variable name for longitude in netcdf input files.";
+  p_help = "Ignored unless input_format is AOAWS_NETCDF.";
+} netcdf_lon_var;
+
+paramdef string {
+  p_default = "time";
+  p_descr = "Variable name for strike times in netcdf input files.";
+  p_help = "Ignored unless input_format is AOAWS_NETCDF.";
+} netcdf_time_var;
+
+
+paramdef string {
+  p_default = "strikeNum";
+  p_descr = "Dimension name for number of entries in netcdf input files.";
+  p_help = "Ignored unless input_format is AOAWS_NETCDF.";
+} netcdf_strike_num_dim;
+
+
+typedef enum {
+   KSC_LDAR_EVENT, 
+   KSC_4DLSS_EVENT, 
+   KSC_GGLSS_EVENT,
+   KSC_CAL_EVENT
+} ksc_event_t;
+ 
+paramdef enum  ksc_event_t {
+  p_descr = "Report type to be decoded for KSC lightning file";
+  p_default =  KSC_4DLSS_EVENT;
+} ksc_event;
+

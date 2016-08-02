@@ -1,0 +1,295 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.JMAMtSatHRIT2Mdv
+ *
+ * This file contains the TDRP parameter definitions for
+ * JMAMtSatHRIT2Mdv.
+ */
+
+commentdef
+{
+  p_header = "JMAMtSatHRIT2Mdv";
+  p_text = "This program reads a set of JMA HRIT MtSat files and writes the "
+           "data to an MDV file.";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_default = DEBUG_OFF;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Instance";
+  p_help = "Used for process registration";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Input parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT PARAMETERS";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  FILE_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program will trigger whenever a new "
+           "ldata file in the input_dir indicates that there is a new "
+           "file ready to be processed.\n"
+           "In FILE_LIST mode, the program operates on the input files "
+           "specified on the command line.\n";
+  p_default = FILE_LIST;
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_default = "raw/sat_hrit";
+} input_dir;
+
+paramdef long
+{
+  p_descr = "Maximum age of input data that will be processed in realtime, "
+            "in seconds.";
+  p_default = 3600;
+} max_valid_secs;
+
+
+/***********************************************************************
+ * Output parameters
+ */
+
+commentdef
+{
+  p_header = "OUTPUT PARAMETERS";
+};
+
+typedef enum
+{
+  PROJ_LATLON,
+  PROJ_LC
+} proj_type_t;
+
+typedef struct
+{
+  string url;
+  proj_type_t proj_type;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  int nx;
+  int ny;
+  double origin_lat;
+  double origin_lon;
+  double lat1;
+  double lat2;
+} output_params_t;
+
+paramdef struct output_params_t
+{
+  p_descr = "List of output directories along with desired domains";
+  p_default =
+    { { "mdvp:://localhost::mdv/satIR/WideView",
+        PROJ_LATLON,
+        75.0, -65.0, 0.5, 0.5, 260, 260, 0.0, 0.0, 0.0, 0.0 },
+      { "mdvp:://localhost::mdv/satIR/domain1",
+        PROJ_LATLON,
+	78.0, -14.0, 0.25, 0.25, 336, 316, 0.0, 0.0, 0.0, 0.0 },
+      { "mdvp:://localhost::mdv/satIR/domain2",
+        PROJ_LATLON,
+        106.5, 8.75, 0.15, 0.15, 207, 189, 0.0, 0.0, 0.0, 0.0 },
+      { "mdvp:://localhost::mdv/satIR/domain3",
+        PROJ_LATLON,
+        116.1, 19.8, 0.05, 0.05, 194, 178, 0.0, 0.0, 0.0, 0.0 } };
+} domains[];
+
+typedef enum
+{
+  TIMESTAMP_BEGIN,
+  TIMESTAMP_END,
+  TIMESTAMP_MIDDLE
+} timestamp_t;
+
+paramdef enum timestamp_t
+{
+  p_descr = "Flag indicating how to time stamp the output file.";
+  p_help = "For TIMESTAMP_BEGIN, the time of the first line in the image will "
+           "be used. "
+           "For TIMESTAMP_END, the time of the last line in the image will "
+           "be used. "
+           "For TIMESTAMP_MIDDLE, the timestamp will be the average of the "
+           "times of the first and last lines in the file.\n";
+  p_default = TIMESTAMP_END;
+} output_timestamp;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to override the field name given in "
+            "the file.";
+  p_help = "If true, the field names specified in the output_field_names "
+           "parameter will be used for these files. "
+           "If false, the field name indicated in the HRIT file will be used "
+           "for both the long and short field names in the MDV file.";
+  p_default = false;
+} override_field_names;
+
+typedef struct
+{
+  string field_name;
+  string field_name_long;
+} output_field_names_t;
+
+paramdef struct output_field_names_t
+{
+  p_descr = "The field names to use in the output MDV file.";
+  p_help = "Used only if override_field_names is set to true.";
+  p_default = { "gms_t_11", "IR1" };
+} output_field_names;
+
+typedef enum
+{
+  VERT_TYPE_SURFACE,
+  VERT_TYPE_Z,
+  VERT_SATELLITE_IMAGE,
+  VERT_FLIGHT_LEVEL
+} vlevel_type_t;
+
+paramdef enum vlevel_type_t
+{
+  p_descr = "Vertical level type to use for the output fields.";
+  p_help = "By default, we use the satellite image vertical type, "
+           "but some applications need a different vertical level type "
+           "for the data. "
+           "Note that the vertical level is set to 0.0, no matter what "
+           "vertical type is chosen.";
+  p_default = VERT_SATELLITE_IMAGE;
+} output_vlevel_type;
+
+
+/***********************************************************************
+ * Data calibration parameters
+ */
+
+commentdef
+{
+  p_header = "DATA CALIBRATION PARAMETERS";
+};
+
+typedef enum {
+  CALIBRATE_SCALE,
+  CALIBRATE_LUT 
+} calib_type_t;
+
+paramdef enum calib_type_t
+{
+  p_descr = "Flag indicating how to calibrate the data.";
+  p_help = "If set to CALIBRATE_LUT, the data values are calculated using the "
+           "look-up table included in the file. "
+           "If set to CALIBRATE_SCALE, the scale and bias specified in "
+           "the calib_scale parameter are used for calibrating the data.";
+  p_default = CALIBRATE_LUT;
+} calib_type;
+
+typedef struct
+{
+  double scale;
+  double bias;
+} calib_scale_t;
+
+paramdef struct calib_scale_t
+{
+  p_descr = "Scale and bias used to convert the count values in the HRIT file "
+            "to data values for the MDV file.";
+  p_help = "Used only if calib_type is set to CALIBRATE_SCALE";
+  p_default = { 0.01, 0.0 };
+} calib_scale;
+
+/***********************************************************************
+ * Units conversion parameters
+ */
+
+commentdef
+{
+  p_header = "UNITS CONVERSION PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to convert the field units on output.";
+  p_default = false;
+} convert_units;
+
+typedef enum
+{
+  CONVERT_K_TO_C
+} units_convert_type_t;
+
+paramdef enum units_convert_type_t
+{
+  p_descr = "Type of units conversion to do on the data before putting it "
+            "into the MDV file.";
+  p_help = "Used only if convert_units is set to true.";
+  p_default = CONVERT_K_TO_C;
+} units_convert_type;

@@ -1,0 +1,85 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions Rhi2Spdb
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Jan 2004
+
+commentdef {
+  p_header = "Program name: Rhi2Spdb";
+  p_text = "Rhi2Spdb reads mdv files containing measured RHI data, creates a GenPt to describe the rhi details and stores it in SPDB.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file - and this requires that the latest_data_info files are available. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in FILELIST mode, at least) MUST contain a day-directory below the data file -- ./data_file.mdv will not work as a file path";
+} mode;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Time between checking for new data (secs)";
+  p_help = "The app checks for new data at this interval.";
+} time_between_checks_secs;
+
+paramdef string {
+  p_default = "mdv/input";
+  p_descr = "Input URL for MDV data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef string {
+  p_default = "spdb/rhi";
+  p_descr = "Output URL for SPBD data.";
+} output_url;
+

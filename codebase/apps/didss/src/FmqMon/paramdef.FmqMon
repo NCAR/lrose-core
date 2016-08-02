@@ -1,0 +1,81 @@
+/*********************************************************
+ * parameter definitions for FmqMon
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * November 1999
+ */
+
+commentdef {
+  p_header = "FmqMon program";
+  p_text = "FmqMon monitors the output from an FMQ, reporting statistics on the queue, such as the number of messages and bytes in a given interval, and the compressed and uncompressed data rate.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "fmq_input";
+  p_descr = "URL for input FMQ.";
+} input_url;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of millisecs to sleep while polling the input.";
+  p_help = "The reads are done in a polling-blocking mode. This is the number of millisecs to sleep between polls.";
+} msecs_sleep_blocking;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If FALSE, the program will seek to the end of the fmq and only read in new data. If TRUE, it will start reading from the beginning of the FMQ.";
+} seek_to_start_of_input;
+
+commentdef {
+  p_header = "OUTPUT STATS.";
+}
+
+typedef enum {
+  SUMMARY, FULL, ASCII_PRINT
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = SUMMARY;
+  p_descr = "Sets the type of printout. All information will be printed to stdout.";
+  p_help = "SUMMARY: scrolling summary of the number of messages and data rate. FULL: prints out message info as messages are read. ASCII_PRINT: assumes the messages are ASCII, prints out the message.";
+} mode;
+
+paramdef int {
+  p_min = 1;
+  p_default = 5;
+  p_descr = "The number of seconds between monitor output.";
+  p_help = "The data rate is computed over this interval.";
+} monitor_interval;
+
+
+
+
+

@@ -1,0 +1,48 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_new_...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href=RSL_ray_struct.html>Ray</a> *RSL_new_ray(int max_bins);<br>
+<a href=RSL_sweep_struct.html>Sweep</a> *RSL_new_sweep(int max_rays);<br>
+<a href=RSL_volume_struct.html>Volume</a> *RSL_new_volume(</b><b>int max_sweeps);</b><br>
+<b><a href=RSL_radar_struct.html>Radar</a> *RSL_new_radar(int nvolumes);</b> 
+
+<h3>
+<hr>Description</h3>
+<b>RSL_new_radar</b> allocates memory for a <b>Radar</b>. It allocates space for it's header and space for <b>nvolumes</b> pointers to <b>Volume</b>, it does not assign anything to the new header. It does not allocate any volumes, just the pointers. You have to perform the allocation of volumes yourself. Do this by looping on <b>nvolumes</b> and calling <b>RSL_new_volume</b>. 
+
+<p><b>nvolumes</b> does not represent the number of volumes in the radar structure. It represents the number of volume index slots or the maximum volume index. Reserved values DZ_INDEX, VR_INDEX, SW_INDEX, CZ_INDEX, ZT_INDEX, DR_INDEX, and LR_INDEX are the numbers 0 through 6. They are volume indexes. If you have 2 volumes (non NULL pointers) that are SW_INDEX and ZT_INDEX, you must be sure that <b>nvolumes</b> is, at least, ZT_INDEX+1. All the other volume pointers are NULL. It is perfectly valid to have NULL volume pointers. 
+
+<p><b>RSL_new_volume</b> allocates memory for a <b>Volume</b>. It allocates space for it's header and space for <b>nsweep</b> pointers to <b>Sweep</b>, it does not assign anything to the new header. It does not allocate any sweeps, just the pointers. You have to perform the allocation of sweeps yourself. Do this by looping on <b>nsweeps</b> and calling <b>RSL_new_sweep</b>. 
+
+<p><b>nsweeps</b> does not represent the number of non NULL sweep pointers. It is the number of index slots or the maximum sweep index. It is valid to have NULL sweep pointers. 
+
+<p><b>RSL_new_sweep</b> allocates memory for a <b>Sweep</b>. It allocates space for it's header and space for <b>nrays</b> pointers to <b>Ray</b>. It does not allocate any rays, just the pointers, nor does it assign any values to the new header. You have to perform the allocation of rays yourself. Do this by looping on <b>nrays</b> and calling <b>RSL_new_ray</b>. 
+
+<p><b>nrays</b> does not represent the number of non NULL ray pointers. It is the number of index slots or the maximum ray index. It is valid to have NULL ray pointers. 
+
+<p><b>RSL_new_ray</b> allocates memory for a <b>Ray</b>. It allocates space for it's header and space for a <b>Range</b> array of size <b>nbins</b>. It does not assign any values to the header. Since, the <b>Range</b> type is not a pointer, this function allocates an array of <b>Range</b> of size <b>nbins</b>. Currently, <b>Range</b> is just an alias for <b>unsigned</b> <b>char</b>. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. Otherwise, a NULL pointer is returned and errno is set. 
+<hr>
+
+<h3>See also</h3>
+<a href=../examples/Example_RSL_new.c>Example</a><br>
+<a href=RSL_free.html>RSL_free_volume</a>, <a href=RSL_free.html>RSL_free_sweep</a>, <a href=RSL_free.html>RSL_free_ray</a> <br>
+<a href=RSL_copy.html>RSL_copy_volume</a>, <a href=RSL_copy.html>RSL_copy_sweep</a>, <a href=RSL_copy.html>RSL_copy_ray</a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

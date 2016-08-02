@@ -1,0 +1,76 @@
+/******************************************************************
+ *
+ * Parameter definitions for PowerInfo2Spdb
+ *
+ */
+
+commentdef {
+  p_header = "PowerInfo2Spdb reads radar power data from UDP writes to an SPDB data base.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Register this process with procmap?";
+} register_with_procmap;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+commentdef {
+  p_header = "UDP INPUT.";
+}
+
+paramdef int {
+  p_default = 4568;
+  p_descr = "UDP port";
+  p_help = "UDP packets are broadcast to this port.";
+} udp_port;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/sweepinfo";
+  p_descr = "Output URL for sweep information.";
+  p_help = "The format is spdbp::params//host:port:dir. Normally params is an empty string, and port is an empty string, so that the default behavior will occur.";
+} output_url;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Frequency for writing power info to SPBP.";
+  p_help = "The power data arrives frequently, multiple times per second. It does not make sense to store power data that frequently. Therefore set this to the number of seconds between output writes. Set to -1 to store every packet.";
+} write_freq_secs;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write the latest struct to shared memory";
+  p_help = "If true, the latest power information will be written, in binary, toa shared memory segment. The struct power_info_packet_t is defined in rapformats/DsRadarPower.hh";
+} write_to_shmem;
+
+paramdef int {
+  p_default = 12600;
+  p_descr = "Shared memory key for power info";
+  p_help = "Any client wishing to use this data, (e.g. TsTcp2Fmq) must attach to the same key.";
+} shmem_key;

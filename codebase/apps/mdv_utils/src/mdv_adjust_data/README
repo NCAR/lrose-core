@@ -1,0 +1,23 @@
+README file for the use of mdv_adjust_data
+------------------------------------------
+
+Running this program on an mdv file adjusts the data in a specified field
+by a specified amount.
+
+The usage is:
+
+  mdv_adjust_data -params mdv_adjust_data.params -f mdv_file_list
+
+For example:
+
+  mdv_adjust_data -params mdv_adjust_data.test -f *.mdv
+
+would adjust the fields in all .mdv files in the current directory
+by the amount specified in the param file 'mdv_adjust_data.test'.
+
+To increase the DBZ data, for example, in field 0 by 10 dBZ you would use
+the following params:
+
+  field_num = 0;
+  data_adjustment = 10;
+

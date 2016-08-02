@@ -1,0 +1,73 @@
+#! /bin/csh
+
+#===========================================================================
+#
+# Plot TITAN output Table Type 1 - for Silke intercomparison project
+#
+#===========================================================================
+
+PlotTitanTableType1.py \
+    --hist \
+    --file table1.dixon.txt \
+    --title "Mean LWP - tracking intercomparison project" \
+    --fieldNameX lwpmean \
+    --fieldLabelX Mean-LWP \
+    --unitsX \(kg/m2\) \
+    --loghist \
+    --counthist \
+    --nbins 40 &
+
+PlotTitanTableType1.py \
+    --hist \
+    --file table1.dixon.txt \
+    --title "Max LWP - tracking intercomparison project" \
+    --fieldNameX lwpmax \
+    --fieldLabelX Max-LWP \
+    --unitsX \(kg/m2\) \
+    --loghist \
+    --counthist \
+    --nbins 40 &
+
+PlotTitanTableType1.py \
+    --hist \
+    --file table1.dixon.txt \
+    --title "Storm size - tracking intercomparison project" \
+    --fieldNameX volume \
+    --fieldLabelX Size \
+    --unitsX \(grid_cells\) \
+    --loghist \
+    --counthist \
+    --nbins 100 &
+
+PlotTitanTableType1.py \
+    --hist \
+    --file table4.dixon.txt \
+    --title "Storm duration - tracks with mergers/splits" \
+    --fieldNameX duration_in_secs \
+    --fieldLabelX "Storm duration" \
+    --unitsX \(secs\) \
+    --loghist \
+    --counthist \
+    --nbins 50 &
+
+PlotTitanTableType1.py \
+    --hist \
+    --file table5.dixon.txt \
+    --title "Storm duration - tracks without mergers/splits" \
+    --fieldNameX duration_in_secs \
+    --fieldLabelX "Storm duration" \
+    --unitsX \(secs\) \
+    --loghist \
+    --counthist \
+    --nbins 50 &
+
+PlotTitanTableType1.py \
+    --xy \
+    --file table3.dixon.txt \
+    --title "N Storms over time - tracking intercomparison project" \
+    --fieldNameX timestep \
+    --fieldLabelX TimeStep \
+    --unitsX \(min\) \
+    --fieldNameY nstorms \
+    --fieldLabelY N-Storms \
+    --unitsY "" &

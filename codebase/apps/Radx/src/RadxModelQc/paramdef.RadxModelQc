@@ -1,0 +1,257 @@
+/**********************************************************
+ * paramdef.RadxModelQc
+ *
+ * This file contains the TDRP parameter definitions for RadxModelQc app
+ * 
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+commentdef
+{
+  p_header = "RadxModelQc";
+  p_text = "Parameters for data filtering for Radx format input data to produce quality control measures";
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header =
+    "Filters to apply";
+  p_text =
+    "The filters to apply, in order applied. A brief description of each filter is:\n"
+    " \n"
+    "AZ_GRADIENT = Compute gradient azimuthally at each point\n"
+    "CLUTTER_2D_QUAL = Compute quality factor based on clutter\n"
+    "COMMENT = Non filter that just prints out 'input field' as a comment followeed by a more extensive message\n"
+    "GAUSSIAN_2D_REMAP = Map 2 variables to a gaussian result\n"
+    "GRIDDED_MATH = Do math operations pointwise using 2 grids\n"
+    "MASK = change data when mask has particular value\n"
+    "MATH = Do mathematical operations on each data point\n"
+    "PASSTHROUGH = Set the output equal to the input, with a name change\n"
+    "QSCALE = Scaling filter r.e. (exp(-.69*(values))\n"
+    "SW_NORM = Spectrum width normalization\n"
+    "THRESH = Threshold filter, do something to data outside a threshold val\n"
+    "The parameters for each filter are found in arrays, one array per filter type, later in this file\n";
+}
+
+typedef enum
+{
+  AZ_GRADIENT,
+  CLUTTER_2D_QUAL,
+  COMMENT,
+  GAUSSIAN_2D_REMAP,
+  GRIDDED_MATH,
+  MASK,
+  MATH,
+  PASSTHROUGH,
+  QSCALE,
+  SW_NORM,
+  THRESH
+} filter_t;
+
+typedef struct
+{
+  filter_t filter;
+  int filter_index;
+  string input_field;
+  string output_field;
+  string output_units;
+  double output_missing;
+  boolean write_output_field;
+} data_filter_t;
+
+typedef enum
+{
+  MULT, ADD, SUBTRACT, NOOP
+} math_e;
+
+typedef enum
+{
+   LESS, LESS_OR_EQUAL, GREATER, GREATER_OR_EQUAL, MISSING
+} thresh_e;
+
+paramdef struct data_filter_t
+{
+  p_descr = "Filters to apply";
+  p_help =
+    "filter = The filter to apply\n"
+    "filter_index = index into an array of params for that filter type (found below)\n"
+    "input_field = name of input field to the filter, could be input to app, or output of an upstream filter\n"
+    "output_field = name of output field to the filter\n"
+    "output_units = name of output field to the filter (empty to pass through input as is)\n"
+    "output_missing = new output missing value (when output_units is not empty)\n"
+    "write_output_field=TRUE to write output field, FALSE to keep it only as a passthrough to downstream filters\n";
+  p_default = {};} filter[];  
+
+typedef struct {
+  int dummy;
+} dummy_t;
+
+typedef struct {
+  math_e type;
+  double value;
+} math_t;
+
+paramdef struct math_t
+{
+  p_descr = "MATH and AZ_GRADIENT params";
+  p_help = "replace values by doing math operations at each point (for AZ_GRADIENT, prior to doing the actual AZ_GRADIENT)\n"
+    "type = what to do\n"
+    "value = how much\n"
+    " for example type=ADD and value=7 means add 7 to each point\n";
+  p_default = {};
+} parm_math[];
+
+typedef struct
+{
+  string vel_field_name;
+  string width_field_name;
+  string cmdflag_field_name;
+  double sw_shape_factor;
+  double vr_shape_factor;
+} clutter_2d_qual_t;
+
+paramdef struct clutter_2d_qual_t
+{
+  p_descr = "CLUTTER_2D_QUAL params";
+  p_help = "\n"
+    "vel_field_name = Input velocity field name\n"
+    "width_field_name = Input spectrum width field name\n"
+    "cmdflag_field_name = input cmdflag field name\n"
+    "sw_shape_factor = param\n"
+    "vr_shape_factor = param\n"
+    "Main input is 'fscr'.  Output is 'fclut'.\n"
+    " fvrsw = (1 - exp(-.69*(|vel|*vr_shape_factor + width*sw_shape_factor)))\n"
+    " fclut = fvrsw*fcsr\n"
+    " fclut(cmdFlag < 0.5) = 1";
+  p_default = {};
+} parm_clutter_2d_qual[];
+
+typedef struct
+{
+  string comment;
+} comment_t;
+
+paramdef struct comment_t
+{
+  p_descr = "COMMENT params";
+  p_help = "Print out a comment\n"
+    "comment = the comment";
+  p_default = {};
+} parm_comment[];
+
+typedef struct
+{
+  string y_field_name;
+  double x_factor;
+  double y_factor;
+  boolean x_is_absolute;
+  boolean y_is_absolute;
+  double scale;
+} gaussian_2d_mapping_t;
+
+paramdef struct gaussian_2d_mapping_t
+{
+  p_descr = "GAUSSIAN_2D_REMAP params";
+  p_help = "the main input is the 'X' variable, the y_field_name is the 'Y' variable, and the mapping is f(x,y) = 1.0 - exp(-scale*(x*xfactor + y*yfactor)), where x and y may or may not be absolute values of input based on the the x_is_absolute and y_is_absolute settings";
+  p_default = {};
+} parm_2d_gaussian_mapping[];
+
+typedef struct {
+  math_e type;
+  string input;
+} gridded_math_t;
+
+paramdef struct gridded_math_t
+{
+  p_descr = "GRIDDED_MATH params";
+  p_help = "replace values by doing pointwise math operations at each point\n"
+    "type = what to do\n"
+    "input = other grid name\n"
+    " for example type=ADD, means add main input and input at each point";
+  p_default = {};
+} parm_gridded_math[];
+
+typedef struct
+{
+  string mask_field_name;  /**< name of input variable to use as mask*/
+  thresh_e type;  /**< threshold test */
+  double mask_threshold;
+  double data_replacement_value; /**< Value to replace with in data */
+  boolean replace_with_missing; /**< True to replace with missing when test satisfied*/
+} mask_t;
+
+paramdef struct mask_t
+{
+  p_descr = "MASK params";
+  p_help = "when mask is within threshold (or missing), replace values in data\n"
+    "mask_field_name =  name of input variable to use as mask\n"
+    "type = threshold test to do\n"
+    "mask_threshold = threshold value\n"
+    "data_replacement_value = Value to replace with in data";
+    "replace_with_missing = true to ignore replacement value and replace with missing value when test satisfied\n";
+  p_default = {};
+} parm_mask[];
+
+paramdef struct dummy_t
+
+{
+  p_descr = "params for filters with no params";
+  p_help = "dummy    = placeholder. \n"
+    "filts with no parms: PASSTHROUGH";
+  p_default = {};
+} parm_dummy[];
+
+typedef struct {
+  double scale;
+  double topv;
+  double lowv;
+  boolean invert;
+} qscale_t;
+
+paramdef struct qscale_t
+{
+  p_descr = "QSCALE params";
+  p_help = "replace values V at all points with scaled value:\n"
+    " exp(-scale*(V/topv - lowv/topv)^2)    (invert = false)\n"
+    " 1 - exp(-scale*(V/topv - lowv/topv)^2)    (invert = true)\n";
+  p_default = {};
+} parm_qscale[];
+
+
+typedef struct
+{
+  boolean dbz;  /**< DBZ or VR */
+  double lambda;
+} sw_norm_t;
+
+paramdef struct sw_norm_t
+{
+  p_descr = "SW_NORM params";
+  p_help = "compute normalized spectrum width, using width field input W\n"
+    "dbz = TRUE for DBZ, FALSE for VR\n"
+    "lambda = constant\n"
+    " dwell = mean(prt)*mean(n_samples)\n"
+    " Mi = 4*sqrt(pi)*W*W*dwell/lambda\n"
+    " If dbz=true    output = 10*log10(1+sqrt(1/Mi))\n"
+    " If dbz = false  output= W*lambda/(8*dwell*sqrt(pi))";
+  p_default = {};
+} parm_sw_norm[];
+
+typedef struct {
+  thresh_e type;
+  double threshold;
+  double replacement;
+  boolean replace_with_missing;
+} thresh_t;
+
+paramdef struct thresh_t
+{
+  p_descr = "THRESH params";
+  p_help = "replace values when within threshold with replacement\n"
+    "type = threshold test to do\n"
+    "threshold = threshold  value \n"
+    "replacement = replacement value when test satisfied\n"
+    "replace_with_missing = true to ignore replacement value and replace with missing value when test satisfied\n";
+  p_default = {};
+} parm_thresh[];

@@ -1,0 +1,759 @@
+/**********************************************************************
+ * TDRP params for MdvPull
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// reg_interval ////////////////////////////
+//
+// Registration interval.
+// The number of seconds between expected procmap registrations.
+// Type: int
+//
+
+reg_interval = 60;
+
+//======================================================================
+//
+// DATA SEARCH.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// MdvPull obtains a time list for files at the source URL. It also 
+//   obtains a time list for the output URL, and compares the two lists. 
+//   It then downloads missing datasets. In REALTIME mode, the search 
+//   period spans 'now' - realtime_lookback_secs to 'now' + 
+//   realtime_lookforward_secs. In ARCHIVE mode, the search period limits 
+//   'start_time' and 'end_time' are specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// new_data_poll_interval //////////////////
+//
+// Interval at which to poll for new data (secs).
+// At this interval, MdvPull will check with the source for new data.
+// Type: int
+//
+
+new_data_poll_interval = 60;
+
+///////////// realtime_lookback_secs //////////////////
+//
+// REALTIME mode only - how far to look back (secs).
+// Applies to both observed and forecast type data.
+// Type: int
+//
+
+realtime_lookback_secs = 3600;
+
+///////////// realtime_lookforward_secs ///////////////
+//
+// REALTIME mode only - how far to look back (secs).
+// Only applicable for forecast-type data retrieved using VALID_TIME.
+// Type: int
+//
+
+realtime_lookforward_secs = 0;
+
+///////////// search_mode /////////////////////////////
+//
+// Mode for searching for data sets.
+// For observational data, always use VALID_TIME. For forecast data, you 
+//   can search using VALID_TIME or GEN_TIME. If you use VALID_TIME, 
+//   MdvPull will find files based on the time at which the forecast is 
+//   valid. If you specifuy GEN_TIME for forecast data, you will find all 
+//   data sets for which the generate (run) time lies within the search 
+//   limits.
+//
+// Type: enum
+// Options:
+//     VALID_TIME
+//     GEN_TIME
+//
+
+search_mode = VALID_TIME;
+
+///////////// source_url //////////////////////////////
+//
+// URL for source data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line. In  
+//   LOCAL_FILEPATH_REALTIME mode, set this to a directory, not a URL.
+// Type: string
+//
+
+source_url = "mdvp:://front.guest.ucar.edu::marshall/mdv/radial/moments/sband/sur";
+
+//======================================================================
+//
+// READ CONSTRAINTS.
+//
+//======================================================================
+ 
+///////////// set_field_names /////////////////////////
+//
+// Option to set field names.
+// Type: boolean
+//
+
+set_field_names = TRUE;
+
+///////////// field_names /////////////////////////////
+//
+// Field name list.
+// Type: string
+// 1D array - variable length.
+//
+
+field_names = { "DBZ" };
+
+///////////// set_horiz_limits ////////////////////////
+//
+// Option to set horizontal limits.
+// Type: boolean
+//
+
+set_horiz_limits = FALSE;
+
+///////////// horiz_limits ////////////////////////////
+//
+// Set horizontal limits.
+//
+// Type: struct
+//   typedef struct {
+//      float min_lat;
+//      float min_lon;
+//      float max_lat;
+//      float max_lon;
+//   }
+//
+//
+
+horiz_limits = { -90, -180, 90, 180 };
+
+///////////// set_vlevel_limits ///////////////////////
+//
+// Option to set plane vlevel limits.
+// Mutually exclusive with set_plane_num_limits.
+// Type: boolean
+//
+
+set_vlevel_limits = TRUE;
+
+///////////// lower_vlevel ////////////////////////////
+//
+// Lower plane vlevel limit.
+// Type: float
+//
+
+lower_vlevel = 0;
+
+///////////// upper_vlevel ////////////////////////////
+//
+// Upper plane vlevel limit.
+// Type: float
+//
+
+upper_vlevel = 2;
+
+///////////// composite ///////////////////////////////
+//
+// Option for creating composite.
+// Composite is a plane in which each grid location contains the maximum 
+//   value at any height.
+// Type: boolean
+//
+
+composite = FALSE;
+
+//======================================================================
+//
+// RENAME FIELDS.
+//
+//======================================================================
+ 
+///////////// rename_fields ///////////////////////////
+//
+// Option to set field names.
+// This is done on the client side, by this application.
+// Type: boolean
+//
+
+rename_fields = FALSE;
+
+///////////// new_names ///////////////////////////////
+//
+// Provides a map from old field name to new field name. Note that 
+//   either the filed name or the long field name must match the 
+//   old_field_name specified for the renaming to take effect, and that if 
+//   the renaming happens then both the field name and the long field name 
+//   are renamed to the new_field_name.
+//
+// Type: struct
+//   typedef struct {
+//      string old_field_name;
+//      string new_field_name;
+//   }
+//
+// 1D array - variable length.
+//
+
+new_names = {
+  { "", ""}
+};
+
+//======================================================================
+//
+// REMAP XY PROJECTION.
+//
+//======================================================================
+ 
+///////////// remap_xy ////////////////////////////////
+//
+// Option to remap grid in x,y.
+// If true, set the remap parameters below. This is done on the client 
+//   side, by this application.
+// Type: boolean
+//
+
+remap_xy = FALSE;
+
+///////////// auto_remap_to_latlon ////////////////////
+//
+// Option to automatically remap the grid to a lat-lon projection.
+// If true, the data in the file will be remapped to a latlon grid which 
+//   matches the existing grid in resolution and extent. Other remap 
+//   parameters will be ignored.
+// Type: boolean
+//
+
+auto_remap_to_latlon = FALSE;
+
+///////////// remap_projection ////////////////////////
+//
+// Projection for remapping in x,y. See projection param below.
+// 	PROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)
+// 	PROJ_FLAT: Azimuthal Equidistant (Radar)
+// 	PROJ_LAMBERT_CONF: Lambert Conformal Conic
+// 	PROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area
+// 	PROJ_MERCATOR: Mercator - EW orientation
+// 	PROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation
+// 	PROJ_POLAR_STEREO: Stereographic- polar aspect
+// 	PROJ_OBLIQUE_STEREO: Stereographic - oblique aspect
+// 	PROJ_ALBERS: Albers Equal Area Conic
+// 	PROJ_VERT_PERSP: Vertical Perspective (satellite view).
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_MERCATOR
+//     PROJ_POLAR_STEREO
+//     PROJ_FLAT
+//     PROJ_OBLIQUE_STEREO
+//     PROJ_TRANS_MERCATOR
+//     PROJ_ALBERS
+//     PROJ_LAMBERT_AZIM
+//     PROJ_VERT_PERSP
+//
+
+remap_projection = PROJ_FLAT;
+
+///////////// remap_grid //////////////////////////////
+//
+// Grid parameters for remapping in x,y.
+// Units in km, except for LATLON, which is in degrees.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+remap_grid = { 1, 1, 0, 0, 1, 1 };
+
+///////////// remap_rotation //////////////////////////
+//
+// Remapped grid rotation.
+// This applies only to PROJ_FLAT projections.
+// Type: double
+//
+
+remap_rotation = 0;
+
+///////////// remap_origin_lat ////////////////////////
+//
+// Remapped grid origin latitude.
+// This applies to all projections except LATLON.
+// Type: double
+//
+
+remap_origin_lat = 0;
+
+///////////// remap_origin_lon ////////////////////////
+//
+// Remapped grid origin longitude.
+// This applies to all projections except LATLON.
+// Type: double
+//
+
+remap_origin_lon = 0;
+
+///////////// remap_lat1 //////////////////////////////
+//
+// Remapped grid reference latitude 1.
+// This applies to LAMBERT_CONF and ALBERS projections.
+// Type: double
+//
+
+remap_lat1 = 0;
+
+///////////// remap_lat2 //////////////////////////////
+//
+// Remapped grid reference latitude 2.
+// This applies to LAMBERT_CONF and ALBERS projections.
+// Type: double
+//
+
+remap_lat2 = 0;
+
+///////////// remap_central_scale /////////////////////
+//
+// Central scale for remapped projections.
+// This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR 
+//   projections.
+// Type: double
+//
+
+remap_central_scale = 1;
+
+///////////// remap_tangent_lat ///////////////////////
+//
+// Remapped tangent latitude (deg).
+// This applies to OBLIQUE_STEREO only.
+// Type: double
+//
+
+remap_tangent_lat = 0;
+
+///////////// remap_tangent_lon ///////////////////////
+//
+// Remapped tangent longitude (deg).
+// This applies to OBLIQUE_STEREO and POLAR_STEREO.
+// Type: double
+//
+
+remap_tangent_lon = 0;
+
+///////////// remap_pole_is_north /////////////////////
+//
+// Flag indicating stereogtraphic is over the NORTH pole.
+// This applies to POLAR_STEREO. If false, the projection is over the 
+//   south pole.
+// Type: boolean
+//
+
+remap_pole_is_north = TRUE;
+
+///////////// remap_persp_radius //////////////////////
+//
+// Radius of perspective point (km).
+// This applies to VERT_PERSP.
+// Type: double
+//
+
+remap_persp_radius = 35786;
+
+///////////// remap_false_northing ////////////////////
+//
+// Remapped false northing correction.
+// Occasionally, this is added to the Y coordinate so that all 
+//   coordinates are positive. Normally 0. As an alternative to 
+//   false_northing and false_easting, you can set the offset_latitude and 
+//   offset_longitude.
+// Type: double
+//
+
+remap_false_northing = 0;
+
+///////////// remap_false_easting /////////////////////
+//
+// Remapped false easting correction.
+// Occasionally, this is added to the X coordinate so that all 
+//   coordinates are positive. Normally 0.
+// Type: double
+//
+
+remap_false_easting = 0;
+
+///////////// remap_set_offset_origin /////////////////
+//
+// Do you want to specify an offset origin using lat/lon instead of 
+//   false_northing and false_easting?.
+// If true, set remap_offset_origin_latitude and 
+//   remap_offset_origin_longitude.
+// Type: boolean
+//
+
+remap_set_offset_origin = FALSE;
+
+///////////// remap_offset_origin_latitude ////////////
+//
+// Latitude of offset origin.
+// See remap_set_offset_origin.
+// Type: double
+//
+
+remap_offset_origin_latitude = 0;
+
+///////////// remap_offset_origin_longitude ///////////
+//
+// Longitude of offset origin.
+// See remap_set_offset_origin.
+// Type: double
+//
+
+remap_offset_origin_longitude = 0;
+
+//======================================================================
+//
+// ENCODING AND COMPRESSION CONVERSION.
+//
+//======================================================================
+ 
+///////////// encoding_type ///////////////////////////
+//
+// Set output encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_ASIS
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+encoding_type = ENCODING_ASIS;
+
+///////////// compression_type ////////////////////////
+//
+// Set output compression type.
+// See <toolsa/compress> for details on the compression types.
+//
+// Type: enum
+// Options:
+//     COMPRESSION_ASIS
+//     COMPRESSION_NONE
+//     COMPRESSION_RLE
+//     COMPRESSION_LZO
+//     COMPRESSION_ZLIB
+//     COMPRESSION_BZIP
+//     COMPRESSION_GZIP
+//     COMPRESSION_GZIP_VOL
+//     COMPRESSION_TYPES_N
+//
+
+compression_type = COMPRESSION_ASIS;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// Output data is written to this URL.
+// Type: string
+//
+
+output_url = "./output";
+
+///////////// write_latest_data_info //////////////////
+//
+// Write _latest_data_info files for output files.
+// If false, will suppress writing of _latest_data_info files.
+// Type: boolean
+//
+
+write_latest_data_info = TRUE;
+
+///////////// output_format ///////////////////////////
+//
+// Specify format of file on output.
+// FORMAT_MDV: normal MDV formal. FORMAT_XML: XML format. XML format 
+//   writes out 2 files: *.mdv.xml and *.mdv.buf. The xml file contains 
+//   the meta-data. The buf file contains the binary fields.
+// NOTE: only COMPRESSION_NONE and COMPRESSION_GZIP_VOL are supported in 
+//   XML. FORMAT_NCF: write file in netCDF CF format. Extension will be 
+//   .nc.
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_MDV
+//     OUTPUT_FORMAT_XML
+//     OUTPUT_FORMAT_NCF
+//
+
+output_format = OUTPUT_FORMAT_MDV;
+// output_format = OUTPUT_FORMAT_XML;
+// output_format = OUTPUT_FORMAT_NCF;
+
+//======================================================================
+//
+// WRITE USING EXTENDED PATHS.
+//
+// This will be overridden if the environment variable 
+//   MDV_WRITE_USING_EXTENDED_PATHS exists and is set to TRUE.
+//
+//======================================================================
+ 
+///////////// write_using_extended_paths //////////////
+//
+// Option to write files with extended paths.
+// If specified, this will override that specified by the client. 
+//   Default is FALSE.
+
+// If set, paths will include a separate year subdirectory, and the file 
+//   name will include date and time.
+
+// Non-forecast path:
+//   dir/yyyy/yyyymmdd/yyyymmdd_hhmmss.mdv.
+
+// Forecast path:
+//   dir/yyyy/yyyymmdd/yyyymmdd_g_hhmmss_f_llllllll.mdv.
+// Type: boolean
+//
+
+write_using_extended_paths = FALSE;
+
+//======================================================================
+//
+// CONTROL OF CONVERSION TO NETCDF.
+//
+// The following parameters control conversion of MDV files to NetCDF 
+//   CF-compliant files.
+//
+//======================================================================
+ 
+///////////// ncf_set_global_attributes ///////////////
+//
+// Option to set specify global attributes in the NCF file.
+// The global attributes are 'institution', 'references' and 'comment'.
+// Type: boolean
+//
+
+ncf_set_global_attributes = FALSE;
+
+///////////// ncf_global_attributes ///////////////////
+//
+// Global attributes for netCDF file.
+// These strings will be included as global attributes in the NetCDF 
+//   file. Other global attributes will be determined from the MDV 
+//   headers.
+//
+// Type: struct
+//   typedef struct {
+//      string institution;
+//      string references;
+//      string comment;
+//   }
+//
+//
+
+ncf_global_attributes = { "NCAR", "", "Converted by MdvPull" };
+
+///////////// ncf_transform_fields ////////////////////
+//
+// Option to tranform field names, units and values when converting MDV 
+//   to NCF.
+// Type: boolean
+//
+
+ncf_transform_fields = FALSE;
+
+///////////// ncf_field_transforms ////////////////////
+//
+// List of transforms. If mdv_field_name is found in the MDV data, these 
+//   other parameters will be used to set the field variable in the netCDF 
+//   file.
+// See mdv2ncf_transform_fields.
+//
+// Type: struct
+//   typedef struct {
+//      string mdv_field_name;
+//      string ncf_field_name;
+//      string ncf_standard_name;
+//      string ncf_long_name;
+//      string ncf_units;
+//      boolean do_linear_transform;
+//      float linear_multiplier;
+//      float linear_const;
+//      data_pack_t packed_data_type;
+//        Options:
+//          DATA_PACK_FLOAT
+//          DATA_PACK_SHORT
+//          DATA_PACK_BYTE
+//          DATA_PACK_ASIS
+//   }
+//
+// 1D array - variable length.
+//
+
+ncf_field_transforms = {
+  { "mdv_field_name", "ncf_field_name", "ncf_standard_name", "ncf_long_name", "ncf_units", FALSE, 1, 0, DATA_PACK_ASIS}
+};
+
+///////////// ncf_compress_data ///////////////////////
+//
+// Option to compress field data.
+// Only applies to NETCDF4 and  NETCDF4_CLASSIC files.
+// Type: boolean
+//
+
+ncf_compress_data = TRUE;
+
+///////////// ncf_compression_level ///////////////////
+//
+// Compression level from 1 to 9 with 9 being the greatest compression. 
+//   Default is 9.
+// Only applies to NETCDF4 and  NETCDF4_CLASSIC files.
+// Type: int
+//
+
+ncf_compression_level = 9;
+
+///////////// ncf_base_name ///////////////////////////
+//
+// Base name for netCDF files.
+// This will be the start of the file name.
+// Type: string
+//
+
+ncf_base_name = "ncf";
+
+///////////// ncf_file_prefix /////////////////////////
+//
+// User-specified output file prefix, comes before basename.
+// Type: string
+//
+
+ncf_file_prefix = "";
+
+///////////// ncf_file_suffix /////////////////////////
+//
+// Suffix of netCDF files.
+// File extension is always .nc. File name will end with mdv.suffix.nc. 
+//   Set to the empty string for no suffix, in which case file name will 
+//   end with .mdv.nc.
+// Type: string
+//
+
+ncf_file_suffix = "";
+
+///////////// ncf_file_format /////////////////////////
+//
+// NetCDF file format.
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+ncf_file_format = NETCDF4;
+
+///////////// ncf_polar_radar_file_type ///////////////
+//
+// Output format for polar radar data.
+//
+// Type: enum
+// Options:
+//     FILE_TYPE_CF
+//     FILE_TYPE_CF_RADIAL
+//     FILE_TYPE_DORADE
+//     FILE_TYPE_UF
+//
+
+ncf_polar_radar_file_type = FILE_TYPE_CF;
+
+///////////// ncf_output_latlon_arrays ////////////////
+//
+// If true latitude and longitude arrays of each grid point are output.
+// The CF convention requires that these arrays are present in the 
+//   netCDF file; however, the information is redundant since the lat and 
+//   lon arrays could be constructed using the other projection and grid 
+//   information required with a gridded data field.
+// Type: boolean
+//
+
+ncf_output_latlon_arrays = FALSE;
+
+///////////// ncf_output_mdv_attributes ///////////////
+//
+// Option to output non-CF compliant MDV attributes.
+// If true, MDV attributes which are not CF compliant will be output. 
+//   This will facilitate the translation of the data back into MDV with 
+//   the minimal loss of information.
+// Type: boolean
+//
+
+ncf_output_mdv_attributes = TRUE;
+
+///////////// ncf_output_mdv_chunks ///////////////////
+//
+// Option to output non-CF compliant MDV chunks.
+// If true, MDV chunks will be included as byte binary variables.
+// Type: boolean
+//
+
+ncf_output_mdv_chunks = TRUE;
+

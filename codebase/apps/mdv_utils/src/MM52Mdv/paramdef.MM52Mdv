@@ -1,0 +1,223 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MM5Ingest
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 1998
+ * 
+ * MM5Ingest takes MDV output files and converts to MDV format.
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef int {
+  p_default = 0;
+  p_min = 0;
+  p_max = 3;
+  p_descr = "Malloc debug level";
+  p_help =
+    "0 - none,"
+    "1 - corruption checking, "
+    "2 - records all malloc blocks and checks, "
+    "3 - printout of all mallocs etc. ";
+} malloc_debug_level;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Find the Fortran headers.";
+  p_help = "If set, the program searches for the Fortran record markers "
+    "around the headers, and prints the positions out to stderr.";
+} find_headers;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+  "In realtime mode, the analysis is performed for each volume scan "
+  "as it becomes available. In archive mode, the file list is obtained "
+  "from the command line.";
+} mode;
+
+commentdef {
+  p_header = "INPUT DATA.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Directory for input MM5 data - REALTIME mode.";
+  p_help = "The latest_data_info file in this directory is updated each time the model adds a forecast time step to the output file.";
+} realtime_input_dir;
+
+paramdef string {
+  p_default = "fort.43";
+  p_descr = "File name for input MM5 data - REALTIME mode.";
+  p_help = "During the MM5 run this file is appended for each forecast time step.";
+} realtime_input_file_name;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be valid. "
+    "If the latest_data_info file is older than this, the program waits "
+    "for new data.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "The minimum forecast time (secs) relative to model start time.";
+  p_help = "Only forecast times greater than or equal to this dtime are "
+    "used. This allows us to ignore the first n forecasts, which may not "
+    "be good anyway due to model spin-up requirements.";
+} min_forecast_dtime;
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Output directory.";
+  p_help = "The MM5 data is output to this directory in MDV format.";
+} output_dir;
+
+typedef enum {
+  U_FIELD, V_FIELD, W_FIELD, WSPD_FIELD,
+  TEMP_FIELD, HUMIDITY_FIELD, CLOUD_FIELD, PRECIP_FIELD,
+  ICING_FIELD, TURB_FIELD, FZLEVEL_FIELD
+} output_field_t;
+
+paramdef enum output_field_t {
+  p_default = { U_FIELD, V_FIELD, WSPD_FIELD,
+		TEMP_FIELD, HUMIDITY_FIELD,
+		CLOUD_FIELD, FZLEVEL_FIELD };
+  p_descr = "Output fields.";
+  p_help = "The CLOUD and PRECIP fields depend on snow and rain data "
+  "being available in the model. If not available these fields will "
+  "be set to 0 in the output fields.";
+} output_fields[];
+  
+typedef enum {
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON
+} output_projection_t;
+
+paramdef enum output_projection_t {
+  p_default = OUTPUT_PROJ_FLAT;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT - (x,y) Cartesian data in km from a given origin. "
+  "LATLON - lat/lon grid with constant grid spacing.";
+} output_projection;
+
+typedef struct {
+  double lat;
+  double lon;
+} output_origin_t;
+
+paramdef struct output_origin_t {
+  p_descr = "Origin of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT only.";
+  p_default = {40.0, -104.0};
+} output_origin;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} output_grid_t;
+
+paramdef struct output_grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "The grid params for the output grid.";
+  p_default = {300, 300, -149.5, -149.5, 1.0, 1.0};
+} output_grid;
+
+paramdef int {
+  p_descr = "Array of output flight levels.";
+  p_help = "The output grid has a variable Z dimension, in flight levels. "
+    "The flight levels in the output are taken from this array.";
+  p_default = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+	       110, 120, 130, 140, 150, 160, 170, 180, 190, 200,
+	       210, 230, 250, 270, 290, 310, 330, 350, 370, 390,
+	       410, 430, 450};
+} flight_levels[];
+
+commentdef {
+  p_header = "FILE HEADER INFO";
+}
+
+paramdef string {
+  p_default = "This MDV file was created by MM5Ingest.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "MM5 model output.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "MM5 output from MMM, NCAR.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+} data_set_source;
+
+
+

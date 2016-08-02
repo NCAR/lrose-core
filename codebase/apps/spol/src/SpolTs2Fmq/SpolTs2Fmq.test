@@ -1,0 +1,366 @@
+/**********************************************************************
+ * TDRP params for SpolTs2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// SpolTs2Fmq reads raw time-series data via TCP/IP. It saves the time 
+//   series data out to a file message queue (FMQ), which can be read by 
+//   multiple clients. It optionally merges in angles from the S2D system, 
+//   and scan information from syscon.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// do_not_register_on_read /////////////////
+//
+// Option to only register with the process mapper during the write.
+// Sometimes the reader keeps registering, but no data is being written 
+//   to the FMQ. If this parameter is true, we only register with procmap 
+//   during the write. So if no writes are occurring, no registrations 
+//   will occur and the auto_restarter will kill and restart this 
+//   application. This makes it robust when the reading hangs for some 
+//   reason.
+// Type: boolean
+//
+
+do_not_register_on_read = FALSE;
+
+//======================================================================
+//
+// TCP DETAILS.
+//
+//======================================================================
+ 
+///////////// ts_tcp_server_host //////////////////////
+//
+// Host name on which time series server is running.
+// Type: string
+//
+
+ts_tcp_server_host = "rvp8";
+
+///////////// ts_tcp_server_port //////////////////////
+//
+// TCP/IP port on which time series server is running.
+// Type: int
+//
+
+ts_tcp_server_port = 14000;
+
+//======================================================================
+//
+// READING SPOL SYSCON INFO FROM SHARED MEMORY.
+//
+// The Syscon information is written to shared memory by the 
+//   SpolSysconRelay application.
+//
+//======================================================================
+ 
+///////////// read_syscon_info_from_shmem /////////////
+//
+// Option to read SPOL SysControl information from shared memory.
+// TCP mode only. If true, the latest scan and other information will be 
+//   read from shared memory, in binary. The struct syscon_spol_shmem_t is 
+//   defined in <radar/syscon_to_spol.h>. The syscon info will be merged 
+//   with the time series data before being written out.
+// Type: boolean
+//
+
+read_syscon_info_from_shmem = FALSE;
+
+///////////// syscon_info_shmem_key ///////////////////
+//
+// Shared memory key for syscon info.
+// Key for shared memory holding spol syscon info.
+// Type: int
+//
+
+syscon_info_shmem_key = 55555;
+
+///////////// sync_syscon_info_with_pulses ////////////
+//
+// Option to synchronize the syscon info with the pulse stream.
+// The syscon info packets arrive somewhat delayed with respect to the 
+//   pulses. If this is true, the times of the syscon packets and pulse 
+//   packets are inspected, and an appropriate delay is inserted into the 
+//   pulse reading to synchronize the info with the pulses.
+// Type: boolean
+//
+
+sync_syscon_info_with_pulses = FALSE;
+
+//======================================================================
+//
+// MERGING ANGLES FROM S2D.
+//
+//======================================================================
+ 
+///////////// merge_antenna_angles ////////////////////
+//
+// Option to merge in angle information from the S2D system.
+// Some data streams (e.g. kband) do not contain angles, only time. 
+//   Time-stamped angles are broadcast in UDP. These are read in, and the 
+//   angles are merged with the data stream, using time to synchronize the 
+//   two streams.
+// Type: boolean
+//
+
+merge_antenna_angles = TRUE;
+
+///////////// angle_fmq_path //////////////////////////
+//
+// Name of input FMQ for angle data.
+// Type: string
+//
+
+angle_fmq_path = "$(DATA_DIR)/fmq/angles";
+
+///////////// position_angle_fmq_at_start /////////////
+//
+// Option to position the angle FMQ at the start of the queue.
+// If false, we start reading at the end of the angle queue. This is the 
+//   default behavior. If true, we position the read pointer at the start 
+//   of the angle queue, and read all data available in the queue before 
+//   starting to read new data. This is generally only used in debug mode.
+// Type: boolean
+//
+
+position_angle_fmq_at_start = FALSE;
+
+//======================================================================
+//
+// CORRECT THE SWEEP NUMBER.
+//
+//======================================================================
+ 
+///////////// zero_sweep_number_at_start_of_vol ///////
+//
+// Option to correct the sweep number relative to the start of a volume.
+// Some radars set the sweep number to always increase, without 
+//   resetting to 0 when a new volume starts. If this parameter is TRUE, 
+//   the sweep number will be corrected so that it is zero at the start of 
+//   each volume.
+// Type: boolean
+//
+
+zero_sweep_number_at_start_of_vol = TRUE;
+
+//======================================================================
+//
+// RADAR POSITION - Mobile Radar Support.
+//
+//======================================================================
+ 
+///////////// update_position /////////////////////////
+//
+// Option to update the radar's position from info in a position file.
+// Type: boolean
+//
+
+update_position = FALSE;
+
+///////////// position_file_path //////////////////////
+//
+// Path Mobile Radar position and heading file.
+// This file contains records: Heading Lat Lon Altitude(m) 
+//   Time(YYYYMMDD.HHMMSS).
+// Type: string
+//
+
+position_file_path = "/var/log/positions";
+
+///////////// position_check_interval /////////////////
+//
+// Interval at which to check on position file changes (secs).
+// The position file will be checked at this interval, and if it has 
+//   changed the new position information will be read in.
+// Type: int
+//
+
+position_check_interval = 5;
+
+//======================================================================
+//
+// SWEEP NUMBER.
+//
+//======================================================================
+ 
+///////////// delay_sweep_num_change_in_sector_scan ///
+//
+// Option to delay the change of the sweep number in sector scan mode.
+// On some systems (e.g. those which use a PMAC) the scan flags are 
+//   updated at the start of the antenna transition. This means that the 
+//   entire transition is included in the new sweep. If this parameter is 
+//   set to TRUE, and the scan mode is SECTOR, the sweep num change is 
+//   delayed until the antenna  changes direction. This means that the 
+//   first half of the transition will be flagged as the previous sweep, 
+//   and the second half as the next sweep. In non-sector mode, this 
+//   parameter is ignored.
+// Type: boolean
+//
+
+delay_sweep_num_change_in_sector_scan = FALSE;
+
+//======================================================================
+//
+// IQ DATA SCALING.
+//
+//======================================================================
+ 
+///////////// apply_scale /////////////////////////////
+//
+// Option to apply a scale and bias to each I and Q value before 
+//   writing.
+// Type: boolean
+//
+
+apply_scale = FALSE;
+
+///////////// scale ///////////////////////////////////
+//
+// Scale constant for I and Q data. Applied if apply_scale == TRUE.
+// Value written = Value_in * scale + bias.
+// Type: double
+//
+
+scale = 1;
+
+///////////// bias ////////////////////////////////////
+//
+// Bias for I and Q data. Applied if apply_scale == TRUE.
+// Value written = Value_in * scale + bias.
+// Type: double
+//
+
+bias = 0;
+
+//======================================================================
+//
+// OUTPUT FMQ DETAILS.
+//
+//======================================================================
+ 
+///////////// output_fmq_path /////////////////////////
+//
+// Path to output FMQ.
+// The FMQ consists of 2 files, ??.buf and ??.stat.
+// Type: string
+//
+
+output_fmq_path = "$(DATA_DIR)/fmq/ts/kband/shmem_11000";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer.
+// Type: int
+//
+
+output_fmq_size = 100000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in the output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 500;
+
+//======================================================================
+//
+// OUTPUT FMQ MESSAGE DETAILS.
+//
+// The output messages are written to the FMQ. To improve performance, 
+//   each message contains a number of time series pulses.
+//
+//======================================================================
+ 
+///////////// n_pulses_per_message ////////////////////
+//
+// Number of pulses per output message.
+// The actual number will sometimes be 1 less than this, because an info 
+//   data part may will be written once in a while.
+// Type: int
+//
+
+n_pulses_per_message = 200;
+
+///////////// n_pulses_per_power_info /////////////////
+//
+// The xmit_power packet will be written each time this number of pulses 
+//   is written.
+// Type: int
+//
+
+n_pulses_per_power_info = 1000;
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+
+///////////// write_end_of_vol_when_data_stops ////////
+//
+// Write end of vol event when data stops.
+// Type: boolean
+//
+
+write_end_of_vol_when_data_stops = FALSE;
+
+///////////// nsecs_no_data_for_end_of_vol ////////////
+//
+// Number of secs before writing end of vol.
+// See 'write_end_of_vol_when_data_stops'.
+// Type: int
+//
+
+nsecs_no_data_for_end_of_vol = 5;
+

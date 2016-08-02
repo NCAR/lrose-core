@@ -1,0 +1,37 @@
+/*********************************************************
+ * parameter definitions for mdv_adjust_data
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * June 1998
+ */
+
+paramdef enum debug {
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef long {
+  p_min = {0};
+  p_descr = "Field for rescaling";
+  p_help = "Field to be rescaled";
+} field_num;
+
+paramdef double {
+  p_default = {0.0};
+  p_descr = "Amount by which to adjust the data.";
+  p_help = "This amount will be added to the data in the selected field.";
+} data_adjustment;
+
+
+

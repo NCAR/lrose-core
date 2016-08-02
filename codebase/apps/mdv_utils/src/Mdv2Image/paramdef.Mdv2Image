@@ -1,0 +1,374 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Mdv2Image
+ * From PrintMdv Template by Mike Dixon Aug 1999.
+ * Author F. Hage Oct. 2006
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "IMAGE OUTPUT CONTROL";
+}
+
+paramdef string {
+  p_default = "png";
+  p_descr = "Type of output images.";
+  p_help = "Supported formats: png, jpeg, gif, bmp, tif ";
+} image_type;
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Directory to output images into";
+} output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the data time in the output file names.";
+} include_time_in_fname;
+
+paramdef int {
+  p_default = "0";
+  p_descr = "Height of output image .";
+  p_help = "Perserves aspect Ratio - Set to 0 to leave unchanged.";
+} height;
+
+commentdef {
+  p_header = "DATA RETRIEVAL CONTROL";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify file by time.";
+  p_help = "If true, paths for reads and writes are based on time and the data directory. If false, reads and writes use the specified path.";
+} specify_file_by_time;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Url string - for timed read/write.";
+  p_help = "On read, files will be searched for in this url. On write, files will be written to this url.";
+} url;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Path string - full path specified.";
+  p_help = "File will be read from this path.";
+} path;
+
+typedef enum {
+  GET_VOLUME             = 0,
+  GET_VSECTION           = 1,
+} get_mode_t;
+
+paramdef enum get_mode_t {
+  p_default = GET_VOLUME;
+  p_descr = "Mode for get request.";
+  p_help = "For GET_VSECTION, you must fill out the waypoint array. A single waypoint yields a column of data.";
+} get_mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use threaded calls.";
+  p_help = "If true, a DsMdvxThreaded object is used. If false, a DsMdvx object is used.";
+} threaded;
+
+typedef enum {
+  READ_LATEST             = 0,
+  READ_CLOSEST            = 1,
+  READ_FIRST_BEFORE       = 2,
+  READ_FIRST_AFTER        = 3,
+  READ_BEST_FORECAST      = 4,
+  READ_SPECIFIED_FORECAST = 5
+} read_search_mode_t;
+
+paramdef enum read_search_mode_t {
+  p_default = READ_CLOSEST;
+  p_descr = "Mode for searching for data in time domain.";
+  p_help = "For all except LATEST, you must specify the search time and the search margin. For SPECIFIED_FORECAST you must also specify the lead time.";
+} read_search_mode;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Data time string.";
+  p_help = "Time for data requested. Format is YYYY MM DD HH MM SS";
+} read_search_time;
+
+paramdef int {
+  p_default = "3600";
+  p_descr = "Margin around search time (secs).";
+  p_help = "Applies to all search modes except LATEST.";
+} read_search_margin;
+
+paramdef int {
+  p_default = "0";
+  p_descr = "Forecast lead time - uses search_time as the model gen time.";
+  p_help = "Applies to READ_SPECIFIED_FORECAST search mode only.";
+} read_forecast_lead_time;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to only consider files written before a specified time.";
+  p_help = "Setting this TRUE causes Mdvx to ignore files written AFTER the specified modify time.";
+} set_latest_valid_mod_time;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Latest valid modify time for file retrieval.";
+  p_help = "See 'read_set_latest_valid_mod_time'.";
+} latest_valid_mod_time;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set valid time search weight.";
+  p_help = " Set the weight given to valid time differences, over gen time differences, when searching for the best forecast for a specified time. Finding the best forecast for a given time is tricky. Do you care more about differences between the valid time and the requested time, or do you want to give more weight to the closest gen time. The default value is 2.5. This works well for most situations. If the time between model runs is long (say 6 hours) as compared to the time between model output times (say 30 mins) then you need to increase the weight to say 25. Setting it to 100 will weight the decision very heavily in favor of the diff between the valid and requested time, and put very little weight on which model run to use.";
+} set_valid_time_search_wt;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "See 'set_valid_time_search_wt.'";
+} valid_time_search_wt;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to constrain the lead times to be considered.";
+  p_help = "If true, only forecast lead times within the specified limits will be considerd. Also, you can specify to request the data by generate time rather than valid time. The valid time will be computed as the request_time plus the mean of the min and max lead times.";
+} constrain_forecast_lead_times;
+
+typedef struct {
+  int min_lead_time;
+  int max_lead_time;
+  boolean request_by_gen_time;
+} forecast_constraints_t;
+
+paramdef struct forecast_constraints_t {
+  p_default = {
+    min_lead_time = 0,
+    max_lead_time = 0,
+    request_by_gen_time = false
+  };
+  p_descr = "Set constraints for forecast lead times.";
+  p_help = "See constrain_forecast_lead_times. Only forecast lead times within the specified limits will be considerd. If request_by_gen_time is true, the search_time specified will be interpreted as the generate time rather than the valid time. The valid time will be computed as the search_time plus the mean of the min and max lead times specified.";
+} forecast_constraints;
+
+commentdef {
+  p_header = "READ CONTROL OPTIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set horizontal limits.";
+} read_set_horiz_limits;
+
+typedef struct {
+  float min_lat;
+  float min_lon;
+  float max_lat;
+  float max_lon;
+} horiz_limits_t;
+
+paramdef struct horiz_limits_t {
+  p_default = {-90.0, -180.0, 90.0, 180.0};
+  p_descr = "Horizontal limits for read.";
+} read_horiz_limits;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set plane vlevel limits";
+  p_help = "Mutually exclusive with read_set_plane_num_limits.";
+} read_set_vlevel_limits;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Lower plane vlevel limit.";
+} read_lower_vlevel;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Upper plane vlevel limit.";
+} read_upper_vlevel;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set plane number limits";
+  p_help = "Mutually exclusive with read_set_vlevel_limits.";
+} read_set_plane_num_limits;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Lower plane num limit.";
+} read_lower_plane_num;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Upper plane num limit.";
+} read_upper_plane_num;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set vlevel type for return data";
+} read_set_vlevel_type;
+
+typedef enum {
+  VERT_TYPE_PRESSURE =  3,
+  VERT_TYPE_Z        =  4,
+  VERT_FLIGHT_LEVEL  =  15
+} vlevel_type_t;
+
+paramdef enum vlevel_type_t {
+  p_default = VERT_TYPE_Z;
+  p_descr = "Read vlevel type.";
+} read_vlevel_type;
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_ASIS;
+  p_descr = "Read encoding type.";
+} read_encoding_type;
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4,
+  COMPRESSION_GZIP =  5,
+  COMPRESSION_GZIP_VOL =  6
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_ASIS;
+  p_descr = "Read compression type.";
+} read_compression_type;
+
+typedef enum {
+  SCALING_NONE =       0,
+  SCALING_ROUNDED =    1,
+  SCALING_INTEGRAL =   2,
+  SCALING_DYNAMIC =    3,
+  SCALING_SPECIFIED =  4
+} scaling_type_t;
+
+paramdef enum scaling_type_t {
+  p_default = SCALING_ROUNDED;
+  p_descr = "Read scaling type.";
+} read_scaling_type;
+
+paramdef float {
+  p_default = 1.0;
+  p_descr = "Read scaling scale.";
+  p_help = "For SCALING_SPECIFIED only.";
+} read_scale;
+
+paramdef float {
+  p_default = 0.0;
+  p_descr = "Read scaling bias.";
+  p_help = "For SCALING_SPECIFIED only.";
+} read_bias;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option for creating composite in the read operation.";
+} read_composite;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fill_missing flag for read";
+} read_set_fill_missing;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force a transform to linear on read.";
+} read_transform_to_linear;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field numbers";
+} read_set_field_nums;
+
+paramdef int {
+  p_default = {0};
+  p_descr = "Field number list.";
+} read_field_nums[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field names";
+} read_set_field_names;
+
+paramdef string {
+  p_default = {"DBZ"};
+  p_descr = "Field name list.";
+} read_field_names[];
+
+typedef struct {
+  float lat;
+  float lon;
+} vsect_waypt_t;
+
+paramdef struct vsect_waypt_t {
+  p_default = {{0.0, 0.0}};
+  p_descr = "Waypts for vertical section.";
+  p_help = "For READ_VSECTION mode only.";
+} read_vsect_waypts[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to disable interpolation for a vert section.";
+  p_help = "By default, data in a vertical section will be interpolated from the grid. If this is set to true, nearest neighbor will be used.";
+} disable_vsection_interp;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to decimate data on return.";
+  p_help = "This allows you to request that the data is returned to you decimated, so that the number of points in a plane does not exceed 'decimation_max_nxy'.";
+} read_set_decimation;
+
+paramdef int {
+  p_default = 10000000;
+  p_descr = "Max number of points in plane, when decimation is on.";
+  p_help = "See 'read_set_decimation'";
+} decimation_max_nxy;

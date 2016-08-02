@@ -1,0 +1,109 @@
+/*********************************************************
+ * parameter definitions for Fmq2MultMsgFmq
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * November 1999
+ */
+
+commentdef {
+  p_header = "Fmq2MultMsgFmq program";
+  p_text = "Fmq2MultMsgFmq packs a number of input messages from an FMQ into a single output message, which is then written to an output FMQ. The reasons for doing this are (a) to improve compression by allowing the compression algorithm to work on a larger buffer and (b) to reduce the number of remote writes made across a network link.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "fmq_input";
+  p_descr = "URL for input FMQ.";
+} input_url;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of millisecs to sleep while polling the input.";
+  p_help = "The reads are done in a polling-blocking mode. This is the number of millisecs to sleep between polls.";
+} msecs_sleep_blocking;
+
+commentdef {
+  p_header = "PACKING.";
+}
+
+typedef enum {
+  PACK_NMESSAGES, PACK_NBYTES, PACK_EITHER
+} pack_decision_t;
+  
+paramdef enum pack_decision_t {
+  p_default = PACK_NMESSAGES;
+  p_descr = "Decision option - for choosing how many messages to pack into a single message.";
+  p_help = "If set to PACK_NMESSAGES, the parameter n_messages_packed will be used to determine how many messages are packed together. If set to PACK_NBYTES, the number of bytes will be summed, and when the sum exceeds min_bytes_packed the messages up to that point will be packed together. If set to PACK_EITHER, either condition will trigger output packing.";
+} pack_decision;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Number of messages packed into a single message.";
+  p_help = "See parameter 'pack_decision'.";
+} n_messages_packed;
+
+paramdef int {
+  p_default = 65536;
+  p_descr = "Min number of bytes packed into a single message.";
+  p_help = "See parameter 'pack_decision'.";
+} min_bytes_packed;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "fmq_output";
+  p_descr = "URL for output FMQ.";
+} output_url;
+
+typedef enum {
+  NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION
+} compression_t;
+  
+paramdef enum compression_t {
+  p_default = ZLIB_COMPRESSION;
+  p_descr = "Output compression options.";
+  p_help = "The data may be optionally compressed for output. BZIP is generally the slowest but most compact. ZLIB uses the gzip compression algorithm, which is faster than BZIP, and for some data more compact as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is simple run-length encoding compression, which is the fastest and least compact.";
+} output_compression;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of slots in output FMQ.";
+} output_n_slots;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_buf_size;
+
+
+
+
+

@@ -1,0 +1,91 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for cindex_test
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * October 1996
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+	       DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately.";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "The instance of this process, used for reistration with procmap.";
+} instance;
+
+paramdef enum mode {
+  p_options = {REALTIME, ARCHIVE};
+  p_default = {REALTIME};
+  p_descr = "Operating mode";
+  p_help = "If REALTIME, index time is based on current time. If ARCHIVE, index time starts at the given start_time, and increments from there.";
+} mode;
+
+paramdef long {
+  p_default = {60};
+  p_min = {1};
+  p_descr = "Update interval (secs).";
+} update_interval;
+
+paramdef char* {
+  p_default = {"null"};
+  p_descr = "Data directory";
+  p_help = "Directory to which index file will be written.";
+} data_dir;
+
+paramdef char* {
+  p_default = {"test"};
+  p_descr = "Extension for data files";
+  p_help = "In this test there are no data files, but we need the extension for filling the index.";
+} file_extension;
+
+paramdef struct grid {
+  p_descr = "Start time";
+  p_help = "In ARCHIVE mode the time starts at this time and increments.";
+  p_field_type = {long, long, long, long, long, long};
+  p_field_name = {year, month, day, hour, min, sec};
+} start_time;
+
+paramdef long {
+  p_descr = "Number of times to write index file.";
+  p_help = "Set to -1 to write files forever.";
+  p_default = { -1 };
+} num_times;

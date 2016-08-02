@@ -1,0 +1,6 @@
+#! /bin/sh
+
+snuff "storm_track -params storm_track.rtest"
+
+
+

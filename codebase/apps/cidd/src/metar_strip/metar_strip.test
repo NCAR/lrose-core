@@ -1,0 +1,522 @@
+/**********************************************************************
+ * TDRP params for metar_strip
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: metar_strip.
+//
+// metar_strip displays a time-history of METAR data.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, metar_strip retrieves data every poll_interval_secs 
+//   and renders that data. In FOLLOW_CIDD mode, metar_strip watches the 
+//   CIDD coordinate shared memory segment, and follows that time. In 
+//   ARCHIVE mode, the program starts up at the archive_time.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FOLLOW_CIDD
+//
+
+mode = REALTIME;
+
+///////////// archive_time ////////////////////////////
+//
+// The display time for ARCHIVE mode.
+// See mode.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+archive_time = { 2000, 9, 5, 12, 0, 0 };
+
+///////////// cidd_shmem_key //////////////////////////
+//
+// The shared memory key for the CIDD coordinate struct.
+// When the user clicks in the CIDD main window, the coordinate struct 
+//   is updated with the location and time. The time value is used to 
+//   drive metar_strip in REALTIME mode.
+// Type: int
+//
+
+cidd_shmem_key = 61500;
+
+///////////// poll_interval_sec ///////////////////////
+//
+// Interval at which to poll the main display for new data (sec).
+// At this interval, the shared memory segment on the main display is 
+//   checked for changes.
+// Type: int
+//
+
+poll_interval_sec = 10;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input SPDB data.
+// METAR data is stored in SPDB format at this URL.
+// Type: string
+//
+
+input_url = "spdbp:://venus::spdb/metar";
+
+//======================================================================
+//
+// STATION DETAILS.
+//
+//======================================================================
+ 
+///////////// stations ////////////////////////////////
+//
+// Information for each station to be displayed.
+// The xwd_path designates the file to be created when doing window 
+//   dumps for HTML generation. The convert_command converts the xwd file 
+//   to a suitable file for web content.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string color;
+//      string xwd_path;
+//      string convert_command;
+//   }
+//
+// 1D array - variable length.
+//
+
+stations = {
+  { "RCTP", "green", "/tmp/RCTP.xwd", "convert /tmp/RCTP.xwd /tmp/RCTP.gif"},
+  { "RCSS", "orange", "/tmp/RCSS.xwd", "convert /tmp/RCSS.xwd /tmp/RCSS.gif"},
+  { "RCKH", "cyan", "/tmp/RCKH.xwd", "convert /tmp/RCKH.xwd /tmp/RCKH.gif"},
+  { "RCFN", "pink", "/tmp/RCFN.xwd", "convert /tmp/RCFN.xwd /tmp/RCFN.gif"}
+};
+
+//======================================================================
+//
+// DISPLAY DETAILS.
+//
+//======================================================================
+ 
+///////////// window_label ////////////////////////////
+//
+// Label for window border.
+// This label will normally appear in the top border of the display 
+//   window.
+// Type: string
+//
+
+window_label = "METAR TIME HISTORY";
+
+///////////// show_window /////////////////////////////
+//
+// Option to map the main window to the screen.
+// If false, the main window will not be mapped to the screen. In this 
+//   case html content will be generated in the background.
+// Type: boolean
+//
+
+show_window = TRUE;
+
+///////////// window_height ///////////////////////////
+//
+// The startup height for the window.
+// Type: int
+//
+
+window_height = 300;
+
+///////////// window_width ////////////////////////////
+//
+// The startup width for the window.
+// Type: int
+//
+
+window_width = 435;
+
+///////////// bottom_margin ///////////////////////////
+//
+// Width of bottom margin (pixels).
+// Type: int
+//
+
+bottom_margin = 35;
+
+///////////// right_margin ////////////////////////////
+//
+// Width of right margin (pixels).
+// Type: int
+//
+
+right_margin = 3;
+
+///////////// plot_period_secs ////////////////////////
+//
+// The initial period for the plot - secs.
+// This is the initial time period for the plot in seconds. If the 
+//   window is resized, the plot period will change.
+// Minimum val: 0
+// Type: int
+//
+
+plot_period_secs = 86400;
+
+///////////// startup_field ///////////////////////////
+//
+// The name of the field on which the display should start.
+//
+// Type: enum
+// Options:
+//     CEILING
+//     VISIBILITY
+//     FLIGHT_CAT
+//     TEMPERATURE
+//     HUMIDITY
+//     WIND_SPEED
+//     WIND_DIRN
+//     PRESSURE
+//
+
+startup_field = VISIBILITY;
+
+///////////// foreground_color ////////////////////////
+//
+// Color of the foreground in the display.
+// Type: string
+//
+
+foreground_color = "white";
+
+///////////// background_color ////////////////////////
+//
+// Color of the background in the display.
+// Type: string
+//
+
+background_color = "black";
+
+///////////// now_color ///////////////////////////////
+//
+// Color for the NOW line on the display.
+// Type: string
+//
+
+now_color = "white";
+
+///////////// font_name ///////////////////////////////
+//
+// Name of font for the text on the display.
+// Type: string
+//
+
+font_name = "6x13";
+
+///////////// min_ceiling_range ///////////////////////
+//
+// Minimum range for ceiling plot.
+// Type: float
+//
+
+min_ceiling_range = 20;
+
+///////////// trace_line_width ////////////////////////
+//
+// The width of the lines used for the plot traces.
+// Type: int
+//
+
+trace_line_width = 2;
+
+//======================================================================
+//
+// FLIGHT CATEGORY AND SKY OBSCURATION.
+//
+//======================================================================
+ 
+///////////// plot_flight_category ////////////////////
+//
+// Option to plot the flight category time history.
+// Type: boolean
+//
+
+plot_flight_category = TRUE;
+
+///////////// flight_category /////////////////////////
+//
+// Array of flight category parameters.
+// The flight category at a station will be computed using the ceiling 
+//   (ft) and visibility (km) thresholds. If both values exceed the 
+//   threshold, the flight category will be equal to or greater that the 
+//   specified category.
+//
+// Type: struct
+//   typedef struct {
+//      flight_category_label_t label;
+//        Options:
+//          VFR
+//          MVFR
+//          IFR
+//      string label_str;
+//      string color;
+//      float ceiling_threshold;
+//      float visibility_threshold;
+//   }
+//
+// 1D array - variable length.
+//
+
+flight_category = {
+  { VFR, "VFR", "seagreen", 1500, 5},
+  { MVFR, "MVFR", "blue", 500, 1.6},
+  { IFR, "IFR", "orange", 0, 0}
+};
+
+///////////// flight_category_line_width //////////////
+//
+// The width of the lines used for flight category.
+// Type: int
+//
+
+flight_category_line_width = 10;
+
+//======================================================================
+//
+// HTML OUTPUT FOR INDIVIDUAL FIELDS.
+//
+//======================================================================
+ 
+///////////// output_html /////////////////////////////
+//
+// Option to generate html output.
+// If true, images suitable for html pages are generated for each 
+//   station and each field. See stations[] and xxxx_html_image.
+// Type: boolean
+//
+
+output_html = FALSE;
+
+///////////// ceiling_html ////////////////////////////
+//
+// File path and conversion for ceiling HTML image.
+// The xwd_path designates the file to be created when doing window 
+//   dumps for HTML generation. The convert_command converts the xwd file 
+//   to a suitable file for web content.
+//
+// Type: struct
+//   typedef struct {
+//      string xwd_path;
+//      string convert_command;
+//   }
+//
+//
+
+ceiling_html = { "ceiling.xwd", "convert ceiling.xwd ceiling.gif" };
+
+///////////// visibility_html /////////////////////////
+//
+// File path and conversion for visibility HTML image.
+// The xwd_path designates the file to be created when doing window 
+//   dumps for HTML generation. The convert_command converts the xwd file 
+//   to a suitable file for web content.
+//
+// Type: struct
+//   typedef struct {
+//      string xwd_path;
+//      string convert_command;
+//   }
+//
+//
+
+visibility_html = { "visibility.xwd", "convert visibility.xwd visibility.gif" };
+
+///////////// flight_cat_html /////////////////////////
+//
+// File path and conversion for flight_cat HTML image.
+// The xwd_path designates the file to be created when doing window 
+//   dumps for HTML generation. The convert_command converts the xwd file 
+//   to a suitable file for web content.
+//
+// Type: struct
+//   typedef struct {
+//      string xwd_path;
+//      string convert_command;
+//   }
+//
+//
+
+flight_cat_html = { "flight_cat.xwd", "convert flight_cat.xwd flight_cat.gif" };
+
+///////////// temperature_html ////////////////////////
+//
+// File path and conversion for temperature HTML image.
+// The xwd_path designates the file to be created when doing window 
+//   dumps for HTML generation. The convert_command converts the xwd file 
+//   to a suitable file for web content.
+//
+// Type: struct
+//   typedef struct {
+//      string xwd_path;
+//      string convert_command;
+//   }
+//
+//
+
+temperature_html = { "temperature.xwd", "convert temperature.xwd temperature.gif" };
+
+///////////// humidity_html ///////////////////////////
+//
+// File path and conversion for humidity HTML image.
+// The xwd_path designates the file to be created when doing window 
+//   dumps for HTML generation. The convert_command converts the xwd file 
+//   to a suitable file for web content.
+//
+// Type: struct
+//   typedef struct {
+//      string xwd_path;
+//      string convert_command;
+//   }
+//
+//
+
+humidity_html = { "humidity.xwd", "convert humidity.xwd humidity.gif" };
+
+///////////// wind_speed_html /////////////////////////
+//
+// File path and conversion for wind_speed HTML image.
+// The xwd_path designates the file to be created when doing window 
+//   dumps for HTML generation. The convert_command converts the xwd file 
+//   to a suitable file for web content.
+//
+// Type: struct
+//   typedef struct {
+//      string xwd_path;
+//      string convert_command;
+//   }
+//
+//
+
+wind_speed_html = { "wind_speed.xwd", "convert wind_speed.xwd wind_speed.gif" };
+
+///////////// wind_dirn_html //////////////////////////
+//
+// File path and conversion for wind_dirn HTML image.
+// The xwd_path designates the file to be created when doing window 
+//   dumps for HTML generation. The convert_command converts the xwd file 
+//   to a suitable file for web content.
+//
+// Type: struct
+//   typedef struct {
+//      string xwd_path;
+//      string convert_command;
+//   }
+//
+//
+
+wind_dirn_html = { "wind_dirn.xwd", "convert wind_dirn.xwd wind_dirn.gif" };
+
+///////////// pressure_html ///////////////////////////
+//
+// File path and conversion for pressure HTML image.
+// The xwd_path designates the file to be created when doing window 
+//   dumps for HTML generation. The convert_command converts the xwd file 
+//   to a suitable file for web content.
+//
+// Type: struct
+//   typedef struct {
+//      string xwd_path;
+//      string convert_command;
+//   }
+//
+//
+
+pressure_html = { "pressure.xwd", "convert pressure.xwd pressure.gif" };
+
+//======================================================================
+//
+// FIELD THRESHOLD DEFINITION AND APPLICATION.
+//
+//======================================================================
+ 
+///////////// apply_ceiling ///////////////////////////
+//
+// Flag to turn on and off application of an upper threshold to ceiling.
+// Type: boolean
+//
+
+apply_ceiling = TRUE;
+
+///////////// ceiling_threshold ///////////////////////
+//
+// Ceiling threshold in feet.
+// Type: float
+//
+
+ceiling_threshold = 2000;
+
+///////////// apply_visibility ////////////////////////
+//
+// Flag to turn on and off application of an upper threshold to 
+//   visibilty.
+// Type: boolean
+//
+
+apply_visibility = TRUE;
+
+///////////// visibility_threshold ////////////////////
+//
+// Visibility threshold in kilometers.
+// Type: float
+//
+
+visibility_threshold = 2;
+

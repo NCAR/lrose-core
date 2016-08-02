@@ -1,0 +1,275 @@
+/*********************************************************
+ * parameter definitions for LdataWatcher
+ *
+ */
+
+commentdef {
+  p_header = "LdataWatcher program";
+  p_text = "LdataWatcher watches ldata file in a directory, optionally registers the latest time with the DataMapper, optionally writes an FMQ, and optionally runs a script.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Register interval for procmap - secs";
+  p_help = "If the script takes longer than 60 secs to complete, you will need to set this to a higher value to avoid the process being killed and restarted by the auto_restarter.";
+} procmap_register_interval;
+
+commentdef {
+  p_header = "INPUT DATA";
+} 
+
+paramdef string {
+  p_default = "./latest_data";
+  p_descr = "Directory path for input data.";
+  p_help = "This directory is watched for new _latest_data_info files.";
+} inputPath;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to read from DsLdataServer.";
+  p_help = "If TRUE, inputUrl will be used. If FALSE, inputPath will be used.";
+} use_url;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Directory path for input data.";
+  p_help = "This directory is watched for new _latest_data_info files.";
+} inputUrl;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Maximum age for files, realtime mode, seconds";
+  p_help = "Default is 15 minutes.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to read FMQ for latest_data_info from start.";
+  p_help = "If TRUE, the all of the entries in the FMQ will be read, from the start. This is useful for archive mode, or for debugging what is in an FMQ.";
+} read_ldata_fmq_from_start;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to save read state.";
+  p_help = "If TRUE, each time a read is successful, a _latest_read_info XML file will be written to a tmp directory, so that read state can be maintained in case the application crashes";
+} save_read_state;
+
+commentdef {
+  p_header = "REGISTER WITH DATA MAPPER WHEN DATA ARRIVES";
+} 
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to register the data set with the DataMapper.";
+  p_help = "If TRUE, when a new _latest_data_info file arrives, that info will be used to register with the DataMapper on the local machine.";
+} register_with_datamapper;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Data type - typically mdv, spdb, www, netCDF";
+  p_help = "Not used if set to null, or if register_with_datamapper is false.";
+} data_type;
+
+commentdef {
+  p_header = "WRITE FMQ ON BEHALF OF DATA SET WRITER WHEN DATA ARRIVES";
+} 
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write out an FMQ which matches the _latest_data_info.";
+  p_help = "If TRUE, the info in the ldata file will be written to an FMQ in the same directory. The intention is to provide a mechanism for adding the FMQ to directories of data arriving from clients which cannot write the FMQ directly.";
+} write_fmq;
+
+commentdef {
+  p_header = "CALL SCRIPT WHEN DATA ARRIVES";
+} 
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to spawn a script when a new file is detected.";
+  p_help = "If TRUE, the script 'script_to_call' will be called with the following args derived from the latest_data_info file: unix_time, year, month, day, hour, min, sec, file_ext, user_info1, user_info2, n_fcasts, lead_time_1, lead_time_2, ... If n_fcasts is 0, that will be the last arg and there will be no lead times.";
+} call_script;
+
+typedef enum {
+  SCRIPT_WITH_ORDERED_ARGS,
+  SCRIPT_WITH_COMMAND_LINE_OPTIONS,
+  SCRIPT_WITH_COMMAND_LINE_OPTIONS_DOUBLE_DASH,
+  SCRIPT_WITH_SPECIFIED_ORDERED_ARGS,
+  SCRIPT_WITH_SPECIFIED_OPTIONS,
+  SCRIPT_WITH_SPECIFIED_OPTIONS_DOUBLE_DASH
+} script_style_t;
+
+paramdef enum script_style_t {
+  p_default = SCRIPT_WITH_ORDERED_ARGS;
+  p_descr = "Type of script to call.";
+  p_help = "\nThe original, and default, behavior is to call a script with an ordered list of arguments - SCRIPT_WITH_ORDERED_ARGS. This is difficult to maintain, since adding extra args can cause the script to fail if the order changes. The new option, SCRIPT_WITH_COMMAND_LINE_OPTIONS, precedes each argument with a '-arg' style command line argument, so that order is not longer important, and extra args can be added without causing problems for client scripts.\n"
+  "\nFor SCRIPT_WITH_ORDERED_ARGS, the args are in the following order:\n  unix_time, year, month, day, hour, min, sec, file_ext, user_info1, user_info2, fcast_flag. fcast_flag will be 1 if this is a forecast data set, 0 if not. If fcast_flag is set, the next arg will be the lead_time. If not, fcast_flag is the last parameter. \n"
+  "If include_data_path is true, 2 extra args will be added at the start of the list: the full data path and the directory relative to $RAP_DATA_DIR. Therefore the arg list will be:\n  full_data_path, rel_dir, unix_time ...\n"
+  "For the late_data_script, the data_late_secs parameter will be added as the first arg. Therefore the arg list will be:\n  data_late_secs, full_data_path, rel_dir, unix_time, ....\n"
+  "\nFor SCRIPT_WITH_COMMAND_LINE_OPTIONS, the following command line args will be included, in no particular order:\n"
+  "  -unix_time ? valid time in unix time\n"
+  "  -year ? valid time year\n"
+  "  -month ? valid time month\n"
+  "  -day ? valid time day\n"
+  "  -hour ? valid time hour\n"
+  "  -min ? valid time min\n"
+  "  -sec ? valid time sec\n"
+  "  -rap_data_dir ? RAP_DATA_DIR env var\n"
+  "  -abs_dir_path ? absolute path of directory containing _latest_data_info\n"
+  "  -full_path ? same as abs_dir_path, backward-compatibility\n"
+  "  -rel_dir ? rel path of directory containing _latest_data_info\n"
+  "             relative to RAP_DATA_DIR\n"
+  "  -sub_dir ? same as rel_dir, backward-compatibility\n"
+  "  -rel_data_path ? path of data file rel to _latest_data_info\n"
+  "  -file_ext ? file extension\n"
+  "  -data_type ? data type string, for DataMapper\n"
+  "  -user_info1 ? info supplied by writer\n"
+  "  -user_info2 ? info supplied by writer\n"
+  "  -is_forecast ? true/false\n"
+  "  -forecast_lead_secs ? lead time in secs, if applicable\n"
+  "  -writer ? application writing the file\n"
+  "  -data_late_secs ? echo of data_late_secs parameters\n"
+  "and each arg will be followed by its respective value.\n"
+  "\nFor SCRIPT_WITH_COMMAND_LINE_OPTIONS_DOUBLE_DASH, the command line "
+  "arguments are included as described for SCRIPT_WITH_COMMAND_LINE_OPTIONS "
+  "except that the option names are preceded by two dashes rather than one "
+  "for use with languages like python.\n"
+  "\nFor SCRIPT_WITH_SPECIFIED_ORDERED_ARGS, only the options specified in "
+  "the script_options parameter will be included on the command line. "
+  "The options will be included in the order specified with no preceding "
+  "tags.\n"
+  "\nFor SCRIPT_WITH_SPECIFIED_OPTIONS, only the options specified in the "
+  "script_options parameter will be included on the command line.\n"
+  "\nFor SCRIPT_WITH_SPECIFIED_OPTIONS_DOUBLE_DASH, only the options "
+  "specified in the script_options parameter will be included on the "
+  "command line and the options will be preceded with a double dash for use "
+  "by languages like python.\n\n";
+
+} script_style;
+
+typedef enum
+{
+  OPTION_UNIX_TIME,
+  OPTION_YEAR,
+  OPTION_MONTH,
+  OPTION_DAY,
+  OPTION_HOUR,
+  OPTION_MIN,
+  OPTION_SEC,
+  OPTION_RAP_DATA_DIR,
+  OPTION_FULL_PATH,
+  OPTION_ABS_DIR_PATH,
+  OPTION_SUB_DIR,
+  OPTION_REL_DIR,
+  OPTION_REL_DATA_PATH,
+  OPTION_FULL_FILE_PATH,
+  OPTION_REL_FILE_PATH,
+  OPTION_FILE_NAME,
+  OPTION_FILE_EXT,
+  OPTION_DATA_TYPE,
+  OPTION_USER_INFO1,
+  OPTION_USER_INFO2,
+  OPTION_IS_FORECAST,
+  OPTION_FORECAST_LEAD_SECS,
+  OPTION_WRITER,
+  OPTION_DATA_LATE_SECS,
+  OPTION_DEBUG,
+  OPTION_VERBOSE
+} script_options_t;
+
+paramdef enum script_options_t
+{
+  p_descr = "List of options to include on the script command line.";
+  p_help = "Only used if script_style is set to SCRIPT_WITH_SPECIFIED_OPTIONS "
+           "or SCRIPT_WITH_SPECIFIED_OPTIONS_DOUBLE_DASH.";
+  p_default = { OPTION_UNIX_TIME };
+} script_options[];
+
+paramdef string {
+  p_default = "run_and_exit_script.pl";
+  p_descr = "Name of script to call if call_script is true";
+  p_help = "The script will be called with the args specified in the 'call_script parameter'. Also, take note of the 'include_input_path' parameter which places extra args at the start of the arg list. If you need extra args ahead of these args, put them in this string after the script name.";
+} script_to_call;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to pass two additional arguments (RAP_DATA_DIR and inputPath) to the called script.";
+  p_help = "The inputPath will be relative to RAP_DATA_DIR and will not include the _latest_data_info file. Also, note that these two additional arguments will occur BEFORE the standard arguments described in 'call_script'
+ above.";
+} include_input_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run script in background.";
+  p_help = "If TRUE, the script will be run in the background. Therefore, the system call will return immediately. If FALSE, LdataWatcher will register with procmap while waiting for the script to complete.";
+} run_script_in_background;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to terminate script if it hangs.";
+  p_help = "If TRUE, the script will be killed if it does not return within 'script_max_run_secs'.";
+} terminate_script_if_hung;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Max time allowed for script - secs.";
+  p_help = "If 'terminate_script_if_hung' is TRUE, the script will be killed if it does not complete withing this number of secs.";
+} script_max_run_secs;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Min allowed interval between calling script - secs.";
+  p_help = "The script will only be called if at least this number of seconds has elapsed since it was last called. If less time has gone by, the program will queue up the script call until the interval has elapsed. If multiple calls occur during a single interval, only the last one will be activated.";
+} script_min_interval_secs;
+
+paramdef string {
+  p_default = { };
+  p_descr = "Supplementary arguments to be added to end of argument list.";
+  p_help = "This allows you to add command line arguments for calling the script. These are added at the END of the list. Only applies if script style is one of the OPTIONS types, i.e. NOT ORDERED.";
+} supplementary_args[];
+
+commentdef {
+  p_header = "CALL SCRIPT WHEN DATA IS LATE";
+} 
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to spawn a script when data is late.";
+  p_help = "If TRUE, the script 'data_late_script_to_call' will be called when data has not arrived within the last 'data_late_secs'. The call to the script will be repeated every 'data_late_secs' until data arrives. The script is called with the following args derived from the latest_data_info file: data_late_secs, RAP_DATA_DIR, inputPath, unix_time, year, month, day, hour, min, sec, file_ext, user_info1, user_info2, n_fcasts, lead_time_1, lead_time_2, ... If n_fcasts is 0, that will be the last arg and there will be no lead times. The inputPath will be relative to RAP_DATA_DIR and will not include the _latest_data_info file. The script will be run in the background. If 'terminate_script_if_hung' is TRUE, the script will be terminated if it does not complete within 'script_max_run_secs'";
+} call_data_late_script;
+
+paramdef string {
+  p_default = "data_late_script.pl";
+  p_descr = "Name of script to call if call_data_late_script is true";
+  p_help = "The script will be called with the args specified in the 'call_data_late_script' parameter. If you need extra args ahead of these standard args, put them in this string after the script name.";
+} data_late_script;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Max data interval before it is considered late - secs.";
+  p_help = "If data has not arrived within this interval, and call_data_late_script is true, the data late script is called.";
+} data_late_secs;
+
+
+
+

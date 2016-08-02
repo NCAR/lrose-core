@@ -1,0 +1,240 @@
+/****************************************************
+ * TDRP params for dva_cart
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_EXTRA;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Dir name for lookup files.
+ * This directory contains the lookup and grid files.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+lookup_dir = "./lookup_dir";
+
+/*
+ * Dir name for beam files.
+ * The beam files are placed in this directory by dva_ingest.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+beam_dir = "../dva_ingest/beam_dir";
+
+/*
+ * Max valid age of input files in realtime mode (secs).
+ * This the max valid age for an incoming file. The program will
+ *   wait for a data file more recent than this.
+ *
+ * Type: double
+ * Default: 360 
+ * Min value: 1 
+ */
+max_realtime_valid_age = 3600;
+
+/*
+ * Dir name for output files.
+ * The dohbson output files are placed in this directory.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+output_dir = "output_dir";
+
+/*
+ * Radar name.
+ *
+ * Type: string
+ * Default: "Unknown" 
+ */
+radar_name = "MRL5";
+
+/*
+ * Radar altitude.
+ * Radar altitude (km MSL).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -2 
+ * Max value: 25 
+ */
+radar_altitude = 1.719;
+
+/*
+ * Radar latitude.
+ * Radar latitude (deg.decimal).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -90 
+ * Max value: 90 
+ */
+radar_latitude = -28.0975;
+
+/*
+ * Radar longitude.
+ * Radar longitude (deg.decimal).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -180 
+ * Max value: 180 
+ */
+radar_longitude = 28.1628;
+
+/*
+ * Number of gates per beam.
+ *
+ * Type: long
+ * Default: 224 
+ */
+gates_per_beam = 224;
+
+/*
+ * Radar elevation angles.
+ *
+ * Type: double
+ * Array elem size: 8 bytes
+ * Array has no max number of elements
+ */
+elevations = {1.5, 3, 4.5, 6, 7.5, 9, 10.8, 13, 15.5, 18.4, 21.8, 25.6, 29.9, 34.6, 39.6, 44.8, 50, 55};
+
+/*
+ * Gate spacing (km).
+ * Radar range gate spacing - used for PACER only. For other radars
+ *   it is determined from the data.
+ *
+ * Type: double
+ * Default: 0.6 
+ * Min value: 0.001 
+ * Max value: 100 
+ */
+gate_spacing = 0.6;
+
+/*
+ * Start range (km).
+ * Range to center of first radar gate - used for PACER only. For
+ *   other radars it is determined from the data.
+ *
+ * Type: double
+ * Default: 0.3 
+ * Min value: 0.001 
+ * Max value: 1000 
+ */
+start_range = 9.3;
+
+/*
+ * Beam width.
+ * Radar half-power beam width (deg).
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0.01 
+ * Max value: 45 
+ */
+beam_width = 1.5;
+
+/*
+ * Samples per beam.
+ * Number of pulse samples used to compute data from a beam.
+ *
+ * Type: long
+ * Default: 32 
+ * Min value: 1 
+ */
+samples_per_beam = 32;
+
+/*
+ * Pulse width.
+ * Radar pulse width (microsecs).
+ *
+ * Type: double
+ * Default: 2 
+ * Min value: 0.001 
+ */
+pulse_width = 2;
+
+/*
+ * PRF.
+ * Radar pulse repitition frequency (pulses per sec).
+ *
+ * Type: double
+ * Default: 250 
+ * Min value: 1 
+ */
+prf = 250;
+
+/*
+ * Wavelength.
+ * Radar wavelength (cm).
+ *
+ * Type: double
+ * Default: 10 
+ * Min value: 0.01 
+ * Max value: 1000 
+ */
+wavelength = 10;
+
+/*
+ * Cartesian delta x (km).
+ *
+ * Type: double
+ * Default: 1 
+ */
+delta_x = 1;
+
+/*
+ * Cartesian delta y (km).
+ *
+ * Type: double
+ * Default: 1 
+ */
+delta_y = 1;
+
+/*
+ * Cartesian delta z (km).
+ *
+ * Type: double
+ * Default: 1 
+ */
+delta_z = 1;
+
+/*
+ * Cartesian min z (km) - height of lowest CAPPI.
+ *
+ * Type: double
+ * Default: 3 
+ */
+min_z = 3;
+
+/*
+ * Number of CAPPI's.
+ *
+ * Type: long
+ * Default: 18 
+ */
+nz = 18;
+
+

@@ -1,0 +1,61 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.01b6C [en] (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY>
+<A HREF="index.html"><IMG SRC="rsl.gif" ></A><A HREF="index.html">&nbsp;</A>&nbsp;
+<HR>
+<PRE>typedef struct {
+&nbsp; int&nbsp;&nbsp; month; /* Time for this ray; month (1-12). */
+&nbsp; int&nbsp;&nbsp; day;&nbsp;&nbsp; /* Time for this ray; day (1-31).&nbsp;&nbsp; */
+&nbsp; int&nbsp;&nbsp; year;&nbsp; /* Time for this ray; year (eg. 1993). */
+&nbsp; int&nbsp;&nbsp; hour;&nbsp; /* Date for this ray; hour (0-23). */
+&nbsp; int&nbsp;&nbsp; minute;/* Date for this ray; minute (0-59).*/
+&nbsp; float sec;&nbsp;&nbsp; /* Date for this ray; second + fraction of second. */
+&nbsp; float unam_rng;&nbsp; /* Unambiguous range. (KM). */
+&nbsp; float azimuth;&nbsp;&nbsp; /* Azimuth angle. (degrees). Must be positive
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * 0=North, 90=east, -90/270=west.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * This angle is the mean azimuth for the whole ray.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * Eg. for NSIG the beginning and end azimuths are
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp; averaged.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp; int&nbsp;&nbsp; ray_num;&nbsp;&nbsp; /* Ray no. within elevation scan. */
+&nbsp; float elev;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Elevation angle. (degrees). */
+&nbsp; int&nbsp;&nbsp; elev_num;&nbsp;&nbsp; /* Elevation no. within volume scan. */
+&nbsp;&nbsp;
+&nbsp; int&nbsp;&nbsp; range_bin1; /* Range to first gate.(meters) */
+&nbsp; int&nbsp;&nbsp; gate_size;&nbsp; /* Data gate size (meters)*/
+&nbsp;&nbsp;
+&nbsp; float&nbsp; vel_res;&nbsp;&nbsp;&nbsp; /* Doppler velocity resolution */
+&nbsp; float sweep_rate;&nbsp;&nbsp; /* Sweep rate. Full sweeps/min. */
+&nbsp;&nbsp;
+&nbsp; int prf;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Pulse repitition frequency, in Hz. */
+&nbsp; float azim_rate;
+&nbsp; float fix_angle;
+&nbsp; float pitch;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Pitch angle. */
+&nbsp; float roll;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Roll&nbsp; angle. */
+&nbsp; float heading;&nbsp;&nbsp;&nbsp; /* Heading. */
+&nbsp; float pitch_rate; /* (angle/sec) */
+&nbsp; float roll_rate;&nbsp; /* (angle/sec) */
+&nbsp; float heading_rate; /* (angle/sec) */
+&nbsp; float lat;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Latitude (degrees) */
+&nbsp; float lon;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Longitude (degrees) */
+&nbsp; int&nbsp;&nbsp; alt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Altitude (m) */
+&nbsp; float rvc;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Radial velocity correction (m/sec) */
+&nbsp; float vel_east;&nbsp;&nbsp;&nbsp;&nbsp; /* Platform velocity to the east&nbsp; (m/sec) */
+&nbsp; float vel_north;&nbsp;&nbsp;&nbsp; /* Platform velocity to the north (m/sec) */
+&nbsp; float vel_up;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Platform velocity toward up&nbsp;&nbsp;&nbsp; (m/sec) */
+&nbsp; float pulse_count;
+&nbsp; float pulse_width; /* Pulse width (micro-sec). */
+&nbsp; float beam_width;&nbsp; /* Beamwidth in degrees. */
+&nbsp; float frequency;&nbsp;&nbsp; /* Bandwidth MHz. */
+&nbsp; float wavelength;&nbsp; /* Wavelength. Meters. */
+&nbsp; float nyq_vel;&nbsp;&nbsp;&nbsp; /* Nyquist velocity. m/s */
+&nbsp; float (*f)(Range x);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Data conversion function. f(x). */
+&nbsp; Range (*invf)(float x);&nbsp;&nbsp;&nbsp; /* Data conversion function. invf(x). */
+&nbsp; int&nbsp;&nbsp; nbins;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Number of array elements for 'Range'. */
+} Ray_header;</PRE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,201 @@
+#!/bin/sh
+
+#
+# Script to start an LDM in a way suitable for our
+# purposes at RAL, or stop a running ldm. Input argument should be
+# either "stop" or "start". Adopted from :
+# 
+# http://www.unidata.ucar.edu/software/ldm/ldm-6.5.1/basics/configuring.html#boot
+#
+# If the ldm is running with a good product queue,
+# then running this with the "start" argument has no effect.
+# Thus, it can be run quite frequently in cron, possibly
+# like this :
+#
+# */5 * * * * csh -c "ldmMgr start  >& /dev/null"
+#
+# Niles Oien February 2007
+#
+
+#
+# Check for active cron
+#
+crontab -l 2> $HOME/cronCheck.dat 1>/dev/null
+grep "no crontab" $HOME/cronCheck.dat 1> $HOME/cronCheck2.dat
+  
+# if $HOME/cronCheck2.dat exists and has size > 0, no cron, so exit
+    
+if [ -s $HOME/cronCheck2.dat ]
+then
+   echo No cron table, not starting ldm
+   exit 0
+fi
+
+
+date -u
+#
+# Set up a few things.
+#
+    export PATH=/bin:/usr/bin
+
+    LDMHOME=/home/ldm
+    LDMBIN=$LDMHOME/bin
+    LDMADMIN=$LDMBIN/ldmadmin
+    PQCHECK=$LDMBIN/pqcheck
+    PQCAT=$LDMBIN/pqcat
+    PQ=$LDMHOME/data/ldm.pq
+
+#
+# Deal with the start option - first, check the product queue,
+# if it is not OK, stop the LDM and fix the product queue.
+#
+# Then, start the ldm if it is not running.
+#
+    case "$1" in
+
+    start)
+         #
+         # See if the product queue file exists, if not, create it.
+         #
+         if [ ! -f $PQ ] ; then
+    		echo Product-queue does not exist.  Creating...
+                #
+                # If we have to create a product queue, stop the LDM, it likely needs restarting.
+                #
+                if [ -x $LDMADMIN ] ; then
+                    $LDMADMIN stop -x
+                fi
+                #
+    		if ! $LDMADMIN mkqueue -c -x; then
+    		    echo Failed to create product queue. Aborting...
+    		    exit 1
+    		fi
+    	 else
+                #
+    		# If we got here, the product queue exists.
+    		# Test the product-queue for corruption.
+    		#
+    		if ! $PQCHECK -l /dev/null -q $PQ; then
+                    #
+                    # Looks like our product queue has problems. 
+                    #
+                    #
+    		    case $? in
+    		    1)  echo System error checking product-queue.  Aborting...
+                        #
+                        # This is such a heavy-duty error that we may as well give up.
+                        #    
+			exit 1
+    			;;
+    		    2)  echo Adding writer-counter to product-queue...
+                        if [ -x $LDMADMIN ] ; then
+                          $LDMADMIN stop -x
+                        fi
+                        #
+    			if ! $PQCHECK -F -q $PQ; then
+    			    echo Failed to add writer-counter. Aborting...
+    			    exit 1
+    			fi
+    			;;
+    		    3)  echo Product-queue was incorrectly closed. Checking.
+                        if [ -x $LDMADMIN ] ; then
+                          $LDMADMIN stop -x
+                        fi
+                        #
+    			if $PQCAT -s -l /dev/null; then
+    			    echo Product-queue appears OK.
+    			    echo Clearing writer-counter...
+    			    if ! $PQCHECK -F -q $PQ; then
+    				echo Could not clear counter.  Aborting...
+    				exit 1
+    			    fi
+    			else
+    			    echo Product-queue appears corrupt.  Deleting.
+    			    /bin/rm -f $PQ
+    			    if ! $LDMADMIN mkqueue -c -x; then
+    				echo Could not make new product-queue.  Aborting...
+    				exit 1
+    			    fi
+    			fi
+    			;;
+    		    4)  echo Product-queue is corrupt.  Deleting.
+                        if [ -x $LDMADMIN ] ; then
+                          $LDMADMIN stop -x
+                        fi
+                        #
+    			/bin/rm -f $PQ
+    			if ! $LDMADMIN mkqueue -c -x; then
+    			    echo Could not make new product-queue.  Aborting...
+    			    exit 1
+    			fi
+    			;;
+    		    esac
+    		fi
+    	    fi
+
+          #
+          # OK, now we're done with the product queue, so start the
+          # LDM if it is not running.
+          #
+          if [ -x $LDMADMIN ] ; then
+    	     if $LDMADMIN isrunning; then
+                echo LDM system is already running.
+    	     else
+                #
+                # Experience suggests that it is worth stopping
+                # the ldm - yes, even if it is not running - before
+                # starting it.
+                #
+                $LDMADMIN stop -x
+                $LDMADMIN start 
+                #
+                # Now wait for 10 seconds. If after that it is not running,
+                # delete the product queue and try again.
+                #
+                echo waiting for 10 seconds to check running status -
+                sleep 10
+                #
+                # If we're not running now, delete and make the queue.
+                #
+                if ! $LDMADMIN isrunning; then
+                   /bin/rm -f $PQ
+                   if ! $LDMADMIN mkqueue -c -x; then
+                       echo Could not make new product-queue.  Aborting...
+                       exit 1
+                   fi
+                #
+                # And restart.
+                #
+                $LDMADMIN stop -x
+                $LDMADMIN start
+                fi 
+             fi
+          fi
+        ;;
+
+#
+# Deal with the (much simpler) case of stopping the ldm.
+#
+    stop)
+        echo Stopping the LDM system.
+        if [ -x $LDMADMIN ] ; then
+            $LDMADMIN stop -x
+        fi
+        ;;
+#
+# If we got no arguments on the command line, or
+# we got the -h argument, then print a usage message.
+#
+     "")
+       echo USAGE : $0 start or $0 stop
+       ;;
+
+     "-h")
+       echo USAGE : $0 start or $0 stop
+       ;;  
+
+    esac
+#
+#
+#
+

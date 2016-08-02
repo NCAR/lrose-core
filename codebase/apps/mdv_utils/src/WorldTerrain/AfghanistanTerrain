@@ -1,0 +1,91 @@
+#!/bin/csh
+#
+# This is a script to run the WorldTerrain program to extract two
+# MDV files covering Afghanistan from the USGS elevation
+# dataset. It is well documented so I can point
+# other people at it. If you want to extract terrain data,
+# copy this file to another name and edit the
+# commands that run WorldTerrain at the bottom of this
+# file.
+#
+# One file is at the maximum resolution of the
+# USGS dataset (0.00833333333333 degrees in latitude
+# and longitude) and the other covers a wider area
+# at a lower resolution.
+#
+# For the WorldTerrain program to run, all the USGS
+# Digital Elevation Model (DEM) files must be in one
+# directory. This is something of a hassle since a
+# lot of disk space is needed (Just under 1.9 GB). 
+# At the time of writing this is too much for one CD.
+# The DEM files are unpacked on
+#
+# aoaws@venus:/d1/terrain
+#
+# And the software (including a copy of this script) is in :
+#
+# aoaws@venus:/d1/terrain/prog
+#
+#
+# Myself, Deirdre Garvey, Frank Hage and Mike Dixon
+# know the password for aoaws@venus.
+#
+# The WorldTerrain  program is checked in as :
+#
+# apps/aoaws/src/WorldTerrain 
+#
+# The program is not efficient. For each grid point, 
+# it opens a DEM file, reads an elevation value, and 
+# then closes the DEM file again. The upshot is that
+# a given DEM file will probably be read several times.
+#
+# Also the program produces only lat/lon projection MDV files.
+#
+# For these reasons, it is best to run the program only
+# to initially extract the terrain data. Remapping the
+# data onto other grid projections is probably best done by
+# running MdvResample on the output of WorldTerrain.
+#
+# WorldTerrain also produces ascii data in the files
+# ascii.dat, ascii.lat and ascii.lon. The file ascii.dat
+# is a two dimensional ASCII file that has the whole grid
+# in it, ascii.lon and ascii.lat are one dimensional and
+# have the longitudes and latitudes used for the grid in them.
+#
+# The program just uses the nearest appropriate DEM point, 
+# there is no internal interpolation.
+#
+# ---------------------------------------------------------
+#
+# To run the program, the usage is :
+#
+# WorldTerrain DEM_DIR ll_lat ll_lon Nx Ny Dx Dy Outfilename
+#
+# Where :
+#
+# DEM_DIR is the directory where the USGS DEM files are,
+# ll_lat is the lower left latitude,
+# ll_lon is the lower left longitude,
+# Nx is the number of points to extract in the longitude direction,
+# Ny is the number of points to extract in the latitude direction,
+# Dx is the increment in longitude, in degrees,
+# Dy is the increment in latitude, in degrees, and
+# Outfilename is the MDV filename, with extension.
+#
+#
+# First the small coverage, high resolution file :
+#
+WorldTerrain ../ 25.0 60.0 1801 1801 0.00833333333333 0.00833333333333  Afghan_HiRes.mdv
+#
+# That should cover 25N to 40N and 60E to 75E (you have to do some
+# minor math to get the coverage you want).
+#
+#
+# Then the wider coverage, lower resolution file :
+#
+WorldTerrain ../ 15.0 45.0 901 601 0.05 0.05 Afghan_WideArea.mdv
+#
+# That should cover 15N to 45N and 45E to 90E
+#
+# Niles Oien October 2001.
+#

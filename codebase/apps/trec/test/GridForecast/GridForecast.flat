@@ -1,0 +1,249 @@
+/**********************************************************************
+ * TDRP params for ../../src/GridForecast/GridForecast
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "flat";
+
+//======================================================================
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Minimum val: 0
+// Type: long
+//
+
+max_realtime_valid_age = 300;
+
+//======================================================================
+//
+//======================================================================
+ 
+///////////// motion_grid_url /////////////////////////
+//
+// URL for grid files for U and V motion data.
+// The program triggers off files in this directory. It matches up an 
+//   image file with the motion file and produces a forecast for the 
+//   image.
+// Type: string
+//
+
+motion_grid_url = "mdvp:://localhost::./mdv/flat/ctrec";
+
+///////////// vector_spacing //////////////////////////
+//
+// Vector spacing for forecast (km).
+// This is the ideal vector spacing - the actual will depend on the 
+//   motion file grid. Vectors are extracted from the grid at this spacing 
+//   in x and y.
+// Type: double
+//
+
+vector_spacing = 5;
+
+///////////// smoothing_radius ////////////////////////
+//
+// Smoothing radius (km).
+// The influence of each sampled vector is felt out to the smoothing 
+//   radius. The weight placed on the vector value at any given point 
+//   within the smoothing radius is inversely proportional to the distance 
+//   of the point from the vector.
+// Type: double
+//
+
+smoothing_radius = 25;
+
+///////////// u_field_num /////////////////////////////
+//
+// Number of U field (0-based).
+// The field number for the U velocity component.
+// Type: long
+//
+
+u_field_num = 1;
+
+///////////// u_plane_ht //////////////////////////////
+//
+// Ht of U plane (km).
+// The plane height for the U velocity component. The plane closest to 
+//   this height will be used.
+// Type: double
+//
+
+u_plane_ht = 1;
+
+///////////// v_field_num /////////////////////////////
+//
+// Number of V field (0-based).
+// The field number for the V velocity component.
+// Type: long
+//
+
+v_field_num = 2;
+
+///////////// v_plane_ht //////////////////////////////
+//
+// Ht of V plane (km).
+// The plane height for the V velocity component. The plane closest to 
+//   this height will be used.
+// Type: double
+//
+
+v_plane_ht = 1;
+
+//======================================================================
+//
+//======================================================================
+ 
+///////////// image_grid_url //////////////////////////
+//
+// Image grid data directory.
+// The program takes an image from this directory and creates a forecast 
+//   using the U and V velocity components from the motion file. The image 
+//   file used is that closest in time before the motion grid.
+// Type: string
+//
+
+image_grid_url = "mdvp:://localhost::./mdv/flat/brightBand";
+
+///////////// image_field_num /////////////////////////
+//
+// Image field number.
+// Field number of image data in grid (0-based).
+// Type: long
+//
+
+image_field_num = 0;
+
+///////////// image_plane_ht //////////////////////////
+//
+// Image plane height (km MSL).
+// Plane height to the image data in grid. The plane closest to this 
+//   height will be used. Use -1 to use composite (column-max) data.
+// Type: double
+//
+
+image_plane_ht = 0;
+
+///////////// image_val_min ///////////////////////////
+//
+// Min value for image data.
+// Only include image data above this value in the forecast.
+// Type: double
+//
+
+image_val_min = 0;
+
+///////////// image_val_max ///////////////////////////
+//
+// Max value for image data.
+// Only include image data below this value in the forecast.
+// Type: double
+//
+
+image_val_max = 255;
+
+///////////// image_time_margin ///////////////////////
+//
+// Time margin (secs).
+// Margin around motion grid file time for finding image grid.
+// Type: long
+//
+
+image_time_margin = 180;
+
+//======================================================================
+//
+//======================================================================
+ 
+///////////// forecast_output /////////////////////////
+//
+// Forecast output parameters.
+// For each forecast lead time (secs) you must provide an output 
+//   directory.
+//
+// Type: struct
+//   typedef struct {
+//      string url;
+//      long lead_time;
+//   }
+//
+// 1D array - variable length.
+//
+
+forecast_output = {
+  {
+    url = "mdvp:://localhost::./mdv/flat/brightBand30",
+    lead_time = 1800
+  }
+  ,
+  {
+    url = "mdvp:://localhost::./mdv/flat/brightBand60",
+    lead_time = 3600
+  }
+};
+
+//======================================================================
+//
+//======================================================================
+ 
+///////////// write_motion_files //////////////////////
+//
+// Option to output motion grid files for debugging.
+// Type: boolean
+//
+
+write_motion_files = TRUE;
+
+///////////// output_motion_url ///////////////////////
+//
+// Motion grid data URL.
+// If 'write_motion_files' is TRUE, motion files will be written to this 
+//   URL.
+// Type: string
+//
+
+output_motion_url = "mdvp:://localhost::./mdv/flat/motion_dir";
+

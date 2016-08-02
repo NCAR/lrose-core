@@ -1,0 +1,6 @@
+.deps
+HiqDos2Dsr
+__makefile.template
+makefile
+makefile.am
+makefile.in

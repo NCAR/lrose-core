@@ -1,0 +1,41 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_write_radar</h1>
+
+
+<h1>RSL_write_radar_fp</h1>
+
+
+<h1>RSL_write_radar_gzip</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>int RSL_write_radar(<a href=RSL_radar_struct.html>Radar</a> *radar, char *outfile);</b> <br>
+<b>int RSL_write_radar_fp(<a href=RSL_radar_struct.html>Radar</a> *radar, FILE *fp);</b> <br>
+<b>int RSL_write_radar_gzip(<a href=RSL_radar_struct.html>Radar</a> *radar, char *outfile);</b> 
+
+<h3>
+<hr>Description</h3>
+Save the Radar structure to disk. This is useful when it take some effort or time to build the Radar structure from data; you can save the Radar as an intermediate result of processing. <b>RSL_write_radar_gzip</b> writes gzip-ed files by passing the data through GNU <b>gzip</b>.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, the number of bytes written is returned. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_read.html><a href=RSL_read.html>RSL_read_volume</a></a>, <a href=RSL_read.html><a href=RSL_read.html>RSL_read_sweep</a></a>, <a href=RSL_read.html><a href=RSL_read.html>RSL_read_ray</a></a>,<br>
+<a href=RSL_write.html>RSL_write_volume</a>, <a href=RSL_write.html>RSL_write_sweep</a>, <a href=RSL_write.html>RSL_write_ray</a>,<br>
+<a href=RSL_read_radar.html>RSL_read_radar</a>, <a href=RSL_radar_file_format.html>File format</a>. 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

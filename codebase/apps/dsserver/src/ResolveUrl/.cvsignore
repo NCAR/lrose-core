@@ -1,0 +1,6 @@
+.deps
+ResolveUrl
+__makefile.template
+makefile
+makefile.am
+makefile.in

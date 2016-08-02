@@ -1,0 +1,82 @@
+/**********************************************************************
+ * TDRP params for FmqMon
+ **********************************************************************/
+
+//======================================================================
+//
+// FmqMon program.
+//
+// FmqMon monitors the output from an FMQ, reporting statistics on the 
+//   queue, such as the number of messages and bytes in a given interval, 
+//   and the compressed and uncompressed data rate.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input FMQ.
+// Type: string
+//
+
+input_url = "fmqp:://localhost::fmq/dsRadarMult";
+
+///////////// msecs_sleep_blocking ////////////////////
+//
+// Number of millisecs to sleep while polling the input.
+// The reads are done in a polling-blocking mode. This is the number of 
+//   millisecs to sleep between polls.
+// Type: int
+//
+
+msecs_sleep_blocking = 1000;
+
+//======================================================================
+//
+// OUTPUT STATS.
+//
+//======================================================================
+ 
+///////////// monitor_interval ////////////////////////
+//
+// The number of seconds between monitor output.
+// The data rate is computed over this interval.
+// Minimum val: 1
+// Type: int
+//
+
+monitor_interval = 5;
+

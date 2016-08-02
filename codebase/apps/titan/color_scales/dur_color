@@ -1,0 +1,21 @@
+# colorscale for nstart
+
+# Mike Dixon, April 1991
+	
+0.0	0.1	DarkSlateBlue
+0.1 	0.2 	NavyBlue
+0.2	0.3 	Blue
+0.3 	0.4	MediumBlue
+0.4 	0.5 	SkyBlue
+0.5 	0.6 	DarkGreen
+0.6	0.7	ForestGreen
+0.7	0.8	YellowGreen
+0.8	0.9	Gold
+0.9	1.0 	Yellow
+1.0	1.25	Coral
+1.25	1.5	Orange
+1.5	1.75	MediumVioletRed
+1.75	2.00	Red
+2.00	3.00	Gray70
+3.00	5.00	white
+

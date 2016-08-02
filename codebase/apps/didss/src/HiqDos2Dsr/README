@@ -1,0 +1,13 @@
+HiqDos2Dsr
+----------
+
+This source code is for the original Hiq2Dsr application that worked with
+the DOS version of the HiQ.  It is being saved for use in TITAN systems
+that are still using the DOS version, but has been replaced with the code
+in Hiq2Dsr which works with the Windows version of the HiQ.  The application
+built in the directory will be called "Hiq2Dsr" so that old system
+configurations will not have to be changed, but this means that both
+applications cannot be installed on a single machine.
+
+Nancy Rehak
+12/30/2008

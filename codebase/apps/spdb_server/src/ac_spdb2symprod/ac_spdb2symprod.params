@@ -1,0 +1,475 @@
+/****************************************************
+ * TDRP params for ac_spdb2symprod
+ ****************************************************/
+
+/*
+ * debug level.
+ * Level of debug messages to be displayed.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS,
+ *   DEBUG_ROUTINES, DEBUG_ALL.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * malloc debug level.
+ * 0 = none, 1 = corruption checking, 2 = record all malloc blocks
+ *   and checks, 3 = printout of all mallocs, etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * wait msecs.
+ * Number of milliseconds to wait before timing out socket operations.
+ *
+ * Type: long
+ * Default: 100 
+ */
+wait_msecs = 100;
+
+/*
+ * database directory.
+ * Directory containing SPDB database.
+ *
+ * Type: string
+ * Default: "." 
+ */
+database_dir = "/home/dixon/mexico/ac_posn/spdb/00HP";
+
+/*
+ * product label.
+ * The product label used in the SPDB database to uniquely identify
+ *   this product.
+ *
+ * Type: string
+ * Default: "AC_POSN" 
+ */
+product_label = "AC_POSN";
+
+/*
+ * product id.
+ * Number which uniquely identifies this product in the SPDB database.
+ *
+ * Type: long
+ * Default: 20001 
+ */
+product_id = 20001;
+
+/*
+ * output port.
+ * Port number to use for output.
+ *
+ * Type: long
+ * Default: 62000 
+ */
+port = 62000;
+
+/*
+ * servmap type.
+ * Server mapper type for this server.
+ *
+ * Type: string
+ * Default: "Spdb" 
+ */
+servmap_type = "Spdb";
+
+/*
+ * servmap subtype.
+ * Server mapper subtype for this server.
+ *
+ * Type: string
+ * Default: "Spdb" 
+ */
+servmap_subtype = "Spdb";
+
+/*
+ * servmap instance.
+ * Server mapper instance for this server.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+servmap_instance = "AcTest";
+
+/*
+ * realtime available flag.
+ * Flag indicating if realtime data is available from this server.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+realtime_avail = FALSE;
+
+/*
+ * Width of polylines.
+ *
+ * Type: long
+ * Default: 1 
+ * Min value: 1 
+ */
+polyline_width = 4;
+
+/*
+ * Plot the arrow for direction.
+ * If TRUE, an arrow will be added to the end of the polyline to indicate
+ *   the direction of travel of the aircraft.
+.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+plot_dirn_arrow = TRUE;
+
+/*
+ * Length of head of dirn arrow (km).
+ *
+ * Type: double
+ * Default: 2 
+ * Min value: 0 
+ */
+dirn_arrow_head_len = 2;
+
+/*
+ * Option to check space between icons.
+ * If TRUE, the distance between consecutive icons will be computed.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+sparse_icons = TRUE;
+
+/*
+ * Minimum distance between sparse icons (km).
+ * Applicable if sparse_icons is TRUE. Icon rendering will be
+ *   limited so that this minimum distance is exceeded bewteen consecutive
+ *   icons.
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: 0 
+ */
+sparse_icons_min_distance = 2.5;
+
+/*
+ * number of seconds of before track.
+ * Number of seconds of track information to display before the
+ *   current position.
+ *
+ * Type: long
+ * Default: 0 
+ */
+before_secs = 300 ;
+
+/*
+ * display before icon flag.
+ * If TRUE, the before icon (described in the before_icon parameter)
+ *   is displayed at each aircraft position before the current position.
+.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+display_before_icon = TRUE;
+
+/*
+ * before icon.
+ * Array defining the icon to be used for the before positions.
+ *   The icon is a bit-mapped 16x16 icon. You put 1's in the positions
+ *   of the icon where the bit should be displayed, and 0's in the positions
+ *   that are not a part of the icon. You may want to look at an example
+ *   parameter file to see how this is done.
+ *
+ * Type: long
+ * Array elem size: 4 bytes
+ * Max number of elements: 256
+ */
+before_icon = { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+		0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+		0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0,
+		0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0,
+		1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+		1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+		0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0,
+		0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0,
+		0, 0, 0, 1, 1, 1,10, 1, 1, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 };
+
+/*
+ * before icon color.
+ * Name of X color to be used when rendering the before icon(s).
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+before_icon_color = "white";
+
+/*
+ * display before polyline flag.
+ * If TRUE, the before positions will be connected with a polyline.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+display_before_polyline = TRUE;
+
+/*
+ * before polyline color.
+ * Name of X color to be used when rendering the before polyline.
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+before_polyline_color = "green";
+
+/*
+ * display current icon flag.
+ * If TRUE, the current icon (described in the current_icon parameter)
+ *   is displayed at the current position.
+.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+display_current_icon = TRUE;
+
+/*
+ * current icon.
+ * Array defining the icon to be used for the current position.
+ *   The icon is a bit-mapped 16x16 icon. You put 1's in the positions
+ *   of the icon where the bit should be displayed, and 0's in the positions
+ *   that are not a part of the icon. You may want to look at an example
+ *   parameter file to see how this is done.
+ *
+ * Type: long
+ * Array elem size: 4 bytes
+ * Max number of elements: 256
+ */
+current_icon = { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 };
+
+/*
+ * current icon color.
+ * Name of X color to be used when rendering the current icon.
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+current_icon_color = "red";
+
+/*
+ * display label flag.
+ * If TRUE, the callsign of the aircraft will be displayed by the
+ *   current position icon (or where the current position icon would
+ *   be if it isn't being displayed.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+display_label = TRUE;
+
+/*
+ * label color.
+ * Name of the X color to be used when rendering the aircraft label.
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+label_color = "yellow";
+
+/*
+ * label font.
+ * Suggested X font to use for rendering label.
+ *
+ * Type: string
+ * Default: "8x13" 
+ */
+label_font = "8x13";
+
+/*
+ * label horizontal alignment.
+ * Desired horizontal alignment for the label.
+ *
+ * Type: enum
+ * Default: HORIZ_ALIGN_CENTER 
+ * Legal values: HORIZ_ALIGN_LEFT, HORIZ_ALIGN_CENTER,
+ *   HORIZ_ALIGN_RIGHT.
+ */
+label_horiz_align = HORIZ_ALIGN_LEFT;
+
+/*
+ * label vertical alignment.
+ * Desired vertical alignment for the label.
+ *
+ * Type: enum
+ * Default: VERT_ALIGN_CENTER 
+ * Legal values: VERT_ALIGN_TOP, VERT_ALIGN_CENTER,
+ *   VERT_ALIGN_BOTTOM.
+ */
+label_vert_align = VERT_ALIGN_BOTTOM;
+
+/*
+ * label offset.
+ * Pixel offsets for label rendering. The label is rendered at
+ *   the given offsets from the current position location. A positive
+ *   x_offset moves the label to the right; a positive y_offset moves
+ *   the label up.
+ *
+ * Type: struct
+ */
+label_offset = { 7,    /* x_offset:long */
+                 7 };  /* y_offset:long */
+
+/*
+ * number of seconds of after track.
+ * Number of seconds of track information to display after the
+ *   current position. Of course, when displaying realtime aircraft
+ *   data, there will be no track information after the current position,
+ *   so this value will be ignored.
+ *
+ * Type: long
+ * Default: 0 
+ */
+after_secs = 300 ;
+
+/*
+ * display after icon flag.
+ * If TRUE, the after icon (described in the after_icon parameter)
+ *   is displayed at each aircraft position after the current position.
+.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+display_after_icon = TRUE;
+
+/*
+ * after icon.
+ * Array defining the icon to be used for the after positions. The
+ *   icon is a bit-mapped 16x16 icon. You put 1's in the positions
+ *   of the icon where the bit should be displayed, and 0's in the positions
+ *   that are not a part of the icon. You may want to look at an example
+ *   parameter file to see how this is done.
+ *
+ * Type: long
+ * Array elem size: 4 bytes
+ * Max number of elements: 256
+ */
+after_icon = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+               1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+               1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+               1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+               1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+               1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+               1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+               1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+               1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+               1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+               1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+               1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+
+/*
+ * after icon color.
+ * Name of X color to be used when rendering the after icon(s).
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+after_icon_color = "cyan";
+
+/*
+ * display after polyline flag.
+ * If TRUE, the after positions will be connected with a polyline.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+display_after_polyline = TRUE;
+
+/*
+ * after polyline color.
+ * Name of X color to be used when rendering the after polyline.
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+after_polyline_color = "green";
+
+/*
+ * Option to set color based on altitude field.
+ * If TRUE, this option overrides the other color options and sets
+ *   the color based on the aircraft altitude. The colors used are
+ *   set in the altitude_color array.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+color_by_altitude = TRUE;
+
+/*
+ * Color scale for altitude data - only used if color_by_altitude
+ *   is TRUE.
+ * This is an array of entries, each of which has min_val, max_val
+ *   and color for each altitude range selected. Altitude units
+ *   are meters. If the true altitude is outside this range the color
+ *   will default to the color which would have been used if color_by_altitude
+ *   were FALSE.
+ *
+ * Type: struct
+ * Array elem size: 20 bytes
+ * Array has no max number of elements
+ */
+altitude_color_scale = {
+  {0.0, 250.0, "DarkSlateBlue"},
+  {250.0, 500.0, "Blue"},
+  {500.0, 750.0, "MediumBlue"},
+  {750.0, 1000.0, "SkyBlue"},
+  {1000.0, 1250.0, "DarkGreen"},
+  {1250.0, 1500.0, "ForestGreen"},
+  {1500.0, 1750.0, "YellowGreen"},
+  {1750.0, 2000.0, "Gold"},
+  {2000.0, 2250.0, "Yellow"},
+  {2250.0, 2500.0, "Orange"},
+  {2500.0, 2750.0, "MediumVioletRed"},
+  {2750.0, 3000.0, "Pink"},
+  {3000.0, 3500.0, "Red"},
+  {3500.0, 5000.0, "Gray"}
+};
+
+/*
+ * Option to plot altitude as text instead of icon.
+ * If TRUE, the altitude value is plotted at the aircraft position
+ *   instead of the icon. The altitude_font is used.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+plot_altitude_text = TRUE;
+
+/*
+ * altitude font.
+ * Suggested X font to use for rendering altitude.
+ *
+ * Type: string
+ * Default: "6x10" 
+ */
+altitude_font = "6x10";
+

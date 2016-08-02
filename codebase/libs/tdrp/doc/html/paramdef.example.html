@@ -1,0 +1,328 @@
+<html>
+
+<head>
+<title>paramdef</title>
+</head>
+
+<body>
+
+<h3>Example paramdef file</h3>
+
+<pre>
+/*********************************************************
+ * Example parameter definitions file
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 1998
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "INTEGER PARAMETERS";
+  p_text = "Testing integer parameter behavior.";
+};
+
+paramdef int {
+  p_min = 0;
+  p_max = 120;
+  p_default = 35;
+  p_private = FALSE;
+  p_descr = "Single int value";
+  p_help = "Testing single int actions.";
+} your_age;
+
+paramdef int {
+  p_min = 0;
+  p_max = 120;
+  p_default = {30, 31, 42, 43, 54};
+  p_private = FALSE;
+  p_descr = "Int array - variable length.";
+  p_help = "Testing variable length int array.";
+} our_ages[];
+
+paramdef int {
+  p_min = 0;
+  p_max = 1;
+  p_default = {{0, 0, 1, 1, 1},
+	       {0, 0, 0, 0, 1}, 
+	       {0, 1, 0, 1, 0},
+	       {0, 0, 0, 1, 1}};
+  p_descr = "Variable length 2-D array.";
+  p_help = "Testing variable length 2-D array.";
+} icon[][];
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "LONG INTEGER PARAMETERS";
+  p_text = "Testing long integer parameter behavior.";
+};
+
+paramdef long {
+  p_default = 1;
+  p_min = 0;
+  p_descr = "Single long value";
+  p_help = "Testing single long actions.";
+} number_of_radars;
+
+paramdef long {
+  p_default = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  p_descr = "Long array - fixed length.";
+  p_help = "Testing fixed length long array.";
+} days_in_month[12];
+
+paramdef long {
+  p_min = 0;
+  p_default = {{0, 5, 6, 11, 2, 3},
+	       {9, 8, 15, 12, 4, 4}, 
+	       {17, 18, 3, 7, 0, 12},
+	       {15, 10, 10, 1, 9, 1}};
+  p_descr = "Variable fixed 2-D array.";
+  p_help = "Testing fixed length 2-D array.";
+} item_count[4][6];
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "FLOAT PARAMETERS";
+  p_text = "Testing float parameter behavior.";
+};
+
+paramdef float {
+  p_default = 15.0;
+  p_min = 0.0;
+  p_private = FALSE;
+  p_descr = "Single float value";
+  p_help = "Testing single float actions.";
+} speed;
+
+paramdef float {
+  p_default = {101.1, 102.1, 103.1, 104.1, 105.1,
+	       106.1, 107.1, 108.1, 109.1, 110.1};
+  p_private = FALSE;
+  p_descr = "Float array - fixed length.";
+  p_help = "Testing fixed length float array.";
+} storm_volume[10];
+
+paramdef float {
+  p_default = {{0.1, 0.6, 1.9, 12.4, 1.1},
+	       {2.3, 5.7, 12.8, 19.4, 0.0}, 
+	       {14.3, 19.3, 12.1, 3.3, 7.5},
+	       {8.0, 6.1, 0.0, 15.1, 10.0}};
+  p_descr = "Variable length 2-D array.";
+  p_help = "Testing variable length 2-D array.";
+} rain_accumulation[][];
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DOUBLE PARAMETERS";
+  p_text = "Testing double parameter behavior.";
+};
+
+paramdef double {
+  p_default = 9.1e-9;
+  p_descr = "Single double value";
+  p_help = "Testing single double actions.";
+} mass_coefficient;
+
+paramdef double {
+  p_default = 3.0e8;
+  p_min = 2.99e8;
+  p_max = 3.01e8;
+  p_private = TRUE;
+  p_descr = "Private double value";
+  p_help = "Testing private double actions.";
+} speed_of_light;
+
+paramdef double {
+  p_default = {1.9e8, 2.1e8, 9.7e7, 5.3e7, 1.1e9};
+  p_min = 1.0;
+  p_private = FALSE;
+  p_descr = "Double array - variable length.";
+  p_help = "Testing variable length double array.";
+} storm_mass[];
+
+paramdef double {
+  p_default = {{0.9, 0.9, 1.9, 1.9, 1.9, 100.3},
+	       {0.9, 1.9, 0.9, 1.9, 0.9, -100.1},
+	       {0.9, 0.9, 0.9, 1.9, 1.9, -99.9}};
+  p_descr = "Fixed length 2-D array.";
+  p_help = "Testing fixed length 2-D array.";
+} length_factor[3][6];
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "BOOLEAN PARAMETERS";
+  p_text = "Testing boolean parameter behavior.";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_private = FALSE;
+  p_descr = "Single bool value";
+  p_help = "Testing single bool actions.";
+} use_data;
+
+paramdef boolean {
+  p_default = {TRUE, FALSE, TRUE, TRUE};
+  p_private = FALSE;
+  p_descr = "Bool array - variable length.";
+  p_help = "Testing variable length bool array.";
+} allow_outliers[];
+
+paramdef boolean {
+  p_default = {{FALSE, FALSE, TRUE,  TRUE,  TRUE},
+	       {FALSE, FALSE, FALSE, FALSE, TRUE}, 
+	       {FALSE, TRUE,  FALSE, TRUE,  FALSE},
+	       {FALSE, FALSE, FALSE, TRUE,  TRUE}};
+  p_descr = "Variable length 2-D array.";
+  p_help = "Testing variable length 2-D array.";
+} compute_length[][];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print debugging messages";
+} debug;
+
+paramdef boolean {
+  p_default = {TRUE, FALSE, TRUE, FALSE, TRUE, TRUE};
+  p_descr = "Test boolean flags.";
+} flags[6];
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "STRING PARAMETERS";
+  p_text = "Testing string parameter behavior.";
+};
+
+paramdef string {
+  p_private = TRUE;
+  p_default = "/";
+  p_descr = "path delimiter";
+  p_help = "Testing private string parameter.";
+} path_delim;
+
+paramdef string {
+  p_default = "mcg";
+  p_descr = "Input file extension";
+  p_help = "Testing single-valued string parameter.";
+} input_file_ext;
+
+paramdef string {
+  p_default = {"$(HOME)/path1", "$(HOME)/paths", "$(HOME)/path3"};
+  p_descr = "Input file paths";
+  p_help = "Testing variable length array of strings. "
+    "Note imbedded environment variables.";
+} input_file_paths[];
+
+paramdef string {
+  p_default = {{"$(USER)/path11", "$(USER)/path21", "$(USER)/path31"},
+	       {"$(USER)/path12", "$(USER)/path22", "$(USER)/path32"},
+	       {"$(USER)/path13", "$(USER)/path23", "$(USER)/path33"},
+	       {"$(USER)/path14", "$(USER)/path24", "$(USER)/path34"},
+	       {"$(USER)/path15", "$(USER)/path25", "$(USER)/path35"},
+	       {"$(USER)/path16", "$(USER)/path26", "$(USER)/path36"}};
+  p_descr = "Output file paths.";
+  p_help = "Testing variable length 2D array of strings."
+    "Note imbedded environment variables.";
+} output_file_paths[][];
+
+paramdef string {
+  p_default = "$(HOME)/input_dir";
+  p_descr = "Input directory";
+  p_help = "Path of input directory - realtime mode only"
+    "Note imbedded environment variables.";
+} input_dir;
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "ENUM PARAMETERS";
+  p_text = "Testing enum parameter behavior.";
+};
+
+typedef enum {
+  ETI = 1, GEONOR = 2, CAMPBELL = 3
+} gauge_t;
+
+typedef enum {
+  BOTLEFT, TOPLEFT, BOTRIGHT, TOPRIGHT
+} origin_t ;
+
+paramdef enum origin_t {
+  p_default = {BOTLEFT, TOPLEFT};
+  p_descr = "Data origin position";
+  p_help = "Testing variable length enum array.";
+} data_origin[];
+
+paramdef enum mode_t {
+  p_options = {REALTIME, ARCHIVE, OTHER};
+  p_default = {{REALTIME, REALTIME, ARCHIVE, OTHER},
+	       {OTHER, ARCHIVE, ARCHIVE, REALTIME}};
+  p_descr = "Testing 2-D enum array.";
+  p_help = "The options for this enum are defined in the paramdef "
+  "instead of in a typedef.";
+} mode[2][4];
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "STRUCT PARAMETERS";
+  p_text = "Testing struct parameter behavior.";
+};
+
+paramdef struct grid {
+  p_descr = "Grid parameters.";
+  p_help = "Testing single-valued struct."
+  "Struct Definition occurs within the paramdef.";
+  p_field_type = {long, long, double, double, double, double};
+  p_field_name = {nx, ny, minx, miny, dx, dy};
+  p_default = {100, 100, -50.0, -50.0, dx = 2.0, 2.5};
+} grid;
+
+typedef struct {
+  double lat;
+  double lon;
+  double wind_sensor_ht;
+  gauge_t gauge_make;
+  boolean has_humidity;
+} surface_station_t;
+
+paramdef struct surface_station_t {
+  p_descr = "Surface station information.";
+  p_help = "Test of variable length struct array."
+  "Note that the struct is defined in a typedef before the paramdef."
+  "Also, the struct includes an enum which is pre-defined. Enums included"
+  "in this manned MUST be defined in a typedef.";
+  p_default = {
+    {40.1012, -104.2309, 10.0, ETI, TRUE},
+    {40.2109, -104.5764, 10.0, GEONOR, FALSE},
+    {39.1379, -104.9080, 3.00, CAMPBELL, FALSE}
+  };
+} surface_stations[3];
+
+typedef struct {
+  double scale;
+  double bias;
+  long nplanes;
+  string name;
+  string units;
+  origin_t origin;
+} data_field_t;
+
+paramdef struct data_field_t {
+  p_descr = "Data field parameters";
+  p_help = "Test of fixed-length struct array.";
+  p_default = {{0.5, bias = 1.0, 16, "Reflectivity", "dBZ", BOTLEFT},
+	       {0.6, 1.1, 17, "Velocity", units = "m/s", TOPLEFT}};
+} data_field[];
+<pre>
+
+</body>
+</html>
+

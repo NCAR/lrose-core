@@ -1,0 +1,139 @@
+<!-- Startup commands for Rvp8Driver -->
+
+<rvp8Commands>
+
+  <!-- fields: you can select one or more fields
+    dbz         Corrected reflectivity
+    vel         Velocity
+    width       Width
+    dbt         Uncorrected reflectivity
+    dbzc        Fully corrected reflectivity
+    velc        Corrected Velocity
+    flags       Censoring flags
+    kdp         Kdp (specific differential phase
+    ldrh        LDR H to V
+    ldrv        LDR V to H
+    phidp       PHIdp (differential phase
+    phih        Phi H to V
+    phiv        Phi V to H
+    rhoh        Rho H to V
+    rhohv       RhoHV(0)
+    rhov        Rho V to H
+    sqi         SQI
+    zdr         Differential reflectivity
+    --> 
+
+  <field>dbz</field>
+  <field>vel</field>
+  <field>width</field>
+
+  <!-- nSamples: number of samples per beam -->
+
+  <nSamples>64</nSamples>
+
+  <!-- nGates: number of gates -->
+
+  <nGates>1000</nGates>
+
+  <!-- gateSpacing: km -->
+
+  <gateSpacing>0.15</gateSpacing>
+
+  <!-- major modes:
+    pulse-pair
+    fft - spectral moments
+    phase-coded - used for sz864
+    staggered-prt
+    user1, user2, user3, user4: user-defined modes
+  -->
+
+  <majorMode>fft</majorMode>
+
+  <!-- speckle filter:
+    off - no filter
+    dbz - reflectivity only
+    vel - velocity only
+    both - reflectivity and velocity
+  -->
+
+  <speckleFilter>off</speckleFilter>
+
+  <!-- prf modes:
+    fixed - constant prf
+    2_3 - staggered 2:3
+    3_4 - staggered 3:4
+    4_5 - staggered 4:5
+  -->
+
+  <prfMode>fixed</prfMode>
+
+  <!-- prf
+    pulses per second
+  -->
+
+  <prf>1000</prf>
+
+  <!-- fft window types:
+    rect - rectangular
+    hamming
+    blackman
+    blkmanex - extended blackman??
+    vonhann
+    adaptive
+  -->
+
+  <windowType>hamming</windowType>
+
+  <!-- range smoothing
+    0: no smoothing, just use the gate
+    1: smooth pairs
+    2: running soothing on 3 gates
+    3: running soothing on 4 gates
+  -->
+
+  <rangeSmoothing>0</rangeSmoothing>
+
+  <!-- processor mode
+    sync: synchronous mode
+    free: free running mode
+    time_series: time series mode
+  -->
+
+  <procMode>time_series</procMode>
+
+  <!-- phase sequence
+    fixed: normal klystron operation
+    random: as in a magnetron
+    custom: user customized series
+    sz8_64: SZ8_64 phase coding
+  -->
+
+  <phaseCoding>fixed</phaseCoding>
+
+  <!-- clutter filter number
+    0: no filter
+    1: least aggressive filter
+    ...
+    7: most aggressive filter
+  -->
+
+  <clutterFilterNumber>0</clutterFilterNumber>
+
+  <!-- polarization
+    horizontal: fixed horizontal
+    vertical: fixed vertical
+    alternating: alternating HV
+    simultaneous: simultaneous HV
+  -->
+
+  <polarization>horizontal</polarization>
+
+  <!-- antenna angle synchronization mode
+    none: no sync
+    dynamic: indexed beams dynamically
+  -->
+
+  <angSyncMode>dynamic</andSyncMode>
+
+</rvp8Commands>
+

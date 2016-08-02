@@ -1,0 +1,12 @@
+main_power=on
+magnetron_power=on
+servo_power=on
+radiate=on
+elevation_steps=0.5,1.5,2.5,5,7,10,14,19,25,30,35,40
+antenna_mode=auto_vol
+az_slew_rate=60.0
+#el=15
+#az=200
+#antenna_mode=manual
+#antenna_mode=stop
+

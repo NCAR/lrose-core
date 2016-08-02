@@ -1,0 +1,493 @@
+
+commentdef {
+  p_header = "The Validator is a program that generates statistics\n"
+             "about a forecasting method.\n\n"
+             "Its inputs are MDV files of forecasts, and\n"
+	     "MDV files of what actually happened (truth\n"
+             "data). These files are then thresholded\n"
+             "to detect storms (a storm is detected if\n"
+             "the value, x, at a grid point is such that\n"
+             "lower_limit <= x <= upper_limit).\n\n"
+             "Statistics are generated and placed\n"
+             "in output files.\n\n"
+	     "The validator can output intermediate MDV\n"
+             "files that show how it performed.\n"
+             "These files show how each grid point was detected\n"
+             "and used in the statistics.\n\n"
+             "It can also operate on a set of regions delineated\n"
+             "by a set of map files. In this\n"
+             "case multiple sets of statistics are generated\n"
+             "(but no intermediate MDV output is available in\n"
+             "this case).\n\n"
+             "A small MatLab script for plotting the statistics\n"
+             "is checked into the CVS repository under the\n"
+             "Validator/plot directory at the time of writing.\n\n"
+	     "Niles Oien August 1999.";
+}
+
+
+paramdef char* {
+  p_descr = "Directory for truth data";
+  p_help = "This is the top directory under which\n"
+           "the MDV truth data is.\n"; 
+  p_default = {""};
+} TruthDir;
+     
+paramdef char* {
+  p_descr = "Directory for forecast data";
+  p_help = "This is the top directory under which\n"
+           "the MDV forecast data is.\n"; 
+  p_default = {""};
+} ForecastDir;
+  
+paramdef char* {
+  p_descr = "Directory in which to write MDV files of contingency tables.";
+  p_help = "These intermediate files serve as a diagnostic\n"
+           "by showing how the Validator treated each grid point.";
+  p_default = {"."};
+} OutDir;
+
+paramdef char* {
+  p_descr = "Directory in which to write statistical output.";
+  p_help = "Files are named Valid_YYYYMMDD_hhmmss.dat and are\n"
+           "MatLab loadable. The final summary is named\n"
+           "Valid_YYYYMMDD_hhmmss.final - in both cases the\n"
+           "time in the filename is the time that the program\n"
+           "was run, not the data time. The format of this file\n"
+           "is probably best ascertained from the MatLab plotting\n"
+           "script PlotValid.m which is in the CVS repository\n"
+           "under Validator/plot";
+  p_default = {"."};
+} StatsDir;
+
+paramdef boolean {
+  p_descr = "Set to true if you want to use UserDefinedName below.";
+  p_help = "If false, Validator will create a file with the\n"
+           "following name: Valid_YYYYMMDD_HHMMSS_Grid.dat (and .final)\n"
+           "unless using map files. When using map files the Grid part of\n"
+           "the name is replaced with the map file name. This is necessary\n"
+           "so multilple map files can be processed and receive unique names.\n" 
+           "DO NOT set this option to true when processing using multiple map\n"
+           "files. If TRUE, the Grid or map file name part of the name\n"
+           "will be replaced with the string specified by UserDefinedName\n"
+           "set below.";
+  p_default = FALSE;
+} DefineName;
+
+paramdef char* {
+  p_descr = "String to add to the output name if DefineName is set to TRUE";
+  p_help = "See help from DefineName for more details\n";
+  p_default = {""};
+} UserDefinedName;
+     
+paramdef int {
+  p_descr = "Forecast field number.";
+  p_help = "Note that the field must have this number AND\n"
+           "the specified name.";
+  p_default = 0;
+} ForecastFieldNum;
+
+paramdef char* {
+  p_descr = "Name of the forecast field.";
+  p_help = "Note that the field must have this name AND\n"
+           "the specified number.";
+  p_default = {"Forecast"};
+} ForecastFieldName;
+
+paramdef int {
+  p_descr = "Truth field number.";
+  p_help = "Note that the field must have this number AND\n"
+           "the specified name.";
+  p_default = 0;
+} TruthFieldNum;
+
+paramdef char* {
+  p_descr = "Name of the truth field.";
+  p_help = "Note that the field must have this name AND\n"
+           "the specified number.";
+  p_default = {"DBZ"};
+} TruthFieldName;
+
+paramdef boolean {
+  p_descr = "Exit if a field is not at the expected number.";
+  p_help = "The user specifies both a field name and a number. "
+	   "If in the actual MDV file the named field does not "
+           "have the expected number and this parameter is set to "
+           "TRUE then the program exits.";
+  p_default = TRUE;
+} FieldNumbersMustMatch;
+
+paramdef boolean {
+  p_descr = "Use field numbers to get input data rather than field names.";
+  p_help = "Useful for dealing with satellite data";
+  p_default = FALSE;
+} UseFieldNumbers;
+
+paramdef char* {
+  p_descr = "Procmap instance";
+  p_help = "Used for process identification.";
+  p_default = {"primary"};
+} Instance;
+     
+paramdef int {
+  p_descr = "Allowable time error between a forecast and truth\n"
+            "file (sec).";
+  p_help = "If no truth file is found, the forecast file\n"
+           "will be skipped.\n";
+  p_default = 600;
+} Slop;
+
+paramdef int {
+  p_descr = "Forecast lead time, seconds.";
+  p_default = 3600;
+} ForecastLead;
+
+paramdef int {
+  p_descr = "Statistical interval time, seconds.";
+  p_help = "Statistics are output to file for every interval\n"
+           "of this duration.";
+  p_default = 1200;
+} OutputInterval;
+
+paramdef int {
+  p_descr = "Debug flag.";
+  p_help = "If set, more verbose output is printed on standard error.";
+  p_default = 0;
+} Debug;
+     
+/////////// Grid parameters.
+commentdef {
+  p_header = " ------------ GRID PARAMETERS --------\n"
+  		"These specify the grid on which the\n"
+                "computations will be performed.\n"
+                "These must be specified - use the\n"
+                "print_mdv facility to get the file\n"
+                "geometry if this is to be duplicated.";
+
+}
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-1000.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-1000.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} grid_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} grid_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} grid_lat2;
+
+typedef enum {
+  FLAT, LATLON, LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT, LATLON and LAMBERT";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in X";
+  p_min = {1};
+  p_default = { 100 };
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in Y";
+  p_min = {1};
+  p_default = {100};
+} grid_ny;
+
+paramdef int { 
+  p_descr = "Number of vertical levels in the output grid or to be composited.";
+  p_help = "See also grid_minz";
+  p_min = {1};
+  p_default = { 1 };
+} grid_nz;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in X";
+  p_default = {1.0};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in Y";
+  p_default = {1.0};
+} grid_dy;
+
+paramdef float {
+  p_descr = "Change in altitude between vertical levels of the output grid";
+  p_help = "Applicable only when grid_nz > 1";
+  p_default = { 1.0};
+} grid_dz;
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_miny;
+
+
+
+commentdef {
+  p_header = "------ End of grid parameters. ";
+}
+
+commentdef {
+  p_header = "------ Compositing parameters. ";
+}
+
+paramdef double {
+  p_descr = "Minimum level to composite in truth field.";
+  p_help = "This is the minimum level to composite\n"
+           "in the units of height (ie. not plane number)"
+	   "if composite_truth is TRUE";
+  p_default = {0.0};
+} composite_min;
+
+paramdef double {
+  p_descr = "Maximum level to composite in truth field.";
+  p_help = "This is the maximum level to composite\n"
+           "in the units of height (ie. not plane number)"
+	   "if composite_truth is TRUE";
+  p_default = {1000000.0};
+} composite_max;
+
+paramdef boolean {
+  p_descr = "If composite_truth is TRUE then the truth field is composited.";
+  p_help = "Limits are set by composite_min and composite_max.";
+  p_default = TRUE;
+} composite_truth;
+
+paramdef boolean {
+  p_descr = "If composite_forecast is TRUE then the forecast field is composited.";
+  p_help = "Limits are set by composite_min and composite_max.";
+  p_default = FALSE;
+} composite_forecast;
+
+
+commentdef {
+  p_header = "------ End of compositing parameters. ";
+}
+
+paramdef float {
+  p_descr = "Lower limit threshold on truth data";
+  p_help = "A storm will be detected if data >= truth_lower_limit and data <= truth_upper_limit";
+  p_default = {35.0};
+} truth_lower_limit;
+
+paramdef float {
+  p_descr = "Upper limit threshold on truth data";
+  p_help = "A storm will be detected if data >= truth_lower_limit and data <= truth_upper_limit";
+  p_default = {1000};
+} truth_upper_limit;
+
+paramdef float {
+  p_descr = "Lower limit threshold on forecast data";
+  p_help = "A storm will be detected if data >= forecast_lower_limit and data <= forecast_upper_limit";
+  p_default = {0.67};
+} forecast_lower_limit;
+
+paramdef float {
+  p_descr = "Upper limit threshold on forecast data";
+  p_help = "A storm will be detected if data >= forecast_lower_limit and data <= forecast_upper_limit";
+  p_default = {1.0};
+} forecast_upper_limit;
+
+paramdef int {
+  p_descr = "Forecast relaxation.";
+  p_help = "For specified N, window is 2*N+1 x 2*N+1 - default is no relaxation of grid.";
+  p_default = 0;
+} ForecastRelax;
+
+
+paramdef int {
+  p_descr = "Forecast relaxation threshold.";
+  p_help = "Number of points within window that must be a storm\n"
+	   "before a storm is detected in relaxed mode.\n"
+	   "Defaults to strict grid mode.";
+  p_default = 2;
+} ForecastNumRelax;
+
+paramdef int {
+  p_descr = "Truth relaxation.";
+  p_help = "For specified N, window is 2*N+1 x 2*N+1 - default is no relaxation of grid.";
+  p_default = 0;
+} TruthRelax;
+
+paramdef int {
+  p_descr = "Truth relaxation threshold.";
+  p_help = "Number of points within window that must be a storm\n"
+	   " before a storm is detected in relaxed mode.\n"
+	   "Similar to ForecastNumRelax";
+  p_default = 2;
+} TruthNumRelax;
+
+paramdef boolean {
+  p_descr = "To use the extended contingency table or not.";
+  p_help = "If set to FALSE a 4x4 contingeny table is used by not\n"
+            "making a distinction between relaxed and true grid points.\n"
+            "If TRUE then relaxed detections will not score\n"
+            "against you but will score for you - which may not\n"
+            "be really very fair.";
+  p_default = FALSE;
+} ExtendedContingency;
+
+paramdef boolean {
+	p_descr = "Set this to detect as TRUE rather than RELAXED TRUE if\n"
+	          "a grid point is on.";
+	p_help = "By default, a grid point is set to RELAXED TRUE\n"
+                 "if the box is partially filled with more than\n"
+                 "the required number of points set. Setting this\n"
+		 "to TRUE will force the grid point to be detected\n"
+                 "TRUE if it meets the threshold criterion - regardless\n"
+                 "of how many points were filled in the box.";
+	p_default = FALSE;
+} NotRelaxedIfTrue;
+
+paramdef boolean {
+  p_descr = "Set to count missing data as being a non-event.";
+  p_help = "Do this for consistency with the old VerifyGrid program - it\n"
+           "may also be physically valid in the case of radar data.";
+  p_default = FALSE;
+} CountMissing;
+
+paramdef boolean {
+  p_descr = "If set, output intermediate MDV files.";
+  p_help = "Intermediate MDV files contain storm detected truth, storm \n"
+           "detected forecast and resulting contingency table and\n"
+           "are useful for debugging.";
+  p_default = FALSE;
+}IntermediateGrids;
+
+
+paramdef boolean {
+  p_descr = "If set, specify a map file of the region of interest";
+  p_help = "Default is not to do this. This allows ONE region map\n"
+           "to be processed - and intermediate output MDV files\n"
+           "can be written. Multiple regions should be processed\n"
+           "with the MapList parameter (which does not allow for\n"
+           "MDV output). Only works for FLAT projection.\n\n"
+           "This is NOT recommened - it is something of a kludge\n"
+           "that was perpetrated for a demo at Sterling. Regional\n"
+           "analyses are best done with the MapMode and MapList\n"
+           "parameters.";
+  p_default = {FALSE};
+} RegionSpecified;
+
+paramdef char* {
+  p_descr = "Map file name for region";
+  p_help = "Should be a polyline of lat,lon points.\n"
+           "See comments for RegionSpecified.";
+  p_default = { "" };
+} RegionMapFile;
+
+paramdef long {
+  p_descr = "Max age (in minutes) of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+  p_min = {0};
+  p_max = {1440};
+  p_default = {6};
+} MaxRealtimeValidAge;
+
+paramdef boolean {
+  p_descr = "If set, remove small clumps from the raw truth field.";
+  p_help = "If set to TRUE, small clumps in the data (clumps smaller than "
+           "the size specified by the MinTruthClumpRawPixels parameter) "
+           "will be replaced with the value given in the ClumpRawThreshold "
+           "parameter.";
+  p_default = {FALSE};
+} ClumpTruthRaw;
+
+paramdef int {
+  p_descr = "How small can a clump be before removal.";
+  p_help = "Ignored unless ClumpTruthRaw is set to TRUE.";
+  p_default = { 75 };
+} MinTruthClumpRawPixels;
+
+paramdef double {
+  p_descr = "Value used to replace data values in small clumps in the "
+            "truth field.";
+  p_help = "Ignored uless ClumpTruthRaw is set to TRUE.";
+  p_default = 2.0;
+} ClumpRawThreshold;
+
+paramdef boolean {
+  p_descr = "If set, remove small clumps from the truth field after "
+            "determining contingency values.";
+  p_help = "If set to TRUE, small clumps in the contingency data "
+           "(clumps smaller than the size specified by the "
+           "MinTruthClumpPixels parameter) will be removed.";
+  p_default = {FALSE};
+} ClumpTruth;
+
+paramdef int {
+  p_descr = "How small can a clump be before removal.";
+  p_help = "Ignored unless ClumpTruth is set to TRUE.";
+  p_default = { 75 };
+} MinTruthClumpPixels;
+
+paramdef boolean {
+  p_descr = "If set, use list of map files.";
+  p_help = "Default is not to use map files.";
+  p_default = {FALSE};
+} MapMode;
+
+paramdef string {
+  p_descr = "List of map files.";
+  p_help = "Only used if MapMode is true. Map files must be\n"
+           "a connected polyline and have #VerifyMap as\n"
+           "the first line.";
+  p_default = { 
+	"maps/Prince_Georges.map", 
+	"maps/Fairfax.map",
+	"maps/Augusta.map" 
+	};
+} MapList[];
+
+paramdef boolean {
+  p_descr = "Set to prepare MDV files for making figures for Cindy's paper.";
+  p_help = "Default is not to do this. This is a very specific option.\n"
+	   "If set, 10 is added to the contingency table numerical values\n"
+           "if a storm is detected in the forecast field.";
+  p_default = {FALSE};
+} SuperImpose;
+
+
+
+
+
+

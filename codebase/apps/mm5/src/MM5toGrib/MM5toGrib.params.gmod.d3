@@ -1,0 +1,677 @@
+/**********************************************************************
+ * TDRP params for MM5toGrib
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Domain3";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// realtime_input_dir //////////////////////
+//
+// Directory for input MM5 data - REALTIME mode.
+// The latest_data_info file in this directory is updated each time the 
+//   model adds a forecast time step to the output file.
+// Type: string
+//
+
+realtime_input_dir = "/raid/data/input/mm5ftp/d3";
+
+///////////// DomainString ////////////////////////////
+//
+// If set to other than NULL, filenames must contain this string to be 
+//   ingested.
+// This can be used to only ingest one domain.
+// Type: string
+//
+
+DomainString = "MMOUTPUT_DOMAIN3";
+
+///////////// use_ldata ///////////////////////////////
+//
+// Set to TRUE if MM5 is writing a _latest_data_info file.
+// Realtime mode only.
+// Type: boolean
+//
+
+use_ldata = TRUE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data - REALTIME mode.
+// For realtime only - max age of input data for it to be valid. If the 
+//   latest_data_info file is older than this, the program waits for new 
+//   data.
+// Minimum val: 0
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// min_forecast_dtime //////////////////////
+//
+// The minimum forecast time (secs) relative to model start time.
+// Only forecast times greater than or equal to this dtime are used. 
+//   This allows us to ignore the first n forecasts, which may not be good 
+//   anyway due to model spin-up requirements.
+// Type: int
+//
+
+min_forecast_dtime = 0;
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+
+///////////// output_file //////////////////////////////
+//
+// Output path and filename.
+// The MM5 data is output to output_file in GRIB format.
+// Type: string
+//
+
+output_file = "./output3.grib";
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// The MM5 data is output to URL in MDV format.
+// Type: string
+//
+
+//output_url = "mdvp:://$(MM5_HOST)::$(RAP_DATA_DIR)/mdv/mm5/domain3";
+output_url = ".";
+
+//======================================================================
+//
+// Supported MM5 raw and derived fields.
+//
+// ========== raw MM5 3-d fields ==========
+// 	
+// U_FIELD, V_FIELD, TK_FIELD, Q_FIELD,
+// CLW_FIELD, RNW_FIELD, ICE_FIELD,
+// SNOW_FIELD, GRAUPEL_FIELD, NCI_FIELD,
+// RAD_TEND_FIELD, W_FIELD, P_FIELD,
+// 	
+// ========== derived 3-d fields ==========
+// 	
+// TC_FIELD, WSPD_FIELD, Z_FIELD, DIVERGENCE_FIELD,
+// PRESSURE_FIELD, RH_FIELD, TURB_FIELD, ICING_FIELD,
+// 	
+// ========== ITFA debug 3-d fields ==========
+// 	
+// BROWN1_FIELD, BROWN2_FIELD, CCAT_FIELD, COLSON_PANOFSKY_FIELD,
+// DEF_SQR_FIELD, ELLROD1_FIELD, ELLROD2_FIELD, DUTTON_FIELD,
+// ENDLICH_FIELD, HSHEAR_FIELD, LAZ_FIELD, PVORT_FIELD,
+// PVORT_GRADIENT_FIELD, NGM1_FIELD, NGM2_FIELD, RICHARDSON_FIELD,
+// RIT_FIELD, SAT_RI_FIELD, STABILITY_FIELD, VORT_SQR_FIELD,
+// VWSHEAR_FIELD,
+// TKE_KH3_FIELD, TKE_KH4_FIELD, TKE_KH5_FIELD,
+// 	
+// ========== raw MM5 2-d fields ==========
+// 	
+// GROUND_T_FIELD, RAIN_CON_FIELD, RAIN_NON_FIELD,
+// TERRAIN_FIELD, CORIOLIS_FIELD, RES_TEMP_FIELD,
+// LAND_USE_FIELD, SNOWCOVR_FIELD, TSEASFC_FIELD,
+// PBL_HGT_FIELD, REGIME_FIELD, SHFLUX_FIELD, LHFLUX_FIELD,
+// UST_FIELD, SWDOWN_FIELD, LWDOWN_FIELD,
+// SOIL_T_1_FIELD, SOIL_T_2_FIELD, SOIL_T_3_FIELD,
+// SOIL_T_4_FIELD, SOIL_T_5_FIELD, SOIL_T_6_FIELD,
+// 	
+// ========== derived 2-d fields ==========
+// 	
+// FZLEVEL_FIELD, RAIN_TOTAL_FIELD.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Output fields with encoding type.
+// Note: do not use START_2D_FIELDS - this is only a marker.
+//
+// Type: struct
+//   typedef struct {
+//      output_field_name_t name;
+//        Options:
+//          U_FIELD
+//          V_FIELD
+//          TK_FIELD
+//          Q_FIELD
+//          CLW_FIELD
+//          RNW_FIELD
+//          ICE_FIELD
+//          SNOW_FIELD
+//          GRAUPEL_FIELD
+//          NCI_FIELD
+//          RAD_TEND_FIELD
+//          W_FIELD
+//          P_FIELD
+//          TC_FIELD
+//          WSPD_FIELD
+//          Z_FIELD
+//          DIVERGENCE_FIELD
+//          PRESSURE_FIELD
+//          RH_FIELD
+//          TURB_FIELD
+//          ICING_FIELD
+//          BROWN1_FIELD
+//          BROWN2_FIELD
+//          CCAT_FIELD
+//          COLSON_PANOFSKY_FIELD
+//          DEF_SQR_FIELD
+//          ELLROD1_FIELD
+//          ELLROD2_FIELD
+//          DUTTON_FIELD
+//          ENDLICH_FIELD
+//          HSHEAR_FIELD
+//          LAZ_FIELD
+//          PVORT_FIELD
+//          PVORT_GRADIENT_FIELD
+//          NGM1_FIELD
+//          NGM2_FIELD
+//          RICHARDSON_FIELD
+//          RIT_FIELD
+//          SAT_RI_FIELD
+//          STABILITY_FIELD
+//          VORT_SQR_FIELD
+//          VWSHEAR_FIELD
+//          TKE_KH3_FIELD
+//          TKE_KH4_FIELD
+//          TKE_KH5_FIELD
+//          START_2D_FIELDS
+//          GROUND_T_FIELD
+//          RAIN_CON_FIELD
+//          RAIN_NON_FIELD
+//          TERRAIN_FIELD
+//          CORIOLIS_FIELD
+//          RES_TEMP_FIELD
+//          LAND_USE_FIELD
+//          SNOWCOVR_FIELD
+//          TSEASFC_FIELD
+//          PBL_HGT_FIELD
+//          REGIME_FIELD
+//          SHFLUX_FIELD
+//          LHFLUX_FIELD
+//          UST_FIELD
+//          SWDOWN_FIELD
+//          LWDOWN_FIELD
+//          SOIL_T_1_FIELD
+//          SOIL_T_2_FIELD
+//          SOIL_T_3_FIELD
+//          SOIL_T_4_FIELD
+//          SOIL_T_5_FIELD
+//          SOIL_T_6_FIELD
+//          FZLEVEL_FIELD
+//          RAIN_TOTAL_FIELD
+//      output_encoding_t encoding;
+//        Options:
+//          OUT_INT8
+//          OUT_INT16
+//          OUT_FLOAT32
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  { U_FIELD, OUT_INT8, 33, 2 },
+  { V_FIELD, OUT_INT8, 34, 2 },
+  { W_FIELD, OUT_INT8, 40, 2 },
+  { WSPD_FIELD, OUT_INT8, 32, 2 },
+  { WDIR_FIELD, OUT_INT8, 31, 2 },
+  { TK_FIELD, OUT_INT16, 11, 2 },
+  { RH_FIELD, OUT_INT8, 52, 2 },
+  { DEWPT_FIELD, OUT_INT8, 17, 2 },
+  { MSLP2_FIELD, OUT_INT8, 2, 2 },
+  { SNOWCOVR_FIELD, OUT_INT16, 238, 2 },
+  { CLW_FIELD, OUT_INT16, 153, 2 },
+  { RNW_FIELD, OUT_INT16, 170, 2 },
+  { RAIN_TOTAL_FIELD, OUT_INT16, 61, 2 },
+  { PBL_HGT_FIELD, OUT_INT16, 221, 2 },
+  { T2_FIELD, OUT_INT16, 11, 2 },
+  { Q2_FIELD, OUT_INT16, 53, 2 },
+  { U10_FIELD, OUT_INT16, 33, 2 },
+  { V10_FIELD, OUT_INT16, 34, 2 },
+  { Z_FIELD, OUT_INT16, 8, 2 },
+  { DIVERGENCE_FIELD, OUT_INT8, 42, 2 },
+  { GROUND_T_FIELD, OUT_INT8, 85, 2 },
+  { PVORT_FIELD, OUT_INT16, 4, 2 },
+  { REGIME_FIELD, OUT_INT8, 128, 2 },
+  { SFCRNOFF_FIELD, OUT_INT16, 235, 2 }
+};
+
+///////////// output_projection ///////////////////////
+//
+// Projection of output grid.
+// FLAT - (x,y) Cartesian data in km from a given origin. LATLON - 
+//   lat/lon grid with constant grid spacing. LAMBERT - Lambert conformal 
+//   projection. NATIVE - use the native data grid, copy to output.
+//
+// Type: enum
+// Options:
+//     OUTPUT_PROJ_FLAT
+//     OUTPUT_PROJ_LATLON
+//     OUTPUT_PROJ_LAMBERT
+//     OUTPUT_PROJ_NATIVE
+//
+
+output_projection = OUTPUT_PROJ_NATIVE;
+
+///////////// output_origin ///////////////////////////
+//
+// Origin of output grid.
+// Used with OUTPUT_PROJ_FLAT only.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+//output_origin = { 40.111, -113.146 };
+output_origin = { 0, 0 };
+
+///////////// lambert_lat1 ////////////////////////////
+//
+// lat 1 value for Lambert conformal projection.
+// Type: double
+//
+
+lambert_lat1 = 25;
+
+///////////// lambert_lat2 ////////////////////////////
+//
+// lat 2 value for Lambert conformal projection.
+// Type: double
+//
+
+lambert_lat2 = 25.05;
+
+///////////// output_grid /////////////////////////////
+//
+// Output grid parameters.
+// The grid params for the output grid.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+//NATIVEoutput_grid = { 79, 79, -260.7, -260.7, 3.30, 3.30  };
+output_grid = { 100, 100, 23, 37, 0.02, 0.02 };
+
+///////////// output_levels ///////////////////////////
+//
+// Option to choose vertical levels for output file.
+// If FLIGHT_LEVELS, vertical levels will be interpolated onto flight 
+//   levels. If NATIVE_SIGMA_LEVELS, no interpolation is done and the data 
+//   is output on the original sigma levels.
+//
+// Type: enum
+// Options:
+//     FLIGHT_LEVELS
+//     PRESSURE_LEVELS
+//     HEIGHT_LEVELS
+//     NATIVE_SIGMA_LEVELS
+//
+
+output_levels = PRESSURE_LEVELS;
+
+///////////// flight_levels ///////////////////////////
+//
+// Array of output flight levels.
+// The output grid has a variable Z dimension, in flight levels. The 
+//   flight levels in the output are taken from this array.
+// Type: int
+// 1D array - variable length.
+//
+
+flight_levels = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 
+250, 260, 270, 280, 290, 300, 325, 350, 375, 400, 425, 450, 475, 500  };
+
+///////////// pressure_levels /////////////////////////
+//
+// Array of output pressure levels (mb).
+// Only used if output_levels is PRESSURE_LEVELS. The output grid has a
+//   variable Z dimension, in pressure levels. The pressure levels in the
+//   output are taken from this array.
+// Type: double
+// 1D array - variable length.
+//
+
+pressure_levels = { 1000, 975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, 675, 650, 625, 600, 575, 550, 525, 500, 475, 450, 425, 400, 375, 350, 325, 300, 275, 250, 225, 200, 175, 150, 125, 100 };
+
+
+///////////// copy_lowest_downwards ///////////////////
+//
+// Option to copy the lowest valid value down to the lowest level.
+// This option is applicable only to FLIGHT_LEVELS. Where terrain is 
+//   encountered, there may be flight levels which have missing data after 
+//   vertical interpolation from sigma levels to flight levels. If this 
+//   option is set to true, the data from the lowest valid flight level 
+//   will be copied down to the levels below.
+// Type: boolean
+//
+
+copy_lowest_downwards = TRUE;
+
+///////////// output_compression //////////////////////
+//
+// Compression tpye for output files.
+// See <mdv/mdv_macros.h> for the C definitions to which these 
+//   correspond.
+//
+// Type: enum
+// Options:
+//     _MDV_COMPRESSION_NONE
+//     _MDV_COMPRESSION_RLE
+//     _MDV_COMPRESSION_LZO
+//     _MDV_COMPRESSION_ZLIB
+//     _MDV_COMPRESSION_BZIP
+//
+
+output_compression = _MDV_COMPRESSION_RLE;
+
+///////////// output_path_in_forecast_format //////////
+//
+// Option to create output path in forecast format.
+// If false, the output path is determined  using the valid time: 
+//   topdir/yyyymmdd/hhmmss.mdv. If true, the output path is determined 
+//   using the model initialization (generate) time and the forecast lead 
+//   time in secs: yyyymmdd/g_hhmmss/f_ssssssss.mdv.
+// Type: boolean
+//
+
+output_path_in_forecast_format = FALSE;
+
+//======================================================================
+//
+// FILE HEADER INFO.
+//
+//======================================================================
+ 
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_info = "MM5toGrib of GMOD RT-FDDA data";
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "MM5 model output.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_source = "MM5 output from GMOD RT-FDDA";
+
+//======================================================================
+//
+// TURBULENCE PRODUCT - ITFA.
+//
+// The turbulence severity product is normalized between 0 and 1, where 
+//   0 indicates low probability of turbulence and 1 indicates a high 
+//   probability of turbulence.
+//
+//======================================================================
+ 
+///////////// itfa_derived_indices ////////////////////
+//
+// Array of derived index parameters for ITFA.
+// These are the itfa indices computed from the MM5 model output 
+//   variables. For each index you specify (a) The name: from the enum 
+//   list. (b) the weight to be applied, set to 0.0 to exclude the index 
+//   altogether. The final value is formed as a linear combination of the 
+//   values multiplied by their weights, and then normalized to between 0 
+//   and 1 by dividing by the sum of the weights. (c) The sense of the 
+//   test: if GREATER_THAN, the index indicates turbulence if the value 
+//   exceeds threshold_1. If LESS_THAN, the index indicates turbulence if 
+//   the value is less than threshold_1. If INSIDE_INTERVAL indicates 
+//   turbulence if the value is between threshold_1 and threshold_2. If 
+//   OUTSIDE_INTERVAL indicates turbulence if the value is NOT between 
+//   threshold_1 and threshold_2. (d) threshold_1. (e) threshold_2, set to 
+//   -999.0 as documentation if sense is LESS_THAN or GREATER_THAN. (f) 
+//   The min flight level for applying the index. (g) The max flight level 
+//   for applying the index.
+//
+// Type: struct
+//   typedef struct {
+//      itfa_derived_index_name name;
+//        Options:
+//          BROWN1
+//          BROWN2
+//          CCAT
+//          COLSON_PANOFSKY
+//          DEF_SQR
+//          ELLROD1
+//          ELLROD2
+//          DUTTON
+//          ENDLICH
+//          HSHEAR
+//          LAZ
+//          PVORT
+//          PVORT_GRADIENT
+//          NGM1
+//          NGM2
+//          RICHARDSON
+//          RIT
+//          SAT_RI
+//          STABILITY
+//          VORT_SQR
+//          VWSHEAR
+//          TKE_GWB
+//          TKE_KH3
+//          TKE_KH4
+//          TKE_KH5
+//      float weight;
+//      itfa_index_sense_t sense;
+//        Options:
+//          LESS_THAN
+//          GREATER_THAN
+//          INSIDE_INTERVAL
+//          OUTSIDE_INTERVAL
+//      float threshold_1;
+//      float threshold_2;
+//      int min_flight_level;
+//      int max_flight_level;
+//   }
+//
+// 1D array - variable length.
+//
+
+itfa_derived_indices = {
+};
+
+///////////// itfa_model_indices //////////////////////
+//
+// Array of model index parameters for ITFA.
+// For each index you specify (a) The name: from the enum list. (b) the 
+//   weight to be applied, set to 0.0 to exclude the index altogether. The 
+//   final value is formed as a linear combination of the values 
+//   multiplied by their weights, and then normalized to between 0 and 1 
+//   by dividing by the sum of the weights. (c) The sense of the test: if 
+//   GREATER_THAN, the index indicates turbulence if the value exceeds 
+//   threshold_1. If LESS_THAN, the index indicates turbulence if the 
+//   value is less than threshold_1. If INSIDE_INTERVAL indicates 
+//   turbulence if the value is between threshold_1 and threshold_2. If 
+//   OUTSIDE_INTERVAL indicates turbulence if the value is NOT between 
+//   threshold_1 and threshold_2. (d) threshold_1. (e) threshold_2, set to 
+//   -999.0 as documentation if sense is LESS_THAN or GREATER_THAN. (f) 
+//   The min flight level for applying the index. (g) The max flight level 
+//   for applying the index.
+//
+// Type: struct
+//   typedef struct {
+//      itfa_model_index_name name;
+//        Options:
+//          W_ITFA
+//          WSPD_ITFA
+//          DIVERGENCE_ITFA
+//      float weight;
+//      itfa_index_sense_t sense;
+//        Options:
+//          LESS_THAN
+//          GREATER_THAN
+//          INSIDE_INTERVAL
+//          OUTSIDE_INTERVAL
+//      float threshold_1;
+//      float threshold_2;
+//      int min_flight_level;
+//      int max_flight_level;
+//   }
+//
+// 1D array - variable length.
+//
+
+itfa_model_indices = {
+};
+
+///////////// min_turb_severity_threshold /////////////
+//
+// Min valid threshold for the turbulence severity index.
+// We are only interested in values above this. Therefore, to save file 
+//   space, all values less that this threshold are set to 0.
+// Type: float
+//
+
+min_turb_severity_threshold = 0.25;
+
+//======================================================================
+//
+// ICING SEVERITY PRODUCT.
+//
+// The icing severity product is normalized between 0 and 1, where 0 
+//   indicates no icing and 1 indicates a high probability of severe 
+//   icing.
+//
+//======================================================================
+ 
+///////////// trace_icing_clw /////////////////////////
+//
+// Cloud liquid water content threshold for trace icing - g/m3.
+// Below this content level, no icing is expected. Above this, trace 
+//   icing is expected.
+// Type: float
+//
+
+trace_icing_clw = 0.01;
+
+///////////// light_icing_clw /////////////////////////
+//
+// Cloud liquid water content threshold for light icing - g/m3.
+// Below this content level, trace icing is expected. Above this, light 
+//   icing is expected.
+// Type: float
+//
+
+light_icing_clw = 0.1;
+
+///////////// moderate_icing_clw //////////////////////
+//
+// Cloud liquid water content threshold for moderate icing - g/m3.
+// Below this content level, light icing is expected. Above this, 
+//   moderate icing is expected.
+// Type: float
+//
+
+moderate_icing_clw = 0.6;
+
+///////////// severe_icing_clw ////////////////////////
+//
+// Cloud liquid water content threshold for severe icing - g/m3.
+// Below this content level, moderate icing is expected. Above this, 
+//   severe icing is expected.
+// Type: float
+//
+
+severe_icing_clw = 1.2;
+
+///////////// clear_ice_temp //////////////////////////
+//
+// Temperature (C) above which clear icing forms.
+// Clear icing occurs at temperatures just below freezing. Clear icing 
+//   is more severe in impact than rime icing. Therefore, when the 
+//   temperature is between this value and freezing, the severity is 
+//   raised by 0.25.
+// Type: float
+//
+
+clear_ice_temp = -10;
+

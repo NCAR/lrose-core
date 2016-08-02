@@ -1,0 +1,195 @@
+/**********************************************************************
+ * TDRP params for CalCompute
+ **********************************************************************/
+
+//======================================================================
+//
+// CalCompute computes calibration from a calibration file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// RADAR PARAMETERS.
+//
+//======================================================================
+ 
+///////////// wavelength_cm ///////////////////////////
+//
+// Radar wavelength (cm).
+// Type: double
+//
+
+wavelength_cm = 10.68;
+
+///////////// horiz_beam_width ////////////////////////
+//
+// Horizontal beam width (deg).
+// Type: double
+//
+
+horiz_beam_width = 0.92;
+
+///////////// vert_beam_width /////////////////////////
+//
+// Vertical beam width (deg).
+// Type: double
+//
+
+vert_beam_width = 0.92;
+
+///////////// antenna_gain_db /////////////////////////
+//
+// Antenna gain (dB).
+// Type: double
+//
+
+antenna_gain_db = 45.6;
+
+///////////// pulse_width_us //////////////////////////
+//
+// Pulse width (micro secs).
+// Type: double
+//
+
+pulse_width_us = 1;
+
+///////////// waveguide_loss_db ///////////////////////
+//
+// Waveguide loss (dB).
+// Loss from antenna to measurement plane. Set to 0 if the antenna gain 
+//   includes this loss.
+// Type: double
+//
+
+waveguide_loss_db = 0;
+
+///////////// radome_loss_db //////////////////////////
+//
+// Loss through the radome (dB).
+// Type: double
+//
+
+radome_loss_db = 0;
+
+///////////// receiver_loss_db ////////////////////////
+//
+// Loss because of receiver filter bandwidth (dB).
+// Type: double
+//
+
+receiver_loss_db = 0.6;
+
+//======================================================================
+//
+// CAL DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_path //////////////////////////////
+//
+// Path for cal data file.
+// Type: string
+//
+
+input_path = "rvp8cal_20060824_180337_example.txt";
+
+///////////// input_channels //////////////////////////
+//
+// Input channels each have a column in the cal data file.
+// column_number starts at 1 (col 0 holds the siggen power). 
+//   coupling_loss_db includes all losses from the siggen into the 
+//   waveguide. peak_power is in W.
+//
+// Type: struct
+//   typedef struct {
+//      string short_label;
+//      string long_label;
+//      int column_num;
+//      double coupling_loss_db;
+//      double peak_power_w;
+//   }
+//
+// 1D array - variable length.
+//
+
+input_channels = {
+  { "ch", "co-polar horiz-receive ifd0", 1, 35.88, 482626},
+  { "xh", "cross-polar horiz-receive ifd1", 2, 35.88, 465758},
+  { "cv", "co-polar vert-receive ifd0", 3, 35.43, 465758},
+  { "xv", "cross-polar vert-receive ifd1", 4, 35.43, 482626}
+};
+
+//======================================================================
+//
+// CAlIBRATION PARAMETERS.
+//
+//======================================================================
+ 
+///////////// min_siggen_power_for_gain ///////////////
+//
+// Min siggen power for computing gain (dBm).
+// Type: double
+//
+
+min_siggen_power_for_gain = -60;
+
+///////////// max_siggen_power_for_gain ///////////////
+//
+// Max siggen power for computing gain (dBm).
+// Type: double
+//
+
+max_siggen_power_for_gain = -20;
+
+///////////// min_siggen_power_for_noise //////////////
+//
+// Min siggen power for noise estimate (dBm).
+// Type: double
+//
+
+min_siggen_power_for_noise = -120;
+
+///////////// max_siggen_power_for_noise //////////////
+//
+// Max siggen power for noise estimate (dBm).
+// Type: double
+//
+
+max_siggen_power_for_noise = -100;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Directory for output file.
+// Type: string
+//
+
+output_dir = "./output";
+

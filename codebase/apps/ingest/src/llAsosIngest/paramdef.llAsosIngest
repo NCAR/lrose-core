@@ -1,0 +1,231 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "llAsosIngest reads ASOS data in the format\n"
+	"documented by Lincoln Labs, typically from a socket, and\n"
+	"then decodes them to SPDB. Niles Oien Feb 2007.";
+
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed.";
+} debug;
+
+paramdef int
+{
+  p_default = 5;
+  p_descr = "Number of seconds before socket reads time out";
+  p_help = "If set, debug messages will be printed.";
+} socketTimeoutSecs;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME_FILE, REALTIME_STREAM};
+  p_default = REALTIME_STREAM;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in three modes, archive, realtime from files and realtime from streams. In realtime from file mode, the conversion is performed for each input file as it becomes available. In realtime from stream mode, the input data are read from a stream (see the hostname and port parameters below). In archive mode, the file list is obtained from the command line with the -f switch.";
+} mode;
+      
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/$(PROJECT)/raw/asosData1Min";
+  p_descr = "Input directory - top level. Set to the\n"
+            "the directory in which the input files appear."
+            "Used in realtime file mode only.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Host name for realtime stream mode.";
+  p_help = "Set to the machine which is producing the input stream.";
+} hostname;
+
+paramdef int {
+  p_default = 4000;
+  p_descr = "Port number for realtime stream mode.";
+  p_help = "Set to the port which is producing the input stream.";
+} port;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = "./station_location.txt";
+  p_descr = "Path to station location file";
+  p_help = "Since the METAR reports do not contain lat/lon information, we must determine this from a separate file. The station l
+ocation file should contain a four letter station identification followed by the latitude and longitude for each station to be pro
+cessed. Stations not in this file will be ignored.";
+} st_location_path;
+
+
+paramdef boolean
+{
+  p_descr = "Units used for the altitude value in the station file.\n"
+	"Default is meters, set this to TRUE for feet.";
+  p_default = FALSE;
+} altInFeet;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "spdbp:://localhost::$(PROJECT)/spdb/surface";
+  p_descr = "URL for output SPDB data.";
+} OutUrl;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "How long data are valid, seconds.";
+} expiry;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the acceptedStations list (below)";
+  p_help = "Only accept stations in this list.";
+} useAcceptedStationsList;
+
+paramdef string {
+  p_default = {
+    "RCTP", "RCFG", "RCSS", "RCGM", "RCNO", "RCQC", "RCBS"
+  };
+  p_descr = "List of accepted station IDs";
+  p_help = "If a station is not on this list, it is not stored.";
+} acceptedStations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the rejectedStations list (below)";
+  p_help = "Reject stations in this list.";
+} useRejectedStationsList;
+
+paramdef string {
+  p_default = {
+    "RCFN", "RCAY", "RCQS", "RCFS","RCMT"
+  };
+  p_descr = "List of rejected station IDs";
+  p_help = "If a station is not on this list, it is not stored.";
+} rejectedStations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to check the report is within a bounding box.";
+} checkBoundingBox;
+
+typedef struct {
+  double min_lat;
+  double max_lat;
+  double min_lon;
+  double max_lon;
+} bbox_t;
+
+paramdef struct bbox_t {
+  p_default = { -90.0, 90.0, -180.0, 180.0 };
+  p_descr = "Bounding box to check if checkBoundingBox is TRUE.";
+  p_help = "Only Metars which fall inside this box will be stored.";
+} boundingBox;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set, then if we encounter a station name that is not\n"
+	"in the station location file, we print a message to that\n"
+	"effect. May be useful when trying to ascertain if stations\n"
+	"are listed or not.";
+} printUnlistedStations;
+
+paramdef boolean
+{
+  p_default = TRUE;
+  p_descr = "Option to only consider stations whose ID start\n"
+	"with an upper case K";
+  p_help = "This is worth doing as at the time of writing these are\n"
+	"the only stations in the data and it helps sort out junk.";
+} KstationsOnly;
+
+typedef struct {
+	boolean compareDataToCurrentTime;
+	int maxDiffDays;
+} realtimeCheck_t;
+
+paramdef struct realtimeCheck_t {
+  p_default = { TRUE, 1 };
+  p_descr = "Option to only consider data that are timestamped\n"
+	"within a tolerance of the current time.";
+  p_help = "Default is to do this. It is reccommended for all but\n"
+	"old archive cases.";
+} realtimeCheck;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Number of stations to collect before doing an SPDB\n"
+	"write. Buffering greatly increases the efficiency.";
+  p_min = 1;
+  p_help = "Set to 1 to turn off buffering, but that is not\n"
+	"reccomended with high flow rates, which we typicall\n"
+	"have here.";
+} numToBuffer;
+
+typedef enum {
+  SAVE_ALL, SAVE_VALID_ACCUM, SAVE_NONZERO_ACCUM, SAVE_CHANGING_ACCUM
+} save_t;
+
+paramdef enum save_t {
+  p_default = SAVE_ALL;
+  p_descr = "Option to filter stations that are saved by accumulation.";
+  p_help = "Options are as follows :\n\n"
+	" SAVE_ALL - save all stations, do not filter\n"
+	"            based on accumulation data.\n\n"
+	" SAVE_VALID_ACCUM - save only stations that have\n"
+	"                    valid accumulation data\n\n"
+	" SAVE_NONZERO_ACCUM - save only those stations that have\n"
+	"                    valid non-zero accumulation data. May\n"
+	"                    be useful to zoom in on rain cases.\n\n"
+	" SAVE_CHANGING_ACCUM - save only valid, nonzero accumulations\n"
+	"                       that have changed. Avoids stuck stations.";
+} saveAccumOption;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to debug SAVE_CHANGING_ACCUM operations.";
+  p_help = "Default should be fine.";
+} debugAccum;

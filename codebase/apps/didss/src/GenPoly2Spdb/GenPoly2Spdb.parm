@@ -1,0 +1,188 @@
+/**********************************************************************
+ * TDRP params for GenPoly2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// GenPoly2Spdb program.
+//
+// GenPoly2Spdb reads ASCII generic polyline data and writes to SPDB.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_NORM;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+//
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the program watches for files arriving in input_dir. In ARCHIVE 
+//   mode it uses the files specified on the command line.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+//
+//
+// Type: string
+//
+
+input_dir = "./example_data";
+
+///////////// use_ldata_info //////////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+//
+// If TRUE, the program watches for an update in the _latest_data_info 
+//   file in input_dir. The file path should be stored as user_info_2.
+//
+//
+// Type: boolean
+//
+
+use_ldata_info = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+//
+// For realtime only - max age of input data for it to be valid.
+//
+//
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for output spdb data.
+//
+//
+// Type: string
+//
+
+output_url = "./spdb/output";
+
+///////////// valid_period ////////////////////////////
+//
+// Valid period of product (secs).
+//
+// Product will be set to expire this number of seconds after the latest 
+//   time in the input file.
+//
+//
+// Type: int
+//
+
+valid_period = 3600;
+
+///////////// restrict_time_range /////////////////////
+//
+// Restrict time range.
+//
+// If true, the two time values in time_limits constrain the portion of 
+//   paths that get converted and written out. If false, no limits are 
+//   used, and time_limits is ignored.
+//
+//
+// Type: boolean
+//
+
+restrict_time_range = TRUE;
+
+///////////// time_limits /////////////////////////////
+//
+// time limits to use.
+//
+// Used only when restrict_time_range = true.  Only content within the 
+//   limits is converted to SPDB, everything else is ignored.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+// 1D array - fixed length - 2 elements.
+//
+
+time_limits = {
+  {
+    year = 2014,
+    month = 2,
+    day = 12,
+    hour = 17,
+    min = 30,
+    sec = 0
+  }
+  ,
+  {
+    year = 2014,
+    month = 2,
+    day = 12,
+    hour = 17,
+    min = 50,
+    sec = 0
+  }
+};
+

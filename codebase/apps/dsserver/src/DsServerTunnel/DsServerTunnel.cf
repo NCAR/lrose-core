@@ -1,0 +1,22 @@
+# DsServerTunnel.cf: configuration file for DsServerTunnel.pm.
+# Tres Hofmeister <tres@ucar.edu>  Thu Mar  4 17:35:15 MST 2010
+
+# This file lists internal server hostname and port pairs, in the
+# format: hostname:port, which external hosts may access via the
+# DsServerTunnel.
+# Comments start with the '#' character and may be anywhere on the line;
+# whitespace is ignored.
+
+# Example host:port entries, with comments.
+server.example.com:5435		# (DsServerMgr)
+server.example.com:5440		# (DsMdvServer)
+server.example.com:5441		# (Spdb)
+server.example.com:5450		# (Ltg2Symprod)
+server.example.com:5456		# (Metar2Symprod)
+server.example.com:5457		# (Pirep2Symprod)
+server.example.com:5460		# (Tstorms2Symprod)
+server.example.com:5467		# (Acars2Symprod)
+server.example.com:5469		# (SigAirmet2Symprod)
+server.example.com:5481		# (StnAscii2Symprod)
+server.example.com:5483		# (Sigwx2Symprod)
+server.example.com:5486		# (Taf2Symprod)

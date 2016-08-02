@@ -1,0 +1,159 @@
+/**********************************************************************
+ * TDRP params for TestMdv
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// url /////////////////////////////////////
+//
+// DS URL string.
+// URL for server to be contacted.
+// Type: string
+//
+
+url = "mdvp:://localhost:10000:mm5";
+
+///////////// data_time ///////////////////////////////
+//
+// Data time string.
+// Time for data requested. Format is YYYY MM DD HH MM SS.
+// Type: string
+//
+
+data_time = "1999 05 20 06 00 00";
+
+///////////// mode ////////////////////////////////////
+//
+// Mode for get request.
+// For GET_VSECTION_MODE, you must fill out the waypoint array. A single 
+//   waypoint yields a column of data.
+//
+// Type: enum
+// Options:
+//   GET_VOLUME_MODE, GET_VSECTION_MODE
+//
+//
+
+mode = GET_VSECTION_MODE;
+
+///////////// vsection_waypts /////////////////////////
+//
+// Waypts for vertical section.
+// For GET_VSECTION_MODE only.
+//
+// Type: struct
+//   typedef struct {
+//      float lat;
+//      float lon;
+//   }
+//
+// 1D array - variable length - 5 elements.
+//
+
+vsection_waypts = {
+  { 28, 118},
+  { 26, 124},
+  { 24, 119},
+  { 22, 133},
+  { 21, 117}
+};
+
+///////////// vsection_set_field_nums /////////////////
+//
+// Option to set field numbers.
+// Type: boolean
+//
+
+vsection_set_field_nums = FALSE;
+
+///////////// vsection_field_nums /////////////////////
+//
+// Field number list.
+// Type: int
+// 1D array - variable length - 3 elements.
+//
+
+vsection_field_nums = { 1, 2, 3 };
+
+///////////// vsection_set_field_names ////////////////
+//
+// Option to set field names.
+// Type: boolean
+//
+
+vsection_set_field_names = TRUE;
+
+///////////// vsection_field_names ////////////////////
+//
+// Field nameber list.
+// Type: string
+// 1D array - variable length - 4 elements.
+//
+
+vsection_field_names = { "Speed", "Temp", "RH", "Cloud" };
+
+///////////// vsection_set_plane_num_limits ///////////
+//
+// Option to set plane number limits.
+// Type: boolean
+//
+
+vsection_set_plane_num_limits = FALSE;
+
+///////////// vsection_lower_plane_num ////////////////
+//
+// Lower plane num limit.
+// Type: int
+//
+
+vsection_lower_plane_num = 2;
+
+///////////// vsection_upper_plane_num ////////////////
+//
+// Upper plane num limit.
+// Type: int
+//
+
+vsection_upper_plane_num = 5;
+
+///////////// vsection_set_plane_vlevel_limits ////////
+//
+// Option to set plane vlevel limits.
+// Type: boolean
+//
+
+vsection_set_plane_vlevel_limits = TRUE;
+
+///////////// vsection_lower_plane_vlevel /////////////
+//
+// Lower plane vlevel limit.
+// Type: float
+//
+
+vsection_lower_plane_vlevel = 370;
+
+///////////// vsection_upper_plane_vlevel /////////////
+//
+// Upper plane vlevel limit.
+// Type: float
+//
+
+vsection_upper_plane_vlevel = 430;
+

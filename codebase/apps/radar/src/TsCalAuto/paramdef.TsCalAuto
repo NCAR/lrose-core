@@ -1,0 +1,345 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for TsCalAuto
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// March 2007
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsCalAuto analyses radar calibration data.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "TIME SERIES - INPUT DATA";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "Path to time series FMQ";
+} input_fmq_path;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of pulse samples to average for cal data.";
+} n_samples;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Gate number for start of averaging.";
+} start_gate;
+
+paramdef int {
+  p_default = 200;
+  p_descr = "Number of gates for averaging.";
+} n_gates;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is the radar running in dual-pol fast alternating mode?";
+  p_help = "If not, set to FALSE.";
+} fast_alternating_mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Does the system have switching receivers?";
+  p_help = "If the receiver path switched every pulse, i.e. to operate in co-polar and x-polar mode, set this to true.";
+} switching_receivers;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check the radar ID in the time series data stream.";
+  p_help = "If TRUE, we will check that the radar_id in the header packet info is either the specified radar_id, or is 0. This allows us to filter out unwanted data from the time series stream. Mostly this is not applicable. However, in some cases time series data from multiple sources is included in a single stream, in which case we need to filter it accordingly.";
+} check_radar_id;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "radar_id to be used for filtering incoming data.";
+  p_help = "See 'check_radar_id' above.";
+} radar_id;
+
+commentdef {
+  p_header = "SIGNAL GENERATOR CONTROL";
+};
+
+paramdef int {
+  p_default = 5025;
+  p_descr = "TCP port for SIGGEN";
+} siggen_tcp_port;
+
+paramdef string {
+  p_default = "sig";
+  p_descr = "IP address for SIGGEN";
+} siggen_ip_address;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Max power for siggen signal (dBm)";
+} siggen_max_power;
+
+paramdef double {
+  p_default = -130;
+  p_descr = "Min power for siggen signal (dBm)";
+} siggen_min_power;
+
+paramdef double {
+  p_default = 5;
+  p_descr = "Power step for siggen (dBm)";
+} siggen_delta_power;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Switch to set the Frequency on the sig gen before starting.";
+  p_help = "If the Test Pulse Manager is on, you probably don't want to reset it.";
+} set_sig_freq;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Siggen frequency (GHz)";
+  p_help = "This should match the radar's frequency.";
+} siggen_frequency;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Siggen command delay (msec)";
+  p_help = "Delay this ammount after each command to give the siggen time to stabilize a power change.";
+} siggen_cmd_delay;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to manually set the siggen.";
+  p_help = "Use for testing etc.";
+} use_manual_siggen_control;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to suspend the test pulse while the calibration is running.";
+  p_help = "See TestPulse_pid_file.";
+} suspend_test_pulse;
+
+paramdef string {
+  p_default = "/tmp/TestPulse.pid";
+  p_descr = "File containing the process ID of the TestPulse Utility program";
+  p_help = "On Startup, this program suspends the operation of TestPulse by sending it a SIGUSR1. After Finishing, it restores TestPulse operation by sending it a SIGUSR2";
+} TestPulse_pid_file;
+
+commentdef {
+  p_header = "CALIBRATION PROCEDURE PARAMETERS";
+};
+
+paramdef string {
+  p_default = "Unknown";
+  p_descr = "Radar name";
+} radarName;
+
+paramdef double {
+  p_default = -9999;
+  p_descr = "Radar frequency (GHz)";
+  p_help = "If this is negative, the siggen_frequency will be used.";
+} radar_frequency;
+
+paramdef double {
+  p_default = 0.93;
+  p_descr = "Constant related to complex index of refraction, for water, at this frequency";
+  p_help =
+    "Suggested values are:\n"
+    "\tS-band: 0.93\n"
+    "\tC-band: 0.93\n"
+    "\tX-band: 0.92\n"
+    "\tKu-band: 0.90\n"
+    "\tKa-band: 0.88\n"
+    "\tW-band: 0.84\n";
+} k_squared;
+
+paramdef double {
+  p_default = 80.0;
+  p_descr = "Transmitter peak power H (dBm)";
+} xmitPowerDbmH;
+
+paramdef double {
+  p_default = 80.0;
+  p_descr = "Transmitter peak power V (dBm)";
+} xmitPowerDbmV;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Transmit pulse width (micro_secs)";
+} pulseWidthUs;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Antenna 3dB beam width H (deg)";
+} beamWidthDegH;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Antenna 3dB beam width V (deg)";
+} beamWidthDegV;
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "Antenna gain H (dB)";
+} antGainDbH;
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "Antenna gain V (dB)";
+} antGainDbV;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "2-way waveguide loss H (dB)";
+  p_help = "This is the loss from the measurement plane to the feed-horn and back. Sometimes it is set to 0 and the loss is incorporated in the antenna gain.";
+} twoWayWaveguideLossDbH;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "2-way waveguide loss V (dB)";
+  p_help = "This is the loss from the measurement plane to the feed-horn and back. Sometimes it is set to 0 and the loss is incorporated in the antenna gain.";
+} twoWayWaveguideLossDbV;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "2-way loss through the radome - H.";
+  p_help = "Set to 0 if no radome.";
+} twoWayRadomeLossDbH;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "2-way loss through the radome - V.";
+  p_help = "Set to 0 if no radome.";
+} twoWayRadomeLossDbV;
+
+paramdef double {
+  p_default = 0.6;
+  p_descr = "Receiver mismatch loss - (dB)";
+  p_help = "This is the loss which results from the fact that the receiver bandwidth is not exactly the same as the pulse width. The calibration procedure is carries out with a CW signal, so the redeiver bandwidth is not a factor. However, during operations, the receiver loses some power because of the bandwidth mismatch. This loss must be taken into account.";
+} receiverMismatchLossDb;
+
+paramdef double {
+  p_default = -40;
+  p_descr = "Noise source power - H (dBm)";
+  p_help = "Some operational calibrations are computed with a calbrated noise source of known power.";
+} noiseSourcePowerDbmH;
+
+paramdef double {
+  p_default = -40;
+  p_descr = "Noise source power - V (dBm)";
+  p_help = "Some operational calibrations are computed with a calbrated noise source of known power.";
+} noiseSourcePowerDbmV;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Power measurement loss - H (dBm).";
+  p_help = "This is the power loss from the signal generator to the waveguide coupler.";
+} powerMeasLossDbH;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Power measurement loss - V (dBm).";
+  p_help = "This is the power loss from the signal generator to the waveguide coupler.";
+} powerMeasLossDbV;
+
+paramdef double {
+  p_default = 37.0;
+  p_descr = "Coupler loss - H (dB)";
+  p_help = "This is the power loss in the directional coupler itself.";
+} couplerForwardLossDbH;
+
+paramdef double {
+  p_default = 37.0;
+  p_descr = "Coupler loss - V (dB)";
+  p_help = "This is the power loss in the directional coupler itself.";
+} couplerForwardLossDbV;
+
+paramdef double {
+  p_default = -70;
+  p_descr = "System PHIDP (deg)";
+  p_help = "This is the approximate PHIDP value in the meteorlogical echo closest to the radar. Compute PHIDP is corrected using this value, so that the computed PHIDP closest to the radar is set to a value which minimizes the chance of folding.";
+} systemPhidpDeg;
+
+commentdef {
+  p_header = "ANALYSIS PARAMETERS";
+};
+
+paramdef double {
+  p_default = -80;
+  p_descr = "power value at lower end of linear region (dBm).";
+} linear_region_min_power;
+
+paramdef double {
+  p_default = -20;
+  p_descr = "power value at upper end of linear region (dBm).";
+} linear_region_max_power;
+
+paramdef double {
+  p_default = -110;
+  p_descr = "power value at upper end of noise region (dBm).";
+} noise_region_max_power;
+
+paramdef double {
+  p_default = -6;
+  p_descr = "SNR for minimum detectable signal (dB).";
+  p_help = "The minimum detectable signal is generally well below the noise. This is the SNR value for the MDS.";
+} snr_for_mds;
+
+commentdef {
+  p_header = "OUTPUT RESULTS";
+};
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output files.";
+  p_help = "The results will be written to sub-directories named from the cal time.";
+} output_dir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Label imbedded in the file name.";
+  p_help = "Ignored if empty";
+} output_file_label;
+
+paramdef string {
+  p_default = "";
+  p_descr = "If set, program will call script passing the output file names as the first argument";
+  p_help = "Typically, this script generates a plot and saves the output";
+} plot_script;
+
+commentdef {
+  p_header = "REPROCESSING OPTIONS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read data file with alternative column order.";
+  p_help = "TsCalAuto writes out the power data in the following order: hc, vc, hx, vx. Some systems, such as the SPOL ATE, writes out the data in hc, hx, vc, vx. If you set this option to true, the latter column order will be used to read in previously-stored data.";
+} read_data_in_alt_column_order;
+

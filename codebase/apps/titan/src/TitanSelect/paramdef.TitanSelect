@@ -1,0 +1,152 @@
+////////////////////////////////////////////////////////////////////////
+// paramdef.TitanSelect
+//
+////////////////////////////////////////////////////////////////////////
+
+
+commentdef {
+  p_header = "Program TitanSelect";
+  p_text = "TitanSelect selects specified Titan track data from the database and prints it to stdout. It watches the Rview shmem segments for user activity and reacts when a new track is specified.";
+}
+
+////////////////////////////////////////////////////////////////////////
+// Debugging and process control
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_descr = "Option to log titan read errors to log directory.";
+  p_help = "If true, TITAN read errors will be logged to the directory specified by errors_log_dir. The reason for dealing with errors in this way is that stdout from this program is displayed as the main product. It is difficult to separate stderr from stdout and pipe stderr to a logging filter. Therefore we log the titan errors directly.";
+  p_default = false;
+} log_read_errors;
+
+paramdef string {
+  p_descr = "Errors log directory.";
+  p_help = "See log_titan_errors.";
+  p_default = "/tmp";
+} errors_log_dir;
+
+////////////////////////////////////////////////////////////////////////
+// user interface
+
+commentdef {
+  p_header = "USER INTERFACE";
+}
+
+paramdef int {
+  p_descr = "sleep milli-seconds";
+  p_help = "Number of milli-seconds to sleep between checks for mouse clicks.";
+  p_min = 20;
+  p_default = 250;
+} sleep_msecs;
+
+////////////////////////////////////////////////////////////////////////
+// Shared memory information
+
+commentdef {
+  p_header = "SHARED MEMORY WITH DISPLAY";
+}
+
+paramdef int {
+  p_descr = "Rview shared memory key";
+  p_help = "Id for the shared memory status segment used for communicating with the display. Must match that used by Rview and TimeHist. There are actually 2 shared mem segments used, one with this key and one with this key + 1.";
+  p_default = 46100;
+} rview_shmem_key;
+
+////////////////////////////////////////////////////////////////////////
+// TITAN data input
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_descr = "URL for reading TITAN data.";
+  p_help = "See DIDSS documentation for URL specs.";
+  p_default = "titanp:://localhost::titan/storms";
+} input_url;
+
+/////////////////////////////////////////////////////////////////////////
+// display
+
+commentdef {
+  p_header = "DISPLAY OPTIONS";
+}
+
+typedef enum {
+  CENTROID_POSITION,
+  TOP,
+  BASE,
+  VOLUME,
+  AREA_MEAN,
+  PRECIP_FLUX,
+  MASS,
+  TILT_ANGLE,
+  TILT_DIRN,
+  DBZ_MAX,
+  DBZ_MEAN,
+  DBZ_MAX_GRADIENT,
+  DBZ_MEAN_GRADIENT,
+  HT_OF_DBZ_MAX,
+  PROJ_AREA,
+  HAIL_PRESENT,
+  VIL_FROM_MAXZ,
+  LTG_COUNT,
+  FOKRCATEGORY,
+  POH,
+  HAILMASSALOFT,
+  VIHM
+} property_t;
+
+paramdef enum property_t {
+  p_default = {
+    TOP,
+    VOLUME,
+    AREA_MEAN,
+    PROJ_AREA,
+    PRECIP_FLUX,
+    MASS,
+    TILT_ANGLE,
+    DBZ_MAX,
+    DBZ_MAX_GRADIENT,
+    HT_OF_DBZ_MAX,
+    VIL_FROM_MAXZ,
+    FOKRCATEGORY,
+    POH,
+    HAILMASSALOFT,
+    VIHM
+  };
+  p_descr = "Array of properties to printed.";
+  p_help = "The properties will be printed in the order they exist in this list.";
+} property_list[];
+
+paramdef int {
+  p_descr = "Number of lines to scroll off the top before starting to print.";
+  p_help = "This is sometimes useful to clear the output window of previous output.";
+  p_default = 1;
+} nlines_scroll_before_printing;
+
+paramdef int {
+  p_descr = "Length of line delimiting prints.";
+  p_help = "A line of dashes will be printed above each series of items printed. This is the number of dashes used. Set to 0 if you do not want a delimiter.";
+  p_default = 34;
+} length_delimiter_line;
+

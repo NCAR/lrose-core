@@ -1,0 +1,217 @@
+/****************************************************
+ * TDRP params for zr_analysis
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_NORM;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Unknown" 
+ */
+instance = "Test";
+
+/*
+ * Operational mode.
+ * Realtime mode - waits for new data; archive mode runs on single
+ *   file.
+ *
+ * Type: enum
+ * Default: REALTIME 
+ * Legal values: REALTIME, ARCHIVE.
+ */
+mode = REALTIME;
+mode = ARCHIVE;
+
+/*
+ * Input directory.
+ * Path of input directory - realtime mode only.
+ *
+ * Type: string
+ * Default: "." 
+ */
+input_dir = ".";
+
+/*
+ * Max age of input data.
+ * For realtime only - max age of input data for it to be valid.
+ *
+ * Type: long
+ * Default: 300 
+ * Min value: 60 
+ */
+max_input_data_age = 300;
+
+/*
+ * Precip field.
+ * Field number of the precip data in the mdv file.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ */
+precip_field = 0;
+
+/*
+ * Option for ASCII output.
+ * If set, selected results will be printed to stdout. This is intended
+ *   for data analysis and plotting.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+ascii_output = TRUE;
+
+/*
+ * ZR directory.
+ * Path of zr data directory for storing output.
+ *
+ * Type: string
+ * Default: "." 
+ */
+zr_dir = "$(TITAN_HOME)/zr";
+
+/*
+ * Precip station gages.
+ * This lists the details of precip stations to be used in the analysis.
+ *
+ * Type: struct
+ * Array elem size: 24 bytes
+ * Array has no max number of elements
+ */
+gages = {
+  {
+    "Wilmette", /* name:string */
+    42.075, /* latitude:double */
+    -87.683 /* longitude:double */
+  },
+  {
+    "Elk Grove", /* name:string */
+    42.050, /* latitude:double */
+    -88.000 /* longitude:double */
+  },
+  {
+    "O'Hare", /* name:string */
+    41.964, /* latitude:double */
+    -87.881 /* longitude:double */
+  },
+  {
+    "DuPage", /* name:string */
+    41.908, /* latitude:double */
+    -88.075 /* longitude:double */
+  }
+};
+
+/*
+ * Precip station server.
+ * This lists the details of precip stations server from which
+ *   the precip data is to be obtained.
+ *
+ * Type: struct
+ * Array elem size: 20 bytes
+ * Array has no max number of elements
+ */
+gage_server = {
+  "Mesonet", /* type:string */
+  "Station_server", /* subtype:string */
+  "ORD_95/96", /* instance:string */
+  "tempest", /* default_host:string */
+  20220, /* default_port:long */
+  10000 /* timeout_msecs */
+};
+
+/*
+ * Servmap host 1.
+ *
+ * Type: string
+ * Default: "local" 
+ */
+servmap_host1 = "tempest";
+
+/*
+ * Servmap host 2.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+servmap_host2 = "none";
+
+/*
+ * Filter type.
+ * Filter for computing the representative precip estimated
+ *   by radar.
+ *
+ * Type: enum
+ * Default: MEAN 
+ * Legal values: MEAN, MEDIAN.
+ */
+filter = MEAN;
+
+/*
+ * Size of kernel for filter.
+ * This is the size of the square which is used to compute the filtered
+ *   estimated precip value from the radar data.
+ *
+ * Type: long
+ * Default: 20 
+ * Min value: 1 
+ * Max value: 100 
+ */
+kernel_size = 20;
+
+/*
+ * Threshold on accumulated depth for a valid data pair.
+ * If both the gage-measured and radar-estimated depth exceeds
+ *   this value, the pair is considered valid. Otherwise, it is invalid.
+ *
+ * Type: double
+ * Default: 0.25 
+ */
+accum_threshold = 0.3;
+
+/*
+ * Threshold on number of data pairs for a valid analysis.
+ * If the number of valid pairs equals or exceeds this number, the
+ *   analysis will be performed. Otherwise, it will not.
+ *
+ * Type: long
+ * Default: 2 
+ * Min value: 1 
+ */
+npair_threshold = 2;
+
+/*
+ * Number of elements in the running filter.
+ * The correction values are stored, and a running mean filter
+ *   is computed. This is the number of elements in the running mean
+ *   filter.
+ *
+ * Type: long
+ * Default: 4 
+ * Min value: 1 
+ */
+n_running_filter = 5;
+

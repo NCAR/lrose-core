@@ -1,0 +1,56 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <toolsa/str.h>
+
+int STRequal(const char *s1, const char *s2)
+   {
+      int iret;
+      char *st1, *st2;
+      char *ptr;
+
+      st1 = (char *) strdup(s1);
+      st2 = (char *) strdup(s2);
+      
+      /* remove trailing and leading blanks */
+      STRblnk(st1);
+      STRblnk(st2);
+
+      /* turn bit 5 off (capitalize) */
+      for (ptr=st1;*ptr;ptr++)
+        *ptr &= ~32;
+      for (ptr=st2;*ptr;ptr++)
+        *ptr &= ~32;
+
+      /* case sensitive compare */
+      iret = (0 == strcmp( st1, st2));
+
+      free(st1);
+      free(st2);
+
+      return iret;
+
+   }

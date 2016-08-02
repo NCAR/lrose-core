@@ -1,0 +1,6 @@
+.deps
+MdvFromCircles
+__makefile.template
+makefile
+makefile.am
+makefile.in

@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+fmq_print
+makefile
+makefile.am
+makefile.in

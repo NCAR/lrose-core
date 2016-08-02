@@ -1,0 +1,8 @@
+#!/bin/csh
+
+#
+# Write example.diagram
+#
+./sysViewAssist -params example.params
+
+#

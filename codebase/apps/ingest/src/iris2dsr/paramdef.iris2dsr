@@ -1,0 +1,206 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "iris2dsr ingests IRIS radar ingest files (this is\n"
+	"what the files are called in the IRIS system) and\n"
+	"writes them to an FMQ. In archive mode the header\n"
+	"file names are specified on the command line :\n\n"
+	"./iris2dsr -params iris2dsr.test -f TIA070724053502.\n\n"
+	"Note that the header file may not end with a dot.\n"
+	"in realtime mode the files are detected automatically.\n"
+	"Nyquist velocity must be scpecified in param file as\n"
+	"it is not set in the data files.\n"
+	"\nNiles Oien August 2007";
+}         
+
+
+////////////////////////////////////////////////////////////////////////
+//
+// Debugging
+//
+
+paramdef boolean
+{
+  p_descr = "Option to print messages.";
+  p_help = "Debug flag.";
+  p_default = { false };
+} debug;
+
+////////////////////////////////////////////////////////////////////////
+//
+// Operational information
+//
+
+paramdef boolean
+{
+  p_descr = "Option to swap bytes.";
+  p_help = "Not needed if running on a PC.";
+  p_default = { false };
+} byteSwap;
+
+paramdef string
+{
+  p_descr = "procmap instance";
+  p_help = "Be sure this is unique to this instance\n"
+	"of the program.";
+  p_default = { "Test" };
+} instance;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_help = "Directory where input files are, realtime\n"
+	"and archive mode.";
+  p_default = { "/some/directory/structure" };
+} inputDir;
+
+paramdef string
+{
+  p_descr = "Message log dir";
+  p_help = "Directory for messages";
+  p_default = { "/some/directory/structure" };
+} msgLog_dir;
+
+paramdef int
+{
+  p_descr = "How long to wait between strobes of the input directory, secs";
+  p_help = "Valid for REALTIME mode only.";
+  p_default = 30;
+} strobeDelay;
+
+paramdef int
+{
+  p_descr = "Number of seconds to delay post tilt, seconds.";
+  p_help = "Can be 0 and probably should be.";
+  p_default = 0;
+} delaySecs;
+
+
+typedef struct {
+	string url;
+	boolean compress;
+	int numSlots;
+	int sizeBytes;
+} fmq_t;
+
+paramdef struct fmq_t
+{
+  p_descr = "Destination FMQ";
+  p_help = "Output beams are written here.";
+  p_default = { "fmqp:://localhost::fmq/iris", FALSE, 7200, 20000000 };
+} fmq;
+
+paramdef enum runmode_t
+{
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode,\n"
+	"the analysis is performed for each dataset as it becomes available. In\n"
+	"archive mode, the file list is obtained from the command line.";
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+} mode;
+
+typedef struct {
+        boolean ingest_dBZ;
+	boolean ingest_V;
+	boolean ingest_W;
+	boolean ingest_dBZc;
+	boolean ingest_dBT;
+} ingestFields_t;
+
+paramdef struct ingestFields_t {
+        p_descr = "Select which fields to ingest.";
+        p_help = "dBZ = reflectivity\n"
+	"V = velocity\n"
+	"W = spectral width\n"
+	"dBZc = Clutter corrected reflectivity\n"
+	"dBT = total power";
+        p_default = { FALSE, TRUE, FALSE, TRUE, FALSE };
+} ingestFields;
+
+typedef struct {
+	int ID;
+	string name;
+} radarSpec_t;
+
+paramdef struct radarSpec_t {
+	p_descr = "Specs of radar.";
+	p_help = "Somewhat arbitrary";
+	p_default = { 42, "IRIS radar" };
+} radarSpec;
+
+paramdef boolean {
+	p_descr = "Option to use the wallclock time.";
+	p_help = "May be useful for sims. By default time\n"
+	"is parsed from the file name.";
+	p_default = FALSE;
+} useRealtime;
+
+paramdef int {
+	p_descr = "Offset, seconds, that is added to the time.";
+	p_help = "By default, if useRealtime is false the time\n"
+	"is parsed from the file name of the data. This offset\n"
+	"may have to be set to get the data onto UTC. Offset is\n"
+	"also applied if useRealtime is TRUE.";
+	p_default = 0;
+} timeOffset;
+
+typedef struct {
+	int numTries;
+	int sleepBetweenTries;
+} timeout_t;
+
+paramdef struct timeout_t {
+	p_descr = "Number of times that an attempt is made to\n"
+	"open a file, and delay between attempts in seconds.\n"
+	"Applies to realtime operation only.";
+	p_help = "Used to determine that the end of volume\n"
+	"has been reached, ie the last tilt file has arrived\n"
+	"and it is time to send an end of volume flag.";
+	p_default = { 20, 1 };
+} endOfVolTimeout;
+
+paramdef int {
+	p_descr = "Number of beams to send before sending params";
+	p_help = "Default should be fine.";
+	p_default = 30;
+} beamsPerParams;
+
+typedef struct {
+	boolean doResample;
+	double firstGateKm;
+	double lastGateKm;
+	double incKm;
+} resample_t;
+
+paramdef struct resample_t {
+	p_descr = "Option to resample beams onto a\n"
+	"uniform geometry.";
+	p_help = "Useful if the radar changes beam geometry\n"
+	"midway though the volume, which at the time\n"
+	"writing Dsr2Vol cannot cope with";
+	p_default = {FALSE, 0.0, 300.0, 0.25 };
+} resample;

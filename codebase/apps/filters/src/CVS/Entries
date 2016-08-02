@@ -1,0 +1,12 @@
+/.cvsignore/1.1/Fri Oct 23 21:59:47 2015//
+/Makefile/1.22/Thu Aug  7 22:03:17 2008//
+/Makefile.dsadmin/1.1/Wed May 28 21:29:30 2003//
+/Makefile.wsddm/1.1/Wed Dec 12 21:12:15 2001//
+D/_makefiles////
+D/ApRemoval////
+D/BrightBand////
+D/ClutterRemove////
+D/LogFilter////
+D/NoiseFilter////
+D/stratiform_filter////
+D/tops_filter////

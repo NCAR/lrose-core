@@ -1,0 +1,42 @@
+<HTML>
+<HEAD>
+<TITLE>MdvServer Programmer's Guide</TITLE>
+</HEAD>
+
+<BODY>
+
+<H1>MdvServer Programmer's Guide</H1>
+
+This document gives information useful to a programmmer
+maintaining the MdvServer code and describes the how
+programmer's should write clients of the MdvServer.
+
+<P>
+The MdvServer serves MDV data to requesting clients using the
+MDV protocol.
+The MDV protocol is described in the <KBD>mdv/mdv_client.h</KBD> include file.
+
+<H2>MdvServer Clients</H2>
+
+Clients should use the <KBD>MDV_put</KBD> and <KBD>MDV_get</KBD> routines
+in the MDV library (described in <KBD>mdv/mdv_client.h</KBD>) to retrieve
+MDV data using the RAP URL.
+These routines will store/retrieve data from the proper data set as
+described by the URL.
+If the data set is local, the routines will access the data directly
+from the disk.
+Otherwise, the routines will communicate with the proper server,
+using the server manager of the DIDSS system,
+to retrieve the data for the client.
+
+
+<P>
+<ADDRESS>
+Author: Nancy Rehak<BR>
+RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000<BR>
+<A HREF="mailto:rehak@ucar.edu">rehak@ucar.edu</A> <BR>
+Last Modified on 7 December, 1998<BR>
+</ADDRESS>
+
+</BODY>
+</HTML>

@@ -1,0 +1,102 @@
+; this is the definition file for the overall radar
+; receiver gains minus LNA 
+; !note: many default values pertain to RapidDOW
+
+description             SVH 
+radar_name              SPol
+polarization            H
+test_pulse_power        0     ;dbm
+test_pulse_frequency    0     ;Hz
+frequency               9375E6 ;Hz  
+
+transmit_power          29500  ; 66 KW - 3 dB splitter - 0.5 dB loss
+
+;MAKE NOISE POWER ZERO TO REMOVE NOISE CORRECTION FOR SOLARS
+;noise_power             0      ;dBm
+;vnoise_power            0      ;dBm
+
+zdr_fudge_factor       1.06 ;dB   Get this from vertically pointing ZDR
+
+missmatch_loss          1.91 ;dB  (this should be positive)
+
+;Use these for normal ops. These are the best numbers 7/21/98
+;noise_power             -115.6      ;dBm normal   about .5 db below the displayed
+;vnoise_power            -115.6      ;dBm normal    noise power
+
+;noise_power0             -110.0      ;dBm normal   
+;noise_power1             -111.0      ;dBm normal   
+;noise_power2             -112.0     ;dBm normal   
+;noise_power3             -113.0      ;dBm normal   
+;noise_power4             -114.0      ;dBm normal   
+;noise_power5             -115.0      ;dBm normal
+; Jon's results w/o LNA:    
+;noise_power0             -93.0      ;dBm normal   
+;noise_power1             -93.0      ;dBm normal   
+;noise_power2             -93.0     ;dBm normal   
+;noise_power3             -93.0      ;dBm normal   
+;noise_power4             -92.0      ;dBm normal   
+;noise_power5             -93.0      ;dBm normal   
+;turn off noise subtraction: 
+noise_power0                0.0      ;dBm normal   
+noise_power1                0.0      ;dBm normal   
+noise_power2                0.0     ;dBm normal   
+noise_power3                0.0      ;dBm normal   
+noise_power4                0.0      ;dBm normal   
+noise_power5                0.0      ;dBm normal   
+;vnoise_power            0.0      ;dBm normal    noise power
+
+
+noise_figure            2.8       ;dB
+
+; receiver gains minus LNA:  
+
+;receiver_gain0       16.0    ;dB Gain from Horizontal coupler to sampler card
+;receiver_gain1       15.5    ;dB Gain from Horizontal coupler to sampler card
+receiver_gain0       2.6    ;dB Gain from Horizontal coupler to sampler card
+receiver_gain1       2.6    ;dB Gain from Horizontal coupler to sampler card
+receiver_gain2       16.7    ;dB Gain from Horizontal coupler to sampler card
+receiver_gain3       16.0    ;dB Gain from Horizontal coupler to sampler card
+receiver_gain4       15.8    ;dB Gain from Horizontal coupler to sampler card
+receiver_gain5       16.8    ;dB Gain from Horizontal coupler to sampler card
+;vreceiver_gain      0.0    ;dB Gain from Vertical coupler to sampler card
+
+piraq_saturation_power  6.5    ;dBm
+
+;these are really system gains
+antenna_gain            45.66  ;New Feed estimate 10/7/99
+vert_antenna_gain       45.42  ;New Feed
+
+horizontal_beamwidth    0.92    ;degrees
+vertical_beamwidth      0.92     ;degrees
+
+e_plane_angle		45.0	;degrees
+h_plane_angle		135.0	;degrees
+
+antenna_rotation_angle	120.0	;degrees
+
+;xmit_pulsewidth         333.0E-9  ;50m gates
+xmit_pulsewidth         667.0E-9  ;50m gates
+;xmit_pulsewidth         333.0E-9  ;transmit pulsewidth in Sec
+;xmit_pulsewidth         1.0E-6  ;transmit pulsewidth in Sec
+phase_offset            -25   	;fortest
+;i_offset		6.0; dc offset subtracted from RapidDOW I datum: Spring 2003 only
+; dc offset removal SWITCH set to piraq executable: 
+; NOTE! if ON (= 1.0), MUST NOT TRANSMIT UNTIL PIRAQS ARE TAKING DATA!
+i_offset		01.0; dc offset SWITCH set to piraq executable 
+q_offset		6.0; dc offset currently subtracted from RapidDOW Q datum: NO FRACTIONS
+debug                   off
+;debug                   on
+
+latitude		40.0	; !!!test data
+longitude		-105.0	; 
+altitude		1715.0	; 
+
+radar_name		CP2	;
+channel_name		CHANEL	;
+project_name		EOLTEST	;
+operator_name		MILANO	;
+site_name		EOL	; 
+
+text                    on	; !MAX 64 CHARACTERS!	
+
+CP2 2006. 

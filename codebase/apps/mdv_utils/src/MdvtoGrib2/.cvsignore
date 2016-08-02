@@ -1,0 +1,6 @@
+.deps
+MdvtoGrib2
+__makefile.template
+makefile
+makefile.am
+makefile.in

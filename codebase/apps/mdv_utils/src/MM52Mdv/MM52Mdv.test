@@ -1,0 +1,237 @@
+/**********************************************************************
+ * TDRP params for MM52Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none,1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc. .
+// Minimum val: 0
+// Maximum val: 3
+// Type: int
+//
+
+malloc_debug_level = 0;
+
+///////////// find_headers ////////////////////////////
+//
+// Find the Fortran headers.
+// If set, the program searches for the Fortran record markers around 
+//   the headers, and prints the positions out to stderr.
+// Type: boolean
+//
+
+find_headers = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//   ARCHIVE, REALTIME
+//
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// realtime_input_dir //////////////////////
+//
+// Directory for input MM5 data - REALTIME mode.
+// The latest_data_info file in this directory is updated each time the 
+//   model adds a forecast time step to the output file.
+// Type: string
+//
+
+realtime_input_dir = "../MM5Simulate/simdata";
+
+///////////// realtime_input_file_name ////////////////
+//
+// File name for input MM5 data - REALTIME mode.
+// During the MM5 run this file is appended for each forecast time step.
+// Type: string
+//
+
+realtime_input_file_name = "fort.43";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data - REALTIME mode.
+// For realtime only - max age of input data for it to be valid. If the 
+//   latest_data_info file is older than this, the program waits for new 
+//   data.
+// Minimum val: 0
+// Type: long
+//
+
+max_realtime_valid_age = 300;
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+// The MM5 data is output to this directory in MDV format.
+// Type: string
+//
+
+output_dir = "mdv_dir";
+
+///////////// output_fields ///////////////////////////
+//
+// Output fields.
+// The CLOUD and PRECIP fields depend on snow and rain data being 
+//   available in the model. If not available these fields will be set to 
+//   0 in the output fields.
+//
+// Type: enum
+// Options:
+//   U_FIELD, V_FIELD, W_FIELD, WSPD_FIELD, TEMP_FIELD, HUMIDITY_FIELD, CLOUD_FIELD, PRECIP_FIELD, ICING_FIELD, TURB_FIELD, FZLEVEL_FIELD
+//
+// 1D array - variable length - 10 elements.
+//
+
+output_fields = { U_FIELD, V_FIELD, WSPD_FIELD, TEMP_FIELD, HUMIDITY_FIELD, CLOUD_FIELD, ICING_FIELD, TURB_FIELD, FZLEVEL_FIELD};
+
+///////////// output_projection ///////////////////////
+//
+// Projection of output grid.
+// FLAT - (x,y) Cartesian data in km from a given origin. LATLON - 
+//   lat/lon grid with constant grid spacing.
+//
+// Type: enum
+// Options:
+//   OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON
+//
+//
+
+output_projection = OUTPUT_PROJ_LATLON;
+
+///////////// output_origin ///////////////////////////
+//
+// Origin of output grid.
+// Used with OUTPUT_PROJ_FLAT only.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+output_origin = { 25, 121 };
+
+///////////// output_grid /////////////////////////////
+//
+// Output grid parameters.
+// The grid params for the output grid.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+output_grid = { 160, 220, 117, 20, 0.05, 0.045 };
+
+///////////// flight_levels ///////////////////////////
+//
+// Array of output flight levels.
+// The output grid has a variable Z dimension, in flight levels. The 
+//   flight levels in the output are taken from this array.
+// Type: int
+// 1D array - variable length - 33 elements.
+//
+
+flight_levels = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 230, 250, 270, 290, 310, 330, 350, 370, 390, 410, 430, 450 };
+
+//======================================================================
+//
+// FILE HEADER INFO.
+//
+//======================================================================
+ 
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_info = "This MDV file was created by MM52Mdv.";
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "MM5 model output.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_source = "MM5 output from SAWB.";
+

@@ -1,0 +1,282 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+commentdef
+{
+  p_header = "nsslMosaic2Mdv reads netcdf files of radar mosaic data "
+	"from nssl (possibly retrieved with the script nsslRetrieve) "
+	"and writes MDV data.";
+}
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string
+{
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum
+{
+  ARCHIVE,
+  REALTIME
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+           "In realtime mode, the conversion is performed for each "
+           "input file as it becomes available. "
+           "In archive mode, the file list is obtained from the command line.";
+  p_default = REALTIME;
+} mode;
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT";
+}
+
+typedef enum
+{
+  OLD_FORMAT,
+  WDSS2_FORMAT
+} format_t;
+
+paramdef enum format_t
+{
+  p_descr = "netcdf data format";
+  p_help = "The OLD_FORMAT should be used on data prior to April 15, 2006.";
+  p_default = OLD_FORMAT;
+} format;
+
+paramdef string
+{
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for nssl netCDF data files.";
+} InDir;
+
+paramdef string
+{
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int
+{
+  p_default = 3600;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean
+{
+  p_default = true;
+  p_descr = "Use _latest_data_info";
+  p_help = "If false, will scan the directory for new files.";
+} use_ldata_info;
+
+paramdef boolean
+{
+  p_default = true;
+  p_descr = "Write _latest_data_info files for output files.";
+  p_help = "If false, will suppress writing of _latest_data_info files.";
+} writeLdataInfo;
+
+paramdef string
+{
+  p_descr = "Output URL to write MDV data to, in form:\n"
+            "mdvp:://host.dom::dir/dir";
+  p_help = "Set to where output MDV data should be written."; 
+  p_default = "mdvp:://localhost::Some/dir";
+} outUrl;
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Set encoding type.";
+} encoding_type;
+
+typedef enum {
+  COMPRESSION_NONE =  0,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4, 
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_GZIP;
+  p_descr = "Set compression type.";
+} compression_type;
+
+paramdef int
+{
+  p_descr = "Time before data expire, seconds.";
+  p_help = "Default is half an hour."; 
+  p_default = 1800;
+} Expiry;
+
+commentdef
+{
+  p_header = "FILE TYPE SPECIFICATIONS";
+}
+
+typedef enum
+{
+  CIWS_TYPE_INPUT_FILE,
+  CONUS_TYPE_INPUT_FILE
+} input_file_type_t;
+
+paramdef enum input_file_type_t
+{
+  p_descr = "Type of input file being processed.";
+  p_help = "We can currently process the following types of files:\n"
+           "\tCIWS_TYPE_INPUT_FILE - These are the original NSSL mosaic "
+           "files produced. "
+           "These files contain a single 3D reflectivity field. "
+           "Sample files can be found in CVS under:\n"
+           "\t\ttest/apps/mdv_utils/src/nsslMosaic2Mdv/data/ciws/raw\n"
+           "CONUS_TYPE_INPUT_FILE - These are files of the type used "
+           "when NSSL expanded its coverage to the full CONUS. "
+           "There are files containing 2D data and files containing "
+           "3D data. "
+           "Sample files can be found in CVS under:\n"
+           "\t\ttest/apps/mdv_utils/src/nsslMosaic2Mdv/data/conus/nsslMosaic3D/raw,\n"
+           "\t\ttest/apps/mdv_utils/src/nsslMosaic2Mdv/data/conus/nsslMosaic2D/raw.\n";
+  p_default = CIWS_TYPE_INPUT_FILE;
+} input_file_type;
+
+paramdef string
+{
+  p_descr = "List of input fields to process";
+  p_default = { "rr" };
+} input_field_list[];
+
+commentdef
+{
+  p_header = "REMAPPING PARAMETERS";
+}
+
+paramdef boolean
+{
+  p_descr = "Option to remap to flat earth grid from internal "
+	"lat/lon grid.";
+  p_help = "AreaIngest uses an internal lat/lon grid specified "
+	"by the Dx, Dy, lonMin, lonMax, latMin, and latMax parameters "
+	"above. This option allows the data to be remapped to a "
+	"flat earth grid. If this option is selected, the flatEarthGrid "
+	"parameters below are utilized. It should not be used in conjunction "
+	"with remapToLambert.";
+  p_default = FALSE;
+} remapToFlat;
+
+typedef struct
+{
+	 int nx;
+	 int ny;
+	 double minx;
+	 double miny;
+	 double dx;
+	 double dy;
+	 double origin_lat; 
+	 double origin_lon;
+	 double rotation;
+} flat_remap_t;
+
+paramdef struct flat_remap_t
+{
+  p_descr = "Grid parameters for flat earth.";
+  p_help = "Used only if remapToFlat is TRUE.";
+  p_default = { 500, 500,
+                -250.0, -250.0,
+                1.0, 1.0,
+                37.0, -98.0, 0.0};
+} flatEarthGrid;
+
+
+paramdef boolean
+{
+  p_descr = "Option to remap to flat earth grid from internal "
+            "lat/lon grid.";
+  p_help = "AreaIngest uses an internal lat/lon grid specified "
+           "by the Dx, Dy, lonMin, lonMax, latMin, and latMax parameters "
+           "above. "
+           "This option allows the data to be remapped to a lambert conformal "
+           "earth grid. If this option is selected, the lambertEarthGrid "
+           "parameters below are utilized. "
+           "It should not be used in conjunction with remapToFlat.";
+  p_default = FALSE;
+} remapToLambert;
+
+
+typedef struct
+{
+	 int nx;
+	 int ny;
+	 double minx;
+	 double miny;
+	 double dx;
+	 double dy;
+	 double origin_lat; 
+	 double origin_lon;
+	 double lat1;
+	 double lat2;
+} lc_remap_t;
+
+paramdef struct lc_remap_t
+{
+  p_descr = "Grid parameters for lambert conformal grid.";
+  p_help = "Used only if remapToLambert is TRUE.";
+  p_default = { 500, 500,
+                0.0, 0.0,
+                1.0, 1.0,
+                37.0, -98.0,
+                20.0, 25.0};
+} lambertEarthGrid;
+
+

@@ -1,0 +1,16 @@
+TO Add New Products to Xspdb_client:
+
+Prereqs:
+New Entries in: <symprod/spdb_products.h>
+Byte Swap and Print routine for your new chunk data in librapformats.
+
+1. Add the proper include to print_chunks.h
+2. Add a new print function definition to print_chunks.h
+   (Copy the style of an existing one)
+3. Add the proper entries into the prod_info_t struct in xspdb_client.h
+   (This adds the proper label in the menu)
+4. Add the proper case in the function display_chunks(), calling your new
+   print function in xspdb_client_guy_proc.c
+
+
+5. Make sure you do a 'make clean all'

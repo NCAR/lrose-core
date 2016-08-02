@@ -1,0 +1,79 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvFillMissing is a program that runs in archive mode\n"
+	"only. It can be used to replace bad or missing values in\n"
+	"the data with other values.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs on data stored here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Output data are written here."; 
+  p_default = {"mdvp:://localhost::mdv/filled"};
+} OutUrl;
+            
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef string {
+  p_default = { "VisField", "IRField" };
+  p_private = FALSE;
+  p_descr = "Input field names to process.";
+  p_help = "Can use short or long field name.";
+} InFieldName[];   
+
+paramdef double {
+  p_default = 0.0;
+  p_private = FALSE;
+  p_descr = "Value to replace missing data with.";
+  p_help = "Data can be marked BAD or MISSING - in many cases the two are\n"
+	"equivalent. When this program encounters MISSING data it will\n"
+	"replace them with this value. Often BadReplaceValue is equal to MissingReplaceValue.";
+} MissingReplaceValue;   
+
+paramdef double {
+  p_default = 0.0;
+  p_private = FALSE;
+  p_descr = "Value to replace bad data with.";
+  p_help = "Data can be marked BAD or MISSING - in many cases the two are\n"
+	"equivalent. When this program encounters BAD data it will\n"
+	"replace them with this value. Often BadReplaceValue is equal to MissingReplaceValue.";
+} BadReplaceValue;   
+
+
+

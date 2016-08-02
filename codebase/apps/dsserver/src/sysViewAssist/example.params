@@ -1,0 +1,216 @@
+/**********************************************************************
+ * TDRP params for ./sysViewAssist
+ **********************************************************************/
+
+//======================================================================
+//
+// Assist in creating diagrams for sysView.
+
+// The idea here is that you give this program a
+// process list file, and a host name, and it will
+// generate a sysView diagram for that host that
+// contains all the processes listed in the process list
+// file.
+
+// Optionally, the program will contact the DataMapper
+// on that host to get a list of datasets, and it will add
+// those to the sysView diagram. You give it a time range
+// to consider to try to calculate the late and very late
+// times (if the calculation fails, a default is used).
+
+// The resulting diagrams do not have any flow arrows
+// or annotation in them. If this is a problem then it
+// may be that some human interaction with sysView is
+// required to re-arrange things and draw the flow lines.
+
+// Niles Oien January 2007.
+//
+//======================================================================
+ 
+///////////// layout //////////////////////////////////
+//
+// Layout information for the output diagram.
+// X and Y increments, in pixels, and the number
+// of items to be written on a line.
+//
+// Type: struct
+//   typedef struct {
+//      int xInc;
+//      int yInc;
+//      int nx;
+//   }
+//
+//
+
+layout = { 150, 75, 9 };
+
+///////////// diagramFile /////////////////////////////
+//
+// Output sysView diagram to write.
+// .diagram is typically used as an extension.
+// Type: string
+//
+
+diagramFile = "example.diagram";
+
+///////////// hostname ////////////////////////////////
+//
+// Host name to use.
+// Default is generally OK.
+// Type: string
+//
+
+hostname = "df1.rap.ucar.edu";
+
+///////////// processList /////////////////////////////
+//
+// Input list of processes.
+// First entry on a line is process name, next entry is
+// process instance.
+// Type: string
+//
+
+processList = "./example.processList";
+
+///////////// subList /////////////////////////////////
+//
+// List of questionmark-based substitutions to make
+// in instance strings.
+// For example, in the process list, the entry :
+
+// Dsr2Vol ?radar5?cartPPIfullVol start_radar_ingest snuff_inst 
+//   localhost
+
+// would be replaced by : 
+
+// Dsr2Vol KFTGcartPPIfullVol start_radar_ingest snuff_inst localhost
+
+// if the substitution for radar5 was set to KFTG. Some systems
+// at UCAR use this methodology. If they do the settings are in
+// $CONTROL_DIR/params/radar_env.lookup.
+//
+// Type: struct
+//   typedef struct {
+//      string oldString;
+//      string newString;
+//   }
+//
+// 1D array - variable length.
+//
+
+subList = {
+  { "radar1", "KFWS"},
+  { "radar2", "KEWX"},
+  { "radar3", "KFDR"},
+  { "radar4", "KSHV"},
+  { "radar5", "KSJT"},
+  { "radar6", "KDYX"},
+  { "radar7", "KTLX"},
+  { "radar8", "KGRK"},
+  { "radar9", "KAMA"},
+  { "radar10", "KLBB"},
+  { "radar11", "KMAF"},
+  { "radar12", "KHGX"},
+  { "radar13", "KDFX"},
+  { "radar14", "KINX"}
+};
+
+///////////// doData //////////////////////////////////
+//
+// Option to attempt to add the datasets to the diagram
+// by interfacing with the DataMapper.
+// Late times will be estimated from data.
+// Type: boolean
+//
+
+doData = TRUE;
+
+///////////// minDataTimes ////////////////////////////
+//
+// Minimum number of data times that need to be found
+// for the program to try to estimate the late time
+// for that dataset.
+// If not enough points are found the default will be used.
+// Minimum val: 2
+// Type: int
+//
+
+minDataTimes = 10;
+
+///////////// lookbackTime ////////////////////////////
+//
+// Amount of time to look back over in order to
+// get data time to calculate the mean time between
+// data, seconds.
+// Default is one day. Relevant only if doData is TRUE.
+// Type: long
+//
+
+lookbackTime = 86400;
+
+///////////// endTime /////////////////////////////////
+//
+// Time to look back from in order to
+// get data time to calculate the mean time between
+// data, in YYYY MM DD hh mm ss format.
+// Relevant only if doData is TRUE.
+// Type: string
+//
+
+endTime = "2007 01 15 23 59 59";
+
+///////////// mean2lateTimeFactor /////////////////////
+//
+// For each dataset, the mean time interval
+// between data will be calculated, and then the late
+// time in sysView will be calculated by multiplying
+// that mean interval by this factor.
+// Relevant only if doData is TRUE.
+// Type: double
+//
+
+mean2lateTimeFactor = 2;
+
+///////////// defaultLateTime /////////////////////////
+//
+// Default late time to use, seconds, if
+// data type is not recognised or data interval
+// cannot be calculated.
+// Relevant only if doData is TRUE.
+// Type: long
+//
+
+defaultLateTime = 1800;
+
+///////////// forceDefaultLateTime ////////////////////
+//
+// Option to always use the defaultlate time, ie. do not attempt to 
+//   calculate a
+// late time from considering data intervals.
+// Relevant only if doData is TRUE.
+// Type: boolean
+//
+
+forceDefaultLateTime = FALSE;
+
+///////////// veryLateFactor //////////////////////////
+//
+// Factor relating very late time to late time, ie
+// veryLateTime = factor * lateTime.
+// Relevant only if doData is TRUE.
+// Type: double
+//
+
+veryLateFactor = 3;
+
+///////////// addUnknownTypes /////////////////////////
+//
+// Option to add unrecognised types to
+// the sysView diagram. MDV and SPDB are the
+// recognized types.
+// Relevant only if doData is TRUE.
+// Type: boolean
+//
+
+addUnknownTypes = TRUE;
+

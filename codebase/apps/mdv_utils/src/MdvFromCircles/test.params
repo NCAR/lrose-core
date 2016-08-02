@@ -1,0 +1,201 @@
+/**********************************************************************
+ * TDRP params for MdvFromCircles
+ **********************************************************************/
+
+//======================================================================
+//
+// Small program to write MDV files from simple
+// ASCII files that specify circular regions to be filled
+// in in the MDV grid (which is asumed to be LAT_LON and
+// is specified in the param file).
+
+// The format of these simple ASCII files is : 
+
+// LAT LON VALUE RADIUS HALF_DISTANCE OVERWRITE
+
+// Where LAT and LON specify the center of the circle,
+// VALUE is the value to be placed at the center
+// of the circle,
+// RADIUS is the radius of the circle, in Km,
+// HALF_LIFE is used to decay the VALUE from the
+// value at the center of the circle - at a distance
+// of HALF_LIFE from the center the value will be
+// half what it is in the center. Decay is exponential.
+// Set to a large value to have no effect.
+// OVERWRITE is an integer. If non-zero then the
+// circle is put in place irrespective of what was there
+// before, if it is zero then the circle is added to previously
+// existing circles. Note that all OVERWRITE circles
+// are drawn in first, then the ADD circles are added.
+
+// Niles Oien February 2002.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "primary";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// InDir ///////////////////////////////////
+//
+// Input directory.
+// Directory path for input data files.
+// Type: string
+//
+
+InDir = "./";
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+// If string is NULL, all extensions are valid.
+// Type: string
+//
+
+fileExtension = ".cir";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 7200;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// OutUrl //////////////////////////////////
+//
+// URL for output SPDB data.
+// Type: string
+//
+
+OutUrl = "./";
+
+///////////// expiry //////////////////////////////////
+//
+// How long data are valid, seconds.
+// Type: int
+//
+
+expiry = 43400;
+
+//======================================================================
+//
+// PROCESSING PARAMETERS.
+//
+//======================================================================
+ 
+///////////// lowerLeftLat ////////////////////////////
+//
+// Lower left latitude for lat/lon grid.
+// Type: double
+//
+
+lowerLeftLat = 37;
+
+///////////// lowerLeftLon ////////////////////////////
+//
+// Lower left longitude for lat/lon grid.
+// Type: double
+//
+
+lowerLeftLon = -109;
+
+///////////// Nx //////////////////////////////////////
+//
+// Number of points in longitude for lat/lon grid.
+// Type: int
+//
+
+Nx = 481;
+
+///////////// Ny //////////////////////////////////////
+//
+// Number of points in latitude for lat/lon grid.
+// Type: int
+//
+
+Ny = 481;
+
+///////////// Dx //////////////////////////////////////
+//
+// Stepsize in Longitude, degrees, for lat/lon grid.
+// Type: double
+//
+
+Dx = 0.00833333;
+
+///////////// Dy //////////////////////////////////////
+//
+// Stepsize in Latitude, degrees, for lat/lon grid.
+// Type: double
+//
+
+Dy = 0.00833333;
+
+///////////// FieldName ///////////////////////////////
+//
+// Field name for output MDV field.
+// Type: string
+//
+
+FieldName = "Interest";
+
+///////////// FieldUnits //////////////////////////////
+//
+// Field units for output MDV field.
+// Type: string
+//
+
+FieldUnits = "Percent";
+
+///////////// replaceZeroWithMissing //////////////////
+//
+// Set to TRUE to replace 0.0 with missing.
+// Type: boolean
+//
+
+replaceZeroWithMissing = FALSE;
+

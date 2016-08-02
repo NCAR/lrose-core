@@ -1,0 +1,551 @@
+#! /usr/bin/perl
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2012 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2012/8/30 18:47:4 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+#
+# Function: Script to replace copyright notice in source code files.
+#           The copyright is found using the special character strings
+#           placed around the copyright notice by copyright_prepend.
+#
+# Usage:    copyright_replace target_directory | target_files
+#
+#==============================================================================
+#
+# Externals
+#
+use Getopt::Std qw( getopts );
+
+# Globals
+@start_comment_chars = ("\/\*", "\/\/", "-- ", "\!", "C   ", "\#", "%", "\<\!--", "\.\\", "\;", " **" );
+@end_comment_chars =   ("\*\/", ""    , ""   , ""  , ""    , ""  , "" , "--\>"  , ""    , ""  , ""    );
+
+$Start_pattern="*=*=*=*=*=*=*=";            # Pattern to match copyright_prepend
+$End_pattern=$Start_pattern;                # Pattern to match copyright_prepend
+
+($prog = $0) =~ s%.*/%%;                    # Program name
+
+# Set command line defaults
+
+$Debug=0;
+$Debug_level=0;
+$Use_std_copyright=1;                      # Flag for standard or alternate copyright
+
+# Parse input parameters
+
+&getopts('a:dh');
+
+if ($opt_h) {
+    print STDERR "Usage: $prog [-dh] -a <file> target-directory | target-files\n";
+    print STDERR " Purpose is to go through the list of target-files and replace the\n";
+    print STDERR " copyright notice at the top of each file. Requires the special\n";
+    print STDERR " characters placed around the copyright notice by copyright_prepend\n";
+    print STDERR " on each file. If given a directory will recursivly process files\n";
+    print STDERR " in that directory and dive into any sub directories.\n";
+    print STDERR "\t-a <file>:\tCopyright text from <file>\n";
+    print STDERR "\t-d:\tprint debug messages\n";
+    print STDERR "\t-h:\tprint this usage message\n";
+    exit 0;
+}
+
+if ($opt_d) {
+    $Debug = 1;
+    $Debug_level =1;
+}
+
+if ($opt_a) {
+    $Non_std_copyright_file=$opt_a;
+    $Use_std_copyright=0;
+}
+
+@ARGV >= 1    || die "Usage: $prog [-dh] -a <file> target-directory | target-files\n";
+
+#
+# ----------------------- Initialization -----------------------
+#
+# get time so can use it to timestamp the copyright
+#
+
+($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) =
+    localtime(time);
+
+$mon = $mon+1;
+$year = $year+1900;
+$Copyright_timestring=sprintf("%04d/%02d/%02d %02d:%02d:%02d", $year, $mon, $mday, $hour, $min, $sec);
+$Copyright_year=$year;
+
+#
+# If a non-standard copyright, does the input file exist?
+#
+
+if (!$Use_std_copyright) {
+    if (!-f $Non_std_copyright_file) {
+	print(STDERR "ERROR: The non-standard copyright text file to read does not exist: $Non_std_copyright_file\n");
+	exit(1);
+    }
+}
+
+# Get the copyright text
+
+($is_ok, $Nlines_copyright_text)=getCopyrightText($Use_std_copyright, $Non_std_copyright_file, 
+						  $Copyright_timestring, $Copyright_year, 
+						  *Copyright_text_arr, $Debug_level);
+
+if (!$is_ok) {
+    exit(1);
+}
+
+if($#ARGV == 0) {
+
+    if (-f $ARGV[0]) {
+	$file = $ARGV[0];
+	($is_ok, $found_copyright)=&process_file($file, $Debug_level, $Start_pattern, $End_pattern);
+    } else {
+	if(-d $ARGV[0]) {
+	    $directory = $ARGV[0];
+	    $is_ok = &process_directory($directory, $Debug_level, $Start_pattern, $End_pattern);
+	}
+    }
+} else {
+    foreach $file (@ARGV) {
+	($is_ok, $found_copyright)=&process_file($file, $Debug_level, $Start_pattern, $End_pattern);
+    }
+
+}
+
+
+# Done
+if(!$is_ok) {
+    exit -1;
+}
+
+exit 0;
+
+#-------------------------------------------------------------------------
+#
+# Subroutine: process_directory
+#
+# Usage: $return_val =
+#             &process_directory($directory, $debug, $start_pattern, $end_pattern)
+#
+# Function: Open the directory and process all files within recursivly
+#           searching through sub directories.
+#
+# Input:  $directory       Directory to check
+#         $debug           Flag for debug info
+#         $start_pattern   start pattern to search for
+#         $end_pattern     end pattern to search for
+#
+# Output: $return_val      1 on success, 0 on error
+#         $found_copyright 1 if a copyright in the file, 0 if not
+#
+#
+sub process_directory {
+    local ($dir, $debug, $start_pattern, $end_pattern) = @_;
+    local ($is_ok, $ok);
+    $is_ok = 1;
+    if ($debug >= 1) {
+	print(STDOUT "Processing directory $dir\n");
+    }
+
+    opendir(DIR, $dir) or die $!;
+    my @files = readdir(DIR);
+    closedir(DIR);
+
+    foreach my $file (@files) {
+
+	# Use a regular expression to ignore files beginning with a period
+	next if ($file =~ m/^\./);
+	# ignore files beginning with a underscore
+	next if ($file =~ m/^\_/);
+	# ignore files ending with a ~
+	next if ($file =~ m/~$/);
+
+	$file = "$dir/$file";
+
+	if(-d $file) {
+	    next if ($file =~ m/^CVS$/);
+	    $ok = &process_directory($file, $Debug_level, $Start_pattern, $End_pattern);
+	    if(!$ok){
+		$is_ok = $ok
+	    }
+	} else {
+	    ($ok, $found_copyright)=&process_file($file, $Debug_level, $Start_pattern, $End_pattern);
+	    if(!$ok){
+		$is_ok = $ok
+	    }
+	}
+    }
+
+    return $is_ok
+}
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: process_file
+#
+# Usage: ($return_val, $found_copyright) =
+#             &process_file($file, $debug, $start_pattern, $end_pattern)
+#
+# Function: Open the file and see if a Copyright exists in the file,
+#           if it does, replace it with new copyright text.
+#
+# Input:  $file            File to check
+#         $debug           Flag for debug info
+#         $start_pattern   start pattern to search for
+#         $end_pattern     end pattern to search for
+#
+# Output: $return_val      1 on success, 0 on error
+#         $found_copyright 1 if a copyright in the file, 0 if not
+#
+#
+sub process_file {
+  local ($filename, $debug, $start_pattern, $end_pattern) = @_;
+
+  local($linenum, $in_copyright, $backup_file);
+  local($found_copyright_start, $found_copyright_end);
+  local($start_comment_char, $end_comment_char);
+  local($is_ok, $string_loc);
+
+  $return_val=0;
+  $found_copyright=0;
+
+  if ($debug >= 1) {
+      print(STDOUT "Processing file $filename\n");
+  }
+
+   # Skip the filename if it is not a file
+
+    if (!-f $filename) {
+	print(STDERR "Skipping $filename - not a file\n");
+	return($return_val, $found_copyright);
+    }
+
+    # Skip the filename if it is a CVS file
+
+    if ($filename =~ /CVS/) {
+	print(STDERR "Skipping $filename - is a CVS file\n");
+	return($return_val, $found_copyright);
+    }
+
+    # Skip the filename if it is a binary file
+
+    if (-B $filename) {
+	print(STDERR "Skipping $filename - is a binary file\n");
+	return($return_val, $found_copyright);
+    }
+
+    # Print info
+
+    # Open the input and output files
+
+    $outfile = $filename . ".modified-$prog";
+
+    if (!open(SRCFILE, $filename)) {
+	print(STDERR "Cannot open source file $filename - continuing ... \n");
+	return($return_val, $found_copyright);
+    }
+
+    if (!open(OUTFILE, ">$outfile")) {
+	print(STDERR "Cannot open output file $outfile - continuing ... \n");
+	return($return_val, $found_copyright);
+    }
+
+    # Initialize for each file before reading it line by line
+
+    $linenum = 0;
+    $in_copyright = 0;
+    $found_copyright_start = 0;
+    $found_copyright_end = 0;
+
+    # loop through the lines in the file
+
+    while ($line = <SRCFILE>) {
+
+	##$linenum++;
+
+	# If not in copyright, look for start of copyright. If inside
+	# the copyright, do not print the lines to the output file.
+	# If outside the copyright, print the lines to the output file.
+
+	if (!$in_copyright) {
+
+	    # If find the start of the copyright, set a flag, 
+	    # else print the line to the output file.
+
+	    $string_loc=index($line, $Start_pattern);
+	    if ($string_loc >= 0) {
+		$in_copyright = 1;
+		$found_copyright_start = 1;
+		print (OUTFILE $line);
+		$line = <SRCFILE>;
+		($is_ok, $start_comment_char, $end_comment_char)=&get_comment_char($line, $Debug_level);
+		if (!$is_ok) {
+		    print(STDERR "ERROR: Could not determine copyright characters in $filename!\n");
+		}
+		if($is_ok) {
+		    $is_ok=&print_copyright(OUTFILE, $start_comment_char, $end_comment_char, 
+					    $Nlines_copyright_text, *Copyright_text_arr, $Debug_level);
+		}
+		if (!$is_ok) {
+		    print(STDERR "ERROR: Failed to print copyright to $filename!\n");
+		}
+
+	    } else {
+		print (OUTFILE $line);
+	    }
+
+	} else {
+
+	    # Look for the end of the copyright
+
+	    $string_loc=index($line, $End_pattern);
+	    if ($string_loc >= 0) {
+		$in_copyright = 0;
+		$found_copyright_end=1;
+		print (OUTFILE $line);
+	    } 
+	}
+
+    } # while 
+
+    # Close the files
+
+    close(SRCFILE);
+    close(OUTFILE);
+
+    # If successful, copy the output file to the source file name
+
+    $backup_file=$filename . ".bak-$prog";
+    if (($is_ok) && ($found_copyright_start) && ($found_copyright_end)) {
+
+	system("/bin/cp $filename $backup_file");
+	system("/bin/cp $outfile $filename");
+
+	print(STDERR "Replaced copyright in $filename\n");
+    } else {
+	print (STDERR "ERROR: in file $filename - copyright not replaced!\n");
+    }
+    
+  # Cleanup 
+  unlink($backup_file);
+  unlink($outfile);
+  
+
+  # Done
+
+  $return_val=1;
+  return($return_val, $found_copyright);
+}
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: getCopyrightText
+#
+# Usage: ($return_val, $narr)=getCopyrightText($use_std_text, $alt_file, 
+#                                              $timestring, $year,
+#                                              *arr, $debug)
+#
+# Function: Put the copyright text into the output array
+#
+# Input:  $use_std_text    flag to use standard copyright text or not
+#         $alt_file        if use_std_text is false, the file to read the text from
+#         $timestring      timestring to print into copyright
+#         $year            year to print into copyright, ignored if using alt_file
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#         $narr            size of arr
+#         *arr             array of copyright text lines
+#
+#
+sub getCopyrightText {
+  local ($use_std_text, $alt_file, $timestring, $year, *arr, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname, $narr);
+  local($line, $found_errors, $i);
+
+  # Set defaults
+
+  $return_val=0;
+  $narr=0;
+  $subname="getCopyrightText";
+  
+  if ($debug > 1) {
+      print(STDERR "$subname: Input...\n");
+      print(STDERR "\tuse_std_text: $use_std_text, alt_file: $alt_file\n");
+      print(STDERR "\ttimestring: $timestring, year: $year\n");
+  }
+
+  # Print chars
+
+  $found_errors=0;
+  
+  # Print copyright text
+
+  if ($use_std_text) {
+      $arr[$narr]="** Copyright UCAR (c) 1992 - $year";
+      $narr++;
+      $arr[$narr]="** University Corporation for Atmospheric Research(UCAR)";
+      $narr++;
+      $arr[$narr]="** National Center for Atmospheric Research(NCAR)";
+      $narr++;
+      $arr[$narr]="** Research Applications Laboratory(RAL)";
+      $narr++;
+      $arr[$narr]="** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA";
+      $narr++;
+      $arr[$narr]="** See LICENCE.TXT if applicable for licence details";
+      $narr++;
+      $arr[$narr]="** $timestring";
+      $narr++;
+  } else {
+      if (!open(INFILE, "< $alt_file")) {
+	   print(STDERR "Cannot open file $altfile\n");
+	   $found_errors=1;
+	   $narr=0;
+       }
+      while ($line = <INFILE>) {
+	  chop($line);
+	  print "$line\n";
+	  if($line ne "") {
+	      $arr[$narr]=$line;
+	      $narr++;
+	  }
+      }
+      close(INFILE);
+  } #end else (use_std_text)
+
+  # Debug
+
+  if ($debug > 1) {
+      print(STDERR "$subname: narr: $narr\n");
+      for ($i=0; $i<$narr; $i++) {
+	  print(STDERR "\ti: $i, arr: $arr[$i]\n");
+      }
+  }
+
+  # Done
+  
+  if ($found_errors) {
+      $return_val=0;
+  } else {
+      $return_val=1;
+  }
+
+  return($return_val, $narr);
+}
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: get_comment_char
+#
+# Usage: ($return_val, $start_comment_char, $end_comment_char)=&get_comment_char($line, $debug)
+#
+# Function: Determine the comment characters used for the line
+#           $line.
+#
+# Input:  $line            line to use
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#         $start_cchar     comment character to start a comment
+#         $end_cchar       comment character to end a comment
+#
+#
+sub get_comment_char {
+  local ($line, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="get_comment_char";
+
+  # Max start chars is 4
+  $start_line=substr($line, 0, 4);
+
+  for (my $i = 0; $i <= $#start_comment_chars; $i++) {
+    if(index($start_line, $start_comment_chars[$i]) > -1) {
+      $start_cchar = $start_comment_chars[$i];
+      $end_cchar = $end_comment_chars[$i];
+      $return_val=1;
+      last;
+    }
+  }
+
+  # Done
+  return($return_val, $start_cchar, $end_cchar);
+}
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: print_copyright
+#
+# Usage: $return_val=&print_copyright($filehandle, $start_cchar,
+#                                     $end_cchar, $ntextarr,
+#                                     *text_arr, $debug)
+#
+# Function: Print the copyright to the output $filehandle using
+#           the input start and end comment characters.
+#
+# Input:  $filehandle      file handle for output file to print to,
+#                              must be already opened for writing
+#         $start_cchar     comment character to start a comment
+#         $end_cchar       comment character to end a comment
+#         $ntextarr        size of *text_arr
+#         *text_arr        array of copyright text lines
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#
+#
+sub print_copyright {
+  local ($filehandle, $start_cchar, $end_cchar, $ntextarr, *text_arr, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($is_ok, $found_errors, $i, $counter, *arr);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="print_copyright";
+
+  # Debug
+
+  if ($debug > 1) {
+      print(STDERR "$subname: Input...\n");
+      print(STDERR "\tstart_cchar: $start_cchar, end_cchar: $end_cchar, ntextarr: $ntextarr\n");
+  }
+
+  $found_errors=0;
+  
+  # Loop through text array and print lines
+
+  for ($i=0; $i<$ntextarr; $i++) {
+      $is_ok=print (OUTFILE "$start_cchar $text_arr[$i] $end_cchar\n");
+      if (!$is_ok) {
+	  $found_errors=1;
+      }
+  }
+
+  # Done
+  
+  if ($found_errors) {
+      $return_val=0;
+  } else {
+      $return_val=1;
+  }
+
+  return($return_val);
+}

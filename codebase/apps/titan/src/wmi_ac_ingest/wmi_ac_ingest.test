@@ -1,0 +1,116 @@
+/****************************************************
+ * TDRP params for wmi_ac_ingest
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Input serial port.
+ * Name of serial device for input data.
+ *
+ * Type: string
+ * Default: "/dev/ttyd1" 
+ */
+input_device = "/dev/tty01";
+
+/*
+ * Baud rate.
+ * Baud rate for incoming serial data port.
+ *
+ * Type: enum
+ * Default: BAUD_9600 
+ * Legal values: BAUD_300, BAUD_1200, BAUD_2400,
+ *   BAUD_4800, BAUD_9600, BAUD_19200, BAUD_38400.
+ */
+baud_rate = BAUD_9600;
+
+/*
+ * Archive directory path.
+ * Arcvive files are written to this directory.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+archive_dir_path = "out";
+
+/*
+ * Realtime file path.
+ * The realtime data is written to this path.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+realtime_file_path = "out/realtime";
+
+/*
+ * Data store interval (secs).
+ * Time between data store - this is used to keep the data file size
+ *   reasonable.
+ *
+ * Type: long
+ * Default: 1 
+ * Min value: 1 
+ * Max value: 3600 
+ */
+data_interval = 1;
+
+/*
+ * Option to store data using spdb.
+ * Data will be stored in SPDB - symbolic products data base.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+use_spdb = TRUE;
+
+/*
+ * Data base directory.
+ * The path to the data base directory. AC posn data will be stored
+ *   in subdirectories named after the aircraft callsign.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+db_dir = "db_dir";
+
+/*
+ * Callsign array.
+ * Array of valid callsigns.
+ *
+ * Type: string
+ * Default: "none" 
+ * Array elem size: 4 bytes
+ * Array has no max number of elements
+ */
+callsigns = {"812V"};
+
+/*
+ * Valid period (secs).
+ * Time period over which the position is valid.
+ *
+ * Type: long
+ * Default: 120 
+ * Min value: 1 
+ */
+valid_period = 120;

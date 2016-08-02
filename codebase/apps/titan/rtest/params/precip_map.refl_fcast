@@ -1,0 +1,257 @@
+/****************************************************
+ * TDRP params for precip_map
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Zfcast";
+
+/*
+ * Operation mode.
+ * Program may be run in two modes, archive and realtime. In realtime
+ *   mode, the analysis is performed for each volume scan as it becomes
+ *   available. In archiv mode, all of the scans in a track file are
+ *   processed.
+ *
+ * Type: enum
+ * Default: ARCHIVE 
+ * Legal values: ARCHIVE, REALTIME.
+ */
+mode = REALTIME;
+
+/*
+ * Map type.
+ * Map type may be 1) FORECAST - from advecting reflectivity using
+ *   storm tracks, 2) PERSISTENCE - from current reflectivity for
+ *   entire forecast period, 3) VERIFY - from on the actual reflectivity
+ *   data, 4) REFL_FORECAST - forecast of refl. at the forecast duration,
+ *   5) ACCUM_PERIOD - precip accumulation for specified duration
+ *   (accum_duration), 6) ACCUM_FROM_START - precip accumulation
+ *   from start.
+ *
+ * Type: enum
+ * Default: FORECAST 
+ * Legal values: FORECAST, PERSISTENCE, VERIFY,
+ *   REFL_FORECAST, ACCUM_PERIOD, ACCUM_FROM_START.
+ */
+map_type = REFL_FORECAST;
+
+/*
+ * Option to produce thresholded forecast.
+ * Thresholded forecast uses individual storm motion. Unthresholded
+ *   forecast uses area-weighted mean storm motion.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+thresholded_forecast = TRUE;
+
+/*
+ * Min area for unthresholded forecast.
+ * For unthresholded forecasts, the storms areas are summed.
+ *   The sum must exceed the min area for a valid forecast. If not,
+ *   forecast speed is set to 0.
+ *
+ * Type: double
+ * Default: 100 
+ * Min value: 1 
+ */
+min_area_unthresholded = 1;
+
+/*
+ * Max valid age of input files in realtime mode (secs).
+ * This the max valid age for an incoming file. The program will
+ *   wait for a data file more recent than this.
+ *
+ * Type: double
+ * Default: 360 
+ * Min value: 1 
+ */
+max_realtime_valid_age = 360;
+
+/*
+ * Radar data directory.
+ * Upper level directory for dobson cartesian radar data files.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+rdata_dir = "$(HOME)/titan/rtest/cdata";
+
+/*
+ * Storms data directory.
+ * Directory for storm and track data files.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+storms_dir = "$(HOME)/titan/rtest/storms";
+
+/*
+ * Precip map directory.
+ * Upper level directory for dobson precip map files.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+map_dir = "$(HOME)/titan/rtest/refl_fcast";
+
+/*
+ * Reflectivity field position.
+ * Position of reflectivity (dBZ) data in the radar volumes.
+ *
+ * Type: long
+ * Default: 0 
+ */
+dbz_field = 0;
+
+/*
+ * Hail reflectivity threshold.
+ * The threshold between rain and hail (dBZ).
+ *
+ * Type: double
+ * Default: 55 
+ * Min value: 40 
+ * Max value: 70 
+ */
+hail_refl_threshold = 55;
+
+/*
+ * Option to use separate file for Z-R.
+ * If set, the Z-R parameters are obtained from a file residing
+ *   in the zr_dir directory.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+get_zr_from_file = FALSE;
+
+/*
+ * Directory for ZR files.
+ * The ZR files reside in this directory.
+ *
+ * Type: string
+ * Default: "." 
+ */
+zr_dir = "$(RTEST_HOME)/zr";
+
+/*
+ * Z-R parameters.
+ * Parameters in Z-R relationship.
+ *
+ * Type: struct
+ */
+ZR = {
+  500, /* coeff:double */
+  1.6  /* expon:double */
+};
+
+/*
+ * Time delay for precip to hit ground (secs).
+ * This delay is used to drift the reflectivity before computing
+ *   the precipitation.
+ *
+ * Type: double
+ * Default: 120 
+ * Min value: 0 
+ * Max value: 10800 
+ */
+time_to_ground = 0;
+
+/*
+ * Forecast durations (secs).
+ * Array of duration of precip forecast map (secs).
+ *
+ * Type: double
+ * Default: 1800 
+ * Min value: 0 
+ * Max value: 10800 
+ * Array elem size: 8 bytes
+ * Array has no max number of elements
+ */
+forecast_durations = {1800};
+
+/*
+ * Accumulation duration (secs).
+ * Duration of precip accumulation map (secs).
+ *
+ * Type: double
+ * Default: 1800 
+ * Min value: 0 
+ * Max value: 10800 
+ */
+accum_duration = 7200;
+
+/*
+ * Radar vol scan interval (secs).
+ * Interval between radar volume scans (secs).
+ *
+ * Type: double
+ * Default: 360 
+ * Min value: 0 
+ * Max value: 1800 
+ */
+scan_interval = 360;
+
+/*
+ * File time stamp mode.
+ * If GENERATE_TIME, file names match generate data time. If FORECAST_TIME,
+ *   file names match forecast time.
+ *
+ * Type: enum
+ * Default: GENERATE_TIME 
+ * Legal values: GENERATE_TIME, FORECAST_TIME.
+ */
+file_time_stamp = GENERATE_TIME;
+
+/*
+ * Option to round the forecast times.
+ * Option to round the forecast times. The interval used is given
+ *   by parameter rounding_interval.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+round_forecast_times = FALSE;
+
+/*
+ * Rounding interval for forecast times (secs).
+ * If round_forecast_times is TRUE, the forecast times are rounded
+ *   to this interval.
+ *
+ * Type: double
+ * Default: 600 
+ * Min value: 10 
+ * Max value: 86400 
+ */
+rounding_interval = 600;
+
+

@@ -1,0 +1,214 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Mrms2Mdv
+ *
+ */
+
+commentdef {
+  p_header = "Mrms2Mdv PARAMETER FILE";
+  p_text = "Mrms2Mdv creates MDV from Ctcr Nc data files.  \n";
+
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Debug option";
+  p_help = "0 = No Debug info."
+	"1 = Regular Debug info."
+	"2 = Full output.";
+} debug;
+
+paramdef char* {
+  p_default = "Test";
+  p_descr = "Instance";
+  p_help = "Process instance for registration with process mapper";
+} instance;
+
+typedef enum {
+  REALTIME, START_END, FILE_LIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the 'input_dir' is watched for new "
+           "incoming files.  In START_END mode input files are specified "
+           "using the -start/-end command line options, and in FILE_LIST "
+           "mode input files are specified using the -file command line option "
+           "for processing a specified list of input files.";
+} mode;
+
+paramdef char* {
+  p_default = "./";
+  p_descr = "Input directory";
+  p_help = "Directory which contains input files. Used only "
+           "if mode is REALTIME.";
+} input_dir;
+
+paramdef long {             
+  p_min = 60;
+  p_default = 10800;
+  p_descr = "Max age (in seconds) of input data";
+  p_help = "Used only if mode is REALTIME.";
+} max_input_data_age;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is _latest_data_info file available?";
+  p_help = "If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
+} latest_data_info_avail;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to recurse to subdirectories while looking for new files.";
+  p_help = "If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE."; 
+} search_recursively;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Maximum depth for recursive directory scan.";
+  p_help = "Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
+} max_recursion_depth;
+
+paramdef int {
+  p_default = 2;
+  p_min = 1;
+  p_descr = "Sleep time between checking directory for input - secs.";
+  p_help = "If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.  Values over 50 will be set to 50.";
+} wait_between_checks;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "File quiescence when checking for files - secs.";
+  p_help = "This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.";
+} file_quiescence;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} search_ext;
+
+commentdef {
+  p_header = "INPUT PARAMETERS";
+  p_text = "Parameters used to read the input file(s).\n";
+}
+
+typedef enum {
+  CREF, MREF, MEHS, LCR_HIGH, LCR_LOW, LCR_SUPER, LCREF, LCREFH, PCPFLAG, POSH, SHI, STRMTOP30, VIL, VILD, ETP, RQI, SHSR, SHSRH, UNQC_CREF, CREFH
+} fields_t;
+
+paramdef enum fields_t {
+  p_default = CREF;
+  p_descr = "List of fields required before writing output mdv.";
+  p_help = "Put all the fields you are expecting to read here or the algorithm will have problems.\n"
+           "CREF      - Composite Reflectivity\n"
+           "MREF      - 3d Reflectivity (Cannot mix 3d field with any 2d fields)\n"
+	   "MEHS      - Max Expected Hail Size\n"
+           "LCR_HIGH  - Layer CREF (High)\n"
+	   "LCR_LOW   - Layer CREF (Low)\n"
+	   "LCR_SUPER - Layer CREF (Super)\n"
+	   "LCREF     - Low_level CREF\n"
+	   "LCREFH    - LCREF Height\n"
+	   "PCPFLAG   - Precip Flag\n"
+	   "POSH      - Prob of Severe Hail\n"
+	   "SHI       - Severe Hail INdex\n"
+	   "STRMTOP30 - Storm Top (30 dBZ)\n"
+	   "VIL       - Virtically Integrated Liquid\n"
+	   "VILD      - VIL Density\n"
+	   "ETP	      - Echo Top (18dBZ)\n"
+	   "RQI       - Radar Quality Index\n"
+	   "SHSR      - Seamliss HSR\n"
+	   "SHSRH     - Seamless HSR Height\n"
+	   "UNQC_CREF - UnQC'd Composite Refl\n"
+	   "CREFH     - CREF Height";
+} required_fields[];
+
+paramdef boolean
+{
+  p_default = TRUE;
+  p_descr = "Ignore unrequested fields.";
+  p_help = "Option to not read fields unless they are in the required_fileds list.";
+} ignore_unrequested_fields;
+
+commentdef {
+  p_header = "OUTPUT PARAMETERS";
+}
+
+paramdef char* {
+  p_default = "mdvp:://localhost::./mdv";
+  p_descr = "Url for mdv files in non-forecast structure";
+  p_help = "";
+} mdv_url;
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4, 
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_ZLIB;
+  p_descr = "Set compression type.";
+} compression_type;
+
+typedef enum {
+  ENCODING_ASIS =      0, 
+  ENCODING_INT8 =      1,  // unsigned 8 bit IEEE integer 
+  ENCODING_INT16 =     2,  // unsigned 16 bit IEEE integer
+  ENCODING_FLOAT32 =   5,  // 32 bit IEEE float
+  ENCODING_RGBA32 =    7  // RGBA image (4 x 8 bits) - Exactly like TIFF RGBA
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Set encoding type.";
+} encoding_type;
+
+paramdef string {
+  p_default = "Converted to MDV with Mrms2Mdv.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;

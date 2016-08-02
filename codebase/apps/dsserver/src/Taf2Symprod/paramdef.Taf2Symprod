@@ -1,0 +1,1584 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for Taf2Symprod
+//
+// Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// Nov 2009
+
+commentdef {
+  p_header = "Taf2Symprod reads TAF data from SPBD, converts the data selectively into Symprod data, and serves it to the client.";
+}
+
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = DEBUG_OFF;
+} debug;
+
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string {
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean {
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef {
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int {
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5486;
+} port;
+  
+paramdef int {
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int {
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Station selection
+
+commentdef {
+  p_header = "STATION SELECTION";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the acceptedStations list (below)";
+  p_help = "Only accept stations in this list.";
+} useAcceptedStationsList;
+
+paramdef string {
+  p_default = {
+    "RCTP", "RCFG", "RCSS", "RCGM", "RCNO", "RCQC", "RCBS",
+    "RCUK", "RCKH", "RCFN", "RCNN", "RCAY", "RCKU", "RCMJ",
+    "RCDC", "RCLG", "RCKW", "RCPO", "RCSQ", "RCQS", "RCLY",
+    "RCYU", "RCMS", "RCDI", "RCMQ", "RCFS", "RCGI", "RCMT",
+    "RCLM"
+  };
+  p_descr = "List of accepted station IDs";
+  p_help = "If a station is not on this list, it is not displayed.";
+} acceptedStations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the rejectedStations list (below)";
+  p_help = "Reject stations in this list.";
+} useRejectedStationsList;
+
+paramdef string {
+  p_default = {
+    "RCFN", "RCAY", "RCQS", "RCFS","RCMT"
+  };
+  p_descr = "List of rejected station IDs";
+  p_help = "If a station is not on this list, it is not displayed.";
+} rejectedStations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to only include stations within the lat-lon bounding box.";
+  p_help = "Only accept stations for which the position is inside the bounding box. Note: this will be overridden if the client specifies horizontal limits.";
+} useBoundingBox;
+
+typedef struct {
+  float min_lat;
+  float min_lon;
+  float max_lat;
+  float max_lon;
+} bounding_box_t;
+
+paramdef struct bounding_box_t {
+  p_default = { -90.0, -180.0, 90.0, 180.0 };
+  p_descr = "If useBoundingBox is true, only stations within this box will be included in the product list.";
+  p_help = "To span the international date line, specify a continuous interval using positive longitudes which exceed 180 or negative longitudes which are less than -180. For example, min_lon = 80 and max_lon = 240 will span between 80E and 120W across the Pacific.";
+} bounding_box;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to decimate metar density spatially. Only applicable if the bounding box option is specified in the param file, or the client specifies the horizontal limits in the request.";
+  p_help = "If active, an imaginary grid will be constructed for the bounding box. The number of grids in each direction will be specified by decimate_n_lat and decimate_n_lon. Only one METAR product will be created for each rectangle in the grid.";
+} decimate_spatially;
+
+paramdef int {
+  p_default = 25;
+  p_descr = "If decimation is active, the bounding box is divided into this number of sub-boxes in the latitude direction.";
+  p_help = "See decimate_spatially.";
+} decimate_n_lat;
+
+paramdef int {
+  p_default = 25;
+  p_descr = "If decimation is active, the bounding box is divided into this number of sub-boxes in the longitude direction.";
+  p_help = "See decimate_spatially.";
+} decimate_n_lon;
+
+paramdef string {
+  p_default = {
+    "RCTP", "RCSS", "RCKH"
+  };
+  p_descr = "List of required stations when decimating.";
+  p_help = "If a station is in this list, it will always be displayed.";
+} decimate_required_stations[];
+
+//////////////////////////////////////////////////////////
+// SPDB uniqueness
+
+commentdef {
+  p_header = "UNIQUENESS OF DATA";
+};
+
+typedef enum {
+  UNIQUE_OFF,
+  UNIQUE_LATEST,
+  UNIQUE_EARLIEST
+} unique_t;
+
+paramdef enum unique_t {
+  p_default = UNIQUE_LATEST;
+  p_descr = "Specify uniqueness of forecast data.";
+  p_help = "OFF, all forecasts will be plotted. LATEST: only the latest relevant forecast will be plotted. EARLIEST: only the earliest relevant forecast will be plotted. A 'relevant' forecast is one for which the start and end times include the request time from the client.";
+} forecast_uniqueness;
+
+//////////////////////////////////////////////////////////
+// Plotting modes
+
+commentdef {
+  p_header = "PLOTTING MODES";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to plot data from non-TEMPO periods.";
+  p_help = "If true, data will be plotted from the non-TEMPO period which contains the client request time.";
+} plot_normal_periods;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to plot data from TEMPO periods.";
+  p_help = "If true, data will be plotted from the TEMPO period which contains the client request time.";
+} plot_tempo_periods;
+
+paramdef boolean {
+  p_descr = "Option to not scale the product with zoom state.";
+  p_help = "If true, the product is always rendered at the same scale, regardless of zoom state. If false, the product is scaled down on the screen as the zoome expands, and is scaled up as you zoom in.";
+  p_default = false;
+} plot_unscaled;
+
+//////////////////////////////////////////////////////////
+// Handling cancelled TAFs
+
+commentdef {
+  p_header = "CANCELLED TAFs";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to plot TAFs which have been cancelled.";
+  p_help = "If true, a TAF will be plotted even if cancelled. If FALSE, a cancelled TAF will not be plotted.";
+} plot_if_cancelled;
+
+//////////////////////////////////////////////////////////
+// Wind barbs
+
+commentdef {
+  p_header = "WIND BARB PLOT";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw the wind barb.";
+} draw_wind_barb;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to draw the wind barb.";
+} draw_gust_barb;
+
+paramdef string {
+  p_default = "green";
+  p_descr = "Color of wind barb.";
+} wind_barb_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of gust barb.";
+} gust_barb_color;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Radius of circle at station position.";
+  p_help = "Set to 0 for no circle.";
+} station_posn_circle_radius;
+  
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the the wind barb color using the flight category color.";
+} override_wind_barb_color_from_flight_cat;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the the wind barb color using the wind speed\n"
+	"table specified below.";
+} override_wind_barb_color_from_wind_speed;
+
+typedef struct {
+	double min;
+	double max;
+	string color;
+} wind_speed_color_t;
+
+paramdef struct wind_speed_color_t {
+  p_default = { {0, 5, "blue"}, {5, 10, "green"}, {10, 1000, "red"} };
+  p_descr = "List of min, max pairs and colors to use if\n"
+	"override_wind_barb_color_from_wind_speed is TRUE. Units are\n"
+	"those specified by the wind_units parameter. If the speed is not\n"
+	"covered by any of the ranges then the color specified by\n"
+	"wind_barb_color is used.";
+} wind_speed_colors[];
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Width of lines used to render wind barbs.";
+} wind_barb_line_width;
+  
+paramdef int {
+  p_default = 32;
+  p_descr = "Length of wind barb shaft in pixels.";
+} wind_barb_shaft_len;
+  
+paramdef int {
+  p_default = 8;
+  p_descr = "Length of wind barb ticks in pixels.";
+} wind_barb_tick_len;
+  
+paramdef float {
+  p_default = 55;
+  p_descr = "Angle of the wind ticks relative to the shaft (deg).";
+} wind_ticks_angle_to_shaft;
+  
+typedef enum {
+  WIND_MS, WIND_KTS, WIND_MPH, WIND_KPH
+} wind_speed_units_t;
+
+paramdef enum wind_speed_units_t {
+  p_default = WIND_KTS;
+  p_descr = "Units for plotting Wind Barbs.";
+} wind_speed_units;
+
+commentdef {
+  p_header = "RENDER ALTERNATIVE STATION ICON IF CEILING DATA IS MISSING";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to render special icon if ceiling is missing.";
+  p_help = "Normally, the station plot shows a circle which is filled in at 0%, 25%, 50%, 75% or 100%, depending on cloud cover. If ceiling is missing, the option allows you to render an alternative icon - say an open triangle, or an M.";
+} render_missing_ceiling_icon;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of icon indicating missing ceiling information.";
+} missing_ceiling_icon_color;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Width of lines used to render missing ceiling icon.";
+} missing_ceiling_icon_line_width;
+
+typedef struct {
+  int x;
+  int y;
+} stroked_icon_point_t;
+
+paramdef struct stroked_icon_point_t {
+  p_descr = "Stroked icon for missing ceiling";
+  p_help = "The coordinates are in pixel space.";
+  p_default = {
+    { 0, 10 },
+    { -8, -5 },
+    { 8, -5 },
+    { 0, 10 }
+  };
+    
+} missing_ceiling_icon[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Scale the icon by this value.";
+  p_help = "This makes it easy to try different sizes without re-specifying all of the icon points every time.";
+} missing_ceiling_icon_scale;
+
+//////////////////////////////////////////////////////////
+// FLIGHT CATEGORY AND SKY OBSCURATION
+
+commentdef {
+  p_header = "FLIGHT CATEGORY AND SKY OBSCURATION";
+  p_help = "Plotting of the icon for flight category and sky obscuration.";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw the flight category and obscuration icon.";
+} draw_flight_category;
+
+typedef enum {
+  VFR, MVFR, IFR
+} flight_category_label_t;
+
+typedef struct {
+  flight_category_label_t label;
+  string color;
+  float ceiling_threshold;
+  float visibility_threshold;
+} flight_category_t;
+
+paramdef struct flight_category_t {
+  p_default = {
+    { VFR, "seagreen", 1500.0, 5.0 },
+    { MVFR, "blue", 500.0, 1.6 },
+    { IFR, "orange", 0.0, 0.0 }
+  };
+  p_descr = "Array of flight category parameters.";
+  p_help = "The flight category at a station will be computed using the ceiling (ft) and visibility (km) thresholds. If both values exceed the threshold, the flight category will be equal to or greater that the specified category.";
+} flight_category[];
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Radius for flight_category / obscuration icon.";
+} flight_category_circle_radius;
+  
+//////////////////////////////////////////////////////////
+// Text Rendering
+
+commentdef {
+  p_header = "TEXT RENDERING PARAMETERS";
+};
+
+typedef enum {
+  VERT_ALIGN_TOP           =  1,
+  VERT_ALIGN_CENTER        =  2,
+  VERT_ALIGN_BOTTOM        =  3
+} vert_align_t;
+
+typedef enum {
+  HORIZ_ALIGN_LEFT         =  1,
+  HORIZ_ALIGN_CENTER       =  2,
+  HORIZ_ALIGN_RIGHT        =  3
+} horiz_align_t;
+
+paramdef string {
+  p_descr = "Text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} text_background_color;
+
+paramdef string {
+  p_descr = "Font name.";
+  p_default = "";
+} font_name;
+
+paramdef enum vert_align_t {
+  p_descr = "Vertical alignment label text.";
+  p_help = "Does not apply if forecast and outlook labels are active.";
+  p_default = VERT_ALIGN_CENTER;
+} text_vert_align;
+
+paramdef enum horiz_align_t {
+  p_descr = "Horizontal alignment for label text.";
+  p_help = "Does not apply if forecast and outlook labels are active.";
+  p_default = HORIZ_ALIGN_CENTER;
+} text_horiz_align;
+
+paramdef int {
+  p_descr = "Size of font to use for text";
+  p_default = 0;
+} text_font_size;
+
+typedef enum {
+  TEXT_NORM,
+  TEXT_BOLD,
+  TEXT_ITALICS,
+  TEXT_SUBSCRIPT,
+  TEXT_SUPERSCRIPT,
+  TEXT_UNDERLINE,
+  TEXT_STRIKETHROUGH
+} font_style_t;
+
+paramdef enum font_style_t {
+  p_descr = "Font style for the text";
+  p_default = TEXT_NORM;
+} text_font_style;
+
+//////////////////////////////////////////////////////////
+// Text labels
+
+commentdef {
+  p_header = "TEXT LABELS";
+};
+
+typedef struct {
+  boolean do_draw;
+  string color;
+  string background_color;
+  string font_name;
+  int font_size;
+  int x_offset;
+  int y_offset;
+  vert_align_t vert_align;
+  horiz_align_t horiz_align;
+} text_item_t;
+
+commentdef {
+  p_header = "Text labels";
+  p_text =
+    "The following are specified for each text label:\n"
+    "\tdo_draw: option to draw the label, true or false\n"
+    "\tcolor: foreground color\n"
+    "\tbackground_color: background color - if empty, no background\n"
+    "\tfont_name: name of font family\n"
+    "\tfont_size: suggest size in pixels\n"
+    "\tx_offset: x offset from station location in pixels\n"
+    "\ty_offset: y offset from station location in pixels\n"
+    "\tvert_align: vert justification of text relative to offset point\n"
+    "\thoriz_align: horiz justification of text relative to offset point\n";
+};
+
+paramdef struct text_item_t {
+  p_default = { TRUE, "yellow", "", "8x13", 13, -6, 0, VERT_ALIGN_CENTER, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for weather label.";
+  p_descr = "Use either weather_type or weather_label, but not both";
+} weather_label;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "pink", "", "8x13", 13, 6, 0, VERT_ALIGN_CENTER, HORIZ_ALIGN_LEFT };
+  p_descr = "Details for wind gust label.";
+} wind_gust_label;
+
+paramdef struct text_item_t {
+  p_default = { TRUE, "cyan", "", "8x13", 13, 6, -16, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+  p_descr = "Details for ceiling label.";
+} ceiling_label;
+  
+typedef enum {
+  CEILING_METERS, CEILING_KM, CEILING_FT, CEILING_KFT, CEILING_FL
+} ceiling_units_t;
+
+paramdef enum ceiling_units_t {
+  p_default = CEILING_FT;
+  p_descr = "Units for plotting ceiling.";
+} ceiling_units;
+
+paramdef struct text_item_t {
+  p_default = { TRUE, "magenta", "", "8x13", 13, -6, -16, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for visibility label.";
+} visibility_label;
+
+typedef enum {
+  VISIBILITY_METERS, VISIBILITY_KM, VISIBILITY_METERS_KM, VISIBILITY_MILES
+} visibility_units_t;
+
+paramdef enum visibility_units_t {
+  p_default = VISIBILITY_METERS;
+  p_descr = "Units for plotting visibility.";
+} visibility_units;
+
+typedef enum {
+  DISPLAY_TEMP_C, DISPLAY_TEMP_F
+} display_temp_t;
+
+paramdef enum display_temp_t {
+  p_default = DISPLAY_TEMP_C;
+  p_descr = "Display of temperature data";
+  p_help = "Set to the units that you want to use.";
+} display_temp;
+             
+paramdef struct text_item_t {
+  p_default = { TRUE, "red", "", "8x13", 13, -6, 6, VERT_ALIGN_BOTTOM, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for max temperature label.";
+} max_temp_label;
+
+paramdef struct text_item_t {
+  p_default = { TRUE, "blue", "", "8x13", 13, -6, -6, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for max temperature label.";
+} min_temp_label;
+
+paramdef int {
+  p_default = 4;
+  p_max = 4;
+  p_descr = "Length of station name label.";
+  p_help = "The last n chars are included in the label.";
+} station_name_label_len;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "gray", "", "fixed", 10, 6, -6, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+  p_descr = "Details for station_name label.";
+} station_name_label;
+
+paramdef struct text_item_t {
+  p_default = { FALSE, "white", "", "fixed", 10, 0, -30, VERT_ALIGN_TOP, HORIZ_ALIGN_CENTER };
+  p_descr = "Details for time string label.";
+  p_help = "Intended mainly for debugging, to see the issue time for the plotted TAF.";
+} issue_time_label;
+
+/////////////////
+// weather icons
+  
+commentdef {
+  p_header = "WEATHER ICONS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw icon depicting type of weather.";
+} draw_wx_icon;
+
+paramdef int {
+  p_descr = "Icon line width";
+  p_help = "Line width for weather icons.";
+  p_default = 1;
+} wx_icon_line_width;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Allow client to scale the weather icons.";
+} wx_icon_allow_client_scaling;
+
+typedef struct {
+
+  string WxWildcard;
+  boolean renderIcon;
+  string iconName;
+  string iconNameSouth;
+  float iconScale;
+  boolean allowClientScaling;
+  string color;
+
+} wx_item_t;
+
+paramdef struct wx_item_t {
+
+  p_descr = "Defines for how to render the weather based on the WxWildcard.";
+
+  p_help = "WxWildCard is a string to separate out weather types.\n"
+    "  Possible wx types are:\n" 
+    "    FZDZ FZRA SHGR SHGS SHRA\n"
+    "    SHSN TSGR TSGS TSPL TSRA TSSN\n"
+    "    BCFG BLDU BLSA BLSN DRDU DRSA\n"
+    "    DRSN FZFG MIFG PRFG\n"
+    "    DZ RA SN SG PL DS\n"
+    "    SS IC FG BR SA DU HZ\n"
+    "    FU VA SQ PO FC TS\n"
+    "  iconName: name of icon to plot, must be defined in wx_icon_defs below\n"
+    "  iconNameSouth: icon name for Southern Hemisphere, if different from main icon.\n"
+    "    Set to empty string if the same icon is used everywhere.\n"
+    "  iconScale: scaling factor to apply to the icon, if scaling is allowed\n"
+    "  allowClientScaling: allow the client to scale or resize the icon?\n"
+    "  color: for icon\n";
+
+  p_default = {
+ {
+    WxWildcard = "-SHSN",
+    renderIcon = TRUE,
+    iconName = "minusSHSN_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "*SHSN",
+    renderIcon = TRUE,
+    iconName = "SHSN_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "-SHRA",
+    renderIcon = TRUE,
+    iconName = "minusSH_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "SHRA",
+    renderIcon = TRUE,
+    iconName = "SH_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "+TSRA",
+    renderIcon = TRUE,
+    iconName = "plusTSRA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "TSRA",
+    renderIcon = TRUE,
+    iconName = "TSRA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "+TSSN",
+    renderIcon = TRUE,
+    iconName = "plusTSRA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "TSSN",
+    renderIcon = TRUE,
+    iconName = "TSRA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "+TSPL",
+    renderIcon = TRUE,
+    iconName = "plusTSRA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "TSPL",
+    renderIcon = TRUE,
+    iconName = "TSRA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "+TSGS",
+    renderIcon = TRUE,
+    iconName = "plusTSGS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "TSGS",
+    renderIcon = TRUE,
+    iconName = "TSGR_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "+TSGR",
+    renderIcon = TRUE,
+    iconName = "plusTSGS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "TSGR",
+    renderIcon = TRUE,
+    iconName = "TSGR_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "-FZDZ",
+    renderIcon = TRUE,
+    iconName = "minusFZDZ_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "*FZDZ",
+    renderIcon = TRUE,
+    iconName = "FZDZ_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "-FZRA",
+    renderIcon = TRUE,
+    iconName = "minusFZRA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "*FZRA",
+    renderIcon = TRUE,
+    iconName = "FZRA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "-SHGS",
+    renderIcon = TRUE,
+    iconName = "minusGS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "*SHGS",
+    renderIcon = TRUE,
+    iconName = "GS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "-SHGR",
+    renderIcon = TRUE,
+    iconName = "minusGR_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "*SHGR",
+    renderIcon = TRUE,
+    iconName = "GR_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "BLSA",
+    renderIcon = TRUE,
+    iconName = "SA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "BLDU",
+    renderIcon = TRUE,
+    iconName = "SA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "DRSA",
+    renderIcon = TRUE,
+    iconName = "SS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "DRDU",
+    renderIcon = TRUE,
+    iconName = "SS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "FU",
+    renderIcon = TRUE,
+    iconName = "FU_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "red"
+  },
+  {
+    WxWildcard = "VA",
+    renderIcon = TRUE,
+    iconName = "FU_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "red"
+  },
+  {
+    WxWildcard = "HZ",
+    renderIcon = TRUE,
+    iconName = "HZ_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "DU",
+    renderIcon = TRUE,
+    iconName = "DU_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "SA",
+    renderIcon = TRUE,
+    iconName = "SA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "PO",
+    renderIcon = TRUE,
+    iconName = "PO_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "BR",
+    renderIcon = TRUE,
+    iconName = "BR_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "yellow"
+  },
+  {
+    WxWildcard = "MIFG",
+    renderIcon = TRUE,
+    iconName = "MIFG_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "TS",
+    renderIcon = TRUE,
+    iconName = "TS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "SQ",
+    renderIcon = TRUE,
+    iconName = "SQ_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "*FC",
+    renderIcon = TRUE,
+    iconName = "FC_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "+SS",
+    renderIcon = TRUE,
+    iconName = "plusSS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "+DS",
+    renderIcon = TRUE,
+    iconName = "plusSS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "SS",
+    renderIcon = TRUE,
+    iconName = "SS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "DS",
+    renderIcon = TRUE,
+    iconName = "SS_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "BLSN",
+    renderIcon = TRUE,
+    iconName = "BLSN_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "DRSN",
+    renderIcon = TRUE,
+    iconName = "DRSN_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "BCFG",
+    renderIcon = TRUE,
+    iconName = "BCFG_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "yellow"
+  },
+  {
+    WxWildcard = "PRFG",
+    renderIcon = TRUE,
+    iconName = "PRFG_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "FZFG",
+    renderIcon = TRUE,
+    iconName = "FZFG_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "yellow"
+  },
+  {
+    WxWildcard = "FG",
+    renderIcon = TRUE,
+    iconName = "FG_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "yellow"
+  },
+  {
+    WxWildcard = "-DZ",
+    renderIcon = TRUE,
+    iconName = "minusDZ_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "cyan"
+  },
+  {
+    WxWildcard = "+DZ",
+    renderIcon = TRUE,
+    iconName = "plusDZ_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "cyan"
+  },
+  {
+    WxWildcard = "DZ",
+    renderIcon = TRUE,
+    iconName = "DZ_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "cyan"
+  },
+  {
+    WxWildcard = "-RA",
+    renderIcon = TRUE,
+    iconName = "minusRA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "blue"
+  },
+  {
+    WxWildcard = "+RA",
+    renderIcon = TRUE,
+    iconName = "plusRA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "blue"
+  },
+  {
+    WxWildcard = "RA",
+    renderIcon = TRUE,
+    iconName = "RA_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "blue"
+  },
+  {
+    WxWildcard = "-SN",
+    renderIcon = TRUE,
+    iconName = "minusSN_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "+SN",
+    renderIcon = TRUE,
+    iconName = "plusSN_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "SN",
+    renderIcon = TRUE,
+    iconName = "SN_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "SG",
+    renderIcon = TRUE,
+    iconName = "SG_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "IC",
+    renderIcon = TRUE,
+    iconName = "IC_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "PL",
+    renderIcon = TRUE,
+    iconName = "PL_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  },
+  {
+    WxWildcard = "*",
+    renderIcon = TRUE,
+    iconName = "simple_square_icon",
+    iconNameSouth = "",
+    iconScale = 1.0,
+    allowClientScaling = FALSE,
+    color = "white"
+  }
+
+  };
+
+} wx_items[];
+
+
+//////////////////////////////////////////////////////////
+// ICON Definitions
+
+commentdef {
+  p_header = "ICON DEFINITIONS";
+};
+
+typedef struct {
+  string icon_name;
+  string icon_points;
+} wx_icon_defs_t;
+
+paramdef struct wx_icon_defs_t {
+
+  p_descr = "Definitions for all of the icons used by the server.";
+
+  p_help = "The icon_points string contains the points used to define the "
+           "icon in a space delimited string like the following:\n"
+           "\t\"x1 y1 x2 y2 .... xn yn\"\n"
+           "Use the value 32767 for both X and Y to indicate a pen up.\n"
+	   "The turb_icon is the standard turbulence symbol.\n" 
+	   "The convective_icon is the standard convective symbol.\n"
+	   "The icing_icon is the standard icing symbol.\n"
+	   "The tc_icon is the standard tropical cyclone symbol.\n"
+	   "The va_icon is an icon for volcanic ash.\n"
+	   "The ds_icon is the standard icon for duststorms\n"
+	   "The mtw_icon is an icon for mountain waves\n"
+	   "The mtn_obsc_icon is the standard icon for mountain obscuration\n"
+	   "The gr_icon is the standard icon for GR\n"
+	   "The unknown is a question mark.\n";
+
+  p_default = {
+  {
+    icon_name = "DU_icon",
+    icon_points = "4 11 2 13 -2 13 -5 10 -6 8 -6 6 -1 1 0 1 4 -4 6 -6 6 -9 5 -11 2 -14 -3 -14 -5 -12 "
+  },
+  {
+    icon_name = "DZ_icon",
+    icon_points = "-2 7 -1 7 32767 32767 -3 6 0 6 32767 32767 -2 5 0 5 32767 32767 0 4 -2 2 32767 32767 -7 -3 -6 -3 32767 32767 -8 -4 -5 -4 32767 32767 -7 -5 -5 -5 32767 32767 -5 -6 -7 -8 32767 32767 4 -3 5 -3 32767 32767 3 -4 6 -4 32767 32767 4 -5 6 -5 32767 32767 6 -6 4 -8 "
+  },
+  {
+    icon_name = "FC_icon",
+    icon_points = "-5 13 -2 10 -2 -11 -5 -15 32767 32767 5 13 2 10 2 -11 5 -15 "
+  },
+  {
+    icon_name = "FZDZ_icon",
+    icon_points = "-9 1 -8 1 32767 32767 -10 0 -7 0 32767 32767 -9 -1 -7 -1 32767 32767 -7 -2 -9 -4 32767 32767 7 1 8 1 32767 32767 6 0 9 0 32767 32767 7 -1 9 -1 32767 32767 9 -2 7 -4 32767 32767 -13 -6 -15 -2 -15 1 -11 5 -8 5 -5 3 3 -4 6 -6 10 -6 13 -3 13 2 12 4 "
+  },
+  {
+    icon_name = "FZRA_icon",
+    icon_points = "-10 1 -7 1 32767 32767 -11 0 -6 0 32767 32767 -11 -1 -6 -1 32767 32767 -11 -2 -6 -2 32767 32767 -11 -3 -6 -3 32767 32767 -10 -4 -7 -4 32767 32767 7 1 10 1 32767 32767 6 0 11 0 32767 32767 6 -1 11 -1 32767 32767 6 -2 11 -2 32767 32767 6 -3 11 -3 32767 32767 7 -4 10 -4 32767 32767 -12 -6 -14 -2 -14 1 -10 5 -7 5 -4 3 4 -4 7 -6 11 -6 14 -3 14 2 13 4 "
+  },
+  {
+    icon_name = "GR_icon",
+    icon_points = "0 10 -1 9 1 9 1 8 -1 8 -2 7 2 7 2 6 -2 6 -3 5 3 5 4 4 -4 4 -4 3 4 3 5 2 -5 2 32767 32767 -5 0 5 0 0 -15 -5 0 32767 32767 -4 -4 4 -4 "
+  },
+  {
+    icon_name = "GS_icon",
+    icon_points = "-5 0 5 0 0 -15 -5 0 -4 -4 4 -4 32767 32767 -5 1 0 10 5 1 -5 1 "
+  },
+  {
+    icon_name = "IC_icon",
+    icon_points = "-2 3 0 1 3 4 32767 32767 -3 0 3 0 32767 32767 -3 -1 3 -1 32767 32767 -2 -4 0 -2 3 -5 32767 32767 -12 0 12 0 32767 32767 -12 -1 12 -1 "
+  },
+  {
+    icon_name = "minusDZ_icon",
+    icon_points = "-5 1 -4 1 32767 32767 -6 0 -3 0 32767 32767 -5 -1 -3 -1 32767 32767 -3 -2 -5 -4 32767 32767 4 1 5 1 32767 32767 3 0 6 0 32767 32767 4 -1 6 -1 32767 32767 6 -2 4 -4 "
+  },
+  {
+    icon_name = "minusFZDZ_icon",
+    icon_points = "-9 1 -8 1 32767 32767 -10 0 -7 0 32767 32767 -9 -1 -7 -1 32767 32767 -7 -2 -9 -4 32767 32767 -13 -6 -15 -2 -15 1 -11 5 -8 5 -5 3 3 -4 6 -6 10 -6 13 -3 13 2 12 4 "
+  },
+  {
+    icon_name = "minusFZRA_icon",
+    icon_points = "-10 1 -7 1 32767 32767 -11 0 -6 0 32767 32767 -11 -1 -6 -1 32767 32767 -11 -2 -6 -2 32767 32767 -11 -3 -6 -3 32767 32767 -10 -4 -7 -4 32767 32767 -12 -6 -14 -2 -14 1 -10 5 -7 5 -4 3 4 -4 7 -6 11 -6 14 -3 14 2 13 4 "
+  },
+  {
+    icon_name = "minusGR_icon",
+    icon_points = "0 10 -1 9 1 9 1 8 -1 8 -2 7 2 7 2 6 -2 6 -3 5 3 5 4 4 -4 4 -4 3 4 3 5 2 -5 2 32767 32767 -5 0 5 0 0 -15 -5 0 "
+  },
+  {
+    icon_name = "minusGS_icon",
+    icon_points = "-5 0 5 0 0 -15 -5 0 -5 1 0 10 5 1 -5 1 "
+  },
+  {
+    icon_name = "minusRA_icon",
+    icon_points = "-6 3 -3 3 32767 32767 -7 2 -2 2 32767 32767 -7 1 -2 1 32767 32767 -7 0 -2 0 32767 32767 -7 -1 -2 -1 32767 32767 -6 -2 -3 -2 32767 32767 3 3 6 3 32767 32767 2 2 7 2 32767 32767 2 1 7 1 32767 32767 2 0 7 0 32767 32767 2 -1 7 -1 32767 32767 3 -2 6 -2 "
+  },
+  {
+    icon_name = "minusSH_icon",
+    icon_points = "-5 0 5 0 0 -15 -5 0 32767 32767 -1 8 2 8 32767 32767 -2 7 3 7 32767 32767 -2 6 3 6 32767 32767 -2 5 3 5 32767 32767 -2 4 3 4 32767 32767 -1 3 2 3 32767 32767 "
+  },
+  {
+    icon_name = "minusSHSN_icon",
+    icon_points = "-5 0 5 0 0 -15 -5 0 32767 32767 -2 10 0 8 3 11 32767 32767 -3 7 3 7 32767 32767 -3 6 3 6 32767 32767 -2 3 0 5 3 2 "
+  },
+  {
+    icon_name = "minusSN_icon",
+    icon_points = "-7 3 -5 1 -2 4 32767 32767 -8 0 -2 0 32767 32767 -8 -1 -2 -1 32767 32767 -7 -4 -5 -2 -2 -5 32767 32767 3 3 5 1 8 4 32767 32767 2 0 8 0 32767 32767 2 -1 8 -1 32767 32767 3 -4 5 -2 8 -5 "
+  },
+  {
+    icon_name = "PL_icon",
+    icon_points = "-11 -7 0 11 11 -7 -11 -7 32767 32767 0 0 1 0 1 -1 0 -1 0 0 "
+  },
+  {
+    icon_name = "plusDZ_icon",
+    icon_points = "-8 0 -7 0 32767 32767 -9 -1 -6 -1 32767 32767 -8 -2 -6 -2 32767 32767 -6 -3 -8 -5 32767 32767 -2 11 -1 11 32767 32767 -3 10 0 10 32767 32767 -2 9 0 9 32767 32767 0 8 -2 6 32767 32767 4 0 5 0 32767 32767 3 -1 6 -1 32767 32767 4 -2 6 -2 32767 32767 6 -3 4 -5 32767 32767 -2 -10 -1 -10 32767 32767 -3 -11 0 -11 32767 32767 -2 -12 0 -12 32767 32767 0 -13 -2 -15 "
+  },
+  {
+    icon_name = "plusRA_icon",
+    icon_points = "-2 11 1 11 32767 32767 -3 10 2 10 32767 32767 -3 9 2 9 32767 32767 -3 8 2 8 32767 32767 -3 7 2 7 32767 32767 -2 6 1 6 32767 32767 -8 1 -5 1 32767 32767 -9 0 -4 0 32767 32767 -9 -1 -4 -1 32767 32767 -9 -2 -4 -2 32767 32767 -9 -3 -4 -3 32767 32767 -8 -4 -5 -4 32767 32767 5 1 8 1 32767 32767 4 0 9 0 32767 32767 4 -1 9 -1 32767 32767 4 -2 9 -2 32767 32767 4 -3 9 -3 32767 32767 5 -4 8 -4 32767 32767 -2 -9 1 -9 32767 32767 -3 -10 2 -10 32767 32767 -3 -11 2 -11 32767 32767 -3 -12 2 -12 32767 32767 -3 -13 2 -13 32767 32767 -2 -14 1 -14 "
+  },
+  {
+    icon_name = "plusSN_icon",
+    icon_points = "-2 12 0 10 3 13 32767 32767 -3 9 3 9 32767 32767 -3 8 3 8 32767 32767 -2 5 0 7 3 4 32767 32767 -7 3 -5 1 -2 4 32767 32767 -8 0 -2 0 32767 32767 -8 -1 -2 -1 32767 32767 -7 -4 -5 -2 -2 -5 32767 32767 4 3 6 1 9 4 32767 32767 3 0 9 0 32767 32767 3 -1 9 -1 32767 32767 4 -4 6 -2 9 -5 32767 32767 -2 -7 0 -9 3 -6 32767 32767 -3 -10 3 -10 32767 32767 -3 -11 3 -11 32767 32767 -2 -14 0 -12 3 -15 "
+  },
+  {
+    icon_name = "plusSS_icon",
+    icon_points = "4 11 2 13 -2 13 -5 10 -6 8 -6 6 -1 1 0 1 4 -4 6 -6 6 -9 5 -11 2 -14 -3 -14 -5 -12 32767 32767 -11 3 9 3 11 1 9 -1 -11 -1 "
+  },
+  {
+    icon_name = "plusTSGS_icon",
+    icon_points = "-9 11 9 11 1 3 9 -5 2 -12 2 -9 5 -12 2 -12 32767 32767 -7 -12 -7 11 32767 32767 -5 13 5 13 0 21 -5 13 "
+  },
+  {
+    icon_name = "plusTSRA_icon",
+    icon_points = "-9 11 9 11 1 3 9 -5 2 -12 2 -9 5 -12 2 -12 32767 32767 -7 -12 -7 11 32767 32767 -2 19 1 19 32767 32767 -3 18 2 18 32767 32767 -3 17 2 17 32767 32767 -3 16 2 16 32767 32767 -3 15 2 15 32767 32767 -2 14 1 14 "
+  },
+  {
+    icon_name = "SA_icon",
+    icon_points = "4 11 2 13 -2 13 -5 10 -6 8 -6 6 -1 1 0 1 4 -4 6 -6 6 -9 5 -11 2 -14 -3 -14 -5 -12 32767 32767 0 15 0 -17 "
+  },
+  {
+    icon_name = "SG_icon",
+    icon_points = "-12 0 12 0 32767 32767 -5 -4 0 5 5 -4 -5 -4 "
+  },
+  {
+    icon_name = "SH_icon",
+    icon_points = "-5 0 5 0 0 -15 -5 0 32767 32767 -1 8 2 8 32767 32767 -2 7 3 7 32767 32767 -2 6 3 6 32767 32767 -2 5 3 5 32767 32767 -2 4 3 4 32767 32767 -1 3 2 3 32767 32767 -4 -4 4 -4 "
+  },
+  {
+    icon_name = "SHSN_icon",
+    icon_points = "-5 0 5 0 0 -15 -5 0 32767 32767 -2 10 0 8 3 11 32767 32767 -3 7 3 7 32767 32767 -3 6 3 6 32767 32767 -2 3 0 5 3 2 32767 32767 -4 -3 4 -3 "
+  },
+  {
+    icon_name = "SN_icon",
+    icon_points = "-8 -1 -6 -3 -3 0 32767 32767 -9 -4 -3 -4 32767 32767 -9 -5 -3 -5 32767 32767 -8 -8 -6 -6 -3 -9 32767 32767 -2 10 0 8 3 11 32767 32767 -3 7 3 7 32767 32767 -3 6 3 6 32767 32767 -2 3 0 5 3 2 32767 32767 4 -1 6 -3 9 0 32767 32767 3 -4 9 -4 32767 32767 3 -5 9 -5 32767 32767 4 -8 6 -6 9 -9 "
+  },
+  {
+    icon_name = "SQ_icon",
+    icon_points = "-7 11 0 7 7 11 0 -10 -7 11 "
+  },
+  {
+    icon_name = "SS_icon",
+    icon_points = "4 11 2 13 -2 13 -5 10 -6 8 -6 6 -1 1 0 1 4 -4 6 -6 6 -9 5 -11 2 -14 -3 -14 -5 -12 32767 32767 -11 2 11 2 8 4 8 0 11 2 "
+  },
+  {
+    icon_name = "TSGR_icon",
+    icon_points = "-9 6 11 6 1 -4 1 -5 12 -16 12 -13 9 -16 12 -16 32767 32767 -6 -18 -6 6 32767 32767 -5 8 5 8 0 16 -5 8 "
+  },
+  {
+    icon_name = "TSGS_icon",
+    icon_points = "-2 19 1 19 32767 32767 -3 18 2 18 32767 32767 -3 17 2 17 32767 32767 -3 16 2 16 32767 32767 -3 15 2 15 32767 32767 -2 14 1 14 -2 19 1 19 32767 32767 -3 18 2 18 32767 32767 -3 17 2 17 32767 32767 -3 16 2 16 32767 32767 -3 15 2 15 32767 32767 -2 14 1 14 "
+  },
+  {
+    icon_name = "TS_icon",
+    icon_points = "-10 11 10 11 0 1 0 0 11 -11 11 -8 8 -11 11 -11 32767 32767 -7 -13 -7 11 "
+  },
+  {
+    icon_name = "TSRA_icon",
+    icon_points = "-10 6 10 6 0 -4 0 -5 11 -16 11 -13 8 -16 11 -16 32767 32767 -7 -18 -7 6 32767 32767 -2 14 1 14 32767 32767 -3 13 2 13 32767 32767 -3 12 2 12 32767 32767 -3 11 2 11 32767 32767 -3 10 2 10 32767 32767 -2 9 1 9 "
+  },
+  {
+    icon_name = "PO_icon",
+    icon_points = "2 11 -3 11 -5 9 -6 7 -6 6 -1 0 2 0 4 2 4 3 2 5 -2 5 -5 2 -6 0 -6 -1 -2 -6 2 -6 4 -4 1 -1 -1 -1 -5 -4 -6 -7 -6 -8 -4 -12 -1 -13 2 -13 "
+  },
+  {
+    icon_name = "MIFG_icon",
+    icon_points = "-12 5 -6 5 32767 32767 5 5 12 5 32767 32767 -13 -4 13 -4"
+  },
+  {
+    icon_name = "RA_icon",
+    icon_points = "-2 8 2 8 32767 32767 -3 7 2 7 32767 32767 -3 6 2 6 32767 32767 -3 6 2 6 32767 32767 -3 5 2 5 32767 32767 -3 4 2 4 32767 32767 -2 3 1 3 32767 32767 -8 -2 -5 -2 32767 32767 -9 -3 -4 -3 32767 32767 -9 -4 -4 -4 32767 32767 -9 -5 -4 -5 32767 32767 -9 -6 -4 -6 32767 32767 -8 -7 -5 -7 32767 32767 5 -2 8 -2 32767 32767 4 -3 9 -3 32767 32767 4 -4 9 -4 32767 32767 4 -5 9 -5 32767 32767 4 -6 9 -6 32767 32767 5 -7 8 -7"
+  },
+  {
+    icon_name = "BR_icon",
+    icon_points = "-12 4 14 4 32767 32767 -12 -4 14 -4"
+  },
+  {
+    icon_name = "VCFG_icon",
+    icon_points = "-13 10 13 10 32767 32767 -13 1 13 1 32767 32767 -13 -7 13 -7 32767 32767 -14 15 32767 32767 14 15 32767 32767 -14 14 32767 32767 14 14 32767 32767 -15 13  15 13 32767 32767 -15 12  15 12 32767 32767 -15 11  15 11 32767 32767 -16 10  16 10 32767 32767 -16 9  16 9 32767 32767 -16 8  16 8 32767 32767 -16 7  16 7 32767 32767 -17 6 -16 6 32767 32767 -17 5 32767 32767 -16 5 32767 32767 -17 4 32767 32767 -16 4 32767 32767 -17 3 32767 32767 -16 3 32767 32767 -17 2 32767 32767 -16 2 32767 32767 -17 1 32767 32767 -16 1 32767 32767 -17 0 32767 32767 -16 0 32767 32767 -17 -1 32767 32767 -16 -1 32767 32767 -17 -2 32767 32767 -16 -2 32767 32767 -17 -3 -16 -3 32767 32767 16 -3 17 -3 32767 32767 -16 -4 32767 32767 16 -4 -16 -5 32767 32767 16 -5 -16 -6 32767 32767 16 -6 -16 -7 32767 32767 16 -7 -15 -8 32767 32767 15 -8 -15 -9 32767 32767 15 -9 -15 -10 32767 32767 15 -10 -15 -11 -14 11 32767 32767 14 -11 15 -11 32767 32767 -14 -12 32767 32767 14 -12"
+  },
+  {
+    icon_name = "BCFG_icon",
+    icon_points = "-12 9 -5 9 32767 32767 6 9 13 9 32767 32767 -12 0 13 0 32767 32767 -12 -8 -5 -8 32767 32767 6 -8 13 -8"
+  },
+  {
+    icon_name = "FG_icon",
+    icon_points = "-12 9 14 9 32767 32767 -12 0 14 0 32767 32767 -12 -8 14 -8"
+  },
+  {
+    icon_name = "BLSN_icon",
+    icon_points = "0 11 0 -11 32767 32767 -9 0 12 0 32767 32767 9 -2 9 2 12 0 9 -2 32767 32767 -2 -7 2 -7 0 -11 -2 -7"
+  },
+  {
+    icon_name = "DRSN_icon",
+    icon_points = "0 11 0 -11 32767 32767 -10 0 12 0 32767 32767 0 11 -2 8 2 8 0 11 32767 32767 12 0 9 2 9 -2 12 0"
+  },
+  {
+    icon_name = "HZ_icon",
+    icon_points = "-15 -2 -16 3 -13 5 -6 5 6 -4 13 -4 16 0 16 1 12 5 6 5 -5 -4 -13 -4 -15 -2 32767 32767 -16 0 -16 1 32767 32767 15 0 15 1"
+  },
+  {
+    icon_name = "FU_icon",
+    icon_points = "-12 -13 -12 11 -10 12 -8 11 -6 7 -4 7 -2 9 -2 10 0 12 2 10 4 7 6 7 8 9 8 11 10 12 12 11 12 10"
+  },
+  {
+    icon_name = "simple_square_icon",
+    icon_points = "-5 -5 -5 5 5 5 5 -5 -5 -5"
+  },
+  {
+    icon_name = "PRFG_icon",
+    icon_points = "-12 9 -5 9 32767 32767 6 9 13 9 32767 32767 -12 0 13 0 32767 32767 -12 -8 13 -8"
+  },
+  {
+    icon_name = "FZFG_icon",
+    icon_points = "-13 8 13 8 32767 32767 -13 -1 13 -1 32767 32767 -13 -9 13 -9 32767 32767 -11 8 0 -9 11 8 32767 32767 -5 -2 5 -2 32767 32767 -4 -3 4 -3 32767 32767 -3 -4 3 -4 32767 32767 -3 -5 3 -5 32767 32767 -2 -6 2 -6 32767 32767 -2 -7 2 -7 32767 32767 -1 -8 1 -8"
+  },
+  {
+    icon_name = "turb_icon",
+    icon_points = "-10 0 0 20 10 0 32767 32767 -10 -10 0 10 10 -10 32767 32767 -20 -10 -10 -10 32767 32767 -5 -10 5 -10 32767 32767 10 -10 20 -10"
+  },
+  {
+    icon_name = "ts_icon",
+    icon_points = "0 0 15 15 -9 15 -9 -15 32767 32767 0 0 15 -15 32767 32767 15 -15 8 -15 32767 32767 15 -15 15 -9"
+  },
+  {
+    icon_name = "convective_icon",
+    icon_points = "0 0 15 15 -9 15 -9 -15 32767 32767 0 0 15 -15 32767 32767 15 -15 8 -15 32767 32767 15 -15 15 -9"
+  },
+  {
+    icon_name = "icing_icon",
+    icon_points = "0 0 0 -18 32767 32767 3 0 3 -18 32767 32767 -9 6 -9 0 -6 -3 -3 -6 6 -6 9 -3 12 0 12 6"
+  },
+  {
+    icon_name = "tc_icon",
+    icon_points = "0 8  1 8  4 7  5 6  6 5  7 4  8 1  8 0  8 -1  7 -4  6 -5  5 -6  4 -7  1 -8  0 -8  -1 -8  -4 -7  -5 -6  -6 -5  -7 -4  -8 -1  -8 0  -8 1  -7 4  -6 5  -5 6  -4 7  -1 8  0 8  32767 32767  -8 0  -8 1  -7 5  -6 7  -3 11  1 14  5 16 32767 32767 8 0  8 -1  7 -5  6 -7  3 -11  -1 -14  -5 -16 32767 32767  0 7  1 7  3 6  5 5  6 3  7 1  7 0  7 -1  6 -3  5 -5  3 -6  1 -7  0 -7  -1 -7  -3 -6  -5 -5  -6 -3  -7 -1  -7 0  -7 1  -6 3  -5 5  -3 6  -1 7  0 7  32767 32767  -7 0  -7 1  -6 4  -5 7  -4 8  -3 9  0 12  1 13  3 14  5 15  32767 32767  7 0  7 -1  6 -4  5 -7  4 -8  3 -9  0 -12  -1 -13  -3 -14  -5 -15 "
+  },
+  {
+    icon_name = "tc_icon_south",
+    icon_points = "0 8  1 8  4 7  5 6  6 5  7 4  8 1  8 0  8 -1  7 -4  6 -5  5 -6  4 -7  1 -8  0 -8  -1 -8  -4 -7  -5 -6  -6 -5  -7 -4  -8 -1  -8 0  -8 1  -7 4  -6 5  -5 6  -4 7  -1 8  0 8  32767 32767  8 0  8 1  7 5  6 7  3 11  -1 14  -5 16 32767 32767 -8 0  -8 -1  -7 -5  -6 -7  -3 -11  1 -14  5 -16  32767 32767  0 7  1 7  3 6  5 5  6 3  7 1  7 0  7 -1  6 -3  5 -5  3 -6  1 -7  0 -7  -1 -7  -3 -6  -5 -5  -6 -3  -7 -1  -7 0  -7 1  -6 3  -5 5  -3 6  -1 7  0 7  32767 32767  7 0  7 1  6 4  5 7  4 8  3 9  0 12  -1 13  -3 14  -5 15  32767 32767  -7 0  -7 -1  -6 -4  -5 -7  -4 -8  -3 -9  0 -12  1 -13  3 -14  5 -15 "
+  },
+  {
+    icon_name = "va_icon",
+    icon_points = "0 0  1 0  -1 0  0 0  0 -1  0 1  32767 32767  4 0  16 0  8 20  -8 20  -16 0  -4 0  32767 32767  4 1  15 1  7 19  -7 19  -15 1  -4 1  32767 32767  2 22  8 28  32767 32767  3 22  9 28  32767 32767  -2 22  -8 28  32767 32767  -3 22  -9 28  132767 32767  0 22  0 28 32767 32767  1 22  1 28 32767 32767  -1 22  -1 28 32767 32767"
+  },
+  {
+    icon_name = "ds_icon",
+    icon_points = "-6 6, -3 3, 0 0, 3 0, 6 3, 9 6, 9 9, 6 12, 3 15, 0 18, -3 21, -3 24, 0 27, 3 30, 6 30, 9 27, 12 24, 32767 32767, -8 17, 15 17, 32767 32767, -8 13 15 13, 32767 32767, 13 21, 18 15, 13 9"
+  },
+  {
+    icon_name = "mtw_icon",
+    icon_points = "0 0, 9 21, 18 0, 32767 32767, 17 12, 17 15, 20 18, 23 18, 26 15, 26 12, 29 9, 32 9, 35 12, 35 18"
+  },
+  {
+    icon_name = "gr_icon",
+    icon_points = "0 0, -6 12, 6 12, 0 0, 32767 32767, -6 15, 0 24, 6 15, -6 15, 32767 32767"
+  },
+  {
+    icon_name = "fog_icon",
+    icon_points = "0 10,  4 9,  6 8,  8 6,  9 4,  10 0,  9 -4,  8 -6,  6 -8,  4 -9,  0 -10,  -4 -9,  -6 -8,  -8 -6,  -9 -4,  -10 0,  -9 4,  -8 6,  -6 8,  -4 9,  0  10, 32767 32767, -4 9, 4 9,  32767 32767, -6 8, 6 8,  32767 32767, -7 7, 7 7,  32767 32767, -8 6, 8 6,  32767 32767, -8 5, 8 5,  32767 32767, -9 4, 9 4,  32767 32767, -9 3, 9 3,  32767 32767, -9 2, 9 2,  32767 32767, -10 1, 10 1,  32767 32767, -10 0, 10 0,  32767 32767, -10 -1, 10 -1,  32767 32767, -9 -2, 9 -2,  32767 32767, -9 -3, 9 -3,  32767 32767, -9 -4, 9 -4,  32767 32767, -8 -5, 8 -5,  32767 32767, -8 -6, 8 -6,  32767 32767, -7 -7, 7 -7,  32767 32767, -6 -8, 6 -8,  32767 32767, -4 -9, 4 -9,  32767 32767 "
+  },
+  {
+    icon_name = "ifr_icon",
+    icon_points = "0 0, -3 3, -3 21, 0 24, 32767 32767, 15 24, 18 21, 18 3, 15 0, 32767 32767, -3 18, 18 18 32767 32767, -3 12, 18 12 32767 32767, -3 6, 18 6"
+  },
+  {
+    icon_name = "vis_icon",
+    icon_points = "-15 5  15 5  32767 32767 -15 0  15 0  32767 32767  -15 -5  15 -5"
+  },
+  {
+    icon_name = "unknown",
+    icon_points = "-6 6 -6 8 -4 10 -2 12 2 12 4 10 6 8 8 4 4 2 2 0 0 0 0 -5 32767 32767 -2 -10 0 -10 0 -12 -2 -12 -2 -10"
+  }
+};
+} wx_icon_defs[];
+  
+commentdef {
+  p_header = "HIDDEN TEXT and POLYGONS";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to activate hidden text.";
+  p_help = "If true, the full METAR message will be sent to the client, marked as hidden text. This text may then be used by the client for any purpose, such as pop-up text in response to a mouse event near the product location.";
+} activate_hidden_text;
+
+paramdef string {
+  p_descr = "Name of font for hidden text.";
+  p_default = "fixed";
+} hidden_text_font_name;
+
+paramdef int {
+  p_descr = "X offset for hidden text (pixels).";
+  p_default = 0;
+} hidden_text_x_offset;
+
+paramdef int {
+  p_descr = "Y offset for hidden text (pixels).";
+  p_default = 0;
+} hidden_text_y_offset;
+
+paramdef int {
+  p_descr = "Font size for hidden text (pixels).";
+  p_default = 10;
+} hidden_text_font_size;
+
+paramdef enum vert_align_t {
+  p_descr = "Vertical alignment hidden text.";
+  p_default = VERT_ALIGN_CENTER;
+} hidden_text_vert_align;
+
+paramdef enum horiz_align_t {
+  p_descr = "Horizontal alignment for hidden text.";
+  p_default = HORIZ_ALIGN_CENTER;
+} hidden_text_horiz_align;
+
+paramdef enum font_style_t {
+  p_descr = "Font style for the hidden text";
+  p_default = TEXT_NORM;
+} hidden_text_font_style;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use flight cat color color.";
+  p_default = "";
+} hidden_text_foreground_color;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} hidden_text_background_color;
+
+//////////////////////////////////////////////////////////
+// Location ICON rendering
+
+commentdef {
+  p_header = "LOCATION ICON";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to plot icon.";
+  p_help = "Icon will be plotted as a stroked icon - a series of lines making a shape. The points included in the icon appear in the parameter icon_points.";
+} draw_location_icon;
+
+paramdef struct stroked_icon_point_t {
+  p_default = {
+    { -5, -5},
+    { 5, -5},
+    { 5, 5},
+    { -5, 5},
+    { -5, -5}
+  };
+  p_descr = "List of points for plotting ICON.";
+  p_help = "The X,Y values are in pixel units. Use -999 to indicate a pen-up action."; 
+} location_icon_points[];
+
+paramdef string {
+  p_descr = "Stroked icon line color.";
+  p_default = "white";
+} location_icon_color;
+
+paramdef int {
+  p_descr = "Stroked icon line width (pixels).";
+  p_default = 1;
+} location_icon_line_width;
+
+paramdef double {
+  p_descr = "Scale of icon.";
+  p_help = "Allows you to make the icon larger or smaller without re-defining the entire icon.";
+  p_default = 1.0;
+} location_icon_scale;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Allows the client to scale the icon depending on zoom state.";
+  p_help = "If false, the icon will always be the specified size.";
+} location_icon_allow_client_scaling;
+

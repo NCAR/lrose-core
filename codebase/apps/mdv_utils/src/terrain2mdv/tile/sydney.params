@@ -1,0 +1,21 @@
+
+proj = LATLON;
+
+output_type = MDV;
+input_type = GTOPO30;
+
+map_south = -39.0;
+map_north = -29.0;
+map_west = 146.0;
+map_east = 156.0;
+
+outfname = "sydney.mdv";
+output_dir = ".";
+
+tile_lat = -60.0;
+tile_lon = 140.0;
+tile_delta = 30;
+tile_nlats = 6000;
+tile_nlons = 4800;
+
+output_grid_size = 3000;

@@ -1,0 +1,82 @@
+/**********************************************************************
+ * TDRP params for RainGage
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+// Modes and trigger mechanism.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, an spdb file is written as soon as gage data becomes available. 
+//   In archive mode, the file list is obtained from the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// INPUT AND OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_gage_url //////////////////////////
+//
+// Input URL for gage data text files.
+// Input data is in ASCII format.
+// Type: string
+//
+
+input_gage_url = "./gage_data";
+
+///////////// output_spdb_url /////////////////////////
+//
+// URL for output SPDB data.
+// Output data is in spdb format.
+// Type: string
+//
+
+output_spdb_url = "./spdb_data";
+

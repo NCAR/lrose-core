@@ -1,0 +1,236 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+////////////////////////////////////////////////////////////////////////////////
+//
+// parameter definitions for application
+//
+// Terri Betancourt, RAP, NCAR, Boulder, CO, USA, 80307-3000
+// September 2001
+//
+// $Id: paramdef.binet2dsr,v 1.4 2016/03/07 01:25:08 dixon Exp $
+//
+////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Print summary";
+  p_help = "If TRUE, summary information will be printed";
+} print_summary;
+
+paramdef long {
+  p_min = 0;
+  p_default = {90};
+  p_descr = "Summary interval for printing radar input";
+  p_help = "Valid only if print_summary is set to TRUE";
+} summary_interval;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting";
+} instance;
+
+commentdef {
+  p_header = "CONSTANT RADAR CHARACTERISTICS";
+};
+
+paramdef char* {
+  p_default = {"NEXRAD"};
+  p_descr = "Radar name";
+} radar_name;
+
+paramdef char* {
+  p_default = {"Mendoza"};
+  p_descr = "Site name";
+} site_name;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Radar ID";
+  p_help = "Project-specific ID for the radar";
+} radar_id;
+
+paramdef long {
+  p_default = {3};
+  p_descr = "Radar polarization code";
+  p_help = "1 = horizontal, 2 = vertical, 3 = circular, 4 = elliptical";
+} polarization_code;
+
+paramdef float {
+  p_default = -113.0;
+  p_descr = "Receiver MDS (dBM)";
+  p_help = "Receiver minimum detectable signal";
+} receiver_mds;
+
+paramdef int {
+  p_default = {0};
+  p_descr = "Scan type id";
+  p_help = "Unique identifier for scan strategy";
+} scan_type;
+
+paramdef char* {
+  p_default = {"Default"};
+  p_descr = "Scan type name";
+  p_help = "Descriptive name for scan strategy";
+} scan_type_name;
+
+commentdef {
+  p_header = "DATA DEFAULTS & INGEST PROCESSING";
+};
+
+paramdef float {
+  p_descr = "Delta elevation (in degrees) for identifying unwanted beams.";
+  p_help = "Used for eliminating beams as the radar is moving around, "
+           "for example when the radar is dropping down "
+           "to begin a new volume scan.";
+  p_default = {0.6};
+} max_elev_change;
+
+paramdef float {
+  p_default = 0.95;
+  p_min = 0.01;   
+  p_max = 45.0;
+  p_descr = "Radar half-power beam width (deg)";
+  p_help = "Value will be overriden if available via the input data stream";
+} horiz_beam_width;
+
+paramdef float {
+  p_default = 0.95;
+  p_min = 0.01;
+  p_max = 45.0;
+  p_descr = "Radar half-power beam width (deg)";
+  p_help = "Value will be overriden if available via the input data stream";
+} vert_beam_width;
+
+commentdef {
+  p_header = "OPTION TO OVERRIDE RADAR LOCATION";
+};
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Override input data stream with user-specified latitude, longitude and altitude";
+} override_radar_location;
+
+paramdef struct radar_location_t {
+  p_descr = "User-specified radar location";
+  p_help = "Used only if override_radar_location is TRUE. "
+           "Latitude and longitude in degrees. Altitude in km";
+  p_field_type = {double, double, double};
+  p_field_name = {latitude, longitude, altitude};
+} radar_location;
+
+commentdef {
+  p_header = "RADAR DATA INPUT";
+};
+
+paramdef char* {
+  p_descr = "URL for NetCDF input file stream";
+  p_help = "This is the $DATA_DIR directory where the incoming NetCDF files "
+           "will be delivered";
+  p_default = {"filep:://$(HOST)::$(PROJECT)/radar"};
+} radar_input_url;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "LdataInfo index file available.";
+  p_help = "If TRUE incoming data files will be triggered via LdataInfo.\n"
+           "otherwise, the application will watch the 'radar_input_url' "
+           "for any newly created files.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Maximum valid age (in min) of input data files.";
+  p_help = "Input files older than this will not be processed.";
+} max_valid_age_min;
+
+commentdef {
+  p_header = "RADAR DATA OUTPUT";
+};
+
+paramdef string {
+  p_descr = "Output URL for DsRadar data via FMQ";
+  p_default = "fmqp:://$(HOST)::fmq/dsRadar";
+} output_fmq_url;
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// NOTE:  If you change the order or number of the available fields,
+//        you MUST also change the corresponding FIELD_INFO struct
+//        in the BinetNetCDF class!
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+typedef enum {
+  DM, DZ, ZDR, PHI, LDR, RHOHV, VE, SW
+} available_fields;
+
+typedef struct {
+  available_fields  type;
+  float             scale;
+  float             bias;
+} output_fields_t;
+
+paramdef struct output_fields_t {
+  p_descr = "Output radar fields";
+  p_help = "Data fields extracted from the input radar stream\n"
+           "DM    =  Power in dBm\n"
+           "DZ    =  Reflectivity factor in dBz\n"
+           "ZDR   =  Polarization diversity in dBm\n"
+           "PHI   =  Differential Phase in degrees\n"
+           "LDR   =  Linear Depolarization Ratio in dBm\n"
+           "RHOHV =  RHOhv is just unit-less RHOhv\n"
+           "VE    =  Doppler velocity in m/s\n"
+           "SW    =  Spectral width in m/s";
+  p_default = { { DZ, 0.5, -32.0 },
+                { VE, 0.5, -63.5 } };
+} output_fields[];
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer
+ will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages wh
+ich may be written to the buffer before overwrites occur. However, overwrites ma
+y occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;

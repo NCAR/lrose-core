@@ -1,0 +1,108 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "One-off ingest program. See Niles Oien for details.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::./mdv/conc";
+  p_descr = "Output MDV url, of form mdvp:://host.domain:[port]:dir/dir ";
+  p_help = "Data are written here.";
+} output_url;
+
+typedef struct {
+	int nx;
+	int ny;
+	double dx;
+	double dy;
+    	double lat_orig;	
+    	double lon_orig;
+} grid_def_t;
+
+paramdef struct grid_def_t {
+  p_descr = "Input LES parameters.";
+  p_help =  "Definition of input grid.";
+  p_default = { 1501, 1501, 0.002, 0.002, 38.89368, -77.02287 };
+} grid_def;
+
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Time step, seconds.";
+  p_help = "Temporal resolution.";
+} timeStep;
+
+paramdef int {
+  p_default = {2004, 12, 17, 10, 00, 00};
+  p_descr = "Valid time for these data.";
+  p_help = "Year month day hour minute and second.";
+} time[];
+
+
+paramdef string {
+  p_default = "/d2/oien/ScipuffData/test2/danzigtest1.hconc_";
+  p_descr = "Base filename";
+  p_help = "Includes directory.";
+} baseFilename;
+
+paramdef double {
+  p_default = 0.06;
+  p_descr = "Elevation of this slice, Km";
+  p_help = "Only 2d data supported.";
+} elevation;
+
+paramdef int {
+  p_default = 121;
+  p_descr = "Number of files to process.";
+  p_help = "Files follow naming convention.";
+} nFiles;
+
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef long {
+  p_descr = "How long the data are valid, seconds.";
+  p_help = "Depends on input frequency.";
+  p_default = 600;
+} Expiry;
+ 
+

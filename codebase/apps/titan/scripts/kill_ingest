@@ -1,0 +1,8 @@
+#! /bin/csh
+
+#
+# kill ingest processes
+#
+
+snuff rdata_to_shmem dobson_from_shmem
+

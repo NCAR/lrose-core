@@ -1,0 +1,234 @@
+/**********************************************************************
+ * TDRP params for RvDealias
+ **********************************************************************/
+
+//======================================================================
+//
+// RvDealias reads radar IQ data, and performs range-velocity dealiasing 
+//   on the data.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "zs864";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In SIMULATE mode, the program moves repeatedly through 
+//   the file list, creating output files with times set to now. This is 
+//   useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// NETCDF FILE DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "$(HOME)/data/nc/radar/iq";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// DATA PROCESSING.
+//
+//======================================================================
+ 
+///////////// algorithm ///////////////////////////////
+//
+// Algorithm to be used.
+// PP: compute pulse-pair moments. FFT: compute spectral moments. SZ864: 
+//   perform rv dealiazing with sz 8-64 algorithm.
+//
+// Type: enum
+// Options:
+//     PP
+//     FFT
+//     FFT_HANNING
+//     FFT_MOD_HANNING
+//     SZ864
+//
+
+algorithm = SZ864;
+
+///////////// n_samples_per_beam //////////////////////
+//
+// Number of samples per beam.
+// This the number of samples in the time series which go up to make a 
+//   beam..
+// Type: int
+//
+
+n_samples_per_beam = 64;
+
+///////////// wavelength_cm ///////////////////////////
+//
+// Radar wavelength (cm).
+// Type: int
+//
+
+wavelength_cm = 10;
+
+///////////// noise_value /////////////////////////////
+//
+// Noise value (dBM).
+// This is used if noise is not available from the data.
+// Type: double
+//
+
+noise_value = 5.5e-07;
+
+///////////// floor_signal_power //////////////////////
+//
+// Floor signal power (dBM).
+// Arbitrary floor value for signal. Lower bound for power from 
+//   computations.
+// Type: double
+//
+
+floor_signal_power = 1e-06;
+
+///////////// trip1_phase_index ///////////////////////
+//
+// Index of phase shift for first pulse in file.
+// The pulses repeat their phases on a 32-phase cycle. In the program we 
+//   compute the phase table. This is the index into that table of the 
+//   first pulse in the file. This therefore applies to trip1. The 
+//   transmitted phase of other pulses are determined by their position in 
+//   the array of pulses in the file.
+// Type: int
+//
+
+trip1_phase_index = 1;
+
+///////////// negate_phase_codes //////////////////////
+//
+// Option to multiple phase codes by -1.
+// In some data sets the phase codes are negated. Set this to true for 
+//   such data cases.
+// Type: boolean
+//
+
+negate_phase_codes = TRUE;
+
+///////////// sz_window ///////////////////////////////
+//
+// Window type for SZ864.
+// Windot type to be applied to strong trip before computing spectra.
+//
+// Type: enum
+// Options:
+//     NO_WINDOW
+//     HANNING
+//     MOD_HANNING
+//
+
+// sz_window = HANNING;
+// sz_window = MOD_HANNING;
+sz_window = NO_WINDOW;
+
+///////////// sz_notch ////////////////////////////////
+//
+// Notch width to be used in SZ algorithm.
+// The notch is applied to the strong trip spectrum, to remove the 
+//   strong trip power and allow recovery of the weak trip spectrum.
+//
+// Type: enum
+// Options:
+//     ONE_QUARTER
+//     ONE_HALF
+//     THREE_QUARTERS
+//
+
+sz_notch = THREE_QUARTERS;
+
+///////////// write_spectra_files /////////////////////
+//
+// Option to write various gate spectra to ASCII files.
+// If true, spectra are written to files in directory 
+//   spectra_output_dir.
+// Type: boolean
+//
+
+write_spectra_files = TRUE;
+
+///////////// spectra_output_dir //////////////////////
+//
+// Spectra file directory.
+// See 'write_spectra_files.
+// Type: string
+//
+
+spectra_output_dir = "./spectra";
+

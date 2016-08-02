@@ -1,0 +1,173 @@
+/**********************************************************************
+ * TDRP params for SpdbXmlPut
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: SpdbXmlPut.
+//
+// SpdbXmlPut writes XML chunks to SPDB. It is intended to be used from 
+//   the command line, or more commonly via a script. It can also take a 
+//   comma or space delimited file, read it in, interpret it and write the 
+//   results to SPDB in XML.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// mode ////////////////////////////////////
+//
+// Run mode.
+//
+// In FILELIST mode, move through the list of specified files, 
+//   processing them one at a time. The data in the files is processed a 
+//   line at a time, and the the time for each entry is read from the line 
+//   contents. In COMMAND_LINE mode, the XML is specified on the command 
+//   line, along with the valid and expire times.
+//
+//
+// Type: enum
+// Options:
+//     COMMAND_LINE
+//     FILELIST
+//
+
+mode = FILELIST;
+
+//======================================================================
+//
+// FILELIST MODE.
+//
+// The input file, if specified, should be delimited using a constant 
+//   character, normally comma or space. The first line should contain 
+//   labels for each of the colums. The labels will be used to create the 
+//   xml tags.
+//
+// Some special labels will be interpreted for date/time. These are: 
+//
+//   'yyyymmddhhmmss' - single date and time column.
+//
+//  'year', 'month', 'day', 'hour', 'min', 'sec': individual date/time 
+//   columns.
+//
+//======================================================================
+ 
+///////////// comment_character ///////////////////////
+//
+// Character with which to start a comment line.
+//
+// Comment lines are ignored except for the first line, which should 
+//   contain the headings for each column.
+//
+//
+// Type: string
+//
+
+comment_character = "#";
+
+///////////// column_delimiter ////////////////////////
+//
+// ASCII column delimiter in input file.
+//
+// Normally comma or space delimiter.
+//
+//
+// Type: string
+//
+
+column_delimiter = ",";
+
+//======================================================================
+//
+// COMMAND_LINE MODE.
+//
+// The valid time, expire time and XML contents are read from the 
+//   command line. You can specify the entire xml string, or specify 
+//   individual pairs of tags and values.
+//
+//======================================================================
+ 
+///////////// outer_xml_tag ///////////////////////////
+//
+// Outer tag for XML.
+//
+// This will delimit the entire XML entry. It is only used if individual 
+//   tags/vals are specified.
+//
+//
+// Type: string
+//
+
+outer_xml_tag = "SpdbXmlPut";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+//
+// Data will be put to the SPDB data base at this URL.
+//
+//
+// Type: string
+//
+
+output_url = "spdb/xml";
+
+///////////// datatype ////////////////////////////////
+//
+// Datatype for SPDB.
+//
+// If numeric, it is used directly. If non-numeric the first 4 bytes are 
+//   hashed into a number.
+//
+//
+// Type: string
+//
+
+datatype = "0";
+
+///////////// datatype2 ///////////////////////////////
+//
+// Datatype2 for SPDB.
+//
+// If numeric, it is used directly. If non-numeric the first 4 bytes are 
+//   hashed into a number.
+//
+//
+// Type: string
+//
+
+datatype2 = "0";
+
+///////////// expire_secs /////////////////////////////
+//
+// data expire seconds.
+//
+// Number of seconds the data is valid before it should be expired.
+//
+//
+// Type: int
+//
+
+expire_secs = 3600;
+

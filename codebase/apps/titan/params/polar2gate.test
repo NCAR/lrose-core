@@ -1,0 +1,141 @@
+########################################################################
+# parameters file for polar2gate
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# December 1991
+#
+#########################################################################
+
+#
+# debugging
+#
+
+polar2gate.debug: false
+polar2gate.malloc_debug_level: 0
+
+#
+# these are the beam intervals at which the header and summary are
+# printed out
+#
+
+polar2gate.header_interval: 1
+polar2gate.summary_interval: 360
+ 
+#
+# size of buffer for incoming data - increase this if
+# you get a relevant message from the program
+#
+
+polar2gate.max_nbytes_beam_buffer: 10000
+
+#
+# output port number - this is a tcpip port
+#
+
+polar2gate.output_port: 49000
+
+#
+# input device - tape or disk
+#
+
+polar2gate.device: tape
+polar2gate.device_name: /dev/rst0
+
+#
+# read wait is delya (in secs) between reads - can put in 
+# fractions of a second. For realtime simulation a value of
+# 0.05 is suitable
+#
+
+polar2gate.device_read_wait: 0.0
+
+#
+# input data format - ncar, chill or lass
+#
+
+polar2gate.input_format: ncar
+
+#
+# header type - lincoln, rp7, chill or lass
+#
+
+polar2gate.header_type: rp7
+
+#
+# scan mode - surveillance, sector or rhi
+#
+
+polar2gate.scan_mode: surveillance
+
+#
+# option to check date spacing
+#
+
+polar2gate.check_gate_spacing: true
+polar2gate.target_gate_spacing: 0.225
+
+#
+# elev table - used to add tilt number to data if
+# none is in the data from the source
+#
+
+polar2gate.use_elev_table: false
+polar2gate.nelev_table: 5
+polar2gate.elev_table: 0.5 1.5 2.5 3.5 4.5
+
+#
+# radar details - these override incoming parameters
+#
+
+polar2gate.radar_id: 3
+polar2gate.altitude: 1.604
+polar2gate.longitude: -104.759
+polar2gate.latitude:  39.87823
+polar2gate.gate_spacing: 0.225
+polar2gate.start_range: 0.1125
+polar2gate.beam_width: 0.95
+polar2gate.samples_per_beam: 45
+polar2gate.pulse_width: 2.0
+polar2gate.prf_nominal: 992
+polar2gate.wavelength: 5.0
+
+#
+# number of gates - ngates_dropeed allows a shift in the start gate
+#
+
+polar2gate.ngates_in: 664
+polar2gate.ngates_out: 600
+polar2gate.ngates_dropped: 0
+
+#
+# number of fields, and their positions in the output stream
+#
+
+polar2gate.nfields_in: 4
+polar2gate.nfields_out: 2
+polar2gate.out_field_pos: 0 1
+
+#
+# output time. time_correction (secs) is added to the
+# data time. If set_time_to_current is true, output time
+# is set to current time
+#
+
+polar2gate.time_correction: 0
+polar2gate.set_time_to_current: false
+
+#
+# chill paramters as applicable
+#
+
+polar2gate.chill_extended_hsk: true
+polar2gate.chill_calibration_path: $(TITAN_HOME)/calib/chill_cal92
+polar2gate.chill_fields_out: IP VR R2
+polar2gate.nchill_scan_types: 1
+polar2gate.chill_scan_types: ALL
+polar2gate.chill_vol_start_scan_type: DIX360L
+polar2gate.chill_vol_start_tilt: 1 
+
+
+

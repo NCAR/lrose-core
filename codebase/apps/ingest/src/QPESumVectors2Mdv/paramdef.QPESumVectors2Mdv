@@ -1,0 +1,121 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for QPESumVectors2Mdv
+ *
+ * Dan Megenahrdt, RAL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * December 2012
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Param file for QPESumVectors2Mdv";
+}
+
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This program registers with procmap. This is the instance used for registration.";
+} instance;
+
+typedef enum {
+  REALTIME, FILELIST, TIME_INTERVAL
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+} mode;
+
+commentdef {
+  p_header = "INPUT DATA";
+};
+
+paramdef string {
+  p_descr = "Input directory";
+  p_default = "/tmp/netCDF";
+} input_dir;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Maximum age of file in minutes";
+  p_help =  "Used in REALTIME mode only.";
+} max_valid_realtime_age_min;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Latest data info file available";
+} ldata_info_avail;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Set wait for file to be written to disk before being served";
+  p_help =  "Used in REALTIME mode only.";
+} file_quiescence_sec;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Set wait for file between checks for new data";
+  p_help =  "Used in REALTIME mode only.";
+} check_input_sec;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for TIME_INTERVAL mode only.";
+} start_time;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for TIME_INTERVAL mode only.";
+} end_time;
+
+commentdef {
+  p_header = "OUTPUT DATA";
+};
+
+paramdef string {
+  p_default = "mdvp:://localhost::/tmp/mdv";
+  p_descr = "URL for the output MDV files.";
+} output_url;
+
+paramdef string {
+ p_default = {};
+ p_descr = "List of field names to be read and transferred to the output file.";
+ p_help = "If empty, all fields in the input file will be used.";
+} field_names[]; 

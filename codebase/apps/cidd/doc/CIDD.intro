@@ -1,0 +1,54 @@
+	CIDD;   Cartesian, Integrated Data Display 
+
+FEATURE SUMMARY:
+
+* Is intended for displaying disparate cartesian gridded data sets
+that cover differing geographical areas at different grid resolutions.
+
+* Runs on "standard" UNIX X based workstations 
+
+* Has both Real-Time and Post Processing Modes of operation.
+
+* Window Size and placement is under user control
+ 
+* Automatically gathers data from remote databases via a client-server
+mechanism. This facility allows the display to run on any desk top
+workstation.  All displays share the same data sources and archives,
+preventing the duplication of data sets and large data transfers.
+
+* Allows users to interactively select which data fields will appear on
+their display, what geographical area the display will cover, and over
+what time periods.
+
+* Displays arbitrary vertical cross sections selected by pointing and
+dragging.  Data field selection for horizontal and vertical views are
+independent.
+
+* Has Zoom and Area Move capabilities, selected by pointing and dragging.
+
+* Allows for contour and wind vector overlays. Contoured and false
+colored data fields are selected independently.
+
+* Allows Movie frame sequences that span over 8 hours.  Movie sequences
+do not need to be "stored". Frames are built "on the fly" from raw data
+files stored on disk. This allows users to configure the display and
+generate a movie sequence at any time. Differing data time
+granularities are accommodated.
+
+* Comes with a color scale editor that allows users to interactively
+select color scales and mappings for their data. Number of colors is
+arbitrary, limited only by the hardware. Any type of scaling between
+data values and colors is possible, including discontinous scales.
+
+* Uses a standard product (overlay) selector interface. Allows for
+display of both real time products and archived products.
+
+* Has facilities that allow external programs to gather coordinates
+(Latitude, Longitude, Altitude and X,Y,Z km) from the display, allowing for
+future interfacing between analysis programs and the display.
+Current ancillary programs include: time_hist, a storm cell analysis tool,
+pos_report, A position finder, for reporting relative distances and headings,
+snow_graph; to quanitate precip accumulation rates, and cidd2skewt,
+program which generates synthetic skewt's from model data.
+
+

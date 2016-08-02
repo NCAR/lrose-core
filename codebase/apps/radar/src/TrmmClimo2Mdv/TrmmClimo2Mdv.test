@@ -1,0 +1,223 @@
+/**********************************************************************
+ * TDRP params for TrmmClimo2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// TrmmClimo2Mdv reads netCDF files for the TRMM climatology data set, 
+//   converts these to MDV or CF-netCDF, and writes them out as specified.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This program registers with procmap. This is the instance used for 
+//   registration.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In FILELIST 
+//   mode, it moves through the list of file names specified on the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     FILELIST
+//     REALTIME
+//
+
+input_mode = FILELIST;
+
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In FILELIST mode, the file paths 
+//   are specified on the command line.
+// Type: string
+//
+
+input_dir = "./input";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// DATA FIELD DETAILS.
+//
+//======================================================================
+ 
+///////////// field_name //////////////////////////////
+//
+// Name of data field.
+// Type: string
+//
+
+field_name = "rain_fraction";
+
+///////////// field_name_long /////////////////////////
+//
+// Long name of data field.
+// Type: string
+//
+
+field_name_long = "rain_time_fraction";
+
+///////////// field_units /////////////////////////////
+//
+// Units of data field.
+// Type: string
+//
+
+field_units = "";
+
+///////////// write_as_single_file ////////////////////
+//
+// Option to write all climo fields to single file.
+// If true, the fields will be named field_name_jan, field_name_feb etc, 
+//   and will be written to a single file. The data time will be the 
+//   00:00:00 on Jan 1 of the reference yearIf false, multiple files will 
+//   be produced each with a single field. The file data times will be 
+//   00:00:00 for the first day of each month of the reference year.
+// Type: boolean
+//
+
+write_as_single_file = TRUE;
+
+///////////// time_period /////////////////////////////
+//
+// String for climatology period.
+// These are concatenated to the field_name, if write_as_single_file is 
+//   true.
+// Type: string
+// 1D array - variable length.
+//
+
+time_period = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
+
+///////////// reference_year //////////////////////////
+//
+// Reference year for the climatology.
+// This climatology provides monthly fields. The time stamp for these 
+//   fields is referenced to this year.
+// Type: int
+//
+
+reference_year = 2010;
+
+//======================================================================
+//
+// DATA SET DETAILS.
+//
+//======================================================================
+ 
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This short string is placed in the MDV master header for 
+//   documentation purposes.
+// Type: string
+//
+
+data_set_name = "TRMM CLIMATOLOGY";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This short string is placed in the MDV master header for 
+//   documentation purposes.
+// Type: string
+//
+
+data_set_source = "Converted by TrmmClimo2Mdv.";
+
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+// This long string is placed in the MDV master header for documentation 
+//   purposes.
+// Type: string
+//
+
+data_set_info = "";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for the output MDV files.
+// Type: string
+//
+
+output_url = "mdvp:://localhost::/tmp/mdv/trmm_climo";
+
+///////////// output_encoding /////////////////////////
+//
+// output encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding = ENCODING_INT16;
+
+///////////// compress_output /////////////////////////
+//
+// Compress the output?.
+// If true, the field data will be compressed using GZIP.
+// Type: boolean
+//
+
+compress_output = TRUE;
+

@@ -1,0 +1,278 @@
+/**********************************************************************
+ * TDRP params for AsciiSelect
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// log_spdb_errors /////////////////////////
+//
+// Option to log spdb get errors to log directory.
+// If true, SPDB errors will be logged to the directory specified by 
+//   errors_log_dir. The reason for dealing with errors in this way is 
+//   that stdout from this program is displayed as the main product. It is 
+//   difficult to separate stderr from stdout and pipe stderr to a logging 
+//   filter. Therefore we log the spdb errors directly.
+// Type: boolean
+//
+
+log_spdb_errors = FALSE;
+
+///////////// errors_log_dir //////////////////////////
+//
+// Errors log directory.
+// See log_spdb_errors.
+// Type: string
+//
+
+errors_log_dir = "$(ERRORS_LOG_DIR)";
+
+//======================================================================
+//
+// USER INTERFACE.
+//
+//======================================================================
+ 
+///////////// use_cidd_time ///////////////////////////
+//
+// Use Cidd time.
+// Use times from Cidd to retrieve data.
+// Type: boolean
+//
+
+use_cidd_time = TRUE;
+
+///////////// mouse_button ////////////////////////////
+//
+// mouse button recognized.
+// 0 = any, 1 = left, 2 = middle, 3 = right.
+// Type: int
+//
+
+mouse_button = 0;
+
+///////////// sleep_msecs /////////////////////////////
+//
+// sleep milli-seconds.
+// Number of milli-seconds to sleep between checks for mouse clicks.
+// Minimum val: 20
+// Type: int
+//
+
+sleep_msecs = 250;
+
+///////////// auto_click_interval /////////////////////
+//
+// Automatic click interval - secs.
+// Number of seconds between automatic clicks.  If the user hasn't 
+//   clicked anywhere after this number of seconds, we will simulate a 
+//   user click in the same place as before and will update the 
+//   information.  If <= 0, no automatic updates of the display are done.
+// Type: int
+//
+
+auto_click_interval = 300;
+
+///////////// startup_location ////////////////////////
+//
+// startup click location.
+// Lat/lon position of METAR station to display if the user hasn't 
+//   clicked on a location.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+startup_location = { 26, 122 };
+
+//======================================================================
+//
+// SHARED MEMORY WITH DISPLAY.
+//
+//======================================================================
+ 
+///////////// coord_shmem_key /////////////////////////
+//
+// Shared memory status key.
+// Id for the shared memory status segment used for communicating with 
+//   the display.
+// Type: int
+//
+
+coord_shmem_key = 61500;
+
+///////////// no_wait_for_shmem ///////////////////////
+//
+// Flag to not wait for display shared memory.
+// If set, this program will not wait for shared memory segment from the 
+//   display to be set ready.
+// Type: boolean
+//
+
+no_wait_for_shmem = FALSE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for reading SPDB data.
+// See DIDSS documentation for URL specs.
+// Type: string
+//
+
+input_url = "spdbp:://localhost:0:spdb/ascii_metar";
+
+///////////// retrieval_period ////////////////////////
+//
+// Data retrieval period - seconds.
+// Retrieve data from now (or CIDD time) back by this number of seconds.
+// Type: int
+//
+
+retrieval_period = 18000;
+
+///////////// sort_by_location ////////////////////////
+//
+// Option to sort entries by proximity to the click point.
+// If true, the data entries will first be sorted by proximity to the 
+//   search point. Then they will be sorted in time order, latest first.
+// Type: boolean
+//
+
+sort_by_location = TRUE;
+
+///////////// station_location_file ///////////////////
+//
+// Station location file - gives Lat, Lon and Alt for each station.
+// Each line in file is of form 4_CHAR_ID, Lat, Lon, Alt.
+// Type: string
+//
+
+station_location_file = "$(PROJ_DIR)/display/params/world_arp.loc";
+
+//======================================================================
+//
+// DISPLAY OPTIONS.
+//
+//======================================================================
+ 
+///////////// no_data_message /////////////////////////
+//
+// Message to print if no data are returned.
+// Message is printed followed by a new line if no data are found.
+// Type: string
+//
+
+no_data_message = "No metar data found.";
+
+///////////// nmax_items_print ////////////////////////
+//
+// Max number of items to print.
+// Type: int
+//
+
+nmax_items_print = 10;
+
+///////////// newline_between_items ///////////////////
+//
+// Option to print a new-line between items.
+// If true, a new line is printed between each item.
+// Type: boolean
+//
+
+newline_between_items = TRUE;
+
+///////////// valid_time_per_item /////////////////////
+//
+// Option to print valid time as first line of item.
+// If true, valid time precedes the data.
+// Type: boolean
+//
+
+valid_time_per_item = TRUE;
+
+///////////// nlines_scroll_before_printing ///////////
+//
+// Number of lines to scroll off the top before starting to print.
+// This is sometimes useful to clear the output window of previous 
+//   output.
+// Type: int
+//
+
+nlines_scroll_before_printing = 10;
+
+///////////// length_delimiter_line ///////////////////
+//
+// Length of line delimiting prints.
+// A line of dashes will be printed above each series of items printed. 
+//   This is the number of dashes used. Set to 0 if you do not want a 
+//   delimiter.
+// Type: int
+//
+
+length_delimiter_line = 68;
+
+///////////// trim_for_window /////////////////////////
+//
+// Option to trim the text to fit in a window.
+// If true, (a) lines will be wrapped at word boundaries to fit on a 
+//   line, (b) number of lines will be limited to that which will fit in 
+//   the window. If there are fewer lines in the text than in the window, 
+//   output will be padded with blank lines to fit in window.
+// Type: boolean
+//
+
+trim_for_window = TRUE;
+
+///////////// window_height ///////////////////////////
+//
+// Total number of lines to be printed.
+// Only used if scroll_after_printing is true.
+// Type: int
+//
+
+window_height = 50;
+
+///////////// window_width ////////////////////////////
+//
+// Total number of lines to be printed.
+// Only used if scroll_after_printing is true.
+// Type: int
+//
+
+window_width = 50;
+

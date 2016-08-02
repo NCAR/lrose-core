@@ -1,0 +1,350 @@
+/**********************************************************************
+ * TDRP params for Cov2Mom
+ **********************************************************************/
+
+//======================================================================
+//
+// Cov2Mom application.
+//
+// Cov2Mom reads covariances in an input DsRadar FMQ, computes moments 
+//   and writes them out to DsRadar queue.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_fmq_url ///////////////////////////
+//
+// Input URL for covariances via DsRadar FMQ.
+// Type: string
+//
+
+input_fmq_url = "fmq/moments";
+
+///////////// seek_to_start_of_input //////////////////
+//
+// Option to seek to the start of the input FMQ.
+// If TRUE, the program will seek to the start of the fmq and read in 
+//   data from the entire queue. If FALSE, it will only read new data as 
+//   it is added to the FMQ.
+// Type: boolean
+//
+
+seek_to_start_of_input = FALSE;
+
+//======================================================================
+//
+// INPUT COVARIANCES.
+//
+// Names of input fields in the Dsr queue.
+//
+//======================================================================
+ 
+///////////// input_fields ////////////////////////////
+//
+// Indicate which Dsr field name is to be used for each covariance.
+// Set the field name for each covariance type. If the covariance is not 
+//   available in the input field, it will be set to missing.
+//
+// Type: struct
+//   typedef struct {
+//      covariance_id_t id;
+//        Options:
+//          LAG0_HC_DB
+//          LAG0_HX_DB
+//          LAG0_VC_DB
+//          LAG0_VX_DB
+//          LAG0_HCVX_DB
+//          LAG0_HCVX_PHASE
+//          LAG0_VCHX_DB
+//          LAG0_VCHX_PHASE
+//          LAG1_HC_DB
+//          LAG1_HC_PHASE
+//          LAG1_VC_DB
+//          LAG1_VC_PHASE
+//          LAG1_HCVC_DB
+//          LAG1_HCVC_PHASE
+//          LAG1_VCHC_DB
+//          LAG1_VCHC_PHASE
+//          LAG1_VXHX_DB
+//          LAG1_VXHX_PHASE
+//          LAG2_HC_DB
+//          LAG2_HC_PHASE
+//          LAG2_VC_DB
+//          LAG2_VC_PHASE
+//          LAG3_HC_DB
+//          LAG3_HC_PHASE
+//          LAG3_VC_DB
+//          LAG3_VC_PHASE
+//      string dsr_name;
+//   }
+//
+// 1D array - variable length.
+//
+
+input_fields = {
+  { LAG0_HC_DB, "LAG0_HC_DB_F"},
+  { LAG0_HX_DB, "LAG0_HX_DB_F"},
+  { LAG0_VC_DB, "LAG0_VC_DB_F"},
+  { LAG0_VX_DB, "LAG0_VX_DB_F"},
+  { LAG0_HCVX_DB, "LAG0_HCVX_DB_F"},
+  { LAG0_HCVX_PHASE, "LAG0_HCVX_PHASE_F"},
+  { LAG0_VCHX_DB, "LAG0_VCHX_DB_F"},
+  { LAG0_VCHX_PHASE, "LAG0_VCHX_PHASE_F"},
+  { LAG1_HC_DB, "LAG1_HC_DB_F"},
+  { LAG1_HC_PHASE, "LAG1_HC_PHASE_F"},
+  { LAG1_VC_DB, "LAG1_VC_DB_F"},
+  { LAG1_VC_PHASE, "LAG1_VC_PHASE_F"},
+  { LAG1_HCVC_DB, "LAG1_HCVC_DB_F"},
+  { LAG1_HCVC_PHASE, "LAG1_HCVC_PHASE_F"},
+  { LAG1_VCHC_DB, "LAG1_VCHC_DB_F"},
+  { LAG1_VCHC_PHASE, "LAG1_VCHC_PHASE_F"},
+  { LAG1_VXHX_DB, "LAG1_VXHX_DB_F"},
+  { LAG1_VXHX_PHASE, "LAG1_VXHX_PHASE_F"},
+  { LAG2_HC_DB, "LAG2_HC_DB_F"},
+  { LAG2_HC_PHASE, "LAG2_HC_PHASE_F"},
+  { LAG2_VC_DB, "LAG2_VC_DB_F"},
+  { LAG2_VC_PHASE, "LAG2_VC_PHASE_F"},
+  { LAG3_HC_DB, "LAG3_HC_DB_F"},
+  { LAG3_HC_PHASE, "LAG3_HC_PHASE_F"},
+  { LAG3_VC_DB, "LAG3_VC_DB_F"},
+  { LAG3_VC_PHASE, "LAG3_VC_PHASE_F"}
+};
+
+//======================================================================
+//
+// MOMENTS COMPUTATIONS.
+//
+//======================================================================
+ 
+///////////// xmit_rcv_mode ///////////////////////////
+//
+// Transmit / receive mode.
+// This governs the type of moments computation which will be carried 
+//   out.
+//
+// Type: enum
+// Options:
+//     SP
+//     DP_ALT_HV_CO_ONLY
+//     DP_ALT_HV_CO_CROSS
+//     DP_ALT_HV_FIXED_HV
+//     DP_SIM_HV_FIXED_HV
+//     DP_SIM_HV_SWITCHED_HV
+//     DP_H_ONLY_FIXED_HV
+//     DP_V_ONLY_FIXED_HV
+//
+
+xmit_rcv_mode = DP_ALT_HV_CO_CROSS;
+
+///////////// is_filtered /////////////////////////////
+//
+// Are these filtered covariances?.
+// Type: boolean
+//
+
+is_filtered = TRUE;
+
+///////////// moments_snr_threshold ///////////////////
+//
+// Signal-to-noise value for thresholding (dB).
+// This is the signal-to-noise ratio used to thresholding based on the 
+//   noise.
+// Type: double
+//
+
+moments_snr_threshold = -100;
+
+///////////// correct_for_system_phidp ////////////////
+//
+// Option to correct for system phidp.
+// If true, the H and V correlation phases will be corrected by 
+//   adding/subtracting the system phidp value as appropriate. This avoids 
+//   premature wrapping of the phased from which phidp and velocity are 
+//   computed. If false, this correction will not be applied. To find the 
+//   system phidp, set this to false and compute phidp for 
+//   vertically-pointing data.
+// Type: boolean
+//
+
+correct_for_system_phidp = TRUE;
+
+///////////// change_aiq_sign /////////////////////////
+//
+// Option to change sign on AIQ field.
+// This affects refractt variables. Set to true to change the sign of 
+//   the computed AIQ field.
+// Type: boolean
+//
+
+change_aiq_sign = FALSE;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for computed moments via DsRadar FMQ.
+// Type: string
+//
+
+output_fmq_url = "fmq/moments_check";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 50000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 7200;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// output_fields ///////////////////////////
+//
+// Indicate which fields should be written to the moments FMQ.
+// Choose the ID from the list. The name and units can be set however 
+//   the user prefers. The scale and bias are applied to the floating 
+//   point value to compute the 8-bit ot 16-bit output value for the FMQ 
+//   If the output encoding is FL32, the scale and bias are not 
+//   applicable.
+//
+// Type: struct
+//   typedef struct {
+//      output_field_id_t id;
+//        Options:
+//          NCP
+//          SNR
+//          DBM
+//          DBZ
+//          VEL
+//          WIDTH
+//          ZDR
+//          LDRH
+//          LDRV
+//          RHOHV
+//          PHIDP
+//          KDP
+//          SNRHC
+//          SNRHX
+//          SNRVC
+//          SNRVX
+//          DBMHC
+//          DBMHX
+//          DBMVC
+//          DBMVX
+//      string name;
+//      string units;
+//      field_encoding_t encoding;
+//        Options:
+//          OUTPUT_INT8
+//          OUTPUT_INT16
+//          OUTPUT_FL32
+//      double scale;
+//      double bias;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  { NCP, "NCP", "", OUTPUT_FL32, 0.0001, -0.01},
+  { DBM, "DBM", "dBm", OUTPUT_FL32, 0.01, -320},
+  { ZDR, "ZDR", "dB", OUTPUT_FL32, 0.001, -32},
+  { DBZ, "DBZ", "dBZ", OUTPUT_FL32, 0.01, -320},
+  { VEL, "VEL", "m/s", OUTPUT_FL32, 0.01, -320},
+  { WIDTH, "WIDTH", "m/s", OUTPUT_FL32, 0.001, -0.01},
+  { PHIDP, "PHIDP", "deg", OUTPUT_FL32, 0.06, -200},
+  { RHOHV, "RHOHV", "", OUTPUT_FL32, 0.0001, -1},
+  { LDRH, "LDRH", "dB", OUTPUT_FL32, 0.005, -160},
+  { LDRV, "LDRV", "dB", OUTPUT_FL32, 0.005, -160},
+  { KDP, "KDP", "deg/km", OUTPUT_FL32, 0.001, -32},
+  { SNRHC, "SNRHC", "dB", OUTPUT_FL32, 0.01, -320},
+  { SNRHX, "SNRHX", "dB", OUTPUT_FL32, 0.01, -320},
+  { SNRVC, "SNRVC", "dB", OUTPUT_FL32, 0.01, -320},
+  { SNRVX, "SNRVX", "dB", OUTPUT_FL32, 0.01, -320},
+  { DBMHC, "DBMHC", "dBm", OUTPUT_FL32, 0.01, -320},
+  { DBMHX, "DBMHX", "dBm", OUTPUT_FL32, 0.01, -320},
+  { DBMVC, "DBMVC", "dBm", OUTPUT_FL32, 0.01, -320},
+  { DBMVX, "DBMVX", "dBm", OUTPUT_FL32, 0.01, -320}
+};
+
+// output_fields = {
+//   { DBZ, "DBZ", "dBZ", OUTPUT_FL32, 0.01, -320},
+//   { NCP, "NCP", "", OUTPUT_FL32, 0.0001, -0.01},
+//   { SNR, "SNR", "dB", OUTPUT_FL32, 0.01, -320},
+//   { DBM, "DBM", "dBm", OUTPUT_FL32, 0.01, -320},
+//   { VEL, "VEL", "m/s", OUTPUT_FL32, 0.01, -320},
+//   { WIDTH, "WIDTH", "m/s", OUTPUT_FL32, 0.001, -0.01},
+//   { ZDR, "ZDR", "dB", OUTPUT_FL32, 0.001, -32},
+//   { LDRH, "LDRH", "dB", OUTPUT_FL32, 0.005, -160},
+//   { LDRV, "LDRV", "dB", OUTPUT_FL32, 0.005, -160},
+//   { RHOHV, "RHOHV", "", OUTPUT_FL32, 0.0001, -1},
+//   { PHIDP, "PHIDP", "deg", OUTPUT_FL32, 0.06, -200},
+//   { KDP, "KDP", "deg/km", OUTPUT_FL32, 0.001, -32},
+//   { SNRHC, "SNRHC", "dB", OUTPUT_FL32, 0.01, -320},
+//   { SNRHX, "SNRHX", "dB", OUTPUT_FL32, 0.01, -320},
+//   { SNRVC, "SNRVC", "dB", OUTPUT_FL32, 0.01, -320},
+//   { SNRVX, "SNRVX", "dB", OUTPUT_FL32, 0.01, -320},
+//   { DBMHC, "DBMHC", "dBm", OUTPUT_FL32, 0.01, -320},
+//   { DBMHX, "DBMHX", "dBm", OUTPUT_FL32, 0.01, -320},
+//   { DBMVC, "DBMVC", "dBm", OUTPUT_FL32, 0.01, -320},
+//   { DBMVX, "DBMVX", "dBm", OUTPUT_FL32, 0.01, -320}
+// };
+

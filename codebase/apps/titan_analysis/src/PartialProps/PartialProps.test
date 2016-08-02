@@ -1,0 +1,85 @@
+/**********************************************************************
+ * TDRP params for PartialProps
+ **********************************************************************/
+
+//======================================================================
+//
+// Computes the properties for partial storm tracks defined in the case 
+//   tracks file. A 'partial track' is that part of a track considered 
+//   relevant when analyzing storm track cases, for example in weather 
+//   modification evaluation. A partial track consists of all elements of 
+//   a track which exist between a specified period before the seeding 
+//   decision time and a specified period after seeding decision time. The 
+//   partial track is intended to capture that part of a track which (a) 
+//   characterizes the track before seeding and (b) allows analysis of the 
+//   effects of seeding, but does not include effects which are not 
+//   attributable to seeding.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// storm_data_dir //////////////////////////
+//
+// Storm and track file data directory.
+// The directory in which to find the storm and track data files for use 
+//   in this analysis.
+// Type: string
+//
+
+storm_data_dir = "/d3/dixon/data/queensland/storms_20/MtStaplAndCp2";
+
+///////////// case_file_path //////////////////////////
+//
+// File path for seed/no-seed cases.
+// This file indicates the time and track numbers for each seeded case. 
+//   In addition the environmental conditions, such as cloud base and CAPE 
+//   are input from this file.
+// Type: string
+//
+
+case_file_path = "./case_tracks.q0708";
+
+///////////// output_dir //////////////////////////////
+//
+// Path for output directory.
+// Case data is written to files in this directory.
+// Type: string
+//
+
+output_dir = "./partial_props";
+
+///////////// altitude_threshold //////////////////////
+//
+// Altitude threshold for computing altitude-thresholded properties.
+// There are a number of properties, e.g. volume, which are computed for 
+//   the whole storm and for the region above an altitude threshold. This 
+//   threshold is used for those computations.
+// Minimum val: 0
+// Maximum val: 30
+// Type: double
+//
+
+altitude_threshold = 4;
+

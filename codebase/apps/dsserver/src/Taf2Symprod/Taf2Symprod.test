@@ -1,0 +1,1341 @@
+/**********************************************************************
+ * TDRP params for Taf2Symprod
+ **********************************************************************/
+
+//======================================================================
+//
+// Taf2Symprod reads TAF data from SPBD, converts the data selectively 
+//   into Symprod data, and serves it to the client.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for procmap registration and auto restarting.
+// Type: string
+//
+
+instance = "";
+
+///////////// no_threads //////////////////////////////
+//
+// Option to prevent server from using a thread per client.
+// For debugging purposes it it sometimes useful to suppress the use of 
+//   threads. Set no_threads to TRUE for this type of debugging.
+// Type: boolean
+//
+
+no_threads = FALSE;
+
+//======================================================================
+//
+// Server details for support from ServerMgr.
+//
+//======================================================================
+ 
+///////////// port ////////////////////////////////////
+//
+// Port number.
+// The server listens on this port for client requests.
+// Type: int
+//
+
+port = 5486;
+
+///////////// qmax ////////////////////////////////////
+//
+// Max quiescent period (secs).
+// If the server does not receive requests for this time period, it will 
+//   die gracefully. If set to -1, the server never exits.
+// Type: int
+//
+
+qmax = -1;
+
+///////////// max_clients /////////////////////////////
+//
+// Maximum number of clients.
+// This is the maximum number of threads the application will produce to 
+//   handle client requests.  If the maximum is reached, new clients will 
+//   receive a SERVICE_DENIED error message and will have to request the 
+//   data again.  If set to -1, no maximum is enforced.
+// Type: int
+//
+
+max_clients = 64;
+
+//======================================================================
+//
+// STATION SELECTION.
+//
+//======================================================================
+ 
+///////////// useAcceptedStationsList /////////////////
+//
+// Set to TRUE to use the acceptedStations list (below).
+// Only accept stations in this list.
+// Type: boolean
+//
+
+useAcceptedStationsList = FALSE;
+
+///////////// acceptedStations ////////////////////////
+//
+// List of accepted station IDs.
+// If a station is not on this list, it is not displayed.
+// Type: string
+// 1D array - variable length.
+//
+
+acceptedStations = { "RCTP", "RCFG", "RCSS", "RCGM", "RCNO", "RCQC", "RCBS", "RCUK", "RCKH", "RCFN", "RCNN", "RCAY", "RCKU", "RCMJ", "RCDC", "RCLG", "RCKW", "RCPO", "RCSQ", "RCQS", "RCLY", "RCYU", "RCMS", "RCDI", "RCMQ", "RCFS", "RCGI", "RCMT", "RCLM" };
+
+///////////// useRejectedStationsList /////////////////
+//
+// Set to TRUE to use the rejectedStations list (below).
+// Reject stations in this list.
+// Type: boolean
+//
+
+useRejectedStationsList = FALSE;
+
+///////////// rejectedStations ////////////////////////
+//
+// List of rejected station IDs.
+// If a station is not on this list, it is not displayed.
+// Type: string
+// 1D array - variable length.
+//
+
+rejectedStations = { "RCFN", "RCAY", "RCQS", "RCFS", "RCMT" };
+
+///////////// useBoundingBox //////////////////////////
+//
+// Set to TRUE to only include stations within the lat-lon bounding box.
+// Only accept stations for which the position is inside the bounding 
+//   box. Note: this will be overridden if the client specifies horizontal 
+//   limits.
+// Type: boolean
+//
+
+useBoundingBox = FALSE;
+
+///////////// bounding_box ////////////////////////////
+//
+// If useBoundingBox is true, only stations within this box will be 
+//   included in the product list.
+// To span the international date line, specify a continuous interval 
+//   using positive longitudes which exceed 180 or negative longitudes 
+//   which are less than -180. For example, min_lon = 80 and max_lon = 240 
+//   will span between 80E and 120W across the Pacific.
+//
+// Type: struct
+//   typedef struct {
+//      float min_lat;
+//      float min_lon;
+//      float max_lat;
+//      float max_lon;
+//   }
+//
+//
+
+bounding_box = { -90, -180, 90, 180 };
+
+///////////// decimate_spatially //////////////////////
+//
+// Option to decimate metar density spatially. Only applicable if the 
+//   bounding box option is specified in the param file, or the client 
+//   specifies the horizontal limits in the request.
+// If active, an imaginary grid will be constructed for the bounding 
+//   box. The number of grids in each direction will be specified by 
+//   decimate_n_lat and decimate_n_lon. Only one METAR product will be 
+//   created for each rectangle in the grid.
+// Type: boolean
+//
+
+decimate_spatially = FALSE;
+
+///////////// decimate_n_lat //////////////////////////
+//
+// If decimation is active, the bounding box is divided into this number 
+//   of sub-boxes in the latitude direction.
+// See decimate_spatially.
+// Type: int
+//
+
+decimate_n_lat = 25;
+
+///////////// decimate_n_lon //////////////////////////
+//
+// If decimation is active, the bounding box is divided into this number 
+//   of sub-boxes in the longitude direction.
+// See decimate_spatially.
+// Type: int
+//
+
+decimate_n_lon = 25;
+
+///////////// decimate_required_stations //////////////
+//
+// List of required stations when decimating.
+// If a station is in this list, it will always be displayed.
+// Type: string
+// 1D array - variable length.
+//
+
+decimate_required_stations = { "RCTP", "RCSS", "RCKH" };
+
+//======================================================================
+//
+// UNIQUENESS OF DATA.
+//
+//======================================================================
+ 
+///////////// forecast_uniqueness /////////////////////
+//
+// Specify uniqueness of forecast data.
+// OFF, all forecasts will be plotted. LATEST: only the latest relevant 
+//   forecast will be plotted. EARLIEST: only the earliest relevant 
+//   forecast will be plotted. A 'relevant' forecast is one for which the 
+//   start and end times include the request time from the client.
+//
+// Type: enum
+// Options:
+//     UNIQUE_OFF
+//     UNIQUE_LATEST
+//     UNIQUE_EARLIEST
+//
+
+forecast_uniqueness = UNIQUE_LATEST;
+
+//======================================================================
+//
+// PLOTTING MODES.
+//
+//======================================================================
+ 
+///////////// plot_normal_periods /////////////////////
+//
+// Option to plot data from non-TEMPO periods.
+// If true, data will be plotted from the non-TEMPO period which 
+//   contains the client request time.
+// Type: boolean
+//
+
+plot_normal_periods = TRUE;
+
+///////////// plot_tempo_periods //////////////////////
+//
+// Option to plot data from TEMPO periods.
+// If true, data will be plotted from the TEMPO period which contains 
+//   the client request time.
+// Type: boolean
+//
+
+plot_tempo_periods = FALSE;
+
+///////////// plot_unscaled ///////////////////////////
+//
+// Option to not scale the product with zoom state.
+// If true, the product is always rendered at the same scale, regardless 
+//   of zoom state. If false, the product is scaled down on the screen as 
+//   the zoome expands, and is scaled up as you zoom in.
+// Type: boolean
+//
+
+plot_unscaled = TRUE;
+
+//======================================================================
+//
+// CANCELLED TAFs.
+//
+//======================================================================
+ 
+///////////// plot_if_cancelled ///////////////////////
+//
+// Option to plot TAFs which have been cancelled.
+// If true, a TAF will be plotted even if cancelled. If FALSE, a 
+//   cancelled TAF will not be plotted.
+// Type: boolean
+//
+
+plot_if_cancelled = TRUE;
+
+//======================================================================
+//
+// WIND BARB PLOT.
+//
+//======================================================================
+ 
+///////////// draw_wind_barb //////////////////////////
+//
+// Option to draw the wind barb.
+// Type: boolean
+//
+
+draw_wind_barb = TRUE;
+
+///////////// draw_gust_barb //////////////////////////
+//
+// Option to draw the wind barb.
+// Type: boolean
+//
+
+draw_gust_barb = TRUE;
+
+///////////// wind_barb_color /////////////////////////
+//
+// Color of wind barb.
+// Type: string
+//
+
+wind_barb_color = "yellow";
+
+///////////// gust_barb_color /////////////////////////
+//
+// Color of gust barb.
+// Type: string
+//
+
+gust_barb_color = "pink";
+
+///////////// station_posn_circle_radius //////////////
+//
+// Radius of circle at station position.
+// Set to 0 for no circle.
+// Type: int
+//
+
+station_posn_circle_radius = 1;
+
+///////////// override_wind_barb_color_from_flight_cat 
+//
+// Option to override the the wind barb color using the flight category 
+//   color.
+// Type: boolean
+//
+
+override_wind_barb_color_from_flight_cat = TRUE;
+
+///////////// override_wind_barb_color_from_wind_speed 
+//
+// Option to override the the wind barb color using the wind speed
+// table specified below.
+// Type: boolean
+//
+
+override_wind_barb_color_from_wind_speed = FALSE;
+
+///////////// wind_speed_colors ///////////////////////
+//
+// List of min, max pairs and colors to use if
+// override_wind_barb_color_from_wind_speed is TRUE. Units are
+// those specified by the wind_units parameter. If the speed is not
+// covered by any of the ranges then the color specified by
+// wind_barb_color is used.
+//
+// Type: struct
+//   typedef struct {
+//      double min;
+//      double max;
+//      string color;
+//   }
+//
+// 1D array - variable length.
+//
+
+wind_speed_colors = {
+  { 0, 5, "blue"},
+  { 5, 10, "green"},
+  { 10, 1000, "red"}
+};
+
+///////////// wind_barb_line_width ////////////////////
+//
+// Width of lines used to render wind barbs.
+// Type: int
+//
+
+wind_barb_line_width = 1;
+
+///////////// wind_barb_shaft_len /////////////////////
+//
+// Length of wind barb shaft in pixels.
+// Type: int
+//
+
+wind_barb_shaft_len = 32;
+
+///////////// wind_barb_tick_len //////////////////////
+//
+// Length of wind barb ticks in pixels.
+// Type: int
+//
+
+wind_barb_tick_len = 8;
+
+///////////// wind_ticks_angle_to_shaft ///////////////
+//
+// Angle of the wind ticks relative to the shaft (deg).
+// Type: float
+//
+
+wind_ticks_angle_to_shaft = 55;
+
+///////////// wind_speed_units ////////////////////////
+//
+// Units for plotting Wind Barbs.
+//
+// Type: enum
+// Options:
+//     WIND_MS
+//     WIND_KTS
+//     WIND_MPH
+//     WIND_KPH
+//
+
+wind_speed_units = WIND_KTS;
+
+//======================================================================
+//
+// RENDER ALTERNATIVE STATION ICON IF CEILING DATA IS MISSING.
+//
+//======================================================================
+ 
+///////////// render_missing_ceiling_icon /////////////
+//
+// Option to render special icon if ceiling is missing.
+// Normally, the station plot shows a circle which is filled in at 0%, 
+//   25%, 50%, 75% or 100%, depending on cloud cover. If ceiling is 
+//   missing, the option allows you to render an alternative icon - say an 
+//   open triangle, or an M.
+// Type: boolean
+//
+
+render_missing_ceiling_icon = FALSE;
+
+///////////// missing_ceiling_icon_color //////////////
+//
+// Color of icon indicating missing ceiling information.
+// Type: string
+//
+
+missing_ceiling_icon_color = "white";
+
+///////////// missing_ceiling_icon_line_width /////////
+//
+// Width of lines used to render missing ceiling icon.
+// Type: int
+//
+
+missing_ceiling_icon_line_width = 1;
+
+///////////// missing_ceiling_icon ////////////////////
+//
+// Stroked icon for missing ceiling.
+// The coordinates are in pixel space.
+//
+// Type: struct
+//   typedef struct {
+//      int x;
+//      int y;
+//   }
+//
+// 1D array - variable length.
+//
+
+missing_ceiling_icon = {
+  { 0, 10},
+  { -8, -5},
+  { 8, -5},
+  { 0, 10}
+};
+
+///////////// missing_ceiling_icon_scale //////////////
+//
+// Scale the icon by this value.
+// This makes it easy to try different sizes without re-specifying all 
+//   of the icon points every time.
+// Type: double
+//
+
+missing_ceiling_icon_scale = 1;
+
+//======================================================================
+//
+// FLIGHT CATEGORY AND SKY OBSCURATION.
+//
+//======================================================================
+ 
+///////////// draw_flight_category ////////////////////
+//
+// Option to draw the flight category and obscuration icon.
+// Type: boolean
+//
+
+draw_flight_category = TRUE;
+
+///////////// flight_category /////////////////////////
+//
+// Array of flight category parameters.
+// The flight category at a station will be computed using the ceiling 
+//   (ft) and visibility (km) thresholds. If both values exceed the 
+//   threshold, the flight category will be equal to or greater that the 
+//   specified category.
+//
+// Type: struct
+//   typedef struct {
+//      flight_category_label_t label;
+//        Options:
+//          VFR
+//          MVFR
+//          IFR
+//      string color;
+//      float ceiling_threshold;
+//      float visibility_threshold;
+//   }
+//
+// 1D array - variable length.
+//
+
+flight_category = {
+  { VFR, "seagreen", 1500, 5},
+  { MVFR, "blue", 500, 1.6},
+  { IFR, "orange", 0, 0}
+};
+
+///////////// flight_category_circle_radius ///////////
+//
+// Radius for flight_category / obscuration icon.
+// Type: int
+//
+
+flight_category_circle_radius = 5;
+
+//======================================================================
+//
+// TEXT RENDERING PARAMETERS.
+//
+//======================================================================
+ 
+///////////// text_background_color ///////////////////
+//
+// Text background color.
+// Set to empty string to use display background color.
+// Type: string
+//
+
+text_background_color = "";
+
+///////////// font_name ///////////////////////////////
+//
+// Font name.
+// Type: string
+//
+
+font_name = "";
+
+///////////// text_vert_align /////////////////////////
+//
+// Vertical alignment label text.
+// Does not apply if forecast and outlook labels are active.
+//
+// Type: enum
+// Options:
+//     VERT_ALIGN_TOP
+//     VERT_ALIGN_CENTER
+//     VERT_ALIGN_BOTTOM
+//
+
+text_vert_align = VERT_ALIGN_CENTER;
+
+///////////// text_horiz_align ////////////////////////
+//
+// Horizontal alignment for label text.
+// Does not apply if forecast and outlook labels are active.
+//
+// Type: enum
+// Options:
+//     HORIZ_ALIGN_LEFT
+//     HORIZ_ALIGN_CENTER
+//     HORIZ_ALIGN_RIGHT
+//
+
+text_horiz_align = HORIZ_ALIGN_CENTER;
+
+///////////// text_font_size //////////////////////////
+//
+// Size of font to use for text.
+// Type: int
+//
+
+text_font_size = 0;
+
+///////////// text_font_style /////////////////////////
+//
+// Font style for the text.
+//
+// Type: enum
+// Options:
+//     TEXT_NORM
+//     TEXT_BOLD
+//     TEXT_ITALICS
+//     TEXT_SUBSCRIPT
+//     TEXT_SUPERSCRIPT
+//     TEXT_UNDERLINE
+//     TEXT_STRIKETHROUGH
+//
+
+text_font_style = TEXT_NORM;
+
+//======================================================================
+//
+// TEXT LABELS.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// Text labels.
+//
+// The following are specified for each text label:
+// 	do_draw: option to draw the label, true or false
+// 	color: foreground color
+// 	background_color: background color - if empty, no background
+// 	font_name: name of font family
+// 	font_size: suggest size in pixels
+// 	x_offset: x offset from station location in pixels
+// 	y_offset: y offset from station location in pixels
+// 	vert_align: vert justification of text relative to offset point
+// 	horiz_align: horiz justification of text relative to offset point.
+//
+//======================================================================
+ 
+///////////// weather_label ///////////////////////////
+//
+// Details for weather label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+weather_label = { TRUE, "yellow", "", "8x13", 13, -8, 6, VERT_ALIGN_CENTER, HORIZ_ALIGN_RIGHT };
+
+///////////// wind_gust_label /////////////////////////
+//
+// Details for wind gust label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+wind_gust_label = { TRUE, "pink", "", "8x13", 13, 6, 0, VERT_ALIGN_CENTER, HORIZ_ALIGN_LEFT };
+
+///////////// ceiling_label ///////////////////////////
+//
+// Details for ceiling label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+ceiling_label = { TRUE, "cyan", "", "8x13", 13, 6, -16, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+
+///////////// ceiling_units ///////////////////////////
+//
+// Units for plotting ceiling.
+//
+// Type: enum
+// Options:
+//     CEILING_METERS
+//     CEILING_KM
+//     CEILING_FT
+//     CEILING_KFT
+//     CEILING_FL
+//
+
+ceiling_units = CEILING_FT;
+
+///////////// visibility_label ////////////////////////
+//
+// Details for visibility label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+visibility_label = { TRUE, "magenta", "", "8x13", 13, -6, -16, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+
+///////////// visibility_units ////////////////////////
+//
+// Units for plotting visibility.
+//
+// Type: enum
+// Options:
+//     VISIBILITY_METERS
+//     VISIBILITY_KM
+//     VISIBILITY_METERS_KM
+//     VISIBILITY_MILES
+//
+
+visibility_units = VISIBILITY_METERS;
+
+///////////// display_temp ////////////////////////////
+//
+// Display of temperature data.
+// Set to the units that you want to use.
+//
+// Type: enum
+// Options:
+//     DISPLAY_TEMP_C
+//     DISPLAY_TEMP_F
+//
+
+display_temp = DISPLAY_TEMP_C;
+
+///////////// max_temp_label //////////////////////////
+//
+// Details for max temperature label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+max_temp_label = { TRUE, "red", "", "8x13", 13, -8, 6, VERT_ALIGN_BOTTOM, HORIZ_ALIGN_RIGHT };
+
+///////////// min_temp_label //////////////////////////
+//
+// Details for max temperature label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+min_temp_label = { TRUE, "blue", "", "8x13", 13, -8, 0, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+
+///////////// station_name_label_len //////////////////
+//
+// Length of station name label.
+// The last n chars are included in the label.
+// Maximum val: 4
+// Type: int
+//
+
+station_name_label_len = 4;
+
+///////////// station_name_label //////////////////////
+//
+// Details for station_name label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+station_name_label = { TRUE, "gray", "", "fixed", 10, 9, 0, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+
+///////////// issue_time_label ////////////////////////
+//
+// Details for time string label.
+// Intended mainly for debugging, to see the issue time for the plotted 
+//   TAF.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+issue_time_label = { FALSE, "white", "", "fixed", 10, 0, -30, VERT_ALIGN_TOP, HORIZ_ALIGN_CENTER };
+
+//======================================================================
+//
+// WEATHER ICONS.
+//
+//======================================================================
+ 
+///////////// draw_wx_icon ////////////////////////////
+//
+// Option to draw icon depicting type of weather.
+// Type: boolean
+//
+
+draw_wx_icon = TRUE;
+
+///////////// wx_icon_line_width //////////////////////
+//
+// Icon line width.
+// Line width for weather icons.
+// Type: int
+//
+
+wx_icon_line_width = 1;
+
+///////////// wx_icon_allow_client_scaling ////////////
+//
+// Allow client to scale the weather icons.
+// Type: boolean
+//
+
+wx_icon_allow_client_scaling = FALSE;
+
+///////////// wx_items ////////////////////////////////
+//
+// Defines for how to render the weather based on the WxWildcard.
+// WxWildCard is a string to separate out weather types.
+//   Possible wx types are:
+//     FZDZ FZRA SHGR SHGS SHRA
+//     SHSN TSGR TSGS TSPL TSRA TSSN
+//     BCFG BLDU BLSA BLSN DRDU DRSA
+//     DRSN FZFG MIFG PRFG
+//     DZ RA SN SG PL DS
+//     SS IC FG BR SA DU HZ
+//     FU VA SQ PO FC TS
+//   iconName: name of icon to plot, must be defined in icon_defs below
+//   iconNameSouth: icon name for Southern Hemisphere, if different from 
+//   main icon.
+//     Set to empty string if the same icon is used everywhere.
+//   iconScale: scaling factor to apply to the icon, if scaling is 
+//   allowed
+//   allowClientScaling: allow the client to scale or resize the icon?
+//   color: for icon.
+//
+// Type: struct
+//   typedef struct {
+//      string WxWildcard;
+//      boolean renderIcon;
+//      string iconName;
+//      string iconNameSouth;
+//      float iconScale;
+//      boolean allowClientScaling;
+//      string color;
+//   }
+//
+// 1D array - variable length.
+//
+
+wx_items = {
+  { "*VA*", TRUE, "va_icon", "", 1, FALSE, "magenta"},
+  { "*TS*", TRUE, "ts_icon", "", 1, FALSE, "red"},
+  { "*BR*", TRUE, "ts_icon", "", 1, FALSE, "red"},
+  { "*FZ*", TRUE, "icing_icon", "", 0.5, FALSE, "cyan"},
+  { "*FG*", TRUE, "ifr_icon", "", 1, FALSE, "white"},
+  { "*DS*", TRUE, "ds_icon", "", 0.5, FALSE, "tan"},
+  { "*SS*", TRUE, "ds_icon", "", 0.5, FALSE, "tan"},
+  { "*BL*", TRUE, "vis_icon", "", 1, FALSE, "white"}
+};
+
+//======================================================================
+//
+// ICON DEFINITIONS.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// ICON DEFINITIONS.
+//
+//======================================================================
+ 
+///////////// wx_icon_defs ////////////////////////////
+//
+// Definitions for all of the icons used by the server.
+// The icon_points string contains the points used to define the icon in 
+//   a space delimited string like the following:
+// 	"x1 y1 x2 y2 .... xn yn"
+// Use the value 32767 for both X and Y to indicate a pen up.
+// The turb_icon is the standard turbulence symbol.
+// The convective_icon is the standard convective symbol.
+// The icing_icon is the standard icing symbol.
+// The tc_icon is the standard tropical cyclone symbol.
+// The va_icon is an icon for volcanic ash.
+// The ds_icon is the standard icon for duststorms
+// The mtw_icon is an icon for mountain waves
+// The mtn_obsc_icon is the standard icon for mountain obscuration
+// The gr_icon is the standard icon for GR
+// The unknown is a question mark.
+//
+// Type: struct
+//   typedef struct {
+//      string icon_name;
+//      string icon_points;
+//   }
+//
+// 1D array - variable length.
+//
+
+wx_icon_defs = {
+  {
+    icon_name = "turb_icon",
+    icon_points = "-10 0 0 20 10 0 32767 32767 -10 -10 0 10 10 -10 32767 32767 -20 -10 -10 -10 32767 32767 -5 -10 5 -10 32767 32767 10 -10 20 -10"
+  }
+  ,
+  {
+    icon_name = "ts_icon",
+    icon_points = "0 0 15 15 -9 15 -9 -15 32767 32767 0 0 15 -15 32767 32767 15 -15 8 -15 32767 32767 15 -15 15 -9"
+  }
+  ,
+  {
+    icon_name = "convective_icon",
+    icon_points = "0 0 15 15 -9 15 -9 -15 32767 32767 0 0 15 -15 32767 32767 15 -15 8 -15 32767 32767 15 -15 15 -9"
+  }
+  ,
+  {
+    icon_name = "icing_icon",
+    icon_points = "0 0 0 -18 32767 32767 3 0 3 -18 32767 32767 -9 6 -9 0 -6 -3 -3 -6 6 -6 9 -3 12 0 12 6"
+  }
+  ,
+  {
+    icon_name = "tc_icon",
+    icon_points = "0 8  1 8  4 7  5 6  6 5  7 4  8 1  8 0  8 -1  7 -4  6 -5  5 -6  4 -7  1 -8  0 -8  -1 -8  -4 -7  -5 -6  -6 -5  -7 -4  -8 -1  -8 0  -8 1  -7 4  -6 5  -5 6  -4 7  -1 8  0 8  32767 32767  -8 0  -8 1  -7 5  -6 7  -3 11  1 14  5 16 32767 32767 8 0  8 -1  7 -5  6 -7  3 -11  -1 -14  -5 -16 32767 32767  0 7  1 7  3 6  5 5  6 3  7 1  7 0  7 -1  6 -3  5 -5  3 -6  1 -7  0 -7  -1 -7  -3 -6  -5 -5  -6 -3  -7 -1  -7 0  -7 1  -6 3  -5 5  -3 6  -1 7  0 7  32767 32767  -7 0  -7 1  -6 4  -5 7  -4 8  -3 9  0 12  1 13  3 14  5 15  32767 32767  7 0  7 -1  6 -4  5 -7  4 -8  3 -9  0 -12  -1 -13  -3 -14  -5 -15 "
+  }
+  ,
+  {
+    icon_name = "tc_icon_south",
+    icon_points = "0 8  1 8  4 7  5 6  6 5  7 4  8 1  8 0  8 -1  7 -4  6 -5  5 -6  4 -7  1 -8  0 -8  -1 -8  -4 -7  -5 -6  -6 -5  -7 -4  -8 -1  -8 0  -8 1  -7 4  -6 5  -5 6  -4 7  -1 8  0 8  32767 32767  8 0  8 1  7 5  6 7  3 11  -1 14  -5 16 32767 32767 -8 0  -8 -1  -7 -5  -6 -7  -3 -11  1 -14  5 -16  32767 32767  0 7  1 7  3 6  5 5  6 3  7 1  7 0  7 -1  6 -3  5 -5  3 -6  1 -7  0 -7  -1 -7  -3 -6  -5 -5  -6 -3  -7 -1  -7 0  -7 1  -6 3  -5 5  -3 6  -1 7  0 7  32767 32767  7 0  7 1  6 4  5 7  4 8  3 9  0 12  -1 13  -3 14  -5 15  32767 32767  -7 0  -7 -1  -6 -4  -5 -7  -4 -8  -3 -9  0 -12  1 -13  3 -14  5 -15 "
+  }
+  ,
+  {
+    icon_name = "va_icon",
+    icon_points = "0 0  1 0  -1 0  0 0  0 -1  0 1  32767 32767  4 0  16 0  8 20  -8 20  -16 0  -4 0  32767 32767  4 1  15 1  7 19  -7 19  -15 1  -4 1  32767 32767  2 22  8 28  32767 32767  3 22  9 28  32767 32767  -2 22  -8 28  32767 32767  -3 22  -9 28  132767 32767  0 22  0 28 32767 32767  1 22  1 28 32767 32767  -1 22  -1 28 32767 32767"
+  }
+  ,
+  {
+    icon_name = "ds_icon",
+    icon_points = "-6 6, -3 3, 0 0, 3 0, 6 3, 9 6, 9 9, 6 12, 3 15, 0 18, -3 21, -3 24, 0 27, 3 30, 6 30, 9 27, 12 24, 32767 32767, -8 17, 15 17, 32767 32767, -8 13 15 13, 32767 32767, 13 21, 18 15, 13 9"
+  }
+  ,
+  {
+    icon_name = "mtw_icon",
+    icon_points = "0 0, 9 21, 18 0, 32767 32767, 17 12, 17 15, 20 18, 23 18, 26 15, 26 12, 29 9, 32 9, 35 12, 35 18"
+  }
+  ,
+  {
+    icon_name = "gr_icon",
+    icon_points = "0 0, -6 12, 6 12, 0 0, 32767 32767, -6 15, 0 24, 6 15, -6 15, 32767 32767"
+  }
+  ,
+  {
+    icon_name = "fog_icon",
+    icon_points = "0 10,  4 9,  6 8,  8 6,  9 4,  10 0,  9 -4,  8 -6,  6 -8,  4 -9,  0 -10,  -4 -9,  -6 -8,  -8 -6,  -9 -4,  -10 0,  -9 4,  -8 6,  -6 8,  -4 9,  0  10, 32767 32767, -4 9, 4 9,  32767 32767, -6 8, 6 8,  32767 32767, -7 7, 7 7,  32767 32767, -8 6, 8 6,  32767 32767, -8 5, 8 5,  32767 32767, -9 4, 9 4,  32767 32767, -9 3, 9 3,  32767 32767, -9 2, 9 2,  32767 32767, -10 1, 10 1,  32767 32767, -10 0, 10 0,  32767 32767, -10 -1, 10 -1,  32767 32767, -9 -2, 9 -2,  32767 32767, -9 -3, 9 -3,  32767 32767, -9 -4, 9 -4,  32767 32767, -8 -5, 8 -5,  32767 32767, -8 -6, 8 -6,  32767 32767, -7 -7, 7 -7,  32767 32767, -6 -8, 6 -8,  32767 32767, -4 -9, 4 -9,  32767 32767 "
+  }
+  ,
+  {
+    icon_name = "ifr_icon",
+    icon_points = "0 0, -3 3, -3 21, 0 24, 32767 32767, 15 24, 18 21, 18 3, 15 0, 32767 32767, -3 18, 18 18 32767 32767, -3 12, 18 12 32767 32767, -3 6, 18 6"
+  }
+  ,
+  {
+    icon_name = "vis_icon",
+    icon_points = "-15 5  15 5  32767 32767 -15 0  15 0  32767 32767  -15 -5  15 -5"
+  }
+  ,
+  {
+    icon_name = "unknown",
+    icon_points = "-6 6 -6 8 -4 10 -2 12 2 12 4 10 6 8 8 4 4 2 2 0 0 0 0 -5 32767 32767 -2 -10 0 -10 0 -12 -2 -12 -2 -10"
+  }
+};
+
+//======================================================================
+//
+// FORECAST AND OUTLOOK DETAILS.
+//
+//======================================================================
+ 
+///////////// forecast_arrow_head_len_pixels //////////
+//
+// Length of forecast arrow head length, in pixels.
+// Type: int
+//
+
+forecast_arrow_head_len_pixels = 20;
+
+///////////// forecast_arrow_head_half_angle //////////
+//
+// Half angle of forecast arrow head (deg).
+// Type: double
+//
+
+forecast_arrow_head_half_angle = 15;
+
+///////////// outlook_arrow_head_len_pixels ///////////
+//
+// Length of outlook arrow head length, in pixels.
+// Type: int
+//
+
+outlook_arrow_head_len_pixels = 20;
+
+///////////// outlook_arrow_head_half_angle ///////////
+//
+// Half angle of outlook arrow head (deg).
+// Type: double
+//
+
+outlook_arrow_head_half_angle = 15;
+
+///////////// render_forecast_and_outlook_times ///////
+//
+// Render time for forecasts and outlooks.
+// If true, times are rendered next to forecasts and outlooks. The 
+//   observed time is also rendered if a forecast and/or outlook exists.
+// Type: boolean
+//
+
+render_forecast_and_outlook_times = TRUE;
+
+///////////// label_forecast_and_outlook_times ////////
+//
+// Label times for forecasts and outlooks.
+// If true, the label OBS, FCST and OTLK will be placed next to the 
+//   times for the forecasts and outlooks. Only active if 
+//   'render_forecast_and_outlook_times' is true.
+// Type: boolean
+//
+
+label_forecast_and_outlook_times = TRUE;
+
+//======================================================================
+//
+// HIDDEN TEXT and POLYGONS.
+//
+//======================================================================
+ 
+///////////// activate_hidden_text ////////////////////
+//
+// Option to activate hidden text.
+// If true, the full METAR message will be sent to the client, marked as 
+//   hidden text. This text may then be used by the client for any 
+//   purpose, such as pop-up text in response to a mouse event near the 
+//   product location.
+// Type: boolean
+//
+
+activate_hidden_text = TRUE;
+
+///////////// hidden_text_font_name ///////////////////
+//
+// Name of font for hidden texy.
+// Type: string
+//
+
+hidden_text_font_name = "fixed";
+
+///////////// hidden_text_x_offset ////////////////////
+//
+// X offset for hidden text (pixels).
+// Type: int
+//
+
+hidden_text_x_offset = 0;
+
+///////////// hidden_text_y_offset ////////////////////
+//
+// Y offset for hidden text (pixels).
+// Type: int
+//
+
+hidden_text_y_offset = 0;
+
+///////////// hidden_text_font_size ///////////////////
+//
+// Font size for hidden text (pixels).
+// Type: int
+//
+
+hidden_text_font_size = 10;
+
+///////////// hidden_text_vert_align //////////////////
+//
+// Vertical alignment hidden text.
+//
+// Type: enum
+// Options:
+//     VERT_ALIGN_TOP
+//     VERT_ALIGN_CENTER
+//     VERT_ALIGN_BOTTOM
+//
+
+hidden_text_vert_align = VERT_ALIGN_CENTER;
+
+///////////// hidden_text_horiz_align /////////////////
+//
+// Horizontal alignment for hidden text.
+//
+// Type: enum
+// Options:
+//     HORIZ_ALIGN_LEFT
+//     HORIZ_ALIGN_CENTER
+//     HORIZ_ALIGN_RIGHT
+//
+
+hidden_text_horiz_align = HORIZ_ALIGN_CENTER;
+
+///////////// hidden_text_foreground_color ////////////
+//
+// Hidden text background color.
+// Set to empty string to use flight cat color color.
+// Type: string
+//
+
+hidden_text_foreground_color = "";
+
+///////////// hidden_text_background_color ////////////
+//
+// Hidden text background color.
+// Set to empty string to use display background color.
+// Type: string
+//
+
+hidden_text_background_color = "";
+
+//======================================================================
+//
+// LOCATION ICON.
+//
+//======================================================================
+ 
+///////////// draw_location_icon //////////////////////
+//
+// Set to TRUE to plot icon.
+// Icon will be plotted as a stroked icon - a series of lines making a 
+//   shape. The points included in the icon appear in the parameter 
+//   icon_points.
+// Type: boolean
+//
+
+draw_location_icon = TRUE;
+
+///////////// location_icon_points ////////////////////
+//
+// List of points for plotting ICON.
+// The X,Y values are in pixel units. Use -999 to indicate a pen-up 
+//   action.
+//
+// Type: struct
+//   typedef struct {
+//      int x;
+//      int y;
+//   }
+//
+// 1D array - variable length.
+//
+
+location_icon_points = {
+  { -5, -5},
+  { 5, -5},
+  { 5, 5},
+  { -5, 5},
+  { -5, -5}
+};
+
+///////////// location_icon_color /////////////////////
+//
+// Stroked icon line color.
+// Type: string
+//
+
+location_icon_color = "gray50";
+
+///////////// location_icon_line_width ////////////////
+//
+// Stroked icon line width (pixels).
+// Type: int
+//
+
+location_icon_line_width = 1;
+
+///////////// location_icon_scale /////////////////////
+//
+// Scale of icon.
+// Allows you to make the icon larger or smaller without re-defining the 
+//   entire icon.
+// Type: double
+//
+
+location_icon_scale = 1.5;
+
+///////////// location_icon_allow_client_scaling //////
+//
+// Allows the client to scale the icon depending on zoom state.
+// If false, the icon will always be the specified size.
+// Type: boolean
+//
+
+location_icon_allow_client_scaling = FALSE;
+

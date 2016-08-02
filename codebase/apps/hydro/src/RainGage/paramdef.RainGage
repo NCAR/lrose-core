@@ -1,0 +1,128 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/****************************************************************
+ * parameter definitions for RainGage
+ *
+ * RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Alex Baia, August 2000
+ *
+ * code created from paramdef.BasinPrecip, Mike Dixon, Sept 1998
+ * 
+ * RainGage reads rain gage data from text files and
+ * writes it to spdb files.
+ */
+
+commentdef
+{
+  p_header = "Read rain gauge data in ASCII format, converts to SPDB.";
+}
+
+
+/****************************************************************
+ * Debugging and process control.
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+           "appropriate level of detail.";
+  p_default = DEBUG_OFF;
+} debug;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+/*********************************************************
+ * Program modes of operation.
+ */
+
+commentdef
+{
+  p_header = "PROGRAM MODES OF OPERATION.";
+  p_text = "Modes and trigger mechanism.";
+}
+
+typedef enum
+{
+  ARCHIVE,
+  REALTIME
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+           "In realtime mode, an spdb file is written as soon as "
+           "gage data becomes available. "
+           "In archive mode, the file list is obtained from the command line.";
+  p_default = ARCHIVE;
+} mode;
+
+/*********************************************************
+ * Input and output data
+ */
+
+commentdef
+{
+  p_header = "INPUT AND OUTPUT DATA.";
+}
+
+paramdef string
+{
+  p_descr = "Input URL for gage data text files.";
+  p_help = "Input data is in text file format.";
+  p_default = "./gage_data";
+} input_gage_url;
+
+paramdef string
+{
+  p_descr = "URL for output SPDB data.";
+  p_help = "Output data is in spdb format.";
+  p_default = "./spdb_data";
+} output_spdb_url;
+
+
+
+
+
+

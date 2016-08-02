@@ -1,0 +1,160 @@
+/*********************************************************
+ * parameter definitions for Scout
+ *
+ * Niles Oien, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * December 1998
+ */
+
+commentdef {
+  p_header =
+    "The Scout is a program that reports data files\n"
+    "to the data manager. It recurses under the top\n"
+    "directory defined by the environment variable\n"
+    "RAP_DATA_DIR and deduces the time that the\n"
+    "data pertains to (from the filename).\n\n"
+    "Many file names contain the date, but not\n"
+    "the time of the data they pertain to. In\n"
+    "this case a time of noon on the day in question\n"
+    "is assumed.\n";
+  p_text =
+    "By default the Scout only counts files which have names\n"
+    "which follow the following naming conventions for date/time:\n"
+    "  */yyyymmdd/g_hhmmss/f_llllllll.ext\n"
+    "  */yyyymmdd/hhmmss.ext\n"
+    "  */*yyyymmdd?hhmmss*\n"
+    "  */*yyyymmddhhmmss*\n"
+    "  */*yyyymmddhhmm*\n"
+    "  */*yyyymmddhh.tmhhmm (mm5 forecast)\n"
+    "  */*yyyymmddhh*\n"
+    "  */*yyyyjjjhh*\n"
+    "  */*yyyymmdd?hhmm*\n"
+    "  */*yyyymmdd?hh*\n"
+    "  */*yyyymmdd*\n"
+    "  */*yyjjj*\n"
+    "  \n"
+    "Set SeeAllFiles to TRUE to count all files";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debugging messages will be printed appropriately.";
+} Debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance.";
+  p_help = "This is used for registration with the process mapper.";
+} Instance;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set the TopDir.";
+  p_help = "By default, this is $DATA_DIR. You can override this to traverse from a point lower in the tree.";
+} OverrideTopDir;
+
+paramdef string {
+  p_default = "$(DATA_DIR)";
+  p_descr = "Top of directory structure to traverse.";
+  p_help = "We scan only from here down.";
+} TopDir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Count all files, ignoring the file naming conventions.";
+  p_help = "By default, the Scout only counts files which follow date/time file naming conventions. If SeeAllFiles is set to TRUE, the Scout will count all files and will use the file modify time deduce the time of files which do not follow the naming connventions.";
+} SeeAllFiles;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Run only once.";
+  p_help = "If true, the scout runs through the directory structure once and then exits.";
+} OnceOnly;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Use a file lock to guarantee a single instance is running.";
+  p_help = "If true, the scout requires a lock file to be obtained before running.";
+} Lock;
+
+
+paramdef int {
+  p_min = 1;
+  p_default = 600;
+  p_descr = "Delay between passes - secs.";
+  p_help = "The scout sleeps for this time between scans of the directory structure.";
+} BetweenPassDelay;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Delay between directories - secs.";
+  p_help = "Sleep for this number of seconds after processing a directory.";
+} BetweenDirDelay;
+
+
+paramdef int {
+  p_min = 0;
+  p_default = 100;
+  p_descr = "Delay between files - micro-secs.";
+  p_help = "Sleep for this number of micro-seconds after processing a file.";
+} BetweenFileDelay;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Report as it goes.";
+  p_help = "If true, the scout writes a report file in each subdirectory it processes.";
+} Report;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to report entry into a new directory by printing to stderr.";
+  p_help = "Intended as a minimal debugging option. Setting Debug to TRUE does this as well.";
+} ReportDirEntry;
+
+
+paramdef string {
+  p_default = ".gz";
+  p_descr = "Extension for compressed files.";
+  p_help = "Use this to check for compressed files.";
+} CompressedExt;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Recurse into this directory and subdirectories below it.";
+  p_help = "If FALSE, the current directory and all those below it are ignored. This value is controlled by inserting a _scout (or _Scout) parameter file into the relevant directory.";
+} Recurse;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "Data type to use for data mapper registration.";
+  p_help = "This data type is used for registration from this point in the direectory tree down, or until another _Scout param file is found.";
+} DataType;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Force a file count from this directory and below.";
+  p_help = "If TRUE, the Scout will count all files below here and report the stats to the DataMapper for this directory. Only a single DataMapper entry will appear.";
+} SummarizeFromHereDown;
+
+typedef struct {
+  string dataSetName;
+  string filePattern;
+} pattern_t;
+
+paramdef struct pattern_t {
+  p_default = {};
+  p_descr = "This contains a list of file name patterns to help Scout parse the date and time from the file name.";
+  p_help = "{ {'dataSetName1', 'filePattern1'}, {'dataSetName2', 'filePattern2'}, ..., ... }.  The data set name should be string that Scout will report to the DataMapper. The values used in the file patterns can be YYYY = 4-digit year; MM = 2-digit month; DD = 2-digit day; HH = 2-digit hour; MN = 2-digit minute; SS = 2-digit second.  For example { { 'sat_radiance', 'YYYYMMDD.gfs.tHHz.1bamub.bufr_d' } }";
+} Patterns[];

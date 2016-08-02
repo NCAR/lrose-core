@@ -1,0 +1,8 @@
+Device: Postscript
+Disposition: To Device
+Geometry: 900x500+0+0
+TitleFont: Helvetica12
+StyleMarkers: False
+XUnitText: X (km)
+YUnitText: Y (km)
+

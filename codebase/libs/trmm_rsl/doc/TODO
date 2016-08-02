@@ -1,0 +1,14 @@
+Work To Do (some WTD's are from previous WTD's):
+
+1. Add RHI processing.  Or, at least, debug why it doesn't work now.
+
+------------------------------------------------------------------------
+No additional functionality is planed for RSL.  The following will occur
+as a consequence of TRMM GV production:
+
+o Bug fixes.
+
+o Optimizations.
+
+o Documentation updates.
+

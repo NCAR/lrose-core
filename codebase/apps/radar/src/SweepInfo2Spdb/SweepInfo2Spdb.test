@@ -1,0 +1,140 @@
+/**********************************************************************
+ * TDRP params for SweepInfo2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// SweepInfo2Spdb reads sweep data from a catalog file and writes the 
+//   info to an SPDB data base.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// register_with_procmap ///////////////////
+//
+// Register this process with procmap?.
+// Type: boolean
+//
+
+register_with_procmap = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program continually watches a catalog file, 
+//   reading any new information added to the file. In ARCHIVE mode, the 
+//   program reads in a series of catalog files and processes them. In UDP 
+//   mode, the program listens for UDP packets containing scan 
+//   information.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     UDP
+//
+
+mode = UDP;
+
+//======================================================================
+//
+// FILE INPUT.
+//
+//======================================================================
+ 
+///////////// catalog_dir /////////////////////////////
+//
+// Catalog directory directory.
+// The catalog files will be written into this directory. There may be 
+//   more than 1 file. In REALTIME mode the latest file will be read.
+// Type: string
+//
+
+catalog_dir = "./input/catalogs";
+
+///////////// sweep_catalog_name_root /////////////////
+//
+// Root string at start of catalog file name.
+// All catalog files will begin with this string.
+// Type: string
+//
+
+sweep_catalog_name_root = "sweep_cat";
+
+///////////// state_file_path /////////////////////////
+//
+// Temporary file for saving state.
+// Used on startup to restore state if program is restarted for any 
+//   reason.
+// Type: string
+//
+
+state_file_path = "/tmp/SweepInfo2Spdb.status";
+
+//======================================================================
+//
+// UDP INPUT.
+//
+//======================================================================
+ 
+///////////// udp_port ////////////////////////////////
+//
+// UDP port.
+// UDP packets are broadcast to this port.
+// Type: int
+//
+
+udp_port = 4567;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL for sweep information.
+// The format is spdbp::params//host:port:dir. Normally params is an 
+//   empty string, and port is an empty string, so that the default 
+//   behavior will occur.
+// Type: string
+//
+
+output_url = "spdbp:://localhost::spdb/sweepinfo";
+

@@ -1,0 +1,23 @@
+# ascii_to_xgraph - acegr output
+#
+@with g0
+@g0 autoscale type AUTO
+@    view xmin 0.35000
+@    view xmax 0.65000
+@    view ymin 0.35000
+@    view ymax 0.65000
+@    title font 0
+@    subtitle ""
+@    subtitle font 0
+@    subtitle size 1.0
+@    s0 type xy
+@    s0 symbol size 0.200000
+@    s0 symbol fill 1
+@    xaxis  label font 0
+@    xaxis  ticklabel font 0
+@    xaxis  label char size 0.75
+@    xaxis  ticklabel char size 0.75
+@    yaxis  label font 0
+@    yaxis  ticklabel font 0
+@    yaxis  label char size 0.75
+@    yaxis  ticklabel char size 0.75

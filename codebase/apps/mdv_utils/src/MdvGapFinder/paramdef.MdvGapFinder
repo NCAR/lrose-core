@@ -1,0 +1,63 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvGapFinder
+ *
+ * This file contains the TDRP parameter definitions for MdvGapFinder
+ */
+
+commentdef
+{
+  p_header = "MdvGapFinder";
+  p_text = "This program finds time gaps in MDV data. It prints summary stats for the time gaps between files in seconds for files in a range of times";
+};
+
+paramdef string
+{
+  p_descr = "url";
+  p_help = "mdv url or path";
+  p_default = "unknown";
+} url;
+
+paramdef double
+{
+  p_descr = "max";
+  p_help = "maximum gap that is ok (minutes)";
+  p_default = 10;
+} max_gap_minutes;
+
+
+paramdef string
+{
+  p_descr = "file path";
+  p_help = "optional output file path. If empty, output does not go to a file. If non-empty, a file with name <path>/<yyyymmddhhmmss>_<yyyymmddhhmmss>_gaps.txt is written to";
+  p_default = "";
+} output_file_path;
+
+paramdef boolean
+{
+  p_descr = "std";
+  p_help = "TRUE to write output to standard output. Note if output_file is empty and this is FALSE, there will be no output.";
+  p_default = TRUE;
+} output_to_std;

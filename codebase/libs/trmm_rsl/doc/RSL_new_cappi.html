@@ -1,0 +1,33 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_new_cappi</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href=RSL_cappi_struct.html>Cappi</a> *RSL_new_cappi(<a href=RSL_sweep_struct.html>Sweep</a> *sweep, float height);</b> 
+
+<h3>
+<hr>Description</h3>
+<b>RSL_new_cappi</b> allocates memory for a <b>Cappi</b>. It allocates space for it's header and space for for a Sweep structure. The Sweep allocated is a copy of <b>sweep</b> with all the data cleared. The <b>height</b> argument is copied to the height member of Cappi. No values are assigned to the rays in the sweep. That is done in the routine RSL_fill_cappi. This routine is not, normally, called unless you are developing a new cappi routine for RSL. Call <a href=RSL_cappi_at_h.html>RSL_cappi_at_h</a> instead. 
+
+<p>
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. Otherwise, a NULL pointer is returned and errno is set. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_free_cappi.html>RSL_free_cappi</a>, <a href=RSL_cappi_at_h.html>RSL_cappi_at_h</a>, <a href=RSL_fill_cappi.html>RSL_fill_cappi</a>, <a href=RSL_get_value_from_cappi.html>RSL_get_value_from_cappi</a>
+
+<p>
+<hr>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

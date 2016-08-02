@@ -1,0 +1,103 @@
+/*********************************************************
+ * parameter definitions for GenPoly2Spdb
+ *
+ */
+
+commentdef {
+  p_header = "GenPoly2Spdb program";
+  p_text = "GenPoly2Spdb reads ASCII generic polyline data and writes to SPDB";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE,
+  REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the program watches for files arriving in input_dir. In ARCHIVE mode it uses the files specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Directory for input data.";
+} input_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "If TRUE, the program watches for an update in the _latest_data_info file in input_dir. The file path should be stored as user_info_2.";
+} use_ldata_info;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "./spdb/output";
+  p_descr = "URL for output spdb data.";
+} output_url;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Valid period of product (secs).";
+  p_help = "Product will be set to expire this number of seconds after the latest time in the input file";
+} valid_period;
+
+
+paramdef boolean
+{
+  p_default = false;
+  p_descr = "Restrict time range";
+  p_help = "If true, the two time values in time_limits constrain the portion of paths that get converted and written out. If false, no limits are used, and time_limits is ignored";
+} restrict_time_range;
+
+typedef struct
+{
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} Date_t;
+
+paramdef struct Date_t
+{
+  p_default = {{2016, 1, 1, 0, 0, 0}, {2016, 1, 1, 1, 0, 0}};
+  p_descr = "time limits to use";
+  p_help = "Used only when restrict_time_range = true.  Only content within the limits is converted to SPDB, everything else is ignored";
+} time_limits[2];
+

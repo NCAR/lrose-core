@@ -1,0 +1,133 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "mdvRhiExtract extracts data on a cartesian grid\n"
+	"from measured RHI data. It does NOT implement the radar\n"
+	"equation, rather, it just does simple geometry. It was\n"
+	"written for the REAL lidar. The output is written to ASCII\n"
+	"files with constant increments in X and Y (specified here)\n"
+	"for external processing.\n\nNiles Oien November 2007";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output directory";
+  p_help = "Output files are written here."; 
+  p_default = {"/Some/Directory/Structure"};
+} OutDir;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef string {
+  p_default = { "Backscatter" };
+  p_private = FALSE;
+  p_descr = "Field name to extract to ASCII files.";
+  p_help = "Default is for REAL lidar";
+} FieldName;   
+
+typedef struct {
+	double min;
+	double inc;
+	double max;
+} range_t;
+
+paramdef struct range_t {
+  p_private = FALSE;
+  p_descr = "Minimum, increment, maximum in Y (vertical) in Km";
+  p_help = "Set as appropriate.";
+  p_default = {0.0, 0.005, 2.5};
+} y;  
+
+paramdef struct range_t {
+  p_private = FALSE;
+  p_descr = "Minimum, increment, maximum in X (horizontal) in Km";
+  p_help = "Set as appropriate.";
+  p_default = {0.5, 0.005, 3.0};
+} x;  
+
+paramdef int {
+  p_private = FALSE;
+  p_descr = "Number of averaging points, plus/minus, in polar grid.";
+  p_help = "Averaging is done on the ploar grid over +/- this many points.";
+  p_default = 1;
+} AveragingPoints;  
+
+paramdef double {
+  p_private = false;
+  p_descr = "Gradient threshold in backscatter/vertical meter.";
+  p_help = "Gradients higher than this are printed if several\n"
+	"sequential high gradient points are detected.";
+  p_default = 0.02;
+} gradientPrintThresh;
+
+paramdef int {
+  p_private = false;
+  p_descr = "Number of sequential detections needed to print\n"
+	"a high gradient message.";
+  p_help = "Default should be OK.";
+  p_default = 3;
+} sequentialDetectionsForPrint;
+
+paramdef boolean {
+  p_private = false;
+  p_descr = "Option to print at what height the maximum backscatter\n"
+	"occurred and regions of high gradient.";
+  p_help = "May be useful information for those attemping to discern\n"
+	"the boundary layer.";
+  p_default = TRUE;
+} printInfo;
+

@@ -1,0 +1,55 @@
+/*********************************************************
+ * parameter definitions for tstorms2spdb
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 1993
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {ARCHIVE};
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the analysis is performed for each volume scan as it becomes available. In archiv mode, all of the scans in a track file are processed";
+} mode;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Output directory";
+  p_help = "Directory for output SPDB files.";
+} output_spdb_dir;
+
+paramdef double {
+  p_default = {360.0};
+  p_min = {1.0};
+  p_descr = "Max valid age of input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this.";
+} max_realtime_valid_age;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Storms data directory";
+  p_help = "Directory for storm and track data files";
+} storms_dir;

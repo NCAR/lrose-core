@@ -1,0 +1,10 @@
+#! /bin/sh
+
+snuff "dobson_server -params dobson_server.precip_fcast"
+
+
+
+
+
+
+

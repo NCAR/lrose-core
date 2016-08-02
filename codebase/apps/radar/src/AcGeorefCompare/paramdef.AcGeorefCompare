@@ -1,0 +1,123 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for AcGeorefCompare
+//
+//  Mike Dixon, EOL, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  March 2016
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "AcGeorefCompare reads multiple ac georef data sets from SPDB and compares them. It is designed to compare the NCAR GV INS with the HCR Gmigits unit.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Register with procmap.";
+} reg_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+  p_text = "We specify a primary and secondary data set. The primary set is read in first, and then data from the secondary data set is matched in time to the entries in the primary.";
+}
+
+paramdef string {
+  p_default = "/tmp/spdb/ac_georef/raf_1hz";
+  p_descr = "SPDB url for primary data set.";
+  p_help = "Can take the form of a local directory path, or a full url of the form:\n\n\t'spdbp:://hostname::dir_path'\n\nIf the dir_path starts with '.' or '/', it specifies a relative or absolute path respectively. If not, it specifies a path relative to '$DATA_DIR'.";
+} primary_spdb_url;
+
+paramdef string {
+  p_default = "/tmp/spdb/ac_georef/cfradial_10hz";
+  p_descr = "SPDB url for secondary data set.";
+  p_help = "Can take the form of a local directory path, or a full url of the form:\n\n\t'spdbp:://hostname::dir_path'\n\nIf the dir_path starts with '.' or '/', it specifies a relative or absolute path respecively. If not, it specifies a path relative to '$DATA_DIR'.";
+} secondary_spdb_url;
+
+commentdef {
+  p_header = "DATA ANALYSIS";
+  p_text = "Data is written to stdout in ASCII column format.";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Frequency of primary data to be used in the analysis.";
+  p_help = "If the data in the primary data set is more frequent than this, we trim it down to this frequency.";
+} primary_frequency_hz;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Length of data time blocks to be read in (secs).";
+  p_help = "The data is read in blocks of this length, to control memory usage for large data sets.";
+} time_block_secs;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Maximum time difference for valid pair (secs).";
+  p_help = "This is the max valid time difference between a primary observation and secondary observation.";
+} max_time_diff_secs;
+
+commentdef {
+  p_header = "AIRCRAFT WEIGHT CALCULATIONS";
+}
+
+paramdef double {
+  p_default = 11500;
+  p_descr = "Fuel burn rate in initial climb (lb/hr).";
+} fuel_burn_rate_initial_climb;
+
+paramdef double {
+  p_default = 3500;
+  p_descr = "Mean Fuel burn rate in cruise after the initial climb (lb/hr).";
+} mean_fuel_burn_rate_cruise;
+
+paramdef double {
+  p_default = 88000;
+  p_descr = "Aircraft takeoff weight (lb).";
+} takeoff_weight_lbs;
+
+paramdef double {
+  p_default = 20000;
+  p_descr = "Target top of climb altitude (ft).";
+} top_of_climb_altitude_ft;
+
+commentdef {
+  p_header = "OUTPUT DETAILS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, write a commented header at the start of the output.";
+} write_commented_header;
+
+paramdef string {
+  p_default = "#";
+  p_descr = "Character at start of comment lines.";
+  p_help = "Each comment line will be start with this character.";
+} comment_character;
+
+paramdef string {
+  p_default = " ";
+  p_descr = "Delimiter between columns.";
+} column_delimiter;
+

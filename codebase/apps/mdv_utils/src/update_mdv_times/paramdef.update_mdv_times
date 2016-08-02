@@ -1,0 +1,138 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.update_mdv_times
+ *
+ * This file contains the TDRP parameter definitions for
+ * update_mdv_times.
+ */
+
+commentdef
+{
+  p_header = "Program name: update_mdv_times";
+  p_text = "update_mdv_times allows you to change the time for the data in MDV file(s) and store the updated file(s) in a specified directory. There are two modes: SINGLE, in which you specify the file path and modify time on the command line; MULTIPLE, in which you specify the start and end time on the command line and the time_offset is applied to each file.";
+}
+
+typedef enum
+{
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+typedef enum
+{
+  SINGLE, MULTIPLE
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_default = SINGLE;
+  p_descr = "Processing mode.";
+  p_help = "SINGLE: specify a single file path on the command line, and the required time, and the updated file is written to the output dir. MULTIPLE: specify the start and end times on the command line, and the times in the file will be offset by the time_offset parameter.";
+} mode;
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/output";
+} output_url;
+
+paramdef boolean
+{
+  p_descr = "Option to write to forecast directory structure";
+  p_default = FALSE;
+} write_as_forecast;
+
+paramdef long
+{
+  p_descr = "time offset in seconds";
+  p_help = "This number of seconds will be added to every time value "
+           "in the MDV file headers.  Use a negative value to move the "
+           "time fields into the past.";
+  p_default = 0;
+} time_offset;
+
+paramdef boolean
+{
+  p_descr = "Option to increase forecast_time in field header with different "
+            "time offset than what is used for other time fields";
+  p_help  = "Added as an option so flat files could be converted "
+            "to forecast directory structure. If false forecast_time is offset "
+            "using the same time_offset as all other time fields.\n"
+            "This option cannot be set to to true if set_forecast_delta is "
+            "also set to true.";
+  p_default = false;
+} update_forecast_time;
+
+paramdef long
+{
+  p_descr = "forecast time offset in seconds";
+  p_help = "Used only if update_forecast_time is true. This number of "
+           "seconds will be added to forecast_time value in the MDV "
+           "field headers.  Use a negative value to move the "
+           "time fields into the past.";
+  p_default = 0;
+} forecast_time_offset;
+
+paramdef boolean
+{
+  p_descr = "Option to set the forecast_delta in each of the field headers "
+            "to a specific value.";
+  p_help = "If true, the forecast_delta value in each of the field headers "
+           "will be set to the value specified in forecast_delta_value and "
+           "each field header forecast time will be set to the master header "
+           "time_gen value plus the value specified in forecast_delta_value\n"
+           "This option cannot be set to true if update_forecast_time is also "
+           "set to true.";
+  p_default = false;
+} set_forecast_delta;
+
+paramdef long
+{
+  p_descr = "forecast delta value in seconds";
+  p_help = "Used only if set_forecast_delta is true. "
+           "The forecast_delta value for each of the fields in the file will "
+           "be set to this value.";
+  p_default = 0;
+} forecast_delta_value;
+
+paramdef boolean
+{
+  p_descr = "Option to set gen_time in master header to match old time centroid";
+  p_help  = "Added this option so flat files could be converted "
+            "to forecast directory structure."; 
+  p_default = FALSE;
+} reset_gen_time;

@@ -1,0 +1,12 @@
+########################################################################
+# parameters file for storms_to_ascii
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# October 1991
+#
+#########################################################################
+
+storms_to_ascii.debug: false
+storms_to_ascii.malloc_debug_level: 0
+

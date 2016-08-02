@@ -1,0 +1,219 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for BasinPrecip
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 1998
+ * 
+ * BasinPrecip computes the precip for given catchments, and
+ * write the results to SPDB.
+ */
+
+commentdef
+{
+  p_header = "Computes the precipitation for defined basins, based on the geographical extent of the basins and a precipitation field provided in MDV format. The output is written to SPDB.";
+}
+
+/*********************************************************
+ * Debugging and process control.
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+           "appropriate level of detail.";
+  p_default = DEBUG_OFF;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "Option to output basin debug info.";
+  p_help = "If set, mask and basin information will be printed "
+	   "to the screen.";
+  p_default = FALSE;
+} basin_debug;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+/*********************************************************
+ * Program modes of operation.
+ */
+
+commentdef
+{
+  p_header = "PROGRAM MODES OF OPERATION.";
+  p_text = "Modes and trigger mechanism.";
+}
+
+typedef enum
+{
+  ARCHIVE,
+  REALTIME
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+           "In realtime mode, the analysis is performed for each volume scan "
+           "as it becomes available. "
+           "In archive mode, the file list is obtained from the command line.";
+  p_default = ARCHIVE;
+} mode;
+
+/*********************************************************
+ * Input and output data
+ */
+
+commentdef
+{
+  p_header = "INPUT AND OUTPUT DATA.";
+}
+
+paramdef string
+{
+  p_descr = "Input URL for precip in MDV files.";
+  p_help =
+    "Input data is in MDV format, and must contain a precip field.";
+  p_default = "mdvp:://localhost::dir";
+} input_mdv_url;
+
+
+paramdef string
+{
+  p_descr = "Shape files to use for basin information";
+  p_help = "Give just the path for all of the related files, not including "
+           "the file extension.";
+} shape_file_bases[];
+
+
+paramdef int
+{
+  p_descr = "Precip field position in input MDV files.";
+  p_help = "Fields are 0-based.";
+  p_default = 0;
+} precip_field;
+
+paramdef string
+{
+  p_descr = "URL for output SPDB data.";
+  p_help = "This is a RAP-defined URL.";
+  p_default = "spdb:://localhost::dir";
+} output_spdb_url;
+
+/*********************************************************
+ * Catchment details
+ */
+
+commentdef
+{
+  p_header = "CATCHMENT DETAILS.";
+}
+
+paramdef string
+{
+  p_descr = "File path for catchment map file.";
+  p_help = "This file must contain the polylines delimiting the catchments "
+           "specified in 'catchment_details'. "
+           "Each catchment polyline must start and end at the outlet point.";
+  p_default = "none";
+} input_map_path;
+
+typedef enum
+{
+  CENTROID_REF,
+  OUTLET_REF,
+  SPECIFIED_REF
+} reference_posn_t;
+
+typedef struct
+{
+  string name;
+  reference_posn_t reference_pos;
+  double specified_lat;
+  double specified_lon;
+} catchment_details_t;
+
+paramdef struct catchment_details_t
+{
+  p_descr = "Array of catchment details.";
+  p_help = "\tname must match a polyline in the map file.\n"
+           "\treference_pos may be either computed (CENTROID), "
+           "obtained as the outlet position from the map file (OUTLET) "
+           "or specified by the user (SPECIFIED). "
+           "If SPECIFIED, the user must fill in the "
+           "specified lat and lon accordingly.";
+  p_default = { { "none",
+                  CENTROID_REF,
+                  0.0,
+                  0.0}
+              };
+} catchment_details[];
+
+/*********************************************************
+ * Debug output
+ */
+
+commentdef
+{
+  p_header = "DEBUG OUTPUT.";
+}
+
+paramdef boolean
+{
+  p_descr = "Option to output debug MDV files.";
+  p_help = "If set, MDV files with catchment numbers is output to "
+           "'debug_output_dir'";
+  p_default = FALSE;
+} output_debug_mdv;
+
+paramdef string
+{
+  p_descr = "Output directory for debug MDV files.";
+  p_help = "See output_debug_mdv.";
+  p_default = "none";
+} debug_mdv_dir;
+
+

@@ -1,0 +1,323 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions CP2Udp2Fmq
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2003
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "CP2Udp2Fmq reads CP2 time series data from UDP and writes the contents into a time series FMQ.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "regWithProcmap option.";
+} regWithProcmap;
+
+paramdef string {
+  p_default = "CP2Udp2Fmq";
+  p_descr = "Process instance name.";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef int {
+  p_default = 3100;
+  p_descr = "Port number for UDP input.";
+} udp_port;
+
+paramdef string {
+  p_default = "cp2exec";
+  p_descr = "Initial UDP source host name";
+} udp_host;
+
+commentdef {
+  p_header = "PULSE TIME CORRECTION";
+  p_text = "The time on the pulses from the PIRAQ lage real-time, because of a delay which occurs in the PIRAQ start sequence in cp2exec. We correct for this, optionally, using the S-band pulses, since they are the first ones to be received. We compare the piraq pulse times to the time of the host computer, over a number of pulses (10000), and compute a time error. This correction is applied to the time in the pulse header.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply the computed time correction to the pulse headers.";
+} apply_computed_time_correction;
+
+paramdef double {
+  p_default = 0.005;
+  p_descr = "Estimated latency for receiving pulses from the PIRAQ computer (secs).";
+  p_help = "In correcting the pulse times, we need to account for the latency in the communications between the PIRAQ computer and the host computer. This value, in seconds, is subtracted from the computed time error.";
+} pulse_time_latency;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts_s";
+  p_descr = "FMQ default S-Band path";
+} outFmqName_s;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts_x";
+  p_descr = "FMQ default X-Band path";
+} outFmqName_x;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "FMQ buffer size";
+} fmqNBytes;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "FMQ number of slots";
+} fmqNSlots;
+
+paramdef int {
+  p_default = 100;
+  p_descr = "FMQ parts per message";
+} nPartsPerMsg;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Time series pulses per info message";
+} nPulsesPerInfo;
+
+paramdef int {
+  p_default = 65534;
+  p_descr = "UDP rx packet buffer size";
+} udpRxBuffsz;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Apply PIRAQ3D_SCALE pulse scaling";
+} applyPulseScaling;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "S-Band IQ swap flag";
+} swapIQ_s;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "X-Band IQ swap flag";
+} swapIQ_x;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "S-Band IQ inverrt flag";
+} invertQ_s;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "X-Band IQ invert flag";
+} invertQ_x;
+
+commentdef {
+  p_header = "RADAR OPERATIONS INFO";
+  p_text = "If any of the params are set in the input data files, the values in those params will be taken from the input data stream rather than from the parameter file."; 
+};
+
+typedef enum {
+  TS_SINGLE_POL = 0, 
+  TS_ALT_HV_CO_ONLY = 1, 
+  TS_ALT_HV_CO_CROSS = 2,
+  TS_ALT_HV_FIXED_HV = 3,
+  TS_SIM_HV_FIXED_HV = 4,
+  TS_SIM_HV_SWITCHED_HV = 5,
+  TS_H_ONLY_FIXED_HV = 6,
+  TS_V_ONLY_FIXED_HV = 7,
+  TS_XMIT_RCV_MODE_UNKNOWN = 999
+} ts_xmit_rcv_mode_t;
+
+typedef enum {
+  TS_SCAN_MODE_CALIBRATION = 0,
+  TS_SCAN_MODE_SECTOR =  1,
+  TS_SCAN_MODE_COPLANE =  2,
+  TS_SCAN_MODE_RHI =  3,
+  TS_SCAN_MODE_VERTICAL_POINTING =  4,
+  TS_SCAN_MODE_TARGET =  5,
+  TS_SCAN_MODE_MANUAL =  6,
+  TS_SCAN_MODE_IDLE =  7,
+  TS_SCAN_MODE_SURVEILLANCE =  8,
+  TS_SCAN_MODE_VERTICAL_SWEEP =  9,
+  TS_SCAN_MODE_SUNSCAN =  10,
+  TS_SCAN_MODE_POINTING =  11,
+  TS_SCAN_MODE_UNKNOWN = 99
+} ts_scan_mode_t;
+
+typedef enum {
+  TS_PRF_MODE_FIXED = 0, 
+  TS_PRF_MODE_STAGGERED_2_3,
+  TS_PRF_MODE_STAGGERED_3_4,
+  TS_PRF_MODE_STAGGERED_4_5,
+  TS_PRF_MODE_UNKNOWN = 99
+} ts_prf_mode_t;
+
+typedef enum {
+  TS_XMIT_PHASE_MODE_FIXED = 0,  /* Klystron */
+  TS_XMIT_PHASE_MODE_RANDOM = 1, /* Magnetron */
+  TS_XMIT_PHASE_MODE_SZ864 = 2,  /* SAchinanda-Zrnic 8/64 phase encoded */
+  TS_XMIT_PHASE_MODE_UNKNOWN = 99
+} ts_xmit_phase_mode_t;
+
+// ts_ops_info_t users should initialise with relevant fields from ds_radar calib_t
+// Doesn't redefine values already in ds_radar_calib_t
+
+typedef struct {
+
+  int version;      /* version number of this struct format */
+  int radarId;      /* to match ids between ops info and pulse headers */
+
+  /* location */
+
+  float altitudeM;    /* altitude in meters */
+  float latitudeDeg;  /* degrees */
+  float longitudeDeg; /* degrees */
+
+  /* gate geometry */
+
+  float startRangeM;  /* range to center of first gate - meters */
+  float gateSpacingM; /* spacing between gates - meters */
+
+  /* operational modes */
+
+  ts_scan_mode_t scanMode;          /* ts_scan_mode_t */
+  ts_xmit_rcv_mode_t xmitRcvMode;       /* ts_xmit_rcv_mode_t */
+  ts_prf_mode_t prfMode;           /* ts_prf_mode_t */
+  ts_xmit_phase_mode_t xmitPhaseMode;     /* ts_xmit_phase_mode_t */
+
+  /* radar and site name */
+  
+  string radarName; /**< UTF-8 encoded radar name */
+  string siteName; /**< UTF-8 encoded radar name */
+
+} ts_ops_info_params;
+
+paramdef struct ts_ops_info_params {
+
+  p_default = { version = 0,
+		radarId = 72,
+		altitudeM = 168,
+		latitudeDeg = -27.6692,
+		longitudeDeg = 152.862,
+		startRangeM = -9999,
+		gateSpacingM = -9999,
+		scanMode = TS_SCAN_MODE_UNKNOWN,
+		xmitRcvMode = TS_ALT_HV_CO_ONLY,
+		prfMode = TS_PRF_MODE_FIXED,
+		xmitPhaseMode = TS_XMIT_PHASE_MODE_FIXED,
+		radarName = "CP2Radar",
+		siteName = "Redbank Plains"
+  };
+  
+} ts_ops_info_sband;
+
+paramdef struct ts_ops_info_params {
+
+  p_default = { version = 0,
+		radarId = 72,
+		altitudeM = 168,
+		latitudeDeg = -27.6692,
+		longitudeDeg = 152.862,
+		startRangeM = -9999,
+		gateSpacingM = -9999,
+		scanMode = TS_SCAN_MODE_UNKNOWN,
+		xmitRcvMode = TS_H_ONLY_FIXED_HV,
+		prfMode = TS_PRF_MODE_FIXED,
+		xmitPhaseMode = TS_XMIT_PHASE_MODE_RANDOM,
+		radarName = "CP2Radar",
+		siteName = "Redbank Plains"
+  };
+  
+} ts_ops_info_xband;
+
+commentdef {
+  p_header = "PULSE HEADER INFORMATION";
+};
+
+typedef enum {
+  TS_IQ_ENCODING_FLOAT32 = 0,     
+  TS_IQ_ENCODING_SCALED_INT16 = 1,                                  
+  TS_IQ_ENCODING_SIGMET_INT16 = 2,
+  TS_IQ_ENCODING_UNKNOWN = 99
+} ts_iq_encoding_t;
+
+typedef struct {
+
+  int version;      /* version number of this struct format */
+  int nChannels;  /* number of channels in the IQ data */
+  ts_iq_encoding_t iqEncoding; /* ts_iq_encoding_t */
+  int hvTxFlag;     /* 1 = H transmit, 0 = V transmit */
+
+  boolean phaseCohered;/* received phases are cohered to burst phase
+			* 1 = TRUE, 0 = FALSE, applies to
+			* TS_XMIT_PHASE_MODE_RANDOM and TS_XMIT_PHASE_MODE_SZ864 */
+
+  float txmitPowerDbmH; /* H power in dBm */
+  float txmitPowerDbmV; /* V power in dBm */
+
+} ts_pulse_info_params;
+
+paramdef struct ts_pulse_info_params {
+  p_descr = "Default S-Band radar pulse params. If any of the params are set in the input UDP timeseries data, the values in those params will be taken from the input data stream rather than from the parameter file.";
+  p_default = { version = 0,
+		nChannels = 1,
+		iqEncoding = TS_IQ_ENCODING_FLOAT32,
+		hvTxFlag = 1,
+		phaseCohered = TRUE,
+		txmitPowerDbmH = 8000000,
+		txmitPowerDbmV = 0
+  };
+} ts_pulse_info_s;
+
+paramdef struct ts_pulse_info_params {
+  p_descr = "Default X-Band radar pulse params. If any of the params are set in the input UDP timeseries data, the values in those params will be taken from the input data stream rather than from the parameter file.";
+  p_default = { version = 0,
+		nChannels = 2,
+		iqEncoding = TS_IQ_ENCODING_FLOAT32,
+		hvTxFlag = 1,
+		phaseCohered = FALSE,
+		txmitPowerDbmH = 8000000,
+		txmitPowerDbmV = 0
+  };
+} ts_pulse_info_x;
+
+commentdef {
+  p_header = "CALIBRATION FILES";
+};
+
+paramdef string {
+  p_default = "./calib_s.xml";
+  p_descr = "XML file name for s-band calibration.";
+} cal_file_s;
+
+paramdef string {
+  p_default = "./calib_x.xml";
+  p_descr = "XML file name for x-band calibration.";
+} cal_file_x;
+

@@ -1,0 +1,321 @@
+
+	File: cfrd.doc
+	A description of the configuration file read module (CFRD)
+
+   A. General:
+
+	This is a tool for opening and reading configuration files. It assumes
+	a simple yet useful configuration file format, which will be 
+	described later. It checks various possible errors in a configuration
+	file and provides convenient services for randomly accessing the file
+	information. It can also return the information about whether all data
+	have been accessed. The design goals are:
+
+	1. To precisely convey information. Information in a configuration 
+	   file should not be misinterpreted or ignored. For instance an
+	   duplicated statement or a misspelled key word should be detected.
+	   Information in a configuration can be either mandatory or
+	   optional. 
+
+	2. A configuration file should be simple and convenient to use. It 
+	   should be easy to read. It uses simple rules and as few as possible
+	   reserved words which require minimum learning efforts. The file
+	   should not require a specific order in specifying configuration 
+	   items. It should support free indentation, continuing lines and in 
+	   line commenting words.
+
+	3. Application protection and error handling. A configuration file is an 
+	   interface between the user and the application program. The user can 
+	   make errors in preparing a configuration. However, it is usually not 
+	   acceptable if an error can crash the application or cause the 
+	   application to enter into an unpredicted state. The CFRD tool 
+	   should never crash due to a configuration error (e.g., a binary
+	   file is accidentally being used). It should detect all detectable 
+	   errors and report the error type and location as precisely as 
+	   possible.
+	   
+	4. The tool should be a compact, light-weight package using small amount
+	   of memory (both program and data spaces) and cpu resources.
+
+	This CFRD tool does not contain application specific information. 
+	The data correctness checks are left to the application program.
+		
+
+    B. The CFRD functions:
+
+	An application using the CFRD library routines must include 
+	"confread.h". The CFRD library supports the following functions:
+
+	int CFRD_open (char *file_name, void (*err_func) ())
+
+	    CFRD_open opens the configuration file "file_name". It reads 
+	    through the file once and checks the possible syntax errors. If no 
+	    error is found it returns the number (always >=0) of key words in 
+	    the file. If an error is found, it reports the error by calling the 
+	    external function "err_func", if non-NULL, and returns CFRD_FAILURE 
+	    (-1). err_func is defined as void err_func (char *msg). A error 
+	    message is passed to "err_func" through argument "msg", which can 
+	    be, for example, printed out on stdout.
+	
+	    The err_func function will be used for all error messages generated 
+	    by this module later.
+
+	    This function can be called only once before a CFRD_close is called. 
+	    The second call is returned with CFRD_FAILURE without other actions. 
+
+	    The possible error messages generated in this function are:
+
+	    Cfrd error (line #, file name): could not open file
+	    Cfrd error (line #, file name): line is tool long or binary file
+	    Cfrd error (line #, file name): unexpected reserved word
+	    Cfrd error (line #, file name): data on the same line after BEGIN
+	    Cfrd error (line #, file name): BEGIN inside a list
+	    Cfrd error (line #, file name): data after END
+	    Cfrd error (line #, file name): BEGIN not closed
+	    Cfrd error: malloc (realloc) failed
+	    Cfrd error (line #, file name): Key word too long
+	    Cfrd error (line #, file name): Duplicated key word
+
+
+	int CFRD_get_next_line (char *key_word,	char **line_buf)
+
+	    This is the basic configuration read function. It reads the line 
+	    specified by "key_word" and returns, in "line_buf", the pointer to a 
+	    buffer that contains the line data. If the key word specifies a 
+	    single-line dataset, the set is returned each time this function is 
+	    called. If the key word specifies a multiple line list, the first 
+	    call returns the first line. The following call, with the same key 
+	    word, will return the next line. If all lines are read, the next 
+	    call will return a pointer to a string of zero length. The next 
+	    call, if using the same key word, will return the first line again. 
+	    Every time the key word changes, the function will return the first 
+	    line in the specified list. 
+
+	    The argument "key_word" can take the value of "CFRD_BEGIN" which 
+	    does not return any data but causes the next CFRD_get_next_line call 
+	    to return the first line in a list.
+
+	    If there is no data in either a single-line dataset or a list, this 
+	    function will return a pointer to a string of zero length.
+
+	    This function returns the line number of the data in the file 
+	    (starting from 1) if the key word is found in the file. The returned 
+	    line number can be useful for application's error messages. It 
+	    returns CFRD_FAILURE (-1) if the key word is not found in the 
+	    configuration file or no file is currently open.
+
+	    The returned line always has a \n as its last character in case 
+	    there is any data.
+
+	    The possible error message generated in this function is:
+
+	    Fatal error - file is corrupted
+
+	    which indicates that the file has been modified since it is opened 
+	    by CFRD_open.
+
+	int CFRD_read_check (char **keyword)
+
+	    CFRD_read_check returns information about whether all key words have
+	    been read. If all are read, this function returns CFRD_SUCCESS (0). 
+	    If any key word has never been read, it returns, in argument 
+	    "keyword", the first unread key word in the file. The function 
+	    returns the line number where the first unread key word was found in 
+	    the later case. If this function is called without an open file, it 
+	    returns CFRD_FAILURE (-1).
+
+	void CFRD_close ()
+	
+	    CFRD_close closes the file handle and frees allocated resources.
+	    Call of this function is necessary before a second configuration 
+	    file can be opened. 
+
+	The CFRD module also provides the following convenience functions:
+
+	int CFRD_read_next_line (char *key_word, int max_len, char **line_buf)
+
+	    This function is similar to CFRD_get_next_line except that the user 
+	    can specified the maximum length of the line to be returned, 
+	    max_len. If the next line is not longer than max_len, it behaves the 
+	    same way and returns the same values as CFRD_get_next_line does. If, 
+	    however, the line length is longer than max_len, it calls err_func 
+	    (if it is non-NULL) with a message of "Line is longer than expected" 
+	    and returns CFRD_FAILURE (-1).
+
+	int CFRD_read_array (char *key_word, int type, int n, void *array, 
+			     int *err)
+
+	    CFRD_read_array reads "n" elements of "type" into "array" under key 
+	    word "key_word". The argument "type" can be one of CFRD_CHAR, 
+	    CFRD_SHORT, CFRD_INT, CFRD_LONG, CFRD_FLOAT and CFRD_DOUBLE. It 
+	    returns the number of items successfully read. This function always 
+	    starts from the next line in the section of "key_word".
+
+	    The argument "err", if non-NULL, returns a status integer, which can 
+	    be one of the following:
+
+	    CRFD_SUCCESS (0)		The read finished successfully;
+
+	    CRFD_KEY_NOT_FOUND (-1)	The key word was not found;
+
+	    CFRD_TYPE_ERROR (-2)	Unexpected argument "type";
+
+	    A positive line number	Stopped at an uninterpretable token on 
+					this line if less items were read, or 
+					there are tokens left unread on the 
+					line, if all required items are read.
+
+	    Note that err can be CRFD_SUCCESS (0) while the function returns 0,
+	    in which case there is nothing in the section under the key word.
+
+	int CFRD_find_token (char *string, int n, int *off)
+
+	    This function returns, in argument "off", the offset of the "n"-th 
+	    token in the string "string". "n" starts with 1. It returns the 
+	    number "n" if that token is found. Otherwise, it returns the number 
+	    of the tokens in the string. The "off" is 0 in the later case.
+
+    C. examples
+
+	The following code reads a list of elevation angles from the 
+	configuration file:
+
+	Elevation_list
+	    BEGIN
+		.5   1   2.2
+		10  12.   13.   22
+	    END
+
+
+	#include "confread.h"
+	#define MAX_ELEVATION	32
+
+	float elevation [MAX_ELEVATION];
+	int cnt;		/* number of elevations */
+
+	if (CFRD_open (file_name) == CFRD_FAILURE) {
+	    printf ("Failed in opening the configuration file\n");
+	    exit (-1);
+	}
+
+	cnt = CFRD_read_array ("Elevation_list", CRFD_FLOAT, MAX_ELEVATION, 
+			(void *)elevation, NULL);
+
+	/* print the values */
+	for (i = 0; i < cnt; i++)
+	    printf ("Elevation: %f\n", elevation[i]);
+	if (cnt == 0)
+	    printf ("No elevation angle found in the configuration\n");
+
+
+   D. The configuration file format:
+
+	The configuration file discussed here contains a number of independent 
+	datasets each of which is identified by a key word. The key words are 
+	case sensitive. The dataset can be a single line character string or a 
+	multiple line list. A single-line dataset has the format:
+
+	key_word data1 data2 ...
+
+	A single-line dataset without any data (except the key word) is legal.
+
+	A multiple line list uses the format:
+
+	key_word
+	    BEGIN
+		data line 1
+		data line 2
+		......
+	    END
+
+	The following variation is permissible:
+
+	key_word BEGIN
+		data line 1
+		data line 2
+		......
+	    END
+
+	A list without any data is legal:
+
+	key_word BEGIN
+	         END
+
+	A key word is the first token in a line, which is not in a list. e.g.
+	the "word1" in the following is not a key word:
+
+	key_word BEGIN 
+	word1
+	END
+
+	Duplicated use of a key word will cause an error.
+
+	CFRD uses two reserved words: BEGIN and END. BEGIN must follow a
+	key word and END must be the first token in a line. A BEGIN without
+	a key word or a BEGIN without a closing END will cause an error. If 
+	BEGIN and END appear in other places they are not interpreted as 
+	reserved words. Any data following the reserved words BEGIN and END in 
+	the same line will cause an error.
+
+	A line can be continued by its next line. The to-be-continued symbol
+	is "\". e.g the follwing 
+
+	a \
+	\
+	bc
+
+	will be read as "a bc". If there is any non-space and non-tab character 
+	after a "\", an error will be generated. "\\" can be used for a "\" in 
+	the data.
+
+	The number of characters in a line is limited by an internal limit (256
+	currently). If a line longer than that is encountered, an error is 
+	declared. This sometimes can help us to identify non-ascii binary file.
+
+	The words in a line is separated by arbitrary number of spaces and TABs.
+	Leading and tailing spaces and TABs are ignored.
+
+	A "#" in a line starts a comment string. Any thing after a "#" including 
+	this "#" is not interpreted as useful data. "\#" can be used for a "#" 
+	in the data. The comment words are stripped before continuing line 
+	processing. For example, the following lines 
+
+	abc  def     #  \ gh
+	abc  \#  \\  
+
+	read as 
+
+	abc  def      
+	abc  #  \
+
+	The line
+
+	abc \#  \\\  \#  def
+
+	will generate an error since character "#" is after a '\'.    
+	
+
+    E. design notes
+
+	This module scans the file once after it is opened. The keywords found
+	as well as their locations in the file are recorded. A later read call 
+	will find the file offset for the specified keyword by using a fseek 
+	call. No repeated file search is needed. The file must not be modified 
+	after it is opened. Normally the user may want to read through a 
+	configaration file and close it as soon as possible to prevent the file 
+	from being modified. If a configuration must be kept open for a long 
+	time, one can copy it to a tmp file and use the tmp file instead of the 
+	original one.
+
+	Most of the functions in this module use only two return values, either 
+	CFRD_SUCCESS or CFRD_FAILURE. Additional error messages are reported 
+	through calling an external function. This simplifies the calling 
+	program.
+
+	Note that only one configuration file can be open at a time since no 
+	file descriptor is returned. Normally the user may want to read through 
+	a configuration file and close it as soon as possible to prevent the 
+	file from being modified. If a configuration must be kept open for a 
+	long time, one can copy it to a tmp file and use the tmp file instead of 
+	the original one.
+

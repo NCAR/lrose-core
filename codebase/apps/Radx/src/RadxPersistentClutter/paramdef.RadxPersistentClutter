@@ -1,0 +1,128 @@
+/**********************************************************
+ * paramdef.RadxPersistentClutter
+ *
+ * This file contains the TDRP parameter definitions for setting the clutter
+ * pixels by processing a sufficient quantity of input data using a statistical
+ * approach
+ * 
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+commentdef
+{
+  p_header = "RadxPersistentClutter";
+  p_text = "Parameters for setting clutter locations of one input field.\n";
+};
+
+paramdef string
+{
+  p_descr = "input field name";
+  p_help = "name of field to find clutter in";
+  p_default = "unknown";
+} input_field;
+
+paramdef string
+{
+  p_descr = "output field name";
+  p_help = "name to give final output clutter field";
+  p_default = "clutter";
+} output_field;
+
+paramdef double
+{
+  p_descr = "threshold";
+  p_help = "If data is always above this value it is a clutter location";
+  p_default = 0.0;
+} threshold;
+
+paramdef double
+{
+  p_descr = "Clutter percentile";
+  p_help = "percentile to use in clutter value determination (see the paper, section III. Correction of Radar Reflectivity";
+  p_default = 0.5;
+} clutter_percentile;
+
+paramdef double
+{
+  p_descr = "Fixed storage elevation values";
+  p_help = "List of target elevation angles (the angles seem to wobble a lot). Inputs are mapped to one of these using tolerance params";
+  p_default = {};
+} fixedElevations[];
+
+paramdef double
+{
+  p_descr = "azimumth tolerance";
+  p_help = "allowed degrees difference between azimuth values from different volumes to be considered part of the same ray";
+  p_default = 0.1;
+} azToleranceDegrees;
+
+paramdef double
+{
+  p_descr = "elevation tolerance";
+  p_help = "allowed degrees difference between elevation values from different volumes to be considered part of the same ray";
+  p_default = 0.1;
+} elevToleranceDegrees;
+
+paramdef boolean
+{
+  p_descr = "diagnostic_output";
+  p_help = "If true, output from each volume is done, to show the build up of skill through time, to the output location. Typically this is a diagnostic mode.  If false, output is only at the end of a processing phase, with output time equal to the time of the first volume processed, and output written to the final_output_url";
+  p_default = FALSE;
+} diagnostic_output;
+
+paramdef string
+{
+  p_descr = "location for main output";
+  p_help = "see diagnostic_output description";
+  p_default = "unknown";
+} final_output_url;
+
+paramdef string
+{
+  p_descr = "Output ascii file path in which to write plottables";
+  p_help = "";
+  p_default = ".";
+} output_ascii_path;
+
+paramdef double
+{
+  p_descr = "missing clutter value";
+  p_help = "value to give clutter estimates when the wanted percentile is the missing data value";
+  p_default = -25.0;
+} missing_clutter_value;
+
+paramdef double
+{
+  p_descr = "variation in threshold for convergence";
+  p_help = "The threshold as percent of total volumes to identify a point as clutter should converge to a stable value.  This value is the allowed tolerance (change) to be considered stable";
+  p_default = 0.025;
+} threshold_tolerance;
+
+paramdef double
+{
+  p_descr = "Maximum percent of pixels that can change for convergence";
+  p_help = "The percentage of pixels that change from clutter to nonclutter or back should decrease to a minimum for convergence";
+  p_default = 0.001;
+} maximum_percent_change;
+
+paramdef double
+{
+  p_descr = "Number of volumes that show stablity prior to considering the situation stable";
+  p_help = "The threshold converges, and needs to stay converged for this many volumes before giving the thumbs up";
+  p_default = 10;
+} minimum_stable_volumes;
+
+paramdef double
+{
+  p_descr = "histogram resolution";
+  p_help = "Histograms are used to set clutter value. This is the resolution";
+  p_default = 0.2;
+} histogram_resolution;
+
+paramdef double
+{
+  p_descr = "histogram max";
+  p_help = "Histograms are used to set clutter value. This is the maximum bin";
+  p_default = 50.0;
+} histogram_max;
+

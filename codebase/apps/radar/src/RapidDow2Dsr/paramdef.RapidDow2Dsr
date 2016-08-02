@@ -1,0 +1,278 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for RapidDow2Dsr
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// March 2011
+
+commentdef {
+  p_header = "Program name: RapidDow2Dsr";
+  p_text = "RapidDow2Dsr reads radial moments data from the RapidDow, corrects the data appropriately for pointing angles and range, and writes the data to a DsRadarQueue beam by beam.";
+}
+
+commentdef {
+  p_header = "PROCESS CONTROL AND DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Directory for input data.";
+  p_help = "This is watched for input files. The files for the various channels are found in the directories specified in the channel parameters.";
+} input_dir;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be valid. If the input file is older than this, the program waits for new data.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to watch for _latest_data_info file in input dir.";
+  p_help = "For realtime only. If true the program watches for the _latest_data_info file to change. If false, it scans the directory for new file.";
+} use_latest_data_info;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to only process the latest file in the directory.";
+  p_help = "For realtime mode only, and only if use_latest_data_info is false, which implies that the program is scanning the input_dir for new files. If true, only the latest file will be processed. If false, all files younger than max_realtime_valid_age will be processed.";
+} latest_file_only;
+
+commentdef {
+  p_header = "CHANNEL DETAILS";
+}
+
+typedef struct {
+  string name;
+  string dir;
+  double frequency;
+  double elevation_offset;
+  double azimuth_offset;
+  double start_range;
+  double gate_spacing;
+} channel_t;
+
+paramdef struct channel_t {
+  p_default = {
+    {
+      name = "ch0",
+      dir = "/tmp/ch0",
+      frequency = 9.310,
+      elevation_offset = -10.90,
+      azimuth_offset = 0.0,
+      start_range = 0.0375,
+      gate_spacing = 0.075
+    }
+    ,
+    {
+      name = "ch1",
+      dir = "/tmp/ch1",
+      frequency = 9.394,
+      elevation_offset = -9.78,
+      azimuth_offset = -0.66,
+      start_range = 0.0375,
+      gate_spacing = 0.075
+    }
+    ,
+    {
+      name = "ch2",
+      dir = "/tmp/ch2",
+      frequency = 9.478,
+      elevation_offset = -8.66,
+      azimuth_offset = -1.32,
+      start_range = 0.0375,
+      gate_spacing = 0.075
+    }
+    ,
+    {
+      name = "ch3",
+      dir = "/tmp/ch3",
+      frequency = 9.562,
+      elevation_offset = -7.54,
+      azimuth_offset = -1.98,
+      start_range = 0.0375,
+      gate_spacing = 0.075
+    }
+    ,
+    {
+      name = "ch4",
+      dir = "/tmp/ch4",
+      frequency = 9.646,
+      elevation_offset = -6.42,
+      azimuth_offset = -2.64,
+      start_range = 0.0375,
+      gate_spacing = 0.075
+    }
+    ,
+    {
+      name = "ch5",
+      dir = "/tmp/ch5",
+      frequency = 9.730,
+      elevation_offset = -5.30,
+      azimuth_offset = -3.3,
+      start_range = 0.0375,
+      gate_spacing = 0.075
+    }
+  };
+  p_descr = "Details for each channel";
+  p_help = "\tname: name for the channel. \n\tdir: directory for the data files. \n\tfrequency: in Ghz. \t\nelevation_offset: offset relative to elevation in file (deg). \n\tazimuth_offset: offset relative to azimuth in file (deg). \n\tstart_range: range to center of first gate (km). \n\tgate_spacing: spacing between gates (km)";
+} channels[];
+
+commentdef {
+  p_header = "RADAR PARAMETERS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar name in the data.";
+} override_radar_name;
+
+paramdef string {
+  p_default = "DOWR";
+  p_descr = "Radar name for output data.";
+} radar_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar location.";
+  p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
+} override_radar_location;
+
+paramdef double {
+  p_default = 39.93208;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_latitude;
+
+paramdef double {
+  p_default = -105.18175;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_longitude;
+
+paramdef double {
+  p_default = 1.742;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} radar_altitude_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply an extra correction to azimuth.";
+  p_help = "This is intended to correct for a north-pointing error.";
+} correct_for_azimuth_error;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Azimuth correction (deg).";
+  p_help = "This value will be ADDED to the recorded azimuths, to correct for north-pointing error.";
+} azimuth_correction;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set transition flag when elevation error is excessive.";
+  p_help = "The flag will be set if the difference between the actual elevation and target elevation exceeds max_elevation_error.";
+} set_transition_flag;
+
+paramdef double {
+  p_default = 5;
+  p_descr = "Max valid elevation error (deg).";
+  p_help = "If the actual elevation differs from the target elevation by more than this, the transition flag will be set.";
+} max_elevation_error;
+
+commentdef {
+  p_header = "DETERMINING END OF VOLUME";
+}
+
+paramdef boolean {
+  p_default = true;;
+  p_descr = "Option to find the end of volume.";
+  p_help = "If true, the end of volume will be determined by a drop in the elevation angle";
+} locate_end_of_volume;
+
+paramdef double {
+  p_default = -10;
+  p_descr = "Change in elevation to indicate end of volume (deg).";
+  p_help = "If negative, we will look for a decrease in elevation angle. If positive, we will look for an increase in elevation angle.";
+} elev_change_for_end_of_volume;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Min number of beams in a volume.";
+  p_help = "After an end-of-volume is found, at least this number of beams must be found before we look for the subsequent end of volume.";
+} min_beams_in_volume;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "fmq/dowr";
+  p_descr = "Output URL for DsRadarQueue fmq.";
+  p_help = "The URL is of the form 'fmqp:://host::dir/name'. If the output is to the local host you can use just 'dir/name'.";
+} output_url;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQs are written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to block on write when the radar queue fills up.";
+  p_help = "If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.";
+} write_blocking;
+
+typedef enum {
+  NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION
+} compression_t;
+  
+paramdef enum compression_t {
+  p_default = NO_COMPRESSION;
+  p_descr = "Output compression options.";
+  p_help = "The data may be optionally compressed for output. BZIP is generally the slowest but most compact. ZLIB uses the gzip compression algorithm, which is faster than BZIP, and for some data more compact as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is simple run-length encoding compression, which is the fastest and least compact.";
+} output_compression;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of slots in output FMQ.";
+} output_n_slots;
+
+paramdef int {
+  p_default = 1000000000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_buf_size;

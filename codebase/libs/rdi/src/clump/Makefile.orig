@@ -1,0 +1,19 @@
+# makefile 
+F = 
+
+#
+# clump source
+#
+CLUMP_SRC = clump_intervals.c overlap_rows.c \
+overlap.c find_overlap.c stack_interval.c overlap_plane.c alloc.c
+
+
+all:
+	cc -c $(F) $(CLUMP_SRC)
+	ar rv libclump.a *.o
+
+#	mv *.o ..
+
+
+clean:
+	/bin/rm *% *.o

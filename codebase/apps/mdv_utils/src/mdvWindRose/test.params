@@ -1,0 +1,142 @@
+/**********************************************************************
+ * TDRP params for ./mdvWindRose
+ **********************************************************************/
+
+//======================================================================
+//
+// mdvWindRose generates histograms of speed and direction
+// given files with U and V fields in them.
+// Niles Oien June 2006.
+//
+//======================================================================
+ 
+///////////// TriggerUrl //////////////////////////////
+//
+// URL to trigger off, typically of the form
+// mdvp:://host.domain:[port]:dir/dir.
+// Program runs when new data appear here.
+// Type: string
+//
+
+TriggerUrl = "mdvp:://df6.rap.ucar.edu::dallas/mdv/ctrec_IR";
+
+///////////// OutDir //////////////////////////////////
+//
+// Output directory.
+// ASCII histograms are written here.
+// Type: string
+//
+
+OutDir = "./output";
+
+///////////// UfieldName //////////////////////////////
+//
+// Name of the U field.
+// Used to index MDV file.
+// Type: string
+//
+
+UfieldName = "U avg";
+
+///////////// VfieldName //////////////////////////////
+//
+// Name of the V field.
+// Used to index MDV file.
+// Type: string
+//
+
+VfieldName = "V avg";
+
+///////////// Instance ////////////////////////////////
+//
+// Instance to check in to Procmap with.
+// Set to something unique.
+// Type: string
+//
+
+Instance = "primary";
+
+///////////// MaxRealtimeValidAge /////////////////////
+//
+// Maximum valid age for files.
+// REALTIME mode only.
+// Type: int
+//
+
+MaxRealtimeValidAge = 1800;
+
+///////////// Debug ///////////////////////////////////
+//
+// Set to print debugging messages.
+// Defaults to FALSE.
+// Type: boolean
+//
+
+Debug = TRUE;
+
+///////////// locations ///////////////////////////////
+//
+// List of locations.
+// Has the following fields :
+
+// name : name for the location, used in making the
+//        output filename so no spaces please.
+
+// lat, lon : In degrees.
+
+// numPointsPlusMinus : calculations are done by
+//                      averaging over a grid centered on the
+//                      lat/lon. Indicies are allowed to vary
+//                      by this amount. Setting this to 1 means
+//                      that a 3x3 grid will be considered.
+
+// minNumGoodPoints : Minimum number of good points for the
+//                    average to be considered.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      double lat;
+//      double lon;
+//      int numPointsPlusMinus;
+//      int minNumGoodPoints;
+//   }
+//
+// 1D array - variable length.
+//
+
+locations = {
+  { "ONE", 32, -97, 2, 10},
+  { "TWO", 33, -97, 2, 10}
+};
+
+///////////// numDirectionBins ////////////////////////
+//
+// Number of bins for direction and weighted direction histograms.
+// Range for direction is always 0 to 360. Default is 180 bins
+// of 2 degrees each.
+// Type: int
+//
+
+numDirectionBins = 180;
+
+///////////// numSpeedBins ////////////////////////////
+//
+// Number of bins for speed histogram which starts at 0.
+// speedBinSize and numSpeedBins parameters determine histogram range.
+// Type: int
+//
+
+numSpeedBins = 100;
+
+///////////// speedBinSize ////////////////////////////
+//
+// Size of bins for speed histogram (always starts at 0).
+// Units are the same as the input. This parameters aswell as the 
+//   numSpeedBins parameter determine the histogram
+// range.
+// Type: double
+//
+
+speedBinSize = 0.5;
+

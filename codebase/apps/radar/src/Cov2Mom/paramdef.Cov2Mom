@@ -1,0 +1,292 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for Cov2Mom
+//
+//  Mike Dixon, RAP, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  May 2008
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Cov2Mom application";
+  p_text = "Cov2Mom reads covariances in an input DsRadar FMQ, computes moments and writes them out to DsRadar queue.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_descr = "Input URL for covariances via DsRadar FMQ";
+  p_default = "fmq/moments";
+} input_fmq_url;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the start of the fmq and read in data from the entire queue. If FALSE, it will only read new data as it is added to the FMQ.";
+} seek_to_start_of_input;
+
+commentdef {
+  p_header = "INPUT COVARIANCES";
+  p_text = "Names of input fields in the Dsr queue.";
+}
+
+typedef enum {
+
+  LAG0_HC_DB,
+  LAG0_HX_DB,
+  LAG0_VC_DB,
+  LAG0_VX_DB,
+
+  LAG0_VCHX_DB,
+  LAG0_VCHX_PHASE,
+
+  LAG0_HCVX_DB,
+  LAG0_HCVX_PHASE,
+
+  LAG0_VXHX_DB,
+  LAG0_VXHX_PHASE,
+
+  LAG1_HC_DB,
+  LAG1_HC_PHASE,
+
+  LAG1_VC_DB,
+  LAG1_VC_PHASE,
+
+  LAG1_HCVC_DB,
+  LAG1_HCVC_PHASE,
+
+  LAG1_VCHC_DB,
+  LAG1_VCHC_PHASE,
+
+  LAG1_VXHX_DB,
+  LAG1_VXHX_PHASE,
+
+  LAG2_HC_DB,
+  LAG2_HC_PHASE,
+
+  LAG2_VC_DB,
+  LAG2_VC_PHASE,
+
+  LAG3_HC_DB,
+  LAG3_HC_PHASE,
+
+  LAG3_VC_DB,
+  LAG3_VC_PHASE
+
+} covariance_id_t;
+
+typedef struct {
+
+  covariance_id_t id;
+  string dsr_name;
+    
+} input_field_t;
+
+paramdef struct input_field_t {
+  p_default = {
+    { LAG0_HC_DB, "LAG0_HC_DB"},
+    { LAG0_HX_DB, "LAG0_HX_DB"},
+    { LAG0_VC_DB, "LAG0_VC_DB"},
+    { LAG0_VX_DB, "LAG0_VX_DB"},
+    { LAG0_VCHX_DB, "LAG0_VCHX_DB"},
+    { LAG0_VCHX_PHASE, "LAG0_VCHX_PHASE"},
+    { LAG0_HCVX_DB, "LAG0_HCVX_DB"},
+    { LAG0_HCVX_PHASE, "LAG0_HCVX_PHASE"},
+    { LAG0_VXHX_DB, "LAG0_VXHX_DB"},
+    { LAG0_VXHX_PHASE, "LAG0_VXHX_PHASE"},
+    { LAG1_HC_DB, "LAG1_HC_DB"},
+    { LAG1_HC_PHASE, "LAG1_HC_PHASE"},
+    { LAG1_VC_DB, "LAG1_VC_DB"},
+    { LAG1_VC_PHASE, "LAG1_VC_PHASE"},
+    { LAG1_HCVC_DB, "LAG1_HCVC_DB"},
+    { LAG1_HCVC_PHASE, "LAG1_HCVC_PHASE"},
+    { LAG1_VCHC_DB, "LAG1_VCHC_DB"},
+    { LAG1_VCHC_PHASE, "LAG1_VCHC_PHASE"},
+    { LAG1_VXHX_DB, "LAG1_VXHX_DB"},
+    { LAG1_VXHX_PHASE, "LAG1_VXHX_PHASE"},
+    { LAG2_HC_DB, "LAG2_HC_DB"},
+    { LAG2_HC_PHASE, "LAG2_HC_PHASE"},
+    { LAG2_VC_DB, "LAG2_VC_DB"},
+    { LAG2_VC_PHASE, "LAG2_VC_PHASE"},
+    { LAG3_HC_DB, "LAG3_HC_DB"},
+    { LAG3_HC_PHASE, "LAG3_HC_PHASE"},
+    { LAG3_VC_DB, "LAG3_VC_DB"},
+    { LAG3_VC_PHASE, "LAG3_VC_PHASE"}
+  };
+  p_descr = "Indicate which Dsr field name is to be used for each covariance.";
+  p_help = "Set the field name for each covariance type. If the covariance is not available in the input field, it will be set to missing.";
+} input_fields[];
+
+commentdef {
+  p_header = "MOMENTS COMPUTATIONS";
+}
+
+typedef enum {
+
+  /// Single polarization (NEXRAD)
+  SP = 0, 
+  /// Dual pol, alternating transmission, copolar receiver only
+  /// (CP2 SBand)
+  DP_ALT_HV_CO_ONLY = 1, 
+  /// Dual pol, alternating transmission, co-polar and cross-polar
+  ///receivers (SPOL with Mitch Switch and receiver in 
+  /// switching mode, CHILL)
+  DP_ALT_HV_CO_CROSS = 2,
+  /// Dual pol, alternating transmission, fixed H and V receivers (SPOL
+  /// with Mitch Switch and receivers in fixed mode)
+  DP_ALT_HV_FIXED_HV = 3,
+  /// Dual pol, simultaneous transmission, fixed H and V receivers (NEXRAD
+  /// upgrade, SPOL with T and receivers in fixed mode)
+  DP_SIM_HV_FIXED_HV = 4,
+  /// Dual pol, simultaneous transmission, switching H and V receivers
+  /// (SPOL with T and receivers in switching mode)
+  DP_SIM_HV_SWITCHED_HV = 5,
+  /// Dual pol, H transmission, fixed H and V receivers (CP2 X band)
+  DP_H_ONLY_FIXED_HV = 6,
+  /// Dual pol, V transmission, fixed H and V receivers (CP2 X band)
+  DP_V_ONLY_FIXED_HV = 7
+
+} xmit_rcv_mode_t;
+
+paramdef enum xmit_rcv_mode_t {
+  p_default = SP;
+  p_descr = "Transmit / receive mode.";
+  p_help = "This governs the type of moments computation which will be carried out.";
+} xmit_rcv_mode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Are these filtered covariances?";
+} is_filtered;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to correct for system phidp.";
+  p_help = "If true, the H and V correlation phases will be corrected by adding/subtracting the system phidp value as appropriate. This avoids premature wrapping of the phased from which phidp and velocity are computed. If false, this correction will not be applied. To find the system phidp, set this to false and compute phidp for vertically-pointing data.";
+} correct_for_system_phidp;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to change sign on AIQ field.";
+  p_help = "This affects refractt variables. Set to true to change the sign of the computed AIQ field.";
+} change_aiq_sign;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_descr = "Output URL for computed moments via DsRadar FMQ";
+  p_default = "fmq/moments_check";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 50000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+typedef enum {
+
+  NCP,
+  SNR,
+  DBM,
+  DBZ,
+  VEL,
+  WIDTH,
+  ZDR,
+  LDRH,
+  LDRV,
+  RHOHV,
+  PHIDP,
+  KDP,
+  SNRHC,
+  SNRHX,
+  SNRVC,
+  SNRVX,
+  DBMHC,
+  DBMHX,
+  DBMVC,
+  DBMVX
+
+} output_field_id_t;
+
+typedef enum
+{
+  OUTPUT_INT8,
+  OUTPUT_INT16,
+  OUTPUT_FL32
+} field_encoding_t;
+
+typedef struct {
+
+  output_field_id_t id;
+  string name;
+  string units;
+  field_encoding_t encoding;
+  double scale;
+  double bias;
+    
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    { NCP, "NCP", "", OUTPUT_FL32, 0.0001, -0.01},
+    { SNR, "SNR", "dB", OUTPUT_FL32, 0.01, -320},
+    { DBM, "DBM", "dBm", OUTPUT_FL32, 0.01, -320},
+    { DBZ, "DBZ", "dBZ", OUTPUT_FL32, 0.01, -320},
+    { VEL, "VEL", "m/s", OUTPUT_FL32, 0.01, -320},
+    { WIDTH, "WIDTH", "m/s", OUTPUT_FL32, 0.001, -0.01},
+    { ZDR, "ZDR", "dB", OUTPUT_FL32, 0.001, -32},
+    { LDRH, "LDRH", "dB", OUTPUT_FL32, 0.005, -160},
+    { LDRV, "LDRV", "dB", OUTPUT_FL32, 0.005, -160},
+    { RHOHV, "RHOHV", "", OUTPUT_FL32, 0.0001, -1},
+    { PHIDP, "PHIDP", "deg", OUTPUT_FL32, 0.06, -200},
+    { KDP, "KDP", "deg/km", OUTPUT_FL32, 0.001, -32},
+    { SNRHC, "SNRHC", "dB", OUTPUT_FL32, 0.01, -320},
+    { SNRHX, "SNRHX", "dB", OUTPUT_FL32, 0.01, -320},
+    { SNRVC, "SNRVC", "dB", OUTPUT_FL32, 0.01, -320},
+    { SNRVX, "SNRVX", "dB", OUTPUT_FL32, 0.01, -320},
+    { DBMHC, "DBMHC", "dBm", OUTPUT_FL32, 0.01, -320},
+    { DBMHX, "DBMHX", "dBm", OUTPUT_FL32, 0.01, -320},
+    { DBMVC, "DBMVC", "dBm", OUTPUT_FL32, 0.01, -320},
+    { DBMVX, "DBMVX", "dBm", OUTPUT_FL32, 0.01, -320}
+  };
+  p_descr = "Indicate which fields should be written to the moments FMQ.";
+  p_help = "Choose the ID from the list. The name and units can be set however the user prefers. The scale and bias are applied to the floating point value to compute the 8-bit ot 16-bit output value for the FMQ If the output encoding is FL32, the scale and bias are not applicable.";
+} output_fields[];
+

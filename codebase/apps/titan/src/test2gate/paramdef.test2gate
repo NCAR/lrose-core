@@ -1,0 +1,220 @@
+/*
+ * paramdef.tass_test_to_socket
+ *
+ * This file contains the TDRP parameter definitions for
+ * tass_test_to_socket.
+ */
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "TRUE if running in debug mode; FALSE otherwise.";
+  p_default = { true };
+} debug;
+
+
+paramdef long
+{
+  p_descr = "malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+  p_default = { 0 };
+  p_min = { 0 };
+  p_max = { 3 };
+} malloc_debug_level;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef long
+{
+  p_descr = "output port";
+  p_help = "Port used for sending radar gate data to clients.";
+  p_default = { 60000 };
+} output_port;
+
+paramdef boolean
+{
+  p_descr = "Option to output veloocity field";
+  p_help = "If FALSE, only dBZ is output. If TRUE, velocity is also output.";
+  p_default = { true };
+} output_vel_field;
+
+paramdef boolean
+{
+  p_descr = "Option to output geometry fields";
+  p_help = "If TRUE, elevation, azimuth and range fields are also output.";
+  p_default = { false };
+} output_geom_fields;
+
+
+paramdef struct radar_params
+{
+  p_descr = "radar parameters";
+  p_help = "Default radar parameters.";
+
+  p_field_name = { radar_id,
+                   altitude,              /* meters */
+                   latitude,              /* degrees */
+                   longitude,             /* degrees */
+                   num_gates,
+                   gate_spacing,          /* meters */
+                   start_range,           /* meters */
+                   beam_width,            /* degrees */
+                   samples_per_beam,
+                   pulse_width,           /* nano-secs */
+                   prf,
+                   wavelength };          /* cm */
+
+  p_field_type = { long,                  /* radar_id */
+                   long,                  /* altitude */
+                   double,                /* latitude */
+                   double,                /* longitude */
+                   long,                  /* num_gates */
+                   double,                /* gate_spacing */
+                   double,                /* start_range */
+                   double,                /* beam_width */
+                   long,                  /* samples_per_beam */
+                   double,                /* pulse_width */
+                   double,                /* prf */
+                   double };              /* wavelength */
+
+  p_default = { 0,                        /* radar_id */
+                0,                        /* altitude - meters */
+                39.87823,                 /* latitude - degrees */
+                -104.75900,               /* longitude - degrees */
+                65,                       /* num_gates */
+                900.0,                    /* gate_spacing - meters */
+                700.0,                    /* start_range - meters */
+                5.0,                      /* beam_width - degrees */
+                32,                       /* samples_per_beam */
+                6000.0,                   /* pulse_width - nano-secs */
+                1000.0,                   /* prf */
+                5.0 };                    /* wavelength - cm */
+} radar_params;
+
+
+paramdef boolean
+{
+  p_descr = "Use scan table";
+  p_help = "If set, use scan azimuth table. If not, construct table from elevation angles, start azimuth and delta azimuth.";
+  p_default = { true };
+} use_scan_table;
+
+
+paramdef char*
+{
+  p_descr = "scan table path";
+  p_default = { "./tass_scan_table" };
+} scan_table_path;
+
+
+paramdef double
+{
+  p_descr = "Noise dBZ level at 100 km range";
+  p_help = "Used to compute noise reflectivity at all ranges.";
+  p_default = {0.0};
+} noise_dbz_at_100km;
+
+paramdef double
+{
+  p_descr = "Elevation angle list";
+  p_help = "If use_scan_table is false, these elevation angles are used to construct the scan table.";
+  p_default = {1.0};
+} elev_angles[];
+
+paramdef long
+{
+  p_descr = "Number of aziimuths";
+  p_help = "If use_scan_table is false, this is used to construct the scan table.";
+  p_default = {360};
+} nazimuths;
+
+paramdef double
+{
+  p_descr = "Start azimuth angle";
+  p_help = "If use_scan_table is false, this is used to construct the scan table.";
+  p_default = {0.0};
+} start_azimuth;
+
+paramdef double
+{
+  p_descr = "Delta azimuth angle";
+  p_help = "If use_scan_table is false, this is used to construct the scan table.";
+  p_default = {1.0};
+} delta_azimuth;
+
+paramdef char*
+{
+  p_descr = "Radar sample file path";
+  p_help = "Path for file from which radar data are sampled";
+  p_default = { "null" };
+} radar_sample_file_path;
+
+paramdef long
+{
+  p_descr = "Sample dbz field num";
+  p_default = { 0 };
+} sample_dbz_field;
+
+paramdef long
+{
+  p_descr = "Sample vel field num";
+  p_default = { 0 };
+} sample_vel_field;
+
+paramdef boolean
+{
+  p_descr = "Override velocity with origin movement.";
+  p_help = "If TRUE, the velocity field will be set using the motion of the sampling origin.";
+  p_default = { false };
+} override_vel;
+
+paramdef struct sampling_origin
+{
+  p_descr = "Radar data sampling origin";
+  p_help = "Origin from which the dobson radar data are sampled.";
+
+  p_field_name = { start_x,   /* km, rel to grid */
+                   start_y,   /* km, rel to grid */
+                   speed,     /* km/hr */
+                   dirn,      /* deg T */
+                   max_dist }; /* km */
+
+  p_field_type = { double,                /* start_x */
+                   double,                /* start_y */
+                   double,                /* speed */
+                   double,                /* dirn */
+                   double };              /* max_dist */
+
+  p_default = { 0.0,                /* start_x */
+		0.0,                /* start_y */
+		0.0,                /* speed */
+		0.0,                /* dirn */
+		200.0 };            /* max_dist */
+
+} sampling_origin;
+
+paramdef long
+{
+  p_descr = "Wait per beam (milli-secs)";
+  p_default = { 50 };
+} beam_wait_msecs;
+
+
+paramdef long
+{
+  p_descr = "Wait per vol (secs)";
+  p_default = { 30 };
+} vol_wait_secs;
+
+
+
+
+
+
+
+
+

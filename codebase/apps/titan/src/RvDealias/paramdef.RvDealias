@@ -1,0 +1,179 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions RvDealias
+//
+// Range-velocity dealiasing
+// Mike Dixon
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Jan 2003
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "RvDealias reads radar IQ data, and performs range-velocity dealiasing on the data.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, SIMULATE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.";
+} mode;
+
+commentdef {
+  p_header = "NETCDF FILE DATA INPUT";
+};
+
+paramdef string {
+  p_default = "$(HOME)/data/nc/radar/iq";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DATA PROCESSING";
+};
+
+typedef enum {
+  PP, FFT, FFT_HANNING, FFT_MOD_HANNING, SZ864_PP, SZ864_FFT, TEST
+} algorithm_t;
+
+paramdef enum algorithm_t {
+  p_default = PP;
+  p_descr = "Algorithm to be used.";
+  p_help = "PP: compute pulse-pair moments. FFT: compute spectral moments. SZ864: perform rv dealiazing with sz 8-64 algorithm.";
+} algorithm;
+
+paramdef int {
+  p_default = 10.0;
+  p_descr = "Radar wavelength (cm).";
+} wavelength_cm;
+
+paramdef double {
+  p_default = 5.5e-7;
+  p_descr = "Noise value (dBM).";
+  p_help = "This is used if noise is not available from the data.";
+} noise_value;
+
+paramdef double {
+  p_default = 1.0e-6;
+  p_descr = "Floor signal power (dBM).";
+  p_help = "Arbitrary floor value for signal. Lower bound for power from computations.";
+} floor_signal_power;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Index of phase shift for first pulse in file.";
+  p_help = "The pulses repeat their phases on a 32-phase cycle. In the program we compute the phase table. This is the index into that table of the first pulse in the file. This therefore applies to trip1. The transmitted phase of other pulses are determined by their position in the array of pulses in the file.";
+} trip1_phase_index;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to multiple phase codes by -1.";
+  p_help = "In some data sets the phase codes are negated. Set this to true for such data cases.";
+} negate_phase_codes;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Signal-to-noise value for thresholding (dB).";
+  p_help = "This is the signal-to-noise ratio used to thresholding based on the noise.";
+} signal_to_noise_ratio_threshold;
+
+paramdef double {
+  p_default = 45.0;
+  p_descr = "Strong-to-weak power ratio censoring threshold (dB).";
+  p_help = "SZ decoding only. If the strong to weak trip power ratio is greater than this, we censor the weak trip.";
+} sz_strong_to_weak_power_ratio_threshold;
+
+paramdef double {
+  p_default = 6.0;
+  p_descr = "Ratio of peak power to off-peak replica power (dB).";
+  p_help = "SZ decoding only. When checking for out-of-trip power after deconvolution, this is the threshold to be used. The power of the spectral peak is compared with the peak for the 6 lowest replicas. If the ratio is less that this for a given number of replicas, it is assumed that out-of-trip power is present. See 'sz_out_of_trip_power_n_replicas'.";
+} sz_out_of_trip_power_ratio_threshold;
+
+paramdef int {
+  p_default = 3;
+  p_max = 6;
+  p_min = 1;
+  p_descr = "Number of replicas used for checking for out-of-trip power.";
+  p_help = "SZ decoding only. When checking for out-of-trip power after deconvolution, this is the number of peaks to check. See 'sz_out_of_trip_power_ratio_threshold'.";
+} sz_out_of_trip_power_n_replicas;
+
+typedef enum {
+  NO_WINDOW, HANNING, MOD_HANNING
+} sz_window_t;
+
+paramdef enum sz_window_t {
+  p_default = HANNING;
+  p_descr = "Window type for SZ864.";
+  p_help = "Windot type to be applied to strong trip before computing spectra.";
+} sz_window;
+
+commentdef {
+  p_header = "OUTPUT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write various gate spectra to ASCII files.";
+  p_help = "If true, spectra are written to files in directory spectra_output_dir.";
+} write_spectra_files;
+
+paramdef string {
+  p_default = "./spectra";
+  p_descr = "Spectra file directory.";
+  p_help = "See 'write_spectra_files.";
+} spectra_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write data for verification purposes.";
+  p_help = "If true, verification data will be written to verification_output_dir.";
+} write_verification_data;
+
+paramdef string {
+  p_default = "./verify";
+  p_descr = "Verifcation file directory.";
+  p_help = "See 'write_verification_data.";
+} verification_dir;

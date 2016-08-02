@@ -1,0 +1,2 @@
+nice find . '(' -name __makefile.template ')' \
+         -user $USER -type f -print -exec \rm '{}' \;

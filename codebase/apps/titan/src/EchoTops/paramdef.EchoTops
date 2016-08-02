@@ -1,0 +1,126 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions EchoTops
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Feb 2005
+//
+
+commentdef {
+  p_header = "Program name: EchoTops";
+  p_text = "EchoTops computes the tops of radar echoes in Cartesian radar data, based on a series of reflectivity thresholds. One output field is written for each threshold.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the application waits for a new input file. When a new file arrives, it proesses it. In ARCHIVE mode, the application processes files between the start and end times. In FILELIST mode, it processes the files listed on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "mdv/radarCart";
+  p_descr = "URL for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef int {
+  p_default = 1800;
+  p_help = "Median period in realtime - secs.";
+  p_descr = "REALTIME mode only. Files from this period in the past will be used for computing the median.";
+} realtime_past_period;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdv/tops";
+  p_descr = "URL for output data.";
+  p_help = "If the directory starts with '/' or '.', the path is absolute. Otherwise it is relative to $DATA_DIR or $RAP_DATA_DIR.";
+} output_url;
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Set output encoding type.";
+} output_encoding_type;
+
+commentdef {
+  p_header = "COMPUTING THE TOPS";
+}
+
+typedef struct {
+  string input_field;
+  string output_field;
+  string output_units;
+  double threshold;
+  boolean compute_base;
+  boolean invert_values;
+} tops_field_t;
+
+paramdef struct tops_field_t {
+  p_default = {
+    { "DBZ", "Tops10", "km", 10, FALSE, FALSE },
+    { "DBZ", "Tops15", "km", 15, FALSE, FALSE },
+    { "DBZ", "Tops20", "km", 20, FALSE, FALSE }
+  };
+  p_descr = "Specify the details for input and output fields.";
+  p_help = "input_field: field name in input file; output_field: field name in output file; threshold: field theshold in input file - the product will be computed as the max height in the file at which this value is exceeded; compute_base: if TRUE, the base will be computed instead  of the tops; invert_values: if TRUE, the sense of the field data will be inverted (multiplied by -1) before the tops (or base) are computed.";
+} tops_fields[];
+
+commentdef {
+  p_header = "OPTION TO SET VLEVEL LIMITS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set plane vlevel limits";
+  p_help = "If true, the data will be cropped in the vertical before processing.";
+} set_vlevel_limits;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Lower plane vlevel limit.";
+} lower_vlevel;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Upper plane vlevel limit.";
+} upper_vlevel;
+
+

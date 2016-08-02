@@ -1,0 +1,297 @@
+/**********************************************************************
+ * TDRP params for TsFile2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// TsFile2Fmq reads raw time-series data from a file. It saves the time 
+//   series data out to a file message queue (FMQ), which can be read by 
+//   multiple clients. Its purpose is mainly for simulation and debugging 
+//   time series operations.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file to process. 
+//   In ARCHIVE mode, it moves through the list of file names specified on 
+//   the command line. In SIMULATE mode, the program moves repeatedly 
+//   through the file list, creating output files with times set to now. 
+//   This is useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input volume scan files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "$(HOME)/data/time_series/save";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// OUTPUT FMQ DETAILS.
+//
+//======================================================================
+ 
+///////////// output_fmq_path /////////////////////////
+//
+// Path to output FMQ.
+// The FMQ consists of 2 files, ??.buf and ??.stat.
+// Type: string
+//
+
+output_fmq_path = "$(DATA_DIR)//fmq/ts_s_1";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer.
+// Type: int
+//
+
+output_fmq_size = 1000000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in the output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 200;
+
+///////////// output_fmq_blocking /////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data. This should only be used if there is a single client reading 
+//   the FMQ.
+// Type: boolean
+//
+
+output_fmq_blocking = TRUE;
+
+//======================================================================
+//
+// OUTPUT MESSAGE DETAILS.
+//
+// The output messages are written to the FMQ. To improve performance, 
+//   each message contains a number of time series pulses.
+//
+//======================================================================
+ 
+///////////// n_pulses_per_message ////////////////////
+//
+// Number of pulses per output message.
+// The actual number will sometimes be 1 less than this, because an info 
+//   data part may will be written once in a while.
+// Type: int
+//
+
+n_pulses_per_message = 200;
+
+///////////// n_pulses_per_info ///////////////////////
+//
+// How often to write an info part.
+// The info part includes data which does not change on a pulse-to-pulse 
+//   basis.
+// Type: int
+//
+
+n_pulses_per_info = 10000;
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+
+//======================================================================
+//
+// SIMULATION MODE.
+//
+//======================================================================
+ 
+///////////// sim_mode_sleep_usecs ////////////////////
+//
+// Sleep between pulses in simulate mode (micro-secs).
+// Type: int
+//
+
+sim_mode_sleep_usecs = 1000;
+
+///////////// sim_mode_radar_name /////////////////////
+//
+// Radar name for simulation mode.
+// Type: string
+//
+
+sim_mode_radar_name = "SPOL";
+
+///////////// sim_mode_site_name //////////////////////
+//
+// Site name for simulation mode.
+// Type: string
+//
+
+sim_mode_site_name = "Marshall";
+
+///////////// sim_mode_latitude_deg ///////////////////
+//
+// Radar latitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+sim_mode_latitude_deg = 39.9321;
+
+///////////// sim_mode_longitude_deg //////////////////
+//
+// Radar longitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+sim_mode_longitude_deg = -105.182;
+
+///////////// sim_mode_altitude_meters ////////////////
+//
+// Radar altitude (meters).
+// See override_radar_location.
+// Type: double
+//
+
+sim_mode_altitude_meters = 1742;
+
+///////////// sim_mode_beam_width_h ///////////////////
+//
+// Horizontal beam width (deg) for simulation mode.
+// Type: double
+//
+
+sim_mode_beam_width_h = 0.92;
+
+///////////// sim_mode_beam_width_v ///////////////////
+//
+// Vertical beam width (deg) for simulation mode.
+// Type: double
+//
+
+sim_mode_beam_width_v = 0.92;
+
+///////////// sim_staggered_prt ///////////////////////
+//
+// Option to simulate staggered PRT operations.
+// See 'staggered_mode'. Selected pulses will be omitted to simulate 
+//   this mode.
+// Type: boolean
+//
+
+sim_staggered_prt = FALSE;
+
+///////////// stagger_mode ////////////////////////////
+//
+// In this mode, we leave out selected pulses and change the data in the 
+//   remaining pulses, as required, to simulate staggered PRT mode.
+//
+// Type: enum
+// Options:
+//     STAGGER_2_3
+//     STAGGER_3_4
+//     STAGGER_4_5
+//
+
+stagger_mode = STAGGER_2_3;
+

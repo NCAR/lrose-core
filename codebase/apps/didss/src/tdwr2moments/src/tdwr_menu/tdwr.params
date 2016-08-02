@@ -1,0 +1,54 @@
+# program name
+MPAR_REFORMATTER
+# debug flag - does not insert data into shmem
+0
+# radar name
+TDWR
+# site name
+memphis
+# latitude int deg X 100000
+4292808
+# longitude int deg X 100000
+-7592406
+# altitude in meters
+1710
+# polarization (1 = hor, 2 = ver, 3 = circ, 4 = ellip) should be 3; 1 for Jing compatibility 
+1 
+#velocity bias - (x 100) required to map 16 bit data into 8 bits of storage
+-4000
+#velocity scale (x 100)
+31
+# gate spacing for low prf
+350
+# command process shmem key def - 20100
+20100
+# input shmem key for receiving radar mpar data for formatting - 2750400
+2750400
+# shmem key for sending moments data to shared memory - 3750400
+3750400
+# realtime 1 to start the real time system from a script 0 from the menu
+0
+# send output to the shared memory buffer.
+1
+# send output to a file message queue (fmq)
+0
+# size of the output FMQ, in bytes
+2000000
+# number of slots in the output FMQ
+3600
+# If TRUE FMQ messages are compressed
+0
+# Path for output FMQ
+/home/jaimi/data_display/fmq_files/mpar_output
+# caf - dealias failure flag
+1
+# ctf - Point Target flag
+1
+# cvf - SNR thresholding /clutter flag
+0
+# ccv - Clutter flag
+1
+# cv - low PRF invalid gate flag
+1
+# true north flag (adds 3 degrees to each azimuth)
+1

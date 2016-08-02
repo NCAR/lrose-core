@@ -1,0 +1,248 @@
+/**********************************************************
+ * paramdef.VerticalShear
+ *
+ * This file contains the TDRP parameter definitions for
+ * VerticalShear.
+ */
+
+
+commentdef
+{
+  p_header = "VerticalShear";
+  p_text = "This program calculates the magnitude of vertical shear "
+           "using the following equation:\n"
+           "\tsqrt((v(i,j,highest_level_k) - v(i,j,lowest_level_k))**2 +\n"
+           "\t\t(u(i,j,highest_level_k) - u(i,j,lowest_level_k))**2) /\n"
+           "\t(lowest_level_height - highest_level_height)";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+   LOCAL_FILEPATH_REALTIME
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter."
+           "LOCAL_FILEPATH_REALTIME is a realtime mode used when data "
+           "resides on the host where the application is running. This "
+           "was added due to the problems that the latest data server layer had " 
+           "distinguishing data times of data written very close together. ";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "URL for input files. Note that for mode LOCAL_FILEPATH_REALTIME this is a fully qualified path. ";
+  p_default = "mdvp:://localhost::./mdv/derived_ruc";
+} input_url;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use the field_name or the field_num "
+            "field in the input_fields array to identify the input fields.";
+  p_default = true;
+} use_field_name;
+
+typedef struct
+{
+  string field_name;
+  long field_num;
+} input_info_t;
+
+paramdef struct input_info_t
+{
+  p_descr = "Information identifying the U field in the input file.";
+  p_help = "If use_field_name is true, uses the field_name field to "
+           "identify the input fields.  "
+           "Otherwise, uses field_num to identify the input fields.";
+  p_default = { "U", 0 };
+} u_field;
+
+paramdef struct input_info_t
+{
+  p_descr = "Information identifying the V field in the input file.";
+  p_help = "If use_field_name is true, uses the field_name field to "
+           "identify the input fields.  "
+           "Otherwise, uses field_num to identify the input fields.";
+  p_default = { "V", 0 };
+} v_field;
+
+typedef struct
+{
+  double lower_level;
+  double upper_level;
+} pressure_limits_t;
+
+paramdef struct pressure_limits_t
+{
+  p_descr = "The minimum and maximum pressure levels to process";
+  p_default = { 1000.0, 700.0 };
+} pressure_limits;
+
+paramdef long
+{
+  p_descr = "Maximum input valid age in seconds";
+  p_help = "Once the algorithm is triggered, it will not use any input data "
+           "older than this value.";
+  p_default = 1800;
+} max_input_valid_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set to true to remap the data.";
+  p_help = "Defaults to false";
+} remap_grid;
+
+typedef enum {
+  PROJ_FLAT, PROJ_LATLON, PROJ_LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type for remapped grid";
+  p_default = PROJ_FLAT;
+  p_help = "Projections currently supported are PROJ_FLAT, PROJ_LATLON and PROJ_LAMBERT";
+} grid_projection;
+
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+p_default = { 812, 485, -99.086,  31.515, .038239, .035933 };
+p_descr = "Grid parameters for remapping in x,y.";
+p_help = "These params apply to all projection types.";
+}grid_params;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin latitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT projections.";
+} origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin longitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT projections.";
+} origin_lon;
+
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} flat_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for PROJ_LAMBERT projection.";
+  p_help = "Applies only to PROJ_LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} lambert_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for PROJ_LAMBERT projection.";
+  p_help = "Applies only to PROJ_LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} lambert_lat2;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set to output the data as forecast in mdv format.";
+  p_help = "This forces a forecast-style output, whether the data is of forecast type or not.";
+} output_as_forecast;
+
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::./mdv/output";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};

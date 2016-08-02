@@ -1,0 +1,38 @@
+########################################################################
+# parameters file for cart_slave
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# April 1991
+#
+#########################################################################
+
+#
+# debugging
+#
+
+cart_slave.debug: false
+cart_slave.malloc_debug_level: 0
+
+#
+# communication
+#
+
+cart_slave.shmem_key: 43100
+cart_slave.max_packet_length: 20000
+
+#
+# server mapper registration
+#
+
+cart_slave.cart_data_server_default_host: local
+cart_slave.cart_data_server_default_port: 41100
+cart_slave.cart_data_server_instance: rtest
+cart_slave.servmap_host1: local
+cart_slave.servmap_host2: none
+
+#
+# slave table path
+#
+
+cart_slave.slave_table: $(RTEST_HOME)/tables/slave_table.rtest

@@ -1,0 +1,6 @@
+.deps
+Rdas2Dsr
+__makefile.template
+makefile
+makefile.am
+makefile.in

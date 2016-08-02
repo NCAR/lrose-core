@@ -1,0 +1,195 @@
+/*********************************************************
+ * parameter definitions for verify_grid
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 1993
+ */
+
+paramdef enum debug {
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef enum mode {
+  p_options = {CONT, STATS, REGRESSION};
+  p_default = {STATS};
+  p_descr = "Operation mode";
+  p_help = "Modes are 1) cont - contingency table analysis, with text output, 2) stats analysis, with text and xgraph output, 3) regression - data pairs for plotting with ascii_to_xgraph, output to stdout";
+} mode;
+
+paramdef string {
+  p_default = {"none"};
+  p_descr = "Truth data directory";
+  p_help = "Directory for dobson cartesian radar data files - truth";
+} truth_data_dir;
+
+paramdef string {
+  p_default = {"Truth"};
+  p_descr = "Truth label";
+  p_help = "Label for truth data";
+} truth_label;
+
+paramdef string {
+  p_default = {"Detection"};
+  p_descr = "Detection label";
+  p_help = "Label for detection data";
+} detect_label;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Truth field number";
+  p_help = "Field number of truth data in cartesian grid (0-based)";
+} truth_field;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Detection field number";
+  p_help = "Field number of detection data in cartesian grid (0-based)";
+} detect_field;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to output scan-by-scan cont. data to named dir";
+  p_help = "If set, the contingency table data computed for each scan will be output to a file in the named directory. The file name will comprise the date and the specified file extension";
+} output_scan_cont;
+
+paramdef string {
+  p_default = {"null"};
+  p_descr = "Dir path for scan-by-scan contingency data";
+} scan_cont_dir;
+
+paramdef string {
+  p_default = {"cont"};
+  p_descr = "Extension for scan-by-scan contingency data";
+} scan_cont_ext;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Time lag (secs)";
+  p_help = "Time lag between truth and detection (secs)";
+} time_lag;
+
+paramdef long {
+  p_default = {180};
+  p_descr = "Time margin (secs)";
+  p_help = "Margin around actual file time used when determining time match";
+} time_margin;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to use a relaxed algorithm to compute the contingencies";
+  p_help = "If set, a relaxed algorithm is used. This means that surrounding points are used in determining the contingency values. The contingency_search_margin governs the search limits. See the code for details";
+} relaxed_contingency;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Search margin (grid units)";
+  p_help = "Number of adjacent grids searched for contingency match";
+} relaxed_margin;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to check range from radar";
+  p_help = "If set, the range from the radar is checked. Only points at less than the maximum range are used";
+} check_range;
+
+paramdef double {
+  p_default = {150.0};
+  p_min = {10.0};
+  p_max = {1000.0};
+  p_descr = "Max range (km)";
+  p_help = "Max. range (km) for analysis - data beyond this is ignored";
+} max_range;
+
+paramdef double {
+  p_default = {1.0};
+  p_min = {-1000.0};
+  p_max = {1000.0};
+  p_descr = "Min regression data value";
+  p_help = "Only points with data above this value are included in the regresion analysis";
+} min_regression_val;
+
+paramdef double {
+  p_default = {0.0};
+  p_min = {-1000.0};
+  p_max = {1000.0};
+  p_descr = "Lower value for truth level";
+  p_help = "Only include truth data above this value in the contingecy table analysis";
+} truth_level_lower;
+
+paramdef double {
+  p_default = {100.0};
+  p_min = {-1000.0};
+  p_max = {1000.0};
+  p_descr = "Upper value for truth level";
+  p_help = "Only include truth data below this value in the contingecy table analysis";
+} truth_level_upper;
+
+paramdef double {
+  p_default = {0.0};
+  p_min = {-1000.0};
+  p_max = {1000.0};
+  p_descr = "Lower value for detection level";
+  p_help = "Only include detection data above this value in the contingecy table analysis";
+} detect_level_lower;
+
+paramdef double {
+  p_default = {100.0};
+  p_min = {-1000.0};
+  p_max = {1000.0};
+  p_descr = "Upper value for detection level";
+  p_help = "Only include detection data below this value in the contingecy table analysis";
+} detect_level_upper;
+
+paramdef struct hist {
+  p_descr = "Histogram parameters";
+  p_help = "The params for the histogram mode";
+  p_field_type = {long, double, double};
+  p_field_name = {n_intervals, low_limit, interval_size};
+} hist;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to use the native grid for the data";
+  p_help = "If set, the native data grid is used for evaluation. Otherwise the grid specified in the param file is used";
+} use_native_grid;
+
+paramdef struct grid {
+  p_descr = "Grid parameters";
+  p_help = "The grid params for the regression mode";
+  p_field_type = {long, long, double, double, double, double};
+  p_field_name = {nx, ny, minx, miny, dx, dy};
+} grid;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to output intermediate grids to an MDV file";
+  p_help = "If set, the intermediate grids are output in an MDV file.  The intermediate grids are the truth and detection grids mapped onto the specified contingency grid and set to 1 if the input grid is between the specified limits, 0 otherwise.  The intermediate grids will only be output if this is set and use_native_grid and relaxed_contingency are both FALSE and you are in CONT mode.";
+} output_intermediate_grids;
+
+paramdef string {
+  p_default = { "." };
+  p_descr = "Intermediate grid output directory";
+  p_help = "The directory to be used for intermediate grids.  Only used if output_intermediate_grids is TRUE.  The files in this directory are named YYYYMMDD/hhmmss.mdv using the centroid time of the truth file as the time used in naming the file.";
+} intermediate_dir;
+
+paramdef enum projection_t
+{
+  p_options = { PROJ_FLAT,
+                PROJ_LATLON };
+  p_default = { PROJ_FLAT };
+  p_descr = "Projection type for intermediate grid file";
+  p_help = "Projection type to put in intermediate grid file so it can be displayed.  See output_intermediate_grids parameter.";
+} projection;
+

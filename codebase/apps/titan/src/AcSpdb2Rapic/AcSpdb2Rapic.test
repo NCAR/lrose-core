@@ -1,0 +1,130 @@
+/**********************************************************************
+ * TDRP params for AcSpdb2Rapic
+ **********************************************************************/
+
+//======================================================================
+//
+// AcSpdb2Rapic reads aircraft data from SPDB, and reformats it for use 
+//   in RAPIC. RAPIC is a radar display tool from the Australian Bureau of 
+//   Meteorologyxb.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the application wakes up periodically, reads the 
+//   SPDB data base, and writes out reformatted files. In ARCHIVE mode, 
+//   the application traverses a time period specified by the user on the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// ac_posn_spdb_url ////////////////////////
+//
+// The SPDB data is stored here.
+// Type: string
+//
+
+ac_posn_spdb_url = "spdbp:://cp2server::spdb/ac_posn";
+
+///////////// altitude_units //////////////////////////
+//
+// Units of the altitude data in the SPDB data base.
+//
+// Type: enum
+// Options:
+//     ALTITUDE_KM
+//     ALTITUDE_METERS
+//     ALTITUDE_FEET
+//
+
+altitude_units = ALTITUDE_METERS;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// The output ASCII data is stored here.
+// Type: string
+//
+
+output_dir = "./output/rapic/ac_posn";
+
+///////////// output_file_ext /////////////////////////
+//
+// Extension of the output files.
+// Type: string
+//
+
+output_file_ext = "trk";
+
+///////////// daily_file_output_interval //////////////
+//
+// Interval at which the data is written to the daily files (secs).
+// Type: int
+//
+
+daily_file_output_interval = 60;
+
+///////////// latest_file_output_interval /////////////
+//
+// Interval at which the data is written to the latest file (secs).
+// Type: int
+//
+
+latest_file_output_interval = 5;
+
+///////////// latest_file_len_secs ////////////////////
+//
+// Length of latest file, in secs.
+// Type: int
+//
+
+latest_file_len_secs = 120;
+

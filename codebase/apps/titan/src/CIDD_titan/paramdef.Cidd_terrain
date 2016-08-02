@@ -1,0 +1,71 @@
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_terrain: Parameter definitions for
+// Terrain Data
+
+commentdef {
+  p_header = "Terrain Parameters";
+};
+
+paramdef string {
+  p_default = "Terrain";
+  p_descr = "Label used for legends";
+} id_label ;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Used to located gridded terrain data";
+  p_help = "Terrain_URL \n"
+    " Note URL is of the form mdvp::[param_file]//host.dom::dir/dir&field_name\n"
+    " Field name follows the Ampersand. Use #N for field number override "
+    "  Use caret: ^ as a substitute for spaces in field names";
+    "\n";
+}terrain_url;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Conversion from terrain units to local coords";
+  p_help = "Choose a scaler which converts plane height values";
+} height_scaler;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Used to located gridded land use data";
+  p_help = "Land Use URL \n"
+    " Note URL is of the form mdvp::[param_file]//host.dom::dir/dir&field_name\n"
+    " Field name follows the Ampersand. Use #N for field number override "
+    "  Use caret: ^ as a substitute for spaces in field names";
+    "\n";
+}landuse_url;
+
+paramdef string {
+  p_default = "land.colors";
+  p_descr = "Color lookup table for Land use";
+  p_help = "Land Use colorscale file name\n"
+    " Note: CIDD looks in the colorscale dir, then in the current dir for this file"; 
+}landuse_colorscale;
+
+typedef enum {
+   RENDER_FILLED_CONT = 1, RENDER_RECTANGLES, RENDER_DYNAMIC_CONTOURS
+} render_type_t;
+
+paramdef enum render_type_t {
+  p_default = RENDER_RECTANGLES;
+  p_descr = "Land Use rendering style";
+  p_help = "Use Contours only for continious data like elevation";
+} land_use_render_method;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Default Display state of Land Use/ Basemap";
+} landuse_active;
+
+paramdef string {
+  p_default = "wheat";
+  p_descr = "Earth's skin color";
+}earth_color1;
+
+paramdef string {
+  p_default = "sienna";
+  p_descr = "Earth's core color";
+}earth_color2;
+

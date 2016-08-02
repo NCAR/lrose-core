@@ -1,0 +1,157 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+###########################################################
+#
+# Makefile macros to be included at start of all Makefiles
+#
+# Mike Dixon
+#
+# RAP,NCAR,Boulder,Colorado,80307,USA
+#
+# Nov 1994
+#
+############################################################
+
+#
+# system-dependent macros
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make.$(HOST_OS)
+
+#
+# flags
+#
+
+INCLUDES = $(LOC_INCLUDES) -I$(RAP_INC_DIR) -I$(RAP_SHARED_INC_DIR) \
+	 $(SYS_INCLUDES) $(LAST_INCLUDES)
+CPPC_INCLUDES = $(LOC_INCLUDES) -I$(RAP_INC_DIR) -I$(RAP_SHARED_INC_DIR) \
+	      $(SYS_CPPC_INCLUDES) $(LAST_INCLUDES)
+
+CFLAGS = $(LOC_CFLAGS) $(DEBUG_CFLAGS) $(SYS_CFLAGS)
+FFLAGS = $(LOC_FFLAGS) $(DEBUG_FFLAGS) $(SYS_FFLAGS) $(GCC_WARNINGS)
+CPPC_CFLAGS = $(LOC_CPPC_CFLAGS) $(DEBUG_CFLAGS) $(SYS_CPPC_CFLAGS)
+PGFFLAGS = $(LOC_PGFFLAGS) $(DEBUG_PGFFLAGS) $(SYS_PGFFLAGS)
+PGF90FLAGS = $(LOC_PGF90FLAGS) $(DEBUG_PGF90FLAGS) $(SYS_PGF90FLAGS)
+PGF95FLAGS = $(LOC_PGF95FLAGS) $(DEBUG_PGF95FLAGS) $(SYS_PGF95FLAGS)
+
+IFORTFFLAGS = $(LOC_IFORTFFLAGS) $(DEBUG_IFORTFFLAGS) $(SYS_IFORTFFLAGS)
+
+YACCFLAGS   = $(LOC_YACCFLAGS) $(SYS_YACCFLAGS)
+YACC_TEMPNAME    = temp000
+LEXFLAGS   = $(LOC_LEXFLAGS) $(SYS_LEXFLAGS)
+
+LINTFLAGS = $(SYS_LINTFLAGS)
+CPPCHECKFLAGS= $(SYS_CPPCHECKFLAGS) $(MY_CPPCHECKFLAGS)
+
+LDFLAGS = -L$(RAP_LIB_DIR) -L$(RAP_SHARED_LIB_DIR) \
+	$(LOC_LDFLAGS) $(SYS_LDFLAGS)
+LIBS = $(LOC_LIBS) $(DEBUG_LIBS) $(SYS_LIBS)
+
+JAVA_CLASSPATH = $(CLASSPATH):$(LOC_JAVA_CLASSPATH):$(SYS_JAVA_CLASSPATH)
+JAVA_FLAGS = $(LOC_JAVA_FLAGS) $(SYS_JAVA_FLAGS) -classpath $(JAVA_CLASSPATH)
+
+#
+# default behavior for compilers
+#
+
+_CC = $(CC)
+_CPPC = $(CPPC)
+_FC = $(FC)
+_F90 = $(F90)
+_F95 = $(F95)
+_F90C = $(F90C)
+_F95C = $(F95C)
+_PGFC = $(PGFC)
+_PGF90C = $(PGF90C)
+_PGF95C = $(PGF95C)
+_YACC = $(YACC)
+_LEX = $(LEX)
+
+#
+# install path
+#
+
+INSTALL_BIN_PATH = $(RAP_BIN_DIR)/$(TARGET_FILE)
+
+INSTALL_BIN_DIR  = $(RAP_BIN_DIR)
+INSTALL_LIB  = $(RAP_LIB_DIR)/$(TARGET_FILE)
+
+INSTALL_PGI_BIN_PATH = $(RAP_PGI_BIN_DIR)/$(TARGET_FILE)
+INSTALL_PGI_BIN_DIR = $(RAP_PGI_BIN_DIR)
+
+INSTALL_INTEL_BIN_PATH = $(RAP_INTEL_BIN_DIR)/$(TARGET_FILE)
+INSTALL_INTEL_BIN_DIR = $(RAP_INTEL_BIN_DIR)
+
+# 
+# for multiple executables in a single directory 
+# TARGET_FILES will be redefined locally.
+#
+
+TARGET_FILES = 
+ACTION_TYPE = build
+
+# for rpcgen
+
+EDIT_RPCGEN = $(PERL) -ne "s/\<rpc\/rpc.h\>/\<twutil\/rpc.h\>/g"
+
+#
+# objects and lint files
+#
+
+OBJS = $(SRCS:.c=.o) \
+	$(C_SRCS:.c=.o) \
+	$(F_SRCS:.f=.o) \
+	$(F_CPP_SRCS:.F=.o) \
+	$(F90_SRCS:.f90=.o) \
+	$(F90_CPP_SRCS:.F90=.o) \
+	$(F95_SRCS:.f95=.o) \
+	$(PGF90_SRCS:.f=.o) \
+	$(PGF_SRCS:.f=.o) \
+	$(CC_SRCS:.cc=.o) \
+	$(CPPC_SRCS:.cc=.o) \
+	$(CPP_SRCS:.cpp=.o) \
+	$(CXX_SRCS:.cxx=.o)
+
+LLNS = $(SRCS:.c=.ln) \
+	$(C_SRCS:.c=.ln) \
+	$(CPPC_SRCS:.cc=.ln) \
+	$(CPP_SRCS:.cpp=.ln)
+
+JAVA_CLASSES = $(JAVA_SRCS:.java=.class)
+
+#
+# target lists
+#
+
+GENERAL_TARGETS = \
+	all debug profile opt optopt opt4 dbgopt static staticopt \
+	lint depend cppcheck pure insure pgi intel\
+	clean clean_bin clean_tdrp clean_insure \
+	clean_depend clean_all clean_yacc clean_lex \
+	install_bin install_shared_bin copy_bin strip install_pgi_bin install_intel_bin \
+	add2readme copyright
+
+LIB_TARGETS = \
+	clean_lib \
+	install_include install_lib \
+	install_shared_include install_shared_lib \
+	install_debug_lib install_profile_lib install_insure_lib \
+	install_llib install_pgi_lib install_intel_lib \
+	cppcheck_lib_incs
+
+DOC_TARGETS = \
+	install_doc install_man \
+	install_shared_doc install_shared_man
+
+JAVA_TARGETS = \
+	all install_java install_shared_java install_shared \
+	install clean clean_all jar install_jar install_shared_jar
+
+INSTALL_TARGETS = \
+	install	install_shared install_copyright

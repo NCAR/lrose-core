@@ -1,0 +1,79 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "This is a small program that reads in SPDB METAR data, and\n"
+"also reads in a list of station locations and altitudes.\n"
+"The station data then have their lat, lon and altitude\n"
+"replaced by that specified in the file.\n\n"
+"Program was occasioned by a station location file that\n"
+"had the altiudes all wrong, thus requiring a fix.\n\n"
+"The program runs in archive mode only and does not\n"
+"check in with procmap. Niles Oien.";
+
+
+}
+
+paramdef string {
+  p_descr = "URL to read data from.";
+  p_default = {"spdbp:://localhost::spdb/data/in"};
+} InputUrl; 
+
+paramdef string {
+  p_descr = "URL to write to.";
+  p_default = {"spdbp:://localhost::spdb/data/out"};
+} OutputUrl; 
+
+paramdef string {
+  p_descr = "URL to read data from.";
+  p_default = {"station_location.dat"};
+} StationLocationFile; 
+
+paramdef boolean {
+  p_descr = "Set to TRUE to pass stations that are not\n"
+            "located in the station_location file to the\n"
+            "output with an unmodified location. If this is not\n"
+            "set and a station that is not in the file is\n"
+            "encountered then ";
+  p_default = { FALSE };
+} PassUnlocatedStations; 
+
+paramdef boolean {
+  p_descr = "Set to TRUE to get more verbose output. If set,\n"
+            "the program will print a message if a station ID is\n"
+            "in the data but not in the station location file.\n"
+            "May be a bit verbose if only fixing one station.";
+  p_default = { FALSE };
+} Debug; 
+
+
+paramdef string {
+  p_descr = "Start time, in YYYY MM DD hh mm ss format.";
+  p_default = {"2001 07 26 23 59 59"};
+} StartTimeString; 
+
+paramdef string {
+  p_descr = "End time, in YYYY MM DD hh mm ss format.";
+  p_default = {"2001 09 28 00 00 01"};
+} EndTimeString; 

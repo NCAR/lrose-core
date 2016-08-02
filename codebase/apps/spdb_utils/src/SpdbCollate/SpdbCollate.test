@@ -1,0 +1,214 @@
+/**********************************************************************
+ * TDRP params for SpdbCollate
+ **********************************************************************/
+
+//======================================================================
+//
+// SpdbCollate program.
+//
+// SpdbCollate reads data from Spdb data bases, at regular intervals, and 
+//   writes out the data in a time-collated format. The intention is to 
+//   allow you to compare data from different data bases.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA SET DESCRIPTIONS.
+//
+//======================================================================
+ 
+///////////// data_sets ///////////////////////////////
+//
+// Data set information.
+// The data sets appear in order in each line of output. Data is read 
+//   from the URL using 'get closest', with the time_margin specified in 
+//   secs. The data_types are entered as strings. If the strings can be 
+//   converted into an integer, that is done. If not, a reverse hash 
+//   lookup is performed to get the integer from the string. Use a data 
+//   type of 0 to get all spdb entries. entry_type specifies the type of 
+//   element you want to print out. The offset, in bytes, gives the 
+//   location of the element from the top of the SPDB data chunk. The 
+//   label is used for printing a header.
+//
+// Type: struct
+//   typedef struct {
+//      string url;
+//      int time_margin;
+//      string data_type;
+//      string data_type2;
+//      data_element_t entry_type;
+//        Options:
+//          UI08
+//          SI08
+//          UI16
+//          SI16
+//          UI32
+//          SI32
+//          FL32
+//          STRING
+//      int offset;
+//      string label;
+//   }
+//
+// 1D array - variable length.
+//
+
+data_sets = {
+  {
+    url = "/d1/dixon/wsddm/cases/spdb/asos",
+    time_margin = 5400,
+    data_type = "KLGA",
+    data_type2 = "0",
+    entry_type = FL32,
+    offset_in_chunk = 64,
+    label = "Visibility_KLGA(km)",
+    format = "%10.2f",
+    missing_str = "     -9999"
+  }
+  ,
+  {
+    url = "/d1/dixon/wsddm/cases/spdb/gauges",
+    time_margin = 600,
+    data_type = "LGA1",
+    data_type2 = "0",
+    entry_type = FL32,
+    offset_in_chunk = 60,
+    label = "SnowRate_LGA1(mm/hr)",
+    format = "%10.2f",
+    missing_str = "     -9999"
+  }
+  ,
+  {
+    url = "/d1/dixon/wsddm/cases/spdb/trecgauge/dix",
+    time_margin = 600,
+    data_type = "LGA1",
+    data_type2 = "0",
+    entry_type = FL32,
+    offset_in_chunk = 80,
+    label = "ReflDix_LGA1(dBZ)",
+    format = "%10.2f",
+    missing_str = "     -9999"
+  }
+  ,
+  {
+    url = "/d1/dixon/wsddm/cases/spdb/trecgauge/okx",
+    time_margin = 600,
+    data_type = "LGA1",
+    data_type2 = "0",
+    entry_type = FL32,
+    offset_in_chunk = 80,
+    label = "ReflOkx_LGA1(dBZ)",
+    format = "%10.2f",
+    missing_str = "     -9999"
+  }
+};
+
+//======================================================================
+//
+// TIME INFORMATION.
+//
+//======================================================================
+ 
+///////////// start_time //////////////////////////////
+//
+// Start time of analysis.
+// Data is gathered from the start to the end time.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+start_time = {
+    year = 2002,
+    month = 1,
+    day = 2,
+    hour = 12,
+    min = 15,
+    sec = 0
+};
+
+///////////// end_time ////////////////////////////////
+//
+// End time of analysis.
+// Data is gathered from the start to the end time.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+end_time = {
+    year = 2002,
+    month = 1,
+    day = 2,
+    hour = 12,
+    min = 15,
+    sec = 0
+};
+
+///////////// data_interval ///////////////////////////
+//
+// Interval between data retrievals - secs.
+// Data is colated at this interval, between the start and end times.
+// Type: int
+//
+
+data_interval = 300;
+
+///////////// print_only_if_all_available /////////////
+//
+// Option to only print out if all data is available.
+// The normal mode is to insert the missing value string if a data set 
+//   is not available at a particular time. If this parameter is true, 
+//   data for a particular time is only printed out if all data sets are 
+//   available at that time.
+// Type: boolean
+//
+
+print_only_if_all_available = FALSE;
+

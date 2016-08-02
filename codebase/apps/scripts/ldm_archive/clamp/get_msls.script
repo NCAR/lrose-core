@@ -1,0 +1,30 @@
+#!/bin/csh -x
+
+set ARC_home = /home/rapdmg/archive_staging
+set EXE_home = /home/rapdmg/exe
+
+set mid = $1
+set year = `$EXE_home/gemtime -o -48h %Y`
+set aryrmn = `$EXE_home/gemtime -o -48h %Y%m`
+set ardate = `$EXE_home/gemtime -o -48h %Y%m%d` 
+set armmdd = `$EXE_home/gemtime -o -48h %m%d` 
+
+set MSS_path = /RAPDMG/grib/$mid/$ardate 
+set outfile = $ARC_home/MSlist/$mid"_msls_"$ardate
+echo $outfile
+echo $MSS_path
+
+if ( -e $outfile ) then
+  rm -f $outfile
+  if ( -e $outfile ) echo "WARNING: Remove of $outfile failed"
+endif
+
+msls -lR $MSS_path >$outfile
+
+exit
+
+
+
+
+
+

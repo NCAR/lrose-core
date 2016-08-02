@@ -1,0 +1,13 @@
+#! /bin/csh
+
+foreach file (*/*)
+
+echo checking file $file
+check_mdv -f $file
+
+if ($status == -1) then
+ echo "--------\> Check on $file FAILED \<------------"
+endif
+
+end
+

@@ -1,0 +1,10 @@
+/*
+ * Parameter list for 'acmg_acpos_filter'
+ */
+
+debug = DEBUG_OFF;
+malloc_debug_level = 0;
+output_dir = "$(TITAN_HOME)/ac_posn/rview";
+output_file_ext = "";
+call_sign = "LC";
+

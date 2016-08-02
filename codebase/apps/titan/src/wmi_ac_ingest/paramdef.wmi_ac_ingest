@@ -1,0 +1,113 @@
+/*********************************************************
+ * parameter definitions for wmi_ac_ingest
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * June 1996
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = 0;
+  p_min = 0;
+  p_max = 3;
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum mode {
+  p_options = {TEST_MODE, REALTIME_MODE};
+  p_default = REALTIME_MODE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME_MODE, the aircraft data is read in from the serial connection. In TEST_MODE, aircraft data is generated for testing purposes.";
+} mode;
+
+paramdef string {
+  p_default = "/dev/ttyd1";
+  p_descr = "Input serial port";
+  p_help = "Name of serial device for input data";
+} input_device;
+
+paramdef enum baud_rate
+{
+  p_options = {BAUD_300, BAUD_1200, BAUD_2400, BAUD_4800,
+	       BAUD_9600, BAUD_19200, BAUD_38400};
+  p_default = BAUD_9600;
+  p_descr = "Baud rate";
+  p_help = "Baud rate for incoming serial data port";
+} baud_rate;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Archive directory path";
+  p_help = "Arcvive files are written to this directory";
+} archive_dir_path;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Realtime file path";
+  p_help = "The realtime data is written to this path";
+} realtime_file_path;
+
+paramdef long {
+  p_default = 1;
+  p_max = 3600;
+  p_descr = "Data store interval (secs)";
+  p_help = "Time between data store - this is used to keep the data file size reasonable.";
+} data_interval;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to store data using spdb.";
+  p_help = "Data will be stored in SPDB - symbolic products data base.";
+} use_spdb;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to store all aircraft data in a single data-base.";
+  p_help = "If TRUE, all data is stored in a single data-base directory, db_dir, regardless of callsign. The chunk type is comuted by hashing the callsign. If FALSE, each callsign has a separate data-base directory, computed as db_dir/callsign.";
+} single_database;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Data base directory";
+  p_help = "The path to the data base directory. See single_database for computing the directory.";
+} db_dir;
+
+paramdef string {
+  p_default = {"none"};
+  p_descr = "Callsign array";
+  p_help = "Array of valid callsigns";
+} callsigns[];
+
+paramdef long {
+  p_default = 120;
+  p_min = 1;
+  p_descr = "Valid period (secs)";
+  p_help = "Time period over which the position is valid.";
+} valid_period;
+
+paramdef struct test_aircraft {
+
+  p_descr = "Details of aircraft for TEST_MODE.";
+ 
+  p_help = "The test aircraft have a starting location, speed (knots) and altitude (ft). They wander randomly around. If they go further that 100 km from their starting location they are brought back to the start.";
+
+  p_field_type = { double, double, double, double, string };
+  p_field_name = { start_lat, start_lon, altitude, speed, callsign };
+
+} test_aircraft[];
+

@@ -1,0 +1,107 @@
+/**********************************************************
+ * paramdef.Mdv2Kavm
+ *
+ * This file contains the TDRP parameter definitions for
+ * Mdv2Kavm.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+typedef enum
+{
+  REALTIME,
+  ARCHIVE
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operating mode";
+  p_help = "If set to ARCHIVE, -start and -end MUST be included on the "
+           "command line.";
+  p_default = REALTIME;
+} mode;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input MDV URL";
+  p_default = "mdvp:://localhost:port:directory";
+} input_url;
+
+paramdef long
+{
+  p_descr = "Input field number";
+  p_help = "The number of the field to be converted to Kavouras mosaic "
+           "format. "
+           "Note that field numbers begin with 0.";
+  p_default = 0;
+} input_field_num;
+
+paramdef long
+{
+  p_descr = "Maximum valid age in seconds";
+  p_help = "In REALTIME mode, files older than this age will not be "
+           "processed.";
+  p_default = 600;
+} max_valid_age;
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = ".";
+} output_dir;
+
+paramdef string
+{
+  p_descr = "Output filename prefix";
+  p_default = "usra";
+} output_prefix;
+
+paramdef string
+{
+  p_descr = "Output filename extension";
+  p_default = "mcg";
+} output_ext;

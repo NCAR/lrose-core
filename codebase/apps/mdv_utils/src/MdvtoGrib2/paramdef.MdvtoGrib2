@@ -1,0 +1,417 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Mdv2Grib2
+ *
+ * This file contains the TDRP parameter definitions for
+ * Mdv2Grib2.
+ */
+
+paramdef boolean
+{
+  p_descr = "Debug flag";
+  p_default = false;
+} debug;
+
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * MDV Input Parameters
+ */
+
+commentdef
+{
+  p_header = "MDV INPUT PARAMETERS";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  FILE_LIST,
+  LATEST_DATA_FCST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the input_url parameter.\n \n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified with the -start and -end args and input_url parameter.\n"
+           "TIME_LIST mode is automatically invoked by -start and -end "
+           "options on the command line\n \n"
+           "In FILE_LIST mode, the files listed on the command line using "
+           "the -f command line option are processed.\n"
+           "FILE_LIST mode is automatically invoked by -f option on the "
+           "command line\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef int
+{
+  p_descr = "Time tolerance";
+  p_help = "Number of seconds allowed difference between latest data time and data time when mode = LATEST_DATA or LATEST_DATA_FCST";
+  p_default = 0;
+} tolerance_seconds;
+
+paramdef string
+{
+  p_descr = "Input URL to use when using LATEST_DATA or TIME_LIST trigger";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+/***********************************************************************
+ * Grib2 parameters.
+ */
+
+commentdef
+{
+  p_header = "GRIB2 PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_help = "Output files names are based on the input mdv file name.";
+  p_default = "./grib2/output";
+} output_dir;
+
+paramdef boolean
+{
+  p_descr = "Create LDataInfo file";
+  p_default = false;
+} create_ldatainfo;
+
+paramdef int
+{
+  p_descr = "Production status of the data";
+  p_help = "\t0 - Operational products\n"
+           "\t1 - Operational test products\n"
+           "\t2 - Research products\n"
+           "\t3 - Re-analysis products\n";
+  p_default = 2;
+} production_status;
+
+paramdef int
+{
+  p_descr = "Originating center";
+  p_help = "See http://www.nco.ncep.noaa.gov/pmb/docs/on388/table0.html\n"
+           "It is advised to use 60 - NCAR.\n"
+           "\t0  - WMO Secretariat\n"
+           "\t7  - NCEP\n"
+           "\t8  - NWS Telecommunications Gateway\n"
+           "\t9  - NWS other\n"
+           "\t59 - NOAA FSL\n"
+           "\t60 - NCAR\n";
+  p_default = 60;
+} centre_id;
+
+paramdef int
+{
+  p_descr = "Origination centers sub center id";
+  p_help = "Each project could have their own id here.";
+  p_default = 0;
+} sub_centre_id;
+
+paramdef int
+{
+  p_descr = "Originating sub centers background generating process identifier.";
+  p_help = "Each process could have its own id here.";
+  p_default = 0;
+} background_process_id;
+
+paramdef int
+{
+  p_descr = "Originating sub centers forecast generating process identifier.";
+  p_help = "Each process could have its own id here.";
+  p_default = 0;
+} forecast_process_id;
+
+paramdef int
+{
+  p_descr = "Discipline type of data in this GRIB file";
+  p_help = "Only one discipline type can be used per file.\n"
+           "See http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table4-2.shtml\n"
+           "\t0 = Meteorological data\n"
+           "\t1 = Hydrological data\n"
+           "\t2 = Land surface data\n"
+           "\t3 = Space data\n"
+           "\t10 = Oceanographic data\n";
+  p_default = 0;
+} discipline_number;
+
+typedef enum
+{
+  SINGLE_RECORD,
+  RECORD_BY_FIELD,
+  RECORD_BY_PLANE
+} record_mode_t;
+
+paramdef enum record_mode_t
+{
+  p_descr = "Output grib record divisions type.";
+  p_help = "This param defines when to create grib record divisions.\n \n"
+           "SINGLE_RECORD mode, (Best) Allows program to repeat sections "
+           "of the grib record whenever possible.\n"
+           "RECORD_BY_FIELD mode, Creates a new grib record when ever a new field is  "
+           "encountered.\n"
+           "RECORD_BY_PLANE mode, Creates a new grib record for each field and "
+           "vertical level (esentially no repeated sections).\n";
+  p_default = "SINGLE_RECORD";
+} record_mode;
+
+typedef enum
+{
+  DATA_CONVERT_NONE,
+  DATA_CONVERT_MULTIPLY
+} data_convert_type_t;
+
+typedef struct
+{
+  string mdv_field_name;
+  int mdv_field_num;
+  int process_type;
+  int param_category;
+  int param_number;
+  int data_type;
+  int compress_method;
+  int floating_point_precision;
+  boolean override_surface_type;
+  int first_surface_type;
+  int second_surface_type;
+  int prod_type;
+  int num_forecasts;
+  int time_interval_type;
+  int time_interval;
+  int user_data_value;
+  float lower_limit;
+  float upper_limit;
+  data_convert_type_t data_convert_type;
+  double data_convert_parameter;
+  double data_addend;
+} output_field_t;
+
+paramdef struct output_field_t
+{
+  p_descr = "List of fields to read from MDV and write to the GRIB2 file.";
+  p_help = "   \n"
+           "str\tmdv_field_name - Field name of the field in the MDV file.\n"
+           "\t                 Used only if mdv_field_num is -1.\n \n"
+           "int\tmdv_field_num - Field number of the field in the MDV file.\n"
+           "\t                Set to -1 to use mdv_field_name instead.\n \n"
+           "int\tprocess_type - Type of generating process.\n"
+             "\t  0  - Analysis\n"
+             "\t  1  - Initialization\n"
+             "\t  2  - Forecast\n"
+             "\t  3  - Bias Corrected Forecast\n"
+             "\t  4  - Ensemble Forecast\n"
+             "\t  5  - Probability Forecast\n"
+             "\t  6  - Forecast Error\n"
+             "\t  7  - Analysis Error\n"
+             "\t  8  - Observation\n \n"
+           "int\tparam_category - Parameter category number.\n"
+           "      A parameter category and parameter number must be chosen \n"
+           "      for each field. All numbers are predefined and should be\n"
+           "      looked up on the following web pages: \n"
+           " http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table4-2.shtml\n \n"
+           "int\tparam_number - Parameter number within parameter category.\n"
+           "                    Should be chosen from above web pages.\n"
+           "              Note: Data units must be as shown on web page.\n \n"
+           "int\tdata_type - \n"
+             "\t  0  - Analysis or forecast.\n"
+             "\t  1  - Individual ensemble forecast.\n"
+             "\t  2  - Derived forecast, based on all ensemble members.\n"
+             "\t  5  - Probability forecast.\n"
+             "\t  6  - Percentile forecast.\n"
+             "\t  7  - Analysis or forecast error.\n"
+             "\t  8  - Statistically processed value over a time interval.\n"
+             "\t  9  - Probability forecast over a time interval.\n"
+             "\t  10 - Percentile forecast over a time interval.\n"
+             "\t  11 - Individual ensemble forecast over a time interval.\n"
+             "\t  12 - Derived forecast based on ensemble members over a time.\n"
+             "   \n"
+           "int\tcompress_method - Data encoding method.\n"
+             "\t  0  - Simple packing method.\n"
+             "\t  41 - PNG compression.\n"
+             "\t  40 - Jpeg 2000 compression.\n \n"
+           "float floating_point_precision - Number of decimal places to store\n"
+           "\t                            data in the Grib2 file.\n \n"
+           "bool\toverride_surface_type - The program will attempt to 'determine'\n"
+           "\t                        vertical level information from the MDV file\n"
+           "\t                        Set this to true to override those values.\n \n"
+           "int\tfirst_surface_type - The surface level bottom type.\n"
+           "\t                     The value is still read from the Mdv file.\n"
+           "\t                 Used only if override_surface_type is set to true.\n \n"
+           "int\tsecond_surface_type - The surface level top type.\n"
+           "\t                      The value is still read from the Mdv file.\n"
+           "\t                 Used only if override_surface_type is set to true.\n \n"
+           "int\tprod_type - Used only if data_type is 1, 2, 5, 8, 9, 11 or 12\n"
+           "\t  1, 11 - Individual Ensemble Forecast type\n"
+           "\t\t0   - Unperturbed High-Resolution Control Forecast\n"
+           "\t\t1   - Unperturbed Low-Resolution Control Forecast\n"
+           "\t\t2   - Negatively Perturbed Forecast\n"
+           "\t\t3   - Positively Perturbed Forecast\n"
+           "\t\t255 - None\n"
+           "\t  2, 12 - Derived Ensemble Forecast type\n"
+           "\t\t0 - Unweighted Mean of All Members\n"
+           "\t\t1 - Weighted Mean of All Members\n"
+           "\t\t2 - Standard Deviation with respect to Cluster Mean\n"
+           "\t\t3 - Standard Deviation with respect to Cluster Mean, Normalized\n"
+           "\t\t4 - Spread of All Members\n"
+           "\t\t5 - Large Anomaly Index of All Members\n"
+           "\t\t6 - Unweighted Mean of the Cluster Members\n"
+           "\t  5, 9 - Probability Forecast type\n"
+           "\t\t0 - Probability of event below lower limit\n"
+           "\t\t1 - Probability of event above upper limit\n"
+           "\t\t2 - Probability of event between upper and lower limits\n"
+           "\t\t3 - Probability of event above lower limit\n"
+           "\t\t4 - Probability of event below upper limit\n \n"
+           "int\tnum_forecasts - Number of associated Ensemble forecasts\n"
+           "\t                Used only if data_type is 1, 2, 5, 9, 11 or 12\n \n"
+           "int\ttime_interval_type - Used only if data_type is 8, 9, 10, 11 or 12\n"
+           "\t  0   - Average\n"
+           "\t  1   - Accumulation\n"
+           "\t  2   - Maximum\n"
+           "\t  3   - Minimum\n"
+           "\t  4   - Difference (end minus beginning)\n"
+           "\t  5   - Root Mean Square\n"
+           "\t  6   - Standard Deviation\n"
+           "\t  7   - Covariance (temporal variance)\n"
+           "\t  8   - Difference (beginning minus end)\n"
+           "\t  9   - Ratio\n"
+           "\t  255 - None\n \n"
+           "int\ttime_interval - Data time interval in seconds\n"
+           "\t                Used only if data_type is 8, 9, 10, 11 or 12\n \n"
+           "int\tuser_data_value - Used only if data_type is 1, 5, 6, 9, 10 or 11\n"
+           "\t  1, 11 - This is the perturbation number\n"
+           "\t  5, 9  - This is the probability number\n"
+           "\t  6, 10 - This is the percentile value (from 100 - 0)\n \n"
+           "float lower_limit / upper_limit - Used only if data_type is 5 or 9\n"
+           "\t\tThis is the lower and/or upper limit of the forecast probability\n"
+           "\tdata_convert_parameter - Parameter used in data conversion:\n"
+           "\t\tDATA_CONVERT_NONE - parameter not used.\n"
+           "\t\tDATA_CONVERT_MULTIPLY - the MDV values are multiplied by "
+           "this value before being written to the GRIB file.\n"
+           "\tdata_addend - This value will be added to the data values; the default addend is 0.\n";
+  p_default = { { "CloudHeight", -1, 0, 3, 6, 0, 40, 2, false, 0, 0, 0, 0, 0, 0, 0, 0.0, 0.0, DATA_CONVERT_NONE, 1, 0} };
+} output_fields[];
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to remap the output fields.";
+  p_help = "If TRUE, the output fields will be remapped according to "
+           "the information in the remap_info parameter.";
+  p_default = FALSE;
+} remap_output;
+
+typedef enum
+{
+  PROJ_LATLON,
+  PROJ_LAMBERT_CONF
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  long nx;
+  long ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  double origin_lat;
+  double origin_lon;
+  double lat1;
+  double lat2;
+} remap_info_t;
+
+paramdef struct remap_info_t
+{
+  p_descr = "Information on how to remap the output fields. "
+            "Used only if remap_output is set to TRUE.";
+  p_help = "\tproj_type - specifies the output projection to use. "
+           "Can be either PROJ_LATLON or PROJ_LAMBERT_CONF. "
+           "Currently, only PROJ_LAMBERT_CONF is supported.\n"
+           "\tnx, ny - specify the output grid dimensions.\n"
+           "\tminx, miny - specify the output grid location.\n"
+           "\tdx, dy - specify the output grid resolution.\n"
+           "\torigin_lat, origin_lon - specify the output grid origin. "
+           "Used only if proj_type is set to PROJ_LAMBERT_CONF.\n"
+           "lat1, lat2 - specify the output grid parameters. "
+           "Used only if proj_type is set to PROJ_LAMBERT_CONF.";
+  p_default = { PROJ_LAMBERT_CONF,
+                301, 225,
+                -3332.139893, -588.890015,
+                20.318001, 20.318001,
+                25.0, -95.0,
+                25.0, 25.0 };
+} remap_info;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to apply horizontal limits instead"
+            " of remapping the output fields using the remap_info.";
+  p_help = "If TRUE and Lambert Conformal projection, the output fields will"
+           " be limited by the horizontal boundary (minLat/maxLat/minLon/maxLon).";
+  p_default = FALSE;
+} use_horiz_limits;
+
+typedef struct
+{
+  double min_lat;
+  double max_lat;
+  double min_lon;
+  double max_lon;
+} horiz_limits_t;
+
+paramdef struct horiz_limits_t
+{
+  p_descr = "Bounding box which defines the horizontal limits of the target data."
+            "Used only if use_horiz_limits is set to TRUE.";
+  p_help = "\tmin_lat - specifies the minimum latitude.\n"
+           "\tmax_lat - specifies the maximum latitude.\n"
+           "\tmin_lon - specifies the minimum longitude.\n"
+           "\tmax_lon - specifies the maximum longitude.";
+  p_default = { -90, 90, -180, 180 };
+} horiz_limits;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true the output filename uses the basename, followed by ISO 8601 timestamp convention";
+  p_help = "eg. basename.2008-05-22T14:00:00.grb2";
+} use_iso8601_filename_convention;
+
+paramdef string {
+  p_default = "grib2";
+  p_descr = "basename of grib files, used only when use_iso8601_filename_convention=TRUE";
+} basename;
+

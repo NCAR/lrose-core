@@ -1,0 +1,411 @@
+/**********************************************************************
+ * TDRP params for Dorade2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// Dorade2Dsr reads Dorade radar beam-by-beam files and copies the 
+//   contents into a DsRadar FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_DATA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In SIMULATE mode, the program moves repeatedly through 
+//   the file list, creating output files with times set to now. This is 
+//   useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DORADE FILE DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "$(HOME)/data/raw/radar/dorade";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+///////////// simulate_wait_secs //////////////////////
+//
+// Time to wait between files in SIMULATE mode - (secs).
+// In SIMULATE mode the program cycles through the input files. This is 
+//   the wait time between the files.
+// Type: int
+//
+
+simulate_wait_secs = 10;
+
+///////////// check_elev //////////////////////////////
+//
+// Option to check elevation for error.
+// If true, and elevation error exceeds 'max_elev_error', the beam is 
+//   discarded.
+// Type: boolean
+//
+
+check_elev = FALSE;
+
+///////////// max_elev_error //////////////////////////
+//
+// Error in elevation (in degrees) for identifying unwanted beams.
+// Used for eliminating beams as the radar is moving around, for example 
+//   when the radar is dropping down to begin a new volume scan.
+// Type: float
+//
+
+max_elev_error = 0.5;
+
+///////////// remove_test_pulse ///////////////////////
+//
+// Option to remove the test pulse data.
+// If true, the test pulse data will be removed from the end of the 
+//   beam. The test pulse data generally lies in the last few gates in the 
+//   beam. If true, the number of gates will be reduced by 
+//   'ngates_test_pulse'.
+// Type: boolean
+//
+
+remove_test_pulse = FALSE;
+
+///////////// ngates_test_pulse ///////////////////////
+//
+// Number of gates to remove to get rid of test pulse.
+// See 'remove_test_pulse'.
+// Type: int
+//
+
+ngates_test_pulse = 20;
+
+//======================================================================
+//
+// RADAR PARAMS.
+//
+// If any of the params are set in the input data files, the values in 
+//   those params will be taken from the input data stream rather than 
+//   from the parameter file.
+//
+//======================================================================
+ 
+///////////// scan_type_id ////////////////////////////
+//
+// Scan type id.
+// Unique identifier for scan strategy.
+// Type: int
+//
+
+scan_type_id = 0;
+
+///////////// scan_type_name //////////////////////////
+//
+// Scan type name.
+// Descriptive name for scan strategy.
+// Type: string
+//
+
+scan_type_name = "Default";
+
+///////////// override_radar_location /////////////////
+//
+// Option to override input data stream with user-specified latitude, 
+//   longitude and altitude.
+// If TRUE, the radar location in the params will be used instead of the 
+//   values in the input files.
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// override_radar_time /////////////////////
+//
+// Option to override input data stream with the current time in 
+//   realtime mode.
+// If TRUE, the data will be timestamped with the current time. Useful 
+//   in REALTIME mode for simulations.
+// Type: boolean
+//
+
+override_radar_time = FALSE;
+
+///////////// radar_latitude //////////////////////////
+//
+// Radar latitude - deg.
+// Only used if override_radar_location is true.
+// Type: double
+//
+
+radar_latitude = 0;
+
+///////////// radar_longitude /////////////////////////
+//
+// Radar longitude - deg.
+// Only used if override_radar_location is true.
+// Type: double
+//
+
+radar_longitude = 0;
+
+///////////// radar_altitude //////////////////////////
+//
+// Radar altitude - km.
+// Only used if override_radar_location is true.
+// Type: double
+//
+
+radar_altitude = 0;
+
+///////////// override_gate_geom //////////////////////
+//
+// Option to override gate_spacing and start_range in the input data.
+// If TRUE, the gate_spacing and start_range in the params will be used 
+//   instead of the values in the input files.
+// Type: boolean
+//
+
+override_gate_geom = FALSE;
+
+///////////// gate_spacing ////////////////////////////
+//
+// Gate_spacing - km.
+// Only used if override_gate_geom is true.
+// Type: double
+//
+
+gate_spacing = 0.15;
+
+///////////// start_range /////////////////////////////
+//
+// start_range - km.
+// Only used if override_gate_geom is true.
+// Type: double
+//
+
+start_range = 0.075;
+
+///////////// receiver_mds ////////////////////////////
+//
+// Receiver min detectable signal - dBm.
+// Type: double
+//
+
+receiver_mds = -108;
+
+//======================================================================
+//
+// OUTPUT FIELDS.
+//
+// Only the following fields will included in the output. If the field 
+//   is not in the input file, it will be left out.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Output radar fields.
+// List of fields to be output if available in the input data. If a 
+//   field does not exist in the input data it will not be output either. 
+//   The dorade_name can be either a single field name, or a 
+//   comma-delimited list. If it is a list, the first name to match a 
+//   field in the input data is used. If the data is output as 
+//   OUTPUT_UI08, the specified scale and bias values will be used. If 
+//   data is output as OUTPUT_UI16, and the input data is not 16-bit, the 
+//   specified scale and bias will be used. If input and output data are 
+//   both 16-bit, the scale and bias supplied by the Dorade data will be 
+//   used. If OUTPUT_FL32, no scale and bias is needed.
+//
+// Type: struct
+//   typedef struct {
+//      string dorade_name;
+//      string name;
+//      string units;
+//      double scale;
+//      double bias;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  { "ZHH0", "DBZ", "dBZ", 0.5, -32},
+  { "VE0", "VEL", "m/s", 0.5, -63.5}
+};
+
+///////////// output_type /////////////////////////////
+//
+// Type of output data.
+// If OUTPUT_UI08, the specified scale and bias will be used. If 
+//   OUTPUT_UI16, the Dorade scale and bias will be used.
+//
+// Type: enum
+// Options:
+//     OUTPUT_UI08
+//     OUTPUT_UI16
+//     OUTPUT_FL32
+//
+
+output_type = OUTPUT_UI08;
+
+///////////// use_dorade_scale_and_bias ///////////////
+//
+// Option to use the Dorade data scale and bias if applicable.
+// If TRUE, then the incoming Dorade scale and bias values will be used 
+//   if the input data type matches the output data type, i.e. if both are 
+//   8-bit or 16-bit values. Otherwise, the scale and bias values 
+//   specified in 'output_fields' will be used.
+// Type: boolean
+//
+
+use_dorade_scale_and_bias = FALSE;
+
+//======================================================================
+//
+// OUTPUT Dsr FMQ.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for DsRadar data via FMQ.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://$(HOST)::fmq/dsRadar";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 2000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 3600;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// beam_wait_msecs /////////////////////////
+//
+// Wait per beam (milli-secs).
+// Type: int
+//
+
+beam_wait_msecs = 0;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+///////////// end_of_vol_flag /////////////////////////
+//
+// Decision on when to set end of vol flag.
+// If CHANGE_IN_VOL_NUM, this only occurs when the sweep file volume 
+//   number changes. If EVERY_FILE, and end-of-volume flag is set after 
+//   every file.
+//
+// Type: enum
+// Options:
+//     CHANGE_IN_SWEEP_VOL
+//     EVERY_FILE
+//
+
+end_of_vol_flag = CHANGE_IN_SWEEP_VOL;
+

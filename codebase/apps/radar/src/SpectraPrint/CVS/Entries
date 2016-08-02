@@ -1,0 +1,18 @@
+/.cvsignore/1.1/Fri Oct 23 21:39:45 2015//
+/Args.cc/1.7/Fri Mar  4 02:39:08 2016//
+/Args.hh/1.4/Fri Mar  4 02:39:08 2016//
+/Beam.cc/1.12/Fri Mar  4 02:39:08 2016//
+/Beam.hh/1.7/Fri Mar  4 02:39:08 2016//
+/BeamMgr.cc/1.22/Fri Mar  4 02:39:08 2016//
+/BeamMgr.hh/1.13/Fri Mar  4 02:39:08 2016//
+/BeamReader.cc/1.9/Fri Mar  4 02:39:08 2016//
+/BeamReader.hh/1.7/Fri Mar  4 02:39:08 2016//
+/Main.cc/1.6/Fri Mar  4 02:39:08 2016//
+/Makefile/1.8/Fri Mar  4 03:06:37 2016//
+/Params.cc/1.10/Sun Mar 18 23:27:08 2012//
+/Params.hh/1.11/Sun Mar 18 23:27:08 2012//
+/SpectraPrint.cc/1.10/Fri Mar  4 02:39:08 2016//
+/SpectraPrint.hh/1.5/Fri Mar  4 02:39:08 2016//
+/SpectraPrint.test/1.11/Mon Jan 19 16:44:42 2015//
+/paramdef.SpectraPrint/1.9/Mon Aug  3 00:39:01 2009//
+D

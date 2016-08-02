@@ -1,0 +1,123 @@
+/*********************************************************
+ * parameter definitions for FixCfradialPaths
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 2012
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Fixes the times in the file names of CfrRadial files. i.e. sets the file name to appropriately reflect the start or end time.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+commentdef {
+  p_header = "RENAME THE FILE BASED ON DATA TIME";
+}
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.";
+} output_filename_mode;
+
+typedef enum {
+  NO_ACTION,
+  RENAME_IN_PLACE,
+  COPY_FILE,
+  CREATE_SYMBOLIC_LINK
+} file_rename_t;
+
+paramdef enum file_rename_t {
+  p_default = NO_ACTION;
+  p_descr = "Mode for renaming the file.";
+  p_help = "RENAME_FILE_IN_PLACE: do not move the file, rename it in the current directory. COPY_FILE: make a copy into 'copy_dir'. CREATE_SYMBOLIC_LINK: create symbolic links in 'link_dir'";
+} file_rename;
+
+paramdef string {
+  p_default = "./copy";
+  p_descr = "Output directory for copied files.";
+  p_help = "COPY_FILE mode only.";
+} copy_dir;
+
+paramdef string {
+  p_default = "./links";
+  p_descr = "Directory for symbolic links.";
+  p_help = "CREATE_SYMBOLIC_LINK mode only.";
+} link_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+
+
+

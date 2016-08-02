@@ -1,0 +1,304 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvAccumulate
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvAccumulate.
+ */
+
+
+commentdef
+{
+  p_header = "MdvAccumulate";
+  p_text = "This program accumulates gridded data through time. "
+           "The idea is that a grid is maintained that is overwritten "
+           "with new data whenever new data appears. "
+           "Pre-existing data will remain in areas where no new data "
+           "has been received.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "If true, verbose debug messages will be printed.";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef string
+{
+  p_descr = "Accumulation URL";
+  p_help = "This is the URL where the data is accumulated. "
+           "It is used for both input and output since the previous "
+           "accumulation file is read in and updated to create the new "
+           "accumulation file.";
+  p_default = "mdvp:://localhost::mdv/accumulate";
+} accum_url;
+
+paramdef long
+{
+  p_descr = "Amount of time the accumulation is valid in seconds.";
+  p_help = "Data in the accumulation that is older than this will be "
+           "set to missing.";
+  p_default = 3600;
+} max_accum_secs;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Remap data flag";
+  p_help = "If true, the output data will be remapped to the given "
+           "projection. "
+           "If false, the output data will be written to the same projection "
+           "as is used by the input data.";
+  p_default = false;
+} remap_data;
+
+typedef enum
+{
+  REMAP_LATLON,
+  REMAP_FLAT,
+  REMAP_LAMBERT_CONFORMAL2
+} remap_type_t;
+
+typedef struct
+{
+  remap_type_t remap_type;
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} remap_info_t;
+
+paramdef struct remap_info_t
+{
+  p_descr = "Information for remapping the input fields";
+  p_help = "If remap_type is REMAP_LATLON, the following fields are used:\n"
+           "\tnx, ny, minx, miny, dx, dy\n\n"
+           "If remap_type is REMAP_FLAT, the following fields are used:\n"
+           "\tnx, ny, minx, miny, dx, dy, origin_lat, origin_lon, rotation\n\n"
+           "If remap_type is REMAP_LAMBERT_CONFORMAL2, the following fields "
+           "are used:\n"
+           "\tnx, ny, minx, miny, dx, dy, origin_lat, origin_lon, "
+           "lat1, lat2";
+} remap_info;
+
+typedef struct
+{
+  string input_field_name;
+  string background_field_url;
+  string background_field_name;
+  long background_field_level_num;
+} background_field_info_t;
+
+paramdef struct background_field_info_t
+{
+  p_descr = "Information on background fields to use";
+  p_help = "If you want to use a background field with any of your input "
+           "fields, put the information here. "
+           "When the program reads an input field, it will check this list "
+           "to see if it needs to use a background field. "
+           "If the input field is found in this list, the specified "
+           "background URL will be checked for new data. "
+           "If there is more recent data in the background field than in "
+           "the most recent accumulation file, the background field will "
+           "be used rather than the accumulation file.\n"
+           "\tinput_field_name - The name of the field in the input MDV "
+           "file. "
+           "This must match exactly.\n"
+           "\tbackground_field_url - The URL to use for retrieving the "
+           "background field. "
+           "I'm allowing a different URL for each background field just in "
+           "case a server is needed for calculating the background field "
+           "(for example if you need a wind speed background field but the "
+           "MDV file has U and V instead).\n"
+           "\tbackground_field_name - The name of the background field as "
+           "it appears in the MDV file (or as it will appear from the "
+           "server.\n"
+           "\tbackground_field_level_num - The level number of the "
+           "background field to use. "
+           "Set to -1 to use a composite of the background field.\n"
+           "Note that currently you can only specify a background field "
+           "if your input field is 2-dimensional.\n"
+           "Also note that even though you can specify a different URL "
+           "for each background field, I am assuming that all of the fields "
+           "come from the same URL. "
+           "This affects the accumulation in the timing out of data fields. "
+           "When a background field is found for any input field, I replace "
+           "the latest accumulations with the appropriate background fields "
+           "and set the data time for each grid point to the background field "
+           "time. "
+           "I also set all of the accumulation fields that I couldn't find "
+           "background fields for to missing data values so that the data "
+           "timing for all fields is the same. "
+           "If any other behavior is desired, it will require a lot more "
+           "coding and disk space since we'll have to keep data times for "
+           "every grid point and every field rather than using the same data "
+           "time for all of the fields at the same grid point.";
+  p_default = {};
+} background_field_info[];
+
+
+/***********************************************************************
+ * Quality control parameters.
+ */
+
+commentdef
+{
+  p_header = "QUALITY CONTROL PARAMETERS";
+};
+
+typedef struct
+{
+  string field_name;
+  double max_value_diff;
+} field_qc_t;
+
+paramdef struct field_qc_t
+{
+  p_descr = "Quality control parameters for the accumulation fields.";
+  p_help = "\tfield_name - Name of the accumulation field for which this "
+           "QC information applies.\n"
+           "\tmax_value_diff - Maximum data value change allowed between "
+           "accumulations. "
+           "If set to a positive value, any new data whose value differs from "
+           "the previous accumulation value (or the background field value "
+           "if the background field is newer than the previous accumulation) "
+           "by more than this ammount will be "
+           "rejected and the previous accumulation value will be used "
+           "instead. "
+           "If set to a negative value, all new data values will be used in "
+           "the accumulation.";
+  p_default = {};
+} field_qcs[];

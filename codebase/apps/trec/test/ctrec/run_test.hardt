@@ -1,0 +1,7 @@
+#!/bin/csh -f
+
+/bin/rm test.log
+/bin/rm -r hardt_test_output
+
+ctrec -params ctrec.hardt_test -mode ARCHIVE \
+    -start "1998 06 15 00 00 00" -end "1998 06 15 23 59 59"

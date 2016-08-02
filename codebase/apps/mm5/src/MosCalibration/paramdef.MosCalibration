@@ -1,0 +1,219 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*
+ *
+ * Parameter definitions for MosCalibration application
+ *
+ * $Id: paramdef.MosCalibration,v 1.17 2016/03/07 01:33:50 dixon Exp $
+ *
+ */
+
+commentdef {
+  p_header = "MosCalibration PARAMETER FILE";
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+paramdef string {
+  p_descr = "Process instance";
+  p_descr = "This is used by the process mapper, procmap";
+  p_default = {"nowcast"};
+} instance;
+
+paramdef boolean {
+  p_descr = "Info messaging option";
+  p_default = {TRUE};
+} info;
+
+paramdef boolean {
+  p_descr = "Debug messaging option";
+  p_default = {FALSE};
+} debug;
+
+commentdef {
+  p_header = "LOGS.";
+}
+
+paramdef string {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} log_dir;
+
+commentdef {
+  p_header = "INPUT.";
+}
+
+paramdef char* {
+  p_descr = "Url for mm5 spdb data";
+  p_default = "spdbp:://localhost::spdb/mm5";
+} mm5_url;
+
+paramdef char* {
+  p_descr = "Url for metar spdb data";
+  p_default = "spdbp:://localhost::spdb/metar";
+} metar_url;
+
+paramdef long {
+  p_descr = "Look back time in days";
+  p_help = "If the start time is not specified on the command line "
+           "look back this amount from the end time.  If the end time "
+           "is not specified on the command line, the current time "
+           "will be used for the end time";
+  p_default = {42};
+} look_back;
+
+commentdef {
+  p_header = "PROCESSING PARAMETERS.";
+}
+
+paramdef long {
+  p_descr = "Forecast times";
+  p_help = "List the forecast times for which the prediction parameters "
+           "should be calculated.  A seperate set of predition "
+           "parameters will be calculated for each forecast time listed."
+           "  Please ensure that these times are in increasing order";
+  p_default = {0};
+} forecast_times[];
+
+paramdef char* {
+  p_descr = "Station ids";
+  p_help = "List the station ids for which the prediction parameters "
+           "should be calculated.  A seperate set of prediction "
+           "parameters will be calculated for each station id listed";
+  p_default = "KCTP";
+} station_ids[];
+
+paramdef long {
+  p_descr = "Time tolerance for data blending in seconds";
+  p_help = "A metar data point must be within this time tolerance "
+           "to be considered a match for a given model data point";
+  p_default = {120};
+} time_tolerance;
+
+paramdef double {
+  p_descr = "Cloud liquid water threshold in kg/kg";
+  p_help = "The height at which the cloud liquid water content "
+           "exceeds this threshold will be used as a predictor "
+           "for ceiling";
+  p_default = {0.000001};
+} cloud_liquid_water_threshold;
+
+paramdef double {
+  p_descr = "Ice content threshold in kg/kg";
+  p_help = "The height at which the ice contend exceeds this "
+           "threshold will be used as a predictor for ceiling";
+  p_default = {0.000001};
+} ice_content_threshold;
+
+paramdef double {
+  p_descr = "Ceiling threshold in km";
+  p_help = "If, at a given point, the metar value for ceiling "
+           "exceeds this value, this value will be used in "
+	   "the regression calculation";
+  p_default = {3.6576};
+} ceiling_threshold;
+
+paramdef double {
+  p_descr = "Visibility threshold in km";
+  p_help = "If, at a given point, the metar value for visibility "
+           "exceeds this value, this value will be used in "
+           "the regression calculation";
+  p_default = {9.999};
+} visibility_threshold;
+
+paramdef boolean {
+  p_descr = "Use normalized vectors";
+  p_help = "If set to TRUE, the data vectors will be normalized in the "
+           "vector sense (scaled by the length of the vector) before "
+           "using in the multiple linear regression.";
+  p_default = {FALSE};
+} normalize;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef char* {
+  p_descr = "Output url";
+  p_help = "Url for output statistics in spdb";
+  p_default = "spdbp:://localhost::spdb/mos";
+} output_url;
+
+paramdef long {
+  p_descr = "Maximum valid age in seconds";
+  p_help = "Maximum valid age for output statistics";
+  p_default = {18600};
+} max_valid_age;
+
+paramdef boolean {
+  p_descr = "Write information and variables to text files";
+  p_help = "Option to write regression information and variables to "
+           "ascii files";
+  p_default = {FALSE};
+} write_regression_info;
+
+paramdef char* {
+  p_descr = "Output directory for regression information files";
+  p_help = "Output directory for ascii files containing regression "
+           "information";
+  p_default = {"./"};
+} regression_output_dir;
+
+paramdef char* {
+  p_descr = "Output directory for coefficient data files";
+  p_help = "Output directory for ascii files containing the coefficient "
+           "information for the regressions performed for a given variable";
+  p_default = {"./"};
+} coefficient_output_dir;
+
+paramdef char* {
+  p_descr = "Output directory for correlation data files";
+  p_help = "Output directory for ascii files containing the correlation "
+           "data for the regressions performed for a given variable";
+  p_default = {"./"};
+} correlation_output_dir;
+
+paramdef char* {
+  p_descr = "Output directory for variable data files";
+  p_help = "Output directory for ascii files containing data from the "
+           "variables used in the regression calculations";
+  p_default = {"./"};
+} variable_output_dir;
+
+
+typedef enum {
+  VARIABLE_OUT_OLD,
+  VARIABLE_OUT_CSV
+} variable_output_format_t;
+ 
+paramdef enum variable_output_format_t
+{
+  p_default = VARIABLE_OUT_CSV;
+  p_descr = "Format for variable output";
+  p_help = "The options are VARIABLE_OUT_OLD, and VARIABLE_OUT_CSV. "
+  		   "VARIABLE_OUT_OLD prints y 1 x"
+		   "VARIABLE_OUT_CSV prints metarHumanTime, metarUnixTime, modelHumanTime, modelUnixTime, y, x";
+} variable_output_format;

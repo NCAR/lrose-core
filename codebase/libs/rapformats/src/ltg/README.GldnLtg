@@ -1,0 +1,41 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:51 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+This from NRL:
+
+Currently our system receives two separate lightning data
+feeds from Viasala.  The first feed is one that we paid for and it's for
+the CONUS.  The second feed we are receiving on a trial basis and it's   
+the global feed.  Please note that the global feed is not supposed to
+contain data for the CONUS.
+
+We decode both feeds into a simple ascii format and send that decoded
+file into LDM.  Here is what the format looks like:
+
+Time:Latitude:Longitude:Cloud:KiloAmps:Deciseconds:Multiplicity
+
+Here is a sample:
+==========================================================
+1050705483:32.746:278.353:0:-016:08:10
+1050705484:32.632:278.277:0:0010:01:01
+1050705493:44.478:266.120:0:-018:01:03
+1050705505:32.792:278.341:0:-004:01:02
+1050705516:35.689:284.927:0:-048:02:03
+1050705545:32.794:278.331:0:-010:05:01
+1050705547:35.714:246.101:0:-008:08:01
+1050705553:37.200:245.369:0:-014:02:01
+1050705559:32.871:278.426:0:-006:04:01
+==========================================================
+
+Time is in epoch (seconds since 1970...)
+Latitude is -90 to 90
+Longitude is - to 360
+Cloud is either 0 (cloud to ground) or 1 (cloud to cloud)
+KiloAmps is the strength, can be positive or negative
+Deciseconds is the duration
+Multiplicity is how many strikes per stroke (poor explanation, sorry)

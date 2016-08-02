@@ -1,0 +1,27 @@
+cartsim2mdv....
+	reads cartesian simulation config. parameters and, for each time
+	specified, creates 3 dimensional cartesian data and writes
+	out to a MDV format file.
+
+Notes:
+
+1. a conflict between tetwws and dataport (both used) as follows:
+
+     /usr/bin/../lib/ld:
+     Warning: /home/dave/lib/libtetwws.a(be.o): BE_is_big_endian: multiply defined
+	   previous (used) definition from '/rap/lib/libdataport.a';
+	   new (ignored) definition from '/home/dave/lib/libtetwws.a'
+
+
+2. The simulation config file has an environment variable
+CSIM_MAPPING_DIR that points to the directory with needed mapping
+files utilda, stilda, w, wr_max.  Examples can be found in
+../../../sim/src/spline_plot.
+
+3. Examples of the config files are found in libs/sim/src/cart_sim
+
+
+	Examples of this file are found in ../lobe_create
+
+4. The fields created are wind u, wind v, wind w, dbz, snr, sw.
+

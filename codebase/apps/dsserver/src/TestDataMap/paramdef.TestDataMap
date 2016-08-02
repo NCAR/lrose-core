@@ -1,0 +1,151 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for DmapTest
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Jan 1999
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "Operational mode";
+};
+
+typedef enum {
+  LATEST_DATA_INFO, STATUS_INFO, DATA_SET_INFO, DELETE_INFO
+} mode_t;
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} data_time_t;
+
+paramdef enum mode_t
+{
+  p_default = LATEST_DATA_INFO;
+  p_descr = "Mode.";
+  p_help = "You can either test in latest_data mode, as in a normal client, or in data_set mode as in the case of the Scout. Latest_data mode will use either the current time or the latest_time parameter for regsitration, depending on use_now_for_latest_time. You can also test registering the status, and can delete a data set.";
+} mode;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use current time for latest time.";
+  p_help = "If set the program will operate in continuous mode, with the given delay between hits. If not, it will operate only once and then exit.";
+} use_now_for_latest_time;
+
+paramdef struct data_time_t {
+  p_default = {1970, 1, 1, 0, 0, 0};
+  p_descr = "Data set start time.";
+} latest_time;
+
+paramdef int {
+  p_default = -1;
+  p_descr = "Forecast lead time (secs).";
+  p_help = "If set to -1, no forecast time is active.";
+} forecast_lead_time;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to operate continuously.";
+  p_help = "If set the program will operate in continuous mode, with the given delay between hits. If not, it will operate only once and then exit.";
+} continuous_operation;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Delay between hits - millisecs.";
+  p_help = "The program will delay by this amount between hits.";
+} delay_msecs;
+  
+commentdef {
+  p_header = "Data type and directory name";
+};
+
+paramdef string {
+  p_default = "mdv";
+  p_descr = "Data type.";
+  p_help = "The data set type, e.g. mdv, spdb, titan.";
+} data_type;
+
+paramdef string {
+  p_default = "data_set_dir";
+  p_descr = "Data set directory.";
+  p_help = "This is the top directory of the data set.";
+} data_set_directory;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Data set hostname.";
+  p_help = "Required for delete.";
+} data_set_host;
+
+commentdef {
+  p_header = "DATA_SET_INFO parameters";
+};
+
+paramdef struct data_time_t {
+  p_default = {1970, 1, 1, 0, 0, 0};
+  p_descr = "Data set start time.";
+} start_time;
+
+paramdef struct data_time_t {
+  p_default = {1999, 12, 31, 23, 59, 59};
+  p_descr = "Data set end time.";
+} end_time;
+
+paramdef double {
+  p_default = 35;
+  p_descr = "Number of files in data set.";
+} nfiles;
+
+paramdef double {
+  p_default = 2500000;
+  p_descr = "Total number of bytes in data set.";
+} total_bytes;
+
+paramdef string {
+  p_default = "OK";
+  p_descr = "Status string.";
+} status;

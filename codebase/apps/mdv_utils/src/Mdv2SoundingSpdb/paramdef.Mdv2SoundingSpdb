@@ -1,0 +1,202 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Mdv2SoundingSpdb
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 2014
+ */
+
+commentdef {
+  p_header = "Mdv2SoundingSpdb reads MDV Cartesian grid files, samples the data at an array of specified points, loads the data as a sounding and writes the soundings to SPDB.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Interval for registering with procmap (secs)";
+  p_help = "Sometime this app will spend a long time writing the netCDF file, since compression can be quite time-consuming. Setting this to longer than 60 secs (say 180) gives the app more time to complete its work. The auto-restarter will restart any app which has not registered for twice the length of the register interval.";
+} procmap_register_interval;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Input directory";
+  p_help = "Path of input directory";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "REALTIME: - waits for new data. ARCHIVE: uses start and end times. FILELIST: processes specified file list";
+} mode;
+  
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data";
+  p_help = "REALTIME mode only. Max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Use _latest_data_info files to decide when new data has arrived.";
+  p_help = "REALTIME mode only. If false, the directory input_dir is scanned for new files.";
+} latest_data_info_avail;
+
+commentdef {
+  p_header = "INPUT DATA FIELD NAMES";
+}
+
+paramdef string {
+  p_default = "Temp";
+  p_descr = "Name of temperature field";
+  p_help = "Set to empty string if no temperature field";
+} temp_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set to TRUE if temperature is in Kelvin.";
+  p_help = "If false, temps are in Celsius. Also applies to dew-pt.";
+} temp_units_are_kelvin;
+
+paramdef string {
+  p_default = "RH";
+  p_descr = "Name of relative humidity field.";
+  p_help = "Set to empty string if no RH field is available";
+} rh_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set to TRUE to compute relative humidity from dew-pt field.";
+} compute_rh_from_dewpt;
+
+paramdef string {
+  p_default = "Dewpt";
+  p_descr = "Name of dew-pt field.";
+  p_help = "Set to empty string if no dew-pt field";
+} dewpt_field_name;
+
+paramdef string {
+  p_default = "Uwind";
+  p_descr = "Name of field for X component of wind.";
+  p_help = "Set to empty string if no X component of wind. Assumed to be in m/s.";
+} u_wind_field_name;
+
+paramdef string {
+  p_default = "Vwind";
+  p_descr = "Name of field for Y component of wind.";
+  p_help = "Set to empty string if no Y component of wind. Assumed to be in m/s.";
+} v_wind_field_name;
+
+paramdef string {
+  p_default = "Wwind";
+  p_descr = "Name of field for Z component of wind.";
+  p_help = "Set to empty string if no Z component of wind. Assumed to be in m/s.";
+} w_wind_field_name;
+
+paramdef string {
+  p_default = "Pressure";
+  p_descr = "Name of pressure field.";
+  p_help = "Set to empty string if no prssure field. Assumed to be in hPa. If this is missing, and the vertical levels are in pressure, the vertical level value will be used.";
+} pressure_field_name;
+
+paramdef string {
+  p_default = "Height";
+  p_descr = "Name of height field.";
+  p_help = "Set to empty string if no height field. Assumed to be in km. If this is missing, and the vertical levels are in km, the vertical level value will be used.";
+} height_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set to TRUE if height values are in km instead of m.";
+} heights_are_in_km;
+
+commentdef {
+  p_header = "SAMPLING LOCATIONS";
+}
+
+typedef struct {
+  string name;
+  double latitude;
+  double longitude;
+  double altitudeKm;
+} station_location_t;
+
+paramdef struct station_location_t {
+  p_default = {
+    { "SPOL", 40.1233, -104.891, 1.55296 },
+    { "CHILL", 40.4464, -104.637, 1.432 },
+    { "KFTG", 39.7866, -104.546, 1.709 },
+    { "KCYS", 41.1519, -104.806, 1.886 },
+    { "KPUX", 38.4595, -104.181, 1.634 },
+    { "KGLD", 39.3667, -101.700, 1.131 },
+    { "KGJX", 39.0622, -108.213, 3.064 },
+    { "PWNE", 40.87115, -104.714, 1.688 }
+  };
+  p_descr = "Sampling locations.";
+} station_locations[];
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "spdbp:://localhost::/tmp/spdb/Mdv2SoundingSpdb";
+  p_descr = "Directory for output data";
+} output_url;
+
+paramdef int {
+  p_default = 43200;
+  p_descr = "Valid age for sounding data.";
+  p_help = "How long until the next sounding is expected?";
+} valid_period_secs;
+

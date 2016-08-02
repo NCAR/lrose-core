@@ -1,0 +1,71 @@
+###########################################################################
+#
+# Makefile for MM5toGrib program with compilation on ATEC dev-c1 cluster.
+#
+# Carl Drews, RAP, NCAR, Boulder, CO, 80307, USA, July 30, 2004
+# Francois Vandenberghe, RAP, NCAR, Boulder, CO, 80307, USA, March 30, 2006
+#
+###########################################################################
+
+# Statement needed to compile on NSAP clusters
+HOST_OS = LINUX
+# Statement needed to compile on NSAP clusters
+RAP_MAKE_INC_DIR = /rap/stable/make_include
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGET_FILE = MM5toGrib
+
+# Statement needed to compile on NSAP clusters
+LOC_INCLUDES = -I/rap/stable/include
+LOC_CFLAGS =
+# Statement needed to compile on NSAP clusters
+LOC_LDFLAGS = -L/rap/stable/lib
+LOC_LIBS = -lMdv -ldsserver -lmm5 -lrapformats -ldidss -lphysics \
+		-ltoolsa -ldataport -ltdrp -lm \
+		-lgrib -leuclid -ltoolsa
+
+MODULE_TYPE = progcpp
+
+HDRS = \
+	$(PARAMS_HH) \
+	Args.hh \
+	InputPath.hh \
+	MM5toGrib.hh \
+	OutputFile.hh \
+	GribWriter.hh
+
+CPPC_SRCS = \
+	$(PARAMS_CC) \
+	Args.cc \
+	InputPath.cc \
+	Main.cc \
+	MM5toGrib.cc \
+	OutputFile.cc \
+	GribWriter.cc
+
+#
+# tdrp macros
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+
+#
+# standard C++ targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_opt_c++_targets
+
+#
+# tdrp targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+
+#
+# local targets
+#
+
+depend: depend_generic
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

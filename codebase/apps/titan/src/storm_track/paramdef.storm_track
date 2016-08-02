@@ -1,0 +1,181 @@
+/*********************************************************
+ * parameter definitions for storm_track
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 1996
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_NORM, DEBUG_EXTRA, DEBUG_VERBOSE};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME, RE_TRACK};
+  p_default = {ARCHIVE};
+  p_descr = "Tracking mode";
+  p_help = "In realtime and archive mode, tracking is performed for each volume scan as it is made available by storm_ident. In retrack mode, tracking is done on an existing storm file";
+} mode;
+
+paramdef enum forecast_type {
+  p_options = {TREND, PARABOLIC, REGRESSION};
+  p_default = {TREND};
+  p_descr = "Forecast mode";
+  p_help = "TREND - linear trend. PARABOLIC - parabolic trend on growth, linear trend on decay. The parabola peaks at time parabolic_growth_period from present. REGRESSION - uses regression equations for forecast (experimental).";
+} forecast_type;
+
+paramdef double {
+  p_default = {1800.0};
+  p_min = {0.0};
+  p_max = {10800.0};
+  p_descr = "Parabolic growth period (secs)";
+  p_help = "Time at which parabolic growth curve becomes flat";
+} parabolic_growth_period;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to force storm growth to be zero";
+  p_help = "If this is set, the storm growth will be forced to zero. Storm decay will be normal. Forecast movement will be normal.";
+} zero_growth;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to force storm decay to be zero";
+  p_help = "If this is set, the storm decay will be forced to zero. Storm growth will be normal. Forecast movement will be normal.";
+} zero_decay;
+
+paramdef double {
+  p_default = {90.0};
+  p_min = {5.0};
+  p_max = {200.0};
+  p_descr = "Maximum allowable speed for tracks";
+  p_help = "This value is used to limit the search for a match in the tracking algorithm.";
+} max_tracking_speed;
+
+paramdef double {
+  p_default = {1.0};
+  p_min = {0.0};
+  p_max = {10.0};
+  p_descr = "Matching parameter.";
+  p_help = "The weight for distance moved in the matching algorithm.";
+} weight_distance;
+
+paramdef double {
+  p_default = {1.0};
+  p_min = {0.0};
+  p_max = {10.0};
+  p_descr = "Matching parameter.";
+  p_help = "The weight for delta_cube_root_volume in the matching algorithm.";
+} weight_delta_cube_root_volume;
+
+paramdef double {
+  p_default = {1200.0};
+  p_min = {60.0};
+  p_max = {86400.0};
+  p_descr = "Max allowable time between scans (secs).";
+  p_help = "Max delta time (secs) for valid tracking - if there is a larger break than this in the data, all tracks are terminated and new ones started.";
+} max_delta_time;
+
+paramdef double {
+  p_min = 0.0;
+  p_max = 1.0;
+  p_default = {1.0, 0.9, 0.8, 0.7, 0.6, 0.5};
+  p_descr = "Weights for making the trend forecast.";
+  p_help = "A trend forecast is made using a weighted linear fit to the storm history. These are the weights used. The first applies to the most recent scan, and the last to the earliest scan used.";
+} forecast_weights[];
+
+paramdef double {
+  p_default = {100.0};
+  p_min = {5.0};
+  p_max = {300.0};
+  p_descr = "Max allowable speed for valid forecast (km/hr).";
+  p_help = "If the speed exceeds this value, the forecast is marked invalid.";
+} max_speed_for_valid_forecast;
+
+paramdef double {
+  p_default = {900.0};
+  p_min = {0.0};
+  p_max = {7200.0};
+  p_descr = "Min history for valid forecast (secs).";
+  p_help = "If the history is less than this value, the forecast is marked invalid.";
+} min_history_for_valid_forecast;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to scale forecasts by history";
+  p_help = "If this is set, forecasts are scaled by the ratio of history over min_history_for_scaling.";
+} scale_forecasts_by_history;
+
+paramdef double {
+  p_default = {1200.0};
+  p_min = {0.0};
+  p_descr = "History value for scaling forecasts (secs).";
+  p_help = "If a storm has a history less than this value, the forecast values are scaled by the ratio of history over history_for_scaling. If the storm history exceeds this value, the scale factor is 1.0";
+} history_for_scaling;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to use storm runs for overlaps";
+  p_help = "If this is set, runs are used to compute the overlaps for identifying mergers and splits. If not, the storm polygons are used.";
+} use_runs_for_overlaps;
+
+paramdef double {
+  p_default = {0.1};
+  p_min = {0.01};
+  p_max = {1.00};
+  p_descr = "Min fraction for valid overlap.";
+  p_help = "When detetmining the overlap of a storm at successive times, we consider the overlap as a fraction of the storm area at time1 and time2. This is the min overlap for a valid match.";
+} min_fraction_overlap;
+
+paramdef double {
+  p_default = {0.3};
+  p_min = {0.01};
+  p_max = {3.00};
+  p_descr = "Min sum fraction for valid overlap.";
+  p_help = "When detetmining the overlap of a storm at successive times, we consider the sum of the overlaps as a fraction of the storm area at time1 and time2. This is the min overlap for a valid match.";
+} min_sum_fraction_overlap;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to perform spatial smoothing.";
+  p_help = "If this is set, the motion forecasts are smoothed using an inverse-distance weighting scheme. The max radius considered is given by the parameter smoothing_radius.";
+} spatial_smoothing;
+
+paramdef double {
+  p_default = {50.0};
+  p_min = {0.0};
+  p_descr = "Radius for forecast smoothing.";
+  p_help = "This is the maximum radius which the forecast algorithm will use when searching for candidates for smoothing data.";
+} smoothing_radius;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to perform spatial smoothing for storms which are not yet old enough for a valid forecast.";
+  p_help = "If this is set, the motion smoothing is performed for young storms. The history is set to a weighted mean of the histories of the storms from which the smoothed motion was obtained.";
+} smooth_invalid_forecasts;
+
+paramdef long {
+  p_default = {44000};
+  p_min = {10000};
+  p_descr = "Shared mem key.";
+  p_help = "This key is used for shared memory communication with storm_ident and the track_server";
+} shmem_key;
+

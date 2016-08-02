@@ -1,0 +1,124 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:46 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+OVERVIEW OF COMPRESSION ROUTINES
+================================
+
+Mike Dixon, RAP, NCAR, BOULDER, CO, 80307, USA
+July 1999
+
+
+The compression section of toolsa contains a number of options for
+compressing and decompressing data buffers.
+
+Options.
+--------
+
+The options included at present are:
+
+1. RLE - Run Length Encoding compression.
+
+This is simple byte-by-byte run length encoding, developed at RAP,
+but based on ideas in the literature.
+
+This is fast, but does not compress very efficiently.
+
+2. LZO Compression.
+
+This uses a library written by Markus Oberhumer. It is a variant of
+Lempel-Ziv encoding, called LZO after Lempel-Ziv-Oberhumer.
+See http://wildsau.idv.uni-linz.ac.at/mfx/.
+
+This is almost as fast as RLE, and compresses 2 - 3 times more efficiently.
+
+3. BZIP Compression.
+
+This uses a library written by Julian Seward (jseward@acm.org). 
+See http://www.digistar.com/bzip2/index.html.
+
+This is quite slow, but compresses much more efficiently than
+RLE and LZO.
+
+API.
+----
+
+The file <toolsa/compress.h> shows you the API. All of the compression
+routines are wrapped so that a header can be added to the compressed
+buffer. This header stores a magic cookie, which documents the type
+of compression, and the size of the uncompressed data which is needed
+for allocating space for the decompressed data.
+
+
+TEST PROGRAMS.
+--------------
+
+You will find a test program for each of the methods:
+
+  test_rle, test_lzo, test_bzip
+
+You can run them to test the compression efficiency and speed.
+
+The usage is similar for all of the test programs, For example:
+
+(venus) compress 312 % test_rle 
+Usage: test_rle filename
+Notes:
+  If filename does not have .rle extension, it is 
+    compressed and stored in file with .rle extension.
+  If filename has .rle extension, it is uncompressed
+    and stored in file without .rle extension.
+
+So if you give it a file without the extension, it will be compressed.
+If the file has the extension it will be uncompressed.
+
+The following are some timed tests, compressing an xwd (X-window dump)
+file 5246059 bytes in length.
+
+1a. compressing with RLE: 12.2%, 0.25 s
+
+(venus) compress 316 % time test_rle test.xwd
+Compressing file 'test.xwd'
+Compressed 5246059 bytes into 644368 bytes
+0.050u 0.250s 0:00.31 96.7%     0+0k 0+0io 87pf+0w
+
+1b. decompressing with RLE: 0.24 s
+
+(venus) compress 317 % time test_rle test.xwd.rle 
+Uncompressing file 'test.xwd.rle'
+Uncompressed 644368 bytes into 5246059 bytes
+0.010u 0.240s 0:00.24 104.1%    0+0k 0+0io 244pf+0w
+
+2a. compressing with LZO: 4.7%, 0.22 s
+
+(venus) compress 319 % time test_lzo test.xwd
+Compressing file 'test.xwd'
+Compressed 5246059 bytes into 246893 bytes
+0.040u 0.220s 0:00.25 104.0%    0+0k 0+0io 88pf+0w
+
+2b. decompressing with LZO: 0.2 s
+
+(venus) compress 320 % time test_lzo test.xwd.lzo
+Uncompressing file 'test.xwd.lzo'
+Uncompressed 246893 bytes into 5246059 bytes
+0.010u 0.200s 0:00.20 105.0%    0+0k 0+0io 148pf+0w
+
+3a. compressing with BZIP: 0.65%, 10.9 s
+
+(venus) compress 322 % time test_bzip test.xwd
+Compressing file 'test.xwd'
+Compressed 5246059 bytes into 34437 bytes
+0.610u 10.900s 0:11.51 100.0%   0+0k 0+0io 102pf+0w
+
+3b. decompressing with BZIP: 0.93 s
+
+(venus) compress 323 % time test_bzip test.xwd.bzip 
+Uncompressing file 'test.xwd.bzip'
+Uncompressed 34437 bytes into 5246059 bytes
+0.130u 0.930s 0:01.06 100.0%    0+0k 0+0io 110pf+0w
+
+

@@ -1,0 +1,5 @@
+echo "Here we go . . ."
+#./MM5toGrib -params ./MM5toGrib.params.fcs -f /d1/mm5/FCS/2005102006_MMOUTPUT_DOMAIN2.GRM_P+FCST+N -mdv -debug -mode ARCHIVE &>logFCS.txt
+#./MM5toGrib -params ./MM5toGrib.params.fcs -f /d1/mm5/FCS/20051020_MMOUTPUT.dat -mdv -mode ARCHIVE &>logFCS.txt
+./MM5toGrib -params ./MM5toGrib.params.fcs -f /d1/mm5/FCS/NewMMINPUT.dat -mdv -mode ARCHIVE &>logFCS.txt
+

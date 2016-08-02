@@ -1,0 +1,6 @@
+.deps
+TdrpTest
+__makefile.template
+makefile
+makefile.am
+makefile.in

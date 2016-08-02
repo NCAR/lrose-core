@@ -1,0 +1,39 @@
+/**********************************************************
+ * paramdef.convertBdry
+ *
+ */
+
+paramdef boolean
+{
+  p_descr = "Print debug messages";
+  p_help = "";
+  p_default = {FALSE};
+} debug;
+
+paramdef string
+{
+  p_descr = "Spdb source";
+  p_help = "";
+  p_default = { "." };
+} spdb_source;
+
+paramdef string
+{ 
+  p_descr = "Spdb destinations";
+  p_help = "";
+  p_default = ".";
+} spdb_destinations[];
+
+paramdef string
+{ 
+  p_descr = "Start time";
+  p_help = "Needs to be in this format:  HH:MM MM/DD/YYYY";
+  p_default = "00:00 01/01/1999";
+} start_time;
+
+paramdef string
+{
+  p_descr = "End time";
+  p_help = "Needs to be in this format: HH:MM MM/DD/YYYY";
+  p_default = "00:00 01/01/1999";
+} end_time;

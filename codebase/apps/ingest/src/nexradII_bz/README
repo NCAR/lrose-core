@@ -1,0 +1,26 @@
+
+This is the program that is used to decompress nexrad
+level II data when it is delivered via the LDM. At
+RAP, this program is usually invoked with a system()
+call by the nexrad2dsr radar ingest program. As a
+stand alone utility, the syntax to run this is
+something like :
+
+nexradII_bz -C BZIP2    unzipped/015758_60.DAT < zipped/015758_60.BZIP2
+
+The program requires that the bzip2 libraries be installed
+in order to build.
+
+The program was obtained from Harry Edmon at the
+University of Washington (harry@atmos.washington.edu).
+The source was obtained at :
+
+ftp://ftp.atmos.washington.edu/harry/nexradII.tgz
+
+ -- This source relied on parts of the ldm library. The
+ldm library was duly downloaded from UniData and the parts
+of the library that this program relies on were pulled out
+and brought into this directory - essentially pulling
+a subset of the library into the application.
+
+Niles Oien February 2004

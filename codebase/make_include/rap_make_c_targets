@@ -1,0 +1,67 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+##########################################################################
+#
+# Makefile targets for C programs
+#
+# Mike Dixon
+#
+# RAP,NCAR,Boulder,Colorado,80307,USA
+# 
+# Nov 1998
+#
+###########################################################################
+
+#
+# Include the recursive targets for C, C++ and FORTRAN
+#
+
+all: debug
+
+include $(RAP_MAKE_INC_DIR)/rap_make_cf_recursive_targets
+
+#
+# compile target
+#
+
+target:
+	echo Making C program ... ; \
+	$(MAKE) _CC="$(_CC)" _CPPC="$(_CPPC)" _FC="$(_FC)" DBUG_OPT_FLAGS="$(DBUG_OPT_FLAGS)" DEBUG_CFLAGS="$(DEBUG_CFLAGS)" DEBUG_LIBS="$(DEBUG_LIBS)" DEBUG_LDFLAGS="$(DEBUG_LDFLAGS)" SYS_LIBS="$(SYS_LIBS)" SYS_CFLAGS="$(SYS_CFLAGS)" $(TARGET_FILE);
+
+#
+# link target
+#
+
+$(TARGET_FILE): $(OBJS) Makefile
+	echo Linking C program ...
+	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LOC_LD_LIBRARY_PATH):$(SYS_LD_LIBRARY_PATH)
+	$(RM) $(TARGET_FILE)
+	$(_CC) $(DBUG_OPT_FLAGS) -o $(TARGET_FILE) \
+	 	$(OBJS) $(DEBUG_LDFLAGS) $(LDFLAGS) $(LIBS)
+
+#
+# Include the bin targets for C, C++ and FORTRAN
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_cf_bin_targets
+
+#
+# miscellaneous targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_misc_targets
+
+clean_all: clean clean_bin clean_insure
+
+#
+# Include the suffixes
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_suffixes
+

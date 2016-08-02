@@ -1,0 +1,287 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body>
+
+<center><a href="index.html"><img SRC="rsl_big.jpg" height=256 width=550></a><render tag="center" style="TT"></center>
+
+<h1>
+Indexed Reference for RSL</h1>
+
+<h1>
+<a href="RSL_radar_intro.html">Introduction&nbsp;<br>
+</a><a href="RSL_structures.html">Structures</a></h1>
+
+<h1>
+<a href="users_guide.html">Users guide</a></h1>
+
+<h1>
+<a href="programmers_guide.html">Programmers guide</a></h1>
+
+<h1>
+<a href="internal_routines.html">Internal Routines</a></h1>
+<a href="whats_new.html">What's New</a>
+<br><a href="README">README</a>
+<br><a href="CHANGES">CHANGES</a>
+<br><a href="TODO">TODO</a>
+<p><a href="RSL_copyright.html">Copyright(c)1996, 1997, 1998, 1999</a>
+<h1>
+<a href="functionality_index.html">Functionality index to RSL routines</a></h1>
+
+<h1>
+Alphabetical index to RSL routines</h1>
+
+<h5>
+(alphabetical and grouped by object returned)</h5>
+<a href="RSL_anyformat_to_radar.html">Radar *RSL_anyformat_to_radar(char
+*infile [, char *callid_or_first_file]);</a>
+<br><a href="RSL_edge_to_radar.html">Radar *RSL_edge_to_radar(char *infile);</a>
+<br><a href="RSL_get_win.html">Radar *RSL_get_window_from_radar(Radar *r,
+float min_range, float max_range, float low_azim, float hi_azim);</a>
+<br><a href="RSL_hdf_to_radar.html">Radar *RSL_hdf_to_radar(char *infile);</a>
+<br><a href="RSL_hdf_to_radar.html">Radar *RSL_hdf_to_radar_unQC(char *infile);</a>
+<br><a href="RSL_lassen_to_radar.html">Radar *RSL_lassen_to_radar(char
+*infile);</a>
+<br><a href="RSL_mcgill_to_radar.html">Radar *RSL_mcgill_to_radar(char
+*infile);</a>
+<br><a href="RSL_new.html">Radar *RSL_new_radar(int nvolumes);</a>
+<br><a href="RSL_nsig_to_radar.html">Radar *RSL_nsig_to_radar(char *infile);</a>
+<br><a href="RSL_prune.html">Radar *RSL_prune_radar(Radar *radar);</a>
+<br><a href="RSL_radtec_to_radar.html">Radar *RSL_radtec_to_radar(char
+*infile);</a>
+<br><a href="RSL_rapic_to_radar.html">Radar *RSL_rapic_to_radar(char *infile);</a>
+<br><a href="RSL_read_radar.html">Radar *RSL_read_radar(char *infile);</a>
+<br><a href="RSL_sort.html">Radar *RSL_sort_radar(Radar *r);</a>
+<br><a href="RSL_toga_to_radar.html">Radar *RSL_toga_to_radar(char *infile);</a>
+<br><a href="RSL_uf_to_radar.html">Radar *RSL_uf_to_radar(char *infile);</a>
+<br><a href="RSL_uf_to_radar.html">Radar *RSL_uf_to_radar_fp(FILE *fp);</a>
+<br><a href="RSL_wsr88d_to_radar.html">Radar *RSL_wsr88d_to_radar(char
+*infile, char *callid_or_first_file);</a>
+<p><a href="RSL_clear.html">Volume *RSL_clear_volume(Volume *v);</a>
+<br><a href="RSL_copy.html">Volume *RSL_copy_volume(Volume *v);</a>
+<br><a href="RSL_get_volume.html">Volume *RSL_get_volume(Radar *r, int
+type_wanted);</a>
+<br><a href="RSL_get_win.html">Volume *RSL_get_window_from_volume(Volume
+*v, float min_range, float max_range, float low_azim, float hi_azim);</a>
+<br><a href="RSL_new.html">Volume *RSL_new_volume(int max_sweeps);</a>
+<br><a href="RSL_prune.html">Volume *RSL_prune_volume(Volume *v);</a>
+<br><a href="RSL_read.html">Volume *RSL_read_volume(FILE *fp);</a>
+<br><a href="RSL_reverse.html">Volume *RSL_reverse_sweep_order(Volume *v);</a>
+<br><a href="RSL_sort.html">Volume *RSL_sort_rays_in_volume(Volume *v);</a>
+<br><a href="RSL_sort.html">Volume *RSL_sort_sweeps_in_volume(Volume *v);</a>
+<br><a href="RSL_sort.html">Volume *RSL_sort_volume(Volume *v);</a>
+<br><a href="RSL_z_to_r.html">Volume *RSL_volume_z_to_r(Volume *z_volume,
+float k, float a);</a>
+<p><a href="RSL_clear.html">Sweep *RSL_clear_sweep(Sweep *s);</a>
+<br><a href="RSL_copy.html">Sweep *RSL_copy_sweep(Sweep *s);</a>
+<br><a href="RSL_get_closest_sweep.html">Sweep *RSL_get_closest_sweep(Volume
+*v,float sweep_angle,float limit);</a>
+<br><a href="RSL_get_first_sweep_of_volume.html">Sweep *RSL_get_first_sweep_of_volume(Volume
+*v);</a>
+<br><a href="RSL_get_sweep.html">Sweep *RSL_get_sweep(Volume *v, float
+elev);</a>
+<br><a href="RSL_get_win.html">Sweep *RSL_get_window_from_sweep(Sweep *s,
+float min_range, float max_range, float low_azim, float hi_azim);</a>
+<br><a href="RSL_new.html">Sweep *RSL_new_sweep(int max_rays);</a>
+<br><a href="RSL_prune.html">Sweep *RSL_prune_sweep(Sweep *s);</a>
+<br><a href="RSL_read.html">Sweep *RSL_read_sweep (FILE *fp);</a>
+<br><a href="RSL_sort.html">Sweep *RSL_sort_rays_in_sweep(Sweep *s);</a>
+<br><a href="RSL_sort.html">Sweep *RSL_sort_rays_by_time(Sweep *s);</a>
+<br><a href="RSL_z_to_r.html">Sweep *RSL_sweep_z_to_r(Sweep *z_sweep, float
+k, float a);</a>
+<p><a href="RSL_clear.html">Ray *RSL_clear_ray(Ray *r);</a>
+<br><a href="RSL_copy.html">Ray *RSL_copy_ray(Ray *r);</a>
+<br><a href="RSL_get_closest_ray_from_sweep.html">Ray *RSL_get_closest_ray_from_sweep(Sweep
+*s,float ray_angle,float limit);</a>
+<br><a href="RSL_get_first_ray_of.html">Ray *RSL_get_first_ray_of_sweep(Sweep
+*s);</a>
+<br><a href="RSL_get_first_ray_of.html">Ray *RSL_get_first_ray_of_volume(Volume
+*v);</a>
+<br><a href="RSL_get_next_cwise_ray.html">Ray *RSL_get_next_ccwise_ray(Sweep
+*s, Ray *ray);</a>
+<br><a href="RSL_get_next_cwise_ray.html">Ray *RSL_get_next_cwise_ray(Sweep
+*s, Ray *ray);</a>
+<br><a href="RSL_get_ray.html">Ray *RSL_get_ray(Volume *v, float elev,
+float azimuth);</a>
+<br><a href="RSL_get_ray_from_sweep.html">Ray *RSL_get_ray_from_sweep(Sweep
+*s, float azim);</a>
+<br><a href="RSL_get_ray_above-below.html">Ray *RSL_get_ray_above(Volume
+*v, Ray *current_ray);</a>
+<br><a href="RSL_get_ray_above-below.html">Ray *RSL_get_ray_below(Volume
+*v, Ray *current_ray);</a>
+<br><a href="RSL_get_win.html">Ray *RSL_get_window_from_ray(Ray *r, float
+min_range, float max_range, float low_azim, float hi_azim);</a>
+<br><a href="RSL_new.html">Ray *RSL_new_ray(int max_bins);</a>
+<br><a href="RSL_prune.html">Ray *RSL_prune_ray(Ray *ray);</a>
+<br><a href="RSL_z_to_r.html">Ray *RSL_ray_z_to_r(Ray *z_ray, float k,
+float a);</a>
+<br><a href="RSL_read.html">Ray *RSL_read_ray (FILE *fp);</a>
+<p><a href="RSL_area_of_ray.html">float RSL_area_of_ray(Ray *r, float lo,
+float hi, float max_range);</a>
+<br><a href="RSL_fraction_of.html">float RSL_fraction_of_ray(Ray *r, float
+lo, float hi, float range);</a>
+<br><a href="RSL_fraction_of.html">float RSL_fraction_of_sweep(Sweep *s,
+float lo, float hi, float range);</a>
+<br><a href="RSL_fraction_of.html">float RSL_fraction_of_volume(Volume
+*v, float lo, float hi, float range);</a>
+<br><a href="RSL_fractional_area_of_sweep.html">float RSL_fractional_area_of_sweep(Sweep
+*s, float lo, float hi, float max_rng);</a>
+<br><a href="RSL_get_linear_value.html">float RSL_get_linear_value(Volume
+*v,float srange,float azim,float elev,float limit);</a>
+<br><a href="RSL_get_nyquist_from_radar.html">float RSL_get_nyquist_from_radar(Radar
+*radar);</a>
+<br><a href="RSL_get_range_of_range_index.html">float RSL_get_range_of_range_index(Ray
+*ray, int index);</a>
+<br><a href="RSL_get_value.html">float RSL_get_value(Volume *v, float elev,
+float azimuth, float range);</a>
+<br><a href="RSL_get_value.html">float RSL_get_value_at_h(Volume *v, float
+azim, float grnd_r, float h);</a>
+<br><a href="RSL_get_value_from_cappi.html">float RSL_get_value_from_cappi(Cappi
+*cappi, float rng, float azm);</a>
+<br><a href="RSL_get_value.html">float RSL_get_value_from_ray(Ray *ray,
+float r);</a>
+<br><a href="RSL_get_value.html">float RSL_get_value_from_sweep(Sweep *s,
+float elev, float azim, float r);</a>
+<br><a href="RSL_z_to_r.html">float RSL_z_to_r(float z, float k, float
+a);</a>
+<p><a href="RSL_fill_cappi.html">int RSL_fill_cappi(Volume *v, Cappi *cap,
+int method);</a>
+<br><a href="RSL_get_sweep_index_from_volume.html">int RSL_get_sweep_index_from_volume(Volume
+*v, float elev,int *next_closest);</a>
+<br><a href="RSL_radar_to_hdf.html">int RSL_radar_to_hdf(Radar *radar,
+char *outfile);</a>
+<br><a href="RSL_write_histogram.html">int RSL_write_histogram(Histogram
+*histogram, char *outfile);</a>
+<br><a href="RSL_write.html">int RSL_write_ray(Ray *r, FILE *fp);</a>
+<br><a href="RSL_write.html">int RSL_write_sweep(Sweep *s, FILE *fp);</a>
+<br><a href="RSL_write.html">int RSL_write_volume(Volume *v, FILE *fp);</a>
+<br><a href="RSL_write_histogram.html">int RSL_write_histogram(Histogram
+*histogram, char *outfile);</a>
+<br><a href="RSL_write_radar.html">int RSL_write_radar(Radar *radar, char
+*outfile);</a>
+<br><a href="RSL_write_radar.html">int RSL_write_radar_fp(Radar *radar,
+FILE *fp);</a>
+<br><a href="RSL_write_radar.html">int RSL_write_radar_gzip(Radar *radar,
+char *outfile);</a>
+<p><a href="RSL_sweep_to_cart.html">unsigned char *RSL_sweep_to_cart(Sweep
+*s, int xdim, int ydim, float range);</a>
+<p><a href="RSL_bscan.html">void RSL_bscan_ray(Ray *r, FILE *fp);</a>
+<br><a href="RSL_bscan.html">void RSL_bscan_sweep(Sweep *s, char *outfile);</a>
+<br><a href="RSL_bscan.html">void RSL_bscan_volume(Volume *v, char *basename);</a>
+<br><a href="RSL_find_rng_azm.html">void RSL_find_rng_azm(float *r, float
+*ang, float x, float y);</a>
+<br><a href="RSL_fix_time.html">void RSL_fix_time(Ray *ray);</a>
+<br><a href="RSL_free_cappi.html">void RSL_free_cappi(Cappi *c);</a>
+<br><a href="RSL_free_histogram.html">void RSL_free_histogram(Histogram
+*histogram);</a>
+<br><a href="RSL_free_radar.html">void RSL_free_radar(Radar *r);</a>
+<br><a href="RSL_free.html">void RSL_free_ray(Ray *r);</a>
+<br><a href="RSL_free.html">void RSL_free_sweep(Sweep *s);</a>
+<br><a href="RSL_clear.html">void RSL_free_volume(Volume *v);</a>
+<br><a href="RSL_color_table.html">void RSL_get_color_table(int icolor,
+char buffer[256], int *ncolors);</a>
+<br><a href="RSL_get_groundr_and_h.html">void RSL_get_groundr_and_h(float
+slant_r, float elev, float *gr, float *h);</a>
+<br><a href="RSL_get_gr_slantr_h.html">void RSL_get_gr_slantr_h(Ray *ray,
+int i, float *gr, float *slantr, float *h)</a>
+<br><a href="RSL_get_slantr_and_elev.html">void RSL_get_slantr_and_elev(float
+gr, float h, float *slant_r, float *elev);</a>
+<br><a href="RSL_get_slantr_and_h.html">void RSL_get_slantr_and_h(float
+gr, float elev, float *slant_r, float *h);</a>
+<br><a href="RSL_load_color_table.html">void RSL_load_color_table(char
+*infile, char buffer[256], int *ncolors);</a>
+<br><a href="RSL_load_color_table.html">void RSL_load_green_table(char
+*infile);</a>
+<br><a href="RSL_load_color_table.html">void RSL_load_blue_table(char *infile);</a>
+<br><a href="RSL_load_color_table.html">void RSL_load_height_color_table();</a>
+<br><a href="RSL_load_color_table.html">void RSL_load_rainfall_color_table();</a>
+<br><a href="RSL_load_color_table.html">void RSL_load_red_table(char *infile);</a>
+<br><a href="RSL_load_color_table.html">void RSL_load_refl_color_table();</a>
+<br><a href="RSL_load_color_table.html">void RSL_load_sw_color_table();</a>
+<br><a href="RSL_load_color_table.html">void RSL_load_vel_color_table();</a>
+<br><a href="RSL_load_color_table.html">void RSL_load_zdr_color_table();</a>
+<br><a href="RSL_print_histogram.html">void RSL_print_histogram(Histogram
+*histogram, int min_range, int max_range, char *filename);</a>
+<br><a href="RSL_print_version.html">void RSL_print_version();</a>
+<br><a href="RSL_radar_to_uf.html">void RSL_radar_to_uf(Radar *r, char
+*outfile);</a>
+<br><a href="RSL_radar_to_uf.html">void RSL_radar_to_uf_fp(Radar *r, FILE
+*fp);</a>
+<br><a href="RSL_radar_to_uf.html">void RSL_radar_to_uf_gzip(Radar *r,
+char *outfile);</a>
+<br><a href="RSL_radar_verbose.html">void RSL_radar_verbose_off(void);</a>
+<br><a href="RSL_radar_verbose.html">void RSL_radar_verbose_on(void);</a>
+<br><a href="RSL_read_these_sweeps.html">void RSL_read_these_sweeps(char
+*sweep#, ..., NULL);</a>
+<br><a href="RSL_rebin_velocity.html">void RSL_rebin_velocity_ray(Ray *r);</a>
+<br><a href="RSL_rebin_velocity.html">void RSL_rebin_velocity_sweep(Sweep
+*s);</a>
+<br><a href="RSL_rebin_velocity.html">void RSL_rebin_velocity_volume(Volume
+*v);</a>
+<br><a href="RSL_rebin.html">void RSL_rebin_ray(Ray *r);</a>
+<br><a href="RSL_rebin.html">void RSL_rebin_sweep(Sweep *s);</a>
+<br><a href="RSL_rebin.html">void RSL_rebin_volume(Volume *v);</a>
+<br><a href="RSL_color_table.html">void RSL_set_color_table(int icolor,
+char buffer[256], int *ncolors);</a>
+<br><a href="RSL_set_hdf_qc_parameters.html">void RSL_set_hdf_qc_parameters(float
+hfreeze, float dbznoise, float hthresh1, float hthresh2, float hthresh3,
+float zthresh1, float zthresh2, float zthresh3, char *outfile);</a>
+<br><a href="RSL_select_fields.html">void RSL_select_fields(char *field_type,
+..., NULL);</a>
+<br><a href="RSL_sweep_to.html">void RSL_sweep_to_gif(Sweep *s, char *outfile,
+int xdim, int ydim, float range);</a>
+<br><a href="RSL_sweep_to.html">void RSL_sweep_to_pgm(Sweep *s, char *outfile,
+int xdim, int ydim, float range);</a>
+<br><a href="RSL_sweep_to.html">void RSL_sweep_to_pict(Sweep *s, char *outfile,
+int xdim, int ydim, float range);</a>
+<br><a href="RSL_sweep_to.html">void RSL_sweep_to_ppm(Sweep *s, char *outfile,
+int xdim, int ydim, float range);</a>
+<br><a href="RSL_volume_to.html">void RSL_volume_to_gif(Volume *v, char
+*basename, int xdim, int ydim, float range);</a>
+<br><a href="RSL_volume_to.html">void RSL_volume_to_pgm(Volume *v, char
+*basename, int xdim, int ydim, float range);</a>
+<br><a href="RSL_volume_to.html">void RSL_volume_to_pict(Volume *v, char
+*basename, int xdim, int ydim, float range) ;</a>
+<br><a href="RSL_volume_to.html">void RSL_volume_to_ppm(Volume *v, char
+*basename, int xdim, int ydim, float range);</a>
+<br><a href="RSL_write.html">void RSL_write_gif(char *outfile, unsigned
+char *image, int xdim, int ydim, char c_t able[256][3]);</a>
+<br><a href="RSL_write.html">void RSL_write_pict(char *outfile, unsigned
+char *image, int xdim, int ydim, char c_ table[256][3]);</a>
+<br><a href="RSL_write.html">void RSL_write_pgm(char *outfile, unsigned
+char *image, int xdim, int ydim);</a>
+<br><a href="RSL_write.html">void RSL_write_ppm(char *outfile, unsigned
+char *image, int xdim, int ydim, char c_t able[256][3]);</a>
+<br><a href="RSL_cappi_at_h.html">Cappi *RSL_cappi_at_h(Volume *v, float
+h, float grnd_range);</a>
+<br><a href="RSL_new_cappi.html">Cappi *RSL_new_cappi(Sweep *sweep, float
+height);</a>
+<p><a href="RSL_cappi_to_carpi.html">Carpi *RSL_cappi_to_carpi(Cappi *cappi,
+float dx, float dy, float lat, float lon, int nx, int ny, int radar_x,
+int radar_y);</a>
+<br><a href="RSL_new_carpi.html">Carpi *RSL_new_carpi(int xdim, int ydim);</a>
+<br><a href="RSL_volume_to_carpi.html">Carpi *RSL_volume_to_carpi(Volume
+*v, float h, float grnd_r, float dx, float dy, int nx, int ny, int radar_x,
+int radar_y, float lat, float lon);</a>
+<p><a href="RSL_volume_to_cube.html">Cube *RSL_volume_to_cube(Volume *v,
+float dx, float dy, float dz, int nx, int ny, int nz, float grnd_r, int
+radar_x, int radar_y, int radar_z);</a>
+<p><a href="RSL_get_slice_from_cube.html">Slice *RSL_get_slice_from_cube(Cube
+*cube, int x, int y, int z);</a>
+<br><a href="RSL_allocate_histogram.html">Histogram *RSL_allocate_histogram(int
+low, int hi);</a>
+<br><a href="RSL_get_histogram_from.html">Histogram *RSL_get_histogram_from_ray(Ray
+*ray, Histogram *histogram, int low, int hi, int min_range, int max_range);</a>
+<br><a href="RSL_get_histogram_from.html">Histogram *RSL_get_histogram_from_sweep(Sweep
+*sweep, Histogram *histogram, int low, int hi, int min_range, int max_range);</a>
+<br><a href="RSL_get_histogram_from.html">Histogram *RSL_get_histogram_from_volume(Volume
+*volume, Histogram *histogram, int low, int hi, int min_range, int max_range);</a>
+<br><a href="RSL_read_histogram.html">Histogram *RSL_read_histogram(char
+*infile);</a>
+<br>
+<hr>Author: <a href="john.merritt.html">John H. Merritt</a>.
+</body>
+</html>

@@ -1,0 +1,98 @@
+
+commentdef {
+
+	p_header = "trecCast is a small program that takes the\n"
+                   "output winds from ctrec and uses them to\n"
+                   "advect the field that ctrec outputs.\n\n"
+                   "trecCast operates soley on the output of ctrec.\n"
+                   "As a result there is currently no way to take\n"
+                   "the ctrec winds and use them to advect a field\n"
+                   "other than the one that ctrec operated on.\n\n"
+                   "Since the ctrec winds are often missing, an\n"
+                   "interpolation scheme is used to get more\n"
+                   "points. This scheme is similar to Barnes.\n\n"
+                   "Niles Oien August 1999.";
+
+}
+
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_descr = "Mode of operation - REALTIME or ARCHIVE";
+  p_default = ARCHIVE;
+} Mode;
+
+paramdef int {
+  p_descr = "Debug flag";
+  p_help = "Set to non-zero for debugging messages.";
+  p_default = 0;
+} Debug;
+
+paramdef char* {
+  p_descr = "Process instance";
+  p_descr = "This is used by the process mapper, procmap";
+  p_default = {"primary"};
+} Instance;
+
+paramdef char* {
+  p_descr = "Input directory";
+  p_descr = "Below this directory is the ctrec MDV output";
+  p_default = {"."};
+} InputDir;
+
+paramdef char* {
+  p_descr = "Output directory";
+  p_descr = "Below this directory is the trecCast MDV output";
+  p_default = {"./trecCast"};
+} OutputDir;
+
+paramdef long {
+  p_descr = "Advection time, seconds";
+  p_help = "The distance moved is Dx = U*T, Dy = V*T";
+  p_default = { 3600 };
+} Time;
+
+paramdef long {
+  p_descr = "Maximum age of input data, seconds.";
+  p_help= "REALTIME mode only.";
+  p_default = 3600;
+} MaxRealtimeValidAge;
+
+paramdef float {
+  p_descr = "Maximum value of a grid point to be advected.";
+  p_help= "Grid points above this value are not advected.";
+  p_default = 0.0;
+} MaxThresh;
+
+paramdef float {
+  p_descr = "Minimum value of a grid point to be advected.";
+  p_help= "Grid points below this value are not advected.";
+  p_default = -1000.0;
+} MinThresh;
+
+paramdef int {
+  p_descr = "Interpolation region size for U and V.";
+  p_help= "If the ctrec output U or V is missing, then\n"
+          "a value will be interpolated using all values\n"
+          "between ix-SquareSize to ix+SquareSize.";
+  p_default = 20;
+} SquareSize;
+
+paramdef float {
+  p_descr = "Weight to apply at edge of square in interpolation of U and V.";
+  p_help= "Weight is 1.0 at square center and WeightAtEdge\n"
+          "at the edge of the square, varies exponentially in between.\n"
+          "If this is set to 1.0 then an average is generated.";
+  p_min=0.05;
+  p_max=1.0;
+  p_default = 0.25;
+} WeightAtEdge;
+
+
+
+
+
+

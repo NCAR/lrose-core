@@ -1,0 +1,51 @@
+###########################################################################
+#
+# Makefile for mdv2gif program
+#
+# Mike Dixon, RAP, NCAR, Boulder, CO, 80307, USA
+#
+# Nov 1994
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGET_FILE = mdv2gif_file
+
+LOC_INCLUDES =
+LOC_CFLAGS =
+LOC_LDFLAGS =
+LOC_LIBS = $(TDRP_LIBS) -ltitan -lmdv -lrapformats -lphysics \
+		-ltoolsa -ldataport -lm 
+
+MODULE_TYPE= program
+
+HDRS = 
+
+SRCS = \
+        drawlib.c\
+        bessel.c\
+        latlon.c\
+        mdv2gif_file.c\
+        mdv_rdwr_utils.c
+#
+# tdrp support
+#
+
+#include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+
+#
+# standard targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_targets
+
+#
+# local targets
+#
+
+depend: $(TDRP_C) depend_generic
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_targets
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

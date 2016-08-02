@@ -1,0 +1,134 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for axfSurface
+ *
+ */
+
+commentdef {
+  p_header = "Runtime Management";
+} 
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME.";
+} mode;
+
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Instance";
+  p_help = "Process instance for registration with process mapper";
+} instance;
+
+
+commentdef {
+  p_header = "Input SAMS Data";
+} 
+
+paramdef char* {
+  p_default = {"./latest.data"};
+  p_descr = "File path of surface input data.";
+  p_help = "This is the directory in which the SAMS files\n"
+           "are - they are named YYYYMMDDhhmm.sams";
+} inputPath;
+
+paramdef char* {
+  p_default = {"./wsmrStations.dat"};
+  p_descr = "The file that lists Lat, Lon, Alt and description\n"
+            "for a station ID";
+  p_help = "See wsmrStations.dat in the CVS repository for an example.";
+} locationFile;
+
+paramdef long {
+  p_default = 900;
+  p_descr = "Maximum age for files, realtime mode, seconds";
+  p_help = "Default is 15 minutes. ";
+} max_realtime_valid_age;
+
+
+commentdef {
+  p_header = "Output SPDB Data";
+} 
+
+paramdef char* {
+  p_default = { "./out" };
+  p_descr = "Output DsSpdb destination.";
+  p_help = "METAR format SPDB data will be written to this destination.";
+} outputUrl;
+
+commentdef {
+  p_header = "Program parameters";
+} 
+
+paramdef long {
+  p_default = 1800;
+  p_descr = "Expire time delta, seconds.";
+  p_help = "Expiry time is validity time plus expire delta.";
+} expireDelta;
+
+paramdef long {
+  p_default = 25200;
+  p_descr = "Time adjustment to UTC, seconds";
+  p_help = "Default (7 hours) is appropriate for White Sands";
+} adjustUTC;
+
+paramdef long {
+  p_default = 3000;
+  p_descr = "Time tolerance for incoming SAMS data";
+  p_help = "If the time in the actual file is different than\n"
+           "the time indicated by the file name by more than this\n"
+           "amount, the data from this line in the SAMS file are\n"
+           "discarded. Default is 50 minutes.";
+} timeTolerance;
+
+typedef enum {
+  WIND_SPEED_MPH, WIND_SPEED_KPH, WIND_SPEED_KTS
+} windUnits_t;
+ 
+paramdef enum  windUnits_t{
+
+  p_default = WIND_SPEED_MPH;
+  p_descr = "Input wind speed units.";
+  p_help = "Having an option on this is a little farcical given that\n"
+	"the input file format units do not change. However, at\n"
+	"the time of writing it is a little unclear as to what the\n"
+	"units are (we suspect MPH at this point) and so allowing\n"
+	"the conversion factor to be changed is an attempt to allow\n"
+	"debugging of unit related problems.";
+
+} windUnits;
+

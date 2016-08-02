@@ -1,0 +1,41 @@
+######################################################################
+# params file for grid_forecast
+#
+# Mike Dixon, RAP, NCAR, Boulder, CO, 80307, USA
+#
+# December 1994
+#
+######################################################################
+
+#
+# debugging
+#
+
+grid_forecast.debug: false
+grid_forecast.malloc_debug_level: false
+
+#
+# directories and files
+#
+
+grid_forecast.original_rdata_dir: $(TITAN_HOME)/cdata
+grid_forecast.forecast_rdata_dir: $(TITAN_HOME)/cdata_forecast
+grid_forecast.dobson_file_ext: dob
+
+#
+# refl field
+#
+
+grid_forecast.dbz_field: 0
+
+#
+# forecast params
+#
+
+grid_forecast.min_history_in_secs: 900
+grid_forecast.forecast_lead_time: 1800
+
+
+
+
+

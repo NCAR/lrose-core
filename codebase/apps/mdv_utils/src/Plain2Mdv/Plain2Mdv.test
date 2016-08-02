@@ -1,0 +1,469 @@
+/**********************************************************************
+ * TDRP params for Plain2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// Plain2Mdv converts a plain binary array file to MDV. The data in the 
+//   file is one or more fields in an ordered binary array. The data 
+//   ordering is ZYX, with Z varying slowest and Z fastest. By default the 
+//   first input row (y = 0) is at the south edge of the data. There is an 
+//   option to accept the (y = 0) row at the north edge.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "HE";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE mode, the file paths 
+//   are specified on the command line.
+// Type: string
+//
+
+input_dir = "$(DATA_DIR)/raw/hydrorsa";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 1200;
+
+///////////// input_file_extension ////////////////////
+//
+// Specify file extension.
+// If empty, all extensions will be accepted.
+// Type: string
+//
+
+input_file_extension = "DATA";
+
+///////////// filename_time ///////////////////////////
+//
+// Method for determining the data time from the file name.
+// This is used if no latest_data_info file is available.
+//   RAP_STANDARD: will use the DataFileNames class to determing time
+//     Supported conventions are:
+//      yyyymmdd/g_hhmmss/f_llllllll.ext
+//      yyyymmdd/hhmmss.ext
+//      *yyyymmdd?hhmmss*
+//      *yyyymmddhhmmss*
+//      *yyyymmddhhmm*
+//      *yyyymmddhh.tmhhmm (mm5 forecast)
+//      *yyyymmddhh*
+//      *yyyyjjjhh*
+//      *yyyymmdd?hhmm*
+//      *yyyymmdd?hh*
+//      *yyyymmdd*
+//      *yyjjj*
+//   YYMMDDHH: two-digit year, followed by month, day, hour.
+//
+// Type: enum
+// Options:
+//     RAP_STANDARD
+//     YYMMDDHH
+//
+
+filename_time = RAP_STANDARD;
+
+///////////// n_fields ////////////////////////////////
+//
+// Number of fields in the input data.
+// This number must match the size of the fields array later in this 
+//   file.
+// Minimum val: 1
+// Type: int
+//
+
+n_fields = 1;
+
+///////////// input_row_ordering //////////////////////
+//
+// Ordering of rows in the input data.
+// If the first row in the input data is in the North, set to 
+//   NORTH_ROW_FIRST.
+//
+// Type: enum
+// Options:
+//     SOUTH_ROW_FIRST
+//     NORTH_ROW_FIRST
+//
+
+input_row_ordering = NORTH_ROW_FIRST;
+
+///////////// input_encoding //////////////////////////
+//
+// Input encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+input_encoding = ENCODING_FLOAT32;
+
+///////////// byte_swap_input_data ////////////////////
+//
+// Option to swap bytes on incoming data.
+// Only applies to INT16 and FLOAT32 data. If true, the bytes on each 
+//   data element will be swapped before interpretation.
+// Type: boolean
+//
+
+byte_swap_input_data = FALSE;
+
+//======================================================================
+//
+// GRID DETAILS.
+//
+//======================================================================
+ 
+///////////// grid_projection /////////////////////////
+//
+// Projection type for grid.
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_POLAR_STEREO
+//     PROJ_FLAT
+//     PROJ_POLAR_RADAR
+//
+
+grid_projection = PROJ_LATLON;
+
+///////////// grid_size ///////////////////////////////
+//
+// Number of grid points in each dimension.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      int nz;
+//   }
+//
+//
+
+grid_size = { 1380, 1200, 1 };
+
+///////////// grid_geom ///////////////////////////////
+//
+// Grid geometry in x,y.
+//  For LATLON projections, minx and miny are the lon/lat of the CENTER 
+//   of the South-West grid cell. For all other projections, minx and miny 
+//   are the (x,y) coordinates in km of the CENTER of the SW grid cell 
+//   relative to the projection origin. dx and dy are the spacing of the 
+//   grid cells in x and y. For LATLON projections, dx is in degrees 
+//   longitude and dy in degrees latitude. For all other projections dx 
+//   and dy are in km. .
+//
+// Type: struct
+//   typedef struct {
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+grid_geom = { 15, -37, 0.016667, 0.016667 };
+
+///////////// grid_origin_lat /////////////////////////
+//
+// Grid origin latitude.
+// For latlon grids, set this to the mid latitude of the grid.
+// Type: double
+//
+
+grid_origin_lat = 26.5;
+
+///////////// grid_origin_lon /////////////////////////
+//
+// Grid origin longitude.
+// For latlon grids, set this to the mid longitude of the grid.
+// Type: double
+//
+
+grid_origin_lon = -27;
+
+///////////// flat_rotation ///////////////////////////
+//
+// Grid rotation relative to TRUE North.
+// This applies to PROJ_FLAT projections only.
+// Type: double
+//
+
+flat_rotation = 0;
+
+///////////// lambert_lat1 ////////////////////////////
+//
+// Lambert reference latitude 1.
+// This applies only to PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+lambert_lat1 = 0;
+
+///////////// lambert_lat2 ////////////////////////////
+//
+// Lambert reference latitude 2.
+// This applies only to PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+lambert_lat2 = 0;
+
+///////////// polar_stereo_tangent_lon ////////////////
+//
+// Tangent longitude.
+// This applies only to PROJ_POLAR_STEREO projections.
+// Type: double
+//
+
+polar_stereo_tangent_lon = 0;
+
+//======================================================================
+//
+// VERTICAL LEVELS.
+//
+//======================================================================
+ 
+///////////// vlevel_type /////////////////////////////
+//
+// Vertical level type.
+// Supported types
+//   VERT_TYPE_UNKNOWN
+//   VERT_TYPE_SURFACE - Earth surface field
+//   VERT_TYPE_SIGMA_P - Sigma pressure levels
+//   VERT_TYPE_PRESSURE - Pressure levels, units = mb
+//   VERT_TYPE_Z - Constant altitude, units = Km MSL
+//   VERT_TYPE_SIGMA_Z - Model sigma Z levels
+//   VERT_TYPE_ETA - Model eta levels
+//   VERT_TYPE_THETA - Isentropic surface, units = Kelvin
+//   VERT_TYPE_MIXED - Any hybrid grid
+//   VERT_TYPE_ELEV - Elevation angles - radar
+//   VERT_TYPE_COMPOSITE - A Composite of a set of planes
+//   VERT_SATELLITE_IMAGE - Satelite Image
+//   VERT_FLIGHT_LEVEL - ICAO flight level (100's of ft)
+//   VERT_EARTH_IMAGE - Image, conformal to the surface of the earth .
+//
+// Type: enum
+// Options:
+//     VERT_TYPE_UNKNOWN
+//     VERT_TYPE_SURFACE
+//     VERT_TYPE_SIGMA_P
+//     VERT_TYPE_PRESSURE
+//     VERT_TYPE_Z
+//     VERT_TYPE_SIGMA_Z
+//     VERT_TYPE_ETA
+//     VERT_TYPE_THETA
+//     VERT_TYPE_MIXED
+//     VERT_TYPE_ELEV
+//     VERT_TYPE_COMPOSITE
+//     VERT_SATELLITE_IMAGE
+//     VERT_FLIGHT_LEVEL
+//     VERT_EARTH_IMAGE
+//
+
+vlevel_type = VERT_TYPE_SURFACE;
+
+///////////// vlevels /////////////////////////////////
+//
+// Array of vertical levels.
+// Number must be equal to nz. See 'grid_size'.
+// Type: double
+// 1D array - variable length.
+//
+
+vlevels = { 0 };
+
+//======================================================================
+//
+// FIELD DETAILS.
+//
+//======================================================================
+ 
+///////////// fields //////////////////////////////////
+//
+// Details of input fields. Size of this array must match n_fields.
+// 'scale' and 'bias' are applied to input data to convert to floats, in 
+//   the case of INT8 and INT16 input data. 'missing_val' is used if a 
+//   specific value in the input data is reserved for missing or bad data. 
+//   Although this is a floating point value, it can be used for all 
+//   encoding types. For INT8 and INT16 data, this is the value of the 
+//   byte or short data BEFORE scale and bias is applied. min_val and 
+//   max_val allow you to only include data within these limits. Data 
+//   outside these limits is set to missing.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string name_long;
+//      string units;
+//      string transform;
+//      double scale;
+//      double bias;
+//      double missing_val;
+//      double min_val;
+//      double max_val;
+//   }
+//
+// 1D array - variable length.
+//
+
+fields = {
+  { "HE", "Hydrorsa", "mm", "", 1, 0, -1e+07, 0, 1e+99}
+};
+
+//======================================================================
+//
+// OUTPUT FILE INFO.
+//
+//======================================================================
+ 
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This short string is placed in the MDV master header for 
+//   documentation purposes.
+// Type: string
+//
+
+data_set_name = "HydroRSA";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This short string is placed in the MDV master header for 
+//   documentation purposes.
+// Type: string
+//
+
+data_set_source = "Converted by Plain2Mdv.";
+
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+// This long string is placed in the MDV master header for documentation 
+//   purposes.
+// Type: string
+//
+
+data_set_info = "SAT Hydro Estimator data";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL for MDV data.
+// Type: string
+//
+
+output_url = "./output";
+
+///////////// output_encoding /////////////////////////
+//
+// output encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding = ENCODING_FLOAT32;
+
+///////////// output_compression //////////////////////
+//
+// Set compression type.
+//
+// Type: enum
+// Options:
+//     COMPRESSION_NONE
+//     COMPRESSION_ZLIB
+//     COMPRESSION_BZIP
+//     COMPRESSION_GZIP
+//
+
+output_compression = COMPRESSION_GZIP;
+

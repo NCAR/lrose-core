@@ -1,0 +1,184 @@
+/**********************************************************************
+ * TDRP params for EchoTops
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: EchoTops.
+//
+// EchoTops computes the tops of radar echoes in Cartesian radar data, 
+//   based on a series of reflectivity thresholds. One output field is 
+//   written for each threshold.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the application waits for a new input file. When a 
+//   new file arrives, it proesses it. In ARCHIVE mode, the application 
+//   processes files between the start and end times. In FILELIST mode, it 
+//   processes the files listed on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_url = "mdv/radarCart";
+
+///////////// realtime_past_period ////////////////////
+//
+// REALTIME mode only. Files from this period in the past will be used 
+//   for computing the median.
+// Median period in realtime - secs.
+// Type: int
+//
+
+realtime_past_period = 1800;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for output data.
+// If the directory starts with '/' or '.', the path is absolute. 
+//   Otherwise it is relative to $DATA_DIR or $RAP_DATA_DIR.
+// Type: string
+//
+
+output_url = "$(HOME)/data/mdv/tops";
+
+///////////// output_encoding_type ////////////////////
+//
+// Set output encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding_type = ENCODING_INT16;
+
+//======================================================================
+//
+// COMPUTING THE TOPS.
+//
+//======================================================================
+ 
+///////////// tops_fields /////////////////////////////
+//
+// Specify the details for input and output fields.
+// input_field: field name in input file; output_field: field name in 
+//   output file; threshold: field theshold in input file - the product 
+//   will be computed as the max height in the file at which this value is 
+//   exceeded; compute_base: if TRUE, the base will be computed instead  
+//   of the tops; invert_values: if TRUE, the sense of the field data will 
+//   be inverted (multiplied by -1) before the tops (or base) are 
+//   computed.
+//
+// Type: struct
+//   typedef struct {
+//      string input_field;
+//      string output_field;
+//      double threshold;
+//      boolean compute_base;
+//      boolean invert_values;
+//   }
+//
+// 1D array - variable length.
+//
+
+tops_fields = {
+  { "Refl", "Tops10", "km", 10, FALSE, FALSE},
+  { "Refl", "Tops15", "km", 15, FALSE, FALSE},
+  { "Refl", "Tops20", "km", 20, FALSE, FALSE},
+  { "Refl", "Tops30", "km", 30, FALSE, FALSE},
+  { "Refl", "Base20", "km", 20, TRUE, FALSE},
+  { "Refl", "Inv20", "km", -20, FALSE, TRUE}
+};
+
+//======================================================================
+//
+// OPTION TO SET VLEVEL LIMITS.
+//
+//======================================================================
+ 
+///////////// set_vlevel_limits ///////////////////////
+//
+// Option to set plane vlevel limits.
+// If true, the data will be cropped in the vertical before processing.
+// Type: boolean
+//
+
+set_vlevel_limits = FALSE;
+
+///////////// lower_vlevel ////////////////////////////
+//
+// Lower plane vlevel limit.
+// Type: float
+//
+
+lower_vlevel = 0;
+
+///////////// upper_vlevel ////////////////////////////
+//
+// Upper plane vlevel limit.
+// Type: float
+//
+
+upper_vlevel = 0;
+

@@ -1,0 +1,271 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for Mdv2NetCDF
+ *
+ */
+
+commentdef {
+  p_header = "Mdv2NetCDF creates CF-1.0 compliant NetCDF files from Mdv files or fields";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  TIME_INTERVAL, FILELIST, REALTIME, REALTIME_FCST_DATA, SPEC_FCST_REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode and in REALTIME_FCST_DATA, the program triggers off of a latest data info file (REALTIME_FCST_DATA is for data stored in forecast directory structure while REALTIME is for flat mdv data dirs). In FILELIST mode the program processed data between start and end times entered on the command line. In FILELIST mode the file processes files entered on the command line. In SPEC_FCST_REALTIME, the program triggers off a specific lead time for data stored in RAL forecast directory structure.";
+} mode;
+
+paramdef int {
+  p_default = 60;
+  p_min = 60;
+  p_descr = "Interval for procmap registration";
+  p_help = "Set to a high value if processing takes a long time. This "
+           "will prevent the auto_restarter from killing and restarting the app. "
+           "If left at 60, the default, will be the same as "
+           "PROCMAP_REGISTER_INTERVAL (60) will be used.";
+} procmap_register_interval_secs;
+
+
+typedef struct
+{
+  int lead_time_secs;
+  boolean use_gen_time;
+} fcast_lead_time_t;
+
+paramdef struct fcast_lead_time_t {
+  p_default = { 0, false };
+  p_descr = "Forecast lead time information for forecast "
+            "files to be processed.";
+  p_help = "Used only if mode is set to SPEC_FCAST_REALTIME.";
+} fcast_lead_time;
+
+
+commentdef {
+  p_header = "DATA INPUT.";
+ }
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv";
+  p_descr = "Url of mdv dataset";
+} mdv_url;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Maximum age(secs) of mdv dataset that will trigger processing.";
+} max_valid_realtime_age;
+
+commentdef {
+  p_header = "PROCESSING.";
+}
+
+// strings to be included in NetCDF file
+
+typedef struct {
+  string conventions;
+  string institution;
+  string references;
+  string source;
+  string title;
+  string comment;
+} global_attributes_t;
+
+paramdef struct  global_attributes_t {
+  p_default = {"","UCAR","","","","Created by Mdv2NetCDF"};
+  p_descr = "Global attributes for netCDF file";
+  p_help = "conventions: ignored, set by Ncf2Mdv library.\ninstitution: used.\nreferences: used.\nsource: ignored - will use MDV master header data_set_source.\ntitle: ignored - will use MDV master header data_set_name.\ncomment: used."; 
+} global_attributes;
+
+typedef enum {
+  DATA_PACK_NONE, DATA_PACK_BYTE, DATA_PACK_SHORT
+} data_pack_t;
+
+
+typedef struct {
+         string mdv_field_name;
+	 string ncf_field_name;
+         string ncf_standard_name;
+         string ncf_long_name;
+         string ncf_units;
+         boolean do_linear_transform;
+         float linear_multiplier;
+         float linear_const;
+         data_pack_t packed_data_type;
+} mdv_ncf_field_t;
+
+paramdef struct mdv_ncf_field_t {
+ p_default = {};
+ p_descr = "field list";
+} mdv_ncf_fields[];
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compress field data. Default is true.";
+  p_help = "Only applies to NETCDF4 and  NETCDF4_CLASSIC files.";
+} compress_data;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Compression level from 1 to 9 with 9 being the greatest compression. Default is 9.";
+  p_help = "Only applies to NETCDF4 and  NETCDF4_CLASSIC files.";
+} compression_level;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "ncfdata";
+  p_descr = "basename of netCDF file";
+} basename;
+
+paramdef string {
+  p_default = "./netCDF";
+  p_descr = "Output direcory";
+  p_help = "Location of netCDF output";
+} output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to add day dir into the output file path";
+  p_help = "If true, the final output dir will be 'output_dir/yyyymmdd'";
+} write_to_day_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output files under forecast dir structure";
+  p_help = "If true, the final output dir will be 'output_dir/g_hhmmss'";
+} output_as_forecast;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true the output filename uses the basename, followed by ISO 8601 timestamp convention";
+  p_help = "eg. basename.2008-05-22T14:00:00.nc";
+} use_iso8601_filename_convention;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true the output filename uses the basename, followed by a Thredds Data Server "
+    " (TDS) compliant timestamp convention";
+  p_help = "The TDS doesn't like ':', '-' in name (basename.20080522_140000.nc";
+} use_TDS_filename_convention;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true the output_filename is used, otherwise it is created with the baename and a timestamp";
+  p_help = "User specifies the output file name";
+} use_output_filename;
+
+paramdef string {
+  p_default = "outputfile.nc";
+  p_descr = "User-specified output filename";
+} output_filename;
+
+paramdef string {
+  p_default = "";
+  p_descr = "User-specified output file prefix, comes before basename";
+} output_file_prefix;
+
+paramdef string {
+  p_default = "";
+  p_descr = "User-specified output file suffix, comes before the .nc which gets automatically tacked on.";
+} output_file_suffix;
+
+typedef enum {
+  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
+} ncformat_t;
+
+paramdef enum ncformat_t {
+  p_default = "CLASSIC";
+  p_descr = "NetCDF file format";
+  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
+} file_format;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true latitude and longitude arrays of each grid point are output";
+  p_help = "The CF convention requires that these arrays are present in the netCDF file; however, the information is redundant since the lat and lon arrays could be constructed using the other projection and grid information required with a gridded data field";
+} output_latlon_arrays;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output non-CF compliant MDV attributes.";
+  p_help = "If true, MDV attributes which are not CF compliant will be output. This will facilitate the translation of the data back into MDV with the minimal loss of information.";
+} output_mdv_attributes;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output non-CF compliant MDV chunks.";
+  p_help = "If true, MDV chunks will be included as byte binary variables.";
+} output_mdv_chunks;
+
+commentdef {
+  p_header = "OUTPUT format options for POLAR RADAR data.";
+}
+
+typedef enum {
+  FILE_TYPE_CF, // basic CF
+  FILE_TYPE_CF_RADIAL, // New CF Radial format
+  FILE_TYPE_DORADE, // NCAR Dorade format
+  FILE_TYPE_UF // universal format
+} radial_file_type_t;
+  
+paramdef enum radial_file_type_t {
+  p_default = FILE_TYPE_CF;
+  p_descr = "Output format for polar radar data.";
+} radial_file_type;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force output ldata info file to use valid time.";
+  p_help = "If true, the ldata info time fields will be generated using the centroid time.  If false, it will determine how to create the time fields based on the collection type and forecast time.";
+} force_ldata_as_valid;

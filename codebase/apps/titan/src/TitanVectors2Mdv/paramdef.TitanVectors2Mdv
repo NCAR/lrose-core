@@ -1,0 +1,252 @@
+/*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+ ** Copyright UCAR (c) 2000
+ ** University Corporation for Atmospheric Research(UCAR)
+ ** National Center for Atmospheric Research(NCAR)
+ ** Research Applications Program(RAP)
+ ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
+ ** All rights reserved. Licenced use only.
+ ** Do not copy or distribute without authorization
+ *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
+/****************************************************************
+ * parameter definitions for TitanVectors2Mdv
+ *  
+ * Nancy Rehak
+ * December 2003
+ */
+
+commentdef
+{
+  p_text = "This program is used to convert the vectors in a TITAN SPDB "
+           "database to an MDV file with U and V fields.";
+}
+
+/****************************************************************
+ * Debugging and process control.
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,		
+  DEBUG_VERBOSE	
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+           "appropriate level of detail.";
+  p_default = DEBUG_OFF;
+} debug;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/*********************************************************
+ * Input and output data
+ */
+
+commentdef
+{
+  p_header = "INPUT AND OUTPUT DATA.";
+}
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string url;
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifices the archive trigger data set.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "spdbp:://localhost::spdb/storms",
+                "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "URL for triggering in latest data mode";
+  p_default = "spdbp:://localhost::spdb/storms";
+} latest_data_trigger;
+
+paramdef string
+{
+  p_descr = "Input URLs";
+  p_help = "URLs of the input TITAN SPDB databases. Each data point from current URL will over write the data from the previous url.";
+  p_default = {"spdbp:://localhost::spdb/storms"};
+} titan_input_urls[];
+
+paramdef long
+{
+  p_descr = "Time margin to look for storms";
+  p_help = "Margin(in sec) from data time when looking for storms";
+  p_min = 0;
+  p_default = 0;
+} storm_time_margin;
+
+paramdef long
+{
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+  p_min = 0;
+  p_default = 7200;
+} max_realtime_valid_age;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/storm_vectors";
+} output_url;
+
+
+/*********************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS.";
+}
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether we should process valid forecasts only";
+  p_default = true;
+} valid_forecasts_only;
+
+typedef enum
+{
+  PROJ_LATLON,
+  PROJ_FLAT
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  long nx;
+  long ny;
+  double dx;
+  double dy;
+  double minx;
+  double miny;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+} proj_t;
+
+paramdef struct proj_t
+{
+  p_descr = "Projection to use for the U and V fields in the output "
+            "MDV file.";
+  p_help = "origin_lat, origin_lon and rotation are ignored for PROJ_LATLON "
+           "output.";
+  p_default = { PROJ_LATLON,
+                2606, 1732,
+                0.012333, 0.009033,
+                -97.011887, 31.497122,
+                0.0, 0.0, 0.0 };
+} output_projection;
+
+paramdef double
+{
+  p_descr = "Amount to grow polygons when gridding the vectors";
+  p_help = "When gridding the polygons, the size of each polygon will "
+           "be increased by this amount around the perimeter. "
+           "The polygon size is increased by moving each vertex in the "
+           "polygon this distance further away from the storm centroid. "
+           "Negative values can be used to decrease the size of the polygon.";
+  p_default = 0.0;
+} polygon_growth_km;
+
+paramdef long
+{
+  p_descr = "Number of seconds to extrapolate the polygon before gridding.";
+  p_default = 0;
+} forecast_secs;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to fill in grid points that don't "
+            "have a TITAN vector with a vector from an MDV file.";
+  p_help = "If TRUE, any grid space that doesn't get a vector from the "
+           "TITAN storms will be filled in the with vector value in the "
+           "grid defined by the mdv_vector_info parameter.";
+  p_default = false;
+} use_mdv_vectors_for_missing;
+
+typedef struct
+{
+  string url;
+  long max_valid_secs;
+  boolean use_field_names;
+  string u_field_name;
+  string v_field_name;
+  long u_field_num;
+  long v_field_num;
+  long level_num;
+} mdv_vector_info_t;
+
+paramdef struct mdv_vector_info_t
+{
+  p_descr = "Information about the MDV vector field to use for missing "
+            "TITAN vectors. "
+            "Used only if use_mdv_vectors_for_missing is TRUE.";
+  p_help = "\turl - URL for the MDV vector fields.\n"
+           "\tmax_valid_secs - maximum valid time for the MDV vectors "
+           "in seconds.\n"
+           "\tuse_field_names - flag indicating whether to use field "
+           "names or field numbers to identify the MDV vector fields. "
+           "If TRUE, the u_field_name and v_field_name values will be "
+           "used to determine the vector fields. "
+           "If FALSE, the u_field_num and v_field_num values will be used.\n"
+           "\tu_field_name, v_field_name - field names for the U and V "
+           "fields exactly as they appear in the MDV file. "
+           "Used only if use_field_names is TRUE.\n"
+           "\tu_field_num, v_field_num - field numbers for the U and V "
+           "fields in the MDV file. "
+           "The first field in the file is field number 0. "
+           "Used only if use_field_names is FALSE.\n"
+           "\tlevel_num - vertical level number for the U and V fields in the "
+           "MDV file. "
+           "Level numbers start at 0.\n";
+  p_default = { "mdvp:://localhost::mdv/vectors",
+                3600,
+                false,
+                "", "",
+                0, 1, 0 };
+} mdv_vector_info;

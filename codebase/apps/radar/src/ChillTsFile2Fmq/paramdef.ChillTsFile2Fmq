@@ -1,0 +1,191 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions ChillTsFile2Fmq
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// April 2009
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "ChillTsFile2Fmq reads legacy CHILL time-series data from a file. It converts the format to IWRF, and saves the time series data out to a file message queue (FMQ), which can be read by multiple clients. Its purpose is mainly for simulation and debugging time series operations.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, SIMULATE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file to process. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default = "$(HOME)/data/time_series/chill";
+  p_descr = "Dir for input volume scan files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "IQ DATA SCALING";
+};
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Scale constant for I and Q data. Applied if apply_scale == TRUE";
+  p_help = "Value written = Value_in * scale + offset";
+} iq_data_scale;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Offset for I and Q data. Applied if apply_scale == TRUE";
+  p_help = "Value written = Value_in * scale + offset";
+} iq_data_offset;
+
+commentdef {
+  p_header = "MODIFYING THE OUTPUT DATA";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to remove gates with negative range.";
+  p_help = "CHILL sometimes starts sampling early so that the burst pulse can be sampled. If so range_offset_m will be set to indicate how early the sampling started. If this parameter is set to TRUE, the gates which have negative range will be removed and the start range will be adjusted accordingly.";
+} remove_negative_range_gates;
+
+commentdef {
+  p_header = "OUTPUT FMQ DETAILS";
+};
+
+paramdef string {
+  p_default = "$(HOME)/data/fmq/chill";
+  p_descr = "Path to output FMQ.";
+  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
+} output_fmq_path;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data. This should only be used if there is a single client reading the FMQ.";
+} output_fmq_blocking;
+
+commentdef {
+  p_header = "OUTPUT MESSAGE DETAILS";
+  p_text = "The output messages are written to the FMQ. To improve performance, each message contains a number of time series pulses.";
+};
+
+paramdef int {
+  p_default = "200";
+  p_descr = "Number of pulses per output message.";
+  p_help = "The actual number will sometimes be 1 less than this, because an info data part may will be written once in a while.";
+} n_pulses_per_message;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "How often to write an info part.";
+  p_help = "The info part includes data which does not change on a pulse-to-pulse basis.";
+} n_pulses_per_info;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+commentdef {
+  p_header = "SIMULATION MODE";
+};
+
+paramdef double {
+  p_descr = "Simulated PRT (micro-secs)";
+  p_default = 1000;
+} sim_mode_prt_usecs;
+
+paramdef string {
+  p_default = "CHILL";
+  p_descr = "Radar name for simulation mode";
+} sim_mode_radar_name;
+
+paramdef string {
+  p_default = "Greeley";
+  p_descr = "Site name for simulation mode";
+} sim_mode_site_name;
+
+paramdef double {
+  p_default = 40.4464;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} sim_mode_latitude_deg;
+
+paramdef double {
+  p_default = -104.637;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} sim_mode_longitude_deg;
+
+paramdef double {
+  p_default = 1432;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} sim_mode_altitude_meters;
+

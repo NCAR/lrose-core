@@ -1,0 +1,169 @@
+/**********************************************************************
+ * TDRP params for Mdv2SweepNetCDF
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: Mdv2SweepNetCDF.
+//
+// Mdv2SweepNetCDF reads and MDV file and converts it into NetCDF sweep 
+//   files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in FILELIST mode, at 
+//   least) MUST contain a day-directory below the data file -- 
+//   ./data_file.mdv will not work as a file path.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = FILELIST;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_url = "./mdv/input";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// OUTPUT FILE.
+//
+//======================================================================
+ 
+///////////// output_encoding /////////////////////////
+//
+// Encoding type for output data.
+// Output can be in scaled 1-byte integers (INT8), scaled 2-byte 
+//   integers (INT16) or 4-byte floating point (FLOAT32).
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding = ENCODING_FLOAT32;
+
+///////////// radar_name //////////////////////////////
+//
+// Radar name.
+// This is the instrument name in the netCDF file.
+// Type: string
+//
+
+radar_name = "CP2";
+
+///////////// project_name ////////////////////////////
+//
+// Radar name.
+// This is the instrument name in the netCDF file.
+// Type: string
+//
+
+project_name = "Brisbane";
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory for netCDF files.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// specify_output_field_names //////////////
+//
+// Option to set field names for output file.
+// If TRUE, only the output_field_names will be written to the output 
+//   file. If FALSE, all fields will be written to the output file.
+// Type: boolean
+//
+
+specify_output_field_names = FALSE;
+
+///////////// output_field_names //////////////////////
+//
+// Field name list.
+// Type: string
+// 1D array - variable length.
+//
+
+output_field_names = { "DBZ" };
+
+///////////// write_ldata_info_file ///////////////////
+//
+// Option to write _latest_data_info file in output dir.
+// If TRUE, _latest_data_info is written to the output directory.
+// Type: boolean
+//
+
+write_ldata_info_file = FALSE;
+

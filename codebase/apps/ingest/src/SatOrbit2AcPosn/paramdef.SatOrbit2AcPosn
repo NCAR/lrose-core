@@ -1,0 +1,108 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SatOrbit2AcPosn
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Jan 2002
+//
+
+commentdef {
+  p_header = "Program name: SatOrbit2AcPosn";
+  p_text = "SatOrbit2AcPosn reads and ascii file containing satellite location data, and writes it to SPDB in ac_posn format.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "ascii/sat_posn";
+  p_descr = "Path for input file.";
+  p_help = "This is an ASCII file. There is one line per time. The format is: yyyy mm dd hh mm ss nadir_lon nadir_lat right_lon right_lat left_lon left_lat. The left and right data may be missing, in which case only the nadir is stored.";
+} input_file_path;
+
+paramdef string {
+  p_default = "spdb/sat_posn";
+  p_descr = "Output SPDB URL.";
+} output_url;
+
+paramdef string {
+  p_default = "NADIR";
+  p_descr = "Label for nadir location.";
+  p_help = "This label is stored in the callsign field. The nadir is stored as though it were a single aircraft.";
+} nadir_label;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to store swath edge locations.";
+  p_help = "If true, each edge is stored as a separate callsign. See swath_left_label and swath_right_label below.";
+} store_swath_positions;
+
+paramdef string {
+  p_default = "LEFT";
+  p_descr = "Label for left edge of swath.";
+  p_help = "This label is stored in the callsign field.";
+} swath_left_label;
+
+paramdef string {
+  p_default = "RIGHT";
+  p_descr = "Label for right edge of swath.";
+  p_help = "This label is stored in the callsign field.";
+} swath_right_label;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to constrain data to within a bounding box.";
+  p_help = "If true, only times for which the nadir is within the bounding box are stored.";
+} apply_bounding_box;
+
+typedef struct {
+  double min_lat;
+  double min_lon;
+  double max_lat;
+  double max_lon;
+} bounding_box_t;
+
+paramdef struct bounding_box_t {
+  p_default = { -90, -180, 90, 180 };
+  p_descr = "Bounding box limits.";
+  p_help = "See 'apply_bounding_box.";
+} bounding_box;
+

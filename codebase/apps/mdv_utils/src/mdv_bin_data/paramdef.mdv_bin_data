@@ -1,0 +1,173 @@
+/**********************************************************
+ * paramdef.stratiform_filter
+ *
+ * This file contains the TDRP parameter definitions for
+ * stratiform_filter.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+/***********************************************************************
+ * Process registration
+ */
+
+commentdef
+{
+  p_header = "PROCESS REGISTRATION PARAMETERS";
+  p_text = "Parameters controlling process registration.";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+/***********************************************************************
+ * Operational parameters
+ */
+
+commentdef
+{
+  p_header = "OPERATIONAL PARAMETERS";
+  p_text = "Parameters controlling the way the program operates.";
+};
+
+typedef enum
+{
+  ARCHIVE,
+  REALTIME
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operational mode";
+  p_help = "Can be either ARCHIVE or REALTIME.";
+  p_default = REALTIME;
+} mode;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_help = "RAP URL that describes the location of the input data.\n"
+           "For data on local disk, this can just be the directory "
+           "containing the input MDV files.  "
+           "For data retrieved from a server, it is the URL for the "
+           "server.  A server URL looks like the following:\n"
+           "\tmdvp:://host:port:directory_path\n"
+           "This URL specifies a DsMdvServer process running on the "
+           "specified host and using the specified port.  "
+           "The data would reside on the specified host under "
+           "$RAP_DATRA_DIR/directory_path.";
+  p_default = { "mdvp:://host:port:directory_path" };
+} input_url;
+
+
+
+paramdef int
+{
+  p_descr = "In realtime mode, this the sleep interval between checks for data.";
+  p_default = 60; 
+} sleep_interval;
+
+paramdef long
+{
+  p_descr = "Input field numbers";
+  p_help = "An array of field numbers in the input file.  Use a single "
+           "value of -1 to bin all of the fields in the input file.";
+  p_default = { -1 };
+} field_nums[];
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "RAP URL that describes the location where the output should "
+           "be written.\n"
+           "For data on local disk, this can just be the directory "
+           "containing the input MDV files.  "
+           "For data retrieved from a server, it is the URL for the "
+           "server.  A server URL looks like the following:\n"
+           "\tmdvp:://host:port:directory_path\n"
+           "This URL specifies a DsMdvServer process running on the "
+           "specified host and using the specified port.  "
+           "The data would reside on the specified host under "
+           "$RAP_DATRA_DIR/directory_path.";
+  p_default = { "mdvp:://host:port:directory_path" };
+} output_url;
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef long
+{
+  p_descr = "Bad data value for output file";
+  p_help = "Can be set to the same value as missing_data_value, if desired.";
+  p_min = 0;
+  p_max = 255;
+  p_default = 0;
+} bad_data_value;
+
+paramdef long
+{
+  p_descr = "Missing data value for output file";
+  p_help = "Can be set to the same value as bad_data_value, if desired.";
+  p_min = 0;
+  p_max = 255;
+  p_default = 0;
+} missing_data_value;
+
+typedef struct
+{
+  double data_start;
+  double data_end;
+  long bin_value;
+} bin_list_t;
+
+paramdef struct bin_list_t
+{
+  p_descr = "Data binning table";
+  p_help = "The data in the input file is binned according to the values "
+           "in this table.  data_start gives the beginning data value for "
+           "the bin; data_end gives the ending data value for the bin.  "
+           "Data is included in the bin if it is >= data_start and "
+           "> data_end.  "
+           "bin_value must be between 0 and 255, inclusive.  "
+           "Bin values can be repeated in this table if separate data ranges "
+           "should be binned together.  "
+           "The table is searched in the order given and each data value is "
+           "binned in the first range in which it is included.";
+} bin_table[];

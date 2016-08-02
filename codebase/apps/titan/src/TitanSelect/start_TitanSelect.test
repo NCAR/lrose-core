@@ -1,0 +1,4 @@
+#! /bin/csh
+#
+
+TitanSelect -params TitanSelect.test

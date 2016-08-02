@@ -1,0 +1,13 @@
+#! /bin/csh -f
+
+/bin/rm -rf $RTEST_HOME/cdata/19* $RTEST_HOME/cdata/*file_index
+/bin/rm -rf $RTEST_HOME/precip_accum/19* $RTEST_HOME/precip_accum/*file_index
+/bin/rm -rf $RTEST_HOME/precip_fcast/19* $RTEST_HOME/precip_fcast/*file_index
+/bin/rm -rf $RTEST_HOME/refl_fcast/19* $RTEST_HOME/refl_fcast/*file_index
+/bin/rm -rf $RTEST_HOME/fmon/*.fmon
+/bin/rm -rf $RTEST_HOME/storms/*.??5
+/bin/rm -rf $RTEST_HOME/storms/*file_index
+/bin/rm -rf $RTEST_HOME/storms/*state
+
+
+

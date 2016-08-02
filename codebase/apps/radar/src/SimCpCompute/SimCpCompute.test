@@ -1,0 +1,366 @@
+/**********************************************************************
+ * TDRP params for SimCpCompute
+ **********************************************************************/
+
+//======================================================================
+//
+// SimCpCompute analyses data from tsarchive time series files taken 
+//   during vertical pointing scans.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or time series API.
+// If FMQ_INPUT, the application will read the time series from a file 
+//   message queue and process the pulses as they come in. If FILE_INPUT, 
+//   the application will process all the files specified on the command 
+//   line.
+//
+// Type: enum
+// Options:
+//     FILE_INPUT
+//     FMQ_INPUT
+//
+
+input_mode = FILE_INPUT;
+
+///////////// input_fmq_name //////////////////////////
+//
+// FMQ name. For FMQ_INPUT only.
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+// Type: string
+//
+
+input_fmq_name = "/tmp/fmq/ts";
+
+///////////// pointing_mode ///////////////////////////
+//
+// Mode for stationary antenna.
+// In pointing mode, the antenna is stationary, and the transmit mode is 
+//   switched manually between H and V. Two sets of time series files are 
+//   created, one for H transmssion and one for V transmission. The 
+//   statistics are computed between these two sets file files. You cannot 
+//   use TS_API_INPUT for this mode.
+// Type: boolean
+//
+
+pointing_mode = FALSE;
+
+//======================================================================
+//
+// AZIMUTH LIMITS.
+//
+// Only beams between these azimuths will be used.
+//
+//======================================================================
+ 
+///////////// start_az ////////////////////////////////
+//
+// Starting azimuth (deg).
+// Type: double
+//
+
+start_az = 60;
+
+///////////// end_az //////////////////////////////////
+//
+// Ending azimuth (deg).
+// Type: double
+//
+
+end_az = 330;
+
+///////////// delta_az ////////////////////////////////
+//
+// Beam width (dwell) for indexed beams (deg).
+// Type: double
+//
+
+delta_az = 1;
+
+///////////// clockwise_rotation //////////////////////
+//
+// Which rotation sense gives us good data?.
+// true - clockwise, false - counter-clockwise.
+// Type: boolean
+//
+
+clockwise_rotation = TRUE;
+
+//======================================================================
+//
+// RANGE LIMITS.
+//
+//======================================================================
+ 
+///////////// start_range /////////////////////////////
+//
+// Start range for analysis (km).
+// Type: double
+//
+
+start_range = 20;
+
+///////////// end_range ///////////////////////////////
+//
+// End range for analysis (km).
+// Type: double
+//
+
+end_range = 100;
+
+///////////// expected_gate_spacing ///////////////////
+//
+// Expected gate spacing (km).
+// Type: double
+//
+
+expected_gate_spacing = 0.25;
+
+//======================================================================
+//
+// SNR LIMITS.
+//
+//======================================================================
+ 
+///////////// min_snr /////////////////////////////////
+//
+// Minimum SNR for analysis.
+// Gates with SNR below this will be ignored.
+// Type: double
+//
+
+min_snr = 15;
+
+///////////// max_snr /////////////////////////////////
+//
+// Maximum SNR for analysis.
+// Gates with SNR above this will be ignored.
+// Type: double
+//
+
+max_snr = 60;
+
+///////////// delta_snr ///////////////////////////////
+//
+// SNR interval for the analysis.
+// The data is partitioned into SNR intervals, and statistics are 
+//   computed for each interval as well as for all values between the min 
+//   and max snr.
+// Type: double
+//
+
+delta_snr = 5;
+
+//======================================================================
+//
+// VEL AND WIDTH LIMITS.
+//
+//======================================================================
+ 
+///////////// max_vel /////////////////////////////////
+//
+// Maximum velocity for analysis (m/s).
+// Set this close to zero to select clutter points.
+// Type: double
+//
+
+max_vel = 2;
+
+///////////// max_width ///////////////////////////////
+//
+// Maximum width for analysis (m/s).
+// Set this close to zero to select clutter points.
+// Type: double
+//
+
+max_width = 2;
+
+//======================================================================
+//
+// MOMENTS COMPUTATION.
+//
+//======================================================================
+ 
+///////////// n_samples ///////////////////////////////
+//
+// Number of pulse samples in a beam.
+// Type: int
+//
+
+n_samples = 128;
+
+///////////// hc_receiver /////////////////////////////
+//
+// Properties of horiz co-polar receiver.
+// bsky_noise_at_ifd: the blue-sky noise measured at the ifd, in dBm. 
+//   gain: the gain from the measurement plane to the ifd, in dB.
+//
+// Type: struct
+//   typedef struct {
+//      double bsky_noise_at_ifd;
+//      double gain;
+//      double radar_constant;
+//   }
+//
+//
+
+hc_receiver = { -77.192, 37.1712, -68.1627 };
+
+///////////// hx_receiver /////////////////////////////
+//
+// Properties of horiz cross-polar receiver.
+//
+// Type: struct
+//   typedef struct {
+//      double bsky_noise_at_ifd;
+//      double gain;
+//      double radar_constant;
+//   }
+//
+//
+
+hx_receiver = { -77.882, 37.0979, -68.3172 };
+
+///////////// vc_receiver /////////////////////////////
+//
+// Properties of vertical co-polar receiver.
+//
+// Type: struct
+//   typedef struct {
+//      double bsky_noise_at_ifd;
+//      double gain;
+//      double radar_constant;
+//   }
+//
+//
+
+vc_receiver = { -77.405, 37.4876, -68.3172 };
+
+///////////// vx_receiver /////////////////////////////
+//
+// Properties of vertical cross-polar receiver.
+//
+// Type: struct
+//   typedef struct {
+//      double bsky_noise_at_ifd;
+//      double gain;
+//      double radar_constant;
+//   }
+//
+//
+
+vx_receiver = { -78.153, 37.4225, -68.1627 };
+
+///////////// atmos_attenuation ///////////////////////
+//
+// Atmospheric attenuation (dB/km).
+// Reflectivity is corrected for this.
+// Type: double
+//
+
+atmos_attenuation = 0.012;
+
+//======================================================================
+//
+// COMPUTING CROSS-POLAR POWER.
+//
+//======================================================================
+ 
+///////////// hc_minus_vc_threshold ///////////////////
+//
+// Threshold for determining H or V transmit (dB).
+// For each PPI, we compute the mean difference between Hc and Vc. If Hc 
+//   exceeds Vc by this threshold, we assume H transmit. If Vc exceeds Hc 
+//   by this threshold, we assume V transmit. If the absolute difference 
+//   is less than or equal to this threshold, we assume simultaneous 
+//   transmit.
+// Type: double
+//
+
+hc_minus_vc_threshold = 2;
+
+///////////// max_time_between_ppis ///////////////////
+//
+// Maximum time interval between PPIs for computing the CP difference 
+//   (secs).
+// We only compute the CP difference if the time between successive PPIs 
+//   is less than this amount.
+// Type: int
+//
+
+max_time_between_ppis = 90;
+
+//======================================================================
+//
+// OUTPUT RESULTS.
+//
+//======================================================================
+ 
+///////////// write_output_files //////////////////////
+//
+// Option to write detailed output to files.
+// If true, files will be written to output_dir.
+// Type: boolean
+//
+
+write_output_files = TRUE;
+
+///////////// output_dir //////////////////////////////
+//
+// Dir for output files.
+// The results will be written to sub-directories named from the data 
+//   time.
+// Type: string
+//
+
+output_dir = "./output";
+

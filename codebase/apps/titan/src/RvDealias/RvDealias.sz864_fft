@@ -1,0 +1,284 @@
+/**********************************************************************
+ * TDRP params for RvDealias
+ **********************************************************************/
+
+//======================================================================
+//
+// RvDealias reads radar IQ data, and performs range-velocity dealiasing 
+//   on the data.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "zs864_fft";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In SIMULATE mode, the program moves repeatedly through 
+//   the file list, creating output files with times set to now. This is 
+//   useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// NETCDF FILE DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "$(HOME)/data/nc/radar/iq";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// DATA PROCESSING.
+//
+//======================================================================
+ 
+///////////// algorithm ///////////////////////////////
+//
+// Algorithm to be used.
+// PP: compute pulse-pair moments. FFT: compute spectral moments. SZ864: 
+//   perform rv dealiazing with sz 8-64 algorithm.
+//
+// Type: enum
+// Options:
+//     PP
+//     FFT
+//     FFT_HANNING
+//     FFT_MOD_HANNING
+//     SZ864_PP
+//     SZ864_FFT
+//     TEST
+//
+
+algorithm = SZ864_FFT;
+
+///////////// wavelength_cm ///////////////////////////
+//
+// Radar wavelength (cm).
+// Type: int
+//
+
+wavelength_cm = 10;
+
+///////////// noise_value /////////////////////////////
+//
+// Noise value (dBM).
+// This is used if noise is not available from the data.
+// Type: double
+//
+
+noise_value = 5.5e-07;
+
+///////////// floor_signal_power //////////////////////
+//
+// Floor signal power (dBM).
+// Arbitrary floor value for signal. Lower bound for power from 
+//   computations.
+// Type: double
+//
+
+floor_signal_power = 5e-05;
+
+///////////// trip1_phase_index ///////////////////////
+//
+// Index of phase shift for first pulse in file.
+// The pulses repeat their phases on a 32-phase cycle. In the program we 
+//   compute the phase table. This is the index into that table of the 
+//   first pulse in the file. This therefore applies to trip1. The 
+//   transmitted phase of other pulses are determined by their position in 
+//   the array of pulses in the file.
+// Type: int
+//
+
+trip1_phase_index = 0;
+
+///////////// negate_phase_codes //////////////////////
+//
+// Option to multiple phase codes by -1.
+// In some data sets the phase codes are negated. Set this to true for 
+//   such data cases.
+// Type: boolean
+//
+
+negate_phase_codes = FALSE;
+
+///////////// signal_to_noise_ratio_threshold /////////
+//
+// Signal-to-noise value for thresholding (dB).
+// This is the signal-to-noise ratio used to thresholding based on the 
+//   noise.
+// Type: double
+//
+
+// signal_to_noise_ratio_threshold = 3;
+signal_to_noise_ratio_threshold = -300;
+
+///////////// sz_strong_to_weak_power_ratio_threshold /
+//
+// Strong-to-weak power ratio censoring threshold (dB).
+// SZ decoding only. If the strong to weak trip power ratio is greater 
+//   than this, we censor the weak trip.
+// Type: double
+//
+
+// sz_strong_to_weak_power_ratio_threshold = 45;
+sz_strong_to_weak_power_ratio_threshold = 450;
+
+///////////// sz_out_of_trip_power_ratio_threshold ////
+//
+// Ratio of peak power to off-peak replica power (dB).
+// SZ decoding only. When checking for out-of-trip power after 
+//   deconvolution, this is the threshold to be used. The power of the 
+//   spectral peak is compared with the peak for the 6 lowest replicas. If 
+//   the ratio is less that this for a given number of replicas, it is 
+//   assumed that out-of-trip power is present. See 
+//   'sz_out_of_trip_power_n_replicas'.
+// Type: double
+//
+
+// sz_out_of_trip_power_ratio_threshold = 6;
+sz_out_of_trip_power_ratio_threshold = -600;
+
+///////////// sz_out_of_trip_power_n_replicas /////////
+//
+// Number of replicas used for checking for out-of-trip power.
+// SZ decoding only. When checking for out-of-trip power after 
+//   deconvolution, this is the number of peaks to check. See 
+//   'sz_out_of_trip_power_ratio_threshold'.
+// Minimum val: 1
+// Maximum val: 6
+// Type: int
+//
+
+sz_out_of_trip_power_n_replicas = 3;
+
+///////////// sz_window ///////////////////////////////
+//
+// Window type for SZ864.
+// Windot type to be applied to strong trip before computing spectra.
+//
+// Type: enum
+// Options:
+//     NO_WINDOW
+//     HANNING
+//     MOD_HANNING
+//
+
+sz_window = HANNING;
+
+//======================================================================
+//
+// OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_spectra_files /////////////////////
+//
+// Option to write various gate spectra to ASCII files.
+// If true, spectra are written to files in directory 
+//   spectra_output_dir.
+// Type: boolean
+//
+
+write_spectra_files = FALSE;
+
+///////////// spectra_dir /////////////////////////////
+//
+// Spectra file directory.
+// See 'write_spectra_files.
+// Type: string
+//
+
+spectra_dir = "./spectra";
+
+///////////// write_verification_data /////////////////
+//
+// Option to write data for verification purposes.
+// If true, verification data will be written to 
+//   verification_output_dir.
+// Type: boolean
+//
+
+write_verification_data = TRUE;
+
+///////////// verification_dir ////////////////////////
+//
+// Verifcation file directory.
+// See 'write_verification_data.
+// Type: string
+//
+
+verification_dir = "./verify_fft";
+

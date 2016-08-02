@@ -1,0 +1,229 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for ChillCal2Xml
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// May 2009
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "ChillCal2Xml reads in CHILL calibration files, and produces a DsRadarCalib XML format file.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "INPUT DATA";
+};
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file to process. In ARCHIVE mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+paramdef string {
+  p_default = "/tmp/cal";
+  p_descr = "Directory for input CHILL calibration files";
+} chill_cal_dir;
+
+paramdef string {
+  p_default = "current_cal.conf";
+  p_descr = "Name of file to watch in chill_cal_dir";
+} current_cal_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Do the receiver channels switch on alternate pulses?";
+  p_help = "If true, the receivers are set up as co-pol and cross-pol. If false, false, they are set up as H and V.";
+} switching_receiver;
+
+commentdef {
+  p_header = "OVERRIDE CALIBRATION PARAMETERS";
+};
+
+paramdef string {
+  p_default = "CSU-CHILL";
+  p_descr = "Radar name";
+} radarName;
+
+paramdef double {
+  p_default = 11.0016;
+  p_descr = "Radar wavelength (cm)";
+} wavelengthCm;
+
+paramdef double {
+  p_default = 87.25;
+  p_descr = "Transmitter peak power H (dBm)";
+} xmitPowerDbmH;
+
+paramdef double {
+  p_default = 86.45;
+  p_descr = "Transmitter peak power V (dBm)";
+} xmitPowerDbmV;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Transmit pulse width (micro_secs)";
+} pulseWidthUs;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Antenna 3dB beam width H (deg)";
+} beamWidthDegH;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Antenna 3dB beam width V (deg)";
+} beamWidthDegV;
+
+paramdef double {
+  p_default = 42.2;
+  p_descr = "Antenna gain H (dB)";
+} antGainDbH;
+
+paramdef double {
+  p_default = 42.2;
+  p_descr = "Antenna gain V (dB)";
+} antGainDbV;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "2-way waveguide loss H (dB)";
+  p_help = "This is the loss from the measurement plane to the feed-horn and back. Sometimes it is set to 0 and the loss is incorporated in the antenna gain.";
+} twoWayWaveguideLossDbH;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "2-way waveguide loss V (dB)";
+  p_help = "This is the loss from the measurement plane to the feed-horn and back. Sometimes it is set to 0 and the loss is incorporated in the antenna gain.";
+} twoWayWaveguideLossDbV;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "2-way loss through the radome - H.";
+  p_help = "Set to 0 if no radome.";
+} twoWayRadomeLossDbH;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "2-way loss through the radome - V.";
+  p_help = "Set to 0 if no radome.";
+} twoWayRadomeLossDbV;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Receiver mismatch loss - (dB)";
+  p_help = "This is the loss which results from the fact that the receiver bandwidth is not exactly the same as the pulse width. The calibration procedure is carries out with a CW signal, so the redeiver bandwidth is not a factor. However, during operations, the receiver loses some power because of the bandwidth mismatch. This loss must be taken into account.";
+} receiverMismatchLossDb;
+
+paramdef double {
+  p_default = -40;
+  p_descr = "Noise source power - H (dBm)";
+  p_help = "Some operational calibrations are computed with a calbrated noise source of known power.";
+} noiseSourcePowerDbmH;
+
+paramdef double {
+  p_default = -40;
+  p_descr = "Noise source power - V (dBm)";
+  p_help = "Some operational calibrations are computed with a calbrated noise source of known power.";
+} noiseSourcePowerDbmV;
+
+paramdef double {
+  p_default = 58.56;
+  p_descr = "Power measurement loss - H (dBm).";
+  p_help = "This is the power loss from the signal generator to the waveguide coupler.";
+} powerMeasLossDbH;
+
+paramdef double {
+  p_default = 57.61;
+  p_descr = "Power measurement loss - V (dBm).";
+  p_help = "This is the power loss from the signal generator to the waveguide coupler.";
+} powerMeasLossDbV;
+
+paramdef double {
+  p_default = 35.9;
+  p_descr = "Coupler loss - H (dB)";
+  p_help = "This is the power loss in the directional coupler itself.";
+} couplerForwardLossDbH;
+
+paramdef double {
+  p_default = 35.6;
+  p_descr = "Coupler loss - V (dB)";
+  p_help = "This is the power loss in the directional coupler itself.";
+} couplerForwardLossDbV;
+
+paramdef double {
+  p_default = -6.09;
+  p_descr = "Test power H (dBm).";
+} testPowerHDbm;
+
+paramdef double {
+  p_default = -6.32;
+  p_descr = "Test power H (dBm).";
+} testPowerVDbm;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to ZDR (dB)";
+  p_help = "True ZDR = measured ZDR + zdrCorrectionDb";
+} zdrCorrectionDb;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to LDR - H (dB)";
+  p_help = "True LDRH = measured LDRH + ldrCorrectionDbH";
+} ldrCorrectionDbH;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to LDR - V (dB)";
+  p_help = "True LDRV = measured LDRV + ldrCorrectionDbV";
+} ldrCorrectionDbV;
+
+paramdef double {
+  p_default = -60;
+  p_descr = "System PHIDP (deg)";
+  p_help = "This is the approximate PHIDP value in the meteorlogical echo closest to the radar. Compute PHIDP is corrected using this value, so that the computed PHIDP closest to the radar is set to a value which minimizes the chance of folding.";
+} systemPhidpDeg;
+
+commentdef {
+  p_header = "OUTPUT RESULTS";
+};
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output files.";
+  p_help = "The results will be written to sub-directories named from the cal time.";
+} xml_output_dir;
+

@@ -1,0 +1,321 @@
+/****************************************************
+ * TDRP params for tstorm_spdb2symprod
+ ****************************************************/
+
+/*
+ * debug level.
+ * Debug level: DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS, DEBUG_ROUTINES,
+ *   DEBUG_ALL.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS,
+ *   DEBUG_ROUTINES, DEBUG_ALL.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * malloc debug level.
+ * 0 = none, 1 = corruption checking, 2 = record all malloc blocks
+ *   and checks, 3 = printout of all mallocs, etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * database directory.
+ * Directory containing SPDB database.
+ *
+ * Type: string
+ * Default: "." 
+ */
+database_dir = "$(TITAN_HOME)/tstorms_spdb";
+
+/*
+ * product label.
+ * The product label used in the SPDB database to uniquely identify
+ *   this product.
+ *
+ * Type: string
+ * Default: "TITAN_STORMS" 
+ */
+product_label = "TITAN_STORMS";
+
+/*
+ * product id.
+ * Number which uniquely identifies this product in the SPDB database.
+ *
+ * Type: long
+ * Default: 20020 
+ */
+product_id = 20020;
+
+/*
+ * output port.
+ * Port number to use for output.
+ *
+ * Type: long
+ * Default: 62020 
+ */
+port = 62020;
+
+/*
+ * servmap type.
+ * Server mapper type for this server.
+ *
+ * Type: string
+ * Default: "Spdb" 
+ */
+servmap_type = "Spdb";
+
+/*
+ * servmap subtype.
+ * Server mapper subtype for this server. The type is always Spdb.
+ *
+ * Type: string
+ * Default: "Tstorms" 
+ */
+servmap_subtype = "Tstorms";
+
+/*
+ * servmap instance.
+ * Server mapper instance for this server. The type is always Spdb.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+servmap_instance = "Test";
+
+/*
+ * realtime available flag.
+ * Flag indicating if realtime data is available from this server.
+ *
+ * Type: long
+ * Default: 1 
+ */
+realtime_avail = 1;
+
+/*
+ * Valid forecasts only flag.
+ * If set, only valid forecasts will be sent. If not, all forecasts
+ *   will be sent.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+valid_forecasts_only = TRUE;
+
+/*
+ * Plot current shape flag.
+ * If set, the current storm shape will be sent.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+plot_current = TRUE;
+
+/*
+ * Plot forecast shape flag.
+ * If set, the forecast storm shape will be sent.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+plot_forecast = TRUE;
+
+/*
+ * Forecast lead time (secs).
+ * Lead time for forecast shapes and positions.
+ *
+ * Type: long
+ * Default: 1800 
+ */
+forecast_lead_time = 1800;
+
+/*
+ * Shape type.
+ * Determines the way in which the storm is represented.
+ *
+ * Type: enum
+ * Default: POLYGON_SHAPE 
+ * Legal values: ELLIPSE_SHAPE, POLYGON_SHAPE.
+ */
+storm_shape = POLYGON_SHAPE;
+
+/*
+ * Plot trend.
+ * If set, the storm size and intensity trend will be included as
+ *   text: '+' or '-'.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+plot_trend = FALSE;
+
+/*
+ * Plot speed.
+ * If set, speed is placed at the head of the vector.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+plot_speed = TRUE;
+
+/*
+ * Plot speed as knots.
+ * Default is speed as km/hr.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+speed_knots = FALSE;
+
+/*
+ * Plot speed rounded to nearest 5.
+ * Default is not rounded.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+speed_round = FALSE;
+
+/*
+ * Plot vector flag.
+ * If set, the forecast vector be sent.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+plot_vectors = TRUE;
+
+/*
+ * Length of arrow head (km).
+ *
+ * Type: double
+ * Default: 2 
+ * Min value: 0 
+ */
+arrow_head_len = 2;
+
+/*
+ * Half angle of arrow head (deg).
+ *
+ * Type: double
+ * Default: 20 
+ * Min value: 0 
+ * Max value: 90 
+ */
+arrow_head_half_angle = 20;
+
+/*
+ * Fixed length arrows flag.
+ * If flag set, direction arrows are of fixed lenght. If not set,
+ *   arrows are scaled to length for time forecast_lead_time.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+fixed_length_arrows = FALSE;
+
+/*
+ * Shaft length arrow head (km).
+ * This is used if 'fixed_length_arrows' is TRUE.
+ *
+ * Type: double
+ * Default: 20 
+ * Min value: 0 
+ */
+arrow_shaft_length = 20;
+
+/*
+ * current color.
+ * Name of color suggested for rendering the current storm.
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+current_color = "yellow";
+
+/*
+ * forecast color.
+ * Name of color suggested for rendering the forecast storm.
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+forecast_color = "yellow";
+
+/*
+ * motion vector color.
+ * Name of color suggested for rendering the motion vector.
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+vector_color = "yellow";
+
+/*
+ * text color.
+ * Name of color suggested for rendering the text.
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+text_color = "yellow";
+
+/*
+ * text font name.
+ * The name of the X font to be used when rendering the text.
+ *
+ * Type: string
+ * Default: "8x13" 
+ */
+text_font = "8x13";
+
+/*
+ * display line type.
+ * Line type suggested for using on the display.
+ *
+ * Type: enum
+ * Default: LINETYPE_SOLID 
+ * Legal values: LINETYPE_SOLID, LINETYPE_DASH,
+ *   LINETYPE_DOT_DASH.
+ */
+suggested_line_type = LINETYPE_SOLID;
+
+/*
+ * display line width.
+ * Line width suggested for using on the display.
+ *
+ * Type: long
+ * Default: 1 
+ */
+suggested_line_width = 1;
+
+/*
+ * display capstyle.
+ * Capstyle suggested for using on the display.
+ *
+ * Type: enum
+ * Default: CAPSTYLE_BUTT 
+ * Legal values: CAPSTYLE_BUTT, CAPSTYLE_NOT_LAST,
+ *   CAPSTYLE_PROJECTING, CAPSTYLE_ROUND.
+ */
+suggested_capstyle = CAPSTYLE_BUTT;
+
+/*
+ * display joinstyle.
+ * Joinstyle suggested for using on the display.
+ *
+ * Type: enum
+ * Default: JOINSTYLE_BEVEL 
+ * Legal values: JOINSTYLE_BEVEL, JOINSTYLE_MITER,
+ *   JOINSTYLE_ROUND.
+ */
+suggested_joinstyle = JOINSTYLE_BEVEL;
+
+

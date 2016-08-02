@@ -1,0 +1,14 @@
+#! /bin/csh
+
+echo test_script
+
+set nargs=$#argv
+echo Number of args: $nargs
+
+echo Args: $argv
+
+#while (1)
+#    echo "Sleeping ..."
+#    sleep 5
+#end
+

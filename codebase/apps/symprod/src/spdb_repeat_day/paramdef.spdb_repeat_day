@@ -1,0 +1,79 @@
+
+
+commentdef {
+  p_header = "spdb_repeat_day is a small program that takes an\n"
+             "input SPDB database that covers at least one day,\n"
+             "and outputs the day ad nauseum to a destination SPDB\n"
+             "database. The day is pointed at by the year, month\n"
+             "and day parameters.\n\nNiles Oien September 1999";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_ON
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_private = FALSE;
+  p_descr = "Single string value";
+  p_help = "ProcMap instance.";
+} instance;
+
+paramdef string {
+  p_default = "./Source";
+  p_private = FALSE;
+  p_descr = "SPDB source database.";
+  p_help = "Source contains (at least) one day of SPDB data.";
+} source;
+
+paramdef string {
+  p_default = "./Destination";
+  p_private = FALSE;
+  p_descr = "SPDB destination database.";
+  p_help = "Destination database will grow in time.";
+} destination;
+
+paramdef long {
+  p_default = 60;
+  p_min = 15;
+  p_max = 600;
+  p_private = FALSE;
+  p_descr = "Interval, in seconds.";
+  p_help = "Defines granularity of data copies.";
+} interval;
+
+paramdef int {
+  p_default = 1990;
+  p_private = FALSE;
+  p_descr = "Year of the day to repeat.";
+  p_help = "Specify year, month and day to repeat.";
+} year;
+
+
+paramdef int {
+  p_default = 6;
+  p_private = FALSE;
+  p_descr = "Month of the day to repeat.";
+  p_min = 1;
+  p_max = 12;
+  p_help = "Specify year, month and day to repeat.";
+} month;
+
+paramdef int {
+  p_default = 15;
+  p_private = FALSE;
+  p_descr = "Day to repeat.";
+  p_min=1;
+  p_max=31;
+  p_help = "Specify year, month and day to repeat.";
+} day;
+
+
+        

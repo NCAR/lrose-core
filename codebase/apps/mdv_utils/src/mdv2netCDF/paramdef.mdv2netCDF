@@ -1,0 +1,317 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions mdv2netCDF
+//
+// Niles Oien
+// Updated by Mike Dixon
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Dec 2001
+
+commentdef {
+  p_header = "Program name: mdv2netCDF";
+  p_text = "mdv2netCDF converts MDV files to netCDF, using the COARDS convention.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} Instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in FILELIST mode, at least) MUST contain a day-directory below the data file -- ./data_file.mdv will not work as a file path";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input URL";
+  p_help = "Set to the URL for the input MDV files";
+} InMdvURL;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Maximum age for file to be considered valid";
+  p_help = "In realtime mode only";
+} RealtimeMaxAge;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to run once and exit";
+  p_help = "Set to TRUE in Realtime only";
+} Once;
+
+commentdef {
+  p_header = "DATA CONVERSION.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to TRUE to convert all fields.";
+  p_help = "If FALSE then only fields in FieldNames are converted.";
+} DoAllFields;
+
+paramdef string {
+  p_default = { "Pressure", "Temperature" };
+  p_descr = "Names of fields to be output in netCDF file.";
+  p_help = "Only used if DoAllFields is FALSE.";
+} FieldNames[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to add the field number to the end of the field name for output.";
+  p_help = "If TRUE, the field number will be added to all field names, except for the first field.";
+} AddNumToFieldName;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to store data in ZYX order, in which Z changes slowest and Z fastest.";
+  p_help = "If FALSE, the default ordering will be used. This is YXZ.";
+} DataOrderingZYX;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Output netCDF directory";
+  p_help = "Set to the name of the output netCDF directory";
+} OutDir;
+
+paramdef string {
+  p_default = "nc";
+  p_descr = "Output file extension.";
+} OutFileExt;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Compute output path from time.";
+  p_help = "If TRUE, path is OutDir/yyyymmdd/hhmmss.nc. If FALSE, the file path is OutDir/yyyymmdd_hhmmss.NetCDF_FileName.";
+} OutputPathFromTime;
+
+paramdef string {
+  p_default = "RapData";
+  p_descr = "Base NetCDF filename, with or without .nc extension";
+  p_help = "Output NetCDF files will have the date/time pre-pended";
+} NetCDF_FileName;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write _latest_data_info file in OutDir.";
+} WriteLdataInfo;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to try gzip -f on the netcdf file after it\n"
+            "is written. If this is invoked, the program sleeps\n"
+            "for a second prior to trying to zip the file.";
+} CompressAfterWrite;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to include an existing ASCII file in the output.";
+  p_help = "If set, the file designated by includeFilename will be read and\n"
+	"added, line by line, to the netCDF output file as an attribute.\n";
+} includeFile;
+
+
+paramdef string {
+  p_default = "/Some/File/Name.ext";
+  p_descr = "ASCII file to be included in the netCDF output if\n"
+	"includeFile is TRUE.";
+  p_help = "The file will be read line by line and included as text\n"
+	"in the netcdf output.";
+} includeFilename;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply vlevel limits.";
+  p_help = "If true, set the minVlevel and maxVlevel below.";
+} applyVleveLimits;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum Vlevel.";
+  p_help = "Applies only if applyVleveLimits is true.";
+} minVlevel;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Maximum Vlevel.";
+  p_help = "Applies only if applyVleveLimits is true.";
+} maxVlevel;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to perform compositing.";
+  p_help = "If true, a maximum value vertical composite is performed.";
+} composite;
+
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remap grid in x,y.";
+  p_help = "If true, set the remap parameters below.";
+} remap_xy;
+
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_FLAT = 8
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_FLAT;
+  p_descr = "Projection for remapping in x,y.";
+} remap_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
+  p_descr = "Grid parameters for remapping in x,y.";
+  p_help = "These params apply to all projection types.";
+} remap_grid;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid rotation.";
+  p_help = "This applies only to PROJ_FLAT projections.";
+} remap_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin latitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.";
+} remap_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin longitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.";
+} remap_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 1.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} remap_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 2.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} remap_lat2;
+
+paramdef string {
+  p_default = "level";
+  p_descr = "Label to use for Z axis units.";
+  p_help = "Another option might be Kilometers.";
+} zUnitLabel;
+
+typedef struct {
+	string mdvFieldname;
+	string netCDFfieldname;
+	string units;
+	string longName;
+} substitution_t;
+
+
+paramdef struct substitution_t {
+	p_descr = "These parameters offer the ability to substitute another\n"
+		"field name or units other than those from the MDV file.\n"
+		"Also a long name can be added.";
+
+	p_help = "Defaults are OK for adjoint 3D.";
+
+	p_default = {
+		{ "uwind", "uwind", "m/s", "u wind component" },
+		{ "vwind", "vwind", "m/s", "v wind component" },
+		{ "wwind", "wwind", "m/s", "w wind component" }
+	};
+} substitutions[];
+
+
+typedef struct {
+  boolean addHeightVar;
+  boolean usePlaneNumber;
+  string mdvFieldName;
+  string netcdfName;
+  string units;
+} addHeight_t;
+
+paramdef struct addHeight_t {
+  p_default = {FALSE, FALSE, "DBZ", "heightDBZ", "elevationDegrees" };
+  p_descr = "Option to add the height as a netCDF variable.";
+  p_help = "Fields have the following meaning :\n\n"
+	" addHeightVar - set to TRUE to add the height as a netCDF\n"
+	"                variable. If this is FALSE, then the remaining\n"
+	"                settings are irrelevant.\n\n"
+	" usePlaneNumber - By default, the actual plane heights are taken from\n"
+	"                  the vlevel header. Setting this option to TRUE\n"
+	"                  means that the plane numbers (starting at 0) will\n"
+	"                  be used rather than the height values.\n\n"
+	" mdvFieldName - mdv field to take the height values from.\n\n"
+	" netcdfName - name to use for the height variable in the netcdf file.\n"
+	" units - units for the height variable.";
+} addHeight;

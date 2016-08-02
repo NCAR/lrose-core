@@ -1,0 +1,63 @@
+;GIL-3
+(
+	:interfaces             (extras_pu.G fields_pu.G h_win.G movie_pu.G v_win.G data_pu.G zoom_pu.G save_pu.G over_pu.G )
+	:actions                (
+		(
+		:from                   (h_win.G horiz_bw movie_start_st)
+		:when                   (Notify )
+		:to                     (movie_pu.G movie_pu)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Show)
+		)
+		(
+		:from                   (h_win.G horiz_bw x_sect_st)
+		:when                   (Notify )
+		:to                     (v_win.G v_win_pu)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Show)
+		)
+		(
+		:from                   (h_win.G horiz_bw overlay_st)
+		:when                   (Notify )
+		:to                     (extras_pu.G extras_pu)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Show)
+		)
+		(
+		:from                   (h_win.G horiz_bw field_sel_st)
+		:when                   (Notify )
+		:to                     (fields_pu.G fields_pu)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Show)
+		)
+		(
+		:from                   (h_win.G horiz_bw field_st)
+		:when                   (Notify )
+		:to                     (data_pu.G data_pu)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Show)
+		)
+		(
+		:from                   (h_win.G horiz_bw zoom_st)
+		:when                   (Notify )
+		:to                     (zoom_pu.G zoom_pu)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Show)
+		)
+		(
+		:from                   (h_win.G horiz_bw movie_st)
+		:when                   (Notify )
+		:to                     (movie_pu.G movie_pu)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Show)
+		)
+	)
+	:root_window            nil
+)

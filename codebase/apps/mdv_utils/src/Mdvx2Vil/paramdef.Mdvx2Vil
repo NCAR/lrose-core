@@ -1,0 +1,360 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Mdv2Vil
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ * Terri Betancourt
+ *
+ * November 1998
+ */
+
+commentdef {
+  p_header = "Program name: Mdv2Vil";
+  p_text = "Computes VIL and related values.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;  
+
+commentdef {
+  p_header = "INPUT and OUTPUT DIRECTORIES";
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+            "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+            "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Output data are written here."; 
+  p_default = {"mdvp:://localhost::mdv/vil"};
+} OutUrl;
+
+commentdef {
+  p_header = "COMPUTING VIL";
+  p_text = "In this application, VIL is referred to as totalVil, as opposed to the deltaVil product. VIL and totalVil are synonymous.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Output VIL to mdv file";
+} output_totalVil;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Reflectivity field name";
+  p_help = "Field name of the reflectivity data in the mdv file";
+} dbz_field;
+
+paramdef double {
+  p_min = 0.0;
+  p_default = 0.0;
+  p_descr = "Minimum Height (in km)";
+  p_help = "Minimum Height from which to calculate VIL";
+} min_height;
+
+commentdef {
+  p_header = "STORM SEVERITY based on DELTA VIL";
+  p_text = "DELTA VIL is computed as the VIL above some level (say the -5C level) minus the VIL below that level. Regions in storms with an overhang (echo vault) will show a positive dvil. This is an indicator of a severe storm."; 
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Output DVIL calculation to mdv file";
+  p_help = "DVIL is the difference between the upper mass and lower mass around the specified difference_height";
+} output_dVil;
+
+paramdef double {
+  p_min = 0.0;
+  p_default = 10.0;
+  p_descr = "Height (in km) used for DVIL calculation";
+  p_help = "Typically set to the height of the -5 C temperature.";
+} difference_height;
+
+commentdef {
+  p_header = "STORM SEVERITY based on SSS";
+  p_text = "Thanks to Pieter Visser of the South African Weather Service. <visser@weathersa.co.za>";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Output the Storm Severity index calculation to mdv file";
+} output_SSS_index;
+
+commentdef {
+  p_header = "SSS CALCULATION PARAMETERS";
+  p_text = "The SSS field is used to partition the grid into the following "
+           "storm categories:\n"
+           "\t1 = Weak Base\n"
+           "\t2 = Weak Volume\n"
+           "\t3 = Weak Top\n"
+           "\t4 = Severe Base\n"
+           "\t5 = Severe Volume\n"
+           "\t6 = Severe Top\n"
+           "\t7 = Very Severe Base\n"
+           "\t8 = Very Severe Volume\n"
+           "\t9 = Very Severe Top\n"
+           "The sss_weak_dbz_max and sss_severe_dbz_max fields are used "
+           "for classifying each grid square into the 3 different storm "
+           "severity categories: weak, severe and very severe. "
+           "Grid points that have a reflectivity value less than the "
+           "sss_weak_dbz_max parameter are classified as weak. "
+           "Grid points that have a reflectivity value between the "
+           "sss_weak_dbz_max parameter and the sss_severe_dbz_max parameter "
+           "are classified as severe. "
+           "Grid points that have a reflectivity value greater than the "
+           "sss_severe_dbz_max parameter are classified as very severe.\n"
+	   "Once the storm severity is determined, the other parameters "
+           "are used to classify the type of storm in the following "
+           "manner:\n"
+           "\tif (centerMass < sss_base_center_mass_max) then\n"
+           "\t\tif (stdDeviation >= sss_std_deviation_limit and\n"
+           "\t\t\tmaxDbzHeight < sss_base_height_max) then\n"
+           "\t\t\t\tstorm type = base\n"
+           "\t\tendif\n"
+           "\t\tif (stdDeviation >= sss_std_deviation_limit and\n"
+           "\t\t\tmaxDbzHeight >= sss_base_height_max) then\n"
+           "\t\t\t\tstorm type = volumetric\n"
+           "\t\tendif\n"
+           "\t\tif (stdDeviation < sss_std_deviation_limit) then\n"
+           "\t\t\tstorm type = base\n"
+           "\t\tendif\n"
+           "\telse if (centerMass < sss_top_center_mass_min) then\n"
+           "\t\tif (stdDeviation >= sss_std_deviation_limit and\n"
+           "\t\t\tmaxDbzHeight < sss_base_height_max) then\n"
+           "\t\t\t\tstorm type = base\n"
+           "\t\tendif\n"
+           "\t\tif (stdDeviation >= sss_std_deviation_limit and\n"
+           "\t\t\tmaxDbzHeight == sss_base_height_max) then\n"
+           "\t\t\t\tstorm type = volumetric\n"
+           "\t\tendif\n"
+           "\t\tif (stdDeviation >= sss_std_deviation_limit and\n"
+           "\t\t\tmaxDbzHeight >= sss_top_height_min) then\n"
+           "\t\t\t\tstorm type = top\n"
+           "\t\tendif\n"
+           "\t\tif (stdDeviation < sss_std_deviation_limit) then\n"
+           "\t\t\tstorm type = volumetric\n"
+           "\t\tendif\n"
+           "\telse\n"
+           "\t\tif (stdDeviation >= sss_std_deviation_limit and\n"
+           "\t\t\tmaxDbzHeight < sss_top_height_min) then\n"
+           "\t\t\t\tstorm type = volumetric\n"
+           "\t\tendif\n"
+           "\t\tif (stdDeviation >= sss_std_deviation_limit and\n"
+           "\t\t\tmaxDbzHeight >= sss_top_height_min) then\n"
+	   "\t\t\t\tstorm type = top\n"
+           "\t\tendif\n"
+           "\t\tif (stdDeviation < sss_std_deviation_limit) then\n"
+           "\t\t\tstorm type = top\n"
+           "\t\tendif\n"
+           "\tendif\n";
+};
+
+paramdef double
+{
+  p_descr = "Maximum dbz value for storms classified as weak";
+  p_default = 45.0;
+} sss_weak_dbz_max;
+
+paramdef double
+{
+  p_descr = "Maximum dbz value for storms classified as severe";
+  p_default = 55.0;
+} sss_severe_dbz_max;
+
+paramdef double
+{
+  p_descr = "Standard deviation limit used for SSS calculations";
+  p_default = 2.0;
+} sss_std_deviation_limit;
+
+paramdef double
+{
+  p_descr = "Base center mass maximum used for SSS calculations";
+  p_default = 6.5;
+} sss_base_center_mass_max;
+
+paramdef double
+{
+  p_descr = "Top center mass minimum used for SSS calculations";
+  p_default = 8.0;
+} sss_top_center_mass_min;
+
+paramdef double
+{
+  p_descr = "Base height maximum used for SSS calculations";
+  p_default = 6.0;
+} sss_base_height_max;
+
+paramdef double
+{
+  p_descr = "Top height minimum used for SSS calculations";
+  p_default = 7.0;
+} sss_top_height_min;
+
+
+/////////// Grid parameters.
+
+commentdef {
+  p_header = " ------------ GRID PARAMETERS --------\n"
+                "These specify the grid on which the\n"
+                "computations will be performed.\n"
+                "These are used only if RemapGrid is set\n"
+                "to TRUE. If RemapGrid is FALSE then it is assumed\n"
+                "that the fields are already on the same grid.";
+
+}
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to TRUE to remap the data - useful if visible is at\n"
+            "four times the resolution of the IR channels.";
+  p_help = "Defaults to FALSE";
+} RemapGrid;   
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} grid_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} grid_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} grid_lat2;
+
+typedef enum {
+  FLAT, LATLON, LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT, LATLON and LAMBERT";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in X";
+  p_min = {1};
+  p_default = { 100 };
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in Y";
+  p_min = {1};
+  p_default = {100};
+} grid_ny;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in X";
+  p_default = {1.0};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in Y";
+  p_default = {1.0};
+} grid_dy;
+
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection
+.";
+  p_default = {0};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection
+.";
+  p_default = {0};
+} grid_miny;
+
+
+commentdef {
+  p_header = "------ End of grid parameters. ";
+}
+

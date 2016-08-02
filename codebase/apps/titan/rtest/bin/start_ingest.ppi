@@ -1,0 +1,20 @@
+#! /bin/sh
+
+cd $RTEST_HOME/params
+
+if (not_running "test2gate -params test2gate.ppi") then
+  test2gate -params test2gate.ppi &
+fi
+
+if (not_running "polar_ingest -params polar_ingest.ppi") then
+  kill_polar2mdv.ppi
+  polar_ingest -params polar_ingest.ppi -summary 360 &
+fi
+
+sleep 5
+
+if (not_running "polar2mdv -params polar2mdv.ppi") then
+  kill_polar_ingest.ppi
+  polar_ingest -params polar_ingest.ppi -summary 360 &
+fi
+

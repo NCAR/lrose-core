@@ -1,0 +1,212 @@
+/*********************************************************
+ * parameter definitions for LdataMultWatcher
+ *
+ */
+
+commentdef {
+  p_header = "LdataMultWatcher program";
+  p_text = "LdataMultWatcher watches for _latest_data_info in multiple directories. The application will optionally call scripts when new data arrives in each directory, or when data is late.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Register interval for procmap - secs";
+  p_help = "If the script takes longer than 60 secs to complete, you will need to set this to a higher value to avoid the process being killed and restarted by the auto_restarter.";
+} procmap_register_interval;
+
+commentdef {
+  p_header = "DATA SET DETAILS";
+  p_text =
+    "For each individual data set, you can set whether to call the new_data and/or late_data scripts.\n"
+    "The new_data_script_name is called as new data arrives. The late_data_script is called when it has been data_late_secs since the last data arrived.\n"
+    "By default, the scripts are called with the following command line args, in no particular order:\n"
+    "  -debug ?: set if params.debug is not DEBUG_OFF\n"
+    "  -valid_utime ?: unix_time\n"
+    "  -valid_time ?: yyyy,mm,dd,hh,mm,ss\n"
+    "  -is_forecast ?: true/false\n"
+    "  -forecast_lead_secs ?: - for forecasts\n"
+    "  -gen_utime ?: unix_time - for forecasts\n"
+    "  -gen_time ?: yyyy,mm,dd,hh,mm,ss - for forecasts\n"
+    "  -rap_data_dir ?: RAP_DATA_DIR environment variable\n"
+    "  -abs_dir_path ?: input_dir relative to /\n"
+    "  -rel_dir ?: input_dir relative to RAP_DATA_DIR\n"
+    "  -rel_data_path ?: input file relative to input_dir\n"
+    "  -file_ext ?: extention of input file\n"
+    "  -data_type ?: data type of input file - for DataMapper\n"
+    "  -user_info1 ?: set by upstream app\n"
+    "  -user_info2 ?: set by upstream app\n"
+    "  -writer ?: which app wrote the data\n"
+    "  -late_data_secs ?: - for late_data_script\n\n"
+    "The arguments included can be controlled using the 'script_args' parameter below.\n\n"
+    "These args will be followed by any trailing arguments specified by 'trailing_args' in the data set details below.\n\n";
+} 
+
+typedef struct {
+  string input_dir;
+  boolean call_new_data_script;
+  string new_data_script_name;
+  boolean call_late_data_script;
+  string late_data_script_name;
+  int late_data_secs;
+  string trailing_args;
+} data_set_t;
+
+paramdef struct data_set_t {
+  p_default = {
+    {
+      input_dir = "/tmp",
+      call_new_data_script = true,
+      new_data_script_name = "test_script",
+      call_late_data_script = false,
+      late_data_script_name = "test_script",
+      late_data_secs = 3600,
+      trailing_args = ""
+    }
+  };
+  p_descr = "List of data set details.";
+  p_help = "\nFor each data set to be watched, set the parameters in this array.\n\nTo call a script when new data arrives set 'call_new_data_script' to TRUE, and specify the 'new_data_script_name'.\n\nTo call a script when data has not arrived in the last 'late_data_secs' set 'call_late_data_script' to TRUE and specify the 'late_data_script_name'.\n\nYou can also specify a list of extra arguments to be appended to the main argument list, using the 'trailing_args' parameter. This is, by default, a comma-delimited list. You can change the delimit character using 'trailing_args_delimiter' parameter.";
+} data_sets[];
+
+paramdef string {
+  p_default = ",";
+  p_descr = "Delimiting character for 'trailing_args'.";
+  p_help = "You can use the 'trailing_args' parameter above to specify arguments to be appended to the standard list of arguments used to call a script. Normally this is a comma-delimited list. Use this parameter to override the standard comma-delimiting character.";
+} trailing_args_delimiter;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the arguments used to call the script.";
+  p_help = "If TRUE, only those arguments specified in the list will be used. If FALSE, all args will be used. This does not affect the trailing_args.";
+} specify_script_args;
+
+typedef enum
+{
+  ARG_VALID_UTIME,
+  ARG_VALID_TIME,
+  ARG_IS_FORECAST,
+  ARG_FORECAST_LEAD_SECS,
+  ARG_GEN_UTIME,
+  ARG_GEN_TIME,
+  ARG_RAP_DATA_DIR,
+  ARG_ABS_DIR_PATH,
+  ARG_REL_DIR,
+  ARG_REL_DATA_PATH,
+  ARG_FILE_EXT,
+  ARG_DATA_TYPE,
+  ARG_USER_INFO1,
+  ARG_USER_INFO2,
+  ARG_WRITER,
+  ARG_DATA_LATE_SECS,
+  ARG_DEBUG,
+  ARG_VERBOSE
+} script_args_t;
+
+paramdef enum script_args_t
+{
+  p_descr = "List of options to include on the script command line.";
+  p_help = "Only used if 'specify_script_args is TRUE.";
+  p_default = {
+    ARG_VALID_UTIME,
+    ARG_VALID_TIME,
+    ARG_IS_FORECAST,
+    ARG_FORECAST_LEAD_SECS,
+    ARG_GEN_UTIME,
+    ARG_GEN_TIME,
+    ARG_RAP_DATA_DIR,
+    ARG_ABS_DIR_PATH,
+    ARG_REL_DIR,
+    ARG_REL_DATA_PATH,
+    ARG_FILE_EXT,
+    ARG_DATA_TYPE,
+    ARG_USER_INFO1,
+    ARG_USER_INFO2,
+    ARG_WRITER,
+    ARG_DATA_LATE_SECS,
+    ARG_DEBUG,
+    ARG_VERBOSE
+  };
+} script_args[];
+
+commentdef {
+  p_header = "LATEST DATA INFO HANDLING DETAILS";
+} 
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Maximum age for files, realtime mode, seconds";
+  p_help = "Default is 15 minutes.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to read FMQ for latest_data_info from start.";
+  p_help = "If TRUE, the all of the entries in the FMQ will be read, from the start. This is useful for archive mode, or for debugging what is in an FMQ.";
+} read_ldata_fmq_from_start;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to save read state.";
+  p_help = "If TRUE, each time a read is successful, a _latest_read_info XML file will be written to a tmp directory, so that read state can be maintained in case the application crashes";
+} save_read_state;
+
+commentdef {
+  p_header = "SCRIPT EXECUTION DETAILS";
+} 
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Generate arguments with '--' prefix instead of '-'.";
+  p_help = "For example, generate '--valid_utime' instead of '-valid_utime'.";
+} generate_double_dash_args;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run script in background.";
+  p_help = "If TRUE, the script will be run in the background. Therefore, the system call will return immediately. If FALSE, LdataMultWatcher will register with procmap while waiting for the script to complete.";
+} run_script_in_background;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to terminate script if it hangs.";
+  p_help = "If TRUE, the script will be killed if it does not return within 'script_max_run_secs'.";
+} terminate_script_if_hung;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Max time allowed for script - secs.";
+  p_help = "If 'terminate_script_if_hung' is TRUE, the script will be killed if it does not complete withing this number of secs.";
+} script_max_run_secs;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to have LdataMultWatcher sleep after the script returns.";
+  p_help = "If TRUE, LdataMultWatcher will sleep for script_sleep_time milliseconds.  This options is ignored if the script is run in the background.";
+} sleep_after_script;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Time to sleep after a script run in the foreground completes - millisec.";
+  p_help = "Only used if sleep_after_script is TRUE.";
+} script_sleep_time;
+
+

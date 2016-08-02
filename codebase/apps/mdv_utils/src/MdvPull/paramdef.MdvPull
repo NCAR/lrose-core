@@ -1,0 +1,539 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+g//////////////////////////////////////////////////////////////////////
+// parameter definitions MdvxConvert
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Sept 2011
+//
+
+commentdef {
+  p_header = "Program name: MdvPull";
+  p_text = "MdvPull reads a timelist, and then data sets, from a remote server, converts as appropriate, and then writes to a local file or a server. This allows you to duplicate a remote MDV data set.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Registration interval.";
+  p_help = "The number of seconds between expected procmap registrations.";
+} reg_interval;
+
+commentdef {
+  p_header = "DATA SEARCH";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help =
+  "MdvPull obtains a time list for files at the source URL. "
+  "It also obtains a time list for the output URL, and compares "
+  "the two lists. It then downloads missing datasets. "
+  "In REALTIME mode, the search period spans 'now' - realtime_lookback_secs "
+  "to 'now' + realtime_lookforward_secs. "
+  "In ARCHIVE mode, the search period limits 'start_time' and 'end_time' "
+  "are specified on the command line.";
+} mode;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Interval at which to poll for new data (secs).";
+  p_help = "At this interval, MdvPull will check with the source for new data.";
+} new_data_poll_interval;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "REALTIME mode only - how far to look back (secs).";
+  p_help = "Applies to both observed and forecast type data.";
+} realtime_lookback_secs;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "REALTIME mode only - how far to look back (secs).";
+  p_help = "Only applicable for forecast-type data retrieved using VALID_TIME.";
+} realtime_lookforward_secs;
+
+typedef enum {
+  VALID_TIME, GEN_TIME
+} search_mode_t;
+
+paramdef enum search_mode_t {
+  p_default = VALID_TIME;
+  p_descr = "Mode for searching for data sets";
+  p_help =
+  "For observational data, always use VALID_TIME. For forecast data, "
+  "you can search using VALID_TIME or GEN_TIME. If you use VALID_TIME, "
+  "MdvPull will find files based on the time at which the forecast is valid. "
+  "If you specifuy GEN_TIME for forecast data, you will find all data sets "
+  "for which the generate (run) time lies within the search limits.";
+} search_mode;
+
+paramdef string {
+  p_default = "mdv/source";
+  p_descr = "URL for source data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line. In
+  LOCAL_FILEPATH_REALTIME mode, set this to a directory, not a URL.";
+} source_url;
+
+commentdef {
+  p_header = "READ CONSTRAINTS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field names";
+} set_field_names;
+
+paramdef string {
+  p_default = 0;
+  p_descr = "Field name list.";
+} field_names[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set horizontal limits.";
+} set_horiz_limits;
+
+typedef struct {
+  float min_lat;
+  float min_lon;
+  float max_lat;
+  float max_lon;
+} horiz_limits_t;
+
+paramdef struct horiz_limits_t {
+  p_default = {-90.0, -180.0, 90.0, 180.0};
+  p_descr = "Set horizontal limits.";
+} horiz_limits;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set plane vlevel limits";
+  p_help = "Mutually exclusive with set_plane_num_limits.";
+} set_vlevel_limits;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Lower plane vlevel limit.";
+} lower_vlevel;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Upper plane vlevel limit.";
+} upper_vlevel;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option for creating composite.";
+  p_help = "Composite is a plane in which each grid location contains the maximum value at any height.";
+} composite;
+
+commentdef {
+  p_header = "RENAME FIELDS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field names";
+  p_help = "This is done on the client side, by this application.";
+} rename_fields;
+
+typedef struct {
+   string old_field_name;
+   string new_field_name;
+} field_names_t;
+
+paramdef struct field_names_t {
+  p_default = { {"",""}};
+  p_descr = "Provides a map from old field name to new field name. Note that either the filed name or the long field name must match the old_field_name specified for the renaming to take effect, and that if the renaming happens then both the field name and the long field name are renamed to the new_field_name.";
+} new_names[];
+
+commentdef {
+  p_header = "REMAP XY PROJECTION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remap grid in x,y.";
+  p_help = "If true, set the remap parameters below. This is done on the client side, by this application.";
+} remap_xy;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to automatically remap the grid to a lat-lon projection.";
+  p_help = "If true, the data in the file will be remapped to a latlon grid which matches the existing grid in resolution and extent. Other remap parameters will be ignored.";
+} auto_remap_to_latlon;
+
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_MERCATOR =  4,
+  PROJ_POLAR_STEREO = 5,
+  PROJ_FLAT = 8,
+  PROJ_OBLIQUE_STEREO = 12,
+  PROJ_TRANS_MERCATOR = 15,
+  PROJ_ALBERS = 16,
+  PROJ_LAMBERT_AZIM = 17,
+  PROJ_VERT_PERSP = 18
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_FLAT;
+  p_descr = "Projection for remapping in x,y. See projection param below.";
+  p_help =
+  "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
+  "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
+  "\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n"
+  "\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n"
+  "\tPROJ_MERCATOR: Mercator - EW orientation\n"
+  "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
+  "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
+  "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
+  "\tPROJ_ALBERS: Albers Equal Area Conic\n"
+  "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
+} remap_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
+  p_descr = "Grid parameters for remapping in x,y.";
+  p_help = "Units in km, except for LATLON, which is in degrees.";
+} remap_grid;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid rotation.";
+  p_help = "This applies only to PROJ_FLAT projections.";
+} remap_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin latitude.";
+  p_help = "This applies to all projections except LATLON.";
+} remap_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin longitude.";
+  p_help = "This applies to all projections except LATLON.";
+} remap_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 1.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} remap_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 2.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} remap_lat2;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Central scale for remapped projections.";
+  p_help = "This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR projections.";
+} remap_central_scale;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped tangent latitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO only.";
+} remap_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped tangent longitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
+} remap_tangent_lon;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
+  p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
+} remap_pole_is_north;
+
+paramdef double {
+  p_default = 35786;
+  p_descr = "Radius of perspective point (km).";
+  p_help = "This applies to VERT_PERSP.";
+} remap_persp_radius;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped false northing correction.";
+  p_help = "Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude";
+} remap_false_northing;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped false easting correction.";
+  p_help = "Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.";
+} remap_false_easting;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Do you want to specify an offset origin using lat/lon instead of false_northing and false_easting?";
+  p_help = "If true, set remap_offset_origin_latitude and remap_offset_origin_longitude.";
+} remap_set_offset_origin;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Latitude of offset origin.";
+  p_help = "See remap_set_offset_origin.";
+} remap_offset_origin_latitude;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Longitude of offset origin.";
+  p_help = "See remap_set_offset_origin.";
+} remap_offset_origin_longitude;
+
+commentdef {
+  p_header = "ENCODING AND COMPRESSION CONVERSION";
+}
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_ASIS;
+  p_descr = "Set output encoding type.";
+} encoding_type;
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4,
+  COMPRESSION_GZIP =  5,
+  COMPRESSION_GZIP_VOL =  6,
+  COMPRESSION_TYPES_N = 7
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_ASIS;
+  p_descr = "Set output compression type.";
+  p_help = "See <toolsa/compress> for details on the compression types.";
+} compression_type;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output URL.";
+  p_help = "Output data is written to this URL.";
+} output_url;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write _latest_data_info files for output files.";
+  p_help = "If false, will suppress writing of _latest_data_info files.";
+} write_latest_data_info;
+
+typedef enum {
+  OUTPUT_FORMAT_MDV,
+  OUTPUT_FORMAT_XML,
+  OUTPUT_FORMAT_NCF
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = OUTPUT_FORMAT_MDV;
+  p_descr = "Specify format of file on output.";
+  p_help = "FORMAT_MDV: normal MDV formal. FORMAT_XML: XML format. XML format writes out 2 files: *.mdv.xml and *.mdv.buf. The xml file contains the meta-data. The buf file contains the binary fields.\nNOTE: only COMPRESSION_NONE and COMPRESSION_GZIP_VOL are supported in XML. FORMAT_NCF: write file in netCDF CF format. Extension will be .nc.";
+} output_format;
+
+commentdef {
+  p_header = "WRITE USING EXTENDED PATHS";
+  p_text = "This will be overridden if the environment variable MDV_WRITE_USING_EXTENDED_PATHS exists and is set to TRUE.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write files with extended paths.";
+  p_help = "If specified, this will override that specified by the client. Default is FALSE.\n\nIf set, paths will include a separate year subdirectory, and the file name will include date and time.\n\nNon-forecast path:\n  dir/yyyy/yyyymmdd/yyyymmdd_hhmmss.mdv.\n\nForecast path:\n  dir/yyyy/yyyymmdd/yyyymmdd_g_hhmmss_f_llllllll.mdv.";
+} write_using_extended_paths;
+
+commentdef {
+  p_header = "CONTROL OF CONVERSION TO NETCDF.";
+  p_text = "The following parameters control conversion of MDV files to NetCDF CF-compliant files."; 
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set specify global attributes in the NCF file.";
+  p_help = "The global attributes are 'institution', 'references' and 'comment'.";
+} ncf_set_global_attributes;
+
+typedef struct {
+  string institution;
+  string references;
+  string comment;
+} ncf_global_attributes_t;
+
+paramdef struct  ncf_global_attributes_t {
+  p_default = {"NCAR", "", "Converted by MdvPull"};
+  p_descr = "Global attributes for netCDF file";
+  p_help = "These strings will be included as global attributes in the NetCDF file. Other global attributes will be determined from the MDV headers."; 
+} ncf_global_attributes;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to tranform field names, units and values when converting MDV to NCF.";
+} ncf_transform_fields;
+
+typedef enum {
+  DATA_PACK_FLOAT, DATA_PACK_SHORT, DATA_PACK_BYTE, DATA_PACK_ASIS
+} data_pack_t;
+
+typedef struct {
+  string mdv_field_name;
+  string ncf_field_name;
+  string ncf_standard_name;
+  string ncf_long_name;
+  string ncf_units;
+  boolean do_linear_transform;
+  float linear_multiplier;
+  float linear_const;
+  data_pack_t packed_data_type;
+} ncf_field_transform_t;
+
+paramdef struct ncf_field_transform_t {
+  p_default = { { "mdv_field_name", "ncf_field_name", "ncf_standard_name", "ncf_long_name", "ncf_units", false, 1.0, 0.0, DATA_PACK_ASIS} };
+  p_descr = "List of transforms. If mdv_field_name is found in the MDV data, these other parameters will be used to set the field variable in the netCDF file.";
+  p_help = "See mdv2ncf_transform_fields.";
+} ncf_field_transforms[];
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compress field data.";
+  p_help = "Only applies to NETCDF4 and  NETCDF4_CLASSIC files.";
+} ncf_compress_data;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Compression level from 1 to 9 with 9 being the greatest compression. Default is 9.";
+  p_help = "Only applies to NETCDF4 and  NETCDF4_CLASSIC files.";
+} ncf_compression_level;
+
+paramdef string {
+  p_default = "ncf";
+  p_descr = "Base name for netCDF files";
+  p_help = "This will be the start of the file name.";
+} ncf_base_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "User-specified output file prefix, comes before basename";
+} ncf_file_prefix;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Suffix of netCDF files";
+  p_help = "File extension is always .nc. File name will end with mdv.suffix.nc. Set to the empty string for no suffix, in which case file name will end with .mdv.nc.";
+} ncf_file_suffix;
+
+typedef enum {
+  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
+} ncf_format_t;
+
+paramdef enum ncf_format_t {
+  p_default = "NETCDF4";
+  p_descr = "NetCDF file format";
+  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
+} ncf_file_format;
+
+typedef enum {
+  FILE_TYPE_CF, // most common
+  FILE_TYPE_CF_RADIAL, // only applies to polar radar
+  FILE_TYPE_DORADE, // only applies to polar radar
+  FILE_TYPE_UF // only applies to polar radar
+} radial_file_type_t;
+  
+paramdef enum radial_file_type_t {
+  p_default = FILE_TYPE_CF;
+  p_descr = "Output format for polar radar data.";
+} ncf_polar_radar_file_type;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true latitude and longitude arrays of each grid point are output";
+  p_help = "The CF convention requires that these arrays are present in the netCDF file; however, the information is redundant since the lat and lon arrays could be constructed using the other projection and grid information required with a gridded data field";
+} ncf_output_latlon_arrays;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output non-CF compliant MDV attributes.";
+  p_help = "If true, MDV attributes which are not CF compliant will be output. This will facilitate the translation of the data back into MDV with the minimal loss of information.";
+} ncf_output_mdv_attributes;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output non-CF compliant MDV chunks.";
+  p_help = "If true, MDV chunks will be included as byte binary variables.";
+} ncf_output_mdv_chunks;
+

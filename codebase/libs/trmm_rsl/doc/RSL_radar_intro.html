@@ -1,0 +1,112 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body>
+<a href="index.html"><img SRC="rsl.gif" height=100 width=100></a>
+<hr>
+<br>&nbsp;
+<br>&nbsp;
+<center>
+<h1>
+The Radar Software Library (RSL).</h1></center>
+
+<h2>
+Introduction</h2>
+
+<h4>
+By <a href="john.merritt.html">John H. Merritt</a> and <a href="david.wolff.html">David
+B. Wolff</a>; NASA/TRMM Office<br>
+Software Verson 1.24 (released 6/28/1999)</h4>
+
+<hr>This library is an object oriented programming environment to keep
+application programming simple, for the casual C programmer, as well as
+for analysis software applicable to all RADAR data related to the TRMM
+GV effort. This library reads the wsr88d, lassen, kwajalein, mcgill, toga,
+UF, RAPIC and native RSL file formats. The most important functions provided
+are those which load any one of the radar file formats into memory; see
+<a href="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</a>. Additional
+functions are provide to mainpulate the RSL objects. Nearly all of the
+functions return objects. When they don't, they usually perform actions
+like output, making images, etc. The most general object in RSL is <b>Radar</b>.
+The structure <b>Radar</b> is the method used to define the ideal or universal
+radar representation in RAM while keeping the natural resolution of the
+data unchanged. More simply, <b>Radar</b> represents the super set of all
+radar file formats. The <a href="RSL_structures.html">Radar structure</a>
+is hierarchically defined such that it is composed of <b>Volumes</b>, each
+containing one field type. <b>Volumes</b> are composed of <b>Sweeps</b>.
+<b>Sweeps</b> are composed of <b>Rays</b> and <b>Rays</b> contains a vector
+of the field type. Some field types are Reflectivity(DZ), Velocity(VR),
+Spectrum Width(SW), etc. There are approximately 20 field types. See the
+<a href="users_guide.html">Users Guide</a> and the <a href="whats_new.html">what's
+new</a> for more information.
+<p>An example of a function that returns the <b>Radar</b> object is the
+<b>Lassen</b> ingest function. The function allocates all memory required
+to store the values from the lassen file in RAM.
+<p><tt>Radar *radar; radar = RSL_lassen_to_radar("lassen.file.22");</tt>
+<p>Syntatically, the object returned is a pointer. However, the functions
+provided in RSL treat this pointer as an object.
+<p>The names of the functions in the library are very descriptive of the
+function they perform. In the previous example, you may infer that some
+conversion from <i>lassen</i> to <i>radar</i> is taking place. Knowing
+that <i>lassen</i> is a file format for the Darwin RADAR datasets and that
+<i>radar</i>
+refers to the data structure <b>Radar</b> helps you understand that the
+function ingests <i>lassen</i> files and loads it into the <b>Radar</b>
+data structure.
+<p>The data structure <b>Radar</b> is composed of other objects called
+<b>Volumes</b>.
+You will notice that throughout this discussion, the natural vocabulary
+of the scientists who talk about the different components of the data received
+from a RADAR is used. This vocabulary is used to describe each component
+of the data structure. The <b>Radar</b> data structure holds RADAR measurements
+of a volume of physical space for the smallest unit of time possible. Typically
+a RADAR can produce a volume of data in 5 to 8 minutes; that becomes the
+smallest unit of time for a volume. This volume of space measured is referred
+to as <b>Volume</b>, in the RSL, and represents one particular measurement
+type or field type. The types of measurements are: reflectivity, velocity,
+spectrum width, quality controlled reflectivity, total reflectivity, differential
+reflectivity and LDR (another form of differential reflectivity). Normally,
+the RADAR records as many fields that it is designed to record and that
+really is one volume. However, I have split the fields into seperate volumes
+so that you can concentrate on only one field type. Thus, the <b>Radar</b>
+datatype is composed of an array of <b>Volumes</b>; one to the number of
+fields.
+<p>The <b>Volume</b> data structure, a single field type, is composed of
+several 360 degree revolutions of the RADAR. These revolutions are refered
+to as sweeps. The first sweep for a volume, commonly known as the base
+scan, is the sweep made by the RADAR pointing nearly horizontally and directing
+a RADAR beam toward the horizon. Then, the RADAR is tilted upwards slightly
+and another revolution is performed. This process continues 10 to 16 times,
+depending on the RADAR. These sweeps are referred to as <b>Sweep</b> in
+the RSL. Thus, a <b>Volume</b> is simply composed of an array of <b>Sweeps</b>;
+one to the number of elevation steps.
+<p>Similiarly, a <b>Sweep</b> is defined as a collection of rays throughout
+the 360 degree revolution. The RADAR takes measurements continually while
+it is sweeping. The number of rays collected is typically a function of
+the beamwidth. A beam width of .95 degrees will yield 379 rays for each
+sweep. For nexrad data the number of rays collected for each sweep is approximately
+366. These rays are referred to as <b>Ray</b> in the RSL. Thus, a <b>Sweep</b>
+is simply an array of <b>Rays</b>; one to the number of rays.
+<p>And, a <b>Ray</b> is one ray measurement from the RADAR. A ray is a
+series of measurements from the minimum to the maximum range of the RADAR.
+Think of it as a meaurement from zero to the maximum range while the RADAR
+is at one azimuthal angle. In reality, the radar is revolving continuously.
+The number of data values in a ray is represented in KM and it defines
+the resolution of the RADAR. NEXRAD is typcally 1.0KM and the new SIGMET
+RADAR is .25 KM. Thus, a <b>Ray</b> is simply an array of <b>Range</b>
+values; one to the number of bin. The number of bins is defined by the
+range of measured space divided by the resolution of a measurement less
+any to the minimum range.
+<p>Finally, a <b>Range</b> value is simply a floating point number that
+represents the data.
+<p>It should be obvious that the <b>Radar</b> data structure is an array
+of <b>Volumes</b> which is an array of <b>Sweeps</b> which is an array
+of <b>Rays</b> which is and array of <b>Ranges</b>. Whew! This hierarchial
+description is easy to understand, when you only think of each object as
+an array of the next subobject. Thinking of it as a 4 or 5 dimensional
+array is very difficult.
+</body>
+</html>

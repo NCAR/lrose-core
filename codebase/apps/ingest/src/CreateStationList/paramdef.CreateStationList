@@ -1,0 +1,95 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.CreateStationList
+ *
+ * This file contains the TDRP parameter definitions for
+ * CreateStationList.
+ */
+
+
+commentdef
+{
+  p_header = "CreateStationList";
+  p_text = "This program creates a list of station locations that can " 
+           "be used in Metar2Spdb.  It gets the station locations from "
+           "files used by the weather program.\n\n"
+	"By default the program reads from\n"
+	"/weather/include/stations.new - this file is no longer\n"
+	"maintained. Users would be well advised to visit :\n\n"
+	"http://www.rap.ucar.edu/weather/surface/stations.txt\n\n"
+	"and save that file locally and then work from that.\n";
+
+};
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input file";
+  p_help = "This file contains the station locations in the format used "
+           "by the weather program.";
+  p_default = "/weather/include/stations.new";
+} input_file;
+
+paramdef string
+{
+  p_descr = "Output file";
+  p_default = "./station_locations.dat";
+} output_file;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef struct
+{
+  double min_lat;
+  double max_lat;
+  double min_lon;
+  double max_lon;
+} grid_limits_t;
+
+paramdef struct grid_limits_t
+{
+  p_descr = "Grid limits for the stations of interest.";
+  p_help = "Only stations located within these limits will be included "
+           "in the output file.";
+  p_default = { 0.0, 90.0, -180.0, 180.0 };
+} grid_limits;
+

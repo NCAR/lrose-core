@@ -1,0 +1,288 @@
+/**********************************************************************
+ * TDRP params for MapCircles
+ **********************************************************************/
+
+//======================================================================
+//
+// MapCircles program.
+//
+// MapCircles creates a map file, with circles of a given radius around 
+//   a set of points. Map file data is written to stdout.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// map_file_header /////////////////////////
+//
+// String to go at the head of the map file as a comment.
+// Type: string
+//
+
+map_file_header = "Arcs around points.";
+
+//======================================================================
+//
+// ARC SPECIFICATION.
+//
+// Use this for placing arcs or circles around a point.
+//
+//======================================================================
+ 
+///////////// arcs ////////////////////////////////////
+//
+// Array of points around which arcs should be placed.
+// The arcs are computed around each point at the given radius in km. If 
+//   a complete circle is required, set start_az_deg to 0 and end_az_deg 
+//   to 360.0. If a partial circle is required, set the start and end 
+//   azimuths accordingly. If the parial arc crosses north, set the 
+//   start_az_deg to a negative value. The arc is represented by a 
+//   poly-line with the specified number of segments.
+//
+// Type: struct
+//   typedef struct {
+//      string label;
+//      double center_lat;
+//      double center_lon;
+//      double start_az_deg;
+//      double end_az_deg;
+//      double radius_km;
+//      int n_segments;
+//   }
+//
+// 1D array - variable length.
+//
+
+arcs = {
+  {
+    label = "RCDI",
+    center_lat = 24.8533,
+    center_lon = 121.237,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "RCFN",
+    center_lat = 22.7567,
+    center_lon = 121.093,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "RCGI",
+    center_lat = 22.6744,
+    center_lon = 121.458,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "RCKH",
+    center_lat = 22.5754,
+    center_lon = 120.351,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "RCKU",
+    center_lat = 23.4667,
+    center_lon = 120.383,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "RCKW",
+    center_lat = 22.04,
+    center_lon = 120.733,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "RCLY",
+    center_lat = 22.0294,
+    center_lon = 121.527,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "RCPO",
+    center_lat = 24.8167,
+    center_lon = 120.933,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "RCSS",
+    center_lat = 25.0696,
+    center_lon = 121.552,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "RCTP",
+    center_lat = 25.0802,
+    center_lon = 121.232,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "RCYU",
+    center_lat = 24.0233,
+    center_lon = 121.61,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "CHIN_HONG",
+    center_lat = 22.7988,
+    center_lon = 121.158,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "MATSU",
+    center_lat = 26.1933,
+    center_lon = 119.974,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "CHINMEN",
+    center_lat = 24.4178,
+    center_lon = 118.35,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "TAICHUNG",
+    center_lat = 24.1883,
+    center_lon = 120.647,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+  ,
+  {
+    label = "MAKUNG",
+    center_lat = 23.5739,
+    center_lon = 119.637,
+    start_az_deg = 0,
+    end_az_deg = 360,
+    radius_km = 8,
+    n_segments = 180
+  }
+};
+
+//======================================================================
+//
+// AZIMUTH LINE SPECIFICATION.
+//
+// Use this for placing azimuth radiating out from a point to a given 
+//   maximum range, as in a radar plot.
+//
+//======================================================================
+ 
+///////////// az_lines ////////////////////////////////
+//
+// Array of lines radiating out from a point, as in radar plot.
+// The lines are spaced evenly, starting at start_az_deg and then every 
+//   delta_az_deg above that. The line is drawn form the minimum radius to 
+//   the maximum radius.
+//
+// Type: struct
+//   typedef struct {
+//      string label;
+//      double center_lat;
+//      double center_lon;
+//      double start_az_deg;
+//      double delta_az_deg;
+//      int n_lines;
+//      double min_radius_km;
+//      double max_radius_km;
+//   }
+//
+// 1D array - variable length.
+//
+
+az_lines = {
+  {
+    label = "unknown",
+    center_lat = 0,
+    center_lon = 0,
+    start_az_deg = 0,
+    delta_az_deg = 45,
+    n_lines = 8,
+    min_radius_km = 0,
+    max_radius_km = 150
+  }
+};
+

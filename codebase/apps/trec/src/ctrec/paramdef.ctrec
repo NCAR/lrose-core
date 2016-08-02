@@ -1,0 +1,760 @@
+/********************************************************
+ * parameter definitions for Cartesian TREC  (CTREC)
+ *
+ * Rachel Ames, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 1996
+ *******************************************************/
+
+commentdef
+{
+  p_header = "ctrec tracks echo motion using a cross-correlation technique to match pattern movement from one image to the next in time. Input is radar reflectivity, or a similar field (such as satellite IR) in MDV format. Output is U/V fields in MDV format, as well as a copy of the original tracked field.";
+}
+
+commentdef
+{
+  p_header = "OPERATIONAL PARAMETERS";
+}
+
+paramdef boolean
+{
+  p_descr = "Option to print debugging messages/post-analysis output.";
+  p_default = TRUE;
+} debug;
+
+paramdef string
+{
+  p_descr = "Program instance for registration with the process mapper.";
+  p_default = "Test";
+} instance;
+ 
+paramdef enum mode_t
+{
+  p_descr = "Operational Mode.";
+  p_help = "Realtime mode waits for new data; "
+           "archive mode processes files in a given file list.";
+  p_options = { REALTIME,
+                ARCHIVE };
+  p_default = ARCHIVE;
+} mode;
+
+typedef enum
+{
+  TIME_BEGIN,
+  TIME_CENTROID,
+  TIME_END
+} time_value_t;
+
+paramdef enum time_value_t
+{
+  p_descr = "Master header time field to use for time calculations";
+  p_default = TIME_BEGIN;
+} time_value;
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+  p_text = "The ctrec algorithm performs the following steps:\n"
+           "\tread in the data\n"
+           "\treplace bad data values with thr_dbz\n"
+           "\tif (clutter_flg)\n"
+           "\t\tremove clutter (detrend if dtrnd_flg set)\n"
+           "\tif (floor_flg)\n"
+           "\t\treplace weak/missing data with noise\n"
+           "\ttrack echoes\n"
+           "\tif (thrvec_flg)\n"
+           "\t\tdiscard vectors based on local mean\n"
+           "\tdiscard vectors based on global mean\n"
+           "\tif (fillvec_flg)\n"
+           "\t\tfill in missing vectors using least-squares fit\n"
+           "\tfill in areas around each vector with closest vector value\n"
+           "\tperform temporal smoothing based on previous vectors\n"
+           "The parameters below are given in the order that things happen "
+           "in the program.";
+}
+
+commentdef
+{
+  p_header = "Image timing parameters";
+}
+
+paramdef long
+{
+  p_descr = "Maximum time (in seconds) allowed between images used to "
+            "generate vectors.";
+  p_help = "Two (consecutive) volume times are required to compute vectors.";
+  p_default = 3600;
+  p_min = 1;
+} max_time_between_images;
+
+paramdef long
+{
+  p_descr = "Minimum time (in seconds) allowed between images used to "
+            "generate vectors.";
+  p_help = "Two (consecutive) volume times are required to compute vectors.";
+  p_default = 240;
+  p_min = 1;
+} min_time_between_images;
+
+commentdef
+{
+  p_header = "Output grid parameters";
+}
+
+paramdef boolean
+{
+  p_descr = "Define output grid flag";
+  p_help = "If TRUE, the output_grid parameter will be used to define the "
+           "output grid.  "
+           "If FALSE, the input grid will be used for the output grid.";
+  p_default = false;
+} define_output_grid;
+
+typedef enum
+{
+  FLAT,
+  LATLON
+} grid_type_t;
+
+typedef struct
+{
+  grid_type_t grid_type;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  long nx;
+  long ny;
+  double origin_lat;
+  double origin_lon;
+} grid_def_t;
+
+paramdef struct grid_def_t
+{
+  p_descr = "Output grid definition";
+  p_help = "If define_output_grid is TRUE, this structure is used to define "
+           "the new output grid.  The grid_type field can be either FLAT or "
+           "LATLON.  If grid_type is LATLON, the origin_lat and "
+           "origin_lon fields are ignored.";
+  p_default = { FLAT,
+                -199.5, -199.5,
+                1.0, 1.0,
+                400, 400,
+                38.9753, -77.476997 };
+} output_grid;
+  
+commentdef
+{
+  p_header = "Input file parameters";
+}
+
+paramdef double
+{
+  p_descr = "Analyze altitude, in units used for vertical levels by the "
+            "input field.";
+  p_help = "This value must be given in units that match the units used "
+           "in the input files.  The plane in the data closest to this "
+           "altitude with be used in the analysis.";
+  p_default = 0.0;
+} analyze_alt;
+
+paramdef string
+{
+  p_descr = "Field name to analyze. The user can specify a field number\n"
+	    "rather than a name by using the pound sign, ie. setting the\n"
+            "name to #3 asks for field number three (fields start at 0).";
+  p_default = "DBZ";
+} field_name;
+
+paramdef string
+{
+  p_descr = "URL used for retrieving the input data.";
+  p_help = "For data on local disk, this can just be the directory containing "
+           "the input MDV data files.  For data retrieved from a server, it "
+           "is the URL for the server.  A server URL looks like the "
+           "following:\n"
+           "\tmdvp:://host:port:directory_path\n"
+           "This URL specifies a DsMdvServer process running on the specified "
+           "host and using the specified port.  The data would reside on the "
+           "specified host under $RAP_DATA_DIR/directory_path.";
+  p_default = "./input";
+} input_url;
+
+commentdef
+{
+  p_header = "Output file parameters";
+}
+
+paramdef string
+{
+  p_descr = "URL used for writing the output data.";
+  p_help = "For data on local disk, this can just be the directory containing "
+           "the output MDV data files.  For data written via a server, it "
+           "is the URL for the server.  A server URL looks like the "
+           "following:\n"
+           "\tmdvp:://host:port:directory_path\n"
+           "This URL specifies a DsMdvServer process running on the specified "
+           "host and using the specified port.  The data would reside on the "
+           "specified host under $RAP_DATA_DIR/directory_path.";
+  p_default = "./output";
+} output_url;
+
+commentdef
+{
+  p_header = "General algorithm parameters";
+}
+
+paramdef double
+{
+  p_descr = "Minimum data value to track";
+  p_help = "This value is given in the same units as the underlying data.\n"
+           "\n"
+           "Note that this value must be greater than or equal to thr_dbz.";
+  p_default = 0;
+} min_echo;
+
+paramdef double
+{
+  p_descr = "Maximum data value to track";
+  p_default = 1000;
+} max_echo;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to track the top_percentage percent "
+            "of the data.";
+  p_help = "If this flag is set, ctrec will track just the top given "
+           "percentage (defined in the top_percentage parameter below) "
+           "of the data values in each correlation box.  For example, "
+           "if top_percentage is set to 0.4, in each correlation box "
+           "ctrec will sort the \"good\" data values "
+           "(those values between min_echo and max_echo) "
+           "and find the value at the "
+           "40% mark from the top of the data.  Then, any data value "
+           "below this value will be replaced with noise before "
+           "calculating the correlation coefficient.\n"
+           "Note that if top_percentage_increasing is set to false, "
+           "the tracking is reversed and the lowest 40% (or whatever) "
+           "of the data in each box will be tracked.";
+  p_default = false;
+} track_top_percentage;
+
+paramdef double
+{
+  p_descr = "The percentage value to use if track_top_percentage is set "
+            "to true.";
+  p_help = "This is a value between 0.0 and 0.1 representing the "
+           "percentage of data values to track.\n\n"
+           "See the description for the track_top_percentage parameter "
+           "for detailed information on how this parameter is used.";
+  p_min = 0.0;
+  p_max = 1.0;
+  p_default = 0.4;
+} top_percentage;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the data values are increasing or "
+            "decreasing when looking for the top percentage of the data.";
+  p_help = "For example, this flag would be true for reflectivity data, "
+           "but false for satellite data.\n"
+           "This flag is ignored if track_top_percentage is set to false.";
+  p_default = true;
+} top_percentage_increasing;
+
+paramdef double
+{
+  p_descr = "User entered maximum expected echo speed (m/s) ";
+  p_help = "This should be set to a reasonable value for the data.  If it "
+           "is set very large not only will it slow down processing, it will "
+           "also reduce the area of the data where motion is calculated "
+           "because we skip the area around the data covered by this distance "
+           "to make sure we can look in all directions before calculating "
+           "the correlations.";
+  p_min = 0;
+  p_default = 25;
+} max_speed_echo;
+
+commentdef
+{
+  p_header = "Clutter removal parameters";
+  p_text = "Clutter removal is performed on the individual images before "
+           "the tracking algorithm is run.  The clutter is removed "
+           "independently on the two images.";
+}
+
+paramdef boolean
+{
+  p_descr = "Remove Clutter Flag";
+  p_help = "If true, clutter in the original images is removed using  the "
+           "reflectivity variance method.";
+  p_default = true;
+} clutter_flg;
+
+paramdef boolean
+{
+  p_descr = "Detrend Flag";
+  p_help = "If true, the reflectivity data will be detrended during the "
+           "variance calculation for clutter removal.  This flag is ignored "
+           "if clutter_flg is false.";
+  p_default = true;
+} dtrnd_flg;
+
+paramdef double
+{
+  p_descr = "Variance threshold for clutter removal ";
+  p_min = 0;
+  p_max = 100;
+  p_default = 25;
+} thr_sd;
+
+paramdef boolean
+{
+  p_descr = "Output data grid after clutter removal flag";
+  p_help = "If true and clutter_flg is also true, the data grid after "
+           "clutter removal has been performed will be added to the output "
+           "file.";
+  p_default = false;
+} output_after_clutter_removal;
+
+commentdef
+{
+  p_header = "Data filling parameters";
+}
+
+paramdef boolean
+{
+  p_descr = "Floor data flag";
+  p_help = "If true, weak/missing reflectivity data will be replaced with "
+           "random numbers.  This should always be set to true.";
+  p_default = true;
+} floor_flg;
+
+paramdef double
+{
+  p_descr = "Threshold dbz -- threshold for reflectivity filling/tracking";
+  p_help = "If floor_flg is true, reflectivity values less than min_echo "
+           "or greater than max_echo "
+           "will be filled with random values centered around this value.\n"
+           "\n"
+           "Note that this value must be less than or equal to min_echo.";
+  p_default = -28;
+} thr_dbz;
+
+paramdef double
+{
+  p_descr = "Delta dbz -- purtubation value for random numbers ";
+  p_help = "If floor_flg is true, reflectivity values less than min_echo "
+           "will be filled with random numbers between thr_dbz - del_dbz "
+           "and thr_dbz + del_dbz.";
+  p_default = 5;
+} del_dbz;
+
+paramdef boolean
+{
+  p_descr = "Output data grid after adding random noise flag";
+  p_help = "If true and floor_flg is also true, the data grid after "
+           "data filling with random noise has been performed will be "
+           "added to the output file.";
+  p_default = false;
+} output_after_random_noise;
+
+commentdef
+{
+  p_header = "Correlation calculation parameters";
+}
+
+paramdef double
+{
+  p_descr = "Correlation box fraction";
+  p_help = "Maximum fraction (%) of bad data allowed in a correlation box.";
+  p_min = 0;
+  p_max = 100;
+  p_default = 95;
+} cbox_fract;
+
+paramdef double
+{
+  p_descr = "Correlation box size";
+  p_help = "The length of one side of the correlation box, in km";
+  p_min = 3;
+  p_max = 1000;
+  p_default = 50;
+} cbox_size;
+
+paramdef double
+{
+  p_descr = "Correlation box spacing";
+  p_help = "Spacing between vectors in the final grid, in km.";
+  p_min = 2;
+  p_max = 1000;
+  p_default = 15;
+} cbox_space;
+
+paramdef double
+{
+  p_descr = "Correlation threshold";
+  p_help = "Echo motion vectors that have (correlation coefficient*100) less "
+           "than this value will be discarded.";
+  p_min = 0;
+  p_max = 100;
+  p_default = 25;
+} thr_cor;
+
+typedef enum
+{
+  UPPER_LEFT_CORNER,
+  UPPER_RIGHT_CORNER,
+  LOWER_LEFT_CORNER,
+  LOWER_RIGHT_CORNER
+} search_start_t;
+
+typedef enum
+{
+  ROW_FIRST_SEARCH,
+  COLUMN_FIRST_SEARCH
+} search_dir_t;
+
+typedef enum
+{
+  TAKE_FIRST_FOUND,
+  TAKE_LAST_FOUND,
+  TAKE_MIDDLE_FOUND
+} search_result_t;
+
+typedef struct
+{
+  search_start_t start;
+  search_dir_t direction;
+  search_result_t result;
+} cormax_search_params_t;
+
+paramdef struct cormax_search_params_t
+{
+  p_descr = "Parameters describing the method for searching for the "
+            "maximum correlation value.";
+  p_help = "This parameter only matters if there are several motions for a "
+           "box that share the same maximum correlation.";
+  p_default = { LOWER_LEFT_CORNER,
+                COLUMN_FIRST_SEARCH,
+                TAKE_FIRST_FOUND };
+} cormax_search_params;
+
+typedef struct
+{
+  double x;
+  double y;
+} corr_loc_t;
+
+paramdef struct corr_loc_t
+{
+  p_descr = "Locations for outputting calculated correlation values";
+  p_help = "X and Y values should be given in the correct units for the "
+           "underlying grid (deg for lat/lon grids; km for flat grids).";
+  p_default = {};
+} output_correlation_locations[];
+
+paramdef boolean
+{
+  p_descr = "Output correlation grid flag";
+  p_help = "If true, the correlation grid will be "
+           "added to the output file.";
+  p_default = false;
+} output_correlation_grid;
+
+paramdef boolean
+{
+  p_descr = "Output max correlation count grid flag";
+  p_help = "If true, a field will be added to the output file containing "
+           "a count of the number of positions where the maximum "
+           "correlation coefficient occurred in the search.  This was added "
+           "to see if the direction of the search for the maximum correlation "
+           "coefficient is affecting the final motion vectors.  For example, "
+           "if we are searching for maximum correlation beginning north of "
+           "the current position and use the first grid space to contain "
+           "the maximum correlation coefficient to determine the motion, "
+           "will be a motion bias to the north if the maximum correlation "
+           "value appears multiple times in the search area.";
+  p_default = false;
+} output_cormax_count_grid;
+
+paramdef boolean
+{
+  p_descr = "Output original vectors flag";
+  p_help = "If true, the original U and V vectors (before all of the "
+           "following thresholding and filling) will be added to the "
+           "output file.";
+  p_default = false;
+} output_original_vectors;
+
+commentdef
+{
+  p_header = "Thresholding based on local mean parameters";
+}
+
+paramdef boolean
+{
+  p_descr = "Threshold Echo Motion Vectors Flag";
+  p_help = "Flag indicating whether the motion vectors should be thresholded "
+           "based on a local mean.";
+  p_default = false;
+} thrvec_flg;
+
+paramdef double
+{
+  p_descr = "Maximum radius used to find the local mean, in km";
+  p_help = "Used only if thrvec_flg is true."
+           "There must be at least 5 valid vectors around the current one "
+           "within this radius in order for the local mean to be computed.  "
+           "If there are not enough valid vectors, the current vector is "
+           "discarded.  The current vector is NOT included in the local "
+           "mean calculation.\n"
+           "Note that this value must be greater than (1.5 * cbox_space) "
+           "for there to ever be enough vectors to calculate the "
+           "local mean.";
+  p_min = 0;
+  p_default = 10;
+} rad_mean;
+
+paramdef double
+{
+  p_descr = "Threshold used for discarding echo motion vectors ";
+  p_help = "If an echo motion vector differs from the local mean in either "
+           "the U or V direction by more than this value, "
+           "it will be discarded.\n"
+           "Used only if thrvec_flg is true.";
+  p_min = 0;
+  p_default = 5;
+} thr_vec;
+
+paramdef boolean
+{
+  p_descr = "Output local mean grid flag";
+  p_help = "If true and thrvec_flg is true, the grids containing the "
+           "calculated local mean values used for threshholding the vectors "
+           "are created and added to the output file.  Note that there are "
+           "separate grids for the U and V components of the vectors.";
+  p_default = false;
+} output_local_mean_grids;
+
+paramdef boolean
+{
+  p_descr = "Output vectors after local mean thresholding flag";
+  p_help = "If true and thrvec_flg is true, the U and V vectors after "
+           "thresholding based on the local mean will be added to the "
+           "output file.";
+  p_default = false;
+} output_local_mean_thresh_vectors;
+
+commentdef
+{
+  p_header = "Thresholding based on global mean parameters";
+}
+
+paramdef double
+{
+  p_descr = "Global mean threshold difference";
+  p_help = "Echo motion vectors that differ from the global mean "
+           "in either the U or V component by more than this value "
+           "will be discarded.\n"
+           "Global mean thresholding is always performed.";
+  p_min = 0;
+  p_default = 10;
+} thr_dif;
+
+paramdef boolean
+{
+  p_descr = "Output vectors after global mean thresholding flag";
+  p_help = "If true, the U and V vectors after "
+           "thresholding based on the global mean will be added to the "
+           "output file.";
+  p_default = false;
+} output_global_mean_thresh_vectors;
+
+commentdef
+{
+  p_header = "Vector filling parameters";
+  p_text = "If requested, at the end of the tracking processing missing "
+           "vectors are filled using a least-squares fit to surrounding "
+           "vectors.  The least-squares fit is done using the smallest "
+           "area around the vector that includes at least min_vec_pts "
+           "valid vectors and has vectors in at least nquad_vec quadrants.  "
+           "If these conditions are not met within rad_vec km around the "
+           "vector, the vector is left as missing.";
+}
+
+paramdef boolean
+{
+  p_descr = "Fill Echo Motion Vectors Flag";
+  p_help = "If true, motion vectors discarded above and missing motion "
+           "vectors will be filled in using the local mean if nquad_vec "
+           "and min_vec_pts are satisfied.";
+  p_default = false;
+} fillvec_flg;
+
+paramdef double
+{
+  p_descr = "Radius for finding filling echo motion vectors, in km";
+  p_help = "Used only if fillvec_flg is true.";
+  p_min = 0;
+  p_default = 10;
+} rad_vec;
+
+paramdef long
+{
+  p_descr = "Number of quadrants with data needed to fill echo motion "
+            "vectors.";
+  p_help = "Used only if fillvec_flg is true.";
+  p_min = 0;
+  p_max = 4;
+  p_default = 4;
+} nquad_vec;
+
+paramdef double
+{
+  p_descr = "Minimum number of points required for filling echo motion "
+            "vectors ";
+  p_help = "Used only if fillvec_flg is true.";
+  p_min = 0;
+  p_default = 10;
+} min_vec_pts;
+
+commentdef
+{
+  p_header = "Parameters for printing the global mean";
+}
+
+paramdef boolean
+{
+  p_descr = "Print global mean";
+  p_help = "If set to TRUE, the global mean will be printed to stdout.";
+  p_default = FALSE;
+} print_global_mean;
+
+commentdef
+{
+  p_header = "Temporal smoothing parameters";
+}
+
+typedef enum
+{
+  SMOOTH_NONE,
+  SMOOTH_WITH_PREVIOUS_VECTOR,
+  SMOOTH_WITH_VECTOR_DIFFERENCE
+} temporal_smoothing_type_t;
+
+paramdef enum temporal_smoothing_type_t
+{
+  p_descr = "Type of temporal smoothing to perform";
+  p_help = "\tSMOOTH_NONE means that no temporal smoothing is performed.\n"
+           "\tSMOOTH_WITH_PREVIOUS_VECTOR means that the change in the "
+           "values of the U and V vector components are limited to "
+           "temporal_u_percent and temporal_v_percent of the "
+           "previous U and V vector component values. "
+           "If there was no vector calculated for the current grid "
+           "position in the previous time period, the new vector is "
+           "unchanged. "
+           "For example, assume both "
+           "temporal_u_percent and temporal_v_percent are set to "
+           "0.1. "
+           "Then, at the end of processing ctrec will compare each "
+           "current vector with the final vector from the previous time "
+           "step. "
+           "If the U value for the new vector is calculated to be 5 m/s "
+           "and the U value of the final vector at the same grid point for "
+           "the prevous time period is 4 m/s, then the U value for the new "
+           "vector will be changed to 4.4 m/s (4 + (4 * 0.1)). "
+           "Since this method breaks down when the previous U or V "
+           "component is 0.0, the temporal_prev_u_min and "
+           "temporal_prev_v_min parameters are used to give minimum "
+           "values for the previous vector components, below which the "
+           "smoothing is skipped (i.e. the current vector values are "
+           "not changed if the previous vector values are below the "
+           "given values).\n"
+           "\tSMOOTH_WITH_VECTOR_DIFFERENCE means that the difference "
+           "between the current and previous vector components is reduced "
+           "by (1.0 - temporal_u_percent) or "
+           "(1.0 - temporal_v_percent). "
+           "So, in the above example, the calculated U difference is 1 m/s. "
+           "This difference is reduced to 0.1 percent of it's original "
+           "value so the smoothed U value becomes 4.1 m/s.";
+  p_default = SMOOTH_NONE;
+} temporal_smoothing_type;
+
+typedef enum
+{
+  PREV_GRID_SMOOTHED,
+  PREV_GRID_UNSMOOTHED,
+  PREV_GRID_AVERAGE
+} temporal_prev_grid_type_t;
+ 
+paramdef enum temporal_prev_grid_type_t
+{
+  p_descr = "Type of grid to use as the previous grid in temporal smoothing";
+  p_help = "\tPREV_GRID_SMOOTHED uses the temporally smoothed grid from the "
+           "previous time period.\n"
+           "\tPREV_GRID_UNSMOOTHED uses the originally calculated vectors "
+           "(before temporal smoothing) from the previous time period.\n"
+           "\tPREV_GRID_AVERAGE uses the average of the above two vectors "
+           "from the previous time period.";
+  p_default = PREV_GRID_SMOOTHED;
+} temporal_prev_grid_type;
+
+paramdef long
+{
+  p_descr = "Maximum time (in seconds) allowed between vectors when "
+            "performing temporal smoothing.";
+  p_help = "";
+  p_default = 3600;
+  p_min = 1;
+} max_time_between_vectors;
+
+paramdef long
+{
+  p_descr = "Minimum time (in seconds) allowed between vectors when "
+            "performing temporal smoothing.";
+  p_help = "";
+  p_default = 240;
+  p_min = 1;
+} min_time_between_vectors;
+
+paramdef double
+{
+  p_descr = "Temporal smoothing U change percentage";
+  p_help = "See the temporal_smoothing_type parameter description for "
+           "information about how this parameter is used.";
+  p_min = 0.0;
+  p_default = 1.0;
+} temporal_u_percent;
+
+paramdef double
+{
+  p_descr = "Temporal smoothing V change percentage";
+  p_help = "See the temporal_smoothing_type parameter description for "
+           "information about how this parameter is used.";
+  p_min = 0.0;
+  p_default = 1.0;
+} temporal_v_percent;
+
+paramdef double
+{
+  p_descr = "Temporal smoothing minimum previous U component value";
+  p_help = "See the temporal_smoothing_type parameter description for "
+           "information about how this parameter is used.";
+  p_default = 0.0;
+} temporal_prev_u_min;
+
+paramdef double
+{
+  p_descr = "Temporal smoothing minimum previous V component value";
+  p_help = "See the temporal_smoothing_type parameter description for "
+           "information about how this parameter is used.";
+  p_default = 0.0;
+} temporal_prev_v_min;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the calculated vectors before "
+            "temporal smoothing should be included in the output file.";
+  p_default = false;
+} output_vectors_before_temporal_smoothing;

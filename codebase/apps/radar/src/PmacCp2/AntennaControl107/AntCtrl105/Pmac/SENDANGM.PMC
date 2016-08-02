@@ -1,0 +1,52 @@
+;this thing sends az and el to the dual port memory
+;also sets aznow and elnow
+#include "spoldefm.h"
+close
+delete gather
+delete trace
+open plc 0
+clear
+;send 16 bit angles to the host
+;while (2>1)
+
+;m170 and, m270 are position sources
+if (sunflag=0)
+
+;m200=(65536/i127)*((m162/(i108*32))%i127)
+;m201=(65536/i227)*((m262/(i208*32))%i227)
+
+
+m200=((m170/(3072.0))%i127)
+m201=((m270/(3072.0))%i227)
+
+
+p300=p300+1
+aznow=m200*360.0/65536.0     ;convert to degrees for scan routines
+	;if (aznow<0)
+	; aznow=aznow+360
+	;endif
+elnow=m201*360.0/65536.0     ;convert to degrees
+endif
+
+
+; optional solar azimuth expansion
+;p51=sun az   p52=sunel
+if (sunflag=1)
+
+aznow=(.0006866250)*((m170/(3072))%i127)  ;deg actual
+elnow=(.0006866250)*((m270/(3072))%i127)  ;deg
+
+
+
+;m201=(.1250)*((m270/(3072))%i227)         ;Normal
+;m200=(((aznow-p51)*1.*10)*182.0444)                   ;X10 sent to VIRAQ
+m200=(((aznow-p51)*cos(elnow)*10)*182.0444)          ;X10 sent to VIRAQ
+m201=(((elnow-p52)*10)*182.0444)           ;X10
+
+;elnow=m201*.0054931     ;convert to degrees
+endif
+
+;endwhile
+close
+;enable plc0
+

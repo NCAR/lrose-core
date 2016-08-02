@@ -1,0 +1,2 @@
+nice find . '(' -name core -o -name 'core.*' ')' \
+         -user $USER -type f -print -exec \rm '{}' \;

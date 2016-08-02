@@ -1,0 +1,9 @@
+#!/bin/csh
+
+/bin/rm -rf testData
+
+./mdvxUnitTest
+
+##find ./testData -name \*.mdv -exec PrintMdv -path {} \;
+
+#

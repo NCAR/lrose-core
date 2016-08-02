@@ -1,0 +1,107 @@
+<HTML>
+<HEAD>
+<TITLE> FORMAT FOR RAP/AWPG/CIDD/RVIEW/RDI MAP FILES</TITLE> 
+
+<H2> FORMAT FOR RAP/AWPG/CIDD/RVIEW/RDI ASCII MAP FILES</H2> 
+
+<P>
+02/06/92 - Original by J Caron - HTML'ized and updated
+by F. Hage April 2001.
+
+
+<P>
+Maps are stored as 'flat' ascii files.  They can be named however you
+wish, although our convention is 'something_descriptive.map' CIDD can load
+its maps via a HTTP server, so it is often convieneint to store everyone's
+maps in <A HREF="http://www.rap.ucar.edu/maps"> a central place, </A>
+served by a Web (HTTP) Server, to avoid duplication and obsolescence.
+CIDD will first check the directory its parameter file is stored in
+before looking in the directory/(web site) listed in the param file.
+This makes a good place to put one-off or modified maps, while still
+making use of the common map site for all other maps.
+
+
+<P>
+These are the allowable types of lines within a ASCII RAP MAP file:
+<OL>
+<LI> Comment lines, which have the character "#" in column 1
+<LI> Keyword lines, begining with a keyword, followed by parameters,
+such as the number of data points which follow or offsets for text.
+<LI> Data Lines  - contain polyline or icon definition data
+</OL>
+
+<P>
+<H2>Keyword lines: <font size=2> -
+Note the MAP_NAME, TRANSFORM and PROJECTION lines are optional </font> </H2>
+
+<UL>
+<LI> <B>  MAP_NAME </B> name desc  (OPTIONAL) <BR>
+   This should be the first line of any map file. The name is restricted to
+64 characters, and must not have whitespace in it. The description is restricted
+to 64 chars.  A list of available map names (and desc) may be passed to client
+programs; typically it is displayed for the user to select from. CIDD Does not use this
+</LI>
+
+<LI> <B>  TRANSFORM </B> tranformation_matrix (OPTIONAL) <BR>
+Optional line used by digitizing program.   CIDD Does not use this
+</LI>
+   
+<LI> <B>  PROJECTION </B> type parameters (OPTIONAL) <BR>
+Optional line used by digitizing program. type = PJG_XXXX; see PJG.h for
+description of the projection parameters. -Note CIDD Does not use this
+</LI>
+   
+<LI> <B>  ICONDEF </B> icon_name npts <BR>
+		x y <BR>
+		x y <BR>
+		x y <BR>
+		... <BR>
+This defines an icon with name 'icon_name'. It consists of npts number
+of points, which immediately follow, one point per line.  The 'x y' are
+in units of pixels, and the line '32767 32767' indicates a pen up. The
+pen goes down at the next 'x y' point.  Note ICONDEF defines an icon,
+but does not draw it. Use one or more ICON lines to have the Icon drawn
+at the indicated lat, lon.
+</LI>
+
+<LI> <B>  ICON </B> icon_name lat lon text_x text_y text <BR>
+This Keyword indicates the icon 'icon_name' should be drawn, with the
+origin (0,0) at 'lat lon'.  If 'text_x text_y' is not equal to "32767
+32767", then also draw the text 'text', with the lower left corner of
+the text at 'text_x text_y' pixels relative to the origin.  An ICON line
+must refer to an icon_name that is already defined by a ICONDEF in the
+same map file.  An ICON stays the about same size as the user zooms.
+</LI>
+
+<LI> <B>  POLYLINE </B> name npts <BR>
+	    lat lon <BR>
+	    lat lon <BR>
+	    ... <BR>
+		-1000 -1000 <BR>
+	    lat lon <BR>
+	    lat lon <BR>
+	    ... <BR>
+This defines an object called 'name', which is simply a polyline of
+npts segments, specified in world (lat, lon) coordinates. Penup =
+-1000, -1000. The pen is place down at the next lat, lon point
+</LI>
+
+<LI> <B>  SIMPLELABEL </B> lat lon  text <BR>
+	lat lon = lower left corner of the Text Location
+	text =  text to display <BR>
+</LI>
+
+</UL>
+
+<H3> See Some Examples Here: </H3>
+<UL>
+<LI> <A HREF="http://www.rap.ucar.edu/maps/Atl_cities.map"> ICONs -  </A> Atlanta area Cities </LI>
+<LI> <A HREF="http://www.rap.ucar.edu/maps/taiwan_marks.map">Multiple ICONDEFs -  </A> Taiwan area </LI>
+<LI> <A HREF="http://www.rap.ucar.edu/maps/DIA_runways.map"> POLYLINE -  </A> DIA Runway </LI>
+<LI> <A HREF="http://www.rap.ucar.edu/maps/NY_roads.map"> Multiple POLYLINEs -  </A> NY area raods </LI>
+<LI> <A HREF="http://www.rap.ucar.edu/maps/Colo_towns.map">SIMPLELABELs -  </A> Towns In CO </LI>
+<LI> <A HREF="http://www.rap.ucar.edu/maps/"> Our Pile of MAPS -  </A> Look for 'standard' Icondefs here, etc </LI>
+</UL>
+
+</BODY>
+</HTML>

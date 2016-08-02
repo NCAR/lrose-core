@@ -1,0 +1,18 @@
+
+
+The motivation for this program is simple : CIDD
+currently recognises fields that have dz=0 and minz=0
+as being surface data. In this event CIDD will print
+"Field X at surface" rather than "Field X at elevation Y".
+
+MDV files exist whicha are surface data, but for some reason
+do not have dz=0.0 and minz=0.0. Hence this program.
+
+Usage is 
+
+MdvMakeSurface infile outfile
+
+Fields with more than one plane (nz != 1) are
+not modified.
+
+Niles Oien September 1999.

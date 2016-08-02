@@ -1,0 +1,18 @@
+#! /bin/csh
+
+
+echo "******* STARTING ***********" 
+date 
+echo "****************************" 
+
+# next launch labview to run self checks, using manually-selected zenith pointing or dummy loads
+
+echo Launching labview to run RunRvp8CalContinuous.vi
+cd ~/labview_work
+labview -launch RunRvp8CalContinuous.vi 
+
+echo "******* DONE ***************"
+echo "****************************"
+
+end
+

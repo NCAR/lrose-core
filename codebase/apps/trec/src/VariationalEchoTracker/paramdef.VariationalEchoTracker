@@ -1,0 +1,225 @@
+/**********************************************************
+ * paramdef.VariationalEchoTracker
+ *
+ * This file contains the TDRP parameter definitions for
+ * VariationalEchoTracker
+ */
+
+commentdef
+{
+  p_header = "VariationalEchoTracker";
+  p_text = "This program generates motion vectors using the variational "
+           "echo tracking technique described in Germann and Zawadzki's "
+           "paper \"Scale-Dependence of the Predictability of Precipitation "
+           "from Continental Radar Images. Part I: Description of the "
+           "Methodology.\"";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+typedef struct
+{
+  string url;
+  boolean use_field_name;
+  string field_name;
+  int field_num;
+} base_field_info_t;
+
+paramdef struct base_field_info_t
+{
+  p_descr = "Information describing how to read the base field";
+  p_help = "\turl - URL for the base field dataset.\n"
+           "\tuse_field_name - flag indicating whether to use field_name "
+           "or field_num to identify the base field.\n"
+           "\tfield_name - exact name of base field as it appears in the "
+           "input file. "
+           "Used only if use_field_name is TRUE.\n"
+           "\tfield_num - field number of the base field in the input file. "
+           "Field numbers start at 0. "
+           "Used only if use_field_name is FALSE.\n";
+  p_default = { "mdvp:://localhost::mdv/reflectivity",
+                true, "DBZ", 0 };
+} base_field_info;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/motion";
+} output_url;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to include the U and V gradient fields "
+            "in the output file.";
+  p_default = false;
+} output_gradients;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef long
+{
+  p_descr = "Maximum number of iterations for finding minimum";
+  p_default = 100;
+} max_iterations;
+
+typedef struct
+{
+  double u_weight;
+  double v_weight;
+} smoothness_constraint_weights_t;
+
+paramdef struct smoothness_constraint_weights_t
+{
+  p_descr = "Weights used for the smoothness constraint";
+  p_default = { 0.01, 0.01 };
+} smoothness_constraint_weights;
+
+paramdef double
+{
+  p_descr = "Reflectivity conservation term weighting";
+  p_default = 1.0;
+} conservation_constraint_weight;
+
+typedef enum
+{
+  CONSTANT_MOTION,
+  MDV_MOTION
+} motion_type_t;
+
+paramdef enum motion_type_t
+{
+  p_descr = "Type of motion to use as a first guess motion";
+  p_help = "\tCONSTANT_MOTION - Use a constant motion defined in the "
+           "parameter file. "
+           "In this case, the first guess motion is a constant grid with "
+           "the U and V values defined in the constant_motion parameter.\n"
+           "\tMDV_MOTION - Use the MDV U and V fields specified in the "
+           "mdv_motion_u and mdv_motion_v parameters as the first guess "
+           "motion.\n";
+  p_default = CONSTANT_MOTION;
+} motion_type;
+
+typedef struct
+{
+  double u;
+  double v;
+} motion_t;
+
+paramdef struct motion_t
+{
+  p_descr = "Specified constant first guess motion";
+  p_help = "This is where we start in determining the motion vectors. "
+           "It is suggested that we use the average TREC wind for this "
+           "value.";
+  p_default = { 1.0, 0.0 };
+} constant_motion;
+
+typedef struct
+{
+  string url;
+  boolean use_field_name;
+  string field_name;
+  int field_num;
+  int level_num;
+} mdv_field_t;
+
+paramdef struct mdv_field_t
+{
+  p_descr = "U field to use for the first guess motion. "
+            "Used only if motion_type is set to MDV_MOTION.";
+  p_help = "\turl - URL for the MDV file.\n"
+           "\tuse_field_name - Flag indicating whether to identify the "
+           "field based on name or number.\n"
+           "\tfield_name - Name of field in the MDV file. "
+           "Used only if use_field_name is true.\n"
+           "\tfield_num - 0-based index of field in the MDV file. "
+           "Used only if use_field_name is false.\n"
+           "\tlevel_num - 0-based index of level to use from the MDV file.\n";
+  p_default = { "mdvp:://localhost::mdv/motion",
+                true, "U", 0, 0 };
+} mdv_motion_u;

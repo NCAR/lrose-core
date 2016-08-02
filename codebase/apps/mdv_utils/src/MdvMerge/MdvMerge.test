@@ -1,0 +1,384 @@
+
+/**********************************************************************
+ * TDRP params for ./MdvMerge
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "NilesTest";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = REALTIME;
+
+///////////// trigger /////////////////////////////////
+//
+// Trigger mechanism.
+// TIME_TRIGGER: the program is triggered at constant time intervals - 
+//   see time_trigger_interval.
+// FILE_TRIGGER: the program watches the first input_dir and triggers 
+//   based on data in that directory.
+//
+// Type: enum
+// Options:
+//     TIME_TRIGGER
+//     FILE_TRIGGER
+//
+
+trigger = FILE_TRIGGER;
+
+///////////// time_trigger_interval ///////////////////
+//
+// Interval for TIME_TRIGGER - secs.
+// For TIME_TRIGGER, this is the interval between trigger events. In 
+//   REALTIME mode, a time trigger always occurs on the hour, and at 
+//   constant intervals thereafter. In ARCHIVE mode the trigger starts at 
+//   start_time and at constant intervals thereafter.
+// Minimum val: 0
+// Type: long
+//
+
+time_trigger_interval = 300;
+
+///////////// trigger_time_margin /////////////////////
+//
+// Max time diff for searching for files relative to the trigger time - 
+//   secs.
+// When matching files up with the trigger time, the difference between 
+//   the trigger time and file time must be less than this margin. This 
+//   value is also used as the max age of the latest data info file when 
+//   in REALTIME mode with FILE_TRIGGER.
+// Minimum val: 0
+// Type: long
+//
+
+trigger_time_margin = 720;
+
+///////////// input_urls //////////////////////////////
+//
+// Array of input URLs.
+// For data on local disk, this can just be the directory containing the 
+//   input MDV data files.  For data retrieved from a server, it is the 
+//   URL for the server.  A server URL looks like the following:
+// 	mdvp://host:port:directory_path
+// This URL specifies a DsMdvServer process running on the specified 
+//   host and using the specified port.  The data would reside on the 
+//   specified host under $RAP_DATA_DIR/directory_path.
+// Type: string
+// 1D array - variable length.
+//
+
+input_urls = { "mdvp:://$(RADAR1_HOST)::$(PROJECT)/mdv/radar$(RADAR1)/cart", 
+               "mdvp:://$(RADAR2_HOST)::$(PROJECT)/mdv/radar$(RADAR2)/cart" };
+
+///////////// urls_that_must_have_updated /////////////
+//
+// Array of input URL numbers as listed above in the
+// input_urls array. The first URL in input_urls is referenced
+// as number 0.
+// This is an array of integers, representing URLs in the
+// order listed above.
+// The user can list the URLs that must have updated before MdvMerge
+// triggers. By default, only the first URL needs to be updated
+// before MdvMerge triggers. If, for example, the user lists
+// five URLs that are to be merged, viz. :
+
+// input_urls = {ua, ub, uc, ud, ue};
+
+// And wants to trigger only when the three URLs ua, uc and ue
+// have updated, then the appropriate setting for this parameter
+// would be :
+
+// urls_that_must_have_updated = { 0, 2, 4};.
+// Type: int
+// 1D array - variable length.
+//
+
+urls_that_must_have_updated = { 0 };
+
+///////////// min_time_between_triggers ///////////////
+//
+// Minimum time between triggering in realtime file triggered
+// mode, seconds.
+// This allows the user to ensure that MdvMerge does not
+// trigger at intervals less than this amount in realtime
+// file triggered mode.
+// Type: int
+//
+
+min_time_between_triggers = 0;
+
+///////////// min_number_updated_urls /////////////////
+//
+// In realtime file triggered mode, MdvMerge will not
+// trigger until at least this number of input URLs have
+// updated. Specified in seconds.
+// The default is 0 which means that this parameter will
+// not affect the triggering.
+// Type: int
+//
+
+min_number_updated_urls = 0;
+
+///////////// max_valid_age ///////////////////////////
+//
+// Maximum file age in realtime file triggered mode, seconds.
+// Applies to all URLs specified.
+// Type: int
+//
+
+max_valid_age = 600;
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// For data on local disk, this can just be the directory containing the 
+//   input MDV data files.  For data retrieved from a server, it is the 
+//   URL for the server.  A server URL looks like the following:
+// 	mdvp://host:port:directory_path
+// This URL specifies a DsMdvServer process running on the specified 
+//   host and using the specified port.  The data would reside on the 
+//   specified host under $RAP_DATA_DIR/directory_path.
+// Type: string
+//
+
+output_url = "/home/oien/rap/apps/mdv_utils/src/MdvMerge/out";
+
+///////////// output_projection ///////////////////////
+//
+// Projection of output grid.
+// FLAT - (x,y) Cartesian data in km from a given origin.
+// LATLON - lat/lon grid with constant grid spacing.
+//
+// Type: enum
+// Options:
+//     OUTPUT_PROJ_FLAT
+//     OUTPUT_PROJ_LATLON
+//     OUTPUT_PROJ_LAMBERT
+//
+
+output_projection = OUTPUT_PROJ_FLAT;
+
+///////////// output_origin ///////////////////////////
+//
+// Origin of output grid.
+// Used with OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+output_origin = { 40.3931, -85.9415 };
+
+///////////// output_rotation /////////////////////////
+//
+// Rotation of output grid.
+// Used with OUTPUT_PROJ_FLAT.
+// Minimum val: 0
+// Maximum val: 360
+// Type: double
+//
+
+output_rotation = 0;
+
+///////////// output_std_parallels ////////////////////
+//
+// Standard parallels of the output grid.
+// Used with OUTPUT_PROJ_LAMBERT only.
+//
+// Type: struct
+//   typedef struct {
+//      double lat_1;
+//      double lat_2;
+//   }
+//
+//
+
+output_std_parallels = { 20, 45 };
+
+///////////// output_grid /////////////////////////////
+//
+// Output grid parameters.
+// The grid params for the output grid.
+//
+// Type: struct
+//   typedef struct {
+//      long nx;
+//      long ny;
+//      long nz;
+//      double minx;
+//      double miny;
+//      double minz;
+//      double dx;
+//      double dy;
+//      double dz;
+//   }
+//
+//
+
+output_grid = { 978, 772, 20, -489, -386, 0.5, 1, 1, 1 };
+
+///////////// set_field_nums //////////////////////////
+//
+// Option to set field numbers.
+// Type: boolean
+//
+
+set_field_nums = FALSE;
+
+///////////// field_nums //////////////////////////////
+//
+// List of field number arrays to be processed from input URLs.
+// Each URL has an array of field numbers. If all URL's field numbersare 
+//   the same one field number array can be used.
+// Type: int
+// 2D array - variable size
+//
+
+field_nums = {
+  { 0 }
+};
+
+///////////// field_names /////////////////////////////
+//
+// Field name list.
+// Each URL has an array of field names. If all URL's field namessare 
+//   the same one field name array can be used.
+// Type: string
+// 2D array - variable size
+//
+
+field_names = {
+  { "DBZ" }
+};
+
+///////////// use_scaling_info ////////////////////////
+//
+// Flag indicating whether the scaling_info parameter will be used.
+// If TRUE, the scale and bias values in the scaling_info parameter will 
+//   be used to scale the output fields.  If FALSE, the scale and bias 
+//   values will be dynamically calculated for each output volume.
+// Type: boolean
+//
+
+use_scaling_info = FALSE;
+
+///////////// scaling_info ////////////////////////////
+//
+// Scaling information to be used for the output fields.
+// This parameter gives a scale and bias to be used for each of the 
+//   output fields.  This parameter is only used if use_scaling_info is 
+//   set to TRUE.  If used, there must be the same number of entries in 
+//   this array as there are in the field_list array and the values will 
+//   be used in the same order as in that array.
+//
+// Type: struct
+//   typedef struct {
+//      double scale;
+//      double bias;
+//   }
+//
+// 1D array - variable length.
+//
+
+scaling_info = {
+  { 0, 0}
+};
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "MdvMergeCart";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_source = "Merged data created by MdvMerge.";
+
+///////////// merge_type //////////////////////////////
+//
+// encoding type used to perform the data merging.
+// INT8 - select 8-bit integer merge.
+// FLOAT32 - select 32-bit floating point merge.
+//
+// Type: enum
+// Options:
+//     MERGE_INT8
+//     MERGE_FLOAT32
+//
+
+merge_type = MERGE_INT8;
+
+///////////// merge_operator //////////////////////////
+//
+// operator to use in merge overlap areas.
+// MAX - select maximum value at grid point.
+// MIN - select minimum value at grid point.
+//
+// Type: enum
+// Options:
+//     MERGE_MIN
+//     MERGE_MAX
+//
+
+merge_operator = MERGE_MAX;
+
+///////////// fill_value //////////////////////////////
+//
+// value to use as initializer for output field.
+// MISSING_VALUE - use the missing data value for each grid point.
+// BAD_VALUE - use the bad data value for grid point.
+//
+// Type: enum
+// Options:
+//     FILL_MISSING_VALUE
+//     FILL_BAD_VALUE
+//
+
+fill_value = FILL_BAD_VALUE;
+

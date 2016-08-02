@@ -1,0 +1,317 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvFutz
+ *
+ * This file contains the TDRP parameter definitions for
+ * calc_convergence.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+/***********************************************************************
+ * Process control parameters.
+ */
+
+commentdef
+{
+  p_header = "PROCESS CONTROL PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+typedef enum
+{
+  ARCHIVE,
+  REALTIME
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Process running mode.";
+  p_help = "Can be either ARCHIVE or REALTIME.";
+  p_default = ARCHIVE;
+} mode;
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef struct input_info_t
+{
+  p_descr = "information on input field(s)";
+  p_help = "The field number is 0-based. Max number of inputs is 2. The level_num is a vertical level not plane number. Plane numbers are 0-based. Field name only used if its length is greater than 0.";
+  p_field_name = { input_url,
+                   field_num,
+                   level_num,
+                   field_name };
+  p_field_type = { string,         /* input_url */
+                   long,           /* field_num */
+                   float,	   /* level_num */
+		   string };       /* field_name */
+  p_default = input_info = { 
+              { input_url = "mdvp:://localhost:43000:mdv/input",
+                field_num = 0,
+                level_num = 0,
+                field_name = "" }
+              };
+} input_info[];
+
+paramdef boolean
+{
+  p_descr = "Write output to forecast directory structure";
+  p_help = "Set to FALSE to write to the flat directory structure";
+  p_default = FALSE;
+} writeAsForecast;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "URL to use for storing results.";
+  p_default = "mdvp:://localhost:43000:mdv/output";
+} output_url;
+
+paramdef boolean
+{
+  p_descr = "Uses second field master header if true";
+  p_help = "Uses first field master header if false";
+  p_default = false;
+} use_second_field_header;
+
+paramdef boolean
+{
+  p_descr = "look forward in time";
+  p_help = "Will change look_back_time to look_forward this number of seconds. Set to true to look_forward";
+  p_default = false;
+} look_forward;
+
+paramdef long
+{
+  p_descr = "Number of seconds to look back in time for the second input file (unless look_forward is set to true)";
+  p_help = "Set to 0 to get file at same time as first input file. Using  READ_FIRST_BEFORE, so a value of 1 should force getting previous time as long as it is within time_offset_max.";
+  p_min = { 0 };
+  p_default = { 0 };
+} look_back_time;
+
+paramdef long
+{
+  p_descr = "max data offset time in seconds";
+  p_help = "In REALTIME mode, the maximum amount of time between the time the first data was GENERATED and the valid time of the second grid.  In ARCHIVE mode, maximum amount of time allowed between the second data time and the first data time for the files to be combined to form an output grid.";
+  p_min = { 0 };
+  p_default = { 0 };
+} time_offset_max;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Maximum valid age in seconds for realtime input data.";
+  p_help = "This option is only in effect for REALTIME mode. Data must be younger than max_valid_age to be used.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Amount of time to sleep between trigger checks.";
+  p_help = "This option is only in effect for REALTIME mode. Delay time in milliseconds.";
+} sleep_time;
+
+
+paramdef string
+{
+  p_descr = "Trigger URL";
+  p_help = "URL to watch to begin processing in REALTIME mode.";
+  p_default = "mdvp:://localhost:43000:mdv/input";
+} trigger_url;
+
+paramdef boolean
+{
+  p_descr = "Trigger processing from URL";
+  p_help = "Set to TRUE to use trigger_url to process files";
+  p_default = FALSE;
+} use_trigger_url;
+
+paramdef double
+{
+  p_descr = "Grid delta tolerance";
+  p_help = "Threshold when comparing grid dimensions.";
+  p_default = { 0.000001 };
+} grid_delta_tol;
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  ADD,
+  ADDNOMISSING,
+  SUBTRACT,
+  MULTIPLY,
+  DIVIDE,
+  DIVIDE2,
+  MODEL_PRECIP,
+  THRESHOLD_GREATER,
+  THRESHOLD_LESS,
+  VECTOR_MAG,
+  VECTOR_DIR,
+  DELTA_WDIR,
+  MAX,
+  MIN,
+  AVG,
+  GRADIENT,
+  GRAD_WDIR,
+  LINE_DET_WE,
+  LINE_DET_SN,
+  SCALE_DATA,
+  DIGITAL_VIL,
+  SQUARE_ROOT
+} processing_type_t;
+
+paramdef enum processing_type_t
+{
+  p_descr = "Process type to apply to data.";
+  p_help = "ADD:               Two fields, first_field + sec_field.\n"
+           "                   One field, first_field + apply_constant.\n"
+           "ADDNOMISSING:      Two fields, first_field + sec_field.\n"
+           "                   Returns missing if either field is missing.\n"
+           "SUBTRACT:          Two fields, first_field - sec_field.\n"
+           "                   One field, first_field - apply_constant.\n"
+           "MULTIPLY:          Two fields, first_field * sec_field.\n"
+           "                   One field, first_field * apply_constant.\n"
+           "DIVIDE:            Two fields, first_field / sec_field.\n"
+           "                   One field, first_field / apply_constant.\n"
+           "DIVIDE2            Two fields, sec_field / first_field.\n"
+           "                   One field, apply_constant / first_field.\n"
+           "MODEL_PRECIP:      Calculates model precipitation in inches\n"
+           "                   from precip rate field. Use apply_constant\n"
+           "                   to define number of seconds of accumulation\n"
+           "THRESHOLD_GREATER: Two fields, if sec_field > apply_constant\n"
+           "                   return MISSING_DATA_VALUE\n"
+           "                   else return first_field.\n"
+           "                   One field, if first_field > apply_constnt\n"
+           "                   return MISSING_DATA_VALUE\n"
+           "                   else return first_field.\n"
+           "THRESHOLD_LESS:    Two fields, if sec_field < apply_constant\n"
+           "                   return MISSING_DATA_VALUE\n"
+           "                   else return first_field.\n"
+           "                   One field, if first_field < apply_constant\n"
+           "                   return MISSING_DATA_VALUE\n"
+           "                   else return first_field.\n"
+           "VECTOR_MAG:        Compute a vector magnitude(two fields needed).\n"
+           "VECTOR_DIR:        Compute vector direction(two fields needed).\n"
+           "                   note: Field 1 needs to be U and Field 2 V.\n"
+           "                   90 deg means easterly wind.\n"
+           "DELTA_WDIR:        Compute change in wind direction(two fields\n"
+           "                   needed).\n"
+           "MAX:               Outputs the max value of two input fields.\n"
+           "MIN:               Outputs the min value of two input fields.\n"
+           "AVG:               Outputs the average value of two input fields.\n"
+           "GRADIENT:          Finds max difference of the points North and South\n"
+           "                   of a given gird point and the points East and West\n"
+           "                   of the grid point (only one field used). Uses\n"
+           "                   apply_constant to determine how many grid points\n"
+           "                   out to go.\n"
+           "GRAD_WDIR:         Special GRADIENT case which corrects for\n"
+           "                   differences that are greater than 180 deg.\n"
+           "LINE_DET_WE        Use to map max value in the west to east direction\n"
+           "LINE_DET_SN        Use to map max value in the south to north direction\n"
+           "SCALE_DATA         Give data a value between 0 - 255\n"
+           "DIGITAL_VIL        Scales vil between 0 - 255 ( based on MIT-LL equation)\n"
+           "SQUARE_ROOT        One input field, returns the square root of the field\n";
+  p_default = ADD;
+} processing_type;
+
+paramdef float
+{
+  p_descr = "Constant to apply to data";
+  p_help = "Needs to be an integer when using GRADIENT";
+  p_default = 1.0;
+} apply_constant;
+
+
+paramdef boolean
+{
+  p_descr = "Option to fill missing data values with fill_value (see below)";
+  p_help = "If the result of the calculation at a grid point results in a missing_data_value, substitute the fill_value instead.";
+  p_default = false;
+} fill_missing;
+
+paramdef float
+{
+  p_descr = "Value giving to grid point if missing_data_value and fill_missing is set to true";
+  p_help = "All calculations resulting in a missing_data_value will receive this value";
+  p_default = 1.0;
+} fill_value;
+
+paramdef string
+{
+  p_descr = "Long name for output field.";
+  p_help = "";
+  p_default = "Affirm";
+} long_field_name;
+
+paramdef string
+{
+  p_descr = "Short name for output field.";
+  p_help = "";
+  p_default = "afrm";
+} short_field_name;
+
+paramdef string
+{
+  p_descr = "Units for header file.";
+  p_help = "";
+  p_default = "";
+} units;
+

@@ -1,0 +1,15 @@
+/Makefile/1.5/Fri Mar  4 03:10:20 2016//
+/ac_ingest.c/1.3/Fri Mar  4 01:28:15 2016//
+/ac_ingest.h/1.2/Fri Mar  4 01:28:15 2016//
+/ac_ingest.test/1.2/Sun Apr 30 19:26:43 2000//
+/ac_ingest_tdrp.c/1.5/Fri Mar  4 01:28:15 2016//
+/ac_ingest_tdrp.h/1.5/Fri Mar  4 01:28:15 2016//
+/data.test/1.1/Tue Mar 28 22:13:16 2000//
+/paramdef.ac_ingest/1.2/Sun Apr 30 19:26:44 2000//
+/parse_args.c/1.2/Fri Mar  4 01:28:15 2016//
+/print_spdb.ac_posn/1.1/Tue Mar 28 22:13:16 2000//
+/process_stream.c/1.2/Fri Mar  4 01:28:15 2016//
+/test_data.c/1.2/Fri Mar  4 01:28:15 2016//
+/tidy_and_exit.c/1.2/Fri Mar  4 01:28:15 2016//
+/tty.c/1.2/Fri Mar  4 01:28:15 2016//
+D

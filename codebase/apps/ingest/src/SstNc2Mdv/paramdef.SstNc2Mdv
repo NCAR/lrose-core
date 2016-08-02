@@ -1,0 +1,396 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*
+-------------------------------------------------------------------------------
+parameter definitions for SstNc2Mdv
+
+Steve Carson, RAP, NCAR, Boulder, CO, USA, 80307-3000
+March 2006
+-------------------------------------------------------------------------------
+*/
+
+commentdef
+   {
+   p_header = "DEBUGGING AND PROCESS CONTROL";
+   }
+
+//--- debug_level
+
+paramdef int
+   {
+   p_default = 0;
+   p_descr   = "Debug level, [0,N]";
+   p_help    = "Controls all output to the MsgLog file\n"
+               "If 0, no MsgLog debug output will be generated\n"
+               "Values > 0, generate increasingly verbose output\n";
+   }
+   debug_level;
+
+//--- instance
+
+paramdef string
+   {
+   p_default = "primary";
+   p_descr   = "Process instance.";
+   p_help    = "Used for procmap registration and auto restarting";
+   }
+   instance;
+
+//--- run_mode_t
+
+typedef enum
+   {
+   REALTIME,
+   ARCHIVE_FILE_LIST,
+   ARCHIVE_START_END_TIMES,
+   FILE_LIST,
+   TIME_LIST
+   }
+   run_mode_t;
+
+//--- run_mode
+
+paramdef enum run_mode_t
+   {
+   p_default = {REALTIME};
+   p_descr   = "Operating mode";
+   p_help    = "REALTIME:\n"
+               "   'radar_input_dir' is watched for new incoming files.\n"
+               "ARCHIVE_FILE_LIST:\n"
+               "   A list of input files is explicitly specified using\n"
+               "   the '-file_list' command line option\n"
+               "ARCHIVE_START_END_TIMES:\n"
+               "   'input_dir' is searched for all files whose\n"
+               "   time and date fall between the start and end times\n"
+               "   as specified with the '-start_time' and '-end_time'\n"
+               "   command line parameters\n"
+	       "FILE_LIST:\n"
+	       "   Same as ARCHIVE_FILE_LIST.  Added for consistency with\n"
+	       "   other programs.\n"
+	       "TIME_LIST:\n"
+	       "   Same as ARCHIVE_START_END_TIMES.  Added for consistency\n"
+	       " with other programs.\n";
+   }
+   run_mode;
+
+//--- use_ldata_info_file
+
+paramdef boolean
+   {
+   p_default = true;
+   p_descr   = "Option to use _latest_data_info file as input trigger.";
+   p_help    = "Used in REALTIME mode only. If true, waits on\n"
+               "_latest_data_info file. If false, scans 'input_dir'\n"
+               " tree for new file.";
+   }
+   use_ldata_info_file;
+
+//----------------------------------------------------------------------------
+
+commentdef
+   {
+   p_header = "ALGORITHM CONTROL";
+   }
+
+//--- out_sst_missing_value
+
+paramdef float
+   {
+   p_default = 999.9;
+   p_descr   = "SST missing value in output file (degrees C)\n";
+   p_help    = "SST missing value in output file (degrees C)\n";
+   }
+   out_sst_missing_value;
+
+//--- out_sst_bad_data_value
+
+paramdef float
+   {
+   p_default = 999.9;
+   p_descr   = "SST bad data value in output file (degrees C)\n";
+   p_help    = "SST bad data value in output file (degrees C)\n";
+   }
+   out_sst_bad_data_value;
+
+
+//--- max_out_sst_age_sec
+
+paramdef int
+   {
+   p_default = 345600; // 4 days
+   p_min     = 1;
+   p_descr   = "Max valid age of output SST data (seconds)\n";
+   }
+   max_out_sst_age_sec;
+
+//--- max_inp_sst_age_sec
+
+paramdef int
+   {
+   p_default = 86400; // 24 hrs
+   p_min     = 1;
+   p_descr   = "Max valid age of input SST Netcdf files in (secs)\n"
+               "in REALTIME mode ONLY.\n";
+   p_help    = "This the max valid age for an input (new) SST Netcdf file.\n"
+               "This is only used in REALTIME mode; in any ARCHIVE mode,\n"
+               "any input SST Netcdf may be used, regardless of age.";
+   }
+   max_inp_sst_age_sec;
+
+//----------------------------------------------------------------------------
+
+commentdef
+   {
+   p_header = "INPUT AND OUTPUT SPECIFICATIONS";
+   }
+
+//--- fname_type_t
+
+typedef enum 
+   {
+   FNAME_RAL,
+   FNAME_NASA,
+   FNAME_NOAA
+   }
+   fname_type_t;
+
+//--- input_filename_type
+
+paramdef enum fname_type_t
+   {
+   p_default = FNAME_RAL;
+   p_descr   = "Filename type of SST input file\n";
+   p_help    = "Used to select correct method of parsing date and time "
+               "from input file name and for how to read the input file. "
+               "Possible values are:\n"
+               "\tFNAME_RAL (data assumed to be in NASA format) - example:\n"
+               "\t\tConvNowcast/raw/SST/20060711/154900.nc\n"
+               "\tFNAME_NASA - example:\n"
+               "\t\t20060711.1549.lev2b_ocean.amsre.a1.sst.ncdf\n"
+               "\tFNAME_NOAA - example:\n"
+               "\t\t2006-08-11_00:00:00_2006-08-12_23:59:59-SST50-anal_temp--80.0_85.0_0.0_360.0-.5.NETCDF\n";
+   } input_filename_type;
+
+
+//--- input_dir
+
+paramdef string
+   {
+   p_default = "./";
+   p_descr   = "Directory to search for input SST files";
+   p_help    = "Ignored when 'run_mode' is ARCHIVE_FILE_LIST;\n"
+               "When 'run_mode' is REALTIME or ARCHIVE_START_END_TIMES\n"
+               "SstNc2Mdv will look for files named using the RAL naming\n"
+               "convention - YYYYMMDD/HHIISS.ext\n"
+               "Example: 20060711/154900.nc\n";
+   }
+   input_dir;
+
+//--- output_url
+
+paramdef string
+   {
+   p_default = "mdvp:://localhost::mdv/sst";
+   p_help    = "URL where output files will be written.";
+   }
+   output_url;
+
+//----------------------------------------------------------------------------
+
+commentdef
+   {
+   p_header = "INPUT AND OUTPUT FIELD NAMES";
+   }
+
+//--- nc_input_var_names
+
+typedef struct
+{
+  string nc_var_name;
+  string missing_data_attr_name;
+  string units_attr_name;
+  string mdv_field_name;
+  double mdv_missing_data_value;
+  boolean specify_mdv_scaling;
+  double mdv_scale;
+  double mdv_bias;
+} input_vars_t;
+
+paramdef struct input_vars_t
+{
+  p_descr = "List of input variables to include in the output file.";
+  p_help = "\tnc_var_name - The name of the variable as it appears in "
+           "the netCDF file.\n"
+           "\tmissing_data_attr_name - The name of the missing data value "
+           "attribute for this variable in the netCDF file. "
+           "Leave blank if there isn't a missing data value for this "
+           "variable.\n"
+           "\tunits_attr_name - The name of the units attribute for this "
+           "variable in the netCDF file. "
+           "Leave blank if there isn't a units attribute for this "
+           "variable.\n"
+           "\tmdv_field_name - The name to use for this field in the "
+           "output MDV file.\n"
+           "\tmdv_missing_data_value - The value to use as the missing "
+           "data value for this field in the output MDV file. "
+           "This must be set because netCDF variables often use a large "
+           "negative number for the missing data value which causes problems "
+           "when used in the MDV file.\n"
+           "\tspecify_mdv_scaling - Flag indicating whether we want to "
+           "explicitly specify the scale and bias to be used for this "
+           "field in the MDV file. "
+           "If set to false, dynamic scaling will be used.\n"
+           "\tmdv_scale - The scale value to use for this field in the "
+           "MDV file. "
+           "Used only if specify_mdv_scaling is set to true.\n"
+           "\tmdv_bias - The bias value to use for this field in the "
+           "MDV file. "
+           "Used only if specify_mdv_scaling is set to true.\n"
+           "Note that all fields in the NASA netCDF files (which are all "
+           "we've used or tested) are assumed to be stored in the netCDF "
+           "file as floats. "
+           "If your field is stored in a different format, new code will "
+           "need to be written.";
+  p_default = { { "low_res_sst", "missing_value", "units",
+                  "sst", 999.9, false, 1.0, 0.0 } };
+} input_vars[];
+
+paramdef string
+   {
+   p_default = "latitude";
+   p_descr   = "Name of latitude field in input Netcdf file\n";
+   p_help    = "This field contains the UNIX time of OW SST data\n";
+   }
+   fld_name_inp_lat;
+
+paramdef string
+   {
+   p_default = "longitude";
+   p_descr   = "Name of longitude field in input Netcdf file\n";
+   p_help    = "This field contains the UNIX time of OW SST data\n";
+   }
+   fld_name_inp_lon;
+
+paramdef string
+   {
+   p_default = "line";
+   p_descr   = "Name of dimension specifying number of rows in SST field\n";
+   p_help    = "This field contains name of the Netcdf dimension that\n"
+               "specifys the number of rows (1st index) in the SST field\n";
+   }
+   dim_name_inp_rows;
+
+paramdef string
+   {
+   p_default = "sample";
+   p_descr   = "Name of dimension specifying number of cols in SST field\n";
+   p_help    = "This field contains name of the Netcdf dimension that\n"
+               "specifys the number of cols (2nd index) in the SST field\n";
+   }
+   dim_name_inp_cols;
+
+paramdef string
+   {
+   p_default = "missing_value";
+   p_descr   = "Name of attribute specifying missing value for lat field\n";
+   p_help    = "This parameter contains the name of the attribute of the\n"
+               "Netcdf variable 'input_fieldname_lat' which specifies\n"
+               "the missing value for that variable\n";
+   }
+   att_name_inp_lat_miss;
+
+paramdef string
+   {
+   p_default = "missing_value";
+   p_descr   = "Name of attribute specifying missing value for lon field\n";
+   p_help    = "This parameter contains the name of the attribute of the\n"
+               "Netcdf variable 'input_fieldname_lon' which specifies\n"
+               "the missing value for that variable\n";
+   }
+   att_name_inp_lon_miss;
+
+//----------------------------------------------------------------------------
+
+commentdef
+   {
+   p_header = "REMAPPING PROJECTIONS - MDV GRID CONTROL";
+   }
+
+typedef enum
+   {
+   PROJ_LATLON       = 0,
+   PROJ_LAMBERT_CONF = 3,
+   PROJ_FLAT         = 8
+   } projection_t;
+
+paramdef enum projection_t
+   {
+   p_default = PROJ_FLAT;
+   p_descr   = "Projection type for remapping in x,y.";
+   } remap_proj_type;
+
+//--- SST output grid - all projections
+//--- Note: some fields are unused in certain projections
+
+typedef struct
+   {
+   int     nx;
+   int     ny;
+   int     nz;
+   double  minx;
+   double  miny;
+   double  minz;
+   double  dx;
+   double  dy;
+   double  dz;
+   double  origin_lat;
+   double  origin_lon;
+   double  lat1;
+   double  lat2;
+   double  rotation;
+   } sst_output_grid_t;
+
+paramdef struct sst_output_grid_t
+   {
+   p_default =
+      {
+      1801,   // nx
+      851,    // ny
+      1,      // nz
+      -180.0, // minx
+      -85.0,  // miny
+      0.0,    // minz
+      0.2,    // dx
+      0.2,    // dy
+      0.0,    // dz
+      0.0,    // origin_lat
+      0.0,    // origin_lon
+      0.0,    // lat1
+      1.0,    // lat2
+      0.0     // rotation
+      };
+   p_descr = "Grid parameters for remapping to MDV grid";
+   p_help  = "These params apply to any and all projection types\n";
+             "Some parameters may be unused for some projection types/n";
+   } sst_output_grid;

@@ -1,0 +1,1 @@
+TsMerge -debug -params TsMerge.test -clut_files ~/data/time_series/tsarchive/kftg/case_no_wx/long_prt/* -wx_files ~/data/time_series/tsarchive/kftg/case_20061026_120000/long_1.5/20061026_120*

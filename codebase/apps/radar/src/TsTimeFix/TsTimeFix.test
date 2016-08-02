@@ -1,0 +1,168 @@
+/**********************************************************************
+ * TDRP params for TsTimeFix
+ **********************************************************************/
+
+//======================================================================
+//
+// TsTimeFix reads raw time-series data, adjusts the time of selected 
+//   components, and writes the results out to a specified directory.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// INPUT MODE.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Operating mode.
+// In FMQ mode, it reads data from a file message queue. In FILES mode, 
+//   it processes the list of file names specified on the command line.
+//
+// Type: enum
+// Options:
+//     INPUT_MODE_FMQ
+//     INPUT_MODE_FILES
+//
+
+input_mode = INPUT_MODE_FMQ;
+
+///////////// input_fmq_path //////////////////////////
+//
+// Fully-qualified path for input FMQ.
+// INPUT_MODE_FMQ only.
+// Type: string
+//
+
+input_fmq_path = "/tmp/fmq/ts/shmem_10100";
+
+///////////// position_fmq_at_start ///////////////////
+//
+// Set input FMQ to the start of the queue.
+// Normally we read from the current end of the queue.
+// Type: boolean
+//
+
+position_fmq_at_start = FALSE;
+
+//======================================================================
+//
+// FIXING THE TIME.
+//
+//======================================================================
+ 
+///////////// time_offset_secs ////////////////////////
+//
+// Numnber of seconds to add to times in data (secs).
+// This correction will be applied to all packets, except as specified 
+//   in these params.
+// Type: double
+//
+
+time_offset_secs = 6;
+
+///////////// preserve_georef_time ////////////////////
+//
+// Option to preserve the georeference time.
+// If true, the time on georeference packets will be preserved, and the 
+//   location of the georeference packets will be changed to place them in 
+//   the corrected time series in the correct order.
+// Type: boolean
+//
+
+preserve_georef_time = TRUE;
+
+///////////// georef_time_margin_secs /////////////////
+//
+// Time margin for matching georef packets to pulses (secs).
+// If the time difference is greater than this, no match is made.
+// Type: double
+//
+
+georef_time_margin_secs = 1;
+
+///////////// apply_georef_to_compute_angles //////////
+//
+// Apply the georeference data to compute az and el angles.
+// We use roll, pitch, heading and drift to compute az/el in world 
+//   coords.
+// Type: boolean
+//
+
+apply_georef_to_compute_angles = FALSE;
+
+//======================================================================
+//
+// OUTPUT LOCATION.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Path to output directory.
+// Files will be written under this directory in a sub-directory 
+//   computed from the date/time.
+// Type: string
+//
+
+output_dir = "/tmp/time_series";
+
+///////////// use_fixed_angle_for_file_name ///////////
+//
+// Option to use the fixed angle (el or az) to compute the file name.
+// If false, the actual measured angle will be used.
+// Type: boolean
+//
+
+use_fixed_angle_for_file_name = TRUE;
+
+///////////// add_scan_mode_to_file_name //////////////
+//
+// Option to add a string indicating the scan mode to the file name.
+// Type: boolean
+//
+
+add_scan_mode_to_file_name = TRUE;
+

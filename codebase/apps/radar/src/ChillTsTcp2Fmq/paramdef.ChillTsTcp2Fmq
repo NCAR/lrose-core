@@ -1,0 +1,144 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions ChillTsTcp2Fmq
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// May 2009
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "ChillTsTcp2Fmq reads raw time-series data via TCP/IP, in legacy CHILL format. It saves the time series data out to a file message queue (FMQ), which can be read by multiple clients.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "TCP DETAILS";
+};
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Host name on which the CHILL time series server is running.";
+  p_help = "This application normally reads data from Rvp8TsTcpServer running on the rvp8 host.";
+} ts_tcp_server_host;
+
+paramdef int {
+  p_default = 2112;
+  p_descr = "TCP/IP port on which the CHILL time series server is running.";
+} ts_tcp_server_port;
+
+commentdef {
+  p_header = "CORRECT THE SWEEP NUMBER";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to correct the sweep number relative to the start of a volume.";
+  p_help = "Some radars set the sweep number to always increase, without resetting to 0 when a new volume starts. If this parameter is TRUE, the sweep number will be corrected so that it is zero at the start of each volume.";
+} zero_sweep_number_at_start_of_vol;
+
+commentdef {
+  p_header = "CONDITIONING THE IQ DATA";
+};
+
+paramdef double {
+  p_default = 3.0e-5;
+  p_descr = "Scale constant for I and Q data. Applied if apply_scale == TRUE";
+  p_help = "Value written = Value_in * scale + offset";;
+} iq_data_scale;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Offset for I and Q data. Applied if apply_scale == TRUE";
+  p_help = "Value written = Value_in * scale + offset";
+} iq_data_offset;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to remove gates with negative range.";
+  p_help = "CHILL sometimes starts sampling early so that the burst pulse can be sampled. If so range_offset_m will be set to indicate how early the sampling started. If this parameter is set to TRUE, the gates which have negative range will be removed and the start range will be adjusted accordingly.";
+} remove_negative_range_gates;
+
+commentdef {
+  p_header = "ADDING IN THE CALIBRATIONS";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to read calibration from files and merge into data set.";
+  p_help = "The app ChillSdb2CalXml reads the CHILL SDB server and produces calibration files every few seconds. This option causes these cal files to be read in, and the cal struct to be inserted into the time series data.";
+} read_cal_from_file;
+
+paramdef string {
+  p_default = "$(DATA_DIR)/cal/sdb";
+  p_descr = "Directory for calibration files.";
+  p_help = "See 'read_cal_from_file' above.";
+} cal_file_dir;
+
+commentdef {
+  p_header = "OUTPUT FMQ MESSAGE DETAILS";
+  p_text = "The output messages are written to the FMQ. To improve performance, each message contains a number of time series pulses.";
+};
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Interval between writing the radar info metadata messages (secs).";
+  p_help = "The radar metadata will be send at least at this inteval.";
+} metadata_interval_secs;
+
+paramdef int {
+  p_default = 200;
+  p_descr = "Number of pulses per output message.";
+  p_help = "The actual number will sometimes be 1 less than this, because an info data part may will be written once in a while.";
+} n_pulses_per_message;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "Path to output FMQ.";
+  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
+} output_fmq_path;
+
+paramdef int {
+  p_default = 20000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+

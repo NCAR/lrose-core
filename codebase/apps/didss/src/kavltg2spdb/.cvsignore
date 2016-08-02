@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+kavltg2spdb
+makefile
+makefile.am
+makefile.in

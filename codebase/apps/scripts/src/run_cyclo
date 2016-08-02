@@ -1,0 +1,559 @@
+#! /usr/bin/perl
+#
+# run_cyclo.pl
+#
+# Function:
+#	Perl script to run the cyclo program (analyzes cyclomatic
+#       complexity) on source code files in input directories.
+#       Sorts the output by complexity number.
+#
+# Overview:
+#       Uses 'find' to search for files in specified directories
+#       then runs mcstrip and cyclo on the files.
+#
+# Usage:
+#       run_cyclo.pl <pathname-list>
+#
+# Input:
+#       Directories of source code files
+#
+# Output:
+#       Writes to STDOUT the sorted output from cyclo.
+#
+# Dependencies:
+#	Perl must be available in the location at the top of this file.
+# 	
+# Author: Deirdre Garvey - NCAR/RAP/ESG		14-APR-2000
+#
+# Modified:
+#
+#---------------------------------------------------------------------------------
+
+# External
+
+use File::Find;
+use Getopt::Std qw( getopts );
+# Need the Perl ctime library to get to the "date" command
+#require 'ctime.pl';
+
+# Program globals
+
+($prog = $0) =~ s%.*/%%;                   # Program name
+@Needed_exes=('mcstrip', 'cyclo');         # programs required for this script
+@Valid_file_ext=('cc', 'c', 'h', 'hh');    # Valid filename extensions to put
+                                           #    through analysis
+$User=$ENV{'USER'};                        # User name
+$Tmpdir="/tmp";                            # temporary directory
+$Tmpfile="${Tmpdir}/${User}.${prog}";      # temporary file
+
+$Threshold_veryhi=50;                      
+$Threshold_high=21;
+$Threshold_mod=11;
+$Threshold_low=1;
+
+# Set command line defaults
+
+$Debug=0;
+$Use_cshell=1;
+$Use_find=0;
+$Verify=0;
+$Do_totals=0;
+
+# Parse input parameters
+
+&getopts('cdfhtv');
+
+if ($opt_h) {
+    print STDERR "Usage: $prog [-cdfhtv] pathname-list\n";
+    print STDERR " Purpose is to go through valid filenames (.c, .cc, .h, .hh)\n";
+    print STDERR " in the pathname-list and run them through the cyclo program\n";
+    print STDERR " and then sort by cyclomatic complexity order number.\n";
+    print STDERR "\t-c:\tuse C-shell syntax for pathname-list (default)\n";
+    print STDERR "\t-d:\tprint debug messages\n";
+    print STDERR "\t-f:\tuse find syntax for pathname-list\n";
+    print STDERR "\t-h:\tprint this usage message\n";
+    print STDERR "\t-t:\tprint totals for different thresholds\n";
+    print STDERR "\t-v:\tprint files as they are processed\n";
+    exit 0;
+}
+
+if ($opt_c) {
+    $Use_cshell=1;
+    $Use_find=0;
+}
+
+if ($opt_d) {
+    $Debug = 1;
+}
+
+if ($opt_f) {
+    $Use_cshell=0;
+    $Use_find=1;
+}
+
+if ($opt_t) {
+    $Do_totals=1;
+}
+
+if ($opt_v) {
+    $Verify=1;
+}
+
+@ARGV >= 1    || die "Usage: $prog [-hdcf] pathname-list\n";
+
+# Error checking
+
+foreach $exe (@Needed_exes) {
+  $is_ok = checkExeExist($exe, $Debug);
+  if (!$is_ok) {
+      print(STDERR "ERROR: $prog: The required executable $exe not found in path\n");
+      exit 0;
+  }
+}
+
+if (!-d $Tmpdir) {
+    print(STDERR "ERROR: $prog: The temporary directory $Tmpdir does not exist\n");
+    exit 0;
+}
+
+# Remove the temporary file if it currently exists
+
+if (-e $Tmpfile) {
+    unlink($Tmpfile);
+}
+
+# Initialize
+
+$Numfound=0;
+
+# Go through each file on the command line
+# Alternative method is to use: &find(@ARGV) and then use subroutine wanted()
+
+if ($Use_cshell) {
+  FILE: foreach $filename (@ARGV) {
+      $is_ok=&processFile($filename, $Debug, $Verify);
+  }
+} else {
+    &find(@ARGV);
+}
+
+# Sort the global array in numerically descending order
+
+@Sorted_array = sort {$b <=> $a} @Found_array;
+
+# Check results
+
+$numsorted=@Sorted_array;
+
+if ($Numfound != $numsorted) {
+    print(STDERR "ERROR: Number of sorted lines not equal number found\n");
+}
+
+# Print a header
+
+print(STDOUT "==================================================================\n");
+print(STDOUT "Results of $prog...\n");
+
+# Print the results
+
+foreach $item (@Sorted_array) {
+    print(STDOUT "$item\n");
+}
+
+# Do totals
+
+if ($Do_totals) {
+    ($is_ok, $veryhi, $high, $mod, $low) = &doTotals(*Sorted_array, $Threshold_veryhi, $Threshold_high, $Threshold_mod, $Threshold_low, $Debug);
+
+    $numfunc=@Sorted_array;
+
+    print(STDOUT "\n");
+    print(STDOUT "--------------------- TOTALS --------------------\n");
+    print(STDOUT "Total number of functions: $numfunc\n");
+    print(STDOUT "\n");
+    print(STDOUT "Number of functions above each threshold in cyclo number...\n");
+    print(STDOUT "\t$veryhi \tfunctions above the VERY HIGH risk threshold of ${Threshold_veryhi}\n");
+    print(STDOUT "\t$high \tfunctions above the HIGH risk threshold of ${Threshold_high}\n");
+    print(STDOUT "\t$mod \tfunctions above the MODERATE risk threshold of ${Threshold_mod}\n");
+    print(STDOUT "\t$low \tfunctions above the LOW risk threshold of ${Threshold_low}\n");
+}
+
+# Done
+
+exit 1;
+
+# ----------------------------- END OF MAIN ------------------------------
+#
+# Subroutine:  wanted()
+# Function:    This is called by "find"
+# Input:       files that match the "find" parameters
+# Output:
+#
+
+sub wanted {
+    (($dev, $ino, $mode, $nlink, $uid, $gid) = lstat($_))
+	|| warn "stat: $name\n";
+
+    # Local variables
+
+    local($subname);
+    local($is_ok, $dirname, $do_append_dir);
+
+    # Set defaults
+
+    $subname="wanted";
+
+    # Process the file
+
+    $is_ok=&processFile($name, $Debug, $Verify);
+
+    # Done
+
+    return;
+}
+
+
+#---------------------------------------------------------------------------
+# Subroutine: processFile
+#
+# Usage:      $return_val= processFile($file, $debug, $verify)
+#
+# Function:   Process $file through mcstrip and cyclo. Update
+#             global variables and arrays
+#
+# Input:      $file              file to process
+#             $debug             debug flag
+#             $verify            verify flag
+#
+# Output:     $return_val        1 on success, 0 on error
+#
+# Overview:   
+#
+
+sub processFile {
+    local ($file, $debug, $verify) = @_;
+
+    # Local variables
+
+    local($return_val, $subname);
+    local($found, $line, $funcname, $num, $string, $dirname, $nlines);
+    local($dbg2);
+
+    # Set defaults
+
+    $return_val=0;
+    $subname="processFile";
+    $nlines=0;
+
+    # If not a file, return
+
+    if (!-f $file) {
+	return($return_val);
+    }
+
+    # If not a valid filename extension, return
+
+    $found=0;
+    foreach $ext (@Valid_file_ext) {
+	if ($file =~ /$ext\Z/)  {
+	    $found = 1;
+	}
+    }
+
+    if (!$found) {
+	return($return_val);
+    }
+    
+    # Should have a valid file now. Run mcstrip and cyclo on it
+
+    if ($verify) {
+	print(STDERR "$prog: $subname: Found file $file\n");
+    }
+
+    system("mcstrip $file | cyclo -c > $Tmpfile");
+
+    # Open the results file
+
+    $is_ok = open(TMPFILE, "< $Tmpfile");
+    if (!$is_ok) {
+	print(STDERR "WARNING: $prog: $subname: Cannot open file $Tmpfile for $file\n");
+	return($return_val);
+    }
+
+    # Parse the output from mcstrip/cyclo
+    
+    while ($line = <TMPFILE>) {
+
+	# Increment the number of lines
+
+	$nlines++;
+
+	# Was a warning or failure found?
+
+	if (($line =~ /WARNING/) || ($line =~ /Parsing failure/)) {
+	    print(STDERR "WARNING: $prog: $subname: Skipping file $file due to errors\n");
+	    return($return_val);
+	}
+
+	# Skip totals line and blank lines
+
+	if ($line =~ /Total complexity/) {
+	    next;
+	}
+
+	if ($line !~ /\w/) {
+	    next;
+	}
+
+	# Okay, found something
+	
+	$return_val=1;
+
+	# Parse out the function and the complexity number
+
+	($is_ok, $funcname, $num) = &parseLine($line, $debug);
+	if (!$is_ok) {
+	    next;
+	}
+	
+	# Add the function and complexity number to the global array
+
+	$string="${num} ${file}::${funcname}";
+
+	$Found_array[$Numfound]=$string;
+
+	# Increment the global counter
+
+	$Numfound++;
+
+	# Debug
+
+	if ($debug) {
+	    print(STDERR "$prog: $subname: funcname: $funcname, num: $num, $line");
+	}
+	
+    } #endwhile
+
+    # Remove the tmp file
+
+    unlink($Tmpfile);
+
+    # If the Tmpfile was empty, return an error
+
+    if ($nlines == 0) {
+	print(STDERR "WARNING: $prog: $subname: ERROR from cyclo on $file\n");
+	print(STDERR "---\n");
+	$return_val=0;
+    }
+
+    # Done
+
+    return($return_val);
+}
+
+
+#---------------------------------------------------------------------------
+# Subroutine: parseLine
+#
+# Usage:      ($return_val, $funcname, $num) = parseLine($line, $debug)
+#
+# Function:   Parse the $line for the function name and complexity number.
+#
+# Input:      $line              line to parse
+#             $debug             debug flag
+#
+# Output:     $return_val        1 on success, 0 on error
+#             $funcname          function name
+#             $num               cyclomatic complexity number
+#
+# Overview:   
+#
+
+sub parseLine {
+  local ($line, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($funcname, $num);
+  local($func1, $func2, $name, $number, $func2a, $func2b);
+  local($dbg2);
+
+  # Set defaults
+
+  $return_val=1;
+  $subname="parseLine";
+  $funcname="NULL";
+  $num=-1;
+
+  # Set to 1 for additional debugging
+
+  $dbg2=0;
+
+  # Split the line
+
+  ($funcname, $number)=split(" ", $line);
+
+  # Kludgey handling for cases where additional spaces occur
+  # Look for non-digit characters in the number field
+
+  if ($number =~ /\D/) {
+
+      if ($debug) {
+	  print(STDERR "$prog: $subname: additional space encountered\n");
+	  print(STDERR "line: $line");
+      }
+      
+      ($arr[0], $arr[1], $arr[2], $arr[3], $arr[4]) = split(" ", $line);
+
+      # In most cases, only need to split in 3 pieces
+
+      if ($arr[2] !~ /\D/) {
+
+	  $funcname="$arr[0] $arr[1]";
+	  $number=$arr[2];
+      } elsif ($arr[3] !~ /\D/) {
+
+	  $funcname="$arr[0] $arr[1] $arr[2]";
+	  $number=$arr[3];
+      } elsif ($arr[4] !~ /\D/) {
+
+	  $funcname="$arr[0] $arr[1] $arr[2] $arr[3]";
+	  $number=$arr[4];
+      } else {
+	  print(STDERR "WARNING: $prog: $subname: Cannot parse line: $line");
+	  $return_val=0;
+      }
+
+  }
+
+  # Debug
+
+  if ($debug) {
+      print(STDERR "$prog: $subname: return: $return_val, funcname: $funcname, num: $number\n");
+  }
+
+  # Done
+
+  $num=$number;
+
+  return($return_val, $funcname, $num);
+}
+
+
+
+#---------------------------------------------------------------------------
+# Subroutine: doTotals
+#
+# Usage:      ($return_val, $num_veryhi, $num_high, $num_mod, $num_low) 
+#                    = doTotals(*array, $threshold_veryhi, $threshold_hi, 
+#                               $threshold_mod, $threshold_low, $debug)
+#
+# Function:   Parse the *array for the totals which fall between each of
+#             the thresholds.
+#
+# Input:      *array             array to read
+#             $threshold_veryhi  threshold value for very high risk numbers
+#             $threshold_hi      threshold value for high risk numbers
+#             $threshold_mod     threshold value for moderate risk numbers
+#             $threshold_low     threshold value for low risk numbers
+#             $debug             debug flag
+#
+# Output:     $return_val        1 on success, 0 on error
+#             $num_veryhi        number of functions that are above the
+#                                   $threshold_veryhi
+#             $num_high          number of functions that are above the
+#                                   $threshold_high but below $threshold_veryhi
+#             $num_mod           number of functions that are above the
+#                                   $threshold_mod but below $threshold_high
+#             $num_low           number of functions that are above the
+#                                   $threshold_low but below $threshold_mod
+#
+# Overview:   
+#
+
+sub doTotals {
+  local (*array, $threshold_veryhi, $threshold_hi, $threshold_mod, $threshold_low, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($item, $num, $rest_of_line);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="doTotals";
+
+  $num_veryhi=0;
+  $num_high=0;
+  $num_mod=0;
+  $num_low=0;
+
+  # Do the totals
+
+  foreach $item (@array) {
+
+      ($num, $rest_of_line) = split(' ', $item);
+      
+      if ($num >= $threshold_veryhi) {
+	  $num_veryhi++;
+      } elsif ($num >= $threshold_hi) {
+	  $num_high++;
+      } elsif ($num >= $threshold_mod) {
+	  $num_mod++;
+      } elsif ($num >= $threshold_low) {
+	  $num_low++;
+      } else {
+	  print(STDERR "$prog: $subname: Cannot do totals on $item\n");
+      }
+  }
+
+  # Done
+
+  $return_val = 1;
+
+  return($return_val, $num_veryhi, $num_high, $num_mod, $num_low);
+}
+
+#---------------------------------------------------------------------------
+# Subroutine: checkExeExist
+#
+# Usage:      $return_val= checkExeExist($exe, $debug)
+#
+# Function:   Check whether $exe exists in the user's path
+#
+# Input:      $exe               name of exe to search for
+#             $debug             debug flag
+#
+# Output:     $return_val         1 on success, 0 on error
+#
+# Overview:   
+#
+
+sub checkExeExist {
+  local ($exe, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($check);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="checkExeExist";
+
+  # Do the check
+
+  $check=`which $exe`;
+
+  if (!$check) {
+    $return_val = 0;
+  } else {
+    $return_val = 1;
+  }
+
+  return($return_val);
+}
+

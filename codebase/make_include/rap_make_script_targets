@@ -1,0 +1,65 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+##########################################################################
+#
+# Makefile targets for script files
+#
+# Deirdre Garvey
+#
+# RAP,NCAR,Boulder,Colorado,80307,USA
+# 
+# Dec 2003
+#
+###########################################################################
+#
+
+all: install
+
+install_shared:
+	$(MAKE) RAP_BIN_DIR=$(RAP_SHARED_BIN_DIR) install
+
+install: create_subdir
+	if test $(INSTALL_DIR) != . ;\
+	then \
+		cp $(SCRIPTS) $(INSTALL_DIR) ;\
+	fi
+
+create_subdir:
+	if test -d $(INSTALL_DIR) ;\
+	then \
+		cd . ;\
+	else \
+		mkdir $(INSTALL_DIR) ;\
+	fi
+
+install_bin: install
+install_shared_bin: install_shared
+copy_bin: install
+
+# unused targets - needed to prevent make failures
+
+clean:
+debug:
+profile:
+opt:
+optopt:
+opt4:
+lint:
+depend:
+pure:
+insure:
+clean_bin:
+clean_tdrp:
+clean_insure:
+clean_depend:
+clean_all:
+static:
+staticopt:
+dbgopt:
+install_copyright:

@@ -1,0 +1,99 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Generates ascii stats for air rep data. The format\n"
+	"of the output ascii files is as follows :\n"
+	" * The time of the airmet, year, month, day, hour, min sec UTC\n"
+	" * The report latitude, longitude and altitude (in feet)\n"
+	" * The report time minus the gridded data time, seconds\n"
+	" * The five maximum turb values for the five expanded\n"
+	"   cubes (the first being only one point), and\n"
+	" * Any text asscoiated with the report (this will be\n"
+	"   omitted if the numericOnly parameter is FALSE).\n\n"
+	"Niles Oien March 2006.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "spdbp:://host.domain:[port]:dir/dir";
+  p_help = "Airmets are read form here."; 
+  p_default = {"spdbp:://localhost::/d2/oien/taiwan/spdb/airep"};
+} airRepUrl;
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Turbulence field is read from here."; 
+  p_default = {"mdvp:://luna.rap.ucar.edu::/mdv/mm5/domain3"};
+} turbUrl;
+ 
+paramdef int {
+  p_descr = "Maximum time difference, seconds, allowable between gridded\n"
+	"observation and report time.";
+  p_help = "Default (two hours) should be fine."; 
+  p_default = 7200;
+} maxTimeDiff;
+ 
+paramdef string {
+  p_descr = "Output directory.";
+  p_help = "ASCII data are written here."; 
+  p_default = {"./Out"};
+} OutDir;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef string {
+  p_default = { "Turb" };
+  p_private = FALSE;
+  p_descr = "Input field name to process.";
+  p_help = "Default should be fine.";
+} fieldName;   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Option to only put numbers (no text) in output\n"
+	"files 9may be useful for MatLab).";
+  p_help = "Defaults to FALSE";
+} numericOnly;   
+
+paramdef int {
+  p_descr = "Number of cubes to take maximum value from.";
+  p_help = "Cubes expand incerementally, maximum value is taken."; 
+  p_default = 5;
+} numCubes;
+ 

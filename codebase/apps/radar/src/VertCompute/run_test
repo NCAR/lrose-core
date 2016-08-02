@@ -1,0 +1,6 @@
+#! /bin/csh
+
+VertCompute -params VertCompute.test -nsamples 512 -f ~/data/time_series/tsarchive/spol/vert/20060709/20060709_* -debug
+
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060818/20060818_213*

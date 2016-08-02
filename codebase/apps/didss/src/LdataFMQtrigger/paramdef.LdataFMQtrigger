@@ -1,0 +1,88 @@
+
+commentdef {
+  p_header = "LdataFMQtrigger program";
+  p_text = "LdataWatcher watches ldata file in a directory, and\n"
+	"when it updates a nowcast trigger message is sent to\n"
+	"a specified FMQ.\n\nNiles Oien October 2004";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+commentdef {
+  p_header = "Input Data parameters";
+} 
+
+paramdef string {
+  p_default = {"./latest_data"};
+  p_descr = "Directory path for input data.";
+  p_help = "This directory is watched for new _latest_data_info files.";
+} inputPath;
+
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Maximum age for files, realtime mode, seconds";
+  p_help = "Default is 15 minutes.";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = {"fmqp:://localhost::./fmq.dsRadar"};
+  p_descr = "Directory path for input data.";
+  p_help = "This directory is watched for new _latest_data_info files.";
+} fmq_url;
+
+paramdef string {
+  p_default = {"MdvMerge2"};
+  p_descr = "The name of the application that we are watching.";
+  p_help = "Used to construe the FMQ message. Probably not critical.";
+} appName;
+
+paramdef long {
+  p_descr = "Number of nowcasts to issue";
+  p_min = {0};
+  p_max = {1000};
+  p_default = {1};
+} nowcast_count;
+
+paramdef long {
+  p_descr = "Frequency (in minutes) of multiple nowcasts";
+  p_min = {1};
+  p_max = {60};
+  p_default = {6};
+} nowcast_frequency;
+
+paramdef long {
+  p_descr = "Time to delay, seconds, before sending trigger\n"
+        "message to FMQ.";
+  p_help = "The trigger will be fired after the output MDV file is written.";
+  p_min = {0};
+  p_default = {0};
+} sleep_before_trigger;
+
+paramdef boolean {
+  p_descr = "If TRUE, the trigger is issued with the current time. If\n"
+	"FALSE (almost always the case) the trigger is issued with the\n"
+	"time read from the ldata info file.";
+  p_default = FALSE;
+} useCurrentTime;
+

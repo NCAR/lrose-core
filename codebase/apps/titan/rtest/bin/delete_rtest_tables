@@ -1,0 +1,5 @@
+#! /bin/csh -f
+
+/bin/rm -rf $RTEST_HOME/tables/*.rtest
+
+

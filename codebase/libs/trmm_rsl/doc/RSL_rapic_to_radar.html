@@ -1,0 +1,44 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.05 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</HEAD>
+<BODY>
+<A HREF="index.html"><IMG SRC="rsl.gif" ></A><A HREF="index.html">&nbsp;</A>&nbsp;
+<HR>
+<H1>
+RSL_rapic_to_radar</H1>
+
+<HR>
+<H3>
+Synopsis</H3>
+<B>#include "rsl.h"</B>
+<BR><B><A HREF="RSL_radar_struct.html">Radar</A> *RSL_rapic_to_radar(char
+*infile);</B>&nbsp;
+<HR>
+<H3>
+Description</H3>
+Reads a RAPIC (data from Berrimah Austrailia) file and returns a pointer
+to the structure <I>Radar</I>. The input file is specified by the string
+<I>infile</I>. If <I>infile</I> is NULL, then stdin is read. The input
+file may be compressed. If the data is compressed, it is passed through
+the GNU <B>gunzip</B> filter. Thus, compressed data can be any format that
+<B>gzip</B> understands.
+
+<P>The radar structure is, essentially, an array of Volumes. These volumes
+represent several field types, including but not limited to, reflectivity,
+velocity and spectrum width fields.&nbsp;
+<HR>
+<H3>
+Return value</H3>
+Upon successful completion, RSL_rapic_to_radar returns a pointer to the
+structure <B>Radar</B>. Otherwise, NULL is returned and errno is set.&nbsp;
+<HR>
+<H3>
+See also</H3>
+<A HREF="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</A>&nbsp;
+<HR>
+
+<P>Author: <A HREF="john.merritt.html">John H. Merritt</A>.
+</BODY>
+</HTML>

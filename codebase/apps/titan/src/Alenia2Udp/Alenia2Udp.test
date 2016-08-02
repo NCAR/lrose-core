@@ -1,0 +1,69 @@
+/****************************************************
+ * TDRP params for Alenia2Udp
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE.
+ */
+debug = DEBUG_NORM;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 2;
+
+/*
+ * Process instance.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Output port for UDP packets.
+ *
+ * Type: long
+ * Default: 5002 
+ */
+output_udp_port = 6002;
+
+/*
+ * Broadcast address for UDP output.
+ *
+ * Type: string
+ * Default: "128.117.197.255" 
+ */
+output_udp_address = "193.207.118.255";
+
+/*
+ * Beam wait interval (msecs).
+ * Process will sleep between beams for this period.
+ *
+ * Type: long
+ * Default: 50 
+ */
+beam_wait_msecs = 100;
+
+/*
+ * Option for automatic repeat through data.
+ * If set, program will cycle through the data.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+auto_repeat = TRUE;
+
+

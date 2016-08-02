@@ -1,0 +1,8 @@
+Import('env')
+
+cp2net = env.Library('cp2net',
+Split("""
+CP2Net.cpp
+CP2UdpSocket.cpp
+"""))
+

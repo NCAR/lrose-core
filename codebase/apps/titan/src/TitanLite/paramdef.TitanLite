@@ -1,0 +1,836 @@
+/*********************************************************
+ * parameter definitions for StormIdent
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 1998
+ */
+
+commentdef {
+  p_header = "Titan it the Thunderstorm Identification, Tracking, Analysis and Nowcasting appliction. It identifies storms in 3-D radar data stored in MDV format, tracks the storms and forecasts their position using extrapolation.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_EXTRA, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, RETRACK, FORECAST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "\nREALTIME mode: Titan waits for a new input MDV file.\n\nARCHIVE mode: Titan iterates through the files between the start and end times set by the user. \n\nFORECAST mode: similar to ARCHIVE mode, except that Titan is run on the output from a model run, specified by the model generate (gen) time. In this case the output files are written to a subdirectory of storm_data_dir, named from the generate time, e.g. 'g_20121205_030000'.\n\nRETRACK mode: only the tracking algorithm is rerun, using the data stored in the existing storm (.sh5, .sd5) files.";
+} mode;
+
+commentdef {
+  p_header = "AUTO-RESTART OPTION.";
+  p_text = "This allows you to automatically restart the program at a given time of day (GMT). This keeps the output files simple - there is one series of files per day. If storm tracking is running it is also restarted.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Auto-restart option. Always forced TRUE for REALTIME mode.";
+  p_help = "If set, the program restarts at restart_time (GMT). The data from the previous 'restart_overlap_period' is copied into the new file, so that tracks at restart time will have some history. Use of this option ensures that the storm and track files will not grow forever.";
+} auto_restart;
+
+typedef struct {
+  int hour;
+  int min;
+} restart_time_t;
+
+paramdef struct restart_time_t {
+  p_default = { 0, 0 };
+  p_descr = "The time in the day (UCT/GMT) at which restart occurs.";
+  p_help = "The program will check for the passing of this time. Once data beyond this time is found, restart will occur.\n";
+} restart_time;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 0;
+  p_descr = "The period copied to the new file on restart (secs).";
+  p_help = "On restart, the program copies some of the previous file, to provide history for storm_track. This is the duration of the copied data.";
+} restart_overlap_period;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "input";
+  p_descr = "URL for input MDV data.";
+  p_help = "The input MDV data files are stored at this URL. In REALTIME mode the program monitors the latest_data_info file for this URL and processes a new scan each time new data arrives.";
+} input_url;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 1000;
+  p_min = 1000;
+  p_descr = "Sleep interval which searching for new data - (millisecs).";
+  p_help = "This is the period of sleep time between successive checks for new data. If you are searching on a remote URL, and the DataMapper is not active, this should be set to 5000 or greater to avoid over-frequent server requests.";
+} input_search_sleep_msecs;
+
+commentdef {
+  p_header = "DATA FIELDS IN INPUT FILES.";
+}
+
+typedef struct {
+  string name;
+  int num;
+} field_t;
+
+paramdef struct field_t {
+  p_default = { "DBZ", 0 };
+  p_descr = "Reflectivity field details.";
+  p_help = "If the field name is specified, that is used. If the field name is empty, the field number is used.";
+} dbz_field;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to negate the data values in the dBZ field.";
+  p_help = "If true, the data values in the dbz field will be multiplied by -1. This is useful for running Titan on fields such as satellite IR fields, in which 'storms' are areas of high negaive instead of high positive values.";
+} negate_dbz_field;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag to indicate if velocity data is available";
+  p_help = "If this is set, velocity data is available in the radar volumes. Velocity-based computations will be carried out. If not, velocity-based computations will be omitted.";
+} vel_available;
+
+paramdef struct field_t {
+  p_default = { "VEL", 0 };
+  p_descr = "Velocity field details.";
+  p_help = "If the field name is specified, that is used. If the field name is empty, the field number is used. Note that the usage must be consistent with the dbz_field parameter, i.e. if you specify the name for reflectivity you must also specify the name for velocity, and vice versa.";
+} vel_field;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Factor to convert velocity field units to m/s.";
+  p_help = "This is included in case the velocity is not in m/s units.";
+} vel_to_m_per_sec_scale;
+
+commentdef {
+  p_header = "REMAPPING THE VERTICAL LEVELS TO CONSTANT SPACING.";
+  p_text = "If the input files do not have constant vertical levels, you will need to remap the vertical levels appropriately. See the following parameters.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remap the Z levels onto a grid with constant dz.";
+  p_help = "Field data will be remapped onto the specified Z levels using the nearest neighbor method. See 'remap_z_grid'. Note that this actually changes the data. Whereas 'override_vlevels' only changes the vlevels in the headers, and does not change the data.";
+} remap_z_to_constant_grid;
+
+typedef struct {
+  int nz;
+  double minz;
+  double dz;
+} remap_z_grid_t;
+
+paramdef struct remap_z_grid_t {
+  p_default = { 10, 0, 1 };
+  p_descr = "Specified Z levels for remapping.";
+} remap_z_grid;
+
+commentdef {
+  p_header = "STORM IDENTIFICATION PARAMETERS.";
+}
+
+paramdef double {
+  p_default = 35.0;
+  p_descr = "Lower dBZ threshold for storm identification (dBZ).";
+  p_help = "Storms are defined as regions with reflectivity values in excess of this value.";
+} low_dbz_threshold;
+
+paramdef double {
+  p_default = 80.0;
+  p_descr = "Upper dBZ threshold (dBZ).";
+  p_help = "If a storm contains reflectivity in excess of this value, it will not be processed.";
+} high_dbz_threshold;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to discard storms with dBZ exceeding the high threshold.";
+  p_help = "If true, a storm with reflectivity in excess of the high_dbz_threshold will be discarded. If false, the storm will be kept, but only those portions below the threshold will be regarded as part of the storm.";
+} discard_high_threshold_storms;
+
+paramdef int {
+  p_default = 1;
+  p_min = 1;
+  p_descr = "Min overlap between storm fragments.";
+  p_help = "A storm is made up of a series of adjacent 'runs' of data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.";
+} min_grid_overlap;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set specific dbz threshold for storm tops.";
+  p_help = "If FALSE, 'low_dbz_threshold' will be used to determine storm tops. If TRUE, 'tops_dbz_threshold' will be used to determine storm tops.";
+} set_dbz_threshold_for_tops;
+
+paramdef double {
+  p_default = 18.0;
+  p_descr = "dBZ threshold for identification of storm tops (dBZ).";
+  p_help = "See 'set_dbz_threshold_for_tops'.";
+} tops_dbz_threshold;
+
+commentdef {
+  p_header = "OPTIONS TO USE DUAL THRESHOLDS.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to perform identification using dual thresholds.";
+  p_help = "If set, the identification is performed in multiple stages. First, an outer storm envelope is computed, using the low_dbz_threshold. This is the default method which has always been used in TITAN. Then, using the dual_threshold parameters, a search is performed for storms within the envelope exceeding the dbz_threshold. If there is only one region at the higher reflectivity, the entire outer envelope is used. If there are two or more regions which meet or exceed the required characteristics, these regions are grown back out to the original envelop, but stop growing where they meet between the higher-reflectivity areas. The final storms are computed by breaking the original storm into regions based upon these secondary areas.\n\nNOTE: work done in South Africa by the SAWS found the following parameter settings to be optimal for strong convection and squall lines:\n\tlow_dbz_threshold: 33 dBZ\n\tmin_storm_size: 100 km3\n\tdual dbz_threshold: 45 dBZ\n\tmin_fraction_all_parts: 0.10\n\tmin_fration_each_part: 0.005\n\tmin_area_each_part: 10 km2\n\n";
+} use_dual_threshold;
+
+typedef struct {
+  double dbz_threshold;
+  double min_fraction_all_parts;
+  double min_fraction_each_part;
+  double min_area_each_part;
+} dual_threshold_t;
+
+paramdef struct dual_threshold_t {
+  p_default = {45.0, 0.5, 0.05, 20.0};
+  p_descr = "Parameters for dual threshold identification.";
+  p_help = "See 'use_dual_threshold'. dbz_threshold: threshold for this stage. A number of regions may be identified at the higher threshold. min_fraction_all_parts: we sum the sizes of the parts at the higher threshold, and the sum divided by the original size of the envelope must exceed this fraction. If it does not the original envelope is used. min_fraction_each_part: for any part to be valid its size as a fraction of all of the parts must exceed this value. min_area_each_part: for any part to be valid its area must exceed this value. If it does not the part is ignored. If only 1 part is valid, the entire envelope is used.";
+} dual_threshold;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create dual threshold files for debugging.";
+  p_help = "If this is set, dual threshold files will be stored at dual_threshold_url.";
+} create_dual_threshold_files;
+
+paramdef string {
+  p_default = "mdv/dual_threshold";
+  p_descr = "URL for dual_threshold data.";
+  p_help = "If create_dual_threshold_files is TRUE, the dual_threshold debugging MDV files are stored at this URL.";
+} dual_threshold_url;
+
+commentdef {
+  p_header = "LIMITS TO BASE, TOP, STORM SIZE.";
+}
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Storm base threshold (km).";
+  p_help = "Storms identification is only performed using CAPPIs at or above this threshold. Reflectivity values in CAPPIs below the base are ignored.";
+} base_threshold;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Storm top threshold (km).";
+  p_help = "Storms identification is only performed using CAPPIs at or below this threshold. Reflectivity values in CAPPIs above the top are ignored.";
+} top_threshold;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Minimum storm size (km2 or km3 depending on input grid type).";
+  p_help = "Storms must exceed this size to be considered valie.  If the data is 2D (i.e. nz == 1), the units are km2; if the data is 3D, units are km3.";
+} min_storm_size;
+
+paramdef double {
+  p_default = 1000000000.0;
+  p_descr = "Maximum storm size (km2 or km3 depending on input grid type).";
+  p_help = "Storms must not exceed this size to be considered valid.  If the data is 2D (i.e. nz == 1), the units are km2; if the data is 3D, the units are km3.";
+} max_storm_size;
+
+commentdef {
+  p_header = "OPTIONS TO CHECK SECOND TRIP.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check for storm range limits.";
+  p_help = "If the storm is at the limit of radar range, a flag is set.";
+} check_range_limits;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check for second trip characteristics.";
+  p_help = "If set, the storm orientation and shape are checked for second trip characteristics. An elongated, low storm with a major axis lined up with the radar indicates a likely second-trip echo. For a storm to be considered second-trip, all 3 of the following tests must be passwd: (a) the horizontal aspect ratio exceeds the given parameter; (b) the vertical aspect ratio exceeds the given parameter; (c) the horizontal orientation lies close to the line from the radra. If the storm is thought to be second-trip, the second-trip flag is set.";
+} check_second_trip;
+
+paramdef double {
+  p_default = 4.0;
+  p_min = 1.0;
+  p_max = 20.0;
+  p_descr = "Second trip detection vertical aspect threshold.";
+  p_help = "If the vertical aspect ratio exceeds this value, the storm may be flagged as second-trip.";
+} sectrip_vert_aspect;
+
+paramdef double {
+  p_default = 4.0;
+  p_min = 1.0;
+  p_max = 20.0;
+  p_descr = "Second trip detection horizontal aspect threshold.";
+  p_help = "If the horizontal aspect ratio (based on the ellipse) exceeds this value, the storm may be flagged as second-trip.";
+} sectrip_horiz_aspect;
+
+paramdef double {
+  p_default = 10.0;
+  p_min = 1.0;
+  p_max = 90.0;
+  p_descr = "Allowable second trip orientation error.";
+  p_help = "For a storm to be flagged as second-trip, the orientation must be aligned with the storm azimuth from the radar, within this allowable error.";
+} sectrip_orientation_error;
+
+commentdef {
+  p_header = "PRECIP RATE AND MASS PARAMETERS.";
+}
+
+paramdef double {
+  p_default = 55.0;
+  p_descr = "Hail reflectivity threshold";
+  p_help = "The threshold between rain and hail (dBZ)";
+} hail_dbz_threshold;
+
+typedef struct {
+  double coeff;
+  double expon;
+} zr_t;
+
+paramdef struct zr_t {
+  p_descr = "Z-R parameters for rainfall";
+  p_help = "Parameters in Z-R relationship for rainfall.";
+  p_default = {200.0, 1.6};
+} ZR;
+
+paramdef struct zr_t {
+  p_descr = "Z-M parameters for rain";
+  p_help = "Parameters in Z-M relationship for rain.";
+  p_default = {20465.0, 1.75};
+} ZM;
+
+typedef enum {
+  PRECIP_FROM_COLUMN_MAX,
+  PRECIP_AT_SPECIFIED_HT,
+  PRECIP_AT_LOWEST_VALID_HT,
+  PRECIP_FROM_LOWEST_AVAILABLE_REFL
+} precip_mode_t;
+
+paramdef enum precip_mode_t {
+  p_default = PRECIP_FROM_COLUMN_MAX;
+  p_descr = "Mode for computing precipitation.";
+  p_help = "PRECIP_FROM_COLUMN_MAX: compute precip from the column-max reflectivity.\n\nPRECIP_AT_SPECIFIED_HT: specify the height of the plane from which precip is to be computed. See 'precip_plane_ht'.\n\nPRECIP_FROM_LOWEST_VALID_HT: compute precip from the lowest valid plane in the storm, i.e. the CAPPI corresponding to 'base_threshold'.\n\nPRECIP_FROM_LOWEST_AVAILABLE_REFL: compute precip from lowest available reflectivity in a column, i.e. from the lowest point at which non-missing reflectivity appears."; 
+} precip_computation_mode;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum height for computing precip (km).";
+  p_help = "See 'precip_mode'. This is the minimum height, in km MSL, of any plane used for computing precip, for the following modes: PRECIP_FROM_COLUMN_MAX or PRECIP_FROM_LOWEST_AVAILABLE_REFL. Data from planes outside these limits will not be used.";
+} precip_min_ht;
+
+paramdef double {
+  p_default = 6.0;
+  p_descr = "Maximum height for computing precip (km).";
+  p_help = "See 'precip_mode'. This is the maximum height, in km MSL, of any plane used for computing precip, for the following modes: PRECIP_FROM_COLUMN_MAX or PRECIP_FROM_LOWEST_AVAILABLE_REFL. Data from planes outside these limits will not be used.";
+} precip_max_ht;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Height of precip plane (km).";
+  p_help = "See 'precip_mode'. This is the height, in km MSL, of the plane from which precip will be computed if precip_mode is PRECIP_AT_SPECIFIED_HT.";
+} precip_plane_ht;
+
+commentdef {
+  p_header = "REFLECTIVITY DISTRIBUTION.";
+  p_text = "NOTE: the 2D reflectivity histogram will be computed for a plane in the same manner as precipitation. See 'precip_mode' parameter for more details.";
+}
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Dbz histogram interval.";
+  p_help = "Reflectivity interval for the 2-D and 3-D reflectivity distributions.";
+} dbz_hist_interval;
+
+commentdef {
+  p_header = "OPTION FOR CALCULATING HAIL METRICS.";
+}
+
+paramdef string {
+  p_default = "hail";
+  p_descr = "Option for calculating additional special features.";
+  p_help = "Currently, 'hail' is the only special feature available. More features may be available to choose from in the future.";
+} special_feature;
+
+paramdef struct zr_t {
+  p_descr = "Z-M parameters for hail";
+  p_help = "Parameters in Z-M relationship for hail.";
+  p_default = {3668298, 1.416};
+} hail_ZM;
+
+paramdef double {
+  p_default = 6.0;
+  p_descr = "Height of the 0C isotherm (km)";
+  p_help = "This value may be dynamically set in the future.";
+} ht_of_freezing;
+
+paramdef double {
+  p_default = 45.0;
+  p_descr = "Reflectivity threshold (dBZ) for hail mass";
+  p_help = "This value is used for calculating VIHM (vertically integrated hail mass) and Hail Mass Aloft";
+} hail_mass_dbz_threshold;
+
+
+commentdef {
+  p_header = "The Foote-Krauss Category (FOKR)";
+  p_text = "The FOKR Category is intended to separate non-hailstorms (Category 0 and 1) from potentially developing hailers (Cat. 2), likely hailstorms (Cat. 3) and severe hailstorms (Cat. 4)";
+}
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "For S-band use 40, for C-band use use 40";
+} FOKR_cat1_zmax_thresh;
+ 
+paramdef double {
+  p_default = 45.0;
+  p_descr = "For S-band use 45, for C-band use 45.";
+} FOKR_cat2_zmax_thresh;
+
+paramdef double {
+  p_default = 55.0;
+  p_descr = "For S-band use 55, for C-band use 45.";
+} FOKR_cat3_zmax_thresh;
+
+paramdef double {
+  p_default = 65.0;
+  p_descr = "For S-band use 65, for C-band use 55.";
+} FOKR_cat4_zmax_thresh;
+
+
+
+commentdef {
+  p_header = "OPTION TO CHECK STORM MORPHOLOGY.";
+  p_text = "The storm morphology check allows you to erode minor connections between storms when these connections really have no phyical significance.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check morphology";
+  p_help = "If this is set, morphology will be used for storm definition. A check is performed on storm morphology to reduce apparent mergers. The technique is as follows: 1. Compute euclidean distance (ed) of each point from edge of storm clump 2. Compute reflectivity excess above threshold, and divide by morphology_refl_divisor (in dbz/km). 3. Add ed to refl excess, to get interest map 4. Threshold interest map using morphology_erosion_threshold (in km). 5. Erode points which do not exceed the threshold, and which are not adjacent to a point which exceeds the threshold.";
+} check_morphology;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create morphology files for debugging.";
+  p_help = "If this is set, morphology MDV files will be stored at morphology_url.";
+} create_morphology_files;
+
+paramdef string {
+  p_default = "mdv/morph";
+  p_descr = "URL for morphology data.";
+  p_help = "If create_morphology_files is TRUE, the morphology MDV files are stored at this URL.";
+} morphology_url;
+
+paramdef double {
+  p_default = 5.0;
+  p_min = 0.0;
+  p_max = 100.0;
+  p_descr = "Erosion threshold for morphology check (km).";
+  p_help = "Threshold to which morphology erosion is performed.";
+} morphology_erosion_threshold;
+
+paramdef double {
+  p_default = 10.0;
+  p_min = 0.1;
+  p_max = 100.0;
+  p_descr = "Reflectivity divisor for morphology check (dbz/km).";
+  p_help = "The morphology value for a point (km) is obtained by adding the euclidean distance to storm edge (km) to the reflectivity excess (above threshold) divided by this value (dbz/km).";
+} morphology_refl_divisor;
+
+commentdef {
+  p_header = "OPTION TO CHECK STORM TOPS.";
+  p_text = "The storm tops check allows you to remove areas with low tops prior to performing the storm identification. In this manner you can ignore regions of stratiform rain.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check tops";
+  p_help = "If this is active, areas with radar tops below min_radar_tops will be removed from the data prior to storm identification. The tops_edge_margin parameter allows you to account for tilted storms, leaving a  margin around the area to be removed.";
+} check_tops;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create tops files for debugging.";
+  p_help = "If this is set, tops MDV files will be stored at tops_url.";
+} create_tops_files;
+
+paramdef string {
+  p_default = "mdv/tops";
+  p_descr = "Radar tops data directory.";
+  p_help = "If create_tops_files is TRUE, the tops MDV files are stored at this URL.";
+} tops_url;
+
+paramdef double {
+  p_default = 4.5;
+  p_descr = "Minimum radar tops (km).";
+  p_help = "Minimum radar tops for valid radar data - see check_tops.";
+} min_radar_tops;
+
+paramdef double {
+  p_default = 1.5;
+  p_min = 0.0;
+  p_descr = "Margin placed around tops when computing min_tops field (km).";
+  p_help = "This takes into account the fact that some storms may be tilted. Grid points within this margin are left intact.";
+} tops_edge_margin;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "$(DATA_DIR)/titan/storms";
+  p_descr = "Storms data directory. The storm files are written to this directory.";
+  p_help = "It is strongly recommended that you use an absolute path for this directory - i.e. start either with '/' or '.'. It is also common to start with an environment variable, e.g. $(DATA_DIR).";
+} storm_data_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to store runs in storm file";
+  p_help = "If set, the raw storm runs are stored in the storm file. A run is a contiguous block of reflectivity in the X direction for a given Y and Z. This is a useful way of storing storm grid locations reasonably efficiently. If the runs are stored, the exact 3D storm shape can be recreated from the storm file.";
+} store_storm_runs;
+
+commentdef {
+  p_header = "OPTION TO CREATE VERIFICATION FILES.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create verification files.";
+  p_help = "If this is set, verification files will be stored at verify_url. The verification files allow forecast verification against the regions which were actually used by the program to compute the storms. There are 2 fields: field 0 is the ALL_STORMS_FIELD - all storms above threshold are stored even if they do not meet other criteria such as minimum storm volume. Field 1 is the VALID_STORMS_FIELD, which only include the valid storms included in the storm file.";
+} create_verification_files;
+
+paramdef string {
+  p_default = "mdv/verify";
+  p_descr = "URL for verify data.";
+  p_help = "If create_verification_files is TRUE, the verification MDV files are stored at this URL.";
+} verify_url;
+
+commentdef {
+  p_header = "TRACKING PARAMETERS.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to run tracking automatically.";
+  p_help = "If this is set, StormIdent will communicate with the storm tracking program, so that the tracking is performed after each scan.";
+} perform_tracking;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Maximum allowable speed for tracks";
+  p_help = "This value is used to limit the search for a match in the tracking algorithm.";
+} tracking_max_speed;
+
+paramdef int {
+  p_default = 1200;
+  p_descr = "Max allowable time between scans (secs).";
+  p_help = "Max delta time (secs) for valid tracking - if there is a larger break than this in the data, all tracks are terminated and new ones started.";
+} tracking_max_delta_time;
+
+paramdef double {
+  p_default = 1.0;
+  p_min = 0.0;
+  p_descr = "Matching parameter.";
+  p_help = "The weight for distance moved in the matching algorithm.";
+} tracking_weight_distance;
+
+paramdef double {
+  p_default = 1.0;
+  p_min = 0.0;
+  p_descr = "Matching parameter.";
+  p_help = "The weight for delta_cube_root_volume in the matching algorithm.";
+} tracking_weight_delta_cube_root_volume;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use storm runs for overlaps";
+  p_help = "If this is set, runs are used to compute the overlaps for identifying mergers and splits. If not, the storm polygons are used.";
+} tracking_use_runs_for_overlaps;
+
+paramdef double {
+  p_default = 0.6;
+  p_max = 2.00;
+  p_descr = "Min sum overlap fraction.";
+  p_help = "To characterize the overap of storm shapes at successive scan times, two overlap fractions can be computed: (1) the overlap area divided by the area of the storm at time 1, and (2) the overlap area divided by the area of the storm at time 2. These two fractions are summed and tested against this parameter. If the sum is less than the parameter value, the overlap is not considered valid. For a perfect overlap the sum will be 2.0. For no overlap at all the sum will be 0.0.";
+} tracking_min_sum_fraction_overlap;
+
+commentdef {
+  p_header = "FORECAST PARAMETERS.";
+}
+
+typedef enum {
+  TREND, PARABOLIC, REGRESSION
+} forecast_type_t;
+
+paramdef enum forecast_type_t {
+  p_default = TREND;
+  p_descr = "Forecast mode";
+  p_help = "TREND - linear trend. PARABOLIC - parabolic trend on growth, linear trend on decay. The parabola peaks at time parabolic_growth_period from present. REGRESSION - uses regression equations for forecast (experimental).";
+} tracking_forecast_type;
+
+paramdef int {
+  p_default = 1800;
+  p_min = 60;
+  p_descr = "Parabolic growth period (secs)";
+  p_help = "Time at which parabolic growth curve becomes flat";
+} tracking_parabolic_growth_period;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to force storm growth to be zero";
+  p_help = "If this is set, the storm growth will be forced to zero. Storm decay will be normal. Forecast movement will be normal.";
+} tracking_zero_growth;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to force storm decay to be zero";
+  p_help = "If this is set, the storm decay will be forced to zero. Storm growth will be normal. Forecast movement will be normal.";
+} tracking_zero_decay;
+
+paramdef double {
+  p_min = 0.0;
+  p_max = 1.0;
+  p_default = {1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4};
+  p_descr = "Weights for making the trend forecast.";
+  p_help = "A trend forecast is made using a weighted linear fit to the storm history. These are the weights used. The first applies to the most recent scan, and the last to the earliest scan used.";
+} tracking_forecast_weights[];
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Max allowable speed for valid forecast (km/hr).";
+  p_help = "If the speed exceeds this value, the forecast is marked invalid.";
+} tracking_max_speed_for_valid_forecast;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Min history for valid forecast (secs).";
+  p_help = "If the history is less than this value, the forecast is marked invalid.";
+} tracking_min_history_for_valid_forecast;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to scale forecasts by history";
+  p_help = "If this is set, forecasts are scaled by the ratio of history over min_history_for_scaling.";
+} tracking_scale_forecasts_by_history;
+
+paramdef double {
+  p_default = 1200.0;
+  p_descr = "History value for scaling forecasts (secs).";
+  p_help = "If a storm has a history less than this value, the forecast values are scaled by the ratio of history over history_for_scaling. If the storm history exceeds this value, the scale factor is 1.0";
+} tracking_history_for_scaling;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to limit relative changes in track speed.";
+  p_help = "If this is TRUE, a check is made for significant speed changes in the track. First, the movements of the centroid from scan to scan for the recent history are put into a list. The median of this list is computed. If any value in the list exceeds the median by a given factor, the value is replaced by the median. After this is done, the history is updated. See 'tracking_max_rel_speed_change.'";
+} tracking_limit_rel_speed_change;
+
+paramdef double {
+  p_default = 12.0;
+  p_descr = "Maximum relative change in speed.";
+  p_help = "See 'tracking_limit_rel_speed_change'. This is the maximum allowable relative change in speed relative to the median speed for the history.";
+} tracking_rel_speed_max_change;
+
+paramdef int {
+  p_default = 5;
+  p_min = 3;
+  p_descr = "Min number of scans for relative speed check.";
+  p_help = "See 'tracking_limit_rel_speed_change'. The track must have this number of scans before the check can be applied. For the speed check to work this number must be less than on equal to the size of the tracking_forecast_weights array.";
+} tracking_rel_speed_min_nscans;
+
+commentdef {
+  p_header = "SMOOTHING THE MOTION FORECAST.";
+  p_text = "Options for smoothing motion forecasts. The smoothed motion is computed using the motion of surrounding storms. The storms included are out to a given radius from the storm undergoing smoothing.";
+}
+
+commentdef {
+  p_header = "SMOOTHING CATEGORIES.";
+  p_text = "For smoothing, you can turn on the following options separately or together: (a) tracking_smooth_invalid_forecasts: smooth motion for storms without a valid forecast; (b) tracking_spatial_smoothing: smooth motion for storms with a valid forecast; (c) tracking_smooth_fast_growth_decay: smooth the forecast for storms which have a rapid growth or decay. In addition to these main categories, you can set other parameters to control the way the smoothing is done.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to perform motion smoothing on invalid forecasts.";
+  p_help = "If this is TRUE, forecast motion is smoothed for storms WITHOUT a valid forecast. The smoothed motion DOES NOT INCLUDE the motion of the storm being smoothed. See also tracking_max_speed_for_valid_forecast and tracking_min_history_for_valid_forecast.";
+} tracking_smooth_invalid_forecasts;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to perform motion smoothing on valid forecasts.";
+  p_help = "If this is TRUE, spatial smoothing is performed on storms with a valid forecast. The smoothed motion INCLUDES the motion of the storm being smoothed. See also tracking_smooth_erratic_motion.";
+} tracking_spatial_smoothing;
+
+commentdef {
+  p_header = "SMOOTHING RADIUS OF INFLUENCE";
+}
+
+paramdef double {
+  p_default = 120.0;
+  p_min = 1.0;
+  p_descr = "Radius for motion smoothing (km).";
+  p_help = "This is the maximum radius within which the smoothing algorithm will search for candidates for smoothing data.";
+} tracking_smoothing_radius;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Min number of other storms for smoothing.";
+  p_help = "This is the minumum number of storms to be used for smoothing. If this criteria is not met, smoothing will not be performed.";
+} tracking_smoothing_min_nstorms;
+
+commentdef {
+  p_header = "SMOOTHING WEIGHTS";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to weight motion based on the inverse of the distacne apart.";
+  p_help = "If true, the motion of each storm is weighted by the inverse of the distance away from the storm to be smoothed.";
+} smoothing_weight_uses_inverse_distance;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to weight motion based on the mean DBZ value for each storm.";
+  p_help = "If true, the motion of each storm is weighted by (mean_dbz - low_dbz_threshold).";
+} smoothing_weight_uses_mean_dbz;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to weight motion based on the top for each storm.";
+  p_help = "If true, the motion of each storm is weighted by (top - base_threshold).";
+} smoothing_weight_uses_top;
+
+commentdef {
+  p_header = "SMOOTHING THRESHOLDS FOR FAST GROWTH AND DECAY";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to perform spatial smoothing on storms which are growing or decaying fast.";
+  p_help = "If this is TRUE, spatial smoothing is performed on storms for which the area is growing or decaying fast. The smoothed motion does not include the motion of the storm being smoothed.";
+} tracking_smooth_fast_growth_decay;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Area growth ratio threshold for smoothing motion.";
+  p_help = "See tracking_smooth_growth_decay. The area ratio is defined as (a2 - a1) / a1, where a2 is the current area and a1 is the previous area. Motion will only be smoothed if the ratio exceeds the specified value. The normal checks on smoothing will apply - search radius, min and max number of storms to be used for smoothing. If the smoothing fails the forecast will be marked as invalid.";
+} tracking_smoothing_growth_threshold;
+
+paramdef double {
+  p_default = -0.5;
+  p_descr = "Area decay ratio threshold for smoothing motion.";
+  p_help = "See tracking_smooth_growth_decay. The area ratio is defined as (a2 - a1) / a1, where a2 is the current area and a1 is the previous area. Motion will only be smoothed if the ratio is less than the specified value. The normal checks on smoothing will apply - search radius, min and max number of storms to be used for smoothing. If the smoothing fails the forecast will be marked as invalid.";
+} tracking_smoothing_decay_threshold;
+
+commentdef {
+  p_header = "SMOOTHING - DETECTING ERRATIC FORECASTS";
+  p_text = "To determine whether a forecast is eratic, the error of the speed and direction is computed for a storm as compared with the mean motion for the storms within the radius of influence.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to only perform smoothing on storms which have an erratic forecast.";
+  p_help = "This is a qualifier to tracking_spatial_smoothing. If TRUE, smoothing is only performed on storms with an erratic motion forecast. The smoothed motion DOES NOT INCLUDE the motion of the storm being smoothed. A forecast is considered erratic if the speed or direction of the forecast differs significantly from the mean motion of surrounding storms. See also max_speed_error and max_dirn_error.";
+} tracking_smooth_erratic_only;
+
+paramdef double {
+  p_default = 55;
+  p_descr = "Speed error for erratic forecasts - percent.";
+  p_help = "The speed error is computed as:\n"
+    "\t(100 * abs(speed - mean_speed)) / max(speed, mean_speed)\n"
+    "If the speed error exceeds this this value, the forecast is considered erratic.";
+} erratic_forecast_speed_error;
+
+paramdef double {
+  p_default = 50;
+  p_descr = "Direction error for erratic forecasts - degrees.";
+  p_help = "If the forecast direction speed for a storm differes from the mean direction by more than this value, the forecast is considered erratic.";
+} erratic_forecast_direction_error;
+
+commentdef {
+  p_header = "OVERRIDE EARLY STORM MOTION FROM FIELD TRACKER";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the early motion using results from a field tracker.";
+  p_help = "In the early stages of a storm, the motion is not well characterized by the track. This allows you to specify that in the early stages of a storm's lifetime, the motion should be determined from the results of a field tracker, such as OpticalFlow or ctrec.";
+} override_early_storm_motion_using_field_tracker;
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/optical_flow";
+  p_descr = "URL for data from field tracker.";
+  p_help = "Format is 'mdvp:://hostname::dir'";
+} field_tracker_url;
+
+paramdef string {
+  p_default = "U";
+  p_descr = "Name of U motion field in field tracker.";
+  p_help = "U is positive for flow from west to east.";
+} field_tracker_U_motion_name;
+
+paramdef string {
+  p_default = "V";
+  p_descr = "Name of V motion field in field tracker.";
+  p_help = "V is positive for flow from south to north.";
+} field_tracker_V_motion_name;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Time margin for searching for field tracker data (secs).";
+  p_help = "We search for field tracker results that are close in time to the DBZ data we are using for Titan. The field tracker results are only used if they are within this number of seconds of the time of the primary DBZ data. If the data is not available within the time margin, the motion will not be adjusted from the field tracker results.";
+} field_tracker_search_margin_secs;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Time to wait for field tracker results - (secs).";
+  p_help = "In realtime mode, the field tracker will take time to run. We therefore may need to wait for up to this number of seconds for the field tracker to complete. If the data is not available by the wait time period, the motion will not be adjusted from the field tracker.";
+} field_tracker_realtime_wait_secs;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Radius of influence of field tracker results (km).";
+  p_help = "In determining the storm motion from the field tracker, we search for results that are close to the storm centroid. This is the radius, from the storm centroid, that we use for computing the mean field velocity to be applied to the storm.";
+} field_tracker_search_radius_km;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Time period, from the start of a storm's life, during which only the field tracker motion is used (secs).";
+  p_help = "During this period, the Titan storm motion is replaced by the field tracker motion.";
+} field_tracker_initial_period_secs;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Time period, from the end of the initial period, during which a combination of the Titan motion and field tracker motion is used (secs).";
+  p_help = "During this period, the Titan storm motion is replaced by a linear combination of the Titan motion and the field tracker motion.";
+} field_tracker_transition_period_secs;
+

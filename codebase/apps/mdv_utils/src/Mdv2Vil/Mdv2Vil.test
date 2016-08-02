@@ -1,0 +1,300 @@
+/**********************************************************************
+ * TDRP params for ./Mdv2Vil
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: Mdv2Vil.
+//
+// Mdv2Vil computes VIL and related values from an MDV file, and stores 
+//   these in a different MDV file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operational mode.
+// Realtime mode - waits for new data; archive mode runs on single file.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//
+
+mode = ARCHIVE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Minimum val: 0
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+//======================================================================
+//
+// INPUT and OUTPUT DIRECTORIES.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Path of input directory.
+// Type: string
+//
+
+input_dir = "/d2/oien/KFTGlevelTwo/mdv/radarKFTG/cart";
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+// Path of output directory.
+// Type: string
+//
+
+output_dir = "/d2/oien/KFTGlevelTwo/mdv/yeOldeVil";
+
+//======================================================================
+//
+// COMPUTING VIL.
+//
+// In this application, VIL is referred to as totalVil, as opposed to 
+//   the deltaVil product. VIL and totalVil are synonymous.
+//
+//======================================================================
+ 
+///////////// output_totalVil /////////////////////////
+//
+// Output VIL to mdv file.
+// Type: boolean
+//
+
+output_totalVil = TRUE;
+
+///////////// dbz_field ///////////////////////////////
+//
+// Reflectivity field.
+// Field number of the reflectivity data in the mdv file.
+// Minimum val: 0
+// Type: int
+//
+
+dbz_field = 0;
+
+///////////// min_height //////////////////////////////
+//
+// Minimum Height (in km).
+// Minimum Height from which to calculate VIL.
+// Minimum val: 0
+// Type: double
+//
+
+min_height = 0;
+
+//======================================================================
+//
+// STORM SEVERITY based on DELTA VIL.
+//
+// DELTA VIL is computed as the VIL above some level (say the -5C level) 
+//   minus the VIL below that level. Regions in storms with an overhang 
+//   (echo vault) will show a positive dvil. This is an indicator of a 
+//   severr storm.
+//
+//======================================================================
+ 
+///////////// output_dVil /////////////////////////////
+//
+// Output DVIL calculation to mdv file.
+// DVIL is the difference between the upper mass and lower mass around 
+//   the specified difference_height.
+// Type: boolean
+//
+
+output_dVil = TRUE;
+
+///////////// difference_height ///////////////////////
+//
+// Height (in km) used for DVIL calculation.
+// Typically set to the height of the -5 C temperature.
+// Minimum val: 0
+// Type: double
+//
+
+difference_height = 10;
+
+//======================================================================
+//
+// STORM SEVERITY based on SSS.
+//
+// Thanks to Pieter Visser of the South African Weather Service. 
+//   <visser@weathersa.co.za>.
+//
+//======================================================================
+ 
+///////////// output_SSS_index ////////////////////////
+//
+// Output the Storm Severity index calculation to mdv file.
+// Type: boolean
+//
+
+output_SSS_index = TRUE;
+
+//======================================================================
+//
+// SSS CALCULATION PARAMETERS.
+//
+// The SSS field is used to partition the grid into the following storm 
+//   categories:
+// 	1 = Weak Base
+// 	2 = Weak Volume
+// 	3 = Weak Top
+// 	4 = Severe Base
+// 	5 = Severe Volume
+// 	6 = Severe Top
+// 	7 = Very Severe Base
+// 	8 = Very Severe Volume
+// 	9 = Very Severe Top
+// The sss_weak_dbz_max and sss_severe_dbz_max fields are used for 
+//   classifying each grid square into the 3 different storm severity 
+//   categories: weak, severe and very severe. Grid points that have a 
+//   reflectivity value less than the sss_weak_dbz_max parameter are 
+//   classified as weak. Grid points that have a reflectivity value 
+//   between the sss_weak_dbz_max parameter and the sss_severe_dbz_max 
+//   parameter are classified as severe. Grid points that have a 
+//   reflectivity value greater than the sss_severe_dbz_max parameter are 
+//   classified as very severe.
+// Once the storm severity is determined, the other parameters are used 
+//   to classify the type of storm in the following manner:
+// 	if (centerMass < sss_base_center_mass_max) then
+// 		if (stdDeviation >= sss_std_deviation_limit and
+// 			maxDbzHeight < sss_base_height_max) then
+// 				storm type = base
+// 		endif
+// 		if (stdDeviation >= sss_std_deviation_limit and
+// 			maxDbzHeight >= sss_base_height_max) then
+// 				storm type = volumetric
+// 		endif
+// 		if (stdDeviation < sss_std_deviation_limit) then
+// 			storm type = base
+// 		endif
+// 	else if (centerMass < sss_top_center_mass_min) then
+// 		if (stdDeviation >= sss_std_deviation_limit and
+// 			maxDbzHeight < sss_base_height_max) then
+// 				storm type = base
+// 		endif
+// 		if (stdDeviation >= sss_std_deviation_limit and
+// 			maxDbzHeight == sss_base_height_max) then
+// 				storm type = volumetric
+// 		endif
+// 		if (stdDeviation >= sss_std_deviation_limit and
+// 			maxDbzHeight >= sss_top_height_min) then
+// 				storm type = top
+// 		endif
+// 		if (stdDeviation < sss_std_deviation_limit) then
+// 			storm type = volumetric
+// 		endif
+// 	else
+// 		if (stdDeviation >= sss_std_deviation_limit and
+// 			maxDbzHeight < sss_top_height_min) then
+// 				storm type = volumetric
+// 		endif
+// 		if (stdDeviation >= sss_std_deviation_limit and
+// 			maxDbzHeight >= sss_top_height_min) then
+// 				storm type = top
+// 		endif
+// 		if (stdDeviation < sss_std_deviation_limit) then
+// 			storm type = top
+// 		endif
+// 	endif.
+//
+//======================================================================
+ 
+///////////// sss_weak_dbz_max ////////////////////////
+//
+// Maximum dbz value for storms classified as weak.
+// Type: double
+//
+
+sss_weak_dbz_max = 45;
+
+///////////// sss_severe_dbz_max //////////////////////
+//
+// Maximum dbz value for storms classified as severe.
+// Type: double
+//
+
+sss_severe_dbz_max = 55;
+
+///////////// sss_std_deviation_limit /////////////////
+//
+// Standard deviation limit used for SSS calculations.
+// Type: double
+//
+
+sss_std_deviation_limit = 2;
+
+///////////// sss_base_center_mass_max ////////////////
+//
+// Base center mass maximum used for SSS calculations.
+// Type: double
+//
+
+sss_base_center_mass_max = 6.5;
+
+///////////// sss_top_center_mass_min /////////////////
+//
+// Top center mass minimum used for SSS calculations.
+// Type: double
+//
+
+sss_top_center_mass_min = 8;
+
+///////////// sss_base_height_max /////////////////////
+//
+// Base height maximum used for SSS calculations.
+// Type: double
+//
+
+sss_base_height_max = 6;
+
+///////////// sss_top_height_min //////////////////////
+//
+// Top height minimum used for SSS calculations.
+// Type: double
+//
+
+sss_top_height_min = 7;
+

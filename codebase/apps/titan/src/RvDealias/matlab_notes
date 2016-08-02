@@ -1,0 +1,10 @@
+d = imat_getdata('data/ds1w2.nc')    
+
+pd = imat(d,'command','simple','simple_fields',{'mom0','mom1','mom2'});
+
+pd.mom2(1,1)
+
+decoded = imat(d,'command','simple','simple_fields',{'decode'});        
+
+trip1 = imat(decoded,'command','simple','simple_fields',{'cohere_n'},'cohere_trip',1);
+

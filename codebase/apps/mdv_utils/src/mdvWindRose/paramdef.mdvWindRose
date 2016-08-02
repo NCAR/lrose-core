@@ -1,0 +1,134 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "mdvWindRose generates histograms of speed and direction\n"
+	"given files with U and V fields in them.\n"
+	"For each location, three files are generated :\n"
+	" [1] A *.dir file, the normalized histogram of direction\n"
+	" [2] A *.dirWeighted file, giving the average wind for\n"
+	"     each direction (effectively a wind rose)\n"
+	" [3] A *.speed file, a normalized histogram of wind speed\n\n"
+	"Niles Oien June 2006.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output directory.";
+  p_help = "ASCII histograms are written here."; 
+  p_default = {"/Some/Directory/Structure" };
+} OutDir;
+
+paramdef string {
+  p_descr = "Name of the U field.";
+  p_help = "Used to index MDV file."; 
+  p_default = {"U" };
+} UfieldName;
+
+paramdef string {
+  p_descr = "Name of the V field.";
+  p_help = "Used to index MDV file."; 
+  p_default = {"V" };
+} VfieldName;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+typedef struct {
+        string name;
+        double lat;
+        double lon;
+	int numPointsPlusMinus;
+	int minNumGoodPoints;
+} location_t;
+
+paramdef struct location_t {
+        p_descr = "List of locations.";
+        p_help = "Has the following fields :\n\n"
+	"name : name for the location, used in making the\n"
+	"       output filename so no spaces please.\n\n"
+	"lat, lon : In degrees.\n\n"
+	"numPointsPlusMinus : calculations are done by\n"
+	"                     averaging over a grid centered on the\n"
+	"                     lat/lon. Indicies are allowed to vary\n"
+	"                     by this amount. Setting this to 1 means\n"
+	"                     that a 3x3 grid will be considered.\n\n"
+	"minNumGoodPoints : Minimum number of good points for the\n"
+	"                   average to be considered.";
+        p_default = { 
+		{ "NORTH", 41.5, -97.0, 2, 10},
+	        { "SOUTH", 40.5, -97.0, 2, 10}
+	 };
+} locations[];
+
+paramdef int {
+  p_descr = "Number of bins for direction and weighted direction histograms.";
+  p_help = "Range for direction is always 0 to 360. Default is 180 bins\n"
+	"of 2 degrees each."; 
+  p_default = 180;
+} numDirectionBins;
+
+paramdef int {
+  p_descr = "Number of bins for speed histogram which starts at 0.";
+  p_help = "speedBinSize and numSpeedBins parameters determine histogram range."; 
+  p_default = 100;
+} numSpeedBins;
+
+paramdef double {
+  p_descr = "Size of bins for speed histogram (always starts at 0).";
+  p_help = "Units are the same as the input. This parameters as"
+	"well as the numSpeedBins parameter determine the histogram\n"
+	"range."; 
+  p_default = 0.5;
+} speedBinSize;
+
+
+
+
+
+

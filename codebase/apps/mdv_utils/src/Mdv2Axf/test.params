@@ -1,0 +1,260 @@
+/**********************************************************************
+ * TDRP params for ./Mdv2Axf
+ **********************************************************************/
+
+///////////// InMdvURL ////////////////////////////////
+//
+// Input URL.
+// Set to the URL for the input MDV files.
+// Type: string
+//
+
+InMdvURL = "/home/oien/rap/apps/aoaws/src/Gms2Mdv";
+
+///////////// OutDir //////////////////////////////////
+//
+// Output netCDF directory.
+// Set to the name of the output netCDF directory.
+// Type: string
+//
+
+OutDir = ".";
+
+///////////// Instance ////////////////////////////////
+//
+// Instance to check into procmap with.
+// Set as appropriate.
+// Type: string
+//
+
+Instance = "primary";
+
+///////////// FieldNames //////////////////////////////
+//
+// Names of desired fields in MDV file.
+// The print_mdv utility may help in getting field names.
+// Type: string
+// 1D array - variable length.
+//
+
+FieldNames = { "gms_t_11", "gms_t_6.5" };
+
+///////////// RealtimeMaxAge //////////////////////////
+//
+// Maximum age for file to be considered valid.
+// In realtime mode only.
+// Type: int
+//
+
+RealtimeMaxAge = 3600;
+
+///////////// PlaneNumber /////////////////////////////
+//
+// Plane number to output.
+// Starts at plane 0. Set to 0 for 2D data.
+// Type: int
+//
+
+PlaneNumber = 0;
+
+///////////// VarName /////////////////////////////////
+//
+// Variable name for the output files.
+// Output files are named
+// <BaseAxfName>_<VarName>_PP_YYYYMMDDhhmmss.axf
+//  eg AutoNowcast_VIL_00_20001103123000.axf
+// where PP is plane number.
+// Type: string
+//
+
+VarName = "GMS";
+
+///////////// BaseAxfName /////////////////////////////
+//
+// Base name for the output files.
+// Output files are named
+// <BaseAxfName>_<VarName>_PP_YYYYMMDDhhmmss.axf
+//  eg AutoNowcast_VIL_00_20001103123000.axf
+// where PP is plane number.
+// Type: string
+//
+
+BaseAxfName = "Satellite";
+
+///////////// MissingVal //////////////////////////////
+//
+// Output value to use at a grid point where data are invalid.
+// Set to a value that will never appear in valid data.
+// Type: float
+//
+
+MissingVal = -1000;
+
+///////////// DoComposite /////////////////////////////
+//
+// Flag to set if doing compositing.
+// If set, composite is done between
+// CompositeMin and CompositeMax. Set plane number to 0.
+// Type: boolean
+//
+
+DoComposite = FALSE;
+
+///////////// CompositeMin ////////////////////////////
+//
+// Minimum height to composite. Same units as MDV file.
+// Only used if DoComposite is true.
+// Type: float
+//
+
+CompositeMin = 0;
+
+///////////// CompositeMax ////////////////////////////
+//
+// Maximum height to composite. Same units as MDV file.
+// Only used if DoComposite is true.
+// Type: float
+//
+
+CompositeMax = 100000;
+
+///////////// DoGridRemap /////////////////////////////
+//
+// Flag to set if data are to be remapped onto another grid.
+// If set, data are remapped onto the grid specified below.
+// Type: boolean
+//
+
+DoGridRemap = FALSE;
+
+//======================================================================
+//
+//  ------------ GRID PARAMETERS --------
+// These specify the grid on which the
+// computations will be performed.
+// These must be specified - use the
+// print_mdv facility to get the file
+// geometry if this is to be duplicated.
+//
+//======================================================================
+ 
+///////////// grid_origin_lat /////////////////////////
+//
+// Latitude of grid origin.
+// Must be specified.
+// Minimum val: -1000
+// Type: double
+//
+
+grid_origin_lat = 34;
+
+///////////// grid_origin_lon /////////////////////////
+//
+// Longitude of grid origin.
+// Must be specified.
+// Minimum val: -1000
+// Type: double
+//
+
+grid_origin_lon = -77;
+
+///////////// grid_rotation ///////////////////////////
+//
+// Rotation (in degrees) of grid from true north.
+// Usually 0 - applied to flat earth only.
+// Minimum val: -360
+// Type: double
+//
+
+grid_rotation = 0;
+
+///////////// grid_projection /////////////////////////
+//
+// Projection type of grid.
+// Projections currently supported are FLAT, LATLON and LAMBERT.
+//
+// Type: enum
+// Options:
+//   FLAT, LATLON
+//
+//
+
+grid_projection = FLAT;
+
+///////////// grid_nx /////////////////////////////////
+//
+// Number of cells in the grid in X.
+// Minimum val: 1
+// Type: int
+//
+
+grid_nx = 100;
+
+///////////// grid_ny /////////////////////////////////
+//
+// Number of cells in the grid in Y.
+// Minimum val: 1
+// Type: int
+//
+
+grid_ny = 100;
+
+///////////// grid_nz /////////////////////////////////
+//
+// Number of vertical levels in the output grid or to be composited.
+// See also grid_minz.
+// Minimum val: 1
+// Type: int
+//
+
+grid_nz = 1;
+
+///////////// grid_dx /////////////////////////////////
+//
+// Size of the cells in the output grid in X.
+// Type: float
+//
+
+grid_dx = 1;
+
+///////////// grid_dy /////////////////////////////////
+//
+// Size of the cells in the output grid in Y.
+// Type: float
+//
+
+grid_dy = 1;
+
+///////////// grid_dz /////////////////////////////////
+//
+// Change in altitude between vertical levels of the output grid.
+// Applicable only when grid_nz > 1.
+// Type: float
+//
+
+grid_dz = 1;
+
+///////////// grid_minx ///////////////////////////////
+//
+// X at grid's lower left corner.
+// Units for this parameter will depend upon the output grid_projection.
+// Type: float
+//
+
+grid_minx = 0;
+
+///////////// grid_miny ///////////////////////////////
+//
+// Y at grid's lower left corner.
+// Units for this parameter will depend upon the output grid_projection.
+// Type: float
+//
+
+grid_miny = 0;
+
+//======================================================================
+//
+// ------ End of grid parameters. .
+//
+//======================================================================
+ 

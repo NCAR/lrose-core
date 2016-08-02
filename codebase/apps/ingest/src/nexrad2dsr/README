@@ -1,0 +1,76 @@
+////////////////////////////////////////////////////////////////////////////////
+PURPOSE
+////////////////////////////////////////////////////////////////////////////////
+
+  This application is intended to read in NEXRAD level II data beam by beam
+  and reformat it into RAP's internal radar format DsRadarMsg, a.k.a. DSR.
+  The DsRadarMsg is then written to an output FMQ for downstream processes
+  to read as input.
+
+////////////////////////////////////////////////////////////////////////////////
+JUSTIFICATION
+////////////////////////////////////////////////////////////////////////////////
+
+  nexrad2dsr is a refactoring of the application ridds2mom.  Refactoring was
+  motivated by the NEXRAD OpenRPG upgrade whereby level II data would no
+  longer be transmitted from a RIDDS host via UDP.  Instead limited socket 
+  connections would be provided to an OpenRPG host at the TCP/IP level.
+  Alternatively organizations could arrange to get the level II data via 
+  an LDM server.
+
+  The input mechanisms supported by RAP's older ridds2mom application
+  included tape, UPD, and shared memory (for testing).
+
+  Rather than adding the new TCP/IP and LDM input mechanisms to an already 
+  complicated and aging C application, it was decided to refactor the 
+  application into C++ while switching to OpenRPG.
+
+////////////////////////////////////////////////////////////////////////////////
+EXTENSIBILITY
+////////////////////////////////////////////////////////////////////////////////
+
+  The new input mechanisms currently supported by nexrad2dsr are tape and
+  LDM.  The abstract base class NexradInput provides a simple hook for adding
+  further NEXRAD input stream mechanisms such as a direct OpenRPC TCP/IP
+  connection, an upstream FMQ, or backwards compatibility for UDP if necessary.
+
+////////////////////////////////////////////////////////////////////////////////
+LEVEL II DATA
+////////////////////////////////////////////////////////////////////////////////
+
+  An example of the NEXRAD velocity and reflectivity data stream:
+
+  tilt 0:  0.5deg  refl @ 1000m              gateSpacing   (low  prf)
+  tilt 1:  0.5deg  vel  @  250m              gateSpacing   (high prf)
+  tilt 2:  1.5deg  refl @ 1000m              gateSpacing   (low  prf)
+  tilt 3:  1.5deg  vel  @  250m              gateSpacing   (high prf)
+  tilt 4:  2.5deg  refl @ 1000m & vel @ 250m gateSpacing   (high prf)
+  tilt 5:  3.5deg  refl @ 1000m & vel @ 250m gateSpacing   (high prf)
+  tilt 6:  4.5deg  refl @ 1000m & vel @ 250m gateSpacing   (high prf)
+
+  NOTE that at the lower tilts, the reflectivity and velocity are
+  sent as separate scans and with different gate spacings.  This is
+  a significant driving force behind the logic of the Reformat class
+  and the existence of the FieldTable/FieldType classes.
+
+////////////////////////////////////////////////////////////////////////////////
+FURTHER NOTES
+////////////////////////////////////////////////////////////////////////////////
+
+  The original ridds2mom C structures and headers (defined in 
+  /rap/include/rapformats/ridds.h) have been retained at the core of the new 
+  nexrad2dsr application.  Although the new application will no longer get 
+  its input data from a RIDDS host, the data structures often have the 
+  "ridds" name as a legacy of the older ridds2mom application.  The URL:
+
+     http://www.nssl.noaa.gov/wrd/msd/icd99.pdf
+
+  from NSSL (providers of RIDDS and OpenRPG) describes the format and content
+  of the NEXRAD radial data, including a discussion on the differences between
+  the originating NEXRAD format and the downstream RIDDS format (which is
+  becoming obsolete with the scheduled installations of OpenRPG.
+
+////////////////////////////////////////////////////////////////////////////////
+
+Terri Betancourt
+December 2001

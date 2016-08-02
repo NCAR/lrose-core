@@ -1,0 +1,124 @@
+/**********************************************************************
+ * TDRP params for TsConvert
+ **********************************************************************/
+
+//======================================================================
+//
+// TsConvert reads IWRF time series files, converts the packing, and 
+//   writes the files to a different location.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// OUTPUT LOCATION.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Directory for output files.
+// Type: string
+//
+
+output_dir = "./output";
+
+//======================================================================
+//
+// MODIFY IQ DATA PACKING.
+//
+//======================================================================
+ 
+///////////// modify_packing //////////////////////////
+//
+// Option to modify the binary packing for the IQ data.
+// If true, the packing will be changed to output_packing.
+// Type: boolean
+//
+
+modify_packing = FALSE;
+
+///////////// output_packing //////////////////////////
+//
+// Packing of the IQ data in the output files.
+// FL32: 32-bit floating point. SCALED_SI16: scaled signed 16-bit 
+//   integers. DBM_PHASE_SI16: signed 16-bit integers representing power 
+//   in dBM and phase in deg. SIGMET_SI16: Sigmet 16-bit floating point 
+//   packing as in the RVP8.
+//
+// Type: enum
+// Options:
+//     PACKING_FL32
+//     PACKING_SCALED_SI16
+//     PACKING_DBM_PHASE_SI16
+//     PACKING_SIGMET_FL16
+//
+
+output_packing = PACKING_FL32;
+
+//======================================================================
+//
+// COMPUTE HCR GEOREFERENCE DETAILS.
+//
+//======================================================================
+ 
+///////////// compute_hcr_rotation_and_tilt ///////////
+//
+// Option to compute HCR rotation and tilt.
+// If true, the these angles will be computed from the HCR antenna drive 
+//   angles.
+// Type: boolean
+//
+
+compute_hcr_rotation_and_tilt = TRUE;
+
+///////////// compute_hcr_elevation_and_azimuth ///////
+//
+// Option to compute HCR elevation and azimuth.
+// If true, the these angles will be computed from the HCR georeference 
+//   data.
+// Type: boolean
+//
+
+compute_hcr_elevation_and_azimuth = TRUE;
+

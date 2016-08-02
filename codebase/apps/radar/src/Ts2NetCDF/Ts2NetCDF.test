@@ -1,0 +1,254 @@
+/**********************************************************************
+ * TDRP params for Ts2NetCDF
+ **********************************************************************/
+
+//======================================================================
+//
+// Ts2NetCDF reads radar time series files in IWRF ir TsArchive format, 
+//   and writes files in netCDF format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// reg_with_procmap ////////////////////////
+//
+// Register with procmap.
+// Type: boolean
+//
+
+reg_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or time series API.
+// If TS_FMQ_INPUT, the application will read the time series from a 
+//   file message queue and process the pulses as they come in. If 
+//   TS_FILE_INPUT, the application will process all the files specified 
+//   on the command line.
+//
+// Type: enum
+// Options:
+//     TS_FILE_INPUT
+//     TS_FMQ_INPUT
+//     TS_TCP_INPUT
+//
+
+input_mode = TS_FILE_INPUT;
+
+///////////// input_fmq_name //////////////////////////
+//
+// FMQ name. For TS_FMQ_INPUT only.
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+// Type: string
+//
+
+input_fmq_name = "/tmp/fmq/ts";
+
+///////////// seek_to_end_of_input ////////////////////
+//
+// Option to seek to the end of the input FMQ.
+// If TRUE, the program will seek to the end of the fmq and only read in 
+//   new data. If FALSE, it will start reading from the beginning of the 
+//   FMQ.
+// Type: boolean
+//
+
+seek_to_end_of_input = TRUE;
+
+///////////// tcp_server_host /////////////////////////
+//
+// Name of host for TCP server. For TS_TCP_INPUT only.
+// Type: string
+//
+
+tcp_server_host = "localhost";
+
+///////////// tcp_server_port /////////////////////////
+//
+// Port for TCP server. For TS_TCP_INPUT only.
+// Type: int
+//
+
+tcp_server_port = 12000;
+
+///////////// rvp8_legacy_unpacking ///////////////////
+//
+// RVP8 TsArchive data is in legacy 11-bit mantissa packing.
+// Type: boolean
+//
+
+rvp8_legacy_unpacking = FALSE;
+
+///////////// filter_antenna_transitions //////////////
+//
+// Option to remove pulses for which the antenna transition flag is set.
+// If true, transition pulses will not be stored in the file.
+// Type: boolean
+//
+
+filter_antenna_transitions = FALSE;
+
+//======================================================================
+//
+// OVERRIDE CALIBRATION.
+//
+//======================================================================
+ 
+///////////// override_radar_cal //////////////////////
+//
+// If true, read in calibration from xml file.
+// Type: boolean
+//
+
+override_radar_cal = FALSE;
+
+///////////// radar_cal_xml_file_path /////////////////
+//
+// Path of radar calibration file.
+// See 'override_radar_calib.
+// Type: string
+//
+
+radar_cal_xml_file_path = "/tmp/radar_cal.xml";
+
+//======================================================================
+//
+// CHANNEL details for dual channel receivers.
+//
+//======================================================================
+ 
+///////////// chan0_is_h_or_copolar ///////////////////
+//
+// Dual pol channel location.
+// For dual pol data there are 2 channels: 0 and 1.
+// 	We have the following cases:
+// 		Fixed receiver: if this param is true, channel 0 holds H data, and 
+//   channel 1 holds V data, and vice-versa.
+// 		Switching receiver: if this param is true, then channel 0 holds 
+//   co-polar data, and channel 1 holds cross-polar data, and vice-versa.
+// Type: boolean
+//
+
+chan0_is_h_or_copolar = TRUE;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Path of output directory.
+// Files are saved to this directory.
+// Type: string
+//
+
+output_dir = "$(HOME)/data/tsarchive/hubbert";
+
+///////////// save_one_file_per_input_file ////////////
+//
+// If true, save one output file for every input file.
+// Only applies to TS_FILE_INPUT mode, in which the input files are 
+//   specified on the command line. This option overrides 
+//   save_scans_in_sectors and max_pulses_per_file.
+// Type: boolean
+//
+
+save_one_file_per_input_file = FALSE;
+
+///////////// save_scans_in_sectors ///////////////////
+//
+// Option to save scans out in sectors to limit the file size.
+// If false, each fixed angle will be in a single file. If true, the 
+//   angular change will be limited per file. See max_sector_size.
+// Type: boolean
+//
+
+save_scans_in_sectors = TRUE;
+
+///////////// max_sector_size /////////////////////////
+//
+// Maximum sector size per output file (degrees).
+// Once this maximum is exceeded, the current file will be closed and a 
+//   new one started.
+// Type: int
+//
+
+max_sector_size = 360;
+
+///////////// max_pulses_per_file /////////////////////
+//
+// Maximum number of pulses per output file.
+// Once this maximum is exceeded, the current file will be closed and a 
+//   new one started.
+// Type: int
+//
+
+max_pulses_per_file = 100000;
+
+///////////// specify_n_gates_save ////////////////////
+//
+// Option to specify the number of gates in pulses to be saved.
+// If false, the number of gates will be checked to make sure it is 
+//   constant. If true, only pulses with the specified number of gates 
+//   will be saved.
+// Type: boolean
+//
+
+specify_n_gates_save = FALSE;
+
+///////////// n_gates_save ////////////////////////////
+//
+// Number of gates in pulses to be saved.
+// Pulses with a different number of gates will be ignored.
+// Type: int
+//
+
+n_gates_save = 1000;
+
+///////////// one_file_only ///////////////////////////
+//
+// If true, write one file only and then quit.
+// Type: boolean
+//
+
+one_file_only = FALSE;
+

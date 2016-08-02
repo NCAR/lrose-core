@@ -1,0 +1,81 @@
+////////////////////////////////////////////////////////
+// parameter definitions for Dsr2File
+///////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "Dsr2File PARAMETER FILE";
+  p_text = "Dsr2File reads DSR messages from a binary file previously saved for this purpose by Dsr2File. This system is used to archive the exact data from an FMQ so it can be played back again later.";
+}
+
+commentdef
+{
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+  p_default = FALSE;
+} debug;
+
+paramdef string
+{
+  p_descr = "Instance";
+  p_help = "Used for process registration";
+  p_default = "Test";
+} instance;
+
+commentdef
+{
+  p_header = "INPUT";
+}
+
+paramdef string
+{
+  p_descr = "Input files to process";
+  p_default = { "file1", "file2", "file3" };
+} input_files[];
+
+commentdef
+{
+  p_header = "OUTPUT";
+}
+
+paramdef string
+{
+  p_descr = "Output FMQ";
+  p_default = "fmqp:://localhost::fmq/dsRadar";
+} output_fmq;
+
+paramdef long
+{
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+  p_default = 2000000;
+} output_fmq_size;
+
+paramdef long
+{
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of "
+           "messages which may be written to the buffer before "
+           "overwrites occur. "
+           "However, overwrites may occur sooner if the size is not "
+           "set large enough.";
+  p_default = 3600;
+} output_fmq_nslots;
+
+paramdef boolean
+{
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+  p_default = FALSE;
+} output_fmq_compress;
+
+paramdef long
+{
+  p_descr = "Approximate number of beams per second to write";
+  p_default = 20;
+} beams_per_sec;

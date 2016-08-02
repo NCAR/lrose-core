@@ -1,0 +1,223 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions MdvMedian
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2000
+//
+
+commentdef {
+  p_header = "Program name: MdvMedian";
+  p_text = "MdvMedian computes the median values from a series of MDV files. The result is stored in an MDV file, the time stamp on the file being the mean of the start and end time of the input data. The usage is 'MdvMedian -params params_file'.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. When a new file arrives, it computes the median of the files from the latest time and back by the parameter 'past_secs'. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "mdv/input";
+  p_descr = "URL for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef int {
+  p_default = 1800;
+  p_help = "Median period in realtime - secs.";
+  p_descr = "REALTIME mode only. Files from this period in the past will be used for computing the median.";
+} realtime_past_period;
+
+commentdef {
+  p_header = "COMPUTING THE MEDIAN";
+}
+
+paramdef int {
+  p_default = 100000;
+  p_help = "Number of points to process at each pass.";
+  p_descr = "The program makes a number of passes through the data file, processing this number of points each pass. Set this to reflect the amount of available memory.";
+} npoints_per_pass;
+
+paramdef string {
+  p_default = {"dBZ"};
+  p_descr = "List of field names for which the median is to be computed.";
+} field_names[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set plane vlevel limits";
+  p_help = "If true, the data will be cropped in the vertical before computing the median.";
+} set_vlevel_limits;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Lower plane vlevel limit.";
+} lower_vlevel;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Upper plane vlevel limit.";
+} upper_vlevel;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option for creating composite.";
+  p_help = "If true, the composite will be computed before computing the median.";
+} composite;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remap grid in x,y.";
+  p_help = "If true, set the remap parameters below.";
+} remap_xy;
+
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_FLAT = 8
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_FLAT;
+  p_descr = "Projection for remapping in x,y.";
+} remap_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
+  p_descr = "Grid parameters for remapping in x,y.";
+  p_help = "These params apply to all projection types.";
+} remap_grid;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid rotation.";
+  p_help = "This applies only to PROJ_FLAT projections.";
+} remap_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin latitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.";
+} remap_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin longitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.";
+} remap_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 1.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} remap_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 2.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} remap_lat2;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write the median to the output path.";
+  p_help = "If true, the output file is written to the specified path. See 'output_path_url'.";
+} write_to_output_path;
+
+paramdef string {
+  p_default = "mdv/median/clutter.mdv";
+  p_descr = "Output path url.";
+  p_help = "The exact path to which the output file is written. See 'write_to_output_path'.";
+} output_path_url;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write the median to the output directory.";
+  p_help = "If true, the output file is written to the data directory. The file name is based on time. The output file is named with the time of the last file used for the computation. See 'output_dir_url'.";
+} write_to_output_dir;
+
+paramdef string {
+  p_default = "mdv/median";
+  p_descr = "Output dir URL.";
+  p_help = "Output data is written to this URL. The output file name is based on the time of the last file used. See 'write_to_output_dir'.";
+} output_dir_url;
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Set encoding type.";
+} output_encoding_type;
+
+

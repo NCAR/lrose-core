@@ -1,0 +1,21 @@
+#!/bin/sh --
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 23:11:36 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
+# ldd_smart:
+#   print out details of how dynamic libs are resolved
+# Mike Dixon - using code from Stephen Dowdy
+# Usage: ldd_smart binfile
+
+export LD_LIBRARY_PATH=/usr/local/lib
+export LD_DEBUG=files,libs
+$1 2>&1
+
+
+

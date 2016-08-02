@@ -1,0 +1,269 @@
+/**********************************************************************
+ * TDRP params for ./WDTncdf2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// WDTncdf2Mdv ingests WDT's netCDF format
+// radar mosaic grids and converts them to MDV
+// format so that they can be displayed in CIDD.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// InDir ///////////////////////////////////
+//
+// Input directory.
+// Directory path for raw satellite data files.
+// Type: string
+//
+
+InDir = "./";
+
+///////////// use_ldata_info //////////////////////////
+//
+// Option to use latest_data_info file to trigger.
+// Use it if you have it - recursively searching the input
+// dir for new files can hammer the CPU if there are a lot of files.
+// Type: boolean
+//
+
+use_ldata_info = FALSE;
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+// If string is NULL, all extensions are valid.
+// Type: string
+//
+
+fileExtension = "nc";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 7200;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// OutUrl //////////////////////////////////
+//
+// URL for output MDV data.
+// Type: string
+//
+
+//OutUrl = "mdvp:://localhost::./";
+OutUrl = "./";
+
+//======================================================================
+//
+// FIELDS.
+//
+//======================================================================
+ 
+///////////// InFields ////////////////////////////////
+//
+// Input netCDF variable names. Output names are the same as input.
+// Type: string
+// 1D array - variable length.
+//
+
+InFields = { "qp" };
+
+//======================================================================
+//
+//  ------------ GRID PARAMETERS --------
+// These are used only if RemapGrid is set
+// to TRUE. If RemapGrid is FALSE then the
+// data are written out on the grid the
+// netCDF file uses.
+//
+//======================================================================
+ 
+///////////// RemapGrid ///////////////////////////////
+//
+// Set to TRUE to remap the data.
+// Defaults to FALSE, set to TRUE to remap data.
+// Type: boolean
+//
+
+RemapGrid = FALSE;
+
+///////////// grid_origin_lat /////////////////////////
+//
+// Latitude of grid origin.
+// Must be specified.
+// Minimum val: -90
+// Maximum val: 90
+// Type: double
+//
+
+grid_origin_lat = 21.12613;
+
+///////////// grid_origin_lon /////////////////////////
+//
+// Longitude of grid origin.
+// Must be specified.
+// Minimum val: -180
+// Maximum val: 180
+// Type: double
+//
+
+grid_origin_lon = -127.8919;
+
+///////////// grid_rotation ///////////////////////////
+//
+// Rotation (in degrees) of grid from true north.
+// Usually 0 - applied to flat earth only.
+// Minimum val: -360
+// Type: double
+//
+
+grid_rotation = 0;
+
+///////////// grid_lat1 ///////////////////////////////
+//
+// First true latitude for LAMBERT projection.
+// Applies only to LAMBERT.
+// Minimum val: -90
+// Maximum val: 90
+// Type: double
+//
+
+grid_lat1 = 25.1;
+
+///////////// grid_lat2 ///////////////////////////////
+//
+// Second true latitude for LAMBERT projection.
+// Applies only to LAMBERT.
+// Minimum val: -90
+// Maximum val: 90
+// Type: double
+//
+
+grid_lat2 = 25;
+
+///////////// grid_projection /////////////////////////
+//
+// Projection type of grid.
+// Projections currently supported are FLAT, LATLON and LAMBERT.
+//
+// Type: enum
+// Options:
+//     FLAT
+//     LATLON
+//     LAMBERT
+//
+
+grid_projection = LATLON;
+
+///////////// grid_nx /////////////////////////////////
+//
+// Number of cells in the grid in X.
+// Minimum val: 1
+// Type: int
+//
+
+grid_nx = 3319;
+
+///////////// grid_ny /////////////////////////////////
+//
+// Number of cells in the grid in Y.
+// Minimum val: 1
+// Type: int
+//
+
+grid_ny = 1874;
+
+///////////// grid_dx /////////////////////////////////
+//
+// Size of the cells in the output grid in X.
+// Type: float
+//
+
+grid_dx = 0.01801802;
+
+///////////// grid_dy /////////////////////////////////
+//
+// Size of the cells in the output grid in Y.
+// Type: float
+//
+
+grid_dy = 0.01801802;
+
+///////////// grid_minx ///////////////////////////////
+//
+// X at grid's lower left corner.
+// Units for this parameter will depend upon the output grid_projection.
+// Type: float
+//
+
+grid_minx = -127.8919;
+
+///////////// grid_miny ///////////////////////////////
+//
+// Y at grid's lower left corner.
+// Units for this parameter will depend upon the output grid_projection.
+// Type: float
+//
+
+grid_miny = 21.12613;
+
+//======================================================================
+//
+// ------ End of grid parameters. .
+//
+//======================================================================
+ 

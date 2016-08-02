@@ -1,0 +1,817 @@
+/**********************************************************************
+ * TDRP params for RadxSunMon
+ **********************************************************************/
+
+//======================================================================
+//
+// Searches for sun spikes in radar volumes, performs solar analysis.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// READING THE VOLUME MOMENTS DATA.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, we wait for a new input file.  It is assumed that 
+//   latest_data_info will be availble in realtime mode. In ARCHIVE mode, 
+//   we move through the data between the start and end times set on the 
+//   command line. In FILELIST mode, we move through the list of file 
+//   names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// moments_input_dir ///////////////////////
+//
+// Input directory for moments files.
+//
+// These are the files we are analyzing for changes in the clutter 
+//   field.
+//
+//
+// Type: string
+//
+
+moments_input_dir = "/scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur";
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+///////////// search_ext //////////////////////////////
+//
+// File name extension.
+//
+// If set, only files with this extension will be processed.
+//
+//
+// Type: string
+//
+
+search_ext = "";
+
+//======================================================================
+//
+// INPUT FIELD NAMES.
+//
+//======================================================================
+ 
+///////////// dbmhc_field_name ////////////////////////
+//
+// Field name for power in H co-polar channel.
+//
+// If not available, leave empty.
+//
+//
+// Type: string
+//
+
+dbmhc_field_name = "DBMHC";
+
+///////////// dbmvc_field_name ////////////////////////
+//
+// Field name for power in V co-polar channel.
+//
+// If not available, leave empty.
+//
+//
+// Type: string
+//
+
+dbmvc_field_name = "DBMVC";
+
+///////////// dbmhx_field_name ////////////////////////
+//
+// Field name for power in H cross-polar channel.
+//
+// If not available, leave empty.
+//
+//
+// Type: string
+//
+
+dbmhx_field_name = "DBMHX";
+
+///////////// dbmvx_field_name ////////////////////////
+//
+// Field name for power in V cross-polar channel.
+//
+// If not available, leave empty.
+//
+//
+// Type: string
+//
+
+dbmvx_field_name = "DBMVX";
+
+///////////// estimate_dbmhc_from_dbz /////////////////
+//
+// Option to compute DBMHC from dbz field.
+//
+// If the HC power field is not available, we can compute it from 
+//   reflectivity, given the radar constant and range correction.
+//
+//
+// Type: boolean
+//
+
+estimate_dbmhc_from_dbz = FALSE;
+
+///////////// use_atmos_atten_in_dbmhc_estimation /////
+//
+// Option to account for atmospheric attenuation when estimating dbmhc 
+//   from dbz.
+//
+// If atmospheric attenuation was considered in computing dbz from 
+//   power, we must reverse that process to estimate dbmhc from dbz.
+//
+//
+// Type: boolean
+//
+
+use_atmos_atten_in_dbmhc_estimation = FALSE;
+
+///////////// dbz_field_name //////////////////////////
+//
+// Field name for reflectivity.
+//
+// See 'estimate_dbmhc_from_dbz.
+//
+//
+// Type: string
+//
+
+dbz_field_name = "DBZ";
+
+///////////// radar_constant_db ///////////////////////
+//
+// Radar constant (dB).
+//
+// Use meters, watts, radians to compute this value. It should be a 
+//   negative number, of around -67 for Sband, -60 for C band, for a 500KW 
+//   transmitter and 1 degree beam width.
+//
+//
+// Type: double
+//
+
+radar_constant_db = -69.18;
+
+///////////// vel_field_name //////////////////////////
+//
+// Field name for radial velocity.
+//
+// This is required for finding the sun as a noise source.
+//
+//
+// Type: string
+//
+
+vel_field_name = "VEL";
+
+///////////// ncp_field_name //////////////////////////
+//
+// Field name for NCP.
+//
+// NCP is normalized coherent power. If it is not available, it can be 
+//   estimated from spectrum width. See below. NCP is required for finding 
+//   the sun as a noise source.
+//
+//
+// Type: string
+//
+
+ncp_field_name = "NCP";
+
+///////////// estimate_ncp_from_spectrum_width ////////
+//
+// Option to estimate NCP from spectrum width.
+//
+// This should be set to true if NCP is not available.
+//
+//
+// Type: boolean
+//
+
+estimate_ncp_from_spectrum_width = FALSE;
+
+///////////// width_field_name ////////////////////////
+//
+// Field name for spectrum width.
+//
+// This applies if 'estimate_ncp_from_spectrum_width' is true.
+//
+//
+// Type: string
+//
+
+width_field_name = "WIDTH";
+
+//======================================================================
+//
+// OPTION TO CORRECT ANTENNA ANGLES.
+//
+//======================================================================
+ 
+///////////// apply_azimuth_offset ////////////////////
+//
+// Option to apply an offset to the azimuth values.
+//
+// If TRUE, this offset will be ADDED to the measured azimuth angles. 
+//   This is useful, for example, in the case of a mobile platform which 
+//   is not set up oriented to true north. Suppose you have a truck (like 
+//   the DOWs) which is oriented off true north. Then if you add in the 
+//   truck HEADING relative to true north, the measured azimuth angles 
+//   will be adjusted by the heading, to give azimuth relative to TRUE 
+//   north.
+//
+//
+// Type: boolean
+//
+
+apply_azimuth_offset = FALSE;
+
+///////////// azimuth_offset //////////////////////////
+//
+// Azimuth offset (degrees).
+//
+// See 'apply_azimuth_offset'. This value will be ADDED to the measured 
+//   azimuths.
+//
+//
+// Type: double
+//
+
+azimuth_offset = 0;
+
+///////////// apply_elevation_offset //////////////////
+//
+// Option to apply an offset to the elevation values.
+//
+// If TRUE, this offset will be ADDED to the measured elevation angles. 
+//   This is useful to correct for a systematic bias in measured elevation 
+//   angles.
+//
+//
+// Type: boolean
+//
+
+apply_elevation_offset = FALSE;
+
+///////////// elevation_offset ////////////////////////
+//
+// Elevation offset (degrees).
+//
+// See 'apply_elevation_offset'. This value will be ADDED to the 
+//   measured elevations.
+//
+//
+// Type: double
+//
+
+elevation_offset = 0;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE RADAR LOCATION.
+//
+//======================================================================
+ 
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+//
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+//
+//
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_latitude_deg = -999;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_longitude_deg = -999;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_altitude_meters = -999;
+
+///////////// change_radar_latitude_sign //////////////
+//
+// Option to negate the latitude.
+//
+// Mainly useful for RAPIC files. In RAPIC, latitude is always positive, 
+//   so mostly you need to set the latitiude to the negative value of 
+//   itself.
+//
+//
+// Type: boolean
+//
+
+change_radar_latitude_sign = FALSE;
+
+//======================================================================
+//
+// SUNSCAN ANALYSIS.
+//
+// We use 'strong' clutter to montitor the clutter power change over 
+//   time, and 'weak' clutter to detect the presence of weather echoes in 
+//   the clutter field.
+//
+//======================================================================
+ 
+///////////// elevation_search_margin_deg /////////////
+//
+// Sun search margin in elevation (deg).
+//
+// We only consider rays within this margin of the theoretical sun 
+//   position.
+//
+//
+// Type: double
+//
+
+elevation_search_margin_deg = 2;
+
+///////////// azimuth_search_margin_deg ///////////////
+//
+// Sun search margin in azimuth (deg).
+//
+// We only consider rays within this margin of the theoretical sun 
+//   position.
+//
+//
+// Type: double
+//
+
+azimuth_search_margin_deg = 2;
+
+///////////// power_reduction_curve ///////////////////
+//
+// Reduction in power if radar is not pointed directly at the sun.
+//
+// This curve must be determined experimentally by performing a box scan 
+//   around the sun. We assume a uniform reduction in power as we move 
+//   away from the sun center in any direction. The angular_offset values 
+//   must start at 0 and increase through the list.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double angular_offset_deg;
+//      double power_reduction_db;
+//   }
+//
+// 1D array - variable length.
+//
+
+power_reduction_curve = {
+  {
+    angular_offset_deg = 0.1,
+    power_reduction_db = -0.2
+  }
+  ,
+  {
+    angular_offset_deg = 0.18,
+    power_reduction_db = -0.36
+  }
+  ,
+  {
+    angular_offset_deg = 0.23,
+    power_reduction_db = -0.6
+  }
+  ,
+  {
+    angular_offset_deg = 0.32,
+    power_reduction_db = -1.25
+  }
+  ,
+  {
+    angular_offset_deg = 0.42,
+    power_reduction_db = -2.15
+  }
+  ,
+  {
+    angular_offset_deg = 0.51,
+    power_reduction_db = -3.25
+  }
+  ,
+  {
+    angular_offset_deg = 0.57,
+    power_reduction_db = -4
+  }
+  ,
+  {
+    angular_offset_deg = 0.68,
+    power_reduction_db = -5.4
+  }
+  ,
+  {
+    angular_offset_deg = 0.72,
+    power_reduction_db = -6.25
+  }
+  ,
+  {
+    angular_offset_deg = 0.78,
+    power_reduction_db = -7.2
+  }
+  ,
+  {
+    angular_offset_deg = 0.84,
+    power_reduction_db = -8.2
+  }
+  ,
+  {
+    angular_offset_deg = 0.88,
+    power_reduction_db = -9.1
+  }
+  ,
+  {
+    angular_offset_deg = 0.91,
+    power_reduction_db = -10.3
+  }
+  ,
+  {
+    angular_offset_deg = 0.96,
+    power_reduction_db = -11.3
+  }
+  ,
+  {
+    angular_offset_deg = 1,
+    power_reduction_db = -12.6
+  }
+  ,
+  {
+    angular_offset_deg = 1.07,
+    power_reduction_db = -13.6
+  }
+  ,
+  {
+    angular_offset_deg = 1.13,
+    power_reduction_db = -15
+  }
+  ,
+  {
+    angular_offset_deg = 1.21,
+    power_reduction_db = -16.2
+  }
+  ,
+  {
+    angular_offset_deg = 1.28,
+    power_reduction_db = -18
+  }
+  ,
+  {
+    angular_offset_deg = 1.32,
+    power_reduction_db = -19.3
+  }
+  ,
+  {
+    angular_offset_deg = 1.38,
+    power_reduction_db = -20
+  }
+};
+
+///////////// max_angle_offset_for_power_estimation ///
+//
+// Max angular offset for valid observation (deg).
+//
+// For power estimation purposes, we will only consider angular offsets 
+//   up to this limit.
+//
+//
+// Type: double
+//
+
+max_angle_offset_for_power_estimation = 0.7;
+
+///////////// max_angle_offset_for_pointing_estimation 
+//
+// Max angular offset for estimating antenna pointing error (deg).
+//
+// For pointing estimation purposes, we will only consider angular 
+//   offsets up to this limit.
+//
+//
+// Type: double
+//
+
+max_angle_offset_for_pointing_estimation = 1;
+
+///////////// theoretical_max_dbmhc ///////////////////
+//
+// Theoretical max H co-polar power likely to be observed (dBm).
+//
+// When computing pointing statistics, we want to give more weight to 
+//   the higher observed powers. This max value tells us how to weight the 
+//   observed angle offsets for computing antenna pointing accuracy.
+//
+//
+// Type: double
+//
+
+theoretical_max_dbmhc = -97;
+
+//======================================================================
+//
+// SUN NOISE SOURCE DETECTION.
+//
+// The sun appears to the radar as an incoherent and unpolarized noise 
+//   source. Therefore we can use noise detection to identify rays that 
+//   show sun spikes.
+//
+//======================================================================
+ 
+///////////// noise_ngates_kernel /////////////////////
+//
+// Number of gates over which the noise detection feature fields are 
+//   computed.
+//
+// To identify noise at a gate, we accumulate the phase change in range 
+//   for the entire ray. We then assume that the phase change will be 
+//   linear in a local sense, i.e. within some region around each gate. 
+//   This parameter specifies the length of the assumed linear region. The 
+//   phase change error is computed as the mean absolute error between the 
+//   actual accumulated phase change and the linear fit to the phase 
+//   change over the local region. NOTE - this number should be odd.
+//
+//
+// Type: int
+//
+
+noise_ngates_kernel = 9;
+
+///////////// noise_min_ngates_for_ray_median /////////
+//
+// Min number of gates for computing median noise on a ray.
+//
+// In order to compute median noise for a ray, we require noise to be 
+//   detected at at least this number of gates.
+//
+//
+// Type: int
+//
+
+noise_min_ngates_for_ray_median = 200;
+
+//======================================================================
+//
+// INTEREST MAPS and WEIGHTS for NOISE LOCATION.
+//
+// Each map should hold at least 2 points. The points should be 
+//   increasing in value, i.e. the value should increase for each 
+//   subsequent point. The various interest values are combined using the 
+//   specified weights in a weighted mean to produce the final interest 
+//   value.
+//
+//======================================================================
+ 
+///////////// phase_change_error_for_noise_interest_map 
+//
+// Interest mapping for phase change for noise.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+phase_change_error_for_noise_interest_map = {
+  {
+    value = 35,
+    interest = 0.001
+  }
+  ,
+  {
+    value = 45,
+    interest = 1
+  }
+};
+
+///////////// phase_change_error_for_noise_interest_weight 
+//
+// Weight for interest for phase change error - for noise.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+phase_change_error_for_noise_interest_weight = 1;
+
+///////////// dbm_sdev_for_noise_interest_map /////////
+//
+// Interest mapping for sdev of dbm for noise.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+dbm_sdev_for_noise_interest_map = {
+  {
+    value = 0.65,
+    interest = 1
+  }
+  ,
+  {
+    value = 0.75,
+    interest = 0.001
+  }
+};
+
+///////////// dbm_sdev_for_noise_interest_weight //////
+//
+// Weight for interest for sdev of dbm - for noise.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+dbm_sdev_for_noise_interest_weight = 1;
+
+///////////// ncp_mean_for_noise_interest_map /////////
+//
+// Interest mapping for mean of ncp for noise.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+ncp_mean_for_noise_interest_map = {
+  {
+    value = 0.1,
+    interest = 1
+  }
+  ,
+  {
+    value = 0.2,
+    interest = 0.001
+  }
+};
+
+///////////// ncp_mean_for_noise_interest_weight //////
+//
+// Weight for interest for sdev of dbm - for noise.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+ncp_mean_for_noise_interest_weight = 1;
+
+///////////// interest_threshold_for_noise ////////////
+//
+// Threshold interest value for identifying noise.
+//
+// If the fuzzy interest value exceeds this threshold, noise is assumed 
+//   to exist at that gate.
+//
+//
+// Type: double
+//
+
+interest_threshold_for_noise = 0.51;
+
+//======================================================================
+//
+// WRITE RESULTS.
+//
+//======================================================================
+ 
+///////////// write_results_to_spdb ///////////////////
+//
+// Option to write out analysis results to SPDB.
+//
+// The results will be written in XML, stored in SPDB. The data can then 
+//   be retrieved for plotting or other purposes.
+//
+//
+// Type: boolean
+//
+
+write_results_to_spdb = TRUE;
+
+///////////// spdb_output_url /////////////////////////
+//
+// URL for writing results to SPDB XML.
+//
+// For local writes, specify the directory. For remote writes, specify 
+//   the full url: spdbp:://host::dir.
+//
+//
+// Type: string
+//
+
+spdb_output_url = "/tmp/spdb/radx_sun_mon";
+

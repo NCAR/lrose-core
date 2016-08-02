@@ -1,0 +1,160 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// paramter definitions mdv_thin
+//
+// Gary Cunning, RAP, NCAR
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Thu Mar  2 14:12 2000
+//
+
+commentdef
+{
+  p_header = "Program name: mdv_thin";
+  p_text = "mdv_thin reduces and synchronizes a datastream.";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "debugging flag";
+} debug;
+
+paramdef string
+{
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum
+{
+  REALTIME=0, 
+  ARCHIVE,
+  INTERVAL_REALTIME,
+  INTERVAL_ARCHIVE,
+  TRIGGER_REALTIME,
+  TRIGGER_ARCHIVE
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Mode of operation";
+  p_help = "In REALTIME mode the program triggers when a new file appears "
+           "in the inputUrl.\n"
+           "In ARCHIVE mode the program is triggered for all files in the "
+           "inputUrl between the specified start and end times.\n"
+           "In INTERVAL_REALTIME mode the program triggers at the specified "
+           "intervalSecs and intervalStartSecs.\n"
+           "In INTERVAL_ARCHIVE mode the program triggers at the specified "
+           "intervalSecs between the specified start and end times. "
+           "In this mode, the first trigger will be exactly at the specified "
+           "start time.\n"
+	   "In TRIGGER_REALTIME mode the program triggers from a URL.\n"
+	   "In TRIGGER_ARCHIVE mode the program triggers from a URL.\n";
+  p_default = REALTIME;
+} runMode;
+
+paramdef string
+{
+  p_descr = "input URL";
+  p_default = "mdvp:://localhost::mdv/input";
+} inputUrl;
+
+paramdef long
+{
+  p_descr = "Number of seconds between program triggering";
+  p_help = "Used only if runMode is set to INTERVAL_REALTIME or "
+           "INTERVAL_ARCHIVE.";
+  p_min = 1;
+  p_default = 300;
+} intervalSecs;
+
+paramdef long
+{
+  p_descr = "Number of seconds after the hour for the first program "
+            "triggering.";
+  p_help = "Used only if runMode is set to INTERVAL_REALTIME.";
+  p_default = 0;
+} intervalStartSecs;
+
+paramdef long
+{
+  p_descr = "Number of seconds to sleep before between heartbeats while"
+            "waiting to trigger.";
+  p_help = "Used only if runMode is set to INTERVAL_REALTIME.";
+  p_default = 90;
+} sleepSecs;
+
+paramdef string
+{
+  p_descr = "trigger URL";
+  p_default = "mdvp:://localhost::mdv/input";
+} triggerUrl;
+
+typedef enum
+{
+  READ_LAST=0, 
+  READ_CLOSEST,
+  READ_FIRST_BEFORE,
+  READ_FIRST_AFTER
+} read_search_mode_t;
+
+paramdef enum read_search_mode_t
+{
+  p_descr = "Read search mode";
+  p_default = READ_CLOSEST;
+} readSearchMode;
+
+paramdef string
+{
+  p_descr = "output URL";
+  p_default = "mdvp:://localhost::mdv/output";
+} outputUrl;
+
+paramdef int
+{
+  p_descr = "Maximum valid age for realtime data.";
+  p_default = 1800;
+} maxValidAge;
+
+paramdef int
+{
+  p_descr = "Minimum number of seconds allowed between data volumes.";
+  p_default = 600;
+} minDataInterval;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to update the output file time to "
+            "match the trigger time.";
+  p_help = "If true, the output file time will be time stamped with the "
+           "trigger time. "
+           "If false, the output file time will match the input file time.\n"
+           "Note that setting this option to true in REALTIME or ARCHIVE "
+           "modes will have no effect because the trigger time is the "
+           "data time in this modes.\n";
+  p_default = false;
+} updateOutputFileTime;

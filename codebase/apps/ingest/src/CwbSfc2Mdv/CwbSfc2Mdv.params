@@ -1,0 +1,175 @@
+/**********************************************************************
+ * TDRP params for CwbSfc2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// CwbSfc2Mdv reads netcdf files of radar mosaic data from nssl 
+//   (possibly retrieved with the script nsslRetrieve) and writes MDV 
+//   data.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// INPUT/OUTPUT.
+//
+//======================================================================
+ 
+///////////// InDir ///////////////////////////////////
+//
+// Input directory.
+// Directory path for nssl netCDF data files.
+// Type: string
+//
+
+InDir = "./";
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+// If string is NULL, all extensions are valid.
+// Type: string
+//
+
+fileExtension = "";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// use_ldata_info //////////////////////////
+//
+// Use _latest_data_info.
+// If false, will scan the directory for new files.
+// Type: boolean
+//
+
+use_ldata_info = TRUE;
+
+///////////// writeLdataInfo //////////////////////////
+//
+// Write _latest_data_info files for output files.
+// If false, will suppress writing of _latest_data_info files.
+// Type: boolean
+//
+
+writeLdataInfo = TRUE;
+
+///////////// outUrl //////////////////////////////////
+//
+// Output URL to write MDV data to, in form:
+// mdvp:://host.dom::dir/dir.
+// Set to where output MDV data should be written.
+// Type: string
+//
+
+//outUrl = "$(RAP_DATA_DIR)/$(PROJECT)/mdv/GT_Official";
+outUrl = "$(RAP_DATA_DIR)/$(PROJECT)/mdv/GT_STMAS";
+
+///////////// encoding_type ///////////////////////////
+//
+// Set encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+encoding_type = ENCODING_FLOAT32;
+
+///////////// compression_type ////////////////////////
+//
+// Set compression type.
+//
+// Type: enum
+// Options:
+//     COMPRESSION_NONE
+//     COMPRESSION_ZLIB
+//     COMPRESSION_BZIP
+//     COMPRESSION_GZIP
+//
+
+compression_type = COMPRESSION_GZIP;
+
+///////////// Expiry //////////////////////////////////
+//
+// Time before data expire, seconds.
+// Default is half an hour.
+// Type: int
+//
+
+Expiry = 1800;
+
+//======================================================================
+//
+// FILE TYPE SPECIFICATIONS.
+//
+//======================================================================
+
+///////////// input_field_list ////////////////////////
+//
+// List of input fields to process.
+// Type: string
+// 1D array - variable length.
+//
+
+input_field_list = { "t",
+                     "dpt",
+                     "rh",
+                     "uw",
+                     "vw"  };
+
+

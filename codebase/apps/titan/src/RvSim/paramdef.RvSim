@@ -1,0 +1,280 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions RvSim
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// March 2003
+
+commentdef {
+  p_header = "Program name: RvSim";
+  p_text = "RvSim simulates raw IQ data with multiple trips and writes it to a netCDF file.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "GATE-BY_GATE POWER,VEL,WIDTH";
+}
+
+typedef enum {
+  SPECIFY_DATA, RANDOM_DATA
+} data_mode_t;
+
+paramdef enum data_mode_t {
+  p_default = SPECIFY_DATA;
+  p_descr = "How data is generated.";
+  p_help = "If SPECIFY_DATA, use trip 1 and 2 moments as specified in gate_data[] array. If RANDOM_DATA, randomly generate power, velocity and width data.";
+} data_mode;
+
+typedef struct {
+  double trip1_dbm;
+  double trip1_vel;
+  double trip1_width;
+  double trip2_dbm;
+  double trip2_vel;
+  double trip2_width;
+} gate_data_t;
+
+paramdef struct gate_data_t {
+  p_default = {
+    { -33, 10.0, 3.0, -50, -5.0, 4.0 }
+  };
+  p_desription = "The first and second trip data for each gate.";
+  p_help = "The length of this array specifies the number of gates.";
+} gate_data[];
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Number of samples per beam.";
+} nsamples;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of beams in generated data.";
+  p_help = "Only used for RANDOM_DATA. For SPECIFY_DATA, nbeams is 1.";
+} nbeams;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of gates in generated data.";
+  p_help = "Only used for RANDOM_DATA. For SPECIFY_DATA, ngates is 1.";
+} ngates;
+
+paramdef double {
+  p_default = -90;
+  p_descr = "Low limit of trip1 power (dbm).";
+  p_help = "RANDOM_DATA only.";
+} random_dbm1_low;
+
+paramdef double {
+  p_default = -30;
+  p_descr = "High limit of trip1 power (dbm).";
+  p_help = "RANDOM_DATA only.";
+} random_dbm1_high;
+
+paramdef double {
+  p_default = -50;
+  p_descr = "Low limit of power diff (trip1 - trip2) (dbm).";
+  p_help = "RANDOM_DATA only.";
+} random_dbm_diff_low;
+
+paramdef double {
+  p_default = 50;
+  p_descr = "high limit of power diff (trip1 - trip2) (dbm).";
+  p_help = "RANDOM_DATA only.";
+} random_dbm_diff_high;
+
+paramdef double {
+  p_default = -20;
+  p_descr = "Low limit of trip1 velocity (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_vel1_low;
+
+paramdef double {
+  p_default = 20;
+  p_descr = "High limit of trip1 velocity (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_vel1_high;
+
+paramdef double {
+  p_default = -20;
+  p_descr = "Low limit of trip1 velocity (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_vel2_low;
+
+paramdef double {
+  p_default = 20;
+  p_descr = "High limit of trip1 velocity (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_vel2_high;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Low limit of trip1 width (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_width1_low;
+
+paramdef double {
+  p_default = 6.0;
+  p_descr = "High limit of trip1 width (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_width1_high;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Low limit of trip2 width (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_width2_low;
+
+paramdef double {
+  p_default = 6.0;
+  p_descr = "High limit of trip2 width (m/s).";
+  p_help = "RANDOM_DATA only.";
+} random_width2_high;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to simulate noise with the exponential function.";
+  p_help = "If FALSE a smooth gaussian is produced. If TRUE, the data is exponentially disctibuted about the the gaussian.";
+} use_exponential;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Mean of exponential distribution.";
+} exponential_lambda;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the phase to 0.";
+  p_help = "This has the effect of generating only real parts.";
+} force_zero_phase;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Apply phase codes to the IQ data.";
+} apply_phase_codes;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Index of phase shift for first pulse in file.";
+  p_help = "The pulses repeat their phases on a 32-phase cycle. In the program we compute the phase table. This is the index into that table of the first pulse in the file. This therefore applies to trip1. The transmitted phase of other pulses are determined by their position in the array of pulses in the file.";
+} trip1_phase_index;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to multiple phase codes by -1.";
+  p_help = "In some data sets the phase codes are negated. Set this to true for such data cases.";
+} negate_phase_codes;
+
+commentdef {
+  p_header = "RADAR AND SCAN DETAILS.";
+}
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "The wavelength of the radar (cm)";
+} wavelength;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "The PRT of the data (miscro-secs)";
+} prt;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "The start gate number in the data set";
+} start_gate;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "The starting azimuith for the data (deg)";
+} start_az;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "The delta azimuth between samples (deg)";
+} delta_az;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "The elevation angle of the data (deg)";
+} elevation;
+
+paramdef double {
+  p_default = 1.0e-6;
+  p_descr = "Receiver noise (watts)";
+} receiver_noise;
+
+commentdef {
+  p_header = "TRUTH DATA OPTIONS.";
+}
+
+typedef enum {
+  THEORETICAL_TRUTH, FFT_TRUTH, PP_TRUTH
+} truth_method_t;
+
+paramdef enum truth_method_t {
+  p_default = THEORETICAL_TRUTH;
+  p_descr = "Specifies how truth data is determined.";
+  p_help = "THEORETICAL_TRUTH: the theoretical values of p, v amd w used to simulate the spectra. PP_TRUTH: the pulse-pair estimates of the moments. FFT_TRUTH - the spectral estimates of the moments.";
+} truth_method;
+
+commentdef {
+  p_header = "OUTPUT FILE.";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory for NetCDF files.";
+} output_dir;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of output files.";
+  p_help = "You can choose to write multiple output files. This allows you to keep the size of each file down, which saves on memory usage because the entire netCDF file must be kept in memory. See output_file_name for details on file naming.";
+} n_files;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Name of output file.";
+  p_help = "The .nc extension is added to this name. If n_files is greater than 1, the file number is added to the name between the name and the extension.";
+} output_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write _latest_data_info file in output dir.";
+  p_help = "If TRUE, _latest_data_info is written to the output directory.";
+} write_ldata_info_file;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write various gate spectra to ASCII files.";
+  p_help = "If true, spectra are written to files in directory spectra_output_dir.";
+} write_spectra_files;
+
+paramdef string {
+  p_default = "./spectra";
+  p_descr = "Spectra file directory.";
+  p_help = "See 'write_spectra_files.";
+} spectra_output_dir;
+

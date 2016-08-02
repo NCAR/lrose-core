@@ -1,0 +1,234 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for Taf2Spdb
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Oct 2009
+
+commentdef {
+  p_header = "Program name: Taf2Spdb";
+  p_text = "Taf2Spdb reads TAF data (Terminal Aerodrome Forecasts) from text files and stores it in an SPDB data base in XML or ASCII format.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print decoding problems to stderr.";
+  p_help = "Turn this on if you want to log these problems in detail or if you want to run Taf2Spdb.pl to generate statistics.";
+} print_decode_problems_to_stderr;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "OPERATIONAL MODE.";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "REALTIME mode - waits for new data. ARCHIVE mode - finds files between start and end times. FILELIST mode - uses file list from -f on command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "raw/aftn";
+  p_descr = "Name of input data directory.";
+  p_help = "ASCII input files are stored in this directory.";
+} input_dir_path;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Max age of input data";
+  p_help = "For REALTIME only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+typedef enum {
+  GTS = 1,
+  AFTN = 2,
+  CAF = 3,
+  CWB_CAF = 4
+} taf_format_t;
+
+paramdef enum taf_format_t {
+  p_default = GTS;
+  p_descr = "taf format : AFTN, GTS, CAF or CWB_CAF";
+  p_help = "Set to the format appropriate for the input stream. GTS: Global Telecommunications System. AFTN: Aeronautical Fixed Telecommunication Network. CAF - Received directly from the Taiwan air force. CWB_CAF: CAF data received via the Central Weather Bureau in Taiwan.";
+} taf_format;
+
+commentdef {
+  p_header = "STATION LOCATIONS.";
+}
+
+paramdef char* {
+  p_default = {"./station_location.txt"};
+  p_descr = "Path to station location file.";
+  p_help = "Used to determine the location of station identifiers. The station location file should contain a station identification followed by the latitude and longitude for each station.";
+} station_location_path;
+
+commentdef {
+  p_header = "FILTERING STATIONS BASED ON NAME.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the acceptedStations list (below)";
+  p_help = "Only accept stations in this list.";
+} useAcceptedStationsList;
+
+paramdef string {
+  p_default = {
+    "RCTP", "RCFG", "RCSS", "RCGM", "RCNO", "RCQC", "RCBS"
+  };
+  p_descr = "List of accepted station IDs";
+  p_help = "If a station is not on this list, it is not stored.";
+} acceptedStations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the rejectedStations list (below)";
+  p_help = "Reject stations in this list.";
+} useRejectedStationsList;
+
+paramdef string {
+  p_default = {
+    "RCFN", "RCAY", "RCQS", "RCFS","RCMT"
+  };
+  p_descr = "List of rejected station IDs";
+  p_help = "If a station is not on this list, it is not stored.";
+} rejectedStations[];
+
+commentdef {
+  p_header = "ASCII OUTPUT.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to store in ascii format.";
+  p_help = "If TRUE, ascii data is stored using the ascii_output_url.";
+} store_ascii_format;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include header with the TAF.";
+  p_help = "Sometimes there is a header, starting with FT, at the start of a TAF block. If store_header is true, the header is added to the start of the TAF message before storing it.";
+} store_header;
+
+paramdef string {
+  p_descr = "Output SPDB URL for ascii data.";
+  p_help = "Used if 'store_ascii_format' is TRUE.";
+  p_default = "spdb/ascii_taf";
+} ascii_output_url;
+
+paramdef int {
+  p_descr = "Data expire seconds - ASCII data";
+  p_help = "Number of seconds the data is valid before it should be expired.";
+  p_default = 10800;
+} ascii_expire_secs;
+
+typedef enum
+{
+  CANCEL_MSG_OVERWRITES_ORIGINAL_MSG,
+  CANCEL_MSG_ADDED_WITH_ORIGINAL_VALID_TIME,
+  CANCEL_MSG_ADDED_WITH_ISSUE_TIME_AS_VALID_TIME
+} cancel_msg_handling_t;
+
+paramdef enum cancel_msg_handling_t
+{
+  p_default = CANCEL_MSG_OVERWRITES_ORIGINAL_MSG;
+  p_descr = "How to process cancel (CNL) messages in the ASCII database.";
+  p_help = "\tCANCEL_MSG_OVERWRITES_ORIGINAL_MSG - "
+           "When a cancel message is received, it overwrites "
+           "the original TAF that it is cancelling, so the original "
+           "message no longer exists in the ASCII database. "
+           "In this case, the valid time of the cancel message "
+           "is the same as the valid time of the original "
+           "message.\n"
+           "\tCANCEL_MSG_ADDED_WITH_ORIGINAL_VALID_TIME - "
+           "The cancel message is added to the ASCII database using "
+           "the valid time of the original message as the valid "
+           "time of the cancel message. "
+           "The original message stays in the database so requests "
+           "to the database will receive both messages.\n"
+           "\tCANCEL_MSG_ADDED_WITH_ISSUE_TIME_AS_VALID_TIME - "
+           "The cancel message is added to the ASCII database using "
+           "the cancel message's issue time as the valid time. "
+           "The original message is left unchanged in the database "
+           "and the cancel message will have a later valid time so "
+           "it will be the message returned from a \"latest\" "
+           "request.\n";
+} ascii_cancel_msg_handling;
+
+commentdef {
+  p_header = "XML OUTPUT.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to store in decoded format in XML.";
+  p_help = "If TRUE, decoded data is stored using the xml_output_url.";
+} store_xml_format;
+
+paramdef string {
+  p_descr = "Output SPDB URL for XML format.";
+  p_help = "Used if 'store_xml_format' is TRUE.";
+  p_default = "spdb/xml_taf";
+} xml_output_url;
+
+paramdef string {
+  p_descr = "Input URL for cancelling.";
+  p_help = "To cancel a sigmet we read in from this URL, set the cancel flag, and then overwrite to decoded_output_url. This is done because the output_url may sometimes be a distribution URL, and we do not want to read from those.";
+  p_default = "spdb/xml_taf";
+} cancel_input_url;
+
+paramdef boolean {
+  p_descr = "Flag indicating whether to process TAFs with a missing issue "
+            "time value.";
+  p_help = "If set to true, TAFs that are missing the issue time field will "
+           "be processed and the issue time will be set to the time in the "
+           "WMO header for the TAF.";
+  p_default = false;
+} process_tafs_with_missing_issue_times;

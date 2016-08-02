@@ -1,0 +1,236 @@
+/**********************************************************************
+ * TDRP params for asdiVector2mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// asdiVector2mdv is a program that ingests the SPDB vector
+// data written by asdi2Vector and writes a gridded field of aircraft
+// tracks. A two dimensional field is always output - for this
+// case, the output is altitude. Optionally a three dimensional
+// field can be output as well - in this case, the output is
+// simply a count of how many aircraft passed over the grid
+// point.
+
+// Niles Oien July 2004.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// Input SPDB url, of form spdbp:://host.domain:[port]:dir/dir .
+// Vector data are read from here.
+// Type: string
+//
+
+input_url = "spdbp:://localhost::spdb/asdi";
+
+///////////// output_url //////////////////////////////
+//
+// Output MDV url, of form mdvp:://host.domain:[port]:dir/dir .
+// Gridded data are written here.
+// Type: string
+//
+
+output_url = "mdvp:://localhost::mdv/asdiGrid";
+
+///////////// lookBack ////////////////////////////////
+//
+// Time to look back by, seconds.
+// Determines temporal extent of grid.
+// Type: int
+//
+
+lookBack = 900;
+
+///////////// outputInterval //////////////////////////
+//
+// Output interval, seconds.
+// Data are output this often. Should be less than or
+// equal to lookBack time.
+// Type: int
+//
+
+outputInterval = 900;
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+// Type: boolean
+//
+
+debug = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "asdi";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = REALTIME;
+
+///////////// output3D ////////////////////////////////
+//
+// Option to output a three dimensional field.
+// Uses much more memory.
+// Type: boolean
+//
+
+output3D = FALSE;
+
+///////////// timestamp ///////////////////////////////
+//
+// How to timestamp the data.
+// Controls if data are timestamped wit the start,
+// middle or end of the time interval.
+//
+// Type: enum
+// Options:
+//     TIMESTAMP_START
+//     TIMESTAMP_MIDDLE
+//     TIMESTAMP_END
+//
+
+timestamp = TIMESTAMP_END;
+
+//======================================================================
+//
+// OUTPUT GRID DEFINITION.
+//
+//======================================================================
+ 
+///////////// output_projection ///////////////////////
+//
+// Projection of output grid.
+// FLAT - (x,y) Cartesian data in km from a given origin.
+// LATLON - lat/lon grid with constant grid spacing.
+//
+// Type: enum
+// Options:
+//     OUTPUT_PROJ_FLAT
+//     OUTPUT_PROJ_LATLON
+//
+
+output_projection = OUTPUT_PROJ_LATLON;
+
+///////////// output_origin ///////////////////////////
+//
+// Origin of output grid.
+// Used with OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+output_origin = { 25, -125 };
+
+///////////// output_grid /////////////////////////////
+//
+// Output grid parameters.
+// The grid params for the output grid.
+//
+// Type: struct
+//   typedef struct {
+//      long nx;
+//      long ny;
+//      long nz;
+//      double minx;
+//      double miny;
+//      double minz;
+//      double dx;
+//      double dy;
+//      double dz;
+//   }
+//
+//
+
+output_grid = { 1200, 500, 15, -125, 25, 0.5, 0.05, 0.05, 1 };
+
+///////////// altsInKm ////////////////////////////////
+//
+// Option to use Km for altitude.
+// If not set, Flight Level units are used..
+// Type: boolean
+//
+
+altsInKm = TRUE;
+
+///////////// takeZeroAsBadValue //////////////////////
+//
+// Option to take 0 as the bad value in MDV.
+// Generally useful for display purposes.
+// Type: boolean
+//
+
+takeZeroAsBadValue = TRUE;
+
+///////////// takeMaximumAlt //////////////////////////
+//
+// Option to take the maximum altitude in the
+// 2D grid at points for which two tracks cross.
+// This is usually true. If false, the
+// minimum altidue is taken.
+// Type: boolean
+//
+
+takeMaximumAlt = TRUE;
+
+///////////// applyQCtests ////////////////////////////
+//
+// Option to apply a test to the altitude, speed
+// and the distance between reports.
+// Default is to do this.
+// Type: boolean
+//
+
+applyQCtests = TRUE;
+
+///////////// maxDist /////////////////////////////////
+//
+// Maximum allowable distance between two ASDI reports, Km.
+// Relevant only if applyQCtests is TRUE.
+// Type: double
+//
+
+maxDist = 300;
+
+///////////// maxAlt //////////////////////////////////
+//
+// Maximum allowable altitude, Km.
+// Relevant only if applyQCtests is TRUE.
+// Type: double
+//
+
+maxAlt = 15;
+
+///////////// maxSpeed ////////////////////////////////
+//
+// Maximum allowable speed, Km/Hr.
+// Relevant only if applyQCtests is TRUE.
+// Type: double
+//
+
+maxSpeed = 1500;
+

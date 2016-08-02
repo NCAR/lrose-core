@@ -1,0 +1,63 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:        angles
+# Required-Start:  $network $remote_fs $syslog
+# Required-Stop:   $network $remote_fs $syslog
+# Default-Start:   2 3 4 5
+# Default-Stop:    0 1 6
+# Short-Description: Start NTP daemon
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/opt/bin
+
+. /lib/lsb/init-functions
+
+export PROCMAP_HOST=localhost
+NAME=SpolS2DAngles
+DAEMON=/opt/bin/SpolS2DAngles
+PIDFILE=/var/run/angles.pid
+
+test -x $DAEMON || exit 5
+
+if [ -e /opt/bin/SpolS2DAngles ]; then
+	ANGLE_OPTS="/opt/bin/SpolS2DAngles -params /opt/params/SpolS2DAngles.lab -daemonize"
+fi
+
+RUNASUSER=root
+UGID=$(getent passwd $RUNASUSER | cut -f 3,4 -d:) || true
+
+case $1 in
+	start)
+		log_daemon_msg "Starting angles app" "SpolS2DAngles"
+		if [ -z "$UGID" ]; then
+			log_failure_msg "user \"$RUNASUSER\" does not exist"
+			exit 1
+		fi
+  		start-stop-daemon --start --oknodo --name $NAME --startas $DAEMON -- -u $UGID $ANGLE_OPTS
+		log_end_msg $?
+  		;;
+	stop)
+		log_daemon_msg "Stopping angles app" "SpolS2DAngles"
+  		start-stop-daemon --stop --quiet --oknodo --name $NAME
+		log_end_msg $?
+		rm -f $PIDFILE
+  		;;
+	restart|force-reload)
+		$0 stop && sleep 2 && $0 start
+  		;;
+	status)
+		pidofproc -p $PIDFILE $DAEMON >/dev/null
+		status=$?
+		if [ $status -eq 0 ]; then
+			log_success_msg "NTP server is running."
+		else
+			log_failure_msg "NTP server is not running."
+		fi
+		exit $status
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart|try-restart|force-reload|status}"
+		exit 2
+		;;
+esac

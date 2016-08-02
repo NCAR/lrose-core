@@ -1,0 +1,404 @@
+/**********************************************************************
+ * TDRP params for Taf2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: Taf2Spdb.
+//
+// Taf2Spdb reads TAF data (Terminal Aerodrome Forecasts) from text 
+//   files and stores it in an SPDB data base in XML or ASCII format.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// print_decode_problems_to_stderr /////////
+//
+// Option to print decoding problems to stderr.
+// Turn this on if you want to log these problems in detail or if you 
+//   want to run Taf2Spdb.pl to generate statistics.
+// Type: boolean
+//
+
+print_decode_problems_to_stderr = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// OPERATIONAL MODE.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operational mode.
+// REALTIME mode - waits for new data. ARCHIVE mode - finds files 
+//   between start and end times. FILELIST mode - uses file list from -f 
+//   on command line.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir_path //////////////////////////
+//
+// Name of input data directory.
+// ASCII input files are stored in this directory.
+// Type: string
+//
+
+input_dir_path = "raw/aftn";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For REALTIME only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+///////////// taf_format //////////////////////////////
+//
+// taf format : AFTN, GTS, CAF or CWB_CAF.
+// Set to the format appropriate for the input stream. GTS: Global 
+//   Telecommunications System. AFTN: Aeronautical Fixed Telecommunication 
+//   Network. CAF - Received directly from the Taiwan air force. CWB_CAF: 
+//   CAF data received via the Central Weather Bureau in Taiwan.
+//
+// Type: enum
+// Options:
+//     GTS
+//     AFTN
+//     CAF
+//     CWB_CAF
+//
+
+taf_format = GTS;
+
+//======================================================================
+//
+// STATION LOCATIONS.
+//
+//======================================================================
+ 
+///////////// station_location_path ///////////////////
+//
+// Path to station location file.
+// Used to determine the location of station identifiers. The station 
+//   location file should contain a station identification followed by the 
+//   latitude and longitude for each station.
+// Type: string
+//
+
+station_location_path = "./world_arp.loc";
+
+//======================================================================
+//
+// FILTERING STATIONS BASED ON NAME.
+//
+//======================================================================
+ 
+///////////// useAcceptedStationsList /////////////////
+//
+// Set to TRUE to use the acceptedStations list (below).
+// Only accept stations in this list.
+// Type: boolean
+//
+
+useAcceptedStationsList = FALSE;
+
+///////////// acceptedStations ////////////////////////
+//
+// List of accepted station IDs.
+// If a station is not on this list, it is not stored.
+// Type: string
+// 1D array - variable length.
+//
+
+acceptedStations = { "RCTP", "RCFG", "RCSS", "RCGM", "RCNO", "RCQC", "RCBS" };
+
+///////////// useRejectedStationsList /////////////////
+//
+// Set to TRUE to use the rejectedStations list (below).
+// Reject stations in this list.
+// Type: boolean
+//
+
+useRejectedStationsList = FALSE;
+
+///////////// rejectedStations ////////////////////////
+//
+// List of rejected station IDs.
+// If a station is not on this list, it is not stored.
+// Type: string
+// 1D array - variable length.
+//
+
+rejectedStations = { "RCFN", "RCAY", "RCQS", "RCFS", "RCMT" };
+
+//======================================================================
+//
+// ASCII OUTPUT.
+//
+//======================================================================
+ 
+///////////// store_ascii_format //////////////////////
+//
+// Option to store in ascii format.
+// If TRUE, ascii data is stored using the ascii_output_url.
+// Type: boolean
+//
+
+store_ascii_format = TRUE;
+
+///////////// store_header ////////////////////////////
+//
+// Option to include header with the TAF.
+// Sometimes there is a header, starting with FT, at the start of a TAF 
+//   block. If store_header is true, the header is added to the start of 
+//   the TAF message before storing it.
+// Type: boolean
+//
+
+store_header = FALSE;
+
+///////////// ascii_output_url ////////////////////////
+//
+// Output SPDB URL for ascii data.
+// Used if 'store_ascii_format' is TRUE.
+// Type: string
+//
+
+ascii_output_url = "./output/spdb/ascii_taf";
+
+///////////// ascii_expire_secs ///////////////////////
+//
+// Data expire seconds - ASCII data.
+// Number of seconds the data is valid before it should be expired.
+// Type: int
+//
+
+ascii_expire_secs = 10800;
+
+//======================================================================
+//
+// XML OUTPUT.
+//
+//======================================================================
+ 
+///////////// store_xml_format ////////////////////////
+//
+// Option to store in decoded format in XML.
+// If TRUE, decoded data is stored using the xml_output_url.
+// Type: boolean
+//
+
+store_xml_format = TRUE;
+
+///////////// xml_output_url //////////////////////////
+//
+// Output SPDB URL for XML format.
+// Used if 'store_xml_format' is TRUE.
+// Type: string
+//
+
+xml_output_url = "./output/spdb/xml_taf";
+
+///////////// cancel_input_url ////////////////////////
+//
+// Input URL for cancelling.
+// To cancel a sigmet we read in from this URL, set the cancel flag, and 
+//   then overwrite to decoded_output_url. This is done because the 
+//   output_url may sometimes be a distribution URL, and we do not want to 
+//   read from those.
+// Type: string
+//
+
+cancel_input_url = "./output/spdb/xml_taf";
+
+///////////// xml_expire_secs /////////////////////////
+//
+// Data expire seconds - XML data.
+// Number of seconds the data is valid before it should be expired.
+// Type: int
+//
+
+xml_expire_secs = 10800;
+
+//======================================================================
+//
+// DECODING SPECIFICS.
+//
+//======================================================================
+ 
+///////////// bogus_stations //////////////////////////
+//
+// List of bogus stations.
+// Only used in station decoding.
+// Type: string
+// 1D array - variable length.
+//
+
+bogus_stations = { "ABV", "AND", "AREA", "AT", "BLO", "BLW", "BOT", "BOUNDED", "BTN", "BUT", "BY", "CHG", "CTA", "DUE", "FROM", "GND", "ICING", "INTSF", "KMH", "KTS", "LIN", "LINE", "METEO-SAT", "MOV", "OBS", "OBS/FCST", "OF", "ON", "OR", "OVER", "SAN", "SLW", "STNR", "THE", "TO", "TOP", "TOPS", "UNTIL", "UTC", "VALID", "WHOLE", "WKN", "WTN" };
+
+///////////// wx_translator ///////////////////////////
+//
+// Translation of message wx text into official text.
+// Some messages contain non-standard weather text. For example, the 
+//   message may contain the text MDT TURB instead of MOD TURB. This array 
+//   allows for the translation of message text into standard text. This 
+//   list should include all the standard wx types as well as non-standard 
+//   ones.
+//
+// Type: struct
+//   typedef struct {
+//      string message_text;
+//      string standard_text;
+//   }
+//
+// 1D array - variable length.
+//
+
+wx_translator = {
+  { "TROPICAL STORM", "TC"},
+  { "TROPICAL CYCLONE", "TC"},
+  { "TYPHOON", "TC"},
+  { "HURRICANE", "TC"},
+  { "TC", "TC"},
+  { "VOLCANIC", "VA"},
+  { "VOLCANIC ASH", "VA"},
+  { "VA", "VA"},
+  { "ERUPTION", "VA"},
+  { "OBSC TS HVYGR", "OBSC TS HVYGR"},
+  { "EMBD TS HVYGR", "EMBD TS HVYGR"},
+  { "FRQ TS HVYGR", "FRQ TS HVYGR"},
+  { "SQL TS HVYGR", "SQL TS HVYGR"},
+  { "ISOL TS GR", "ISOL TS GR"},
+  { "OCNL TS GR", "OCNL TS GR"},
+  { "TSGR", "TS GR"},
+  { "ISOL TS", "ISOL TS"},
+  { "OCNL TS", "OCNL TS"},
+  { "OBSC TS", "OBSC TS"},
+  { "EMBD TS", "EMBD TS"},
+  { "EMBD TS/CB", "EMBD TS"},
+  { "FRQ TS", "FRQ TS"},
+  { "FRQ TSRA", "FRQ TS"},
+  { "SQL TS", "SQL TS"},
+  { "LN TS", "LN TS"},
+  { "LN DVLPG TS", "LN TS"},
+  { "TS", "TS"},
+  { "EMBD CB", "EMBD CB"},
+  { "EMBD CB/TS", "EMBD TS"},
+  { "ISOL CB", "ISOL CB"},
+  { "ISOL CB/TS", "ISOL TS"},
+  { "ISOL/OCNL CB", "ISOL CB"},
+  { "OCNL CB", "OCNL CB"},
+  { "FRQ CB", "FRQ CB"},
+  { "LN CB", "LN CB"},
+  { "CB/TS", "TS"},
+  { "SEV ICE(FZRA)", "SEV ICE(FZRA)"},
+  { "FZRA", "SEV ICE(FZRA)"},
+  { "SEV ICE", "SEV ICE"},
+  { "SEV ICG", "SEV ICE"},
+  { "SEV ICING", "SEV ICE"},
+  { "SEV/MOD ICE", "SEV ICE"},
+  { "MOD-SEV ICE", "SEV ICE"},
+  { "MDT-SEV ICE", "SEV ICE"},
+  { "MOD/SEV ICE", "SEV ICE"},
+  { "MDT/SEV ICE", "SEV ICE"},
+  { "MOD-SEV ICING", "SEV ICE"},
+  { "MDT-SEV ICING", "SEV ICE"},
+  { "MOD/SEV ICING", "SEV ICE"},
+  { "MDT/SEV ICING", "SEV ICE"},
+  { "SEV MXD ICGICIP", "SEV ICE"},
+  { "SEV MXD ICGIC", "SEV ICE"},
+  { "SEV MXD/CLR ICGICIP", "SEV ICE"},
+  { "SEV MXD ICG/TURB", "SEV ICE"},
+  { "MDT ICE", "MOD ICE"},
+  { "MOD ICE", "MOD ICE"},
+  { "SEV TURB", "SEV TURB"},
+  { "SEV TRB", "SEV TURB"},
+  { "SEVERE TURB", "SEV TURB"},
+  { "SEVERE TURBULENCE", "SEV TURB"},
+  { "MODERATE TO SEVERE TURBULENCE", "SEV TURB"},
+  { "MOD-SEV TURB", "SEV TURB"},
+  { "MDT-SEV TURB", "MOD TURB"},
+  { "MOD/SEV TURB", "SEV TURB"},
+  { "MDT/SEV TURB", "SEV TURB"},
+  { "SEV/MOD TURB", "SEV TURB"},
+  { "SEV-MOD TURB", "SEV TURB"},
+  { "SEV/MDT TURB", "SEV TURB"},
+  { "SEV-MDT TURB", "SEV TURB"},
+  { "MODERATE TURBULENCE", "MOD TURB"},
+  { "MOD TURB", "MOD TURB"},
+  { "MDT TURB", "MOD TURB"},
+  { "TURB MOD", "MOD TURB"},
+  { "SEV CAT", "SEV TURB"},
+  { "MOD-SEV CAT", "SEV TURB"},
+  { "MDT-SEV CAT", "SEV TURB"},
+  { "MOD CAT", "MOD TURB"},
+  { "MDT CAT", "MOD TURB"},
+  { "MDT-SEV MECH/LLJ", "SEV TURB"},
+  { "MDT-SEV MECH", "SEV TURB"},
+  { "SEV MTW", "SEV MTW"},
+  { "MOD MTW", "MOD MTW"},
+  { "HVY DS", "HVY DS"},
+  { "HVY SS", "HVY SS"},
+  { "SFC WSPD", "SFC WSPD"},
+  { "SFC VIS", "SFC VIS"},
+  { "BKN CLD", "BKN CLD"},
+  { "OVC CLD", "OVC CLD"},
+  { "MT OBSC", "MT OBSC"},
+  { "GR", "GR"}
+};
+
+//======================================================================
+//
+// QUALITY CONTROL.
+//
+//======================================================================
+ 
+///////////// max_duration ////////////////////////////
+//
+// Maximum TAF duration - secs.
+// The maximum duration of a TAF. If the duration exceeds this value, 
+//   the start and expire times are set to the issue time. That way the 
+//   TAF will have no effect, but will still be in the data base.
+// Type: int
+//
+
+max_duration = 21600;
+

@@ -1,0 +1,20 @@
+#! /bin/sh
+
+cd $RTEST_HOME/params
+
+if (not_running "test2gate -params test2gate.rtest") then
+  test2gate -params test2gate.rtest &
+fi
+
+if (not_running "polar_ingest -params polar_ingest.rtest") then
+  kill_polar2mdv.rtest
+  polar_ingest -params polar_ingest.rtest -summary 360 &
+fi
+
+sleep 5
+
+if (not_running "polar2mdv -params polar2mdv.rtest") then
+  kill_polar_ingest.rtest
+  polar_ingest -params polar_ingest.rtest -summary 360 &
+fi
+

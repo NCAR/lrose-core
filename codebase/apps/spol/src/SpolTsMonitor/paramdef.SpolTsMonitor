@@ -1,0 +1,312 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SpolTsMonitor
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// April 2011
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SpolTsMonitor reads IWRF time-series data from a file message queue (FMQ). It locates monitoring information in the time series, and writes that information out to SPDB, and in a form suitable for Nagios.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT - from file message queue (FMQ)";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For FMQ input_mode only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} fmq_name;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Maximum interval with no data (secs).";
+  p_help = "After this time elapses with no data, the status data is considered invalid until the data restarts.";
+} data_valid_interval_secs;
+
+commentdef {
+  p_header = "XML STATUS INPUT";
+};
+
+typedef enum {
+  XML_ENTRY_BOOLEAN,
+  XML_ENTRY_INT,
+  XML_ENTRY_DOUBLE,
+  XML_ENTRY_STRING
+} xml_entry_type_t;
+
+typedef struct {
+  string xml_outer_tag;
+  string xml_inner_tag;
+  xml_entry_type_t entry_type;
+  boolean ok_boolean;
+  boolean boolean_failure_is_critical;
+  double ok_value_lower_limit;
+  double ok_value_upper_limit;
+  double impaired_value_lower_limit;
+  double impaired_value_upper_limit;
+  string label;
+  string units;
+  double graph_min_val;
+  double graph_max_val;
+  string comment;
+} xml_entry_t;
+
+paramdef struct xml_entry_t {
+  p_default = {
+    {
+      xml_outer_tag = "KaTransmitterStatus",
+      xml_inner_tag = "SerialConnected",
+      entry_type = XML_ENTRY_BOOLEAN,
+      ok_boolean = true,
+      boolean_failure_is_critical = true,
+      ok_value_lower_limit = 0,
+      ok_value_upper_limit = 0,
+      impaired_value_lower_limit = 0,
+      impaired_value_upper_limit = 0,
+      label = "",
+      units = "",
+      graph_min_val = 0,
+      graph_max_val = 1,
+      comment = ""
+    }
+    ,
+    {
+      xml_outer_tag = "KaTransmitterStatus",
+      xml_inner_tag = "MagnetronCurrentFaultCount",
+      entry_type = XML_ENTRY_INT,
+      ok_boolean = true,
+      boolean_failure_is_critical = true,
+      ok_value_lower_limit = 0,
+      ok_value_upper_limit = 10,
+      impaired_value_lower_limit = 11,
+      impaired_value_upper_limit = 20,
+      label = "",
+      units = "",
+      graph_min_val = 0,
+      graph_max_val = 30,
+      comment = ""
+    }
+    ,
+    {
+      xml_outer_tag = "KaTransmitterStatus",
+      xml_inner_tag = "MagnetronCurrent",
+      entry_type = XML_ENTRY_DOUBLE,
+      ok_boolean = true,
+      boolean_failure_is_critical = true,
+      ok_value_lower_limit = 10,
+      ok_value_upper_limit = 20,
+      impaired_value_lower_limit = 5,
+      impaired_value_upper_limit = 10,
+      label = "average = ",
+      units = "mA",
+      graph_min_val = 0,
+      graph_max_val = 30,
+      comment = ""
+    }
+  };
+  p_descr = "Details of XML entries to process.";
+  p_help =
+    "\txml_outer_tag: the main tag for the entry\n"
+    "\txml_inner_tag: the sub tag for the entry\n"
+    "\tentry_type: the type of data stored\n"
+    "\tok_boolean: BOOLEAN only: the value for an OK state\n"
+    "\tboolean_failure_is_critical: true if FAILURE is critical, false if failure indicates IMPAIRED\n"
+    "\tok_value_lower_limit: INT or DOUBLE: the lower limit for an OK state\n"
+    "\tok_value_upper_limit: INT or DOUBLE: the upper limit for an OK state\n"
+    "\timpaired_value_lower_limit: INT or DOUBLE: the lower limit for an IMPAIRED state\n"
+    "\timpaired_value_upper_limit: INT or DOUBLE: the upper limit for an IMPAIRED state\n"
+    "\tgraph_min_val: minimum value for history graph\n"
+    "\tgraph_max_val: maximim value for history graph\n"
+    "\tcomment: if set, appears at end of status line\n"
+    ".";
+} xml_entries[];
+
+commentdef {
+  p_header = "MONITOR TEST PULSE POWER";
+  p_text = "If test pulse monitoring is active, an extra XML block will be generate to hold the test pulse powers. The main tag for this block is specified in test_pulse_tag. Within the test pulse block, the following values will the stored, as applicable:\n\tTestPulsePowerHcDb\n\tTestPulsePowerVcDb\n\tTestPulsePowerHxDb\n\tTestPulsePowerVxDb.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute test pulse power and add to monitoring.";
+} monitor_test_pulse;
+
+paramdef string {
+  p_default = "KaBandTestPulse";
+  p_descr = "Tag to delineate test pulse block in output XML.";
+} test_pulse_xml_tag;
+
+paramdef double {
+  p_default = 145.0;
+  p_descr = "Range to test pulse (km).";
+  p_help = "We compute the gate number from this range. The power at this gate is averaged over the monitoring interval.";
+} test_pulse_range_km;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Number of samples used to compute test pulse power.";
+} test_pulse_n_samples;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If this is a dual-polarization system, is it operating in fast alternating mode?";
+  p_help = "If true, the HV flag is used to determine which receiver path to use.";
+} dual_pol_alternating_mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If this is a dual-polarization system, does it have switching receivers?";
+  p_help = "If true, then there is a co-pol receiver path and a cross-pol receiver path. If false, there is an H and V receiver path.";
+} dual_pol_switching_receivers;
+
+commentdef {
+  p_header = "MONITOR GATE 0 VELOCITY";
+  p_text = "This is used to make sure the Ka-band is cohering correctly.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to monitor the gate 0 velocity - intended for the ka-band.";
+} monitor_g0_velocity;
+
+paramdef string {
+  p_default = "KaBandG0Velocity";
+  p_descr = "Tag to delineate G0 velocity blocki in output XML.";
+} g0_velocity_xml_tag;
+
+paramdef double {
+  p_default = 0.15;
+  p_descr = "Range to test pulse (km).";
+  p_help = "We compute the gate number from this range. The velocity at this gate is averaged over the monitoring interval.";
+} g0_velocity_range_km;
+
+paramdef int {
+  p_default = 1024;
+  p_descr = "Number of samples used to compute g0 velocity.";
+} g0_velocity_n_samples;
+
+commentdef {
+  p_header = "NAGIOS OUTPUT";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, writes  one file only and then quit.";
+} write_to_nagios;
+
+paramdef string {
+  p_default = "/tmp/nagios/spol_monitoring";
+  p_descr = "File path for NAGIOS data.";
+  p_help = "This file is overwritten at regular intervals.";
+} nagios_file_path;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Interval at which the data is written to NAGIOS (secs).";
+} nagios_interval_secs;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Length of missing data to generate a warning (secs).";
+} nagios_nsecs_missing_for_warning;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Length of missing data to generate a critical state (secs).";
+} nagios_nsecs_missing_for_critical;
+
+commentdef {
+  p_header = "CHECK FOR ANTENNA MOVEMENT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to only process status if antenna is moving.";
+} check_for_moving_antenna;
+
+paramdef string {
+  p_default = "AntennaMovement";
+  p_descr = "Tag to delineate antenna movement block in output XML.";
+} antenna_movement_xml_tag;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Minimim time between checks for movement (secs).";
+} movement_check_interval;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Maximum angle change for stationary mode (deg).";
+  p_help = "For the antenna to be considered stationary, it must not move by more than this angle in the lockon period.";
+} stationary_max_angle_change;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to add movement monitoring to nagios.";
+} nagios_monitor_antenna_movement;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Number of stationary seconds to generate a warning.";
+} nagios_antenna_movement_warn_secs;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Number of stationary seconds to generate a critical condition.";
+} nagios_antenna_movement_crit_secs;
+
+paramdef string {
+  p_default = "SBandAntennaMovement";
+  p_descr = "Name for antenna movement entry in nagios.";
+} nagios_antenna_movement_label;
+
+commentdef {
+  p_header = "SPDB OUTPUT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, writes status out to SPDB in XML format.";
+} write_to_spdb;
+
+paramdef string {
+  p_default = "spdbp:://localhost::/tmp/spdb/spol_monitoring";
+  p_descr = "URL for SPDB output.";
+  p_help = "SPDB data is written to this location.";
+} spdb_url;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Interval at which the data is written to SPDB (secs).";
+} spdb_interval_secs;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, compress the SPDB chunks on write.";
+} compress_spdb;
+

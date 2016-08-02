@@ -1,0 +1,132 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "threshOnHeight thresholds a 3D field above\n"
+  "and/or below a height. Height is obtained from a 2D\n"
+  "mdv field. Niles Oien April 2011.";
+
+}
+	
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here. This is the field\n"
+  "to be thresholded."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+
+paramdef string {
+  p_descr = "Field to threshold.";
+  p_help = "Set as appropriate."; 
+  p_default = {"DBZ"};
+} fieldName;
+
+
+paramdef string {
+  p_descr = "URL for height data.";
+  p_help = "Set as appropriate."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} heightUrl;
+
+paramdef string {
+  p_descr = "2D height field name.";
+  p_help = "Set as appropriate."; 
+  p_default = {"fzgLevel"};
+} heightFieldName;
+
+paramdef int {
+  p_descr = "Temporal tolerance to use when looking for the height field.";
+  p_help = "Set as appropriate."; 
+  p_default = { 3600};
+} temporalTolerance;
+
+typedef struct {
+	double scale;
+	double bias;
+} scaleBias_t;
+
+
+paramdef struct scaleBias_t {
+  p_descr = "Scale and bias to apply to the height field to adjust\n"
+            "the units so that they match the vlevel header in the\n"
+	    "field to be thresholded. For example, if the 2D height\n"
+	    "field is in meters and the vlevel is in Km then set the scale\n"
+	    "to 0.001 and bias to 0.";
+  p_help = "Set as appropriate."; 
+  p_default = { 0.001, 0.0};	 
+} heightAdjust;
+ 
+paramdef struct scaleBias_t {
+  p_descr = "Scale and bias to apply to the field values that are above\n"
+  "the height.";
+  p_help = "Set as appropriate."; 
+  p_default = { 1.0, 0.0};	 
+} layerAdjust;
+
+paramdef float {
+  p_descr = "Height tolerance to use when looking for the height field.";
+  p_help = "Height tolerance is in adjusted height units";
+  p_default = {.125};
+} heightTolerance;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Derived satellite fields are written here."; 
+  p_default = {"mdvp:://localhost::mdv/grad"};
+} OutUrl;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef float {
+  p_descr = "Set vlevel val for thresholded layer.";
+  p_default = -10;
+} vlevelVal;

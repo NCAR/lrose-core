@@ -1,0 +1,18 @@
+#
+# Selects which fields to take from which rotation for VCP 211.
+# The first rotation is number 1. Niles Oien Feb 2008.
+#
+DBZ[1] VEL[2] SW[2] ZDR[1] PHI[1] RHO[1]
+DBZ[3] VEL[4] SW[4] ZDR[3] PHI[3] RHO[3]
+DBZ[5] VEL[5] SW[5] ZDR[5] PHI[5] RHO[5]
+DBZ[6] VEL[6] SW[6] ZDR[6] PHI[6] RHO[6]
+DBZ[7] VEL[7] SW[7] ZDR[7] PHI[7] RHO[7]
+DBZ[8] VEL[8] SW[8] ZDR[8] PHI[8] RHO[8]
+DBZ[9] VEL[9] SW[9] ZDR[9] PHI[9] RHO[9]
+DBZ[10] VEL[10] SW[10] ZDR[10] PHI[10] RHO[10]
+DBZ[11] VEL[11] SW[11] ZDR[11] PHI[11] RHO[11]
+DBZ[12] VEL[12] SW[12] ZDR[12] PHI[12] RHO[12]
+DBZ[13] VEL[13] SW[13] ZDR[13] PHI[13] RHO[13]
+DBZ[14] VEL[14] SW[14] ZDR[14] PHI[14] RHO[14]
+DBZ[15] VEL[15] SW[15] ZDR[15] PHI[15] RHO[15]
+DBZ[16] VEL[16] SW[16] ZDR[16] PHI[16] RHO[16]

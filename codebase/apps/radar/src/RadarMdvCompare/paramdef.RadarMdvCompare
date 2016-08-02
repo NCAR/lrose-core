@@ -1,0 +1,278 @@
+/*********************************************************
+ * parameter definitions for RadarMdvCompare
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Oct 2007
+ * 
+ */
+
+commentdef {
+  p_header = "RadarMdvCompare compares MDV data from 2 radars and compares the values in selected fields.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "OPERATIONAL MODE AND TRIGGERING.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME.\n\nIn REALTIME mode, the analysis is performed at regular times or as new data arrives.\n\nIn ARCHIVE mode, the file list is obtained from the command line or a start and end time are specified.";
+} mode;
+
+typedef enum {
+  TIME_TRIGGER, FILE_TRIGGER
+} trigger_t;
+
+paramdef enum trigger_t {
+  p_default = TIME_TRIGGER;
+  p_descr = "Trigger mechanism.";
+  p_help = "\nTIME_TRIGGER: program is triggered at constant time intervals - see time_trigger_interval.\n\nFILE_TRIGGER: the program watches the first input_dir and triggers based on data in that directory.";
+} trigger;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Interval for TIME_TRIGGER - secs.";
+  p_help = "For TIME_TRIGGER, this is the interval between trigger events. Time triggers are synchronized to the hour, and occur at constant intervals thereafter.";
+} time_trigger_interval;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time trigger offset - secs.";
+  p_help = "Time triggers occur on the hour and at constant intervals thereafter until the next hour. This parameters allows you to schedule the trigger to be offset from the anchored time by the specified number of secs. For example, if you set time_trigger_interval to 600 (10 mins) and time_trigger_offset to 420 (7 minutes), the trigger will occur at 7, 17, 27, 37, 47 and 57 mins after the hour.";
+} time_trigger_offset;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Max time diff for searching for files relative to the trigger time - secs.";
+  p_help = "When matching files up with the trigger time, the difference between the trigger time and file time must be less than this margin.";
+} time_trigger_margin;
+
+paramdef int {
+  p_default = 120;
+  p_descr = "Minimum time between triggering in REALTIME FILE_TRIGGER mode, in seconds.";
+  p_help = "This prevents the arrival of files in FILE_TRIGGER mode from triggering at intervals less than this amount.";
+} min_time_between_file_triggers;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Maximum file age in REALTIME file triggered mode, seconds.";
+  p_help = "Applies to all URLs specified.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of seconds to sleep after triggering before processing the data. The intent is to allow realtime URLs that come in nearly simultaneously (satellite) to have a chance to catch up.";
+  p_help = "Only applies in REALTIME mode.";
+} sleep_after_trigger;
+
+commentdef {
+  p_header = "INPUT DATA SPECIFICATIONS.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/radar1/cart";
+  p_descr = "URL for primary radar.";
+  p_help = "This is the URL from which the trigger is derived.";
+} primary_url;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for primary data.";
+  p_help = "Only this field will be used for comparison.";
+} primary_field_name;
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/radar1/cart";
+  p_descr = "URL for secondary radar.";
+  p_help = "Data from this url will be compared against the primary.";
+} secondary_url;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for secondary data.";
+  p_help = "Only this field will be used for comparison.";
+} secondary_field_name;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum time difference, in secs, between the primary and secondary fields.";
+  p_help = "if the time difference exceeds this value, the comparison will not be performed.";
+} max_time_diff;
+
+commentdef {
+  p_header = "GEOMETRIC LIMITS.";
+  p_text = "Limits for the analysis region.";
+}
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Max difference in vlevels for comparison.";
+  p_descr = "The grids may have different vertical levels. We search through them, looking for a match in which the difference is less than this amount.";
+} max_vlevel_diff;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set bounding box.";
+} set_bounding_box;
+
+typedef struct {
+  double min_lat;
+  double min_lon;
+  double max_lat;
+  double max_lon;
+} bounding_box_t;
+
+paramdef struct bounding_box_t {
+  p_default = {-90.0, -180.0, 90.0, 180.0};
+  p_descr = "Horizontal limits for analysis.";
+} bounding_box;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to request composite.";
+  p_help = "This computes the composite of the data in the vertical, which is the maximum value in the column. If combined with set_vlevel_limits, it will compute the maximum within the vlevel limits specified.";
+} request_composite;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set vertical limits";
+} set_vlevel_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower vlevel limit.";
+} lower_vlevel;
+
+paramdef double {
+  p_default = 100;
+  p_descr = "Upper vlevel limit.";
+} upper_vlevel;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set range limits";
+} set_range_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Min range from radar in km.";
+} min_range_km;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Max range from radar in km.";
+} max_range_km;
+
+commentdef {
+  p_header = "COMPARISON DETAILS.";
+}
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Minimum value for valid comparison.";
+  p_help = "The field value for both the primary and secondary radars must exceed this value for the diff to be computed.";
+} min_value_for_diff;
+
+paramdef double {
+  p_default = 10;
+  p_descr = "Maximum valid value for difference.";
+  p_help = "If the difference is greater than this, it is ignored.";
+} max_valid_diff;
+
+paramdef double {
+  p_default = -10;
+  p_descr = "Minimum valid value for difference.";
+  p_help = "If the difference is less than this, it is ignored.";
+} min_valid_diff;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Minimum number of pts with values above threshold.";
+  p_help = "In computing the stats, The field value for both the primary and secondary radars must exceed this value for the diff to be computed.";
+} min_number_of_pts_above_threshold;
+
+paramdef double {
+  p_default = 30;
+  p_descr = "Threshold value for checking if stats are valid.";
+  p_help = "For the stats to be considered valid, we need at least min_number_of_pts_above_threshold to exceed this threshold. For example, we may say we want at least 1000 points to have DBZ values in excess of 30 DBZ for the stats to be considered valid.";
+} threshold_value_for_min_pts;
+
+commentdef {
+  p_header = "OUTPUT OPTIONS.";
+}
+
+paramdef string {
+  p_default = "$(DATA_DIR)/inter_radar_comparison";
+  p_descr = "Directory for output files.";
+  p_help = "Files will be named by the date.";
+} output_dir;
+
+paramdef string {
+  p_default = "Marburg_minus_MtStapl";
+  p_descr = "Prefix for files.";
+  p_help = "Files will start with this prefix, then the date, and then the extension.";
+} output_file_prefix;
+
+paramdef string {
+  p_default = "txt";
+  p_descr = "Extension for output files.";
+  p_help = "File will start with the prefix, then the date, and then this extension.";
+} output_file_ext;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print output stats to stdout";
+  p_help = "The stats summarise the difference between the primary and secondary data sets.";
+} write_output_stats;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print output table to stdout";
+  p_help = "Columns will be 'lat lon alt primary secondary diff'. Columns are space-delimted."; 
+} write_output_table;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to append to a global summary file";
+  p_help = "Columns will be yyyy mm dd hh mm ss unixsecs unixdays count mean_diff sdev_diff median_diff. Columns are space-delimted.";
+} append_to_summary_file;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out analysis results to SPDB.";
+  p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
+} write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/radar_mdv_compare";
+  p_descr = "URL for writing results to SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} spdb_output_url;
+
+

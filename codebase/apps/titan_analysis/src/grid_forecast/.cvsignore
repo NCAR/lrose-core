@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+grid_forecast
+makefile
+makefile.am
+makefile.in

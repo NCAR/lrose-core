@@ -1,0 +1,88 @@
+The display software, CIDD (Client-Server, Integrated Data Display), is
+a regional-area  situational display system for real time meterological
+data.  It runs on a  wide variety of Unix workstations using X-Windows
+controls and graphics. Its principle function is to integrate and
+display, in real-time, meterological information from disparate
+sources.  It combines visualizations of gridded data along with other
+products displayed as symbols or text, overlaid
+with maps or other geographical symbols.  Graphics on the display are
+automatically updated as new data arrives.  The display's user
+interface is designed to be operated without extensive training or
+reference to detailed operators manuals.  The display software is
+flexible and modular, allowing easy integration of new data and
+configuration for a variety of locations and classes of users.  The
+user interface can be configured to display just the controls
+necessary to display pre-configured combinations of products, or can
+be set to allow full control over product combinations and image
+generation. This allows the same software to be used by both non
+technical personnel with little or no training, as well as highly
+technical users who want to customize the imagery and explore the data
+in a variety of ways. CIDD's windows can be resized or closed on the
+screen, making it compatible with other tools the user may wish to run
+on the display workstation.
+
+Gridded data can be visualized in a variety of ways; as color-filled
+rectangles, color filled-contours and open contours. Wind fields may
+be displayed as wind barbs or scalable vectors. Data from grids of
+differing resolutions or positions can be viewed simultaneously, being
+automatically registered correctly onto the same image.
+
+The imagery can be animated to form movie loops of meterological
+products over time with the display automatically updating the
+animation loop as new data arrives. Non-gridded data such as pilot
+reports, meterological station reports, or hazard areas, are immediately
+displayed over the gridded products as colored lines, text, or iconic
+symbols and can be displayed during animation.
+
+Users can select from a set of preset geographic domains or can
+arbitrarily zoom over any region of the display. As the user zooms in,
+additional detail in geographical overlays and symbolic products can be
+revealed. This feature prevents the display from becoming crowded with
+too much graphics when viewing a regional area, yet allows the user to see
+all of the availible information when viewing a limited area.
+
+Users may arbitrarily select a path, using the mouse, for viewing
+vertical cross sections of the gridded data. The cross sections are
+constructed on demand and can be animated along with the main plan view
+imagery. Contours, and up to three sets of wind vectors based on gridded
+data, can be overlaid on top of the cross section imagery.
+
+CIDD uses a flexible client-server mechanism to retrieve its data for
+display.  Data are served to each user's workstation via TCP/IP network
+protocols as the user requests different products.  This allows the
+display to operate adequately over both high bandwidth (10 Mbit/sec or greater)
+and low bandwidth networks such as ISDN or 56 kb circuits.
+
+CIDD's client-server data access mechanism is flexible and
+configurable. Data distribution topologies can be set up to allow users
+access to data than cannot be transmitted in their entirity down low
+bandwidth or transiently connected networks.  Data can be automatically
+pre-distributed to sites which have higher speed networks and whose
+users need rapid access to large data sets.
+
+
+The Displays main features include:
+
+* Easy to learn X based User interface.
+* The most commonly used features are controllable from the main window or keyboard.
+* Integrates data from different sources into one image.
+* Automatically updates imagery with new data.
+* Unlimited number of animated frames in loops.(Dependant on system memory available)
+* Predefined or Arbitrary Zoom on plan view displays
+* Arbitrary selection of cross sections via simple mouse actions.
+* Animation Speed and end of loop delays are user adjustable.
+* Dislays 2 gridded fields simultaneously, one overlaying the other.
+* Overlays Contours of gridded data with user selectable intervals and color.
+* Overlays up to three sets of wind barbs or scalable vectors.
+* Users may select/deselect or change the color of geographic overlays. 
+* Font sizes and line withs are adjustable for contours and symbolic products.
+* Built in range rings and azmiuth overlays with increasing detail on zooms.
+* Gridded data can be easily dimmed to enhance and clarify complex overlaid products.
+* Archival data can easily be displayed.
+
+
+
+
+
+
+

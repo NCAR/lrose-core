@@ -1,0 +1,44 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	CoSPA \
+	didss \
+	dsserver \
+	filters \
+	fuzzy_logic \
+	hydro \
+	ingest \
+	interp \
+	mdv_utils \
+	niwot \
+	nowcast \
+	physics \
+	procmap \
+	rucApps \
+	satApps \
+	scripts \
+	tdrp \
+	titan \
+	trec \
+	TurbRemoteSensing 
+
+$(TARGETS): FORCE
+	$(MAKE) $(SUB_DIRS) TARGET=$@
+
+$(SUB_DIRS): FORCE
+	cd $@; $(MAKE) $(TARGET)
+
+FORCE:
+
+
+
+
+
+
+

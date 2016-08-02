@@ -1,0 +1,6 @@
+#! /bin/sh
+
+snuff "precip_map -params precip_map.precip_accum"
+
+
+

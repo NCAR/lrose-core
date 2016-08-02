@@ -1,0 +1,299 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions TsSmartSave
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// June 2006
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsSmartSave reads raw time-series data from a file message queue (FMQ). It saves the time series data out in files. It has the capability of saving out to different sub-directories based on the antenna position. For example, sun calibrations and vertically-pointing data may be saves to separate directories.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to exit after a specified time period.";
+  p_help = "If true, the application will exit after 'run_period_secs' has elapsed.";
+} exit_after_specified_period;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Run period (secs).";
+  p_help = "If exit_after_specified_period is true, the application will exit after this number of seconds.";
+} run_period_secs;
+
+commentdef {
+  p_header = "DATA INPUT - from file message queue (FMQ)";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For FMQ input_mode only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} fmq_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove pulses for which the antenna transition flag is set.";
+  p_help = "If true, transition pulses will not be stored in the file.";
+} filter_antenna_transitions;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to use the fixed angle (el or az) to compute the file name.";
+  p_help = "If false, the actual measured angle will be used.";
+} use_fixed_angle_for_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to add a string indicating the scan mode to the file name.";
+} add_scan_mode_to_file_name;
+
+commentdef {
+  p_header = "OUTPUT FILE FORMAT and PACKING";
+};
+
+typedef enum {
+  FORMAT_IWRF, FORMAT_TSARCHIVE
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = FORMAT_IWRF;
+  p_descr = "Format of the output files";
+  p_help = "IWRF: stream of binary structs and IQ data following the IWRF (CSU-CHILL/NCAR Integrated Weather Radar Facility) format. TSACHIVE: Sigmet time series archive format";
+} output_format;
+
+typedef enum {
+  PACKING_ASIS,
+  PACKING_FL32,
+  PACKING_SCALED_SI16,
+  PACKING_DBM_PHASE_SI16,
+  PACKING_SIGMET_FL16
+} output_packing_t;
+
+paramdef enum output_packing_t {
+  p_default = PACKING_ASIS;
+  p_descr = "Packing of the IQ data in the output files";
+  p_help = "ASIS: as it was read. FL32: 32-bit floating point. SCALED_SI16: scaled signed 16-bit integers. DBM_PHASE_SI16: signed 16-bit integers representing power in dBM and phase in deg. SIGMET_SI16: Sigmet 16-bit floating point packing as in the RVP8.";
+} output_packing;
+
+commentdef {
+  p_header = "NORMAL SCAN OUTPUT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to save normal scan data.";
+  p_help = "Normal scans are those which do not fall into the other categories - sunscan, vert pointing etc. Normal scans are typically PPIs and RHIs.";
+} save_normal_scan_data;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, write one file only and then quit.";
+} one_file_only;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, do not save files when scan mode is 'IDLE'.";
+  p_help = "Only applies to 'normal' save mode.";
+} normal_ignore_idle_mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, do not save files when antenna is stationary.";
+  p_help = "Only applies to 'normal' save mode.";
+} normal_ignore_stationary_antenna;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to save scans out in sectors to limit the file size.";
+  p_help = "If false, each fixed angle will be in a single file. If true, the angular change will be limited per file. See max_sector_size.";
+} save_scans_in_sectors;
+
+paramdef int {
+  p_default = 90;
+  p_descr = "Maximum sector size per output file (degrees).";
+  p_help = "Once this maximum is exceeded, the current file will be closed and a new one started.";
+} max_sector_size;
+
+paramdef int {
+  p_default = 50000;
+  p_descr = "Maximum number of pulses per output file.";
+  p_help = "Once this maximum is exceeded, the current file will be closed and a new one started.";
+} max_pulses_per_file;
+
+paramdef string {
+  p_default = "./tsarchive/save";
+  p_descr = "Normal mode output directory path.";
+  p_help = "Files are written to this directory, unless a special condition applies, in which case an alternative directory may be used. See VERTICALLY-POINTING and SUN-SCAN sections below.";
+} normal_output_dir;
+
+commentdef {
+  p_header = "VERTICALLY-POINTING DATA OUTPUT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to save vertically-pointing data to a separate directory.";
+  p_help = "If true, vertically-pointing data will be saved to a separate subdirectory. See also 'min_elev_for_vert_pointing_data'.";
+} save_vert_pointing_data;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to check for VERT scanning mode before saving time series data.";
+  p_help = "If true, vertically-pointing data will only be saved in VERT scan mode.";
+} check_for_vert_mode;
+
+paramdef double {
+  p_default = 88.0;
+  p_descr = "Minimum elevation angle for vert pointing data (deg).";
+  p_help = "If the elevation angle exceeds this min value, and is less than the max (see below), for at least the lockon period (see below), the radar will be assumed to be in vertically-pointing mode.";
+} min_elev_for_vert_pointing;
+
+paramdef double {
+  p_default = 92.0;
+  p_descr = "Maximum elevation angle for vert pointing data (deg).";
+  p_help = "See 'min_elev_for_vert_pointing' above.";
+} max_elev_for_vert_pointing;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Minimim lockon period for determing vert pointing mode (secs).";
+  p_help = "In order to enter vert pointing mode, the antenna elevation must exceed 'min_elev_for_vert_pointing_data' and be less than 'max_elev_for_vert_pointing' for a continuous period exceeding this number of seconds. This prevents interpreting vert pointing mode when the antenna scans through vertical during normal scanning operations.";
+} vert_pointing_lockon_period;
+
+paramdef string {
+  p_default = "./tsarchive/vert";
+  p_descr = "Vertically pointing data output directory path.";
+  p_help = "Files are written to this directory when the radar is in vertically-pointing mode.";
+} vert_pointing_output_dir;
+
+commentdef {
+  p_header = "SUN-SCAN DATA OUTPUT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to save sun-scan calibtation data to a separate directory.";
+  p_help = "If true, sun-scan data will be saved to a separate subdirectory.";
+} save_sun_scan_data;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to check for SECT scanning mode before saving time series data.";
+  p_help = "If true, sunscan data will only be saved in SECT scan mode.";
+} check_for_sun_scan_sector_mode;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Pointing margin to determine when radar is in sun-scan mode (deg).";
+  p_help = "If both the azimuth and elevation angles are within this margin of the current sun angle for more than sun_scan_lockon_time, the radar will be assumed to be in sun-scan mode.";
+} sun_scan_pointing_margin;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Minimim lockon period for determing sun-scan mode (secs).";
+  p_help = "In order to enter sun-scan mode, the antenna must point with 'sun_scan_pointing_margin' of the sun for a continuous period exceeding this number of seconds. This prevents interpreting sun-scan mode when the antenna scans across the sun during normal scanning operations.";
+} sun_scan_lockon_period;
+
+paramdef string {
+  p_default = "./tsarchive/sunscan";
+  p_descr = "Sun-scan data output directory path.";
+  p_help = "Files are written to this directory when the radar is in sun-scan mode.";
+} sun_scan_output_dir;
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "Latiitude of radar location (deg).";
+  p_help = "North is positive, South is negative.";
+} radar_latitude;
+
+paramdef double {
+  p_default = -105.0;
+  p_descr = "Longitude of radar location (deg).";
+  p_help = "East is positive, West is negative.";
+} radar_longitude;
+
+paramdef double {
+  p_default = 1.704;
+  p_descr = "MSL altitde of radar (km).";
+} radar_altitude_km;
+
+commentdef {
+  p_header = "FLAG FILE OUTPUT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to save data when a flag file exists.";
+  p_help = "A user, or other process, can create a flag file of a given name. If this file exists, the program will save out data accordingly.";
+} save_when_flag_file_exists;
+
+paramdef string {
+  p_default = "./TsSmartSave.flag";
+  p_descr = "Path for flag file.";
+  p_help = "If this file exists, data will be written out to the flag_file_output_dir.";
+} flag_file_path;
+
+paramdef string {
+  p_default = "./tsarchive/flagged";
+  p_descr = "Directory for flagged data to be saved to.";
+  p_help = "Files are written to this directory if the flag file exists.";
+} flag_file_output_dir;
+
+commentdef {
+  p_header = "STATIONARY MODE OUTPUT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to save data when the antenna is in stationary mode - i.e. stationary.";
+  p_help = "This mode also checks the flag file. If the flag file does not exist, the stationary data will not be saved.";
+} save_stationary_data;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Minimim staionary time for determing stationary mode (secs).";
+  p_help = "In order to enter stationary mode, the antenna must be stationay for this number of seconds.";
+} stationary_lockon_period;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Maximum angle change for stationary mode (deg).";
+  p_help = "For the antenna to be considered stationary, it must not move by more than this angle in the lockon period.";
+} stationary_max_angle_change;
+
+paramdef string {
+  p_default = "./tsarchive/stationary";
+  p_descr = "Vertically stationary data output directory path.";
+  p_help = "Files are written to this directory when the radar is in vertically-stationary mode.";
+} stationary_output_dir;
+

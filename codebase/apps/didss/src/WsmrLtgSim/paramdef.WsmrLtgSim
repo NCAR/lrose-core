@@ -1,0 +1,53 @@
+///////////////////////////////////////////////////////////
+//
+//
+//
+
+commentdef {
+  p_header = "Small program to simulate NOAAPORT ltg file generation.\n"
+              "Cant use file_repeat_day due to the time being in the\n"
+	      "actual files. Currently only works for White Sands,\n"
+	      "locations are hard coded. Only used for testing in a mock-up.\n\n"
+              "Niles Oien March 2001";
+}         
+
+
+////////////////////////////////////////////////////////////////////////
+//
+// Debugging
+//
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = { false };
+} Debug;
+
+////////////////////////////////////////////////////////////////////////
+//
+// Operational information
+//
+
+paramdef string
+{
+  p_descr = "procmap instance";
+  p_default = { "Test" };
+} Instance;
+
+paramdef long
+{
+  p_descr = "Generation timestep";
+  p_help = "Approximate time step, seconds, for generating files.";
+  p_default = { 60 };
+} TimeStep;
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_help = "Directory to write pseudo-noaaport ltg output files to";
+  p_default = { "." };
+} OutputDir;
+
+
+

@@ -1,0 +1,48 @@
+#!/bin/csh
+#
+# This is an example of how to run the software that
+# copies REAL lidar files with a name change and does
+# some statistics on the data and writes the statistics
+# to a file.
+#
+# You need to have the ./bin directory in your path for this
+# to work.
+#
+# First, copy the files with a name change from
+# the input directory to an output directory.
+# The output dir will be created if it does not exist.
+#
+renameLidarDirectoryFiles ./sampleInData ./sampleOutData
+#
+# In this example, the file 024.dat in sampleInData/ has
+# been copied with a name change to
+# sampleOutData/REAL_ONE_20070821_054546.lidar
+#
+#######################################################
+#
+# Then, do some statistics on the data in this new
+# directory that holds the renamed files. This requires
+# that the parameter file realLidarStats.params be set
+# up.
+#
+checkLidarDir ./sampleOutData
+#
+# After this, the following files will have been written
+# in ./sampleOutData :
+#
+# REAL_20070821_054546.beamStats - beam-by-beam stats. This is an
+# ASCII file, the cols are :
+#
+# beam unix_time year month day hour min sec numValidGates minVal meanVal maxVal
+#
+#
+# REAL_20070821_054546.FileStats - overall stats. This is a four line file,
+# on the first line is the time of the first beam, on the next line is the mean
+# time for the beams in the file and on the third line is the last beam time
+# in the file. On the last line are the number of valid gates considered,
+# the min, mean and max gat values.
+#
+# REAL_ONE_20070821_054546.lidar.check - a log file that will
+#                  contain errors from the processing of the file
+#                  when getting the statistics.
+#

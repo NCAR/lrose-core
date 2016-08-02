@@ -1,0 +1,75 @@
+/**********************************************************************
+ * TDRP params for TsFmq2Tcp
+ **********************************************************************/
+
+//======================================================================
+//
+// TsFmq2Tcp listens for clients. When a client connects, it spawns a 
+//   child to handle the client. The child opens the time-series FMQ, 
+//   reads a message at a time from the FMQ and writes this data, 
+//   unchanged, to the client in a continuous stream.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Type: string
+//
+
+instance = "test";
+
+///////////// debug ///////////////////////////////////
+//
+// Print debug messages.
+// Type: boolean
+//
+
+debug = FALSE;
+
+///////////// verbose /////////////////////////////////
+//
+// Print verbose debug messages.
+// Type: boolean
+//
+
+verbose = FALSE;
+
+///////////// port ////////////////////////////////////
+//
+// Port number.
+// The server listens on this port for client requests.
+// Type: int
+//
+
+port = 12000;
+
+///////////// max_clients /////////////////////////////
+//
+// Max number of clients supported.
+// Type: int
+//
+
+max_clients = 2;
+
+///////////// no_threads //////////////////////////////
+//
+// Option to prevent server from using a thread per client.
+// For debugging purposes it it sometimes useful to suppress the use of 
+//   threads. Set no_threads to TRUE for this type of debugging.
+// Type: boolean
+//
+
+no_threads = FALSE;
+
+///////////// fmq_path ////////////////////////////////
+//
+// Path of FMQ.
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+// Type: string
+//
+
+fmq_path = "$(DATA_DIR)/fmq/ts_s";
+

@@ -1,0 +1,81 @@
+
+commentdef {
+  p_header = "Outputs information about the distances between storms\n"
+	"from a TITAN database. Run it like this :\n\n"
+	"stormDist -params stormDist.test -start \"2006 05 30 00 00 00\" -end \"2006 06 01 00 00 00\"\n\n"
+	"Output is printed to stdout. The following fields are printed :\n"
+	"Year\nMonth\n Day\nHour\nMinute\nSecond\nStorm1ComplexNum\nStorm1SimpleNum\n"
+	"Storm2ComplexNum\nStorm2SimpleNum\nStorm1Area\nStorm2Area\nStorm1Duration\n"
+	"Storm2Duration\nStorm1LatCent\nStorm1LonCent\nStorm2LatCent\nStorm2LonCent\n"
+	"distCent\ndistEdges\n\n"
+	"Distances are in Km.\n\n"
+        "Niles Oien December 2006.";
+}
+
+
+paramdef string {
+  p_descr = "Input titan URL";
+  p_help = "Program reads these data as input."; 
+  p_default = {"titanp:://localhost::titan/input"};
+} titanUrl;
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate "
+           "level of detail.";
+} debug;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+commentdef {
+  p_header = " STORM THRESHOLDS - determine which storms are significant.";
+}
+
+paramdef double {
+  p_descr = "Spatial threshold, square kilometers.";
+  p_help =  "Storm must pass the temporalThreshold and have exceeded\n"
+	"this area threshold to be considered significant.";
+  p_default = 0.0;
+} areaThreshold;
+
+paramdef int {
+  p_descr = "Duration threshold, seconds.";
+  p_help =  "Storm must have lasted this long to be significant.";
+  p_default = 0;
+} durationThreshold;
+
+paramdef int {
+  p_descr = "Determines number of index points to do averaging over\n"
+	"to get the distance from the center of the storm to the edge\n"
+	"of the storm.";
+  p_help =  "Averaging is done from the center radial minus radialSpread\n"
+	"to the center radial plus the radial spread. Direction incement\n"
+	"is five degrees per index incement. Default is 3, which means\n"
+	"averaging runs from -3 to 3 around the central direction, thus\n"
+	"encompassing a 30 degree range in azimuth. Setting this to 0 means\n"
+	"that no averaging is done; only the closest radial is taken.";
+  p_default = 3;
+} radialSpread;
+
+paramdef double {
+  p_descr = "Maximum distance between the centrod of two storms for\n"
+	"the distance information to be printed, Km.";
+  p_help =  "Set to a negative value to have no effect.";
+  p_default = -1.0;
+} maxCentroidDist;
+
+paramdef boolean {
+  p_descr = "Option to annotate output.";
+  p_help =  "If this is set to true then the output will\n"
+	"be more human-readable.";
+  p_default = FALSE;
+} annotateOutput;

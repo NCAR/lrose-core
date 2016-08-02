@@ -1,0 +1,189 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "RayTraceMdv3D simulates lidar or radar operation.\n"
+	"The radar equation is not implemented, simple geometry\n"
+	"is used.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+         
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+typedef struct {
+  double sensorLat;
+  double sensorLon;
+  double sensorAlt;
+  double sensorRangeSpacing;
+  double horizBeamWidth;
+  double vertBeamWidth;
+} sensorGeometry_t;
+
+paramdef struct sensorGeometry_t {
+  p_descr = "Geometry for the sensor.";
+  p_help = "Set as appropriate. Distances, altitude in meters, angles degrees.";
+  p_default = {40.0, -104.0, 1645.0, 1.5, 1.0, 0.1 };
+} sensorGeometry;
+
+typedef struct {
+  double tiltElevation;
+  double tiltMinAz;
+  double tiltMaxAz;
+  double tiltDelAz;
+  double tiltFirstGateRange;
+  double tiltLastGateRange;
+} tilt_t;
+
+paramdef struct tilt_t {
+  p_descr = "Array of tilts.";
+  p_help = "Set as appropriate. Distances, altitude in meters, angles degrees.";
+  p_default = {
+               { 1.5, 0.0, 359.0, 1.0,  500, 35000 },
+               { 5, 0.0, 359.0, 1.0,  500, 35000 },
+               { 10, 0.0, 359.0, 1.0,  500, 20000 },
+               { 20, 0.0, 359.0, 1.0,  500, 5000 }
+              };
+} tilts[];
+
+paramdef string {
+  p_descr = "output fmq url";
+  p_help = "Path for FMQ output data.";
+  p_default = {"fmqp:://localhost::./fmq.dsLidar"};
+} output_fmq_url;
+
+paramdef long {
+  p_default = {2000000};
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} output_fmq_size;
+
+paramdef long {
+  p_default = {360};
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_descr = "After finishing a file, delay for this\n"
+        "many seconds.";
+  p_help = "The intent is to allows Dsr2Vol some catchup time.\n";
+  p_default = 2;
+} fileDelaySecs;
+
+
+typedef struct {
+  string uNameMdv;
+  string vNameMdv;
+  double scaleFactor;
+  string radialName;
+  string units;
+} radial_t;
+
+paramdef struct radial_t {
+  p_descr = "Set of U,V pairs in the MDV data to extract to radials.";
+  p_help = "Generally used to extract a radial wind.";
+  p_default = {
+                { "U", "V", 1.0, "VEL", "m/s" }
+               };
+} radials[];
+
+typedef struct {
+  string nameMdv;
+  double scaleFactor;
+  string outName;
+  string units;
+} field_t;
+
+
+paramdef struct field_t {
+  p_descr = "Set of fields in the MDV data to extract directly.";
+  p_help = "Generally used to extract dbz";
+  p_default = {
+                { "DBZ", 1.0, "DBZ", "dBZ" }
+               };
+} fields[];
+
+
+paramdef string {
+  p_descr = "Message log directory.";
+  p_help = "Set as appropriate";
+  p_default = "./";
+} msgLog_dir;
+
+paramdef int {
+  p_descr = "How many beams to send before sending lidar params.";
+  p_help = "Set as appropriate";
+  p_default = 30;
+} beamsPerMessage;
+
+paramdef double {
+  p_descr = "Maximum slop to allow in the vertical.";
+  p_help = "Units are the same as the input vlevels (usually Km)";
+  p_default = 1;
+} vertSlop;
+
+paramdef boolean {
+  p_descr = "Option to stop filling a beam if missing data encountered.";
+  p_help = "May make sense to do this for model data since it\n"
+	"means you have hit the ground.";
+  p_default = TRUE;
+} stopOnMissing;

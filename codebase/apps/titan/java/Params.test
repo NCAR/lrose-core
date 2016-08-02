@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<!DOCTYPE parameters [
+ <!ELEMENT parameters (param+) >
+ <!ELEMENT param (label?, description?, info?, value?, param*) >
+ <!ELEMENT label (#PCDATA)>
+ <!ELEMENT description (#PCDATA)>
+ <!ELEMENT info (#PCDATA)>
+ <!ELEMENT value (#PCDATA)>
+ <!ATTLIST param name NMTOKEN #REQUIRED>
+ <!ATTLIST param type NMTOKEN #REQUIRED>
+ <!ATTLIST param type ( String | Boolean | Integer | Float | Double | Option | Collection ) #REQUIRED>
+]>
+
+<parameters>
+
+  <!-- ====== start of collection Root ====== -->
+
+  <param name="Root" type="Collection">
+    <label>Param manager</label>
+    <description>Root-depth parameter manager</description>
+
+    <param name="debug" type="Boolean">
+      <label>Debugging flag</label>
+      <description></description>
+      <value>false</value>
+    </param>
+
+    <param name="verbose" type="Boolean">
+      <label>Verbose debugging flag</label>
+      <description></description>
+      <value>false</value>
+    </param>
+
+    <!-- ====== start of collection radar ====== -->
+
+    <param name="radar" type="Collection">
+      <label>Radar params</label>
+      <description>Edit the radar parameters</description>
+
+      <param name="siteNum" type="Integer">
+        <label>Site number</label>
+        <description>The indexed number for this site</description>
+        <info>
+          <![CDATA[
+          You should arrange these numbers with reference to other sites in the area. The number is used identify the radar site if mode than one radar is used in the network
+          ]]>
+        </info>
+        <value>0</value>
+      </param>
+
+      <param name="siteName" type="String">
+        <label>Site name</label>
+        <description>The name of the site</description>
+        <info>
+          <![CDATA[
+          The site name must be a text description of the geographical geographical location of the radar installation, such as a farm name or nearby town.
+          ]]>
+        </info>
+        <value>Bethlehem</value>
+      </param>
+
+      <param name="userName" type="String">
+        <label>User name</label>
+        <description>The name of the technician or user</description>
+        <info>
+          <![CDATA[
+          The technician or user of the program can put their name in this field. The reason for having it is to keep track of who performed the last calibration.
+          ]]>
+        </info>
+        <value>Unknown</value>
+      </param>
+
+      <param name="latitude" type="Double">
+        <label>Latitude</label>
+        <description>Radar latitude (decimal deg)</description>
+        <value>40.0</value>
+      </param>
+
+      <param name="longitude" type="Double">
+        <label>Longitude</label>
+        <description>Radar longitude (decimal deg)</description>
+        <value>-105.0</value>
+      </param>
+
+      <param name="altitude" type="Double">
+        <label>Altitude</label>
+        <description>Radar altitude (km)</description>
+        <value>1.7</value>
+      </param>
+
+      <param name="peakXmitPower" type="Double">
+        <label>Peak power</label>
+        <description>Peak transmitter power (dBM)</description>
+        <value>80.0</value>
+      </param>
+
+      <param name="xmitFreq" type="Double">
+        <label>Xmit Frequency</label>
+        <description>Transmitter Frequency (GHz)</description>
+        <info>
+          <![CDATA[
+          Transmitter frequency in GigaHertz
+          ]]>
+        </info>
+        <value>5.66</value>
+      </param>
+
+      <param name="beamWidth" type="Double">
+        <label>Beam width</label>
+        <description>Antenna beam width (deg)</description>
+        <info>
+          <![CDATA[
+          Half-power beam width in degrees
+          ]]>
+        </info>
+        <value>1.0</value>
+      </param>
+
+      <param name="antGain" type="Double">
+        <label>Antenna gain</label>
+        <description>Antenna gain (dB)</description>
+        <info>
+          <![CDATA[
+          Antenna gain in dB
+          ]]>
+        </info>
+        <value>44.0</value>
+      </param>
+
+      <param name="waveguideLoss" type="Double">
+        <label>Waveguide loss</label>
+        <description>One-way waveguide loss (dB)</description>
+        <info>
+          <![CDATA[
+          Typical loss values:
+<p>  C-band: 1.75 dB per 100 ft / 30 m
+<p>  S-band: 0.75 dB per 100 ft / 30 m
+
+          ]]>
+        </info>
+        <value>0.5</value>
+      </param>
+
+      <param name="radomeLoss" type="Double">
+        <label>Radome loss</label>
+        <description>Two-way radome loss (dB)</description>
+        <info>
+          <![CDATA[
+          If no radome set to 0.
+          ]]>
+        </info>
+        <value>0.5</value>
+      </param>
+
+      <param name="testCableAtten" type="Double">
+        <label>Test cable attenuation</label>
+        <description>Test cable attenuation (dB)</description>
+        <info>
+          <![CDATA[
+          Typical values:
+<p>C-band: 0.6 dB/ft with RG58 or similar
+<p>S-band: 0.4 dB/ft with RG58 or similar
+
+          ]]>
+        </info>
+        <value>3.8</value>
+      </param>
+
+      <param name="couplerAtten" type="Double">
+        <label>Coupler attenuation</label>
+        <description>Coupler attenuation (dB)</description>
+        <info>
+          <![CDATA[
+          If the signal generator input is connected directly to the receiver set this to 0
+          ]]>
+        </info>
+        <value>30.75</value>
+      </param>
+
+      <param name="displaceType" type="Option">
+        <label>Displace type</label>
+        <description>Displace table type</description>
+        <info>
+          <![CDATA[
+          Quadratic should be used unless the user has a specific reason for choosing a different type. Further information on the table types may be found in the RDAS documentation
+          ]]>
+        </info>
+        <value>Quadratic</value>
+      </param>
+
+      <param name="clutFilter" type="Boolean">
+        <label>Clutter filter on</label>
+        <description>Is the clutter filter on or off?</description>
+        <info>
+          <![CDATA[
+          Select true to turn clutter filtering on, false to turn it off
+          ]]>
+        </info>
+        <value>false</value>
+      </param>
+
+      <param name="antMinElev" type="Double">
+        <label>Antenna min el</label>
+        <description>Min antenna elevation (deg)</description>
+        <info>
+          <![CDATA[
+          The antenna cannot go below this elevation. Therefore the control program will not request elevation angles below this value.
+          ]]>
+        </info>
+        <value>0.0</value>
+      </param>
+
+      <param name="antMaxElev" type="Double">
+        <label>Antenna max el</label>
+        <description>Max antenna elevation (deg)</description>
+        <info>
+          <![CDATA[
+          The antenna cannot go above this elevation. Therefore the control program will not request elevation angles above this value.
+          ]]>
+        </info>
+        <value>45.0</value>
+      </param>
+
+      <param name="antMaxElSlewRate" type="Double">
+        <label>Antenna max el slew rate</label>
+        <description>Max el slew rate (deg/s)</description>
+        <info>
+          <![CDATA[
+          The antenna cannot slew faster than this. Therefore the control program will not request slew rates above this value.
+          ]]>
+        </info>
+        <value>10.0</value>
+      </param>
+
+      <param name="antMaxAzSlewRate" type="Double">
+        <label>Antenna max az slew rate</label>
+        <description>Max az slew rate (deg/s)</description>
+        <info>
+          <![CDATA[
+          The antenna cannot slew faster than this. Therefore the control program will not request slew rates above this value.
+          ]]>
+        </info>
+        <value>24.0</value>
+      </param>
+
+    </param>
+
+    <!-- ======= end of collection radar ======= -->
+
+    <!-- ====== start of collection scan ====== -->
+
+    <param name="scan" type="Collection">
+      <label>Scan strategy</label>
+      <description>Edit the radar scan strategy</description>
+
+      <param name="elevationList" type="String">
+        <label>Elevation list</label>
+        <description>Comma-delimited elevation angle list</description>
+        <info>
+          <![CDATA[
+          Enter the elevation angles in a comma-delimited list.
+          ]]>
+        </info>
+        <value>0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.9</value>
+      </param>
+
+      <param name="azSlewRate" type="Double">
+        <label>Azimuth slew rate</label>
+        <description>Antenna slew rate in azimuth (deg/sec)</description>
+        <value>18.0</value>
+      </param>
+
+      <param name="elSlewRate" type="Double">
+        <label>Elevation slew rate</label>
+        <description>Antenna slew rate in elevation (deg/sec)</description>
+        <value>10.0</value>
+      </param>
+
+      <param name="nGates" type="Integer">
+        <label>N Gates</label>
+        <description>Number of gates per beam</description>
+        <value>500</value>
+      </param>
+
+      <param name="startRange" type="Double">
+        <label>Start range</label>
+        <description>Range to center of first gate (km)</description>
+        <value>0.125</value>
+      </param>
+
+      <param name="gateSpacing" type="Double">
+        <label>Gate spacing</label>
+        <description>Spacing between gates (km)</description>
+        <value>0.25</value>
+      </param>
+
+      <param name="prf" type="Double">
+        <label>PRF</label>
+        <description>Pulse Repetition Frequency (/s)</description>
+        <value>1000.0</value>
+      </param>
+
+    </param>
+
+    <!-- ======= end of collection scan ======= -->
+
+    <!-- ====== start of collection calib ====== -->
+
+    <param name="calib" type="Collection">
+      <label>Calibration params</label>
+      <description>Edit the calibration values</description>
+
+      <param name="vipLow" type="Double">
+        <label>VipLow</label>
+        <description>VIP count low value (count)</description>
+        <value>273.01</value>
+      </param>
+
+      <param name="vipHigh" type="Double">
+        <label>VipHigh</label>
+        <description>VIP count high value (count)</description>
+        <value>2835.0</value>
+      </param>
+
+      <param name="powerLow" type="Double">
+        <label>PowerLow</label>
+        <description>Power low value (dBM)</description>
+        <value>-95.0</value>
+      </param>
+
+      <param name="powerHigh" type="Double">
+        <label>PowerHigh</label>
+        <description>Power high value (dBM)</description>
+        <value>-40.0</value>
+      </param>
+
+      <param name="xmtPower" type="Double">
+        <label>XMT power</label>
+        <description>Transmitter power (dBM)</description>
+        <value>84.0</value>
+      </param>
+
+      <param name="radarConstant" type="Double">
+        <label>Radar constant</label>
+        <description>Radar constant (mm6.m-3.mW.km-2)</description>
+        <value>-158.0</value>
+      </param>
+
+      <param name="atmosAtten" type="Double">
+        <label>Atmospheric attenuation</label>
+        <description>Atmospheric attenuation at radar wavelength (dB/km)</description>
+        <value>0.014</value>
+      </param>
+
+    </param>
+
+    <!-- ======= end of collection calib ======= -->
+
+    <!-- ====== start of collection controlPanel ====== -->
+
+    <param name="controlPanel" type="Collection">
+      <label>Control Panel</label>
+      <description>Radar control panel</description>
+      <info>
+        <![CDATA[
+        Parameters for the size, location, etc. of the control panel
+        ]]>
+      </info>
+
+      <param name="xx" type="Integer">
+        <label>X offset</label>
+        <description>The X offset from the parent</description>
+        <info>
+          <![CDATA[
+          This the the X offset, in pixels, from the main frame of the application.
+          ]]>
+        </info>
+        <value>600</value>
+      </param>
+
+      <param name="yy" type="Integer">
+        <label>Y offset</label>
+        <description>The Y offset from the parent</description>
+        <info>
+          <![CDATA[
+          This the the Y offset, in pixels, from the main frame of the application.
+          ]]>
+        </info>
+        <value>0</value>
+      </param>
+
+      <param name="width" type="Integer">
+        <label>Width</label>
+        <description>The window width in pixels</description>
+        <value>550</value>
+      </param>
+
+      <param name="height" type="Integer">
+        <label>Height</label>
+        <description>The window height in pixels</description>
+        <value>507</value>
+      </param>
+
+      <param name="startVisible" type="Boolean">
+        <label>Start visible</label>
+        <description>Start with the window visible?</description>
+        <info>
+          <![CDATA[
+          If true, the program will start with the Control Panel visible. If not, it will be hidden at startup
+          ]]>
+        </info>
+        <value>true</value>
+      </param>
+
+    </param>
+
+    <!-- ======= end of collection controlPanel ======= -->
+
+    <!-- ====== start of collection aScope ====== -->
+
+    <param name="aScope" type="Collection">
+      <label>A-Scope</label>
+      <description>A-scope display - for calibration</description>
+      <info>
+        <![CDATA[
+        Parameters for the size, location, etc. of the A-scope
+        ]]>
+      </info>
+
+      <param name="xx" type="Integer">
+        <label>X offset</label>
+        <description>The X offset from the parent</description>
+        <info>
+          <![CDATA[
+          This the the X offset, in pixels, from the main frame of the application.
+          ]]>
+        </info>
+        <value>0</value>
+      </param>
+
+      <param name="yy" type="Integer">
+        <label>Y offset</label>
+        <description>The Y offset from the parent</description>
+        <info>
+          <![CDATA[
+          This the the Y offset, in pixels, from the main frame of the application.
+          ]]>
+        </info>
+        <value>510</value>
+      </param>
+
+      <param name="width" type="Integer">
+        <label>Width</label>
+        <description>The window width in pixels</description>
+        <value>1149</value>
+      </param>
+
+      <param name="height" type="Integer">
+        <label>Height</label>
+        <description>The window height in pixels</description>
+        <value>443</value>
+      </param>
+
+      <param name="startVisible" type="Boolean">
+        <label>Start visible</label>
+        <description>Start with the window visible?</description>
+        <info>
+          <![CDATA[
+          If true, the program will start with the A-Scope visible. If not, it will be hidden at startup
+          ]]>
+        </info>
+        <value>true</value>
+      </param>
+
+      <param name="topMargin" type="Integer">
+        <label>Top margin</label>
+        <description>Top margin (pixels)</description>
+        <value>30</value>
+      </param>
+
+      <param name="bottomMargin" type="Integer">
+        <label>Bottom margin</label>
+        <description>Bottom margin (pixels)</description>
+        <value>30</value>
+      </param>
+
+      <param name="leftMargin" type="Integer">
+        <label>Left margin</label>
+        <description>Left margin (pixels)</description>
+        <value>45</value>
+      </param>
+
+      <param name="rightMargin" type="Integer">
+        <label>Right margin</label>
+        <description>Right margin (pixels)</description>
+        <value>50</value>
+      </param>
+
+      <param name="maxCount" type="Integer">
+        <label>Max count</label>
+        <description>Max count to be displayed - Y axis</description>
+        <value>4096</value>
+      </param>
+
+      <param name="minDbz" type="Double">
+        <label>Min dbz</label>
+        <description>Min dbz to be displayed - Y axis</description>
+        <value>-20.0</value>
+      </param>
+
+      <param name="maxDbz" type="Double">
+        <label>Max dbz</label>
+        <description>Max dbz to be displayed - Y axis</description>
+        <value>80.0</value>
+      </param>
+
+      <param name="plotCount" type="Boolean">
+        <label>Plot count?</label>
+        <description>Option to plot count values</description>
+        <value>true</value>
+      </param>
+
+      <param name="plotDbz" type="Boolean">
+        <label>Plot dbz?</label>
+        <description>Option to plot dbz values</description>
+        <value>true</value>
+      </param>
+
+      <param name="plotSample" type="Boolean">
+        <label>Plot sampled values?</label>
+        <description>Option to plot sampled values.</description>
+        <info>
+          <![CDATA[
+          You have the option to sample the values over a selected number of gates.
+          ]]>
+        </info>
+        <value>false</value>
+      </param>
+
+      <param name="sampleCenter" type="Integer">
+        <label>Sample center</label>
+        <description>Location of the center of the sampled region (gates).</description>
+        <value>240</value>
+      </param>
+
+      <param name="sampleNGates" type="Integer">
+        <label>Sample N Gates</label>
+        <description>Number of gates in sample.</description>
+        <info>
+          <![CDATA[
+          This is the width of the sample in gates
+          ]]>
+        </info>
+        <value>21</value>
+      </param>
+
+    </param>
+
+    <!-- ======= end of collection aScope ======= -->
+
+    <!-- ====== start of collection ppiDisplay ====== -->
+
+    <param name="ppiDisplay" type="Collection">
+      <label>PPI Display</label>
+      <description>PPI Display for viewing raw radar data</description>
+      <info>
+        <![CDATA[
+        Parameters for the size, location, etc. of the PPI display
+        ]]>
+      </info>
+
+      <param name="xx" type="Integer">
+        <label>X offset</label>
+        <description>The X offset from the parent</description>
+        <info>
+          <![CDATA[
+          This the the X offset, in pixels, from the main frame of the application.
+          ]]>
+        </info>
+        <value>300</value>
+      </param>
+
+      <param name="yy" type="Integer">
+        <label>Y offset</label>
+        <description>The Y offset from the parent</description>
+        <info>
+          <![CDATA[
+          This the the Y offset, in pixels, from the main frame of the application.
+          ]]>
+        </info>
+        <value>300</value>
+      </param>
+
+      <param name="width" type="Integer">
+        <label>Width</label>
+        <description>The window width in pixels</description>
+        <value>800</value>
+      </param>
+
+      <param name="height" type="Integer">
+        <label>Height</label>
+        <description>The window height in pixels</description>
+        <value>800</value>
+      </param>
+
+    </param>
+
+    <!-- ======= end of collection ppiDisplay ======= -->
+
+    <!-- ====== start of collection mainWindow ====== -->
+
+    <param name="mainWindow" type="Collection">
+      <label>Main window</label>
+      <description>Main window</description>
+
+      <param name="xx" type="Integer">
+        <label>X offset</label>
+        <description>The X offset from the parent</description>
+        <info>
+          <![CDATA[
+          This the the X offset, in pixels, from the main frame of the application.
+          ]]>
+        </info>
+        <value>0</value>
+      </param>
+
+      <param name="yy" type="Integer">
+        <label>Y offset</label>
+        <description>The Y offset from the parent</description>
+        <info>
+          <![CDATA[
+          This the the Y offset, in pixels, from the main frame of the application.
+          ]]>
+        </info>
+        <value>0</value>
+      </param>
+
+      <param name="width" type="Integer">
+        <label>Width</label>
+        <description>The window width in pixels</description>
+        <value>600</value>
+      </param>
+
+      <param name="height" type="Integer">
+        <label>Height</label>
+        <description>The window height in pixels</description>
+        <value>506</value>
+      </param>
+
+      <param name="imageName" type="String">
+        <label>Image name</label>
+        <description>Name of image in main window</description>
+        <value>./main_window.png</value>
+      </param>
+
+    </param>
+
+    <!-- ======= end of collection mainWindow ======= -->
+
+    <!-- ====== start of collection paramGui ====== -->
+
+    <param name="paramGui" type="Collection">
+      <label>Param GUI params</label>
+      <description>Parameters for controlling the parameter GUI.</description>
+      <info>
+        <![CDATA[
+        This sets parameters which control how the GUI for editing the parameters is laid out.
+        ]]>
+      </info>
+
+      <param name="cascadeOffsetX" type="Integer">
+        <label>Cascade offset X</label>
+        <description>The X offset when cascading.</description>
+        <info>
+          <![CDATA[
+          Parameters collections may be nested to any depth. This is the offset applied to cascade the X offset for the GUI window as the user opens a parameter at the next level down.
+          ]]>
+        </info>
+        <value>50</value>
+      </param>
+
+      <param name="cascadeOffsetY" type="Integer">
+        <label>Cascade offset Y</label>
+        <description>The Y offset when cascading.</description>
+        <info>
+          <![CDATA[
+          Parameters collections may be nested to any depth. This is the offset applied to cascade the Y offset for the GUI window as the user opens a parameter at the next level down.
+          ]]>
+        </info>
+        <value>50</value>
+      </param>
+
+      <param name="infoX" type="Integer">
+        <label>Info window X</label>
+        <description>The X location of the Info window</description>
+        <value>800</value>
+      </param>
+
+      <param name="infoY" type="Integer">
+        <label>Info window Y</label>
+        <description>The Y location of the Info window</description>
+        <value>0</value>
+      </param>
+
+      <param name="infoWidth" type="Integer">
+        <label>Info window width</label>
+        <description>The width of the Info window</description>
+        <value>500</value>
+      </param>
+
+      <param name="infoHeight" type="Integer">
+        <label>Info window height</label>
+        <description>The height of the Info window</description>
+        <value>300</value>
+      </param>
+
+    </param>
+
+    <!-- ======= end of collection paramGui ======= -->
+
+  </param>
+
+  <!-- ======= end of collection Root ======= -->
+
+</parameters>
+

@@ -1,0 +1,470 @@
+/**********************************************************************
+ * TDRP params for Tstorms2Symprod
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for procmap registration and auto restarting.
+// Type: string
+//
+
+instance = "small_storms";
+
+///////////// no_threads //////////////////////////////
+//
+// Option to prevent server from using a thread per client.
+// For debugging purposes it it sometimes useful to suppress the use of 
+//   threads. Set no_threads to TRUE for this type of debugging.
+// Type: boolean
+//
+
+no_threads = FALSE;
+
+//======================================================================
+//
+// Server details for support from ServerMgr.
+//
+//======================================================================
+ 
+///////////// port ////////////////////////////////////
+//
+// Port number.
+// The server listens on this port for client requests.
+// Type: int
+//
+
+port = 60001;
+
+///////////// qmax ////////////////////////////////////
+//
+// Max quiescent period (secs).
+// If the server does not receive requests for this time period, it will 
+//   die gracefully. If set to -1, the server never exits.
+// Type: int
+//
+
+qmax = -1;
+
+///////////// max_clients /////////////////////////////
+//
+// Maximum number of clients.
+// This is the maximum number of threads the application will produce to 
+//   handle client requests.  If the maximum is reached, new clients will 
+//   receive a SERVICE_DENIED error message and will have to request the 
+//   data again.  If set to -1, no maximum is enforced.
+// Type: int
+//
+
+max_clients = -1;
+
+//======================================================================
+//
+// RENDERING PARAMETERS.
+//
+//======================================================================
+ 
+///////////// valid_forecasts_only ////////////////////
+//
+// Valid forecasts only flag.
+// If set, only valid forecasts will be sent. If not, all forecasts will 
+//   be sent.
+// Type: boolean
+//
+
+valid_forecasts_only = FALSE;
+
+///////////// plot_current ////////////////////////////
+//
+// Plot current shape flag.
+// If set, the current storm shape will be sent.
+// Type: boolean
+//
+
+plot_current = TRUE;
+
+///////////// plot_forecast ///////////////////////////
+//
+// Plot forecast shape flag.
+// If set, the forecast storm shape will be sent.
+// Type: boolean
+//
+
+plot_forecast = FALSE;
+
+///////////// forecast_lead_time //////////////////////
+//
+// Forecast lead time (secs).
+// Lead time for forecast shapes and positions.
+// Type: long
+//
+
+forecast_lead_time = 1800;
+
+///////////// forecast_dashed /////////////////////////
+//
+// Forecast line dashed flag.
+// If set, the forecast will be rendered using a dashed line rather than 
+//   a solid line.
+// Type: boolean
+//
+
+forecast_dashed = TRUE;
+
+///////////// grow_forecast ///////////////////////////
+//
+// Grow the storm when plotting the forecast.
+// If set, the growth rate information provided by TITAN will be used to 
+//   modify the storm area.  If not set, the storm will be moved to the 
+//   extrapolated position without changing the area.
+// Type: boolean
+//
+
+grow_forecast = TRUE;
+
+///////////// storm_shape /////////////////////////////
+//
+// Shape type.
+// Determines the way in which the storm is represented.
+//
+// Type: enum
+// Options:
+//     ELLIPSE_SHAPE
+//     POLYGON_SHAPE
+//
+
+storm_shape = POLYGON_SHAPE;
+
+///////////// plot_text_line_offset ///////////////////
+//
+// Vertical line spacing, pixels.
+// Optionally, the user may choose to plot various parameters (storm 
+//   speed, simple and complex track number, trend etc). The selected 
+//   poltting elements are then draw vertically above each other on the 
+//   display, separated by plot_text_line_offset pixels in the vertical. 
+//   If this is negative then the column of numbers will ascend rather 
+//   than descend on the display.
+// Type: int
+//
+
+plot_text_line_offset = 10;
+
+///////////// plot_trend //////////////////////////////
+//
+// Plot trend.
+// If set, the storm size and intensity trend will be included as text: 
+//   '+', '-' or '0'.
+// Type: boolean
+//
+
+plot_trend = FALSE;
+
+///////////// plot_speed //////////////////////////////
+//
+// Plot speed.
+// If set, speed is placed at the head of the vector.
+// Type: boolean
+//
+
+plot_speed = FALSE;
+
+///////////// speed_units /////////////////////////////
+//
+// Units for plotting speed.
+// The speed is computed in kmh. The speed will be converted and plotted 
+//   in these units.
+//
+// Type: enum
+// Options:
+//     SPEED_KMH
+//     SPEED_KNOTS
+//     SPEED_MPH
+//
+
+speed_units = SPEED_KMH;
+
+///////////// speed_round /////////////////////////////
+//
+// Plot speed rounded to nearest 5.
+// Default is not rounded.
+// Type: boolean
+//
+
+speed_round = FALSE;
+
+///////////// plot_top ////////////////////////////////
+//
+// Plot top.
+// If set, top value is placed at the head of the vector.
+// Type: boolean
+//
+
+plot_top = FALSE;
+
+///////////// top_km //////////////////////////////////
+//
+// Plot top value in kilometers.
+// If FALSE, top value is plotted in 100s of feet.
+// Type: boolean
+//
+
+top_km = TRUE;
+
+///////////// plot_track_numbers //////////////////////
+//
+// Plot track numbers.
+// If TRUE, track numbers are plotted.
+// Type: boolean
+//
+
+plot_track_numbers = FALSE;
+
+//======================================================================
+//
+// Polygon smoothing.
+//
+//======================================================================
+ 
+///////////// hull_smooth /////////////////////////////
+//
+// Smooth the storm polygon.
+// If TRUE and storm_shape is POLYGON_SHAPE, the storm polygon will be 
+//   smoothed within the boundaries defined by inner_bnd_multiplier and 
+//   outer_bnd_multiplier.
+// Type: boolean
+//
+
+hull_smooth = FALSE;
+
+///////////// inner_bnd_multiplier ////////////////////
+//
+// Inner boundary multiplier for storm smoothing.
+// Multipliers less than 1.0 produce an inner boundary smaller than the 
+//   original storm. Multipliers greater than 1.0 produce an inner 
+//   boundary larger than the original storm. inner_bnd_multiplier must be 
+//   <= outer_bnd_multiplier.
+// Minimum val: 0
+// Type: double
+//
+
+inner_bnd_multiplier = 1;
+
+///////////// outer_bnd_multiplier ////////////////////
+//
+// Outer boundary multiplier for storm smoothing.
+// Multipliers less than 1.0 produce an outer boundary smaller than the 
+//   original storm. Multipliers greater than 1.0 produce an outer 
+//   boundary larger than the original storm. outer_bnd_multiplier must be 
+//   >= inner_bnd_multiplier.
+// Minimum val: 0
+// Type: double
+//
+
+outer_bnd_multiplier = 1;
+
+//======================================================================
+//
+// Vector rendering.
+//
+//======================================================================
+ 
+///////////// plot_vectors ////////////////////////////
+//
+// Plot vector flag.
+// If set, the forecast vector be sent.
+// Type: boolean
+//
+
+plot_vectors = FALSE;
+
+///////////// arrow_head_len //////////////////////////
+//
+// Length of arrow head (km).
+// Minimum val: 0
+// Type: double
+//
+
+arrow_head_len = 2;
+
+///////////// arrow_head_half_angle ///////////////////
+//
+// Half angle of arrow head (deg).
+// Minimum val: 0
+// Maximum val: 90
+// Type: double
+//
+
+arrow_head_half_angle = 20;
+
+///////////// fixed_length_arrows /////////////////////
+//
+// Fixed length arrows flag.
+// If flag set, direction arrows are of fixed lenght. If not set, arrows 
+//   are scaled to length for time forecast_lead_time.
+// Type: boolean
+//
+
+fixed_length_arrows = FALSE;
+
+///////////// arrow_shaft_length //////////////////////
+//
+// Shaft length arrow head (km).
+// This is used if 'fixed_length_arrows' is TRUE.
+// Minimum val: 0
+// Type: double
+//
+
+arrow_shaft_length = 20;
+
+//======================================================================
+//
+// Colors.
+//
+//======================================================================
+ 
+///////////// current_color ///////////////////////////
+//
+// current color.
+// Name of color suggested for rendering the current storm.
+// Type: string
+//
+
+current_color = "red";
+
+///////////// forecast_color //////////////////////////
+//
+// forecast color.
+// Name of color suggested for rendering the forecast storm.
+// Type: string
+//
+
+forecast_color = "yellow";
+
+///////////// vector_color ////////////////////////////
+//
+// motion vector color.
+// Name of color suggested for rendering the motion vector.
+// Type: string
+//
+
+vector_color = "yellow";
+
+///////////// text_color //////////////////////////////
+//
+// text color.
+// Name of color suggested for rendering the text.
+// Type: string
+//
+
+text_color = "yellow";
+
+///////////// text_background_color ///////////////////
+//
+// text background color.
+// Name of color suggested for rendering the background for the text.  
+//   Set to blank string (the default) to use the default background 
+//   color.
+// Type: string
+//
+
+text_background_color = "";
+
+//======================================================================
+//
+// Fonts.
+//
+//======================================================================
+ 
+///////////// text_font ///////////////////////////////
+//
+// text font name.
+// The name of the X font to be used when rendering the text.
+// Type: string
+//
+
+text_font = "8x13";
+
+//======================================================================
+//
+// Line styles.
+//
+//======================================================================
+ 
+///////////// suggested_line_type /////////////////////
+//
+// display line type.
+// Line type suggested for using on the display.
+//
+// Type: enum
+// Options:
+//     LINETYPE_SOLID
+//     LINETYPE_DASH
+//     LINETYPE_DOT_DASH
+//
+
+suggested_line_type = LINETYPE_SOLID;
+
+///////////// suggested_line_width ////////////////////
+//
+// display line width.
+// Line width suggested for using on the display.
+// Type: long
+//
+
+suggested_line_width = 1;
+
+///////////// suggested_capstyle //////////////////////
+//
+// display capstyle.
+// Capstyle suggested for using on the display.
+//
+// Type: enum
+// Options:
+//     CAPSTYLE_BUTT
+//     CAPSTYLE_NOT_LAST
+//     CAPSTYLE_PROJECTING
+//     CAPSTYLE_ROUND
+//
+
+suggested_capstyle = CAPSTYLE_BUTT;
+
+///////////// suggested_joinstyle /////////////////////
+//
+// display joinstyle.
+// Joinstyle suggested for using on the display.
+//
+// Type: enum
+// Options:
+//     JOINSTYLE_BEVEL
+//     JOINSTYLE_MITER
+//     JOINSTYLE_ROUND
+//
+
+suggested_joinstyle = JOINSTYLE_BEVEL;
+

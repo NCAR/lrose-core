@@ -1,0 +1,32 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_closest_ray_from_sweep</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href="RSL_ray_struct.html">Ray</a> *RSL_get_closest_ray_from_sweep(<a href="RSL_sweep_struct.html">Sweep</a> *s,float ray_angle,float limit);</b>
+
+<h3>
+<hr>Description</h3>
+Return the closest ray within a sweep. Closeness is determined by the minimum absolute difference of ray_angle and the azimuth angle of the ray. The difference must be less than <b>limit</b>. If no such ray can be found, return NULL.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the Ray structure is returned. Otherwise, a NULL pointer is returned. 
+<hr>
+
+<h3>See also</h3>
+<a href="RSL_get_ray.html">RSL_get_ray</a>, <a href="RSL_get_ray_from_sweep.html">RSL_get_ray_from_sweep</a>, <a href="RSL_get_ray_above-below.html">RSL_get_ray_above</a>, <a href="RSL_get_ray_above-below.html">RSL_get_ray_below</a>, <a href="RSL_get_first_ray_of.html">RSL_get_first_ray_of_sweep</a>, <a href="RSL_get_first_ray_of.html">RSL_get_first_ray_of_volume</a>. 
+<hr>
+
+<p>Author: <a href="dennis.flanigan.html">Dennis Flanigan Jr.</a> 
+</body>
+

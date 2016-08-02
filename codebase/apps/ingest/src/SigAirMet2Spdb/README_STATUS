@@ -1,0 +1,1134 @@
+Title:	Status of SIGMET and AIRMET Decoding
+Date:	25-MAY-2004
+Author:	Deirdre Garvey
+================================================================================
+This README contains the following sections:
+
+	Refactoring suggestions 
+	General  - known general SIG/AIRMET decoding problems
+	Preamble - known problems in the "preamble", handled in Input.cc
+	Cancel   - known problems with cancelling a SIG/AIRMET
+	Valid times - known problems with decoding valid times
+	Weather  - known problems parsing weather tokens
+	Correction - known problems handling corrections to SIG/AIRMETs
+	Flight levels - known problems parsing flight levels
+	FIR	 - known problems with parsing FIR
+	Forecast - known problems parsing forecasts
+	Outlook  - known problems parsing outlooks
+	NIL SIGMETs - known problems parsing NIL SIGMETs
+	Vertices - known problems parsing vertices
+
+	Updates - code modifications made to fix other problems
+
+
+Refactoring suggestions
+-----------------------
+1. Write something more "strict" with better thresholding for problems. For
+   example, implement a parser with the ICAO SIG/AIRMET standard and note
+   any SIG/AIRMETS which don't meet it, then try to parse those (up to a point).
+
+Status: May 2004 added "strictness info" lines on the log output and
+	stats output. No strictness checking on weather types yet.
+
+================================================================================
+				O P E N
+================================================================================
+General
+================================================================================
+1. Cannot decode SIGMETs in languages other than English. 
+Priority: None
+Status:	Will not fix.
+
+  a) 2003041400.SIGMETS
+
+	WSCH31 SCCI 140019^M
+	SIGMET 1 VALIDO 140019/140600 UTC - FIR SCCI - POR JET STREAM ENTRE^M
+	LAT 49/54S CON NUCLEO A LOS 35MFT, TURB FCST MOD/FTE 20/30MFT^M
+	TURB FCST MOD OCNL BTN 30/35MFT, TURB FCST MOD/FTE 35/40MFT=^M
+
+  b) 2003041909.SIGMETS
+
+	115 ^M
+	WSRS31 RUKZ 190900^M
+	UWKD SIGMET 190900^M
+	{T/PREDUPREVDENIE N 1^M
+	DEJSTWITELXNO 191000/191600^M
+	PO R/NU AD  PROGNOZIRUETSQ UMEREN TURBULEN=^M
+
+--------------------------------------------------------------------------------
+2. Cannot decode words broken by <CR>. For example "F CST" for "FCST",
+"VE RAS" for "VERAS", "F L300" for "FL300".
+Priority: None
+Status:	Will not fix.
+
+--------------------------------------------------------------------------------
+3. Cannot decode typos. 
+Priority: None
+Status:	Will not fix.
+
+   a) For example "O" (thats an "O" not a zero) in a lat lon. 
+   b) For example "UTTTYMYX", which may be supposed to be UTTT (FIR)
+      and YMYX (station)?
+   c) For example: "49N-00 STNR" will not be found as a lat lon, no
+      direction given on the 00.
+   d) For example: "N23 E1175" will not be found as a lat lon, cannot
+      decode "E1175", is it 11.75 or 117.5?
+
+--------------------------------------------------------------------------------
+4. NIL or NULL SIGMETs are not included in the output SPDB database.
+Priority: None
+Status:	Not scheduled.
+Effort:	Minimal
+What to do: Change to code to have different return codes for NIL/NULL
+	    than CANCEL. Then put these into SPDB database.
+
+--------------------------------------------------------------------------------
+5. Cannot decode US Alaska SIGMETs or AIRMETs due to different syntax than 
+lower-48.
+Priority: None
+Status: Not scheduled
+Effort: Difficult
+What to do: Write new parser
+
+  a. For example AIRMET, (20030619/012500.gts)
+
+	075
+	WAAK01 PANC 190104 AAB
+	WA8O  
+	ANCS WA 190445 AAB
+	AIRMET SIERRA FOR IFR AND MT OBSC VALID UNTIL 190200
+	ALSO SEE SIGMET KIL0 SERIES
+	ALSO SEE SIGMET KIL0 SERIES
+	.
+	COOK INLET AND SUSITNA VLY AB
+	
+	PASW N..MTS OCNL OBSCD IN CLDS/PCPN. NC.
+	.
+	CNTRL GLF CST AD
+	PACV S..MTS OCNL OBSC IN CLDS/PCPN. NC.
+	.
+	UNIMAK PASS TO ADAK AJ
+	MTS OCNL OBSC IN CLDS/PCPN. NC.
+	.
+	ADAK TO ATTU AK
+	OCNL CIGS BLW 010 VIS BLW 3SM BR/RA BR. NC.
+	.
+	=ANCT WA 190445 AAB
+
+   b. For example SIGMET, (20030619/011000.gts)
+
+	780
+	WAAK01 PAFA 190059 AAB
+	WA9O  
+	FAIS WA 190445 AAB
+	ALSO SEE SIGMET KILO SERIES
+	.
+	UPR YKN VLY FB
+	SE PACR..MTS OCNL OBSC IN CLDS/PCPN. NC.
+	.
+	ARCTIC SLP CSTL FG
+	OCNL CIG BLW 010/ISOL VIS BLW 3SM BR. NC.
+	.
+	NORTH SLOPES OF BROOKS RANGE FH
+	NRN PLAIN..OCNL CIG BLW 010/ISOL VIS BLW 3SM BR. NC.
+	.
+	=FAIT WA 190445 AAB
+
+
+================================================================================
+Preamble
+================================================================================
+1. Cannot decode SIGMETs or AIRMETs without an ID number.
+Priority: None
+Status:	Will not fix.
+
+  a) 20030619/105500.gts
+
+	824
+	WSUS41 KMKC 191050
+	WSTC  
+	MKCC WST 191055
+	CONVECTIVE SIGMET...NONE
+
+	OUTLOOK VALID 191255-191655
+	FROM HLC-SLN-SPS-MRF-ELP-HLC
+	WST ISSUANCES POSS. REFER TO MOST RECENT ACUS01 KWNS FROM STORM
+	PREDICTION CENTER FOR SYNOPSIS AND METEOROLOGICAL DETAILS.
+
+	DPZ
+
+  b) 20030619/081500.gts
+
+	334
+	WSCN32 CWEG 190808
+	CB HAVE BECMG ISOLD. AS A RESULT THIS SIGMET HAS BEEN CANCELLED.
+	END/3/YG/PAAWC
+
+  c) 20030619/002500.gts
+
+	540
+	WSUS40 KMKC 190016
+	WSTE  
+	MKCE WST 180014
+	...ADDED SIGMET...
+
+	OUTLOOK VALID 190155-190555
+	AREA 1...FROM 190SE ACK-130SE MIA-80WSW EYW-190ESE LEV-50ENE
+	PXV-190SE ACK
+	WST ISSUANCES POSS. REFER TO MOST RECENT ACUS01 KWNS FROM STORM
+	PREDICTION CENTER FOR SYNOPSIS AND METEOROLOGICAL DETAILS.
+
+	AREA 2...FROM SSM-60NE ASP-60NW ERI-BVT-70SSE MQT-SSM
+	WST ISSUANCES POSS. REFER TO MOST RECENT ACUS01 KWNS FROM STORM
+	PREDICTION CENTER FOR SYNOPSIS AND METEOROLOGICAL DETAILS.
+
+--------------------------------------------------------------------------------
+2. Cannot decode SIGMETs without a space between the string "SIGMET" and
+the ID number.
+Priority: None
+Status:	Will not fix.
+
+  a) 20030619/115500.gts
+
+	WSRS31 RUKG 191100
+	UMKK SIGMET1 VALID
+	192200/192100 UMKK-KALININGRAD FIR
+	FRQ TS FCST MOV W 30KMH
+	TOPS FL240 NC=
+
+
+================================================================================
+Valid times
+================================================================================
+
+
+
+================================================================================
+Weather
+================================================================================
+1. If multiple weather types in one SIGMET, only pickup the first one.
+Priority: Low
+Status:	Not currently handled. Not scheduled.
+Effort: Moderate - Difficult
+What to do: Come up with a scheme to search for all weather tokens then
+	pick one?
+
+  a) For example, picks up ISOL CB as the weather type, not MOD/SEV TURB
+     or ICING (20030619/063000.gts)
+
+	717
+	WSBW20 VGZR 190700
+	VGZR SIGMET 03 VALID 190800/191200
+	VGZR FIR ISOL CB/TS WITH MOD/SEV TURB AND ICING FCST=
+
+
+================================================================================
+Cancel
+================================================================================
+1. Cannot update (cancel the previous) a US AIRMET that has a different area 
+   than the previous AIRMET. Since US AIRMETs do not have a number to identify,
+   use the states list. If the states lists do not match, cannot identify which
+   AIRMET to cancel. In example below, can cancel the old MTN OBSCN AIRMET but
+   not the IFR due to different states lists.
+Priority: Low
+Status:	Not currently handled. Not scheduled.
+Effort: Moderate - Difficult
+What to do: Come up with a scheme to get a "close match" but not an absolute
+match.
+
+	Original (20030619/015500.gts)
+	-------------------------------
+	716
+	WAUS1 KBOS 190134
+	WA1S  
+	BOSS WA 190145
+	AIRMET SIERRA FOR IFR AND MTN OBSCN VALID UNTIL 190800
+	.
+	AIRMET IFR...ME NH VT MA CT RI NY PA NJ MD DC DE VA WV AND CSTL
+	WTRS
+	FROM MLT TO 50WSW YSJ TO ACK TO 15SE ORF TO HMV TO HNN TO RIC TO
+	PSB TO ALB TO MLT
+	OCNL CIG BLW 010/VIS BLW 3SM PCPN/BR/FG. CONDS SPRDG FROM CSTL
+	AREAS TO INLAND AREAS 05-08Z. CONDS CONTG BYD 08Z ENDG INLAND
+	AREAS AND SERN VA ERN MD 12-14Z CONTG RMNDR CSTL AREAS THRU 14Z.
+	.
+	AIRMET MTN OBSCN...ME NH VT NY PA WV MD VA
+	FROM HUL TO CON TO HNK TO 30NW GSO TO HMV TO HNN TO JHW TO SYR TO
+	MSS TO YSC TO HUL
+	MTNS OCNL OBSC CLDS/PCPN/FG/BR. CONDS CONTG BYD 08Z THRU 14Z.
+	....
+	
+	Update (20030619/060000.gts)
+	-----------------------------
+	BOSS WA 190555 AMD
+	AIRMET SIERRA UPDT 1 FOR IFR AND MTN OBSCN VALID UNTIL 190800
+	.
+	AIRMET IFR...ME NH VT MA CT RI NY OH PA NJ MD DC DE VA WV AND
+	CSTL WTRS...UPDT
+	FROM MLT TO 50WSW YSJ TO ACK TO 15SE ORF TO HMV TO APE TO JHW TO
+	ALB TO MLT
+	OCNL CIG BLW 010/VIS BLW 3SM PCPN/BR/FG. CONDS CONTG BYD 08Z ENDG
+	INLAND AREAS AND SERN VA ERN MD 12-14Z CONTG RMNDR CSTL AREAS
+	THRU 14Z.
+	...UPDTD TO EXPAND AREA WWD...
+	.
+	AIRMET MTN OBSCN...ME NH VT NY PA WV MD VA
+	FROM HUL TO CON TO HNK TO 30NW GSO TO HMV TO HNN TO JHW TO SYR TO
+	MSS TO YSC TO HUL
+	MTNS OCNL OBSC CLDS/PCPN/FG/BR. CONDS CONTG BYD 08Z THRU 14Z.
+	....
+
+
+2. BUG. Currently do not handle reissues. If a SIGMET is cancelled and reissued 
+   as a different number, do the cancel but not the reissue.
+Priority: Low
+Status:	Not currently handled. Not scheduled. 5/25/04 add parsing to find reissue
+Effort:	Moderate
+What to do: What to do about handling a reissue? what time(s) to use?
+
+  a) 20030619/125500.gts
+
+	WSNZ21 NZKL 191236
+	NZZC CANCEL SIGMET 06
+	REISSUED AS 08
+
+
+================================================================================
+Correction
+================================================================================
+1. Cannot handle CORRECTed SIG/AIRMETs
+Priority: Low
+Status:	Not currently handled. Not scheduled. 5/25/04 add parsing to find correction
+What to do: Not sure what to do with correction. Cancel previous? 
+
+ a) 2003050423.SIGMETS
+
+	WSPA31 PHFO 042330 CCB^M
+	SIGPS1^M
+	^M
+	KZOA SIGMET TANGO 4 VALID 042200/050200 PHFO-^M
+	OAKLAND OCEANIC FIR. CORRECTS SIGMET TANGO 3. MOD OR GREATER CAT ^M
+	FCST BTN FL310 AND 380 WITHIN 90 NM EITHER SIDE OF LINE 29N165W ^M
+	25N170W. MOV E 5 KT. NC.^M
+
+
+2. Cannot handle AMENDed AIRMETs
+Priority: Low
+Status:	Not currently handled. Not scheduled. 5/25/04 add parsing to find amend
+Effort:	Difficult
+What to do: Not sure what to do with amended text and location. Overwrite?
+	    Append?
+
+  a) 20030619/035500.gts
+
+	WSAW31 LOWM 190333
+	AMEND AIRMET 1
+	ISOL EMBD CB TOPS 29000FT AND LOW LEVEL CLOUDS/SFC VIS 
+	 LESS THAN 3000M DUE TO DZ OBS/FCST OVER N OF IRAN  
+	SFC VIS LESS THAN 2500M DUE TO BR OBS/FCST OVER SSE OF IRAN
+	SFC WSPD MAX 13MPS AND SCF VIS LESS THAN 1000M DUE TO SA
+	 OBS/FCST OVER OIZB AREA=
+
+
+
+================================================================================
+Flight levels
+================================================================================
+1. Cannot decode flight levels with no units or keywords.
+Priority: None
+Status:	Will not fix.
+
+  a) 2003041003.SIGMETS 
+
+	SIGMET OSCAR 1 VALID UNTIL 100700^M
+	OH WV VA TN IN KY^M
+	FROM CLE TO BKW TO HMV TO VXV TO IND TO FWA TO CLE^M
+	OCNL SEV TURB BTN 150 AND 280. RPRTD BY ACFT. CONDS CONTG BYD^M
+	0700Z.^M
+
+  b) 2003041400.SIGMETS
+
+	UAFM SIGMET N1 VALID 140100/140500 UAFM-^M
+	BISHKEK FIR FCST FRONT TS MOV NE 25KMH^M
+	MOD ICE 2000-9000 MOD TURB 0500-9000 INTST NC=^M
+
+--------------------------------------------------------------------------------
+2. Cannot decode "TOP F L400" as a flight level (2003041307.SIGMETS)
+Priority: None
+Status:	Will not fix.
+
+	WSBZ22 SBBS 130726 ^M
+	SBBS SIGMET 4 VALID 130725/131100 SBBR- BRASILIA FIR EMBD TS/CB TOP F^M
+	L400 OBS IN AD SBPM  STNR NC=^M
+
+--------------------------------------------------------------------------------
+3. Cannot decode "F300/380" as a flight level (2003050515.SIGMETS)
+Priority: Low
+Status:	Not scheduled
+Effort:	Minimal
+What to do: Change to code to add additional flight level parsing type
+
+	WSIL31 BICC 051500^M
+	BIRD SIGMET 1 VALID 051415/051700 BIRK-^M
+	REYKJAVIK CTA MOD TO OCNL SEV TURB FCST OVER SW-GREENLAND, IN AREA^M
+	6330N055W, 68N55W, 68N40W, 6330N045W, 6330N055W, F300/380 STNR,^M
+	WKN.=^M
+
+
+================================================================================
+FIR
+================================================================================
+1. Cannot decode FIR if it does not ocurr in the header or the source
+Priority: None
+Status:	Will not fix.
+
+  a) 2003041911.SIGMETS
+
+	092 ^M
+	WSRA31 TKAC 191130^M
+	UTTT SIGMET 2 VALID 191130Z/191730Z UTTTYMYX-^M
+	SEV TURB 0500/7500M SEV ICG 1500/7500M FCST UTTT FIR^M
+	INTST WKN=^M
+
+2. Cannot decode FIR if occurs between dashes (-) and proceeded by FIR
+   string
+Priority: Low
+Status:	Not scheduled
+Effort:	Minimal-Moderate
+What to do: Change to code to add additional FIR parsing searches
+
+   a) 20030619/132500.gts
+
+	WSCH31 SCCI 191257
+	SIGMET 1 VALIDO  191300/191900 UTC - FIR SCCI - TURB MOD BTN
+	FL200/360 FCST, POR CIZALLE HORIZONTAL DE VIENTO ENTRE
+	LAT47S/LAT50S=
+
+
+================================================================================
+Forecast
+================================================================================
+
+
+
+================================================================================
+Outlook
+================================================================================
+
+
+================================================================================
+NIL SIGMETs
+================================================================================
+1. Did not decode this as a NULL SIGMET to ignore. Did return the FIR
+as a polygon (2003050401.SIGMETS)
+Priority: Low
+Status:	Problems capturing the "NIL=" as a token
+Effort:	Moderate
+What to do: Not sure. Debugging required.
+
+
+	WSZA21 FAJS 040145^M
+	^M
+	SIGMET 2 VALID 040300/040600^M
+	NIL=^M
+
+
+================================================================================
+Vertices - general
+================================================================================
+1. If multiple SIGMETs in one message, we currently find all the points as
+one polygon. This is a problem.
+Priority: None
+Status:	Will not fix.
+
+  a) 2003020323.SIGMETS
+
+	WSZA21 FAJS 032300^M
+	^M
+	SIGMET 1 VALID 040000/040300^M
+	OCNL EMBD CB TOPS FL390 LOC 27S18E 32S24E 33S29E 29S33E 28S27E 29S22E^M
+	ISOL EMBD CB TOPS FL360 LOC 15S39E 16S37E 15S33E 15S27E 19S21E 28S27E^M
+	                            30S23E 27S18E 19S13E=^M
+
+
+  b) 2003020307.SIGMETS 
+	
+	WSPF21 NTAA 030732^M
+	NTTT SIGMET NR01 VALID 030800/031400 NTAA-FIR^M
+	1) ISOL EMBD CB TOP FL480 IN AREA BOUNDED BY : 05S157W 08S152W^M
+	13S157W AND 05S157W MOV WEST SLW.^M
+	2) ISOL EMBD CB TOP FL440 IN AREA BOUNDED BY : 15S149W 11S148W^M
+	11S140W 16S137W 18S137W 20S134W 22S140W 21S146W 17S148W AND 15S149W^M
+	MOV WEST SLW AND NC.^M
+	3) ISOL EMBD CB TOP FL370 IN AREA BOUNDED BY : 25S125W 27S120W^M
+	30S120W AND 25S125W MOV SOUTH-EAST 08KT.=^M
+
+
+--------------------------------------------------------------------------------
+2. Cannot find stations if they are split by a <CR>. For example, would
+not find "FCST" from "F CST" or "VERAS" from "VER AS".
+Priority: None
+Status:	Will not fix.
+
+	SBBS SIGMET 3 VALID 101030/101430 SBBR - BRASILIA FIR EMBD TS OBS/FCS^M
+	T IN IVON PSN/BAIAN PSN/KAKUD PSN/KUNOS PSN/FURNAS/SBVG/JAPER PSN/VER^M
+	AS PSN/BORGA PSN/SIGNO PSN/IVON PSN AREA TOPS FL380 STNR NC=^M
+
+
+--------------------------------------------------------------------------------
+3. Not finding all station locations, some are missing from database (see
+below) so that affects polygon
+Priority: None
+Status:	Will not fix.
+
+
+--------------------------------------------------------------------------------
+4. Need to do some sort of ordering or cleanup on polygons to make sure
+they do not cross over. 
+Priority: Low
+Status:	Possible function from Gerry Wiener to do convex hulls. Untested.
+Effort:	Difficult
+What to do: Add function. Extensive testing and debugging required.
+
+  a) For example, find tokens in order (2003041421.SIGMETS):
+     tok: 49N07W, lat,lon: 49, -7
+     tok: 44N05W, lat,lon: 44, -5
+     tok: 49N02W, lat,lon: 49, -2
+     tok: 44N04W, lat,lon: 44, -4
+
+     but actually want them as: 49N07W, 49N02W, 44N04W, 44N05W.
+
+	LFFF SIGMET SST 4 VALID 142200/150400 LFPW-^M
+	UIR FRANCE MOD TURB FCST BLW FL400 BTN LINE 49N07W/44N05W AND LINE^M
+	49N02W/44N04W MOV W SLW NC=^M
+
+--------------------------------------------------------------------------------
+5. Cannot decode polygons from very overloaded SIGMETS (2003041705.SIGMETS)
+Priority: None
+Status:	Will not fix.
+
+	WSAW31 LOWM 170539^M
+	OIII SIGMET 3 VALID 170530/170830 OIII-^M
+	TEHRAN FIR^M
+	ISOL EMBD CB TOPS 30000FT WITH SHRA/SN/LOW LEVEL CLOUDS AND ^M
+	  SFC VIS LESS THAN 1000M OBS/FCST OVER N OFIRAN(SPC OVER OINZ)^M
+	ISOL EMBD CB TOPS 29000FT WITH TS/RA/SFC WSPD MAX 14MPS AND^M
+	  SFC VIS LESS THAN 3000M OBS/FCST OVER LOC E,SE,SSE OF IRAN^M
+	ISOL EMBD CB TOPS 30000FT WITH TS/SHRA/SN/SFC WSPD MAX 12MPS AND SFC ^M
+	  VIS LESS THAN 2500M OBS/FCST OVER W,NW,NE OF IRAN AND LIKELY TEHRAN^M
+	  AND ALBORZ MOUNTAIN AREA(SFC VIS OVER MAAA 0150M DUE TO FG) ^M
+	ISOL EMBD CB TOPS 29000FT AND POOR VIS LESS THAN 1000M DUE TO DU/HZ^M
+	  OBS/FCST OVER OIBB AREA^M
+	SFC VIS LESS THAN 1000M DUE TO FG/SN/LOW LEVEL CLOUDS OBS/FCST^M
+	  OVER OITL AREA^M
+	POOR VIS LESS THAN 1000M DUE TO HZ OBS/FCST OVER OIBB AREA=^M
+	ISOL EMBD CB TOPS 29000FT OBS/FCST AND SFC VIS LESS THAN 3000 OVER^M
+	  LOC SW,CENTRAL AREA OF IRAN=^M
+
+
+================================================================================
+Vertices - single points icons - not polygons
+================================================================================
+
+
+================================================================================
+Vertices - relative to FIR boundaries
+================================================================================
+In most cases, sets polygon to entire FIR boundary instead of only part of
+it. 
+Priority: ?
+Status:	Not scheduled
+Effort:	Difficult!!
+What to do: Major code mods
+
+--------------------------------------------------------------------------------
+1. For example, the following implies a polygon bounded by NZNR-OHURA
+to the south, and the FIR boundaries to the north, east and west
+(2003041003.SIGMETS)
+Priority: Med
+Status:	Modifications added by Niles Oien in May 2004
+Effort:	Moderate
+What to do: Cannot test. No location for OHURA.
+
+	WSNZ21 NZKL 100329^M
+	NZZC SIGMET 02 VALID 100329/100729 UTC OR 101529/101929 NZST NZKL- ^M
+	NZFIR ISOL SEV TURB FCST BTN FL320-FL360 N OF A LINE NZNR-OHURA VOR.^M
+	INTST NC.^M
+
+--------------------------------------------------------------------------------
+2. For example, the following implies a region south of N67 and north of N64 
+(2003041512.SIGMETS)
+Priority: Low
+Status:	Not scheduled
+Effort:	Difficult
+What to do: Add new code to handle "BTN" but that is also used for flight levels
+
+	WSGL31 BGSF 151234^M
+	BGGL SIGMET 1 VALID 151235/151635 BGSF-^M
+	SONDRESTROM FIR OCNL SEV TURB FCST OVER SE-COAST OF GREENLAND BTN N64^M
+	AND N67 BLW FL090, STNR, NC=^M
+
+--------------------------------------------------------------------------------
+3. For example, not entirely sure what is implied by the following
+Priority: None
+Status:	Will not fix.
+
+   a) Maybe the SE quarter of the FIR? (2003041422.SIGMETS)
+
+	WSFR31 LFPW 142200^M
+	LFBB SIGMET 6 VALID 142200/150200 LFBD-^M
+	FIR BORDEAUX SEV TURB OVER 1/4 SE FIR BTN GND AND FL070 NC=^M
+
+   b) Maybe the SE part of the FIR? (2003050501.SIGMETS)
+
+	WSEE31 UUWW 050137^M
+	UUWV SIGMET 1 VALID 050145/050745 UUWW-
+	MOSCOW FIR EMBD TS FCST TOP 9 KM NE E SE PART MOV SE 30 KM NC-
+
+   c) Maybe the east part of the FIR? What is the east part? 
+      (20030619/014500.gts)
+
+	444
+	WSIY31 LIIB 190124
+	LIBB SIGMET 02 VALID 190200/190600 LIMM-
+	BRINDISI FIR FRQ CB AND TS OBS MAINLY E PART STNR NC=
+
+
+--------------------------------------------------------------------------------
+4. For example, the following implies a polygon bounded by 24N to the
+south, 43E to the west, 48E to the west, and the FIR boundaries to the
+north (2003041611.SIGMETS):
+Priority: None
+Status:	Will not fix.
+
+	WSAW31 LOWM 161115^M
+	OEJD SIGMET 01 VALID 161100 TO 161500 OEJN-^M
+	JEDDAH FIR DS/BLDU OBS/FCST N OF 24.0 N DEG E OF 43.0 E DEG W OF 48.0^M
+	E DEG AND DS/TS FCST/OBS S OF 20 N DEG W OF 44 E DEG=^M
+
+--------------------------------------------------------------------------------
+5. For example, not sure what this implies, SBMD is a station but what
+does it mean in this context? what should the polygon look like? 
+(2003041701.SIGMETS):
+Priority: None
+Status:	Will not fix.
+
+	WSBZ19 SBBE 170100^M
+	SBBL SIGMET 2 VALID 170100/170500 SBBE-^M
+	BELEM FIR EMBD TS OBS IN SBMD FL400 STNR NC=^M
+
+
+--------------------------------------------------------------------------------
+6. Generate a line with no width from the following. Should reject
+a polygon of 3 points where 2 points are the same? (gts/20030613/110000.gts)
+Priority: ?
+Status: Not started on debug
+Effort: Difficult
+What to do: (16-JUN-2003) Added check for invalid polygon. 
+	    Need to debug why such bad points to begin with
+
+	465
+	WSSS20 VHHH 131040
+	VHHK SIGMET 3 VALID 131040/131440 VHHH-
+	HONG KONG CTA EMBD TS FCST N OF N19 CB TOP FL 450 MOV E 20 KT NC 
+
+
+
+--------------------------------------------------------------------------------
+7. Cannot decode lat or lon and direction from the following...
+Priority: ??
+Status:	Not started
+Effort:	Minimal-Difficult
+What to do: Add to parsing code for direction and line
+
+  a) "N 28" and "E 34" (2003050408.SIGMETS)
+
+	WSEG31 HECA 040800^M
+	HECC SIGMET SST 1 VALID 040900 / 041500 HECA-^M
+	CAIRO FIR ISOL EMBD CB FCST N 28 E 34 TOP FL 280 MOV N E 15KTS WKN=^M
+
+  b) "E 44N-03W/49N-00" (2003050423.SIGMETS)
+
+	WSFR31 LFPW 042300^M
+	LFRR SIGMET   2  VALID 042300/050300 LFRN-^M
+	FIR BREST:^M
+	EMBD TS OBS AT 2300 E OF 44N-03W/49N-00 STNR. INTSF=^M
+
+  c) "N OF N2030" (2003050501.SIGMETS)
+
+	WSSS20 VHHH 050105^M
+	VHHK SIGMET 1 VALID 050110/050510 VHHH-
+	HONG KONG CTA EMBD TS FCST N OF N2030 CB TOP FL400 MOV NE 15 KT 
+	NC =^M
+
+  d) "W OF 10W" and "N OF 45N" (2003050508.SIGMETS)
+
+	WSFR31 LFPW 050840^M
+	LFFF SIGMET SST 1 VALID 050900/051500 LFPW-^M
+	UIR FRANCE MOD TURB FCST BLW FL410 W OF 01W AND N OF 45N^M
+	MOV NE SLW NC=^M
+
+  e) "NORTH OF 28 DEG" (20030619/073500.gts) 
+
+	WSIN90 VIDP 190700
+	VIDP SIGMET 03 VALID 190700-191100Z DELHI FIR ACTIVE TS AREA F/C
+	NORTH OF 28 DEG. N =
+
+  f) "LAT47S/LAT50S" (20030619/132500.gts)
+
+	WSCH31 SCCI 191257
+	SIGMET 1 VALIDO  191300/191900 UTC - FIR SCCI - TURB MOD BTN
+	FL200/360 FCST, POR CIZALLE HORIZONTAL DE VIENTO ENTRE
+	LAT47S/LAT50S=
+
+
+
+================================================================================
+Vertices - stations
+================================================================================
+1. Problems with finding a station "STG" that should be excluded.
+   max_valid_distance set to 5000km in param file, test shows that
+   the max R to the outlier point is 3743km. (2003051213.SIGMETS):
+Priority: Med
+Status:	Not started
+Effort:	Minimal
+What to do: Change to param file to reduce max_valid_distance
+
+	findPoints: polygonStr: PA WV MD DC SC SLT TO 50SW HNK TO RIC TO RDU TO ODF TO SLT DUE MOD-STG WLY WND FLOW ACRS RUFF TRRN. LLWS ALSO LIKELY. CONDS CONTG BYD 1730Z. PGR .... 
+	cannot find: PA
+	cannot find: WV
+	cannot find: MD
+	cannot find: DC
+	cannot find: SC
+	station: SLT, lat,lon: 41.5167,-77.9667
+	station modLoc: 50SW, HNK, lat,lon: 41.4752, -76.1026
+	station: RIC, lat,lon: 37.5,-77.3167
+	station: RDU, lat,lon: 35.8725,-78.7833
+	station: ODF, lat,lon: 34.7,-83.3
+	station: SLT, lat,lon: 41.5167,-77.9667
+	cannot find: DUE
+	cannot find: MOD
+	station: STG, lat,lon: 8.08778,-80.9397
+	cannot find: WLY
+	cannot find: WND
+	cannot find: FLOW
+	cannot find: ACRS
+	cannot find: RUFF
+
+
+
+
+================================================================================
+Vertices - latlon formats
+================================================================================
+1. Cannot decode a latlon in the following formats: 
+Priority: None
+Status:	Will not fix.
+
+  a) For example "23 DEG S, 39 DEG W" (2003041410.SIGMETS):
+
+	WSBZ22 SBBS 141047 ^M
+	SBBS SIGMET 05 VALID 141030/141430 SBBR- BRASILIA FIR EMBD TS FCST IN^M
+	MILTA PSN/ TMA BELO HORIZONTE/ 23 DEG S, 39 DEG W/ 20 DEG S , 35 DEG^M
+	W AREA TOPS FL380 STNR NC=^M
+
+  b) For example, "15: 304S,59:004W" (2003041610.SIGMETS):
+
+	WSBZ22 SBBS 161017 ^M
+	SBBS SIGMET 04 VALID 161000/161400 SBBR- BRASILIA FIR EMBD TS OBS IN ^M
+	NABOL PSN/TOMBO PSN/ROSER PSN/15: 304S,59:004W/SIGNO PSN/RAPAT PSN/NA^M
+	BOL PSN AREA TOP FL400 STNR NC=^M
+
+  c) For example, "E 44N-03W/49N-00" no direction on "00" (2003050423.SIGMETS):
+
+	WSFR31 LFPW 042300^M
+	LFRR SIGMET   2  VALID 042300/050300 LFRN-^M
+	FIR BREST:^M
+	EMBD TS OBS AT 2300 E OF 44N-03W/49N-00 STNR. INTSF=^M
+
+  d) For example, "NORTH OF 28 DEG" no direction on "28 DEG" 
+     (20030619/073500.gts)
+
+	WSIN90 VIDP 190700
+	VIDP SIGMET 03 VALID 190700-191100Z DELHI FIR ACTIVE TS AREA F/C
+	NORTH OF 28 DEG. N =
+
+
+
+================================================================================
+Vertices - physical locations
+================================================================================
+1. Cannot decode physical locations at this time. No database to search.
+No code written for decoding.
+Priority: None
+Status:	Will not fix.
+
+  a) 2003041413.SIGMETS
+
+	WSFR31 LFPW 141300^M
+	LFMM SIGMET 3 VALID 141340/141740 LFMM-^M
+	FIR MARSEILLE : SEV TURB OBS ON WEST LFMM FIR,ON MASSIF CENTRAL TO^M
+	ROUSSILLON AND ON AUDE VALLEY, BTN GND AND FL070, INTSF=^M
+
+  b) 2003041500.SIGMETS
+
+	WSNZ21 NZKL 150012^M
+	NZZC SIGMET 01 VALID 150010/150410 UTC OR 151210/151610 NZST NZKL- ^M
+	NZFIR ISOL SEV TURB FCST BLW 9000FT ABT/S OF FIORDLAND RANGES. INTSF.^M
+
+  c) 2003040405.SIGMETS
+
+	WSIY31 LIIB 040506^M
+	LIBB SIGMET 01 VALID 040530/040930 LIMM-^M
+	BRINDISI FIR EMBD TS OBS AND FCST N ADRIATIC SEA AND S APPENNINIAN^M
+	AREA AND FCST APPENNINIAN AND IONIAN AREA STNR INTSF=^M
+
+
+================================================================================
+Vertices - other formats
+================================================================================
+1. Cannot decode polygons with "BTN" in them. For example, the following 
+message implies combining the values to create: 48N00E, 48N10E, 50N10E, 
+50N00E (2003041015.SIGMETS):
+Priority: None
+Status:	Will not fix.
+
+	UIR FRANCE MOD TURB FCST BLW FL320 BTN 48N AND 50N AND BTN 00E AND^M
+	10E MOV SE 10KT NC=^M
+
+
+
+
+================================================================================
+Missing stations
+================================================================================
+Missing stations (?) from our database:
+Priority: None
+Status:	Will not fix.
+
+EGALE
+PAGUE
+SAOD
+ELIZE
+CREPI
+MAGNO
+SBAN
+PARACATU
+ARAXA
+EQUIV
+FERAZ
+IPATINGA
+YBOR
+YMCO
+YDLI
+WEBS
+TASIL
+KODOS
+SBEK
+SBYA
+ATHINAI
+MEDAL
+MENET
+VGZR (FIR)
+UTTT (FIR)
+CNB
+ALCIR
+TUBO
+SANW
+CHINK
+MAGIC
+GAVEL
+SATI
+CANABRAVA
+CLASP
+REDE
+NEURA
+KRYVYI
+KRASNOJARSK
+OHURA
+VALUT
+REGVA
+NINON
+
+================================================================================
+Display issues
+================================================================================
+1. How to handle multiple SIGMETs for one FIR that all use the FIR centroid?
+the text overwrites one another
+Priority: Med
+Status:	Not scheduled
+Difficulty: Moderate-Difficult
+What to do: Not sure
+
+
+================================================================================
+				F I X E D
+================================================================================
+This section only includes fixes after 4/20/03, no notes available on previous
+--------------------------------------------------------------------------------
+Cannot decode FIR in the following (preceeded by a dash?)
+(2003041920.SIGMETS):
+Priority: None
+Status:	Fixed 4/21/03
+
+	WSBO SLLP 192038^M
+	SIGMET 01 VALID 192030/202300 SLLF-LA PAZ FIR^M
+	TURB MOD/FTE OBS IN MARIA BTN FL270/FL310 NC=^M
+
+
+--------------------------------------------------------------------------------
+Did not decode this as a NULL SIGMET to ignore. Did return the FIR
+as a polygon (2003041917.SIGMETS)
+Priority: None
+Status:	Fixed 4/21/03
+
+	WSZA21 FAJS 191700^M
+	^M
+	SIGMET 7 VALID 191800/192100^M
+	NILSIG=^M
+
+--------------------------------------------------------------------------------
+Major bug, generated a bogus point from searchForModifyFir that caused a
+really bad polygon (2003050918.SIGMETS) -- fixed 5/12/03
+Priority: High
+Status: Fixed 5/12/03
+
+	WSNZ21 NZKL 091820^M
+	NZZC SIGMET 06 VALID 091816/092216 UTC OR 100616/101016 NZST NZKL- 
+	NZFIR OCNL SEV TURB FCST ABOUT/E OF THE RANGES BLW 8000FT OVER THE NI
+	,
+	BUT BLW FL120 OVER THE SI, S OF LINE NZWU-NZPM. INTST NC.^M
+
+--------------------------------------------------------------------------------
+Cannot decode lat or lon and direction from the following...
+
+    - "N OF N5700" (2003050406.SIGMETS) -- fixed 5/12/03
+
+	WSUK33 EGGY 040600^M
+	EGPX SIGMET 01 VALID 040600/041000 EGRR-^M
+	SCOTTISH FIR SEV TURB FCST BLW FL060 LAN N OF N5700 MOV N 20KT^M
+	WKN=^M
+
+--------------------------------------------------------------------------------
+Cannot decode latlon from the following
+
+  a) For example "50 30N 159 00E" (2003041916.SIGMETS): -- fixed 4/21/03
+
+	166 ^M
+	XWSPN01 PANC 191627^M
+	SIGANC^M
+	ANCJ UWS 191627^M
+	PAZA SIGMET JULIETT 1 VALID 191625/192025 PANC-^M
+	SATELLITE IMAGERY SHOWS VOLCANIC ASH FROM AN ERUPTION OF^M
+	CHIKURACHKI VOLCANO (50 19N/155 27E). ASH EXTENDS FROM 50 30N ^M
+	159 00E/50 40N 159 00E/50 40N 161 00E/50 30N 161 00E. TOP OF ASH^M
+	IS ESTIMATED AT FL350 AND MOVING EAST AT 40KT.   ^M
+
+  b) For example, "/06S045 W/" (2003041916.SIGMETS) -- fixed 4/21/03
+
+	615 ^M
+	WSBZ21 SBRF 191635 ^M
+	SBRE SIGMET 03 VALID 191635/192035 SBRF-^M
+	RECIFE FIR EMBD TS OBS AT 1630Z IN ESTEP PSN/ 05S042W/ 06S042W/06S045^M
+	W/ ANDER PSN/ESTEP PSN AREA TOP FL390 STNR NC=^M
+
+
+--------------------------------------------------------------------------------
+FIR. For example, the following implies a polygon bounded by N4 to the
+north, E10430 to the east, and the existing FIR boundaries to the
+south and west (2003041512.SIGMETS) 
+Priority: Med
+Status: Added 5/2/03. Being tested.
+
+	WSSR20 WSSS 151228    ^M
+	WSJC SIGMET 3 VALID 151230/151630 WSSS-SINGAPORE FIR EMBD TS OBS S^M
+	 OF N04 AND E OF E10430 FCST STNR NC=^M
+
+--------------------------------------------------------------------------------
+Problems finding the right station.
+Priority: Medium
+Status:	Fixed 5/12/03
+
+  a) For example, find TOSAR in database that is outside expected limits
+     for this polygon. Need to find a different TOSAR in database
+     (2003050509.SIGMETS):
+
+	findPoints: polygonStr: - IN SBCG/TOSAR PSN/TOMBO PSN/VERAS PSN/FEVER PSN/SBCG AREA NC= 
+	station: SBCG, lat,lon: -20.4694,-54.6703
+	station: TOSAR, lat,lon: 33.5006,134.599
+	station: TOMBO, lat,lon: 62,11.5625
+	station: VERAS, lat,lon: -18.7878,-52.2216
+	station: FEVER, lat,lon: 32.3403,-97.6623
+	station: SBCG, lat,lon: -20.4694,-54.6703
+
+--------------------------------------------------------------------------------
+FIR. For example, the following implies a polygon bounded by N6700W03700,
+N6400W04300 to the west and the FIR boundaries to the north, east,
+and south (2003041413.SIGMETS)
+Priority: Med
+Status:	Fixed 5/13/03
+
+	BGGL SIGMET 1 VALID 141300/1700 BGSF-^M
+	SONDRESTROM FIR OCNL SEV TURB FCST OVER E-GREENLAND BLW FL080, E OF^M
+	LINE N6700 W03700 TO N6400 W04300, STNR, WKN=^M
+
+--------------------------------------------------------------------------------
+Cannot decode "FL 300 /400" as a flight level (2003041314.SIGMETS)
+Priority: Low
+Status:	Fixed 5/13/03
+Effort:	Minimal
+What to do: Change to code to add additional flight level parsing type
+
+	WSEG31 HECA 131400^M
+	HECC SIGMET SST 2 VALID 131500 / 132100 HECA-^M
+	CAIRO FIR MOD TURB FCST N OF N 31 FL 300 /400 MOV S E 25KMH NC=^M
+
+--------------------------------------------------------------------------------
+Tropical cyclones only have a center point, no width. This is currently 
+rejected by decoder and server as non-polygon. (2003020322.SIGMETS)
+Priority: High (Mike)
+Status: Fixed 6/15/03
+Effort: Moderate
+What to do: Add code to server and decoder for icons
+
+	WSAU21 ABRF 032233 
+	YBBB SIGMET BN01 VALID 032250/040450 YBRF-
+	BRISBANE FIR EX TROPICAL CYCLONE BENI OBS S2054E15206 AT2200UTC. 
+	FRQ TS TOPS FL450 IN THE EASTERN SEMICIRCLE WITHIN 160 NM OF CENTRE
+	MOVING W 08KT INSTF. OUTLOOK CENTRE 041000 S2054 E15100 041600 S2118
+	E14918      
+	STS:NEW            
+
+--------------------------------------------------------------------------------
+Cannot decode a latlon in the following formats: 
+For example, "N21 E11750" and "N23 E1175" (2003050503.SIGMETS):
+Priority: ?
+Status: Fixed 5/24/04
+Effort: Minimal
+What to do: Add code to hasLatOrLon() to decode additional lat lon types.
+
+	WSCI31 RCTP 050300Z^M
+	RCTP SIGMET 1 VALID 050200/050600 RCTP-^M
+	TAIPEI FIR EMBD TS OBS AND FCST IN AREA BOUNDED BY N29 E122 N25 E122^M
+	N23 E1175 N21 E11750 N2350 E124 N29 E124 AND N29 E122^M
+	CB TOP FL400  MOV NE 15KT NC=^M
+
+--------------------------------------------------------------------------------
+Cannot decode valid times with Z in both start and end times.
+Priority: ?
+Status: Fixed 5/24/04
+Effort: Minimal
+What to do: Add code to computeStartEndTimes() to decode additional type.
+
+   a) 2003050423.SIGMETS
+
+	WSRA31 TKAC 042315^M
+	UTTT SIGMET 1 VALID 050000Z/050600Z UTTT - AIRMASS TS FCST^M
+	UTTT FIR MOV NE 30KM/H  SEV TURB 0500/9000M ^M
+	SEV ICG 2200/9000M INTST NC=^M
+
+--------------------------------------------------------------------------------
+Did not decode this as a test SIGMET to ignore. Did return the FIR
+as a polygon. (2003041709.SIGMETS)
+Priority: ?
+Status:	Fixed 5/24/04
+What to do: Added isTestMessage() function
+
+	WSNL31 EHDB 170931^M
+	EHAA SIGMET 1 VALID 170940/171140 EHDB-^M
+	AMSTERDAM FIR TEST TEST TEST PSE DISREGARD.=^M
+
+--------------------------------------------------------------------------------
+Cannot decode lat or lon and direction from the following...
+Priority: ??
+Status:	Fixed 5/25/04
+What to do: Add to parsing code for direction and line
+
+  b) "W OF LIN 43N08W-50N06W" (2003050409.SIGMETS)
+
+	WSFR31 LFPW 040955^M
+	LFFF SIGMET SST 1 VALID 041000/041600 LFPW-^M
+	UIR FRANCE MOD TURB FCST BLW FL380 W OF LIN 43N08W-50N06W^M
+	MOV E 20 KT NC=^M
+
+--------------------------------------------------------------------------------
+Finds reference to SIGMET in a SIGMET as a second SIGMET with no
+weather, flight levels, etc.
+Priority: None
+Status: Fixed 5/25/04
+What to do: Add _ignoreKeyword() to Input.cc to skip references to
+	    other SIG/AIRMETs in a message
+
+ a) For example, finds SIGMET LIMA 2 in the following SIGMET (2003080819.SIGMETS).
+
+	CONVECTIVE SIGMET 95E^M
+	VALID UNTIL 2155Z^M
+	FL AND FL GA CSTL WTRS^M
+	FROM 100ENE CRG-50E PBI-40NNE EYW-50E CRG-100ENE CRG^M
+	AREA SEV TS MOV FROM 25020KT. TOPS ABV FL450.^M
+	TORNADOES...HAIL TO 1 IN...WIND GUSTS TO 50KT POSS.^M
+	SEE INTL SIGMET LIMA 2 FOR ADDL INFO.^M
+
+--------------------------------------------------------------------------------
+BUG. For example the following is handled as 2 distinct SIGMETs. First
+   is KZOA TANGO 4 which has no weather string or FL and is set to the KZOA
+   FIR. The second is PHFO TANGO 3 set to the defined line, FL, and weather.
+Priority: Low
+Status:	Fixed 5/25/04
+What to do: Add _ignoreKeyword() to Input.cc to skip references to
+	    other SIG/AIRMETs in a message
+
+ a) 2003050423.SIGMETS
+
+	WSPA31 PHFO 042330 CCB^M
+	SIGPS1^M
+	^M
+	KZOA SIGMET TANGO 4 VALID 042200/050200 PHFO-^M
+	OAKLAND OCEANIC FIR. CORRECTS SIGMET TANGO 3. MOD OR GREATER CAT ^M
+	FCST BTN FL310 AND 380 WITHIN 90 NM EITHER SIDE OF LINE 29N165W ^M
+	25N170W. MOV E 5 KT. NC.^M
+
+--------------------------------------------------------------------------------
+
+================================================================================
+Updates
+================================================================================
+
+--------------------------------------------------------------------------------
+Made in June 2011 by Paul Prestopnik
+
+# LOC/PSN of VA is no longer included in vertices
+
+# If vertices for OBS & vertices for FCST are present.  FCST vertices
+  are no longer included in OBS vertices.
+
+# If multiple flight levels are present, the FIR boundary is used.  
+On AOAWS this draws with a dashed boundary.
+
+# If LINE is found, verticesFromPolygon() bails out to let
+  verticesFromFir handle it instead.  Previously a location like
+  "S OF LINE N7300 W01334 - N7323 W01244" would try to use the line
+  coordinates for vertices of a polygon, now they are used to segment
+  the FIR boundary.
+
+# If AND is found in verticesFromFir, it tries to handle the text
+  before and after the 'AND' seperately.  This means that a location
+  can be given by "S OF LINE N7300 W01334 - N7323 W01244 -
+AND E OF LINE - N7152 W01958 - N6736 W02741" will now decode and
+  segment the FIR correctly.
+
+# Added decoding for another Flight level syntax: "TOP FL nnn"
+
+# If Volcano has LOC/PSN, but FIR is not found, volcano LOC/PSN
+  is used for centroid (i.e. the VA icon location)
+
+# Added support for FCST AT <time> in sigmets with obs & forecast.
+  This was previously only handled in sigmet with just forecst.
+
+# Added support for setting FCST boundary by FIR boundary.  This
+  allows something like "FCST AT 1200Z
+SFC/FL200 SE OF LINE N7526 E00000 - N7500 W00957 - N6940 W02917 -
+N7124 W03101 - N6952 W03450 - N6730 W03546 - N6532 W03337"
+to decode correctly.  Previously this worked for OBS, but did not work
+for a FCST that was included in an OBS.
+--------------------------------------------------------------------------------

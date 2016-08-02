@@ -1,0 +1,84 @@
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_gui: Parameter definitions for gui configuration
+
+commentdef {
+  p_header = "CIDD GUI Configuration Parameters";
+};
+
+typedef struct {
+  char* id_label;
+  char* grid_list;
+} field_set_t;
+
+paramdef struct field_set_t {
+//  p_default = {{"Sample", "One Two Three"}};
+  p_descr = " Groups Grids into Sets";
+  p_help = 
+  " Each Entry needs:\n"
+  "ID_Label  List\n"
+  "    ID_Label - This is used in the choice menu\n"
+  "    List - Space Delimited list of grid legend names\n"
+  "      If the grid legend label matches any part of the list string\n"
+  "      it will be configured in to the field list\n"
+   "\n";
+
+} field_list[];
+
+typedef struct {
+  char* label;
+  char* commands;
+} command_set_t;
+
+paramdef struct command_set_t {
+//  p_default = {{"Screen 1", "SET_ALTITUDE 120;SELECT_H_PAGE_NUM 2;SELECT_DOMAIN_NUM 2"}};
+  p_descr = "Defines a menu of complex, gui commands.";
+  p_help = 
+  " Each Entry needs:\n"
+  "Label  Command_List\n"
+  "    Label - This is used in the menu\n"
+  "    Command List - Semicolon Delimited list of commands\n"
+   "\n"
+   " Currently Supported Commands:
+   "
+   " SET_ALTITUDE Value       Sets the altitude\n"
+   " SET_REQUEST_TIME Time // Data request Time - either 'now' or int unix_time\n"
+   "                       // seconds since 1970\n"
+   " PICK_LATEST_MODEL_RUN // Requests  data from the latest model runs\n"
+   " PICK_MODEL_RUN  Time  // Requests data from Model run at the specific time (int unix time)\n"
+   " SET_REFERENCE_LINES  ON | OFF // Turns on/off the route and height reference lines.\n"
+   " #                // Comment\n"
+   " #\n"
+   " SELECT_ROUTE Name         // Sets a Predefined route by name\n"
+   " SELECT_ROUTE_NUM Number   // Sets a Predefined route by number\n"
+   " SET_ROUTE Lat Lon Lat lon ... // Sets a route by lat,lon point list\n"
+   "\n"
+   " SELECT_V_PAGE Name        // Selects the Page/data to display by name\n"
+   " SELECT_V_PAGE_NUM Number  // Selects the Page/data to display by number\n"
+   " *\n"
+   " SET_V_IMAGE_SIZE  X Y     // Sets the size of the output image\n"
+   " SET_V_IMAGE_NAME Name     // Sets the output file name\n"
+   " DUMP_V_IMAGE              // Output a Cross Section Image\n"
+   " #\n"
+   " SELECT_DOMAIN_NAME name   // Sets a Predefined zoom by label\n"
+   " SELECT_DOMAIN_NUM Number  // Sets a Predefined zoom by index number\n"
+   " SET_DOMAIN MIN_X MIN_Y MAX_X MAXY // Sets zoom by bounding box\n"
+   " #\n"
+   " SET_H_IMAGE_HEIGHT Height // Sets the height of the output image - Width set by aspect ratio\n"
+   " SELECT_H_PAGE Name        // Selects the Page/data to display by name\n"
+   " SELECT_H_PAGE_NUM Number  // Selects the Page/data to display by number\n"
+   " #\n"
+   " SET_H_IMAGE_NAME Name     // Sets the output file name\n"
+   " GEN_H_IMAGE_NAME          // Automatically Generates an Image name\n"
+   " DUMP_H_IMAGE              // Output a Plan View Image\n"
+   " #\n"
+   " SET_SYMPRODS_OFF_ALL      // Turns off All Symbolic Products\n"
+   " SET_SYMPRODS_ON Name      // Turns On a specific Symbolic Product by name\n"
+   " #\n"
+   " SET_MAPS_OFF_ALL          // Turns off All Map Overlays\n"
+   " SET_MAPS_ON Name          // Turns On a specific Map Overlay by name\n"
+   " #\n"
+   " SET_WINDS_OFF_ALL         // Turns off All Wind Fields\n"
+   " SET_WINDS_ON Name         // Turns On a specific Wind Field by name\n"
+   "\n";
+
+} cmd_list[];

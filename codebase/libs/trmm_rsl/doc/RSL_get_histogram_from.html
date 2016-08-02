@@ -1,0 +1,33 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_histogram_from_...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b><br>
+<b><a href=RSL_histogram_struct.html>Histogram</a> *RSL_get_histogram_from_ray(<a href=RSL_ray_struct.html>Ray</a> *ray, Histogram *histogram, int low, int hi, int min_range, int max_range);<br>
+<a href=RSL_histogram_struct.html>Histogram</a> *RSL_get_histogram_from_sweep(<a href=RSL_sweep_struct.html>Sweep</a> *sweep, Histogram *histogram, int low, int hi, int min_range, int max_range);<br>
+<a href=RSL_histogram_struct.html>Histogram</a> *RSL_get_histogram_from_volume(<a href=RSL_volume_struct.html>Volume</a> *volume, Histogram *histogram, int low, int hi, int min_range, int max_range); </b>
+<hr>
+
+<h3>Description</h3>
+Load <i>histogram</i> with the histogram from a <b>Ray</b>, <b>Sweep</b>, or <b>Volume</b>. If histogram is NULL, then space is automatically allocated by <a href=RSL_allocate_histogram.html>RSL_allocate_histogram</a>. Notice that a histogram pointer is passed into the routines. The argument <i>histogram</i> is used as an accumulator. For instance, getting the histogram for an entire sweep involves getting the histogram for ray #1, then adding the histograms for ray #2 through #n. Although, the argument <i>histogram</i> is modified, a pointer to that histogram is returned so that the function interface, that is commonly used throughout the RSL, is maintained.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to <b>Histogram</b> is returned. NULL is returned if an error occurs and <i>errno</i> is set. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_read_histogram.html>RSL_read_histogram</a>, <a href=RSL_write_histogram.html>RSL_write_histogram</a>, <a href=RSL_print_histogram.html>RSL_print_histogram</a>, <a href=RSL_free_histogram.html>RSL_free_histogram</a> 
+<hr>
+
+<p>Author: <a href=david.wolff.html>David B. Wolff</a> 
+</body>

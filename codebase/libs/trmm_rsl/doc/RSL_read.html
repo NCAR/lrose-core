@@ -1,0 +1,41 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_read_...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href=RSL_ray_struct.html>Ray</a> *RSL_read_ray(FILE *fp);<br>
+<a href=RSL_sweep_struct.html>Sweep</a> *RSL_read_sweep(FILE *fp);</b><b><a href=RSL_volume_struct.html><br>
+Volume</a> *RSL_read_volume</b><b>(FILE *fp);</b> 
+
+<h3>
+<hr>Description</h3>
+<b>RSL_read_volume</b> reads an entire volume structure from the input stream <b>fp</b>. <b>fp</b> is usually assigned inside the routine <b>RSL_read_radar</b>, however, you can assign the stream <b>fp</b> via fopen. <b>RSL_read_volume</b> calls <b>RSL_read_sweep</b> for the number of sweeps, vol-&gt;h.nsweeps, as determined from reading <b>fp</b>. Memory is allocated via <b>RSL_new_volume</b>. 
+
+<p><b>RSL_read_sweep</b> reads an entire sweep structure from the input stream fp. <b>RSL_read_sweep</b> calls <b>RSL_read_ray</b> for the number of rays, sweep-&gt;h.nrays, as determined by reading <b>fp</b>. Memory is allocated via <b>RSL_new_sweep</b>. 
+
+<p><b>RSL_read_ray</b> reads an entire ray structure from the input stream fp. RSL_read_ray ingests an entire ray of data and sets ray-&gt;h.nbins. Memory is allocated via <b>RSL_new_ray</b>. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. Otherwise, a NULL pointer is returned and errno is set. 
+<hr>
+
+<h3>See also</h3>
+<a href=../examples/Example_RSL_read.c>Example</a><br>
+<a href=RSL_new.html>RSL_new_volume</a>, <a href=RSL_new.html>RSL_new_sweep</a>, <a href=RSL_new.html>RSL_new_ray</a>,<br>
+<a href=RSL_write.html>RSL_write_volume</a>, <a href=RSL_write.html>RSL_write_sweep</a>, <a href=RSL_write.html>RSL_write_ray</a>,<br>
+<a href=RSL_read_radar.html>RSL_read_radar</a>, <a href=RSL_write_radar.html>RSL_write_radar</a>,<br>
+<a href=RSL_radar_file_format.html>File format</a>. 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

@@ -1,0 +1,121 @@
+/*********************************************************
+ * parameter definitions for TsAscope
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Dec 2011
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsAscope reads IWRF time series data, and displays it on an AScope";
+  p_text = "This is a C++ application using the QT4 GUI toolkit.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILE_INPUT, TS_FMQ_INPUT, TS_TCP_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FILE_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_fmq;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Name of host for TCP server. For TS_TCP_INPUT only.";
+} tcp_server_host;
+
+paramdef int {
+  p_default = 12000;
+  p_descr = "Port for TCP server. For TS_TCP_INPUT only.";
+} tcp_server_port;
+
+commentdef {
+  p_header = "DISPLAY DETAILS";
+}
+
+paramdef double {
+  p_default = 50;
+  p_descr = "The scope refresh rate in Hz.";
+} refresh_rate_hz;
+
+paramdef string {
+  p_default = "/tmp/TsAscope";
+  p_descr = "Directory for saving images.";
+} image_save_dir;
+
+paramdef string {
+  p_default = "SPOL S-band";
+  p_descr = "Title for scope window.";
+} scope_title;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override radar name in the data.";
+} override_radar_name;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Radar name if overridden.";
+} radar_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to display the site name in the left panel.";
+} display_site_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override site name in the data.";
+} override_site_name;
+
+paramdef string {
+  p_default = "MARSHALL";
+  p_descr = "Site name if overridden.";
+} site_name;
+

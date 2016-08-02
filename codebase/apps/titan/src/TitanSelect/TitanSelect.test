@@ -1,0 +1,191 @@
+/**********************************************************************
+ * TDRP params for TitanSelect
+ **********************************************************************/
+
+//======================================================================
+//
+// Program TitanSelect.
+//
+// TitanSelect selects specified Titan track data from the database and 
+//   prints it to stdout. It watches the Rview shmem segments for user 
+//   activity and reacts when a new track is specified.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// log_read_errors /////////////////////////
+//
+// Option to log titan read errors to log directory.
+// If true, TITAN read errors will be logged to the directory specified 
+//   by errors_log_dir. The reason for dealing with errors in this way is 
+//   that stdout from this program is displayed as the main product. It is 
+//   difficult to separate stderr from stdout and pipe stderr to a logging 
+//   filter. Therefore we log the titan errors directly.
+// Type: boolean
+//
+
+log_read_errors = TRUE;
+
+///////////// errors_log_dir //////////////////////////
+//
+// Errors log directory.
+// See log_titan_errors.
+// Type: string
+//
+
+errors_log_dir = "/tmp";
+
+//======================================================================
+//
+// USER INTERFACE.
+//
+//======================================================================
+ 
+///////////// sleep_msecs /////////////////////////////
+//
+// sleep milli-seconds.
+// Number of milli-seconds to sleep between checks for mouse clicks.
+// Minimum val: 20
+// Type: int
+//
+
+sleep_msecs = 250;
+
+//======================================================================
+//
+// SHARED MEMORY WITH DISPLAY.
+//
+//======================================================================
+ 
+///////////// rview_shmem_key /////////////////////////
+//
+// Rview shared memory key.
+// Id for the shared memory status segment used for communicating with 
+//   the display. Must match that used by Rview and TimeHist. There are 
+//   actually 2 shared mem segments used, one with this key and one with 
+//   this key + 1.
+// Type: int
+//
+
+rview_shmem_key = 46200;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for reading TITAN data.
+// See DIDSS documentation for URL specs.
+// Type: string
+//
+
+input_url = "titanp:://localhost::titan/storms";
+
+//======================================================================
+//
+// DISPLAY OPTIONS.
+//
+//======================================================================
+ 
+///////////// property_list ///////////////////////////
+//
+// Array of properties to printed.
+// The properties will be printed in the order they exist in this list.
+//
+// Type: enum
+// Options:
+//     CENTROID_POSITION
+//     TOP
+//     BASE
+//     VOLUME
+//     AREA_MEAN
+//     PRECIP_FLUX
+//     MASS
+//     TILT_ANGLE
+//     TILT_DIRN
+//     DBZ_MAX
+//     DBZ_MEAN
+//     DBZ_MAX_GRADIENT
+//     DBZ_MEAN_GRADIENT
+//     HT_OF_DBZ_MAX
+//     PROJ_AREA
+//     HAIL_PRESENT
+//     VIL_FROM_MAXZ
+//     LTG_COUNT
+//     ABSHAEVCATEGORY
+//     WALDVOGELPROBABILITY
+//     HAILMASSALOFT
+//     VIHM
+// 1D array - variable length.
+//
+
+property_list = {
+ TOP,
+ VOLUME,
+ AREA_MEAN,
+ PROJ_AREA,
+ PRECIP_FLUX,
+ MASS,
+ TILT_ANGLE,
+ DBZ_MAX,
+ DBZ_MAX_GRADIENT,
+ HT_OF_DBZ_MAX,
+ VIL_FROM_MAXZ,
+ ABSHAEVCATEGORY,
+ WALDVOGELPROBABILITY,
+ HAILMASSALOFT,
+ VIHM
+};
+
+///////////// nlines_scroll_before_printing ///////////
+//
+// Number of lines to scroll off the top before starting to print.
+// This is sometimes useful to clear the output window of previous 
+//   output.
+// Type: int
+//
+
+nlines_scroll_before_printing = 1;
+
+///////////// length_delimiter_line ///////////////////
+//
+// Length of line delimiting prints.
+// A line of dashes will be printed above each series of items printed. 
+//   This is the number of dashes used. Set to 0 if you do not want a 
+//   delimiter.
+// Type: int
+//
+
+length_delimiter_line = 34;
+

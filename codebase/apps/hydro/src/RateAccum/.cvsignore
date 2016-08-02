@@ -1,0 +1,6 @@
+.deps
+RateAccum
+__makefile.template
+makefile
+makefile.am
+makefile.in

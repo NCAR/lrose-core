@@ -1,0 +1,31 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_fill_cappi</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>int </b><b>*RSL_fill_cappi(<a href=RSL_volume_struct.html>Volume</a> *v, <a href=RSL_cappi_struct.html>Cappi</a> *cap, int method);</b> 
+
+<h3>
+<hr>Description</h3>
+Using data from <b>v</b>, and information from <b>cap</b>, this routine fill the cappi structure <b>cap</b> with values from the rays in <b>v</b>. The argument <b>cap</b> is modified. The <b>method</b> passed indicates the interpolation used, however, no interpolation is used, yet. Normally, you should not call this routine unless you're writing an RSL routine, instead, call <a href=RSL_cappi_at_h.html>RSL_cappi_at_h</a>.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, 1 is returned. -1 is returned upon failure. The argument <b>cap</b> is modified. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_free_cappi.html>RSL_free_cappi</a>, <a href=RSL_cappi_to_carpi.html>RSL_cappi_to_carpi</a>, <a href=RSL_get_value_from_cappi.html>RSL_get_value_from_cappi</a>, <a href=RSL_new_cappi.html>RSL_new_cappi</a> 
+
+<p>
+<hr>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

@@ -1,0 +1,758 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions Lirp2Dsr
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// May 2003
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Lirp2Dsr reads raw LIRP IQ time-series data, computes the moments and writes the contents into a DsRadar FMQ.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Print summary to stdout.";
+  p_help = "If set, a summary for each beam is printed to stdout. No data is sent to the FMQ.";
+} print_summary;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Compute and print out average IQ noise value.";
+  p_help = "If set, the average IQ noise value for the input files will be computed and printed out. No data is sent to the FMQ.";
+} compute_noise;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, SIMULATE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.";
+} mode;
+
+commentdef {
+  p_header = "TIME-SERIES FILE DATA INPUT";
+};
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "RADAR PARAMS";
+  p_text = "If any of the params are set in the input data files, the values in those params will be taken from the input data stream rather than from the parameter file."; 
+};
+
+typedef enum {
+  HORIZONTAL = 0,
+  VERTICAL = 1,
+  RIGHT_CIRCULAR = 2,
+  ELLIPTICAL = 3,
+  LEFT_CIRCULAR = 4,
+  DUAL = 5
+} polar_t;
+
+typedef struct {
+
+  int radar_id;
+  string radar_name;
+  string site_name;
+  polar_t polarization;      // polarization type
+  double altitude;           // km
+  double latitude;           // degrees
+  double longitude;          // degrees
+  double horiz_beam_width;   // half-power beam width - degrees
+  double vert_beam_width;    // half-power beam width - degrees
+  double wavelength;         // cm
+  double radar_constant;     // dB
+  double xmit_peak_pwr;      // watts
+  double receiver_mds;       // dBm
+  double receiver_gain;      // dB
+  double antenna_gain;       // dB
+  double system_gain;        // dB
+  double noise_value;        // dBM
+  double min_dbz_at_1km;     // dBZ
+  
+} radar_params_t;
+
+paramdef struct radar_params_t {
+
+  p_descr = "Default radar params. If any of the params are set in the input data files, the values in those params will be taken from the input data stream rather than from the parameter file.";
+
+  p_help = "========== Radar params ==========\n"
+  "\t\n"
+  "polarization: polarization type\n"
+  "altitude: km\n"
+  "latitude: degrees\n"
+  "longitude: degrees\n"
+  "gate_spacing: km\n"
+  "start_range: km\n"
+  "horiz_beam_width: half-power beam width - degrees\n"
+  "vert_beam_width: half-power beam width - degrees\n"
+  "pulse_width: micro-secs\n"
+  "wavelength: cm\n"
+  "radar_constant: dB\n"
+  "xmit_peak_pwr: watts\n"
+  "receiver_mds: dBm\n"
+  "receiver_gain: dB\n"
+  "antenna_gain: dB\n"
+  "system_gain: dB\n"
+  "noise_value: dBM - system noise\n"
+  "min_dbz_at_1km: dBZ - min detectable dBZ at 1km range\n"
+  "\t\n";
+  
+  p_default = { radar_id = 0,
+		radar_name = "SPOL",
+		site_name = "Boulder",
+		polarization = HORIZONTAL,
+                altitude = 1.742,
+                latitude = 39.93208,
+                longitude = -105.18175,
+                horiz_beam_width = 0.91,
+                vert_beam_width = 0.91,
+                wavelength = 10.68,
+		radar_constant = 70.1652,
+		xmit_peak_pwr = 8000000,
+		receiver_mds = -113.0,
+		receiver_gain = 46.05,
+		antenna_gain = 45.2,
+		system_gain = 46.05,
+		noise_value = -83.76,
+		min_dbz_at_1km = -42.66
+  };
+  
+} radar;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Scan type id";
+  p_help = "Unique identifier for scan strategy";
+} scan_type_id;
+
+paramdef string {
+  p_default = "Default";
+  p_descr = "Scan type name";
+  p_help = "Descriptive name for scan strategy";
+} scan_type_name;
+
+paramdef double {
+  p_default = 0.016;
+  p_descr = "Atmospheric attenuation (dB/km).";
+  p_help = "Reflectivity is corrected for this.";
+} atmos_attenuation;
+
+paramdef double {
+  p_default = 36.0;
+  p_descr = "Sampling frequency of Sigmet IFD (Mhz).";
+} ifd_sampling_freq;
+
+paramdef double {
+  p_default = 126.0;
+  p_descr = "Dual Pol H-V phase difference (deg).";
+  p_help = "This is the 'theoretical' value for the phase difference. The measured value is computed on the fly. Run in VERBOSE debug mode to see the measured value.";
+} dual_pol_h_v_phase_diff;
+
+commentdef {
+  p_header = "MOMENTS COMPUTATIONS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to index the beams to azimuth.";
+  p_help = "If true, moments are computed for IQ series centered around azimuths at a specified spacing.";
+} index_beams_in_azimuth;
+
+paramdef double {
+  p_default = 1.0;
+  p_min = 0.001;
+  p_max = 360.0;
+  p_descr = "Resolution in azimuth for beam indexing.";
+  p_help = "See index_beams_in_azimuth. This is the azimuth resolution for computing the location at which to compute the moments. The azimuths always start at 0.0 and increase at this resolution.";
+} azimuth_resolution;
+
+paramdef double {
+  p_default = 175.0;	
+  p_descr = "Phase differential between H and V receiving circuits (deg).";
+  p_help = "For dual pol operation only. Used to normalize phidp around 0.";
+} H2V_phase_differential;
+
+typedef enum {
+  ALG_PP, ALG_FFT
+} algorithm_t;
+
+typedef enum {
+  WINDOW_HANNING, WINDOW_BLACKMAN, WINDOW_NONE
+} fft_window_t;
+
+typedef struct {
+  double lower_prf;
+  double upper_prf;
+  double pulse_width;
+  double start_range;
+  double gate_spacing;
+  algorithm_t algorithm;
+  fft_window_t window;
+  boolean apply_sz;
+  boolean dual_pol;
+  int n_samples;
+} moments_params_t;
+
+paramdef struct moments_params_t {
+  p_default = {
+    { 0.0,    500.0,  1.0, 0.15,  0.3, ALG_FFT, WINDOW_BLACKMAN, false, false, 32 },
+    { 500.0, 2000.0, 1.0, 0.075, 0.15, ALG_FFT, WINDOW_HANNING, true, false, 64 }
+  };
+  p_descr = "Algorithm geometry - based on PRF.";
+  p_help = "Sets the moments algorithm parameters based on PRF. This is a temporary solution until this information is available directly from the data. UNITS: pulse width: microsecs. start_range: km. gate_spacing: km. The algorithm indicates whether Pulse-Pair or FFT method should be used. The window is applied upstream of the moments computation. For SZ, no window should be used upstream. apply_sz indicates whether to apply SZ decoding. n_samples is the number of samples to be used for computing moments. If apply_sz is true, this will be forced to 64.";
+} moments_params[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use C implementation for SZ.";
+  p_help = "If true, the sz864.c module will be used for the SZ implementation.";
+} use_c_for_sz;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to multiple phase codes by -1.";
+  p_help = "In some data sets the phase codes are negated. Set this to true for such data cases.";
+} negate_phase_codes;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Signal-to-noise value for thresholding (dB).";
+  p_help = "This is the signal-to-noise ratio used to thresholding based on the noise.";
+} signal_to_noise_ratio_threshold;
+
+paramdef double {
+  p_default = 50.0;
+  p_descr = "Strong-to-weak power ratio censoring threshold (dB).";
+  p_help = "SZ decoding only. If the strong to weak trip power ratio is greater than this, we censor the weak trip.";
+} sz_strong_to_weak_power_ratio_threshold;
+
+paramdef double {
+  p_default = 6.0;
+  p_descr = "Ratio of peak power to off-peak replica power (dB).";
+  p_help = "SZ decoding only. When checking for out-of-trip power after deconvolution, this is the threshold to be used. The power of the spectral peak is compared with the peak for the 6 lowest replicas. If the ratio is less that this for a given number of replicas, it is assumed that out-of-trip power is present. See 'sz_out_of_trip_power_n_replicas'.";
+} sz_out_of_trip_power_ratio_threshold;
+
+paramdef int {
+  p_default = 3;
+  p_max = 6;
+  p_min = 1;
+  p_descr = "Number of replicas used for checking for out-of-trip power.";
+  p_help = "SZ decoding only. When checking for out-of-trip power after deconvolution, this is the number of peaks to check. See 'sz_out_of_trip_power_ratio_threshold'.";
+} sz_out_of_trip_power_n_replicas;
+
+typedef enum {
+  NO_WINDOW, HANNING, BLACKMAN
+} sz_window_t;
+
+paramdef enum sz_window_t {
+  p_default = HANNING;
+  p_descr = "Window type for SZ864.";
+  p_help = "Window type to be applied to strong trip before computing spectra.";
+} sz_window;
+
+commentdef {
+  p_header = "SPECTRAL PRINTS FOR DEBUGGING";
+};
+
+typedef struct {
+  double min_el;
+  double max_el;
+  double min_az;
+  double max_az;
+  double min_range;
+  double max_range;
+} selected_region_t;
+
+paramdef struct selected_region_t {
+  p_default = {
+    min_el = 0.0,
+    max_el = 1.0,
+    min_az = 0.0,
+    max_az = 1.0,
+    min_range = 0.0,
+    max_range = 1.0
+  };
+  p_descr = "Region for selected prints and spectra files.";
+  p_help = "See do_selected_print and write_spectra_files.";
+} selected_region;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print info for a selected region.";
+  p_help = "If true, debug info for a selected region will be printed to stderr.";
+} do_selected_print;
+
+paramdef string {
+  p_default = "/tmp/spectra";
+  p_descr = "Directory to which spectra are written.";
+} spectra_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write individual spectral files.";
+  p_help = "If true, ASCII files with the spectra are written to the specified directory, for the selected region. A separate file is written for each spectrum.";
+} write_individual_spectra_files;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write combined spectra file.";
+  p_help = "If true, a single file is written, with one line per spectrum.";
+} write_combined_spectra_file;
+
+paramdef double {
+  p_default = 10;
+  p_descr = "Minimum SNR for writing combined spectra to file (dB).";
+  p_help = "The spectrum will only be added if the SNR exceeds this value.";
+} min_snr_for_combined_spectra_file;
+
+commentdef {
+  p_header = "REC - RADAR ECHO CLASSIFIER";
+  p_text = "Option to use the compute and use REC fields. Note that the REC can only be used if beams are indexed in azimuth. Set 'index_beams_in_azimuth' to true.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply the REC for filtering.";
+  p_help = "If true, the REC will be used to determine to which gates filtering should be applied.";
+} apply_rec;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Length of REC kernel in range (km).";
+  p_help = "All REC features are computed over a kernel in range. This is the length of the kernel in range.";
+} rec_kernel_range_len;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Width of REC kernel in azimuth (deg).";
+  p_help = "Some of the REC features are computed over a kernel in azimuth as well as range. This is the width of the kernel in azimuth. The number of beams in the kernel is computed as the azimuth_width divided by the azimuth_resolution.";
+} rec_kernel_azimuth_width;
+
+paramdef double {
+  p_default = 3.5;
+  p_descr = "Threshold for computing spin change in the REC (dBZ).";
+  p_help = "The SPIN change variable is computed using the difference in dBZ between adjacent gates. If the difference exceeds this threshold, the change counter is incremented.";
+} rec_spin_dbz_threshold;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use dbz narrow for computing tdbz and spin.";
+  p_help = "Normally, dBZ is used to compute tdbz and spin. If this option is set true, then a dbz value is computed from just those points close to 0 velocity and this value is used to compute tdbz and spin.";
+} use_dbz_narrow_for_tdbz_and_spin;
+
+commentdef {
+  p_header = "REC - INTEREST MAPS and WEIGHTS";
+  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final REC value.";
+};
+
+typedef struct {
+  double value;
+  double interest;
+} interest_map_point_t;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.0, 0.0}, {45.0, 1.0}};
+  p_descr = "Interest mapping for dBZ texture.";
+} dbz_texture_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for dBZ texture.";
+} dbz_texture_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.0, 0.0}, {45.0, 1.0}};
+  p_descr = "Interest mapping for sqrt texture.";
+} sqrt_texture_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for sqrt texture.";
+} sqrt_texture_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.0, 0.0}, {50.0, 1.0}, {100.0, 0.0}};
+  p_descr = "Interest mapping for dBZ spin.";
+} dbz_spin_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for dBZ spin.";
+} dbz_spin_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.0, 0.0}, {5.0, 1.0}};
+  p_descr = "Interest mapping for weighted spin.";
+} wt_spin_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for weighted spin.";
+} wt_spin_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{-2.3, 0.0}, {0, 1.0}, {2.3, 0.0}};
+  p_descr = "Interest mapping for velocity.";
+} vel_interest_map[];
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Weight for for velocity.";
+} vel_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.0, 1.0}, {3.2, 0.0}};
+  p_descr = "Interest mapping for spectrum width.";
+} width_interest_map[];
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Weight for for spectrum width.";
+} width_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.0, 1.0}, {0.7, 0.0}};
+  p_descr = "Interest mapping for standard deviation of velocity.";
+} vel_sdev_interest_map[];
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Weight for for standard deviation of velocity.";
+} vel_sdev_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.5, 0.0}, {1.5, 1.0}};
+  p_descr = "Interest mapping for zdr.";
+} zdr_sdev_interest_map[];
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Weight for for standard deviation of zdr.";
+} zdr_sdev_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.65, 0.0}, {0.75, 1.0}};
+  p_descr = "Interest mapping for rhohv.";
+} rhohv_interest_map[];
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Weight for for standard deviation of rhohv.";
+} rhohv_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.25, 0.0}, {0.75, 1.0}};
+  p_descr = "Interest mapping for standard deviation of rhohv.";
+} rhohv_sdev_interest_map[];
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Weight for for standard deviation of rhohv.";
+} rhohv_sdev_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{30.0, 0.0}, {40.0, 1.0}};
+  p_descr = "Interest mapping for clutter ratio narrow.";
+  p_help = "Clutter ratio narrow is the ratio of the power in the 3 spectral points at 0 m/s divided by the power in the 4 spectral points around this. Expressed in dB.";
+} clut_ratio_narrow_interest_map[];
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Weight for for clutter ration narrow.";
+} clut_ratio_narrow_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{-3.0, 0.0}, {3.0, 1.0}};
+  p_descr = "Interest mapping for clutter ratio wide.";
+  p_help = "Clutter ratio wide is the ratio of the power in the 3 spectral points at 0 m/s divided by the power in the rest of the spectrum. Expressed in dB.";
+} clut_ratio_wide_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for clutter ratio wide.";
+} clut_ratio_wide_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{-3.0, 0.0}, {3.0, 1.0}};
+  p_descr = "Interest mapping for clutter-to-wx peak ratio.";
+  p_help = "Ratio of clutter peak to weather peak, expressed in dB.";
+} clut_wx_peak_ratio_interest_map[];
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Weight for for clutter-to-wx peak ratio.";
+} clut_wx_peak_ratio_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.2, 0.0}, {0.3, 1.0}};
+  p_descr = "Interest mapping for clutter-to-weather peak separation.";
+  p_help = "Spectral separation of clutter and weather peaks, expressed as a fraction of the nyquist.";
+} clut_wx_peak_sep_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for  clutter-to-wx peak separation.";
+} clut_wx_peak_sep_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.2, 0.0}, {0.3, 1.0}};
+  p_descr = "Interest mapping for SDEV of clutter-to-weather peak separation.";
+  p_help = "Standard deviation of spectral separation of clutter and weather peaks.";
+} clut_wx_peak_sep_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for  SDEV of clutter-to-wx peak separation.";
+} clut_wx_peak_sep_sdev_interest_weight;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to filter clutter using SSEF.";
+  p_help = "If true, the Spectral Stationary Echo Filter (SSEF) will be applied to the spectra before computing moments.";
+} filter_clutter_using_rec;
+
+paramdef double {
+  p_default = 6;
+  p_descr = "Minimum ratio narrow for clutter (dB).";
+  p_help = "Clutter will only be considered if ratioNarrow exceeds this value.";
+} min_ratio_narrow_clutter;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Threshold REC value for identifying clutter.";
+  p_help = "If the REC value exceeds this threshold, clutter is assumed to exist at that point.";
+} rec_threshold_for_clutter;
+
+commentdef {
+  p_header = "OUTPUT FIELDS";
+  p_text = "Only the following fields will included in the output. If the field is not in the input file, it will be left out.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output SNR in dB.";
+} output_snr;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output DBZ total.";
+  p_help = "DBZ total is power from all trips, converted to DBZ.";
+} output_dbz_total;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output DBZ.";
+} output_dbz;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output radial VEL (m/s).";
+} output_velocity;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output spectral width (m/s).";
+} output_width;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output filtered fields.";
+} output_filtered;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output infilled fields.";
+} output_infilled;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output moments flags.";
+} output_flags;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output trip indicator flag.";
+} output_trip_flag;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output infill flags.";
+} output_infill_flags;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output censoring debug fields.";
+} output_censoring_debug;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output infill debug fields.";
+} output_infill_debug;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output dual-pol fields.";
+} output_dual_pol_fields;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output REC field.";
+} output_rec;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output REC debug fields.";
+  p_help = "This will output the fields from which REC is computed, for example dbZTexture and Spin.";
+} output_rec_debug;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output fields related to measured noise.";
+  p_help = "The fields are measured noise, and SNR and DBZ computed relative to measured noise.";
+} output_noise_fields;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output clutter and related fields.";
+} output_clutter_fields;
+
+commentdef {
+  p_header = "OUTPUT DsRadar FMQ";
+};
+
+paramdef string {
+  p_default = "fmqp:://localhost::fmq/lirp";
+  p_descr = "Output URL for DsRadar data via FMQ";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 50000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Wait per beam (milli-secs)";
+  p_help = "ARCHIVE and SIMULATE modes only.";
+} beam_wait_msecs;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to set the end of vol flag based on elevation angle.";
+  p_help = "If true, the program will look for changes in antenna angle to compute the end of volume.";
+} set_end_of_vol_from_elev_angle;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flag to indicate that elevation angles increase in the volume.";
+  p_help = "If the volume starts at the top, i.e. elevations decrease during the volume, set this to FALSE.";
+} vol_starts_at_bottom;
+
+paramdef double {
+  p_default = 1.5;
+  p_min = 0.1;
+  p_descr = "Change in elevation which triggers and end of volume.";
+  p_help = "If the elevation angle changes by this amount, and end of volume flag will be set.";
+} elev_change_for_end_of_vol;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Min number of beams per volume.";
+  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume. Only used for set_end_of_vol_from_elev_angle.";
+} min_beams_per_vol;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to set the end-of-vol flag when the PRF changes.";
+} set_end_of_vol_on_prf_change;
+
+

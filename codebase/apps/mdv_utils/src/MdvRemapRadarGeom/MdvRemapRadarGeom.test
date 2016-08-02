@@ -1,0 +1,189 @@
+/**********************************************************************
+ * TDRP params for MdvRemapRadarGeom
+ **********************************************************************/
+
+//======================================================================
+//
+// MdvRemapRadarGeom remaps the beam geometry of polar radar data in an 
+//   MDV file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_NORM;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Path of input directory.
+// Type: string
+//
+
+input_dir = "./input";
+
+///////////// mode ////////////////////////////////////
+//
+// Operational mode.
+// REALTIME: - waits for new data. ARCHIVE: uses start and end times. 
+//   FILELIST: processes specified file list.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = FILELIST;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// REALTIME mode only. Max age of input data for it to be valid.
+// Minimum val: 0
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+///////////// latest_data_info_avail //////////////////
+//
+// Use _latest_data_info files to decide when new data has arrived.
+// REALTIME mode only. If false, the directory input_dir is scanned for 
+//   new files.
+// Type: boolean
+//
+
+latest_data_info_avail = TRUE;
+
+//======================================================================
+//
+// FIELD DETAILS.
+//
+//======================================================================
+ 
+///////////// fields //////////////////////////////////
+//
+// Details of fields to be converted, and how to combine them.
+// 	input_name: name of field in input file
+// 	ouput_name: name of field in output file
+// 	comb_method: how to combine gates if the output gate spacing is 
+//   larger than the input. COMB_CLOSEST: take value from closest input 
+//   gate. COMB_MEAN: take mean value from input gates. COMB_DB_MEAN: take 
+//   mean after converting dB to power, as in the case of a DBZ-type 
+//   field.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      string output_name;
+//      comb_method_t comb_method;
+//        Options:
+//          COMB_CLOSEST
+//          COMB_MEAN
+//          COMB_DB_MEAN
+//   }
+//
+// 1D array - variable length.
+//
+
+fields = {
+  { "DBZ", "DBZ", COMB_DB_MEAN},
+  { "VEL", "VEL", COMB_CLOSEST},
+  { "WIDTH", "WIDTH", COMB_MEAN},
+  { "SNRHC", "SNRHC", COMB_MEAN}
+};
+
+//======================================================================
+//
+// BEAM GEOMETRY CONVERSION.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// REMAP POLAR RADAR BEAM GEOMETRY.
+//
+//======================================================================
+ 
+///////////// remap_radar_beam_geometry ///////////////
+//
+// Option to remap beam geometry.
+// Only applies to polar radar data.
+// Type: boolean
+//
+
+remap_radar_beam_geometry = TRUE;
+
+///////////// remap_radar_n_gates /////////////////////
+//
+// Number of gates for remapped radar geometry.
+// Type: int
+//
+
+remap_radar_n_gates = 498;
+
+///////////// remap_radar_start_range /////////////////
+//
+// Start range for remapped radar geometry (km).
+// Type: double
+//
+
+remap_radar_start_range = 0.075;
+
+///////////// remap_radar_gate_spacing ////////////////
+//
+// Gate spacing for remapped radar geometry (km).
+// Type: double
+//
+
+remap_radar_gate_spacing = 0.15;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for output data.
+// Data will be written to either the local file system, or to a remote 
+//   host using the DsMdvServer.
+// Type: string
+//
+
+output_url = "$(DATA_DIR)/mdv/radial/moments/kband_150/sur";
+

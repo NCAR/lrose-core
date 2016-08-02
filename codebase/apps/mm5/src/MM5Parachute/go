@@ -1,0 +1,3 @@
+./MM5Parachute -params ./MM5Parachute.params.d4 -f /d1/mm5/fivemin/200409010900_MMOUTPUT_DOMAIN4.GRM -debug -verbose -mode ARCHIVE >& MM5Parachute.out
+
+

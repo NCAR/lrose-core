@@ -1,0 +1,273 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvCINprocess reads a 3D CIN volume and does\n"
+	"the following :\n\n"
+	" * Remaps the data onto another grid if desired.\n"
+	" * Takes vertical levels between two limits.\n"
+	" * Computes the mean in the vertical for data\n"
+	"   values lying between two thresholds.\n"
+	" * Outputs this 2D grid.\n\n"
+	"Niles Oien June 2005.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Output data are written here."; 
+  p_default = {"mdvp:://localhost::mdv/output"};
+} OutUrl;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef string {
+  p_default = { "CIN" };
+  p_private = FALSE;
+  p_descr = "Field name for CIN.";
+  p_help = "Look at input data and set.";
+} CinFieldName;   
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field name";
+} rename_field;
+
+typedef struct {
+   string old_field_name;
+   string new_field_name;
+} field_names_t;
+
+paramdef struct field_names_t {
+  p_default = { "CIN","CIN" };
+  p_descr = "Provides a map from old field name to new field name";
+} new_name;
+
+paramdef double {
+  p_default = 0.0;
+  p_private = FALSE;
+  p_descr = "Minimum vertical height (not plane number) to consider.";
+  p_help = "Units depend on input data.";
+} minVlevel;   
+
+paramdef double {
+  p_default = 100.0;
+  p_private = FALSE;
+  p_descr = "Maximum vertical height (not plane number) to consider.";
+  p_help = "Units depend on input data.";
+} maxVlevel;   
+
+paramdef double {
+  p_default = 0.0;
+  p_private = FALSE;
+  p_descr = "Minimum CIN value to consider.";
+  p_help = "Values not meeting this are rejected.";
+} minValidCINvalue;  
+
+paramdef double {
+  p_default = 100.0;
+  p_private = FALSE;
+  p_descr = "Maximum CIN value to consider.";
+  p_help = "Values not meeting this are rejected.";
+} maxValidCINvalue;  
+
+paramdef double {
+  p_default = 0.0;
+  p_private = FALSE;
+  p_descr = "Output vertical level.";
+  p_help = "Units are the same as the input. This is\n"
+	"settable as a parameter rather than taking\n"
+	"the mean level to allow the user to account for\n"
+	"any expected skew in the CIN data.";
+} outputVlevel;  
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "After processing all the points using the Vlevel limits\n"
+            "attempt to fill any points that still have missing data\n"
+            "values with the closest vertical point that has a non\n"
+            "missing data value. This is an attempt to fill in cin \n"
+	    "values in areas were there is high terrain and the Vlevel\n"
+	    "limits are below ground in those locations.";
+} fill_missing;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If fill_missing is set to true, we want to be able to\n"
+  	    "only check above the highest vlevel limit for a non\n"
+	    "missing data values. If the data levels are pressure,\n" 
+	    "we will go from the minVlevel to lower pressure. In\n"
+	    "this case set this to false. If running on hybrid data\n"
+	    "were the Vlevel values are increasing with hight, set\n"
+	    "this to true.";
+} level_increases_with_height;
+
+/////////// Grid parameters.
+
+commentdef {
+  p_header = " ------------ GRID PARAMETERS --------\n"
+  		"These specify the grid on which the\n"
+                "computations will be performed.\n"
+		"These are used only if RemapGrid is set\n"
+		"to TRUE. If RemapGrid is FALSE then it is assumed\n"
+		"that the fields are already on the same grid.";
+
+}
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to TRUE to remap the data - useful if visible is at\n"
+	    "four times the resolution of the IR channels.";
+  p_help = "Defaults to FALSE";
+} RemapGrid;   
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} grid_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} grid_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} grid_lat2;
+
+typedef enum {
+  FLAT, LATLON, LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT, LATLON and LAMBERT";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in X";
+  p_min = {1};
+  p_default = { 100 };
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in Y";
+  p_min = {1};
+  p_default = {100};
+} grid_ny;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in X";
+  p_default = {1.0};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in Y";
+  p_default = {1.0};
+} grid_dy;
+
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_miny;
+
+
+commentdef {
+  p_header = "------ End of grid parameters. ";
+}
+
+
+
+
+
+
+

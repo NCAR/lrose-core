@@ -1,0 +1,185 @@
+/*********************************************************
+ * parameter definitions for Mdv2netCDF
+ *
+ * Sue Dettling, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 2007
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Param file for Mdv2netCDF";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This program registers with procmap. This is the instance used for registration.";
+} instance;
+
+typedef enum {
+  REALTIME, FILELIST, TIME_INTERVAL
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+} mode;
+
+commentdef {
+  p_header = "INPUT DATA";
+};
+
+paramdef string {
+  p_descr = "Sparse geolocation latitude information including ground track and cross track end points";
+  p_default = "Latitude@VIIRS-IMG-GTM-EDR-GEO";
+} sparse_lat_fieldname;
+
+paramdef string {
+  p_descr = "Sparse geolocation latitude information including ground track and cross track end points";
+  p_default = "Longitude@VIIRS-IMG-GTM-EDR-GEO";
+} sparse_lon_fieldname;
+
+paramdef string {
+  p_descr = "Satellite data fieldname";
+  p_default = "Reflectance@VIIRS-I1-IMG-EDR";
+} sat_data_fieldname;
+
+paramdef string {
+  p_descr = "Satellite data fieldname";
+  p_default = "Reflectance";
+} sat_data_short_name;
+
+paramdef string {
+  p_descr = "Satellite data units";
+  p_default = "noUnits";
+} sat_data_units;
+
+paramdef int {
+  p_default = 65528;
+  p_descr = "Min missing or bad data";
+} min_sat_missing_or_bad;
+
+paramdef int {
+  p_default = 1541;
+  p_descr = "Along track dimension";
+} along_track_dim;
+
+paramdef int {
+  p_default = 8241;
+  p_descr = "Cross track dimension";
+} cross_track_dim;
+
+paramdef string {
+  p_descr = "Input directory";
+  p_default = "/tmp/netCDF";
+} input_dir;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Maximum age of file in minutes";
+  p_help =  "Used in REALTIME mode only.";
+} max_valid_realtime_age_min;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Latest data info file available";
+} ldata_info_avail;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Set wait for file to be written to disk before being served";
+  p_help =  "Used in REALTIME mode only.";
+} file_quiescence_sec;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Set wait for file between checks for new data";
+  p_help =  "Used in REALTIME mode only.";
+} check_input_sec;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for TIME_INTERVAL mode only.";
+} start_time;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for TIME_INTERVAL mode only.";
+} end_time;
+
+typedef enum
+{
+  PROJ_FLAT,
+  PROJ_LATLON,
+  PROJ_LC2
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  double minx;
+  double miny;
+  int nx;
+  int ny;
+  double dx;
+  double dy;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} proj_t;
+
+paramdef struct proj_t
+{
+  p_descr = "Output projection";
+  p_default = {PROJ_LATLON,-177.498,59.2721,8241,1541,.0496,.01,0,0,0,0,0 };
+  //p_default = {PROJ_LATLON,-177.498,59.2721,824,154,.496,.1,0,0,0,0,0 };
+} output_proj;
+
+commentdef {
+  p_header = "OUTPUT DATA";
+};
+
+paramdef string {
+  p_default = "mdvp:://localhost::$(PROJECT)/mdv/polarSat";
+  p_descr = "URL for the output MDV files.";
+} output_url;
+
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to check successive files for input in the output domain and add to one Mdv file";
+} collect_granular_data;
+
+paramdef int {
+  p_default =  180;
+  p_descr = "Maximum time to wait for a new file to append to other files. After this time, stored data will be written to disk. ";
+  p_help =  "Used if collect_granular_data == true";
+} max_time_between_files;
+
+paramdef int {
+  p_default =  900;
+  p_descr = "Maximum time time span for data in mdv file. If difference between begin and end times exceeds this value then, stored data will be written to disk and another Mdv file will be started for new data. ";
+  p_help = "Used if collect_granular_data == true";
+} max_data_time_span_per_file;
+
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Seconds to sleep between data checks";
+} sleep_secs;

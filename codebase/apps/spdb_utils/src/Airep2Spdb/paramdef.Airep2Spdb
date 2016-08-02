@@ -1,0 +1,128 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Airep2Spdb
+ */
+
+commentdef {
+  p_header = "Program Airep2Spdb";
+  p_text = "This program reads airep data from ascii input files and stores it in spdb format.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_descr = "Process instance for procmap.";
+  p_help = "This program uses this instance when registering with the process mapper.";
+  p_default = "test";
+} instance;
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; archive mode runs on single file";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be valid. "
+    "If the latest_data_info file is older than this, the program waits "
+    "for new data.";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_descr = "Input directory";
+  p_help = "Path for directory to the input lightning files.";
+  p_default = "./input";
+} input_dir;
+
+paramdef string {
+  p_default = {"./world_arp_vhf_wpt.loc"};
+  p_descr = "Path to station location file";
+  p_help = "The station location file should contain a station identification followed by the latitude and longitude for each station that should be
+ added to the airep SPDB";
+} st_location_path;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef boolean
+{
+  p_descr = "Save decoded data out in Spdb.";
+  p_help = "If true, data will be written to decoded_spdb_url.";
+  p_default = true;
+} write_decoded_spdb;
+
+paramdef string
+{
+  p_descr = "Spdb URL for decoded airep data.";
+  p_help = "The name of the directory which will be used as the destination for the SPDB data.";
+  p_default = "spdb/airep";
+} decoded_spdb_url;
+
+paramdef boolean
+{
+  p_descr = "Save ascii data out in Spdb.";
+  p_help = "If true, data will be written to ascii_spdb_url.";
+  p_default = true;
+} write_ascii_spdb;
+
+paramdef string
+{
+  p_descr = "Spdb URL for ASCII airep data.";
+  p_descr = "list of destination SPDB database";
+  p_help = "The name of the directory which will be used as the destination for the SPDB data.";
+  p_default = "spdb/ascii_airep";
+} ascii_spdb_url;
+
+paramdef int
+{
+  p_descr = "Data expire period - seconds";
+  p_help = "In the SPDB data base, the data is set as expired after this period.";
+  p_default = 21600;
+} expire_secs;
+

@@ -1,0 +1,26 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<pre>typedef struct {
+  int   month;  /* Begin time for this Cappi; month (1-12). */
+  int   day;    /* Begin time for this Cappi; day (1-31). */
+  int   year;   /* Begin time for this Cappi; year (eg. 1993). */
+  int   hour;   /* Begin date for this Cappi; hour (0-23). */
+  int   minute; /* Begin date for this Cappi; minute (0-59).*/
+  float sec;    /* Begin date for this Cappi; second + fraction of  second. */ 
+  float height;      /* Height for this Cappi. */
+  float lat;
+  float lon;         /* Lat/lon of lower left corner of Carpi. */
+  int field_type;
+  char radar_type[50]; /* Value of Constant radar-&gt;h.radar_type */ 
+  int interp_method; /* ??? string describing interpolation method. */
+  <a href=RSL_Er_loc_struct.html>Er_loc</a> *loc;       /* elevation and range coordinate array */
+  <a href=RSL_sweep_struct.html>Sweep</a> *sweep;      /* Pointers to rays of data */
+} Cappi; </pre>
+
+</body>

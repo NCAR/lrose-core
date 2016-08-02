@@ -1,0 +1,361 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Mdv2Medoc is a small converter that reads MDV\n"
+	"formatted gridded data and writes MEDOC data suitable for\n"
+	"driving SCIPUFF. At the time of writing, the program\n"
+	"reads three dimensional data from the MDV file. Two\n"
+	"dimensional fields can be added, but they are of constant\n"
+	"value and are NOT from the MDV file. Rather, they are specified\n"
+	"in the parameter file for Mdv2Medoc. This suits our purposes\n"
+	"for now, but a future exercise of adding the ability to\n"
+	"convert two dimensional MDV data fields to MEDOC as well as\n"
+	"appending the constant-value two dimensional fields specified\n"
+	"in the parameter file would be a worthwhile goal.\n"
+	"Niles Oien March 2005. \n\n"
+	"Converting two dimensional MDV data fields to MEDOC is now working.\n"
+	"Yan Chen. Oct. 2008.";
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here.";
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/GLOBAL_STATIC";
+  p_descr = "URL for terrain file.";
+  p_help = "Terrain data can be in separate url.";
+} TerrainUrl;
+ 
+paramdef string {
+  p_descr = "Output directory";
+  p_help = "Medoc format dara are written here.";
+  p_default = {"Some/Dir/Structure"};
+} OutDir;
+
+paramdef string {
+  p_descr = "Base name.";
+  p_help = "Used in the output file name.";
+  p_default = {"VDRAS"};
+} baseName;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique.";
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;
+
+paramdef string {
+  p_default = { "uwind", "vwind", "wwind", "temp" };
+  p_private = FALSE;
+  p_descr = "Input 3D field names to process.";
+  p_help = "Must have matching entry in Out3DFieldName and Out3DUnits arrays.";
+} In3DFieldName[];
+
+paramdef string {
+  p_default = { "U", "V", "W", "T" };
+  p_private = FALSE;
+  p_descr = "Output 3D field names.";
+  p_help = "Used in Medoc files.";
+} Out3DFieldName[];
+
+paramdef string {
+  p_default = { "M/S", "M/S", "M/S", "C" };
+  p_private = FALSE;
+  p_descr = "Output units for 3D fields.";
+  p_help = "Used in Medoc files.";
+} Out3DUnits[];
+
+paramdef string {
+  p_default = { "pbl_hgt", "shflux" };
+  p_descr = "Input 2D field names to process.";
+  p_help = "Must have matching entry in Out2DFieldName and Out2DUnits arrays.";
+} In2DFieldName[];
+
+paramdef string {
+  p_default = { "PBL_HITE", "SFC_HTFX" };
+  p_descr = "Output 2D field names.";
+  p_help = "Used in Medoc files.";
+} Out2DFieldName[];
+
+paramdef string {
+  p_default = { "M", "W/M2" };
+  p_descr = "Output units for 2D fields.";
+  p_help = "Used in Medoc files.";
+} Out2DUnits[];
+
+paramdef string {
+  p_default = "terrain";
+  p_descr = "Input terrain field name.";
+} InTerrainName;
+
+paramdef string {
+  p_default = "TOPO";
+  p_descr = "Output terrain field name.";
+} OutTerrainName;
+
+paramdef string {
+  p_default = "M";
+  p_descr = "Output units for terrain.";
+} OutTerrainUnits;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "Option to override lat, lon from MDV file.";
+  p_help = "Can be useful with SCIPUFF.";
+} overrideMdvLatLon;
+
+paramdef double {
+  p_default = 0.0;
+  p_private = FALSE;
+  p_descr = "Latitude to use if override option is invoked.";
+  p_help = "Relevant only if overrideLatLon is TRUE.";
+} lat;
+
+
+paramdef double {
+  p_default = 0.0;
+  p_private = FALSE;
+  p_descr = "Longitude to use if override option is invoked.";
+  p_help = "Relevant only if overrideLatLon is TRUE.";
+} lon;
+
+
+typedef struct {
+  string name;
+  string units;
+  double value;
+} two_d_variable_t;
+
+paramdef struct two_d_variable_t {
+  p_descr = "Array of two dimensional constant variables to output.";
+  p_help = "Useful for working with SCIPUFF.";
+  p_default = { 
+              { "TOPO",      "METERS",  0.0     },
+              { "HFLUX",     "C-M/S",   0.24    },
+              { "ZI",        "M",       1200.0  },
+              { "ZRUF",      "M",       0.16    }
+  };
+} two_d_variables[];
+
+
+/////////// Grid parameters.
+
+commentdef {
+  p_header = " ------------ GRID PARAMETERS --------\n"
+  		"These specify the grid on which the\n"
+                "computations will be performed.\n"
+		"These are used only if RemapGrid is set\n"
+		"to TRUE. If RemapGrid is FALSE then it is assumed\n"
+		"that the fields are already on the same grid.";
+
+}
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to TRUE to remap the data.";
+  p_help = "Defaults to FALSE";
+} RemapGrid;   
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified. Relevant only if RemapGrid is TRUE.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified. Relevant only if RemapGrid is TRUE.";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only. Relevant only if RemapGrid is TRUE.";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} grid_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT. Relevant only if RemapGrid is TRUE.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} grid_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT. Relevant only if RemapGrid is TRUE.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} grid_lat2;
+
+typedef enum {
+  FLAT, LATLON, LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT, LATLON and LAMBERT.  Relevant only if RemapGrid is TRUE.";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in X";
+  p_min = {1};
+  p_default = { 100 };
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in Y Relevant only if RemapGrid is TRUE.";
+  p_min = {1};
+  p_default = {100};
+} grid_ny;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in X Relevant only if RemapGrid is TRUE.";
+  p_default = {1.0};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in Y Relevant only if RemapGrid is TRUE.";
+  p_default = {1.0};
+} grid_dy;
+
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection. Relevant only if RemapGrid is TRUE.";
+  p_default = {0};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection. Relevant only if RemapGrid is TRUE.";
+  p_default = {0};
+} grid_miny;
+
+
+commentdef {
+  p_header = "------ End of grid parameters. ";
+}
+
+commentdef {
+  p_header = "Vertical parameters : ";
+}
+
+paramdef boolean {
+  p_descr = "Option to apply min_vlevel and max_vlevel restrictions.";
+  p_help = "Default is not to do this.";
+  p_default = FALSE;
+} applyVlevels;
+
+
+paramdef double {
+  p_descr = "Minimum vlevel to process, units same as input levels.";
+  p_help = "Relevant only if applyVlevels is TRUE.";
+  p_default = {0.0};
+} min_vlevel;
+
+paramdef double {
+  p_descr = "Minimum vlevel to process, units same as input levels.";
+  p_help = "Relevant only if applyVlevels is TRUE.";
+  p_default = {100.0};
+} max_vlevel;
+
+commentdef {
+  p_header = "Sigma Z parameters:";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use sigma z levels in header part.";
+} use_sigma_z;
+
+paramdef double {
+  p_default = {
+    0.9991856,
+    0.9969941,
+    0.994046,
+    0.9907315,
+    0.9870296,
+    0.9828962,
+    0.9782801,
+    0.973123,
+    0.9673609,
+    0.9609231,
+    0.9537289,
+    0.9456865,
+    0.936695,
+    0.9266383,
+    0.9153867,
+    0.9027978,
+    0.8887083,
+    0.8729309,
+    0.8552511,
+    0.835426,
+    0.8004348,
+    0.7441863,
+    0.6730068,
+    0.5822942,
+    0.4655175,
+    0.3276598,
+    0.1824171,
+    0.0273403
+  };
+  p_descr = "Sigma Z values used in header part, only if use_sigma_z is TRUE.";
+} sigma_z_values[];

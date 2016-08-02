@@ -1,0 +1,182 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvExtractPoint
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvExtractPoint
+ */
+
+commentdef
+{
+  p_header = "MdvExtractPoint";
+  p_text = "This program extracts the field values for a given list of "
+           "lat/lon locations and outputs them in the specified format.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tIn LATEST_DATA mode, the program will process new files as they "
+           "appear in the input_url.\n"
+           "\tIn TIME_LIST mode, the program will process all of the files "
+           "valid at times between the start and end time specified on the "
+           "command line.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string url;
+  int max_valid_secs;
+  string field_name;
+  int field_num;
+  int vlevel_num;
+} input_field_info_t;
+
+paramdef struct input_field_info_t
+{
+  p_descr = "Input field information";
+  p_help = "\turl - URL for the input files.\n"
+           "\tmax_valid_secs - Maximum number of seconds input files are "
+           "valid. "
+           "Used only if trigger_mode is set to LATEST_DATA.\n"
+           "\tfield_name - Name of field to extract from the MDV file. "
+           "Set to \"\" to use field number instead.\n"
+           "\tfield_num - 0-based index of field to extract from the MDV "
+           "file. "
+           "Used only if field_name is set to \"\".\n"
+           "\tvlevel_num - 0-based index of the vertical level to use. "
+           "Use -1 to extract data from a maximum composite of the data. "
+           "Use any other negative number to extract the points at all "
+           "vertical levels in the data.\n";
+  p_default = { "mdvp:://localhost::mdv/input", 600, "", 0, 0 };
+} input_field_info;
+
+typedef struct
+{
+  double lat;
+  double lon;
+} point_t;
+
+paramdef struct point_t
+{
+  p_descr = "List of points to process";
+  p_default = { { 24.9253, 46.7218 },
+                { 27.435158, 41.689986 },
+                { 26.311961, 43.764742 },
+                { 20.295040, 41.642742 },
+                { 18.228599, 42.660783 },
+                { 24.439593, 44.129573 },
+                { 21.71082778, 39.18527778 },
+                { 16.89632778, 42.58349444 },
+                { 29.789080, 40.097991 },
+                { 21.479867, 40.560677 },
+                { 28.377384, 36.605850 } };
+} points[];
+
+typedef enum
+{
+  OUTPUT_ASCII1
+} output_type_t;
+
+paramdef enum output_type_t
+{
+  p_descr = "Type of output to produce";
+  p_help = "\tOUTPUT_ASCII1 - Generate ASCII output of the form (all on a "
+           "single line):\n"
+           "\t\tyear month day hour min sec loc_index lat lon alt grid_size value value_nw value_n value_ne value_e value_se value_s value_sw value_w\n\n"
+           "loc_index is the index of the lat/lon location in the location "
+           "array specified above. "
+           "The value_xx values are the data values in the 8 grid squares "
+           "surrounding the square containing the lat/lon point. "
+           "Altitude is given in the native units of the grid. "
+           "Grid size is given in km^2. "
+           "This output is sent to stdout.\n";
+  p_default = OUTPUT_ASCII1;
+} output_type;
+
+paramdef string
+{
+  p_descr = "String to write to output if a data value is missing.";
+  p_help = "Used only if output_type is set to OUTPUT_ASCII1.";
+  p_default = "MISS";
+} ascii1_missing_string;

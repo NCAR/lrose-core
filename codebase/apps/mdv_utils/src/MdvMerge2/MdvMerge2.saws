@@ -1,0 +1,452 @@
+/**********************************************************************
+ * TDRP params for MdvMerge2
+ **********************************************************************/
+
+//======================================================================
+//
+// MdvMerge2 takes MDV data from a number of separate input directories 
+//   and merges them into a single MDV file as a mosaic.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// OPERATIONAL MODE AND TRIGGERING.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, ARCHIVE and REALTIME.
+
+// In REALTIME mode, the analysis is performed at regular times or as 
+//   new data arrives.
+
+// In ARCHIVE mode, the file list is obtained from the command line or a 
+//   start and end time are specified.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// trigger /////////////////////////////////
+//
+// Trigger mechanism.
+
+// TIME_TRIGGER: program is triggered at constant time intervals - see 
+//   time_trigger_interval.
+
+// FILE_TRIGGER: the program watches the first input_dir and triggers 
+//   based on data in that directory.
+//
+// Type: enum
+// Options:
+//     TIME_TRIGGER
+//     FILE_TRIGGER
+//
+
+trigger = TIME_TRIGGER;
+
+///////////// time_trigger_interval ///////////////////
+//
+// Interval for TIME_TRIGGER - secs.
+// For TIME_TRIGGER, this is the interval between trigger events. In 
+//   REALTIME mode, a time trigger always occurs on the hour, and at 
+//   constant intervals thereafter. In ARCHIVE mode the trigger starts at 
+//   start_time and at constant intervals thereafter.
+// Type: int
+//
+
+time_trigger_interval = 300;
+
+///////////// time_trigger_margin /////////////////////
+//
+// Max time diff for searching for files relative to the trigger time - 
+//   secs.
+// When matching files up with the trigger time, the difference between 
+//   the trigger time and file time must be less than this margin.
+// Type: int
+//
+
+time_trigger_margin = 600;
+
+///////////// min_time_between_file_triggers //////////
+//
+// Minimum time between triggering in REALTIME FILE_TRIGGER mode, in 
+//   seconds.
+// This prevents the arrival of files in FILE_TRIGGER mode from 
+//   triggering at intervals less than this amount.
+// Type: int
+//
+
+min_time_between_file_triggers = 120;
+
+///////////// min_number_updated_urls /////////////////
+//
+// Minumum number of URLs to update for trigger.
+// Type: int
+//
+
+min_number_updated_urls = 0;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Maximum file age in REALTIME file triggered mode, seconds.
+// Applies to all URLs specified.
+// Type: int
+//
+
+max_realtime_valid_age = 600;
+
+//======================================================================
+//
+// FIELD SPECIFICATIONS.
+//
+//======================================================================
+ 
+///////////// merge_fields ////////////////////////////
+//
+// Specifications for merged output field.
+
+// 'name': specify the name of this field in the output MDV file. This 
+//   is also probably the name of the fields in the input files. However, 
+//   you may specify a different field name for the input - see input_url 
+//   for details.
+
+// 'merge_method': MERGE_MIN - take the minimum value at a grid point; 
+//   MERGE_MAX - take the maximum value at a grid point; MERGE_MEAN - take 
+//   the mean value at a point.
+
+// 'merge_encoding': the type of data used to perform the merge. For 
+//   best results FLOAT32 is recommended. However, this uses more memory. 
+//   To conserve memory, use INT8 or INT16. If you select INT8 or INT16 
+//   you must also specify 'merge_scale' and 'merge_bias' to be used to 
+//   represent the data in the merge.
+
+// 'output_encoding': determines the type for storing the merged data in 
+//   the output file. This affects the size of the output file. Use 
+//   FLOAT32 for maximum precision, INT8 for smallest files.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      merge_method_t merge_method;
+//        Options:
+//          MERGE_MIN
+//          MERGE_MAX
+//          MERGE_MEAN
+//      encoding_t merge_encoding;
+//        Options:
+//          INT8
+//          INT16
+//          FLOAT32
+//      double merge_scale;
+//      double merge_bias;
+//      encoding_t output_encoding;
+//        Options:
+//          INT8
+//          INT16
+//          FLOAT32
+//   }
+//
+// 1D array - variable length.
+//
+
+merge_fields = {
+  {
+    name = "DBZ",
+    merge_method = MERGE_MAX,
+    merge_encoding = INT8,
+    merge_scale = 0.5,
+    merge_bias = -32,
+    output_encoding = INT16
+  }
+};
+
+//======================================================================
+//
+// INPUT DATA SPECIFICATIONS.
+//
+//======================================================================
+ 
+///////////// input_urls //////////////////////////////
+//
+// Array of input data URLs and related information.
+
+// 'url': specify the URL for the input data. For data on local disk, 
+//   the URL this can just be the directory containing the input MDV data 
+//   files. For data retrieved from a server, it is the URL for the 
+//   server. A server URL takes the following form: 
+//   'mdvp:://host:port:directory_path'. The directory path is relative to 
+//   $DATA_DIR or $RAP_DATA_DIR.
+
+// 'field_names': If the field names in the input file match those in 
+//   the 'merge_fields' parameter you should set field_names to an empty 
+//   string. If the field names differ, specify the input field names as a 
+//   comma-delimted list. If you wish to specify field numbers instead of 
+//   names, use a comma-delimited list of numbers. Do not mix names and 
+//   numbers.
+
+// 'is_required': if true, the merge will only be performed if data from 
+//   this URL is available. If false, the merge will go ahead even if no 
+//   data is available from this URL.
+
+// 'must_update': if true, data from this URL must have updated since 
+//   the previous merge before the merge can go ahead.
+//
+// Type: struct
+//   typedef struct {
+//      string url;
+//      string field_names;
+//      boolean is_required;
+//      boolean must_update;
+//   }
+//
+// 1D array - variable length.
+//
+
+input_urls = {
+  {
+    url = "/d2/dixon/saws/radars/fadn_cdata",
+    field_names = "",
+    is_required = FALSE,
+    must_update = FALSE
+  }
+  ,
+  {
+    url = "/d2/dixon/saws/radars/fabl_cdata",
+    field_names = "Refl",
+    is_required = FALSE,
+    must_update = FALSE
+  }
+  ,
+  {
+    url = "/d2/dixon/saws/radars/fady_cdata",
+    field_names = "Refl",
+    is_required = FALSE,
+    must_update = FALSE
+  }
+  ,
+  {
+    url = "/d2/dixon/saws/radars/fael_cdata",
+    field_names = "Refl",
+    is_required = FALSE,
+    must_update = FALSE
+  }
+  ,
+  {
+    url = "/d2/dixon/saws/radars/faeo_cdata",
+    field_names = "",
+    is_required = FALSE,
+    must_update = FALSE
+  }
+  ,
+  {
+    url = "/d2/dixon/saws/radars/fair_cdata",
+    field_names = "",
+    is_required = FALSE,
+    must_update = FALSE
+  }
+  ,
+  {
+    url = "/d2/dixon/saws/radars/fapb_cdata",
+    field_names = "",
+    is_required = FALSE,
+    must_update = FALSE
+  }
+  ,
+  {
+    url = "/d2/dixon/saws/radars/fape_cdata",
+    field_names = "Refl",
+    is_required = FALSE,
+    must_update = FALSE
+  }
+  ,
+  {
+    url = "/d2/dixon/saws/radars/mrl5_cdata",
+    field_names = "Refl",
+    is_required = FALSE,
+    must_update = FALSE
+  }
+};
+
+//======================================================================
+//
+// OUTPUT DATA SPECIFICATIONS.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output data URL.
+// URL for output data files. Has the form 
+//   mdvp:://host:port:directory_path.
+// Type: string
+//
+
+output_url = "/d2/dixon/saws/radars/merged_max2";
+
+///////////// output_projection ///////////////////////
+//
+// Projection of output grid.
+// FLAT: (x,y) Cartesian data in km from a given origin, typical of 
+//   local radar data.
+
+// LATLON - lat/lon grid with constant grid spacing (Mercator).
+
+// LAMBERT - Lambert Conformal projection.
+//
+// Type: enum
+// Options:
+//     OUTPUT_PROJ_FLAT
+//     OUTPUT_PROJ_LATLON
+//     OUTPUT_PROJ_LAMBERT
+//
+
+output_projection = OUTPUT_PROJ_LATLON;
+
+///////////// output_origin ///////////////////////////
+//
+// Origin of output grid.
+// Applies to OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+output_origin = {
+    lat = 40,
+    lon = -104
+};
+
+///////////// output_rotation /////////////////////////
+//
+// Rotation of output grid.
+// Applicable to OUTPUT_PROJ_FLAT.
+// Type: double
+//
+
+output_rotation = 0;
+
+///////////// output_std_parallels ////////////////////
+//
+// Standard parallels.
+// Applicable to OUTPUT_PROJ_LAMBERT only.
+//
+// Type: struct
+//   typedef struct {
+//      double lat_1;
+//      double lat_2;
+//   }
+//
+//
+
+output_std_parallels = {
+    lat_1 = 20,
+    lat_2 = 45
+};
+
+///////////// output_grid /////////////////////////////
+//
+// Output grid parameters.
+// For OUTPUT_PROJ_LATLON, minx, miny, dx and dy are in degrees. 
+//   Otherwise they are in km.
+//
+// Type: struct
+//   typedef struct {
+//      long nx;
+//      long ny;
+//      long nz;
+//      double minx;
+//      double miny;
+//      double minz;
+//      double dx;
+//      double dy;
+//      double dz;
+//   }
+//
+//
+
+output_grid = {
+    nx = 1200,
+    ny = 1400,
+    nz = 20,
+    minx = 22,
+    miny = -36,
+    minz = 1,
+    dx = 0.01,
+    dy = 0.01,
+    dz = 1
+};
+
+///////////// output_compression //////////////////////
+//
+// Compression method for output fields.
+//
+// Type: enum
+// Options:
+//     COMPRESSION_NONE
+//     COMPRESSION_RLE
+//     COMPRESSION_ZLIB
+//     COMPRESSION_GZIP
+//
+
+output_compression = COMPRESSION_ZLIB;
+
+///////////// output_data_set_name ////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+output_data_set_name = "SAWS 3D Mosaic";
+
+///////////// output_data_set_source //////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+output_data_set_source = "Merged data created by MdvMerge2.";
+

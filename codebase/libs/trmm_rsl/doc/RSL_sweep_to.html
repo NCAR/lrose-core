@@ -1,0 +1,73 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body>
+<a href="index.html"><img SRC="rsl.gif" height=100 width=100></a>
+<hr>
+<h1>
+RSL_sweep_to...</h1>
+
+<hr>
+<h3>
+Synopsis</h3>
+<b>#include "rsl.h"</b>
+<br><b>void RSL_sweep_to_gif(<a href="RSL_sweep_struct.html">Sweep</a>
+*s, char *outfile, int xdim, int ydim, float range);</b>
+<br><b>void RSL_sweep_to_pict(<a href="RSL_sweep_struct.html">Sweep</a>
+*s, char *outfile, int xdim, int ydim, float range);</b>
+<br><b>void RSL_sweep_to_pgm(<a href="RSL_sweep_struct.html">Sweep</a>
+*s, char *outfile, int xdim, int ydim, float range);</b>
+<br><b>void RSL_sweep_to_ppm(<a href="RSL_sweep_struct.html">Sweep</a>
+*s, char *outfile, int xdim, int ydim, float range);</b>
+<h3>
+
+<hr>Description</h3>
+<b>RSL_sweep_to_gif</b>: Given a Sweep pointer, <b>s</b>, output a GIF
+image with the filename specified in <b>outfile</b>. This function calls
+<a href="RSL_sweep_to_cart.html">RSL_sweep_to_cart</a>
+to do the polar to cartesean mapping, then calls <a href="RSL_write.html">RSL_write_gif</a>.
+When making images of velocity data, it may be necessary to call <a href="RSL_rebin_velocity.html">RSL_rebin_velocity_sweep</a>
+to rebin the values from -nyquist to +nyquist.
+<p><b>RSL_sweep_to_pict</b>: Identical to RSL_sweep_to_gif except it outputs
+a PICT file, by calling <a href="RSL_write.html">RSL_write_pict</a>.
+<p><b>RSL_sweep_to_ppm</b>: Identical to RSL_sweep_to_gif except it outputs
+a PICT file, by calling <a href="RSL_write.html">RSL_write_ppm</a>.
+<p><b>RSL_sweep_to_pgm</b>: Identical to RSL_sweep_to_gif except it outputs
+a PICT file, by calling <a href="RSL_write.html">RSL_write_pgm</a>.
+<p>Efficiency note: The functions RSL_volume_to_gif and RSL_volume_to_pict.
+and any other output formats that may arrise, all function identically
+with the only difference being the output pipe command (ppmtogif, ppmtopict,
+etc.). Each routine performs a polar to cartesean mapping via RSL_sweep_to_cart,
+then calls the appropriate write function. If you plan to output many image
+formats at once, it will be wise to perform the polar to cartesean mapping
+once, then call RSL_write_gif, RSL_write_pict, etc. This could be done,
+for instance, in a function called RSL_volume_to_pict_and_gif.&nbsp;
+<hr>
+<h3>
+Return value</h3>
+None.&nbsp;
+<hr>
+<h3>
+See also</h3>
+<a href="RSL_rebin_velocity.html">RSL_rebin_velocity_ray</a>, <a href="RSL_rebin_velocity.html">RSL_rebin_velocity_sweep</a>,
+<a href="RSL_rebin_velocity.html">RSL_rebin_velocity_volume</a>,
+<br><a href="RSL_sweep_to.html">RSL_sweep_to_gif</a>, <a href="RSL_sweep_to.html">RSL_sweep_to_pict</a>,
+<a href="RSL_sweep_to.html">Vsweep_to_pgm</a>,
+<a href="RSL_sweep_to.html">Vsweep_to_ppm</a>,
+<br><a href="RSL_load_color_table.html">RSL_load_color_table</a>, <a href="RSL_load_color_table.html">RSL_load_green_table</a>,
+<a href="RSL_load_color_table.html">RSL_load_red_table</a>,
+<a href="RSL_load_color_table.html">RSL_load_blue_table</a>,
+<br><a href="RSL_load_color_table.html">RSL_load_refl_color_table</a>,
+<a href="RSL_load_color_table.html">RSL_load_sw_color_table</a>,
+<a href="RSL_load_color_table.html">RSL_load_vel_color_table</a>,
+<br><a href="RSL_volume_to.html">RSL_volume_to_gif</a>, <a href="RSL_volume_to.html">RSL_volume_to_pict</a>,
+<a href="RSL_volume_to.html">RSL_volume_to_pgm</a>,
+<a href="RSL_volume_to.html">RSL_volume_to_ppm</a>.
+<br><a href="RSL_color_table.html">RSL_get_color_table</a>, <a href="RSL_color_table.html">RSL_set_color_table</a>.
+<hr>
+<p>Author: <a href="john.merritt.html">John H. Merritt</a>
+</body>
+</html>

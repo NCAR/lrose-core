@@ -1,0 +1,179 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions MdvStats
+//
+// Yan Chen, RAL, NCAR
+//
+// Dec.2007
+//
+
+commentdef {
+  p_header = "Program name: MdvStats";
+  p_text = "MdvStats computes the statistic values from a series of MDV files. The result is stored in a serials of MDV files, with each file indicates each statistics. The usage is 'MdvMedian -params params_file'.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug message will be printed appropriately.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In ARCHIVE mode, the program moves through the data between the start and end times. In FILELIST mode, it moves through the list of file names specified.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio:0:mdv/NH/";
+  p_descr = "URL directory for input data.";
+} input_url_dir;
+
+paramdef string {
+  p_default = {
+    "19850101/000000.mdv",
+    "19860101/000000.mdv"
+  };
+  p_descr = "FILELIST mode only. A list of file path need to be read in.";
+  p_help = "The program moves through the list and calculates the statistics needed.";
+} input_files[];
+
+paramdef string {
+  p_default = "1985 01 01 00 00 00";
+  p_descr = "Start date time string.";
+  p_help = "ARCHIVE mode only. Start date time for data requested. Format is YYYY MM DD HH MM SS";
+} start_date_time;
+
+paramdef string {
+  p_default = "1986 01 01 00 00 00";
+  p_descr = "End date time string.";
+  p_help = "ARCHIVE mode only. End date time for data request. Format is YYYY MM DD HH MM SS";
+} end_date_time;
+
+typedef enum {
+  YEARLY = 0,
+  DAYLY = 1,
+  HOURLY = 2,
+  ALL = 3
+} data_collection_type_t;
+
+paramdef enum data_collection_type_t {
+  p_default = YEARLY;
+  p_descr = "Set data collection type, over the years, days or hours.";
+  p_help = "REALTIME and ARCHIVE mode only. Given start date time and end date time, move through files:\n YEARLY: over the years, at the same month, day and hour.\n DAYLY: over the days, at the same year, month and hour.\n HOURLY: over the hours, at the same year, month and day.\n ALL: move through all files between start and end date time.";
+} data_collection_type;
+
+commentdef {
+  p_header = "COMPUTING THE STATISTICS";
+}
+
+typedef struct {
+  string field_name;
+  boolean std_dev;
+  boolean mean;
+  boolean min;
+  boolean max;
+  boolean sum;
+} field_stats_t;
+
+paramdef struct field_stats_t {
+  p_default = {
+    {"Temp",     TRUE, TRUE, TRUE, TRUE, FALSE},
+    {"RH",       TRUE, TRUE, TRUE, TRUE, FALSE},
+    {"U",        TRUE, TRUE, TRUE, TRUE, FALSE},
+    {"V",        TRUE, TRUE, TRUE, TRUE, FALSE},
+    {"W",        TRUE, TRUE, TRUE, TRUE, FALSE},
+    {"pressure", TRUE, TRUE, TRUE, TRUE, FALSE}
+  };
+  p_descr = "Fields and statistics information.";
+  p_help = "Fields and statistics to calculate. Make sure there are no duplicated fields here. Use short field names.";
+} fields_stats[];
+
+typedef struct {
+  string field_name1;
+  string field_name2;
+} covariance_t;
+
+paramdef struct covariance_t {
+  p_default = { {"U", "V"}, {"V", "W"}, {"U", "W"} };
+  p_descr = "Covariance information.";
+  p_help = "Calculates covariance for fields. Use short field names";
+} covariance_fields[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use absolute values to calculate standard deviation and mean.";
+  p_help = "Using absolute values is helpful in finding outliers, especially for fields like U,V,W.";
+} use_absolute_values;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio:0:mdv/NH/mdvstats";
+  p_descr = "Statistics files URL directory.";
+  p_help = "Statistics file is written to this URL directory. The file name is based on the time of the last file used.";
+} stats_url_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag indicating whether to compress the stats fields when writing them to disk.";
+  p_help = "Compressing the statistics files will save disk space, but will slow down the reading and writing of the files. ";
+} compress_stats_fields;
+
+paramdef string {
+  p_default = "Statistics data calculated by MdvStats.";
+  p_descr = "Data set information.";
+  p_help = "This info will be placed in the MDV master header for documentation purposes.";
+} output_data_set_info;
+
+paramdef string {
+  p_default = "1hrby1dby21yr";
+  p_descr = "Data transformation type.";
+  p_help = "No more than 15 characters. This information will be placed in the MDV field headers for documentation and search purposes.";
+} data_transformation_type;

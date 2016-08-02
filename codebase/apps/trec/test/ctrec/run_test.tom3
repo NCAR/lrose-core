@@ -1,0 +1,7 @@
+#!/bin/csh -f
+
+/bin/rm test.log
+/bin/rm -r tom/output_test3
+
+ctrec -params tom/new_ctrec3.params -mode ARCHIVE \
+    -start "1999 12 13 00 00 00" -end "1999 12 13 23 59 59"

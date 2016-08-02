@@ -1,0 +1,55 @@
+/*********************************************************
+ * parameter definitions for fmq2tape
+ *
+ * Jaimi Yee, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * June 1997
+ */
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option.";
+  p_help = "Print debug messages.";
+} debug;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance.";
+  p_help = " ";
+} instance;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"fmq_dir"};
+  p_descr = "FMQ path.";
+  p_help = "Directory for FMQ files.";
+} fmq_path;
+
+paramdef long {
+  p_default = {65536};
+  p_descr = "Maximum block size.";
+  p_help = "Maximum number of bytes for block to be written to tape.";
+} max_block_size;
+
+paramdef long {
+  p_default = {10};
+  p_descr = "Maxinum number of messages.";
+  p_help = "Maxinum number of messages per block to be written to tape.";
+} max_message_per_block;
+
+paramdef char* {
+  p_default = {"/dev/tape"};
+  p_descr = "Tape device name.";
+  p_help = "Name of tape device to which the fmq will be written.";
+} tape_device_name;
+
+
+
+

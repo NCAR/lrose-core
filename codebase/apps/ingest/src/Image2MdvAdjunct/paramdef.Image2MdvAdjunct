@@ -1,0 +1,112 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Image2MdvAdjunct takes some of the legwork out of getting"
+	"a background image into MDV for CIDD to use. Produces a csh\n"
+	"script named Runner, and param files for Image2Mdv, that\n"
+	"allow Image2Mdv to be run in an automated manner.\n\n"
+        "NOTE : the app apps/ingest/src/Image2MdvAdjunct/adjunctAdjunct\n"
+	"may be useful in setting up this param file.\n\nNiles Oien.";
+
+}
+
+paramdef string {
+  p_descr = "Input image filename.";
+  p_help = "The world file filename will be construed from this."; 
+  p_default = { "/d2/oien/fromJen/bouldergeo.jpg" };
+} inImageFile;
+ 
+paramdef string {
+  p_descr = "Output image type.";
+  p_help = "Use one of the standard three letter image\n"
+	"filename extensions : jpg, tif, png. Image2Mdv takes tif."; 
+  p_default = { "tif" };
+} imageType;
+ 
+paramdef string {
+  p_descr = "Temporary directory.";
+  p_help = "Set to somewhere with a lot of space, probably NOT /tmp"; 
+  p_default = { "/d1/oien/tmp" };
+} tempDir;
+
+paramdef boolean {
+  p_descr = "Option to delete interim images.";
+  p_help = "Don't do this if debugging image conversions."; 
+  p_default = { TRUE };
+} deleteInterims;
+
+paramdef boolean {
+  p_descr = "Option to negate indicies in the Y direction to cope\n"
+	"with different image storage techniques.";
+  p_help = "Trial and error Im afraid."; 
+  p_default = { FALSE };
+} negateInY;
+
+paramdef boolean {
+  p_descr = "Option to go ahead and execute the Runner script\n"
+	"that we write.";
+  p_help = "Don't do this if you want a chance to check it\n"
+	"visuall prior to running it."; 
+  p_default = { FALSE };
+} runScript;
+
+
+typedef struct {
+	int nx;
+	int ny;
+} inputDimension_t;
+
+paramdef struct inputDimension_t {
+  p_descr = "Dimensions of image from ESRI system.";
+  p_help = "Can be ascertained with the linux identify command, eg.\n"
+	"identify bouldergeo.jpg - or possibly from a display system like xv"; 
+  p_default = { 21851, 17868 };
+} inDimensions;
+
+
+typedef struct {
+	string domainName;
+	double minLat;
+	double minLon;
+	double maxLat;
+	double maxLon;
+	int nx;
+	double offsetLat;
+	double offsetLon;
+} outputSpecification_t;
+
+paramdef struct outputSpecification_t {
+  p_descr = "Desired dimensions of final images and MDV files.";
+  p_help = "Up to the user to decide on. The lat/lon\n"
+	"range is specified, as is nx, and ny is calculated internally\n"
+	"to preserve aspect ratio. The lat/lon offsets are added\n"
+	"to the input image navigation to tweak the navigation\n"
+	"if needed. To move the background image south, the offsetLat\n"
+	"should be positive."; 
+  p_default = { 
+     { "InnerDomain", 40.0473, -105.2389, 40.072, -105.2012, 900, 0.0, 0.0 },
+     { "OuterDomain", 40.0, -105.3, 40.1, -105.2, 900, 0.0, 0.0 } };
+} outDimensions[];
+

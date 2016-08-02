@@ -1,0 +1,445 @@
+/**********************************************************************
+ * TDRP params for ./TsCalAuto
+ **********************************************************************/
+
+//======================================================================
+//
+// TsCalAuto analyses radar calibration data.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_NORM;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// TIME SERIES - INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_fmq_path //////////////////////////
+//
+// Path to time series FMQ.
+// Type: string
+//
+
+input_fmq_path = "/tmp/fmq/ts-2";
+
+///////////// n_samples ///////////////////////////////
+//
+// Number of pulse samples to average for cal data.
+// Type: int
+//
+
+n_samples = 1000;
+
+///////////// start_gate //////////////////////////////
+//
+// Gate number for start of averaging.
+// Type: int
+//
+
+start_gate = 50;
+
+///////////// n_gates /////////////////////////////////
+//
+// Number of gates for averaging.
+// Type: int
+//
+
+n_gates = 300;
+
+///////////// fast_alternating_mode ///////////////////
+//
+// Is the radar running in dual-pol fast alternating mode?.
+// If not, set to FALSE.
+// Type: boolean
+//
+
+fast_alternating_mode = FALSE;
+
+//======================================================================
+//
+// SIGNAL GENERATOR CONTROL.
+//
+//======================================================================
+ 
+///////////// siggen_tcp_port /////////////////////////
+//
+// TCP port for SIGGEN.
+// Type: int
+//
+
+siggen_tcp_port = 5025;
+
+///////////// siggen_ip_address ///////////////////////
+//
+// IP address for SIGGEN.
+// Type: string
+//
+
+siggen_ip_address = "10.40.0.21";
+
+///////////// siggen_max_power ////////////////////////
+//
+// Max power for siggen signal (dBm).
+// Type: double
+//
+
+siggen_max_power = 10;
+
+///////////// siggen_min_power ////////////////////////
+//
+// Min power for siggen signal (dBm).
+// Type: double
+//
+
+siggen_min_power = -120;
+
+///////////// siggen_delta_power //////////////////////
+//
+// Power step for siggen (dBm).
+// Type: double
+//
+
+siggen_delta_power = 1;
+
+///////////// siggen_frequency ////////////////////////
+//
+// Siggen frequency (GHz).
+// This matches the radar frequency.
+// Type: double
+//
+
+siggen_frequency = 9.325;
+
+///////////// use_manual_siggen_control ///////////////
+//
+// Option to manually set the siggen.
+// Use for testing etc.
+// Type: boolean
+//
+
+use_manual_siggen_control = FALSE;
+
+//======================================================================
+//
+// CALIBRATION PROCEDURE PARAMETERS.
+//
+//======================================================================
+ 
+///////////// radarName ///////////////////////////////
+//
+// Radar name.
+// Type: string
+//
+
+radarName = "Unknown";
+
+///////////// wavelengthCm ////////////////////////////
+//
+// Radar wavelength (cm).
+// Type: double
+//
+
+wavelengthCm = 3;
+
+///////////// xmitPowerDbmH ///////////////////////////
+//
+// Transmitter peak power H (dBm).
+// Type: double
+//
+
+xmitPowerDbmH = 80;
+
+///////////// xmitPowerDbmV ///////////////////////////
+//
+// Transmitter peak power V (dBm).
+// Type: double
+//
+
+xmitPowerDbmV = 80;
+
+///////////// pulseWidthUs ////////////////////////////
+//
+// Transmit pulse width (micro_secs).
+// Type: double
+//
+
+pulseWidthUs = 1;
+
+///////////// beamWidthDegH ///////////////////////////
+//
+// Antenna 3dB beam width H (deg).
+// Type: double
+//
+
+beamWidthDegH = 1;
+
+///////////// beamWidthDegV ///////////////////////////
+//
+// Antenna 3dB beam width V (deg).
+// Type: double
+//
+
+beamWidthDegV = 1;
+
+///////////// antGainDbH //////////////////////////////
+//
+// Antenna gain H (dB).
+// Type: double
+//
+
+antGainDbH = 40;
+
+///////////// antGainDbV //////////////////////////////
+//
+// Antenna gain V (dB).
+// Type: double
+//
+
+antGainDbV = 41;
+
+///////////// twoWayWaveguideLossDbH //////////////////
+//
+// 2-way waveguide loss H (dB).
+// This is the loss from the measurement plane to the feed-horn and 
+//   back. Sometimes it is set to 0 and the loss is incorporated in the 
+//   antenna gain.
+// Type: double
+//
+
+twoWayWaveguideLossDbH = 0;
+
+///////////// twoWayWaveguideLossDbV //////////////////
+//
+// 2-way waveguide loss V (dB).
+// This is the loss from the measurement plane to the feed-horn and 
+//   back. Sometimes it is set to 0 and the loss is incorporated in the 
+//   antenna gain.
+// Type: double
+//
+
+twoWayWaveguideLossDbV = 0;
+
+///////////// twoWayRadomeLossDbH /////////////////////
+//
+// 2-way loss through the radome - H.
+// Set to 0 if no radome.
+// Type: double
+//
+
+twoWayRadomeLossDbH = 0;
+
+///////////// twoWayRadomeLossDbV /////////////////////
+//
+// 2-way loss through the radome - V.
+// Set to 0 if no radome.
+// Type: double
+//
+
+twoWayRadomeLossDbV = 0;
+
+///////////// receiverMismatchLossDb //////////////////
+//
+// Receiver mismatch loss - (dB).
+// This is the loss which results from the fact that the receiver 
+//   bandwidth is not exactly the same as the pulse width. The calibration 
+//   procedure is carries out with a CW signal, so the redeiver bandwidth 
+//   is not a factor. However, during operations, the receiver loses some 
+//   power because of the bandwidth mismatch. This loss must be taken into 
+//   account.
+// Type: double
+//
+
+receiverMismatchLossDb = 0.6;
+
+///////////// noiseSourcePowerDbmH ////////////////////
+//
+// Noise source power - H (dBm).
+// Some operational calibrations are computed with a calbrated noise 
+//   source of known power.
+// Type: double
+//
+
+noiseSourcePowerDbmH = -9999;
+
+///////////// noiseSourcePowerDbmV ////////////////////
+//
+// Noise source power - V (dBm).
+// Some operational calibrations are computed with a calbrated noise 
+//   source of known power.
+// Type: double
+//
+
+noiseSourcePowerDbmV = -9999;
+
+///////////// powerMeasLossDbH ////////////////////////
+//
+// Power measurement loss - H (dBm).
+// This is the power loss from the signal generator to the waveguide 
+//   coupler.
+// Type: double
+//
+
+powerMeasLossDbH = 2;
+
+///////////// powerMeasLossDbV ////////////////////////
+//
+// Power measurement loss - V (dBm).
+// This is the power loss from the signal generator to the waveguide 
+//   coupler.
+// Type: double
+//
+
+powerMeasLossDbV = 2;
+
+///////////// couplerForwardLossDbH ///////////////////
+//
+// Coupler loss - H (dB).
+// This is the power loss in the directional coupler itself.
+// Type: double
+//
+
+couplerForwardLossDbH = 37;
+
+///////////// couplerForwardLossDbV ///////////////////
+//
+// Coupler loss - V (dB).
+// This is the power loss in the directional coupler itself.
+// Type: double
+//
+
+couplerForwardLossDbV = 38;
+
+///////////// zdrCorrectionDb /////////////////////////
+//
+// Correction to ZDR (dB).
+// True ZDR = measured ZDR + zdrCorrectionDb.
+// Type: double
+//
+
+zdrCorrectionDb = 0;
+
+///////////// ldrCorrectionDbH ////////////////////////
+//
+// Correction to LDR - H (dB).
+// True LDRH = measured LDRH + ldrCorrectionDbH.
+// Type: double
+//
+
+ldrCorrectionDbH = 0;
+
+///////////// ldrCorrectionDbV ////////////////////////
+//
+// Correction to LDR - V (dB).
+// True LDRV = measured LDRV + ldrCorrectionDbV.
+// Type: double
+//
+
+ldrCorrectionDbV = 0;
+
+///////////// systemPhidpDeg //////////////////////////
+//
+// System PHIDP (deg).
+// This is the approximate PHIDP value in the meteorlogical echo closest 
+//   to the radar. Compute PHIDP is corrected using this value, so that 
+//   the computed PHIDP closest to the radar is set to a value which 
+//   minimizes the chance of folding.
+// Type: double
+//
+
+systemPhidpDeg = -70;
+
+//======================================================================
+//
+// ANALYSIS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// linear_region_min_power /////////////////
+//
+// power value at lower end of linear region (dBm).
+// Type: double
+//
+
+linear_region_min_power = -60;
+
+///////////// linear_region_max_power /////////////////
+//
+// power value at upper end of linear region (dBm).
+// Type: double
+//
+
+linear_region_max_power = -20;
+
+///////////// noise_region_max_power //////////////////
+//
+// power value at upper end of noise region (dBm).
+// Type: double
+//
+
+noise_region_max_power = -110;
+
+//======================================================================
+//
+// OUTPUT RESULTS.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Dir for output files.
+// The results will be written to sub-directories named from the cal 
+//   time.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// plot_script /////////////////////////////
+//
+// If set, program will call script passing the output file names as the 
+//   first argument.
+// Typically, this script generates a plot and saves the output.
+// Type: string
+//
+
+plot_script = "do_calplot";
+

@@ -1,0 +1,194 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvAreaCoverage
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvAreaCoverage.
+ */
+
+
+commentdef
+{
+  p_header = "CleanSeviriData";
+  p_text = "This program takes MDV files that contain multiple fields that "
+           "are forecasts of the same field and divides the forecasts into "
+           "separate files and writs them to a RAP foreast-style directory.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "If true, verbose debug messages will be printed.";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  TIME_LIST,
+  LATEST_DATA
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+           "In LATEST_DATA mode, the program operates on new files as they "
+           "appear in the input directory.\n";
+  p_default = TIME_LIST;
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef long
+{
+  p_descr = "Maximum time data is value in LATEST_DATA mode in seconds";
+  p_default = 3600;
+} max_valid_secs;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/output";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef struct
+{
+  boolean use_field_name;
+  string field_name;
+  long field_num;
+  long fcst_lead_secs;
+} fcst_info_t;
+
+paramdef struct fcst_info_t
+{
+  p_descr = "Forecast field information";
+  p_help = "\tuse_field_name - Flag indicating whether to use the field name "
+           "or the field number to identify this field in the input file.\n"
+           "\tfield_name - Field name of input field. "
+           "Used only if use_field_name set to true.\n"
+           "\tfield_num - Field number of input field. "
+           "Used only if use_field_name set to false.\n"
+           "\tfcst_lead_secs - Forecast lead seconds for this field.\n";
+  p_default = { { true, "COMBBASE", 0, 0 },
+                { true, "FCST010", 1, 600 },
+                { true, "FCST020", 2, 1200 },
+                { true, "FCST030", 3, 1800 },
+                { true, "FCST040", 4, 2400 },
+                { true, "FCST050", 5, 3000 } };
+} fcst_info[];
+
+paramdef string
+{
+  p_descr = "Output field name";
+  p_default = "COMBBASE";
+} output_field_name;

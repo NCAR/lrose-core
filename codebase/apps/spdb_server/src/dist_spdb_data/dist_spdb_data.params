@@ -1,0 +1,99 @@
+/****************************************************
+ * TDRP params for dist_spdb_data
+ ****************************************************/
+
+/*
+ * debug level.
+ * Debug level: DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS, DEBUG_ROUTINES,
+ *   DEBUG_ALL.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS,
+ *   DEBUG_ROUTINES, DEBUG_ALL.
+ */
+debug = DEBUG_ALL;
+
+/*
+ * malloc debug level.
+ * 0 = none, 1 = corruption checking, 2 = record all malloc blocks
+ *   and checks, 3 = printout of all mallocs, etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 2;
+
+/*
+ * Number of milliseconds to wait for a socket operations before
+ *   going on to other work.
+ * wait time.
+ *
+ * Type: long
+ * Default: 100 
+ */
+wait_msecs = 300;
+
+/*
+ * server mapper type.
+ * The server mapper type for registering with the server mapper.
+ *
+ * Type: string
+ * Default: "Spdb" 
+ */
+servmap_type = "Spdb";
+
+/*
+ * server mapper subtype.
+ * The server mapper subtype for registering with the server mapper.
+ *
+ * Type: string
+ * Default: "Spdb" 
+ */
+servmap_subtype = "Spdb";
+
+/*
+ * instance.
+ * The instance for this server. This is used for both the server
+ *   mapper and the process mapper.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * input port.
+ * Port number to use for input.
+ *
+ * Type: long
+ * Default: 62000 
+ */
+input_port = 62005;
+
+/*
+ * output destination list.
+ * List of output destinations. The destinations should be specified
+ *   in the format used by the spdb_client routines.
+ *
+ * Type: string
+ * Array elem size: 4 bytes
+ * Array has no max number of elements
+ */
+/* destinations =
+{"/space2/rehak/rap/projects/spdb_server/src/dist_spdb_data/database",
+"62000@anteater"}; */
+destinations = {"/space2/rehak/rap/projects/spdb_server/src/dist_spdb_data/database"};
+
+/*
+ * product label.
+ * Product label. Used only for disk destinations.
+ *
+ * Type: string
+ * Default: "" 
+ */
+product_label = "";
+
+

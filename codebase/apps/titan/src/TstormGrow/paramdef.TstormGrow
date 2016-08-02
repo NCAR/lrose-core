@@ -1,0 +1,231 @@
+/**********************************************************
+ * paramdef.TstormGrow
+ *
+ * This file contains the TDRP parameter definitions for
+ * TstormGrow.
+ */
+
+
+commentdef
+{
+  p_header = "TstormGrow";
+  p_text = "This program takes a TITAN storm SPDB database and applies the "
+           "growth and decay to the given gridded data without applying any "
+           "extrapolation.  The idea is that this could be used as input to "
+           "GridForecast to get and extrapolation that includes growth and "
+           "decay.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "If true, verbose debug messages will be printed.";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Trigger URL";
+  p_help = "This will generally be the URL of one of the input fields, "
+           "but doesn't have to be.";
+  p_default = "mdvp:://localhost::mdv/trigger";
+} trigger_url;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef struct
+{
+  string url;
+  boolean use_field_name;
+  string field_name;
+  long field_num;
+  long max_input_secs;
+} gridded_field_t;
+
+paramdef struct gridded_field_t
+{
+  p_descr = "Information about the gridded input field.";
+  p_help = "\turl - The URL for retrieving the field.\n"
+           "\tuse_field_name - Flag indicating whether to identify the "
+           "field based on its name or number in the MDV file.\n"
+           "\tfield_name - The name of the field in the MDV file. "
+           "Used only if use_field_name is set to true.\n"
+           "\tfield_num - The number of the field in the MDV file. "
+           "Field numbers start at 0. "
+           "Used only iif use_field_name is set to false.\n"
+           "\tmax_input_secs - The maximum number of seconds that this "
+           "input field is valid. "
+           "If there is no data available for this field within this number "
+           "of seconds of the trigger time, no scatter plot will be produced "
+           "for this time period.\n";
+  p_default = { "mdvp:://localhost::mdv/field1",
+                true,
+                "field1",
+                0,
+                3600 };
+} gridded_field;
+
+paramdef string
+{
+  p_descr = "URL for input SPDB Titan database";
+  p_default = "spdbp:://localhost::spdb/storms";
+} storms_url;
+
+paramdef long
+{
+  p_descr = "Maximum number of seconds that the storm data is valid";
+  p_default = 3600;
+} storms_max_input_secs;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/grown";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to process valid storms only";
+  p_default = true;
+} valid_storms_only;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to apply growth to the storms";
+  p_default = true;
+} apply_growth;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to apply decay to the storms";
+  p_default = true;
+} apply_decay;
+
+paramdef double
+{
+  p_descr = "Maximum storm size for applying growth/decay in km";
+  p_default = 1000;
+} max_storm_size;
+
+paramdef long
+{
+  p_descr = "Lead time for applying growth/decay in seconds";
+  p_help = "The growth and decay are calculated based on the storm's area "
+           "change with time. "
+           "This gives us the time for calculating the area change.";
+  p_default = 3600;
+} fcst_lead_time_secs;
+
+paramdef double
+{
+  p_descr = "Base value for intensity change calculations";
+  p_help = "This is needed because not all fields vary around a value of 0. "
+           "For example, if you are growing a degree K field, you might want "
+           "to base the growth and decay changes on the distance from 273.15.";
+  p_default = 0.0;
+} intensity_base_value;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the data value are ascending or "
+            "descending.";
+  p_help = "This is needed so that the growth and decay can be applied in the "
+           "correct direction for descending fields like satellite IR fields.";
+  p_default = false;
+} data_is_descending;

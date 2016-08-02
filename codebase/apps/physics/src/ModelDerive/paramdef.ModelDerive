@@ -1,0 +1,226 @@
+/**********************************************************
+ * paramdef.ModelDerive
+ *
+ * This file contains the TDRP parameter definitions for
+ * ModelDerive.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Input Parameters
+ */
+
+commentdef {
+  p_header = "DATA INPUT PARAMETERS.";
+}
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  FILE_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "location specified by the input_path parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter and the input_path.\n"
+           "In FILE_LIST mode, the files listed on the command line using "
+           "the -f command line option are processed."
+           "FILE_LIST mode is automatically invoked by -f option on the "
+           "command line and if the FILE_LIST mode is specified, the -f "
+           "option is required on the command line.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "Input Path or URL.";
+  p_help = "Input location/url for the input files.";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_path;
+
+typedef enum
+{
+  INPUT_MDV
+} input_type_t;
+
+paramdef enum input_type_t
+{ 
+  p_descr = "Input/Output file type.";
+  p_help = "Currently only INPUT_MDV is supported";
+  p_default = "INPUT_MDV";
+} input_type;
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef float {
+  p_default = {};
+  p_descr = "Levels to perform vertical interpolation at. Blank for no interpolation";
+  p_help = "Level units are specific to the interpolate_function being used";
+} interpolate_levels[];
+
+paramdef string {
+  p_default = {"AglFromSigma", "HGT"};
+  p_descr = "Interpolation function and input variable list.";
+  p_help = "First string is the name of the interpolation function. "
+	   "The following strings are the inputs needed for that function.\n"
+	   "Only used if interpolate_levels is not blank.\n"
+           " \n"
+           "List of known interpolation functions:\n"
+           "FunctionName (OutUnits), InputFiedl1 (units), InputField2 (units)..\n"
+           "AglFromSigma (ft), Height (ft)\n"
+           "IsblFromSigma (mb), Pressure (pa)\n"
+           "FlFromKm (100ft)\n"
+           "SfcFromSigma (0)\n";
+
+} interpolate_function[];
+
+paramdef string {
+  p_default = { {"WindSpeedDirectionFromUV", "U", "V"} };
+  p_descr = "Derive functions and input variable lists to each";
+  p_help = "First string in each row is the name of the derive function.\n"
+	   "The following strings in the row are the inputs needed for that function.\n"
+           " \n"
+           "List of known derive functions:\n"
+           "FunctionName (OutUnits), InputFiedl1 (units), InputField2 (units)..\n"
+           "AirTempFromVptmpMixrPres (C), VpTmp (K), Mixr (g/kg), Pressure (pa)\n"
+           "RhFromTmpMixrPres (%), Temperature (C), Mixr (g/kg), Pressure (pa)\n"
+           "RhFromTmpSpecPres (%), Temperature (C), Spec (g/kg), Pressure (pa)\n"
+           "RhFromVptmpMixrPres (%), VpTmp (K), Mixr (g/kg), Pressure (pa)\n"
+           "WindSpeedDirectionFromUV (inputs units), Wind_U, Wind_V\n";
+
+} derive_functions[][];
+
+paramdef string {
+  p_default = { };
+  p_descr = "Fields requested to be copied from the input file to the output file";
+  p_help = "This should be blank if the input_path and output_path are the same as "
+	   "all fields will be kept in the file.";
+} copy_fields[];
+
+/***********************************************************************
+ * Output parameters.
+ */
+
+commentdef {
+  p_header = "DATA OUTPUT PARAMETERS.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/output";
+  p_descr = "Output Path or URL.";
+  p_help = "Output location.";
+} output_path;
+
+/***********************************************************************
+ * MDV Specific Output parameters.
+ */
+
+commentdef {
+  p_header = "MDV OUTPUT PARAMETERS.";
+}
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_FLOAT32;
+  p_descr = "Set encoding type.";
+} encoding_type;
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4, 
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_ZLIB;
+  p_descr = "Set compression type.";
+} compression_type;
+
+typedef enum {
+  SCALING_NONE =       0,
+  SCALING_ROUNDED =    1,
+  SCALING_INTEGRAL =   2,
+  SCALING_DYNAMIC =    3,
+  SCALING_SPECIFIED =  4
+} scaling_type_t;
+
+paramdef enum scaling_type_t {
+  p_default = SCALING_NONE;
+  p_descr = "Set scaling type.";
+  p_help = "Only used when Encoding to int.";
+} scaling_type;
+

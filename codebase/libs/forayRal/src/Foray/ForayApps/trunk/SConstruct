@@ -1,0 +1,47 @@
+import os
+
+buildOptions = Options('buildOpts.py')
+buildOptions.Add(PathOption('ncdir'    ,'Root directory where netcdf library was installed.'       ,'/opt/local'      ,PathOption.PathIsDir))
+buildOptions.Add(PathOption('foraydir' ,'Root directory where foray library was installed.'        ,'/opt/local/foray',PathOption.PathIsDir))
+buildOptions.Add(PathOption('prefix'   ,'Root directory where foray applications will be installed','/opt/local/foray',PathOption.PathAccept))
+
+env = Environment(options=buildOptions,CCFLAGS='-g', LDFLAGS='-g', LINKFLAGS='-g')
+Export('env')
+
+if not os.path.exists('buildOpts.py'):
+    buildOptions.Save('buildOpts.py',env)
+
+Help(buildOptions.GenerateHelpText(env))
+
+env.installBin = os.path.join(env['prefix'],'bin');
+env.installLib = os.path.join(env['prefix'],'lib',);
+env.installInc = os.path.join(env['prefix'],'include')
+
+env.netcdfBin  = os.path.join(env['ncdir'],'bin');
+env.netcdfLib  = os.path.join(env['ncdir'],'lib');
+env.netcdfInc  = os.path.join(env['ncdir'],'include')
+env.netcdfLIBS = ['netcdf']
+
+env.forayBin = os.path.join(env['foraydir'],'bin');
+env.forayLib = os.path.join(env['foraydir'],'lib');
+env.forayInc = os.path.join(env['foraydir'],'include')
+env.forayLIBS = ['rayfilefactory','ncradar','dorade','rayfile','forayutil','netcdf']
+
+env.Alias('install',(env.installBin,env.installLib,env.installInc))
+
+env.installLocalLib = '#/lib'
+env.installLocalInc = '#/include'
+env.installLocalBin = '#bin'
+
+SConscript(['Foray01/SConscript'])
+SConscript(['ForayInfo/SConscript'])
+SConscript(['SweepInfo/SConscript'])
+SConscript(['DoradeInfo/SConscript'])
+SConscript(['ScaleBiasConvert/SConscript'])
+
+
+
+
+
+
+

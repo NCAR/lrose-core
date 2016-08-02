@@ -1,0 +1,82 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+commentdef {
+  p_header = "Ltg2Rampclosure";
+}
+
+commentdef {
+  p_header = "Ltg2Rampclosure";
+}
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_NORM;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef char* {
+   p_descr = "Program instance";
+   p_default = "test";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program... In ARCHIVE mode... In FILELIST mode, it processes all of the files in the list specified on the command line. In FILELIST mode paths must be fully qualified.";
+} mode;
+
+paramdef struct region_t {
+  p_descr = "Specifications of ramp regions.";
+  p_help = "Ramp radius in km and clsureTime after ltg event is in seconds,"
+           " please no blank spaces in region name";
+  p_field_type = {string, float, float, float, int};
+  p_field_name = {regionName, lat, lon, radius, closureTime};
+} rampRegions[];
+
+paramdef char* {
+   p_descr = "Spdb url for ltg data";
+   p_default = "spdbp:://winter.rap.ucar.edu::/d1/data/spdb/ltg/Wxbug";
+} ltgUrl;
+
+paramdef char* {
+   p_descr = "Output url for ascii ramp closure results";
+   p_default = "./";
+} asciiOutdir;
+
+paramdef int {
+   p_descr = "Data will be processed in subintervals  this long";
+   p_default = 3600;
+} processingInterval;
+

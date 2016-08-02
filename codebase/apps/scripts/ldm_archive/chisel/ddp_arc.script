@@ -1,0 +1,75 @@
+#!/bin/csh -x
+#
+# Script to make an archive file of yesterdays DDP data and age off old data.
+# First get a date string for yesterday.  The program "yesterday" returns this
+# Alternatively, let the user specify the date sting on the command line.
+#
+set EXE_home = /home/rapdmg/exe
+set ARC_home  = /home/rapdmg/archive_staging
+set ARC_SCRIPTS_home  = /home/rapdmg/archive_scripts
+set DDP_home = /weather/ddp
+set ARC_ddp = /d1/ldm/archive/ddp_test
+set MSS_path = /RAPDMG/LDM/ARCHIVE
+
+set time1 = `date`
+echo "Start time: " $time1
+
+  if ( $1 == "" ) then
+    set aryr = "$EXE_home/gemtime -o -24h %y"
+#    set aryr = `$EXE_home/gemtime -o -24h %y`
+    set aryear = `$EXE_home/gemtime -o -24h %Y`
+    set aryrmn = `$EXE_home/gemtime -o -24h %Y%m`
+    set ardate = `$EXE_home/gemtime -o -24h %Y%m%d`
+    set armmdd = `$EXE_home/gemtime -o -24h %m%d`
+    echo "ardate, armmdd=" $ardate $armmdd
+    set ddpdir = "$DDP_home/$ardate"
+  else
+    set ardate = $1
+    set aryear = `echo $ardate | awk '{print substr($1,1,4)}'`
+    set armmdd = `echo $ardate | awk '{print substr($1,5,8)}'`
+    set ddpdir = "$DDP_home/$ardate"
+  endif
+
+    echo "ardate=" $ardate
+    echo "aryear=" $aryear
+    echo "armmdd=" $armmdd
+
+set Tlist = $ARC_home/Tlist/list1_$ardate
+if (-e $Tlist) then
+  rm $Tlist/*
+else
+  mkdir -p $Tlist
+endif
+
+# First create the DDP archive.  
+#  set ARC_nids = /ssg/ldm/archive/nids
+  set tmpdir = $ARC_ddp
+
+  cd $ddpdir
+  tar cvf $tmpdir/$ardate.ddp.tar $ardate* >$Tlist/tarlist_$ardate.ddp
+  gzip $tmpdir/$ardate.ddp.tar
+  gzip $Tlist/tarlist_$ardate.ddp
+
+# And send tar file to the MassStore.  Send the compressed (.gz file) if exists, otherwise send the TAR file
+#  set aryear = 19`echo $ardate | awk '{print substr($1,1,2)}'`
+#
+if (-e $tmpdir/$ardate.ddp.tar.gz) then
+   /usr/local/dcs/bin/msrcp -pr 48500002 -pe 4096 $tmpdir/$ardate.ddp.tar.gz mss:$MSS_path/$aryear/$armmdd/$ardate.ddp.tar.gz
+   /usr/local/dcs/bin/msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate.ddp.tar.gz
+else
+   #msrcp -pe 4096 $tmpdir/$ardate.ddp.tar mss:$MSS_path/$aryear/$armmdd/$ardate.ddp.tar
+   echo "  $tmpdir/$ardate.ddp.tar.gz DOES NOT exist."
+endif
+
+#
+# Now schedule a job to make sure the archive went OK, and if so, delete the archive files locally
+#
+
+#  sleep 10
+ $ARC_SCRIPTS_home/ddp_compare_msarc.script
+
+set time2 = `date`
+echo "End time: " $time2
+
+  exit
+

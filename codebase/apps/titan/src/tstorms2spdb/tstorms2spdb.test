@@ -1,0 +1,79 @@
+/****************************************************
+ * TDRP params for ttracks2spdb
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Operation mode.
+ * Program may be run in two modes, archive and realtime. In realtime
+ *   mode, the analysis is performed for each volume scan as it becomes
+ *   available. In archiv mode, all of the scans in a track file are
+ *   processed.
+ *
+ * Type: enum
+ * Default: ARCHIVE 
+ * Legal values: ARCHIVE, REALTIME.
+ */
+mode = ARCHIVE;
+
+/*
+ * Output directory.
+ * Directory for output SPDB files.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+output_spdb_dir = "$(TITAN_HOME)/tstorms_spdb";
+
+/*
+ * Max valid age of input files in realtime mode (secs).
+ * This the max valid age for an incoming file. The program will
+ *   wait for a data file more recent than this.
+ *
+ * Type: double
+ * Default: 360 
+ * Min value: 1 
+ */
+max_realtime_valid_age = 360;
+
+/*
+ * Storms data directory.
+ * Directory for storm and track data files.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+storms_dir = "$(TITAN_HOME)/storms";
+
+

@@ -1,0 +1,10 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Appdefaults file for procview program
+! To install, copy to /usr/lib/X11/app-defaults
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+procview*fontList:  -*-helvetica-bold-r-normal--14-*-*-*-*-*-iso8859-1
+procview*quit*labelString: Quit
+procview*XmScale*orientation: horizontal
+procview*stage*width: 800
+procview*stage*height: 700

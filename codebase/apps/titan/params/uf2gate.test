@@ -1,0 +1,350 @@
+/****************************************************
+ * TDRP params for uf2gate
+ ****************************************************/
+
+/*
+ * field information.
+ * Information about the fields in the UF file. Also indicates
+ *   which fields to output.
+ *
+ * Type: struct
+ * Array elem size: 20 bytes
+ * Array has no max number of elements
+ */
+field_info = {{
+  "DZ", /* field_name:string */
+  100, /* field_factor:long */
+  50, /* field_scale:long */
+  -3000, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "DM", /* field_name:string */
+  100, /* field_factor:long */
+  50, /* field_scale:long */
+  -12000, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "XH", /* field_name:string */
+  100, /* field_factor:long */
+  50, /* field_scale:long */
+  -3000, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "MH", /* field_name:string */
+  100, /* field_factor:long */
+  50, /* field_scale:long */
+  -12000, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "XV", /* field_name:string */
+  100, /* field_factor:long */
+  50, /* field_scale:long */
+  -3000, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "MV", /* field_name:string */
+  100, /* field_factor:long */
+  50, /* field_scale:long */
+  -12000, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "ZD", /* field_name:string */
+  100, /* field_factor:long */
+  10, /* field_scale:long */
+  -1000, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "HD", /* field_name:string */
+  100, /* field_factor:long */
+  30, /* field_scale:long */
+  -2000, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "AT", /* field_name:string */
+  100, /* field_factor:long */
+  10, /* field_scale:long */
+  0, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "DW", /* field_name:string */
+  100, /* field_factor:long */
+  20, /* field_scale:long */
+  -2500, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "LD", /* field_name:string */
+  100, /* field_factor:long */
+  40, /* field_scale:long */
+  -5000, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}, {
+  "VT", /* field_name:string */
+  100, /* field_factor:long */
+  25, /* field_scale:long */
+  -3200, /* field_bias:long */
+  TRUE  /* output_flag:boolean */
+}};
+
+/*
+ * tilt table.
+ * Table of tilt information including target elevation.
+ *
+ * Type: struct
+ * Array elem size: 16 bytes
+ * Array has no max number of elements
+ */
+tilt_table = {{
+  0.45, /* target_elevation:double */
+  1  /* tilt_num:long */
+}, {
+  1.2, /* target_elevation:double */
+  2  /* tilt_num:long */
+}, {
+  2, /* target_elevation:double */
+  3  /* tilt_num:long */
+}, {
+  2.8, /* target_elevation:double */
+  4  /* tilt_num:long */
+}, {
+  3.8, /* target_elevation:double */
+  5  /* tilt_num:long */
+}, {
+  4.8, /* target_elevation:double */
+  6  /* tilt_num:long */
+}, {
+  6, /* target_elevation:double */
+  7  /* tilt_num:long */
+}, {
+  7.2, /* target_elevation:double */
+  8  /* tilt_num:long */
+}, {
+  8.5, /* target_elevation:double */
+  9  /* tilt_num:long */
+}, {
+  10, /* target_elevation:double */
+  10  /* tilt_num:long */
+}};
+
+/*
+ * tilt table enum.
+ * Enum indicating how to use the tilt table to determine the target
+ *   elevation and tilt number for a tilt.
+ *
+ * Type: enum
+ * Default: GET_TARGET_FROM_TABLE 
+ * Legal values: GET_TARGET_FROM_TABLE, COMPUTE_TILT_NUM_FROM_TABLE,
+ *   DONT_USE_TABLE.
+ */
+tilt_table_flag = GET_TARGET_FROM_TABLE;
+
+/*
+ * radar parameters.
+ * Default radar parameters.
+ *
+ * Type: struct
+ * Default: <structure> 
+ */
+radar_params = {
+  -9999, /* use_file_value:double */
+  0, /* radar_id:long */
+  39.946, /* latitude:double */
+  -105.194, /* longitude:double */
+  1646, /* altitude:double */
+  0.9375, /* beam_width:double */
+  64, /* samples_per_beam:double */
+  1666.67, /* pulse_width:double */
+  321, /* prf:double */
+  10, /* wavelength:double */
+  TRUE  /* adj_start_range:boolean */
+};
+
+/*
+ * debug flag.
+ * TRUE if running in debug mode; FALSE otherwise.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+debug = FALSE;
+
+/*
+ * malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * field order flag.
+ * TRUE if each field is transmitted in order; FALSE if the field
+ *   values are interspersed.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+data_field_by_field = FALSE;
+
+/*
+ * set time to current flag.
+ * TRUE if data time is set to the current time; FALSE if the data
+ *   time is sent unchanged.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+set_time_to_current = FALSE;
+
+/*
+ * force volume change flag.
+ * If TRUE, volume number will be updated if tilt number in beam
+ *   header is less than the previous tilt number.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+force_volume_change = FALSE;
+
+/*
+ * scan mode.
+ * SCAN_SECTOR_MODE, SCAN_RHI_MODE or SCAN_SURVEILLANCE_MODE.
+ *
+ * Type: enum
+ * Default: SCAN_SURVEILLANCE_MODE 
+ * Legal values: SCAN_SECTOR_MODE, SCAN_RHI_MODE,
+ *   SCAN_SURVEILLANCE_MODE.
+ */
+scan_mode = SCAN_SURVEILLANCE_MODE;
+
+/*
+ * summary interval.
+ * Interval between printing summary information.
+ *
+ * Type: long
+ * Default: 360 
+ */
+summary_interval = 90;
+
+/*
+ * print summary flag.
+ * Print summary information while running?.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+summary_print = TRUE;
+
+/*
+ * header interval.
+ * Interval between printing header information.
+ *
+ * Type: long
+ * Default: 360 
+ */
+header_interval = 360;
+
+/*
+ * print header flag.
+ * Print header information while running?.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+header_print = FALSE;
+
+/*
+ * output port.
+ * Port used for sending radar information to clients.
+ *
+ * Type: long
+ * Default: 65000 
+ */
+output_port = 65000;
+
+/*
+ * check gate spacing flag.
+ * Check gate spacing while running?.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_gate_spacing = FALSE;
+
+/*
+ * target gate spacing.
+ * Target gate spacing in meters.
+ *
+ * Type: long
+ * Default: 250 
+ */
+target_gate_spacing = 200;
+
+/*
+ * target start range.
+ * Output start range in meters, usually half of gate spacing.
+ *
+ * Type: double
+ * Default: 125 
+ */
+target_start_range = 100;
+
+/*
+ * device read wait.
+ * Delay between beam reads in micro-seconds.
+ *
+ * Type: long
+ * Default: 0 
+ */
+device_read_wait = 0;
+
+/*
+ * num output gates.
+ * Number of gates to output for each beam.
+ *
+ * Type: long
+ * Default: 920 
+ */
+ngates_out = 512;
+
+/*
+ * num gates dropped.
+ * Number of start gates to be dropped.
+ *
+ * Type: long
+ * Default: 0 
+ */
+ngates_dropped = 0;
+
+/*
+ * time correction.
+ * Seconds added to the data time before transmission.
+ *
+ * Type: long
+ * Default: 0 
+ */
+time_correction = 0;
+
+/*
+ * input file path.
+ * Input file directory path specification.
+ *
+ * Type: string
+ * Default: "." 
+ */
+input_file_path = "/space2/rehak/work/projects/titan/src/uf_to_socket";
+
+/*
+ * input file specifier.
+ * Regular expression, like that used in the ls command, specifying
+ *   the input files of interest.
+ *
+ * Type: string
+ * Default: "*" 
+ */
+input_file_spec = "*p.tape";
+
+

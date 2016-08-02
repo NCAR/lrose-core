@@ -1,0 +1,455 @@
+/**********************************************************************
+ * TDRP params for LdarFlashExtent
+ **********************************************************************/
+
+//======================================================================
+//
+// LdarPointProcess is a simple program to ingest ltg data from
+// the Kennedy Space Center's LDAR system.
+// Files are ASCII with (roughly) the following format :
+//
+// The following Lightning Detection and Ranging (LDAR) and Cloud to 
+//   Ground Lightning
+// Surveillance (CGLSS) data sets are displayed in a tab delimited 
+//   format:
+//
+// The EVENT TYPE field will display the data type as an LDAR EVENT, 
+//   GGLSS EVENT or
+// CAL EVENT. A CAL EVENT is a locally generated simulated lightning 
+//   event used to
+// validate the operation status of the Kennedy Space Center's LDAR 
+//   System.
+//
+// The X, Y and Z coordinates are in reference to the Kennedy Space 
+//   Center's LDAR
+// Central Site located at Latitude 28 32 18.55N and Longitude 80 38 
+//   33.48W
+//
+// JDAY	TIME(UTC)       	X(M)     	Y(M)      	Z(M)  	EVENT TYPE
+//
+// 109	03:00:00:010007  	+0050431	+0047426	+13249	LDAR EVENT
+// 109	03:00:00:018755  	+0049489	+0047438	+08848	4DLSS EVENT
+// 109	03:00:00:020457  	+0049351	+0046647	+12848	4DLSS EVENT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output url, of form mdvp:://host.domain:[port]:dir/dir .
+//
+// Data are written here.
+//
+//
+// Type: string
+//
+
+output_url = "mdvp:://localhost::./mdv/LdarFlashExtent";
+
+///////////// timeStamp ///////////////////////////////
+//
+// Time stamp given to output file.
+//
+// Defines what timestamp is given based on the outputInterval. If the 
+//   interval start time is 04:00 and the outputInterval is 300 seconds, 
+//   then a timeStamp set to END, will give 04:05:00, a timeStamp set to 
+//   BEGIN will give 04:00:00, and a timeStamp set to MIDDLE will give a 
+//   time of 04:02:30.
+//
+//
+// Type: enum
+// Options:
+//     BEGIN
+//     MIDDLE
+//     END
+//
+
+timeStamp = END;
+
+///////////// InDir ///////////////////////////////////
+//
+// Input directory.
+//
+// Directory path for input data files.
+//
+//
+// Type: string
+//
+
+InDir = "./";
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+//
+//
+// Type: string
+//
+
+fileExtension = ".txt";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+//
+// For realtime only - max age of input data for it to be valid.
+//
+//
+// Type: int
+//
+
+max_realtime_valid_age = 7200;
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// debugRejects ////////////////////////////
+//
+// Debug rejection option.
+//
+// If set, print messages about why data are being rejected.
+//
+//
+// Type: boolean
+//
+
+debugRejects = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+//
+// In realtime mode, the conversion is performed for each input file as 
+//   it becomes available. In archive mode, the file list is obtained from 
+//   the command line. In TIME_INTERVAL mode, a list of files is gathered 
+//   between start and end times.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     TIME_INTERVAL
+//
+
+mode = REALTIME;
+
+///////////// LDAR_Central_Site_Loc ///////////////////
+//
+// Latitude and Longitude of the LDAR.
+//
+// Used to compute the Lat and Lon of the
+// strokes.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double latOrigin;
+//      double lonOrigin;
+//   }
+//
+//
+
+LDAR_Central_Site_Loc = {
+    latOrigin = 28.5385,
+    lonOrigin = -80.6426
+};
+
+///////////// minAlt //////////////////////////////////
+//
+// Minimum altitude to accept, m.
+//
+// Set to define the ingest region.
+//
+//
+// Type: double
+//
+
+minAlt = 0;
+
+///////////// maxAlt //////////////////////////////////
+//
+// Maximum altitude to accept, m.
+//
+// Set to define the ingest region. May also be used for
+// quality control - occasionally data with clearly erroneously high
+// altitudes come in.
+//
+//
+// Type: double
+//
+
+maxAlt = 20000;
+
+///////////// maxAllowedDist //////////////////////////
+//
+// The maximum allowable distance, Km,
+// between succesive points for LDAR entries to
+// be bundled into the same event.
+//
+// May be horizontal distance only, or may be 3D distance,
+// depending on the setting of considerVerticalDistance.
+//
+//
+// Type: double
+//
+
+maxAllowedDist = 30;
+
+///////////// maxAllowedTime //////////////////////////
+//
+// The maximum allowable time, seconds, betwen successive
+// points, for LDAR entries to
+// be bundled into the same event.
+//
+// The default seemed to work well for the STEPS case the program
+// was tested on.
+//
+//
+// Type: double
+//
+
+maxAllowedTime = 1.5;
+
+///////////// maxDuration /////////////////////////////
+//
+// The maximum allowable time duration (in seconds) for 
+// a flash .
+//
+// If the time between the first point and current point exceeds
+// this threshold, the current point will be considered the start
+// of a new flash.
+//
+//
+// Type: double
+//
+
+maxDuration = 3;
+
+///////////// considerVerticalDistance ////////////////
+//
+// Option to consider the vertical component in the
+// calculation of distance. Default is not to do this.
+//
+// For the STEPS data I have, it turned out not to make much
+// difference anyway.
+//
+//
+// Type: boolean
+//
+
+considerVerticalDistance = FALSE;
+
+///////////// useZeroForMissing ///////////////////////
+//
+// Option to use 0 as the bad/missing value.
+//
+// Good for the display. If FALSE then -1.0 is used.
+//
+//
+// Type: boolean
+//
+
+useZeroForMissing = FALSE;
+
+///////////// minNumEntries ///////////////////////////
+//
+// The minimum number of LDAR entires in a bundle for that
+// bundle to be written out.
+//
+// The default was developed for a STEPS case in which there
+// was a lot of ltg activity, so it might be a bit high. The danger in
+// making it too low is that too much data results.
+//
+//
+// Type: int
+//
+
+minNumEntries = 20;
+
+///////////// outputInterval //////////////////////////
+//
+// Output interval, seconds.
+//
+// MDV output happens over this interval.
+//
+//
+// Type: int
+//
+
+outputInterval = 300;
+
+///////////// format //////////////////////////////////
+//
+// Input data file format.
+//
+// See comments at top of param file.
+//
+//
+// Type: enum
+// Options:
+//     FORMAT_ONE
+//
+
+format = FORMAT_ONE;
+
+///////////// gridDef /////////////////////////////////
+//
+// Definition of MDV grid.
+//
+// The grid can be either a cartesian grid with
+// the minx, miny, dx and dy in Km
+// or a lat/lon grid with the minx, miny, and dx,
+// and dy in degrees and the extent determined by
+// nx,ny,dx and dy. See the useLatlon parameter.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double dx;
+//      double dy;
+//      double latOrigin;
+//      double lonOrigin;
+//      double minx;
+//      double miny;
+//   }
+//
+//
+
+gridDef = {
+    nx = 400,
+    ny = 400,
+    dx = 1,
+    dy = 1,
+    latOrigin = 28.5385,
+    lonOrigin = -80.6426,
+    minx = -200,
+    miny = -200
+};
+
+///////////// useLatlon ///////////////////////////////
+//
+// Option to use a latlon grid rather than a flat one.
+//
+// See comments for the gridDef parameter.
+//
+//
+// Type: boolean
+//
+
+useLatlon = FALSE;
+
+///////////// normSpatial /////////////////////////////
+//
+// Option to normalize spatially.
+//
+// If TRUE, output values are divided by grid size, that
+// is, val = val / (dx*dy). Can be used in conjunction with
+// normTemporal.
+//
+//
+// Type: boolean
+//
+
+normSpatial = FALSE;
+
+///////////// normTemporal ////////////////////////////
+//
+// Option to normalize temporally.
+//
+// If TRUE, output values are divided by output interval, that
+// is, val = val / (outputInterval). Can be used in
+// conjunction with normSpatial.
+//
+//
+// Type: boolean
+//
+
+normTemporal = FALSE;
+
+///////////// minLat //////////////////////////////////
+//
+// Minimum latitude to accept, decimal degrees.
+//
+// Set to define the ingest region.
+//
+//
+// Type: double
+//
+
+minLat = -90;
+
+///////////// maxLat //////////////////////////////////
+//
+// Maximum latitude to accept, decimal degrees.
+//
+// Set to define the ingest region.
+//
+//
+// Type: double
+//
+
+maxLat = 90;
+
+///////////// minLon //////////////////////////////////
+//
+// Minimum longitude to accept, decimal degrees.
+//
+// Set to define the ingest region.
+//
+//
+// Type: double
+//
+
+minLon = -180;
+
+///////////// maxLon //////////////////////////////////
+//
+// Maximum longitude to accept, decimal degrees.
+//
+// Set to define the ingest region.
+//
+//
+// Type: double
+//
+
+maxLon = 180;
+
+///////////// ldata_available /////////////////////////
+//
+// Flag to indicate availability of latest data info files.
+//
+//
+// Type: boolean
+//
+
+ldata_available = FALSE;
+

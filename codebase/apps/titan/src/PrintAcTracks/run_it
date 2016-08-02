@@ -1,0 +1,204 @@
+# WXMOD
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 01 00 00 00" -end "2008 01 02 00 00 00" -summary | grep 47RE > out/wxmod_track.20080101.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 02 00 00 00" -end "2008 01 03 00 00 00" -summary | grep 47RE > out/wxmod_track.20080102.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 03 00 00 00" -end "2008 01 04 00 00 00" -summary | grep 47RE > out/wxmod_track.20080103.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 04 00 00 00" -end "2008 01 05 00 00 00" -summary | grep 47RE > out/wxmod_track.20080104.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 05 00 00 00" -end "2008 01 06 00 00 00" -summary | grep 47RE > out/wxmod_track.20080105.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 06 00 00 00" -end "2008 01 07 00 00 00" -summary | grep 47RE > out/wxmod_track.20080106.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 07 00 00 00" -end "2008 01 08 00 00 00" -summary | grep 47RE > out/wxmod_track.20080107.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 08 00 00 00" -end "2008 01 09 00 00 00" -summary | grep 47RE > out/wxmod_track.20080108.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 09 00 00 00" -end "2008 01 10 00 00 00" -summary | grep 47RE > out/wxmod_track.20080109.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 10 00 00 00" -end "2008 01 11 00 00 00" -summary | grep 47RE > out/wxmod_track.20080110.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 11 00 00 00" -end "2008 01 12 00 00 00" -summary | grep 47RE > out/wxmod_track.20080111.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 12 00 00 00" -end "2008 01 13 00 00 00" -summary | grep 47RE > out/wxmod_track.20080112.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 13 00 00 00" -end "2008 01 14 00 00 00" -summary | grep 47RE > out/wxmod_track.20080113.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 14 00 00 00" -end "2008 01 15 00 00 00" -summary | grep 47RE > out/wxmod_track.20080114.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 15 00 00 00" -end "2008 01 16 00 00 00" -summary | grep 47RE > out/wxmod_track.20080115.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 16 00 00 00" -end "2008 01 17 00 00 00" -summary | grep 47RE > out/wxmod_track.20080116.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 17 00 00 00" -end "2008 01 18 00 00 00" -summary | grep 47RE > out/wxmod_track.20080117.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 18 00 00 00" -end "2008 01 19 00 00 00" -summary | grep 47RE > out/wxmod_track.20080118.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 19 00 00 00" -end "2008 01 20 00 00 00" -summary | grep 47RE > out/wxmod_track.20080119.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 20 00 00 00" -end "2008 01 21 00 00 00" -summary | grep 47RE > out/wxmod_track.20080120.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 21 00 00 00" -end "2008 01 22 00 00 00" -summary | grep 47RE > out/wxmod_track.20080121.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 22 00 00 00" -end "2008 01 23 00 00 00" -summary | grep 47RE > out/wxmod_track.20080122.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 23 00 00 00" -end "2008 01 24 00 00 00" -summary | grep 47RE > out/wxmod_track.20080123.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 24 00 00 00" -end "2008 01 25 00 00 00" -summary | grep 47RE > out/wxmod_track.20080124.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 25 00 00 00" -end "2008 01 26 00 00 00" -summary | grep 47RE > out/wxmod_track.20080125.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 26 00 00 00" -end "2008 01 27 00 00 00" -summary | grep 47RE > out/wxmod_track.20080126.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 27 00 00 00" -end "2008 01 28 00 00 00" -summary | grep 47RE > out/wxmod_track.20080127.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 28 00 00 00" -end "2008 01 29 00 00 00" -summary | grep 47RE > out/wxmod_track.20080128.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 29 00 00 00" -end "2008 01 30 00 00 00" -summary | grep 47RE > out/wxmod_track.20080129.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 30 00 00 00" -end "2008 01 31 00 00 00" -summary | grep 47RE > out/wxmod_track.20080130.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 31 00 00 00" -end "2008 02 01 00 00 00" -summary | grep 47RE > out/wxmod_track.20080131.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 01 00 00 00" -end "2008 02 02 00 00 00" -summary | grep 47RE > out/wxmod_track.20080201.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 02 00 00 00" -end "2008 02 03 00 00 00" -summary | grep 47RE > out/wxmod_track.20080202.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 03 00 00 00" -end "2008 02 04 00 00 00" -summary | grep 47RE > out/wxmod_track.20080203.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 04 00 00 00" -end "2008 02 05 00 00 00" -summary | grep 47RE > out/wxmod_track.20080204.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 05 00 00 00" -end "2008 02 06 00 00 00" -summary | grep 47RE > out/wxmod_track.20080205.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 06 00 00 00" -end "2008 02 07 00 00 00" -summary | grep 47RE > out/wxmod_track.20080206.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 07 00 00 00" -end "2008 02 08 00 00 00" -summary | grep 47RE > out/wxmod_track.20080207.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 08 00 00 00" -end "2008 02 09 00 00 00" -summary | grep 47RE > out/wxmod_track.20080208.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 09 00 00 00" -end "2008 02 10 00 00 00" -summary | grep 47RE > out/wxmod_track.20080209.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 10 00 00 00" -end "2008 02 11 00 00 00" -summary | grep 47RE > out/wxmod_track.20080210.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 11 00 00 00" -end "2008 02 12 00 00 00" -summary | grep 47RE > out/wxmod_track.20080211.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 12 00 00 00" -end "2008 02 13 00 00 00" -summary | grep 47RE > out/wxmod_track.20080212.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 13 00 00 00" -end "2008 02 14 00 00 00" -summary | grep 47RE > out/wxmod_track.20080213.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 14 00 00 00" -end "2008 02 15 00 00 00" -summary | grep 47RE > out/wxmod_track.20080214.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 15 00 00 00" -end "2008 02 16 00 00 00" -summary | grep 47RE > out/wxmod_track.20080215.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 16 00 00 00" -end "2008 02 17 00 00 00" -summary | grep 47RE > out/wxmod_track.20080216.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 17 00 00 00" -end "2008 02 18 00 00 00" -summary | grep 47RE > out/wxmod_track.20080217.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 18 00 00 00" -end "2008 02 19 00 00 00" -summary | grep 47RE > out/wxmod_track.20080218.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 19 00 00 00" -end "2008 02 20 00 00 00" -summary | grep 47RE > out/wxmod_track.20080219.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 20 00 00 00" -end "2008 02 21 00 00 00" -summary | grep 47RE > out/wxmod_track.20080220.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 21 00 00 00" -end "2008 02 22 00 00 00" -summary | grep 47RE > out/wxmod_track.20080221.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 22 00 00 00" -end "2008 02 23 00 00 00" -summary | grep 47RE > out/wxmod_track.20080222.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 23 00 00 00" -end "2008 02 24 00 00 00" -summary | grep 47RE > out/wxmod_track.20080223.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 24 00 00 00" -end "2008 02 25 00 00 00" -summary | grep 47RE > out/wxmod_track.20080224.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 25 00 00 00" -end "2008 02 26 00 00 00" -summary | grep 47RE > out/wxmod_track.20080225.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 26 00 00 00" -end "2008 02 27 00 00 00" -summary | grep 47RE > out/wxmod_track.20080226.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 27 00 00 00" -end "2008 02 28 00 00 00" -summary | grep 47RE > out/wxmod_track.20080227.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 28 00 00 00" -end "2008 02 29 00 00 00" -summary | grep 47RE > out/wxmod_track.20080228.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 29 00 00 00" -end "2008 03 01 00 00 00" -summary | grep 47RE > out/wxmod_track.20080229.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 01 00 00 00" -end "2008 03 02 00 00 00" -summary | grep 47RE > out/wxmod_track.20080301.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 02 00 00 00" -end "2008 03 03 00 00 00" -summary | grep 47RE > out/wxmod_track.20080302.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 03 00 00 00" -end "2008 03 04 00 00 00" -summary | grep 47RE > out/wxmod_track.20080303.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 04 00 00 00" -end "2008 03 05 00 00 00" -summary | grep 47RE > out/wxmod_track.20080304.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 05 00 00 00" -end "2008 03 06 00 00 00" -summary | grep 47RE > out/wxmod_track.20080305.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 06 00 00 00" -end "2008 03 07 00 00 00" -summary | grep 47RE > out/wxmod_track.20080306.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 07 00 00 00" -end "2008 03 08 00 00 00" -summary | grep 47RE > out/wxmod_track.20080307.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 08 00 00 00" -end "2008 03 09 00 00 00" -summary | grep 47RE > out/wxmod_track.20080308.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 09 00 00 00" -end "2008 03 10 00 00 00" -summary | grep 47RE > out/wxmod_track.20080309.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 10 00 00 00" -end "2008 03 11 00 00 00" -summary | grep 47RE > out/wxmod_track.20080310.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 11 00 00 00" -end "2008 03 12 00 00 00" -summary | grep 47RE > out/wxmod_track.20080311.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 12 00 00 00" -end "2008 03 13 00 00 00" -summary | grep 47RE > out/wxmod_track.20080312.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 13 00 00 00" -end "2008 03 14 00 00 00" -summary | grep 47RE > out/wxmod_track.20080313.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 14 00 00 00" -end "2008 03 15 00 00 00" -summary | grep 47RE > out/wxmod_track.20080314.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 15 00 00 00" -end "2008 03 16 00 00 00" -summary | grep 47RE > out/wxmod_track.20080315.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 16 00 00 00" -end "2008 03 17 00 00 00" -summary | grep 47RE > out/wxmod_track.20080316.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 17 00 00 00" -end "2008 03 18 00 00 00" -summary | grep 47RE > out/wxmod_track.20080317.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 18 00 00 00" -end "2008 03 19 00 00 00" -summary | grep 47RE > out/wxmod_track.20080318.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 19 00 00 00" -end "2008 03 20 00 00 00" -summary | grep 47RE > out/wxmod_track.20080319.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 20 00 00 00" -end "2008 03 21 00 00 00" -summary | grep 47RE > out/wxmod_track.20080320.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 21 00 00 00" -end "2008 03 22 00 00 00" -summary | grep 47RE > out/wxmod_track.20080321.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 22 00 00 00" -end "2008 03 23 00 00 00" -summary | grep 47RE > out/wxmod_track.20080322.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 23 00 00 00" -end "2008 03 24 00 00 00" -summary | grep 47RE > out/wxmod_track.20080323.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 24 00 00 00" -end "2008 03 25 00 00 00" -summary | grep 47RE > out/wxmod_track.20080324.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 25 00 00 00" -end "2008 03 26 00 00 00" -summary | grep 47RE > out/wxmod_track.20080325.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 26 00 00 00" -end "2008 03 27 00 00 00" -summary | grep 47RE > out/wxmod_track.20080326.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 27 00 00 00" -end "2008 03 28 00 00 00" -summary | grep 47RE > out/wxmod_track.20080327.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 28 00 00 00" -end "2008 03 29 00 00 00" -summary | grep 47RE > out/wxmod_track.20080328.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 29 00 00 00" -end "2008 03 30 00 00 00" -summary | grep 47RE > out/wxmod_track.20080329.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 30 00 00 00" -end "2008 03 31 00 00 00" -summary | grep 47RE > out/wxmod_track.20080330.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 31 00 00 00" -end "2008 04 01 00 00 00" -summary | grep 47RE > out/wxmod_track.20080331.txt
+
+# SEEDA1
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 01 00 00 00" -end "2008 01 02 00 00 00" -summary | grep JRA > out/seeda1_track.20080101.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 02 00 00 00" -end "2008 01 03 00 00 00" -summary | grep JRA > out/seeda1_track.20080102.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 03 00 00 00" -end "2008 01 04 00 00 00" -summary | grep JRA > out/seeda1_track.20080103.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 04 00 00 00" -end "2008 01 05 00 00 00" -summary | grep JRA > out/seeda1_track.20080104.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 05 00 00 00" -end "2008 01 06 00 00 00" -summary | grep JRA > out/seeda1_track.20080105.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 06 00 00 00" -end "2008 01 07 00 00 00" -summary | grep JRA > out/seeda1_track.20080106.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 07 00 00 00" -end "2008 01 08 00 00 00" -summary | grep JRA > out/seeda1_track.20080107.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 08 00 00 00" -end "2008 01 09 00 00 00" -summary | grep JRA > out/seeda1_track.20080108.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 09 00 00 00" -end "2008 01 10 00 00 00" -summary | grep JRA > out/seeda1_track.20080109.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 10 00 00 00" -end "2008 01 11 00 00 00" -summary | grep JRA > out/seeda1_track.20080110.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 11 00 00 00" -end "2008 01 12 00 00 00" -summary | grep JRA > out/seeda1_track.20080111.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 12 00 00 00" -end "2008 01 13 00 00 00" -summary | grep JRA > out/seeda1_track.20080112.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 13 00 00 00" -end "2008 01 14 00 00 00" -summary | grep JRA > out/seeda1_track.20080113.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 14 00 00 00" -end "2008 01 15 00 00 00" -summary | grep JRA > out/seeda1_track.20080114.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 15 00 00 00" -end "2008 01 16 00 00 00" -summary | grep JRA > out/seeda1_track.20080115.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 16 00 00 00" -end "2008 01 17 00 00 00" -summary | grep JRA > out/seeda1_track.20080116.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 17 00 00 00" -end "2008 01 18 00 00 00" -summary | grep JRA > out/seeda1_track.20080117.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 18 00 00 00" -end "2008 01 19 00 00 00" -summary | grep JRA > out/seeda1_track.20080118.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 19 00 00 00" -end "2008 01 20 00 00 00" -summary | grep JRA > out/seeda1_track.20080119.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 20 00 00 00" -end "2008 01 21 00 00 00" -summary | grep JRA > out/seeda1_track.20080120.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 21 00 00 00" -end "2008 01 22 00 00 00" -summary | grep JRA > out/seeda1_track.20080121.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 22 00 00 00" -end "2008 01 23 00 00 00" -summary | grep JRA > out/seeda1_track.20080122.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 23 00 00 00" -end "2008 01 24 00 00 00" -summary | grep JRA > out/seeda1_track.20080123.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 24 00 00 00" -end "2008 01 25 00 00 00" -summary | grep JRA > out/seeda1_track.20080124.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 25 00 00 00" -end "2008 01 26 00 00 00" -summary | grep JRA > out/seeda1_track.20080125.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 26 00 00 00" -end "2008 01 27 00 00 00" -summary | grep JRA > out/seeda1_track.20080126.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 27 00 00 00" -end "2008 01 28 00 00 00" -summary | grep JRA > out/seeda1_track.20080127.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 28 00 00 00" -end "2008 01 29 00 00 00" -summary | grep JRA > out/seeda1_track.20080128.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 29 00 00 00" -end "2008 01 30 00 00 00" -summary | grep JRA > out/seeda1_track.20080129.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 30 00 00 00" -end "2008 01 31 00 00 00" -summary | grep JRA > out/seeda1_track.20080130.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 01 31 00 00 00" -end "2008 02 01 00 00 00" -summary | grep JRA > out/seeda1_track.20080131.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 01 00 00 00" -end "2008 02 02 00 00 00" -summary | grep JRA > out/seeda1_track.20080201.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 02 00 00 00" -end "2008 02 03 00 00 00" -summary | grep JRA > out/seeda1_track.20080202.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 03 00 00 00" -end "2008 02 04 00 00 00" -summary | grep JRA > out/seeda1_track.20080203.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 04 00 00 00" -end "2008 02 05 00 00 00" -summary | grep JRA > out/seeda1_track.20080204.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 05 00 00 00" -end "2008 02 06 00 00 00" -summary | grep JRA > out/seeda1_track.20080205.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 06 00 00 00" -end "2008 02 07 00 00 00" -summary | grep JRA > out/seeda1_track.20080206.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 07 00 00 00" -end "2008 02 08 00 00 00" -summary | grep JRA > out/seeda1_track.20080207.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 08 00 00 00" -end "2008 02 09 00 00 00" -summary | grep JRA > out/seeda1_track.20080208.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 09 00 00 00" -end "2008 02 10 00 00 00" -summary | grep JRA > out/seeda1_track.20080209.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 10 00 00 00" -end "2008 02 11 00 00 00" -summary | grep JRA > out/seeda1_track.20080210.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 11 00 00 00" -end "2008 02 12 00 00 00" -summary | grep JRA > out/seeda1_track.20080211.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 12 00 00 00" -end "2008 02 13 00 00 00" -summary | grep JRA > out/seeda1_track.20080212.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 13 00 00 00" -end "2008 02 14 00 00 00" -summary | grep JRA > out/seeda1_track.20080213.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 14 00 00 00" -end "2008 02 15 00 00 00" -summary | grep JRA > out/seeda1_track.20080214.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 15 00 00 00" -end "2008 02 16 00 00 00" -summary | grep JRA > out/seeda1_track.20080215.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 16 00 00 00" -end "2008 02 17 00 00 00" -summary | grep JRA > out/seeda1_track.20080216.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 17 00 00 00" -end "2008 02 18 00 00 00" -summary | grep JRA > out/seeda1_track.20080217.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 18 00 00 00" -end "2008 02 19 00 00 00" -summary | grep JRA > out/seeda1_track.20080218.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 19 00 00 00" -end "2008 02 20 00 00 00" -summary | grep JRA > out/seeda1_track.20080219.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 20 00 00 00" -end "2008 02 21 00 00 00" -summary | grep JRA > out/seeda1_track.20080220.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 21 00 00 00" -end "2008 02 22 00 00 00" -summary | grep JRA > out/seeda1_track.20080221.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 22 00 00 00" -end "2008 02 23 00 00 00" -summary | grep JRA > out/seeda1_track.20080222.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 23 00 00 00" -end "2008 02 24 00 00 00" -summary | grep JRA > out/seeda1_track.20080223.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 24 00 00 00" -end "2008 02 25 00 00 00" -summary | grep JRA > out/seeda1_track.20080224.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 25 00 00 00" -end "2008 02 26 00 00 00" -summary | grep JRA > out/seeda1_track.20080225.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 26 00 00 00" -end "2008 02 27 00 00 00" -summary | grep JRA > out/seeda1_track.20080226.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 27 00 00 00" -end "2008 02 28 00 00 00" -summary | grep JRA > out/seeda1_track.20080227.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 28 00 00 00" -end "2008 02 29 00 00 00" -summary | grep JRA > out/seeda1_track.20080228.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 02 29 00 00 00" -end "2008 03 01 00 00 00" -summary | grep JRA > out/seeda1_track.20080229.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 01 00 00 00" -end "2008 03 02 00 00 00" -summary | grep JRA > out/seeda1_track.20080301.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 02 00 00 00" -end "2008 03 03 00 00 00" -summary | grep JRA > out/seeda1_track.20080302.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 03 00 00 00" -end "2008 03 04 00 00 00" -summary | grep JRA > out/seeda1_track.20080303.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 04 00 00 00" -end "2008 03 05 00 00 00" -summary | grep JRA > out/seeda1_track.20080304.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 05 00 00 00" -end "2008 03 06 00 00 00" -summary | grep JRA > out/seeda1_track.20080305.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 06 00 00 00" -end "2008 03 07 00 00 00" -summary | grep JRA > out/seeda1_track.20080306.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 07 00 00 00" -end "2008 03 08 00 00 00" -summary | grep JRA > out/seeda1_track.20080307.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 08 00 00 00" -end "2008 03 09 00 00 00" -summary | grep JRA > out/seeda1_track.20080308.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 09 00 00 00" -end "2008 03 10 00 00 00" -summary | grep JRA > out/seeda1_track.20080309.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 10 00 00 00" -end "2008 03 11 00 00 00" -summary | grep JRA > out/seeda1_track.20080310.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 11 00 00 00" -end "2008 03 12 00 00 00" -summary | grep JRA > out/seeda1_track.20080311.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 12 00 00 00" -end "2008 03 13 00 00 00" -summary | grep JRA > out/seeda1_track.20080312.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 13 00 00 00" -end "2008 03 14 00 00 00" -summary | grep JRA > out/seeda1_track.20080313.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 14 00 00 00" -end "2008 03 15 00 00 00" -summary | grep JRA > out/seeda1_track.20080314.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 15 00 00 00" -end "2008 03 16 00 00 00" -summary | grep JRA > out/seeda1_track.20080315.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 16 00 00 00" -end "2008 03 17 00 00 00" -summary | grep JRA > out/seeda1_track.20080316.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 17 00 00 00" -end "2008 03 18 00 00 00" -summary | grep JRA > out/seeda1_track.20080317.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 18 00 00 00" -end "2008 03 19 00 00 00" -summary | grep JRA > out/seeda1_track.20080318.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 19 00 00 00" -end "2008 03 20 00 00 00" -summary | grep JRA > out/seeda1_track.20080319.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 20 00 00 00" -end "2008 03 21 00 00 00" -summary | grep JRA > out/seeda1_track.20080320.txt
+
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 21 00 00 00" -end "2008 03 22 00 00 00" -summary | grep JRA > out/seeda1_track.20080321.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 22 00 00 00" -end "2008 03 23 00 00 00" -summary | grep JRA > out/seeda1_track.20080322.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 23 00 00 00" -end "2008 03 24 00 00 00" -summary | grep JRA > out/seeda1_track.20080323.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 24 00 00 00" -end "2008 03 25 00 00 00" -summary | grep JRA > out/seeda1_track.20080324.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 25 00 00 00" -end "2008 03 26 00 00 00" -summary | grep JRA > out/seeda1_track.20080325.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 26 00 00 00" -end "2008 03 27 00 00 00" -summary | grep JRA > out/seeda1_track.20080326.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 27 00 00 00" -end "2008 03 28 00 00 00" -summary | grep JRA > out/seeda1_track.20080327.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 28 00 00 00" -end "2008 03 29 00 00 00" -summary | grep JRA > out/seeda1_track.20080328.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 29 00 00 00" -end "2008 03 30 00 00 00" -summary | grep JRA > out/seeda1_track.20080329.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 30 00 00 00" -end "2008 03 31 00 00 00" -summary | grep JRA > out/seeda1_track.20080330.txt
+PrintAcTracks -url spdb/ac_posn -mode interval -start "2008 03 31 00 00 00" -end "2008 04 01 00 00 00" -summary | grep JRA > out/seeda1_track.20080331.txt
+

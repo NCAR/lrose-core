@@ -1,0 +1,705 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for Metar2Symprod
+//
+// Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// Jan 2000
+//
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+} instance;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+    "the use of threads. Set no_threads to TRUE for this type "
+    "of debugging.";
+} no_threads;
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef {
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int {
+  p_default = 5456;
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+} port;
+  
+paramdef int {
+  p_default = -1;
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+    "it will die gracefully. If set to -1, the server never exits.";
+} qmax;
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+    "produce to handle client requests.  If the maximum is reached, "
+    "new clients will receive a SERVICE_DENIED error message and will "
+    "have to request the data again.  If set to -1, no maximum is "
+    "enforced.";
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Station selection
+
+commentdef {
+  p_header = "STATION SELECTION";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the acceptedStations list (below)";
+  p_help = "Only accept stations in this list.";
+} useAcceptedStationsList;
+
+paramdef string {
+  p_default = {
+    "RCTP", "RCFG", "RCSS", "RCGM", "RCNO", "RCQC", "RCBS",
+    "RCUK", "RCKH", "RCFN", "RCNN", "RCAY", "RCKU", "RCMJ",
+    "RCDC", "RCLG", "RCKW", "RCPO", "RCSQ", "RCQS", "RCLY",
+    "RCYU", "RCMS", "RCDI", "RCMQ", "RCFS", "RCGI", "RCMT",
+    "RCLM"
+  };
+  p_descr = "List of accepted station IDs";
+  p_help = "If a station is not on this list, it is not displayed.";
+} acceptedStations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the rejectedStations list (below)";
+  p_help = "Reject stations in this list.";
+} useRejectedStationsList;
+
+paramdef string {
+  p_default = {
+    "RCFN", "RCAY", "RCQS", "RCFS","RCMT"
+  };
+  p_descr = "List of rejected station IDs";
+  p_help = "If a station is not on this list, it is not displayed.";
+} rejectedStations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to only include stations within a defined pressure
+  range.";
+} usePressureRange;
+
+paramdef double
+{
+  p_default = 0.0;
+  p_descr = "Minimum station pressure for stations to be displayed.";
+  p_help = "Used only if usePressureRange is set to TRUE.";
+} minStationPressure;
+
+paramdef double
+{
+  p_default = 0.0;
+  p_descr = "Maximum station pressure for stations to be displayed.";
+  p_help = "Used only if usePressureRange is set to TRUE.";
+} maxStationPressure;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to only include stations within the lat-lon bounding box.";
+  p_help = "Only accept stations for which the position is inside the bounding box. Note: this will be overridden if the client specifies horizontal limits.";
+} useBoundingBox;
+
+typedef struct {
+  float min_lat;
+  float min_lon;
+  float max_lat;
+  float max_lon;
+} bounding_box_t;
+
+paramdef struct bounding_box_t {
+  p_default = { -90.0, -180.0, 90.0, 180.0 };
+  p_descr = "If useBoundingBox is true, only stations within this box will be included in the product list.";
+  p_help = "To span the international date line, specify a continuous interval using positive longitudes which exceed 180 or negative longitudes which are less than -180. For example, min_lon = 80 and max_lon = 240 will span between 80E and 120W across the Pacific.";
+} bounding_box;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to decimate metar density spatially. Only applicable if the bounding box option is specified in the param file, or the client specifies the horizontal limits in the request.";
+  p_help = "If active, an imaginary grid will be constructed for the bounding box. The number of grids in each direction will be specified by decimate_n_lat and decimate_n_lon. Only one METAR product will be created for each rectangle in the grid.";
+} decimate_spatially;
+
+paramdef int {
+  p_default = 25;
+  p_descr = "If decimation is active, the bounding box is divided into this number of sub-boxes in the latitude direction.";
+  p_help = "See decimate_spatially.";
+} decimate_n_lat;
+
+paramdef int {
+  p_default = 25;
+  p_descr = "If decimation is active, the bounding box is divided into this number of sub-boxes in the longitude direction.";
+  p_help = "See decimate_spatially.";
+} decimate_n_lon;
+
+paramdef string {
+  p_default = {
+    "RCTP", "RCSS", "RCKH"
+  };
+  p_descr = "List of required stations when decimating.";
+  p_help = "If a station is in this list, it will always be displayed.";
+} decimate_required_stations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check station data for required fields before accepting.";
+  p_help = "If set, this allows you to require certain fields to be present in the data before accepting the station for rendering.";
+} check_for_required_fields;
+
+typedef struct {
+  boolean require_temperature;
+  boolean require_dewpoint;
+  boolean require_wind_speed;
+  boolean require_wind_direction;
+  boolean require_pressure;
+  boolean require_ceiling;
+  boolean require_visibility;
+  boolean require_rvr;
+} required_fields_t;
+
+paramdef struct required_fields_t {
+  p_default = {
+    require_temperature = FALSE,
+    require_dewpoint = FALSE,
+    require_wind_speed = FALSE,
+    require_wind_direction = FALSE,
+    require_pressure = FALSE,
+    require_ceiling = FALSE,
+    require_visibility = FALSE,
+    require_rvr = FALSE
+  };
+  p_descr = "Specify which fields must be present to accept station.";
+  p_help = "If you want to require a given field to accept the station for rendering, set that field to TRUE.";
+} required_fields;
+
+//////////////////////////////////////////////////////////
+// Translation to symprod format
+
+commentdef {
+  p_header = "TRANSLATION OPTION";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to perform translation to symprod format.";
+  p_help = "If FALSE, the data is passed to the client in binary format\n."
+		   "Note: Display control of binary format is extremely limited\n"
+		   "Value must be TRUE to turn labels on/off, and set colors and\n"
+		   "positions independently";
+} do_translation;
+
+typedef enum {
+  DISPLAY_TEMP_C, DISPLAY_TEMP_F, DISPLAY_TEMP_K
+} display_temp_t;
+
+paramdef enum display_temp_t {
+  p_default = DISPLAY_TEMP_C;
+  p_descr = "Display of temperature data";
+  p_help = "Set to the units that you want to use.";
+} display_temp;
+             
+//////////////////////////////////////////////////////////
+// Translated rendering
+
+commentdef {
+  p_header = "TRANSLATED RENDERING PARAMETERS";
+  p_text = "Parameters for translated rendering using symprod format.";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to not scale the product with zoom state.";
+  p_help = "If true, the product is always rendered at the same scale, regardless of zoom state. If false, the product is scaled down on the screen as the zoome expands, and is scaled up as you zoom in.";
+  p_default = false;
+} plot_unscaled;
+
+typedef enum {
+  VERT_ALIGN_TOP           =  1,
+  VERT_ALIGN_CENTER        =  2,
+  VERT_ALIGN_BOTTOM        =  3
+} vert_align_t;
+
+typedef enum {
+  HORIZ_ALIGN_LEFT         =  1,
+  HORIZ_ALIGN_CENTER       =  2,
+  HORIZ_ALIGN_RIGHT        =  3
+} horiz_align_t;
+
+typedef struct {
+  boolean do_draw;
+  string color;
+  string background_color;
+  boolean override_color_from_flight_cat;
+  string font_name;
+  int font_size;
+  int x_offset;
+  int y_offset;
+  vert_align_t vert_align;
+  horiz_align_t horiz_align;
+} text_item_t;
+
+commentdef {
+  p_header = "Text labels";
+  p_text =
+    "The following are specified for each text label:\n"
+    "\tdo_draw: option to draw the label, true or false\n"
+    "\tcolor: foreground color\n"
+    "\tbackground_color: background color - if empty, no background\n"
+    "\toverride_color_from_flight_cat - if true, flight cat color will \n"
+    "\t                                 used instead of specified color\n"
+    "\tfont_name: name of font family\n"
+    "\tfont_size: suggest size in pixels\n"
+    "\tx_offset: x offset from station location in pixels\n"
+    "\ty_offset: y offset from station location in pixels\n"
+    "\tvert_align: vert justification of text relative to offset point\n"
+    "\thoriz_align: horiz justification of text relative to offset point\n";
+};
+
+paramdef struct text_item_t {
+  p_default = { TRUE, "red", "", false, "fixed", 10, -6, 6, VERT_ALIGN_BOTTOM, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for temperature label.";
+} temperature_label;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "blue", "", false, "fixed", 10, -6, -6, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for dew_point label.";
+} dew_point_label;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to draw pressure in 3 digits only.";
+  p_help = "If true, only the first 3 digits of the pressure are plotted. So, for example, 1014 will appear as 014. 998 will always appear as 998.";
+} pressure_as_3_digits;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to draw temperature and dew point to only one decmal point.";
+  p_help = "If true, temperature and dew point will appear to one decimal place, ie. 2.1198 will appear as 2.1";
+} temps_to_1_digit;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to round temperature and dew point to nearest integer.";
+  p_help = "If true, temperature and dew point will appear as integers, ie. 2.1198 will appear as 2. Overides temps_to_1_digit";
+} temps_to_int;
+
+paramdef struct text_item_t {
+  p_default = { TRUE, "white", "", false, "fixed", 10, 6, 6, VERT_ALIGN_BOTTOM, HORIZ_ALIGN_LEFT };
+  p_descr = "Details for pressure label.";
+} pressure_label;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "yellow", "", false, "fixed", 10, -6, 0, VERT_ALIGN_CENTER, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for current weather label.";
+  p_descr = "Use either current_weather_type or current_weather_label, but not both";
+} current_weather_label;
+  
+paramdef struct text_item_t {
+  p_default = { FALSE, "yellow", "", false, "fixed", 10, -6, 0, VERT_ALIGN_CENTER, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for current weather types - Set as bit fields";
+  p_descr = "Use either current_weather_type or current_weather_label, but not both";
+} current_weather_type;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "green", "", false, "fixed", 10, 6, 0, VERT_ALIGN_CENTER, HORIZ_ALIGN_LEFT };
+  p_descr = "Details for wind gust label.";
+} wind_gust_label;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "cyan", "", false, "fixed", 10, 6, -16, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+  p_descr = "Details for ceiling label.";
+} ceiling_label;
+  
+typedef enum {
+  CEILING_METERS, CEILING_KM, CEILING_FT, CEILING_KFT, CEILING_FL
+} ceiling_units_t;
+
+paramdef enum ceiling_units_t {
+  p_default = CEILING_FT;
+  p_descr = "Units for plotting ceiling.";
+} ceiling_units;
+
+typedef enum {
+  WIND_MS, WIND_KTS, WIND_MPH, WIND_KPH
+} wind_units_t;
+
+paramdef enum wind_units_t {
+  p_default = WIND_KTS;
+  p_descr = "Units for plotting Wind Barbs.";
+} wind_units;
+
+paramdef struct text_item_t {
+  p_default = { TRUE, "magenta", "", false, "fixed", 10, -6, -16, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for visibility label.";
+} visibility_label;
+
+paramdef struct text_item_t {
+  p_default = { FALSE, "blue", "", false, "fixed", 10, -6, -6, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for humidity label.";
+} humidity_label;
+
+typedef enum {
+  VISIBILITY_METERS, VISIBILITY_KM, VISIBILITY_METERS_KM, VISIBILITY_MILES
+} visibility_units_t;
+
+paramdef enum visibility_units_t {
+  p_default = VISIBILITY_METERS;
+  p_descr = "Units for plotting visibility.";
+} visibility_units;
+
+commentdef {
+  p_header = "PRECIP PRODUCTS";
+};
+
+paramdef struct text_item_t {
+  p_default = { FALSE, "white", "", false, "fixed", 10, -26, -16, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for precip rate label.";
+} precip_rate_label;
+
+paramdef struct text_item_t {
+  p_default = { FALSE, "white", "", false, "fixed", 10, -36, -16, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for precip accum label.";
+} precip_accum_label;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the duration for precip accum product.";
+  p_help = "If true, only accum values within the specified duration will be processed. See precip_accum_min_duration and precip_accum_max_duration.";
+} precip_accum_specify_duration_limits;
+
+paramdef int {
+  p_default = 3500;
+  p_descr = "Minimum duration for precip accum products (secs).";
+  p_help = "Only values with durations greater than or equal to this will be processed. See 'specify_precip_accum_duration_limits'.";
+} precip_accum_min_duration_secs;
+  
+paramdef int {
+  p_default = 3700;
+  p_descr = "Maximum duration for precip accum products (secs).";
+  p_help = "Only values with durations less than or equal to this will be processed. See 'specify_precip_accum_duration_limits'.";
+} precip_accum_max_duration_secs;
+  
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include duration text in precip accum product.";
+  p_help = "If true, the duration (in hours) will be added to the precip depth value.";
+} precip_accum_include_duration_text;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Line spacing in the vertical for multiple-line text.";
+  p_help = "Precip_accum may have more than 1 value, for different accumulation durations. Each value will appear on a different line, below the previous entry.";
+} precip_accum_line_spacing_pixels;
+  
+commentdef {
+  p_header = "STATION NAME AND TIME LABEL";
+};
+
+paramdef int {
+  p_default = 4;
+  p_max = 4;
+  p_descr = "Length of station name label.";
+  p_help = "The last n chars are included in the label.";
+} station_name_label_len;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "gray", "", false, "fixed", 10, 6, -6, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+  p_descr = "Details for station_name label.";
+} station_name_label;
+  
+paramdef struct text_item_t {
+  p_default = { FALSE, "white", "", false, "fixed", 10, 0, -30, VERT_ALIGN_TOP, HORIZ_ALIGN_CENTER };
+  p_descr = "Details for time string label.";
+  p_help = "Intended mainly for debugging, to see the time for the plotted METAR.";
+} time_label;
+  
+commentdef {
+  p_header = "WIND BARB PLOT";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw the wind barb.";
+} draw_wind_barb;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Radius of circle at station position.";
+  p_help = "Set to 0 for no circle.";
+} station_posn_circle_radius;
+  
+paramdef string {
+  p_default = "green";
+  p_descr = "Color of wind barb.";
+} wind_barb_color;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the the wind barb color using the flight category color.";
+} override_wind_barb_color_from_flight_cat;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the the wind barb color using the wind speed\n"
+	"table specified below.";
+} override_wind_barb_color_from_wind_speed;
+
+
+typedef struct {
+	double min;
+	double max;
+	string color;
+} wind_speed_color_t;
+
+paramdef struct wind_speed_color_t {
+  p_default = { {0, 5, "blue"}, {5, 10, "green"}, {10, 1000, "red"} };
+  p_descr = "List of min, max pairs and colors to use if\n"
+	"override_wind_barb_color_from_wind_speed is TRUE. Units are\n"
+	"those specified by the wind_units parameter. If the speed is not\n"
+	"covered by any of the ranges then the color specified by\n"
+	"wind_barb_color is used.";
+} wind_speed_colors[];
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Width of lines used to render wind barbs.";
+} wind_barb_line_width;
+  
+paramdef int {
+  p_default = 32;
+  p_descr = "Length of wind barb shaft in pixels.";
+} wind_barb_shaft_len;
+  
+paramdef int {
+  p_default = 8;
+  p_descr = "Length of wind barb ticks in pixels.";
+} wind_barb_tick_len;
+  
+paramdef float {
+  p_default = 55;
+  p_descr = "Angle of the wind ticks relative to the shaft (deg).";
+} wind_ticks_angle_to_shaft;
+  
+commentdef {
+  p_header = "FLIGHT CATEGORY AND SKY OBSCURATION";
+  p_help = "Plotting of the icon for flight category and sky obscuration.";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw the flight category and obscuration icon.";
+} draw_flight_category;
+
+typedef enum {
+  VFR, MVFR, IFR
+} flight_category_label_t;
+
+typedef struct {
+  flight_category_label_t label;
+  string color;
+  float ceiling_threshold;
+  float visibility_threshold;
+} flight_category_t;
+
+paramdef struct flight_category_t {
+  p_default = {
+    { VFR, "seagreen", 1500.0, 5.0 },
+    { MVFR, "blue", 500.0, 1.6 },
+    { IFR, "orange", 0.0, 0.0 }
+  };
+  p_descr = "Array of flight category parameters.";
+  p_help = "The flight category at a station will be computed using the ceiling (ft) and visibility (km) thresholds. If both values exceed the threshold, the flight category will be equal to or greater that the specified category.";
+} flight_category[];
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Radius for flight_category / obscuration icon.";
+} flight_category_circle_radius;
+  
+//////////////////////////////////////////////////////////
+// Native rendering
+
+commentdef {
+  p_header = "NATIVE RENDERING PARAMETERS";
+  p_text = "Parameters for rendering from native binary format.";
+};
+
+paramdef string {
+  p_default = "green";
+  p_descr = "Chunk object foreground color";
+  p_help = "Suggested foreground color for rendering the object.";
+} color;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Chunk object background color";
+  p_help = "Suggested background color for rendering the object.";
+} background_color;
+
+commentdef {
+  p_header = "FULL METAR MESSAGE AS HIDDEN TEXT";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to activate hidden text.";
+  p_help = "If true, the full METAR message will be sent to the client, marked as hidden text. This text may then be used by the client for any purpose, such as pop-up text in response to a mouse event near the product location.";
+} activate_hidden_text;
+
+paramdef string {
+  p_descr = "Name of font for hidden texy.";
+  p_default = "fixed";
+} hidden_text_font_name;
+
+paramdef int {
+  p_descr = "X offset for hidden text (pixels).";
+  p_default = 0;
+} hidden_text_x_offset;
+
+paramdef int {
+  p_descr = "Y offset for hidden text (pixels).";
+  p_default = 0;
+} hidden_text_y_offset;
+
+paramdef int {
+  p_descr = "Font size for hidden text (pixels).";
+  p_default = 10;
+} hidden_text_font_size;
+
+paramdef enum vert_align_t {
+  p_descr = "Vertical alignment hidden text.";
+  p_default = VERT_ALIGN_CENTER;
+} hidden_text_vert_align;
+
+paramdef enum horiz_align_t {
+  p_descr = "Horizontal alignment for hidden text.";
+  p_default = HORIZ_ALIGN_CENTER;
+} hidden_text_horiz_align;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use flight cat color color.";
+  p_default = "";
+} hidden_text_foreground_color;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} hidden_text_background_color;
+
+commentdef {
+  p_header = "ADD CHUNK TO END OF PRODUCT";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to add raw data as chunk.";
+  p_help = "If true, the raw data buffer will be added as a chunk at the end of the product.";
+} add_raw_data_as_chunk;
+
+commentdef {
+  p_header = "RENDER ALTERNATIVE STATION ICON IF CEILING DATA IS MISSING";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to render special icon if ceiling is missing.";
+  p_help = "Normally, the station plot shows a circle which is filled in at 0%, 25%, 50%, 75% or 100%, depending on cloud cover. If ceiling is missing, the option allows you to render an alternative icon - say an open triangle, or an M.";
+} render_missing_ceiling_icon;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of icon indicating missing ceiling information.";
+} missing_ceiling_icon_color;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Width of lines used to render missing ceiling icon.";
+} missing_ceiling_icon_line_width;
+
+typedef struct {
+  int x;
+  int y;
+} stroked_icon_point_t;
+
+paramdef struct stroked_icon_point_t {
+  p_descr = "Stroked icon for missing ceiling";
+  p_help = "The coordinates are in pixel space.";
+  p_default = {
+    { 0, 10 },
+    { -8, -5 },
+    { 8, -5 },
+    { 0, 10 }
+  };
+    
+} missing_ceiling_icon[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Scale the icon by this value.";
+  p_help = "This makes it easy to try different sizes without re-specifying all of the icon points every time.";
+} missing_ceiling_icon_scale;

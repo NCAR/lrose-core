@@ -1,0 +1,230 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for GenPtField2Symprod
+//
+// Nancy Rehak, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// August 2000
+//
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef
+{
+  p_header = "DEBUGGING";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { DEBUG_OFF };
+} debug;
+
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string
+{
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean
+{
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef
+{
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int
+{
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5466;
+} port;
+  
+paramdef int
+{
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef
+{
+  p_header = "RENDERING PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Field name to display.";
+  p_help = "This must appear exactly as it appears in the SPDB database.";
+} field_name;
+
+paramdef double
+{
+  p_descr = "Data value multiplier.";
+  p_help = "The data value in the SPDB database will be multiplied by this "
+           "factor to determine the value to display.  "
+           "This is included so you can change units for display.";
+  p_default = 1.0;
+} multiplier;
+
+typedef enum
+{
+  VERT_ALIGN_TOP,
+  VERT_ALIGN_CENTER,
+  VERT_ALIGN_BOTTOM
+} vert_align_t;
+
+typedef enum
+{
+  HORIZ_ALIGN_LEFT,
+  HORIZ_ALIGN_CENTER,
+  HORIZ_ALIGN_RIGHT
+} horiz_align_t;
+
+typedef enum
+{
+  TEXT_NORM,
+  TEXT_BOLD,
+  TEXT_ITALICS,
+  TEXT_SUBSCRIPT,
+  TEXT_SUPERSCRIPT,
+  TEXT_UNDERLINE,
+  TEXT_STRIKETHROUGH
+} font_style_t;
+
+typedef struct
+{
+  double min_value;
+  double max_value;
+  string value_format_string;
+  string font_name;
+  string color_name;
+  string background_color_name;
+  long x_offset;
+  long y_offset;
+  vert_align_t vert_align;
+  horiz_align_t horiz_align;
+  long font_size;
+  font_style_t font_style;
+} text_values_t;
+
+paramdef struct text_values_t
+{
+  p_descr = "Information about how to render data values that are rendered "
+            "as text.";
+  p_help = "Data values between the min_value (inclusive) and max_value "
+           "(exclusive) after multiplying by the multiplier will be rendered "
+           "textually as indicated. "
+           "If a data value falls within more than one given range, the first "
+           "range it falls in will be used."
+           "If a data value falls within both a text range and an icon range, "
+           "it will be rendered as text.";
+  p_default = { { MIN, MAX, "%f", "", "red", "", 0, 0,
+                  VERT_ALIGN_CENTER, HORIZ_ALIGN_CENTER, 0, TEXT_NORM } };
+} text_values[];
+
+typedef struct
+{
+  string icon_name;
+  string icon_points;
+} icon_defs_t;
+
+paramdef struct icon_defs_t
+{
+  p_descr = "Definitions for all of the icons used by the server.";
+  p_help = "The icon_points string contains the points used to define the "
+           "icon in a space delimited string like the following:\n"
+           "\t\"x1 y1 x2 y2 .... xn yn\"\n"
+           "Use the value 32767 for both X and Y to indicate a pen up.";
+} icon_defs[];
+
+typedef struct
+{
+  double min_value;
+  double max_value;
+  string icon_name;
+  string color_name;
+} icon_values_t;
+
+paramdef struct icon_values_t
+{
+  p_descr = "Information about how to render data values that are rendered "
+            "as icons.";
+  p_help = "Data values between the min_value (inclusive) and max_value "
+           "(exclusive) after multiplying by the multiplier will be rendered "
+           "as icons as indicated. "
+           "If a data value falls within more than one given range, the first "
+           "range it falls in will be used. "
+           "If a data value falls within both a text range and an icon range, "
+           "it will be rendered as text. "
+           "The icon_name field must match one of the icon_name fields in "
+           "the icon_defs array exactly.";
+} icon_values[];

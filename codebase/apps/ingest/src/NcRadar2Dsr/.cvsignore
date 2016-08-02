@@ -1,0 +1,6 @@
+.deps
+NcRadar2Dsr
+__makefile.template
+makefile
+makefile.am
+makefile.in

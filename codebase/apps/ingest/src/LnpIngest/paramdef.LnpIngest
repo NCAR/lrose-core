@@ -1,0 +1,119 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.LnpIngest
+ *
+ * This file contains the TDRP parameter definitions for
+ * LnpIngest.
+ */
+
+
+commentdef
+{
+  p_header = "LnpIngest";
+  p_text = "This program reads the Lightning Network Processor data from a "
+           "socket and writes the data to ASCII files using the universal "
+           "lightning format.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Input parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "LNP host name";
+  p_default = "localhost";
+} lnp_hostname;
+
+paramdef long
+{
+  p_descr = "LNP port number";
+  p_default = 10102;
+} lnp_port;
+
+
+/***********************************************************************
+ * Output parameters
+ */
+
+commentdef
+{
+  p_header = "OUTPUT PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = ".";
+} output_dir;
+
+paramdef long
+{
+  p_descr = "Seconds per file";
+  p_help = "Each output file will contain this number of seconds of "
+           "lightning data.";
+  p_min = 1;
+  p_default = 1;
+} seconds_per_file;

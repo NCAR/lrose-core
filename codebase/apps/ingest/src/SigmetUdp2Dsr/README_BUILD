@@ -1,0 +1,28 @@
+README FOR BUILDING SigmetUdDsr
+===============================
+
+This applicartion needs the Sigmet includes installed.
+
+1. Download includes from Sigmet ftp site
+-----------------------------------------
+
+ftp ftp.sigmet.com
+
+log in as anonymous, use email as password
+
+cd (for example) to 
+
+  outgoing/releases/8.12.5/RHEL5/rda
+
+Get the headers:
+
+  get headers.tgz
+
+2. Install headers
+------------------
+
+  tar xvfz headers.tgz
+  sudo mkdir /usr/sigmet
+  sudo cp -r include /usr/sigmet
+
+

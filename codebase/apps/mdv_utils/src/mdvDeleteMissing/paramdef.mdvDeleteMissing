@@ -1,0 +1,122 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "mdvDeleteMissing reads MDV data, examines an\n"
+  "MDV field to see if the data values pass a threshold\n"
+  "in terms of what percentage of data for that field is\n"
+  "non-missing. If the field fails to pass this threshold\n"
+  "(ie. we wanted the field uwind to be 90% non-missing\n"
+  "data and it is instead 95% missing) then the file is\n"
+  "deleted - meaning that this program should run on the\n"
+  "host where the data are written to (there being at\n"
+  "the time of writing no DsDeleteFile server).\n\n"
+  "Intended for use with VDRAS/VLAS. Niles Oien.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://shield-vdras-test.rap.ucar.edu::pentagonVDRAS/mdv/adjoint"};
+} TriggerUrl;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to check if data is between min and max azimuth.";
+  p_help = "Defaults to FALSE";
+} LimitAz;
+
+paramdef double {
+  p_default = "0";
+  p_private = FALSE;
+  p_descr = "minimum azimuth";
+  p_help = "Defaults to zero";
+} MinAz;
+
+paramdef double {
+  p_default = "360";
+  p_private = FALSE;
+  p_descr = "maximum azimuth";
+  p_help = "Defaults to 360";
+} MaxAz;
+
+
+typedef struct {
+   string fieldName;
+   double percentMissingMax;
+   boolean deleteData;
+} missingSpec_t;
+
+paramdef struct missingSpec_t {
+  p_descr = "Parameters for the program to run with.";
+  p_help = "Fieldname and non-missing threshold as discussed. Data\n"
+  "are only deleted if deleteData is TRUE, if not then a message\n"
+  "to the effect that the data would have been deleted is printed\n"
+  "(ie. a dry run is performed).";
+  p_default = { "uwind", 90.0, FALSE };
+} missingSpec;
+
+typedef struct {
+  boolean runScript;
+  string scriptName;
+} script_t;
+
+paramdef struct script_t {
+  p_descr = "Option to run a script if a file is deleted.";
+  p_help = "Filename is the first argument to the script.\n"
+		   "Script is run before file is deleted.";
+  p_default = { FALSE, "restartVdras" };
+} script;
+
+

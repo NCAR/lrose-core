@@ -1,0 +1,116 @@
+////////////////////////////////////////////////////////
+//  paramdef for DsrAddTime
+//
+// $Id: paramdef.DsrAddTime,v 1.2 2001/08/30 02:57:19 jaimi Exp $
+//
+///////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DsrAddTime PARAMETER FILE";
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Info option";
+  p_help = "Print info messages";
+} info;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "LOGGING"; 
+}
+
+paramdef char* {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} log_dir;
+
+commentdef {
+  p_header = "INPUT";
+}
+
+paramdef string {
+  p_descr = "Input fmq URL, typically of the form\n"
+            "fmqp:://host.domain:[port]:dir/dir";
+  p_help = "URL for DSR input fmq"; 
+  p_default = {"fmqp:://localhost::./fmq.dsRadar.input"};
+} inputFmqUrl;
+
+commentdef {
+  p_header = "PROCESSING PARAMS";
+} 
+
+paramdef string {
+  p_descr = "Name for time field";
+  p_help = "Name to be used for new time field";
+  p_default = {"beam time"};
+} timeFieldName;
+
+paramdef long {
+  p_descr = "Scale value used for time data in seconds";
+  p_help = "Value used to scale the time data.  For example, if "
+           "You wanted time data accurate to the nearest 10 seconds, "
+           "you would set the time scale to 10";
+  p_default = {10};
+} timeScale;
+
+commentdef {
+  p_header = "DIAGNOSTICS";
+}
+
+paramdef boolean {
+  p_descr = "Print summary";
+  p_help = "If set to true, summaries are printed at given interval";
+  p_default = {FALSE};
+} printSummary;
+
+paramdef int {
+  p_descr = "Summary interval";
+  p_help = "See print_summary";
+  p_default = {90};
+} summaryInterval;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef string {
+  p_descr = "Output fmq URL, typically of the form\n"
+            "fmqp:://host.domain:[port]:dir/dir";
+  p_help = "URL for DSR output fmq"; 
+  p_default = {"fmqp:://localhost::./fmq.dsRadar.output"};
+} outputFmqUrl;
+
+paramdef long {
+  p_default = {2000000};
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} outputFmqSize;
+
+paramdef long {
+  p_default = {3600};
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} outputFmqNslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} outputFmqCompress;
+

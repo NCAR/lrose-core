@@ -1,0 +1,33 @@
+#!/bin/csh
+#
+# This is a small script that compiles the Fortran
+# lidar netCDF reader. The netcdf library from Unidata
+# should be installed.
+#
+# This may be useful for users outside of UCAR, since
+# the Makefile refers to our methods of making
+# things and is not easily transportable.
+#
+# Niles Oien, oien@ucar.edu February 2004.
+#
+#
+# Clean up previous build attempts.
+#
+\rm  *.o >& /dev/null
+\rm -f readWindtracer  >& /dev/null
+#
+# Compile the Fortran source to an object.
+#
+g77  -O2 -c readWindtracer.f
+#
+# Compile the C++ source. The -I option must be set so that
+# it points to where the netcdf.h header can be found.
+#
+g++   -Wall -DLINUX_IL6 -DBSD -D_BSD_SOURCE -D_SVID_SOURCE -O2 -c -I/rap/include readNetcdf.cc
+#
+# Link the ojects into an executable with g77. The -L option should
+# point at where the libnetcdf.a library can be found.
+#
+g77 -O2 -o readWindtracer readWindtracer.o readNetcdf.o -static  -L/rap/lib   -lnetcdf
+#
+#

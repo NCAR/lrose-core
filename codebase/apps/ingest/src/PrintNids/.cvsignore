@@ -1,0 +1,6 @@
+.deps
+PrintNids
+__makefile.template
+makefile
+makefile.am
+makefile.in

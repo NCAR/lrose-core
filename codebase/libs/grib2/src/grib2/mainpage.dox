@@ -1,0 +1,22 @@
+/**
+\mainpage grib2 library
+ \section intro GRIB2 Introduction
+
+ GRIB (GRIdded Binary or General Regularly-distributed Information in Binary form) second addition.\n
+ This GRIB2 library was developed by Jason Craig and Gary Blackburn at the National Center for Atmospheric Research (NCAR)\n
+ Research Applications Laboratory (RAL).  It is designed to facilitate reading and writing grib2 files.\n
+ See the Grib2File class for the reading and writing methods.\n
+ 
+
+ External GRIB2 Resources:\n
+ From WMO:  http://www.wmo.int/pages/prog/www/WMOCodes.html\n
+ From NCEP: http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc.shtml\n
+
+\section copyright Copyright
+
+ ** *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+ ** (c) Copyright 2015 University Corporation for Atmospheric Research 
+ ** (UCAR). All Rights Reserved. For U.S.A. Government Use Only 
+ ** *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
+*/

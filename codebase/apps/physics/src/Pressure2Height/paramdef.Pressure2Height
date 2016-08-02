@@ -1,0 +1,172 @@
+/**********************************************************
+ * paramdef.Pressure2Height
+ *
+ * This file contains the TDRP parameter definitions for
+ * Pressure2Height.
+ */
+
+
+commentdef
+{
+  p_header = "Pressure2Height";
+  p_text = "This program converts a field of pressure values into height "
+           "values.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "If true, verbose debug messages will be printed.";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  FCST_TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program triggers whenever a new input "
+           "file appears.\n"
+           "In TIME_LIST mode, the program operates on every input file "
+           "between the start and end times specified on the command line.\n"
+           "In FCST_TIME_LIST mode, the program operates on every input "
+           "file in a forecast directory structure that are valid between "
+           "the supplied start and end time.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input URL.";
+  p_default = "mdvp:://localhost::mdv/gfs";
+} input_url;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use names or numbers to identify "
+            "the input fields.";
+  p_help = "Set to true to use field names; false to use field numbers.";
+  p_default = true;
+} use_field_names;
+
+paramdef int
+{
+  p_descr = "Maximum valid time for input files in seconds.";
+  p_default = 25200;
+} max_valid_secs;
+
+typedef struct
+{
+  string field_name;
+  int field_num;
+  string output_field_name;
+  string output_field_name_long;
+} field_info_t;
+
+paramdef struct field_info_t
+{
+  p_descr = "Information about the input fields to process.";
+  p_help = "These fields must be in pressure units, using the same units as "
+           "the vertical units of the temperature field. "
+           "The pressure values are converted to height values in the "
+           "output.\n"
+           "Note that all of the fields processed must use the same "
+           "projection.";
+  p_default = { { "PRES_CCBL", 0, "CCBL", "CCBL" } };
+} input_fields[];
+
+typedef struct
+{
+  string url;
+  string field_name;
+  int field_num;
+  int max_valid_secs;
+} model_field_info_t;
+
+paramdef struct model_field_info_t
+{
+  p_descr = "Information about the temperature field used in the conversion.";
+  p_help = "This field must be a 3D field with the vertical units being "
+           "pressure in the same units as the input_field.\n"
+           "If the field_name is set to \"\", the the field_num is used.\n";
+  p_default = { "mdvp:://localhost::mdv/gfs",
+                "TMP_ISBL", 0,
+                25200 };
+} temperature_field;
+
+paramdef string
+{
+  p_descr = "Output URL.";
+  p_default = "mdvp:://localhost::mdv/ltgGroup";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+

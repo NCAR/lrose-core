@@ -1,0 +1,129 @@
+/**********************************************************************
+ * TDRP params for DataMapper
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// no_threads //////////////////////////////
+//
+// Option to prevent server from using a thread per client.
+// For debugging purposes it it sometimes useful to suppress the use of 
+//   threads. Set no_threads to TRUE for this type of debugging.
+// Type: boolean
+//
+
+no_threads = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for procmap registration and auto restarting.
+// Type: string
+//
+
+instance = "primary";
+
+//======================================================================
+//
+// RECOGNIZED DATA TYPESE.
+//
+// These are the data types which the DataMapper automatically 
+//   recognizes. If an entry arrives without the data type specified, the 
+//   type will be automatically determined by the DataMapper by searhcing 
+//   the directory string for one if these types.
+//
+//======================================================================
+ 
+///////////// data_types //////////////////////////////
+//
+// Recognized data types.
+// The DataMapper will attempt to determine the data type from the URL, 
+//   using the types in this list. If it does not recognize the data type, 
+//   none will be displayed.
+// Type: string
+// 1D array - variable length.
+//
+
+data_types = { "grib", "mdv", "md", "ncraw", "sim", "simulate", "spdb", "titan", "www", "www_content" };
+
+//======================================================================
+//
+// SAVING STATE TO FILE.
+//
+// This controls saving the DataMapper state table to a file at set 
+//   intervals. This facilitiates the restart of the DataMapper without 
+//   significantly losing state.
+//
+//======================================================================
+ 
+///////////// save_state //////////////////////////////
+//
+// Option to save state, so that on restart the DataMapper will have the 
+//   same state as when it last exited.
+// If true, state will be saved in file dmap_table_path.
+// Type: boolean
+//
+
+save_state = TRUE;
+
+///////////// save_state_path /////////////////////////
+//
+// File path for DataMapper state table.
+// If save_state is true, the info table is saved to this file every 
+//   save_state_secs.
+// Type: string
+//
+
+save_state_path = "/tmp/_dmap_table";
+
+///////////// save_state_secs /////////////////////////
+//
+// Frequency at which state is saved to file - secs.
+// See 'save_state'.
+// Type: int
+//
+
+save_state_secs = 10;
+
+//======================================================================
+//
+// PURGING ENTRIES AUTOMATICALLY.
+//
+// Option to purge entries which have not been updated within a given 
+//   interval.
+//
+//======================================================================
+ 
+///////////// purge_old_entries ///////////////////////
+//
+// Option to purge data entries if no regsitration has beed received for 
+//   a while.
+// If true, data entries state will be removed from the table if 
+//   registration has not been received in the last 'purge_age' secs.
+// Type: boolean
+//
+
+purge_old_entries = FALSE;
+
+///////////// purge_age_days //////////////////////////
+//
+// Purge age for table entries - days.
+// If an entry is not updated within this number of days, it is removed 
+//   from the table. See 'purge_old_entries'.
+// Type: double
+//
+
+purge_age_days = 1;
+

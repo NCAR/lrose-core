@@ -1,0 +1,660 @@
+#! /usr/bin/perl
+#
+# script to restart processes which are no longer talking to the 
+# procmap
+#
+# Usage :
+#   procmap_auto_restart <proc_list_file> [ <procmap_host> [ <sleep_secs> [ <log_file> ] ] ]
+#
+# Where :
+#   <proc_list_file> is the name of the file containing the list
+#                    of processes to restart.  This file contains
+#                    lines of the following format:
+#                       <name> <instance> <start_script> <kill_script> <default_host>
+#                    Comment lines start with #.
+#                    Blank lines are ignored.
+#
+#
+# Example file entries:
+#
+#  rdata_to_shmem     rtest           start_ingest     kill_ingest             kodiak
+#  dobson_from_shmem  rtest           start_ingest     kill_ingest             kodiak
+#  dobson_server      ReflFcast       start_servers    kill_dobson_servers     kodiak
+#  dobson_server      rtest           start_servers    kill_dobson_servers     bear
+#  forecast_monitor   Rtest           start_tracking   kill_forecast_monitor   bear
+#  precip_map         precip_fcast    start_tracking   kill_precip_maps        bear
+#  precip_map         precip_accum    start_tracking   kill_precip_maps        bear
+#  storm_track        rtest           start_tracking   kill_storm_track        kodiak
+#  storm_ident        rtest           start_tracking   kill_storm_ident        kodiak
+#  time_hist          rtest           start_display    snuff_inst              kodiak
+#  rview              rtest           start_display    snuff_inst              kodiak
+#
+#
+#   <procmap_host> is the name of the host where procmap is running.
+#                   Default = "local".
+#
+#   <sleep_secs> is the number of seconds to sleep between process
+#                    checks.  Default = 60.
+#
+#   <log_file> is the name of the log file.  Default = "procmap_auto_restart.log".
+#   set log_file to STDOUT in order to write to STDOUT instead of a file
+#
+# Nancy Rehak, RAP, NCAR, Boulder, CO, USA July 1996
+#
+#============================================================================
+#
+# Make 'date' available
+#
+
+use Time::Local;
+
+#
+# Make hostname() available
+#
+
+use Sys::Hostname;
+
+#
+# Make autoflush() available
+#
+
+use FileHandle;
+
+#
+# RAP procmap module
+#
+use Env qw(RAP_INST_LIB_DIR);
+use Env qw(RAP_SHARED_LIB_DIR);
+use Env qw(RAP_LIB_DIR);
+
+use lib "$RAP_INST_LIB_DIR/perl5/";
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+
+use Procmap;
+
+# ------------------------ START OF MAIN ---------------------------
+#
+# main routine
+#
+
+#
+# Set debug flags.
+#
+
+$debug = 0;              # print debug messages to STDOUT
+$debug_log = 0;          # print debug messages to output log
+$debug_flag = 0;         # for PMP_*() print print messages to STDOUT
+
+# Set the timezone to use for printing dates
+
+$local_tz=3;
+
+#
+# Set the sleep times
+#
+
+$kill_sleep = 5;		# Time to sleep after killing by PID
+$kill_script_sleep = 5;		# Time to sleep after killing by script
+
+#
+# Set the procmap missing variables
+#
+
+$procmap_restart_script = "start_procmap";
+$procmap_min_uptime = 300;
+
+#
+# check usage
+#
+
+($prog = $0) =~ s%.*/%%;
+
+$usage = "Usage : $prog <proc_list_file> [ <procmap_host> [ <sleep_secs> [ <log_file> ] ] ]";
+ 
+if (@ARGV < 1 ||
+    @ARGV > 4)
+{
+  print("$usage\n");
+  exit(-1);
+}
+
+$proc_list_file = shift(@ARGV);
+
+if (@ARGV >= 1)
+{
+    $procmap_host = shift(@ARGV);
+}
+else
+{
+    $procmap_host = "local";
+}
+
+if (@ARGV >= 1)
+{
+    $sleep_secs = shift(@ARGV);
+}
+else
+{
+    $sleep_secs = 60;
+}
+
+if (@ARGV >= 1)
+{
+    $log_file = shift(@ARGV);
+}
+else
+{
+    $log_file = "procmap_auto_restart.log";
+}
+
+if ($log_file eq "STDOUT")
+{
+    $LOGFILE = "STDOUT";
+    autoflush STDOUT 1;
+}
+else
+{
+    $LOGFILE = "LOGFILE";
+}
+
+$forever = 1;
+
+#
+# Print out the command line arguments for debugging.
+#
+
+if ($debug)
+{
+    print "proc_list_file = $proc_list_file\n";
+    print "procmap_host = $procmap_host\n";
+    print "sleep_secs = $sleep_secs\n";
+    print "log_file = $log_file\n";
+}
+
+#
+# Open the log file and append to it.  Set the filehandle to flush
+# after every print.
+#
+
+if ($log_file ne "STDOUT")
+{
+    open ($LOGFILE, ">>$log_file") || die "Error opening log file $log_file";
+    select((select($LOGFILE), $| = 1)[0]);
+}
+
+#
+# print header
+#
+
+($is_ok, $datestring, $dateutime, $datetime)=PMP_get_datestrings($local_tz, $debug_flag);
+if ($is_ok == 0) {
+    print(STDERR "Problem getting date string...\n");
+}
+
+print($LOGFILE "\n---------------------------------------------------\n");
+print($LOGFILE "$datestring: STARTING $prog\n");
+print($LOGFILE "$datestring: Checking procmap on $procmap_host ");
+if ( $procmap_host eq "local" or $procmap_host eq "localhost" ) {
+   $hostName = hostname();
+   print($LOGFILE "($hostName)");
+}
+print($LOGFILE "\n");
+
+#
+# Close the log file so we can reopen it at the beginning of each
+# loop.
+#
+
+if ($log_file ne "STDOUT")
+{
+    close($LOGFILE);
+}
+
+#
+# Now, run forever.
+#
+
+while ($forever)
+{
+    #
+    # Get the current date and time for messages. Need both
+    # UNIX time and human-readable time.
+    #
+
+    ($is_ok, $datestring, $dateutime, $datetime)=PMP_get_datestrings($local_tz, $debug_flag);
+    if ($is_ok == 0) {
+	print(STDERR "Problem with getting date string...\n");
+    }
+
+    #
+    # Reopen the log file at the beginning of each loop so we can delete
+    # the log file while procmap_auto_restart is running without losing
+    # the log.  Set the filehandle to flush after every print.
+    #
+
+    if ($log_file ne "STDOUT")
+    {
+	open ($LOGFILE, ">>$log_file") || die "Error opening log file $log_file";
+	select((select($LOGFILE), $| = 1)[0]);
+    }
+
+    #
+    # Debug log message.
+    #
+
+    if ($debug_log)
+    {
+	print($LOGFILE "\n$datestring: Checking processes\n");
+ 	print($LOGFILE "--------------------------------------------\n");
+    }
+
+    if ($debug)
+    {
+	print "\n$datestring: Checking processes.\n";
+    }
+
+    #
+    # get the current processes from procmap.  If you can't get the
+    # process list, log an error and try again after sleeping.
+    #
+
+    if ($debug_log)
+    {
+ 	print($LOGFILE "$datestring: Getting procmap info from host $procmap_host.\n");
+    }
+ 
+    if ($debug)
+    {
+	print "$datestring: Getting procmap info from host $procmap_host.\n";
+    }
+
+    unless (open(PROCMAP, "print_procmap -plain -host $procmap_host |"))
+    {
+	if ($debug)
+	{
+	    print "$datestring: Error getting print_procmap list from $procmap_host.\n";
+	}
+
+	print($LOGFILE
+	      "$datestring: Error getting print_procmap list from $procmap_host.\n");
+
+	goto ERROR_EXIT;
+
+    } # endunless - open print_procmap command
+
+    #
+    # get expected procs and put them in an array.  Initialize the
+    # $restart_flags array.  The $restart_flags array is an array
+    # which is parallel to the $expected_entries array and has the
+    # following flag values:
+    #              0 = process not found in procmap list
+    #              1 = process found and needs to be restarted
+    #              2 = process found and okay
+    #
+
+
+    ($is_ok, $nexpected) = &PMP_read_proc_list_file($proc_list_file, *expected_entries, *started, $LOGFILE);
+
+    if ($is_ok == 0) {
+	print($LOGFILE 
+	      "$datestring: Error opening expected process list file $proc_list_file.\n");
+	goto ERROR_EXIT;
+    }
+
+    if ($debug) {
+	print("Go through expected_entries array...\n");
+	for ($i=0; $i<$nexpected; $i++) {
+	    print("$i $expected_entries[$i]\n");
+	}
+
+	$num_elem=%started;
+	print("Number of elements in started associate array is $num_elem\n");
+    }
+
+    @restart_flags = ( 0 );
+    foreach $i (0..($nexpected - 1))
+    {
+	$restart_flags[$i] = 0;
+    }
+
+    #
+    # Initialize the kill flag
+    #
+
+    $kill_processes = 1;
+
+    #
+    # skip the first two entries in the procmap list - these are the
+    # procmap host name and the number of seconds procmap has been running
+    #
+
+    $first_line = <PROCMAP>;
+    $procmap_uptime = <PROCMAP>;
+
+    #
+    # Make sure the procmap is running and that there are processes
+    # registered.  If there is no procmap running, the first line
+    # returned will be
+    #   "No procmap reachable on <host>".
+    # If no processes are registered the first line will be
+    #   "No procs registered with <host>"
+    #
+
+    if ($first_line =~ m/^No procmap reachable on/)
+    {
+	if ($debug)
+	{
+	    print "$datestring: No procmap: $first_line";
+	}
+
+	print($LOGFILE "$datestring: No procmap: $first_line");
+
+	print($LOGFILE "   Killing procmap with snuff command\n");
+
+	exec_cmd($procmap_host, 10, "snuff procmap");
+
+	print($LOGFILE "   Restarting procmap with start_procmap cmd\n");
+
+	exec_cmd($procmap_host, 10,
+		 "$procmap_restart_script 1> /dev/console 2>&1 < /dev/null & ");
+
+	sleep($procmap_min_uptime - $sleep_secs);
+
+	goto ERROR_EXIT;
+    }
+    elsif ($first_line =~ m/^No procs registered with/)
+    {
+	if ($debug)
+	{
+	    print "$datestring: No procs registered: $first_line";
+	}
+	
+	#
+	# Just continue on.  The restarter will restart everything
+	#
+
+	$kill_processes = 0;
+
+	print($LOGFILE "$datestring: No procs registered: $first_line");
+    }
+
+    #
+    # Make sure the process mapper has been up long enough to restart
+    # the other processes
+    #
+
+    if ($procmap_uptime < $procmap_min_uptime)
+    {
+	if ($debug)
+	{
+	    print "$datestring: Procmap just restarted $procmap_uptime secs ago -- skipping\n";
+	}
+
+	goto ERROR_EXIT;
+    }
+
+    #
+    # loop through the lines in the procmap list
+    #
+
+    if ($debug_log)
+    {
+ 	print($LOGFILE "\n$datestring: Procmap entries:\n");
+    }
+ 
+    while ($procmap_entry = <PROCMAP>)
+    {
+	if ($debug)
+	{
+	    print $procmap_entry;
+	}
+
+	if ($debug_log)
+	{
+	    print($LOGFILE "   $procmap_entry");
+	}
+
+	#
+	# Get the pieces of the procmap entry
+	#
+
+	($process_name, $process_instance, $process_host, $process_user,
+	 $process_pid, $process_interval, $process_heartbeat,
+	 $process_uptime, $process_nreg, $process_status,
+	 $process_status_str) = split(/\s+/, $procmap_entry);
+
+	#
+	# Make sure the interesting values are positive
+	#
+
+	$process_interval = abs($process_interval);
+	$process_heartbeat = abs($process_heartbeat);
+	$process_uptime = abs($process_uptime);
+
+	# 
+	# Loop through the expected process list and search for processes
+	# listed in procmap with process_heartbeat > process_interval and 
+	# kill and restart them.
+	#
+
+	foreach $i (0..($nexpected - 1))
+	{
+	    #
+	    # extract the information from the expected process list
+	    #
+
+	    ($expected_name, $expected_instance, $expected_start_script,
+	     $expected_kill_script, $expected_host) =
+		 split(/\s+/, $expected_entries[$i]);
+
+##################################################################################
+# Commented out 21-MAY-1998 (DAG)
+#	    #
+#	    # skip over if start script already used
+#	    #
+#
+#	    if ($started{$expected_start_script} == 1)
+#	    {
+#	    if (debug_log) {
+#		print($LOGFILE "doing next: i=$i, restart=$restart_flags[$i], script=$expected_start_script\n");
+#	    }
+#		next;
+#	    }
+##################################################################################
+
+            #
+            # Fully qualify the process hostname.
+            #
+            ($process_hostname) = gethostbyname( $process_host );
+
+            #
+            # Fully qualify the expected hostname.
+            #
+            ($expected_hostname) = gethostbyname( $expected_host );
+
+	    #
+	    # Is this the matching entry?
+	    #
+
+	    if ($process_name eq $expected_name &&
+                $process_hostname eq $expected_hostname &&
+		$process_instance eq $expected_instance)
+	    {
+		#
+		# see if we need to restart the process
+		#
+
+		if ($process_heartbeat > $process_interval)
+		{
+
+		    #
+		    # Debug messages
+		    #
+
+		    if ($debug)
+		    {
+			print "$datestring: Need to restart $process_name $process_instance.\n";
+		    }
+
+		    if ($debug_log) {
+			print($LOGFILE "$datestring: Mode 2 need to restart i:$i, $expected_entries[$i]\n");
+		    }
+
+		    #
+		    # Set the restart flag.
+		    #
+
+		    $restart_flags[$i] = 1;
+
+		    #
+		    # Log the fact that we're restarting the process.
+		    #
+
+		    print ($LOGFILE
+			   "$datestring: Restarting process $process_name $process_instance on $process_host\n");
+		    print ($LOGFILE
+			   "   $procmap_entry\n");
+
+		    #
+		    # Restart the process
+		    #
+
+		    restart($process_host,
+			    $expected_name, $expected_instance,
+			    $expected_start_script,
+			    $expected_kill_script, $process_pid,
+			    $kill_processes);
+
+		    #
+		    # set flag for this start script
+		    #
+
+		    $started{$expected_start_script} = 1;
+
+		}
+		else
+		{
+		    $restart_flags[$i] = 2;
+		} # if ($process_heartbeat > $process_interval)
+	    } # if matching entry
+
+	} # foreach $i
+
+    } # while ($procmap_entry = <PROCMAP>) 
+
+    #
+    # Close the PROCMAP file
+    #
+
+    close(PROCMAP);
+
+    #
+    # Restart expected processes not found in the procmap by looping
+    # through the expected process list file.
+    #
+
+    foreach $i (0..($nexpected - 1))
+    {
+	if ($debug)
+	{
+	    print "$datestring: i=$i, restart flag = $restart_flags[$i], entry = $expected_entries[$i]\n";
+	}
+
+	if ($debug_log)
+	{
+	    print ($LOGFILE "$datestring: i=$i, restart flag=$restart_flags[$i], entry=$expected_entries[$i]\n");
+	}
+
+	#
+	# See if the process was missing.
+	#
+
+	if ($restart_flags[$i] == 0)
+	{
+	    #
+	    # extract the information from the expected process list
+	    #
+
+	    ($expected_name, $expected_instance, $expected_start_script,
+	     $expected_kill_script, $expected_host) =
+		split(/\s+/, $expected_entries[$i]);
+
+	    #
+	    # Log the fact that the process doesn't exist
+	    #
+
+	    if ($debug)
+	    {
+ 		print "$datestring: $expected_name $expected_instance $expected_start_script $expected_kill_script $expected_host\n";
+		print "$datestring: $expected_name $expected_instance not in procmap, restarting on $expected_host\n";
+	    }
+
+	    if ($debug_log)
+	    {
+ 		print ($LOGFILE "$datestring: $expected_name $expected_instance $expected_start_script $expected_kill_script $expected_host\n");
+		print ($LOGFILE "$datestring: $expected_name $expected_instance not in procmap, restarting on $expected_host\n");
+	    }
+
+	    print ($LOGFILE
+		   "$datestring: Missing process $expected_name $expected_instance on $expected_host in procmap -- restarting.\n");
+
+	    #
+	    # skip over if start script already used
+	    #
+
+	    if ($started{$expected_start_script} == 1)
+	    {
+		if ($debug)
+		{
+		    print "   Already starting script $expected_start_script, skipping.\n";
+		}
+
+		print($LOGFILE "   Already starting script $expected_start_script, skipping.\n");
+
+		next;
+	    }
+
+	    #
+	    # Now restart the process using the given script.
+	    #
+
+	    restart($expected_host,
+		    $expected_name, $expected_instance,
+		    $expected_start_script,
+		    $expected_kill_script, -1,
+		    $kill_processes);
+
+	    #
+	    # set flag for this start script
+	    #
+
+	    $started{$expected_start_script} = 1;
+
+	} # if ($restart_flags[$i] == 0)
+
+    } # foreach $i
+
+    if ($debug)
+    {
+	print "\n";
+    }
+
+ERROR_EXIT :
+
+    #
+    # Close the log file so we can reopen it at the beginning of each
+    # loop.
+    #
+
+    if ($log_file ne "STDOUT")
+    {
+	close($LOGFILE);
+    }
+
+    sleep($sleep_secs);
+
+} # while ($forever)
+
+exit();
+

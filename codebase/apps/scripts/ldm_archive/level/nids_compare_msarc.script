@@ -1,0 +1,67 @@
+#!/bin/csh -x
+#
+# Script to verify that the daily weather data backup tar files were
+# indeed sent and received by the MassStore correctly.  It gets a
+# new listing of MassStore files, compares the entries in that listing
+# to the files on the local disk.  If the files match, then it deletes
+# the local copy, otherwise it resends the file(s) to the MassStore.
+#
+# PNeilley
+###########################################################################
+
+set ARC_home = /home/rapdmg/archive_staging
+set SSG_arc = /archive
+set ARC_SCRIPTS_home = /home/rapdmg/archive_scripts
+set ARC_nids = $ARC_home/nids
+#set ARC_nowrad = /nids/archive/nowrad
+set MSS_path = /RAPDMG/LDM/ARCHIVE
+set MS_List = $ARC_home/MSlist/msls.out
+set EXE_home = /home/rapdmg/exe
+ 
+set ardate = `date --date="-24 hour" +%Y%m%d`
+set armmdd = `date --date="-24 hour" +%m%d`
+
+if ( $1 != "x" ) $ARC_SCRIPTS_home/get_msls.script $MS_List
+
+cd $ARC_nids
+set files = `ls *.tar*`
+
+foreach file ($files)
+  set local_size = `ls -l $file | awk '{print $5}'`
+  set msfile = `echo $file`
+  #set msfile = `echo $file | tr "[a-z]" "[A-Z]"`
+  set ms_size = `grep $msfile $MS_List | awk '{print $5}'`
+
+  if ( $ms_size >= $local_size ) then
+     cp $file $SSG_arc/nids
+     rm $file
+     echo "nids data sucessfully sent to the mass store ($ARC_nids/*.tar)"
+  else
+     set year = `echo $file | awk '{print substr($0,1,4)}'`
+     set yrmn = `echo $file | awk '{print substr($0,1,6)}'`
+     msrcp -pr 48500002 -pe 4096 $ARC_nids/$file mss:$MSS_path/$year/$armmdd/$msfile
+     msclass -class reliability=economy $MSS_path/$year/$armmdd/$msfile
+  endif
+end
+
+#cd $ARC_nowrad
+#set files = `ls *.tar*`
+
+#foreach file ($files)
+#  set local_size = `ls -l $file | awk '{print $5}'`
+#  set msfile = `echo $file`
+#  set ms_size = `grep $msfile $MS_List | awk '{print $5}'`
+
+#  if ( $ms_size >= $local_size ) then
+#     cp $file $SSG_arc/nowrad
+#     rm $file
+#  else
+#     set year = `echo $file | awk '{print substr($0,1,4)}'`
+#     set yrmn = `echo $file | awk '{print substr($0,1,6)}'`
+#     msrcp -pe 4096 $ARC_nowrad/$file mss:$MSS_path/$year/$armmdd/$msfile
+#  endif
+#end
+
+ $ARC_SCRIPTS_home/get_msls.script $MS_List"_"$ardate
+
+

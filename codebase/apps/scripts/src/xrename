@@ -1,0 +1,3 @@
+#!/usr/bin/perl --                                                              
+# Output the xterm(1) control codes to rename a window title.                   
+printf("\033]0;%s\007", shift);

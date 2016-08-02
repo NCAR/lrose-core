@@ -1,0 +1,448 @@
+/*********************************************************
+ * parameter definitions for RadxSunMon
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Dec 2015
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Searches for sun spikes in radar volumes, performs solar analysis";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "READING THE VOLUME MOMENTS DATA";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, we wait for a new input file.  "
+  "It is assumed that latest_data_info will be availble in realtime mode. "
+  "In ARCHIVE mode, we move through the data between the start "
+  "and end times set on the command line. "
+  "In FILELIST mode, we move through the list of file names "
+  "specified on the command line. "
+  "Paths (in ARCHIVE mode, at least) MUST contain a "
+  "day-directory above the data file -- ./data_file.ext will not "
+  "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef string {
+  p_default = "./cfradial/moments";
+  p_descr = "Input directory for moments files.";
+  p_help = "These are the files we are analyzing for changes in the clutter field.";
+} moments_input_dir;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} search_ext;
+
+commentdef {
+  p_header = "INPUT FIELD NAMES";
+}
+
+paramdef string {
+  p_default = "DBMHC";
+  p_descr = "Field name for power in H co-polar channel.";
+  p_help = "If not available, leave empty";
+} dbmhc_field_name;
+
+paramdef string {
+  p_default = "DBMVC";
+  p_descr = "Field name for power in V co-polar channel.";
+  p_help = "If not available, leave empty";
+} dbmvc_field_name;
+
+paramdef string {
+  p_default = "DBMHX";
+  p_descr = "Field name for power in H cross-polar channel.";
+  p_help = "If not available, leave empty";
+} dbmhx_field_name;
+
+paramdef string {
+  p_default = "DBMVX";
+  p_descr = "Field name for power in V cross-polar channel.";
+  p_help = "If not available, leave empty";
+} dbmvx_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute DBMHC from dbz field.";
+  p_help = "If the HC power field is not available, we can compute it from reflectivity, given the radar constant and range correction.";
+} estimate_dbmhc_from_dbz;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to account for atmospheric attenuation when estimating dbmhc from dbz.";
+  p_help = "If atmospheric attenuation was considered in computing dbz from power, we must reverse that process to estimate dbmhc from dbz.";
+} use_atmos_atten_in_dbmhc_estimation;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for reflectivity.";
+  p_help = "See 'estimate_dbmhc_from_dbz";
+} dbz_field_name;
+
+paramdef double {
+  p_default = -67.0;
+  p_descr = "Radar constant (dB).";
+  p_help = "Use meters, watts, radians to compute this value. It should be a negative number, of around -67 for Sband, -60 for C band, for a 500KW transmitter and 1 degree beam width";
+} radar_constant_db;
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "Field name for radial velocity.";
+  p_help = "This is required for finding the sun as a noise source";
+} vel_field_name;
+
+paramdef string {
+  p_default = "NCP";
+  p_descr = "Field name for NCP.";
+  p_help = "NCP is normalized coherent power. If it is not available, it can be estimated from spectrum width. See below. NCP is required for finding the sun as a noise source";
+} ncp_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to estimate NCP from spectrum width.";
+  p_help = "This should be set to true if NCP is not available.";
+} estimate_ncp_from_spectrum_width;
+
+paramdef string {
+  p_default = "WIDTH";
+  p_descr = "Field name for spectrum width.";
+  p_help = "This applies if 'estimate_ncp_from_spectrum_width' is true.";
+} width_field_name;
+
+commentdef {
+  p_header = "OPTION TO CORRECT ANTENNA ANGLES";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply an offset to the azimuth values.";
+  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.";
+} apply_azimuth_offset;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Azimuth offset (degrees).";
+  p_help = "See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.";
+} azimuth_offset;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply an offset to the elevation values.";
+  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.";
+} apply_elevation_offset;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Elevation offset (degrees).";
+  p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
+} elevation_offset;
+
+commentdef {
+  p_header = "OPTION TO OVERRIDE RADAR LOCATION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar location.";
+  p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
+} override_radar_location;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_latitude_deg;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_longitude_deg;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} radar_altitude_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to negate the latitude.";
+  p_help = "Mainly useful for RAPIC files. In RAPIC, latitude is always positive, so mostly you need to set the latitiude to the negative value of itself.";
+} change_radar_latitude_sign;
+
+commentdef {
+  p_header = "SUNSCAN ANALYSIS";
+  p_text = "We use 'strong' clutter to montitor the clutter power change over time, and 'weak' clutter to detect the presence of weather echoes in the clutter field.";
+}
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Sun search margin in elevation (deg).";
+  p_help = "We only consider rays within this margin of the theoretical sun position.";
+} elevation_search_margin_deg;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Sun search margin in azimuth (deg).";
+  p_help = "We only consider rays within this margin of the theoretical sun position.";
+} azimuth_search_margin_deg;
+
+paramdef double {
+  p_default = 1.25;
+  p_descr = "Min elevation angle for sun analysis (deg).";
+  p_help = "We do not use the sun when its elevation is below this limit.";
+} sun_analysis_min_elevation_deg;
+
+typedef struct {
+  double angular_offset_deg;
+  double power_correction_db;
+} power_curve_t;
+
+paramdef struct power_curve_t {
+  p_default = {
+    { 0.00,  0.00 },
+    { 0.10,  0.20 },
+    { 0.18,  0.36 },
+    { 0.23,  0.60 },
+    { 0.32,  1.25 },
+    { 0.42,  2.15 },
+    { 0.51,  3.25 },
+    { 0.57,  4.00 },
+    { 0.68,  5.40 },
+    { 0.72,  6.25 },
+    { 0.78,  7.20 },
+    { 0.84,  8.20 },
+    { 0.88,  9.10 },
+    { 0.91,  10.30 },
+    { 0.96,  11.30 },
+    { 1.00,  12.60 },
+    { 1.07,  13.60 },
+    { 1.13,  15.00 },
+    { 1.21,  16.20 },
+    { 1.28,  18.00 },
+    { 1.32,  19.30 },
+    { 1.38,  20.00 }
+  };
+  p_descr = "Correction in power for radar not pointed directly at the sun.";
+  p_help = "These corrections are ADDED to the measured sun power to get the corrected sun power. This curve must be determined experimentally by performing a box scan around the sun. We assume a uniform reduction in power as we move away from the sun center in any direction. The angular_offset values must start at 0 and increase through the list.";
+} power_correction_curve[];
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to correct the measured sun power for atmospheric attenuation.";
+  p_help = "The power from the sun arriving at the antenna is attenuated by a 1-way trip through the atmosphere. This should be corrected for.";
+} correct_measured_powers_for_atmos_atten;
+
+paramdef double {
+  p_default = 0.7;
+  p_descr = "Max angular offset for valid observation (deg).";
+  p_help = "For power estimation purposes, we will only consider angular offsets up to this limit.";
+} max_angle_offset_for_power_estimation;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Max angular offset for estimating antenna pointing error (deg).";
+  p_help = "For pointing estimation purposes, we will only consider angular offsets up to this limit.";
+} max_angle_offset_for_pointing_estimation;
+
+paramdef double {
+  p_default = -96.0;
+  p_descr = "Theoretical max H co-polar power likely to be observed (dBm).";
+  p_help = "When computing pointing statistics, we want to give more weight to the higher observed powers. This max value tells us how to weight the observed angle offsets for computing antenna pointing accuracy.";
+} theoretical_max_dbmhc;
+
+commentdef {
+  p_header = "SUN NOISE SOURCE DETECTION";
+  p_text = "The sun appears to the radar as an incoherent and unpolarized noise source. Therefore we can use noise detection to identify rays that show sun spikes.";
+}
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Number of gates over which the noise detection feature fields are computed.";
+  p_help = "To identify noise at a gate, we accumulate the phase change in range for the entire ray. We then assume that the phase change will be linear in a local sense, i.e. within some region around each gate. This parameter specifies the length of the assumed linear region. The phase change error is computed as the mean absolute error between the actual accumulated phase change and the linear fit to the phase change over the local region. NOTE - this number should be odd.";
+} noise_ngates_kernel;
+
+paramdef int {
+  p_default = 200;
+  p_descr = "Min number of gates for computing median noise on a ray.";
+  p_help = "In order to compute median noise for a ray, we require noise to be detected at at least this number of gates"; 
+} noise_min_ngates_for_ray_median;
+
+commentdef {
+  p_header = "INTEREST MAPS and WEIGHTS for NOISE LOCATION";
+  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.";
+};
+
+typedef struct {
+  double value;
+  double interest;
+} interest_map_point_t;
+
+paramdef struct interest_map_point_t {
+  p_default = {{35.0, 0.001}, {45.0, 1.0}};
+  p_descr = "Interest mapping for phase change for noise.";
+} phase_change_error_for_noise_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for phase change error - for noise.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} phase_change_error_for_noise_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.65, 1.0}, {0.75, 0.001}};
+  p_descr = "Interest mapping for sdev of dbm for noise.";
+} dbm_sdev_for_noise_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for sdev of dbm - for noise.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} dbm_sdev_for_noise_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.1, 1.0}, {0.2, 0.001}};
+  p_descr = "Interest mapping for mean of ncp for noise.";
+} ncp_mean_for_noise_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for sdev of dbm - for noise.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} ncp_mean_for_noise_interest_weight;
+
+paramdef double {
+  p_default = 0.51;
+  p_descr = "Threshold interest value for identifying noise.";
+  p_help = "If the fuzzy interest value exceeds this threshold, noise is assumed to exist at that gate.";
+} interest_threshold_for_noise;
+
+commentdef {
+  p_header = "OPTION TO COMPUTE CROSS-POLAR POWER RATIO IN CLUTTER";
+  p_text = "For an alternating-mode radar, we can compute the cross-polar ratio and hence the ZDR bias";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute cross-polar power ratio in clutter.";
+  p_help = "This is only applicable for alternating mode radars such as SPOL.";
+} compute_cross_pol_ratio_in_clutter;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Specified minimum range for clutter (km).";
+  p_help = "Gates closer than this range are ignored.";
+} clutter_min_range_km;
+
+paramdef double {
+  p_default = 36.0;
+  p_descr = "Specified maximum range (km).";
+  p_help = "Gates beyond this range are ignored.";
+} clutter_max_range_km;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Specified minimum elevation for clutter (deg).";
+  p_help = "Angles below this are ignored.";
+} clutter_min_elevation_deg;
+
+paramdef double {
+  p_default = 0.75;
+  p_descr = "Specified maximum elevation for clutter (deg).";
+  p_help = "Elevations above this are ignored.";
+} clutter_max_elevation_deg;
+
+paramdef double {
+  p_default = -80.0;
+  p_descr = "Minimum power for clutter (dBm).";
+  p_help = "We set this to provide a reasonable minimum SNR.";
+} clutter_min_power_dbm;
+
+paramdef double {
+  p_default = -40.0;
+  p_descr = "Maximum power for clutter (dBm).";
+  p_help = "We need to ensure that we do not include gates where the receiver is saturated. So set this to a value 5 dB or more below saturation.";
+} clutter_max_power_dbm;
+
+commentdef {
+  p_header = "RETRIEVING SITE TEMPERATURE FROM SPDB";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read site temperature from SPDB.";
+  p_help = "The temperature closest to the radar volume time will be read in.";
+} read_site_temp_from_spdb;
+
+paramdef string {
+  p_default = "spdbp:://hail:0:pecan/spdb/spol/temp";
+  p_descr = "URL for temperatures from SPDB.";
+} site_temp_spdb_url;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Station name for site temperature.";
+} site_temp_station_name;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding site temp data (secs).";
+  p_help = "We search for the temperature closest in time to the radar volume. This is the search margin on either side of the volume time.";
+} site_temp_search_margin_secs;
+
+commentdef {
+  p_header = "WRITE RESULTS";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out analysis results to SPDB.";
+  p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
+} write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/radx_sun_mon";
+  p_descr = "URL for writing results to SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} spdb_output_url;
+

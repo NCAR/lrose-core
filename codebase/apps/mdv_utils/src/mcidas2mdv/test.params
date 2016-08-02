@@ -1,0 +1,131 @@
+/**********************************************************************
+ * TDRP params for mcidas2mdv
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: long
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operational mode.
+// Realtime mode - waits for new data; archive mode runs on file list.
+//
+// Type: enum
+// Options:
+//   REALTIME, ARCHIVE
+//
+//
+
+mode = ARCHIVE;
+
+///////////// input_file_ext //////////////////////////
+//
+// Input file extension.
+// Type: string
+//
+
+input_file_ext = "area";
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Path of input directory - realtime mode only.
+// Type: string
+//
+
+input_dir = ".";
+
+///////////// output_file_ext /////////////////////////
+//
+// Output file extension.
+// Type: string
+//
+
+output_file_ext = "mdv";
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+// Path of output directory.
+// Type: string
+//
+
+output_dir = ".";
+
+///////////// max_input_data_age //////////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Minimum val: 60
+// Type: long
+//
+
+max_input_data_age = 300;
+
+///////////// field_name //////////////////////////////
+//
+// Field name.
+// Type: string
+//
+
+field_name = "IR";
+
+///////////// field_units /////////////////////////////
+//
+// Field units.
+// Type: string
+//
+
+field_units = "Counts";
+
+///////////// output_grid /////////////////////////////
+//
+// Grid params for output data.
+//
+// Type: struct
+//   typedef struct {
+//      double origin_lon;
+//      double origin_lat;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//      long nx;
+//      long ny;
+//   }
+//
+//
+
+output_grid = { -100.0, 40.0, -200.0, -200.0, 1, 1, 400, 400 };
+

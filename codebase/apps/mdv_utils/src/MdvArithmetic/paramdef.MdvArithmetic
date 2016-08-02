@@ -1,0 +1,291 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvArithmetic
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvArithmetic.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  FCST_TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the input_url parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+           "In FCST_TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter, processing all "
+	   "forcasts gen time between the start and end times.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_help = "This must be a URL for RUC pressure files.";
+  p_default = "mdvp:://localhost::./mdv/input";
+} input_url;
+
+paramdef long
+{
+  p_descr = "field number to use for algorithm";
+  p_help = "The algorithm will only be run on this field.";
+  p_min = 0;
+  p_default = 0;
+} field_num;
+
+paramdef boolean
+{
+  p_descr = "Use the field name to get the data";
+  p_help = "If false, field number will be used.";
+  p_default = false;
+} use_field_name;
+
+paramdef string
+{
+  p_descr = "Field name to use for algorithm";
+  p_help = "use_field_name flag must be set to true.";
+  p_default = "LIK";
+} field_name;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::./mdv/output";
+} output_url;
+
+paramdef boolean
+{
+ p_descr = "Option to write to forecast data directory";
+ p_default = false;
+} output_forecast_directory;
+
+paramdef enum encoding_type {
+  p_options = {ENCODING_MDV_ASIS, ENCODING_MDV_INT8,
+               ENCODING_MDV_INT16, ENCODING_MDV_FLOAT32};
+  p_default = {ENCODING_MDV_ASIS};
+  p_descr = "Output MDV encoding type.";
+  p_help = "ASIS and FLOAT32 will be the same in this case "
+           "because FLOAT32 is the encoding set at read time.";
+} outputEncodingType;
+
+typedef enum
+{
+  ADDITION,
+  SUBTRACTION,
+  MULTIPLICATION,
+  SQUARE_ROOT,
+  POWER
+} arithmetic_operator_t;
+
+paramdef enum arithmetic_operator_t
+{
+  p_descr = "Arithmetic operator to apply to the data";
+  p_help = "ADDITION\n"
+           "SUBTRACTION\n"
+           "MULTIPLICATION\n"
+           "SQUARE_ROOT\n"
+           "POWER\n";
+  p_default = "MULTIPLICATION";
+} arithmetic_operator;
+
+paramdef float
+{
+  p_descr = "Constant to apply to data";
+  p_help = "arithmetic_operator is applied to data using this value";
+  p_default = 1.0;
+} apply_constant;
+
+paramdef boolean
+{
+  p_descr = "Give bad_data a value";
+  p_help = "Where bad data is found substitute with new_bad_value. "
+           "Note this doesnt change field header information for bad data";
+  p_default = false;
+} fill_bad;
+
+paramdef float
+{
+  p_descr = "Value to give bad data if fill_bad is set to true";
+  p_default = 0.0;
+} new_bad_value;
+
+paramdef boolean
+{
+  p_descr = "Give missing_data a value";
+  p_help = "Where missing data is found substitute with new_missing_value. " 
+           "Note this doesnt change field header information for missing data";
+  p_default = false;
+} fill_missing;
+
+paramdef float
+{
+  p_descr = "Value to give missing data if fill_missing is set to true";
+  p_default = 0.0;
+} new_missing_value;
+
+paramdef boolean
+{
+  p_descr = "Option to change the bad data value in the Mdv field header";
+  p_default = false;
+} redefine_header_bad;
+
+paramdef float
+{
+  p_descr = "New value to give bad data in the field header if redfine_header_bad is true";
+  p_default = 0.0;
+} header_bad;
+
+paramdef boolean
+{
+  p_descr = "Option to change missing data value in the Mdv field header";
+  p_default = false;
+} redefine_header_missing;
+
+paramdef float
+{
+  p_descr = "New value to give missing data in the field header if redefine_header_missing is true";
+  p_default = 0.0;
+} header_missing;
+
+paramdef boolean
+{
+  p_descr = "Minimum value to output to grid.";
+  p_help = "Set all values less than min_value to the min_value defined below.";
+  p_default = false;
+} set_min_value;
+
+paramdef boolean
+{
+  p_descr = "Minimum value to output to grid. This only applies to values "
+            "that go below the min_value after applying the function. If the "
+	    "value is below the min_value prior to applying the funciton this "
+	    "will have NO effect.";
+  p_help = "Set all newly computed values less than min_value to the min_value defined below.";
+  p_default = false;
+} set_min_output_value;
+
+paramdef float
+{
+  p_descr = "Value used if min_output_value is set to true";
+  p_default = 0.0;
+} min_value;
+
+paramdef boolean
+{
+  p_descr = "Max value to output to grid.";
+  p_help = "Set all values greater than max_value to the max_value "
+           "defined below.";
+  p_default = false;
+} set_max_value;
+
+paramdef boolean
+{
+  p_descr = "Max value to output to grid. This only applies to values that go "
+            "above the max_value after applying the function. If the value "
+	    "is above the max_value prior to applying the function this will "
+	    "have NO effect.";
+  p_help = "Set all newly computed values greater than max_value "
+           "to the max_value defined below.";
+  p_default = false;
+} set_max_output_value;
+
+
+paramdef float
+{
+  p_descr = "Value used if max_output_value is set to true";
+  p_default = 1.0;
+} max_value;
+

@@ -1,0 +1,94 @@
+/****************************************************
+ * TDRP params for mdv2vil
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Operational mode.
+ * Realtime mode - waits for new data; archive mode runs on single
+ *   file.
+ *
+ * Type: enum
+ * Default: REALTIME 
+ * Legal values: REALTIME, ARCHIVE.
+ */
+mode = REALTIME;
+
+/*
+ * Reflectivity field.
+ * Field number of the reflectivity data in the mdv file.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ */
+dbz_field = 0;
+
+/*
+ * Vil file extension.
+ *
+ * Type: string
+ * Default: "mdv" 
+ */
+output_file_ext = "vil";
+
+/*
+ * Input directory.
+ * Path of input directory - realtime mode only.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+input_dir = "/home/dixon/titan/cdata";
+
+/*
+ * Output directory.
+ * Path of output directory.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+output_dir = "/home/dixon/titan/vil";
+
+/*
+ * Max age of input data.
+ * For realtime only - max age of input data for it to be valid.
+ *
+ * Type: long
+ * Default: 300 
+ * Min value: 60 
+ */
+max_input_data_age = 300;
+
+

@@ -1,0 +1,1719 @@
+#!/usr/bin/perl
+###############################################################################
+# $Id: processData,v 1.27 2007/01/31 04:08:10 oien Exp $
+###############################################################################
+#
+# Process data across a distributed system based on:
+#   1. a set of timed events
+#   2. a set of data directives describing the time-stamped data files
+#
+# Options are available to:
+#   1. list, tar, or delete the specified data (--action)
+#   2. list, tar, or delete all but the specified data (--not)
+# Tar will produce one tar file per host specified in the data directives.
+#
+# Examples of distributed data directives include:
+#   host1: $HOME/data/storms/<yyyymmdd>.*
+#   host2: $HOME/data/colide/<yyyymmdd>/*.*.<yyyymmdd>.<hhmmss>
+#   host3: $HOME/data/radar_radial/<yyyymmdd>/<hhmmss>.mdv
+# Local data directives can be specified without host names;
+# however, local and distributed data directives cannot be mixed.
+#
+# Events can be specified in a time table file using the following syntax:
+#   start 19970728000000      end 19970729000000
+#   start 1997 07 28 00 00 00 end 1997 07 29 00 00 00
+#   start 1997/07/28 00:00:00 end 1997/07/29 00:00:00
+# as a single event on the command line using the options:
+#   --start 19970728000000      --end 19970729000000
+#   --start 1997/07/28_00:00:00 --end 1997/07/29_00:00:00
+# as time or age limits using the options:
+#   --priorTo   1997/08/31_12:30:00
+#   --laterThan 1997/09/31_00:00:00
+#   --olderThan 1997/10/10_23:59:00
+#
+# EXAMPLES:
+#
+#   1. To tar up the data files included in an event list:
+#
+#      processData -d $PROJ_DIR/dataDirectives.list \
+#                  --time $PROJ_DIR/events.list \
+#                  -a tar -f tapeHost:/dev/nst0
+#
+#   2. To delete the data files not included in an event list:
+#
+#      processData -d $PROJ_DIR/dataDirectives.list \
+#                  --not --time $PROJ_DIR/events.list \
+#                  -a purge -f /tmp/processData.results
+#
+#   3. To list to stdout the data files that have been generated
+#      in the last 24 hours:
+#
+#      processData -d $PROJ_DIR/dataDirectives.list
+#
+#   4. To tar all data files after a specified time:
+#
+#      processData -d $PROJ_DIR/dataDirectives.list \
+#                  -a tar \
+#                  --laterThan 19971010000000
+#
+#   5. To delete all data files older than five days:
+#      processData -d $PROJ_DIR/dataDirectives.list \
+#                  -a purge \
+#                  --olderThan 5
+#
+#      In this example, age is based on the implicit time stamp of the
+#      file name, not the modification time from a file stat.
+#
+#
+#   6. To delete all data files older than five days
+#      except for those in the event list:
+#
+#      processData -d $PROJ_DIR/dataDirectives.list \
+#                  -a purge \
+#                  --olderThan 5 \
+#                  --xclude  --time $PROJ_DIR/events.list 
+#
+#   7. To delete all data file older than five days 
+#      only from those listed in the event list:
+#
+#      processData -d $PROJ_DIR/dataDirectives.list \
+#                  -a purge \
+#                  --olderThan 5 \
+#                  --time $PROJ_DIR/events.list --intersect
+#
+#   8. To delete all data file older than five days 
+#      plus those listed in the event list:
+#
+#      processData -d $PROJ_DIR/dataDirectives.list \
+#                  -a purge \
+#                  --olderThan 5 \
+#                  --time $PROJ_DIR/events.list --union
+#
+#   --intersect, --union, --xclude are logical operators used for combining
+#   multiple time qualifying options.  For example the following
+#   combination of options are legal:
+#           
+#   --priorTo 1997/08/01_12:30:00  --union  --laterThan 1997/09/31_12:30:00
+#   --priorTo 1997/08/01_12:30:00  --intersect  --time event.list
+#   --olderThan 5 --time event.list --priorTo 1997/08/01_12:30:00 --union
+#   --olderThan 14 --xclude --time  $PROJ_DIR/event.list
+#
+#   --xclude is essential an --intersection which excludes the event list
+#   Only one logical operator is allowed on the command line.
+#
+# Return Values
+#   Non-negative values indicate the number of data files processed
+#   Negative values indicate the following errors:
+#   -1  error in processing command line arguments
+#   -2  error in directives syntax
+#   -3  error in event syntax
+#   -4  error in directory or file I/O
+#   -5  error from system call
+#   -9  unexpected results
+#   
+#
+#######################
+# Terri L. Betancourt #
+# NCAR - October 1997 #
+###############################################################################
+
+use Cwd;
+
+use Getopt::Long;
+$Getopt::Long::ignorecase = false;
+$Getopt::Long::autoabbrev = true;
+
+use Env;
+Env::import();
+
+sub processArgs;
+sub badArg;
+sub processEvents;
+sub processDirectives;
+sub processAction;
+sub cleanup;
+sub nextDirective;
+sub doPrimaryDirective;
+sub doSecondaryDirective;
+sub parseDirective;
+sub checkForMatch;
+sub expandToken;
+sub translateWildcard;
+sub translatePattern;
+sub matchExpression;
+sub executeList;
+sub executePurge;
+sub executeTar;
+sub setupLinks;
+
+#
+# Initialize the status
+#
+$status = 0;
+
+#
+# Error status constants
+#
+$ERR_COMMAND_LINE     = -1;
+$ERR_DIRECTIVE_SYNTAX = -2;
+$ERR_EVENT_SYNTAX     = -3;
+$ERR_IO               = -4;
+$ERR_SYSTEM_CALL      = -5;
+$ERR_STATUS_UNKNOWN   = -8;
+$ERR_UNEXPECTED       = -9;
+
+#
+# Get the program basename.
+#
+($prog = $0) =~ s|.*/||;
+
+#
+# Save the usage to print to the user if there is a problem
+#
+$usage =                                                 
+    "\nUsage: $prog [options]\n\n" .
+    "   --action [list | purge | tar]\n" .
+    "        Action to be taken on event data.\n" .
+    "        The default action is LIST.\n\n" .
+    "   --clean | --noclean\n" .
+    "        Clean up transitory files from --tmp.\n" .
+    "        The default behavior is --clean.\n\n" .
+    "   --data FILE\n" .
+    "        File containing data directives.\n" .
+    "        The default filename is dataDirectives.list.\n\n" .
+    "   --end yyyymmddhhmmss\n" .
+    "        End time of data to be processed (inclusive).\n" .
+    "        Must be specified in conjunction with --start option.\n\n" .
+    "   --file FILE\n" .
+    "        File containing action output.\n" .
+    "        For LIST and PURGE actions output goes to STDOUT by default.\n" .
+    "        For a TAR action output goes to /dev/nst0 by default.\n\n" .
+    "   --help\n" .
+    "        Print this usage message.\n\n" .
+    "   --intersect\n" .
+    "        Logical operator for combining time qualifying options.\n\n" .
+    "   --keep\n" .
+    "        Keep going as much as possible after an error.\n\n" .
+    "   --laterThan yyyymmddhhmmss\n" .
+    "        Initial time for data processing (not inclusive).\n\n" .
+    "   --msg\n" .
+    "        File containing error and verbose (if -v is set) messages.\n" .
+    "        Messages are sent to STDOUT by default.\\n" .
+    "   --not\n" .
+    "        Invert the logic for data inclusion.\n\n" .
+    "   --olderThan <days>\n" .
+    "        Minimum age of data to be processed (fractions are allowed).\n\n" .
+    "   --priorTo yyyymmddhhmmss\n" .
+    "        Final time for data processing (not inclusive).\n\n" .
+    "   --queue\n" .
+    "        Print queue processing messages -- very very verbose!\n\n" .
+    "   --rmdir\n" .
+    "        Remove empty parent directories.\n\n" .
+    "   --start yyyymmddhhmmss\n" .
+    "        Start time of data to be processed (inclusive).\n" .
+    "        Must be specified in conjunction with --end option.\n\n" .
+    "   --Secure\n" .
+    "        Use secure ssh/scp for network communications.\n" .
+    "        Default behavior is rsh/rcp.\n\n" .
+    "   --time FILE\n" .
+    "        File containing time table of data to be processed.\n\n" .
+    "   --tmp\n" .
+    "        Path for writing temporary data processing files.\n" .
+    "        Default path is /tmp.\n\n" .
+    "   --union\n" .
+    "        Logical operator for combining time qualifying options.\n\n" .
+    "   --verbose\n" .
+    "        Execute with verbose messages\n\n" .
+    "   --wait\n" .
+    "        Wait for remote hosts to processData before continuing.\n" .
+    "        Default behavior is to background the processData command\n".
+    "        on each remote host.\n\n" .
+    "   --xclude\n" .
+    "        Logical operator for combining the event list\n" .
+    "        other time qualifying options.\n\n" .
+    "   --zip\n" .
+    "        Filter the tar archive through gzip.\n" .
+    "        Not valid with remote tar archive.\n\n";
+
+#
+# Process the command line arguments
+#
+processArgs;
+$status == 0 or exit $status;
+
+#
+# Process the events
+#
+processEvents;
+$status == 0 or exit $status;
+
+#
+# Process the data directives
+#
+processDirectives;
+$status >= 0 or exit $status;
+
+#
+# Process the action (list, tar, purge)
+#
+processAction;
+
+#
+# Clean up before exiting
+#
+cleanup;
+
+#
+# Report on the number of data files processed
+#
+if ( $status >= 0 ) {
+   print MSG_FILE "Processed $status data files. ($ARGV[0])\n";
+}
+else {
+   print MSG_FILE "Error status = $status. ($ARGV[0])\n";
+}
+
+#
+# That'll wrap it up
+#
+print MSG_FILE "Done.\n";
+exit $status;
+
+###############################################################################
+
+sub processArgs
+{
+   #
+   # Set the default options
+   #
+   $opt_clean = 1;
+   $opt_tmp   = "/tmp";
+
+   #
+   # Get the arguments from the command line
+   # Changes to the command line arguments must have corresponding changes to:
+   #    1. the usage string (above)
+   #    2. the rsh command specification in processAction
+   #
+   $options = &GetOptions('action=s',
+                          'clean!',
+                          'data=s',
+                          'end=s',
+                          'file=s',
+                          'help', 
+                          'keep', 
+                          'intersect',
+                          'laterThan=s',
+                          'msg=s',
+                          'not',
+                          'olderThan=s',
+                          'priorTo=s',
+                          'queue',
+                          'rmdir',
+                          'Secure',
+                          'start=s',
+                          'time=s',
+                          'tmp=s',
+                          'union',
+                          'verbose',
+                          'wait',
+                          'xclude', 
+                          'zip', 
+                          '<>', \&badArg );
+
+   if ( $options == 0 || $opt_help ) {
+      print $usage;
+      exit 0;
+   }
+
+   #
+   # Do we try to continue upon errors?
+   #
+   if ( $opt_keep ) {
+      $returnOnError = 0;
+   }
+   else {
+      $returnOnError = 1;
+   }
+
+   #
+   # Initialize temporary base file names               
+   #                  
+   $tmpDataName   = "$opt_tmp/dataDirectives";                
+   $tmpEventName  = "$opt_tmp/dataEvents";
+   $tmpStatusName = "$opt_tmp/dataStatus";
+
+   #
+   # Open the log message file
+   # 
+   if ( $opt_msg ) {             
+      if ( !open( MSG_FILE, ">$opt_msg" ) ) {                             
+         print "ERROR: $opt_msg cannot be opened.\n";
+         $status = $ERR_IO;                                                    
+         $returnOnError and return;                      
+      }
+   }
+   else {               
+      *MSG_FILE = *STDOUT;                               
+   }
+
+   #
+   # Keep track of time qualifing options
+   #
+   $eventOptions = 0;
+   $timeQualifiers = 0;
+
+   #
+   # Open the data directive file
+   #
+   $opt_data or $opt_data = "dataDirectives.list";
+   if ( !open( DATA_FILE, "<$opt_data" ) ) {
+      print MSG_FILE "ERROR: $opt_data cannot be opened.\n";
+      $status = $ERR_IO;
+      return;
+   }
+
+   #
+   # Determine the type of action
+   #
+   $ACTION_LIST = 1; $ACTION_PURGE = 2; $ACTION_TAR = 3;
+   if ( $opt_action ) {
+      if ( $opt_action =~ m/list/i ) {
+         $action = $ACTION_LIST;
+      }
+      elsif ( $opt_action =~ m/purge/i ) {
+         $action = $ACTION_PURGE;
+      }
+      elsif ( $opt_action =~ m/tar/i ) {
+         $action = $ACTION_TAR;
+      }
+      else {
+         print MSG_FILE "ERROR: invalid --action specified.\n";
+         $status = $ERR_COMMAND_LINE;
+         return;
+      }
+   }
+   else {
+      $action = $ACTION_LIST;
+   }
+
+   #
+   # Open the action output file
+   #
+   if ( $action == $ACTION_TAR ) {
+      if ( $opt_file ) {
+         if ( $opt_file =~ m/\w+\:.+/ ) {
+            #
+            # Remote tar file, 
+            # make sure --wait is set and --zip is off
+            #
+####################################################################
+#
+# Now that we're doing a tar create rather than a tar append,
+# the zip option should be ok on remote archive -- needs testing!
+#
+#            if ( $opt_zip ) {
+#               print MSG_FILE "ERROR: --zip option is not valid ".
+#                              "with remote tar archive.\n";
+#               $status = $ERR_COMMAND_LINE;
+#               $returnOnError and return;
+#            }
+####################################################################
+            $remoteTar = 1;
+            $tar_file = $opt_file;
+            $opt_wait = 1;
+         }
+         elsif ( $opt_file =~ m%^/.*% ) {
+            #
+            # Explicit local path
+            #
+            $tar_file = $opt_file;
+         }
+         else {
+            #
+            # Relative local path
+            #
+            $tar_file = cwd() . "/$opt_file";
+         }
+      }
+      else {
+         $tar_file = "/dev/nst0";
+      }
+   }
+   else {
+      if ( $opt_file ) {
+         if ( !open( OUT_FILE, ">$opt_file" ) ) {
+            print MSG_FILE "ERROR: $opt_file cannot be opened.\n";
+            $status = $ERR_IO;
+            $returnOnError and return;
+            *OUT_FILE = *STDOUT;
+         }
+      }
+      else {
+         *OUT_FILE = *STDOUT;
+      }
+   }
+
+   #
+   # Open the event file
+   #
+   if ( $opt_time ) {
+      if ( !open( EVENT_FILE, "<$opt_time" ) ) {
+         print MSG_FILE "ERROR: $opt_time cannot be opened.\n";
+         $status = $ERR_IO;
+         return;
+      }
+      $eventOptions++;
+   }
+
+   #
+   # Make sure start and end occur together
+   #
+   if ( ($opt_start && !$opt_end) || ($opt_end && !$opt_start) ) {
+      print MSG_FILE "ERROR: -start and -end options must occur together\n";
+      $status = $ERR_COMMAND_LINE;
+      return;
+   }
+
+   #
+   # Translate olderThan to a specific date/time
+   #
+   if ( $opt_olderThan ) {
+      $timeQualifiers++;
+      $now = time;
+      $then = $now - (scalar($opt_olderThan)*86400);
+      ($gmtSec,$gmtMin,$gmtHour,$gmtDay,$gmtMonth,$gmtYear) = gmtime($then);
+      $olderThan = sprintf( "%04d%02d%02d%02d%02d%02d", 
+                   $gmtYear+1900,$gmtMonth+1,$gmtDay,$gmtHour,$gmtMin,$gmtSec ); 
+   }
+
+   #
+   # Parse out optional syntax for -priorTo, -laterThan, -start, -end
+   #
+   if ( $opt_priorTo ) {
+      if ( $opt_priorTo =~ m%(\d{4})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})% ) {
+         $priorTo = $1.$2.$3.$4.$5.$6;
+         $timeQualifiers++;
+      }
+      else {
+         print MSG_FILE "ERROR: Illegal command line syntax for -priorTo\n";
+         $status = $ERR_COMMAND_LINE;
+         return;
+      }
+   }
+   if ( $opt_laterThan ) {
+      if ( $opt_laterThan =~ m%(\d{4})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})% ) {
+         $laterThan = $1.$2.$3.$4.$5.$6;
+         $timeQualifiers++;
+      }
+      else {
+         print MSG_FILE "ERROR: Illegal command line syntax for -laterThan\n";
+         $status = $ERR_COMMAND_LINE;
+         return;
+      }
+   }
+   if ( $opt_start ) {
+      if ( $opt_start =~ m%(\d{4})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})% ) {
+         $start = $1.$2.$3.$4.$5.$6;
+         $eventOptions++;
+      }
+      else {
+         print MSG_FILE "ERROR: Illegal command line syntax for -start\n";
+         $status = $ERR_COMMAND_LINE;
+         return;
+      }
+   }
+   if ( $opt_end ) {
+      if ( $opt_end =~ m%(\d{4})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})[/:_]*(\d{2})% ) {
+         $end = $1.$2.$3.$4.$5.$6;
+         $eventOptions++;
+      }
+      else {
+         print MSG_FILE "ERROR: Illegal command line syntax for -end\n";
+         $status = $ERR_COMMAND_LINE;
+         return;
+      }
+   }
+
+   #
+   # Check for the correct combination of time qualifing options
+   #
+   $logicalOptions = 0;
+   if ( $opt_union ) { $logicalOptions++; }
+   if ( $opt_intersect ) { $logicalOptions++; }
+   if ( $opt_xclude ) { $logicalOptions++; }
+
+   if ( (($timeQualifiers >= 2) && !$logicalOptions ) || 
+        (($timeQualifiers == 1) && $eventOptions && !$logicalOptions) ) {
+      print MSG_FILE "ERROR: Multiple time qualifing options require a\n" .
+                    "       logical operator option ".
+                    "(--union, --intersect, --xclude).\n";
+      $status = $ERR_COMMAND_LINE;
+      return;
+   }
+   if ( $logicalOptions > 1 ) {
+      print MSG_FILE "ERROR: Only one logical option is allowed.\n";
+      $status = $ERR_COMMAND_LINE;
+      return;
+   }
+   if ( ($logicalOptions && !$timeQualifiers) ||
+        ($logicalOptions &&  $timeQualifiers==1  && !$eventOptions) ) {
+      print MSG_FILE "ERROR: Unnecessary logical operator option\n" .
+                    "       may cause unexpected results.\n";
+      $status = $ERR_COMMAND_LINE;
+      return;
+   }
+}
+
+###############################################################################
+
+sub badArg 
+{
+   print $usage;
+   exit $ERR_COMMAND_LINE;
+}
+
+###############################################################################
+
+sub processEvents
+{
+   #
+   # Determine the events to be processed with data directives
+   #
+   $opt_verbose and print MSG_FILE "\n\n***** Time *****\n";
+
+   if ( $opt_time ) {
+      #
+      # Get events from a file
+      #
+      while( <EVENT_FILE> ) {
+         #
+         # skip comments and blank lines
+         #
+         next if ( m/^\s*#/ );
+         next if ( m/^\s*$/ );
+
+         #
+         # event syntax: "start yyyy mm dd hh mm ss end yyyy mm dd hh mm ss"
+         #
+         if ( m%\s*start\s*(\d{4})[ /:_]*(\d{1,2})[ /:_]*(\d{1,2})[ /:_]*(\d{1,2})[ /:_]*(\d{1,2})[ /:_]*(\d{1,2})\s*end\s*(\d{4})[ /:_]*(\d{1,2})[ /:_]*(\d{1,2})[ /:_]*(\d{1,2})[ /:_]*(\d{1,2})[ /:_]*(\d{1,2})% ) {
+            $year  = $1; 
+            $month = twoDigit( $2 );
+            $day   = twoDigit( $3 );
+            $hour  = twoDigit( $4 );
+            $min   = twoDigit( $5 );
+            $sec   = twoDigit( $6 );
+            $startStr = $year.$month.$day.$hour.$min.$sec;
+            $year  = $7; 
+            $month = twoDigit( $8 );
+            $day   = twoDigit( $9 );
+            $hour  = twoDigit( $10 );
+            $min   = twoDigit( $11 );
+            $sec   = twoDigit( $12 );
+            $endStr = $year.$month.$day.$hour.$min.$sec;
+            push( @eventStart, $startStr );
+            push( @eventEnd, $endStr );
+            $opt_verbose and 
+               print MSG_FILE "Event start=$startStr   end = $endStr\n";
+         }
+         else {
+            print MSG_FILE "ERROR: Illegal date/time syntax at line $..\n";
+            $status = $ERR_DIRECTIVE_SYNTAX;
+            return;
+         }
+      }
+      close( EVENT_FILE );
+   }
+
+   #
+   # Add command line event, if specified
+   #
+   if ( $opt_start  &&  $opt_end ) {
+      push( @eventStart, $start );
+      push( @eventEnd, $end );
+      $opt_verbose and 
+         print MSG_FILE "Event start=$start   end = $end\n";
+   }
+   
+
+   if ( !$opt_time && !$opt_start && !$opt_end && 
+        !$opt_priorTo && !$opt_laterThan && !$opt_olderThan ) {
+      #
+      # Use today's events
+      #
+      $opt_verbose and 
+         print MSG_FILE "Using the last 24 hours " .
+                       "for processing data directives\n";
+      ($gmtSec, $gmtMin, $gmtHour, $gmtDay, $gmtMonth, $gmtYear) = gmtime;
+      $startStr = sprintf( "%04d%02d%02d%02d%02d%02d", 
+                  $gmtYear+1900,$gmtMonth+1,$gmtDay-1,$gmtHour,$gmtMin,$gmtSec ); 
+      $endStr   = sprintf( "%04d%02d%02d%02d%02d%02d", 
+                  $gmtYear+1900,$gmtMonth+1,$gmtDay,$gmtHour,$gmtMin,$gmtSec ); 
+      $startStr =~ s/\s{1}/0/g;
+      $endStr   =~ s/\s{1}/0/g;
+      push( @eventStart, $startStr );
+      push( @eventEnd, $endStr );
+      $opt_verbose and 
+         print MSG_FILE "Event start=$startStr   end = $endStr\n";
+   }
+   elsif ( $opt_olderThan && $opt_verbose ) {
+      print MSG_FILE "Older than: $olderThan\n";
+   }
+
+   $numEvents = scalar( @eventStart );
+}
+
+###############################################################################
+
+sub processDirectives
+{
+   while ( <DATA_FILE> ) {
+      #
+      # skip comments and blank lines
+      #
+      next if ( m/\s*#/ );
+      next if ( m/^\s*$/ );
+
+      if ( m/(\$?\w+)\s*\:\s*(.+)/ ) {
+         #
+         # We have a primary directive
+         #
+         $hostName = $1;
+         $directive = $2;
+         doPrimaryDirective;
+      }
+      else {
+         #
+         # We have a secondary directive
+         #
+         chop;
+         $directive = $_;
+         $directives{$_} = "";
+         doSecondaryDirective;
+      }
+   }
+
+   #
+   # Close a few files that we're finished with
+   #
+   close( DATA_FILE );
+   $status >= 0 or return;
+   foreach $hostName( @hostList ){
+      close( $secondaryFile{$hostName} );
+   }
+}
+
+###############################################################################
+
+sub doPrimaryDirective
+{
+   $primary = 1;
+   $opt_verbose and 
+      print MSG_FILE "Primary directive: host = $hostName    " .
+                    "directive = $directive\n";
+
+   #
+   # Make sure all directives are primary
+   #
+   if ( $secondary ) {
+      print MSG_FILE "ERROR: Missing host name " .
+                    "in data directive prior to line $..\n";
+      $status = $ERR_DIRECTIVE_SYNTAX;
+      return;
+   }
+
+   #
+   # Check the syntax of the secondary directive
+   #
+   $syntaxCheckOnly = 1;
+   parseDirective;
+   $status >= 0 or return;
+
+   #
+   # Open the secondary directive file if necessary
+   #
+   ($logicalHost, $physicalHost) = interpolateHostName( $hostName );
+   if ( !$secondaryFile{$hostName} ) {
+      $remoteDataFile = "$tmpDataName.$logicalHost.$$";
+      $data2Handle = $remoteDataFile;
+      if ( !open( $data2Handle, ">>$remoteDataFile" ) ) {
+         print MSG_FILE "ERROR: Cannot open secondary data directive file\n" .
+                       "$remoteDataFile.\n";
+         $status = $ERR_IO;
+         return;
+      }
+      $opt_verbose and 
+         print MSG_FILE "Opening secondary data directive file " .
+                       "$remoteDataFile\n";
+      $secondaryFile{$hostName} = $data2Handle;
+      push( @hostList, $hostName );
+   }
+
+   #
+   # Write out the secondary directive
+   #
+   $handle2 = $secondaryFile{$hostName};
+   print $handle2 "$directive\n";
+}
+
+###############################################################################
+
+sub doSecondaryDirective
+{
+   $secondary = 1;
+   $opt_verbose and 
+      print MSG_FILE "\n***** Secondary directive *****\n";
+
+   #
+   # Make sure all directives are secondary
+   #
+   if ( $primary ) {
+      print MSG_FILE "ERROR: Missing host name in data directive on line $..\n";
+      $status = $ERR_DIRECTIVE_SYNTAX;
+      return;
+   }
+
+   #
+   # Do a cursory check to make sure any directive with a <date/time> 
+   # expression begins with a YEAR specification
+   #
+   if ( $directive =~ tr/<>/<>/  &&
+      !($directive =~ m/.*<y{2,4}.*>.*/i) ) {
+      print MSG_FILE "ERROR: Illegal data directive syntax at line $..\n" .
+                    "Date/time expression does not begin with " .
+            "YY or YYYY specification\n";
+      $status = $ERR_DIRECTIVE_SYNTAX;
+      return;
+   }
+
+   #
+   # Parse the directive, checking for date/time matches
+   #
+   $syntaxCheckOnly = 0; $makeLinks = 0;
+   while( nextDirective( \%directives ) ) {
+      parseDirective;
+      $status >= 0 or return;
+   }
+}
+
+###############################################################################
+
+sub nextDirective
+{
+   my( $href ) = @_;
+   $directive = each %$href;
+   $fileDateTime = $$href{$directive};
+   delete $$href{$directive};
+   scalar( keys %$href );
+   return $directive;
+}
+
+###############################################################################
+
+sub parseDirective
+{
+   $opt_queue and 
+      print MSG_FILE "directive: $directive  dateTime: $fileDateTime\n";
+
+   #
+   # Do some initializations
+   #
+   undef $logicalPath;
+   undef $physicalPath;
+   $canonicalPath = 1;
+   $checkEvents = 0;
+
+   #
+   # Tokenize the directive and determine if we have a canonical directive
+   #
+   @tokens = split( m%/%, $directive );
+   $first = 1;
+   while( $#tokens >= $[ ) {
+      expandToken;
+      $status >= 0 or return;
+      $first = 0;
+   }
+
+   # 
+   # If this is a canonical directive -- check for a date/time match
+   # unless we're simply doing a syntax check or constructing links
+   #
+   if (  $canonicalPath  &&  !$syntaxCheckOnly  &&  !$makeLinks ) {
+      $opt_verbose and 
+         print MSG_FILE "   canonical path: $physicalPath\n";
+      checkForMatch;
+   }
+}
+
+###############################################################################
+
+sub checkForMatch
+{
+   $toss = 0;
+   $dateTimeMatch = 0;
+
+   #
+   # Compare the file's date/time spec with the event times
+   #
+   $formatLength = length( $fileDateTime );
+   for( $i=0; $formatLength && $i<$numEvents; $i++ ) {
+      $checkEvents = 1;
+      $startStr = substr($eventStart[$i],0,$formatLength);
+      $endStr   = substr($eventEnd[$i],0,$formatLength);
+      if ( $fileDateTime ge $startStr and $fileDateTime le $endStr ) {
+         #
+         # We've got a date/time match -- jump out
+         #
+         $dateTimeMatch = 1;
+         $opt_verbose and 
+            print MSG_FILE "   Event Match ($startStr - $endStr)\n";
+         last;
+      }
+   }
+
+   #
+   # See if we have any reason to throw this file out yet
+   #
+   if ( ($dateTimeMatch and $opt_xclude)  ||
+        (!$dateTimeMatch and $opt_intersect and $checkEvents) ) {
+      $toss = 1;
+      $opt_verbose and 
+         print MSG_FILE "   Toss after event check\n";
+   }
+
+   #
+   # Compare the file's date/time spec with the -priorTo time
+   #
+   if ( $opt_priorTo and !$toss ) {
+      if ( $fileDateTime lt $priorTo ) {
+         $dateTimeMatch = 1;
+         $opt_verbose and 
+            print MSG_FILE "   PriorTo Match\n";
+      }
+      elsif( $opt_intersect or $opt_xclude ) {
+         $toss = 1;
+         $opt_verbose and 
+            print MSG_FILE "   Toss after priorTo\n";
+      }
+   }
+
+   #
+   # Compare the file's date/time spec with the -laterThan time
+   #
+   if ( $opt_laterThan  and !$toss ) {
+      if ( $fileDateTime gt $laterThan ) {
+         $dateTimeMatch = 1;
+         $opt_verbose and 
+            print MSG_FILE "   LaterThan Match\n";
+      }
+      elsif( $opt_intersect or $opt_xclude ) {
+         $toss = 1;
+         $opt_verbose and 
+            print MSG_FILE "   Toss after laterThan\n";
+      }
+   }
+
+   #
+   # Compare the file's date/time spec with the -olderThan time
+   #
+   if ( $opt_olderThan  and !$toss ) {
+      if ( $fileDateTime lt $olderThan ) {
+         $dateTimeMatch = 1;
+         $opt_verbose and 
+            print MSG_FILE "   OlderThan Match\n";
+      }
+      elsif( $opt_intersect or $opt_xclude ) {
+         $toss = 1;
+         $opt_verbose and 
+            print MSG_FILE "   Toss after olderThan\n";
+      }
+   }
+
+   #
+   #
+   # Check the --not option to determine if we keep this entry
+   #
+   $keep = 0;
+   if ( $toss ) {
+      if ( $opt_not ) { $keep = 1; }
+   }
+   elsif ( ( $fileDateTime   &&  !$opt_not  &&  $dateTimeMatch )  ||
+           ( $fileDateTime   &&   $opt_not  && !$dateTimeMatch )  || 
+           (!$fileDateTime   &&  !$opt_not ) ) {
+      $keep = 1;
+   }
+
+   #
+   # It's a keeper, put it in the list of dataFiles to act on
+   #
+   if ( $keep ) {
+      $opt_verbose and 
+         print MSG_FILE "   Keep\n";
+      $dataFiles{$directive} = $fileDateTime;
+   }
+}
+
+###############################################################################
+
+sub expandToken
+{
+   undef $interpEnvVar;
+
+   #
+   # Get the next token
+   #
+   $token = shift @tokens;
+
+   #
+   # Figure out what type of token it is
+   #
+   if ( $token =~ m/^\$(.+)/ ) {
+      #
+      # Environment variable
+      #
+      $interpEnvVar = $ENV{$1};
+      $opt_queue and 
+         print MSG_FILE "   Environment token: $token\n";
+
+      if ( $first ) {
+         #
+         # Skip open an env. var. in the first positition 
+         # so that it is retained as a logical path
+         # to be used later as a link
+         #
+         $logicalPath  = $token;
+         $physicalPath = $ENV{$1};
+         return;
+      }
+      else {
+         #
+         # Interpolate all other env. vars.
+         #
+         $logicalPath  .= "/$interpEnvVar";
+         $physicalPath .= "/$interpEnvVar";
+         $tarPath      .= "/$interpEnvVar";
+      }
+   }
+   elsif ( $token =~ tr/*/*/ ) {
+      #
+      # Shell wildcard expression -- match the wildcard
+      #
+      $canonicalPath = 0;
+      translateWildcard;
+      $exprCount = $token =~ tr/<>/<>/;
+      if ( !$syntaxCheckOnly && !$exprCount ) {
+         matchExpression;
+         return;
+      }
+   }
+   if ( $exprCount = $token =~ tr/<>/<>/ ) {
+      #
+      # Date/Time expression -- match the date/time
+      #
+      $opt_queue and 
+         print MSG_FILE "   Expressive token: $token\n";
+      $canonicalPath = 0;
+
+      translatePattern;
+      ($status >= 0 && !$syntaxCheckOnly) or return;
+
+      matchExpression;
+      $status >= 0 or return;
+   }
+   if ( !$interpEnvVar  &&  $token ) {
+      #
+      # Literal string
+      #
+      if ( $first ) {
+         print MSG_FILE "ERROR: Illegal data directive syntax at line $..\n" . 
+               "       Relative path not valid.\n";
+         $status = $ERR_DIRECTIVE_SYNTAX;
+         return;
+      }
+      $opt_queue and 
+         print MSG_FILE "   Literal token: $token\n";
+      $logicalPath  .= "/$token";
+      $physicalPath .= "/$token";
+      $tarPath      .= "/$token";
+   }
+
+   #
+   # If we've gotten this far, we have a fully expanded token
+   # Create the physical destination, if necessary
+   #
+   if ( $makeLinks ) {
+      if ( $#tokens < $[ ) {
+         #
+         # We've hit the filename, make a link
+         #
+         if ( -e $tarPath ) {
+            print MSG_FILE "EIKES! path already exists!\n" .
+                          "       $tarPath\n";
+            $status = $ERR_SYSTEM_CALL;
+            return;
+         }
+         else {
+            symlink( $physicalPath, $tarPath );
+            $opt_queue and 
+               print MSG_FILE "   Link from: $physicalPath\n".
+                             "          to: $tarPath\n";
+         }
+      }                                                            
+      else {            
+         #
+         # We're on a directory name, create the destination subdirectory
+         #
+         if ( !-e $tarPath ) {
+            if ( !mkdir( $tarPath, 0777 ) ) {
+               print MSG_FILE "ERROR: Cannot create directory $tarPath\n";
+               $status = $ERR_IO;
+               $returnOnError and return;
+            }
+            $opt_queue and print MSG_FILE "   Mk dir:  $tarPath\n";
+         }
+      }        
+   }
+}
+
+###############################################################################
+
+sub matchExpression
+{
+   #
+   # Make sure we can open the physical path up to this point in the directive
+   #
+   if ( !opendir( SRCDIR, $physicalPath )) {
+      print MSG_FILE "ERROR: Cannot open directory $physicalPath\n";
+      $status = $ERR_IO;
+      return;
+   }
+
+   #
+   # Compare entries against pattern
+   #
+   $opt_queue and print MSG_FILE "      Scanning directory $physicalPath\n";
+   while( $dirEntry = readdir( SRCDIR ) ) {
+      $dirEntry =~ m/^\.{1,2}$/ and next;
+      !($dirEntry =~ m/^$token$|^$token.Z$|^$token.gz$/) and next;
+      @matches = $dirEntry =~ m/$token/;
+      if ( $matches[0] ) {
+         #
+         # We've got a match 
+         #    put it back in the directives list with the new date/time
+         #
+         if ( $short_year ) {
+	     if( $year >= 90 ) {
+		 $newDateTime = "19";
+	     }
+             else {
+		 $newDateTime = "20";
+	     }
+         }
+         else {
+            $newDateTime = $fileDateTime;
+         }
+         $pos = 0;
+         foreach $patternMatch ( @matches ) {
+            $pos++;
+            if ( $julian && $pos == $jpos ) {
+               #
+               # Convert the julian date to a month/day
+               # The first four digits of the file's date/time
+               # are guaranteed to be the year
+               #
+               $newDateTime =~ m/^(\d{4})/;
+               $jyear = $1;
+               ($jmo, $jday) = &inv_julian( $patternMatch, $jyear );
+               $newDateTime = sprintf( "%s%02d%02d", 
+                                       $newDateTime, $jmo, $jday );
+            }
+            elsif ( $patternMatch ne "1" ) {
+               #
+               # Conventional month/day syntax
+               #
+               $newDateTime .= $patternMatch;
+            }
+         }
+         $opt_queue and print MSG_FILE "      dirEntry = $dirEntry\n";
+         $logicalEntry = $logicalPath . "/$dirEntry";
+         foreach $token ( @tokens ) {
+            $logicalEntry .= "/$token";
+         }
+         $directives{$logicalEntry} .= $newDateTime;
+      }
+   }
+   @tokens = ();
+   close SRCDIR;
+}
+
+###############################################################################
+
+sub translatePattern
+{
+   #
+   # Transform the date/time token to a pattern matching string
+   #
+   while ( $token =~ m/(.*)<(\w+)>(.*)/ ) {
+      #
+      # Clear out the old stuff
+      #
+      undef $short_year; undef $year; undef $month; undef $day;
+      undef $hour; undef $minute; undef $second;
+      undef $julian; undef $jpos;
+
+      #
+      # Extract date/time format specification
+      #
+      $jpos    = 0;
+      $prefix  = $1;
+      $format  = $2;
+      $suffix  = $3;
+      $token   = $prefix;
+
+      #
+      # YEAR
+      #
+      if ( $format =~ m/^(y{2,4})(.*)/i ) {
+         $year = $1;
+         length( $year ) == 2 and $short_year = 1;
+         $yearFormat = "(\\d{" . length( $1 ) . "})";
+         $token .= $yearFormat;
+         $format = $2;
+         $jpos++;
+      }
+
+      #
+      # MONTH
+      #
+      if ( $format =~ m/^(m{2})(.*)/i ) {
+         $month = $1;
+         $monthFormat = "(\\d{2})";
+         $token .= $monthFormat;
+         $format = $2;
+      }
+
+      #
+      # DAY
+      #
+      if ( $format =~ m/^(d{2})(.*)/i ) {
+         $day = $1;
+         $dayFormat = "(\\d{2})";
+         $token .= $dayFormat;
+         $format = $2;
+      }
+
+      #
+      # DAY-Of-YEAR, aka julian day
+      #
+      if ( $format =~ m/^(j{3})(.*)/i ) {
+         $julian = $1;
+         $julianFormat = "(\\d{3})";
+         $token .= $julianFormat;
+         $format = $2;
+         $jpos++;
+      }
+
+      #
+      # HOUR
+      #
+      if ( $format =~ m/^(h{2})(.*)/i ) {
+         $hour = $1;
+         $hourFormat = "(\\d{2})";
+         $token .= $hourFormat;
+         $format = $2;
+      }
+
+      #
+      # MINUTE
+      #
+      if ( $format =~ m/^(m{2})(.*)/i ) {
+         $minute = $1;
+         $minuteFormat = "(\\d{2})";
+         $token .= $minuteFormat;
+         $format = $2;
+      }
+
+      #
+      # SECOND
+      #
+      if ( $format =~ m/^(s{2})(.*)/i ) {
+         $second = $1;
+         $secondFormat = "(\\d{2})";
+         $token .= $secondFormat;
+         $format = $2;
+      }
+      $token .= $suffix;
+   }
+
+   if ( $opt_queue ) {
+      if ( $julian ) {
+         print MSG_FILE "      Pattern = " .
+                       "$token ($year$julian$hour$minute$second)\n";
+      }
+      else {
+         print MSG_FILE "      Pattern = " .
+                       "$token ($year$month$day$hour$minute$second)\n";
+      }
+   }
+}
+
+###############################################################################
+
+sub translateWildcard
+{
+   #
+   # Translate shell . and * syntax to perl \. and .* syntax
+   #
+   $token =~ s/\./\\\./g;
+   $token =~ s/\*/\.\*/g;
+}
+
+###############################################################################
+
+sub twoDigit
+{
+   my( $digit ) = @_;
+   if ( length($digit) == 1 ) {
+      $digit = "0$digit";
+   }
+   return $digit;
+}    
+
+###############################################################################
+
+sub interpolateHostName
+{
+   my( $machine ) = @_;
+
+   if ( $machine =~ m/^\$(.+)/ ) {       
+      $logicalHost = $1;
+      $physicalHost = $ENV{$1};
+   }
+   else {                         
+      $logicalHost = $machine;      
+      $physicalHost = $machine;      
+   }
+
+   return( $logicalHost, $physicalHost );
+}
+
+###############################################################################
+
+sub processAction
+{
+   if ( $primary ) {
+      #
+      # We don't need the output file since we won't be processing data
+      # Get rid of it so that the secondary/remote execution can use it
+      #
+      if ( $opt_file  &&  $action != $ACTION_TAR ) {
+         close( OUT_FILE );
+         unlink( $opt_file );
+      }
+
+      #
+      # Primary directives: setup data processing for each logical host
+      # First, write out the temporary event file to be used
+      #
+      $tmpEventFile = "$tmpEventName.$$";
+      if ( !open( EVENT_FILE, ">$tmpEventFile" ) ) {
+         print MSG_FILE "ERROR: $tmpEventFile cannot be opened.\n";
+         $status = $ERR_IO;
+         return;
+      }
+      for( $i=0; $i<$numEvents; $i++ ) {
+         print EVENT_FILE "start $eventStart[$i] end $eventEnd[$i]\n";
+      }
+      close( EVENT_FILE );
+
+      #
+      # Establish command line options for remote processData execution 
+      #
+      $opt_action    and $aopt = "--action $opt_action";
+     !$opt_clean     and $copt = "--noclean";
+      $opt_file      and $fopt = "--file $opt_file";
+      $opt_intersect and $iopt = "--intersect";
+      $opt_keep      and $kopt = "--keep";
+      $opt_laterThan and $lopt = "--laterThan $opt_laterThan";
+      $opt_msg       and $mopt = "--msg $opt_msg";
+      $opt_not       and $nopt = "--not";
+      $opt_olderThan and $oopt = "--olderThan $opt_olderThan";
+      $opt_queue     and $qopt = "--queue";
+      $opt_priorTo   and $popt = "--priorTo $opt_priorTo";
+      $opt_Secure    and $Sopt = "--Secure";
+      $opt_tmp       and $topt = "--tmp $opt_tmp";
+      $opt_union     and $uopt = "--union";
+      $opt_wait      and $wopt = "--wait";
+      $opt_xclude    and $xopt = "--xclude";
+      $opt_zip       and $zopt = "--zip";
+
+      #
+      # Which communication mechanism do we use?
+      #
+      if ( $opt_Secure ) {
+         $shell = "ssh";
+         $copy  = "scp";
+      }
+      else {
+         $shell = "ssh";
+         $copy  = "scp";
+      }
+
+      #
+      # Execute processData on each of the logical remote hosts
+      #
+      foreach $hostName ( @hostList ) {
+         #
+         # Interpolate the hostname
+         #
+         ($logicalHost, $physicalHost) = interpolateHostName( $hostName );
+         $opt_verbose and 
+            print MSG_FILE "HOST: $logicalHost ($physicalHost)...\n";
+
+         #
+         # First, copy the directives file to the remote host
+         #
+         $remoteDataFile = "$tmpDataName.$logicalHost.$$";
+         $cmd = "$copy $remoteDataFile $physicalHost:$remoteDataFile";
+         $opt_verbose and print MSG_FILE "  $cmd\n";
+         if ( system( "$cmd" ) != 0 ) {
+            $status = $ERR_SYSTEM_CALL;
+            $returnOnError and return;
+            next;
+         }
+
+         #
+         # Next, copy the event file to the remote host
+         #
+         $remoteEventFile = "$tmpEventName.$logicalHost.$$";
+         $cmd = "$copy $tmpEventFile $physicalHost:$remoteEventFile";
+         $opt_verbose and print MSG_FILE "  $cmd\n";
+         if ( system( "$cmd" ) != 0 ) {
+            $status = $ERR_SYSTEM_CALL;
+            $returnOnError and return;
+            next;
+         }
+
+         #
+         # Finally, execute processData on the remote host
+         #
+         $processData = "$prog --time $remoteEventFile " .
+                        "--data $remoteDataFile " .
+                        "$aopt $copt $fopt $iopt $kopt $lopt $mopt " .
+                        "$nopt $oopt $popt $Sopt $topt $qopt $uopt $wopt " .
+                        "$xopt $zopt -- $logicalHost";
+         if ( $opt_wait ) {
+            $cmd = "$shell $physicalHost \"$processData\"";
+         }
+         else {
+            $cmd = "$shell -n $physicalHost \"$processData &\" &";
+         }
+         $opt_verbose and print MSG_FILE "  $cmd\n";
+         $rc = system( "$cmd" );
+
+         #
+         # Return codes for ssh and rsh are different
+         # ssh will do a pass-thru, rsh will not so we must
+         # get the return code from a file
+         #
+         if ( $shell eq "ssh" ) {
+            if ( $rc < 0 ) {
+               $status = $ERR_SYSTEM_CALL;
+               $returnOnError and return;
+               next;
+            }
+            elsif( $opt_wait ) {
+               #
+               # Accumulate the return codes
+               #
+               $status += $rc;
+            }
+         }
+         else {
+            if ( $rc != 0 ) {
+               $status = $ERR_SYSTEM_CALL;
+               $returnOnError and return;
+               next;
+            }
+            elsif( $opt_wait ) {
+               #
+               # Read return code from a file
+               #
+               $remoteStatusFile = "$tmpStatusName.$logicalHost.$$";
+               $cmd = "$copy $physicalHost:$remoteStatusFile $tmpStatusName";
+               $opt_verbose and print MSG_FILE "  $cmd\n";
+               if ( system( "$cmd" ) != 0  ||
+                    !open( STATUS_FILE, "<$tmpStatusName" )) {
+                  print MSG_FILE "ERROR: $tmpStatusName cannot be opened.\n".
+                                 "       Return status for remote processes ".
+                                 "is unknown.\n";
+                  $status = $ERR_STATUS_UNKNOWN;
+                  $returnOnError and return;
+               }
+               else {
+                  $remoteStatus = <STATUS_FILE>;
+                  close( STATUS_FILE );
+                  unlink( $tmpStatusName );
+                  $cmd = "$shell $physicalHost " .
+                         "\"/bin/rm $remoteStatusFile &\" &";
+                  system( $cmd );
+                  if ( $remoteStatus >= 0 ) {
+                     #
+                     # Accumulate status upon successful execution of
+                     # remote processData command
+                     #
+                     $status += $remoteStatus;
+                  }
+                  else {
+                     #
+                     # Something failed on the remote processData command
+                     #
+                     $status = $remoteStatus;
+                     $returnOnError and return;
+                  }
+               }
+            }
+         }
+      }
+   }
+   else {
+      #
+      # Secondary directives: execute the requested action
+      #
+      $opt_verbose and print MSG_FILE "\n***** Results *****\n";
+      if ( $action == $ACTION_LIST ) {
+         executeList;
+      }
+      elsif ( $action == $ACTION_PURGE  ) {
+         executePurge;
+      }
+      elsif ( $action == $ACTION_TAR  ) {
+         executeTar;
+      }
+
+      #
+      # If this is a remote execution which is executed sequentially via rsh, 
+      # write out the status file so the parent process knows how we did
+      # We don't need to do this for ssh since ssh will pass-thru the status
+      #
+      if ( $ARGV[0] && $opt_wait && !$opt_Secure ) {
+         if ( $opt_data =~ m/\w+\.(\w+)\.(\d+)/ ) {
+            $logicalHost = $1;
+            $pid  = $2;
+            $remoteStatusFile = "$tmpStatusName.$logicalHost.$pid";
+            if ( !open( STATUS_FILE, ">$remoteStatusFile" ) ) {
+               print MSG_FILE "ERROR: $remoteStatusFile cannot be opened.\n";
+               $status = $ERR_IO;
+               return;
+            }
+            else {
+               print STATUS_FILE "$status\n";
+               close( STATUS_FILE );
+            }
+         }
+         else {
+            print MSG_FILE "ERROR: Unexpected data directives file name\n" .
+                           "       $opt_data\n";
+            $status = $ERR_UNEXPECTED;
+            return;
+         }
+      }
+   }
+}
+
+###############################################################################
+
+sub executeList
+{
+   foreach $entry ( keys %dataFiles ) {
+      $status++;
+      print OUT_FILE "$entry\n";
+   }
+}
+
+###############################################################################
+
+sub executePurge
+{
+   foreach $entry ( keys %dataFiles ) {
+      #
+      # Interpolate any leading environment variable
+      #
+      @tokens = split( m%/%, $entry );
+      $token = shift @tokens;
+      if ( $token =~ m/^\$(.+)/ ) {
+         $physicalPath = $ENV{$1};
+         while( $#tokens >= $[ ) {                      
+            $token = shift @tokens;
+            $physicalPath .= "/$token";
+         }
+      }
+      else {
+         $physicalPath = $entry;
+      }
+
+      if ( unlink( $physicalPath ) == 1 ) {
+         $status++;
+         print OUT_FILE "Removed: $physicalPath\n";
+         if ( $opt_rmdir && $physicalPath =~ m%(.+)/.+% ) {
+            if ( rmdir( $1 ) == 1 ) {
+               print OUT_FILE "Rmdir: $1\n";
+            }
+         }
+      }
+      else {
+         print OUT_FILE "WARNING: Cannot remove $physicalPath\n";
+      }
+   }
+}
+
+###############################################################################
+
+sub executeTar
+{
+   #
+   # Make the tar directory if necessary
+   #
+   $tarDir = "$opt_tmp/tarstuff";
+   if ( !mkdir( $tarDir, 0777 ) ) {
+      print MSG_FILE "ERROR: Cannot create directory $tarDir\n";
+      $status = $ERR_IO;
+      return;
+   }
+
+   #
+   # Establish links to data files to be tar'ed
+   #
+   setupLinks;
+
+   #
+   # Do the tar archive only if there are data files to be processed
+   #
+   if ( $status > 0 ) {
+      if ( $remoteTar ) {
+         $tarOptions = "cvhf";
+      }
+      else {
+         $tarOptions = "chf";
+         if ( $opt_zip ) {
+            $tarOptions = "z" . $tarOptions;
+         }
+         else {
+            $tarOptions = "v" . $tarOptions;
+         }
+      }
+      $cmd = "cd $tarDir; tar $tarOptions $tar_file .";
+      print MSG_FILE "Running $cmd\n";
+      if ( system( "$cmd" ) != 0 ) {
+         print MSG_FILE "ERROR: tar failed - $!\n";
+         $status = $ERR_SYSTEM_CALL;
+      }
+   }
+
+   #
+   # Clean off tar directory
+   #
+   system( "rm -rf $tarDir" ) == 0 or
+      print MSG_FILE "WARNING: Cannot remove tar directory $tarDir\n";
+}
+
+###############################################################################
+
+sub setupLinks
+{
+   $opt_verbose and print MSG_FILE "Executing physical links...\n";
+
+   #
+   # Now, process the link directives
+   #
+   while( nextDirective( \%dataFiles ) ) {
+      $status++;
+      $makeLinks = 1;
+      $tarPath = $tarDir;
+      parseDirective;
+      if ( $status < 0 ) {
+         #
+         # Something when really wrong!
+         #
+         $status = $ERR_UNEXPECTED;
+         return;
+      }
+   }
+}
+
+###############################################################################
+# &inv_julian: Calculate year, month, day, from julian day
+#              From Laurie Carson
+#
+# Arguments: julian day, year
+# Returns: month, day
+
+sub inv_julian {
+    local($jul_day, $yr) = @_;
+
+    local($mo, $dy, $b, $g, $d, $e, $f, $first_of_year);
+    local($mjd, $l, $n, $i, $j, $month, $day, @answer);
+
+    # Compute number of days from Oct 1, 1582 to Jan 1, $yr
+    $mo = 1;
+    $dy = 1;
+    $b = int( ($mo - 14) / 12);
+    $g = $yr + 4900 + $b;
+    $b = $mo - 2 - 12*$b;
+
+    $d = int( (1461*($g-100))/4);
+    $e = int( (367*$b)/12);
+    $f = int( (3*int($g/100))/4);
+
+    $first_of_year = $d + $e - $f + $dy - 2432076;
+
+    $mjd = $first_of_year + $jul_day - 1;
+    $l = $mjd + 2468570;
+    $n = int( (4*$l)/146097);
+    $l -= int( (146097*$n + 3)/4);
+    $i = int( (4000*($l+1))/1461001);
+    $l += 31 - int( (1461*$i)/4);
+    $j = int( (80*$l)/2447);
+    $day = $l - int( (2447*$j)/80);
+    $l = int($j/11);
+    $month = $j + 2 - 12*$l;
+
+    @answer = ($month, $day);
+    @answer;
+}
+
+###############################################################################
+
+sub cleanup {
+
+   #
+   # Skip this if requested
+   #
+   !$opt_clean and return;
+   
+   #
+   # If this is a remote execution, i.e., via rsh/ssh,
+   # remove the remote directives and events file
+   #
+   if ( $ARGV[0] ) {
+      unlink $opt_data;
+      unlink $opt_time;
+   }
+
+   #
+   # If this is a primary execution, i.e., parent of remote executions,
+   # remove the transitory directives and events file
+   #
+   if ( $primary ) {
+      unlink $tmpEventFile;
+      foreach $hostName( @hostList ){
+         ($logicalHost, $physicalHost) = interpolateHostName( $hostName );
+         $ENV{"HOST"} eq $physicalHost and next;
+         $remoteDataFile = "$tmpDataName.$hostName.$$";
+         unlink $remoteDataFile;
+         $remoteEventFile = "$tmpEventName.$hostName.$$";
+         unlink $remoteEventFile;
+      }
+   }
+}
+

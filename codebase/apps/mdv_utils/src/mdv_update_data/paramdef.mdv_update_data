@@ -1,0 +1,65 @@
+/*********************************************************
+ * parameter definitions for mdv_update_data
+ *
+ * Nancy Rehak, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * October 1997
+ */
+
+paramdef boolean
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { FALSE };
+} debug_flag;
+
+paramdef long
+{
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+  p_min = { 0 };
+  p_max = { 3 };
+  p_default = { 0 };
+} malloc_debug_level;
+
+paramdef enum data_type_t
+{
+  p_descr = "Type of data in input file";
+  p_help = "Uncompressed type of data in input file.";
+  p_options = { DATA_INT8,
+                DATA_INT16,
+                DATA_FLOAT32 };
+  p_default = { DATA_INT8 };
+} data_type;
+
+paramdef enum output_type_t
+{
+  p_descr = "Type to use for writing data to output file";
+  p_options = { OUTPUT_INT8,
+                OUTPUT_INT16,
+                OUTPUT_FLOAT32,
+                OUTPUT_PLANE_RLE8 };
+  p_default = { OUTPUT_PLANE_RLE8 };
+} output_type;
+
+paramdef double
+{
+  p_descr = "old data value";
+  p_help = "All occurrences of this data value in the input file will be changed to new_data_value in the output file.";
+  p_default = { 1.0 };
+} old_data_value;
+
+paramdef double
+{
+  p_descr = "new data value";
+  p_help = "All occurrences of old_data_value in the input file will be changed to this data value in the output file.";
+  p_default = { 0.0 };
+} new_data_value;
+
+paramdef string
+{
+  p_descr = "output directory path";
+  p_help = "Output files will have the same names as the input files, but will be put in this directory.  Note that we currently don't handle recursive directories so all files specified on the command line will end up in the same output directory.";
+  p_default = { "./output" };
+} output_dir;
+

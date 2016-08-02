@@ -1,0 +1,168 @@
+/**********************************************************************
+ * TDRP params for KbandBlanking
+ **********************************************************************/
+
+//======================================================================
+//
+// KbandBlanking reads angles from the SPOL angle FMQ, and determines 
+//   whether the azimith falls into a blanking region or not. It then 
+//   issues blanking/not blanking commands to the kadrx. kadrx will then 
+//   disable the transmit triggers while blanked.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "ops";
+
+//======================================================================
+//
+// COMMUNICATING WITH KADRX via XML-RPC.
+//
+//======================================================================
+ 
+///////////// rpc_server_host /////////////////////////
+//
+// Host name for the ka digital receiver.
+// Type: string
+//
+
+rpc_server_host = "kadrx";
+
+///////////// rpc_server_port /////////////////////////
+//
+// Port for contacting kadrx via XML RPC.
+// Type: int
+//
+
+rpc_server_port = 8081;
+
+///////////// rpc_max_interval ////////////////////////
+//
+// Maximum interval between rpc calls (secs).
+// Type: double
+//
+
+rpc_max_interval = 1;
+
+//======================================================================
+//
+// READING ANGLES FROM S2D.
+//
+//======================================================================
+ 
+///////////// angle_fmq_path //////////////////////////
+//
+// Name of input FMQ for angle data.
+// Type: string
+//
+
+angle_fmq_path = "$(DATA_DIR)/fmq/angles/shmem_30000";
+
+//======================================================================
+//
+// SPECIFYING BLANKING SECTORS.
+//
+//======================================================================
+ 
+///////////// blanking_sectors ////////////////////////
+//
+// Specify the sectors for blanking.
+// The name is for debugging purposes. The counter_clockwise and 
+//   clockwise azimuth limits define the sector in azimuth. The lower and 
+//   upper elevation limits define the sector in elevation.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      double counter_clockwise_azimuth_limit_deg;
+//      double clockwise_azimuth_limit_deg;
+//      double lower_elevation_limit_deg;
+//      double upper_elevation_limit_deg;
+//   }
+//
+// 1D array - variable length.
+//
+
+blanking_sectors = {
+  { "DOE", 20, 40, -90, 2},
+  { "TEST1", 75, 85, -90, 3},
+  { "TEST2", 95, 105, -90, 5},
+  { "TEST3", 115, 130, -90, 5},
+  { "TEST4", 140, 150, -90, 2},
+  { "TEST5", 220, 250, -90, 2},
+  { "TEST6", 350, 10, -90, 4}
+};
+
+///////////// azimuth_lut_resolution //////////////////
+//
+// Resolution of lookup table in azimuth.
+// We compute a lookup table in azimuth, and load it up with flags which 
+//   indicate whether a particular azimuth should be blanked or not.
+// Type: double
+//
+
+azimuth_lut_resolution = 0.01;
+
+//======================================================================
+//
+// SIMULATE MODE.
+//
+//======================================================================
+ 
+///////////// simulate_mode ///////////////////////////
+//
+// Simulation mode.
+// In simulate mode, the blanking will be turned on and off at regular 
+//   intervals. See params below.
+// Type: boolean
+//
+
+simulate_mode = TRUE;
+
+///////////// sim_mode_blanking_on_time_secs //////////
+//
+// Time for blanking to be on in simulate mode (secs).
+// Blanking alternates between on and off regularly. This is the time in 
+//   secs for blanking to be on.
+// Type: double
+//
+
+sim_mode_blanking_on_time_secs = 2;
+
+///////////// sim_mode_blanking_off_time_secs /////////
+//
+// Time for blanking to be off in simulate mode (secs).
+// Blanking alternates between off and off regularly. This is the time 
+//   in secs for blanking to be off.
+// Type: double
+//
+
+sim_mode_blanking_off_time_secs = 5;
+

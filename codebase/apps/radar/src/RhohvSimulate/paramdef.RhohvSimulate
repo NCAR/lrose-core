@@ -1,0 +1,61 @@
+/*********************************************************
+ * parameter definitions for RhohvSimulate
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * June 2012
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "This app simulates time series data and tests the computation of rhohv for various signal-to-noise ratios.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+typedef enum {
+  SIMULTANEOUS, ALTERNATING
+} transmit_mode_t;
+
+paramdef enum transmit_mode_t {
+  p_default = SIMULTANEOUS;
+  p_descr = "Transmit mode for the simulation";
+  p_help = "SIMULTANEOUS: slant 45. ALTERNATING: fast alternating as for CHILL and SPOL.";
+} transmit_mode;
+
+paramdef double {
+  p_default = 100;
+  p_descr = "Number of samples for computing moments";
+  p_help = "We generate an IQ time series of this length.";
+} n_samples;
+
+paramdef double {
+  p_default = -30.0;
+  p_descr = "Signal power (dBm)";
+  p_help = "Signal power starts at this level, and then is iteratively multiplied by signal_multiplier.";
+} signal_power;
+
+paramdef double {
+  p_default = 0.95;
+  p_descr = "We repeatedly multiply the signal power by this value, to iteratively decrease the signal power until it is below the noise.";
+} signal_multiplier;
+
+paramdef double {
+  p_default = -115.0;
+  p_descr = "Noise power (dBm)";
+} noise_power;
+
+  

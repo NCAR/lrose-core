@@ -1,0 +1,241 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MM5Ingest
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 1998
+ * 
+ * MM5Ingest takes MDV output files and converts to MDV format.
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+  "In realtime mode, the analysis is performed for each volume scan "
+  "as it becomes available. In archive mode, the file list is obtained "
+  "from the command line.";
+} mode;
+
+commentdef {
+  p_header = "INPUT DATA.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Directory for input MM5 data - REALTIME mode.";
+  p_help = "The latest_data_info file in this directory is updated each time the model adds a forecast time step to the output file.";
+} realtime_input_dir;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be valid. "
+    "If the latest_data_info file is older than this, the program waits "
+    "for new data.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Output directory.";
+  p_help = "The MM5 data is output to this directory.";
+} output_dir;
+
+paramdef int {
+  p_descr = "Array of output flight levels.";
+  p_help = "The output grid has a variable Z dimension, in flight levels. "
+    "The flight levels in the output are taken from this array.";
+  p_default = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+	       110, 120, 130, 140, 150, 160, 170, 180, 190, 200,
+	       210, 230, 250, 270, 290, 310, 330, 350, 370, 390,
+	       410, 430, 450};
+} flight_levels[];
+
+commentdef {
+  p_header = "TURBULENCE PRODUCT - ITFA";
+  p_text = "The turbulence severity product is normalized between 0 and 1, where 0 indicates low probability of turbulence and 1 indicates a high probability of turbulence.";
+}
+
+typedef enum {
+  LESS_THAN,
+  GREATER_THAN,
+  INSIDE_INTERVAL,
+  OUTSIDE_INTERVAL
+} itfa_index_sense_t;
+
+typedef enum {
+  BROWN1,
+  BROWN2,
+  CCAT,
+  COLSON_PANOFSKY,
+  DEF_SQR,
+  ELLROD1,
+  ELLROD2,
+  DUTTON,
+  ENDLICH,
+  HSHEAR ,
+  LAZ,
+  PVORT,
+  PVORT_GRADIENT,
+  NGM1,
+  NGM2,
+  RICHARDSON,
+  RIT,
+  SAT_RI,
+  STABILITY,
+  VORT_SQR,
+  VWSHEAR,
+  TKE_GWB,
+  TKE_KH3,
+  TKE_KH4,
+  TKE_KH5
+} itfa_derived_index_name;
+
+typedef struct {
+  itfa_derived_index_name name;
+  float weight;
+  itfa_index_sense_t sense;
+  float threshold_1;
+  float threshold_2;
+  int min_flight_level;
+  int max_flight_level;
+} itfa_derived_index_t;
+
+paramdef struct itfa_derived_index_t {
+  p_default = {
+    { BROWN1,          1.0, GREATER_THAN,     1.0e-4, -999.0, 200, 260 },
+    { BROWN1,          1.0, GREATER_THAN,     1.0e-4, -999.0, 260, 310 },
+    { BROWN2,          1.8, GREATER_THAN,     0.4,    -999.0, 200, 260 },
+    { BROWN2,          0.9, GREATER_THAN,     0.4,    -999.0, 260, 310 },
+    { CCAT,            0.0, GREATER_THAN,     2.0e-8, -999.0, 200, 400 },
+    { COLSON_PANOFSKY, 0.0, GREATER_THAN,     0.0,    -999.0, 200, 400 },
+    { DEF_SQR,         1.3, GREATER_THAN,     0.5e-8, -999.0, 200, 260 },
+    { DEF_SQR,         0.9, GREATER_THAN,     0.5e-8, -999.0, 260, 310 },
+    { ELLROD1,         1.4, GREATER_THAN,     5.0e-6, -999.0, 200, 260 },
+    { ELLROD1,         0.8, GREATER_THAN,     5.0e-6, -999.0, 260, 310 },
+    { ELLROD2,         1.7, GREATER_THAN,     4.0e-7, -999.0, 200, 260 },
+    { ELLROD2,         1.0, GREATER_THAN,     4.0e-7, -999.0, 260, 310 },
+    { DUTTON,          1.4, GREATER_THAN,     30.0,   -999.0, 200, 260 },
+    { ENDLICH,         0.0, GREATER_THAN,     0.2   , -999.0, 200, 400 },
+    { HSHEAR,          0.0, GREATER_THAN,     0.5e-4, -999.0, 200, 400 },
+    { LAZ,             0.0, LESS_THAN,        1.0,    -999.0, 200, 400 },
+    { PVORT,           0.0, LESS_THAN,        0.0,    -999.0, 200, 400 },
+    { PVORT_GRADIENT,  0.0, GREATER_THAN,     4.0e-13,-999.0, 200, 400 },
+    { NGM1,            1.6, GREATER_THAN,     0.002,  -999.0, 200, 260 },
+    { NGM1,            1.5, GREATER_THAN,     0.002,  -999.0, 260, 310 },
+    { NGM2,            0.0, GREATER_THAN,     0.0,    -999.0, 200, 400 },
+    { RICHARDSON,      1.2, LESS_THAN,        2.0,    -999.0, 200, 260 },
+    { RIT,             0.0, LESS_THAN,        0.0,    -999.0, 200, 400 },
+    { SAT_RI,          0.0, LESS_THAN,        1.0,    -999.0, 200, 400 },
+    { STABILITY,       0.0, INSIDE_INTERVAL,  1.0e-4, 2.0e-4, 200, 400 },
+    { VORT_SQR,        0.0, GREATER_THAN,     1.0e-8, -999.0, 200, 400 },
+    { VWSHEAR,         1.5, GREATER_THAN,     0.006,  -999.0, 200, 260 },
+    { VWSHEAR,         1.1, GREATER_THAN,     0.006,  -999.0, 260, 310 },
+    { TKE_KH3,         1.4, GREATER_THAN,     3.0,    -999.0, 200, 260 },
+    { TKE_KH3,         0.8, GREATER_THAN,     3.0,    -999.0, 260, 310 },
+    { TKE_KH3,         1.5, GREATER_THAN,     3.0,    -999.0, 310, 400 },
+    { TKE_KH4,         0.8, GREATER_THAN,     10.0,   -999.0, 200, 260 },
+    { TKE_KH4,         0.0, GREATER_THAN,     10.0,   -999.0, 260, 310 },
+    { TKE_KH4,         1.2, GREATER_THAN,     10.0,   -999.0, 310, 400 },
+    { TKE_KH5,         1.7, GREATER_THAN,     0.3,    -999.0, 200, 260 },
+    { TKE_KH5,         1.2, GREATER_THAN,     0.3,    -999.0, 260, 310 },
+    { TKE_KH5,         1.6, GREATER_THAN,     0.3,    -999.0, 310, 400 }
+  };
+  p_descr = "Array of derived index parameters for ITFA.";
+  p_help = "These are the itfa indices computed from the MM5 model output variables. For each index you specify (a) The name: from the enum list. (b) the weight to be applied, set to 0.0 to exclude the index altogether. The final value is formed as a linear combination of the values multiplied by their weights, and then normalized to between 0 and 1 by dividing by the sum of the weights. (c) The sense of the test: if GREATER_THAN, the index indicates turbulence if the value exceeds threshold_1. If LESS_THAN, the index indicates turbulence if the value is less than threshold_1. If INSIDE_INTERVAL indicates turbulence if the value is between threshold_1 and threshold_2. If OUTSIDE_INTERVAL indicates turbulence if the value is NOT between threshold_1 and threshold_2. (d) threshold_1. (e) threshold_2, set to -999.0 as documentation if sense is LESS_THAN or GREATER_THAN. (f) The min flight level for applying the index. (g) The max flight level for applying the index.";
+} itfa_derived_indices[];
+
+typedef enum {
+  W_ITFA,
+  WSPD_ITFA,
+  DIVERGENCE_ITFA
+} itfa_model_index_name;
+
+typedef struct {
+  itfa_model_index_name name;
+  float weight;
+  itfa_index_sense_t sense;
+  float threshold_1;
+  float threshold_2;
+  int min_flight_level;
+  int max_flight_level;
+} itfa_model_index_t;
+
+paramdef struct itfa_model_index_t {
+  p_default = {
+    { W_ITFA,          1.3, OUTSIDE_INTERVAL, -0.04,    0.04, 200, 260 },
+    { W_ITFA,          1.1, OUTSIDE_INTERVAL, -0.04,    0.04, 260, 310 },
+    { WSPD_ITFA,       0.9, GREATER_THAN,     80.0,   -999.0, 200, 260 },
+    { WSPD_ITFA,       1.3, GREATER_THAN,     80.0,   -999.0, 260, 310 },
+    { WSPD_ITFA,       1.5, GREATER_THAN,     80.0,   -999.0, 310, 400 },
+    { DIVERGENCE_ITFA, 0.0, GREATER_THAN,     1.0e-5, -999.0, 200, 400 }
+  };
+  p_descr = "Array of model index parameters for ITFA.";
+  p_help = "For each index you specify (a) The name: from the enum list. (b) the weight to be applied, set to 0.0 to exclude the index altogether. The final value is formed as a linear combination of the values multiplied by their weights, and then normalized to between 0 and 1 by dividing by the sum of the weights. (c) The sense of the test: if GREATER_THAN, the index indicates turbulence if the value exceeds threshold_1. If LESS_THAN, the index indicates turbulence if the value is less than threshold_1. If INSIDE_INTERVAL indicates turbulence if the value is between threshold_1 and threshold_2. If OUTSIDE_INTERVAL indicates turbulence if the value is NOT between threshold_1 and threshold_2. (d) threshold_1. (e) threshold_2, set to -999.0 as documentation if sense is LESS_THAN or GREATER_THAN. (f) The min flight level for applying the index. (g) The max flight level for applying the index.";
+} itfa_model_indices[];
+
+paramdef float {
+  p_default = 0.25;
+  p_descr = "Min valid threshold for the turbulence severity index.";
+  p_help = "We are only interested in values above this. Therefore, to save file space, all values less that this threshold are set to 0.";
+} min_turb_severity_threshold;
+
+
+

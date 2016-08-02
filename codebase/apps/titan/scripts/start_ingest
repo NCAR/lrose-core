@@ -1,0 +1,18 @@
+#! /bin/csh
+
+#
+# kill if running
+#
+
+kill_ingest
+
+#
+# start ingest processes
+#
+
+rdata_to_shmem -params $TITAN_HOME/params/rdata_to_shmem.test &
+
+
+
+
+

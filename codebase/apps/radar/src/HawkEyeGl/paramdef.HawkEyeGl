@@ -1,0 +1,182 @@
+/*********************************************************
+ * parameter definitions for HawkEyeGl
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * May 2010
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "HawkEyeGl is the engineering display for the HAWK moments data";
+  p_text = "This is a C++ application using the QT4 GUI toolkit.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  DSR_FMQ_INPUT, IWRF_TCP_INPUT, SIMULATED_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = DSR_FMQ_INPUT;
+  p_descr = "Method for reading the input data";
+  p_help = "DSR_FMQ_INPUT: read a Dsr moments stream from a file message queue. IWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket. SIMULATED_INPUT: internally-generated test pattern data.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/test";
+  p_descr = "DSR_FMQ_INPUT mode: input URL for moments data from an FMQ";
+  p_help = "Full url is of the form fmqp:://hostname:port:path. Path does not in lude the file extension.";
+} input_fmq_url;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_fmq;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "IWRF_TCP_INPUT: name of host running IWRF moments server.";
+} input_tcp_host;
+
+paramdef int {
+  p_default = 11000;
+  p_descr = "IWRF_TCP_INPUT: port for IWRF moments server.";
+} input_tcp_port;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Size of the internal queue used to store beams.";
+  p_help = "The reader runs in a separate thread, and stored the beams in a queue. The main thread then grabs the available beams from the queue as they become available.";
+} beam_queue_size;
+
+commentdef {
+  p_header = "FIELDS TO BE DISPLAYED";
+}
+
+paramdef string {
+  p_default = "./colorscapes";
+  p_descr = "Directory for color scales";
+} color_scale_dir;
+
+typedef struct {
+
+  string label;
+  string raw_name;
+  string filtered_name;
+  string units;
+  string color_map;
+  string shortcut;
+
+} field_t;
+
+paramdef struct field_t {
+  p_default = {
+    { "DBZ", "DBZ", "DBZ_F", "dBZ", "dbz.colors", "1" },
+    { "VEL", "VEL", "VEL_F", "m/s", "vel.colors", "2" },
+    { "WIDTH", "WIDTH", "WIDTH_F", "m/s", "width.colors", "3" }
+  };
+  p_descr = "Fields to be displayed.";
+  p_help = "label: appears on the GUI. raw_name: unfiltered field name. filtered_name: field with clutter filter applied. units: units string for color scale. color_map: name of color map in color_scale_dir. shortcut: keyboard character for shortcut. Specified key will select raw field. Use ALT-key to get filtered field.";
+} fields[];
+
+commentdef {
+  p_header = "DISPLAY DETAILS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override radar name in the data.";
+} override_radar_name;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Radar name if overridden.";
+} radar_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to display the site name in the left panel.";
+} display_site_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override site name in the data.";
+} override_site_name;
+
+paramdef string {
+  p_default = "MARSHALL";
+  p_descr = "Site name if overridden.";
+} site_name;
+
+paramdef double {
+  p_default = 150.0;
+  p_descr = "Max range for the display (km).";
+} max_range_km;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Startup width of main window (pixels).";
+} main_window_width;
+
+paramdef int {
+  p_default = 800;
+  p_descr = "Startup height of main window (pixels).";
+} main_window_height;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup X for main window (pixels).";
+} main_window_start_x;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup Y for main window (pixels).";
+} main_window_start_y;
+
+paramdef int {
+  p_default = 80;
+  p_descr = "Width of color scale (pixels).";
+} color_scale_width;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Basic font size for labels (pixels).";
+  p_help = "Some of the labels are scaled relative to this size.";
+} label_font_size;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Color of main display background.";
+} background_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of grids and range rings.";
+} grid_and_range_ring_color;
+

@@ -1,0 +1,149 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions mdv2netCDF
+//
+// Niles Oien
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2002
+
+commentdef {
+  p_header = "Program name: netCDFmesonet2SPDB";
+  p_text = "netCDFmesonet2SPDB reads netCDF files of mesonet data in the\n"
+	"ZEB-friendly netCDF ATD format from Chris Burghardt and writes\n"
+	"these data to an SPDB database. The program requires that the filename\n"
+	"be specified on the command line with a -f option. It does\n"
+	"not check in with procmap, it is intended to run only in archive\n"
+	"mode.\n\nNiles Oien July 2002.";
+}
+
+paramdef boolean
+{
+  p_default = false;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} Debug;
+
+paramdef int
+{
+  p_default = 1800;
+  p_descr = "Time before expire, seconds.";
+  p_help = "Set as appropriate.";
+} Expiry;
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/metars";
+  p_descr = "Output SPDB URL.";
+  p_help = "Mesonet data are written to this URL.";
+} OutUrl;
+
+typedef struct
+{
+ string         input_name;
+ string         output_name;
+} RemapName_t;
+
+
+paramdef struct RemapName_t {
+  p_descr = "Remapping table of station names.";
+  p_help = "Some of the input station names are not\n"
+	"four characters - this table allows them\n"
+	"to be remapped so that they are.";
+  p_default = {
+       {"AP005", "AP05" },
+       {"AP046", "AP46" },
+       {"AP065", "AP65" },
+       {"AP076", "AP76" },
+       {"AP096", "AP96" },
+       {"AP143", "AP43" },
+       {"AP225", "A225" },
+       {"AP227", "A227" },
+       {"AP228", "A228" },
+       {"AP229", "A229" },
+       {"AP230", "A230" },
+       {"AP272", "A272" },
+       {"AP391", "A391" },
+       {"AP426", "A426" },
+       {"AW024", "AW24" },
+       {"C0062", "C062" },
+       {"C0115", "C115" },
+       {"C0144", "C144" },
+       {"C0162", "C162" },
+       {"C0180", "C180" },
+       {"CPPN5", "CPN5" },
+       {"DQUA4", "DUA4" },
+       {"F1592", "F592" },
+       {"GDAC2", "GAC2" },
+       {"GLMT2", "GMT2" },
+       {"HBRK1", "HRK1" },
+       {"HKLO2", "HLO2" },
+       {"HVLK1", "HLK1" },
+       {"JTNT2", "JNT2" },
+       {"K1BSP", "1BSP" },
+       {"K1EGN", "1EGN" },
+       {"K5ADT", "5ADT" },
+       {"K5BCR", "5BCR" },
+       {"K5BRP", "5BRP" },
+       {"K5CHE", "5CHE" },
+       {"K5CHN", "5CHN" },
+       {"K5CNC", "5CNC" },
+       {"K5CNE", "5CNE" },
+       {"K5COO", "5COO" },
+       {"K5ED7", "5ED7" },
+       {"K5EHT", "5EHT" },
+       {"K5ELW", "5ELW" },
+       {"K5EUR", "5EUR" },
+       {"K5FVW", "5FVW" },
+       {"K5GAR", "5GAR" },
+       {"K5HJN", "5HJN" },
+       {"K5JCT", "5JCT" },
+       {"K5KIO", "5KIO" },
+       {"K5LEA", "5LEA" },
+       {"K5MAN", "5MAN" },
+       {"K5MCP", "5MCP" },
+       {"K5NES", "5NES" },
+       {"K5NIC", "5NIC" },
+       {"K5OK7", "5OK7" },
+       {"K5PTT", "5PTT" },
+       {"K5SCT", "5SCT" },
+       {"K5SLN", "5SLN" },
+       {"K5TPK", "5TPK" },
+       {"K5TRY", "5TRY" },
+       {"K5WKR", "5WKR" },
+       {"K5WKY", "5WKY" },
+       {"K5WLC", "5WLC" },
+       {"LMNO2", "LMNO" },
+       {"LTHM7", "LTHM" },
+       {"MPAN5", "MPAN" },
+       {"TCUN5", "TCUN" },
+       {"TR479", "TR47" },
+       {"TR484", "TR48" },
+       {"VCIO2", "VCIO" }
+ };
+
+} NameRemap[];
+
+

@@ -1,0 +1,96 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.UpdateMdvCollectionType
+ */
+
+commentdef
+{
+  p_header = "Program name: UpdateMdvCollectionType";
+  p_text = "This program updates the data_collection_type field in the "
+           "master header of all specified MDV files to the data collection "
+           "type specified. "
+           "The MDV files are updated in place, so make a copy of the files "
+           "before running if you need to have the original versions, too.";
+}
+
+typedef enum
+{
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+typedef enum
+{
+  FILE_LIST,
+  TIME_LIST
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Processing mode.";
+  p_help = "\tFILE_LIST - Processes all of the files listed on the "
+           "command line. "
+           "When your input files are in a RAP forecast style directory "
+           "then you must use this trigger mode.\n"
+           "\tTIME_LIST - Processes all of the files in the input URL "
+           "for times between the start and end times specified on the "
+           "command line.";
+  p_default = TIME_LIST;
+} mode;
+
+paramdef string
+{
+  p_descr = "URL for the MDV files to be updated";
+  p_default = "mdvp:://localhost::mdv/input";
+} url;
+
+paramdef boolean
+{
+  p_descr = "Option to write to forecast directory structure";
+  p_default = FALSE;
+} write_as_forecast;
+
+typedef enum
+{
+  DATA_MEASURED,
+  DATA_EXTRAPOLATED,
+  DATA_FORECAST,
+  DATA_SYNTHESIS,
+  DATA_MIXED,
+  DATA_IMAGE,
+  DATA_GRAPHIC
+} data_collection_type_t;
+
+paramdef enum data_collection_type_t
+{
+  p_descr = "New data collection type value for the MDV files.";
+  p_default = DATA_FORECAST;
+} data_collection_type;

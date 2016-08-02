@@ -1,0 +1,20 @@
+/////////////////////////////////////////////////////////////
+// Complex.hh
+//
+// Mike Dixon, RAP, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// March 2003
+//
+///////////////////////////////////////////////////////////////
+
+#ifndef Complex_hh
+#define Complex_hh
+
+typedef struct {
+  double re;
+  double im;
+} Complex_t;
+
+#endif
+

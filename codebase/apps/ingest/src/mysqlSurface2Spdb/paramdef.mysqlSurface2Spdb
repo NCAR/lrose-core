@@ -1,0 +1,179 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "mysqlSurface2Spdb is a small program that reads ASCII\n"
+  "files that have been dumped from a mysql database of surface\n"
+  "station reports and converts the results to SPDB.\n\n"
+  "Niles Oien December 2003.";
+}
+
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_DATA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+      
+
+paramdef string {
+  p_descr = "output spdb url";
+  p_help = "Path for FMQ output data.";
+  p_default = {"spdbp:://localhost::spdb/metars"};
+} outUrl;
+ 
+paramdef long {
+  p_descr = "Offset to add to the data time, seconds.";
+  p_help = "May be useful for generating a test dataset.";
+  p_default = 0;
+} timeOffset;
+
+paramdef boolean {
+  p_descr = "Option to use the wallclock time rather than the time\n"
+  "decoded from the files.";
+  p_help = "May be useful for generating a test dataset.";
+  p_default = FALSE;
+} useRealTime;
+
+paramdef long {
+  p_descr = "How long the data are valid, seconds.";
+  p_help = "Depends on input frequency.";
+  p_default = 600;
+} Expiry;
+ 
+paramdef boolean {
+  p_descr = "If set, the station is assumed to be identified by a\n"
+  "four character string and this is hashed into the datatype.";
+  p_help = "Default is not to do this.";
+  p_default = FALSE;
+} hashCodesDirectly;
+
+paramdef string {
+  p_descr = "Format for getting the station ID integer, C-style.";
+  p_help = "Default is OK for YPG - for other sites, this needs to\n"
+  "be changed after looking at a sample input file. Relevant only if\n"
+  "hashCodesDirectly is FALSE.";
+  p_default = "ypg_s%d";
+} IDstringFormat;
+ 
+paramdef boolean {
+  p_descr = "Option to create a label and then hash this\n"
+  "into a datatype.";
+  p_help = "The stations are identified by a number. If useLabelsAsDataType\n"
+  "is FALSE then this number will be used in the SPDB database directly\n"
+  "as the data type. If useLabelsAsDataType is TRUE then the labelFormat\n"
+  "parameter will be used to create a four character station ID sting,\n"
+  "and this will then be hashed into a data type. Relevant only if\n"
+  "hashCodesDirectly is FALSE.";
+  p_default = TRUE;
+} useLabelsAsDataType;
+
+paramdef string {
+  p_descr = "Format for creating labels from integer IDs, C-style.";
+  p_help = "Default is OK for YPG so long at the numbers do not\n"
+  "exceed two digits.";
+  p_default = "YP%02d";
+} labelFormat;
+ 
+paramdef boolean {
+  p_descr = "Option to apply a time test to METARS so that\n"
+  "only recent ones get ingested in REALTIME mode.";
+  p_help = "Default is not to do this.";
+  p_default = FALSE;
+} applyTimeTest;
+ 
+paramdef long {
+  p_descr = "Time to look back from now if applyTimeTest is TRUE, secs.";
+  p_help = "Has no effect if applyTimeTest is FALSE.";
+  p_default = 7200;
+} timeTestMaxAge;
+
+paramdef boolean {
+  p_descr = "Option to limit the spatial range of input.";
+  p_help = "May be useful if a large dataset is presented as input.";
+  p_default = FALSE;
+} limitRange;
+
+typedef struct {
+  double minLat;
+  double minLon;
+  double maxLat;
+  double maxLon;
+} region_t;
+
+paramdef struct region_t {
+  p_descr = "Defines the region to do the ingest over.";
+  p_help = "Relevant only if limitRange is TRUE.";
+  p_default = {29.0, -118.0, 35.0, -110.0 };
+} region;
+
+paramdef boolean {
+  p_descr = "Option to deal with older SAMS format.";
+  p_help = "If lat and lon need to be divided by 10000, use this.";
+  p_default = TRUE;
+} scaledSamsFormat;

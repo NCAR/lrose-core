@@ -1,0 +1,69 @@
+/****************************************************
+ * TDRP params for TrackProps
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Altitude threshold for computing altitude-thresholded properties.
+ * There are a number of properties, e.g. volume, which are computed
+ *   for the whole storm and for the region above an altitude threshold.
+ *   This threshold is used for those computations.
+ *
+ * Type: double
+ * Default: 6 
+ * Min value: 0 
+ * Max value: 30 
+ */
+altitude_threshold = 6;
+
+/*
+ * Minimum track duration (secs).
+ * Only tracks with durations which exceed this value will be processed.
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: 0 
+ */
+min_duration = 1500;
+
+/*
+ * Maximum track duration (secs).
+ * Only tracks with durations which do not exceed this value will
+ *   be processed.
+ *
+ * Type: double
+ * Default: 86400 
+ */
+max_duration = 86400;
+
+

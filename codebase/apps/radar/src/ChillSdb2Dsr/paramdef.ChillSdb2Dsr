@@ -1,0 +1,163 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions ChillSdb2Dsr
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// May 2009
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "ChillSdb2Dsr reads CHILL moments from the SDB server, reformats it into DsRadar format and writes to a DsRadar FMQ.";
+  p_text = "Optionally, ChillSdb2Dsr also extracts calibration information, and writee the latest cal files to the specified directory. _latest_data_info files are also written to this location. The cal data is then read by ChillTsTcp2Fmq and the cal packet is merged into the time series data stream.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "TCP DETAILS";
+};
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Host name on which the CHILL SDB server is running.";
+  p_help = "This application normally reads data from Rvp8TsTcpServer running on the rvp8 host.";
+} sdb_server_host;
+
+paramdef int {
+  p_default = 2111;
+  p_descr = "TCP/IP port on which the CHILL SDB server is running.";
+} sdb_server_port;
+
+commentdef {
+  p_header = "WRITING OUTPUT TO DS-RADAR FMQ";
+  p_text = "This is the normal usage of this application.";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/sdb";
+  p_descr = "Output URL for DsRadar data via FMQ";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 50000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Number of beams between sending params and calibration.";
+  p_help = "The params and calibration data is sent when the radar operation changes, as well as once every tilt. However, if none of these triggers a change, the params will be sent regardless when this number of beams have been written.";
+} nbeams_for_params_and_calib;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+commentdef {
+  p_header = "OUTPUT OF CAL XML FILES";
+};
+
+
+commentdef {
+  p_header = "WRITING CAL XML FILES";
+  p_text = "This is the normal usage of this application.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write calibration XML files for use by time series.";
+  p_help = "If false, no calibration data will be written.";
+} write_cal_xml_files;
+
+paramdef string {
+  p_default = "$(DATA_DIR)/cal/sdb";
+  p_descr = "Output dir for CAL xml files.";
+} calibration_xml_dir;
+
+paramdef int {
+  p_default = 120;
+  p_descr = "Minimum interval between writes (secs).";
+  p_help = "We do not want to write cal files too frequently, so we check the time since the last write and make sure the interval exceeds this minimum.";
+} min_write_interval_secs;
+
+commentdef {
+  p_header = "CALIBRATION CONSTANTS";
+  p_text = "Required for computing the calibration correctly.";
+};
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Transmit pulse width (micro_secs)";
+} pulseWidthUs;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "2-way waveguide loss H (dB)";
+  p_help = "This is the loss from the measurement plane to the feed-horn and back. Sometimes it is set to 0 and the loss is incorporated in the antenna gain.";
+} twoWayWaveguideLossDbH;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "2-way waveguide loss V (dB)";
+  p_help = "This is the loss from the measurement plane to the feed-horn and back. Sometimes it is set to 0 and the loss is incorporated in the antenna gain.";
+} twoWayWaveguideLossDbV;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "2-way loss through the radome - H.";
+  p_help = "Set to 0 if no radome.";
+} twoWayRadomeLossDbH;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "2-way loss through the radome - V.";
+  p_help = "Set to 0 if no radome.";
+} twoWayRadomeLossDbV;
+
+paramdef double {
+  p_default = 2.2;
+  p_descr = "Receiver mismatch loss - (dB)";
+  p_help = "This is the loss which results from the fact that the receiver bandwidth is not exactly the same as the pulse width. The calibration procedure is carries out with a CW signal, so the redeiver bandwidth is not a factor. However, during operations, the receiver loses some power because of the bandwidth mismatch. This loss must be taken into account.";
+} receiverMismatchLossDb;
+

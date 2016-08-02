@@ -1,0 +1,154 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions MdvFixTimes
+//
+// Gary Cunning, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// April 2005
+//
+
+commentdef {
+  p_header = "Program name: MdvFixTims";
+  p_text = "MdvFixTimes reads mdv data, modifies master and field header times, and writes it out. The usage is 'MdvFixTimes -params params_file'.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Registration interval.";
+  p_help = "The number of seconds between expected procmap registrations.";
+} reg_interval;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in FILELIST mode, at least) MUST contain a day-directory below the data file -- ./data_file.mdv will not work as a file path";
+} mode;
+
+paramdef string {
+  p_default = "mdv/input";
+  p_descr = "URL for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output URL.";
+  p_help = "Output data is written to this URL.";
+} output_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field numbers";
+} set_field_nums;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Field number list.";
+} field_nums[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field names";
+} set_field_names;
+
+paramdef string {
+  p_default = 0;
+  p_descr = "Field number list.";
+} field_names[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set to output the data as forecast in mdv format.";
+} output_as_forecast;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to adjust forecast time.";
+  p_help = "If true, set the forecast time parameters below.";
+} adjust_forecast_time;
+
+typedef enum {
+  TIME_GEN,
+  TIME_BEGIN,
+  TIME_CENTROID,
+} forecast_base_time_t;
+
+paramdef enum forecast_base_time_t {
+  p_default = TIME_CENTROID;
+  p_descr = "Base time used to calulate forecast time";
+} forecast_base_time;
+
+paramdef long {
+  p_default = 0;
+  p_descr = "Field header forecast delta.";
+} forecast_delta;
+
+paramdef long {
+  p_default = 0;
+  p_descr = "Master header begin time offset from forecast base time.";
+} begin_offset;
+
+paramdef long {
+  p_default = 0;
+  p_descr = "Master header centroid time offset from forecast base time.";
+} centroid_offset;
+
+paramdef long {
+  p_default = 0;
+  p_descr = "Master header expire time offset from forecast base time.";
+} expire_offset;
+
+paramdef long {
+  p_default = 0;
+  p_descr = "Master header end time offset from forecast time.";
+} end_offset;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "adjust gen_time to match centroid_time.";
+} adjust_gen_time;
+

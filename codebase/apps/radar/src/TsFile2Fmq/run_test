@@ -1,0 +1,30 @@
+#! /bin/csh
+
+TsFile2Fmq -params TsFile2Fmq.sim -debug -sim \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012011_3599_180.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012020_004_270.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012029_004_000.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012038_004_090.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012047_004_180.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012056_014_270.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012105_013_000.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012114_012_090.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012123_012_180.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012132_022_270.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012140_022_000.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012149_021_090.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012158_021_180.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012207_021_270.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012216_041_000.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012225_041_090.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012234_041_180.tsarchive \
+  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012243_041_270.tsarchive
+#  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012252_062_000.tsarchive \
+#  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012301_062_090.tsarchive \
+#  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012310_061_180.tsarchive \
+#  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012318_061_270.tsarchive \
+#  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012327_081_000.tsarchive \
+#  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012336_081_090.tsarchive \
+#  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012345_081_180.tsarchive \
+#  ~/data/time_series/tsarchive/spol/fastAlt/20070728/20070728_012354_082_270.tsarchive
+

@@ -1,0 +1,27 @@
+#ifndef __titansemids_h
+#define __titansemids_h
+
+#define SHMEMKEY 41234L
+#define DETAILSKEY SHMEMKEY + 1
+#define TIMEHTPROFILEKEY SHMEMKEY + 2
+#define FEEDBACKKEY SHMEMKEY + 3
+#define TIMEHISTCOORDKEY (SHMEMKEY + 4)
+#define TIMEHISTTRACKKEY (TIMEHISTCOORDKEY + 1)
+#define TRECSEMAPHOREKEY (TIMEHISTTRACKKEY + 1)
+#define RADARSHMEM      (TRECSEMAPHOREKEY + 1)
+#define TRECSHMEM       (RADARSHMEM + 2)
+#define DICTRADARKEY 	(TRECSHMEM + 1)
+#define DICTCAPPIKEY 	(TRECSHMEM + 2)
+ 
+#define N_RAPIC_SEM_IDS 2
+#define RAPIC_TO_TITAN_SEM_ID 0
+#define TITAN_TO_RAPIC_SEM_ID 1
+
+#define N_DETAILS_SEM_IDS 2
+#define RAPICREADY  0
+#define QUITDETAILS 1
+#define S_PERMISSIONS 0666
+#define STORMDETAILSFILE "stormdetails.dat"
+#define HEIGHTPROFILEFILE "heightprofile.dat"
+
+#endif

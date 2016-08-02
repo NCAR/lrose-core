@@ -1,0 +1,192 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "wrfLtgPotential computes the ltg potential forecast\n"
+	"as well as the dbs from model data input. Niles Oien.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Derived satellite fields are written here."; 
+  p_default = {"mdvp:://localhost::mdv/grad"};
+} OutUrl;
+ 
+ paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "Option to write mdv in forecast mode.";
+  p_help = "Defaults to FALSE";
+} writeAsForecast;   
+    
+      
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+
+typedef struct {
+	string graupelFieldName;
+	string pressureFieldName;
+	string tempFieldName;
+	string snowFieldName;
+	string wFieldName;
+} inFieldNames_t;
+
+paramdef struct inFieldNames_t {
+  p_default = { "graupel", "pressure", "TK", "snow", "W" };
+  p_private = FALSE;
+  p_descr = "Names for input fields.";
+  p_help = "Defaults are for WRF model";
+} inFieldNames;   
+
+typedef struct {
+	double maxTempIce;
+	double minVertSpeedIce;
+	double maxTempIceAll;
+} iceThresh_t;
+
+
+paramdef struct iceThresh_t {
+  p_default = { -5.0, 5.0, -10.0 };
+  p_private = FALSE;
+  p_descr = "Threshholds for ice calculation to make sure\n"
+	"the point is moving upwards fast enough and is cold\n"
+	"enough to be counted.";
+  p_help = "Defaults are -5 degrees C, 5 m/s and -10 deg C";
+} iceThresh;   
+
+typedef struct {
+	double iceScale;
+	double iceBias;
+} iceScaleBias_t;
+
+
+paramdef struct iceScaleBias_t {
+  p_default = { 33.3333, 0.005 };
+  p_private = FALSE;
+  p_descr = "The ltg potential for ice is calculated from :\n"
+	"ltg_pot_ice = scale*(ice_all-bias)\n"
+	"these are the scale and bias.";
+  p_help = "Defaults are -5 degrees C and 5 m/s";
+} iceScaleBias;   
+
+typedef struct {
+	double steigvar_w;
+	double steigvar_pice;
+} steigvarThresh_t;
+
+
+paramdef struct steigvarThresh_t {
+  p_default = { 10.0, 8.0 };
+  p_private = FALSE;
+  p_descr = "Threshholds for updraft speed and precip ice\n"
+	"mass in final calculation.";
+  p_help = "Defaults are 10.0 and 8.0";
+} steigvarThresh;   
+
+typedef struct {
+	boolean doCalc;
+	double minVal;
+	string rainFieldName;
+} dbz_t;
+
+paramdef struct dbz_t {
+  p_default = { FALSE, -15.0, "rain" };
+  p_private = FALSE;
+  p_descr = "Determines if DBZ should be written as a 3D\n"
+	"derived field.";
+  p_help = "dbz values less than the minimum value are set to missing.\n"
+	"The rain field name is a required field in the input.";
+} dbz;   
+
+ paramdef boolean {
+  p_default = TRUE;
+  p_private = FALSE;
+  p_descr = "If set to TRUE then the mdv bad and missing values are\n"
+	"set to 0 for the ltgPotW and ltgPotIce fields. If set to FALSE\n"
+	"then the value -999 is used. The value of 0 corresponds\n"
+	"roughly to there being no weather.\n"
+	"Using 0 has the advantage that the data can be overlaid\n"
+	"on terrain more effectively in the display, but since 0\n"
+	"is in fact a valid value and some downstream algorithms\n"
+	"legitimately avoid using bad/missing values, it may be better\n"
+	"to use -999 for bad/missing values by setting this to FALSE.";
+  p_help = "Defaults to TRUE";
+} useZeroForBad;   
+    
+
+typedef struct {
+	boolean doRemap;
+	int nx;
+	int ny;
+	double minx;
+	double miny;
+	double dx;
+	double dy;
+	double originLat;
+	double originLon;
+} remap_t;
+
+
+paramdef struct remap_t {
+  p_default = { FALSE, 200, 200, -199.5, -199.5, 1.0, 1.0, 40.0, -110.0 };
+  p_private = FALSE;
+  p_descr = "Option to remap to a flat earth projection.";
+  p_help = "Program needs data to be on a flat earth projection.";
+} remap;
+
+

@@ -1,0 +1,86 @@
+/*********************************************************
+ * parameter definitions for load_spdb
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 1996
+ */
+
+commentdef {
+  p_header = "load_spdb allows you to load an SPDB data base from ASCII data. The binary structure stored is specified in the parameter file in terms of binary word lengths and offsets.";
+}
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Directory for data base";
+} data_base_dir;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Text file path from which to read the product data";
+  p_help = "This is a text file which holds product data line-by-line.";
+} product_file_path;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Product label string";
+  p_help = "This label is stored in the product data base.";
+} product_label;
+
+paramdef long {
+  p_default = {10000};
+  p_descr = "Product ID";
+  p_help = "This ID is used for identifying the product, specifying transformation routines, etc.";
+} product_id;
+
+paramdef enum load_mode
+{
+  p_options = {LOAD_ONCE, LOAD_OVERWRITE, LOAD_ADD};
+  p_default = {LOAD_ADD};
+  p_descr = "Load mode";
+  p_help = "If LOAD_ONCE, a chunk at a given time can only be stored once - a second attempt causes and error. If LOAD_OVERWRITE, a new chunk at a given time will overwrite and old one. If LOAD_ADD, new chunks will be added to the list at a given time.";
+} load_mode;
+
+paramdef long {
+  p_default = {32};
+  p_descr = "Max length of any string in the input file";
+  p_help = "If an input string exceeds this length, it will be truncated.";
+} string_len;
+
+paramdef char* {
+  p_default = {"float"};
+  p_descr = "Format template - specifies the product format in the text file";
+  p_help = "The template specifies the order and type of the fields in the input file. Legal values are 'int', 'float' and 'string'. Strings must be shorter than max_string_len. Multi-word strings must be separated by underscores. The fields in the data line must be delimited by spaces or tabs.";
+} data_format[];
+
+paramdef enum date_time_format {
+  p_options = {UNIX_TIME, YR_MO_DAY_HR_MIN_SEC};
+  p_default = {UNIX_TIME};
+  p_descr = "Format of the date/time field";
+  p_help = "Each data line must start with valid time, either as unix_time or as year month day hour min sec. This parameter specifies the format.";
+} date_time_format;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Number of secs for which product is valid.";
+  p_help = "The expire time is computed by adding this to the valid time.";
+} product_lifetime;
+
+
+

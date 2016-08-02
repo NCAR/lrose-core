@@ -1,0 +1,335 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for PosnRpt2Symprod
+//
+// Nancy Rehak, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// Jan 2000
+//
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef
+{
+  p_header = "DEBUGGING";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { DEBUG_OFF };
+} debug;
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string
+{
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean
+{
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef
+{
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int
+{
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5458;
+} port;
+  
+paramdef int
+{
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef
+{
+  p_header = "RENDERING PARAMETERS";
+};
+
+typedef struct
+{
+  long x_offset;
+  long y_offset;
+} text_offset_t;
+
+paramdef string
+{
+  p_descr = "List of flight numbers to display";
+  p_help = "If this list is empty, all flights will be displayed.  "
+           "Otherwise, only flights in this list will be displayed.";
+  p_default = {};
+} flight_list[];
+
+paramdef string
+{
+  p_descr = "Color to use for rendering the aircraft's current position";
+  p_default = "green";
+} current_pos_color;
+
+paramdef long
+{
+  p_descr = "Current position icon";
+  p_help = "Array defining the icon to be used for the current positions.  "
+           "The icon is a bit-mapped 16x16 icon.  "
+           "You put 1's in the positions of the icon where the bit should "
+           "be displayed, and 0's in the other positions.";
+  p_default = { 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
+} current_pos_icon[];
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the flight number will be printed "
+            "by the current position icon";
+  p_default = true;
+} render_flight_num;
+
+paramdef struct text_offset_t
+{
+  p_descr = "Text offsets for displaying the flight number by the current "
+            "position icon";
+  p_default = { 6, 6 };
+} flight_num_text_offsets;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the position report time will be printed "
+            "by the current position icon";
+  p_default = true;
+} render_report_time;
+
+paramdef struct text_offset_t
+{
+  p_descr = "Text offsets for displaying the position report time by the "
+            "current position icon";
+  p_default = { 6, -10 };
+} report_time_text_offsets;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the way point 0 icon will be "
+            "rendered.";
+  p_default = true;
+} render_way_pt0_icon;
+
+paramdef string
+{
+  p_descr = "Color to use for rendering the aircraft's way point 0";
+  p_default = "green";
+} way_pt0_color;
+
+paramdef long
+{
+  p_descr = "Way point 0 icon";
+  p_help = "Array defining the icon to be used for the way point 0 "
+           "positions.  "
+           "The icon is a bit-mapped 16x16 icon.  "
+           "You put 1's in the positions of the icon where the bit should "
+           "be displayed, and 0's in the other positions.";
+  p_default = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+} way_pt0_icon[];
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the way point 1 icon will be "
+            "rendered.";
+  p_default = true;
+} render_way_pt1_icon;
+
+paramdef string
+{
+  p_descr = "Color to use for rendering the aircraft's way point 1";
+  p_default = "green";
+} way_pt1_color;
+
+paramdef long
+{
+  p_descr = "Way point 1 icon";
+  p_help = "Array defining the icon to be used for the way point 1 "
+           "positions.  "
+           "The icon is a bit-mapped 16x16 icon.  "
+           "You put 1's in the positions of the icon where the bit should "
+           "be displayed, and 0's in the other positions.";
+  p_default = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+} way_pt1_icon[];
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the way point 2 icon will be "
+            "rendered.";
+  p_default = true;
+} render_way_pt2_icon;
+
+paramdef string
+{
+  p_descr = "Color to use for rendering the aircraft's way point 2";
+  p_default = "green";
+} way_pt2_color;
+
+paramdef long
+{
+  p_descr = "Way point 2 icon";
+  p_help = "Array defining the icon to be used for the way point 2 "
+           "positions.  "
+           "The icon is a bit-mapped 16x16 icon.  "
+           "You put 1's in the positions of the icon where the bit should "
+           "be displayed, and 0's in the other positions.";
+  p_default = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+} way_pt2_icon[];
+
+paramdef string
+{
+  p_descr = "Font to use for rendering any text in the product";
+  p_default = "8x13";
+} text_font;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether a line will be drawn connecting "
+            "the way points in the position report.";
+  p_default = true;
+} render_way_pt_line;
+
+paramdef string
+{
+  p_descr = "Color to be used when rendering the way point line";
+  p_default = "green";
+} way_pt_line_color;
+
+paramdef long
+{
+  p_descr = "Width, in pixels, of the way point line";
+  p_min = 1;
+  p_default = 1;
+} way_pt_line_width;
+

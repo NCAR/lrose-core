@@ -1,0 +1,178 @@
+
+commentdef {
+  p_header = "StormInitBdry is a small application that is\n"
+	"designed to facilitate the study of the relation\n"
+	"between storm initiation and boundaries.\n\n"
+	"The storm initiation data comes from the output\n"
+	"of the StormInitLocation program, and the boudary\n"
+	"information typically comes from the colide algorithm\n"
+	"(although use of MIGFA is also possible).\n\n"
+	"The program reads storm initiation locations from\n"
+	"an SPDB database for a temporal interval specified\n"
+	"by the command line arguments :\n"
+	"-start \"YYYY MM DD hh mm ss\" -end \"YYYY MM DD hh mm ss\"\n\n"
+	"For each initiation point, the program reads boundary\n"
+	"data from another SPDB database. The temporal window to read\n"
+	"from is determined by the secsPriorToInit and secsPostInit\n"
+	"parameters.\n\n"
+	"For each boundary, the program computes some statistics about\n"
+	"the relation between the initiation point and the boundary.\n"
+	"These include the distance from the boundary and the angle the\n"
+	"line from the boundary to the init point makes with the\n"
+	"mean boundary velocity vector. Note that if a boundary is\n"
+	"determined to be stationary - its mean velocity is less than\n"
+	"the minBdryVel parameter below - then the angle cannot be\n"
+	"calculated, so this is a special case.\n\n"
+	"The program then applies limits to these statistics to determine\n"
+	"which output file they should go into. These limits are applied\n"
+	"to the angle, distance and the exrapolation time for the boundary.\n"
+	"The limits are specified in the Limits[] structure below.\n"
+	"The default settings are used to determine if the initiation\n"
+	"point is in front of, to the side of, or behind the boundary.\n"
+	"A stationary boundary is a special case. Since the angular\n"
+	"considerations cannot be calculated, they are simply not applied.\n"
+	"In this case the staticBdryLimit structure determines what limits\n"
+	"to apply, and obviously the angle is not included in the output.\n\n"
+	"Output files appear in outDir and are named by the convention :\n"
+	"LimitName_YYYYMMDD_hhmmss.dat\n"
+	"Where YYYYMMDD_hhmmss is the time specified by the -start argument\n"
+	"and LimitName is the name of the Limit from Limits[].\n\n"
+	"The output files are ASCII files in which the colums have\n"
+	"the following significance :\n\n"
+	"(1) The unix time of the initiation point, seconds since Jan 1 1970\n"
+	"(2-7) The year, month, day, hour, minute and second of\n"
+	"    the initiation point.\n"
+	"(8) The boundary time minus the init time, in seconds.\n"
+	"(9) The extrapolation seconds for the boundary (0 if detection)\n"
+	"(10-11) The lat, lon of the initiation point.\n"
+	"(12-13) The lat, lon of the closest point in the boundary to the\n"
+	"        initiation point.\n"
+	"(14) The sequence number of the boundary.\n"
+	"(15) The group ID of the boundary.\n"
+	"(16-17) The Titan complex and simpletrack numbers\n"
+	"         of the storm that was initiated.\n"
+	"(18) The maximum DBZ the storm achived.\n"
+	"(19) The maximum area the storm achieved.\n"
+	"(20) The duration of the storm, in minutes.\n"
+	"(21) The minimum distance from the boundary to the\n"
+	"     initiation point, Km.\n"
+	"(22) The modulus of the boundary velocity, Km/Hr\n"
+	"(23-24) The U and V components of the mean boundary velocity.\n"
+	"(25) OPTIONAL : The angle between the direction of the\n"
+	"     direction of the mean boundary velocity and the line\n"
+	"     from the boundary to the storm initiation point, in degrees.\n"
+	"     This is not output for the case of static boundaries, but\n"
+	"     since all the static boundaries are written to a seperate\n"
+	"     file, all the entries in that file have 24 entries, while\n"
+	"     all the other files have 25 colums. So all the files can be\n"
+	"     loaded into MatLab, ExCel etc.\n\nNiles Oien December 2002.";
+
+}
+
+paramdef string {
+  p_descr = "Input storm init location SPDB URL";
+  p_help = "The GenPt structures that drive the program\n"
+	"are read from this SPDB URL."; 
+  p_default = {"spdbp:://localhost::spdb/StormInitLoc"};
+} spdbUrl;
+
+paramdef string {
+  p_descr = "Input SPDB boundary URL.";
+  p_help = "The boundaries are read from here."; 
+  p_default = {"spdbp:://localhost::spdb/bdry"};
+} bdryUrl;
+
+paramdef int {
+  p_descr = "For each storm init point, the temporal window\n"
+	"to search for boundaries runs from the init time minus\n"
+	"secsPriorToInit to secsPostInit";
+  p_help = "Default is to look 600 secs before and 300 secs after\n"
+	"init points for boundaries.";
+  p_default = 600;
+} secsPriorToInit;
+
+paramdef int {
+  p_descr = "For each storm init point, the temporal window\n"
+	"to search for boundaries runs from the init time minus\n"
+	"secsPriorToInit to secsPostInit";
+  p_help = "Default is to look 600 secs before and 300 secs after\n"
+	"init points for boundaries.";
+  p_default = 300;
+} secsPostInit;
+
+paramdef double {
+  p_descr = "Value to output when data are bad/missing.";
+  p_help = "Set to something physical values cannot reach.";
+  p_default = -999.0;
+} badVal;
+ 
+paramdef string {
+  p_descr = "Output directory.";
+  p_help = "Data files are written here."; 
+  p_default = {"./some/directory/structure"};
+} outDir;
+ 
+
+paramdef boolean {
+  p_descr = "Set to print more messages as data are processed.";
+  p_help = "Can usually be FALSE"; 
+  p_default = FALSE;
+} debug;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+typedef struct {
+  string  Name;
+  double min_angle;
+  double max_angle;
+  double min_dist;
+  double max_dist;
+  int minExtrapSecs;
+  int maxExtrapSecs;
+} Limit_t;
+
+paramdef struct Limit_t {
+  p_descr = "Limits into which the relations between boundaries and\n"
+	"storm initiation points fall into. Limits are placed\n"
+	"on distance to the boundary and the angle between the boundary's\n"
+	"average velocity, and the line between the storm init point and\n"
+	"the closest point to it in the boundary. These angles are between\n"
+	"0 and 180 degrees. Limits are inclusive. Limits are also placed\n"
+	"on the extrapolation time. NOTE that none of these limits will\n"
+	"apply if the boundary is determined to be stationary, according\n"
+	"the velocity theshold set by minBdryVel.\nLimits are inclusive.";
+  p_help = "Typically used to deliniate between init points that are\n"
+	"in front of a boundary, behind a boundary and to the side of\n"
+	"a boundary. The name is used in the output filename, so no\n"
+	"spaces or odd characters please. Several catergories can be met\n"
+	"simultaneously.";
+  p_default = {
+	{ "Front", 0.0, 30.0, 0.0, 50.0, 0, 0 },
+	{ "Side", 30.0, 150.0, 0.0, 20.0, 0, 0  },
+	{ "Rear", 150.0, 180.0, 0.0, 150.0, 0, 0  }
+    };
+} Limits[];  
+
+paramdef double {
+  p_descr = "Lower limit on boundary velocity, m/s.";
+  p_help = "If the boundary's mean velocity is less than this, then\n"
+	"the velocity will be set to 0. None of the limits in the Limits\n"
+	"struct will apply, instead, only the minStationaryDist\n"
+	"and maxStationaryDist parameters will be used. The output file\n"
+	"will be named 'stationary'"; 
+  p_default = 0.5;
+} minBdryVel;
+
+
+paramdef struct Limit_t {
+  p_descr = "This is the limit that is used when the boundary is determined\n"
+	"to be stationary from the minBdryVel threshold.";
+  p_help = " In this case the angular limits have no meaning\n"
+	"and are not applied. They default to -999.0 to reflect this.";
+  p_default = { "Static", -999.0, -999.0, 0.0, 50.0, 0, 0 };
+} staticBdryLimit;
+

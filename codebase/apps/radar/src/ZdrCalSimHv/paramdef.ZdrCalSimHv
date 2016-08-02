@@ -1,0 +1,297 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for ZdrCalSimHv
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// March 2011
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "ZdrCalSimHv computes the cross-polar ratios between H and V returns, in simulataneous mode. This is used for the cross-polar method of ZDR calibration, in conjunction with SunScan analysis - see SunCal.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILE_INPUT, TS_FMQ_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FILE_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+paramdef int {
+  p_default = 512;
+  p_descr = "Max size of pulse queue.";
+  p_help = "The input queue is trimmed to this size. This keeps memory usage under control.";
+} max_pulse_queue_size;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Max time between pulses for valid data (secs).";
+  p_help = "If the interval between pulses exceeds this value, the power accumulation arrays will be reset to 0.";
+} max_data_interval_secs;
+
+commentdef {
+  p_header = "ANALYSIS PARAMETERS";
+};
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Resolution of the analysis in azimuth (deg).";
+  p_help = "The data is analyzed in evenly-spaced azimuth dwells. This is the angular resolution of the dwells.";
+} azimuth_resolution;
+
+paramdef int {
+  p_default = 16;
+  p_descr = "Min number of samples in an azimuth resolution.";
+} min_samples_per_dwell;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Antenna collects data while stationary.";
+  p_help = "In this mode, the power values are averaged for successive H and V time periods, and the ratios are then computed.";
+} stationary_mode;
+
+paramdef int {
+  p_default = 256;
+  p_descr = "Number of samples in a beam, in stationary mode.";
+} n_samples_stationary_mode;
+
+commentdef {
+  p_header = "RANGE LIMITS FOR ANALYSIS";
+};
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Start range for analysis (km).";
+} start_range;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "End range for analysis (km).";
+} end_range;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Gate spacing for analysis (km).";
+} gate_spacing;
+
+commentdef {
+  p_header = "AZIMUTH LIMITS FOR ANALYSIS";
+  p_text = "Allows you to just analyze a specified sector.";
+};
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Start azimuth for analysis (deg).";
+} start_az;
+
+paramdef double {
+  p_default = 360.0;
+  p_descr = "End azimuth for analysis (deg).";
+} end_az;
+
+commentdef {
+  p_header = "CPA LIMITS";
+  p_text = "CPA - clutter phase alignment - is a good indicator of clutter.";
+};
+
+paramdef double {
+  p_default = 0.9;
+  p_descr = "Minimum CPA for analysis.";
+} min_cpa;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Maximum CPA for analysis.";
+} max_cpa;
+
+commentdef {
+  p_header = "CALIBRATION XML PATH";
+};
+
+paramdef string {
+  p_default = "./spol_cal.xml";
+  p_descr = "Path for XML calibration file.";
+  p_help = "At a minimum, the calibration file should contain noiseDbm values for each channel.";
+} cal_xml_file_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read the noise from the time series data stream.";
+  p_help = "Some time series formats (e.g. SIGMET tsarchive) includes noise values. If this parameter is true, the noise is read from the time series and this overrides the calibration file.";
+} get_noise_from_time_series;
+
+commentdef {
+  p_header = "SNR LIMITS";
+};
+
+paramdef double {
+  p_default = 15;
+  p_descr = "Minimum SNR for analysis (dB).";
+} min_snr;
+
+paramdef double {
+  p_default = 70;
+  p_descr = "Maximum SNR for analysis (dB).";
+} max_snr;
+
+commentdef {
+  p_header = "DETERMINING H or V transmit";
+};
+
+paramdef double {
+  p_default = 4.5;
+  p_descr = "Threshold for determining H or V transmit (dB).";
+  p_help = "For each beam, we compute the mean difference between Hc and Vx, or Hx and Vc, depending on whether we are in H-only or V-only transmit. If H exceeds V by this threshold, we assume H transmit. If V exceeds H by this threshold, we assume V transmit. If the absolute difference is less than or equal to this threshold, we do not use the beam.";
+} h_minus_v_threshold;
+
+commentdef {
+  p_header = "COMPUTING CROSS-POLAR POWER RATIO";
+};
+
+paramdef double {
+  p_default = -10;
+  p_descr = "Minimum valid Vx/Hx ratio (dB).";
+  p_help = "Sometimes, odd data leads to inappropriate ratios. This puts limits on the ratios to be used in the analysis.";
+} min_valid_ratio_db;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Maximum valid Vx/Hx ratio (dB).";
+  p_help = "Sometimes, odd data leads to inappropriate ratios. This puts limits on the ratios to be used in the analysis.";
+} max_valid_ratio_db;
+
+commentdef {
+  p_header = "OVERRIDE RADAR LOCATION";
+  p_text = "In cases where location is not stored in the meta data";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override radar location.";
+  p_help = "If TRUE, the program will use location specified in the 'radar_location' parameter.";
+} override_radar_location;
+
+typedef struct {
+  double latitude;
+  double longitude;
+  double altitude_km;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 0.0, 0.0, 0.0 };
+  p_descr = "Radar location if override is set true.";
+  p_help = "The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in kilometers, not meters.";
+} radar_location;
+
+commentdef {
+  p_header = "WRITE RESULTS";
+};
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output files.";
+  p_help = "The results will be written to sub-directories named from the data time.";
+} output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write summary results to files.";
+  p_help = "If true, files will be written to output_dir.";
+} write_results;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write individual hx/vx data pairs to an output file.";
+  p_help = "The raw pairs can then be used for generating plots. The file appears in output_dir, and the file name includes the start time for the analysis.";
+} write_data_pairs;
+
+paramdef string {
+  p_default = "spol";
+  p_descr = "Used in file names.";
+} radar_name;
+
+commentdef {
+  p_header = "WRITE MDV FILES FOR DEBUGGING";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write MDV files for debugging.";
+  p_help = "These files contain the mean x-polar powers, and ratio, at each gate.";
+} write_mdv_files;
+
+paramdef string {
+  p_default = "./mdv";
+  p_descr = "Dir for MDV files.";
+  p_help = "See 'write_mdv'";
+} mdv_output_dir;
+
+commentdef {
+  p_header = "TESTING IN ALTERNATING H/V mode";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Radar operation is alternating H/V mode.";
+  p_help = "This is only used for testing. If true, the HV flag in the time series indicates which transmission path was in use for each pulse.";
+} alternating_hv_mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Does the receiver path switch between each pulse.";
+  p_help = "In some alternating mode radars, the receiver chain switches between pulses. This is done to create a co-polar and cross-polar receiver system which is more stable for ZDR. If this is set to TRUE, then the receiver is assumed to switch and the data for each channel is gathered accordingly.";
+} switching_receiver;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute the CP ratio on a gate-by-gate basis.";
+  p_help = "This is only used for testing with alternating data. If true, it also computes the ratio as is done by AltCpCompute, so that we can check the gate-by-gate results against the ppi-by-ppi results.";
+} also_compute_results_by_gate;
+
+paramdef double {
+  p_default = 60;
+  p_descr = "Sampling periond in stationary mode (secs).";
+  p_help = "Averages will be computed successively in H and V, using this sampling period.";
+} averaging_period_in_stationary_mode;
+

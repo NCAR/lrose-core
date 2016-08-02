@@ -1,0 +1,11 @@
+#!/bin/csh -f
+
+/bin/rm test.log
+/bin/rm -r mdv/latlon/interest_web30
+/bin/rm -r mdv/latlon/interest_web60
+/bin/rm -r mdv/latlon/motion_grid
+
+../../src/GridForecast/GridForecast \
+    -params GridForecast.latlon \
+    -start "2000 09 11 16 00 00" -end "2000 09 11 17 00 00"
+#	>&! test.log

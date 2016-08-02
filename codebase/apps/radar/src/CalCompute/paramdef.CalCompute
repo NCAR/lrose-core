@@ -1,0 +1,157 @@
+/******************************************************************
+ *
+ * Parameter definitions for CalCompute
+ *
+ */
+
+commentdef {
+  p_header = "CalCompute computes calibration from a calibration file.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+commentdef {
+  p_header = "RADAR PARAMETERS.";
+}
+
+paramdef double {
+  p_default = 10.68;
+  p_descr = "Radar wavelength (cm).";
+} wavelength_cm;
+
+paramdef double {
+  p_default = 0.92;
+  p_descr = "Horizontal beam width (deg).";
+} horiz_beam_width;
+
+paramdef double {
+  p_default = 0.92;
+  p_descr = "Vertical beam width (deg).";
+} vert_beam_width;
+
+paramdef double {
+  p_default = 45.6;
+  p_descr = "Antenna gain (dB).";
+} antenna_gain_db;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Pulse width (micro secs).";
+} pulse_width_us;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Waveguide loss (dB).";
+  p_help = "Loss from antenna to measurement plane. Set to 0 if the antenna gain includes this loss.";
+} waveguide_loss_db;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Loss through the radome (dB).";
+} radome_loss_db;
+
+paramdef double {
+  p_default = 0.6;
+  p_descr = "Loss because of receiver filter bandwidth (dB).";
+} receiver_loss_db;
+
+commentdef {
+  p_header = "CAL DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./input/cal.txt";
+  p_descr = "Path for cal data file.";
+} input_path;
+
+typedef struct {
+  string short_label;
+  string long_label;
+  int column_num;
+  double coupling_loss_db;
+  double peak_power_w;
+} input_channel_t;
+
+paramdef struct input_channel_t {
+  p_default = {
+    {
+      short_label = "ch",
+      long_label = "co-polar horiz-receive ifd0",
+      column_num = 1,
+      coupling_loss_db = 35.89,
+      peak_power_w = 956000
+    }
+    ,
+    {
+      short_label = "xh",
+      long_label = "cross-polar horiz-receive ifd1",
+      column_num = 2,
+      coupling_loss_db = 35.89,
+      peak_power_w = 956000
+    }
+    ,
+    {
+      short_label = "cv",
+      long_label = "co-polar vert-receive ifd0",
+      column_num = 3,
+      coupling_loss_db = 35.46,
+      peak_power_w = 956000
+    }
+    ,
+    {
+      short_label = "xv",
+      long_label = "cross-polar vert-receive ifd1",
+      column_num = 4,
+      coupling_loss_db = 35.46,
+      peak_power_w = 956000
+    }
+  }
+  p_descr = "Input channels each have a column in the cal data file.";
+  p_help = "column_number starts at 1 (col 0 holds the siggen power). coupling_loss_db includes all losses from the siggen into the waveguide. peak_power is in W.";
+} input_channels[];
+
+commentdef {
+  p_header = "CAlIBRATION PARAMETERS.";
+}
+
+paramdef double {
+  p_default = -60;
+  p_descr = "Min siggen power for computing gain (dBm).";
+} min_siggen_power_for_gain;
+
+paramdef double {
+  p_default = -10;
+  p_descr = "Max siggen power for computing gain (dBm).";
+} max_siggen_power_for_gain;
+
+paramdef double {
+  p_default = -120;
+  p_descr = "Min siggen power for noise estimate (dBm).";
+} min_siggen_power_for_noise;
+
+paramdef double {
+  p_default = -100;
+  p_descr = "Max siggen power for noise estimate (dBm).";
+} max_siggen_power_for_noise;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Directory for output file.";
+} output_dir;
+

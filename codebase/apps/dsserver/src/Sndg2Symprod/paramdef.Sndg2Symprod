@@ -1,0 +1,274 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for Sndg2Symprod
+//
+// Frank Hage RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// Aug 2005
+//
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef
+{
+  p_header = "DEBUGGING";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { DEBUG_OFF };
+} debug;
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string
+{
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean
+{
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef
+{
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int
+{
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5476;
+} port;
+  
+paramdef int
+{
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = -1;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef
+{
+  p_header = "RENDERING PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "display color";
+  p_help = "Name of color suggested for using on the display.";
+  p_default = "yellow";
+} display_color;
+
+paramdef int
+{
+  p_descr = "Line thickness of icon lines";
+  p_help = "Thickness in pixels.";
+  p_default = 1;
+} line_width;
+
+paramdef int
+{
+  p_descr = "Size of icon in pixels";
+  p_help = "Sounding Sites are represented by a cross. This is the length of each arm of the cross in pixels.";
+  p_default = 10;
+} icon_size;
+
+
+commentdef
+{
+  p_header = "TIME LABELLING PARAMETERS";
+};
+
+
+paramdef boolean
+{
+  p_descr = "Option to add a text label representing the ID\n";
+  p_default = TRUE;
+} do_id_labelling;
+
+paramdef struct text_offset_t
+{
+  p_descr = "Pixel offset values for starting the time labelling text";
+  p_help = "Only relevant if do_id_labelling is TRUE";
+  p_default = { 0, -15 };
+} id_text_offset;
+
+paramdef string
+{
+  p_descr = "Color for ID labels.";
+  p_help = "Only relevant if do_time_labelling is TRUE";
+  p_default = "White";
+} id_label_color;
+
+paramdef boolean
+{
+  p_descr = "Option to add a text label representing the time\n"
+	"of each strike to the display.";
+  p_default = FALSE;
+} do_time_labelling;
+
+typedef enum
+{
+  TIME_LABEL_HHMM,
+  TIME_LABEL_HHMMSS,
+  TIME_LABEL_YYYYMMDDHHMMSS
+} time_format_t;
+
+paramdef enum time_format_t
+{
+  p_descr = "Time label format";
+  p_help = "Only relevant if do_time_labelling is TRUE";
+  p_default = { TIME_LABEL_HHMM };
+} time_format;
+
+typedef struct
+{
+  long x;
+  long y;
+} text_offset_t;
+
+paramdef struct text_offset_t
+{
+  p_descr = "Pixel offset values for starting the time labelling text";
+  p_help = "Only relevant if do_time_labelling is TRUE";
+  p_default = { 0, 15 };
+} time_text_offset;
+
+paramdef string
+{
+  p_descr = "Color for time labels.";
+  p_help = "Only relevant if do_time_labelling is TRUE";
+  p_default = "gray";
+} time_label_color;
+
+commentdef
+{
+  p_header = "FONT OPTIONS";
+};
+
+typedef enum
+{
+  VERT_ALIGN_TOP,
+  VERT_ALIGN_CENTER,
+  VERT_ALIGN_BOTTOM
+} vert_align_t;
+
+paramdef enum vert_align_t
+{
+  p_descr = "Vertical alignment for the text";
+  p_default = VERT_ALIGN_CENTER;
+} text_vert_align;
+
+typedef enum
+{
+  HORIZ_ALIGN_LEFT,
+  HORIZ_ALIGN_CENTER,
+  HORIZ_ALIGN_RIGHT
+} horiz_align_t;
+
+paramdef enum horiz_align_t
+{
+  p_descr = "Horizontal alignment for the text";
+  p_default = HORIZ_ALIGN_CENTER;
+} text_horiz_align;
+
+typedef enum
+{
+  TEXT_NORM,
+  TEXT_BOLD,
+  TEXT_ITALICS,
+  TEXT_SUBSCRIPT,
+  TEXT_SUPERSCRIPT,
+  TEXT_UNDERLINE,
+  TEXT_STRIKETHROUGH
+} font_style_t;
+
+paramdef enum font_style_t
+{
+  p_descr = "Font style for the text";
+  p_default = TEXT_NORM;
+} text_font_style;
+
+paramdef long
+{
+  p_descr = "Size of font to use for text";
+  p_default = 0;
+} text_font_size;
+
+paramdef string
+{
+  p_descr = "Text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} text_background_color;
+
+paramdef string
+{
+  p_descr = "Font name.";
+  p_default = "";
+} font_name;

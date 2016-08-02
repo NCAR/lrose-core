@@ -1,0 +1,141 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "Migfa2Spdb, as the name suggests, reads MIGFA\n"
+             "boundaries from Lincoln Labs and writes\n"
+             "them to an SPDB database.\n\nNiles Oien March 2002.";
+
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed.";
+} debug;
+
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME_FILE, REALTIME_STREAM};
+  p_default = REALTIME_STREAM;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in three modes, archive, realtime from files and realtime from streams. In realtime from file mode, the conversion is performed for each input file as it becomes available. In realtime from stream mode, the input data are read from a stream (see the hostname and port parameters below). In archive mode, the file list is obtained from the command line with the -f switch.";
+} mode;
+      
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/$(PROJECT)/raw/MigfaBoundaries";
+  p_descr = "Input directory - top level. Set to the\n"
+            "the directory in which the input files appear."
+            "Used in realtime file mode only.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Host name for realtime stream mode.";
+  p_help = "Set to the machine which is producing the input stream.";
+} hostname;
+
+paramdef int {
+  p_default = 4000;
+  p_descr = "Port number for realtime stream mode.";
+  p_help = "Set to the port which is producing the input stream.";
+} port;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Byte swap";
+  p_help = "Experience suggests that this should be TRUE.";
+} byteSwap;
+
+commentdef {
+  p_header = "RADAR LOCATION INFORMATION.";
+}
+
+paramdef double {
+  p_default = 41.0;
+  p_descr = "Latitude of radar, decimal degrees.";
+  p_help = "Needed to locate MIGFA boundaries which are in X,Y\n"
+           "relative to the radar.";
+} radar_lat;
+
+paramdef double {
+  p_default = -105.0;
+  p_descr = "Longitude of radar, decimal degrees.";
+  p_help = "Needed to locate MIGFA boundaries which are in X,Y\n"
+           "relative to the radar.";
+} radar_lon;
+
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+
+paramdef string {
+  p_default = "spdbp:://localhost::$(PROJECT)/spdb/MigfaBoundaries";
+  p_descr = "URL for output SPDB data.";
+} OutUrl;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "How long data are valid, seconds.";
+} expiry;
+
+paramdef int {
+  p_default = {0, 15, 30 };
+  p_descr = "MIGFA lead times to use, in minutes.";
+  p_default = "By default, MIGFA gives an extrapolated output\n"
+	"every minute - this is a bit excessive. Only the lead\n"
+	"times requested in this array are output.";
+} desiredLeadTimes[];
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Occasionally it is necessary to write a single\n"
+	"spdb database from several MIGFA detections operating\n"
+	"on different radars. In this case the ID offset can be used\n"
+	"to avoid SPDB overwrites.";
+} ID_offset;

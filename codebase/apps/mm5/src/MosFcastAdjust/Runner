@@ -1,0 +1,5 @@
+#!/bin/csh
+
+./MosFcastAdjust -params MosFcastAdjust.test -interval 20010730180000  20010730235959
+
+#

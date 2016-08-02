@@ -1,0 +1,18 @@
+UpdateMdvFieldNames was copied almost wholesale from
+update_mdv_times (by Nancy Rehak) - only minor edits
+were required to change the short field names rather 
+than adding an offset to the file times.
+
+The program was motivated by a new version of CIDD that uses
+the short field name to determine what field to display.
+A lot of MDV files exist for GOES satellite data that have
+the short field name "temperature" for all infra red fields - CIDD
+will only be able to display the first one in this case.
+
+Niles Oien May 1999
+
+
+Moved test parameter files and control scripts to
+apps/mdv_utils/test/UpdateMdvFieldNames.
+
+Nancy Rehak     7 Feb 2002

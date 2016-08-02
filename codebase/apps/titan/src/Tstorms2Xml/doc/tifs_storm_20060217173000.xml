@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<wxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML"
+	version="1.01"
+	xsi:schemaLocation="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML/wxml.1.01.xsd">
+<head>
+	<product concise-name="track" operational-mode="experimental">
+		<system>tifs
+			<sub-system>TITAN</sub-system>
+		</system>
+		<title>Thunderstorm Interactive Forecast System Thunderstorm Track</title>
+                <description>B08FDP TIFS track</description>
+		<category>analysis</category>
+		<creation-date refresh-frequency=" PT10M ">2006-02-17T17:35:00</creation-date>
+	</product>
+	<data-source>
+		<radar name="Tianjin" type="NEXRAD" latitude="39.20" longitude="117.30" />
+	</data-source>
+	<product-source>
+		<more-information>
+			http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/info.html
+		</more-information>
+		<production-center>Bureau of Meteorology
+			<sub-center>Research Centre</sub-center>
+		</production-center>
+		<disclaimer>http://www.bom.gov.au/other/disclaimer.shtml</disclaimer>
+		<credit>http://www.bom.gov.au</credit>
+		<credit-logo>http://www.bom.gov.au/images/bom_logo.gif</credit-logo>
+	</product-source>
+</head>
+<nowcast-data>
+	<time-layout time-coordinate="UTC">
+		<start-valid-time>2006-02-17T17:30:00</start-valid-time>
+		<end-valid-time>2006-02-17T17:30:00</end-valid-time>
+	</time-layout>
+	<event ID="00036">
+		<case>
+			<time time-coordinate="UTC" period="PT10M">2006-02-17T17:30:00</time>
+			<location>
+			    <area>
+				<ellipse>
+					<moving-point type="centroid">
+						<latitude>39.55</latitude>
+						<longitude>116.67</longitude>
+						<polar_motion>
+							<speed units="km h-1">10.1</speed>
+							<direction_from units="degrees true">94</direction_from>
+						</polar_motion>
+					</moving-point>
+					<major_axis units="km">4.2</major_axis>
+					<minor_axis units="km">2.5</minor_axis>
+					<orientation units="degrees true">22</orientation>
+				</ellipse>
+			    </area>
+			</location>
+			<nowcast-parameters>
+				<max_dbz units="dbz">52</max_dbz>
+				<VIL units="kg m-2">3.4</VIL>
+				<original_speed units="km h-1">9.8</original_speed>
+				<original_direction units="degrees true">138</original_direction>
+				<visible units="none">true</visible>
+				<storm_intensity categorical-table="storm categories">4</storm_intensity>
+			</nowcast-parameters>
+		</case>
+	</event>
+	<event ID="00037">
+		<case>
+			<time time-coordinate="UTC" period="PT10M">2006-02-17T17:30:00</time>
+			<location>
+			    <area>
+				<ellipse>
+					<moving-point type="centroid">
+						<latitude>40.02</latitude>
+						<longitude>116.89</longitude>
+						<polar_motion>
+							<speed units="km h-1">11.7</speed>
+							<direction_from units="degrees true">98</direction_from>
+						</polar_motion>
+					</moving-point>
+					<major_axis units="km">3.9</major_axis>
+					<minor_axis units="km">2.2</minor_axis>
+					<orientation units="degrees true">25</orientation>
+				</ellipse>
+			    </area>
+			</location>
+			<nowcast-parameters>
+				<max_dbz units="dbz">46</max_dbz>
+				<VIL units="kg m-2">2.7</VIL>
+				<original_speed units="km h-1">11.7</original_speed>
+				<original_direction units="degrees true">98</original_direction>
+				<visible units="none">true</visible>
+				<storm_intensity categorical-table="storm categories">3</storm_intensity>
+			</nowcast-parameters>
+		</case>
+	</event>
+	<event ID="00038">
+		<case>
+			<time time-coordinate="UTC" period="PT10M">2006-02-17T17:30:00</time>
+			<location>
+			    <area>
+				<ellipse>
+					<moving-point type="centroid">
+						<latitude>40.21</latitude>
+						<longitude>116.56</longitude>
+						<polar_motion>
+							<speed units="km h-1">9.8</speed>
+							<direction_from units="degrees true">95</direction_from>
+						</polar_motion>
+					</moving-point>
+					<major_axis units="km">8.7</major_axis>
+					<minor_axis units="km">3.1</minor_axis>
+					<orientation units="degrees true">24</orientation>
+				</ellipse>
+			    </area>
+			</location>
+			<nowcast-parameters>
+				<max_dbz units="dbz">43</max_dbz>
+				<VIL units="kg m-2">2.9</VIL>
+				<original_speed units="km h-1">9.8</original_speed>
+				<original_direction units="degrees true">95</original_direction>
+				<visible units="none">true</visible>
+				<storm_intensity categorical-table="storm categories">2</storm_intensity>
+			</nowcast-parameters>
+		</case>
+	</event>
+	<categorical-definitions>
+		<categorical-table>
+			<categorical-key>storm categories</categorical-key>
+			<value category="very mild">1</value>
+			<value category="mild">2</value>
+			<value category="moderate">3</value>
+			<value category="strong">4</value>
+			<value category="intense">5</value>
+		</categorical-table>
+	</categorical-definitions>
+</nowcast-data>
+</wxml>

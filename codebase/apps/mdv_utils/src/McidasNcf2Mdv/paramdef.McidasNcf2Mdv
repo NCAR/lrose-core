@@ -1,0 +1,444 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for McidasNcf2Mdv
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Aug 1999
+//
+
+commentdef {
+  p_header = "Program name: McidasNcf2Mdv";
+  p_text = "McidasNcf2Mdv reads netCDF files containing satellite data written by a McIdas system, and converts it into MDV format. It is assumed that data from only a single band (field) exists in the file.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Registration interval.";
+  p_help = "The number of seconds between expected procmap registrations.";
+} reg_interval;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in FILELIST mode, at least) MUST contain a "
+           "day-directory below the data file -- ./data_file.mdv will not "
+           "work as a file path";
+} mode;
+
+paramdef string {
+  p_default = "raw/input";
+  p_descr = "Directory for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_age;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to use only the latest file to have arrived.";
+  p_help = "REALTIME mode only. If true, will process only the latest file on startup, if the file has an age less than max_realtime_age. If false, on startup will process all files with age less than max_realtime_age.";
+} process_latest_file_only;
+
+paramdef string {
+  p_default = "nc";
+  p_descr = "Specify the extension of the files to be read.";
+  p_help = "If blank, all extensions will be used.";
+} file_name_ext;
+
+paramdef string {
+  p_default = "NCF";
+  p_descr = "Specify a seach string for the names of the files to be read.";
+  p_help = "If blank, no check will be performed.";
+} file_name_substr;
+
+commentdef {
+  p_header = "NETCDF dimension and variable names";
+  p_text = "Specify the names used in the netCDF file for dimensions and variables, since they can vary depending on the application used to create the file.";
+}
+
+paramdef string {
+  p_default = "lines";
+  p_descr = "name for netCDF dimension for number of lines.";
+} netcdf_dim_n_lines;
+
+paramdef string {
+  p_default = "elems";
+  p_descr = "name for netCDF dimension for number of elements (pixels across image).";
+} netcdf_dim_n_elems;
+
+paramdef string {
+  p_default = "bands";
+  p_descr = "name for netCDF dimension for number of bands.";
+} netcdf_dim_n_bands;
+
+paramdef string {
+  p_default = "imageDate";
+  p_descr = "name for netCDF variable for image date.";
+} netcdf_var_image_date;
+
+paramdef string {
+  p_default = "imageTime";
+  p_descr = "name for netCDF variable for image time.";
+} netcdf_var_image_time;
+
+paramdef string {
+  p_default = "time";
+  p_descr = "name for netCDF variable for time.";
+} netcdf_var_time;
+
+paramdef string {
+  p_default = "lineRes";
+  p_descr = "name for netCDF variable for line resolution.";
+} netcdf_var_line_res;
+
+paramdef string {
+  p_default = "prefixSize";
+  p_descr = "name for netCDF variable for line prefix size.";
+} netcdf_var_prefix_size;
+
+paramdef string {
+  p_default = "elemRes";
+  p_descr = "name for netCDF variable for element resolution.";
+} netcdf_var_elem_res;
+
+paramdef string {
+  p_default = "data";
+  p_descr = "name for netCDF variable for image_data.";
+} netcdf_var_image_data;
+
+paramdef string {
+  p_default = "data_width";
+  p_descr = "name for netCDF variable for width of image data in bytes.";
+} netcdf_var_data_width;
+
+paramdef string {
+  p_default = "latitude";
+  p_descr = "name for netCDF variable for latitude.";
+} netcdf_var_latitude;
+
+paramdef string {
+  p_default = "longitude";
+  p_descr = "name for netCDF variable for longitude.";
+} netcdf_var_longitude;
+
+paramdef string {
+  p_default = "crDate";
+  p_descr = "name for netCDF variable for creation date.";
+} netcdf_var_creation_date;
+
+paramdef string {
+  p_default = "crTime";
+  p_descr = "name for netCDF variable for creation time.";
+} netcdf_var_creation_time;
+
+paramdef string {
+  p_default = "sensorID";
+  p_descr = "name for netCDF variable for sensor ID.";
+} netcdf_var_sensor_id;
+
+paramdef string {
+  p_default = "auditTrail";
+  p_descr = "name for netCDF variable for audit trail, if available.";
+} netcdf_var_audit_trail;
+
+commentdef {
+  p_header = "DATASET TYPE";
+}
+
+typedef struct {
+  string file_name_sub_string;
+  string field_name;
+  string field_name_long;
+  string units;
+  double data_scale;
+  double data_offset;
+  int grid_nx;
+  int grid_ny;
+  double grid_minx;
+  double grid_miny;
+  double grid_dx;
+  double grid_dy;
+  string output_url;
+} dataset_t;
+
+paramdef struct dataset_t {
+  p_default = {
+    { "ch1", "VIS","Visible", "Albedo", 1.0, 0.0, 1200, 1200, -600, -600, 1, 1, "./output/vis" },
+    { "ch2", "IR","Near IR", "C", 1.0, -273.15, 300, 300, -600, -600, 4, 4, "./output/ir" },
+    { "ch4", "WV","Water Vapor", "C", 1.0, -273.15, 300, 300, -600, -600, 4, 4, "./output/wv" }
+  };
+  p_descr = "Details applicable to each input dataset type.";
+  p_help = "Each dataset contains a single field. We look for the name_sub_string in the file name. If found, those details are applied to that dataset. If a 0-length sub string is supplied, it will be used for all files for which a valid sub string is not found. The data_scale and data_offset are applied to the data dataset, to scale the data appropriately and allow you to change units. If set to 1.0 and 0.0 respectively, no transformation will occur. The grid parameters are also set individually for each data set.";
+} datasets[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute albedo (%), given raw counts.";
+  p_help = "If true, the albedo will be computed by scaling the counts into albedo, and then correcting for sun angle.";
+} convert_counts_to_albedo;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Scale factor to apply to convert raw count values into albedo.";
+} counts_to_albedo_scale;
+
+commentdef {
+  p_header = "OUTPUT TIME STAMPING";
+}
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Offset added to image time to get valid time (secs)";
+  p_help = "The McIdas images are time-stamed at the start of taking data for the image. Generally, MDV files are time-stamped with the end time of the data. So, this offset is added to the image time to give the valid time of the data.";
+} valid_time_offset;
+
+commentdef {
+  p_header = "OUTPUT PROJECTION and GRID";
+}
+
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_MERCATOR =  4,
+  PROJ_POLAR_STEREO = 5,
+  PROJ_FLAT = 8,
+  PROJ_OBLIQUE_STEREO = 12,
+  PROJ_TRANS_MERCATOR = 15,
+  PROJ_ALBERS = 16,
+  PROJ_LAMBERT_AZIM = 17,
+  PROJ_VERT_PERSP = 18
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_FLAT;
+  p_descr = "Projection for remapping in x,y. See projection param below.";
+  p_help =
+  "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
+  "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
+  "\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n"
+  "\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n"
+  "\tPROJ_MERCATOR: Mercator - EW orientation\n"
+  "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
+  "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
+  "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
+  "\tPROJ_ALBERS: Albers Equal Area Conic\n"
+  "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
+} output_projection;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to preserve the input grid details for regular lat/lon grids.";
+  p_help = "If the output projection type is LATLON, and the input data is on a regular latlon grid, the input grid is preserved, and the output grid will match the input grid.";
+} preserve_input_geom_for_regular_latlon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid rotation.";
+  p_help = "This applies only to PROJ_FLAT projections.";
+} proj_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid origin latitude.";
+  p_help = "This applies to all projections except LATLON.";
+} proj_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid origin longitude.";
+  p_help = "This applies to all projections except LATLON.";
+} proj_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid reference latitude 1.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} proj_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid reference latitude 2.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} proj_lat2;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Central scale for remapped projections.";
+  p_help = "This applies to POLAR_STEREO and TRANSVERSE_MERCATOR projections.";
+} proj_central_scale;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection tangent latitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO only.";
+} proj_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection tangent longitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
+} proj_tangent_lon;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
+  p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
+} proj_pole_is_north;
+
+paramdef double {
+  p_default = 35786;
+  p_descr = "Radius of perspective point (km).";
+  p_help = "This applies to VERT_PERSP.";
+} proj_persp_radius;
+
+commentdef {
+  p_header = "OUTPUT ENCODING AND COMPRESSION";
+}
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Set output encoding type.";
+} output_encoding_type;
+
+typedef enum {
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4,
+  COMPRESSION_GZIP =  5,
+  COMPRESSION_GZIP_VOL = 6
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_GZIP;
+  p_descr = "Set output compression type.";
+  p_help = "See <toolsa/compress> for details on the compression types.";
+} output_compression_type;
+
+paramdef string {
+  p_default = "McIDAS";
+  p_descr = "Name of data set.";
+  p_help = "Appears in Mdv master header.";
+} data_set_name;
+
+paramdef string {
+  p_default = "Bureau of Meteorology, Australia";
+  p_descr = "Source of data.";
+  p_help = "Appears in Mdv master header.";
+} data_set_source;
+
+commentdef {
+  p_header = "WRITE ZEBRA NETCDF";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write NetCDF files for use in Zebra.";
+  p_help = "Zebra uses a specific NetCDF output format.";
+} write_zebra_netcdf;
+
+paramdef string {
+  p_default = "/tmp/zebra/sat";
+  p_descr = "Directory for Zebra NetCDF files.";
+} zebra_netcdf_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to create a day dir for Zebra data.";
+  p_help = "A subdirectory named yyyymmdd will be created for the files.";
+} zebra_write_to_day_dir;
+
+typedef struct {
+  string file_name_sub_string;
+  string zebra_data_set_name;
+  string zebra_field_name;
+} zebra_dataset_t;
+
+paramdef struct zebra_dataset_t {
+  p_default = {
+    { "ch1", "goes_1km", "VIS" },
+    { "ch2", "goes_4km","IR" },
+    { "ch4", "goes_4km", "WV" }
+  };
+  p_descr = "Zebra field name details.";
+  p_help = "Zebra field data will be written in floats.";
+} zebra_datasets[];
+
+
+

@@ -1,0 +1,12 @@
+#!/bin/csh
+#
+#
+setenv RAP_DATA_DIR /home/oien/rap/apps/didss/src/Scout/testbed/
+#
+find ./testbed -name _Scout_Report -print -exec /bin/rm -f {} \;
+#
+./Scout -dirsleep 0 -once -report 
+#
+#
+/bin/rm core
+

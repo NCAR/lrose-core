@@ -1,0 +1,452 @@
+/**********************************************************************
+ * TDRP params for TsRefract2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// TsRefract2Dsr reads time-series data in Sigmet TsArchive format, 
+//   computes the basic moments and refractivity quantities, and writes 
+//   the results into a DsRadar FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In SIMULATE mode, the program moves repeatedly through 
+//   the file list, creating output files with times set to now. This is 
+//   useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// TIME-SERIES FILE DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "./input";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// RADAR PARAMS.
+//
+// If any of the params are set in the input data files, the values in 
+//   those params will be taken from the input data stream rather than 
+//   from the parameter file.
+//
+//======================================================================
+ 
+///////////// radar ///////////////////////////////////
+//
+// Default radar params. If any of the params are set in the input data 
+//   files, the values in those params will be taken from the input data 
+//   stream rather than from the parameter file.
+// ========== Radar params ==========
+// 	
+// altitude: km
+// latitude: degrees
+// longitude: degrees
+// horiz_beam_width: half-power beam width - degrees
+// vert_beam_width: half-power beam width - degrees
+// radar_constant: dB
+// xmit_peak_pwr: watts
+// receiver_mds: dBm
+// receiver_gain: dB
+// antenna_gain: dB
+// system_gain: dB
+// 	.
+//
+// Type: struct
+//   typedef struct {
+//      double altitude;
+//      double latitude;
+//      double longitude;
+//      double horiz_beam_width;
+//      double vert_beam_width;
+//      double radar_constant;
+//      double xmit_peak_pwr;
+//      double receiver_mds;
+//      double receiver_gain;
+//      double antenna_gain;
+//      double system_gain;
+//   }
+//
+//
+
+radar = {
+    altitude = 1.742,
+    latitude = 39.9321,
+    longitude = -105.182,
+    horiz_beam_width = 0.91,
+    vert_beam_width = 0.91,
+    radar_constant = 70.1652,
+    xmit_peak_pwr = 8e+06,
+    receiver_mds = -113,
+    receiver_gain = 46.05,
+    antenna_gain = 45.2,
+    system_gain = 46.05
+};
+
+///////////// scan_type_id ////////////////////////////
+//
+// Scan type id.
+// Unique identifier for scan strategy.
+// Type: int
+//
+
+scan_type_id = 0;
+
+///////////// scan_type_name //////////////////////////
+//
+// Scan type name.
+// Descriptive name for scan strategy.
+// Type: string
+//
+
+scan_type_name = "Default";
+
+///////////// atmos_attenuation ///////////////////////
+//
+// Atmospheric attenuation (dB/km).
+// Reflectivity is corrected for this.
+// Type: double
+//
+
+atmos_attenuation = 0.012;
+
+//======================================================================
+//
+// MOMENTS COMPUTATIONS.
+//
+//======================================================================
+ 
+///////////// index_beams_in_azimuth //////////////////
+//
+// Option to index the beams to azimuth.
+// If true, moments are computed for IQ series centered around azimuths 
+//   at a specified spacing.
+// Type: boolean
+//
+
+index_beams_in_azimuth = TRUE;
+
+///////////// azimuth_resolution //////////////////////
+//
+// Resolution in azimuth for beam indexing.
+// See index_beams_in_azimuth. This is the azimuth resolution for 
+//   computing the location at which to compute the moments. The azimuths 
+//   always start at 0.0 and increase at this resolution.
+// Minimum val: 0.001
+// Maximum val: 360
+// Type: double
+//
+
+azimuth_resolution = 1;
+
+///////////// moments_algorithm ///////////////////////
+//
+// Algorithm to use for computing moments.
+// ALG_PP: pulse-pair. ALG_FFT: spectral processing.
+//
+// Type: enum
+// Options:
+//     ALG_PP
+//     ALG_FFT
+//
+
+moments_algorithm = ALG_FFT;
+
+///////////// fft_window //////////////////////////////
+//
+// Window to use for spectral processing.
+// HANNING or BLACKMAN.
+//
+// Type: enum
+// Options:
+//     WINDOW_HANNING
+//     WINDOW_BLACKMAN
+//     WINDOW_NONE
+//
+
+fft_window = WINDOW_HANNING;
+
+///////////// n_samples ///////////////////////////////
+//
+// Number of samples (pulses) for computing moments.
+// Type: int
+//
+
+n_samples = 64;
+
+///////////// signal_to_noise_ratio_threshold /////////
+//
+// Signal-to-noise value for thresholding (dB).
+// This is the signal-to-noise ratio used to thresholding based on the 
+//   noise.
+// Type: double
+//
+
+signal_to_noise_ratio_threshold = 3;
+
+//======================================================================
+//
+// OUTPUT FIELDS.
+//
+// Only the following fields will included in the output. If the field 
+//   is not in the input file, it will be left out.
+//
+//======================================================================
+ 
+///////////// output_snr //////////////////////////////
+//
+// Option to output SNR in dB.
+// Type: boolean
+//
+
+output_snr = FALSE;
+
+///////////// output_dbz //////////////////////////////
+//
+// Option to output DBZ.
+// Type: boolean
+//
+
+output_dbz = TRUE;
+
+///////////// output_velocity /////////////////////////
+//
+// Option to output radial VEL (m/s).
+// Type: boolean
+//
+
+output_velocity = TRUE;
+
+///////////// output_width ////////////////////////////
+//
+// Option to output spectral width (m/s).
+// Type: boolean
+//
+
+output_width = TRUE;
+
+///////////// output_aiq //////////////////////////////
+//
+// Option to output AIQ field - for refractivity.
+// AIQ is the mean absolute phase.
+// Type: boolean
+//
+
+output_aiq = FALSE;
+
+///////////// output_niq //////////////////////////////
+//
+// Option to output NIQ fields - for refractivity.
+// NIQ is the mean power.
+// Type: boolean
+//
+
+output_niq = FALSE;
+
+///////////// output_mean_i ///////////////////////////
+//
+// Option to output average I field - for refractivity.
+// Type: boolean
+//
+
+output_mean_i = FALSE;
+
+///////////// output_mean_q ///////////////////////////
+//
+// Option to output average Q field - for refractivity.
+// Type: boolean
+//
+
+output_mean_q = FALSE;
+
+//======================================================================
+//
+// OUTPUT DsRadar FMQ.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for DsRadar data via FMQ.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::fmq/refract";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 50000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 7200;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+///////////// beam_wait_msecs /////////////////////////
+//
+// Wait per beam (milli-secs).
+// ARCHIVE and SIMULATE modes only.
+// Type: int
+//
+
+beam_wait_msecs = 25;
+
+//======================================================================
+//
+// END OF VOLUME FLAG.
+//
+//======================================================================
+ 
+///////////// set_end_of_vol_from_elev_change /////////
+//
+// Option to set the end of vol flag based on change in elevation angle.
+// If true, the program will look for changes in antenna angle to 
+//   compute the end of volume.
+// Type: boolean
+//
+
+set_end_of_vol_from_elev_change = TRUE;
+
+///////////// elev_change_for_end_of_vol //////////////
+//
+// Change in elevation which triggers and end of volume.
+// If the elevation angle changes by this amount, and end of volume flag 
+//   will be set.
+// Minimum val: 0.1
+// Type: double
+//
+
+elev_change_for_end_of_vol = 1.5;
+
+///////////// vol_starts_at_bottom ////////////////////
+//
+// Flag to indicate that elevation angles increase in the volume.
+// If the volume starts at the top, i.e. elevations decrease during the 
+//   volume, set this to FALSE.
+// Type: boolean
+//
+
+vol_starts_at_bottom = TRUE;
+
+///////////// min_beams_per_vol ///////////////////////
+//
+// Min number of beams per volume.
+// Used to prevent end-of-volume conditions being determined during 
+//   antenna transition to the start of the next volume. Only used for 
+//   set_end_of_vol_from_elev_angle.
+// Type: int
+//
+
+min_beams_per_vol = 360;
+

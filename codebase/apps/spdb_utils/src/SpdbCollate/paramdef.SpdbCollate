@@ -1,0 +1,122 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for SpdbCollate
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * Jan 2002
+ */
+
+commentdef {
+  p_header = "SpdbCollate program";
+  p_text = "SpdbCollate reads data from Spdb data bases, at regular intervals, and writes out the data in a time-collated format. The intention is to allow you to compare data from different data bases.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA SET DESCRIPTIONS.";
+}
+
+typedef enum {
+  UI08, SI08, UI16, SI16, UI32, SI32, FL32, STRING
+} data_element_t;
+
+typedef struct {
+  string url;
+  int time_margin;
+  string data_type;
+  string data_type2;
+  data_element_t entry_type;
+  int offset_in_chunk;
+  string label;
+  string format;
+  string missing_str;
+} data_set_t;
+
+paramdef struct data_set_t {
+  p_default = {{ "spdb/ltg", 3600, 0, 0, FL32, 4, "latitude" , "%10.2f", "     -9999" }};
+  p_descr = "Data set information.";
+  p_help = "The data sets appear in order in each line of output. Data is read from the URL using 'get closest', with the time_margin specified in secs. The data_types are entered as strings. If the strings can be converted into an integer, that is done. If not, a reverse hash lookup is performed to get the integer from the string. Use a data type of 0 to get all spdb entries. entry_type specifies the type of entry you want to print out. The offset_in_chunk, in bytes, gives the location of the element from the top of the SPDB data chunk. The label is used for printing a header. The format parameter is a C-style printf format string. The missing_str is printed if the data is missing for that entry.";
+} data_sets[];
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} date_time_t;
+
+paramdef struct date_time_t {
+  p_default = { 2002, 01, 02, 12, 15, 00 };
+  p_descr = "Start time of analysis.";
+  p_help = "Data is gathered from the start to the end time.";
+} start_time;
+
+paramdef struct date_time_t {
+  p_default = { 2002, 01, 02, 12, 15, 00 };
+  p_descr = "End time of analysis.";
+  p_help = "Data is gathered from the start to the end time.";
+} end_time;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Interval between data retrievals - secs";
+  p_help = "Data is colated at this interval, between the start and end times.";
+} data_interval;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to only print out if all data is available.";
+  p_help = "The normal mode is to insert the missing value string if a data set is not available at a particular time. If this parameter is true, data for a particular time is only printed out if all data sets are available at that time.";
+} print_only_if_all_available;
+
+

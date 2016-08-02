@@ -1,0 +1,319 @@
+/*********************************************************
+ * parameter definitions for RadxDiff
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * march 2013
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Checks 2 Radx-supported files for differences.";
+  p_text = "Prints report to stdout. Returns 0 on success, 1 on failure.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "READING THE DATA";
+  p_text = "The most common option is to specify the file paths.";
+}
+
+typedef enum {
+  SEARCH_BY_PATH,
+  SEARCH_BY_TIME
+} search_mode_t;
+
+paramdef enum search_mode_t {
+  p_default = SEARCH_BY_PATH;
+  p_descr = "Mode for finding files";
+  p_help = "SEARCH_BY_PATH: use specified paths. SEARCH_BY_TIME: find files by time, given the directories and search criteria";
+} search_mode;
+
+commentdef {
+  p_header = "SEARCH_BY_PATH";
+}
+
+paramdef string {
+  p_default = "/tmp/file1";
+  p_descr = "Full path for file1.";
+} file1_path;
+
+paramdef string {
+  p_default = "/tmp/file2";
+  p_descr = "Full path for file2.";
+} file2_path;
+
+commentdef {
+  p_header = "SEARCH_BY_TIME";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Data directory for file1.";
+  p_help = "See file1_specify_by_time.";
+} file1_dir;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Data directory for file2.";
+  p_help = "See file2_specify_by_time.";
+} file2_dir;
+
+typedef enum {
+  READ_LATEST             = 0,
+  READ_CLOSEST            = 1,
+  READ_FIRST_BEFORE       = 2,
+  READ_FIRST_AFTER        = 3
+} time_mode_t;
+
+paramdef enum time_mode_t {
+  p_default = READ_LATEST;
+  p_descr = "Mode for searching for files in time domain.";
+  p_help = "For all except LATEST, you must specify the search time and the search margin.";
+} time_mode;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Search time for files.";
+  p_help = "Time for data requested. Format is YYYY MM DD HH MM SS";
+} read_search_time;
+
+paramdef int {
+  p_default = "3600";
+  p_descr = "Margin around search time (secs).";
+  p_help = "Applies to all search modes except LATEST.";
+} read_search_margin;
+
+commentdef {
+  p_header = "FIELDS TO COMPARE";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the field names for comparison";
+  p_help = "If TRUE, the field name pairs in field_names[] are used for comparison. If FALSE, each field in file1 is compared with a field of the same name in file2.";
+} specify_field_names;
+
+typedef struct {
+  string file1_field_name;
+  string file2_field_name;
+} field_name_pair_t;
+
+paramdef struct field_name_pair_t {
+  p_default = {
+    { "DBZ", "DBZ" },
+    { "VEL", "VEL" }
+  };
+  p_descr = "List of fields for comparison.";
+} field_names[];
+
+commentdef {
+  p_header = "READ CONSTRAINTS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only read sweeps within the specified fixed angle limits. Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
+} read_set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower fixed angle limit - degrees.";
+} read_lower_fixed_angle;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Upper fixed angle limit - degrees.";
+} read_upper_fixed_angle;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set sweep number limits";
+  p_help = "Only read sweeps within the specified sweep number limits.";
+} read_set_sweep_num_limits;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Lower sweep number limit.";
+} read_lower_sweep_num;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Upper sweep number limit.";
+} read_upper_sweep_num;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to aggregate sweep files into a volume on read.";
+  p_help = "If false, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.";
+} aggregate_sweep_files_on_read;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the number of gates to be constant.";
+  p_help = "If TRUE, the number of gates on all rays will be set to the maximum, and gates added to shorter rays will be filled with missing values.";
+} set_ngates_constant;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to keep long range rays.";
+  p_help = "Applies to NEXRAD data. If true, data from the non-Doppler long-range sweeps will be kept. By default these are removed after their fields are copied over to the short-range sweep.";
+} keep_long_range_rays;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove short range rays.";
+  p_help = "Applies to NEXRAD data. If true, data from the Doppler short-range sweeps will be removed.";
+} remove_short_range_rays;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
+  p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
+} trim_surveillance_sweeps_to_360deg;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to negate the latitude.";
+  p_help = "Mainly useful for RAPIC files. In RAPIC, latitude is always positive, so mostly you need to set the latitiude to the negative value of itself.";
+} change_radar_latitude_sign;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the range geometry to match.";
+  p_help = "If true, the range geometry of the second file will be metched to that of the first, before the comparison is made.";
+} match_range_geometry;
+
+commentdef {
+  p_header = "WHAT TO REPORT";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Check the volume number in the two data sets.";
+} check_volume_number;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Check the sweep details in the two data sets.";
+  p_help = "If false, we do not perform any checks on the sweep information.";
+} check_sweeps;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Check the sweep numbers in the two data sets.";
+  p_help = "If false, we do not check that the sweep numbers match.";
+} check_sweep_numbers;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Check the ray details in the two data sets.";
+  p_help = "If false, we do not perform any checks on the ray information.";
+} check_rays;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Check the field details in the two data sets.";
+  p_help = "If false, we do not perform any checks on the field information.";
+} check_fields;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Check the number of fields is the same in the two data sets.";
+} check_number_of_fields;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Check the field names in the two data sets.";
+  p_help = "If false, it is assumed that the fields are in the same order in the 2 files, and only the data, not the names, is checked.";
+} check_field_names;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Check the field units in the two data sets.";
+} check_field_units;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Check the field data values in the two data sets.";
+} check_field_data;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Maximum absolute difference to be considered a match.";
+  p_help = "This is the expected resolution of data values. Set to 0.0 to have all differences shown. Differences less than this value are considered perfect matches";
+} field_data_max_diff_for_match;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print details at every gate with a difference.";
+  p_help = "If FALSE, only a summary will be printed.";
+} report_all_field_data_diffs;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min percentage of error gates to trigger data reporting.";
+  p_help = "This is the threshold for triggering a summary report. If the fraction of gates with errors exceeds this percentage, the summary will be reported and the program will return an error. If the percentage of bad gates is less than this threshold, no error will be reported.";
+} min_percent_error_for_summary_report;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Maximum absolute difference in time (secs).";
+  p_help = "Max allowable time difference. Diffs greater than this will generate an error.";
+} time_max_diff_for_match;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Maximum absolute difference in angle (deg).";
+  p_help = "Max allowable angle difference. Diffs greater than this will generate an error.";
+} angle_max_diff_for_match;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Maximum absolute difference in nyquist (m/s).";
+  p_help = "Max allowable nyquist velocity difference. Diffs greater than this will generate an error.";
+} nyquist_max_diff_for_match;
+
+commentdef {
+  p_header = "WRITING THE OUTPUT";
+  p_text = "Where to write the results.";
+}
+
+paramdef string {
+  p_default = "stderr";
+  p_descr = "Full path for output file.";
+  p_help = "If this is set to stdout, then standard output is used. If this is set to stderr, then standard error output is used.";
+} output_file_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to append to the output file.";
+  p_help = "If FALSE, the output file will be empty when opened.";
+} append_to_output;
+

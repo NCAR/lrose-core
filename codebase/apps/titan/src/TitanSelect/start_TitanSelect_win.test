@@ -1,0 +1,11 @@
+#! /bin/csh
+#
+
+setenv DISPLAY :0.0
+
+running "TitanSelect -params TitanSelect.test"
+if ($status == 1) then
+xterm -bg black -fg cyan -geometry 35x24-0+0 +sb -T "TITAN STORM PROPS" \
+          -font "8x13bold" -e start_TitanSelect.test |& \
+		  LogFilter -d $ERRORS_LOG_DIR -p TitanSelect -i test >& /dev/null &
+endif

@@ -1,0 +1,304 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for EuMetSat2Mdv
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 2000
+ * 
+ * EuMetSat2Mdv reads in EU sat data and converts to MDV format.
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_VERBOSE_2
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+  "In realtime mode, the analysis is performed for each volume scan "
+  "as it becomes available. In archive mode, the file list is obtained "
+  "from the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Directory for input radar data - REALTIME mode.";
+  p_help = "The latest_data_info file in this directory is updated each time the model adds a forecast time step to the output file.";
+} realtime_input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use latest_data_info file.";
+  p_help = "It true, the program will use the _latest_data_info file for identifying the incoming data file name. If false, it will scan the input directory.";
+} use_latest_data_info_file;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be valid. "
+    "If the latest_data_info file is older than this, the program waits "
+    "for new data.";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Sub-string to be searched for in file path.";
+  p_help = "If not empty, only files with paths containing this string will be ingested. As an example, this is useful for only handling files from a given channel. If the string is set to HRV, only files for the HRV channel will be processed.";
+} search_string;
+
+commentdef {
+  p_header = "OUTPUT FIELD DEFINITIONS.";
+  p_text = "Using this section, you set up a pallette of possible output field characteristics. In the OUTPUT_FILE section, you then pick which of these fields are to be included in each output file.";
+}
+
+typedef enum {
+  VIS006 = 0,
+  VIS008 = 1,
+  IR_016 = 2,
+  IR_039 = 3,
+  WV_062 = 4,
+  WV_073 = 5,
+  IR_087 = 6,
+  IR_097 = 7,
+  IR_108 = 8,
+  IR_120 = 9,
+  IR_134 = 10,
+  HRV = 11
+} channel_id_t;
+
+typedef enum {
+  COUNT = 0,
+  RADIANCE = 1,
+  DEG_K = 2,
+  DEG_C = 3,
+  ALBEDO = 4
+} output_units_t;
+
+typedef enum {
+  OUT_INT8 = 1,
+  OUT_INT16 = 2,
+  OUT_FLOAT32 = 5
+} output_encoding_t;
+
+typedef struct {
+
+  string name;
+  channel_id_t channel_id;
+  output_units_t output_units;
+  output_encoding_t output_encoding;
+
+} field_t;
+
+paramdef struct field_t {
+
+  p_default = {
+    { "HRV", HRV, COUNT, OUT_INT8 },
+    { "VIS006", VIS006, COUNT, OUT_INT16 },
+    { "VIS008", VIS008, COUNT, OUT_INT16 },
+    { "IR_016", IR_016, RADIANCE, OUT_FLOAT32},
+    { "IR_039", IR_039, DEG_C, OUT_INT8},
+    { "IR_087", IR_087, DEG_C, OUT_INT8 },
+    { "IR_108", IR_108, DEG_C, OUT_INT8 },
+    { "IR_120", IR_120, DEG_C, OUT_INT8 },
+    { "WV_062", WV_062, DEG_K, OUT_INT8 },
+    { "WV_073", WV_073, DEG_K, OUT_INT8 },
+    { "IR_097", IR_097, DEG_K, OUT_INT8 },
+    { "IR_134", IR_134, DEG_K, OUT_INT8 }
+  };
+
+  p_descr = "Field specification.";
+  
+  p_help =
+    "Specification for possible output fields. In the output_files section, you will then choose which of these fields will be included in each output file.\n\n"
+    "  name: name of the field\n"
+    "  channel_id: channel upon which the field is based\n"
+    "  units: output units\n"
+    "  output_encoding: encoding for field in output file\n\n";
+  
+} fields[];
+
+commentdef {
+  p_header = "CALIBRATION SOURCE.";
+}
+
+typedef enum {
+  PARAMETER_FILE_ONLY,
+  PROLOGUE_FILE,
+  CALIBRATION_FILE
+} calibration_source_t;
+
+paramdef enum calibration_source_t {
+  p_default = PROLOGUE_FILE;
+  p_descr = "Source for parameter information.";
+  p_help = "At startup, the calibration values for each channel are set from the parameter file. If the source is PARAMETER_FILE_ONLY, these calibration values are never changed. For PROLOGUE_FILE, the calibration data is updated from the Hrit prologe files. For CALIBRATION_FILE, an ASCII calibration file is read each time the calibration is needed.";
+} calibration_source;
+
+paramdef string {
+  p_default = "./cal_file";
+  p_descr = "Path for calibration file.";
+  p_help = "See 'use_calibration_file'.";
+} calibration_file_path;
+
+commentdef {
+  p_header = "OUTPUT FILES.";
+}
+
+typedef enum {
+  OUTPUT_PROJ_LATLON = 0,
+  OUTPUT_PROJ_LAMBERT = 3,
+  OUTPUT_PROJ_FLAT = 8
+} projection_t;
+
+typedef struct {
+
+  string fields;
+
+  string output_url;
+
+  projection_t projection;
+
+  double origin_lat;
+  double origin_lon;
+  
+  double lambert_lat1;
+  double lambert_lat2;
+
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+
+} output_file_t;
+
+paramdef struct output_file_t {
+
+  p_default = {
+    {
+      fields = "VIS006,VIS008,IR_016,IR_039",
+      output_url = "mdv/sat/domain1",
+      projection = OUTPUT_PROJ_LATLON,
+      origin_lat = 0,
+      origin_lon = 0,
+      lambert_lat1 = 0,
+      lambert_lat2 = 0,
+      nx = 700,
+      ny = 700,
+      minx = -40.0,
+      miny = -15.0,
+      dx = 0.1,
+      dy = 0.1
+    }
+    ,
+    {
+      fields = "HRV,VIS006,VIS008,IR_016,IR_039",
+      output_url = "mdv/sat/domain2",
+      projection = OUTPUT_PROJ_LATLON,
+      origin_lat = 0,
+      origin_lon = 0,
+      lambert_lat1 = 0,
+      lambert_lat2 = 0,
+      nx = 1000,
+      ny = 1000,
+      minx = -40.0,
+      miny = 5.0,
+      dx = 0.03,
+      dy = 0.03
+    }
+  };
+  
+  p_descr = "Output file information.";
+
+  p_help =
+    "You create an entry for each output file required. You may set up multiple output files, on different grids and/or with different channels.\n\n"
+    "  fields: comma-delimited list of fields\n"
+    "  output_url: the URL for the output MDV files\n"
+    "  projection: projection for the output grid\n"
+    "  origin_lat: latitude origin for output grid, FLAT, LAMBERT only\n"
+    "  origin_lon: longitude origin for output grid, FLAT, LAMBERT only\n"
+    "  lambert_lat1: LAMBERT latitide 1, ignored for FLAT, LATLON\n"
+    "  lambert_lat2: LAMBERT latitide 2, ignored for FLAT, LATLON\n"
+    "  nx: number of grid points in x\n"
+    "  ny: number of grid points in y\n"
+    "  dx: grid resolution in x\n"
+    "  dy: grid resolution in y\n"
+    "  minx: X coord of center of SW grid cell\n"
+    "  miny: Y coord of center of SW grid cell\n"
+    "    Units for dx, dy, minx, miny: km for FLAT and LAMBERT\n"
+    "                                  deg for LATLON\n\n";
+  
+} output_files[];
+
+paramdef string {
+  p_default = "This MDV file was created by EuMetSat2Mdv.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "Satellite data.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "Satellite data from EuMetSat.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+

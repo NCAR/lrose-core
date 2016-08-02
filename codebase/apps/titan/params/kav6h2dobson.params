@@ -1,0 +1,22 @@
+/*
+ * Parameter list for 'kav6h2dobson'
+ */
+
+debug = DEBUG_NORM;
+malloc_debug_level = 2;
+mode = ARCHIVE;
+input_file_ext = "nbr";
+input_dir = "/usr/people/ice/titan/kav6h";
+output_file_ext = "dob";
+output_dir = "$(TITAN_HOME)/lot";
+output_host = "local";
+output_type = DOBSON;
+output_data_origin = BOTLEFT;
+fortran_output = FALSE;
+max_input_data_age = 300;
+processing_delay = 10;
+radar_name = "LOT";
+radar_longitude = -88.0847;
+radar_latitude = 41.6047;
+clipping_rect = {0, 0, 520, 480};
+

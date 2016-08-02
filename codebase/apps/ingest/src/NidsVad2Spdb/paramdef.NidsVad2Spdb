@@ -1,0 +1,180 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for NidsVad2Spdb
+ *
+ * Niles Oien, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * January 2002
+ */
+
+
+commentdef {
+  p_header = "NidsVad2Spdb is a small program to read NIDS VAD sounding\n"
+             "data and produce an SPDB database of soundings. The input\n"
+	     "files look something like this :\n\n"
+	     "# NIDS VAD data for:\n"
+	     "# /nids/raw/nids/FTG/VAD/19990525/19990525.2115.VAD\n"
+	     "# Julian Date : 2451324\n"
+	     "# Calendar Date: 5 25 1999\n"
+	     "# Time: 21:22:1\n"
+	     "# Radar Latitude: 39.786\n"
+	     "# Radar Longitude: 4294862.751\n"
+	     "# Radar Altitude: 5610\n"
+	     "# Radar Operating in Precipitation Mode\n"
+	     "# Radar Scan Coverage Pattern: 21\n"
+	     "# Max Wind Speed (kts): 12\n"
+	     "# Max Wind Direction (deg): 83\n"
+	     "# Max Wind Altitude (ft): 12000\n"
+	     "#\n"
+	     "# Alt (m) DIR/SPD(m/s)  Time (gmt)\n\n"
+	     "1829    162   3      2117\n"
+	     "2134    139   5      2117\n"
+	     "2439    138   5      2117\n"
+	     "2743    141   5      2117\n\n"          
+	     "Note that at least one entry in the header (the longitude)\n"
+	     "seems deeply suspect. As a result, the header is not read.\n"
+             "The time is parsed from the file name, which should\n"
+	     "be something like FTG/19990525/19990525.2055.VAD - in\n"
+	     "this case the three letter FTG code indicates the radar\n"
+	     "site. This is used to look up the VAD location (lat, lon and\n"
+	     "altitude) from the parameter file.\n\n\n"
+	     "NOTE that it is assumed that a _latest_data_info file\n"
+	     "will be generated for the input files. At the time\n"
+	     "of writing the getNIDSvad.pl script that generates the\n"
+	     "input files will do this if the -l option is specified for it.";
+
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed.";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+      
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = {
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/DMX",
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/DVN",
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/GRR",
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/ILN",
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/ILX",
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/IND",
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/IWX",
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/LOT",
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/LSX",
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/LVX",
+	"$(RAP_DATA_DIR)/$(PROJECT)/other/vad/MKX"
+  };
+  p_descr = "Input directories in which data appear.\n"
+            "Used in realtime mode only.";
+  p_help = "Directory path for input data files.";
+} InDirs[];
+
+paramdef string {
+  p_default = "VAD";
+  p_descr = "Input file extension.";
+  p_help = "Default is to search for *.gms - if string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid.\n"
+	"NOTE : NOT IMPLEMENTED FOR CURRENT MODE OF REALTIME TRIGGERING.";
+} max_realtime_valid_age;
+
+typedef struct {
+	string vadID;
+	double lat;
+	double lon;
+	double alt;
+	int soundingSiteId;
+} id_t;
+
+
+paramdef struct id_t {
+  p_default = {
+	{ "AKQ", 36.9839, -77.007, 34.0,    1},
+	{ "CCX", 40.9231, -78.003, 733.0,   2},
+	{ "DIX", 39.9469, -74.410, 45.0,    3},
+	{ "DOX", 38.8256, -75.440, 15.0,    4},
+	{ "FCX", 37.0244, -80.273, 874.0,   5},
+	{ "FTG", 39.7867, -104.545, 1675.0, 6},
+	{ "LWX", 38.9753, -77.477, 83.0,    7},
+	{ "PBZ", 40.5317, -80.218, 361.0,   8},
+	{ "RLX", 38.3111, -81.723, 329.0,   9}
+  };
+  p_descr = "Map that relates the three character radar\n"
+            "IDs to locations (lat, lon, alt in meters).\n"
+            "Can be set up from the US_Nexrad.map file and\n"
+            "the /weather/include/stations.new file. Default\n"
+            "is suitable for Sterling nowcaster project.\n"
+            "Sounding site IDs are somewhat arbitrary.";
+
+  p_help = "The three character ID is parsed from the filename.\n"
+	"If an ID is encountered that is not in this list it is not processed.";
+} siteMap[];
+
+
+
+
+
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+
+paramdef string {
+  p_default = "spdbp:://localhost::$(PROJECT)/spdb/VadSoundings";
+  p_descr = "URL for output SPDB data.";
+} OutUrl;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "How long data are valid, seconds.";
+} expiry;
+
+

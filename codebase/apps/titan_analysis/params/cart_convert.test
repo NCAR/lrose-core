@@ -1,0 +1,12 @@
+########################################################################
+# parameters file for cart_convert
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# April 1991
+#
+#########################################################################
+
+cart_convert.rc_table: $(TITAN_HOME)/tables/rc_table.summer
+
+

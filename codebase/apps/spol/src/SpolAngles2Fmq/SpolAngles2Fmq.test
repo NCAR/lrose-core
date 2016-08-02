@@ -1,0 +1,227 @@
+/**********************************************************************
+ * TDRP params for SpolAngles2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// SpolAngles2Fmq reads SPOL angle data from the S2D ARM processor, via 
+//   TCP. It saves the data out to a file message queue (FMQ), which can 
+//   be read by multiple clients. This application has a monitor mode that 
+//   can read that FMQ and print out the data from it. In addition the app 
+//   can be used to check for antenna motion and write the results to a 
+//   file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "angles";
+
+//======================================================================
+//
+// OPERATIONAL MODE.
+//
+//======================================================================
+ 
+///////////// ops_mode ////////////////////////////////
+//
+// Operational mode.
+// In READ_SERVER_MODE, data is read from the angle server via a TCP 
+//   socket and written to the FMQ. In FMQ_MONITOR_MODE, angles are read 
+//   from the FMQ and printed to stdout.
+//
+// Type: enum
+// Options:
+//     READ_SERVER_MODE
+//     FMQ_MONITOR_MODE
+//
+
+ops_mode = READ_SERVER_MODE;
+
+//======================================================================
+//
+// TCP ANGLE SERVER DETAILS.
+//
+//======================================================================
+ 
+///////////// angle_server_host ///////////////////////
+//
+// Name/IP address of host for the angle server.
+// Type: string
+//
+
+angle_server_host = "angles";
+
+///////////// angle_server_port ///////////////////////
+//
+// TCP port from which to read the angle data.
+// Type: int
+//
+
+angle_server_port = 15000;
+
+///////////// angle_read_frequency_hz /////////////////
+//
+// Frequency at which angles are read from the server (hz).
+// This is approximate, and will be used to determine how long to sleep 
+//   between each read.
+// Type: double
+//
+
+angle_read_frequency_hz = 1000;
+
+//======================================================================
+//
+// FMQ DETAILS.
+//
+//======================================================================
+ 
+///////////// output_fmq_path /////////////////////////
+//
+// Path to output FMQ.
+// The FMQ consists of 2 files, ??.buf and ??.stat.
+// Type: string
+//
+
+output_fmq_path = "/tmp/fmq/angles";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer.
+// Type: int
+//
+
+output_fmq_size = 10000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in the output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 500;
+
+///////////// n_angles_per_message ////////////////////
+//
+// Number of angles to be bundled into a single message for writing.
+// The data rate is about 2500 angles per second. For efficiency, we 
+//   bindle a number of these into a DsMessage, and write the message to 
+//   the FMQ.
+// Type: int
+//
+
+n_angles_per_message = 100;
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+
+//======================================================================
+//
+// MONITOR DETAILS.
+//
+//======================================================================
+ 
+///////////// monitor_update_interval /////////////////
+//
+// Update interval for monitor display (secs).
+// Update rate for monitoring mode. New angles will be printed at this 
+//   interval.
+// Type: double
+//
+
+monitor_update_interval = 1;
+
+//======================================================================
+//
+// CHECKING ANTENNA STATUS.
+//
+//======================================================================
+ 
+///////////// check_antenna_motion_status /////////////
+//
+// Option to check if the antenna is moving.
+// Type: boolean
+//
+
+check_antenna_motion_status = TRUE;
+
+///////////// antenna_status_file_path ////////////////
+//
+// Path to antenna status file.
+// The file contains an ASCII string. The string will depend on whether 
+//   the antenna is stationary, and how long that condition has lasted.
+// 	Example messages are:
+// 		'AntennaStatus - OK'
+// 		'AntennaStatus - WARN Antenna stopped for 300 seconds'
+// 		'AntennaStatus - CRITICAL Antenna stopped for 600 seconds'.
+// Type: string
+//
+
+antenna_status_file_path = "/tmp/antenna_status";
+
+///////////// antenna_motion_check_interval ///////////
+//
+// Period for checking for antenna motion (secs).
+// Motion will be checked at this interval.
+// Type: int
+//
+
+antenna_motion_check_interval = 15;
+
+///////////// antenna_motion_warning_secs /////////////
+//
+// Number of seconds before antenna status warrants a warning.
+// If the antenna has not moved in this time, a warning message will be 
+//   written to the antenna status file.
+// Type: int
+//
+
+antenna_motion_warning_secs = 300;
+
+///////////// antenna_motion_critical_secs ////////////
+//
+// Number of seconds before antenna status warrants a critical.
+// If the antenna has not moved in this time, a critical message will be 
+//   written to the antenna status file.
+// Type: int
+//
+
+antenna_motion_critical_secs = 600;
+

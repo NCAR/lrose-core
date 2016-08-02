@@ -1,0 +1,246 @@
+/****************************************************
+ * TDRP params for CaseStats
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * File path for seed/no-seed cases.
+ * This file indicates the time and track numbers for each seeded
+ *   case. In addition the environmental conditions, such as cloud
+ *   base and CAPE are input from this file.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+case_file_path = "$(TITAN_HOME)/params/case_tracks.1997";
+
+/*
+ * Directory for properties files.
+ * This directory holds the files produced by PartialProps.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+props_files_dir = "$(TITAN_HOME)/props_files";
+
+/*
+ * Global property list.
+ * The is the list of global properties used in the analysis. Global
+ *   properties apply to the entire case, for example mean_volume.
+ *
+ * Type: string
+ * Array elem size: 4 bytes
+ * Array has no max number of elements
+ */
+global_props = {"cloud_base",
+		"mixing_ratio",
+		"temp_ccl",
+		"deltat_500mb",
+		"nscans",
+		"seed_duration",
+		"duration_before_decision",
+		"duration_after_decision",
+		"dbz_max_mean",
+		"dbz_max_max",
+		"dbz_max_max_roi",
+		"precip_flux_mean",
+		"precip_flux_max",
+		"precip_flux_max_roi",
+		"volume_mean",
+		"volume_max",
+		"volume_max_roi",
+		"volume_above_alt_mean",
+		"volume_above_alt_max",
+		"volume_above_alt_max_roi",
+		"mass_mean",
+		"mass_max",
+		"mass_max_roi",
+		"mass_above_alt_mean",
+		"mass_above_alt_max",
+		"mass_above_alt_max_roi",
+		"area_mean",
+		"area_max",
+		"area_max_roi",
+		"ht_of_dbz_max_mean",
+		"ht_of_dbz_max_max",
+		"ht_of_dbz_max_max_roi",
+		"refl_centroid_z_mean",
+		"refl_centroid_z_max",
+		"refl_centroid_z_max_roi",
+		"ht_max_minus_centroid_z_mean",
+		"ht_max_minus_centroid_z_max",
+		"ht_max_minus_centroid_z_max_roi",
+		"top_mean",
+		"top_max",
+		"top_max_roi",
+		"base_max_roi",
+		"ATI",
+		"precip_mass",
+		"VCDI"
+};
+
+#global_props = {"cloud_base"};
+
+/*
+ * Time series property list.
+ * The is the list of time series properties used in the analysis.
+ *   Time series properties are instanteous values, for example
+ *   the volume at a given time.
+ *
+ * Type: string
+ * Array elem size: 4 bytes
+ * Array has no max number of elements
+ */
+tseries_props = {
+  "dbz_max",
+  "precip_flux",
+  "volume",
+  "mass",
+  "area",
+  "ht_of_dbz_max",
+  "refl_centroid_z",
+  "ht_max_minus_centroid_z",
+#  "base",
+#  "top",
+  "volume_above_alt",
+  "mass_above_alt",
+  "ATI",
+  "VCDI",
+  "precip_mass"
+};
+
+#tseries_props = {"precip_flux"};
+
+/*
+ * Time series delta time list (secs).
+ * The is the list of time series delta time values used in the analysis.
+ *   Delta_times are relative to decision time. Each of the tseries
+ *   properties will be computed at each of these times.
+ *
+ * Type: long
+ * Array elem size: 4 bytes
+ * Array has no max number of elements
+ */
+tseries_dtimes = {-600, -300, 0, 300, 600, 900, 1200, 1500, 1800, 2100, 2400, 2700, 3000};
+
+/*
+ * Conditions on variables for analysis.
+ * If you wish you may impose conditions on the analysis by using
+ *   this parameter array. For global props, just insert the prop_name
+ *   and the max and min vals (e.g. precip_flux_max). Only cases
+ *   in which the global val falls with the range will be included.
+ *   For time_series props, designate the prop_name as prop_name@time,
+ *   where time is the number of seconds from decision time in the
+ *   time series (e.g. precip_flux@300 for precip_flux 5 mins after
+ *   decision time).
+ *
+ * Type: struct
+ * Array elem size: 20 bytes
+ * Array has no max number of elements
+ */
+conditions = {
+  {
+    "seed_duration", /* prop_name:string */
+    1200.0, /* min_val:double */
+    3600.0 /* max_val:double */
+#  },
+#  {
+#    "volume@0", /* prop_name:string */
+#    0.0, /* min_val:double */
+#    100000.0 /* max_val:double */
+#  },
+#  {
+#    "deltat_500mb", /* prop_name:string */
+#    0.0, /* min_val:double */
+#    4.0 /* max_val:double */
+  }
+};
+
+/*
+ * Statistic type for analysis.
+ * One of the following stats may be utilized in any single analysis:
+ *   arithmetic mean, geometric mean (better for log-normal data),
+ *   first quartile, second quartile and third quartile.
+ *
+ * Type: enum
+ * Default: ARITH_MEAN 
+ * Legal values: ARITH_MEAN, GEOM_MEAN, FIRST_QUARTILE,
+ *   SECOND_QUARTILE, THIRD_QUARTILE.
+ */
+stat_type = ARITH_MEAN;
+
+/*
+ * Option to perform re-randomization.
+ * If set, the re-randomization technique will be used to compute
+ *   the significance of any changes between the seed and no-seed
+ *   data. The results will be included in the printout.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+use_rerandomization = TRUE;
+
+/*
+ * Number of re-randomization sequences.
+ * If rerandomization is used, this is the number of re-randomized
+ *   sequences which are used in the analysis.
+ *
+ * Type: long
+ * Default: 1000 
+ * Min value: 10 
+ */
+n_rerand = 1000;
+
+/*
+ * Number of entries in randomized list.
+ * Each time a random list is created, it will be n_random_list
+ *   long. The entries in the list will be used from the start of the
+ *   list, one per case. If there are more cases than n_random_list
+ *   an error will be reported.
+ *
+ * Type: long
+ * Default: 200 
+ * Min value: 10 
+ */
+n_random_list = 200;
+
+/*
+ * Maximum seed-no_seed split.
+ * This is the max allowable split between the seed and no-seed
+ *   pools in the re-randomization. If the split in a list exceeds
+ *   this value, a new list will be generated.
+ *
+ * Type: long
+ * Default: 7 
+ */
+max_split = 7;

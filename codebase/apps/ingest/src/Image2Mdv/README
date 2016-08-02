@@ -1,0 +1,105 @@
+
+This file has been superseeded, see README.html - Niles Oien.
+
+# Notes and Info on converting Geo-tiffs and other Images to MDV
+
+# US Shaded relief maps CONUS Only : See.
+http://pubs.usgs.gov/of/of99-011/1readme.html
+
+
+# North American Shaded Reliefs:
+1. Shuttle Radar Topography Mission (SRTM) based:
+
+http://photojournal.jpl.nasa.gov/catalog/PIA03377
+
+
+2. Derived from the GTOPO30 elevation data. GTOPO30 is a global digital
+elevation model (DEM) with a horizontal grid spacing of 30 arc seconds
+(approximately 1 kilometer).
+
+http://nationalatlas.gov/shadedm.html
+
+
+# WORLD Shaded reliefs.
+
+# NASA  Global Land One-km Base Elevation (GLOBE) Project
+# 5 second grid.
+http://www.ngdc.noaa.gov/seg/topo/globega2.shtml
+
+---------------------------------------------------------
+Preparing images for MDV and nesting the grids for auto 
+domain switching.
+
+
+0. One can't display grid cells smaller than the pixel size on
+  your screen.  Current PC screens have at most about 3.2 Mpixels. Most
+  windows and images are under 1 Mpixel. Do not deliver more grid cells
+  than you can render. Use the nested grids and the decimation features
+  on the MDV server to pair down the number of grid cells delivered to
+  a display client.
+
+
+1. Select a good image:
+
+    Rules of thumb.
+		* The image map projection has to be known and supported. You need to know the
+		  projection parameters and the location of a corner,
+		  and the exact pixel size in some known units of
+		  measure. Many times this information is included in
+		  a separate "geo" file or included in the header info.
+		  Recovering this information is not withing the scope
+		  of this document. FOllow the above links to some images
+		  which have the required info.
+
+        * Keep images under 20 megapixels for better disk acesses.
+		* Use standard image tools to view and covert to a supported format
+			(PNG,JPG,TIF,GIF)
+		* I use Imagemagic tools (convert, display, import etc) to do a bunch from
+		the command line, which I record in simple scripts for repition.
+
+		* It takes a big ass machine to deal with images larger than 100 megapixels.
+
+2. Decimate huge images for improved performance. See the rules of thumb above.
+     Example: 'convert -geometry <width>x<height>+<x>+<y> input.img output.img'
+
+	 Multiples of 2 work pretty good. Divide the image in 2 a couple of times to
+	 get it under 40 Mpixels. 
+
+3. 	 Crop out small areas of the highest resolution images for your local / regional
+	 views. Keep the nested images less than 40Mpixels.
+
+Here's the process with an example:"
+
+
+Desired Domain - Picked visually.
+Lon:  -108 to -118
+Lat: 36 to 44
+
+Orig lon/lat: grid = { -124.758, 49.3796, 0.00416667, -0.00416667 };
+
+Do this math:
+
+(124.758 - 118) / 0.00416667 = 1621.9187 the # pixels to use for cropping
+
+Must be int:
+
+1622 = # to crop
+
+True ll corner into Image2Mdv param file:
+
+1622 * 0.00416667 + -124.758 = -117.99966
+
+Same for Latitude
+
+(49.3796 - 44 )/ -0.00416667 = 1291 crop
+
+1291 * 0.00416667 - 49.3796 = true new lat = 44.00039
+
+Now figure how how many pixels to crop TO (eg: width and height)
+
+118 - 108 = 10 degrees
+
+10 degrees / -0.00416667 degr/pixel =~ 2400 pixels
+8 degrees / -0.00416667 degr/pixel =~ 1920 pixels
+
+convert -crop 2400x1920+1622+1291 fromImage toImage

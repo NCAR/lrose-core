@@ -1,0 +1,281 @@
+#!/usr/bin/perl --
+#
+# pull_kavltg: Pull Kavouras lightning files from an NFS partition.
+# 
+# Nancy Rehak
+# Oct, 1998
+#
+# Based on pullmcg written by Tres Hofmeister
+#
+# Usage:
+#    pull_kavltg <options>
+#
+# Options:
+#    -help                : Print usage
+#    -output_dir <dir>    : Output dir (default = ".")
+#    -instance <instance> : PMU instance (default = "test")
+#    -debug               : Print debug messages
+
+#
+# Get the needed standard PERL libraries
+#
+
+require 'stat.pl';
+
+use Getopt::Long;
+use Time::Local;
+
+#
+# Get the RAP library modules
+#
+
+use Env qw(RAP_LIB_DIR);
+use Env qw(RAP_SHARED_LIB_DIR);
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+use Toolsa;
+
+#
+# Get the program basename.
+#
+
+($prog = $0) =~ s|.*/||;
+
+#
+# Unbuffer output.
+#
+
+$| = 1;
+
+#
+# Set global constants
+#
+
+$dir = "/kavouras/ltgr";	# Data directory.
+$interval = 2;			# Data directory polling interval.
+
+#    
+# Initialize the command line arguments
+#
+
+$opt_output_dir = ".";
+$opt_instance = "test";
+$opt_debug = 0;
+
+#
+# Save the usage to print to the user if there is a problem
+#
+
+$usage =
+    "Usage: $prog [options]\n" .
+    "Options:\n" .
+    "   -help                : Print usage\n" .
+    "   -output_dir <dir>    : Output dir (default = $opt_output_dir)\n" .
+    "   -instance <instance> : PMU instance (default = $opt_instance)\n" .
+    "   -debug               : Print debug messages\n";
+
+#
+# Get the arguments from the command line
+#
+
+$result = &GetOptions('help',
+		      'output_dir=s',
+		      'instance=s',
+		      'debug');
+
+if ($result == 0 ||
+    $opt_help)
+{
+    print $usage;
+    exit 0;
+}
+
+#
+# Make sure the output directory exists
+#
+
+mkdir($opt_output_dir, 0755) ||
+    die "mkdir: $opt_output_dir: $!" unless -d $opt_output_dir;
+
+#
+# Initialize use of PMU functions
+#
+
+&Toolsa::PMU_auto_init($prog, $opt_instance, 60);
+
+#
+# Set up signal handlers so we unregister from the process mapper
+# when we quit
+#
+
+$SIG{INT} = \&tidy_and_exit;
+$SIG{KILL} = \&tidy_and_exit;
+$SIG{HUP} = \&tidy_and_exit;
+$SIG{TERM} = \&tidy_and_exit;
+
+#
+# Monitor the data directory for new files.
+#
+
+while ()
+{
+    #
+    # Register with the process mapper
+    #
+
+    &Toolsa::PMU_auto_register("Waiting for data");
+
+    #
+    # Get the directory's modification time.
+    #
+
+    ($mtime = (stat($dir))[$ST_MTIME]) || die "stat: $!";
+
+    if ($mtime > $old_mtime)
+    {
+	opendir(DIR, $dir) || die "Can't open directory $dir";
+
+	#
+	# Skip the current and parent directory entries.
+	#
+
+	@files = grep(!/^\.\.?$/, readdir(DIR));
+	closedir(DIR);
+
+	#
+	# Exclude subdirectories.
+	#
+
+	@files = grep(!-d, @files);
+
+	#
+	# Exclude files that don't match the lightning file
+	# naming convention
+	#
+
+	@files = grep(/dltg\d\d\d\d.ltg/, @files);
+
+	#
+	# Look for new files.  We'll always send what's
+	# lying around initially.
+	#
+
+	grep($mark{$_}++, @old_files);
+	@new_files = grep(!$mark{$_}, @files);
+
+	if ($opt_debug)
+	{
+	    $s = @new_files == 1 ? '' : 's';
+	    print join("\n  ", "New file$s:", @new_files), "\n"
+		if @new_files;
+	}
+
+	#
+	# Get the current time so we have the date for the data times
+	# since that's not indicated in the filename.
+	#
+
+	$current_time = time;
+	($curr_sec, $curr_min, $curr_hour,
+	 $curr_mday, $curr_mon, $curr_year,
+	 $curr_wday, $curr_yday, $curr_isdst) =
+	     gmtime($current_time);
+
+	#
+	# Copy the files to a local directory, renaming them.
+	#
+
+	&retrieve(*new_files);
+
+	#
+	# Prepare for the next iteration of the loop.
+	#
+
+	$old_mtime = $mtime;
+	@old_files = @files;
+	undef %mark;
+	undef @new_files;
+    }
+    sleep($interval);
+}
+
+
+# Pull the list of files to the local directory.
+sub retrieve
+{
+    local(*files) = @_;
+
+    foreach $file (@files)
+    {
+	#
+	# Register with the process mapper
+	#
+
+	&Toolsa::PMU_force_register("Pulling file $dir/$file");
+
+	#
+	# Pull the data time out of the file name
+	#
+
+	$hour = substr($file, 4, 2);
+	$minute = substr($file, 6, 2);
+
+	#
+	# Calculate the file time to see if we have the correct
+	# date.  We must do this to handle data received around
+	# 0000GMT.
+	#
+
+	$file_time =
+	    &timegm(0, $minute, $hour,
+		    $curr_mday, $curr_mon, $curr_year,
+		    $curr_wday, $curr_yday, $curr_isdst);
+
+	if ($file_time > $current_time)
+	{
+	    $file_time = $file_time - 86400;
+	}
+
+	($file_second, $file_minute, $file_hour,
+	 $file_mday, $file_month, $file_year) =
+	     gmtime($file_time);
+
+	#
+	# Build the local directory name.
+	#
+
+	$file_year = $file_year + 1900;
+
+	$ldir = sprintf("%04d%02d%02d",
+			$file_year, $file_month + 1, $file_mday);
+
+	$output_dir = $opt_output_dir . '/' . $ldir;
+
+	mkdir($output_dir, 0755) ||
+	    die "mkdir: $output_dir: $!" unless -d $output_dir;
+
+	#
+	# Build the local file name.
+	#
+
+	$input_path = $dir . '/' . $file;
+	$rename = sprintf("%s/%02d%02d00.ltgr",
+			  $output_dir, $file_hour, $file_minute);
+
+	print "Saving file <$input_path> as <$rename>\n";
+
+	system("/bin/cp $input_path $rename");
+    }
+}
+
+
+#
+# Exit in a "tidy" fashion
+#
+
+sub tidy_and_exit
+{
+    my $signame = shift;
+    &Toolsa::PMU_auto_unregister();
+    die "Exiting on signal SIG$signame";
+}

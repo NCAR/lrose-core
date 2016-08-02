@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+ascii_to_xgraph
+makefile
+makefile.am
+makefile.in

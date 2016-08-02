@@ -1,0 +1,18 @@
+ <ogc:Sequence>
+	<ogc:Filter color="#FF0000">
+	    <ogc:PropertyIsGreaterThan>
+	       <ogc:PropertyName>temperatureC</ogc:PropertyName>
+	       <ogc:Literal>7.5</ogc:Literal>
+	     </ogc:PropertyIsGreaterThan>
+	</ogc:Filter>
+
+	<ogc:Filter color="#00FF00">
+	    <ogc:PropertyIsGreaterThan>
+	       <ogc:PropertyName>visibilityM</ogc:PropertyName>
+	       <ogc:Literal>2000</ogc:Literal>
+	     </ogc:PropertyIsGreaterThan>
+	</ogc:Filter>
+
+	<ogc:Filter color="#0000FF">
+	</ogc:Filter>
+  </ogc:Sequence>

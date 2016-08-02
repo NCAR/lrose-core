@@ -1,0 +1,153 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for AdvectPolygon
+ *
+ */
+
+commentdef {
+  p_header = "AdvectPolygon creates a circle with the centroid of a polygon as its center and uses the average wind in this circle to advect that polygon.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program triggers off of new radar data volumes. In ARCHIVE mode, it processes all tracks for each radar volume between start and end times set on the command line. ";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+ }
+
+paramdef string {
+  p_default = "mdvp:://localhost::$(PROJECT)/mdv/ctrec";
+  p_descr = "Url of wind dataset";
+} wind_url;
+
+paramdef string {
+p_default = "U";
+p_descr = "Name of the u component of the wind";
+} u_field_name;
+
+paramdef string {
+p_default = "V";
+p_descr = "Name of the v component of the wind";
+} v_field_name;
+
+paramdef string {
+  p_default = "mdvp:://localhost::$(PROJECT)/mdv/radar";
+  p_descr = "Url of dbz data";
+} dbz_url;
+
+paramdef string {
+p_default = "DBZ";
+p_descr = "Name of the dbz field";
+} dbz_field_name;
+
+paramdef string {
+  p_default = "spdbp: ://localhost::$(PROJECT)/spdb/AcTrackPolygon";
+  p_descr = "Url of unadvected polygons";
+} polygon_url;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Lookback time (secs) for polygons to be advected.";
+  p_help = "We gather polygons in the interval [trigger time - lookback, trigger time] advect them.";
+} lookback;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Maximum age(secs) of wind dataset that will trigger processing of polygons.";
+} max_valid_realtime_age;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "spdbp:://localhost::$(PROJECT)/spdb/AdvectPolygon";
+  p_descr = "Output url";
+  p_help = "Location of polygon output";
+} output_url;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Expire time in seconds of polygons.";
+  p_help = "This value will be added to the polygon time to determine the expire time for the object";
+} expire_seconds;
+
+commentdef {
+  p_header = "PROCESSING";
+}  
+
+paramdef float{
+ p_default = .5;
+ p_descr = "Radius in km from the centroid of a polygon.";
+ p_help =  "The circle defined by the radius and centroid center will be used to find average wind.";
+} radius;
+
+typedef struct {
+  double coefficient;
+  double exponent;
+} zr_t;
+
+paramdef struct zr_t {
+  p_default = {200.0, 1.6};
+  p_descr = "ZR function parameters.";
+} zr;
+
+paramdef int{
+ p_default = 3600;
+ p_descr = "Defines the duration that a polygon lives";
+ p_help =  "Polygon will not be advected after this time.";
+} polygon_expire_seconds;

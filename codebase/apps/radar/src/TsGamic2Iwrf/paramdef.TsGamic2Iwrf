@@ -1,0 +1,266 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions TsGamic2Iwrf
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2016
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsGamic2Iwrf reads pulse IQ data in GAMIC format and converts to IWRF format.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "INPUT DATA";
+};
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file to process. In ARCHIVE mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+paramdef string {
+  p_default = "/tmp/input";
+  p_descr = "Directory for IQ data files";
+} input_dir;
+
+commentdef {
+  p_header = "SET RADAR INFO";
+};
+
+paramdef string {
+  p_default = "Hohnpeissenberg";
+  p_descr = "Name of radar";
+} radar_name;
+
+paramdef string {
+  p_default = "Hohnpeissenberg";
+  p_descr = "Name of radar site";
+} site_name;
+
+paramdef double {
+  p_default = 47.80151;
+  p_descr = "Latitude of radar.";
+} radar_latitude;
+
+paramdef double {
+  p_default = 11.00929;
+  p_descr = "Longitude of radar.";
+} radar_longitude;
+
+paramdef double {
+  p_default = 1006.20;
+  p_descr = "Altitude of radar dish (m).";
+} radar_altitude_m;
+
+paramdef double {
+  p_default = 45.9;
+  p_descr = "Gain of antenna (dB).";
+} antenna_gain_db;
+
+paramdef double {
+  p_default = 85.0;
+  p_descr = "Nominal transmit power, H channel (dBm).";
+} xmit_power_dbm_h;
+
+paramdef double {
+  p_default = 85.0;
+  p_descr = "Nominal transmit power, V channel (dBm).";
+} xmit_power_dbm_v;
+
+typedef enum {
+  XMIT_RCV_UNKNOWN = 0, 
+  /// Single polarization (NEXRAD)
+  SINGLE_POL = 1, 
+  /// Dual pol, alternating transmission, copolar receiver only
+  /// (CP2 SBand)
+  DP_ALT_HV_CO_ONLY = 2, 
+  /// Dual pol, alternating transmission, co-polar and cross-polar
+  ///receivers (SPOL with Mitch Switch and receiver in 
+  /// switching mode, CHILL)
+  DP_ALT_HV_CO_CROSS = 3,
+  /// Dual pol, alternating transmission, fixed H and V receivers (SPOL
+  /// with Mitch Switch and receivers in fixed mode)
+  DP_ALT_HV_FIXED_HV = 4,
+  /// Dual pol, simultaneous transmission, fixed H and V receivers (NEXRAD
+  /// upgrade, SPOL with T and receivers in fixed mode)
+  DP_SIM_HV_FIXED_HV = 5,
+  /// Dual pol, simultaneous transmission, switching H and V receivers
+  /// (SPOL with T and receivers in switching mode)
+  DP_SIM_HV_SWITCHED_HV = 6,
+  /// Dual pol, H transmission, fixed H and V receivers (CP2 X band)
+  DP_H_ONLY_FIXED_HV = 7,
+  /// Dual pol, V transmission, fixed H and V receivers (CP2 X band)
+  DP_V_ONLY_FIXED_HV = 8,
+  /// Dual pol, alternating transmission, pulsing HHVV sequence,
+  /// fixed receiver chain (HCR)
+  DP_ALT_HHVV_FIXED_HV = 9
+} xmit_rcv_mode_t;
+
+paramdef enum xmit_rcv_mode_t {
+  p_default = SINGLE_POL;
+  p_descr = "Transmit-receive mode for radar.";
+  p_help =
+  "  SINGLE_POL: Single polarization (NEXRAD)\n\n"
+  "  DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (CP2 SBand)\n\n"
+  "  DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (SPOL with Mitch Switch and receiver in switching mode, CHILL)\n\n"
+  "  DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (SPOL with Mitch Switch and receivers in fixed mode)\n\n"
+  "  DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n\n"
+  "  DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (SPOL with T and receivers in switching mode)\n\n"
+  "  DP_H_ONLY_FIXED_HV: Dual pol, H transmission, fixed H and V receivers (CP2 X band)\n\n"
+  "  DP_V_ONLY_FIXED_HV: Dual pol, V transmission, fixed H and V receivers (CP2 X band)\n\n"
+  "  DP_ALT_HHVV_FIXED_HV: Dual pol, alternating transmission, pulsing HHVV sequence, fixed receiver chain (HCR)\n\n";
+} xmit_rcv_mode;
+
+typedef enum {
+  SCAN_MODE_UNKNOWN = 0, 
+  SCAN_MODE_SECTOR = 1, /**< sector scan mode */
+  SCAN_MODE_COPLANE = 2, /**< co-plane dual doppler mode */
+  SCAN_MODE_RHI = 3, /**< range height vertical scanning mode */
+  SCAN_MODE_VERTICAL_POINTING = 4, /**< vertical pointing for calibration */
+  SCAN_MODE_IDLE = 7, /**< between scans */
+  SCAN_MODE_AZ_SUR_360 = 8, /**< 360-degree azimuth mode - surveillance */
+  SCAN_MODE_EL_SUR_360 = 9, /**< 360-degree elevation mode - eg Eldora */
+  SCAN_MODE_SUNSCAN = 11, /**< scanning the sun for calibrations */
+  SCAN_MODE_POINTING = 12, /**< fixed pointing */
+  SCAN_MODE_FOLLOW_VEHICLE = 13, /**< follow target vehicle */
+  SCAN_MODE_EL_SURV = 14, /**< elevation surveillance (ELDORA) */
+  SCAN_MODE_MANPPI = 15, /**< Manual PPI mode (elevation does */
+  SCAN_MODE_MANRHI = 16, /**< Manual RHI mode (azimuth does */
+  SCAN_MODE_SUNSCAN_RHI = 17 /**< sunscan in RHI mode */
+} scan_mode_t;
+
+paramdef enum scan_mode_t {
+  p_default = SCAN_MODE_AZ_SUR_360;
+  p_descr = "Scan mode for radar.";
+  p_help = "Set to the relevant scan mode\n\n"
+  "SCAN_MODE_SECTOR: sector scan mode\n\n" 
+  "SCAN_MODE_COPLANE: co-plane dual doppler mode\n\n" 
+  "SCAN_MODE_RHI: range height vertical scanning mode\n\n" 
+  "SCAN_MODE_VERTICAL_POINTING: vertical pointing for calibration\n\n" 
+  "SCAN_MODE_IDLE: between scans\n\n" 
+  "SCAN_MODE_AZ_SUR_360: 360-degree azimuth mode - surveillance\n\n" 
+  "SCAN_MODE_EL_SUR_360: 360-degree elevation mode - eg Eldora\n\n" 
+  "SCAN_MODE_SUNSCAN: scanning the sun for calibrations\n\n" 
+  "SCAN_MODE_POINTING: fixed pointing\n\n" 
+  "SCAN_MODE_FOLLOW_VEHICLE: follow target vehicle\n\n" 
+  "SCAN_MODE_EL_SURV: elevation surveillance (ELDORA)\n\n" 
+  "SCAN_MODE_MANPPI: Manual PPI mode (elevation does\n\n" 
+  "SCAN_MODE_MANRHI: Manual RHI mode (azimuth does\n\n" 
+  "SCAN_MODE_SUNSCAN_RHI: sunscan in RHI mode\n\n";
+} scan_mode;
+
+commentdef {
+  p_header = "PULSE WIDTH DECODING";
+};
+
+typedef struct {
+  int index;
+  double pulse_width_us;
+} pulse_width_t;
+
+paramdef struct pulse_width_t {
+  p_default = {
+    {
+      index = 0,
+      pulse_width_us = 0.4
+    }
+    ,
+    {
+      index = 1,
+      pulse_width_us = 0.8
+    }
+  };
+  p_descr = "Lookup table for pulse widths";
+  p_help = "The data only contains the pulse width index. This lookup table allows you to decode the pulse width from the index.";
+} pulse_width_lookup[];
+
+commentdef {
+  p_header = "SCALING FOR NOMINAL RECEIVER GAIN";
+  p_text = "The raw I/Q data should be scaled to provide powers in the correct range.";
+};
+
+paramdef double {
+  p_default = 107;
+  p_descr = "Nominal receiver gain in H channel (dB).";
+  p_help = "The IQ data will be scaled based on this nominal gain";
+} rx_gain_nominal_db_h;
+
+paramdef double {
+  p_default = 107;
+  p_descr = "Nominal receiver gain in V channel (dB).";
+  p_help = "The IQ data will be scaled based on this nominal gain";
+} rx_gain_nominal_db_v;
+
+commentdef {
+  p_header = "OUTPUT FILES";
+};
+
+paramdef string {
+  p_default = "/tmp/outdir";
+  p_descr = "Output directory path.";
+  p_help = "Files are written to this directory.";
+} output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to add a string indicating the scan mode to the file name.";
+} add_scan_mode_to_file_name;
+
+typedef enum {
+  FORMAT_IWRF, FORMAT_TSARCHIVE
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = FORMAT_IWRF;
+  p_descr = "Format of the output files";
+  p_help = "IWRF: stream of binary structs and IQ data following the IWRF (CSU-CHILL/NCAR Integrated Weather Radar Facility) format. TSACHIVE: Sigmet time series archive format";
+} output_format;
+
+typedef enum {
+  PACKING_ASIS,
+  PACKING_FL32,
+  PACKING_SCALED_SI16,
+  PACKING_DBM_PHASE_SI16,
+  PACKING_SIGMET_FL16
+} output_packing_t;
+
+paramdef enum output_packing_t {
+  p_default = PACKING_FL32;
+  p_descr = "Packing of the IQ data in the output files";
+  p_help = "ASIS: as it was read. FL32: 32-bit floating point. SCALED_SI16: scaled signed 16-bit integers. DBM_PHASE_SI16: signed 16-bit integers representing power in dBM and phase in deg. SIGMET_SI16: Sigmet 16-bit floating point packing as in the RVP8.";
+} output_packing;
+

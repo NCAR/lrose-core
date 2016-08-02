@@ -1,0 +1,92 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<pre>typedef struct {
+  <a href="RSL_radar_header_struct.html">Radar_header</a> h;
+  <a href="RSL_volume_struct.html">Volume</a> **v;   /* Array 0..nvolumes-1 of pointers to Volumes.
+                      * 0 = DZ_INDEX = reflectivity.
+                      * 1 = VR_INDEX = velocity.
+                      * 2 = SW_INDEX = spectrum_width.
+                      * 3 = CZ_INDEX = corrected reflectivity.
+                      * 4 = ZT_INDEX = total reflectivity.
+                      * 5 = DR_INDEX = differential refl.
+                      * 6 = LR_INDEX = another differential refl.
+                      * 7 = ZD_INDEX = another refl form.
+                      * 8 = DM_INDEX = recieved power.
+                      * 9 = RH_INDEX = Rho coefficient.
+                      *10 = PH_INDEX = Phi (MCTEX parameter).
+                      *11 = XZ_INDEX = X-band reflectivity.
+                      *12 = CR_INDEX = Corrected DR.
+                      *13 = MZ_INDEX = DZ mask for 1C-51 HDF.
+                      *14 = MR_INDEX = DR mask for 1C-51 HDF.
+                      *15 = ZE_INDEX = Edited reflectivity.
+                      *16 = VE_INDEX = Edited velocity.
+                      *17 = KD_INDEX = KDP (unknown)  for MCTEX data.
+                      *18 = TI_INDEX = TIME (unknown)  for MCTEX data.
+                */
+} Radar;
+
+/*
+ * DZ     Reflectivity (dBZ), may contain some   DZ_INDEX
+ *        signal-processor level QC and/or      
+ *        filters. This field would contain 
+ *        Darwin's CZ, or WSR88D's standard 
+ *        reflectivity. In other words, unless
+ *        the field is described otherwise, it
+ *        should always go here. In essence, this
+ *        is the "cleanest" reflectivity field
+ *        for a radar.
+ *
+ * VR     Radial Velocity (m/s)                  VR_INDEX
+ *
+ * SW     Spectral Width (m2/s2)                 SW_INDEX
+ *
+ * CZ     QC Reflectivity (dBZ), contains
+ *        post-processed QC'd data               CZ_INDEX
+ *
+ * ZT     Total Reflectivity (dBZ)               ZT_INDEX
+ *        May be uncommon, but important
+ *        This is UZ in UF files.
+ *
+ * DR     Differential reflectivity              DR_INDEX
+ *        DR and LR are for dual-polarization
+ *        radars only. Unitless or in dB.
+ *
+ * LR     Another form of differential ref       LR_INDEX
+ *        called LDR, not sure of units
+ *
+ * ZD     ZDR: Reflectivity Depolarization Ratio ZD_INDEX
+ *        ZDR = 10log(ZH/ZV)  (dB)
+ *
+ * DM     Received power measured by the radar.  DM_INDEX
+ *        Units are dBm.
+ *
+ * RH     Rho : Correlation coefficient (MCTEX)  RH_INDEX
+ *
+ * PH     Phi (MCTEX parameter)                  PH_INDEX
+ *
+ * XZ     X-band reflectivity                    XZ_INDEX
+ *
+ * CD     Corrected ZD reflectivity (differential) CD_INDEX
+ *        contains QC'ed data
+ *
+ * MZ     DZ mask volume for HDF 1C-51 product.  MZ_INDEX
+ *
+ * MD     ZD mask volume for HDF 1C-51 product.  MD_INDEX
+ *
+ * ZE     Edited Reflectivity.                   ZE_INDEX
+ *
+ * VE     Edited Velocity.                       VE_INDEX
+ *
+ * KD     KDP (unknown)  for MCTEX data.         KD_INDEX
+ *
+ * TI     TIME (unknown)  for MCTEX data.        TI_INDEX
+ */
+
+</pre>
+</body>

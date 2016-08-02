@@ -1,0 +1,225 @@
+/****************************************************
+ * TDRP params for rdacs2gate
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_VERBOSE, DEBUG_EXTRA.
+ */
+debug = DEBUG_NORM;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Is the input data big-endian?.
+ * Normally the input data will come from an Intel machine, so it
+ *   will be small-endian.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+input_big_endian = FALSE;
+
+/*
+ * Input data host.
+ * TCP/IP name/address of host for input data.
+ *
+ * Type: string
+ * Default: "localhost" 
+ */
+input_host = "redwood";
+
+/*
+ * Input data port.
+ * TCP/IP port number for input data from RDACS.
+ *
+ * Type: long
+ * Default: 14998 
+ * Min value: 1 
+ * Max value: 65535 
+ */
+input_port = 14998;
+
+/*
+ * Radar login user name.
+ * User name for logging in to RDACS.
+ *
+ * Type: string
+ * Default: "tom" 
+ */
+user = "tom";
+
+/*
+ * Radar login password name.
+ * Password name for logging in to RDACS.
+ *
+ * Type: string
+ * Default: "tomt" 
+ */
+password = "tomt";
+
+/*
+ * Output data to client?.
+ * Option to turn off output while debugging.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+output_data = TRUE;
+
+/*
+ * Output data port.
+ * TCP/IP port number for output data.
+ *
+ * Type: long
+ * Default: 49000 
+ * Min value: 5000 
+ * Max value: 65535 
+ */
+output_port = 49000;
+
+/*
+ * Time storage.
+ * The time with which the data is tagged.
+ *
+ * Type: enum
+ * Default: UCT 
+ * Legal values: LOCAL, UCT.
+ */
+time_mode = UCT;
+
+/*
+ * Target radar ID.
+ * The radar ID - this is added to the data stream.
+ *
+ * Type: long
+ * Default: 0 
+ */
+radar_id = 0;
+
+/*
+ * Elevation angle table.
+ * Array of expected elevation angles (deg).These are used to
+ *   determine the tilt number for a beam.
+ *
+ * Type: double
+ * Array elem size: 8 bytes
+ * Array has no max number of elements
+ */
+elev_table = {1.5, 2.5, 3.5, 4.5, 5.5, 6.7, 8.0, 9.6, 11.5, 13.7};
+
+/*
+ * Beam width.
+ * Radar half-power beam width (deg).
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0.01 
+ * Max value: 45 
+ */
+beam_width = 1;
+
+/*
+ * Samples per beam.
+ * Number of pulse samples used to compute data from a beam.
+ *
+ * Type: long
+ * Default: 8 
+ * Min value: 1 
+ */
+samples_per_beam = 8;
+
+/*
+ * Pulse width.
+ * Radar pulse width (microsecs).
+ *
+ * Type: double
+ * Default: 2 
+ * Min value: 0.001 
+ */
+pulse_width = 2;
+
+/*
+ * PRF.
+ * Radar pulse repitition frequency (pulses per sec).
+ *
+ * Type: double
+ * Default: 250 
+ * Min value: 1 
+ */
+prf = 250;
+
+/*
+ * Wavelength.
+ * Radar wavelength (cm).
+ *
+ * Type: double
+ * Default: 5 
+ * Min value: 0.01 
+ * Max value: 1000 
+ */
+wavelength = 5;
+
+/*
+ * Array of data fields.
+ * The type should be set to: DBZ, VEL or WIDTH. DBZ must always be
+ *   the first field. If there are 2 fields, the second should be VEL.
+ *   If there are 3 fields, the third should be WIDTH.
+ *
+ * Type: struct
+ * Array elem size: 20 bytes
+ * Array has no max number of elements
+ */
+fields = {{
+  "DBZ", /* type:string */
+  1, /* scale:double */
+  -127  /* bias:double */
+}, {
+  "VEL", /* type:string */
+  1, /* scale:double */
+  -127  /* bias:double */
+}, {
+  "WIDTH", /* type:string */
+  1, /* scale:double */
+  -127  /* bias:double */
+}};
+
+/*
+ * Use the log receiver for reflectivity.
+ * Some radars have both a log and linear receiver, and in some cases
+ *   either may be used for reflectivity. This option selects whether
+ *   to use the log receiver for reflectivity.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+log_receiver_for_dbz = FALSE;
+
+/*
+ * Last elevation angle in volume (deg).
+ * This is the final elevation angle in the volume sequence. It
+ *   is used to trigger the end-of-vol.
+ *
+ * Type: double
+ * Default: 30 
+ * Min value: -10 
+ * Max value: 180 
+ */
+last_el_in_vol = 16;
+
+

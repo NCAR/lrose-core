@@ -1,0 +1,128 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SpolSysconRelay
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2010
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SpolSysconRelay reads status packets from the Syscon server, and relays relevant information to SPOL processes.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "SYSCON DETAILS";
+};
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Host name on which SysCon server is running.";
+} syscon_server_host;
+
+paramdef int {
+  p_default = 2513;
+  p_descr = "TCP/IP port from which ops_info packets are available.";
+} syscon_ops_info_port;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use info from IWRF-style syscon packets.";
+  p_help = "Packets are sent from syscon in a mixture of CHILL and IWRF packets. The CHILL packets are the original, and appear to be more reliable. Therefore, by default we use the CHILL packets. If this is set to true, the IWRF packets will be used as available, and the CHILL packets where IWRF packets are not available.";
+} use_iwrf_syscon_packets;
+
+commentdef {
+  p_header = "DEBUG - PRINT RSM INFO";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print the RSM info packets.";
+  p_help = "RSM contains status information on the radar system. Enabling this monitoring prints RSM packet information to stderr.";
+} print_rsm_info;
+
+paramdef int {
+  p_default = 2515;
+  p_descr = "TCP/IP port from which RSM packets are available.";
+} syscon_rsm_info_port;
+
+commentdef {
+  p_header = "OUTPUT FMQ DETAILS";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/syscon";
+  p_descr = "Path to output FMQ.";
+  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
+} output_fmq_path;
+
+paramdef int {
+  p_default = 1000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 100;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+commentdef {
+  p_header = "REGISTERING WITH DATA MAPPER";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to register writes to fmq with the DataMapper.";
+  p_help = "If true, the app will register with the DataMapper when data is written to the FMQ.";
+} register_with_data_mapper;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+commentdef {
+  p_header = "MONITOR MODE";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to monitor the output fmq from a different instance.";
+  p_help = "If true, this application will monitor the fmq written by a different instance of this application, and print out debugging information.";
+} monitor_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/syscon";
+  p_descr = "Path to monitor FMQ.";
+} monitor_fmq_path;
+

@@ -1,0 +1,109 @@
+/**********************************************************************
+ * TDRP params for Bdry2Xml
+ **********************************************************************/
+
+//======================================================================
+//
+// Param file for Bdry2Xml. Ingests Bdry objects and  converts to Xml 
+//   format as specified by Beijing 2008 Olympics FDP.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_ON
+//
+
+debug = DEBUG_ON;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This program registers with procmap. This is the instance used for 
+//   registration.
+// Type: string
+//
+
+instance = "primary";
+
+//======================================================================
+//
+// RUN MODES.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Modes of running the program. In realtime mode the  program is 
+//   triggered by the latest data info file in the input spdb  directory. 
+//   In ARCHIVE mode, you must enter start and end times on  the command 
+//   line.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// Input url.
+// Type: string
+//
+
+input_url = "spdbp:://thorn-rap2::/d1/fieldData/Thor/spdb/humanMgr/boundary";
+
+///////////// start_time //////////////////////////////
+//
+// yyyymmddhhMMss.
+// Set for ARCHIVE mode only.
+// Type: string
+//
+
+start_time = "";
+
+///////////// end_time ////////////////////////////////
+//
+// yyyymmddhhMMss.
+// Set for ARCHIVE mode only.
+// Type: string
+//
+
+end_time = "";
+
+///////////// max_valid_age ///////////////////////////
+//
+// maximum age of data that will be processed in realtime mode.
+// Type: int
+//
+
+max_valid_age = 54000;
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output url.
+// Type: string
+//
+
+output_url = "$(RAP_DATA_DIR)/$(PROJECT)/xml/bdry";
+

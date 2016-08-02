@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+file_repeat_day
+makefile
+makefile.am
+makefile.in

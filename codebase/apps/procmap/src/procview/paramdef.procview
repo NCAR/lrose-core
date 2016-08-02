@@ -1,0 +1,42 @@
+/*********************************************************
+ * parameter definitions for procview
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Jan 1997
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"local"};
+  p_descr = "Procmap host";
+  p_help = "Host on which the procmap is queried.";
+} procmapHost;
+
+paramdef long {
+  p_default = {10};
+  p_descr = "Interval between procmap queries (sec).";
+  p_help = "The procmap is queried once per interval to update the information for the display.";
+} procmapInterval;
+
+paramdef char* {
+  p_descr = "List of available procmap hosts";
+  p_help = "This is the list from which procmap hosts may be chosen";
+} hostList[];
+
+

@@ -1,0 +1,8 @@
+#
+# LDLIBS for executable which will not use the mosaic server
+#
+
+LIBS = -ldixutil -lcdata_util -ltoolsa -leuclid \
+	$(DEBUG_LIBS) $(SYS_LIBS) -lm
+
+LINTFLAGS = $(SYS_LINTFLAGS)

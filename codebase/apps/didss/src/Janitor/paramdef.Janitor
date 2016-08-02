@@ -1,0 +1,461 @@
+/*********************************************************
+ * parameter definitions for janitor
+ *
+ * Niles Oien, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * December 1998
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "The Janitor is a program that does maintenance on data files.\n";
+  p_text   = "It is used to : \n\n"
+             "\t* Delete files that have not been modified for a certain time\n"
+             "\t* Compress files that have not been accessed for a certain time\n"
+             "\t* Leave data alone if it is listed in an eventlist as pertaining to\n"
+             "\t  an interesting case.\n\n"
+             "So there are three different times involved :\n"
+             "\t * The time since file modification, for deletion\n"
+             "\t * The time since file access, for compression, and\n"
+             "\t * The time the data pertains to, which is parsed from\n"
+             "\t   the filename according to the RAP file naming convention.\n\n"
+             "The Janitor operates by recursing under a top directory (usually\n"
+             "defined by the RAP_DATA_DIR environment variable). As the Janitor\n"
+             "recurses into a directory it looks for a file named _janitor and\n"
+             "reads its parameters from it, if it exists. If it does not,\n"
+             "then the parameters the janitor entered the directory with\n"
+             "are used.\n\n"
+             "Typically a user will specify a very complete _janitor file in the\n"
+             "top directory. Directories lower in the tree typically\n"
+             "contain _janitor files that only overwrite a few\n"
+             "variables - the rest retain the values\n"
+             "that were specified in the top level directory.\n\n"
+             "At the time of writing, users may consult\n"
+             "http://www.rap.ucar.edu/staff/oien/janitor.html\n"
+             "for more information.\n\n"
+             "Niles Oien, RAP, NCAR, August 1999 (oien@rap.ucar.edu)";
+}
+
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debugging messages will be printed.";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Top level directory - defaults to DATA_DIR or RAP_DATA_DIR if not set.";
+  p_help = "The Janitor traverses recursively from this directory downwards.";
+} top_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to traverse the directories once and then exit.";
+  p_help = "If false, the Janitor will repeatedly traverse the directory tree, with a delay of 'SleepBetweenPasses' between the passes. If true, the Janitor will make a single pass and then exit.";
+} once_only;
+
+paramdef int {
+  p_min = 0;
+  p_default = 900;
+  p_descr = "Sleep time between passes - secs";
+  p_help = "Janitor sleeps for this time between traversal passes of the directory structure. This is intended to prevent the Janitor from causing an excessive CPU load.";
+} SleepBetweenPasses;
+
+paramdef int {
+  p_min = 0;
+  p_default = 0;
+  p_descr = "Sleep time between directories - secs";
+  p_help = "Janitor sleeps for this time as it moves between between directories. It is intended to prevent the Janitor from causing an excessive CPU load.";
+} SleepBetweenDirs;
+
+////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TRAVERSING THE DIRECTORY TREE";
+  p_text = "Controlling the way the Janitor searches the directory tree for files to delete or compress.";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Recurse to lower directories.";
+  p_help = "Set to false to leave directories below the current directory alone.";
+} recurse;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Follow path relative soft links ./ and ../";
+  p_help = "Setting this to true is dangerous if recurse is true. Beware of circular links.";
+} FollowDangerousLinks;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Process files in this directory.";
+  p_help = "Set to false to leave the current directory alone. However, subdirs are processed unless the recurse parameter is set to false.";
+} process;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to place a report file in each directory visisted.";
+  p_help = "If set, a file named _janitor_Report is written in the directory\n"
+           "where the -janitor file was found. Note that this parameter\n"
+           "does NOT recurse, that is, setting report=TRUE in the top directory\n"
+           "will cause a _janitor_Report to be written to the top\n"
+           "directory but not subdirectories.\n\n"
+           "The _janitor_Report file is an ASCII report of the state of\n"
+           "the janitor when it got to that directory.";
+} report;
+
+////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "FILE IDENTIFICATION";
+  p_text = "Controlling the way the Janitor finds files to delete or compress.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check for file extension.";
+  p_help = "If set, only files with the 'ext' extension are processed.";
+} check_ext;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Specified file extension. See 'check_ext'.";
+  p_help = "The specified extension may optionally include the leading period.";
+} ext;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check for RAP date-time naming convention.";
+  p_help = "If set, the files must follow the RAP file naming\n"
+           "convention (which means that the filename is based\n"
+           "on the date that the data in the file pertains to).";
+} date_format;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify file ages in days, instead of secs.";
+  p_help = "If TRUE, 'MaxNoModDays' and 'MaxNoAccessDays' are used. If FALSE, 'MaxModificationAgeBeforeDelete' and 'MaxAccessAgeBeforeCompress' are used.";
+} file_ages_in_days;
+
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "FILE DELETION";
+  p_text = "Option to delete files.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to delete files.";
+  p_help = "If set, files are deleted if their modification age exceeds MaxNoModDays, if set, or MaxModificationAgeBeforeDelete.";
+} delete_files;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Max file age before deletion - days. Used if 'file_ages_in_days' is TRUE.";
+  p_help = "If delete_files is TRUE, a file will be deleted if it has not been modified in this amount of time.";
+} MaxNoModDays;
+
+paramdef int {
+  p_min = 1;
+  p_default = 1728000;
+  p_descr = "Max file age before deletion - secs. Used if 'file_ages_in_days' is FALSE.";
+  p_help = "If delete_files is TRUE, a file will be deleted if it has not been modified in this amount of time.";
+} MaxModificationAgeBeforeDelete;
+
+paramdef int {
+  p_min = 0;
+  p_max = 100;
+  p_default = 100;
+  p_descr = "Percentage full disk threshold";
+  p_help = "If this is exceeded, then the Janitor will start deleting "
+           "the oldest files in the data repository until the disk usage "
+           "percentage is below disk_delete_threshold.\n\n"
+           "NOTE : This facility is only supported under LINUX. "
+           "For other UNIX OS's the disk is assumed to be 0% full.";
+} disk_use_threshold;
+
+paramdef int {
+  p_min = 0;
+  p_max = 100;
+  p_default = 100;
+  p_descr = "Percentage full disk threshold for deletions";
+  p_help = "If the disk is considered too full based on the "
+           "disk_use_threshold parameter, the oldest files in the data "
+           "repository will be deleted until the disk usage falls below "
+           "this value. "
+           "Note that files will only be deleted if they are not in an "
+           "event list and are not in a directory with a disk_use_threshold "
+           "of 100. "
+           "Note that this value must be less than the disk_use_threshold "
+           "value or your disk could fill up.";
+} disk_delete_threshold;
+
+paramdef int {
+  p_min = -1;
+//  p_max = MAX_INT;
+  p_default = -1;
+  p_descr = "Maximum number of files allowed in a directory";
+  p_help = "If the number of files in a directory (after other deletion "
+	   "processes have completed) exceeds this number, then the "
+ 	   "oldest files (based upon modification time) will be deleted "
+	   "until the number of files left is equal to this value. "
+	   "When MaxNumFilesInDir is less than zero (the default) it "
+	   "will not be applied.  Setting MaxNumFilesInDir to zero will "
+	   "cause it to delete all files in a directory.  Files that begin "
+	   "with a '.' or '_' will not be included in the count. The value "
+	   " of 'delete_files' does not influence the behavior wrt.  "
+	   "MaxNumFilesInDir";
+ 
+} MaxNumFilesInDir;
+
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DIRECTORY DELETION";
+  p_text = "Option to delete directories.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to remove empty directories.";
+  p_help = "If set, directories are removed if file deletion leaves them empty.";
+} RemoveEmptyDirs;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Max dir age before deletion - days. Used if 'file_ages_in_days' is TRUE.";
+  p_help = "If RemoveEmptyDirs is TRUE, a dir will be deleted if it has not been modified in this amount of time.";
+} MaxDirAgeDays;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Max dir age before deletion - secs. Used if 'file_ages_in_days' is FALSE.";
+  p_help = "If RemoveEmptyDirs is TRUE, a dir will be deleted if it has not been modified in this amount of time.";
+} MaxDirAgeSecs;
+
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "FILE COMPRESSION";
+  p_text = "Option to compress files.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Should we compress files?";
+  p_help = "If set, files are compressed if their age indicates\n"
+           "that they should be. Systems that do not decompress\n"
+           "on the fly should avoid compression.";
+} compress;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Make compression decision based on access time";
+  p_help =
+    "If TRUE, the compression decision will be made based on\n"
+    "the latest ACCESS time of the file.\n"
+    "See MaxNoAccessDays or MaxAccessAgeBeforeCompress.\n"
+    "If FALSE, the compression decision will be made based on\n"
+    " the latest MODIFICATION time of the file.\n"
+    "See MaxNoModDaysBeforeCompress or MaxNoModSecsBeforeCompress.\n";
+} CompressBasedOnAccessTime;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Max quiescent age before compression - days. Used if 'file_ages_in_days' is TRUE";
+  p_help = "If compress is TRUE, a file will be compressed if it has not been accessed within this time.";
+} MaxNoAccessDays;
+
+paramdef int {
+  p_min = 1;
+  p_default = 86400;
+  p_descr = "Max quiescent age before compression - secs. Used if 'file_ages_in_days' is FALSE.";
+  p_help = "If compress is TRUE, a file will be compressed if it has not been accessed within this time.";
+} MaxAccessAgeBeforeCompress;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Max file mod age before compression - days.";
+  p_help = " Used if 'file_ages_in_days' is TRUE. If compress is TRUE, a file will be compressed if it has not been modified in this amount of time.";
+} MaxNoModDaysCompress;
+
+paramdef int {
+  p_default = 1728000;
+  p_descr = "Max file mod age before compression - secs.";
+  p_help = " Used if 'file_ages_in_days' is FALSE. If compress is TRUE, a file will be compressed if it has not been modified in this amount of time.";
+} MaxNoModSecsCompress;
+
+paramdef string {
+  p_default = "gzip -f ^";
+  p_descr = "Compress command to be executed on files, with carat (^) for filename";
+  p_help = "Compress command to execute on files.";
+} com_str;
+
+paramdef string {
+  p_default = ".gz";
+  p_descr = "Extension for compressed files.";
+  p_help = "Extension for compressed files. The Janitor needs this to determine\n"
+           "if a file has already been compressed. If a compression technique\n"
+           "other than gzip is used, this may have to be changed (for instance\n"
+           "if the compress command was used the extension should be .Z).";
+} compressed_ext;
+
+paramdef double {
+  p_min = 0.0;
+  p_default = 0.25;
+  p_descr = "Single int value";
+  p_help = "Sleep for sleep_factor*compression_time after compressing a file."; 
+} sleep_factor;
+
+////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "EVENT LISTS";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Single bool value";
+  p_help = "The Janitor will look for two eventlists. One is\n"
+           "in the directory with the data it pertains to\n"
+           "and is named _janitor_Eventlist, the other (master)\n"
+           "eventlist is specified by the MasterEventsFile parameter\n"
+           "and this may be on a disk that is remotely mounted.\n\n"
+           "If for some reason the master eventlist file is not\n"
+           "found, the user can specify that the Janitor is to\n"
+           "do nothing by specifying ProcessIfNoMaster=FALSE.";
+} ProcessIfNoMaster;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If this is set, ignore event lists.";
+  p_help = "This parameter intended to be used to delete MM5 raw\n"
+    "data, even if it is on an eventlist.";
+} ignoreEventlists;
+
+paramdef string {
+  p_default = "$(HOME)/data/_janitor_Master_Eventlist";
+  p_private = FALSE;
+  p_descr = "Single string value";
+  p_help = "Event list file.";
+} MasterEventsFile;
+
+////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "CROSS MOUNT ISSUES";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set this to TRUE to force the host name to match the one\n"
+            "specified by the Hostname parameter. The intent is to give some\n"
+            "control over the processing of cross mounted directories. If\n"
+            "a directory physically attached to a machine named Grasshopper is\n"
+            "cross mounted on a machine named Monkey via nfs, and in that directory\n"
+            "the _janitor file specifies that the hostname must be Grasshopper,\n"
+            "then only the janitor from Grasshopper will be able to recurse\n"
+            "into that directory. The janitor on Monkey will be denied access.";
+  p_help = "The default is to set this to FALSE.";
+} HostnameMustMatch;
+
+paramdef string {
+  p_default = "MachineName";
+  p_descr = "The host name.";
+  p_help = "See comments for HostnameMustMatch above.";
+} Hostname;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If this is set, use lock files to lock a directory.";
+  p_help = "Default is not to do this.";
+} UseLockfiles;
+
+////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "CALL SCRIPT WHEN FILES ARE DELETED";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to spawn a script when a file is deleted.";
+  p_help = "If TRUE, the script 'script_to_call' will be called each time a file is deleted.";
+} call_script_on_file_deletion;
+
+paramdef string {
+  p_default = "delete_script_example.py";
+  p_descr = "Name of script to call if call_script_on_file_deletion is true";
+  p_help = "The script will be called with the args specified in script_arg_list[] and supplementary_args[] - see below.";
+} script_to_call_on_file_deletion;
+
+typedef enum
+{
+  DELETE_DATA_TIME,
+  DELETE_MOD_TIME,
+  DELETE_DIR_PATH,
+  DELETE_FILE_PATH,
+  DELETE_FILE_NAME,
+  DELETE_FILE_EXT
+} delete_script_id_t;
+
+typedef struct {
+  delete_script_id_t id;
+  string str;
+} delete_script_arg_t;
+
+paramdef struct delete_script_arg_t {
+  p_default = {
+    { DELETE_DATA_TIME, "--data_time" },
+    { DELETE_MOD_TIME, "--mod_time" },
+    { DELETE_DIR_PATH, "--dir" },
+    { DELETE_FILE_PATH, "--path" },
+    { DELETE_FILE_NAME, "--name" },
+    { DELETE_FILE_EXT, "--ext" }
+  };
+  p_descr = "List of arguments to be passed to the delete script.";
+  p_help = "The arg string is followed by the respective value, for example file_path. So on the command line, you could see '-file /tmp/data/filename.ext -dir /tmp/data -name filename.ext'. DATA_TIME is the time of the data in the file, if that can be deduced from the file name, and -1 if not. MOD_TIME is the latest mod time of the file.";
+} delete_script_arg_list[];
+
+paramdef string {
+  p_default = { "--debug" };
+  p_descr = "Supplementary arguments to be added to end of delete argument list.";
+  p_help = "This allows you to add arbitrary command line arguments at the END of the list. So for example if you want to add a debug arg to your script, you could specify '-debug' as a supplementary arg. The supplementary args will appear on the command line in the order specified, wth spaces between them.";
+} delete_supplementary_args[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to run delete script in background.";
+  p_help = "If TRUE, the script will be run in the background. Therefore, the system call will return immediately. If FALSE, the Janitor will wait until the script completes before continuing execution.";
+} run_delete_script_in_background;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to terminate delete script if it hangs.";
+  p_help = "If TRUE, the script will be killed if it does not return within 'delete_script_max_run_secs'.";
+} terminate_delete_script_if_hung;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Max time allowed for script - secs.";
+  p_help = "If 'terminate_delete_script_if_hung' is TRUE, the script will be killed if it does not complete withing this number of secs.";
+} delete_script_max_run_secs;
+

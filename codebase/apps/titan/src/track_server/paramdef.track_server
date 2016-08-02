@@ -1,0 +1,156 @@
+/*********************************************************
+ * parameter definitions for track_server
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * May 1996
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+		 DEBUG_EXTRA, DEBUG_VERBOSE};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately. DEBUG_EXTRA and above suppresses the spawning of child processes.";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process and server instance";
+  p_help = "Used for registration with procmap and servmap.";
+} instance;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Server subtype";
+  p_help = "Used for registration with servmap.";
+} subtype;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Server info";
+  p_help = "Used for registration with servmap.";
+} info;
+
+paramdef long {
+  p_default = {44000};
+  p_min = {10000};
+  p_descr = "Server port number.";
+  p_help = "TCP/IP port for this server.";
+} port;
+
+paramdef char* {
+  p_default = {"."};
+  p_descr = "Storm data directory";
+  p_help = "Directory holding the storm data.";
+} storm_data_dir;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Real-time flag";
+  p_help = "If set, indicates real-time data is available, shmem is created.";
+} realtime_avail;
+
+paramdef double {
+  p_default = {360.0};
+  p_min = {1.0};
+  p_descr = "Max valid age of input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this.";
+} max_realtime_valid_age;
+
+paramdef long {
+  p_default = {100000};
+  p_min = {10000};
+  p_descr = "Max packet length.";
+  p_help = "Max length of packets for communicating with clients.";
+} max_packet_length;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Send invalid forecasts flag";
+  p_help = "Product output mode. If set, all forecasts will be sent. If not, only those marked valid will be sent.";
+} product_mode_send_invalid_forecasts;
+
+paramdef long {
+  p_default = {1800};
+  p_descr = "Forecast lead time (secs).";
+  p_help = "Lead time for forecast shapes and positions.";
+} product_mode_forecast_lead_time;
+
+paramdef long {
+  p_default = {10100};
+  p_min = {1};
+  p_descr = "Product id.";
+  p_help = "The product server uses this id to select a transformation routine.";
+} product_mode_product_id;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Plot current shape flag";
+  p_help = "Product output mode. If set, the current storm shape will be sent.";
+} product_mode_plot_current;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Plot forecast shape flag";
+  p_help = "Product output mode. If set, the forecast storm shape will be sent.";
+} product_mode_plot_forecast;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Plot shape as ellipse";
+  p_help = "Product output mode. If set, the storm shape will be represented by and ellipse.";
+} product_mode_plot_ellipse;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Plot shape as polygon";
+  p_help = "Product output mode. If set, the storm shape will be represented by and polygon.";
+} product_mode_plot_polygon;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Plot trend";
+  p_help = "Product output mode. If set, the storm size and intensity trend will be included as text: '+' or '-'.";
+} product_mode_plot_trend;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Plot speed as knots.";
+  p_help = "Product output mode. Default is speed as km/hr.";
+} product_mode_speed_knots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Plot speed rounded to nearest 5.";
+  p_help = "Product output mode. Default is not rounded.";
+} product_mode_speed_round;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Fixed length arrows flag";
+  p_help = "Product output mode. If flag set, direction arrows are of fixed lenght. If not set, arrows are scaled to length for time product_mode_forecast_lead_time.";
+} product_mode_fixed_length_arrows;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Zero growth forecast flag";
+  p_help = "Product output mode. If flag set, growth forecasts are forced to zero. Default is growth is non-zero.";
+} product_mode_zero_growth_forecast;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to resend old data";
+  p_help = "Product output mode. If flag set, previously sent data will be resent if the algorithms are rerun. If not, only data later than that previously sent will be sent.";
+} product_mode_resend_old_data;
+
+

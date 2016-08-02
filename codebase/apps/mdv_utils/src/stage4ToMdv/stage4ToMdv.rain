@@ -1,0 +1,220 @@
+/**********************************************************************
+ * TDRP params for ./stage4ToMdv
+ **********************************************************************/
+
+//======================================================================
+//
+// stage4ToMdv reads netcdf files from the ingest of stage4 precip data
+// and converts it to mdv.
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// INPUT/OUTPUT.
+//
+//======================================================================
+ 
+///////////// InDir ///////////////////////////////////
+//
+// Input directory.
+// Directory path for nssl netCDF data files.
+// Type: string
+//
+
+InDir = "./";
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+// If string is NULL, all extensions are valid.
+// Type: string
+//
+
+fileExtension = "";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// outUrl //////////////////////////////////
+//
+// Output URL to write MDV data to, in form:
+// mdvp:://host.dom::dir/dir.
+// Set to where output MDV data should be written.
+// Type: string
+//
+
+outUrl = "/scratch/hardt/test";
+
+///////////// Expiry //////////////////////////////////
+//
+// Time before data expire, seconds.
+// Default is half an hour.
+// Type: int
+//
+
+Expiry = 1800;
+
+//======================================================================
+//
+// FILE TYPE SPECIFICATIONS.
+//
+//======================================================================
+ 
+///////////// input_field_list ////////////////////////
+//
+// List of input fields to process.
+// Type: string
+// 1D array - variable length.
+//
+
+input_field_list = {
+ "RAIN"
+};
+
+//======================================================================
+//
+// REMAPPING PARAMETERS.
+//
+//======================================================================
+ 
+///////////// remapToFlat /////////////////////////////
+//
+// Option to remap to flat earth grid from internal lat/lon grid.
+// AreaIngest uses an internal lat/lon grid specified by the Dx, Dy, 
+//   lonMin, lonMax, latMin, and latMax parameters above. This option 
+//   allows the data to be remapped to a flat earth grid. If this option 
+//   is selected, the flatEarthGrid parameters below are utilized. It 
+//   should not be used in conjunction with remapToLambert.
+// Type: boolean
+//
+
+remapToFlat = FALSE;
+
+///////////// flatEarthGrid ///////////////////////////
+//
+// Grid parameters for flat earth.
+// Used only if remapToFlat is TRUE.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//      double origin_lat;
+//      double origin_lon;
+//      double rotation;
+//   }
+//
+//
+
+flatEarthGrid = {
+    nx = 500,
+    ny = 500,
+    minx = -250,
+    miny = -250,
+    dx = 1,
+    dy = 1,
+    origin_lat = 37,
+    origin_lon = -98,
+    rotation = 0
+};
+
+///////////// remapToLatlon ///////////////////////////
+//
+// Option to remap to latlon earth grid from internal lat/lon grid.
+// AreaIngest uses an internal lat/lon grid specified by the Dx, Dy, 
+//   lonMin, lonMax, latMin, and latMax parameters above. This option 
+//   allows the data to be remapped to a latlon earth grid. If this option 
+//   is selected, the latlonEarthGrid parameters below are utilized. It 
+//   should not be used in conjunction with remapToFlat.
+// Type: boolean
+//
+
+remapToLatlon = TRUE;
+
+///////////// latlonEarthGrid /////////////////////////
+//
+// Grid parameters for lambert conformal grid.
+// Used only if remapToLambert is TRUE.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+latlonEarthGrid = {
+    nx = 126,
+    ny = 92,
+    minx = -85.5451,
+    miny = 34.4320,
+    dx = 0.1,
+    dy = 0.1
+//    nx = 145,
+//    ny = 105,
+//    minx = -85.49779,
+//    miny = 34.46441,
+//    dx = .0899,
+//    dy = .0899
+};
+

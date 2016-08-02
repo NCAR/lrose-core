@@ -1,0 +1,52 @@
+#! /bin/csh
+
+set log=/tmp/run_sun_and_rvp8_cal.log
+
+while (1)
+
+echo "******* STARTING ***********" >>& $log
+date >>& $log
+echo "****************************" >>& $log
+
+# first, stop sun data aquisition on iq
+
+echo Running ssh iq kill_TsTcpSmartSave.ops >>& $log
+\ssh iq kill_TsTcpSmartSave.ops >>& $log &
+
+# next, save sun time series to date/time dir, and run SunCal on that data
+
+echo Running ssh /home/operator/projDir/cal/scripts/save_sun_tseries >>& $log
+\ssh iq /home/operator/projDir/cal/scripts/save_sun_tseries >>& $log &
+
+# next launch labview to run calibration, using Summy loads
+
+echo Launching labview to run RunCalDummyLoads.vi >>& $log
+#cd ~/rap/apps/rvp8/src/labview
+cd ~/labview_work
+labview -launch RunCalDummyLoads.vi >>& $log &
+
+# now sleep for a while
+
+echo "###### wait for rvp8 CW cal & self checkis to complete, sleeping for 310 sec...." >>& $log
+sleep 310
+echo "done sleeping for 310 secs during rvp8 cal & self checks" >>& $log
+
+# finally, restart sun data aquisition on iq
+
+echo Running ssh iq start_TsTcpSmartSave.ops >>& $log
+\ssh iq start_TsTcpSmartSave.ops >>& $log &
+
+echo "####### wait for 3 or 4 sunscans to complete, sleeping for 360 sec ...." >>& $log
+sleep 360
+echo "done sleeping for 360 secs during solar box scans" >>& $log
+
+echo "******* DONE ***************" >>& $log
+echo "****************************" >>& $log
+
+end
+
+
+
+
+
+

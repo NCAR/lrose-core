@@ -1,0 +1,11 @@
+Import('env')
+
+# create svnInfo.h
+svnInfo = env.SvnInfo('svnInfo.h', '#')
+
+cp2lib = env.Library('cp2lib',
+Split("""
+CP2Version.cpp
+SimAngles.cpp
+"""))
+

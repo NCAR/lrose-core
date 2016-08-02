@@ -1,0 +1,153 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MdvRemapRadarGeom
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * October 2011
+ */
+
+commentdef {
+  p_header = "MdvRemapRadarGeom remaps the beam geometry of polar radar data in an MDV file.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Input directory";
+  p_help = "Path of input directory";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "REALTIME: - waits for new data. ARCHIVE: uses start and end times. FILELIST: processes specified file list";
+} mode;
+  
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data";
+  p_help = "REALTIME mode only. Max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Use _latest_data_info files to decide when new data has arrived.";
+  p_help = "REALTIME mode only. If false, the directory input_dir is scanned for new files.";
+} latest_data_info_avail;
+
+commentdef {
+  p_header = "FIELD DETAILS";
+}
+
+typedef enum {
+  COMB_CLOSEST, COMB_MEAN, COMB_DB_MEAN
+} comb_method_t;
+
+typedef struct {
+  string input_name;
+  string output_name;
+  comb_method_t comb_method;
+} field_t;
+
+paramdef struct field_t {
+  p_default = {
+    { "DBZ", "DBZ", COMB_DB_MEAN },
+    { "VEL", "VEL", COMB_CLOSEST },
+    { "WIDTH", "WIDTH", COMB_MEAN }
+  };
+  p_descr = "Details of fields to be converted, and how to combine them";
+  p_help =
+    "\tinput_name: name of field in input file\n"
+    "\touput_name: name of field in output file\n"
+    "\tcomb_method: how to combine gates if the output gate spacing is larger than the input. COMB_CLOSEST: take value from closest input gate. COMB_MEAN: take mean value from input gates. COMB_DB_MEAN: take mean after converting dB to power, as in the case of a DBZ-type field.";
+} fields[];
+
+commentdef {
+  p_header = "BEAM GEOMETRY CONVERSION";
+}
+
+commentdef {
+  p_header = "REMAP POLAR RADAR BEAM GEOMETRY";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remap beam geometry.";
+  p_help = "Only applies to polar radar data";
+} remap_radar_beam_geometry;
+
+paramdef int {
+  p_default = 100;
+  p_descr = "Number of gates for remapped radar geometry.";
+} remap_radar_n_gates;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Start range for remapped radar geometry (km).";
+} remap_radar_start_range;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Gate spacing for remapped radar geometry (km).";
+} remap_radar_gate_spacing;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::/tmp/output";
+  p_descr = "URL for output data";
+  p_help = "Data will be written to either the local file system, or to a remote host using the DsMdvServer.";
+} output_url;

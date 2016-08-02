@@ -1,0 +1,441 @@
+/**********************************************************************
+ * TDRP params for ./Ltg2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// Ltg2Spdb reads LTG records from ASCII files, converts them to 
+//   LTG_strike_t format (rapformats library) and stores them in SPDB. The 
+//   input format is variable and controlled by the param file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In this 
+//   mode it is optional to watch for a latest_data_info file. In ARCHIVE 
+//   mode, it processes all of the data files in the input directory 
+//   between the start and end times set on the command line. In FILELIST 
+//   mode, it processes all of the files in the list specified on the 
+//   command line. In FILELIST mode paths must be fully qualified with 
+//   respect to the date and time - so if each date has a separate 
+//   subdirectory the date part of the path must be included.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Directory where input data files can be found.
+// Type: string
+//
+
+input_dir = "./raw/ltg";
+
+///////////// latest_data_info_avail //////////////////
+//
+// Set to true if there is a latest_data_info file available in the 
+//   input directory.
+// REALTIME mode only.
+// Type: boolean
+//
+
+latest_data_info_avail = TRUE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// strict_subdir_check /////////////////////
+//
+// When set, only checks input_dir for subdirs of the form YYYYMMDD.
+// Only in REALTIME mode with latest_data_info_avail FALSE.
+// Type: boolean
+//
+
+strict_subdir_check = FALSE;
+
+///////////// file_name_check /////////////////////////
+//
+// When set, check file name contains specified sub-string.
+// See file_match_string.
+// Type: boolean
+//
+
+file_name_check = FALSE;
+
+///////////// file_match_string ///////////////////////
+//
+// Input filename match string.
+// Files must contain this string to be processed.
+// Type: string
+//
+
+file_match_string = "ltg";
+
+///////////// checkBoundingBox ////////////////////////
+//
+// Set to TRUE to check that LTG strike is within a bounding box.
+// Type: boolean
+//
+
+checkBoundingBox = FALSE;
+
+///////////// boundingBox /////////////////////////////
+//
+// Bounding box to check if checkBoundingBox is TRUE.
+// Only data which falls inside this box will be stored.
+//
+// Type: struct
+//   typedef struct {
+//      double min_lat;
+//      double max_lat;
+//      double min_lon;
+//      double max_lon;
+//   }
+//
+//
+
+boundingBox = { -90, 90, -180, 180 };
+
+//======================================================================
+//
+// INPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// input_format ////////////////////////////
+//
+// Input format type.
+// A number of formats are supported. The input is one line per strike, 
+//   space-delimited ASCII.
+
+// FORMAT_1:
+//   10 fields:
+//     year month day hour min sec lat lon amplitude type
+
+// FORMAT_2:
+//   11 fields:
+//     year month day hour min sec lat lon alt_km amplitude type
+
+// FORMAT_3:
+//   10 fields:
+//     month/day/year hour:min:sec lat lon Ka C/G, where
+//     sec is a float (not an int) and C/G is either 0 or 1.
+
+// FORMAT_4:
+//   6 fields : unixTime,lat,lon,amp,dummy,cg (cg=0 => cloud-ground 1 => 
+//   could-cloud)
+
+//   UALF_LF_1: Universal ASCII Ltg Format, Low Freq (LF), version 1:
+//   25 fields:
+//   version# year month day hour min sec nanosec lat lon amplitude 
+//   multiplicity n_sensors degress_of_freedom ellipse_angle 
+//   semi_major_axis semi_minor_axis chi_sq rise_time peak_to_zero_time 
+//   max_rate_of_rise cloud_flag angle_flag signal_flag timing_flag
+
+// UALF_LF_1B: Universal ASCII Ltg Format, Low Freq (LF), version 1B:
+//   25 fields:
+//   version# year-month-day hour:min:decimal_secs*10-3 nanosec lat lon 
+//   amplitude multiplicity n_sensors degress_of_freedom ellipse_angle 
+//   semi_major_axis semi_minor_axis chi_sq rise_time peak_to_zero_time 
+//   max_rate_of_rise cloud_flag angle_flag signal_flag timing_flag
+
+//   Notes:
+//     (a) lat and lon in decimal degrees
+//     (b) amplitude is peak current in kA, optinally with sign to 
+//   indicate polarity
+//     (c) type: G - cloud-to-ground, C - cloud-to-cloud, U - unknown
+//     (d) alt_km is altitude in km MSL
+//     (e) multiplicity: stroke_data = 0
+//     (f) n_sensors - participating in solution
+//     (g) degrees_of_freedom - when optimizing location
+//     (h) ellipse_angle - as a clockwise bearing from true N
+//     (i) semi_major_axis - length of ellipse in km
+//     (j) semi_minor_axis - width of ellipse in km
+//     (k) chi_sq - value from location optimization
+//     (l) rise_time - of the waveform in microsecs
+//     (m) peak_to_zero_time - of the waveform in microsecs
+//     (n) max_rate_of_rize - of the waveform in kA/microsec
+//     (o) cloud_flag: 0 for cloud-to-ground and 1 for cloud-to-cloud
+//     (p) angle_flag: angle data used for posn, 0(no) or 1(yes)
+//     (q) signal_flag: signal data used for posn, 0(no) or 1(yes)
+//     (r) timing_flag: timing data used for posn, 0(no) or 1(yes)
+
+// BOM_AXF: Australian Bureau of Meteorology AXF format:
+//   "yyyymmddhhmmss",lat,lon,amplitude
+//   e.g. "20071029004920",-39.769972,157.216649,-34.4
+
+// WWLDN: World Wide Lightning Data Network:
+//   7 fields:
+//     date time milliseconds latN lonE residual N
+//     (a) date in format YYYY/MM/DD
+//     (b) time in format HH:MM:SS
+//     (c) time millisec
+//     (d) residual is roughly the location error in seconds
+//     (e) N is the number of stations for the flash location (minimum = 
+//   5)
+//   Note: milliseconds, residual and N values not stored in database
+
+// WWLLN: World Wide Lightning Location Network, comma-delimited:
+//   7 fields:
+//     date,time.microsecs, latN, lonE, residual, N
+//     (a) date in format YYYY/MM/DD
+//     (b) time in format HH:MM:SS
+//     (c) time microsecs
+//     (d) residual is roughly the location error in seconds
+//     (e) N is the number of stations for the flash location (minimum = 
+//   5)
+
+// NAPLN: North American Precision Lightning Network, comma-delimited:
+//   7 fields:
+//     
+//   2011-08-26T00:58:37.916,46.4984573,-111.7280142,-15.9,0.5,0.25,-20
+//     YYYY-MM-DDTHH:MM:SS.microsecs, lat, lon, amplitude,
+//     semi_major_axis, semi_minor_axis, ellipse_angle
+
+// NDLN_BINARY: US National Lightning Network (Vaisala) Binary format:
+//   7 fields:
+//     
+//   2011-08-26T00:58:37.916,46.4984573,-111.7280142,-15.9,0.5,0.25,-20
+//     YYYY-MM-DDTHH:MM:SS.microsecs, lat, lon, amplitude,
+//     semi_major_axis, semi_minor_axis, ellipse_angle
+
+// AOAWS_NETCDF: NetCDF format used by CWB.
+//   Expected field names are defined in params below
+
+// KSC:  Kennedy Space Center
+//  7 fields:
+//    julianDay utcTime xcoordinate ycoordinatae zcoordinate event type
+//    (a) format of UTC time: HH:MM:SS:ssssss( or 
+//   hour:minute:seconds:microseconds)
+//    (b) x-coordinate in meters from KSC ldar longitude -80.642633
+//    (c) y-coordinate in meters from KSC ldar latitude 28.538486
+//    (d) z-coordinate in meters from KSC ldar
+//    (e) Event type is two strings composed of 'LDAR EVENT', 'GGLSS 
+//   EVENT', 'CAL EVENT' 
+//        This program will convert only the 'CGLASS EVENT' and the 
+//   '4DLSS EVENT'.
+//
+// Type: enum
+// Options:
+//     FORMAT_1
+//     FORMAT_2
+//     FORMAT_3
+//     FORMAT_4
+//     UALF_LF_1
+//     UALF_LF_1B
+//     BOM_AXF
+//     WWLDN
+//     WWLLN
+//     NAPLN
+//     NLDN_BINARY
+//     AOAWS_NETCDF
+//     KSC
+//
+
+input_format = AOAWS_NETCDF;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL for decoded metars.
+// Example of full URL: spdbp:://localhost::spdb/ltg. If the dir does 
+//   not start with . or / it is stored relative to $DATA_DIR.
+// Type: string
+//
+
+output_url = "./data/spdb/ltg";
+
+///////////// expire_seconds //////////////////////////
+//
+// Expire time in seconds for each strike.
+// Type: int
+//
+
+expire_seconds = 300;
+
+///////////// bufferingPeriod /////////////////////////
+//
+// Buffering period, seconds.
+// Setting to one second effectively disables buffering.
+// Type: int
+//
+
+bufferingPeriod = 30;
+
+///////////// flush_buffer_per_file ///////////////////
+//
+// If TRUE, data write will be forced at end of each file.
+// Type: boolean
+//
+
+flush_buffer_per_file = FALSE;
+
+///////////// put_mode ////////////////////////////////
+//
+// Put mode for SPDB data base.
+// PUT_OVER - new data will overwrite a previously-stored data for the 
+//   same time. PUT_ADD: a chunk will be added to the list of chunks 
+//   stored at a given valid_time. PUT_ADD_UNIQUE: a chunk will be added 
+//   to the list of data stored at a given valid_time, provided identical 
+//   data has not already been added. PUT_ONCE: you can only put data for 
+//   a given time once. Trying to put at the same valid_time again will 
+//   generate an error. .
+//
+// Type: enum
+// Options:
+//     PUT_OVER
+//     PUT_ADD
+//     PUT_ADD_UNIQUE
+//     PUT_ONCE
+//
+
+put_mode = PUT_OVER;
+
+///////////// delay_after_write ///////////////////////
+//
+// Sleep time after writing, millisecs.
+// Use to prevent data distribution problems.
+// Type: int
+//
+
+delay_after_write = 0;
+
+///////////// delay_before_processing /////////////////
+//
+// Sleep time before processing file, secs.
+// Use to prevent data being processed prematurely.
+// Type: int
+//
+
+delay_before_processing = 0;
+
+///////////// duplicates //////////////////////////////
+//
+// Option to filter out near duplicate types and
+// parameters to do so.
+// Set check to TRUE to perform this check. It is
+// assumed that the strikes come in in temporal order. If
+// a strike is spatially within maxDist (Km), and temporally
+// within maxTime (seconds) of the last strike then the strike
+// will be seen as a near duplicate and will be rejected.
+//
+// Type: struct
+//   typedef struct {
+//      boolean check;
+//      double maxDist;
+//      int maxTime;
+//   }
+//
+//
+
+duplicates = { FALSE, 1, 1 };
+
+///////////// dup_check_cg_only ///////////////////////
+//
+// Option to apply duplicates check to cg strikes only, not cc.
+// May be useful.
+// Type: boolean
+//
+
+dup_check_cg_only = FALSE;
+
+///////////// netcdf_lat_var //////////////////////////
+//
+// Variable name for latitude in netcdf input files.
+// Ignored unless input_format is AOAWS_NETCDF.
+// Type: string
+//
+
+netcdf_lat_var = "lat";
+
+///////////// netcdf_lon_var //////////////////////////
+//
+// Variable name for longitude in netcdf input files.
+// Ignored unless input_format is AOAWS_NETCDF.
+// Type: string
+//
+
+netcdf_lon_var = "lon";
+
+///////////// netcdf_time_var /////////////////////////
+//
+// Variable name for strike times in netcdf input files.
+// Ignored unless input_format is AOAWS_NETCDF.
+// Type: string
+//
+
+netcdf_time_var = "time";
+
+///////////// netcdf_strike_num_dim ///////////////////
+//
+// Dimension name for number of entries in netcdf input files.
+// Ignored unless input_format is AOAWS_NETCDF.
+// Type: string
+//
+
+netcdf_strike_num_dim = "strikeNum";
+

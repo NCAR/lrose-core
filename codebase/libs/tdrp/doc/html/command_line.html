@@ -1,0 +1,162 @@
+<html>
+
+<head>
+<title>The TDRP command line</title>
+</head>
+
+<body>
+
+<h3>The TDRP command line</h3>
+
+If a program complies with the current TDRP usage, the user
+will get the following printout when invoking the -h option
+on the command line:<p>
+
+<pre>
+TDRP args: [options as below]
+   [ -params path ] specify params file path.
+     If not specified, the default params are loaded.   
+   [ -check_params] check which params are not set
+   [ -print_params [mode]] print parameters
+     using following modes, default mode is 'norm'
+       short:   main comments only, no help or descriptions
+                structs and arrays on a single line
+       norm:    short + descriptions and help
+       long:    norm  + arrays and structs expanded
+       verbose: long  + private params included
+       short_expand:   short with env vars expanded
+       norm_expand:    norm with env vars expanded
+       long_expand:    long with env vars expanded
+       verbose_expand: verbose with env vars expanded
+   [ -tdrp_debug] debugging prints for tdrp
+   [ -tdrp_usage] print this usage
+</pre>
+
+This usage message is expanded on below, with more detailed
+explanations for the actions.  It is assumed you are working with a
+program named <i>prog_name</i>, and that you type in one of the
+following:<p>
+
+<dl>
+
+<dt><pre><big>
+prog_name
+</big></pre></dt>
+<dd>
+Run <i>prog_name</i> using the default parameters.
+</dd>
+
+<dt><pre><big>
+prog_name -params param_file_name
+</big></pre></dt>
+<dd>
+Run <i>prog_name</i> using the parameter file <i>param_file_name</i>.
+</dd>
+
+<dt><pre><big>
+prog_name -params param_file_name -check_params(return)
+</big></pre></dt>
+<dd>
+Print to the screen those parameters which are not set by the
+parameter file. Then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -params param_file_name -print_params
+</big></pre></dt>
+<dd>
+Print the parameters in the param file to stdout in standard
+format. If this text is captured to a file it forms a valid parameter
+file. Then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -print_params<p>
+prog_name -print_params norm
+</big></pre></dt>
+<dd>
+Print the default parameters to stdout in standard format. Arrays and
+structs are printed across the screen. Then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -print_params short
+</big></pre></dt>
+<dd>
+Print the default parameters to stdout in short format. The comments
+associated with each parameter are suppressed. The commentdefs are
+printed. Then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -print_params long
+</big></pre></dt>
+<dd>
+Print the default parameters to stdout in short format. Arrays and
+structs are printed down the screen. Then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -print_params verbose
+</big></pre></dt>
+<dd>
+Print the default parameters to stdout in verbose format. This is the
+same as the long format except private parameters are printed as
+well. Note that this does not produce a valid parameter file if there
+are private parameters because you cannot override private params
+through the param file. Then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -print_params short_expand
+</big></pre></dt>
+<dd>
+Same as short except expand the environment variables before
+printing. Then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -print_params norm_expand
+</big></pre></dt>
+<dd>
+Same as norm except expand the environment variables before
+printing. Then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -print_params long_expand
+</big></pre></dt>
+<dd>
+Same as long except expand the environment variables before
+printing. Then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -print_params verbose_expand
+</big></pre></dt>
+<dd>
+Same as verbose except expand the environment variables before
+printing. Then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -tdrp_usage
+</big></pre></dt>
+<dd>
+Print out TDRP usage statement and then exit.
+</dd>
+
+<dt><pre><big>
+prog_name -params param_file_name -tdrp_debug
+</big></pre></dt>
+<dd>
+Turn on tdrp debugging. This is sometimes useful for finding errors
+which the standard error messages do not describe in sufficient
+detail.
+</dd>
+
+</dl>
+
+</body>
+</html>
+

@@ -1,0 +1,6 @@
+#! /bin/sh
+
+snuff "storm_ident -params storm_ident.rtest"
+
+
+

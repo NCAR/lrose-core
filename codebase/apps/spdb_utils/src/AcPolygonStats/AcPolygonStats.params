@@ -1,0 +1,74 @@
+/**********************************************************************
+ * TDRP params for AcPolygonStats
+ **********************************************************************/
+
+//======================================================================
+//
+// AcPolygonStats prints ascii stats on aircraft track polygons.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_NORM;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// ARCHIVE mode processes all polygons between start and end times set 
+//   on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// polygon_url /////////////////////////////
+//
+// Url of ac track polygons polygons.
+// Type: string
+//
+
+polygon_url = "spdbp:://localhost::/d1/fieldData/bari_2004/spdb/AdvectPolygon";
+

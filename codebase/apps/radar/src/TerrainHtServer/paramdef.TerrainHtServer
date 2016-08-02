@@ -1,0 +1,90 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for TerrainHtServer
+//
+//  Mike Dixon, RAP, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  June 2014
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TerrainHtServer reads requests from a client, providing a lat/lon position. It returns the terrain height, and whether the location is water or not. XmlRpc protool is used for communication.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Register with procmap.";
+} reg_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "XMLRPC SERVER PORT";
+};
+
+paramdef int {
+  p_default = 9090;
+  p_descr = "Port for XmlRpc server to listen on.";
+} xmlrpc_server_port;
+
+commentdef {
+  p_header = "DIGITAL ELEVATION MAP FILES";
+}
+
+paramdef string {
+  p_default = "/tmp/dem";
+  p_descr = "Directory for digital elevation files.";
+  p_help = "This is the SRTM30 data set, in tiles. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon.";
+} srtm30_dem_dir;
+
+paramdef string {
+  p_default = "/tmp/water";
+  p_descr = "Directory for water layer data in netCDF format.";
+  p_help = "These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.";
+} water_layer_dir;
+
+commentdef {
+  p_header = "MEMORY MANAGEMENT";
+};
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Time to wait before freeing memory (secs).";
+  p_help = "If a height tile has not been accessed within this time, it will be freed.";
+} secs_before_freeing_memory;
+
+commentdef {
+  p_header = "SERVER OPTIONS";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check terrain and water in adjacent grid cells.";
+  p_descr = "If true, we check the terraom and water not only at the requested grid point, but also in the surrounding grid points. The reported height is the max height in the search area. Water is reported if it exists anywhere in the seach area. See 'search_margin_km'.";
+} check_adjacent_grid_cells;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Margin width in checking for adjacent grid points (km).";
+  p_help = "We search around the selected point by this distance.";
+} search_margin_km;
+

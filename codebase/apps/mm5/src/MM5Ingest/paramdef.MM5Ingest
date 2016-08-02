@@ -1,0 +1,715 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MM5Ingest
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 1998
+ * 
+ * MM5Ingest takes MM5 output files and converts to MDV format.
+ */
+
+
+commentdef {
+  p_header = "MM5Ingest reads output files from the MM5 model and writes\n"
+	"MDV data. It also allows the computation of some turbulence\n"
+        "indicies. Both MM5 version 2 and 3 input files are coped with.\n\n"
+	"One arcane detail of the program's operation is that the base\n"
+	"state variables are placed in the user data section of the\n"
+	"master header as follows :\n\n"
+	"mhdr.user_data_fl32[0] =  Base state sea-level pressure (Pa)\n"
+    	"mhdr.user_data_fl32[1] =  Base state sea-level temperature (K)\n"
+    	"mhdr.user_data_fl32[2] =  Base state lapse rate d(T)/d(ln P)\n"
+    	"mhdr.user_data_fl32[3] =  Base state isothermal stratospheric\n"
+        "                          temperature (K)\n"
+    	"mhdr.user_data_fl32[4] =  Top pressure (Pa)\n\n"
+	"This allows the vertical level scheme to be changed from sigma-p by\n"
+	"other applications if desired.";
+}
+
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Somewhat arcance option involving how the derived\n"
+	"dbz field is calculated.";
+  p_help = "If TRUE (default) then a simple constant intercept\n"
+	"scheme is used. If FALSE, a more complex scheme is used.\n"
+	"Relevant only if the DBZ field is being derived.";
+} dbzConstantIntercepts;
+
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+  "In realtime mode, the analysis is performed for each volume scan "
+  "as it becomes available. In archive mode, the file list is obtained "
+  "from the command line.";
+} mode;
+
+commentdef {
+  p_header = "INPUT DATA.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Directory for input MM5 data - REALTIME mode.";
+  p_help = "The latest_data_info file in this directory is updated each time the model adds a forecast time step to the output file.";
+} realtime_input_dir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "If set to other than NULL, filenames must contain this string to be ingested.";
+  p_help = "This can be used to only ingest one domain.";
+} DomainString;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to TRUE if MM5 is writing a _latest_data_info file.";
+  p_help = "Realtime mode only.";
+} use_ldata;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be valid (secs). "
+    "If the latest_data_info file is older than this, the program waits "
+    "for new data.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "The minimum forecast time (secs) relative to model start time.";
+  p_help = "Only forecast times greater than or equal to this dtime are "
+    "used. This allows us to ignore the first n forecasts, which may not "
+    "be good anyway due to model spin-up requirements.";
+} min_forecast_dtime;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify which lead times to process.";
+  p_help = "If FALSE, all lead times are processed. If TRUE, only files with lead times in the parameter 'lead_times' will be processed. If this is set, it will act together with min_forecast_dtime to limit the output times. For a forecast to be accepted it must have a lead time equal to or greater than min_forecast_dtime, and must also be in the lead_times array.";
+} specify_lead_times;
+
+paramdef int {
+  p_default = { };
+  p_descr = "Array of lead times (secs).";
+  p_help = "If 'specify_lead_times' is TRUE, only the files with lead times matching this array will be processed.";
+} lead_times[];
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+typedef struct {
+	boolean round_lead_times;
+	int lead_time_resolution_seconds;
+} round_lead_times_t;
+
+paramdef struct round_lead_times_t {
+  p_default = {TRUE, 900};
+  p_descr = "Option to round lead times and the temporal resolution, seconds, to use in the rounding.";
+  p_help = "If you have a lot of very rapid forecasts you may wish to set the temporal resolution to a lower value, or simply turn this feature off";
+} round_leads;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Output URL.";
+  p_help = "The MM5 data is output to URL in MDV format.";
+} output_url;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use date and time in model ouput filename for gen_time instead of model cold start time.";
+  p_help = "If FALSE, gen_time is the model cold start time (old behavior). If TRUE, the gen_time becomes the time given in the model output filename which better represents the gen_time of that model run.";
+} use_filename_for_gen_time;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use date and time from input path for gen_time instead of model cold start time.";
+  p_help = "If FALSE, gen_time is the model cold start time (old behavior). If TRUE, the gen_time becomes the time given in the input path (parent path) which better represents the gen_time of that model run. If use_filename_for_gen_time is TRUE, then apply use_filename_for_gen_time";
+} use_parent_path_for_gen_time;
+
+commentdef {
+  p_header = "Supported MM5 raw and derived fields";
+  p_text =
+    "====== raw MM5 3-d fields - on cross (center) points =====\n"
+    "\t\n"
+    "U_FIELD, V_FIELD, TK_FIELD, Q_FIELD,\n"
+    "CLW_FIELD, RNW_FIELD, ICE_FIELD,\n"
+    "SNOW_FIELD, GRAUPEL_FIELD, NCI_FIELD,\n"
+    "RAD_TEND_FIELD, W_FIELD, P_FIELD,\n"
+    "\t\n"
+    "======= raw MM5 3-d fields - on dot (corner) points =====\n"
+    "\t\n"
+    "NOTE: only applicable if output_projection is OUTPUT_PROJ_NATIVE\n"
+    "\t\n"
+    "U_CORNER_FIELD, V_CORNER_FIELD,\n"
+    "\t\n"
+    "========== derived 3-d fields ==========\n"
+    "\t\n"
+    "TC_FIELD, WSPD_FIELD, WDIR_FIELD, Z_FIELD, DIVERGENCE_FIELD,\n"
+    "PRESSURE_FIELD, RH_FIELD, DEWPT_FIELD, TURB_FIELD, ICING_FIELD,\n"
+    "CLW_G_FIELD, RNW_G_FIELD, Q_G_FIELD,\n"
+    "THETA_FIELD, THETAE_FIELD, THETAV_FIELD, DBZ_3D_FIELD,\n"
+    "TOT_CLD_CON_FIELD, (CLW_FIELD + ICE_FIELD)\n" 
+    "\t\n"
+    "========== ITFA debug 3-d fields ==========\n"
+    "\t\n"
+    "BROWN1_FIELD, BROWN2_FIELD, CCAT_FIELD, COLSON_PANOFSKY_FIELD,\n"
+    "DEF_SQR_FIELD, ELLROD1_FIELD, ELLROD2_FIELD, DUTTON_FIELD,\n"
+    "ENDLICH_FIELD, HSHEAR_FIELD, LAZ_FIELD, PVORT_FIELD,\n"
+    "PVORT_GRADIENT_FIELD, NGM1_FIELD, NGM2_FIELD, RICHARDSON_FIELD,\n"
+    "RIT_FIELD, SAT_RI_FIELD, STABILITY_FIELD, VORT_SQR_FIELD,\n"
+    "VWSHEAR_FIELD,\n"
+    "TKE_KH3_FIELD, TKE_KH4_FIELD, TKE_KH5_FIELD,\n"
+    "\t\n"
+    "========== raw MM5 2-d fields ==========\n"
+    "\t\n"
+    "GROUND_T_FIELD, RAIN_CON_FIELD, RAIN_NON_FIELD,\n"
+    "TERRAIN_FIELD, CORIOLIS_FIELD, RES_TEMP_FIELD,\n"
+    "LAND_USE_FIELD, SNOWCOVR_FIELD, TSEASFC_FIELD,\n"
+    "PBL_HGT_FIELD, REGIME_FIELD, SHFLUX_FIELD, LHFLUX_FIELD,\n"
+    "UST_FIELD, SWDOWN_FIELD, LWDOWN_FIELD,\n"
+    "SOIL_T_1_FIELD, SOIL_T_2_FIELD, SOIL_T_3_FIELD,\n"
+    "SOIL_T_4_FIELD, SOIL_T_5_FIELD, SOIL_T_6_FIELD,\n"
+    "SOIL_M_1_FIELD, SOIL_M_2_FIELD, SOIL_M_3_FIELD,\n"
+    "SOIL_M_4_FIELD\n"
+    "T2_FIELD, Q2_FIELD, U10_FIELD, V10_FIELD,\n"
+    "WEASD_FIELD, SNOWH_FIELD,LON_FIELD, LAT_FIELD\n"
+    "HOURLY_CONV_RAIN_FIELD, HOURLY_NONC_RAIN_FIELD,\n"
+    "\t\n"
+    "========== derived 2-d fields ==========\n"
+    "\t\n"
+    "FZLEVEL_FIELD, RAIN_TOTAL_FIELD, HOURLY_RAIN_TOTAL_FIELD,\n"
+    "RH2_FIELD, DEWPT2_FIELD,\n"
+    "WSPD10_FIELD, WDIR10_FIELD,\n"
+    "THETA2_FIELD, THETAE2_FIELD, THETAV2_FIELD,\n"
+    "MSLP2_FIELD, T2C_FIELD, Q2_G_FIELD, DBZ_2D_FIELD.\n"
+    "CLOUD_FRACT_FIELD, TWP_FIELD, RWP_FIELD,\n"
+    "TOT_CLD_CONP_FIELD -  Total cloud condensate Path -Vertical Integration of TOT_CLD_CON_FIELD \n"
+    "CLWP_FIELD - Cloud Liquid Water Path - Vertical Integration of CLW_FIELD";
+}
+ 
+typedef enum {
+
+  // raw MM5 3-d fields, on dot (center) points
+
+  U_FIELD, V_FIELD, TK_FIELD, Q_FIELD,
+  CLW_FIELD, RNW_FIELD, ICE_FIELD,
+  SNOW_FIELD, GRAUPEL_FIELD, NCI_FIELD,
+  RAD_TEND_FIELD, W_FIELD, P_FIELD,
+
+  // raw MM5 3-d fields, on cross (corner) points
+
+  U_CORNER_FIELD, V_CORNER_FIELD,
+
+  // derived 3-d fields
+
+  TC_FIELD, WSPD_FIELD, WDIR_FIELD, Z_FIELD, DIVERGENCE_FIELD,
+  PRESSURE_FIELD, RH_FIELD, DEWPT_FIELD, TURB_FIELD, ICING_FIELD,
+  CLW_G_FIELD, RNW_G_FIELD, Q_G_FIELD, 
+  THETA_FIELD, THETAE_FIELD, THETAV_FIELD, DBZ_3D_FIELD, 
+  TOT_CLD_CON_FIELD,
+
+  // ITFA debug fields
+
+  BROWN1_FIELD, BROWN2_FIELD, CCAT_FIELD, COLSON_PANOFSKY_FIELD, 
+  DEF_SQR_FIELD, ELLROD1_FIELD, ELLROD2_FIELD, DUTTON_FIELD,
+  ENDLICH_FIELD, HSHEAR_FIELD, LAZ_FIELD, PVORT_FIELD,
+  PVORT_GRADIENT_FIELD, NGM1_FIELD, NGM2_FIELD, RICHARDSON_FIELD,
+  RIT_FIELD, SAT_RI_FIELD, STABILITY_FIELD, VORT_SQR_FIELD,
+  VWSHEAR_FIELD,
+  TKE_KH3_FIELD, TKE_KH4_FIELD, TKE_KH5_FIELD,
+
+  // raw MM5 2-d fields
+
+  START_2D_FIELDS,
+  GROUND_T_FIELD, RAIN_CON_FIELD, RAIN_NON_FIELD,
+  TERRAIN_FIELD, CORIOLIS_FIELD, RES_TEMP_FIELD,
+  LAND_USE_FIELD, SNOWCOVR_FIELD, TSEASFC_FIELD,
+  PBL_HGT_FIELD, REGIME_FIELD, SHFLUX_FIELD, LHFLUX_FIELD,
+  UST_FIELD, SWDOWN_FIELD, LWDOWN_FIELD,
+  SOIL_T_1_FIELD, SOIL_T_2_FIELD, SOIL_T_3_FIELD,
+  SOIL_T_4_FIELD, SOIL_T_5_FIELD, SOIL_T_6_FIELD,
+  SOIL_M_1_FIELD, SOIL_M_2_FIELD, SOIL_M_3_FIELD,
+  SOIL_M_4_FIELD, 
+  T2_FIELD, Q2_FIELD, U10_FIELD, V10_FIELD,
+  WEASD_FIELD, SNOWH_FIELD, LON_FIELD, LAT_FIELD,
+  HOURLY_CONV_RAIN_FIELD, HOURLY_NONC_RAIN_FIELD,
+
+  // derived 2-d fields
+
+  FZLEVEL_FIELD, RAIN_TOTAL_FIELD, HOURLY_RAIN_TOTAL_FIELD,
+  RH2_FIELD, DEWPT2_FIELD,
+  WSPD10_FIELD, WDIR10_FIELD,
+  THETA2_FIELD, THETAE2_FIELD, THETAV2_FIELD,
+  MSLP2_FIELD, T2C_FIELD, Q2_G_FIELD,
+  DBZ_2D_FIELD, CLOUD_FRACT_FIELD, TWP_FIELD, RWP_FIELD,
+  TOT_CLD_CONP_FIELD, // Total cloud condensate path - Vertical Integration of TOT_CLD_CON_FIELD 
+  CLWP_FIELD         // Cloud Liquid Water Path: Vertical Integration of CLW_FIELD 
+
+} output_field_name_t;
+
+typedef enum {
+  OUT_INT8 = 1,
+  OUT_INT16 = 2,
+  OUT_FLOAT32 = 5
+} output_encoding_t;
+
+typedef struct {
+  output_field_name_t name;
+  output_encoding_t encoding;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    { U_FIELD, OUT_INT8 },
+    { V_FIELD, OUT_INT8 },
+    { WSPD_FIELD, OUT_INT8 },
+    { TC_FIELD, OUT_INT16 },
+    { RH_FIELD, OUT_INT8 },
+    { CLW_FIELD, OUT_INT8 },
+    { FZLEVEL_FIELD, OUT_INT16 },
+    { DBZ_2D_FIELD, OUT_INT8 }
+  };
+  p_descr = "Output fields with encoding type.";
+  p_help = "Note: do not use START_2D_FIELDS - this is only a marker.";
+} output_fields[];
+
+paramdef enum output_field_name_t {
+  p_default = { LAND_USE_FIELD };
+  p_descr = "Output fields to be saved as indices, not float values.";
+  p_help = "Use the enum list.";
+} output_fields_as_index[];
+  
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to convert wind speed fields to knots.";
+} wind_speed_in_knots;
+
+typedef enum {
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON, OUTPUT_PROJ_LAMBERT, OUTPUT_PROJ_STEREOGRAPHIC, OUTPUT_PROJ_MERCATOR, OUTPUT_PROJ_NATIVE
+} output_projection_t;
+
+paramdef enum output_projection_t {
+  p_default = OUTPUT_PROJ_FLAT;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT - (x,y) Cartesian data in km from a given origin. LATLON - lat/lon grid with constant grid spacing. LAMBERT - Lambert conformal projection. NATIVE - use the native data grid, copy to output. NATIVE only works for model data on Lambert and Stereographic projections.";
+} output_projection;
+
+typedef struct {
+  double lat;
+  double lon;
+} output_origin_t;
+
+paramdef struct output_origin_t {
+  p_descr = "Origin of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LAMBERT, OUTPUT_PROJ_STEREOGRAPHIC.";
+  p_default = {40.0, -104.0};
+} output_origin;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "lat 1 value for Lambert conformal projection.";
+} lambert_lat1;
+
+paramdef double {
+  p_default = 60.0;
+  p_descr = "lat 2 value for Lambert conformal projection.";
+} lambert_lat2;
+
+paramdef double {
+  p_default = 60.0;
+  p_descr = "Tangent latitude for stereographic projection.";
+} stereographic_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Tangent longitude for stereographic projection.";
+} stereographic_tangent_lon;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Stereographic projection - Central Scale Factor.";
+} stereographic_central_scale;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} output_grid_t;
+
+paramdef struct output_grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "The grid params for the output grid.";
+  p_default = {300, 300, -149.5, -149.5, 1.0, 1.0};
+} output_grid;
+
+typedef enum {
+  FLIGHT_LEVELS, PRESSURE_LEVELS, HEIGHT_LEVELS, NATIVE_SIGMA_LEVELS
+} output_levels_t;
+
+paramdef enum output_levels_t {
+  p_default = FLIGHT_LEVELS;
+  p_descr = "Option to choose vertical levels for output file.";
+  p_help = "If FLIGHT_LEVELS, PRESSURE_LEVELS or HEIGHT_LEVELS, vertical levels will be interpolated accordingly. If NATIVE_SIGMA_LEVELS, no interpolation is done and the data is output on the original sigma levels.";
+} output_levels;
+
+paramdef int {
+  p_descr = "Array of output flight levels.";
+  p_help = "Only used if output_levels is FLIGHT_LEVELS. "
+    "The output grid has a variable Z dimension, in flight levels. "
+    "The flight levels in the output are taken from this array.";
+  p_default = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+	       110, 120, 130, 140, 150, 160, 170, 180, 190, 200,
+	       210, 230, 250, 270, 290, 310, 330, 350, 370, 390,
+	       410, 430, 450};
+} flight_levels[];
+
+paramdef double {
+  p_descr = "Array of output pressure levels (mb).";
+  p_help = "Only used if output_levels is PRESSURE_LEVELS. "
+    "The output grid has a variable Z dimension, in pressure levels. "
+    "The pressure levels in the output are taken from this array.";
+  p_default = {1000, 950, 900, 850, 700, 500, 300, 200, 100};
+} pressure_levels[];
+
+paramdef double {
+  p_descr = "Array of output height levels (km).";
+  p_help = "Only used if output_levels is HEIGHT_LEVELS. "
+    "The output grid has a variable Z dimension. "
+    "The height levels in the output are taken from this array.";
+  p_default = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+} height_levels[];
+
+typedef enum {
+  _MDV_COMPRESSION_NONE = 0,
+  _MDV_COMPRESSION_RLE = 1,
+  _MDV_COMPRESSION_LZO = 2,
+  _MDV_COMPRESSION_ZLIB = 3,
+  _MDV_COMPRESSION_BZIP = 4
+} compression_t;
+
+typedef enum {
+  SCALING_ROUNDED,
+  SCALING_DYNAMIC
+} scaling_t;
+
+paramdef enum scaling_t {
+  p_default = SCALING_ROUNDED;
+  p_descr = "Applicable for INT8 and INT16 encoding.";
+  p_help = "ROUNDED: produces values which are easily readable. INTEGRAL: integer output values. DYNAMIC: utilizes the full dynamic range.";
+} output_scaling;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to copy the lowest valid value down to the lowest level";
+  p_help = "This option is applicable only to FLIGHT_LEVELS. Where terrain is encountered, there may be flight levels which have missing data after vertical interpolation from sigma levels to flight levels. If this option is set to true, the data from the lowest valid flight level will be copied down to the levels below.";
+} copy_lowest_downwards;
+
+paramdef enum compression_t
+{
+  p_default = _MDV_COMPRESSION_ZLIB;
+  p_descr = "Compression tpye for output files";
+  p_help = "See <mdv/mdv_macros.h> for the C definitions to which these correspond.";
+} output_compression;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to create output path in forecast format.";
+  p_help = "If false, the output path is determined  using the valid time: topdir/yyyymmdd/hhmmss.mdv. If true, the output path is determined using the model initialization (generate) time and the forecast lead time in secs: yyyymmdd/g_hhmmss/f_ssssssss.mdv";
+} output_path_in_forecast_format;
+
+commentdef {
+  p_header = "FILE HEADER INFO";
+}
+
+typedef enum {
+  DATA_MEASURED =     0,  // from some instrument
+  DATA_EXTRAPOLATED = 1,  // based on measured data
+  DATA_FORECAST =     2,  // Numerically modeled
+  DATA_SYNTHESIS =    3,  // A synthesis of modeled, measured data
+  DATA_MIXED =        4,   // Different types of data in dataset
+  DATA_IMAGE =        5,   // A Photograph - RGB Image
+  DATA_GRAPHIC =      6,   // A Syntheticly Rendered RGB Image
+  DATA_CLIMO_ANA =    7,  // A Climotology (aggregation of data) from Model Analyses.
+  DATA_CLIMO_OBS =    8   // A Climotology (aggregation of data) from Observational Data.
+} data_collection_type_t;
+
+paramdef enum data_collection_type_t {
+  p_default = DATA_FORECAST;
+  p_descr = "Data collection type";
+} data_collection_type;
+
+paramdef string {
+  p_default = "This MDV file was created by MM5Ingest.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "MM5 model output.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "MM5 output from MMM, NCAR.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+} data_set_source;
+
+commentdef {
+  p_header = "TURBULENCE PRODUCT - ITFA";
+  p_text = "The turbulence severity product is normalized between 0 and 1, where 0 indicates low probability of turbulence and 1 indicates a high probability of turbulence.";
+}
+
+typedef enum {
+  LESS_THAN,
+  GREATER_THAN,
+  INSIDE_INTERVAL,
+  OUTSIDE_INTERVAL
+} itfa_index_sense_t;
+
+typedef enum {
+  BROWN1,
+  BROWN2,
+  CCAT,
+  COLSON_PANOFSKY,
+  DEF_SQR,
+  ELLROD1,
+  ELLROD2,
+  DUTTON,
+  ENDLICH,
+  HSHEAR ,
+  LAZ,
+  PVORT,
+  PVORT_GRADIENT,
+  NGM1,
+  NGM2,
+  RICHARDSON,
+  RIT,
+  SAT_RI,
+  STABILITY,
+  VORT_SQR,
+  VWSHEAR,
+  TKE_GWB,
+  TKE_KH3,
+  TKE_KH4,
+  TKE_KH5
+} itfa_derived_index_name;
+
+typedef struct {
+  itfa_derived_index_name name;
+  float weight;
+  itfa_index_sense_t sense;
+  float threshold_1;
+  float threshold_2;
+  int min_flight_level;
+  int max_flight_level;
+} itfa_derived_index_t;
+
+paramdef struct itfa_derived_index_t {
+  p_default = {
+    { BROWN1,          1.0, GREATER_THAN,     1.0e-4, -999.0, 200, 260 },
+    { BROWN1,          1.0, GREATER_THAN,     1.0e-4, -999.0, 260, 310 },
+    { BROWN2,          1.8, GREATER_THAN,     0.4,    -999.0, 200, 260 },
+    { BROWN2,          0.9, GREATER_THAN,     0.4,    -999.0, 260, 310 },
+    { CCAT,            0.0, GREATER_THAN,     2.0e-8, -999.0, 200, 400 },
+    { COLSON_PANOFSKY, 0.0, GREATER_THAN,     0.0,    -999.0, 200, 400 },
+    { DEF_SQR,         1.3, GREATER_THAN,     0.5e-8, -999.0, 200, 260 },
+    { DEF_SQR,         0.9, GREATER_THAN,     0.5e-8, -999.0, 260, 310 },
+    { ELLROD1,         1.4, GREATER_THAN,     5.0e-6, -999.0, 200, 260 },
+    { ELLROD1,         0.8, GREATER_THAN,     5.0e-6, -999.0, 260, 310 },
+    { ELLROD2,         1.7, GREATER_THAN,     4.0e-7, -999.0, 200, 260 },
+    { ELLROD2,         1.0, GREATER_THAN,     4.0e-7, -999.0, 260, 310 },
+    { DUTTON,          1.4, GREATER_THAN,     30.0,   -999.0, 200, 260 },
+    { ENDLICH,         0.0, GREATER_THAN,     0.2   , -999.0, 200, 400 },
+    { HSHEAR,          0.0, GREATER_THAN,     0.5e-4, -999.0, 200, 400 },
+    { LAZ,             0.0, LESS_THAN,        1.0,    -999.0, 200, 400 },
+    { PVORT,           0.0, LESS_THAN,        0.0,    -999.0, 200, 400 },
+    { PVORT_GRADIENT,  0.0, GREATER_THAN,     4.0e-13,-999.0, 200, 400 },
+    { NGM1,            1.6, GREATER_THAN,     0.002,  -999.0, 200, 260 },
+    { NGM1,            1.5, GREATER_THAN,     0.002,  -999.0, 260, 310 },
+    { NGM2,            0.0, GREATER_THAN,     0.0,    -999.0, 200, 400 },
+    { RICHARDSON,      1.2, LESS_THAN,        2.0,    -999.0, 200, 260 },
+    { RIT,             0.0, LESS_THAN,        0.0,    -999.0, 200, 400 },
+    { SAT_RI,          0.0, LESS_THAN,        1.0,    -999.0, 200, 400 },
+    { STABILITY,       0.0, INSIDE_INTERVAL,  1.0e-4, 2.0e-4, 200, 400 },
+    { VORT_SQR,        0.0, GREATER_THAN,     1.0e-8, -999.0, 200, 400 },
+    { VWSHEAR,         1.5, GREATER_THAN,     0.006,  -999.0, 200, 260 },
+    { VWSHEAR,         1.1, GREATER_THAN,     0.006,  -999.0, 260, 310 },
+    { TKE_KH3,         1.4, GREATER_THAN,     3.0,    -999.0, 200, 260 },
+    { TKE_KH3,         0.8, GREATER_THAN,     3.0,    -999.0, 260, 310 },
+    { TKE_KH3,         1.5, GREATER_THAN,     3.0,    -999.0, 310, 400 },
+    { TKE_KH4,         0.8, GREATER_THAN,     10.0,   -999.0, 200, 260 },
+    { TKE_KH4,         0.0, GREATER_THAN,     10.0,   -999.0, 260, 310 },
+    { TKE_KH4,         1.2, GREATER_THAN,     10.0,   -999.0, 310, 400 },
+    { TKE_KH5,         1.7, GREATER_THAN,     0.3,    -999.0, 200, 260 },
+    { TKE_KH5,         1.2, GREATER_THAN,     0.3,    -999.0, 260, 310 },
+    { TKE_KH5,         1.6, GREATER_THAN,     0.3,    -999.0, 310, 400 }
+  };
+  p_descr = "Array of derived index parameters for ITFA.";
+  p_help = "These are the itfa indices computed from the MM5 model output variables. For each index you specify (a) The name: from the enum list. (b) the weight to be applied, set to 0.0 to exclude the index altogether. The final value is formed as a linear combination of the values multiplied by their weights, and then normalized to between 0 and 1 by dividing by the sum of the weights. (c) The sense of the test: if GREATER_THAN, the index indicates turbulence if the value exceeds threshold_1. If LESS_THAN, the index indicates turbulence if the value is less than threshold_1. If INSIDE_INTERVAL indicates turbulence if the value is between threshold_1 and threshold_2. If OUTSIDE_INTERVAL indicates turbulence if the value is NOT between threshold_1 and threshold_2. (d) threshold_1. (e) threshold_2, set to -999.0 as documentation if sense is LESS_THAN or GREATER_THAN. (f) The min flight level for applying the index. (g) The max flight level for applying the index.";
+} itfa_derived_indices[];
+
+typedef enum {
+  W_ITFA,
+  WSPD_ITFA,
+  DIVERGENCE_ITFA
+} itfa_model_index_name;
+
+typedef struct {
+  itfa_model_index_name name;
+  float weight;
+  itfa_index_sense_t sense;
+  float threshold_1;
+  float threshold_2;
+  int min_flight_level;
+  int max_flight_level;
+} itfa_model_index_t;
+
+paramdef struct itfa_model_index_t {
+  p_default = {
+    { W_ITFA,          1.3, OUTSIDE_INTERVAL, -0.04,    0.04, 200, 260 },
+    { W_ITFA,          1.1, OUTSIDE_INTERVAL, -0.04,    0.04, 260, 310 },
+    { WSPD_ITFA,       0.9, GREATER_THAN,     80.0,   -999.0, 200, 260 },
+    { WSPD_ITFA,       1.3, GREATER_THAN,     80.0,   -999.0, 260, 310 },
+    { WSPD_ITFA,       1.5, GREATER_THAN,     80.0,   -999.0, 310, 400 },
+    { DIVERGENCE_ITFA, 0.0, GREATER_THAN,     1.0e-5, -999.0, 200, 400 }
+  };
+  p_descr = "Array of model index parameters for ITFA.";
+  p_help = "For each index you specify (a) The name: from the enum list. (b) the weight to be applied, set to 0.0 to exclude the index altogether. The final value is formed as a linear combination of the values multiplied by their weights, and then normalized to between 0 and 1 by dividing by the sum of the weights. (c) The sense of the test: if GREATER_THAN, the index indicates turbulence if the value exceeds threshold_1. If LESS_THAN, the index indicates turbulence if the value is less than threshold_1. If INSIDE_INTERVAL indicates turbulence if the value is between threshold_1 and threshold_2. If OUTSIDE_INTERVAL indicates turbulence if the value is NOT between threshold_1 and threshold_2. (d) threshold_1. (e) threshold_2, set to -999.0 as documentation if sense is LESS_THAN or GREATER_THAN. (f) The min flight level for applying the index. (g) The max flight level for applying the index.";
+} itfa_model_indices[];
+
+paramdef float {
+  p_default = 0.25;
+  p_descr = "Min valid threshold for the turbulence severity index.";
+  p_help = "We are only interested in values above this. Therefore, to save file space, all values less that this threshold are set to 0.";
+} min_turb_severity_threshold;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to fill in the edges of the ITFA grid.";
+  p_help = "The ITFA combined index is not computed all the way to the edge of the grid, because surrounding values are required to compute the indices at a point. This function fills in the edges by copying the data from the closest interior point out to the edges.";
+} itfa_fill_edges;
+
+// paramdef boolean {
+//   p_default = false;
+//   p_descr = "Option to use ITFA development mode.";
+//   p_help = "If false, only completed ITFA indices will be computed. If true, the indices under development will also be computed.";
+// } itfa_development_mode;
+
+// typedef struct {
+//   float lower_bound;
+//   float upper_bound;
+//   float severity;
+// } itfa_severity_threshold_t;
+
+// paramdef struct itfa_severity_threshold_t {
+//   p_default = {
+//     { 0.00, 0.25, 0.125},
+//     { 0.25, 0.50, 0.375},
+//     { 0.50, 0.75, 0.625},
+//     { 0.75, 1.00, 0.875}
+//   };
+//   p_descr = "ITFA severity thresholds.";
+//   p_help = "When ITFA computes the combined index, it is normalized to fall between 0 and 1. This matrix maps the computed values into a series of indices, to aid compression. Normally, 0.125 implies NONE, 0.375 implies LIGHT, 0.625 implied MODERATE and 0.875 implies SEVERE.";
+// } itfa_severity_thresholds[];
+
+commentdef {
+  p_header = "ICING SEVERITY PRODUCT";
+  p_text = "The icing severity product is normalized between 0 and 1, where 0 indicates no icing and 1 indicates a high probability of severe icing.";
+}
+
+paramdef float {
+  p_default = 0.01;
+  p_descr = "Cloud liquid water content threshold for trace icing - g/m3.";
+  p_help = "Below this content level, no icing is expected. Above this, trace icing is expected. At trace or below, the icing index is set to 0. If the temperature is between 0 and -10C, the index is increased by 0.25.";
+} trace_icing_clw;
+
+paramdef float {
+  p_default = 0.1;
+  p_descr = "Cloud liquid water content threshold for light icing - g/m3.";
+  p_help = "Below this content level, trace icing is expected. Above this, light icing is expected. Between trace and light, the icing index is set to 0.25. If the temperature is between 0 and -10C, the index is increased by 0.25.";
+} light_icing_clw;
+
+paramdef float {
+  p_default = 0.6;
+  p_descr = "Cloud liquid water content threshold for moderate icing - g/m3.";
+  p_help = "Below this content level, light icing is expected. Above this, moderate icing is expected. Between light and moderate, the icing index is set to 0.5. If the temperature is between 0 and -10C, the index is increased by 0.25.";
+} moderate_icing_clw;
+
+paramdef float {
+  p_default = 1.2;
+  p_descr = "Cloud liquid water content threshold for severe icing - g/m3.";
+  p_help = "Below this content level, moderate icing is expected. Above this, severe icing is expected. Between moderate and severe, the icing index is set to 0.75. If the temperature is between 0 and -10C, the index is increased by 0.25.";
+} severe_icing_clw;
+
+paramdef float {
+  p_default = -10.0;
+  p_descr = "Temperature (C) above which clear icing forms.";
+  p_help = "Clear icing occurs at temperatures just below freezing. Clear icing is more severe in impact than rime icing. Therefore, when the temperature is between this value and freezing, the severity is raised by 0.25.";
+} clear_ice_temp;
+

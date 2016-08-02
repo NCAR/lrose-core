@@ -1,0 +1,127 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for SpolS2DAngles
+//
+//  Mike Dixon, EOL, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  April 2014
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SpolS2DAngles reads angles from the TS-7800, listens for a client, and writes the angles to the client.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Register with procmap.";
+} reg_with_procmap;
+
+paramdef string {
+  p_default = "ops";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Run as a daemon process.";
+} run_as_daemon;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time to sleep before accessing data and serial ports (msecs).";
+  p_help = "Allows the computer to boot fully before starting the app.";
+} sleep_msecs_on_start;
+
+commentdef {
+  p_header = "READING ANGLES from TS-7800";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is there a pc104 available on this host.";
+  p_help = "If false, we will simulate the pc104 instead.";
+} pc104_available;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Offset for azimuth (deg).";
+  p_help = "This value will be ADDED to the azimuth read from the PC104.";
+} azimuth_offset_deg;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Offset for elevation (deg).";
+  p_help = "This value will be ADDED to the elevation read from the PC104.";
+} elevation_offset_deg;
+
+commentdef {
+  p_header = "ANGLE DISPLAY";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Are there display units available on this host.";
+  p_help = "If false, we will simulate the display instead.";
+} displays_available;
+
+typedef enum {
+  LCD2041, GLK24064R
+} display_type_t;
+  
+paramdef enum display_type_t
+{
+  p_default = LCD2041;
+  p_descr = "Type of display units for angles";
+  p_help = "The displays are from Matrix Orbital. The lab displays are type LCD2041, a back-lit green character-only LCD. The units at SPOL are of type GLK24064R, a blue LCD for both characters and gtraphics.";
+} display_type;
+
+paramdef string {
+  p_default = "/dev/ttyS2";
+  p_descr = "Serial device for elevation angle readout.";
+  p_help = "Elevation data is written to this serial device.";
+} el_serial_device;
+
+paramdef string {
+  p_default = "/dev/ttyS1";
+  p_descr = "Serial device for azimuth angle readout.";
+  p_help = "Azimuth data is written to this serial device.";
+} az_serial_device;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Frequency at which angles are written to the displays (hz).";
+  p_help = "The displays will be updated at this rate.";
+} angle_display_frequency_hz;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to show both az and el on both displays.";
+  p_help = "Useful if one display is not working - you can see all angles on each display. Date and time will not be shown.";
+} show_angles_on_both_displays;
+
+commentdef {
+  p_header = "SERVER DETAILS";
+};
+
+paramdef int {
+  p_default = 15000;
+  p_descr = "Port to listen on.";
+  p_help = "A client that needs angles will connect to this port. Can only handle a single client.";
+} server_port;
+

@@ -1,0 +1,207 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvHist does simple histograms on MDV formatted gridded\n"
+  "field data.\n\n"
+  "The histogram is defined by the numBins, binStart and binWidth\n"
+  "parameters. Only those points that lie within the lat/lon\n"
+  "domain defined by the latMin, latMax, lonMin and lonMax parameters\n"
+  "are considered in the histogram. There is no vertical differentiation\n"
+  "(it would be fairly easy to add).\n\n"
+  "The output is printed to standard out. Debugging messages are printed\n"
+  "to standard error. The output is ASCII columbs of numbers with the\n"
+  "following meanings :\n"
+  "The year, month, day, hour, minute and second of the MDV data, and\n"
+  "The number of non-missing points found in the domain,\n"
+  "The number of non-missing points that did not lie in any of the\n"
+  "      histogram bins,\n"
+  "The counts from the histogram bins themselves. The lower limit on\n"
+  "the histogram is inclusive, the upper is exclusive.\n\n"
+  "The -yesterday option can be used to process yesterday's data,\n"
+  "useful for cron-driven post processing.\n\n"
+  "If file output is selected and archive data are run, an ASCII\n"
+  "file is output that has cumulative histogram data for the\n"
+  "entire data set over the specified archive time.\n\n"
+  "Niles Oien, August 2003";
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs on data from here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef string {
+  p_default = { "DBZ" };
+  p_private = FALSE;
+  p_descr = "Input field name";
+  p_help = "Histograms will be generated for these data.";
+} FieldName;   
+
+paramdef double {
+  p_default = { -90.0 };
+  p_private = FALSE;
+  p_descr = "Minimum latitude of points to consider.";
+  p_help = "latMin, latMax, lonMin and lonMax define the domain.";
+} latMin;   
+
+paramdef double {
+  p_default = { 90.0 };
+  p_private = FALSE;
+  p_descr = "Maximum latitude of points to consider.";
+  p_help = "latMin, latMax, lonMin and lonMax define the domain.";
+} latMax;   
+
+paramdef double {
+  p_default = { -180.0 };
+  p_private = FALSE;
+  p_descr = "Minimum longitude of points to consider.";
+  p_help = "latMin, latMax, lonMin and lonMax define the domain.";
+} lonMin;   
+
+paramdef double {
+  p_default = { 180.0 };
+  p_private = FALSE;
+  p_descr = "Maximum longitude of points to consider.";
+  p_help = "latMin, latMax, lonMin and lonMax define the domain.";
+} lonMax;   
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag indicating whether to apply vertical limits to "
+            "the input.";
+  p_help = "If set to TRUE, only the vertical levels between "
+           "minVerticalLevel and maxVerticalLevel will be processed.";
+} applyVerticalLimits;
+
+paramdef long {
+  p_default = 0;
+  p_descr = "Minimum vertical level number to process";
+  p_help = "Only used if applyVerticalLimits is set to TRUE.";
+} minVerticalLevel;
+
+paramdef long {
+  p_default = 0;
+  p_descr = "Maximum vertical level number to process";
+  p_help = "Only used if applyVerticalLimits is set to TRUE.";
+} maxVerticalLevel;
+
+paramdef double {
+  p_default = { 0.0 };
+  p_private = FALSE;
+  p_descr = "Lower limit of first bin.";
+  p_help = "binStart, binWidth and numBins define the histograms.";
+} binStart;   
+
+paramdef double {
+  p_default = { 1.0 };
+  p_private = FALSE;
+  p_descr = "Bin width";
+  p_help = "binStart, binWidth and numBins define the histograms.";
+} binWidth;   
+
+paramdef int {
+  p_default = { 30 };
+  p_private = FALSE;
+  p_descr = "Number of bins.";
+  p_help = "binStart, binWidth and numBins define the histograms.";
+} numBins;   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to output to files instead of to stdout.";
+  p_help = "Defaults to FALSE, but can be useful.";
+} fileOut;   
+
+paramdef string {
+  p_default = "./MdvHistOut";
+  p_private = FALSE;
+  p_descr = "Output directory.";
+  p_help = "Relevant if fileOutput is TRUE. Output files are written here.";
+} outDir;   
+
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "Option to output files to YYYYMMDD directory under the outDir directory.";
+  p_help = "Relevant if fileOutput is TRUE. Not used for Total files";
+} outputDateSub;   
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Output data for individual files.";
+} outputIndividualFiles;
+
+typedef enum {
+  OUTPUT_PLAIN,
+  OUTPUT_FORMATTED
+} ind_output_type_t;
+
+paramdef enum ind_output_type_t {
+  p_descr = "Output type for the individual output files.";
+  p_help = "Used only if outputIndividualFiles is set to true.";
+  p_default = OUTPUT_PLAIN;
+} individualOutputType;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Output total data in a file.";
+} outputTotalFile;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Operate in forecast mode (forecast MDV files for\n"
+			"input, lead time in output filenames).";
+} forecastMode;
+

@@ -1,0 +1,110 @@
+/**********************************************************************
+ * TDRP params for Tcp2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: int
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_tcp_host //////////////////////////
+//
+// Host name for input TCP data.
+// The program reads the UDP data from this host.
+// Type: string
+//
+
+input_tcp_host = "sunburn.fsl.noaa.gov";
+input_tcp_host = "128.117.200.20";
+
+///////////// input_tcp_port //////////////////////////
+//
+// Port number of input TCP data.
+// The program reads the UDP data from this port.
+// Type: int
+//
+
+input_tcp_port = 10000;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// URL for FMQ output.
+// The output data is written to the FMQ at this URL.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::fmq/test";
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The FMQ wraps around when the slots have been filled.
+// Type: int
+//
+
+output_fmq_nslots = 4000;
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of message queue in bytes.
+// The FMQ wraps around when the buffer has been filled.
+// Type: int
+//
+
+output_fmq_size = 10000000;
+
+///////////// output_fmq_compressed ///////////////////
+//
+// Option to compress data in FMQ.
+// Type: boolean
+//
+
+output_fmq_compressed = TRUE;
+

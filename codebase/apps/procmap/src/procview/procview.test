@@ -1,0 +1,11 @@
+debug = DEBUG_OFF;
+
+malloc_debug_level = 0;
+
+procmapHost = "kodiak";
+
+procmapInterval = 15;
+
+hostList = {"kodiak", "powder", "splash"};
+
+

@@ -1,0 +1,63 @@
+# RCS info
+#   $Author: karp $
+#   $Date: 2009/03/27 20:40:36 $
+#   $Revision: 1.1 $
+###########################################################################
+#
+# Makefile for MdvtoGrib2.
+#
+# Jason Craig, RAP, NCAR, Boulder, CO, 80307, USA
+#
+# September 2006
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+MODULE_TYPE=progcpp
+
+TARGET_FILE = MdvtoGrib2
+
+LOC_INCLUDES = -I/opt/jasper/include/jasper
+LOC_CFLAGS =
+LOC_CPPC_CFLAGS = 
+LOC_LDFLAGS = -L/opt/jasper/lib
+LOC_LIBS = -ldsdata -lSpdb -lMdv -ldsserver -ldidss -lrapformats -lgrib2 \
+	-leuclid -ltoolsa -ljasper -lpng -lz -ldataport -ltdrp -lrapmath -lm
+
+HDRS = \
+	Params.hh \
+	Args.hh \
+	MdvtoGrib2.hh
+
+CPPC_SRCS = \
+	Params.cc \
+	Main.cc \
+	Args.cc \
+	MdvtoGrib2.cc
+
+#
+# tdrp macros
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+
+#
+# C++ targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+
+#
+# tdrp targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+
+#
+# local targets
+#
+
+depend: depend_generic
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

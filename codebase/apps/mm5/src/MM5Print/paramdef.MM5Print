@@ -1,0 +1,117 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MM5Print
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 1999
+ * 
+ * MM5Ingest takes MDV output files and converts to MDV format.
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Find the Fortran headers.";
+  p_help = "If set, the program searches for the Fortran record markers "
+    "around the headers, and prints the positions out to stderr.";
+} find_headers;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+commentdef {
+  p_header = "INPUT DATA.";
+}
+
+paramdef string {
+  p_default = "fort.43";
+  p_descr = "File path for input MM5 data.";
+} input_file_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print out model data fields.";
+  p_help = "Warning - this is verbose output.";
+} print_model_fields;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print out derived data fields.";
+  p_help = "Warning - this is verbose output.";
+} print_derived_fields;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to print out fields in full.";
+  p_help = "If true, all field data is printed. If false, data is only printed for the first lat line.";
+} print_fields_full;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print model domain border in map format.";
+  p_help = "NOTE: use of this option suppresses normal output.";
+} print_border_map;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print model domain border in ESRI GIS input format.";
+  p_help = "NOTE: use of this option suppresses normal output.";
+} print_border_gis;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print model domain grid in map format.";
+  p_help = "NOTE: use of this option suppresses normal output.";
+} print_grid_map;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print a check on the computed projection.";
+  p_help = "If set, the computed projection is used to compute the lat/lon values around the grid, and these values are checked against the model-supplied grid points.";
+} check_projection;
+
+

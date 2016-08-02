@@ -1,0 +1,256 @@
+/**********************************************************************
+ * TDRP params for SerialIngest
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: int
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// SERIAL DATA INPUT.
+//
+//======================================================================
+ 
+///////////// connection //////////////////////////////
+//
+// Connection type.
+// If serial, data will come in via a serial port. If TCP, this program 
+//   will connect to a server using TCP.
+//
+// Type: enum
+// Options:
+//     SERIAL
+//     TCP
+//
+
+connection = TCP;
+
+///////////// input_device ////////////////////////////
+//
+// Name of input serial port.
+// For connection SERIAL. This is the name, starting with /dev, of the 
+//   serial port to be read. Make sure the permissions on the port have 
+//   been set appropriately for reading from this user.
+// Type: string
+//
+
+input_device = "/dev/ttyS1";
+
+///////////// baud_rate ///////////////////////////////
+//
+// Baud rate.
+// For connection SERIAL. Baud rate for incoming serial data port.
+//
+// Type: enum
+// Options:
+//     BAUD_300
+//     BAUD_1200
+//     BAUD_2400
+//     BAUD_4800
+//     BAUD_9600
+//     BAUD_19200
+//     BAUD_38400
+//
+
+baud_rate = BAUD_9600;
+
+///////////// dataIs7Bit //////////////////////////////
+//
+// Flag for 7-bit data.
+// For connection SERIAL. Set TRUE for 7-bit data, FALSE for 8-bit data.
+// Type: boolean
+//
+
+dataIs7Bit = FALSE;
+
+///////////// twoStopBits /////////////////////////////
+//
+// Flag for two stop bits.
+// For connection SERIAL. If TRUE, 2 stop bits. If FALSE, 1 stop bit.
+// Type: boolean
+//
+
+twoStopBits = FALSE;
+
+///////////// enableParity ////////////////////////////
+//
+// Flag for enabling parity checking.
+// For connection SERIAL. If TRUE, parity generation is enabled for 
+//   outgoing characters, and checking enabled for incoming characters. If 
+//   FALSE, parity generation and checking is off.
+// Type: boolean
+//
+
+enableParity = TRUE;
+
+///////////// oddParity ///////////////////////////////
+//
+// Flag for parity type.
+// For connection SERIAL. If TRUE, odd parity. If FALSE, even parity. 
+//   Only applies if enableParity is TRUE.
+// Type: boolean
+//
+
+oddParity = FALSE;
+
+///////////// tcp_server_host_name ////////////////////
+//
+// Name of TCP server host.
+// For connection TCP. The name of the host for the TCP server.
+// Type: string
+//
+
+tcp_server_host_name = "128.117.200.6";
+
+///////////// tcp_server_port /////////////////////////
+//
+// TCP server port number.
+// For connection TCP. The number of the port for the TCP server.
+// Type: int
+//
+
+tcp_server_port = 2003;
+
+//======================================================================
+//
+// FILTERING.
+//
+//======================================================================
+ 
+///////////// filter_ctrlm ////////////////////////////
+//
+// Flag to set filtering of CONTROL-M (^M) characters.
+// If TRUE, ^M characters in the input stream will be ignored and will 
+//   not appear in the output stream.
+// Type: boolean
+//
+
+filter_ctrlm = TRUE;
+
+///////////// filter_nulls ////////////////////////////
+//
+// Flag to set filtering of NULL (^@) characters.
+// If TRUE, null characters in the input stream will be ignored and will 
+//   not appear in the output stream.
+// Type: boolean
+//
+
+filter_nulls = TRUE;
+
+///////////// end_of_message_check ////////////////////
+//
+// Option to check for end of message before closing an output file.
+// Some of the incoming data streams have special characters for 
+//   indicating the end of a message. The following EOM conditions are 
+//   used: (a) EOM_CHECK_NNNN: the 4 characters NNNN; (b) EOM_CHECK_CTRLC: 
+//   Ctrl-C; (c) EOM_CHECK_CTRLKC: Ctrl-K Ctrl-C; (d) EOM_CHECK_EQUALS: an 
+//   equals-sign followed by a line-feed.
+//
+// Type: enum
+// Options:
+//     EOM_CHECK_NONE
+//     EOM_CHECK_NNNN
+//     EOM_CHECK_CTRLC
+//     EOM_CHECK_CTRLKC
+//     EOM_CHECK_EQUALS
+//
+
+end_of_message_check = EOM_CHECK_NONE;
+
+//======================================================================
+//
+// METAR DATA FILE OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_interval /////////////////////////
+//
+// Interval at which output files are created (secs).
+// The program reads the incoming data and stores it in a temporary 
+//   file. At regular intervals, the file is renamed - see 
+//   output_dir_path.
+// Type: int
+//
+
+output_interval = 60;
+
+///////////// force_output_if_stalled /////////////////
+//
+// Flag for forcing the file output if the input stream in stalled.
+// If TRUE, on output file will be written at the appropriate time, even 
+//   if no data is coming in. If FALSE, the output file will only be 
+//   written when message data indicates that an appropriate 
+//   end-of-message condition has been met.
+// Type: boolean
+//
+
+force_output_if_stalled = TRUE;
+
+///////////// discard_zero_length_files ///////////////
+//
+// Flag for discarding 0-length files.
+// If TRUE, output files will be ignored if they are empty. If FALSE, 
+//   files will be output even if empty.
+// Type: boolean
+//
+
+discard_zero_length_files = TRUE;
+
+///////////// output_dir_path /////////////////////////
+//
+// Name of output directory.
+// The output files will be stored in this level directory.
+// The file path is computed as follows:
+// 	 output_dir_path/yyyymmdd/hhmmss.ext.
+// Type: string
+//
+
+output_dir_path = "./output";
+
+///////////// output_file_ext /////////////////////////
+//
+// Extension for output file.
+// See output_dir_path.
+// Type: string
+//
+
+output_file_ext = "gts";
+

@@ -1,0 +1,225 @@
+FORMAT FOR MAP FILES                                            10/03/92
+--------------------
+
+Maps are stored in ascii files; this document describes their format.
+
+These are the types of lines within the file:
+	1) comment lines, which have the character "#" in column 1
+	2) keyword lines, begining with a keyword
+	3) lines of coordinate data following a keyword line
+
+Coordinates are in (lat, lon), except for the ICONDEF, which has 
+relative coords in pixels.
+
+1. MAP_NAME <name> <desc>
+
+This should be the first line of any map file. The name is restricted to
+8 characters, and must not have whitespace in it. The description is restricted
+to 64 chars.  A list of available map names (and desc) is passed to client
+programs; typically it is displayed for the user to select from.
+
+2. TRANSFORM <tranformation matrix>
+
+Optional line used by digitizing program.  
+   
+3. PROJECTION <type> <parameters>
+
+Optional line used by digitizing program. <type> = PJG_XXXX, as follows
+   
+#define PJG_POLAR_STEREOGRAPHIC_NORTH   1
+#define PJG_OBLIQUE_STEREOGRAPHIC       2
+#define PJG_LAMBERT_CONFORMAL2          3
+#define PJG_TRANSVERSE_MERCATOR         4
+#define PJG_FLAT                        5
+#define PJG_STEREOGRAPHIC_ELLIPSOID     6
+#define PJG_DENVER_ARTCC                7
+
+4. ICONDEF <icon name> <npts>
+    <x> <y>
+    <x> <y>
+    <x> <y>
+		...
+This defines an icon with name <icon name>. It consists of <npts> number
+of points, which immediately follow.  The <x> <y> are in units of pixels, 
+and the value "32767 32767" indicates a pen up.  Note this defines an
+icon, but does not draw it.
+
+5. ICON <icon name> <lat> <lon> <text x> <text y> <text>
+
+This indicates to draw the icon <icon name>, with origin at <lat> <lon>.
+If <text x> <text y> is not equal to "32767 32767", then also draw the
+text <text>, with the lower left corner of the text at <text x> <text y> pixels
+relative to the origin.
+
+An ICON line can only refer to an <icon name> that is already defined by a
+ICONDEF in the same map file.
+
+An ICON stays the same size as the user zooms.
+
+
+6. POLYLINE <name> <npts>
+    <lat> <lon>
+    <lat> <lon>
+	    ...
+This indicates an object called <name>, which is simply a polyline of
+<npts> segments, specified in world (lat, lon) coordinates. Penup =
+(-1000.0, -1000.0).
+
+7. SIMPLELABEL <lat> <lon> <text>
+
+Unscaleable label.
+
+The text is centered on (<lat>,<lon>) in a font determined by the
+display program. The text takes up the rest of the line after the
+longitude, except for the space immediately after lon.
+
+8. LABEL <ll lat> <ll lon> <ur lat> <ur lon> <rot. angle> <attach loc> <text>
+
+Scaleable label.
+
+These are specified in world coordinates, and scale as the user zooms.
+Note all are space-delineated tokens with the exception of the text itself:
+
+  `LABEL` in column 1.
+  <ll lat> <ll lon> = lower left corner of the bounding rectangle
+  <ur lat> <ur lon> = upper right corner of the bounding rectangle
+  <rotation angle> = angle to rotate text in degrees: 
+                     0 = regular, 90 = vertical text goes up,
+                     180 = upside down, 270 = vertical text goes down
+  <attach point> = lat, lon of the "attach point"; -1000, -1000 means none
+  <text>=  text to display
+
+9. PRODUCTS.
+
+Products are described by some header lines, followed by a number of
+graphic objects, such as ICON, POLYLINE, LABEL, SIMPLELABEL.
+
+The header lines are:
+
+PRODUCT  type sub_type num_objects group_id event_id
+PRODUCT_TIME  data_time valid_time expire_time
+PRODUCT_DESCRIPTION  (description string)
+
+Times are 6 integers: year month day hour min sec
+
+Examples are:
+
+PRODUCT  BN  ALL  1  0  8
+PRODUCT_TIME  1993 8 17 0 17 49  1993 8 17 0 17 49  1993 8 17 0 22 49
+PRODUCT_DESCRIPTION Convergence line boundary
+POLYLINE  Boundary  7
+     39.694740    -106.186122
+     39.156321    -106.178152
+     38.874879    -106.369435
+     38.752462    -106.505044
+     38.666834    -105.691739
+     38.691299    -105.301086
+     38.727997    -104.759000
+
+PRODUCT  BN  ALL  1  0  9
+PRODUCT_TIME  1993 8 17 0 17 49  1993 8 17 0 17 49  1993 8 17 0 22 49
+PRODUCT_DESCRIPTION Convergence line boundary
+POLYLINE  Boundary  6
+     38.538300    -105.691739
+     38.636162    -105.006074
+     38.831975    -104.408197
+     38.991090    -103.993516
+     39.033904    -103.180329
+     39.009439    -102.988928
+
+
+10. EXAMPLES.
+
+10.1 Airports.
+
+MAP_NAME labeled_airports
+#
+ICONDEF AIRPORT 23
+-3 1
+-3 -1
+-1 -3
+1 -3
+3 -1
+3 1
+-1 3
+1 3
+-3 1
+32767 32767
+-4 1
+-4 -1
+32767 32767
+-1 4
+1 4
+32767 32767
+4 1
+4 -1
+32767 32767
+-1 -4
+1 -4
+32767 32767
+#
+ICON AIRPORT 39.22306 -106.86833 32767 32767
+ICON AIRPORT 39.57028 -104.84889 32767 32767
+ICON AIRPORT 41.15583 -104.81222 32767 32767
+ICON AIRPORT 38.81194 -104.71111 32767 32767
+ICON AIRPORT 36.74194 -108.22917 32767 32767
+ICON AIRPORT 44.34889 -105.53889 32767 32767
+ICON AIRPORT 42.944 -101.76889 32767 32767
+ICON AIRPORT 39.90833 -105.11583 32767 32767
+ICON AIRPORT 42.90833 -106.46306 32767 32767
+ICON AIRPORT 38.28917 -104.49611 32767 32767
+ICON AIRPORT 44.4528 -103.5694 32767 32767
+ICON AIRPORT 35.61694 -106.8889 32767 32767
+ICON AIRPORT 39.77444 -104.87917 32767 32767
+# END
+
+10.2 Stapleton Airport
+
+MAP_NAME Stapleton
+#
+PROJECTION 5 39.87842       -104.75789      11.5 0
+POLYLINE Stapleton  42
+39.812628 -104.876361
+39.779742 -104.878679
+39.779523 -104.873421
+39.812409 -104.871100
+39.812628 -104.876361
+-1000. -1000.
+39.795617 -104.883260
+39.764101 -104.885475
+39.763882 -104.880218
+39.795398 -104.878000
+39.795617 -104.883260
+-1000. -1000.
+39.756071 -104.859942
+39.756057 -104.895501
+39.752010 -104.895497
+39.752024 -104.859941
+39.756071 -104.859942
+-1000. -1000.
+39.760790 -104.864924
+39.760776 -104.895506
+39.756729 -104.895502
+39.756743 -104.864922
+39.760790 -104.864924
+-1000. -1000.
+  39.812519 -104.873730
+  39.978644 -104.861980
+-1000. -1000.
+  39.779633 -104.876050
+  39.613507 -104.887732
+-1000. -1000.
+  39.795508 -104.880630
+  39.845346 -104.877121
+-1000. -1000.
+  39.763992 -104.882846
+  39.714154 -104.886347
+-1000. -1000.
+  39.754048 -104.859942
+  39.754045 -104.795021
+-1000. -1000.
+  39.754034 -104.895499
+  39.753980 -104.960419
+-1000. -1000.
+#
+SIMPLELABEL 39.80000 -104.88000 Stapleton airport

@@ -1,0 +1,169 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for dobson2plain	
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 1995
+ */
+
+paramdef enum debug_t {
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef string {
+  p_default = {"test"};
+  p_descr = "Process registration instance";
+} instance;
+
+paramdef enum mode_t {
+  p_options = {REALTIME, ARCHIVE};
+  p_default = {ARCHIVE};
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; archive mode runs on file list";
+} mode;
+
+paramdef string {
+  p_default = {"mdv"};
+  p_descr = "Input file extension";
+} input_file_ext;
+
+paramdef string {
+  p_default = {"."};
+  p_descr = "Input directory";
+  p_help = "Path of input directory - realtime mode only";
+} input_dir;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option to get file names using the latest_data_info file";
+  p_help = "This parameter is only used in REALTIME mode.  If TRUE, realtime "
+           "data files will be retrieved using the latest_data_info file. "
+           "If FALSE, data files will be expected to reside directly in "
+           "the given input_dir.";
+} use_ldata_info;
+
+paramdef string {
+  p_default = {"plain"};
+  p_descr = "Output file extension";
+} output_file_ext;
+
+paramdef string {
+  p_default = {"."};
+  p_descr = "Output directory";
+  p_help = "Path of output directory";
+} output_dir;
+
+paramdef enum output_data_origin_t {
+  p_options = {BOTLEFT, TOPLEFT};
+  p_default = {BOTLEFT};
+  p_descr = "Data origin position";
+  p_help = "Data origin - data may be output starting at bottom left corner (BOTLEFT) or top left corner (TOPLEFT)";
+} output_data_origin;
+
+paramdef long {
+  p_min = {60};
+  p_default = {300};
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_input_data_age;
+
+paramdef long {
+  p_min = {0};
+  p_max = {300};
+  p_default = {0};
+  p_descr = "Delay before processing incoming file (sec)";
+  p_help = "Delay between finding new file and processing it - realtime only (sec)";
+} processing_delay;
+
+paramdef long {
+  p_min = {0};
+  p_default = {0};
+  p_descr = "Start plane number";
+  p_help = "Number of first plane to be output";
+} start_plane;
+
+paramdef long {
+  p_min = {0};
+  p_default = {0};
+  p_descr = "End plane number";
+  p_help = "Number of last plane to be output";
+} end_plane;
+
+paramdef long {
+  p_min = {0};
+  p_default = {0};
+  p_descr = "Field number";
+  p_help = "Number of field to be output";
+} field_num;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option to output file with FORTRAN record markers";
+  p_help = "If this is set, the output file will have a leading and trailing      4-byte word indicating the array length. This allows FORTRAN to read the array as Unformatted Sequential";
+} fortran_output;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option to output file in vip levels";
+  p_help = "If this is set, the output data will be in vip levels instead of dbz";
+} vip_output;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option to compress output files.";
+  p_help = "If this is set, the output data will be compressed after being written. The command used is given by the parameter 'compress_command'.";
+} compress_output;
+
+paramdef string {
+  p_default = {"gzip"};
+  p_descr = "Command for compressing output files.";
+  p_help = "See parameter 'compress_output'.";
+} compress_command;
+
+paramdef string {
+  p_default = {"plain.gz"};
+  p_descr = "Extension of output file after compression command run";
+  p_help = "See parameter 'compress_output'.";
+} compress_file_ext;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Output scale and bias flag";
+  p_help = "If TRUE, the scale and bias for the data will be included in "
+           "the output file as the first 2 64-bit floats in the file.  The "
+           "output is the data scale followed by the bias.";
+} output_scale_flag;

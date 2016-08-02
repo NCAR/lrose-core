@@ -1,0 +1,650 @@
+/**********************************************************
+ * paramdef.FiltAlg
+ *
+ * This file contains the TDRP parameter definitions for FiltAlg
+ * 
+ */
+
+commentdef
+{
+  p_header = "FiltAlg";
+  p_text = "This program does generic and general algorithm data filtering";
+};
+
+paramdef string
+{
+  p_descr = "instance";
+  p_help = "for PMU";
+  p_default = "default";
+} instance;
+
+typedef enum
+{NONE, DEBUG, DEBUG_VERBOSE} debug_e;
+
+paramdef enum debug_e
+{
+  p_descr = "debugging mode";
+  p_help = "NONE=as quiet as possible, DEBUG = minimal debug output, DEBUG_VERBOSE=more";
+  p_default = DEBUG;
+} debug_mode;
+
+paramdef boolean
+{
+  p_descr = "triggering debug";
+  p_help = "set to TRUE to debug triggering";
+  p_default = FALSE;
+} debug_triggering;
+
+paramdef boolean
+{
+  p_descr = "realtime";
+  p_default = TRUE;
+} realtime;
+
+paramdef double
+{
+  p_descr = "max wait";
+  p_help = "maximum wait time (minutes) for realtime=TRUE and multiple input URLs. Not used in archive mode";
+  p_default = 1.0;
+} max_wait_minutes;
+
+paramdef int
+{
+  p_descr = "read_tolerance_seconds";
+  p_help = "maximum allowed difference (seconds) between read request time and data time";
+  p_default = 120;
+} read_tolerance_seconds;
+
+paramdef string
+{
+  p_descr = "trigger url";
+  p_help = "URL to trigger off";
+  p_default = "";
+} trigger_url;
+
+paramdef int
+{
+  p_descr = "min gate index";
+  p_help = "sometimes the data is bad too close to radar. Don't include data this close or closer in computations. Set to -1 for no effect";
+  p_default = -1;
+} min_gate_index;
+
+paramdef string
+{
+  p_descr = "output for Algorithm MDV (grids)";
+  p_default = "";
+} output_url;
+  
+paramdef string
+{
+  p_descr = "output for Algorithm SPDB (1d data)";
+  p_default = "";
+} output_spdb;
+  
+typedef enum
+{
+  CLUMP,
+  ELLIP,
+  DILATE,
+  MEDIAN,
+  SDEV,
+  MEDIAN_NO_OVERLAP,
+  SDEV_NO_OVERLAP,
+  TEXTURE_X,
+  TEXTURE_Y,
+  REMAP,
+  REPLACE,
+  MAX_TRUE,
+  MAX,
+  AVERAGE,
+  AVERAGE_ORIENTATION,
+  PRODUCT,
+  FULL_MEAN,
+  FULL_SDEV,
+  FULL_MEDIAN,
+  VERT_AVERAGE,
+  VERT_MAX,
+  VERT_PRODUCT,
+  WEIGHTED_SUM,
+  WEIGHTED_ORIENTATION_SUM,
+  NORM_WEIGHTED_SUM,
+  NORM_WEIGHTED_ORIENTATION_SUM,
+  MASK,
+  RESCALE,
+  DB2LINEAR,
+  LINEAR2DB,
+  TRAPEZOID_REMAP,
+  S_REMAP,
+  PASSTHROUGH,
+  APPFILTER
+} filter_t;
+
+typedef struct
+{
+  string field;
+  boolean is_input_field;
+  boolean write_output_field;
+  string output_field;
+  filter_t filter;
+  int filter_index;
+  string app_filter_name;
+} data_filter_t;
+
+paramdef struct data_filter_t
+{
+  p_descr = "Filters to apply";
+  p_help =
+    "field = name of input field to the filter\n"
+    "is_input_field = TRUE if field is an actual input FALSE if an upstream filters output\n"
+    "write_output_field=TRUE to write output field to MDV file, FALSE to keep it only as a passthrough to downstream filters\n"
+    "output_field = name of output field to the filter\n"
+    "filter = The filter to apply\n"
+    "filter_index = index into an array of params for that filter type (below)\n"
+    "app_filter_name = name of filter when type = APPFILTER, empty if not";
+  p_default = {};
+} filter[];  
+
+typedef struct 
+{
+  string name;
+  string url;
+  string field;
+} input_t;
+
+paramdef struct input_t
+{
+  p_descr = "input fields";
+  p_help =
+    "The fields read in externally\n"
+    "name = name used in filtering as input\n"
+    "url = where the data is\n"
+    "field = field name within this data\n";
+  p_default = {};
+} input[];    
+
+paramdef struct input_t
+{
+  p_descr = "input fields that are feedback inputs";
+  p_help =
+    "The fields read in externally from the previous processing step\n"
+    "name = name used in filtering as input\n"
+    "url = where the data is\n"
+    "field = field name within this data\n"
+    "This allows data output from a downstream filter to be used upstream with a time delay i.e. feedback";
+  p_default = {};
+} feedback_input[];    
+
+paramdef boolean
+{
+  p_descr = "feedback immediately";
+  p_help =
+    "If TRUE, the app will look back for the most recent feedback data for the first processing step. If FALSE, the first processing step will replace feedback data with all missing values and not attempt to read in older data";
+  p_default = false;
+} feedback_immediately;
+
+paramdef int
+{
+  p_descr = "max feedback lookback";
+  p_help =
+    "Maximum number of seconds back for immediate feedback, when feedback_immediate = true, ignored otherwise";
+  p_default = 3600;
+} max_feedback_seconds_back;
+
+paramdef string
+{
+  p_descr = "input info url";
+  p_help = "URL that has info that can be extracted from the chunk, empty for none";
+  p_default = "";
+} input_info_url;
+
+paramdef double
+{ 
+  p_descr = "vlevel range";
+  p_help = "range of radar vertical levels to use from input data (degrees). If either value < 0, then use all radar vertical levels in the input";
+} vlevel[2];
+
+paramdef double
+{
+  p_descr = "vlevel tolerance";
+  p_help = "maximum allowed difference (vlevel units within MDV) between inputs";
+  p_default = 0.1;
+} vlevel_tolerance;
+
+paramdef int
+{
+  p_help = "Number of threads, 1 or less for no threading";
+  p_default = 0;
+} num_threads;
+
+paramdef boolean
+{
+  p_help = "Thread debugging";
+  p_default = FALSE;
+} thread_debug;
+
+typedef struct
+{
+  int nr;
+  int ntheta;
+} filter_2d_t;
+
+paramdef struct filter_2d_t
+{
+  p_descr = "list of 2d filter params";
+  p_help =
+    "nr = number of radial points\n"
+    "ntheta = number of azimuthal points\n"
+    "filters that are 2d are:  ELLIP, DILATE SDEV SDEV_NO_OVERLAP TEXTURE_X TEXTURE_Y\n";
+  p_default = {};
+} parm_2d[];
+
+typedef struct
+{
+  int nr;
+  int ntheta;
+  double bin_min;
+  double bin_max;
+  double bin_delta;
+} filter_2d_median_t;
+
+paramdef struct filter_2d_median_t
+{
+  p_descr = "list of 2d median filter params";
+  p_help =
+    "nr = number of radial points\n"
+    "ntheta = number of azimuthal points\n"
+    "bin_min = minimum data bin value\n"
+    "bin_max = maximum data bin value\n"
+    "bin_delta = bin delta value resolution\n"
+    "filters that are use these params are:  MEDIAN  MEDIAN_NO_OVERLAP\n";
+  p_default = {};
+} parm_2d_median[];
+
+typedef struct
+{
+  int rLwr;
+  int rUpr;
+  int thetaLwr;
+  int thetaUpr;
+} filter_Scalar_t;
+
+typedef struct
+{
+  double input_weight;
+  int combine_index;
+} filter_comb_t;
+
+paramdef struct filter_comb_t
+{
+  p_descr = "filters for combining.";
+  p_help = "For AVERAGE, AVERAGE_ORIENTATION, PRODUCT, MAX, WEIGHTED_SUM, NORM_WEIGHTED_SUM, WEIGHTED_ORIENTATION_SUM, NORM_WEIGHTED_ORIENTATION_SUM\n"
+    "input_weight = main input weight, when WEIGHTED_SUM or NORM_WEIGHTED_SUM or WEIGHTED_ORIENTATION_SUM or NORM_WEIGHTED_ORIENTATION_SUM\n"
+    "combine_index = index into combine arrays below\n";
+  p_default = {};
+} parm_combine[];
+
+
+typedef struct
+{
+  double threshold;
+} filter_clump_t;
+
+paramdef struct filter_clump_t
+{
+  p_descr = "filters for clumping";
+  p_help = "For CLUMP\n"
+    "threshold = clumping threshold, all data >= threshold goes into a clump\n"
+    "Clump output values are 1.0 in a clump, 0.0 outside a clump";
+  p_default = {};
+} parm_clump[];
+
+typedef struct
+{
+  boolean set_initial_value;
+  double initial_value;
+  double replacement_value;
+  string logical_command;
+  int combine_index;
+} filter_replace_t;
+
+paramdef struct filter_replace_t
+{
+  p_descr = "filters for the REPLACE filter.";
+  p_help = 
+"set_initial_value = TRUE to set the initial value to a constant prior to replacing values, FALSE to set the initial value to the main input to the filter\n"
+"initial_value = The value to fill the input with when set_initial_value=TRUE, ignored when set_initial_value=FALSE\n"
+"replacement_value = The value to set into the output data when conditions are met\n"
+"logical_command = string with named data and conditionals (for example \"A <= 30 & B < 5\", where A and B are named data values found upstream or as input)\n"
+"combine_index = index into combine arrays below (this filter will ignore weight)\n";
+  p_default = {};
+} parm_replace[];
+
+typedef struct
+{
+  int strings_index;
+  int combine_index;
+} filter_max_true_t;
+
+paramdef struct filter_max_true_t
+{
+  p_descr = "filters for the MAX_TRUE filter.";
+  p_help = 
+    "strings_index = index to strings<strings_index> params below, with each string there of the form of a conditional (for example (for example \"A <= 30 & B < 5\", where A and B are named data values found upstream or as input)\n"
+"combine_index = index into combine arrays below (this filter will ignore weight)\n";
+  p_default = {};
+} parm_max_true[];
+
+typedef struct
+{
+  double scale;
+  double offset;
+} filter_rescale_t;
+
+paramdef struct filter_rescale_t
+{
+  p_descr = "filters for the RESCALE filter.";
+  p_help = "The remap value at each point is old_value*scale + offset";
+  p_default = {};
+} parm_rescale[];
+
+typedef struct
+{
+  double a;
+  double b;
+  double c;
+  double d;
+} filter_trap_remap_t;
+
+paramdef struct filter_trap_remap_t
+{
+  p_descr = "filters for the TRAPEZOID_REMAP filter";
+  p_help =
+    "The filter is trapezoid shaped with 4 parameters a < b < c < d\n"
+    "The remap value at each point x is max(min((x-a)/(b-a),1,(d-x)/(d-c)), 0)";
+  p_default = {};
+} parm_trap_remap[];
+
+
+typedef struct
+{
+  double a;
+  double b;
+} filter_s_remap_t;
+
+paramdef struct filter_s_remap_t
+{
+  p_descr = "filters for the S_REMAP filter";
+  p_help =
+    "The remap is 'S' shaped, with two params a and b with a < b\n"
+    "f(x) = 0 for x<= a\n"
+    "f(x) = 2*((x-a)/(b-a))^2  for a <= x and x <= (a+b)/2\n"
+    "f(x) = 1 - 2*((x-b)/(b-a))^2  for (a+b)/2 <= x and x <= b\n"
+    "f(x) = 1  for x >= b";
+  p_default = {};
+} parm_s_remap[];
+
+paramdef struct filter_Scalar_t
+{
+  p_descr = "list of scalar filter params";
+  p_help =
+    "rLwr     = lower bound of radials to calculate scalar statistic over\n"
+    "rUpr     = upper bound of radials to calculate scalar statistic over\n"
+    "thetaLwr = lower bound of aziumuths to calculate scalar statistic over\n"
+    "thetaUpr = upper bound of aziumuths to calculate scalar statistic over\n"
+    "filters that are Scalr are:  FULL_MEAN, FULL_SDEV, FULL_MEDIAN\n";
+  p_default = {};
+} parm_Scalar[];
+
+typedef struct
+{
+  int dummy;
+} dummy_t;
+
+paramdef struct dummy_t
+{
+  p_descr = "params for filters with no params";
+  p_help = "dummy    = placeholder. \n"
+           "filts with no parms: VERT_AVERAGE, VERT_MAX, VERT_PRODUCT\n"
+           "                     DB2LINEAR, LINEAR2DB, PASSTHROUGH";
+  p_default = {};
+} parm_dummy[];
+
+typedef struct
+{
+  string mask_name;
+  boolean mask_is_input;
+  int mask_list_index;
+} mask_t;
+
+paramdef struct mask_t
+{
+  p_descr = "MASK filter params";
+  p_help = 
+  "mask_name = name of mask field\n"
+  "mask_is_input = TRUE if this is an input to the program, FALSE if derived within the program\n"
+  "mask_list_index = index to list of mask ranges below\n";
+  p_default = {};
+} parm_mask[];
+
+typedef struct
+{
+  double x;
+  double y;
+} fuzzy_t;
+
+commentdef
+{
+  p_header = "Fuzzy Function params";
+  p_text = 
+    " Used internally for various filters, and for REMAP filter\n"
+    " index 0 up to 11, each one has any number of :\n"
+    "   x = fuzzy x value\n"
+    "   y = fuzzy y value\n";
+};
+
+paramdef struct fuzzy_t
+{
+  p_descr = "0 fuzzy f";
+  p_default = {};
+} fuzzy0[];
+paramdef struct fuzzy_t
+{
+  p_descr = "1 fuzzy f";
+  p_default = {};
+} fuzzy1[];
+paramdef struct fuzzy_t
+{
+  p_descr = "2 fuzzy f";
+  p_default = {};
+} fuzzy2[];
+paramdef struct fuzzy_t
+{
+  p_descr = "3 fuzzy f";
+  p_default = {};
+} fuzzy3[];
+paramdef struct fuzzy_t
+{
+  p_descr = "4 fuzzy f";
+  p_default = {};
+} fuzzy4[];
+paramdef struct fuzzy_t
+{
+  p_descr = "5 fuzzy f";
+  p_default = {};
+} fuzzy5[];
+paramdef struct fuzzy_t
+{
+  p_descr = "6 fuzzy f";
+  p_default = {};
+} fuzzy6[];
+paramdef struct fuzzy_t
+{
+  p_descr = "7 fuzzy f";
+  p_default = {};
+} fuzzy7[];
+paramdef struct fuzzy_t
+{
+  p_descr = "8 fuzzy f";
+  p_default = {};
+} fuzzy8[];
+paramdef struct fuzzy_t
+{
+  p_descr = "9 fuzzy f";
+  p_default = {};
+} fuzzy9[];
+paramdef struct fuzzy_t
+{
+  p_descr = "10 fuzzy f";
+  p_default = {};
+} fuzzy10[];
+paramdef struct fuzzy_t
+{
+  p_descr = "11 fuzzy f";
+  p_default = {};
+} fuzzy11[];
+
+paramdef struct fuzzy_t
+{
+  p_descr = "12 fuzzy f";
+  p_default = {};
+} fuzzy12[];
+
+paramdef struct fuzzy_t
+{
+  p_descr = "13 fuzzy f";
+  p_default = {};
+} fuzzy13[];
+
+paramdef struct fuzzy_t
+{
+  p_descr = "14 fuzzy f";
+  p_default = {};
+} fuzzy14[];
+
+
+typedef struct
+{
+  string name;
+  boolean is_input;
+  double weight;
+} combine_t;
+
+commentdef
+{
+  p_header = "Combine params";
+  p_text = 
+    " for filters AVERAGE, PRODUCT, MAX, WEIGHTED_SUM, NORM_WEIGHTED_SUM, REPLACE\n"
+    " index 0 up to 6, each one has any number of :\n"
+    "   name = data name\n"
+    "   is_input = TRUE if the input is an original input\n"
+    "   weight = weight for WEIGHTED_SUM and NORM_WEIGHTED_SUM\n";
+};
+
+paramdef struct combine_t
+{
+  p_descr = "0 combine params";
+  p_default = {};
+} combine0[];
+
+paramdef struct combine_t
+{
+  p_descr = "1 combine params";
+  p_default = {};
+} combine1[];
+
+paramdef struct combine_t
+{
+  p_descr = "2 combine params";
+  p_default = {};
+} combine2[];
+
+paramdef struct combine_t
+{
+  p_descr = "3 combine params";
+  p_default = {};
+} combine3[];
+
+paramdef struct combine_t
+{
+  p_descr = "4 combine params";
+  p_default = {};
+} combine4[];
+
+paramdef struct combine_t
+{
+  p_descr = "5 combine params";
+  p_default = {};
+} combine5[];
+
+paramdef struct combine_t
+{
+  p_descr = "6 combine params";
+  p_default = {};
+} combine6[];
+
+paramdef struct combine_t
+{
+  p_descr = "7 combine params";
+  p_default = {};
+} combine7[];
+
+paramdef struct combine_t
+{
+  p_descr = "8 combine params";
+  p_default = {};
+} combine8[];
+
+paramdef struct combine_t
+{
+  p_descr = "9 combine params";
+  p_default = {};
+} combine9[];
+
+typedef struct
+{
+  double mask_min;
+  double mask_max;
+} mask_range_t;
+
+paramdef struct mask_range_t
+{
+  p_descr = "0 mask_range params";
+  p_default = {};
+} mask_range0[];
+paramdef struct mask_range_t
+{
+  p_descr = "1 mask_range params";
+  p_default = {};
+} mask_range1[];
+paramdef struct mask_range_t
+{
+  p_descr = "2 mask_range params";
+  p_default = {};
+} mask_range2[];
+
+
+paramdef string
+{
+  p_descr = "0 array of strings";
+  p_default = {};
+} strings0[];
+paramdef string
+{
+  p_descr = "1 array of strings";
+  p_default = {};
+} strings1[];
+paramdef string
+{
+  p_descr = "2 array of strings";
+  p_default = {};
+} strings2[];
+paramdef string
+{
+  p_descr = "3 array of strings";
+  p_default = {};
+} strings3[];
+paramdef string
+{
+  p_descr = "4 array of strings";
+  p_default = {};
+} strings4[];

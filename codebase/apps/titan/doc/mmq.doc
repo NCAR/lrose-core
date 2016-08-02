@@ -1,0 +1,545 @@
+
+    File: mmq.doc
+
+    A description of the shared memory message queue, MMQ, module
+
+
+    A. General:
+
+	The shared memory message queue is designed for efficient message 
+	passing between two processes. Using a shared memory segment
+	the messages can be transferred through passing pointers from
+	one process to another. The MMQ does not require any access lock 
+	between the message writer and reader. Thus it is one of the most 
+	efficient message passing mechanisms that can be implemented in 
+	the UNIX system environment. The MMQ can also be used as a buffer 
+	space by the reading process. In addition to these, the MMQ can be
+	used for data buffering in real time distributed applications for
+	maintaining continuous and smooth data flow.
+
+	The MMQ is an FIFO message queue. A message is a byte string of 
+	given length. The MMQ module provides functions to read and write 
+	messages from and into an MMQ. When a message is written to an MMQ, 
+	the message length as well as the message is stored in the MMQ. 
+	When a message is read from the MMQ, the message as well as the message 
+	length is returned. When a message is read it is removed from the queue 
+	and the space is freed for new messages.
+
+	An MMQ is implemented with a shared memory segment, which contains 
+	a control area in the beginning. In the control area a read pointer, 
+	pointing to the first unread message, and a write pointer, pointing 
+	to the available free space, are stored along with other queue control 
+	information. Messages are stored after the control area. To protect the 
+	integrity of an MMQ, the user should only access the memory segment
+	returned by an MMQ access function. 
+
+	The MMQ is a uni-directional massage passing channel. There can only
+	be a single reader and a single writer connecting to an MMQ. If
+	a third process tries to open an MMQ, an error message will return.
+	If a second reader or writer process tries to open an MMQ, both 
+	will not be able to read or write.
+
+	The MMQ is a reliable message passing channel. No messages written to 
+	an MMQ are ever lost and no corrupted messages are ever read as long as 
+	at least one of the communicating processes is running at any given time. 
+	The MMQ automatically processes the connection and termination. The 
+	reader or writer can start, terminate or crash at any time without 
+	destroying the MMQ. For example, the reader and writer can start 
+	regardless of the other party's status (running or not). As long as both
+	reader and writer open the MMQ, the MMQ is ready for message passing.
+	The reader or writer can crash, restart later and resume message passing 
+	without need of either restarting the other party, or any exception
+	handling (such as reconnection) in the other party. If both processes 
+	terminate, the messages in the MMQ are lost. If they terminate after 
+	closing the MMQ, the shared memory segment is removed. Thus no cleanup 
+	is necessary in this case.
+
+	Message passing with an MMQ is simple. There is no connection to 
+	build between processes. Each communicating process accesses the 
+	MMQ independently without having to worry about the status of the other 
+	process. In a typical MMQ application, a process calls "MMQ_open" 
+	to open an MMQ and get an MMQ descriptor. It then calls MMQ_read or 
+	MMQ_write to read or write messages. The procedure is just like opening, 
+	reading and writing a Unix file. 
+	
+    B. The MMQ functions:
+
+	An application using the MMQ library routines must include "mmq.h".
+	The MMQ library supports the following functions:
+
+	int MMQ_open (int type, int key) 
+
+	    This function opens an MMQ and returns a non-negative MMQ descriptor 
+	    on success. The "key" argument is used as the key for the shared memory 
+	    segment. Thus communicating processes must use the same "key" to be able 
+	    to connect to the same MMQ. The size of the MMQ, the size of the part of 
+	    the shared memory segment for message store, is deduced from the key: 
+	    The last four digits in the key is used as the size in K (1024) bytes. 
+	    i.e.
+
+	    size = (key % 10000) * 1024.
+
+	    The MMQ size should be at least twice as the maximum size of the 
+	    messages.
+
+	    The "type" argument is an integer containing the following bit fields:
+
+	        Access mode field: MMQ_READ or MMQ_WRITE
+			This 1 bit field specifies that the MMQ is opened for
+			either read or write.
+
+	        Flush mode: MMQ_FLUSH or nothing
+			This one bit field specifies the flush mode. If the 
+			"FLUSH" mode is set, the messages in the MMQ are 
+			discarded when the other party reconnects to the
+			MMQ. Otherwise, no message is discarded. 
+
+	    This function returns a non-negative number called the MMQ 
+	    descriptor, which will be used later for MMQ access just like the 
+	    file descriptor returned by the "open" call. On failure the 
+	    function returns a negative number indicating one of the following 
+	    error conditions:
+
+		MMQ_KEY_NEGATIVE: A negative key was passed to MMQ_open.
+		MMQ_TOO_MANY_OPENED: Too many (more than MAX_N_MMQS) MMQs opened. 
+		MMQ_SIZE_TOO_SMALL: The size for the MMQ is too small to hold any 
+			message.
+		MMQ_MALLOC_FAILED: Failed in allocating memory.
+		MMQ_SHMGET_FAILED: Failed in shmget system call.
+		MMQ_SHMAT_FAILED: Failed in shmat system call.
+		MMQ_TOO_MANY_CLIENTS: There are already at least two processes 
+			using the shared memory segment.
+
+	    Examples:
+
+		md = MMQ_open (MMQ_READ, 40100) opens an MMQ with key = 40100
+		for receiving messages. The size of the shared memory segment is
+		100 K (101024) bytes.
+
+		md = MMQ_open (MMQ_WRITE | MMQ_FLUSH, 40100) opens an MMQ with 
+		the same key and the same size as above for writing (sending) 
+		messages. If the reader terminates and reconnects to the MMQ,
+		the existing messages in the MMQ before reconnection are 
+		discarded.
+
+	int MMQ_read (int md, char **msg) 
+
+	    This function reads a message from the MMQ "md" and returns the 
+	    pointer to the message in the MMQ in "msg" on success. The message
+	    length is the function return value. The message read is the oldest
+	    message in the queue. The user should never try to read or write
+	    outside the message area in the memory as specified by the message
+	    length. The message remains available until next call to this function,
+	    which will discard this message.
+
+	    If there is no message in the MMQ, the function returns 
+	    MMQ_WOULD_BLOCK, which is 0. On failure, this function returns a 
+	    negative value indicating one of the following error conditions:
+
+		MMQ_BAD_DESCRIPTOR: Unopened or closed MMQ descriptor is used.
+		MMQ_BAD_ACCESS: One tries to read an MMQ with a descriptor opened 
+			for writing or vice versa.
+		MMQ_INTERNAL_ERROR: An internal inconsistency is found. The MMQ is 
+			damaged due to unknown reason. This can happen if the user 
+			violates the rules of using the MMQ. E.g., one writes 
+			outside the message or buffer boundaries.
+
+	int MMQ_preview (int md, int n_msg, char **buf, int *length)
+
+	    This function returns the first "n_msg" messages' pointers and
+	    their lengths in MMQ "md" by putting them in arrays "buf" and "length" 
+	    respectively. The return value of this function is the number of 
+	    messages actually found. If no message is found, 0 is returned.
+	    The size of the arrays "buf" and "length" must be at least "n_msg".
+
+	    All messages returned can be accessed or even modified. However,
+	    never touch any memory area that is not within any of the message 
+	    boundaries. This function does not discard any message in the MMQ.
+
+	    This function can also return the same negative values as those
+	    returned from MMQ_read indicating several error conditions.
+
+	int MMQ_write (int md, char *message, int length) 
+
+	    This function writes a message of "length" bytes in "message" into 
+	    MMQ "md" if there is a sufficiently large free space in the MMQ. 
+	    On success it returns the length of the message in number of bytes. 
+	    It returns MMQ_WOULD_BLOCK (0) if there is no enough free space left
+	    in the MMQ. Otherwise, it returns a negative value indicating one of 
+	    the following error conditions:
+
+		MMQ_ZERO_MESSAGE: A message to send is of zero or negative 
+			size.
+		MMQ_BAD_DESCRIPTOR: Unopened or closed MMQ descriptor is used.
+		MMQ_BAD_ACCESS: One tries to read an MMQ with a descriptor opened 
+			for writing or vice versa.
+		MMQ_CANNOT_WRITE: MMQ_write can not be done because an on-going 
+			write was initiated by calling MMQ_request and never 
+			finished (no MMQ_send was called after that).
+		MMQ_MSG_TOO_LARGE: A message to send is larger than half of the 
+			MMQ size.
+
+	    This function, with a similar interface to the "write" system call, 
+	    involves a copy of the message. To be more efficient, one can instead 
+	    use the following two functions to send a message.
+
+	int MMQ_request (int md, int length, char **buf)
+
+	    This function asks for a piece of free memory segment of size "length"
+	    in MMQ "md" for putting the next message. On success a pointer to
+	    the requested space is returned in "buf" and the function returns the
+	    length of the buffer (the same value as "length"). This function 
+	    returns MMQ_WOULD_BLOCK (0) if there is no such space available. This
+	    function may fail and return one of the following negative numbers to
+	    indicate the error condition:
+
+		MMQ_ZERO_MESSAGE: A message to send is of zero or negative 
+			size.
+		MMQ_BAD_DESCRIPTOR: Unopened or closed MMQ descriptor is used.
+		MMQ_BAD_ACCESS: One tries to read an MMQ with a descriptor opened 
+			for writing or vice versa.
+		MMQ_MSG_TOO_LARGE: A message to send is larger than half of the 
+			MMQ size.
+
+	int MMQ_send (int md, int length)
+
+	    This function is used to finish the message sending after receiving
+	    a space returned from a MMQ_request call. The argument "length" is
+	    the actual message length, which must be smaller than or equal to the
+	    length specified in the previous MMQ_request call. This function 
+	    returns the message length on success or one of the following negative
+	    numbers on failure:
+
+		MMQ_ZERO_MESSAGE: A message to send is of zero or negative 
+			size.
+		MMQ_BAD_DESCRIPTOR: Unopened or closed MMQ descriptor is used.
+		MMQ_BAD_ACCESS: One tries to read a MMQ with a descriptor opened 
+			for writing or vice versa.
+		MMQ_NO_BUFFER_RETURNED: The MMQ_send is called but MMQ_request is 
+			not called before.
+		MMQ_LENGTH_ERROR: The length in MMQ_send call is larger than that 
+			in the previous MMQ_request call.
+
+	    This function can also return MMQ_WOULD_BLOCK (0) when the MMQ is 
+	    opened as MMQ_FLUSH and the reader restarts after a previous MMQ_request 
+	    call.
+
+	int MMQ_close (int md)
+
+	    This function closes the MMQ "md". It frees all allocated resources
+	    for the MMQ, closes the shared memory segment if there is no other
+	    process accessing it. This function returns MMQ_SUCCESS on success or
+	    the following negative number:
+
+		MMQ_BAD_DESCRIPTOR: Unopened or closed MMQ descriptor is used.
+
+	    When one exits without closing an opened MMQ, the connection to the MMQ 
+	    is automatically detached. However, the opened shared memory resource 
+	    may be left over in the UNIX system.
+		
+	void MMQ_msg (int sw)
+
+	    The MMQ package can print out, on the standard output, messages in 
+	    certain error conditions. This feature can be turned on and off by 
+	    calling this function with sw = MMQ_ON and sw = MMQ_OFF respectively.
+	    The default is no message print out. The error messages provide 
+	    additional information for debugging.
+		
+	void MMQ_old ()
+
+	    This call directs the MMQ module to use the old pipe data format.
+	    This function must be called before any other MMQ function calls.
+	    The function affects all MMQs opened in the application.
+	    Note that the messages in the queue are always discarded after a 
+	    reconnection. When using the old format, the returned message length
+	    from MMQ_read can be larger than the true message length due to
+	    alignment.
+
+    C. Examples of using MMQ:
+
+	The following section of code tries to write a message to the MMQ of key
+	= 50050 and size of 50 * 1024 bytes. If the MMQ is full, it re-tries every 
+	second until the message is written or an error is encountered.
+
+
+	#include "mmq.h"
+
+	int md;
+	static char message [] = "This is a test message";
+
+	/* open an MMQ for writing */
+	md = MMQ_open (MMQ_WRITE, 50050);
+	if (md < 0) {               /* open failed */
+	    printf ("MMQ_open failed. The return number is %d\n", md);
+	    exit (-1);
+	}
+
+	while (1) {
+	    int ret;
+
+	    /* write the message to the MMQ */
+	    ret = MMQ_write (md, message, strlen (message) + 1);
+
+	    if (ret == strlen (message) + 1) exit (0);   /* success */
+
+	    if (ret == MMQ_WOULD_BLOCK) {    /* MMQ is full. We will retry */
+		sleep (1);
+		continue;
+	    }
+
+	    else {                     /* other errors */
+		printf ("MMQ_write failed. The return number = %d\n", ret);
+		exit (-1);
+	    }
+	}
+
+	The following code demonstrates how to use the MMQ_request and MMQ_send
+	to write messages (This simple example, though, does not display any 
+	advantage over the MMQ_write call):
+
+	#include "mmq.h"
+
+	int md;
+	static char message [] = "This is a test message";
+	int len;
+
+	/* open an MMQ for writing */
+	md = MMQ_open (MMQ_WRITE, 50050);
+	if (md < 0) {               /* open failed */
+	    printf ("MMQ_open failed. The return number is %d\n", md);
+	    exit (-1);
+	}
+
+	len = strlen (message) + 1;
+
+	while (1) {
+	    int ret;
+	    char *buf;
+	    int buf_size;
+
+	    buf_size = 128;
+
+	    /* get a piece of free space in the MMQ */
+	    ret = MMQ_request (md, buf_size, &buf);
+
+	    if (ret < 0) {                     /* an error */
+		printf ("MMQ_request failed. The return number = %d\n", ret);
+		exit (-1);
+	    }
+
+	    if (ret == MMQ_WOULD_BLOCK) {    /* MMQ is full. We will retry */
+		sleep (1);
+		continue;
+	    }
+
+	    /* generate the message in buf */
+	    memcpy (buf, message, len);
+
+	    /* send the message */
+	    ret = MMQ_ send (md, len);
+
+	    if (ret == len) exit (0);    /* success */
+	    else {                     /* other errors */
+		printf ("MMQ_send failed. The return = %d\n", ret);
+		exit (-1);
+	    }
+	}
+
+	The following section of code reads a message from an MMQ. If the MMQ is 
+	empty, it will re-try every second until a message is read or an error is 
+	encountered.
+
+
+	#include "mmq.h"
+
+	int md;
+	char *message;
+
+	/* open an MMQ for reading */
+	md = MMQ_open (MMQ_READ, 50050);
+	if (md < 0) {               /* open failed */
+	    printf ("MMQ_open failed. The error number is %d\n", md);
+	    exit (-1);
+	}
+
+	while (1) {
+	    int len;
+
+	    len = MMQ_read (md, &message);
+
+	    if (len > 0) {  /* success */
+		message[len - 1] = '\0';
+		printf ("Message read: %s (msg len = %d)\n", message, len);
+		exit (0);
+	    }
+
+	    if (len == MMQ_WOULD_BLOCK) {    /* MMQ is empty. We will retry */
+		sleep (1);
+		continue;
+	    }
+
+	    else {                     /* an error */
+		printf ("MMQ_read failed. The return number = %d\n", len);
+		exit (-1);
+	    }
+	}
+
+	Note:
+
+	A single process may open the same MMQ for read and write (by calling 
+	MMQ_open twice and getting both read and write MMQ descriptors). One 
+	must first call MMQ_read (this call will return MMQ_WOULD_BLOCK) to 
+	initialize the MMQ before any message can be written to the MMQ.
+	
+
+    D. MMQ detailed design:
+
+	An MMQ uses 4 control numbers, which are located at the beginning of the
+	shared memory segment. The four numbers are the read pointer, the write
+	pointer, the reader's flag and the writer's flag. The messages follow the
+	control numbers as illustrated in the following:
+
+	| 4 (4-byte) control numbers |  The messages (mmq->b_size bytes) |
+	4 byte control area |
+
+	A 4 byte control area at the end of the MMQ is reserved for writing a 
+	termination mark (explained later).
+
+	A message is stored in the MMQ in the following format:
+
+	| length (4 bytes) |  message (length bytes) | padding bytes |
+
+	A message takes a space of
+
+	    stored_length = (((length + 3) >> 2) << 2) + sizeof (mmq_t)
+	
+	bytes in the message queue. Where mmq_t is the type of the 4-byte
+	integer. A stored message starts with the length of the message (mmq_t). 
+	The message then follows the length. A suitable number of padding bytes 
+	are used to ensure that every message in the queue is started from a 
+	4-byte boundary.
+
+	Messages in the MMQ are placed one immediately after another according
+	to the order they have been written. After a message is read, its space
+	is freed for new messages. When message writing reaches the end of the
+	MMQ, the writing will fold back and continue at the beginning of
+	the message area if the space there is free. Every message uses a 
+	contiguous segment of memory.
+
+	It is helpful to think that we are using different pages of the message
+	area when we reuse the space. The following illustrates two typical
+	situations how the messages are located in the queue:
+
+	The read and write pointers are on the same page:
+
+	| control area | free space    : message 1 : message 2 : free space |
+			               |                       |
+			       the read pointer          the write pointer
+
+	The read and write pointers are on different pages:
+
+	| control area | message 2 : free space : message 1 | TM | residue |
+			           |            |
+			 the write pointer  the read pointer
+
+	The read pointer points at the beginning position of the first unread 
+	message. The write pointer points to the beginning position of the free 
+	space. Both pointers move towards the right until they fold back. When 
+	one pointer folds back, its page number is incremented by 1. It is 
+	not necessary to record the full value of the page numbers. We record
+	only the one bit value of "page number % 2".
+
+	When the read and write pointers are on the same page, there are two
+	pieces of free space at the beginning and the end of the MMQ's message 
+	area respectively. If a MMQ write occurs, the free space at the end is
+	first examined. If the size is not large enough to hold the new message,
+	the free space at the beginning is checked. If both are too small to hold
+	the new message, the MMQ write will return MMQ_WOULD_BLOCK. If the free
+	space at the end is too small while that at the beginning is sufficiently
+	large, a termination mark (TM) is written at the beginning of the free
+	space at the end. The new message is placed at the beginning of the MMQ
+	message area. The termination mark will tell the later read call to return
+	to the beginning of the MMQ for the new message when the read pointer
+	reaches the mark. The area after the termination mark is not used.
+
+	MMQ accesses:
+
+	When a message is written into the MMQ, the read and write pointers are
+	checked and a contiguous free space is searched for the new message. If a
+	suitable space is found, the message is written to the MMQ and the write 
+	page number and pointer are updated.
+
+	To read a message from the MMQ, the read and write pointers are checked.
+	If there is an unread message, the message length and the pointer to the
+	message in the MMQ are returned. The new read pointer value is stored and 
+	the read pointer will be updated next time the MMQ_read function is called.
+
+	Because the page number is a one bit number, we place it on the left
+	most byte of the corresponding pointer. The pointer, thus, uses the lower 
+	24 bits of the 4-byte number that represents both the offset and the page
+	number. This reduces the pointer and page number updates to a 4 byte memory 
+	write, which is atomic as we tested. Note that the pointer and page updates 
+	must be performed in an atomic function. Otherwise, inconsistent page 
+	numbers and pointers may be read by the other party on the communication 
+	channel.
+	
+	Initialization:
+
+	The MMQ initialization must be carefully processed. The difficulty lies on
+	that the two communicating processes may try to initialize the MMQ (a 
+	non-atomic process) simultaneously and competitively and there is no scheme 
+	to guarantee ordered access to the MMQ.
+
+	We solve this problem by using two flags, the reader's flag and the writer's
+	flags. Each party, the read process or the write process, sets its own flag
+	when it opens the MMQ. Only the other party can reset the flag. The flag acts
+	as a self lock. i.e. No reading or writing can happen if a party's own flag 
+	is set. Setting and resetting the flag is an atomic process. By setting its
+	own flag and locking itself, the reader, or writer, allows the other party
+	to reliably complete MMQ initialization before message passing can start. 
+
+	The two flags also provide a mechanism to lock the MMQ when two processes 
+	open the MMQ both for reading or writing. In these cases non of these 
+	processes is able to reset the flag and no message passing will happen.
+
+	The MMQ descriptor:
+
+	When an MMQ is opened, we allocate an MMQ structure for the opened MMQ and 
+	return an index, called the MMQ descriptor, of an array that stores the 
+	open MMQ's structure pointers. The MMQ structure allows us to put control 
+	information in it. 
+
+	Currently, an MMQ descriptor has a value between 128 and 144. 
+
+	The MMQ size:
+
+	Instead of requiring exchanging size information between the reader and the 
+	writer to guarantee consistency, we embed the size information in the MMQ key.
+	In the current implementation, the size of the maximum messages, that can be
+	written to the MMQ, must be less than the half of the MMQ size. Because of
+	the message length field and the alignment pad bytes, the actual allowable
+	message size is even smaller. It is possible to modify the MMQ to allow 
+	larger messages. However this is not accomplished since that kind of use
+	(single message movement in the queue) is not the MMQ's intended design goal.
+
+	Performance:
+
+	To maximize the message passing rate, one should use a sufficiently large MMQ
+	that can contain a large number of messages. Otherwise, the message passing 
+	rate will be limited by the UNIX scheduling frequency. As we tested on a 
+	SPARC 2 station, a rate of more than 30000 messages per second was achievable.
+
+	
+    E. Future work:
+
+	1. It is possible to add a function to hold the communication partner's 
+	   access to the MMQ. This can be done by setting the other party's flag.
+
+	2. It may be useful to add a function to discard a specified number of 
+	   messages in the MMQ. This can only be done from the reader's side.
+
+	3. Limited effort is make to detect any damage to the MMQ by illegal use of
+	   the MMQ such as writing outside the message boundaries in the MMQ. If
+	   an MMQ is damaged, program may crash in the MMQ functions. It is possible
+	   to add more protections such as parity checks to protect the control
+	   numbers and the message lengths.

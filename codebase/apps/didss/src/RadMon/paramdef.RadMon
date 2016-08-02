@@ -1,0 +1,121 @@
+/*********************************************************
+ * parameter definitions for RadMon
+ *
+ * Jaimi Yee, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * May 1998
+ */
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If TRUE, debug messages will be printed.";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Verbose debug option";
+  p_help = "If TRUE, verbose debug messages will be printed.";
+} verbose;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with the process mapper";
+} instance;
+
+paramdef string {
+  p_descr = "URL for DsRadar data via FMQ";
+  p_default = "fmqp:://localhost::./fmq.dsRadar";
+} fmq_url;
+
+typedef enum {
+  MONITOR, DD_MONITOR, SUMMARY, FULL, DATA, SINGLE_GATE, POWER_AND_FREQ, PLATFORM_GEOREF
+} print_type_t;
+
+paramdef enum print_type_t {
+  p_default = MONITOR;
+  p_descr ="Sets the type of printout. All information will be printed to stdout.";
+  p_help = "\n MONITOR: single line which overwrites itself. Suitable for a small "
+           " window with a single output line.\n\n "
+           "DD_MONITOR: Same as MONITOR but shows radarId, volume start time, tilt, "
+           "and VCP number.\n\n "
+           "SUMMARY: scrolling summary.\n\n "
+           "FULL: radar, field and beam params in full.\n\n "
+           "DATA: data as well - very verbose.\n\n "
+           "SINGLE_GATE: data for a single gate at specficied range.\n\n "
+           "POWER_AND_FREQ: power and frequency summary.\n\n "
+           "PLATFORM_GEOREF: platform georeference info with each beam, if available";
+} print_type;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print label line in monitor mode.";
+  p_help = "If TRUE, a line containing labels is printed ahead of the data line in monitor mode.";
+} labels_in_monitor_mode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print volume number in monitor mode.";
+  p_help = "If TRUE, the volume number is printed at the start of the line in monitor mode.";
+} volume_num_in_monitor_mode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print start of tilt, end of volume, etc. flags in monitor mode.";
+  p_help = "If TRUE, a 3-letter string is added to the end of the line. The strings are EOT (end-of-tilt), EOV (end-of-volume), SOT (start-of-tilt), SOV (start-of-volume) and NST (new-scan-type).";
+} flags_in_monitor_mode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print start/end of tilt flags in summary mode.";
+  p_help = "If TRUE, the start and end of tilts will be printed in summary mode.";
+} tilt_flags_in_summary_mode;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of decimals for partial secs in summary mode.";
+  p_help = "If TRUE, the time will be printed out to this number of decimals.";
+} subsecs_precision_in_summary_mode;
+
+paramdef int {
+  p_default = 1; 
+  p_descr = "Update interval for display in secs.";
+  p_help = "Set to negative values to update based on count rather than seconds between beam timestamps. If 0, prints on every beam.";
+} update_interval;
+
+paramdef double {
+  p_default = 1.0; 
+  p_descr = "Range for printing out data for single gate - km.";
+  p_help = "For print_type = SINGLE_GATE.";
+} range_for_single_gate;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If FALSE, the program will seek to the end of the fmq and only read in new data. If TRUE, it will start reading from the beginning of the FMQ.";
+} seek_to_start_of_input;
+
+paramdef int {
+  p_default = 0; 
+  p_descr = "Number of line feeds in monitor mode.";
+  p_help = "The number of line feeds inserted before refreshing the line in monitor mode.";
+} n_monitor_line_feeds;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check for missing beams.";
+  p_help = "If TRUE, RadMon will check for missing beams by computing the change in angle since the previous beam. If this exceeds 'max_delta_angle', a warning message will be printed.";
+} check_for_missing_beams;
+
+paramdef double {
+  p_default = 1.0; 
+  p_descr = "Max delta angle for missing beam check (deg).";
+  p_help = "If the angle of the latest beam differs from the angle of the previous beam by more than this value, it will be assumed that one or more beams are missing. For RHI scans, the 'angle' referred to here is the 'elevation angle'. For other scans, it is the 'azimuth angle'.";
+} max_delta_angle;
+
+
+
+
+
+

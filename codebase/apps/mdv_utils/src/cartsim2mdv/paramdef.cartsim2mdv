@@ -1,0 +1,169 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/********************************************************
+ * Parameter definitions for tasssim2mdv conversion routine.
+ * Note that defaults are for standard tass simulation files.
+ * Enumerated types are dependent on <mdv/mdv_macros.h>
+ * and <mdv/mdv_file.h>.
+ *
+ *******************************************************/
+
+paramdef boolean {
+  p_descr = "Option to print debugging messages";
+  p_default = {FALSE};
+} debug;
+
+paramdef boolean {
+  p_descr = "Option to check if parameters are set";
+  p_default = {FALSE};
+  p_help = "If this is true, a check will be made on which parameters is set. A report will be generated for those params which are using the defaults";
+} check_params;
+
+paramdef boolean {
+  p_descr = "Option to print parameters ";
+  p_default = {FALSE};
+  p_help = "If this is true, used parameters will be printed at the beginning of the run.";
+} print_params;
+
+paramdef char* {
+  p_descr = "output file suffix";
+  p_default = {"mdv"};
+} output_file_suffix;
+
+paramdef char* {
+  p_descr = "Output File directory (top directory)";
+  p_help = "Name of directory where mdv files will be placed.";
+} output_dir;
+
+paramdef long {
+  p_descr = "Malloc debug level";
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char *
+{
+  p_descr = "List of field names in the order written to MDV file";
+  p_help = "allowed field names/meanings are 'RADIAL_VEL' (radial component of velocity), 'VEL_X' (x component of velocity), 'VEL_Y' (y component of velocity, 'VEL_Z' (z component of velocity), 'DBZ' (reflectivity), 'SNR' (signal to noise ratio), 'SW' (spectrum width). Each field name has fixed MDV file scale, bias, field name, etc.";
+} fields[];
+
+paramdef long {
+  p_descr = "Output Encoding Type";
+  p_default = {0};
+  p_min = {0};
+  p_max = {1};
+  p_help = "0 - None (data written as unsigned char), 1 - URL 8bit encoding.";
+} output_encoding_type;
+
+
+paramdef long {
+  p_descr = "Projection Type ";
+  p_default = {8};
+  p_help = "Options are: -1-Native, 0-Lat/Lon, 1-Artcc, 2-Stereographic, 3-Lambert conformal, 4-Mercator  5-Polar stereo, 6-Polar stereo elliptic, 7-Cylindrical equidist, 8-Flat (cartesian), 9-Shperical";
+  p_min = {-2};
+  p_max = {9};
+} projection_type;
+
+paramdef long {
+  p_descr = "Vertical Type ";
+  p_default = {4};
+  p_help = "Options are: 0-Unknown, 1-Surface, 2-sigma-p, 3-Pressure , 4-Z (Constant Altitude)  5-sigma-z , 6-eta , 7-theta, 8-Mixed , 9-Elevation, 10-Composite, 11-Cross-section, 12- satelite 13 -variable elev 14-fields_var_elev";
+  p_min = {0};
+  p_max = {14};
+} vertical_type;
+
+paramdef long {
+  p_descr = "Grid order direction ";
+  p_default = {1};
+  p_help = "Options are: 0-Other, 1-SN_WE, 2-NS_WE, 3-SN_EW , 4-NS_EW";
+  p_min = {0};
+  p_max = {4};
+} grid_order_direction;
+
+paramdef char* {
+  p_descr = "cartesian simulation parameter file";
+  p_default = {"csim.conf"};
+} csim_config_file;
+
+paramdef char* {
+  p_descr = "grid parameter file";
+  p_default = {"grid.conf"};
+} grid_config_file;
+
+paramdef long {
+  p_descr = "Data Collection Type ";
+  p_default = {0};
+  p_help = "Options are: 0 - Measured, 1 - Extrapolated, 2 - Forecast, 3 - Synthesis, 4 - Mixed";
+  p_min = {0};
+  p_max = {4};
+} collection_type;
+
+paramdef double {
+  p_descr = "Sensor Latitude ";
+  p_help = "Sensor Latitude (if different than what is in gint header)";
+  p_default = {0.0};
+  p_min = {-90.0};
+  p_max = {90.0};
+} sensor_latitude;
+
+paramdef double {
+  p_descr = "Sensor Longitude ";
+  p_help = "Sensor Longitude (if different than what is in gint header)";
+  p_default = {0.0};
+  p_min = {-180.0};
+  p_max = {180.0};
+} sensor_longitude;
+
+paramdef double {
+  p_descr = "Sensor Altitude (KM)";
+  p_help = "Sensor Altitude (in KM - not in gint header)";
+  p_default = {0.0};
+  p_min = {0.0};
+} sensor_altitude;
+
+paramdef char* {
+  p_descr = "Data Source";
+  p_help = "Data Source (ie. NIDS/LOT)";
+  p_default = {"NIDS/LOT"};
+} data_source;
+
+
+paramdef long {
+  p_descr = "Maximum time";
+  p_help = "Time at which simulation stops  (seconds from start)";
+  p_default = {300};
+  p_min = {1};
+  p_max = {9000};
+} maximum_time;
+
+paramdef long {
+  p_descr = "delta time";
+  p_help = "Time between simulation steps (seconds)";
+  p_default = {60};
+  p_min = {1};
+  p_max = {1500};
+} delta_time;
+

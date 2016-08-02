@@ -1,0 +1,156 @@
+/**********************************************************************
+ * TDRP params for AcTrack2Polygon
+ **********************************************************************/
+
+//======================================================================
+//
+// AcTrack2Polygon reads the ac_posn_wmod_t or ac_posn_t spdb points 
+//   making up a flight track and creates the convex hull containing them. 
+//   The convex hull is output as a GenPoly object.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program triggers off of new radar data volumes. 
+//   In ARCHIVE mode, it processes all tracks for each radar volume 
+//   between start and end times set on the command line. .
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// trigger_url /////////////////////////////
+//
+// Url of dataset used to trigger processing of new flight tracks.
+// Type: string
+//
+
+trigger_url = "/d1/fieldData/bari_2004/mdv/radar/cart_no_clutter";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// tailnum /////////////////////////////////
+//
+// Tail number or call sign of aircraft.
+// Type: string
+//
+
+tailnum = "FINA";
+
+///////////// ac_posn_url /////////////////////////////
+//
+// Input url.
+// Location of spdb aircraft track points.
+// Type: string
+//
+
+ac_posn_url = "spdbp:://localhost::/d1/fieldData/bari_2004/spdb/ac_posn";
+
+///////////// lookback ////////////////////////////////
+//
+// Lookback time (secs) for aircraft position points used to create 
+//   flight track.
+// We gather aircraft position points in the interval [trigger time - 
+//   lookback, trigger time].
+// Type: int
+//
+
+lookback = 240;
+
+///////////// max_valid_realtime_age //////////////////
+//
+// Maximum age(secs) of dataset that will trigger processing.
+// Type: int
+//
+
+max_valid_realtime_age = 600;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output url.
+// Location of polygon output.
+// Type: string
+//
+
+output_url = "spdbp:://localhost::/d1/fieldData/bari_2004/spdb/AcTrackPolygon";
+
+///////////// expire_seconds //////////////////////////
+//
+// Expire time in seconds GenPoly objects.
+// This value will be added to the GenPoly time to determine the expire 
+//   time for the object.
+// Type: int
+//
+
+expire_seconds = 300;
+
+//======================================================================
+//
+// PROCESSING.
+//
+//======================================================================
+ 
+///////////// expansion_factor ////////////////////////
+//
+// Percent by which the convex hull will be expanded or contracted.
+// If expansion_factor is positive, polygon will be expanded. If 
+//   expansion_factor is negative, then polygon wilbe contracted. If 
+//   expansion_factor is zero, no expansion or contraction will take 
+//   place.
+// Type: float
+//
+
+expansion_factor = 200;
+

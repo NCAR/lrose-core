@@ -1,0 +1,29 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<pre>typedef struct {
+  int   month;            /* (1-12). */
+  int   day;              /* (1-31).   */
+  int   year;             /* (eg. 1993). */
+  int   hour;             /* (0-23). */
+  int   minute;           /* (0-59).*/
+  float sec;              /* second + fraction of second. */
+  float dx, dy;           /* Size of cell in km. */
+  int   nx, ny;           /* Number of cells. */
+  int   radar_x, radar_y; /* Location of center of radar. */
+  float height;           /* Height of this Carpi. */
+  float lat, lon;         /* Lat/lon of lower left corner of Carpi. */
+  char  radar_type[50];   /* Radar types. */
+  int   field_type;       /* Same as for Radar. */
+  int   interp_method;    /* ??? string describing interpolation method. */
+  float (*f)(Carpi_value x);    /* Data conversion function. f(x). */
+  Carpi_value (*invf)(float x); /* Data conversion function. invf(x). */
+  Carpi_value **data;     /* data[ny][nx] */
+} Carpi; </pre>
+
+</body>

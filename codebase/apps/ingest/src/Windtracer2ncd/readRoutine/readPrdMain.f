@@ -1,0 +1,113 @@
+C
+C Program to read *.prd files directly.
+C
+C Niles Oien September 2004
+C oien@ucar.edu
+C
+      PROGRAM readPrdMain
+
+      IMPLICIT NONE
+C
+C Declare some arrays and variables.
+C
+      INTEGER ITIME
+      INTEGER IGATE
+      INTEGER INDEX
+
+      INTEGER IT, IG
+
+      INTEGER NUMTIMES
+      INTEGER MAXNUMTIMES
+      PARAMETER (MAXNUMTIMES = 1000)
+
+      INTEGER NUMGATES
+      INTEGER MAXNUMGATES
+      PARAMETER (MAXNUMGATES = 150)
+
+      REAL AZ
+      DIMENSION AZ(MAXNUMTIMES)
+
+      REAL EL
+      DIMENSION EL(MAXNUMTIMES)
+
+      INTEGER YEAR, MONTH, DAY, HOUR, MIN, SEC, MSEC
+C
+C Note that the year, month and day are single values, not
+C arrays - taken at the time the file started.
+C
+
+      DIMENSION HOUR(MAXNUMTIMES)
+      DIMENSION MIN(MAXNUMTIMES)
+      DIMENSION SEC(MAXNUMTIMES)
+      DIMENSION MSEC(MAXNUMTIMES)
+
+      REAL VEL
+      DIMENSION VEL(MAXNUMTIMES*MAXNUMGATES)
+
+      REAL BACKSCATTER
+      DIMENSION BACKSCATTER(MAXNUMTIMES*MAXNUMGATES)
+
+      REAL SNR
+      DIMENSION SNR(MAXNUMTIMES*MAXNUMGATES)
+
+      REAL CFAR
+      DIMENSION CFAR(MAXNUMTIMES*MAXNUMGATES)
+
+      REAL SW
+      DIMENSION SW(MAXNUMTIMES*MAXNUMGATES)
+
+      REAL MCFAR
+      DIMENSION MCFAR(MAXNUMTIMES*MAXNUMGATES)
+
+      REAL QUALITY
+      DIMENSION QUALITY(MAXNUMTIMES*MAXNUMGATES)
+
+      REAL FVEL
+      DIMENSION FVEL(MAXNUMTIMES*MAXNUMGATES)
+
+      REAL FSNR
+      DIMENSION FSNR(MAXNUMTIMES*MAXNUMGATES)
+
+C
+C Set debug to 1 to get output from the C subroutines.
+C
+      INTEGER DEBUG
+      PARAMETER (DEBUG = 0)
+
+      REAL FIRST_RANGE
+      REAL DELTA_RANGE
+
+      INTEGER PROBLEM
+
+      CALL readPrd('20030728_151311_base.prd', NUMTIMES,
+     1 NUMGATES, FIRST_RANGE, DELTA_RANGE, YEAR, MONTH, DAY,
+     2 HOUR, MIN, SEC, MSEC, AZ, EL, VEL, SNR, CFAR,
+     3 SW, BACKSCATTER, MCFAR, QUALITY, FVEL, FSNR,
+     4 MAXNUMGATES, MAXNUMTIMES, DEBUG, PROBLEM)
+
+
+      IF (PROBLEM .NE. 0) THEN
+         PRINT *, 'PROBLEM : ', PROBLEM
+         STOP
+      END IF
+C
+C Print a few velocity values.
+C
+      DO IT=1,10
+         PRINT *, YEAR, MONTH, DAY, HOUR(IT), MIN(IT), SEC(IT)
+         PRINT *, AZ(IT), EL(IT)
+         DO IG = 10,14
+            INDEX = (IT - 1) * NUMGATES + IG
+            PRINT *, VEL(INDEX), BACKSCATTER(INDEX)
+         END DO
+         PRINT *,'------------------------'
+      END DO
+
+
+      STOP
+      END
+
+
+
+
+

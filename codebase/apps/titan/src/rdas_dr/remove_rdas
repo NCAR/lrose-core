@@ -1,0 +1,9 @@
+#! /bin/sh
+
+module="rdas_dr"
+device="rdas"
+
+/sbin/rmmod $module
+
+/bin/rm /dev/$device
+

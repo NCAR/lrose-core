@@ -1,0 +1,386 @@
+/**********************************************************
+ * paramdef.RadarModelQc
+ *
+ * This file contains the TDRP parameter definitions for RadarModelQc app
+ * 
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+commentdef
+{
+  p_header = "RadarModelQc";
+  p_text = "Parameters for data filtering for Radx format input data to produce quality control measures";
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header =
+    "Filters to apply";
+  p_text =
+    "The filters to apply, in order applied. A brief description of each filter is:\n"
+    " \n"
+    "AVERAGE = Set the output equal to the weighted average of any number of inputs\n"
+    "DB2LINEAR = Convert input to linear scale\n"
+    "DIFFERENCE = Set the output equal to the main input data minus another input data\n"
+    "DIVIDE = Divide the data by a fixed value to create the output data\n"
+    "FUZZY_REMAP = Map each input data value to an output data value using a fuzzy function\n"
+    "GAUSSIAN_2D_REMAP = Map 2 variables to a gaussian result\n"
+    "LINEAR2DB = Convert input to db scale\n"
+    "MASK = Set output data to one of two values, based on whether input data has one of two values, within a tolerance\n"
+    "MIN = Set the output equal to the minimum of any number of inputs\n"
+    "MAX = Set the output equal to the maximum of any number of inputs\n"
+    "PASSTHROUGH = Set the output equal to the input, with a name change\n"
+    "PRODUCT = Set the output equal to the product of any number of inputs\n"
+    "REMAP = Linear remapping of data at each point\n"
+    "RESTRICT = Restrict places where values pass through using a mask, with values elsewhere set to a constant\n"
+    "SPECKLE = 1 and 2 point speckle identifier\n"
+    " \n"
+    "The parameters for each filter are found in arrays, one array per filter type, later in this file\n";
+}
+
+typedef enum
+{
+  AVERAGE,
+  DB2LINEAR,
+  DIFFERENCE,
+  DIVIDE,
+  FUZZY_REMAP,
+  FUZZY_2D_REMAP,
+  GAUSSIAN_2D_REMAP,
+  LINEAR2DB,
+  MASK,
+  MIN,
+  MAX,
+  PASSTHROUGH,
+  PRODUCT,
+  REMAP,
+  RESTRICT,
+  SCR,
+  SPECKLE
+} filter_t;
+
+
+typedef struct
+{
+  filter_t filter;
+  int filter_index;
+  string input_field;
+  string output_field;
+  string output_units;
+  double output_missing;
+  boolean write_output_field;
+} data_filter_t;
+
+paramdef struct data_filter_t
+{
+  p_descr = "Filters to apply";
+  p_help =
+    "filter = The filter to apply\n"
+    "filter_index = index into an array of params for that filter type (found below)\n"
+    "input_field = name of input field to the filter, could be input to app, or output of an upstream filter\n"
+    "output_field = name of output field to the filter\n"
+    "output_units = name of output field to the filter (empty to pass through input as is)\n"
+    "output_missing = new output missing value (when output_units is not empty)\n"
+    "write_output_field=TRUE to write output field, FALSE to keep it only as a passthrough to downstream filters\n";
+  p_default = {};} filter[];  
+
+typedef struct {
+  int dummy;
+} dummy_t;
+
+paramdef struct dummy_t
+{
+  p_descr = "params for filters with no params";
+  p_help = "dummy    = placeholder. \n"
+           "filts with no parms: DB2LINEAR, LINEAR2DB, PASSTHROUGH";
+  p_default = {};
+} parm_dummy[];
+
+typedef struct {
+  double mask_value;
+  double tolerance;
+  double mask_replacement_value;
+  double nonmask_replacement_value;
+} mask_t;
+
+paramdef struct mask_t
+{
+  p_descr = "MASK params";
+  p_help = "replace values at all points with replacement mask or non-mask values, where data close to mask value";
+  p_default = {};
+} parm_mask[];
+
+typedef struct {
+  double divisor;
+  boolean divide_by_nyquist;
+} divide_t;
+
+paramdef struct divide_t
+{
+  p_descr = "DIVIDE params";
+  p_help = "divide all data by the divisor, or nyquist velocity from metadata";
+  p_default = {};
+} parm_divide[];
+
+typedef struct {
+  string subtractField;
+} difference_t;
+
+paramdef struct difference_t
+{
+  p_descr = "DIFFERENCE params";
+  p_help = "subtract data from subtractField from the main field";
+  p_default = {};
+} parm_difference[];
+
+typedef struct
+{
+  double input_weight;
+  int combine_index;
+  boolean normalize;
+  boolean missing_ok;
+} filter_comb_t;
+
+paramdef struct filter_comb_t
+{
+  p_descr = "AVERAGE, PRODUCT, MIN and MAX parameters, when combining more than one input.";
+  p_help = 
+    "input_weight = weight to give main input, when AVERAGE. Ignored for PRODUCT or MAX\n"
+    "combine_index = index into combine arrays below (combine0, combine1,...). Within the combine arrays,"
+    "weights are found for the additional inputs\n"
+    "normalize = TRUE to divide by sum of weights when AVERAGE, ignored if not AVERAGE\n"
+    "missing_ok = TRUE to allow one or more missing values, and proceed to take AVERAGE,PRODUCT,..etc.";
+  p_default = {};
+} parm_combine[];
+
+typedef struct {
+  boolean outlier_exceeds_surroundings;
+  double outlier_thresh;
+  double speckle_confidence;
+  double nonspeckle_confidence;
+} speckle_t;
+
+paramdef struct speckle_t
+{
+  p_descr = "SPECKLE params";
+  p_help = "Look for one and two point outliers in a ray to create a mask image";
+  p_default = {};
+} parm_speckle[];
+
+typedef struct {
+  double offset;
+  double scale;
+} remap_t;
+
+paramdef struct remap_t
+{
+  p_descr = "REMAP params";
+  p_help = "New value = value* scale + offset at each point";
+  p_default = {};
+} parm_remap[];
+
+typedef struct {
+  string mask_field;
+  double mask_value;
+  double output_nonmask_value;
+  boolean set_nonmask_missing;
+} restrict_t;
+
+paramdef struct restrict_t
+{
+  p_descr = "RESTRICT params";
+  p_help = "In the mask_field, at places where the value = mask_value, the input data is passed through. "
+           "At all other places the output value is set to output_nonmask_value, unless set_nonmask_missing"
+           "is true, in which case set those values to missing";
+  p_default = {};
+} parm_restrict[];
+
+typedef struct
+{
+  string y_field_name;
+  string paramfile_name;
+} fuzzy2_t;
+
+paramdef struct fuzzy2_t
+{
+  p_descr = "FUZZY_2D_REMAP params";
+  p_help = "the main input is the 'X' variable, the y_field_name is the 'Y' variable, and the param file"
+    " is the name of parameters that map from X,Y to Z, which is the output of the filter";
+  p_default = {};
+} parm_fuzzy2d[];
+
+typedef struct
+{
+  string y_field_name;
+  double x_factor;
+  double y_factor;
+  boolean x_is_absolute;
+  boolean y_is_absolute;
+  double scale;
+} gaussian_2d_mapping_t;
+
+paramdef struct gaussian_2d_mapping_t
+{
+  p_descr = "GAUSSIAN_2D_REMAP params";
+  p_help = "the main input is the 'X' variable, the y_field_name is the 'Y' variable, and the mapping is f(x,y) = 1.0 - exp(-scale*(x*xfactor + y*yfactor)), where x and y may or may not be absolute values of input based on the the x_is_absolute and y_is_absolute settings";
+  p_default = {};
+} parm_2d_gaussian_mapping[];
+
+
+
+typedef struct
+{
+  double x;
+  double y;
+} Fuzzy_t;
+
+commentdef
+{
+  p_header = "Fuzzy Function params";
+  p_text = 
+    " Used internally for various filters, and for REMAP filter\n"
+    " index 0 up to 11, each one has any number of :\n"
+    "   x = fuzzy x value\n"
+    "   y = fuzzy y value\n";
+};
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "0 fuzzy f";
+  p_default = {};
+} fuzzy0[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "1 fuzzy f";
+  p_default = {};
+} fuzzy1[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "2 fuzzy f";
+  p_default = {};
+} fuzzy2[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "3 fuzzy f";
+  p_default = {};
+} fuzzy3[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "4 fuzzy f";
+  p_default = {};
+} fuzzy4[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "5 fuzzy f";
+  p_default = {};
+} fuzzy5[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "6 fuzzy f";
+  p_default = {};
+} fuzzy6[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "7 fuzzy f";
+  p_default = {};
+} fuzzy7[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "8 fuzzy f";
+  p_default = {};
+} fuzzy8[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "9 fuzzy f";
+  p_default = {};
+} fuzzy9[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "10 fuzzy f";
+  p_default = {};
+} fuzzy10[];
+paramdef struct Fuzzy_t
+{
+  p_descr = "11 fuzzy f";
+  p_default = {};
+} fuzzy11[];
+
+
+typedef struct
+{
+  string name;
+  double weight;
+} Combine_t;
+
+commentdef
+{
+  p_header = "Combine params";
+  p_text = 
+    " for filters AVERAGE, PRODUCT, MIN, MAX\n"
+    " index 0 up to 9, each one has any number of :\n"
+    "   name = data name\n"
+    "   weight = weight for AVERAGE case\n";
+};
+
+paramdef struct Combine_t
+{
+  p_descr = "0 combine params";
+  p_default = {};
+} combine0[];
+
+paramdef struct Combine_t
+{
+  p_descr = "1 combine params";
+  p_default = {};
+} combine1[];
+
+paramdef struct Combine_t
+{
+  p_descr = "2 combine params";
+  p_default = {};
+} combine2[];
+
+paramdef struct Combine_t
+{
+  p_descr = "3 combine params";
+  p_default = {};
+} combine3[];
+
+paramdef struct Combine_t
+{
+  p_descr = "4 combine params";
+  p_default = {};
+} combine4[];
+
+paramdef struct Combine_t
+{
+  p_descr = "5 combine params";
+  p_default = {};
+} combine5[];
+
+paramdef struct Combine_t
+{
+  p_descr = "6 combine params";
+  p_default = {};
+} combine6[];
+
+paramdef struct Combine_t
+{
+  p_descr = "7 combine params";
+  p_default = {};
+} combine7[];
+
+paramdef struct Combine_t
+{
+  p_descr = "8 combine params";
+  p_default = {};
+} combine8[];
+
+paramdef struct Combine_t
+{
+  p_descr = "9 combine params";
+  p_default = {};
+} combine9[];
+
+

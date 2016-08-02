@@ -1,0 +1,88 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1990 - 2016                                         
+# ** University Corporation for Atmospheric Research (UCAR)                 
+# ** National Center for Atmospheric Research (NCAR)                        
+# ** Boulder, Colorado, USA                                                 
+# ** BSD licence applies - redistribution and use in source and binary      
+# ** forms, with or without modification, are permitted provided that       
+# ** the following conditions are met:                                      
+# ** 1) If the software is modified to produce derivative works,            
+# ** such modified software should be clearly marked, so as not             
+# ** to confuse it with the version available from UCAR.                    
+# ** 2) Redistributions of source code must retain the above copyright      
+# ** notice, this list of conditions and the following disclaimer.          
+# ** 3) Redistributions in binary form must reproduce the above copyright   
+# ** notice, this list of conditions and the following disclaimer in the    
+# ** documentation and/or other materials provided with the distribution.   
+# ** 4) Neither the name of UCAR nor the names of its contributors,         
+# ** if any, may be used to endorse or promote products derived from        
+# ** this software without specific prior written permission.               
+# ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+# ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+# ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+###########################################################################
+#
+# Makefile for mem module
+#
+# Mike Dixon, RAP, NCAR, Boulder, Co, USA, 80307
+#
+# Nov 1994
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+LOC_INCLUDES = -I../include
+LOC_CFLAGS =
+
+TARGET_FILE = ../libtoolsa.a
+
+#
+# file lists
+#
+
+HDRS = \
+	../include/toolsa/mem.h
+
+SRCS = \
+	blockbuf.c \
+	mem.c \
+	mem_buf.c \
+	umalloc.c
+
+CPPC_SRCS = \
+	MemBuf.cc \
+	TEST_TaArray.cc
+
+# testing
+
+TEST_PROG = test_mem
+TEST_OBJS = TEST_toolsa_mem.o
+
+#
+# general targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+
+#
+# local targets
+#
+
+depend: depend_generic
+
+#
+# testing
+#
+
+test:
+	$(MAKE) _CC="$(CC)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" $(TEST_PROG)
+
+$(TEST_PROG): $(TEST_OBJS)
+	$(CC) $(DEBUG_FLAG) $(TEST_OBJS) \
+	$(LDFLAGS) -o $(TEST_PROG) -ltoolsa -lm $(SYS_LIBS)
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

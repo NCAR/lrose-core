@@ -1,0 +1,4 @@
+#!/bin/csh
+#
+#
+./mcidas2mdv  -params test.params -if 190200.area 

@@ -1,0 +1,390 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// paramter definitions MdvBlender
+//
+// Paul Prestopnik, RAP, NCAR
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2014
+//
+
+commentdef {
+  p_header = "Program name: MdvBlender";
+  p_text = "MdvBlender offers advanced methods for combining similar datasets.  Initially it will support a dithering like probabilistic combination.";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+typedef enum {
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE,
+  DEBUG_GARRULOUS
+} debug_t;
+ 
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "The options are DEBUG_OFF, DEBUG_NORM and DEBUG_VERBOSE. "
+	"If set, debug messages will be printed appropriately";
+} debug;
+
+
+/***********************************************************************
+ * Process control parameters.
+ */
+
+commentdef
+{
+  p_header = "PROCESS CONTROL PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+typedef enum
+{
+  REALTIME,
+  ARCHIVE,
+  RUNTIME
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operating mode";
+  p_default = REALTIME;
+} run_mode;
+
+paramdef string
+{
+  p_descr = "Start time";
+  p_help = "run time is in the form <YYYY MM DD HH MM SS>";
+  p_default = "2005 01 19 18 00 00";
+} start_time;
+
+paramdef string
+{
+  p_descr = "Run time";
+  p_help = "run time is in the form <YYYY MM DD HH MM SS>";
+  p_default = "2005 01 19 18 00 00";
+} end_time;
+
+paramdef string
+{
+  p_descr = "Run time";
+  p_help = "run time is in the form <YYYY MM DD HH MM SS>";
+  p_default = "2005 01 19 18 00 00";
+} run_time;
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+
+paramdef string
+{
+  p_descr = "Input1 URL";
+  p_help = "This is the URL for the first input to be blended.";
+  p_default = "mdvp:://localhost::mdv/metar_mapper";
+} input1_url;
+
+paramdef int
+{
+  p_descr = "Input1 maximum valid age";
+  p_help = "units are seconds";
+  p_default = 1800;
+} input1_max_valid_age;
+
+paramdef string
+{
+  p_descr = "Input2 URL";
+  p_help = "This is the URL for the second input to be blended.";
+  p_default = "mdvp:://localhost::mdv/model_metars";
+} input2_url;
+
+paramdef int
+{
+  p_descr = "Input2 maximum valid age";
+  p_help = "units are seconds";
+  p_default = 1800;
+} input2_max_valid_age;
+
+paramdef string
+{
+  p_descr = "Trigger URL";
+  p_help = "This is the URL to use to trigger processing.  The valid time of the new data is used as the runtime for\n"
+  	   "ARCHIVE mode, but not for realtime mode where the current time is used as the runtime.";
+  p_default = "mdvp:://localhost::mdv/metar_mapper";
+} trigger_url;
+
+paramdef int
+{
+  p_descr = "Trigger maximum valid age";
+  p_help = "units are seconds";
+  p_default = 1800;
+} trigger_max_valid_age;
+
+paramdef int
+{
+  p_descr = "Sleep after Trigger";
+  p_help = "units are seconds";
+  p_default = 0;
+} trigger_sleep;
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_FLOAT32;
+  p_descr = "Set encoding type.";
+} encoding_type;
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4,
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_RLE;
+  p_descr = "Set compression type.";
+} compression_type;
+
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "URL to use for storing results.";
+  p_default = "mdvp:://localhost::mdv/blended_metars";
+} output_url;
+
+paramdef int
+{
+  p_descr = "Expire Offset";
+  p_help = "This many seconds will be added to the write time to the run time to calculate the expire time.\n"
+  	   "Generally this is 2 to 4 times the expected output interval.";
+  p_default = 3600;
+} expire_offset;
+
+paramdef boolean
+{
+  p_descr = "Flag to turn on writing ldata information.";
+  p_help = "The default is true.";
+  p_default = true;
+} write_ldata;
+
+
+typedef enum {
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON, OUTPUT_PROJ_LAMBERT, OUTPUT_PROJ_STEREOGRAPHIC, OUTPUT_PROJ_MERCATOR, OUTPUT_PROJ_INPUT1
+} output_projection_t;
+
+paramdef enum output_projection_t {
+  p_default = OUTPUT_PROJ_INPUT1;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT - (x,y) Cartesian data in km from a given origin. LATLON - lat/lon grid with constant grid spacing. LAMBERT - Lambert conformal projection. INPUT1 - use the same grid as the input1 data. INPUT1 only works for data on Lambert and Stereographic projections.";
+} output_projection;
+
+
+typedef struct {
+  double lat;
+  double lon;
+} output_origin_t;
+
+paramdef struct output_origin_t {
+  p_descr = "Origin of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LAMBERT, OUTPUT_PROJ_STEREOGRAPHIC.";
+  p_default = {40.0, -104.0};
+} output_origin;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "lat 1 value for Lambert conformal projection.";
+} lambert_lat1;
+
+paramdef double {
+  p_default = 60.0;
+  p_descr = "lat 2 value for Lambert conformal projection.";
+} lambert_lat2;
+
+paramdef double {
+  p_default = 60.0;
+  p_descr = "Tangent latitude for stereographic projection.";
+} stereographic_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Tangent longitude for stereographic projection.";
+} stereographic_tangent_lon;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} output_grid_t;
+
+paramdef struct output_grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "The grid params for the output grid.";
+  p_default = {300, 300, -149.5, -149.5, 1.0, 1.0};
+} output_grid;
+
+/***********************************************************************
+ * Pass Through Configurarion
+ */
+
+commentdef
+{
+  p_header = "Pass Through Configuration";
+  p_text = "Parameters desfining the pass through of inputs.";
+};
+
+typedef struct {
+  string inFieldName;
+  string outFieldName;
+  string outFieldLongName;
+} pass_through_t;
+
+paramdef struct pass_through_t {
+  p_descr = "These fields from INPUT1 will be passed through to the output with only field names changed.";
+  p_help = "";
+  p_default = { {"","",""} };
+} input1_pass_throughs[];
+  
+paramdef struct pass_through_t {
+  p_descr = "These fields from INPUT2 will be passed through to the output with only field names changed.";
+  p_help = "";
+  p_default = { {"","",""} };
+} input2_pass_throughs[];
+  
+
+/***********************************************************************
+ * Blender Configurarion
+ */ 
+
+commentdef
+{
+  p_header = "Blender Configuration";
+  p_text = "Parameters desfining the blender process.";
+};
+
+
+typedef struct {
+  string outputFieldNames;
+  string outputFieldLongNames;
+  string outputFieldUnits;
+  string input1WeightField;
+  double input1ConstantWeight;
+  string input1FieldNames;
+  string input2WeightField;
+  double input2ConstantWeight;
+  string input2FieldNames;
+  string outputRounding;
+} blender_info_t;
+
+paramdef struct blender_info_t {
+  p_descr = "Define the blending to be done";
+  p_help = "outputFieldNames and inputFieldNames are comma separated lists & must have the same number of elements.  If a weight field is an empty string, the constant weight is used instead. All fields in a single struct are tied together (i.e. one probabilistic deicision is made and then applied to all fields in the same blender_info element";
+  p_default = {
+    { "CLD_BASE_HGT,CLOUD_COVER", "Cloud Base Height,Cloud Cover", "m MSL,max for GP",
+      "CBH_CONF", 0.5,"CLD_BASE_HGT,CLOUD_COVER", 
+      "", 0.25, "CLD_BASE_HGT,CLOUD_COVER",
+      "ROUND_NONE,ROUND_UP"}
+  };
+} blender_info[];
+
+paramdef double
+{
+  p_descr = "Grid delta tolerance";
+  p_help = "Threshold when comparing grid dimensions.";
+  p_default = { 0.01 };
+} grid_delta_tol;
+
+typedef enum {
+  BLEND_DITHER,
+  BLEND_AVERAGE
+} blender_t;
+ 
+paramdef enum blender_t
+{
+  p_default = BLEND_DITHER;
+  p_descr = "Blender type";
+  p_help = "The options are BLEND_DITHER and BLEND_AVERAGE. "
+	"Data can be combined in different ways";
+} blend_method;
+
+typedef enum {
+  ROUND_NONE,
+  ROUND_UP,
+  ROUND_DOWN,
+  ROUND_CLOSEST
+} round_t;
+
+paramdef boolean
+{
+  p_descr = "Flag to output dither decision field.";
+  p_help = "The default is false.";
+  p_default = false;
+} output_decision;
+
+paramdef int
+{
+  p_descr = "Number to seed the random number generator";
+  p_help = "If negative, current time will be used\n";
+  p_default = -1;
+} random_seed;

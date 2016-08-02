@@ -1,0 +1,25 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_allocate_histogram</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;<br>
+<a href=histogram_struct.html><a href=RSL_histogram_struct.html>Histogram</a></a> *RSL_allocate_histogram(int low, int hi);</b> 
+<hr>
+
+<h3>Description</h3>
+Allocate space for the structure <b>Histogram</b>. <i>low</i> and <i>hi</i> specify the low and high dBZ bin values. The bin spacing is 1 dBZ. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, Vallocate_histogram returns a pointer to the structure <b>Histogram</b>. Otherwise, NULL is returned and errno is set. 
+<hr>Author: <a href=david.wolff.html>David B. Wolff</a> 
+</body>

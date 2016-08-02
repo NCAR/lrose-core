@@ -1,0 +1,4 @@
+#! /bin/csh
+
+RadarCal -params RadarCal.test -f data/rvp8_cal_atten_2007032* -debug
+

@@ -1,0 +1,20 @@
+/**********************************************************
+ * paramdef.one_filter_app
+ *
+ * This file contains the TDRP parameter definitions for one_filter_app
+ * 
+ */
+
+commentdef
+{
+  p_header = "one_filter_app";
+  p_text = "This program is an example of an app with a single filter";
+};
+
+paramdef double
+{
+  p_descr = "app param";
+  p_help = "";
+  p_default = 0;
+} param;
+

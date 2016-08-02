@@ -1,0 +1,14 @@
+XCOMM Choose platform here
+#define LINUX
+#undef SGI
+#undef SGI_GCC
+#undef AIX
+
+XCOMM for linux choose btwn RH73 and RH9
+#ifdef LINUX
+#undef _RH9
+#undef _RH73
+#undef _FC4
+#define _ES4
+#endif
+

@@ -1,0 +1,60 @@
+FiltAlg is a library upon which to build algorithms that filter 
+input 3 dimensional data volumes using the Ds Server software.
+
+A set of filters is part of the library, and an additional set of
+filters are presumed part of the app.  The app can make use of any
+of the lib filters.
+
+Two examples are provided that show how to build an app..
+One that has several filters,   multi_filter_app
+One that has only one filter    one_filter_app
+
+A typical application built upon this lib would be written as follows:
+
+1. Design the filters for the app.  These are derived from the Filter 
+   base class. Put parameters for these filters into a 'paramdef' file
+   for the app.
+
+2. Write an application "Parms" class that is derived from FiltAlgParms,
+   it should implement the two virtual methods:
+
+     int app_max_elem_for_filter(const FiltAlgParams::data_filter_t f) const;
+
+     void *app_parms(void) const;
+
+   and contain the app Params object that is automatically created by the
+   'paramdef' file.
+
+3. For each app filter, write a class for that filter that is 
+   a derived class of the Filter class in the lib, implement all the 
+   methods in FilterVirtualFunctions.hh.
+
+4. Write a Main.cc that calls the appropriate lib functions.
+
+5. write appFiltCreate.cc function similar to the examples.
+
+6. build 
+
+7. create an example param file by running the app with  the command line
+   argument '-print_params'.
+   The lib params should show up first, then the app params.
+
+8. Save a copy of the -print_params output, and edit that to create an
+   actual paramter file, putting in the filters you want to run, in order.
+
+
+Actual example apps and parms:
+
+apps/icing/src/FreezingLevel
+apps/radar/src/RePOH
+projects/IHL/ihlHome/params/FreezingLevel*
+projects/REPoH/REPoH.*
+
+
+   
+   
+
+
+
+
+

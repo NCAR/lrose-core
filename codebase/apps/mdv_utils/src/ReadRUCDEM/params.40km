@@ -1,0 +1,125 @@
+/**********************************************************************
+ * TDRP params for ReadDEM
+ **********************************************************************/
+
+///////////// BaseName ////////////////////////////////
+//
+// Single string value.
+// Base name for input file.
+// Type: string
+//
+
+BaseName = "/data/save/USA";
+
+///////////// OutName /////////////////////////////////
+//
+// Single string value.
+// Name of output MDV file.
+// Type: string
+//
+
+OutName = "topo.mdv.lambert.40km";
+
+///////////// debug ///////////////////////////////////
+//
+// Single int value.
+// Debug messages or not.
+// Type: int
+//
+
+debug = 1;
+
+///////////// flat ////////////////////////////////////
+//
+// Single int value.
+// Flat earth or not. If not, LatLon.
+// Type: int
+//
+
+// not flat indicates lambert in this case.
+flat = 0;
+
+///////////// AllowOutsideDEM /////////////////////////
+//
+// Single int value.
+// Use bad value if outside of DEM grid. If not, fail.
+// Type: int
+//
+
+AllowOutsideDEM = 0;
+
+///////////// Nx //////////////////////////////////////
+//
+// Single int value.
+// Size in X direction.
+// Type: int
+//
+
+Nx = 151;
+
+///////////// Ny //////////////////////////////////////
+//
+// Single int value.
+// Size in Y direction.
+// Type: int
+//
+
+Ny = 113;
+
+///////////// dx //////////////////////////////////////
+//
+// Single float value.
+// Pixels size in x.
+// Type: float
+//
+
+dx = 40.634998;
+
+///////////// dy //////////////////////////////////////
+//
+// Single float value.
+// Pixel size in y.
+// Type: float
+//
+
+dy = 40.634998;
+
+///////////// lat_origin //////////////////////////////
+//
+// Single float value.
+// Center of LL grid cell.
+//  LL corner of whole grid is -609.52496
+// Type: float
+//
+
+lat_origin = -589.207458;
+
+///////////// lon_origin //////////////////////////////
+//
+// Single float value.
+// Lower left corner if latlon, center if flat earth.
+//  LL corner of whole grid is -3352.3873
+// Type: float
+//
+
+lon_origin = -3332.069824;
+
+///////////// SubstituteMissing ///////////////////////
+//
+// Single bool value.
+// (If TRUE substitue Missing values (typically sea) with 
+//   SubstituteMissingValue.
+// Type: boolean
+//
+
+SubstituteMissing = TRUE;
+
+///////////// SubstituteMissingValue //////////////////
+//
+// Single float value.
+// Value to put in for missing values, if SubstituteMissing is TRUE.
+// Type: float
+//
+
+SubstituteMissingValue = -10;
+

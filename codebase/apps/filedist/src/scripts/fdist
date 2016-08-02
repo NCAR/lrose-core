@@ -1,0 +1,1168 @@
+#!/usr/local/bin/perl --
+# fdist: File distribution utility.  Tres Hofmeister <tres@ncar.ucar.edu>
+# CVS: $Id: fdist,v 1.1 1996/11/28 01:25:36 dixon Exp $
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Initialization.
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+# RCS revision.
+$revision = '$Revision: 1.1 $';
+$revision =~ s|^[^\d.]*([\d.]+).*|$1|;
+
+# Perl 5.002 is required.
+require 5.002;
+
+# Modules.
+use Cwd;
+use Net::Ping;
+use Getopt::Std;
+use POSIX 'sys_wait_h';
+
+# Programs used: rsh(1), rcp(1).
+$ENV{'PATH'} = '/usr/ucb:/usr/bsd:/bin:/usr/bin';
+
+# Defaults.
+$cfile			= 'fdist.cf';	# Configuration file.
+$log_level		= 'info';	# syslog(3) level.
+$log_facility		= 'local7';	# syslog(3) facility.
+$channels		= 4;		# Number of send channels.
+
+$def_interval		= 2;		# Local directory polling interval.
+$def_r_interval		= 20;		# Recursive polling interval.
+$def_rfs_warn		= 90;		# Remote filesystem warning level.
+$def_rfs_limit		= 95;		# Remote filesystem limit level.
+$def_up_timeout		= 10;		# Remote up test timeout.
+$def_rsh_timeout	= 30;		# Remote shell timeout.
+$def_rcp_timeout	= 30;		# Remote copy timeout.
+
+($prog = $0) =~ s|.*/||;
+
+# Clean up the command line.
+$0 = "$prog @ARGV";
+
+$usage = <<EOF;
+Usage: $prog [-acdkls] [-f file] [-p pat] [-q sec] [-t tag] [-x channels]
+  -a  Send all files, rather than only new files.
+  -c  Create a default configuration file.
+  -d  Print debugging messages.
+  -f  Specify an alternate configuration file, default: fdist.cf
+  -k  Enable remote filesystem capacity checking.
+  -l  Log miscellaneous information via syslog(3).
+  -p  Send only files matching the Perl regular expression `pattern'.
+  -q  Send files only after they have been quiescent for `sec' seconds.
+  -r  Recursively search for files in subdirectories.
+  -s  Enable checksum testing for files sent (requires perl on remotes).
+  -t  Specify tag for use with a master configuration file.
+  -x  Specify the number of file transmit channels.
+EOF
+
+# Unbuffer output.
+$| = 1;
+
+# Process command line arguments.
+getopts('f:acdklp:q:rst:x:') || die $usage;
+$send_all = $opt_a if $opt_a;		# Send all, not just new, files.
+$debug = $opt_d if $opt_d;		# Print debug messages.
+$main::cfile = $opt_f if $opt_f;	# Configuration file.
+$pattern = $opt_p if $opt_p;		# Desired file pattern.
+$r_qtime = $opt_q if $opt_q;		# Required file quiescence time.
+$tag = $opt_t if $opt_t;		# Process specific conf. tag.
+$channels = $opt_x if $opt_x;		# Number of send channels.
+
+$def_interval = $def_r_interval if $opt_r;
+
+# Standard libraries.
+require 'stat.pl';
+require 'ctime.pl' if $opt_c;
+require 'syslog.pl' if $opt_l;
+require 'find.pl' if $opt_r;
+
+# Print the program name and version number.
+print "$prog, v. $revision\n";
+
+# Silence complaints from "perl -cw" about these variables.
+$ST_SIZE = $ST_SIZE;
+$opt_k = $opt_k;
+
+# Create a configuration file.
+if ($opt_c) {
+    &create_cfile($main::cfile);
+    die "Please edit \"$main::cfile\" as appropriate, and restart.\n";
+}
+die "No configuration file.\n", $usage unless -f $main::cfile;
+
+# Fully qualify the configuration file name.
+$main::cfile = getcwd . "/$main::cfile" unless $main::cfile =~ m%^/%;
+
+# Read the configuration file.
+print "Parsing configuration file... " if $debug;
+&configure($main::cfile);
+print "done.\n" if $debug;
+
+# List the remote hosts, users and data directories.
+if ($debug) {
+    print "Remotes:\n";
+    foreach $remote (@main::remotes) {
+	print "  $rarg{$remote}:$rdir{$remote}\n";
+    }
+}
+
+# Verify and initialize each of the remote hosts.
+print "Verifying remote access and directory structure...\n" if $debug;
+foreach $remote (@main::remotes) {
+    &init_host($remote);
+}
+print "...verification done.\n" if $debug;
+
+# Initialize syslog(3).
+&openlog($prog, 'cons|pid', $log_facility) if $opt_l;
+
+# Move to the data directory.
+chdir($main::dir) || die "chdir: $main::dir: $!";
+
+# Set up signal handlers now, just before the main loop.
+$SIG{'HUP'} = 'hup';
+$SIG{'USR1'} = 'usr1';
+$SIG{'INT'} = $SIG{'QUIT'} = 'handler';
+
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Main loop.  Monitor the data directory, indefinitely.
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+for (;;) {
+    # Reconfigure, if this has been requested.
+    if ($reconfigure) {
+	print "Rereading configuration file.\n";
+	&configure($main::cfile);
+
+	# Reinitialize all of the remote hosts, as even previously
+	# initialized hosts may have had their data directories
+	# changed.
+	foreach $remote (@main::remotes) {
+	    &init_host($remote);
+	}
+	$reconfigure = 0;
+    }
+
+    # Scan the data directory for new files, and distribute any found.
+    &distribute if &scan($main::dir);
+
+    # Reap any exited children.
+    &reap if $active;
+
+    sleep($main::interval);
+}
+
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Subroutines.
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+# &wanted: Recursively find subdirectories modified since the last scan.
+#     Called by the library routine &find used in &scan.
+sub wanted {
+    my($mtime);
+
+    # Skip everything but directories.
+    return unless -d $_;
+
+    ($mtime = (stat(_))[$ST_MTIME]) || die "stat: $!";
+
+    # Add only updated directories to the list to be scanned.
+    return unless $mtime > $main::mtime{$name};
+
+    $main::mtime{$name} = $mtime;
+    push(@dirs, $name);
+}
+
+# &scan: Scan a directory for new files.
+# Arguments: $dir: the directory to be scanned.
+# Returns: 1 if any new files were found, otherwise undef.
+sub scan {
+    my($directory) = shift;
+    my($time, $found, %mark, @files, @new_files);
+
+    # &find needs to see @dirs, thus the dynamic scope.
+    local(@dirs);
+
+    # Recursively search for subdirectories with new files.
+    if ($opt_r) {
+	&find($directory) if $opt_r;
+    }
+    # Get the only the main directory's modification time, and put it on
+    # the list of directories to be scanned if it's been updated.
+    else {
+	($mtime = (stat($directory))[$ST_MTIME]) || die "stat: $!";
+	push(@dirs, $directory) if $mtime > $main::mtime{$directory};
+    }
+
+    # Scan each modified directory in turn for new files.
+    foreach $dir (@dirs) {
+	my($subdir);
+
+	# Check the directory contents.
+	opendir(DIR, $dir) || die "Can't open directory $dir";
+
+	# Get the current contents of the directory.
+	@files = readdir(DIR);
+	closedir(DIR);
+
+	# Exclude any files not matching our pattern.  Do so here before
+	# the directory name is prepended.
+	@files = grep(/$main::pattern/o, @files) if $main::pattern;
+
+	# Prepend the directory name to the list of files, with name of
+	# the main data directory removed.
+	($subdir = $dir) =~ s|$directory/||;
+	map($_ = "$subdir/$_", @files) unless $dir eq $directory;
+
+	# Note the current time.
+	$time = time;
+
+	# Look for new files, but skip what's lying around initially,
+	# unless we've been asked to send all files.
+	map($mark{$_}++, @{$old_files{$dir}});
+	@new_files = grep(!$mark{$_}, @files) if $main::initialized
+	    || $send_all;
+
+	# Exclude subdirectories.
+	@new_files = grep(!-d, @new_files);
+
+	# Skip the current and parent directory entries.
+	@new_files = grep(!/^\.\.?$/, @new_files);
+
+	# Record the time each new file was noticed.
+	map($main::time_detected{$_} = $time, @new_files);
+
+	if ($debug) {
+	    my($s) = @new_files == 1 ? '' : 's';
+	    print join("\n  ", "New file$s:", @new_files), "\n" if @new_files;
+	}
+
+	# Queue any new files, in host/file pairs.
+	if (@new_files) {
+	    my($host, $file);
+
+	    # Note that we found something.
+	    $found = 1;
+
+	    foreach $file (@new_files) {
+		foreach $host (@main::remotes) {
+		    push(@main::queue, join($;, $host, $file));
+		}
+	    }
+	}
+
+	# Prepare for the next iteration of the loop.
+	$main::mtime{$dir} = $mtime;
+	@{$old_files{$dir}} = @files;
+    }
+    $main::initialized = 1;
+
+    # Return true if we found any files to send.
+    $found;
+}
+
+
+# &configure: Parse the configuration file.
+# Arguments: $cfile: the configuration filename to be processed.
+# Returns: n/a, terminates process if configuration cannot be completed.
+sub configure {
+    my($cfile) = shift;
+    my($remote, @rtmp, %tmp);
+
+    # Reset these arrays, for the case where the file is being reread.
+    # The scalar values should remain the same unless their value
+    # specifically has been changed.
+    undef @main::remotes;
+    undef %ruser;
+    undef %rdir;
+
+    # Read the configuration file.
+    open(CONF, $cfile) || die "open: $cfile: $!";
+    while (<CONF>) {
+	s/\s*#.*//;		# Strip comments.
+	s/^\s*//;		# Strip leading white space.
+	s/\s*$//;		# Strip trailing white space; includes "\n".
+	next if /^\s*$/;	# Skip blank lines.
+
+	# Handle lines continued with a trailing backslash.
+	if (s/\\$//) {
+	    while ($_ .= <CONF>) {
+		last unless s/\\$//;
+	    }
+	}
+
+	# Search for the beginning of a tag block.  If no tag is defined,
+	# or if the tag found is not our tag, skip to the end of the
+	# block.  Note: the closing brace must appear on a line by itself,
+	# and no keywords may appear on the line with the opening brace.
+	if (/^tag:\s*(\w*)/ && ($1 ne $tag || !defined $tag)) {
+	    while (<CONF>) {
+		last if /}/;
+	    }
+	}
+	# The tag is valid.  Skip the tag line, and continue processing.
+	next if /^tag:/;
+
+	# Skip any block opening or closing brace lines.
+	next if /{|}/;
+
+	# Search for valid keywords.  These are required.
+	$dir = $_, next			if s/^directory:\s*//;
+	push(@rtmp, split), next        if s/^remotes:\s*//;
+	if (s/^remote:\s*//) {
+	    my($host, @tags) = split;
+
+	    # If no tag has been defined, we only need the host info.
+	    push(@rtmp, $host), next unless $tag;
+
+	    # Grab the host if our tag is in its tag list.
+	    push(@rtmp, $host) if grep(/^$tag$/, @tags);
+
+	    next;
+	}
+
+	# These are optional.
+	$rdir_default = $_, next	if s/^rdir_default:\s*//;
+	$ruser_default = $_, next	if s/^ruser_default:\s*//;
+	$rtask = $_, next		if s/^rtask:\s*//;
+
+	# These carry defaults.
+	$interval = $_, next		if s/^interval:\s*//;
+	$rfs_warn = $_, next		if s/^rfs_warn:\s*//;
+	$rfs_limit = $_, next		if s/^rfs_limit:\s*//;
+	$up_timeout = $_, next		if s/^up_timeout:\s*//;
+	$rsh_timeout = $_, next		if s/^rsh_timeout:\s*//;
+	$rcp_timeout = $_, next		if s/^rcp_timeout:\s*//;
+	die "Unknown keyword at $main::cfile line $..\n";
+    }
+    close(CONF) || warn "close: $main::cfile: $!";
+
+    # Die if required configuration information is missing.
+    die "No remotes specified in $main::cfile\n" unless @rtmp;
+    die "No directory specified in $main::cfile\n" unless $dir;
+
+    # Set defaults.
+    $interval = $def_interval unless $interval;
+    $rfs_warn = $def_rfs_warn unless $rfs_warn;
+    $rfs_limit = $def_rfs_limit unless $rfs_limit;
+    $up_timeout = $def_up_timeout unless $up_timeout;
+    $rsh_timeout = $def_rsh_timeout unless $rsh_timeout;
+    $rcp_timeout = $def_rcp_timeout unless $rcp_timeout;
+
+    # Process the remotes array.
+    foreach (@rtmp) {
+	my($user, $host, $dir);
+
+	# Both a remote user and directory were specified.
+	if (($user, $host, $dir) = /^(.+)@(.+):(.+)/) {
+	    push(@main::remotes, $host);
+	    $rdir{$host} = $dir;
+	    $ruser{$host} = $user;
+	}
+	# Only a remote directory was specified.
+	elsif (($host, $dir) = /^(.+):(.+)/) {
+	    push(@main::remotes, $host);
+	    $rdir{$host} = $dir;
+	    $ruser{$host} = $ruser_default if $ruser_default;
+	}
+	# Only a remote user was specified.
+	elsif (($user, $host) = /^(.+)@(.+)/) {
+	    push(@main::remotes, $host);
+	    $ruser{$host} = $user;
+	    # The remote dir. must be set to something for various things
+	    # to work properly...
+	    $rdir{$host} = $rdir_default ? $rdir_default : ".";
+	}
+	# Neither was specified, only a hostname.
+	else {
+	    push(@main::remotes, $_);
+	    $rdir{$_} = $rdir_default ? $rdir_default : ".";
+	}
+    }
+    # Sort the array uniquely, so each file will be sent only once.
+    @main::remotes = grep(!$tmp{$_}++, @main::remotes);
+
+    # Build the rarg and rtmp hashes, as a convenience for calls to the
+    # &rsh and &rcp subroutines.
+    foreach $remote (@main::remotes) {
+	$rarg{$remote} =
+	    $ruser{$remote} ? "$ruser{$remote}\@$remote" : $remote;
+	$rtmp{$remote} = $rdir{$remote} ? $rdir{$remote} . "/tmp" : "tmp";
+    }
+}
+
+
+# &send: Send a file to a host.
+# Arguments:
+#     $host: a hostname.
+#     $file: a filename.
+# Returns: 1 on success, 0 on failure, -1 if host is down.
+sub send {
+    my($host, $file) = @_;
+
+    my(
+	$date, $sum, $nsum, $rsum, $rcmd, $rfs_level, $basename, $dirname,
+	$sum_retry, $rcp_retry, $rsh_retry, %time_transmit, %time_complete,
+	$result
+    );
+
+    # Checksum the file.
+    if ($opt_s) {
+	print "$$: calculating local checksum.\n" if $debug;
+	    $sum = &sum($file);
+    }
+
+    # Copy the file to the remote.
+    sendfile: {
+	($dirname = $file)  =~ s|/[^/]*$||;
+	($basename = $file) =~ s|.*/||;
+
+	printf("%s: %s: sending \"$file\" to $host:$rdir{$host}\n", $$, &gmt)
+	    if $debug;
+
+	# Is the remote host really up?
+	unless (pingecho($host, $up_timeout)) {
+	    warn "$$: Warning!  Host $host down or unreacheable.  ",
+		"(File \"$file\" not sent.)\n";
+	    &slog($log_level, "MSG:^Host $host down or " .
+		"unreacheable.  (File \"$file\" not sent.)");
+	    return(-1);
+	}
+
+	# Has the host just now come up?  If so, (re)initialize it.
+	if ($main::down{$host}) {
+	    print "$$: Host $host up.  Reinitializing...\n";
+	    return(0) unless &init_host($host);
+	    print "$$: Host $host initialization complete.\n";
+	}
+
+	# Is there room on the remote filesystem?
+	if ($opt_k) {
+	    $rfs_level = &rfscheck($host, $rdir{$host});
+	    if ($rfs_level >= $rfs_warn) {
+		warn "$$: Warning: $host:$rdir{$host} at ",
+		    "$rfs_level% capacity\n";
+		&slog($log_level, "MSG:^$host:$rdir{$host} at " .
+		    "$rfs_level%% capacity, filesystem nearing full.");
+	    }
+	    if ($rfs_level >= $rfs_limit) {
+		warn "$$: Warning!  Skipping $host!\n";
+		&slog($log_level, "MSG:^$host:$rdir{$host} at " .
+		    "$rfs_level%% capacity, file \"$file\" not sent!");
+		return(0);
+	    }
+	    print "$$: target filesystem at $rfs_level% capacity.\n"
+		if $debug;
+	}
+
+	# Record the time the remote copy was begun.
+	$time_transmit{$file, $host} = time;
+
+	# Copy the file to the temporary directory on the remote.  Copy to the
+	# remote filename explicitly, thus causing an error message if the
+	# temporary directory is accidentally removed after startup.
+	until (&rcp($file, "$rarg{$host}:$rtmp{$host}/$basename",
+		$rcp_timeout)) {
+	    if ($rcp_retry >= 2) {
+		warn "$$: giving up on copy to $host after ",
+		    "$rcp_retry retries.\n";
+		&slog($log_level, "MSG:^Remote copy to $host failed.  " .
+		    "File \"$file\" not sent!");
+		return(0);
+	    }
+	    else {
+		warn "$$: remote copy failed, resending $file to $host\n";
+		$rcp_retry++;
+	    }
+	}
+
+	# Record the time the remote copy completed.
+	$time_complete{$file, $host} = time;
+
+	# Checksum the remote file.
+	if ($opt_s) {
+	    $rsum = &rsum($host, "$rtmp{$host}/$file");
+	    print "$$: local checksum: \"$sum{$file}\", remote checksum: ",
+		"\"$rsum\"\n" if $debug;
+	}
+
+	# Compare local and remote checksums.
+	if ($opt_s && $rsum != $sum{$file}) {
+	    # The check may have failed because the file was modified between
+	    # the time the local checksum was calculated and the time rcp(1)
+	    # completed.  If this is the case, recalculate the local file's
+	    # checksum, and try again.
+	    if ($nsum = &sum($file) ne $sum{$file}) {
+		$sum{$file} = $nsum;
+		warn "$$: local checksum has changed, ",
+		    "resending $file to $host.\n";
+		redo sendfile;
+	    }
+	    else {
+		if ($sum_retry >= 2) {
+		    warn "$$: giving up on $host after $sum_retry retries.\n";
+		    &slog($log_level, "MSG:^$host: remote " .
+			"checksum failure, file \"$file\" not verified!");
+		    return(0);
+		}
+		else {
+		    warn "$$: checksum mismatch, resending $file to $host\n";
+		    $sum_retry++;
+		    redo sendfile;
+		}
+	    }
+	}
+
+	# mv(1) the file into the data directory, for atomicity.  If
+	# we're using recursive mode, is this file in a subdirectory?
+	if ($opt_r && $file =~ /\//) {
+	    $rcmd = "mkdir -p $rdir{$host}/$dirname; " .
+		"mv $rtmp{$host}/$basename $rdir{$host}/$dirname";
+	}
+	else {
+	    $rcmd = "mv $rtmp{$host}/$file $rdir{$host}";
+	}
+
+	# Interpolate simple variables in $rtask.  This gives access to
+	# some internal variables in the remote task string, e.g., $file.
+	# Note: there's no error checking...
+	if ($rtask) {
+	    $rtask =~ s/(\$\w+)/$1/gee;
+	    $rcmd .= " && $rtask";
+	}
+	print "$$: rcmd: $rcmd\n" if $debug;
+
+	unless (defined($result = &rsh($rarg{$host}, $rsh_timeout,
+		$rcmd))) {
+	    if ($rsh_retry >= 2) {
+		warn "$$: giving up on $host after ",
+		    "$rsh_retry retries.\n";
+		&slog($log_level, "MSG:^$host: remote shell " .
+		    "failure, file \"$file\" not moved to data directory!");
+		return(0);
+	    }
+	    else {
+		warn "$$: $host: remote command failure, retrying...\n";
+		$rsh_retry++;
+		redo sendfile;
+	    }
+	}
+	print "$$: rtask result: $result" if $debug;
+	print "$$: send of $host:$file done.\n" if $debug;
+
+	# Log the file transfer information.  Format:
+	# ^rhost^filename^filesize^Td^Tx^Tr
+
+	# rhost: remote destination hostname.
+	# filename: file being sent.
+	# filesize: size of the file, in bytes.
+	# Td: time the file was detected by fdist.
+	# Tx: time the file send was initiated.
+	# Tr: time the file send was completed.
+	# The default value on error is zero.
+
+	$log_entry = '^' . join('^',
+	    $host,
+	    $file,
+	    (stat($file))[$ST_SIZE] || 0,
+
+	    # Clean up these hashes as they're used.
+	    delete $main::time_detected{$file} || 0,
+	    delete $time_transmit{$file, $host} || 0,
+	    delete $time_complete{$file, $host} || 0
+	);
+	&slog($log_level, $log_entry);
+    }
+    return(1);
+}
+
+
+# &distribute: Distribute files to hosts.
+# Arguments: n/a
+# Returns: n/a
+sub distribute {
+    my($host, $file, $cpid);
+
+    # Retrieve a host/file pair from the queue.
+    while (($host, $file) = &retrieve) {
+
+	#!# 5.002 hack alert: Well, this is some kind of lame-ass shit!
+	last unless $host && $file;
+
+	# Is there a channel available?  If not, block until a child exits.
+	&reap('block') unless $active < $channels;
+
+	# Child code.
+	unless ($cpid = fork) {
+	    my($exit);
+
+	    # Modify the argument vector.
+	    $0 = "($prog) send $host:$file";
+
+	    $exit = &send($host, $file);
+
+	    # Convert the subroutine return value to a "normal" process
+	    # return value in the range 0-255.
+	    $exit = 255 if $exit == -1;
+	    exit($exit);
+	}
+
+	$active++;
+	$pids{$cpid} = $host;
+    }
+}
+
+
+# &retrieve: Retrieve a task from the queue.
+# Arguments: n/a
+# Returns: An array containing a host/file pair, or undef if no tasks
+#     are available.
+sub retrieve {
+    my($pair, $host, $file);
+
+    # If all remotes are active, we need to wait for one to finish.
+    &reap('block') unless $active < @main::remotes;
+
+    while (@main::queue) {
+	my(@tmp);
+
+	# Process the queue.
+	while ($pair = shift @main::queue) {
+	    ($host, $file) = split(/$;/, $pair);
+
+	    # Skip this task if the host is active.
+	    push(@tmp, $pair), next if $active{$host};
+
+	    # Skip this task if the file was recently modified.
+	    if ($opt_q) {
+		my($mtime, $qtime);
+
+		($mtime = (stat($file))[$ST_MTIME]) || die "stat: $!";
+		$qtime = time - $mtime;
+
+		unless ($qtime >= $main::r_qtime) {
+		    my($s) = $qtime == 1 ? '' : 's';
+		    printf("File \"$file\" quiescent only %d second$s, " .
+			"returning to queue.\n", $qtime) if $debug;
+
+		    push(@tmp, $pair), next;
+		}
+	    }
+
+	    # Return any skipped tasks to the queue.
+	    unshift(@main::queue, @tmp);
+
+	    # Mark the host active and return the pair.
+	    $active{$host} = 1;
+	    return($host, $file);
+	}
+	# Return any skipped tasks to the queue.
+	unshift(@main::queue, @tmp);
+
+	# There is no task available for any ready host.  Scan the data
+	# directory again, looking for new files to send until the queue
+	# has drained.  This way we can continue to utilize available
+	# channels until slower connections are serviced.
+	next if &scan($main::dir);
+
+	# The scan failed to turn up anything, but perhaps a child has
+	# exited in the mean time.  If so, we can process the queue
+	# again.
+	next if &reap;
+
+	# No children have exited, so pause here to avoid scanning in a
+	# what might otherwise be a rather tight loop.
+	sleep($main::interval);
+    }
+
+    # The queue is empty.
+    undef;
+}
+
+
+# &reap: wait(2) for child processes, then mark the hosts they were
+#     servicing inactive.
+# Arguments: $block: With an argument, perform a blocking wait for any
+#     single process, otherwise perform a non-blocking wait(2) for each
+#     and every exited child.
+# Returns: The number of children reaped.
+sub reap {
+    my($block) = shift;
+    my($exited, $pid, $status) = 0;
+
+    # Perform a blocking wait(2) for a child to exit.
+    if ($block) {
+	warn "waitpid: $!" if ($pid = waitpid(-1, 0)) < 0;
+
+	# Collect the exit status of the child.
+	$status = WEXITSTATUS($?);
+
+	# Note the host's status.
+	$down{$pids{$pid}} = 1 if $status == 255;
+	$down{$pids{$pid}} = 0 if $status == 1;
+
+	# Mark the host inactive, and decrement the channel counter.
+	$active{$pids{$pid}} = 0;
+	$active--;
+
+	# Clean up the hash.
+	delete $pids{$pid};
+
+	$exited = 1;
+    }
+    # Perform a non-blocking wait(2) for any child processes.
+    else {
+	while (($pid = waitpid(-1, WNOHANG)) > 0) {
+
+	    # Collect the exit status of the child.
+	    $status = WEXITSTATUS($?);
+
+	    # Note the host's status.
+	    $down{$pids{$pid}} = 1 if $status == 255;
+	    $down{$pids{$pid}} = 0 if $status == 1;
+
+	    # Mark the host inactive, and decrement the channel counter.
+	    $active{$pids{$pid}} = 0;
+	    $active--;
+
+	    # Clean up the hash.
+	    delete $pids{$pid};
+
+	    $exited++;
+	}
+    }
+
+    # Return the number of children reaped.
+    $exited;
+}
+
+
+# &sum: Checksum a file.
+# Arguments: $file: the name of the file to checksum.
+# Returns: A 16 bit checksum of the file.
+sub sum {
+    my($file) = shift;
+    local($/) = undef;
+    my($sum);
+
+    open(FILE, $file) || die "open: $file: $!";
+    $sum = unpack("%16C*", <FILE>);
+    close(FILE) || warn "close: $file: $!";
+
+    # Return the checksum.
+    $sum;
+}
+
+
+# &rsum: Checksum a remote file.
+# Arguments:
+#     $remote: the name of the remote system.
+#     $file: the filename to checksum.
+# Returns: A 16 bit checksum of the file, or undef on &rsh failure.
+sub rsum {
+    my($remote, $file) = @_;
+    my($rcmd, $rsum);
+
+    $rcmd = q["perl -e 'undef $/; open(F, \"] . $file .
+	q[\"); print unpack(\"%16C*\", <F>);'"];
+
+    chop($rsum = &rsh($rarg{$remote}, $rsh_timeout, $rcmd));
+
+    # Return the checksum.
+    $rsum;
+}
+
+
+# &rcp: Copy a file to a remote system, with a timeout.
+# Arguments:
+#     $file: the filename to send.
+#     $target: the remote target, in either of the formats:
+#         user@host:directory
+#         host:directory
+#     "directory" is optional; if not specified (e.g., "host:") the
+#         remote home directory is used.
+#     $timeout: the timeout, in seconds.
+# Returns: 0 on timeout or if rcp(1) exits with a non-zero value, 1
+#     otherwise (probable success).
+sub rcp {
+    my($file, $target, $timeout) = @_;
+    my($cmd, $ruser, $cpid, $remote, $signal, $ztime, $cexit, $exit);
+
+    # Split the destination into a host and target directory.
+    ($remote, $target) = split(/:/, $target, 2);
+
+    # Has a different remote user been specified?
+    ($ruser, $remote) = split(/@/, $remote, 2) if $remote =~ /@/;
+
+    if ($ruser) {
+	$cmd = "rcp $file $ruser\@$remote:$target";
+    }
+    else {
+	$cmd = "rcp $file $remote:$target";
+    }
+
+    # Child code.
+    unless ($cpid = fork) {
+	exec("$cmd");
+	die "exec: $!";
+    }
+
+    # Set up the timeout.
+    $ztime = time + $timeout;
+
+    # Loop until the child times out or exits.
+    while (time < $ztime) {
+	$cexit = 1, last if waitpid($cpid, WNOHANG) > 0;
+	select(undef, undef, undef, .5)
+    }
+
+    # Kill the child process if necessary.
+    unless ($cexit) {
+	kill(9, $cpid);
+	warn "$$: Remote copy timeout: PID $cpid killed.\n" if $debug;
+
+	# Is it a bad idea to block here?
+	warn "wait: $!" if waitpid($cpid, 0) < 0;
+    }
+
+    # Check exit status: The child exited normally.
+    if (WIFEXITED($?)) {
+	$exit = WEXITSTATUS($?);
+	if ($exit != 0) {
+	    warn "$$: $cpid (rcp) exit status: $exit\n" if $debug;
+	}
+	return(!$exit);
+    }
+    # The child was signaled.
+    elsif (WIFSIGNALED($?)) {
+	$signal = WTERMSIG($?);
+	warn "$$: $cpid (rcp) exited on signal $signal\n" if $debug;
+	return(!$signal);
+    }
+    # The child was stopped for some reason.  Note: we should never get
+    # here with a blocking wait...
+    else {
+	$signal = WSTOPSIG($?);
+	warn "$$: $cpid (rcp) stopped on signal $signal, killing $cpid\n"
+	    if $debug;
+	kill(9, $cpid);
+
+	# Is it a bad idea to block here?
+	warn "wait: $!" if waitpid($cpid, 0) < 0;
+
+	return(!$signal);
+    }
+}
+
+
+# &rsh: Run a command on a remote system, with a timeout.
+# Arguments:
+#     $remote: the name of the remote system.
+#     $timeout: the timeout, in seconds.
+#     @rcmd: an array consisting of shell commands to be passed to the
+#         remote system.  The elements of the array are (implicitly)
+#         joined with a space character before being passed to exec().
+# Returns: The undefined value on timeout or if rcp(1) exits with a
+#     non-zero value, a string containing any output from the remote
+#     command otherwise (probable success).
+sub rsh {
+    my($remote, $timeout, @rcmd) = @_;
+    my($rcmd, $ruser, $return, $cpid, $tmp, $signal, $ztime, $cexit, $exit);
+
+    undef $return;
+
+    # Has a different remote user been specified?
+    ($ruser, $remote) = split(/@/, $remote, 2) if $remote =~ /@/;
+
+    if ($ruser) {
+	$rcmd = "rsh $remote -n -l $ruser '@rcmd'";
+    }
+    else {
+	$rcmd = "rsh $remote -n '@rcmd'";
+    }
+
+    # Child code.
+    unless ($cpid = fork) {
+	# Temporary file for output.
+	$tmp = "/tmp/rshout.$$";
+	open(STDOUT, ">$tmp") || die "open: $tmp: $!";
+	open(STDERR, ">&STDOUT");
+
+	exec("$rcmd");
+	die "exec: $!";
+    }
+
+    # Set up the timeout.
+    $ztime = time + $timeout;
+
+    # Loop until the child times out or exits.
+    while (time < $ztime) {
+	$cexit = 1, last if waitpid($cpid, WNOHANG) > 0;
+	select(undef, undef, undef, .5)
+    }
+
+    # Kill the child process if necessary.
+    unless ($cexit) {
+	kill(9, $cpid);
+	warn "$$: Remote shell timeout: PID $cpid killed.\n" if $debug;
+
+	# Is it a bad idea to block here?
+	warn "wait: $!" if waitpid($cpid, 0) < 0;
+    }
+
+    # Collect exit status: The child exited normally.
+    if (WIFEXITED($?)) {
+	$exit = WEXITSTATUS($?);
+	if ($exit != 0) {
+	    warn "$$: $cpid (rsh) exit status: $exit\n" if $debug;
+	}
+	# Gather the output of the remote command.  A null string must be
+	# returned when the rsh(1) succeeds but produces no output.
+	else {
+	    $return = "";
+	    $tmp = "/tmp/rshout.$cpid";
+	    open(TMP, $tmp) || die "open: $tmp: $!";
+	    while (<TMP>) {
+		$return .= $_;
+		$return .= "\n" unless /\n$/;
+	    }
+	    close(TMP) || warn "close: $tmp: $!";
+	}
+    }
+    # The child was signaled.
+    elsif (WIFSIGNALED($?)) {
+	$signal = WTERMSIG($?);
+	warn "$$: $cpid (rsh) exited on signal $signal\n" if $debug;
+    }
+    # The child was stopped for some reason.  Note: we should never get
+    # here with a blocking wait...
+    else {
+	$signal = WSTOPSIG($?);
+	warn "$$: $cpid (rsh) stopped on signal $signal, killing $cpid\n"
+	    if $debug;
+
+	kill(9, $cpid);
+
+	# Is it a bad idea to block here?
+	warn "wait: $!" if waitpid($cpid, 0) < 0;
+    }
+
+    unlink($tmp) || warn "unlink: $tmp: $!" if -f $tmp;
+
+    # Return the result, or undef on failure.
+    $return;
+}
+
+
+# &rfscheck: Check a remote filesystem's capacity.
+# Arguments:
+#     $remote: the name of the remote system.
+#     $fs: the filesystem to be checked, or the name of a file on the
+#         filesystem.
+# Returns: The current capacity, in percent, of the remote filesystem,
+#     or the output of the remote command on strange sum(1) or rsh(1)
+#     errors.
+sub rfscheck {
+    my($remote, $fs) = @_;
+    my($capacity);
+
+    warn "$remote: remote command failure"
+	unless defined($capacity = &rsh($rarg{$remote}, $rsh_timeout,
+	    "df $fs"));
+
+    # Extract the filesystem capacity, if it looks valid.
+    $capacity = $1 if $capacity =~ /(\d+)%/;
+
+    # Return the filesystem capacity.
+    $capacity;
+}
+
+
+# &create_cfile: Create a generic configuration file.
+# Arguments: $cfile: the name of the file to be created.
+# Returns: n/a
+sub create_cfile {
+    my($cfile) = shift;
+
+    chop($date = &ctime(time));
+
+    open(CFILE, ">$cfile") || die "open: $cfile: $!";
+    print CFILE <<EOF;
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# $prog.cf: Configuration file for $prog, created $date.
+# Comments begin with `#' anywhere on a line, and continue to the end of
+# line.  Long lines may be continued with `\\'.
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+# The remote hosts, host:directory pairs, or user\@host:directory triplets
+# to receive copies of the files, separated by whitespace.  They may also
+# be specified on separate lines with the "remote:" keyword.  If this is a
+# master configuration file, tags may be specified after the host name
+# (separated by white space) to specify which products will be sent to
+# each host.  Use the "remote:" keyword, with one host per line in this
+# case.  Required.
+remotes: 
+
+# The local directory where files to be distributed reside.  Required.
+directory: 
+
+# The default remote directory to receive the files, for hosts without a
+# specific directory specified.  Optional.
+rdir_default: 
+
+# The default remote username on remote systems, for hosts without a
+# specific username specified.  The effective UID of the process is used
+# if this is not specified.  Optional.
+ruser_default: 
+
+# A command to be run on each remote system after each file has been
+# successfully sent.  Simple internal scalar variables will be
+# interpolated, e.g., \$file.  Optional.
+rtask: 
+
+# The directory polling interval, in seconds.  Unless in recursive mode,
+# this can be a small value, as all that is done is to stat(2) the data
+# directory itself to determine if it's been updated.  In recursive mode,
+# however, the entire directory tree must be scanned.
+# Default value: $def_interval, recursive default: $def_r_interval
+interval: 
+
+# How full a remote filesystem must be to generate a warning, in percent.
+# Default value: $def_rfs_warn
+rfs_warn: 
+
+# How full a remote filesystem must be to stop sending files, in percent.
+# Default value: $def_rfs_limit
+rfs_limit: 
+
+# The timeout value for the host "up" test.
+# Default value: $def_up_timeout
+up_timeout: 
+
+# The timeout value for remote shell commands.
+# Default value: $def_rsh_timeout
+rsh_timeout: 
+
+# The timeout value for remote copy commands.
+# Default value: $def_rcp_timeout
+rcp_timeout: 
+
+# A product tag, if this is a master configuration file.  Tags are
+# specified on the $prog command line with the -t flag, and allow multiple
+# instances of $prog to share a configuration file.  Options set here
+# override those above.  Optional.
+tag: example {
+    # Insert product-specific $prog configuration here.
+}
+EOF
+
+    close(CFILE) || warn "close: $cfile: $!";
+}
+
+
+# &init_host: Verify and initialize the directory structure on a remote
+#     host, and verify that the host is up.
+# Arguments: $host: the host to initialize.
+# Returns: 1 on success, 0 on failure.
+sub init_host {
+    my($host) = shift;
+    my($error) = 0;
+    my($result);
+
+    # Is the host up?
+    if (pingecho($host, $up_timeout)) {
+
+	# Can we access the host?
+	unless (defined &rsh($rarg{$host}, $rsh_timeout, ":")) {
+	    warn "Warning!  $rarg{$host}: access denied.\n";
+	    $down{$host} = 1;
+	    return 0;
+	}
+
+	# Does the remote data directory exist?
+	$error = 1, warn "$host: remote command failure"
+	    unless defined($result = &rsh($rarg{$host}, $rsh_timeout,
+		"test -d $rdir{$host} && echo True"));
+
+	$error = 1, warn "$host:$rdir{$host}: No such file or directory.\n"
+	    unless $result eq "True\n";
+
+	# Create the remote temporary directory.
+	$error = 1, warn "$host: remote command failure.\n"
+	    unless defined($result = &rsh($rarg{$host}, $rsh_timeout,
+		"test -d $rtmp{$host} ||",
+		    "(rm -f $rtmp{$host}; mkdir $rtmp{$host})"));
+
+	# Don't remove the host from the hosts array, but mark it "down"
+	# and try to reinitialize again later.  This way, we may waste as
+	# much as two &rsh timeouts each time we send to this host until
+	# it is properly initialized, but at least we'll resume normal
+	# service at that point...
+	if ($error) {
+	    warn "Warning!  Problem initializing host $host.\n";
+		&slog($log_level, "MSG:^Problem with host $host.  " .
+		    "Skipping host initialization.");
+	    $main::down{$host} = 1;
+	}
+    }
+    # The host is down.
+    else {
+	warn "Warning!  Host $host unreachable!  ",
+	    "Skipping host initialization.\n";
+	$main::down{$host} = 1;
+    }
+
+    # Return error status.
+    !$error;
+}
+
+
+# &gmt: Get the current Greenwich Mean Time (UTC).
+# Arguments: none.
+# Returns: A string containing the current GMT, e.g. "23:54:41 GMT"
+sub gmt {
+    my($sec, $min, $hour) = gmtime(time);
+    sprintf("%2d:%02d:%02d GMT", $hour, $min, $sec);
+}
+
+
+# &slog: Log a message via syslog(3) if logging is enabled.
+# Arguments: as &syslog (see syslog.pl).
+# Returns: as &syslog (see syslog.pl).
+sub slog {
+    &syslog(@_) if $opt_l;
+}
+
+
+# Generic signal handler.
+sub handler {
+    my($sig) = shift;
+
+    # What else do we need to do?
+    &closelog() if $opt_l;
+    print "SIG$sig: exiting\n";
+    exit(0);
+}
+
+
+# HUP signal handler.
+sub hup {
+    my($sig) = shift;
+
+    print "SIG$sig: preparing to reread configuration file...\n";
+    $reconfigure = 1;
+}
+
+
+# USR1 signal handler.
+sub usr1 {
+    my($sig) = shift;
+
+    $debug = !$debug;
+    printf "SIG$sig: Toggling printing of debugging messages %s.\n",
+	$debug ? 'on' : 'off';
+}

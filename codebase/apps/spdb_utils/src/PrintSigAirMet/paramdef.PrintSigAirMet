@@ -1,0 +1,324 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+////////////////////////////////////////////////////////////////////////
+// paramdef.PrintSigAirMet
+//
+// TDRP parameter definitions for PrintSigAirMet.
+//
+////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Application: PrintSigAirMet";
+  p_text = "PrintSigAirMet reads SigAirMet data from Spdb, reformats it and prints it to stdout. Optionally it follows a click point in CIDD shared memory and prints out the Sigmet or Airmet closest to that point.";
+}
+
+////////////////////////////////////////////////////////////////////////
+// Debugging and process control
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+////////////////////////////////////////////////////////////////////////
+// Time and location
+
+commentdef {
+  p_header = "TIME AND LOCATION FOR RETRIEVAL";
+}
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} ttime_t;
+
+paramdef struct ttime_t {
+  p_default = {2001, 01, 01, 01, 01, 01};
+  p_descr = "Valid time.";
+  p_help = "Used if follow_cidd is false.";
+} valid_time;
+
+typedef struct {
+  double lat;
+  double lon;
+} closest_point_t;
+
+paramdef struct closest_point_t {
+  p_default = { 0.0, 0.0 };
+  p_descr = "Closest point location.";
+  p_help = "Get data closest to this point. This is the default. See bounding_box alternative below.";
+} closest_point;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Apply a bounding box to the data.";
+  p_help = "If set, only consider sigmets with centroids within the bounding box. Default is closest point.";
+} apply_bounding_box;
+
+typedef struct {
+  double min_lon;
+  double max_lon;
+  double min_lat;
+  double max_lat;
+} bounding_box_t;
+
+paramdef struct bounding_box_t {
+  p_default = { -180.0, 180.0, -90.0, 90.0 };
+  p_descr = "Bounding box limits.";
+  p_help = "See 'apply_bounding_box'. Longitude values should be between -180 and +180.";
+} bounding_box;
+
+////////////////////////////////////////////////////////////////////////
+// Option to follow CIDD.
+// In this mode the app will watch the CIDD shared memory interface
+// and print out the sigmets closest to the click point and time.
+
+commentdef {
+  p_header = "FOLLOW CIDD MODE";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Follow CIDD.";
+  p_help = "In this mode the application will watch the CIDD shared memory interface and print out the sigmets closest to the click point and time.";
+} follow_cidd;
+
+paramdef boolean {
+  p_descr = "Use times from Cidd to retrieve data.";
+  p_help = "If false uses current time.";
+  p_default = true;
+} use_cidd_time;
+
+paramdef int {
+  p_descr = "CIDD time adjustment (secs)";
+  p_help = "Number of seconds to add to (subtract from if negative) CIDD time. This can be useful to get the desired behavior with respect to expire time. For example, in the AOAWS, we need the SIGMETs to expire one second early, to avoid overlap with the next SIGMET. In this case, we set this adjustment to 1 second.";
+  p_default = 0;
+} cidd_time_adjustment;
+
+paramdef int {
+  p_descr = "mouse button recognized";
+  p_help = "0 = any, 1 = left, 2 = middle, 3 = right.";
+  p_default = 0;
+} mouse_button;
+
+paramdef int {
+  p_descr = "sleep milli-seconds";
+  p_help = "Number of milli-seconds to sleep between checks for mouse clicks.";
+  p_min = 500;
+  p_default = 1000;
+} sleep_msecs;
+
+paramdef int {
+  p_descr = "Automatic click interval - secs";
+  p_help = "Number of seconds between automatic clicks.  If the user hasn't clicked anywhere after this number of seconds, we will simulate a user click in the same place as before and will update the information.  If <= 0, no automatic updates of the display are done.";
+  p_default = 60;
+} auto_click_interval;
+
+typedef struct {
+  double lat;
+  double lon;
+} startup_location_t;
+
+paramdef struct startup_location_t {
+  p_default = { 0.0, 0.0 };
+  p_descr = "startup click location";
+  p_help = "Lat/lon position of METAR station to display if the user hasn't clicked on a location.";
+} startup_location;
+
+paramdef int {
+  p_descr = "Shared memory status key";
+  p_help = "Id for the shared memory status segment used for communicating with the display.";
+  p_default = 42500;
+} coord_shmem_key;
+
+paramdef boolean {
+  p_descr = "Flag to not wait for display shared memory.";
+  p_help = "If set, this program will not wait for shared memory segment from the display to be set ready.";
+  p_default = false;
+} no_wait_for_shmem;
+
+////////////////////////////////////////////////////////////////////////
+// SPDB data retrieval
+
+commentdef {
+  p_header = "DATA RETRIEVAL";
+}
+
+paramdef string {
+  p_descr = "URL for reading SPDB data.";
+  p_help = "See DIDSS documentation for URL specs.";
+  p_default = "spdb/sigmet";
+} input_url;
+
+paramdef boolean {
+  p_descr = "Option to log spdb get errors to log directory.";
+  p_help = "If true, SPDB errors will be logged to the directory specified by errors_log_dir. The reason for dealing with errors in this way is that stdout from this program is displayed as the main product. It is difficult to separate stderr from stdout and pipe stderr to a logging filter. Therefore we log the spdb errors directly.";
+  p_default = false;
+} log_spdb_errors;
+
+paramdef string {
+  p_descr = "Errors log directory.";
+  p_help = "See log_spdb_errors.";
+  p_default = "$(ERRORS_LOG_DIR)";
+} errors_log_dir;
+
+/////////////////////////////////////////////////////////////////////////
+// printing and display
+
+commentdef {
+  p_header = "PRINTING AND DISPLAY OUTPUT";
+}
+
+paramdef string {
+  p_default = "No data found.";
+  p_descr = "Message to print if no data are returned.";
+  p_help = "Message is printed followed by a new line if no data are found.";
+} no_data_message;
+
+paramdef int {
+  p_default = -1;
+  p_descr = "Max number of items to print in a single request.";
+  p_help = "Ignored if negative.";
+} nmax_items_print;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to wrap long text lines.";
+  p_help = "If true, lines will be wrapped at word boundaries to fit on a line of max_line_length.";
+} wrap_long_lines;
+
+paramdef int {
+  p_default = 78;
+  p_descr = "Maximum number of characters on a line.";
+  p_help = "Used for delimiter lines and wrapping of long text lines.";
+} max_line_length;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to print a new-line between items.";
+  p_help = "If true, a new line is printed between each item.";
+} newline_between_items;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print a delimiter line after individual reports.";
+  p_help = "If true, a line of '-' dashes will be printed below each report. The length of the delimiter line is max_line_length.";
+} delimiter_line_after_each_item;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print items in reverse order.";
+} reverse;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print a delimiter line between groups of reports.";
+  p_help = "If true, a line of '=' dashes will be printed above each group of items printed. The length of the delimiter line is max_line_length.";
+} delimiter_line_between_groups;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of lines to scroll off the top before starting to print.";
+  p_help = "This is sometimes useful to clear the output window of previous output.";
+} nlines_scroll_before_printing;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Print cancelled reports as well as valid reports.";
+  p_help = "If false, cancelled reports will be skipped.";
+} print_cancelled_reports;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Print banner with valid time requested. Only valid with run_once";
+  p_help = "If true, prints a banner with the valid time requested before any stations";
+} print_banner;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Print interpreted Source and ID";
+  p_help = "Interpreted source and ID.";
+} print_source_id;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Print SIG/AIRMET start time";
+  p_help = "Interpreted start time.";
+} print_start_time;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Print expire time";
+  p_help = "Interpreted expire time.";
+} print_end_time;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Print weather type";
+  p_help = "Interpreted Weather type.";
+} print_weather_type;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Print flight levels";
+  p_help = "Interpreted flight levels.";
+} print_flight_levels;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Print FIR name (if known)";
+  p_help = "Interpreted FIR name.";
+} print_fir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Print whether polyon is FIR boundary, not SIG/AIRMET boundary. This occurs when cannot decode SIG/AIRMET polygon but can decode SIG/AIRMET FIR.";
+  p_help = "Polygon is FIR boundary.";
+} print_if_polygon_is_fir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Print movement speed and direction";
+  p_help = "Interpreted movement speed and direction";
+} print_movement;
+

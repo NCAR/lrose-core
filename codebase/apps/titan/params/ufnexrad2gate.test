@@ -1,0 +1,275 @@
+/****************************************************
+ * TDRP params for ufnexrad2gate
+ ****************************************************/
+
+/*
+ * file information.
+ * Information about the input files used by ufnexrad_to_socket.
+ *
+ * Type: struct
+ * Array elem size: 24 bytes
+ * Array has no max number of elements
+ */
+file_info = {{
+  "ref", /* file_id_string:string */
+  "ref", /* field_name:string */
+  100, /* field_factor:long */
+  50, /* field_scale:long */
+  -3000, /* field_bias:long */
+  TRUE  /* primary_flag:boolean */
+}, {
+  "vel", /* file_id_string:string */
+  "vel", /* field_name:string */
+  100, /* field_factor:long */
+  25, /* field_scale:long */
+  -3200, /* field_bias:long */
+  FALSE  /* primary_flag:boolean */
+}, {
+  "swd", /* file_id_string:string */
+  "swd", /* field_name:string */
+  100, /* field_factor:long */
+  25, /* field_scale:long */
+  0, /* field_bias:long */
+  FALSE  /* primary_flag:boolean */
+}};
+
+/*
+ * tilt table.
+ * Table of tilt information including target elevation.
+ *
+ * Type: struct
+ * Array elem size: 16 bytes
+ * Array has no max number of elements
+ */
+tilt_table = {{
+  0.5, /* target_elevation:double */
+  1, /* primary_tilt:long */
+  2  /* secondary_tilt:long */
+}, {
+  1.5, /* target_elevation:double */
+  3, /* primary_tilt:long */
+  4  /* secondary_tilt:long */
+}, {
+  2.5, /* target_elevation:double */
+  5, /* primary_tilt:long */
+  5  /* secondary_tilt:long */
+}, {
+  3.5, /* target_elevation:double */
+  6, /* primary_tilt:long */
+  6  /* secondary_tilt:long */
+}, {
+  4.5, /* target_elevation:double */
+  7, /* primary_tilt:long */
+  7  /* secondary_tilt:long */
+}, {
+  6, /* target_elevation:double */
+  8, /* primary_tilt:long */
+  8  /* secondary_tilt:long */
+}, {
+  10, /* target_elevation:double */
+  9, /* primary_tilt:long */
+  9  /* secondary_tilt:long */
+}, {
+  14.5, /* target_elevation:double */
+  10, /* primary_tilt:long */
+  10  /* secondary_tilt:long */
+}, {
+  19.5, /* target_elevation:double */
+  11, /* primary_tilt:long */
+  11  /* secondary_tilt:long */
+}};
+
+/*
+ * radar parameters.
+ * Default radar parameters.
+ *
+ * Type: struct
+ * Default: <structure> 
+ */
+radar_params = {
+  0, /* radar_id:long */
+  64, /* samples_per_beam:long */
+  1666.67, /* pulse_width:double */
+  10  /* wavelength:double */
+};
+
+/*
+ * debug flag.
+ * TRUE if running in debug mode; FALSE otherwise.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+debug = FALSE;
+
+/*
+ * malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * field order flag.
+ * TRUE if each field is transmitted in order; FALSE if the field
+ *   values are interspersed.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+data_field_by_field = FALSE;
+
+/*
+ * set time to current flag.
+ * TRUE if data time is set to the current time; FALSE if the data
+ *   time is sent unchanged.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+set_time_to_current = FALSE;
+
+/*
+ * scan mode.
+ * SCAN_SECTOR_MODE, SCAN_RHI_MODE or SCAN_SURVEILLANCE_MODE.
+ *
+ * Type: enum
+ * Default: SCAN_SURVEILLANCE_MODE 
+ * Legal values: SCAN_SECTOR_MODE, SCAN_RHI_MODE,
+ *   SCAN_SURVEILLANCE_MODE.
+ */
+scan_mode = SCAN_SURVEILLANCE_MODE;
+
+/*
+ * summary interval.
+ * Interval between printing summary information.
+ *
+ * Type: long
+ * Default: 360 
+ */
+summary_interval = 360;
+
+/*
+ * print summary flag.
+ * Print summary information while running?.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+summary_print = FALSE;
+
+/*
+ * header interval.
+ * Interval between printing header information.
+ *
+ * Type: long
+ * Default: 360 
+ */
+header_interval = 360;
+
+/*
+ * print header flag.
+ * Print header information while running?.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+header_print = FALSE;
+
+/*
+ * output port.
+ * Port used for sending radar information to clients.
+ *
+ * Type: long
+ * Default: 60000 
+ */
+output_port = 60000;
+
+/*
+ * check gate spacing flag.
+ * Check gate spacing while running?.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_gate_spacing = FALSE;
+
+/*
+ * target gate spacing.
+ * Target gate spacing in meters.
+ *
+ * Type: long
+ * Default: 250 
+ */
+target_gate_spacing = 250;
+
+/*
+ * target start range.
+ * Output start range in meters, usually half of gate spacing.
+ *
+ * Type: long
+ * Default: 125 
+ */
+target_start_range = 125;
+
+/*
+ * device read wait.
+ * Delay between beam reads in micro-seconds.
+ *
+ * Type: long
+ * Default: 0 
+ */
+device_read_wait = 0;
+
+/*
+ * num output gates.
+ * Number of gates to output for each beam.
+ *
+ * Type: long
+ * Default: 920 
+ */
+ngates_out = 920;
+
+/*
+ * num gates dropped.
+ * Number of start gates to be dropped.
+ *
+ * Type: long
+ * Default: 0 
+ */
+ngates_dropped = 0;
+
+/*
+ * time correction.
+ * Seconds added to the data time before transmission.
+ *
+ * Type: long
+ * Default: 0 
+ */
+time_correction = 0;
+
+/*
+ * input file path.
+ * Input file directory path specification.
+ *
+ * Type: string
+ * Default: "." 
+ */
+input_file_path = "/space2/rehak/work/princeton";
+
+/*
+ * input file specifier.
+ * Regular expression, like that used in the ls command, specifying
+ *   the input files of interest.
+ *
+ * Type: string
+ * Default: "*" 
+ */
+input_file_spec = "*.uf";
+
+

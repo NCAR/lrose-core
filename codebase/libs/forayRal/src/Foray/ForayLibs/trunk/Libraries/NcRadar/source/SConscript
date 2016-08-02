@@ -1,0 +1,19 @@
+# -*- python -*-
+#
+#
+
+
+Import('env')
+
+sources  = ['NcRadarFile.cpp','NcRadarFileName.cpp','NcRadarFile_Protected.cpp'];
+hFiles   = ['NcRadarFile.h','NcRadarFile_inline.h','NcRadarFileName.h']
+
+libNode  = env.Library('ncradar',source = sources, 
+                       CPPPATH=[env.installLocalInc,env.netcdfInc]);
+
+localInstallLibNode = env.Install(env.installLocalLib ,libNode);
+localInstallIncNode = env.Install(env.installLocalInc ,hFiles);
+
+env.Default([libNode,localInstallLibNode,localInstallIncNode])
+env.Install(env.installLib,libNode);
+env.Install(env.installInc,hFiles);

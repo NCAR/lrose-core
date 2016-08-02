@@ -1,0 +1,131 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for TestMdv
+ *
+ * Paddy McCarthy, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Jan 1999
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "mdvp:://ncwf:40000:web";
+  p_descr = "DS URL string.";
+  p_help = "URL for server to be contacted.";
+} url;
+
+paramdef string {
+  p_default = "1999 05 10 15 50 00";
+  p_descr = "Data time string.";
+  p_help = "Time for data requested. Format is YYYY MM DD HH MM SS";
+} data_time;
+
+typedef enum {
+  GET_VOLUME_MODE, GET_VSECTION_MODE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = GET_VOLUME_MODE;
+  p_descr = "Mode for get request.";
+  p_help = "For GET_VSECTION_MODE, you must fill out the waypoint array. A single waypoint yields a column of data.";
+} mode;
+
+typedef struct {
+  float lat;
+  float lon;
+} waypt_t;
+
+paramdef struct waypt_t {
+  p_default = {{0.0, 0.0}};
+  p_descr = "Waypts for vertical section.";
+  p_help = "For GET_VSECTION_MODE only.";
+} vsection_waypts[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field numbers";
+} vsection_set_field_nums;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Field number list.";
+} vsection_field_nums[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field names";
+} vsection_set_field_names;
+
+paramdef string {
+  p_default = 0;
+  p_descr = "Field nameber list.";
+} vsection_field_names[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set plane number limits";
+} vsection_set_plane_num_limits;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Lower plane num limit.";
+} vsection_lower_plane_num;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Upper plane num limit.";
+} vsection_upper_plane_num;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set plane vlevel limits";
+} vsection_set_plane_vlevel_limits;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Lower plane vlevel limit.";
+} vsection_lower_plane_vlevel;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Upper plane vlevel limit.";
+} vsection_upper_plane_vlevel;
+

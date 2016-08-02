@@ -1,0 +1,89 @@
+/*********************************************************
+ * parameter definitions for Archiver
+ *
+ * Nancy Rehak, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * September 2001
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "The Archiver is a program to collect data files on a "
+             "single machine into a clean directory that can then "
+             "be archived to CD, MSS, tape, etc.";
+}
+
+
+//////////////////////////////////////////////////////////
+// Debugging
+//////////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+}
+
+typedef enum
+{
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "Sets the level of debug messages to be printed";
+  p_default = DEBUG_OFF;
+} debug;
+
+
+//////////////////////////////////////////////////////////
+// Process Control
+//////////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "PROCESS CONTROL PARAMETERS";
+}
+
+paramdef string
+{
+  p_descr = "Top directory for retrieving data files";
+  p_default = "$(RAP_DATA_DIR)";
+} data_dir;
+
+paramdef string
+{
+  p_descr = "Top directory for putting archive data into";
+  p_default = ".";
+} archive_dir;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether we should process this directory.";
+  p_default = true;
+} process_dir;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the data files should be compressed.";
+  p_default = true;
+} compress;
+
+paramdef string
+{
+  p_descr = "Command to use for compressing files.";
+  p_help = "Put a \"^\" character in the command string anywhere the "
+           "filename of the file to be compressed should appear in the "
+           "command.";
+  p_default = "gzip -f ^";
+} compress_cmd;
+
+paramdef string
+{
+  p_descr = "Extension used for compressed files";
+  p_help = "This is used to determine whether a file has been compressed "
+           "so should be consistent with the compress command.";
+  p_default = ".gz";
+} compressed_ext;

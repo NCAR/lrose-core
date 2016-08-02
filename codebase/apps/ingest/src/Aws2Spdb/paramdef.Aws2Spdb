@@ -1,0 +1,124 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for Aws2Spdb
+ *
+ */
+
+commentdef {
+  p_header = "Aws2Spdb reads AWS records from ASCII files and converts them to station_report_t format and writes them to an SPDB data base.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In this mode it is optional to watch for a latest_data_info file. In ARCHIVE mode, it processes all of the data files in the input directory between the start and end times set on the command line. In FILELIST mode, it processes all of the files in the list specified on the command line. In FILELIST mode paths must be fully qualified with respect to the date and time - so if each date has a separate subdirectory the date part of the path must be included.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/$(PROJECT)/raw/AWS";
+  p_descr = "Input directory";
+  p_help = "Directory where input data files can be found.";
+} input_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+
+paramdef string {
+  p_default = "spdbp:://localhost::$(PROJECT)/spdb/aws";
+  p_descr = "Output URL for decoded metars.";
+  p_help = "See the DIDSS docs for details on URL usage.";
+} output_url;
+
+
+
+paramdef string {
+  p_default = "./station_location.txt";
+  p_descr = "Path to station location file";
+  p_help = "Since the METAR reports do not contain lat/lon information, we must determine this from a separate file. The station location file should contain a four letter station identification followed by the latitude and longitude for each station to be processed. Stations not in this file will be ignored.";
+} st_location_path;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Expire time in seconds for each metar";
+  p_help = "This value will be added to the metar time to determine the expire time for the metar";
+} expire_seconds;
+
+
+
+
+
+
+
+
+

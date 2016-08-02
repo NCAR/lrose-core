@@ -1,0 +1,48 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body>
+<a href="index.html"><img SRC="rsl.gif" height=100 width=100></a>
+<hr>
+<h1>
+RSL_edge_to_radar</h1>
+
+<hr>
+<h3>
+Synopsis</h3>
+<b>#include "rsl.h"</b>
+<br><b><a href="RSL_radar_struct.html">Radar</a> *RSL_edge_to_radar(char
+*infile);</b>
+<hr>
+<h3>
+Description</h3>
+Reads the EDGE&nbsp;format and returns a pointer to the structure
+<i>Radar</i>.
+The input file is specified by the string <i>infile</i>. If <i>infile</i>
+is NULL, then stdin is read. The input file may be compressed. If the data
+is compressed, it is passed through the GNU <b>gunzip</b> filter. Thus,
+compressed data can be any format that <b>gzip</b> understands.&nbsp; However,
+the EDGE&nbsp;format uses the lzw compression and requires a supporting
+library to decode the file.&nbsp; The supporting library is called ETOR
+and is distributed separately, since it is not free software.&nbsp; Contact
+Enterprise Electronics Corporation to obtain the ETOR library that decodes
+the EDGE&nbsp;format.
+<p>&nbsp;Enterprise&nbsp; Electronics&nbsp; Corporation, Enterprise,&nbsp;
+Alabama,&nbsp; USA&nbsp; 36330 (334) 347-3478.
+<br>
+<hr>
+<h3>
+Return value</h3>
+Upon successful completion, RSL_edge_to_radar returns a pointer to the
+structure <b>Radar</b>. Otherwise, NULL is returned and errno is set.&nbsp;
+<hr>
+<h3>
+See also</h3>
+<a href="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar&nbsp;</a>
+<hr>
+<p>Author:&nbsp; Don Burrows @&nbsp;Enterprise Electronics Corporation
+</body>
+</html>

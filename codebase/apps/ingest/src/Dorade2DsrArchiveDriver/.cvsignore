@@ -1,0 +1,6 @@
+.deps
+Dorade2DsrArchiveDriver
+__makefile.template
+makefile
+makefile.am
+makefile.in

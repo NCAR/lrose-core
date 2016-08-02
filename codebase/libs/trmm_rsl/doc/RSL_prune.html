@@ -1,0 +1,35 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_prune_...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href=RSL_ray_struct.html>Ray</a> *RSL_prune_ray(<a href=RSL_ray_struct.html>Ray</a> *ray);<br>
+<a href=RSL_sweep_struct.html>Sweep</a> *RSL_prune_sweep(<a href=RSL_sweep_struct.html>Sweep</a> *s);<br>
+<a href=RSL_volume_struct.html>Volume</a> *RSL_prune_volume(<a href=RSL_volume_struct.html>Volume</a> *v</b><b>);</b><br>
+<b><a href=RSL_radar_struct.html>Radar</a> *RSL_prune_radar(<a href=RSL_radar_struct.html>Radar</a> *radar);</b> 
+
+<h3>
+<hr>Description</h3>
+These routines eliminates dataless substructures. A search is conducted for any substructures that contain only header information and, when found, are set to NULL. During the initial allocation step for ingest of a data format, substructure header information is minimially filled. It is not generally known if, for instance, a volume is NULL until it can be determined if there have been no rays assigned to it. In such a case, all sweep pointers have been allocated but no ray pointers assigned. Pruning this volume will result in setting the volume to NULL. A ray is pruned if <b>h.nbins</b> is 0. A sweep is pruned if <b>h.nrays</b> is 0. A volume is pruned if <b>h.nsweeps</b> is 0. A radar is pruned if <b>h.nvolumes</b> is 0. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. Otherwise, a NULL pointer is returned. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_new.html>RSL_new_radar</a>, <a href=RSL_new.html>RSL_new_volume</a>, <a href=RSL_new.html>RSL_new_sweep</a>, <a href=RSL_new.html>RSL_new_ray</a>, <a href=RSL_copy.html><br>
+RSL_copy_volume</a>, <a href=RSL_copy.html>RSL_copy_sweep</a>, <a href=RSL_copy.html>RSL_copy_ray</a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

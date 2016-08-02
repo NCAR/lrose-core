@@ -1,0 +1,256 @@
+/**********************************************************
+ * paramdef.TstormVertStats
+ *
+ * This file contains the TDRP parameter definitions for
+ * TstormVertStats.
+ */
+
+
+commentdef
+{
+  p_header = "TstormVertStats";
+  p_text = "This program reads a 3D gridded field and an associated SPDB "
+           "Titan data base and produces statistics (e.g. mean, max, min) "
+           "for each storm at each vertical level in the grid.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "If true, verbose debug messages will be printed.";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Trigger URL";
+  p_help = "This will generally be the URL of one of the input fields, "
+           "but doesn't have to be.";
+  p_default = "mdvp:://localhost::mdv/trigger";
+} trigger_url;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef struct
+{
+  string url;
+  boolean use_field_name;
+  string field_name;
+  long field_num;
+  long max_input_secs;
+} gridded_field_t;
+
+paramdef struct gridded_field_t
+{
+  p_descr = "Information about the gridded input field.";
+  p_help = "\turl - The URL for retrieving the field.\n"
+           "\tuse_field_name - Flag indicating whether to identify the "
+           "field based on its name or number in the MDV file.\n"
+           "\tfield_name - The name of the field in the MDV file. "
+           "Used only if use_field_name is set to true.\n"
+           "\tfield_num - The number of the field in the MDV file. "
+           "Field numbers start at 0. "
+           "Used only iif use_field_name is set to false.\n"
+           "\tmax_input_secs - The maximum number of seconds that this "
+           "input field is valid. "
+           "If there is no data available for this field within this number "
+           "of seconds of the trigger time, no scatter plot will be produced "
+           "for this time period.\n";
+  p_default = { "mdvp:://localhost::mdv/field1",
+                true,
+                "field1",
+                0,
+                3600 };
+} gridded_field;
+
+paramdef string
+{
+  p_descr = "URL for input SPDB Titan database";
+  p_default = "spdbp:://localhost::spdb/storms";
+} storms_url;
+
+paramdef long
+{
+  p_descr = "Maximum number of seconds that the storm data is valid";
+  p_default = 3600;
+} storms_max_input_secs;
+
+paramdef double
+{
+  p_descr = "Growth factor for polygons in km";
+  p_help = "This can be used to make all of the storms larger or smaller";
+  p_default = 0.0;
+} storm_growth_km;
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = "$(RAP_DATA_DIR)/plots";
+} output_dir;
+
+paramdef string
+{
+  p_descr = "Output file extension";
+  p_default = "txt";
+} output_ext;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  STAT_MEAN,
+  STAT_MAX,
+  STAT_MIN,
+  STAT_MEDIAN
+} statistics_t;
+
+paramdef enum statistics_t
+{
+  p_descr = "List of statistics to calculate";
+  p_default = { STAT_MEAN };
+} statistics[];
+
+typedef enum
+{
+  OUTPUT_ASCII
+} output_type_t;
+
+paramdef enum output_type_t
+{
+  p_descr = "Type of output to create";
+  p_help = "\tOUTPUT_ASCII - Produces an ASCII table with all of the "
+           "statistics.\n";
+  p_default = OUTPUT_ASCII;
+} output_type;
+
+typedef struct
+{
+  string delimiter;
+  boolean include_header;
+} output_ascii_t;
+
+paramdef struct output_ascii_t
+{
+  p_descr = "Parameters for outputting the data to ASCII files.";
+  p_help = "Used only if output_type is set to OUTPUT_ASCII.\n"
+           "\tdelimiter - The delimiter to use between the fields in the "
+           "file. "
+           "The fields are output in this order:\n"
+           "\t\tyr<del>mon<del>day<del>hr<del>min<del>sec<del>simp tr<del>"
+           "comp tr<del>vert level<del>stat1<del>stat2<del>...\n"
+           "The date and time indicate the trigger time for the data.\n"
+           "\tinclude_header - Flag indicating whether to include a header "
+           "in the file. "
+           "The header just indicates the field ordering.\n";
+  p_default = { " ", false };
+} output_ascii;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to accumulate the data into a single "
+            "output file";
+  p_help = "If true, the program will continue to write the data to a single "
+           "output file until all input files are processed.";
+  p_default = false;
+} accumulate_output;
+
+paramdef string
+{
+  p_descr = "File path for accumulated output file.";
+  p_help = "Used only if accumulate_plots is set to true.";
+  p_default = "$(RAP_DATA_DIR)/ascii/tstorm_vert_stats.txt";
+} accumulation_file;

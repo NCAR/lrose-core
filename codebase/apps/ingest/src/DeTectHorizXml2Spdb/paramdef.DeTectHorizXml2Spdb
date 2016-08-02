@@ -1,0 +1,134 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.DeTectHorizXml2Spdb
+ *
+ * This file contains the TDRP parameter definitions for
+ * DeTectHorizXml2Spdb
+ */
+
+commentdef
+{
+  p_header = "DeTectHorizXml2Spdb";
+  p_text = "This program converts a set of DeTect horizontal tracking XML "
+           "files into a GenPoly SPDB database.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Input/output parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Path of the file containing the XML for the Horizontal table";
+  p_default = "Horizontal.xml";
+} horizontal_xml_path;
+
+paramdef string
+{
+  p_descr = "Path of the file containing the XML for the Metadata table";
+  p_default = "Metadata.xml";
+} metadata_xml_path;
+
+paramdef string
+{
+  p_descr = "Output SPDB URL.";
+  p_default = "./spdb/detect_horiz";
+} output_url;
+
+paramdef long
+{
+  p_descr = "Entry expire time in seconds";
+  p_default = 300;
+} entry_expire_secs;
+
+
+/***********************************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether shift the radar location for the "
+            "tracks.";
+  p_help = "If set to true, the track lat/lon values will be shifted by the "
+           "offset between the radar location in the Metadata XML file and "
+           "the location given in the radar_location parameter below.";
+  p_default = false;
+} shift_radar_location;
+
+typedef struct
+{
+  double lat;
+  double lon;
+} location_t;
+
+paramdef struct location_t
+{
+  p_descr = "The real location of the radar";
+  p_default = { 0.0, 0.0 };
+} radar_location;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use the explicit DeTect track or to "
+            "use the pixel grid based track.";
+  p_help = "Set to true to use the pixel grid based track. "
+           "Set to false to use the explicit track.";
+  p_default = false;
+} use_pixel_grid_track;

@@ -1,0 +1,124 @@
+/**********************************************************************
+ * TDRP params for BrightBandFilter
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: BrightBandFilter.
+//
+// BrightBandFilter finds bright band in a 3-D reflectivity file, 
+//   removes it and writes out a adjusted 2-D reflectivity field.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+// Type: enum
+// Options:
+//   ARCHIVE, REALTIME, FILELIST
+//
+//
+
+mode = ARCHIVE;
+
+///////////// input_url ///////////////////////////////
+//
+// URL for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_url = "../bband/cdata";
+
+///////////// dbz_field ///////////////////////////////
+//
+// dBZ field position in input MDV files.
+// Position of reflectivity (dBZ) data in the radar volumes.
+// Type: int
+//
+
+dbz_field = 0;
+
+///////////// analysis_min_altitude ///////////////////
+//
+// Min altitude CAPPI used in analysis (km).
+// Bright band computations are done between the min and max analysis 
+//   altitudes.
+// Type: float
+//
+
+analysis_min_altitude = 3;
+
+///////////// analysis_max_altitude ///////////////////
+//
+// Max altitude CAPPI used in analysis (km).
+// Bright band computations are done between the min and max analysis 
+//   altitudes.
+// Type: float
+//
+
+analysis_max_altitude = 8;
+
+///////////// dbz_threshold ///////////////////////////
+//
+// Low reflectivity threshold (dBZ).
+// Reflectivity below this threshold is ignored in making the 
+//   computations. This prevents clear air returns from creating areas of 
+//   low precipitation.
+// Minimum val: -40
+// Maximum val: 90
+// Type: float
+//
+
+dbz_threshold = 18;
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// Output data is written to this URL.
+// Type: string
+//
+
+output_url = "./mdv/bband";
+
+///////////// output_compression_type /////////////////
+//
+// Set compression type.
+//
+// Type: enum
+// Options:
+//   COMPRESSION_ASIS, COMPRESSION_NONE, COMPRESSION_RLE, COMPRESSION_LZO, COMPRESSION_ZLIB, COMPRESSION_BZIP
+//
+//
+
+output_compression_type = COMPRESSION_ZLIB;
+

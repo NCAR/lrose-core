@@ -1,0 +1,677 @@
+/**********************************************************************
+ * TDRP params for PartRain
+ **********************************************************************/
+
+//======================================================================
+//
+// PartRain (Particle-ID/Rain-rate) application.
+//
+// PartRain reads dual-polarization moments in an input DsRadar FMQ, 
+//   computes rain rate and particle ID, and writes the results to a 
+//   DsRadar queue.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_fmq_url ///////////////////////////
+//
+// Input URL for dual-pol moments data via DsRadar FMQ.
+// Type: string
+//
+
+input_fmq_url = "fmq/moments";
+
+///////////// seek_to_start_of_input //////////////////
+//
+// Option to seek to the start of the input FMQ.
+// If TRUE, the program will seek to the start of the fmq and read in 
+//   data from the entire queue. If FALSE, it will only read new data as 
+//   it is added to the FMQ.
+// Type: boolean
+//
+
+seek_to_start_of_input = FALSE;
+
+//======================================================================
+//
+// INPUT FIELD INFORMATION.
+//
+// Names of input fields in the Dsr queue. The following fields are 
+//   required: SNR, DBZ, ZDR, PHIDP and RHOHV. KDP is also required 
+//   internally, but if KDP is not available it will be computed from 
+//   PHIDP. LDR is optional, and is used for PID only.
+//
+//======================================================================
+ 
+///////////// dsr_name_SNR ////////////////////////////
+//
+// Dsr field name for SNR.
+// Signal-to-noise ratio (dB).
+// Type: string
+//
+
+dsr_name_SNR = "SNRHC_F";
+
+///////////// dsr_name_DBZ ////////////////////////////
+//
+// Dsr field name for DBZ.
+// Horizontally-polarized reflectivity factor.
+// Type: string
+//
+
+dsr_name_DBZ = "DBZ_F";
+
+///////////// dsr_name_ZDR ////////////////////////////
+//
+// Dsr field name for ZDR.
+// Type: string
+//
+
+dsr_name_ZDR = "ZDR_F";
+
+///////////// dsr_name_PHIDP //////////////////////////
+//
+// Dsr field name for PHIDP.
+// Type: string
+//
+
+dsr_name_PHIDP = "PHIDP_F";
+
+///////////// dsr_name_RHOHV //////////////////////////
+//
+// Dsr field name for RHOHV.
+// Type: string
+//
+
+dsr_name_RHOHV = "RHOHV_F";
+
+///////////// KDP_available ///////////////////////////
+//
+// Is KDP data available?.
+// If not, KDP will be computed from PHIDP.
+// Type: boolean
+//
+
+KDP_available = FALSE;
+
+///////////// dsr_name_KDP ////////////////////////////
+//
+// Dsr field name for KDP.
+// Type: string
+//
+
+dsr_name_KDP = "KDP_F";
+
+///////////// LDR_available ///////////////////////////
+//
+// Is LDR data available?.
+// Type: boolean
+//
+
+LDR_available = TRUE;
+
+///////////// dsr_name_LDR ////////////////////////////
+//
+// Dsr field name for LDR.
+// Type: string
+//
+
+dsr_name_LDR = "LDRH_F";
+
+//======================================================================
+//
+// SMOOTHING INPUT FIELDS.
+//
+// DBZ, ZDR, LDR and RHOHV can be somewhat noisy gate-to-gate. This 
+//   section gives you the option of smoothing the fields in range by 
+//   applying a median filter.
+//
+//======================================================================
+ 
+///////////// apply_median_filter_to_DBZ //////////////
+//
+// Option to filter DBZ with median filter.
+// The filter is computed in range, and affects both rain rate and PID.
+// Type: boolean
+//
+
+apply_median_filter_to_DBZ = TRUE;
+
+///////////// DBZ_median_filter_len ///////////////////
+//
+// Length of median filter for DBZ - gates.
+// See 'appply_median_filter_to_DBZ'.
+// Type: int
+//
+
+DBZ_median_filter_len = 9;
+
+///////////// apply_median_filter_to_ZDR //////////////
+//
+// Option to filter ZDR with median filter.
+// The filter is computed in range, and affects both rain rate and PID.
+// Type: boolean
+//
+
+apply_median_filter_to_ZDR = TRUE;
+
+///////////// ZDR_median_filter_len ///////////////////
+//
+// Length of median filter for ZDR - gates.
+// See 'appply_median_filter_to_ZDR'.
+// Type: int
+//
+
+ZDR_median_filter_len = 9;
+
+///////////// apply_median_filter_to_LDR //////////////
+//
+// Option to filter LDR with median filter.
+// The filter is computed in range, and affects PID only.
+// Type: boolean
+//
+
+apply_median_filter_to_LDR = TRUE;
+
+///////////// LDR_median_filter_len ///////////////////
+//
+// Length of median filter for LDR - gates.
+// See 'appply_median_filter_to_LDR'.
+// Type: int
+//
+
+LDR_median_filter_len = 9;
+
+///////////// apply_median_filter_to_RHOHV ////////////
+//
+// Option to filter RHOHV with median filter.
+// The filter is computed in range, and affects PID only.
+// Type: boolean
+//
+
+apply_median_filter_to_RHOHV = TRUE;
+
+///////////// RHOHV_median_filter_len /////////////////
+//
+// Length of median filter for RHOHV - gates.
+// See 'appply_median_filter_to_RHOHV'.
+// Type: int
+//
+
+RHOHV_median_filter_len = 9;
+
+///////////// ngates_for_sdev /////////////////////////
+//
+// Number of gates for computing standard deviations.
+// This applies to computing the standard deviation of zdr and phidp, 
+//   for PID.
+// Type: int
+//
+
+ngates_for_sdev = 9;
+
+//======================================================================
+//
+// SMOOTHING FIELDS FOR KDP.
+//
+// PHIDP can have spikes in it. This section gives you the option of 
+//   smoothing the fields in range by applying a median filter before 
+//   computing KDP. This only applies to KDP.
+//
+//======================================================================
+ 
+///////////// apply_median_filter_to_PHIDP ////////////
+//
+// Option to filter PHIDP with median filter.
+// The filter is applied in range.
+// Type: boolean
+//
+
+apply_median_filter_to_PHIDP = TRUE;
+
+///////////// PHIDP_median_filter_len /////////////////
+//
+// Length of median filter for PHIDP - gates.
+// See 'appply_median_filter_to_PHIDP'.
+// Type: int
+//
+
+PHIDP_median_filter_len = 9;
+
+//======================================================================
+//
+// SMOOTHING OUTPUT PID.
+//
+// This section gives you the option of smoothing the output pid field 
+//   in range by applying a median filter.
+//
+//======================================================================
+ 
+///////////// apply_median_filter_to_PID //////////////
+//
+// Option to filter PID with median filter.
+// The filter is computed in range, and affects both rain rate and PID.
+// Type: boolean
+//
+
+apply_median_filter_to_PID = TRUE;
+
+///////////// PID_median_filter_len ///////////////////
+//
+// Length of median filter for PID - gates.
+// See 'appply_median_filter_to_PID'.
+// Type: int
+//
+
+PID_median_filter_len = 7;
+
+//======================================================================
+//
+// CENSORING.
+//
+//======================================================================
+ 
+///////////// censor_using_thresholds /////////////////
+//
+// Option to censor the output using set thresholds.
+// If TRUE, the thresholding fields will be examined to see if it is 
+//   within the desired range. Examples are SNR (Signal-to-noise) and NCP 
+//   (normalized coherent power). If the specified field at a gate falls 
+//   outside the specified range, all output fields will be set to missing 
+//   for that gate.
+// Type: boolean
+//
+
+censor_using_thresholds = TRUE;
+
+///////////// censor_field_name ///////////////////////
+//
+// Name of field for thresholding.
+// This is the DSR (input) field name for the thresholding field. If 
+//   this field is available, it is used for thresholding. If not, 
+//   thresholding will not be performed.
+// Type: string
+//
+
+censor_field_name = "SNRHC_F";
+
+///////////// censor_min_value ////////////////////////
+//
+// Minimum threshold - see 'censor_output_using_thresholds'.
+// The specified field at a gate must exceed this value for the gate to 
+//   be accepted.
+// Type: double
+//
+
+censor_min_value = 5;
+
+///////////// censor_max_value ////////////////////////
+//
+// Maximum threshold - see 'censor_output_using_thresholds'.
+// The specified field at a gate must be less than this value for the 
+//   gate to be accepted.
+// Type: double
+//
+
+censor_max_value = 1000;
+
+///////////// min_DBZ_for_KDP_rates ///////////////////
+//
+// KDP-based rates will be set to 0 for gates with DBZ values below this 
+//   threshold.
+// KDP can be a noisy field, which can lead to large KDP-based estimates 
+//   even in low reflectivity areas. Use of this threshold prevents high 
+//   KDP estimates in low reflectivity regions.
+// Type: double
+//
+
+min_DBZ_for_KDP_rates = 25;
+
+///////////// min_valid_rate //////////////////////////
+//
+// Minimum valid precip rate (mm/hr).
+// If any computed rate is less than this value, it is set to 0.
+// Type: double
+//
+
+min_valid_rate = 0.1;
+
+//======================================================================
+//
+// PRECIP COMPUTATIONS.
+//
+// Coefficients for the precip equations.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PRECIP_RATE_ZH.
+//
+// RATE_ZH = zh_aa * (ZH ** zh_bb).
+//
+//======================================================================
+ 
+///////////// zh_aa ///////////////////////////////////
+//
+// Coefficient for PRECIP_RATE_ZH.
+// Type: double
+//
+
+zh_aa = 0.017;
+
+///////////// zh_bb ///////////////////////////////////
+//
+// Exponent for PRECIP_RATE_ZH.
+// Type: double
+//
+
+zh_bb = 0.714;
+
+//======================================================================
+//
+// PRECIP_RATE_Z_ZDR.
+//
+// RATE_Z_ZDR = zzdr_aa * (ZH ** zzdr_bb) * (ZDR ** zzdr_cc).
+//
+//======================================================================
+ 
+///////////// zzdr_aa /////////////////////////////////
+//
+// Coefficient for PRECIP_RATE_ZZDR.
+// Type: double
+//
+
+zzdr_aa = 0.00684;
+
+///////////// zzdr_bb /////////////////////////////////
+//
+// ZH exponent for PRECIP_RATE_ZZDR.
+// Type: double
+//
+
+zzdr_bb = 1;
+
+///////////// zzdr_cc /////////////////////////////////
+//
+// ZDR exponent for PRECIP_RATE_ZZDR.
+// Type: double
+//
+
+zzdr_cc = -4.86;
+
+//======================================================================
+//
+// PRECIP_RATE_KDP.
+//
+// RATE_KDP = sign(KDP) * kdp_aa * (|KDP| ** kdp_bb).
+//
+//======================================================================
+ 
+///////////// kdp_aa //////////////////////////////////
+//
+// Coefficient for PRECIP_RATE_KDP.
+// Type: double
+//
+
+kdp_aa = 40.6;
+
+///////////// kdp_bb //////////////////////////////////
+//
+// Exponent for PRECIP_RATE_KDP.
+// Type: double
+//
+
+kdp_bb = 0.866;
+
+//======================================================================
+//
+// PRECIP_RATE_KDP_ZDR.
+//
+// RATE_KDP_ZDR = sign(KDP) * kdpzdr_aa * (|KDP| ** kdpzdr_bb) * (ZDR ** 
+//   kdpzdr_cc).
+//
+//======================================================================
+ 
+///////////// kdpzdr_aa ///////////////////////////////
+//
+// Coefficient for PRECIP_RATE_KDP_ZDR.
+// Type: double
+//
+
+kdpzdr_aa = 136;
+
+///////////// kdpzdr_bb ///////////////////////////////
+//
+// KDP exponent for PRECIP_RATE_KDP_ZDR.
+// Type: double
+//
+
+kdpzdr_bb = 0.968;
+
+///////////// kdpzdr_cc ///////////////////////////////
+//
+// ZDR exponent for PRECIP_RATE_KDP_ZDR.
+// Type: double
+//
+
+kdpzdr_cc = -2.86;
+
+//======================================================================
+//
+// PRECIP_RATE_HYBRID.
+//
+// The HYBRID rate is a combination of the other rates.
+//
+//======================================================================
+ 
+///////////// hybrid_aa ///////////////////////////////
+//
+// If RATE_ZH <= hybrid_aa, RATE_HYBRID = RATE_ZH.
+// Type: double
+//
+
+hybrid_aa = 10;
+
+///////////// hybrid_bb ///////////////////////////////
+//
+// Else if RATE_Z_ZDR <= hybrid_bb, RATE_HYBRID = RATE_Z_ZDR.
+// Type: double
+//
+
+hybrid_bb = 50;
+
+///////////// hybrid_cc ///////////////////////////////
+//
+// Else If RATE_Z_ZDR <= hybrid_cc, RATE_HYBRID = RATE_KDP_ZDR.
+// Else if RATE_Z_ZDR > hybrid_bb, RATE_HYBRID = RATE_KDP.
+// Type: double
+//
+
+hybrid_cc = 100;
+
+//======================================================================
+//
+// PARTICLE ID COMPUTATIONS - PID.
+//
+//======================================================================
+ 
+///////////// compute_pid /////////////////////////////
+//
+// Option to compute particle ID.
+// Type: boolean
+//
+
+compute_pid = TRUE;
+
+///////////// pid_thresholds_file_path ////////////////
+//
+// File path for fuzzy logic thresholds for PID.
+// This file contains the thresholds and weights for computing particle 
+//   ID.
+// Type: string
+//
+
+pid_thresholds_file_path = "$(PROJ_DIR)/pgen/params/pid_tables26_MAP.input";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for derived data via DsRadar FMQ.
+// Type: string
+//
+
+output_fmq_url = "fmq/partrain";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 100000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 7200;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// output_fields ///////////////////////////
+//
+// Indicate which fields should be written to the Dsr FMQ.
+// Choose the ID from the list. The name and units can be set however 
+//   the user prefers. The scale and bias are applied to the floating 
+//   point value to compute the 16-bit output value for the FMQ.
+//
+// Type: struct
+//   typedef struct {
+//      output_field_id_t id;
+//        Options:
+//          SNR
+//          DBZ
+//          ZDR
+//          LDR
+//          PHIDP
+//          RHOHV
+//          KDP
+//          PHIDP_FOR_KDP
+//          SDPHIDP_FOR_KDP
+//          PRECIP_RATE_ZH
+//          PRECIP_RATE_Z_ZDR
+//          PRECIP_RATE_KDP
+//          PRECIP_RATE_KDP_ZDR
+//          PRECIP_RATE_HYBRID
+//          DBZ_FOR_RATE
+//          ZDR_FOR_RATE
+//          KDP_FOR_RATE
+//          PARTICLE_ID
+//          PID_INTEREST
+//          PARTICLE_ID2
+//          PID_INTEREST2
+//          PID_CONFIDENCE
+//          DBZ_FOR_PID
+//          ZDR_FOR_PID
+//          LDR_FOR_PID
+//          PHIDP_FOR_PID
+//          RHOHV_FOR_PID
+//          KDP_FOR_PID
+//          SDZDR_FOR_PID
+//          SDPHIDP_FOR_PID
+//          TEMP_FOR_PID
+//      string name;
+//      string units;
+//      double scale;
+//      double bias;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  { KDP, "KDP", "deg/km", 0.001, -32.0},
+  { DBZ_FOR_KDP, "DBZ_FOR_KDP", "dBZ", 0.01, -320},
+  { ZDR_FOR_KDP, "ZDR_FOR_KDP", "dB", 0.001, -32},
+  { RHOHV_FOR_KDP, "RHOHV_FOR_KDP", "", 0.0001, -1},
+  { SNR_FOR_KDP, "SNR_FOR_KDP", "dB", 0.01, -320},
+  { PHIDP_FOR_KDP, "PHIDP_FOR_KDP", "deg", 0.06, -200},
+  { SDPHIDP_FOR_KDP, "SDPHIDP_FOR_KDP", "deg", 0.001, -1},
+  { PRECIP_RATE_ZH, "RATE_ZH", "mm/hr", 0.01, 0},
+  { PRECIP_RATE_Z_ZDR, "RATE_Z_ZDR", "mm/hr", 0.01, 0},
+  { PRECIP_RATE_KDP, "RATE_KDP", "mm/hr", 0.01, 0},
+  { PRECIP_RATE_KDP_ZDR, "RATE_KDP_ZDR", "mm/hr", 0.01, 0},
+  { PRECIP_RATE_HYBRID, "RATE_HYBRID", "mm/hr", 0.01, 0},
+  { DBZ_FOR_RATE, "DBZ_FOR_RATE", "dBZ", 0.01, -320},
+  { ZDR_FOR_RATE, "ZDR_FOR_RATE", "dB", 0.001, -32},
+  { KDP_FOR_RATE, "KDP_FOR_RATE", "deg/km", 0.001, -32.0},
+  { PARTICLE_ID, "PID", "", 1, 0},
+  { PID_INTEREST, "PidInterest", "", 0.0001, -1},
+  { PARTICLE_ID2, "PID2", "", 1, 0},
+  { PID_INTEREST2, "PidInterest2", "", 0.0001, -1},
+  { PID_CONFIDENCE, "PidConfidence", "", 0.0001, -1},
+  { DBZ_FOR_PID, "DBZ_FOR_PID", "dBZ", 0.01, -320},
+  { ZDR_FOR_PID, "ZDR_FOR_PID", "dB", 0.001, -32},
+  { LDR_FOR_PID, "LDR_FOR_PID", "dB", 0.001, -32},
+  { PHIDP_FOR_PID, "PHIDP_FOR_PID", "deg", 0.06, -200},
+  { RHOHV_FOR_PID, "RHOHV_FOR_PID", "", 0.0001, -1},
+  { KDP_FOR_PID, "KDP_FOR_PID", "deg/km", 0.001, -32.0},
+  { SDZDR_FOR_PID, "SDZDR_FOR_PID", "dB", 0.001, -1},
+  { SDPHIDP_FOR_PID, "SDPHIDP_FOR_PID", "deg", 0.001, -1},
+  { TEMP_FOR_PID, "TEMP_FOR_PID", "C", 0.01, -100}
+};
+

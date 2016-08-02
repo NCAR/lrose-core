@@ -1,0 +1,13 @@
+/.cvsignore/1.1/Fri Oct 23 21:19:01 2015//
+/Makefile/1.33/Thu Oct  7 23:50:03 2010//
+D/DataMapper////
+D/DestUrlArray////
+D/DsClient////
+D/DsFileCopy////
+D/DsFileIo////
+D/DsLdataInfo////
+D/DsLocator////
+D/DsServer////
+D/DsSvrMgrSocket////
+D/_makefiles////
+D/include////

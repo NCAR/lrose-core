@@ -1,0 +1,132 @@
+/*********************************************************
+ * parameter definitions for forecast_monitor
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 1993
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {ARCHIVE};
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the analysis is performed for each volume scan as it becomes available. In archiv mode, all of the scans in a track file are processed";
+} mode;
+
+paramdef boolean
+{
+  p_default = {FALSE};
+  p_descr = "Printout option";
+  p_help = "Option to print stats on tracks";
+} print_stats;
+
+paramdef double {
+  p_default = {360.0};
+  p_min = {1.0};
+  p_descr = "Max valid age of input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this.";
+} max_realtime_valid_age;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Radar data directory";
+  p_help = "Upper level directory for dobson cartesian radar data files";
+} rdata_dir;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Storms data directory";
+  p_help = "Directory for storm and track data files";
+} storms_dir;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Output directory";
+  p_help = "Directory for output data file, must have 'tmp' subdirectory";
+} output_dir;
+
+paramdef char* {
+  p_default = {"fmon"};
+  p_descr = "Output file extension";
+  p_help = "File name extension for forecast monitor output files";
+} output_file_ext;
+
+paramdef char* {
+  p_default = {"dob"};
+  p_descr = "Dobson file extension";
+  p_help = "File name extension for dobson cartesian radar data files";
+  p_private = TRUE;
+} dobson_file_ext;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Reflectivity field position";
+  p_help = "Position of reflectivity (dBZ) data in the radar volumes";
+} dbz_field;
+
+paramdef double {
+  p_default = {1800.0};
+  p_min = {0.0};
+  p_max = {10800.0};
+  p_descr = "Forecast lead time (secs)";
+  p_help = "Lead time for which forecast stats are to be computed (secs)";
+} forecast_lead_time;
+
+paramdef double {
+  p_default = {1800.0};
+  p_min = {0.0};
+  p_max = {10800.0};
+  p_descr = "Time search margin (secs)";
+  p_help = "Time margin to allow for when searching for scan times (secs)";
+} time_search_margin;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Parabolic growth for storm trend";
+  p_help = "Apply parabolic growth to storm trend, such that the growth curve is flat after parabolic_growth_period secs";
+} parabolic_growth;
+
+paramdef double {
+  p_default = {1800.0};
+  p_min = {0.0};
+  p_max = {10800.0};
+  p_descr = "Parabolic growth period (secs)";
+  p_help = "Time at which parabolic growth curve becomes flat";
+} parabolic_growth_period;
+
+paramdef double {
+  p_default = {900.0};
+  p_min = {0.0};
+  p_max = {10800.0};
+  p_descr = "Min history for valid forecast(secs)";
+  p_help = "Min history for a forecast to be valid - if the storm has less history than this then the forecast is not evaluated";
+} forecast_min_history;
+
+paramdef struct verify_grid_t {
+  p_descr = "Grid for verification";
+  p_field_type = {double, double, double, double, long, long};
+  p_field_name = {min_x, min_y, dx, dy, nx, ny};
+} verify_grid;
+

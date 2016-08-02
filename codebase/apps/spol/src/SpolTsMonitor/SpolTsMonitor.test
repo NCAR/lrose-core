@@ -1,0 +1,259 @@
+/**********************************************************************
+ * TDRP params for SpolTsMonitor
+ **********************************************************************/
+
+//======================================================================
+//
+// SpolTsMonitor reads IWRF time-series data from a file message queue 
+//   (FMQ). It locates monitoring information in the time series, and 
+//   writes that information out to SPDB, and in a form suitable for 
+//   Nagios.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT - from file message queue (FMQ).
+//
+//======================================================================
+ 
+///////////// fmq_name ////////////////////////////////
+//
+// FMQ name. For FMQ input_mode only.
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+// Type: string
+//
+
+fmq_name = "$(DATA_DIR)/fmq/ts/kband/shmem_11000";
+
+//======================================================================
+//
+// XML STATUS INPUT.
+//
+//======================================================================
+ 
+///////////// process_xml_status //////////////////////
+//
+// Option to process the status_xml in the IWRF data stream.
+// Some time series data includes a general status packet, formatted in 
+//   XML. We can save this to SPDB, and also process it to generate NAGIOS 
+//   information.
+// Type: boolean
+//
+
+process_xml_status = TRUE;
+
+///////////// xml_entries /////////////////////////////
+//
+// Details of XML entries to process.
+// 	xml_outer_tag: the main tag for the entry
+// 	xml_inner_tag: the sub tag for the entry
+// 	entry_type: the type of data stored
+// 	ok_boolean: BOOLEAN only: the value for an OK state
+// 	ok_value_lower_limit: INT or DOUBLE: the lower limit for an OK state
+// 	ok_value_upper_limit: INT or DOUBLE: the upper limit for an OK state
+// 	impaired_value_lower_limit: INT or DOUBLE: the lower limit for an 
+//   IMPAIRED state
+// 	impaired_value_upper_limit: INT or DOUBLE: the upper limit for an 
+//   IMPAIRED state
+// .
+//
+// Type: struct
+//   typedef struct {
+//      string xml_outer_tag;
+//      string xml_inner_tag;
+//      xml_entry_type_t entry_type;
+//        Options:
+//          XML_ENTRY_BOOLEAN
+//          XML_ENTRY_INT
+//          XML_ENTRY_DOUBLE
+//          XML_ENTRY_STRING
+//      boolean ok_boolean;
+//      double ok_value_lower_limit;
+//      double ok_value_upper_limit;
+//      double impaired_value_lower_limit;
+//      double impaired_value_upper_limit;
+//      string label;
+//      string units;
+//   }
+//
+// 1D array - variable length.
+//
+
+xml_entries = {
+  {
+    xml_outer_tag = "KaTransmitterStatus",
+    xml_inner_tag = "SerialConnected",
+    entry_type = XML_ENTRY_BOOLEAN,
+    ok_boolean = TRUE,
+    ok_value_lower_limit = 0,
+    ok_value_upper_limit = 0,
+    impaired_value_lower_limit = 0,
+    impaired_value_upper_limit = 0,
+    label = "",
+    units = ""
+  }
+  ,
+  {
+    xml_outer_tag = "KaTransmitterStatus",
+    xml_inner_tag = "MagnetronCurrentFaultCount",
+    entry_type = XML_ENTRY_INT,
+    ok_boolean = TRUE,
+    ok_value_lower_limit = 0,
+    ok_value_upper_limit = 10,
+    impaired_value_lower_limit = 11,
+    impaired_value_upper_limit = 20,
+    label = "",
+    units = ""
+  }
+  ,
+  {
+    xml_outer_tag = "KaTransmitterStatus",
+    xml_inner_tag = "MagnetronCurrent",
+    entry_type = XML_ENTRY_DOUBLE,
+    ok_boolean = TRUE,
+    ok_value_lower_limit = 10,
+    ok_value_upper_limit = 20,
+    impaired_value_lower_limit = 5,
+    impaired_value_upper_limit = 10,
+    label = "average =",
+    units = "mA"
+  }
+};
+
+//======================================================================
+//
+// SPDB OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_to_spdb ///////////////////////////
+//
+// If true, writes status out to SPDB in XML format.
+// Type: boolean
+//
+
+write_to_spdb = TRUE;
+
+///////////// spdb_url ////////////////////////////////
+//
+// URL for SPDB output.
+// SPDB data is written to this location.
+// Type: string
+//
+
+spdb_url = "spdbp:://localhost::/tmp/spdb/spol_monitoring";
+
+///////////// spdb_interval_secs //////////////////////
+//
+// Interval at which the data is written to SPDB (secs).
+// Type: int
+//
+
+spdb_interval_secs = 10;
+
+///////////// compress_spdb ///////////////////////////
+//
+// If true, compress the SPDB chunks on write.
+// Type: boolean
+//
+
+compress_spdb = TRUE;
+
+//======================================================================
+//
+// NAGIOS OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_to_nagios /////////////////////////
+//
+// If true, writes  one file only and then quit.
+// Type: boolean
+//
+
+write_to_nagios = TRUE;
+
+///////////// nagios_file_path ////////////////////////
+//
+// File path for NAGIOS data.
+// This file is overwritten at regular intervals.
+// Type: string
+//
+
+nagios_file_path = "/tmp/nagios/ka_band_status";
+
+///////////// nagios_interval_secs ////////////////////
+//
+// Interval at which the data is written to NAGIOS (secs).
+// Type: int
+//
+
+nagios_interval_secs = 10;
+
+//======================================================================
+//
+// CHECKING FOR MOVEMENT.
+//
+//======================================================================
+ 
+///////////// check_for_moving_antenna ////////////////
+//
+// Option to only process status if antenna is moving.
+// Type: boolean
+//
+
+check_for_moving_antenna = FALSE;
+
+///////////// stationary_lockon_period ////////////////
+//
+// Minimim staionary time for determing stationary mode (secs).
+// In order to enter stationary mode, the antenna must be stationay for 
+//   this number of seconds.
+// Type: int
+//
+
+stationary_lockon_period = 2;
+
+///////////// stationary_max_angle_change /////////////
+//
+// Maximum angle change for stationary mode (deg).
+// For the antenna to be considered stationary, it must not move by more 
+//   than this angle in the lockon period.
+// Type: double
+//
+
+stationary_max_angle_change = 0.01;
+

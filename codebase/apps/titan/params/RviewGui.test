@@ -1,0 +1,134 @@
+/*
+ * RviewGui.test
+ *
+ * Parameter file for the RviewGui application.
+ */
+
+/*
+ * Debugging
+ */
+
+x_sync = false;
+debug = true;
+malloc_debug_level = 0;
+
+/*
+ * Application colors.
+ */
+
+background_color = "red";
+foreground_color = "black";
+
+/*
+ * Parameters for creating the main (CAPPI) window.
+ */
+
+main_width = 700;
+main_height = 700;
+
+main_scale_width = 100;
+
+main_x = 0;
+main_y = 0;
+
+main_border_color = "CadetBlue";
+main_border_width = 1;
+
+/*
+ * Parameters for creating the vertical cross-section window.
+ */
+
+vert_width = 300;
+vert_height = 250;
+
+vert_x_from_main = 402;
+vert_y_from_main = 567;
+
+/*
+ * Field information.
+ */
+
+field_info = { { "dbz",   "Reflectivity" },
+               { "sdbz",  "S-band reflectivity" },
+               { "srp",   "S-band returned power" },
+               { "xdbzh", "X-band reflectivity, horiz polarity" },
+               { "xrph",  "X-band returned power, horiz polarity" },
+               { "xdbzv", "X-band reflectivity, vert polarity" },
+               { "xrpv",  "X-band returned power, vert polarity" },
+               { "zdr",   "ZDR" },
+               { "hdr",   "HDR" },
+               { "att",   "Attenuation" },
+               { "dwr",   "Dual wavelength ratio" },
+               { "ldr",   "LDR" },
+               { "vel",   "Radial velocity" } };
+
+/*
+ * Mode may be either MODE_REALTIME or MODE_ARCHIVE.  In archive
+ * mode, the time_requested is used.
+ */
+
+mode = MODE_ARCHIVE;
+/* time_requested = "1993/06/21_21:00:00"; */
+time_requested = "1995/10/03_18:00:00";
+
+/*
+ * Basic setup
+ *
+ * z_requested is initial height
+ * delta_z is change in height using level button
+ */
+
+z_requested = 3.0;
+delta_z = 1.0;
+
+/*
+ * base_timer_interval is the basic interval for the interrupt timer
+ * in seconds.
+ */
+
+base_timer_interval = 0.15;
+
+/*
+ * Initial option settings
+ *
+ * plot_rings controls initial range ring setting
+ * plot_map controls initial map overlay setting
+ * plot_image controls initial image plot setting
+ * plot_cappi_contours controls initial cappi contour setting
+ * plot_vsection_contours controls initial vert section contour setting
+ * interpolate_vsection controls initial vert section interp setting
+ * vsection_interp_res gives the interpolated resolution in km
+ */
+
+plot_rings = true;
+plot_map = true;
+plot_image = true;
+plot_storms = true;
+plot_cappi_contours = false;
+plot_vsection_contours = false;
+interpolate_vsection = false;
+vsection_interp_res = 0.2;
+
+/*
+ * Time hist parameters
+ */
+
+use_time_hist = false;
+time_hist_command_line = "time_hist -params $(TITAN_HOME)/params/time_hist.test &";
+
+/*
+ * Storm tracks
+ *
+ * A check for new data is made every track_check_interval secs.
+ * The data is in shared memory with the given key.  The track server
+ * is specified by a subtype and instance, with a default host and
+ * port.  If the server mapper is running, the subtype and instance
+ * are used.
+ */
+
+plot_tracks = PLOT_ALL_TRACKS;
+annotate_tracks = ANNOTATE_SPEED;
+track_graphic = GRAPHIC_ELLIPSES;
+plot_forecast = PLOT_FORECAST_LIMITED;
+plot_past = PLOT_PAST_LIMITED;
+plot_future = PLOT_FUTURE_NONE;

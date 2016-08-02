@@ -1,0 +1,8 @@
+#!/bin/csh
+#
+# How to run SpdbBdry2Axf in archive mode.
+#
+\rm Output/*
+\rm *.axf
+
+./SpdbBdry2Axf -archive 20000913010101 20000913235959 -params test.p

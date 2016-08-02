@@ -1,0 +1,50 @@
+#!/bin/csh -x
+#
+# Script to verify that the daily weather data backup tar files were
+# indeed sent and received by the MassStore correctly.  It gets a
+# new listing of MassStore files, compares the entries in that listing
+# to the files on the local disk.  If the files match, then it deletes
+# the local copy, otherwise it resends the file(s) to the MassStore.
+#
+# PNeilley
+###########################################################################
+
+set ARC_home = /home/rapdmg/archive_staging
+set ARC_SCRIPTS_home = /home/rapdmg/archive_scripts
+set SSG_arc = /archive
+set ARC_ddp = /d1/ldm/archive/ddp_test
+set MSS_path = /RAPDMG/LDM/ARCHIVE
+set MS_List = $ARC_home/MSlist/msls.out
+set EXE_home = /home/rapdmg/exe
+ 
+set ardate = `$EXE_home/gemtime -o -24h %Y%m%d`
+set armmdd = `$EXE_home/gemtime -o -24h %m%d`
+
+if ( $1 != "x" ) $ARC_SCRIPTS_home/get_msls.script $MS_List
+cd $ARC_ddp
+set files = `ls *.tar*`
+
+foreach file ($files)
+  set local_size = `ls -l $file | awk '{print $5}'`
+# set msfile = `echo $file | tr "[a-z]" "[A-Z]"`
+  set msfile = `echo $file`
+  set ms_size = `grep $msfile $MS_List | awk '{print $5}'`
+
+  if ( $ms_size >= $local_size ) then
+    cp $file $SSG_arc/ddp
+     rm $file
+     echo "done: rm $file"
+  else
+     set year = `echo $file | awk '{print substr($0,1,4)}'`
+     set yrmn = `echo $file | awk '{print substr($0,1,6)}'`
+     /usr/local/dcs/bin/msrcp -pr 48500002 -pe 4096 $ARC_ddp/$file mss:$MSS_path/$year/$armmdd/$msfile
+     echo "done: msrcp $ARC_ddp/$file"
+  endif
+end
+
+
+ $ARC_SCRIPTS_home/get_msls.script $MS_List"_"$ardate
+
+
+
+

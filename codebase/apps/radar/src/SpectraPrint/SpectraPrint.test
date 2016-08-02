@@ -1,0 +1,510 @@
+/**********************************************************************
+ * TDRP params for SpectraPrint
+ **********************************************************************/
+
+//======================================================================
+//
+// SpectraPrint reads raw time-series data, forms the time series into 
+//   beams, and prints out spectra and time series values for selected 
+//   elevations, azimuths and gates.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "fmq_s";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In FMQ mode, the program opens the input_fmq, and reads 
+//   time series data from the queue.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FMQ
+//
+
+mode = FMQ;
+
+//======================================================================
+//
+// TIME-SERIES FILE DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "./input";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+///////////// input_fmq ///////////////////////////////
+//
+// FMQ name for time series data.
+// This is used in FMQ mode only.
+// Type: string
+//
+
+input_fmq = "$(DATA_DIR)/fmq/CP2UDP2Fmq_ts_s";
+
+///////////// position_fmq_at_start ///////////////////
+//
+// Option to position the input FMQ at the start of the queue.
+// FMQ mode only. If false, we start reading at the end of the queue. 
+//   This is the default behavior. If true, we position the read pointer 
+//   at the start of the queue, and read all data available in the queue 
+//   before starting to read new data.
+// Type: boolean
+//
+
+position_fmq_at_start = FALSE;
+
+///////////// invert_hv_flag //////////////////////////
+//
+// Option to invert the sense of the HV flag in alternating mode.
+// In alternating dual-pol mode, the HV flag indicates whether the pulse 
+//   is horizontally or vertically polarized. Normally 1 indicates H and 0 
+//   V. This parameter allows you to invert the sense of the flag, so that 
+//   1 is interpreted as V and 0 as H.
+// Type: boolean
+//
+
+invert_hv_flag = FALSE;
+
+//======================================================================
+//
+// RADAR CALIBRATION.
+//
+//======================================================================
+ 
+///////////// cal_file_path ///////////////////////////
+//
+// File name for XML calibration file.
+// Type: string
+//
+
+// cal_file_path = "$(PROJ_DIR)/ingest/params/startup_cal_s.xml";
+cal_file_path = "$(PROJ_DIR)/mgen/params/spol_cal.xml";
+
+///////////// use_cal_from_time_series ////////////////
+//
+// Option to override cal in time series data.
+// If false, the cal information in the time series data will be used. 
+//   If true, the cal info in the param file will be used.
+// Type: boolean
+//
+
+use_cal_from_time_series = FALSE;
+
+//======================================================================
+//
+// RADAR OPERATION.
+//
+//======================================================================
+ 
+///////////// xmit_rcv_mode ///////////////////////////
+//
+// Transmit/receive mode in which the radar is operating.
+//
+// Type: enum
+// Options:
+//     SP
+//     DP_ALT_HV_CO_ONLY
+//     DP_ALT_HV_CO_CROSS
+//     DP_ALT_HV_FIXED_HV
+//     DP_SIM_HV_FIXED_HV
+//     DP_SIM_HV_SWITCHED_HV
+//     DP_H_ONLY_FIXED_HV
+//     DP_V_ONLY_FIXED_HV
+//
+
+xmit_rcv_mode = DP_ALT_HV_CO_ONLY;
+
+///////////// prf_mode ////////////////////////////////
+//
+// Prf mode in which the radar is operating.
+//
+// Type: enum
+// Options:
+//     PRF_MODE_FIXED
+//     PRF_MODE_STAGGERED_2_3
+//     PRF_MODE_STAGGERED_3_4
+//     PRF_MODE_STAGGERED_4_5
+//
+
+prf_mode = PRF_MODE_FIXED;
+
+///////////// window //////////////////////////////////
+//
+// Window to be applied before computing spectra.
+//
+// Type: enum
+// Options:
+//     WINDOW_RECT
+//     WINDOW_VONHANN
+//     WINDOW_BLACKMAN
+//
+
+window = WINDOW_VONHANN;
+
+///////////// n_samples ///////////////////////////////
+//
+// Number of samples (pulses) per dwell.
+// Type: int
+//
+
+n_samples = 256;
+
+///////////// index_the_beams /////////////////////////
+//
+// Index the beams on even centers?.
+// If false, the pulses are formed into beams sequentially, with no 
+//   overlap.
+// Type: boolean
+//
+
+index_the_beams = FALSE;
+
+///////////// indexed_resolution //////////////////////
+//
+// Dwell width (deg).
+// Type: double
+//
+
+indexed_resolution = 1;
+
+///////////// switching_receiver //////////////////////
+//
+// Does the receiver path switch every other pulse?.
+// Type: boolean
+//
+
+switching_receiver = FALSE;
+
+//======================================================================
+//
+// OVERRIDING RADAR PARAMETERS.
+//
+// Some radar parameters may be included in the time series data. This 
+//   section allows you to optionally override some of those values.
+//
+//======================================================================
+ 
+///////////// override_radar_name /////////////////////
+//
+// Option to override the radar name.
+// If true, the name in this file will be used. If not, the name in the 
+//   time series data will be used.
+// Type: boolean
+//
+
+override_radar_name = TRUE;
+
+///////////// radar_name //////////////////////////////
+//
+// Name of the radar.
+// See 'override_radar_name'.
+// Type: string
+//
+
+radar_name = "CP2_S";
+
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_latitude_deg = 39.9321;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_longitude_deg = -105.182;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+// See override_radar_location.
+// Type: double
+//
+
+radar_altitude_meters = 1742;
+
+///////////// override_gate_geometry //////////////////
+//
+// Option to override the gate geometry.
+// If true, the gate_spacing and start_range in the time series data is 
+//   overridden by the parameters in this file.
+// Type: boolean
+//
+
+override_gate_geometry = FALSE;
+
+///////////// gate_spacing_meters /////////////////////
+//
+// Gate spacing (meters).
+// See override_gate_geometry.
+// Type: double
+//
+
+gate_spacing_meters = 150;
+
+///////////// start_range_meters //////////////////////
+//
+// Start range (meters).
+// See override_gate_geometry.
+// Type: double
+//
+
+start_range_meters = 150;
+
+///////////// override_radar_wavelength ///////////////
+//
+// Option to override the radar wavelength.
+// If true, the radar wavelength in this file will be used. If not, the 
+//   wavelength in the time series data will be used if available.
+// Type: boolean
+//
+
+override_radar_wavelength = FALSE;
+
+///////////// radar_wavelength_cm /////////////////////
+//
+// Radar wavelength (cm).
+// See override_radar_wavelength.
+// Type: double
+//
+
+radar_wavelength_cm = 10;
+
+//======================================================================
+//
+// SPECTRAL PRINT SELECTION.
+//
+//======================================================================
+ 
+///////////// min_snr_for_spectra /////////////////////
+//
+// Minimum SNR for writing spectra to file (dB).
+// The spectrum will only be printed if the SNR exceeds this value.
+// Type: double
+//
+
+min_snr_for_spectra = -20;
+
+///////////// region //////////////////////////////////
+//
+// Region for selected prints and spectra files.
+// See do_selected_print and write_spectra_files.
+//
+// Type: struct
+//   typedef struct {
+//      double min_el;
+//      double max_el;
+//      double min_az;
+//      double max_az;
+//      double min_range;
+//      double max_range;
+//   }
+//
+//
+
+region = { -90, 90, 0, 360, 0, 150 };
+
+//======================================================================
+//
+// ASCII OUTPUT FILES.
+//
+//======================================================================
+ 
+///////////// write_ascii_files ///////////////////////
+//
+// Option to write out individual spectra to ASCII files.
+// Type: boolean
+//
+
+write_ascii_files = FALSE;
+
+///////////// output_dir //////////////////////////////
+//
+// Directory to which spectra files will be written.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// include_time_in_file_name ///////////////
+//
+// Option to add date and time to output file name.
+// Type: boolean
+//
+
+include_time_in_file_name = FALSE;
+
+///////////// include_elevation_in_file_name //////////
+//
+// Option to add elevation angle to output file name.
+// Type: boolean
+//
+
+include_elevation_in_file_name = FALSE;
+
+///////////// include_azimuth_in_file_name ////////////
+//
+// Option to add azimuth to output file name.
+// Type: boolean
+//
+
+include_azimuth_in_file_name = TRUE;
+
+///////////// include_range_in_file_name //////////////
+//
+// Option to add range to output file name.
+// Type: boolean
+//
+
+include_range_in_file_name = TRUE;
+
+//======================================================================
+//
+// SPDB OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_to_spdb ///////////////////////////
+//
+// Option to write out to SPDB data base.
+// Type: boolean
+//
+
+write_to_spdb = FALSE;
+
+///////////// output_spdb_url /////////////////////////
+//
+// SPDB URL to which spectra data will be written.
+// Type: string
+//
+
+output_spdb_url = "spdbp:://localhost::spdb/spectra/cp2_s";
+
+//======================================================================
+//
+// FMQ OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_to_fmq ////////////////////////////
+//
+// Option to write out to SPDB data base.
+// Type: boolean
+//
+
+write_to_fmq = TRUE;
+
+///////////// output_fmq_url //////////////////////////
+//
+// FMQ URL to which spectra data will be written.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::fmq/spectra";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 100000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 1000;
+
+

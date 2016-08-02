@@ -1,0 +1,318 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions TsFile2Fmq
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Feb 2009
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsFile2Fmq reads raw time-series data from a file. It saves the time series data out to a file message queue (FMQ), which can be read by multiple clients. Its purpose is mainly for simulation and debugging time series operations.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, SIMULATE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file to process. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now A delay is inserted between pulses to simulate an operational radar.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default = "$(HOME)/data/time_series/save";
+  p_descr = "Dir for input volume scan files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "OUTPUT FMQ DETAILS";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "Path to output FMQ.";
+  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
+} output_fmq_path;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data. This should only be used if there is a single client reading the FMQ.";
+} output_fmq_blocking;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write latest_data_info for the output FMQ.";
+  p_help = "If TRUE, latest_data_info will be written for the output FMQ, at the specified interval.";
+} write_latest_data_info;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between writing latest_data_info.";
+  p_help = "If write_latest_data_info is TRUE, the program will register with the DataMapper when the output FMQ is written to.";
+} latest_data_info_interval;
+
+commentdef {
+  p_header = "OUTPUT MESSAGE DETAILS";
+  p_text = "The output messages are written to the FMQ. To improve performance, each message contains a number of time series pulses.";
+};
+
+paramdef int {
+  p_default = "200";
+  p_descr = "Number of pulses per output message.";
+  p_help = "The actual number will sometimes be 1 less than this, because an info data part may will be written once in a while.";
+} n_pulses_per_message;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "How often to write an info part.";
+  p_help = "The info part includes data which does not change on a pulse-to-pulse basis.";
+} n_pulses_per_info;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+commentdef {
+  p_header = "ADJUSTING THE TIME";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set the pulse time to the current time.";
+  p_help = "This can be used for two purposes: (a) if the drx time is incorrect, and you wish to override the time, or (b) for simulating an operational radar, or for correcting.";
+} set_time_to_now;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to change the time by a selected offset.";
+} set_time_offset;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time offset to be applied (secs)";
+} time_offset_secs;
+
+commentdef {
+  p_header = "CONVERTING THE IQ DATA ENCODING TYPE";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to convert the IQ encoding type.";
+  p_help = "The IQ data will be converted to the requested encoding type before being written to the FMQ.";
+} convert_iq_encoding;
+
+typedef enum {
+  IQ_ENCODING_FL32,
+  IQ_ENCODING_SCALED_SI16,
+  IWRF_IQ_ENCODING_DBM_PHASE_SI16,
+  IWRF_IQ_ENCODING_SIGMET_FL16
+} iq_encoding_t;
+
+paramdef enum iq_encoding_t {
+  p_default = IQ_ENCODING_FL32;
+  p_descr = "Encoding type for outgoing IQ data.";
+  p_help = "Only applies if convert_iq_encoding is true.";
+} iq_encoding;
+
+commentdef {
+  p_header = "SIMULATION MODE";
+};
+
+paramdef double {
+  p_descr = "PRF for sim mode (pulses/s)";
+  p_help = "The app will attempt to deliver pulses at this rate.";
+  p_default = 1000;
+} sim_mode_prf;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override radar params in simulate mode.";
+  p_help = "If TRUE, the following sim parameters will be used to override the radar params in the time series. If FALSE, the original params will be retained.";
+} sim_override_radar_params;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Radar name for simulation mode";
+} sim_radar_name;
+
+paramdef string {
+  p_default = "Marshall";
+  p_descr = "Site name for simulation mode";
+} sim_site_name;
+
+paramdef double {
+  p_default = 39.93208;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} sim_latitude_deg;
+
+paramdef double {
+  p_default = -105.18175;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} sim_longitude_deg;
+
+paramdef double {
+  p_default = 1742;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} sim_altitude_meters;
+
+paramdef double {
+  p_default = 0.92;
+  p_descr = "Horizontal beam width (deg) for simulation mode.";
+} sim_beam_width_h;
+
+paramdef double {
+  p_default = 0.92;
+  p_descr = "Vertical beam width (deg) for simulation mode.";
+} sim_beam_width_v;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to simulate staggered PRT operations.";
+  p_help = "See 'staggered_mode'. Selected pulses will be omitted to simulate this mode.";
+} sim_staggered_prt;
+
+typedef enum {
+  STAGGER_2_3, STAGGER_3_4, STAGGER_4_5
+} stagger_mode_t;
+
+paramdef enum stagger_mode_t {
+  p_default = STAGGER_2_3;
+  p_descr = "In this mode, we leave out selected pulses and change the data in the remaining pulses, as required, to simulate staggered PRT mode.";
+} stagger_mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to simulate a lower PRT by discarding pulses and only keeping pulses at a selected interval.";
+} sim_select_pulse_interval;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Interval at which you wish to keep the pulses.";
+  p_help = "see sim_select_pulse_interval";
+} sim_pulse_interval;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to add a second channel for dual-polarization simulations.";
+} sim_add_dual_pol_channel;
+
+paramdef double {
+  p_default = 3;
+  p_descr = "Constant ZDR value for dual-pol simulation (dB).";
+  p_help = "The power in the second channel will be lower that the first by this amount.";
+} sim_fixed_zdr;
+
+paramdef double {
+  p_default = 45;
+  p_descr = "Constant PHIDP value for dual-pol simulation (deg).";
+  p_help = "The phase in the second channel will be computed relative to the first channel to yield this phidp value.";
+} sim_fixed_phidp;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the transmit/receive mode in the pulse info header.";
+} override_xmit_rcv_mode;
+
+typedef enum {
+
+  /// Single polarization (NEXRAD)
+  SINGLE_POL = 1, 
+  /// Dual pol, alternating transmission, copolar receiver only
+  /// (CP2 SBand)
+  DP_ALT_HV_CO_ONLY = 2, 
+  /// Dual pol, alternating transmission, co-polar and cross-polar
+  ///receivers (SPOL with Mitch Switch and receiver in 
+  /// switching mode, CHILL)
+  DP_ALT_HV_CO_CROSS = 3,
+  /// Dual pol, alternating transmission, fixed H and V receivers (SPOL
+  /// with Mitch Switch and receivers in fixed mode)
+  DP_ALT_HV_FIXED_HV = 4,
+  /// Dual pol, simultaneous transmission, fixed H and V receivers (NEXRAD
+  /// upgrade, SPOL with T and receivers in fixed mode)
+  DP_SIM_HV_FIXED_HV = 5,
+  /// Dual pol, simultaneous transmission, switching H and V receivers
+  /// (SPOL with T and receivers in switching mode)
+  DP_SIM_HV_SWITCHED_HV = 6,
+  /// Dual pol, H transmission, fixed H and V receivers (CP2 X band)
+  DP_H_ONLY_FIXED_HV = 7,
+  /// Dual pol, V transmission, fixed H and V receivers (CP2 X band)
+  DP_V_ONLY_FIXED_HV = 8
+
+} xmit_rcv_mode_t;
+
+paramdef enum xmit_rcv_mode_t {
+  p_default = SINGLE_POL;
+  p_descr = "Simulated transmit-receive mode.";
+  p_help = "This will be used to modify the ops info.";
+} xmit_rcv_mode;
+

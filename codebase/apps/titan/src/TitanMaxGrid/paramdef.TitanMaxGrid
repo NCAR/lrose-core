@@ -1,0 +1,157 @@
+/*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+ ** Copyright UCAR (c) 2000
+ ** University Corporation for Atmospheric Research(UCAR)
+ ** National Center for Atmospheric Research(NCAR)
+ ** Research Applications Program(RAP)
+ ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
+ ** All rights reserved. Licenced use only.
+ ** Do not copy or distribute without authorization
+ *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
+/****************************************************************
+ * parameter definitions for TitanMaxGrid
+ *  
+ * Nancy Rehak
+ * December 2003
+ */
+
+commentdef
+{
+  p_text = "This program finds the maximum grid value within each "
+           "TITAN storm and writes that value at the grid point location "
+           "to an SPDB GenPt database.";
+}
+
+/****************************************************************
+ * Debugging and process control.
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,		
+  DEBUG_VERBOSE	
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+           "appropriate level of detail.";
+  p_default = DEBUG_OFF;
+} debug;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/*********************************************************
+ * Input and output data
+ */
+
+commentdef
+{
+  p_header = "INPUT AND OUTPUT DATA.";
+}
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "location specified by the storms_url parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data between "
+           "the times specified in the time_list_trigger parameter.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "Storms URL";
+  p_help = "URL of the input TITAN SPDB database.";
+  p_default = "spdbp:://localhost::spdb/titan_storms";
+} storms_url;
+
+typedef struct
+{
+  string url;
+  string field_name;
+  long vlevel_index;
+  long max_valid_secs;
+} grid_info_t;
+
+paramdef struct grid_info_t
+{
+  p_descr = "Information identifying the gridded dataset";
+  p_help = "\turl - The URL of the MDV files.\n"
+           "\tfield_name - The name of the gridded field to use.\n"
+           "\tvlevel_index - The index of the vertical level to use "
+           "when looking for the maximum value. "
+           "Set to -1 to use a composite of the grid.\n"
+           "\tmax_valid_secs - The maximum valid age of the data "
+           "in seconds. "
+           "If we don't find gridded data within this time period "
+           "of the storm data, we won't generate any output.\n";
+  p_default = { "mdvp:://localhost::mdv/grid",
+                "cloud_ht",
+		0, 3600 };
+} grid_info;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "spdbp:://localhost::spdb/gen_pt_max";
+} output_url;
+
+
+/*********************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS.";
+}
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether we should process valid forecasts only";
+  p_default = true;
+} valid_forecasts_only;
+
+paramdef long
+{
+  p_descr = "Number of seconds before the GenPt object expires";
+  p_default = 600;
+} expire_seconds;

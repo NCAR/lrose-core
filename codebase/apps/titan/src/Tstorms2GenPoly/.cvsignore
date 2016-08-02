@@ -1,0 +1,6 @@
+.deps
+Tstorms2GenPoly
+__makefile.template
+makefile
+makefile.am
+makefile.in

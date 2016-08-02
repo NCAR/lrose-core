@@ -1,0 +1,448 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for Pirep2Symprod
+//
+// Niles Oien, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// Jan 2000
+//
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef
+{
+  p_header = "DEBUGGING";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { DEBUG_OFF };
+} debug;
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string
+{
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean
+{
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef
+{
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int
+{
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5457;
+} port;
+  
+paramdef int
+{
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Clipping
+
+commentdef
+{
+  p_header = "CLIPPING PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to only include pireps within certain flight level limits.";
+  p_default = FALSE;
+} apply_flight_level_limits;
+
+paramdef int
+{
+  p_descr = "Min flight level (altitude(ft)/100).";
+  p_help = "See apply_flight_level_limits.";
+  p_default = 0;
+} min_flight_level;
+
+paramdef int
+{
+  p_descr = "Max flight level (altitude(ft)/100).";
+  p_help = "See apply_flight_level_limits.";
+  p_default = 0;
+} max_flight_level;
+
+paramdef boolean
+{
+  p_descr = "Option to only include pireps within given bounding box.";
+  p_default = FALSE;
+} apply_lat_lon_limits;
+
+paramdef int
+{
+  p_descr = "Min latitude (deg).";
+  p_help = "See apply_lat_lon_limits.";
+  p_default = 0;
+} min_lat;
+
+paramdef int
+{
+  p_descr = "Min longitude (deg).";
+  p_help = "See apply_lat_lon_limits.";
+  p_default = 0;
+} min_lon;
+
+paramdef int
+{
+  p_descr = "Max latitude (deg).";
+  p_help = "See apply_lat_lon_limits.";
+  p_default = 0;
+} max_lat;
+
+paramdef int
+{
+  p_descr = "Max longitude (deg).";
+  p_help = "See apply_lat_lon_limits.";
+  p_default = 0;
+} max_lon;
+
+//////////////////////////////////////////////////////////
+// Translation to symprod format
+
+commentdef {
+  p_header = "TRANSLATION OPTION";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to perform translation to symprod format.";
+  p_help = "If FALSE, the data is passed to the client in binary format\n."
+                   "Note: Display control of binary format is extremely limited\n"
+                   "Value must be TRUE to turn labels on/off, and set colors and\n"
+                   "positions independently";
+} do_translation;
+
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef
+{
+  p_header = "RENDERING PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to not scale the product with zoom state.";
+  p_help = "If true, the product is always rendered at the same scale, regardless of zoom state. If false, the product is scaled down on the screen as the zoome expands, and is scaled up as you zoom in.";
+  p_default = true;
+} plot_unscaled;
+
+paramdef boolean
+{
+  p_descr = "Option to plot only if there is a text message.";
+  p_help = "If true, the pirep is only plotted if there is a text message portion to the pirep.";
+  p_default = TRUE;
+} plot_only_if_message;
+
+commentdef
+{
+  p_header = "POSITION ICONS";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to plot position icons.";
+  p_help = "If true, a triangle-shaped icon is drawn first, and then text is put around it. This is useful for large domains because you can see the icon even when the text is not displayed.";
+  p_default = TRUE;
+} plot_icon;
+
+paramdef int
+{
+  p_descr = "Size of icon in pixels";
+  p_help = "Acars is represented by a triangle. This is the distance from the center to each extremity of the triangle shape.";
+  p_default = 5;
+} icon_size;
+
+paramdef string
+{
+  p_descr = "Color for icon.";
+  p_help = "Name of color suggested for rendering acars icon.";
+  p_default = "pink";
+} icon_color;
+
+//////////////////////////////////////////////////////////
+// Text rendering
+
+commentdef
+{
+  p_header = "TEXT";
+};
+
+typedef enum {
+  VERT_ALIGN_TOP           =  1,
+  VERT_ALIGN_CENTER        =  2,
+  VERT_ALIGN_BOTTOM        =  3
+} vert_align_t;
+
+typedef enum {
+  HORIZ_ALIGN_LEFT         =  1,
+  HORIZ_ALIGN_CENTER       =  2,
+  HORIZ_ALIGN_RIGHT        =  3
+} horiz_align_t;
+
+typedef struct {
+  boolean do_draw;
+  string color;
+  string background_color;
+  string font_name;
+  int font_size;
+  int x_offset;
+  int y_offset;
+  vert_align_t vert_align;
+  horiz_align_t horiz_align;
+} text_item_t;
+
+commentdef {
+  p_header = "Text labels";
+  p_text =
+    "The following are specified for each text label:\n"
+    "\tdo_draw: option to draw the label, true or false\n"
+    "\tcolor: foreground color\n"
+    "\tbackground_color: background color - if empty, no background\n"
+    "\tfont_name: name of font family\n"
+    "\tfont_size: suggest size in pixels\n"
+    "\tx_offset: x offset from station location in pixels\n"
+    "\ty_offset: y offset from station location in pixels\n"
+    "\tvert_align: vert justification of text relative to offset point\n"
+    "\thoriz_align: horiz justification of text relative to offset point\n";
+};
+
+paramdef struct text_item_t {
+  p_default = { TRUE, "pink", "", "8x13", 10, -2, -5, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+  p_descr = "Details for callsign label.";
+} callsign_label;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "pink", "", "8x13", 10, 2, -5, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+  p_descr = "Details for flight level label.";
+} flight_level_label;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "pink", "", "8x13", 10, 0, -14, VERT_ALIGN_TOP, HORIZ_ALIGN_CENTER };
+  p_descr = "Details for message label.";
+} message_label;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "pink", "", "8x13", 10, 0, -26, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+  p_descr = "Details for temperature label.";
+} temperature_label;
+  
+paramdef struct text_item_t {
+  p_default = { TRUE, "pink", "", "8x13", 10, 0, -38, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+  p_descr = "Details for wind label.";
+} wind_label;
+  
+///////////////////////////
+// turbulence icon options
+
+commentdef
+{
+  p_header = "TURBULENCE ICON PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to only send pireps related to turbulence.";
+  p_help = "If true, only pireps with a turbulence intensity filled in will be sent.";
+  p_default = FALSE;
+} send_turb_pireps_only;
+
+paramdef boolean
+{
+  p_descr = "Option to plot turbulence icons.";
+  p_help = "If true, the relevant ICAO turbulence symbol is plotted.";
+  p_default = FALSE;
+} plot_turb_icon;
+
+paramdef int
+{
+  p_descr = "Size of turb icon in pixels";
+  p_help = "Pirep is represented by a diamond. This is the distance from the center to each extremity of the diamond shape.";
+  p_default = 8;
+} turb_icon_size;
+
+paramdef string
+{
+  p_descr = "Color for turbulence icons.";
+  p_help = "Name of color suggested for rendering turbulence icons.";
+  p_default = { "blue",
+		"green", "green",
+		"orange", "orange",
+		"red", "red", "red", "red" };
+} turb_icon_colors[9];
+
+commentdef {
+  p_header = "FULL PIREP MESSAGE AS HIDDEN TEXT";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to activate hidden text.";
+  p_help = "If true, the full PIREP message will be sent to the client, marked as hidden text. This text may then be used by the client for any purpose, such as pop-up text in response to a mouse event near the product location.";
+} activate_hidden_text;
+
+paramdef string {
+  p_descr = "Name of font for hidden text.";
+  p_default = "fixed";
+} hidden_text_font_name;
+
+paramdef int {
+  p_descr = "X offset for hidden text (pixels).";
+  p_default = 0;
+} hidden_text_x_offset;
+
+paramdef int {
+  p_descr = "Y offset for hidden text (pixels).";
+  p_default = 0;
+} hidden_text_y_offset;
+
+paramdef int {
+  p_descr = "Font size for hidden text (pixels).";
+  p_default = 10;
+} hidden_text_font_size;
+
+paramdef enum vert_align_t {
+  p_descr = "Vertical alignment hidden text.";
+  p_default = VERT_ALIGN_CENTER;
+} hidden_text_vert_align;
+
+paramdef enum horiz_align_t {
+  p_descr = "Horizontal alignment for hidden text.";
+  p_default = HORIZ_ALIGN_CENTER;
+} hidden_text_horiz_align;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_default = "pink";
+} hidden_text_foreground_color;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} hidden_text_background_color;
+
+///////////////////////////
+// wind barb plotting
+
+commentdef {
+  p_header = "WIND BARB PLOT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to draw the wind barb.";
+} draw_wind_barb;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Radius of circle at station position.";
+  p_help = "Set to 0 for no circle.";
+} station_posn_circle_radius;
+  
+paramdef string {
+  p_default =  "pink";
+  p_descr = "Color of wind barb.";
+} wind_barb_color;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Width of lines used to render wind barbs.";
+} wind_barb_line_width;
+  
+paramdef int {
+  p_default = 32;
+  p_descr = "Length of wind barb shaft in pixels.";
+} wind_barb_shaft_len;
+  
+paramdef int {
+  p_default = 8;
+  p_descr = "Length of wind barb ticks in pixels.";
+} wind_barb_tick_len;
+  
+paramdef float {
+  p_default = 55;
+  p_descr = "Angle of the wind ticks relative to the shaft (deg).";
+} wind_ticks_angle_to_shaft;
+  
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use pirep_t formatted SPDB files or XML formatted files.";
+  p_help = "If true, pirep_t SPDB files are expected.  If false, XML formatted SPDB files are expected (output from Pirep2Spdb).";
+} use_pirep_t;

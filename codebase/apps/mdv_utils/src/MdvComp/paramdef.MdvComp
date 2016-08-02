@@ -1,0 +1,147 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions MdvxConvert
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Aug 1999
+//
+
+commentdef {
+  p_header = "Program name: MdvComp";
+  p_text = "MdvComp reads MDV data, computes the composite (maximum at any height) and writes the results to MDV.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+paramdef string {
+  p_default = "mdv/input";
+  p_descr = "URL for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output URL.";
+  p_help = "Output data is written to this URL.";
+} output_url;
+
+typedef enum {
+  COMP_FULL, COMP_LAYERED
+} comp_method_t;
+
+paramdef enum comp_method_t {
+  p_default = COMP_FULL;
+  p_descr = "Composite method - either full or layered.";
+  p_help = "COMP_FULL: a single composite is computed using the full depth of the data. COMP_LAYERED: a multi-layered composite is computed, using the layer_limits array.";
+} comp_method;
+
+typedef enum {
+  ALL_FIELDS, SOME_FIELDS, COMBO_FIELDS
+} field_select_t;
+
+paramdef enum field_select_t {
+  p_default = ALL_FIELDS;
+  p_descr = "Field selection mode.";
+  p_help = "ALL_FIELDS: composite all fields, using the specified comp_method. SOME_FIELDS: composite the specified fields using the specified comp_method - see field_names array. COMBO_FIELDS: composite specified fields over the range of vlevels specified in the field_vlevel_combo array.";
+} field_select;
+
+paramdef string {
+  p_default = {"none"};
+  p_descr = "List of specified field names.";
+  p_help = "Only used for SOME_FIELDS - see field_select.";
+} field_names[];
+
+typedef struct {
+  float lower_vlevel;
+  float mid_vlevel;
+  float upper_vlevel;
+} layer_vlevels_t;
+
+paramdef struct layer_vlevels_t {
+  p_default = {{1.0, 2.0, 3.0}};
+  p_descr = "Array of layer vlevel values.";
+  p_help = "This array of layers is used to compute the layered composite if comp_method is COMP_LAYERED. It does not apply if COMBO_FIELDS is selected. The mid_vlevel value is used as the height of the layer.";
+} layer_vlevels[];
+
+typedef struct {
+  string in_fld_name;
+  string out_fld_name;
+  float lower_vlevel;
+  float upper_vlevel;
+} field_vlevel_combo_t;
+
+paramdef struct field_vlevel_combo_t {
+  p_default = {{"none", "none", 1.0, 2.0}};
+  p_descr = "Specifications for taking individual fields and creating composites with varying vlevel limits.";
+  p_help = "See field_select.";
+} field_vlevel_combo[];
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4 
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_ZLIB;
+  p_descr = "Set compression type.";
+} output_compression_type;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to create output path in forecast format.";
+  p_help = "This option is only applicable to forecast data sets. If false, the output path is determined  using the valid time: topdir/yyyymmdd/hhmmss.mdv. If true, the output path is determined using the model initialization (generate) time and the forecast lead time in secs: yyyymmdd/g_hhmmss/f_ssssssss.mdv";
+} output_path_in_forecast_format;
+

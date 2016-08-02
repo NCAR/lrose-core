@@ -1,0 +1,168 @@
+/****************************************************
+ * TDRP params for image2mdv
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Operational mode.
+ * Realtime mode - waits for new data; archive mode runs on file
+ *   list.
+ *
+ * Type: enum
+ * Default: ARCHIVE 
+ * Legal values: REALTIME, ARCHIVE.
+ */
+mode = ARCHIVE;
+
+/*
+ * Input file extension.
+ *
+ * Type: string
+ * Default: "gif" 
+ */
+input_file_ext = "gif";
+
+/*
+ * Input directory.
+ * Path of input directory - realtime mode only.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+input_dir = "null";
+
+/*
+ * Output file extension.
+ *
+ * Type: string
+ * Default: "dob" 
+ */
+output_file_ext = "dob";
+
+/*
+ * Output directory.
+ * Path of output directory.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+output_dir = "null";
+
+/*
+ * Input image type.
+ * Input image type - only RAW_TYPE or TIFF_TYPE supported.
+ *
+ * Type: enum
+ * Default: TIFF_TYPE 
+ * Legal values: RAW_TYPE, TIFF_TYPE.
+ */
+image_type = TIFF_TYPE;
+
+/*
+ * Name of image.
+ *
+ * Type: string
+ * Default: "A" 
+ */
+image_name = "A";
+
+/*
+ * Location of image.
+ *
+ * Type: struct
+ */
+image_location = {
+  0, /* latitude:double */
+  0  /* longitude:double */
+};
+
+/*
+ * Size of image - used for RAW_TYPE only.
+ *
+ * Type: struct
+ */
+image_size = {
+  0, /* nx:long */
+  0  /* ny:long */
+};
+
+/*
+ * Image time.
+ *
+ * Type: struct
+ */
+image_time = {
+  0, /* year:long */
+  0, /* month:long */
+  0, /* day:long */
+  0, /* hour:long */
+  0, /* min:long */
+  0  /* sec:long */
+};
+
+/*
+ * Dots per inch.
+ * Resolution of image in dots per inch.
+ *
+ * Type: long
+ * Default: 50 
+ * Min value: 1 
+ * Max value: 2000 
+ */
+dpi = 50;
+
+/*
+ * Magnification factor for copy.
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0.05 
+ * Max value: 100 
+ */
+magnification_factor = 1;
+
+/*
+ * Max age of input data.
+ * For realtime only - max age of input data for it to be valid.
+ *
+ * Type: long
+ * Default: 300 
+ * Min value: 60 
+ */
+max_input_data_age = 300;
+
+/*
+ * Delay before processing incoming file (sec).
+ * Delay between finding new file and processing it - realtime
+ *   only (sec).
+ *
+ * Type: long
+ * Default: 10 
+ * Min value: 0 
+ * Max value: 300 
+ */
+processing_delay = 10;
+
+

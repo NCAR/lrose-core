@@ -1,0 +1,6 @@
+.deps
+DistFit
+__makefile.template
+makefile
+makefile.am
+makefile.in

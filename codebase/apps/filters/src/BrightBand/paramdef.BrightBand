@@ -1,0 +1,255 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for BrightBand
+ *
+ * Jaimi Yee, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * November 1997
+ */
+
+commentdef {
+  p_header = "BrightBand filters bright-band refelectivies from radar data "
+             "in a Cartesian grid MDV file.";
+}
+ 
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+ 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE,
+  REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+           "In realtime mode, the analysis is performed for each volume "
+           "scan as it becomes available. "
+           "In archive mode, the file list is obtained from the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+ 
+paramdef long {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/radar";
+  p_descr = "URL for input mdv files";
+  p_help = "The program will trigger off files in this directory when "
+           "in realtime mode.";
+} input_data_dir;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Reflectivity field label";
+  p_help = "Name found in input mdv files for reflectivity field";
+} dbz_label;
+
+commentdef {
+  p_header = "ALGORITHM CONTROL";
+}
+ 
+paramdef double {
+  p_descr = "Brightband will not be found below this height";
+  p_help = "Given in km";
+  p_default = 2.0;
+} max_down;
+
+paramdef double {
+  p_descr = "Brightband will not be found above this height";
+  p_help = "Given in km";
+  p_default = 7.0;
+} max_up;
+
+paramdef double {
+  p_descr = "The following values describe a template to be used to "
+            "detect bright band.";
+  p_help = "Specify reflectivity values for each grid point in dBZ";
+  p_default = { 30, 30, 45, 45, 25, 25 };
+} input_template1[]; 
+
+typedef struct
+{
+  boolean compute_interest;
+  long band_base_idex;
+  long band_top_idex;
+  double min_refl_in_band;
+  double max_refl_in_band;
+} input_template_info_t;
+
+paramdef struct input_template_info_t {
+  p_descr = "The following contains information pertaining to input_template1";
+  p_help = "Note that band_base_idex and band_top_idex describe which number "
+           "in the template above are the band base and band top "
+           "respectively.  "
+           "The first number in the template has an index of 1";
+  p_default =    { TRUE,              /* compute_interest */
+                    3,                /* band_base_idex */
+                    4,                /* band_top_idex */
+                   20.0,              /* min_refl_in_band - dBZ */
+                   45.0 };            /* max_refl_in_band - dBZ */
+
+} input_template1_info;
+
+paramdef double {
+  p_descr = "The following values describe a template to be used to "
+            "detect bright band.";
+  p_help = "Specify reflectivity values for each grid point in dBZ";
+  p_default = { 30, 30, 45, 25, 25 };
+} input_template2[]; 
+
+paramdef struct input_template_info_t {
+  p_descr = "The following contains information pertaining to input_template2";
+  p_help = "Note that band_base_idex and band_top_idex describe which number "
+           "in the template above are the band base and band top "
+           "respectively.  "
+           "The first number in the template has an index of 1";
+  p_default =    { TRUE,               /* compute_interest */
+                    3,                 /* band_base_idex */
+                    3,                 /* band_top_idex */
+                   20.0,               /* min_refl_in_band - dBZ */
+                   45.0 };             /* max_refl_in_band - dBZ */
+
+} input_template2_info;
+
+paramdef double {
+  p_descr = "The following values describe a template to be used to "
+            "detect bright band.";
+  p_help = "Specify reflectivity values for each grid point in dBZ";
+  p_default = { 30, 45, 45, 45, 45, 25 };
+} input_template3[];
+
+paramdef struct input_template_info_t {
+  p_descr = "The following contains information pertaining to input_template3";
+  p_help = "Note that band_base_idex and band_top_idex describe which number "
+           "in the template above are the band base and band top "
+           "respectively.  "
+           "The first number in the template has an index of 1";
+  p_default =    { FALSE,               /* compute_interest */
+                    2,                 /* band_base_idex */
+                    5,                 /* band_top_idex */
+                   20.0,               /* min_refl_in_band - dBZ */
+                   45.0 };             /* max_refl_in_band - dBZ */
+
+} input_template3_info;
+
+paramdef double {
+  p_descr = "Interest threshold";
+  p_help = "Interest values below this threshold will not be used in "
+           "identifying areas of brightband";
+  p_default = 0.6;
+} interest_threshold;
+
+paramdef long {
+  p_descr = "Area threshold";
+  p_help = "The smallest area in square km that should be considered "
+           "brightband";
+  p_default = 50;
+} area_threshold_sq_km;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+ 
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/brightBand";
+  p_descr = "URL for output mdv files";
+  p_help = "Filtered data written to mdv files in this URL";
+} output_dir;
+
+commentdef {
+  p_header = "ENCODING AND COMPRESSION CONVERSION";
+}
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_ASIS;
+  p_descr = "Set encoding type for output files.";
+} output_encoding;
+
+typedef enum {
+  COMPRESSION_ASIS =  -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_BZIP2 =  4,
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_GZIP;
+  p_descr = "Set compression type for output files.";
+} output_compression;
+
+commentdef {
+  p_header = "WRITING INTERMEDIATE FIELDS";
+}
+ 
+typedef enum {
+  ALWAYS,
+  BRIGHTBAND_FOUND,
+  NEVER
+} write_interest_t;
+
+paramdef enum write_interest_t {
+  p_descr = "Describes when to write interest fields to an mdv file";
+  p_help = "Options are to always write the interest fields to an mdv file, "
+           "to only write interest fields to an mdv file when areas of "
+           "brightband are identified and filtered, "
+           "or to never write the interest fields to an mdv file";
+  p_default = NEVER;
+} write_interest;
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/interest";
+  p_descr = "URL for interest mdv files";
+  p_help = "Interest values written to mdv files in this URL";
+} interest_dir;
+

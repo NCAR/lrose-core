@@ -1,0 +1,48 @@
+#! /bin/csh
+
+# For stand alone compilation of apiTitan (without using the higher level 
+# build_titan_libs script) the RAP_DIR will need to be set appropriately
+
+# setenv RAP_DIR $HOME/rap 
+
+mkdir -p $RAP_DIR/libs/apiTitan/src/include
+/bin/cp -r $RAP_DIR/incs/* $RAP_DIR/libs/apiTitan/src/include
+/bin/cp -r $RAP_DIR/libs/rapmath/src/include/rapmath $RAP_DIR/libs/apiTitan/src/include
+/bin/cp -r $RAP_DIR/libs/dataport/src/include/dataport $RAP_DIR/libs/apiTitan/src/include
+/bin/cp -r $RAP_DIR/libs/didss/src/include/didss $RAP_DIR/libs/apiTitan/src/include
+/bin/cp -r $RAP_DIR/libs/dsserver/src/include/dsserver $RAP_DIR/libs/apiTitan/src/include
+/bin/cp -r $RAP_DIR/libs/titan/src/include/titan $RAP_DIR/libs/apiTitan/src/include
+/bin/cp -r $RAP_DIR/libs/rapformats/src/include/rapformats $RAP_DIR/libs/apiTitan/src/include
+/bin/cp -r $RAP_DIR/libs/toolsa/src/include/toolsa $RAP_DIR/libs/apiTitan/src/include
+
+/bin/cp -r $RAP_DIR/libs/dataport/src/bigend $RAP_DIR/libs/apiTitan/src/dataport_bigend
+/bin/cp -r $RAP_DIR/libs/dataport/src/smallend $RAP_DIR/libs/apiTitan/src/dataport_smallend
+/bin/cp -r $RAP_DIR/libs/dataport/src/swap $RAP_DIR/libs/apiTitan/src/dataport_swap
+/bin/cp -r $RAP_DIR/libs/didss/src/DataFileNames $RAP_DIR/libs/apiTitan/src/didss_DataFileNames
+/bin/cp -r $RAP_DIR/libs/didss/src/DsMessage $RAP_DIR/libs/apiTitan/src/didss_DsMessage
+/bin/cp -r $RAP_DIR/libs/didss/src/DsURL $RAP_DIR/libs/apiTitan/src/didss_DsURL
+/bin/cp -r $RAP_DIR/libs/didss/src/LdataInfo $RAP_DIR/libs/apiTitan/src/didss_LdataInfo
+/bin/cp -r $RAP_DIR/libs/didss/src/RapDataDir $RAP_DIR/libs/apiTitan/src/didss_RapDataDir
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DataMapper $RAP_DIR/libs/apiTitan/src/dsserver_DataMapper
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DsClient $RAP_DIR/libs/apiTitan/src/dsserver_DsClient
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DsLdataInfo $RAP_DIR/libs/apiTitan/src/dsserver_DsLdataInfo
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DsLocator $RAP_DIR/libs/apiTitan/src/dsserver_DsLocator
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DsServer $RAP_DIR/libs/apiTitan/src/dsserver_DsServer
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DsSvrMgrSocket $RAP_DIR/libs/apiTitan/src/dsserver_DsSvrMgrSocket
+/bin/cp -r $RAP_DIR/libs/titan/src/DsTitan $RAP_DIR/libs/apiTitan/src/titan_DsTitan
+/bin/cp -r $RAP_DIR/libs/titan/src/file_io $RAP_DIR/libs/apiTitan/src/titan_file_io
+/bin/cp -r $RAP_DIR/libs/titan/src/tserver $RAP_DIR/libs/apiTitan/src/titan_tserver
+/bin/cp -r $RAP_DIR/libs/rapformats/src/titan $RAP_DIR/libs/apiTitan/src/rapformats_titan
+/bin/cp -r $RAP_DIR/libs/toolsa/src/Path $RAP_DIR/libs/apiTitan/src/toolsa_Path
+/bin/cp -r $RAP_DIR/libs/toolsa/src/URL $RAP_DIR/libs/apiTitan/src/toolsa_URL
+/bin/cp -r $RAP_DIR/libs/toolsa/src/compress $RAP_DIR/libs/apiTitan/src/toolsa_compress
+/bin/cp -r $RAP_DIR/libs/toolsa/src/file_io $RAP_DIR/libs/apiTitan/src/toolsa_file_io
+/bin/cp -r $RAP_DIR/libs/toolsa/src/fmq $RAP_DIR/libs/apiTitan/src/toolsa_fmq
+/bin/cp -r $RAP_DIR/libs/toolsa/src/mem $RAP_DIR/libs/apiTitan/src/toolsa_mem
+/bin/cp -r $RAP_DIR/libs/toolsa/src/pjg $RAP_DIR/libs/apiTitan/src/toolsa_pjg
+/bin/cp -r $RAP_DIR/libs/toolsa/src/pmu $RAP_DIR/libs/apiTitan/src/toolsa_pmu
+/bin/cp -r $RAP_DIR/libs/toolsa/src/port $RAP_DIR/libs/apiTitan/src/toolsa_port
+/bin/cp -r $RAP_DIR/libs/toolsa/src/sockutil $RAP_DIR/libs/apiTitan/src/toolsa_sockutil
+/bin/cp -r $RAP_DIR/libs/toolsa/src/str $RAP_DIR/libs/apiTitan/src/toolsa_str
+/bin/cp -r $RAP_DIR/libs/toolsa/src/umisc $RAP_DIR/libs/apiTitan/src/toolsa_umisc
+/bin/cp -r $RAP_DIR/libs/toolsa/src/utim $RAP_DIR/libs/apiTitan/src/toolsa_utim

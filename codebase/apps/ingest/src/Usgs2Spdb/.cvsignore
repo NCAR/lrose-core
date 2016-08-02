@@ -1,0 +1,6 @@
+.deps
+Usgs2Spdb
+__makefile.template
+makefile
+makefile.am
+makefile.in

@@ -1,0 +1,278 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvResample
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvResample.
+ */
+
+
+commentdef
+{
+  p_header = "MdvResample";
+  p_text = "This program resamples MDV data.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "If true, verbose debug messages will be printed.";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  FCST_TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program triggers whenever a new input "
+           "file appears.\n"
+           "In TIME_LIST mode, the program operates on every input file "
+           "between the start and end times specified on the command line.\n"
+           "In FCST_TIME_LIST mode, the program operates on every input "
+           "file in a forecast directory structure that are valid between "
+           "the supplied start and end time.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input URL.";
+  p_help = "The data in this URL must be on a lat/lon or flat projection.";
+  p_default = "mdvp:://localhost::mdv/gfs";
+} input_url;
+
+paramdef int
+{
+  p_descr = "Maximum valid time for input files in seconds.";
+  p_default = 25200;
+} max_valid_secs;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to specify the fields to process.";
+  p_help = "If set to false, all fields in the input file will be resampled "
+           "and included in the output file. "
+           "If set to true, only the fields specified in the input_fields "
+           "parameter will be processed.";
+  p_default = false;
+} specify_fields;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use names or numbers to identify "
+            "the input fields.";
+  p_help = "Set to true to use field names; false to use field numbers.";
+  p_default = true;
+} use_field_names;
+
+typedef struct
+{
+  string field_name;
+  int field_num;
+} field_info_t;
+
+paramdef struct field_info_t
+{
+  p_descr = "Information about the input fields to process.";
+  p_help = "These fields must be in pressure units, using the same units as "
+           "the vertical units of the temperature field. "
+           "The pressure values are converted to height values in the "
+           "output.\n"
+           "Note that all of the fields processed must use the same "
+           "projection.";
+  p_default = { { "PRES_CCBL", 0 } };
+} input_fields[];
+
+paramdef string
+{
+  p_descr = "Output URL.";
+  p_default = "mdvp:://localhost::mdv/resampled";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  PROJ_LATLON,
+  PROJ_FLAT,
+  PROJ_LAMBERT
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  double minx;
+  double miny;
+  int nx;
+  int ny;
+  double dx;
+  double dy;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+} proj_info_t;
+
+paramdef double
+{
+  p_descr = "Radius, in km, of the area around the center of the output grid "
+            "to use resampling the grid square.";
+  p_default = 10.0;
+} resample_radius;
+
+paramdef struct proj_info_t
+{
+  p_descr = "Projection information for the resampled grid.";
+  p_default = { PROJ_LATLON,
+                0.0, 0.0,
+                0, 0,
+                0.0, 0.0,
+                0.0, 0.0, 0.0 };
+} resample_proj_info;
+
+paramdef double 
+{
+  p_descr = "lat1 when projection = PROJ_LAMBERT";
+  p_default = 0;
+} lambert_lat1;
+
+paramdef double 
+{
+  p_descr = "lat2 when projection = PROJ_LAMBERT";
+  p_default = 0;
+} lambert_lat2;
+
+
+typedef enum
+{
+  STAT_MAX,
+  STAT_MIN,
+  STAT_MEAN,
+  STAT_MEDIAN,
+  STAT_MODE_MAX,
+  STAT_MODE_MIN,
+  STAT_MODE_MEAN,
+  STAT_MODE_MEDIAN,
+  STAT_PERCENTILE
+} stat_type_t;
+
+paramdef enum stat_type_t
+{
+  p_descr = "Type of statistic to use for resampling";
+  p_default = STAT_MAX;
+} stat_type;
+
+paramdef double
+{
+  p_descr = "Percentile for the STAT_PERCENTILE statistic";
+  p_help = "The STAT_PERCENTILE statistic returns the value that is greater "
+           "than this percentage of the data values.";
+  p_min = 0.0;
+  p_max = 100.0;
+  p_default = 100.0;
+} stat_percentile_value;
+
+
+paramdef int
+{
+  p_descr = "Number of threads";
+  p_help = "Set to 0 or 1 to disable threading";
+  p_default = 1;
+} num_threads;
+
+paramdef boolean
+{
+  p_descr = "Thread debugging";
+  p_help = "Set to true to enable threading debug messages";
+  p_default = FALSE;
+} thread_debug;

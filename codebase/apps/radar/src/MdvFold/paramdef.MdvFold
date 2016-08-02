@@ -1,0 +1,110 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions MdvFold
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// April 2009
+//
+
+commentdef {
+  p_header = "MdvFold is intended to help simulate folded data. It takes MDV data which is not folded and artificially folds the data. The folded data can then be used to test algorithms.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./input/mdv";
+  p_descr = "Directory for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_dir;
+
+commentdef {
+  p_header = "INPUT FIELD INFORMATION";
+  p_text = "Names of input fields in the Dsr queue.";
+}
+
+paramdef string {
+  p_default = { "SNR", "DBZ", "VEL" };
+  p_descr = "Name of fields to be read from the input MDV file and written to the output MDV file.";
+} input_field_names[];
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "Field name for velocity data.";
+} VEL_field_name;
+
+commentdef {
+  p_header = "VELOCITY FOLDING";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to artificially fold the velocity data.";
+  p_help = "If TRUE, the velocity data will be folded using the folding_nyquist value.";
+} apply_velocity_folding;
+
+paramdef double {
+  p_default = 8.0;
+  p_descr = "Nyquist to be applied to velocity data.";
+  p_help = "See apply_velocity_folding.";
+} folding_nyquist;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "./output/mdv/folded";
+  p_descr = "Output URL.";
+  p_help = "Output MDV data is written to this URL.";
+} output_url;
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Set output encoding type.";
+} encoding_type;
+
+paramdef string {
+  p_default = "VEL_FOLDED";
+  p_descr = "Output field name for folded velocity data.";
+} VEL_folded_field_name;

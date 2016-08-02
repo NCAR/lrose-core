@@ -1,0 +1,152 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SpolAngles2Fmq
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Feb 2011
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SpolAngles2Fmq reads SPOL angle data from the S2D ARM processor, via TCP. It saves the data out to a file message queue (FMQ), which can be read by multiple clients. This application has a monitor mode that can read that FMQ and print out the data from it. In addition the app can be used to check for antenna motion and write the results to a file.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "OPERATIONAL MODE";
+};
+
+typedef enum {
+  READ_SERVER_MODE, FMQ_MONITOR_MODE
+} ops_mode_t;
+
+paramdef enum ops_mode_t {
+  p_default = READ_SERVER_MODE;
+  p_descr = "Operational mode";
+  p_help = "In READ_SERVER_MODE, data is read from the angle server via a TCP socket and written to the FMQ. In FMQ_MONITOR_MODE, angles are read from the FMQ and printed to stdout.";
+} ops_mode;
+
+commentdef {
+  p_header = "TCP ANGLE SERVER DETAILS";
+};
+
+paramdef string {
+  p_default = "angles";
+  p_descr = "Name/IP address of host for the angle server";
+} angle_server_host;
+
+paramdef int {
+  p_default = 15000;
+  p_descr = "TCP port from which to read the angle data.";
+} angle_server_port;
+
+paramdef double {
+  p_default = 1000.0;
+  p_descr = "Frequency at which angles are read from the server (hz).";
+  p_help = "This is approximate, and will be used to determine how long to sleep between each read.";
+} angle_read_frequency_hz;
+
+commentdef {
+  p_header = "FMQ DETAILS";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/angles";
+  p_descr = "Path to output FMQ.";
+  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
+} output_fmq_path;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef int {
+  p_default = 100;
+  p_descr = "Number of angles to be bundled into a single message for writing.";
+  p_help = "The data rate is about 2500 angles per second. For efficiency, we bindle a number of these into a DsMessage, and write the message to the FMQ.";
+} n_angles_per_message;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+commentdef {
+  p_header = "MONITOR DETAILS";
+};
+
+paramdef double {
+  p_default = 1; 
+  p_descr = "Update interval for monitor display (secs).";
+  p_help = "Update rate for monitoring mode. New angles will be printed at this interval.";
+} monitor_update_interval;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Period for checking for antenna rate (secs).";
+  p_help = "Rate will be computed at this interval.";
+} antenna_rate_check_interval;
+
+commentdef {
+  p_header = "CHECKING ANTENNA STATUS";
+  p_help = "Optionally SpolAngles2Fmq can check for antenna status, for example motion, and write a status file summarizing the status. This may be used to monitor the antenna system and warn if the antenna stops unexpectedly.";
+};
+
+paramdef boolean {
+  p_default = false; 
+  p_descr = "Option to check if the antenna is moving.";
+} check_antenna_motion_status;
+
+paramdef string {
+  p_default = "/tmp/antenna_status";
+  p_descr = "Path to antenna status file.";
+  p_help = "The file contains an ASCII string. The string will depend on whether the antenna is stationary, and how long that condition has lasted.\n\tExample messages are:\n\t\t'AntennaStatus - OK'\n\t\t'AntennaStatus - WARN Antenna stopped for 300 seconds'\n\t\t'AntennaStatus - CRITICAL Antenna stopped for 600 seconds'";
+} antenna_status_file_path;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Period for checking for antenna motion (secs).";
+  p_help = "Motion will be checked at this interval.";
+} antenna_motion_check_interval;
+
+paramdef int {
+  p_default = 300; 
+  p_descr = "Number of seconds before antenna status warrants a warning.";
+  p_help = "If the antenna has not moved in this time, a warning message will be written to the antenna status file.";
+} antenna_motion_warning_secs;
+
+paramdef int {
+  p_default = 600; 
+  p_descr = "Number of seconds before antenna status warrants a critical.";
+  p_help = "If the antenna has not moved in this time, a critical message will be written to the antenna status file.";
+} antenna_motion_critical_secs;
+

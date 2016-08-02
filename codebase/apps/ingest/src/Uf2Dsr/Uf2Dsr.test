@@ -1,0 +1,504 @@
+/**********************************************************************
+ * TDRP params for Uf2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// Uf2Dsr reads Universal Format radar beam-by-beam files and copies the 
+//   contents into a DsRadar FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In SIMULATE mode, the program moves repeatedly through 
+//   the file list, creating output files with times set to now. This is 
+//   useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// UF FILE DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "$(HOME)/projDir/data/uf";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+///////////// check_elev //////////////////////////////
+//
+// Option to check elevation for error.
+// If true, and elevation error exceeds 'max_elev_error', the beam is 
+//   discarded.
+// Type: boolean
+//
+
+check_elev = FALSE;
+
+///////////// max_elev_error //////////////////////////
+//
+// Error in elevation (in degrees) for identifying unwanted beams.
+// Used for eliminating beams as the radar is moving around, for example 
+//   when the radar is dropping down to begin a new volume scan.
+// Type: float
+//
+
+max_elev_error = 0.5;
+
+//======================================================================
+//
+// RADAR PARAMS.
+//
+//======================================================================
+ 
+///////////// radar ///////////////////////////////////
+//
+// Default radar params. If you set a parameter to -9999, or an empty 
+//   string, the value in the data stream will be used. If you set the 
+//   parameter to some other value, this will override the value in the 
+//   data.
+// ========== Radar params ==========
+// 	
+// polarization: polarization type
+// adj_start_range: option to adjust start range
+// altitude: km
+// latitude: degrees
+// longitude: degrees
+// gate_spacing: km
+// start_range: km
+// beam_width: half-power beam width - degrees
+// pulse_width: nano-secs
+// prf: /s
+// wavelength: cm
+// radar_constant: dB
+// xmit_peak_pwr: watts
+// receiver_mds: dBm
+// receiver_gain: dB
+// antenna_gain: dB
+// system_gain: dB
+// unambig_velocity: m/s
+// unambig_range: km
+// 	.
+//
+// Type: struct
+//   typedef struct {
+//      int radar_id;
+//      string radar_name;
+//      polar_t polarization;
+//        Options:
+//          USE_FILE_VALUE
+//          HORIZONTAL
+//          VERTICAL
+//          CIRCULAR
+//          ELLIPTICAL
+//      boolean adj_start_range;
+//      double altitude;
+//      double latitude;
+//      double longitude;
+//      double gate_spacing;
+//      double start_range;
+//      double beam_width;
+//      double pulse_width;
+//      double prf;
+//      double wavelength;
+//      double radar_constant;
+//      double xmit_peak_pwr;
+//      double receiver_mds;
+//      double receiver_gain;
+//      double antenna_gain;
+//      double system_gain;
+//      double unambig_velocity;
+//      double unambig_range;
+//   }
+//
+//
+
+radar = {
+    radar_id = 0,
+    radar_name = "CP2",
+    polarization = CIRCULAR,
+    adj_start_range = FALSE,
+    altitude = -9999,
+    latitude = -9999,
+    longitude = -9999,
+    gate_spacing = -9999,
+    start_range = -9999,
+    beam_width = -9999,
+    pulse_width = -9999,
+    prf = -9999,
+    wavelength = -9999,
+    radar_constant = -9999,
+    xmit_peak_pwr = 400000,
+    receiver_mds = -113,
+    receiver_gain = -9999,
+    antenna_gain = -9999,
+    system_gain = 46,
+    unambig_velocity = 25,
+    unambig_range = 150
+};
+
+///////////// scan_type_id ////////////////////////////
+//
+// Scan type id.
+// Unique identifier for scan strategy.
+// Type: int
+//
+
+scan_type_id = 0;
+
+///////////// scan_type_name //////////////////////////
+//
+// Scan type name.
+// Descriptive name for scan strategy.
+// Type: string
+//
+
+scan_type_name = "Default";
+
+//======================================================================
+//
+// TILT TABLE.
+//
+// Tilt may be computed from a table of tilt angles.
+//
+//======================================================================
+ 
+///////////// tilt_table_flag /////////////////////////
+//
+// tilt table enum.
+// Enum indicating how to use the tilt table to determine the target 
+//   elevation and tilt number for a tilt.
+//
+// Type: enum
+// Options:
+//     GET_TARGET_FROM_TABLE
+//     COMPUTE_TILT_NUM_FROM_TABLE
+//     DONT_USE_TABLE
+//
+
+tilt_table_flag = DONT_USE_TABLE;
+
+///////////// tilt_table //////////////////////////////
+//
+// tilt table.
+// Table of tilt information including target elevation.
+//
+// Type: struct
+//   typedef struct {
+//      double target_elevation;
+//      int tilt_num;
+//   }
+//
+// 1D array - variable length.
+//
+
+tilt_table = {
+  {
+    target_elevation = 0.5,
+    tilt_num = 0
+  }
+  ,
+  {
+    target_elevation = 1.5,
+    tilt_num = 1
+  }
+};
+
+//======================================================================
+//
+// OUTPUT FIELDS.
+//
+// Only the following fields will included in the output. If the field 
+//   is not in the input file, it will be left out.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Field info.
+// List of fields to be output if available in the input data. If a 
+//   field does not exist in the input data it will not be output either. 
+//   The nc_name can be either a single field name, or a comma-delimited 
+//   list. If it is a list, the first name to match a field in the input 
+//   data is used.
+//
+// Type: struct
+//   typedef struct {
+//      string uf_name;
+//      string name;
+//      string units;
+//      double factor;
+//      double scale;
+//      double bias;
+//      boolean output_flag;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    uf_name = "DZ",
+    name = "DBZ",
+    units = "dBZ",
+    scale = 0.5,
+    bias = -32
+  }
+};
+
+//======================================================================
+//
+// FILTERING OPTIONS.
+//
+//======================================================================
+ 
+///////////// set_time_to_current /////////////////////
+//
+// set time to current flag.
+// TRUE if data time is set to the current time; FALSE if the data time 
+//   is sent unchanged.
+// Type: boolean
+//
+
+set_time_to_current = FALSE;
+
+///////////// time_correction /////////////////////////
+//
+// time correction -secs.
+// Seconds added to the data time.
+// Type: int
+//
+
+time_correction = 0;
+
+///////////// force_volume_change /////////////////////
+//
+// force volume change flag.
+// If TRUE, volume number will be updated if tilt number in beam header 
+//   is less than the previous tilt number.
+// Type: boolean
+//
+
+force_volume_change = FALSE;
+
+///////////// scan_mode ///////////////////////////////
+//
+// scan mode.
+// SCAN_SECTOR_MODE, SCAN_RHI_MODE or SCAN_SURVEILLANCE_MODE.
+//
+// Type: enum
+// Options:
+//     SCAN_SECTOR_MODE
+//     SCAN_RHI_MODE
+//     SCAN_SURVEILLANCE_MODE
+//
+
+scan_mode = SCAN_SURVEILLANCE_MODE;
+
+///////////// check_gate_geom /////////////////////////
+//
+// Check gate geometry flag.
+// Check gate spacing and start range. If they do not match the target 
+//   values do not process the beam.
+// Type: boolean
+//
+
+check_gate_geom = FALSE;
+
+///////////// target_gate_spacing /////////////////////
+//
+// Target gate spacing - km.
+// Type: double
+//
+
+target_gate_spacing = 250;
+
+///////////// target_start_range //////////////////////
+//
+// Target start range - km.
+// Usually half of gate spacing.
+// Type: double
+//
+
+target_start_range = 125;
+
+///////////// set_ngates_out //////////////////////////
+//
+// Options to set number of output gates.
+// If true, number of output gates is set to ngates_out. Data is either 
+//   truncated or filled with missing as appropriate.
+// Type: boolean
+//
+
+set_ngates_out = FALSE;
+
+///////////// ngates_out //////////////////////////////
+//
+// Number of output gates, if set_ngates_out is true.
+// See set_ngates_out.
+// Type: int
+//
+
+ngates_out = 1000;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for DsRadar data via FMQ.
+// Type: string
+//
+
+output_fmq_url = "data/fmq/from_uf";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 10000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 7200;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// beam_wait_msecs /////////////////////////
+//
+// Wait per beam (milli-secs).
+// Type: int
+//
+
+beam_wait_msecs = 0;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+//======================================================================
+//
+// PRINT CONTROL.
+//
+//======================================================================
+ 
+///////////// print_headers ///////////////////////////
+//
+// Option to print headers to stdout.
+// If TRUE, UF headers are printed to stdout.
+// Type: boolean
+//
+
+print_headers = TRUE;
+
+///////////// print_data //////////////////////////////
+//
+// Option to print data to stdout.
+// If TRUE, UF data is printed to stdout.
+// Type: boolean
+//
+
+print_data = TRUE;
+

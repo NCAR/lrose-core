@@ -1,0 +1,103 @@
+/**********************************************************************
+ * TDRP params for GenPt2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// GenPt2Spdb program.
+//
+// GenPt2Spdb reads ASCII generic point data and writes it to SPDB.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the program watches for files arriving in input_dir. In ARCHIVE 
+//   mode it uses the files specified on the command line.
+//
+// Type: enum
+// Options:
+//   ARCHIVE, REALTIME
+//
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+// Type: string
+//
+
+input_dir = "./input";
+
+///////////// use_ldata_info //////////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// If TRUE, the program watches for an update in the _latest_data_info 
+//   file in input_dir. The file path should be stored as user_info_2.
+// Type: boolean
+//
+
+use_ldata_info = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Minimum val: 0
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for output spdb data.
+// Type: string
+//
+
+output_url = "./spdb/output";
+

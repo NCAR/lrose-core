@@ -1,0 +1,148 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "RayTraceMdv simulates lidar operation.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+         
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+typedef struct {
+  double lidarLat;
+  double lidarLon;
+  double r0;
+  double dR;
+  double Rmax;
+  double azMin;
+  double delAz;
+  double azMax;
+} geometry_t;
+
+paramdef struct geometry_t {
+  p_descr = "Geometry for lidar scanning.";
+  p_help = "Set as appropriate. Distances in meters.";
+  p_default = {40.0, -104.0, 100.0, 3.0, 7000.0, 45.0, 0.5, 135.0 };
+} geometry;
+
+paramdef string {
+  p_descr = "output fmq url";
+  p_help = "Path for FMQ output data.";
+  p_default = {"fmqp:://localhost::./fmq.dsLidar"};
+} output_fmq_url;
+
+paramdef long {
+  p_default = {2000000};
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} output_fmq_size;
+
+paramdef long {
+  p_default = {360};
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_descr = "After finishing a file, delay for this\n"
+        "many seconds.";
+  p_help = "The intent is to allows Dsr2Vol some catchup time.\n";
+  p_default = 2;
+} fileDelaySecs;
+
+paramdef string {
+  p_descr = "MDV field name";
+  p_help = "Only 2D fields are supported.";
+  p_default = "noise";
+} fieldName;
+
+paramdef string {
+  p_descr = "Field units";
+  p_help = "Set as appropriate";
+  p_default = "none";
+} units;
+
+paramdef string {
+  p_descr = "Message log directory.";
+  p_help = "Set as appropriate";
+  p_default = "./";
+} msgLog_dir;
+
+paramdef int {
+  p_descr = "How many beams to send before sending lidar params.";
+  p_help = "Set as appropriate";
+  p_default = 30;
+} beamsPerMessage;
+
+paramdef double {
+  p_descr = "Nominal horizontal beam width, degrees.";
+  p_help = "The default should be OK.\n";
+  p_default = 1.0;
+} horizBeamWidth;
+
+
+paramdef double {
+  p_descr = "Nominal vertical beam width, degrees.";
+  p_help = "The default should be OK.\n";
+  p_default = 0.1;
+} vertBeamWidth;
+

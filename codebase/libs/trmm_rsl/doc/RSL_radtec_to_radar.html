@@ -1,0 +1,43 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.05 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</HEAD>
+<BODY>
+<A HREF="index.html"><IMG SRC="rsl.gif" ></A>&nbsp;
+<HR>
+<H1>
+RSL_radtec_to_radar</H1>
+
+<HR>
+<H3>
+Synopsis</H3>
+<B>#include "rsl.h"</B>
+<BR><B><A HREF="RSL_radar_struct.html">Radar</A> *RSL_radtec_to_radar(char
+*infile);</B>&nbsp;
+<HR>
+<H3>
+Description</H3>
+Reads a RADTEC (SPANDAR) file and returns a pointer to the <I>Radar</I>
+structure. The input file is specified by the string <I>infile</I>. If
+<I>infile</I> is NULL, then stdin is read.&nbsp; The data is compressed
+with PKWARE implode.&nbsp; RSL needs to be installed with -DHAVE_PKWARE
+in order to used RSL_radtec_to_radar.
+
+<P>The radar structure is, essentially, an array of Volumes. These volumes
+represent the reflectivity, velocity and spectrum width fields.&nbsp;
+<HR>
+<H3>
+Return value</H3>
+Upon successful completion, RSL_radtec_to_radar returns a pointer to the
+structure <B>Radar</B>. Otherwise, NULL is returned. A valid <B>Radar</B>
+structure will be returned if the <B>infile</B> is valid.&nbsp;
+<HR>
+<H3>
+See also</H3>
+<A HREF="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</A>&nbsp;
+<HR>
+
+<P>Author: <A HREF="john.merritt.html">John H. Merritt</A>.
+</BODY>
+</HTML>

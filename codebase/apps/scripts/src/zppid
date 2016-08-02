@@ -1,0 +1,29 @@
+#!/usr/bin/perl --
+# zppid: print the parent process IDs of any zombie processes.
+#  To remove zombies, you might try something like this: kill -1 `zppid`
+# Tres Hofmeister <tres@rap.ucar.edu>  Tue Sep 29 17:45:03 MDT 1998
+
+$debug = 0;
+
+opendir(DIR, "/proc") || die "Can't open directory /proc";
+@files = readdir(DIR);
+closedir(DIR);
+
+@files = grep(/^\d+$/, @files);
+
+foreach $file (@files) {
+    open(STATUS, "/proc/$file/status") || warn "open: $file: $!\n";
+    while (<STATUS>) {
+	chomp;
+	$pid = $_, push(@pids, $pid), next if s/^Pid:\t//;
+	$ppid = $_, next if s/^PPid:\t//;
+	$state = $_, next if s/^State:\t//;
+    }
+    $ppid{$pid} = $ppid;
+    $state{$pid} = $state;
+    push(@zparents, $ppid{$pid}) if $state{$pid} =~ /\(zombie\)/;
+
+    print "PID: $pid, PPID: $ppid{$pid}, State: $state{$pid}", "\n" if $debug;
+}
+
+print "@zparents\n" if @zparents;

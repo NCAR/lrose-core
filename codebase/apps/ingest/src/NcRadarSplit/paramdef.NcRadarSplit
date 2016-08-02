@@ -1,0 +1,160 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions NcRadarSplit
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Dec 2001
+//
+
+commentdef {
+  p_header = "Program name: NcRadarSplit";
+  p_text = "NcRadarSplit splits a netCDF radar file into PPI files.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, SIMULATE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.";
+} mode;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Time between output files - secs.";
+  p_help = "SIMULATE mode only. This is the rate at which files will be written, assuming the machine can keep up at that rate.";
+} simulate_rate_secs;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "$(HOME)/data/nc/combined";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE mode, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+commentdef {
+  p_header = "FILE CONVERSION.";
+}
+
+typedef struct {
+  double lower_elev;
+  double upper_elev;
+} elev_limits_t;
+
+paramdef struct elev_limits_t {
+  p_default = {
+    { 0.0, 1.0 },
+    { 1.0, 2.0 },
+    { 2.0, 3.0 },
+    { 3.0, 4.0 },
+    { 4.0, 5.0 },
+    { 5.0, 6.0 },
+    { 6.0, 7.0 },
+    { 7.0, 8.0 },
+    { 8.0, 9.0 },
+    { 9.0, 10.0 },
+    { 10.0, 11.0 },
+    { 11.0, 12.0 },
+    { 12.0, 14.0 },
+    { 14.0, 16.0 },
+    { 16.0, 18.0 },
+    { 18.0, 20.0 }
+  };
+  p_descr = "Elevation limits for each PPI.";
+  p_help = "When splitting the file, these limits indicate which beams belong to which PPI. The lower limit is exclusive, the upper limit is enclusive.";
+} elev_limits[];
+
+commentdef {
+  p_header = "OUTPUT FILE.";
+}
+
+paramdef string {
+  p_default = "./tmp";
+  p_descr = "Temporary directory.";
+  p_help = "Output files are written to this directory first, and then renamed to the correct path.";
+} tmp_dir;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory for split files.";
+  p_help = "";
+} output_dir;
+
+paramdef string {
+  p_default = "nc";
+  p_descr = "File extension for output files.";
+} output_file_ext;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write _latest_data_info file in output dir.";
+  p_help = "If TRUE, _latest_data_info is written to the output directory.";
+} write_ldata_info_file;
+

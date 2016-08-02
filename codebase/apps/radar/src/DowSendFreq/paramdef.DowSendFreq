@@ -1,0 +1,134 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions TsScanInfoMerge
+//
+// EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Dec 2014
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DowSendFreq provides the RF frequency for both the high and low frequency radars, via a socket, to a device designed to control the magnetron frequencies. The control device will act as a server, to which this application will connect.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "READING THE HIGH FREQUENCY INFO";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to read info for high frequency transmitter.";
+  p_help = "If false, the default value will be passed to the frequency controller.";
+} high_frequency_active;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts/shmem_10100";
+  p_descr = "Name for high frequency FMQ.";
+} high_freq_input_fmq_name;
+
+paramdef double {
+  p_default = 9550.0;
+  p_descr = "Option to read info for high frequency transmitter.";
+  p_help = "This is the ideal frequency for the high transmitter. If we cannot read in the measured high frequency, this value will be used instead.";
+} high_freq_default_mhz;
+
+commentdef {
+  p_header = "READING THE LOW FREQUENCY INFO";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to read info for low frequency transmitter.";
+  p_help = "If false, the default value will be passed to the frequency controller.";
+} low_frequency_active;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts/shmem_10100";
+  p_descr = "Name for low frequency FMQ.";
+} low_freq_input_fmq_name;
+
+paramdef double {
+  p_default = 9400.0;
+  p_descr = "Option to read info for low frequency transmitter.";
+  p_help = "This is the ideal frequency for the low transmitter. If we cannot read in the measured low frequency, this value will be used instead.";
+} low_freq_default_mhz;
+
+commentdef {
+  p_header = "CONTROLLING THE FMQ";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to start reading at beginning of input FMQs.";
+  p_help = "Normally, we start reading at the end of the queues. For debugging, however, it is sometimes helpful to start at the beginning of the queues.";
+} start_reading_at_fmq_start;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Sleep this amount of time between reads (secs).";
+} time_between_reads_secs;
+
+commentdef {
+  p_header = "TCP OUTPUT - to frequency controller";
+};
+
+paramdef double {
+  p_default = 1;
+  p_descr = "Rate at which frequency will be reported to the contol device.";
+} output_interval_secs;
+
+typedef enum {
+  TCP_MODE_SERVER, TCP_MODE_CLIENT
+} tcp_mode_t;
+
+paramdef enum tcp_mode_t {
+  p_default = TCP_MODE_SERVER;
+  p_descr = "Mode for sending data.";
+  p_help = "TCP_MODE_SERVER: this app listens on a port, and when it gets a connection from a client it starts to send data to the client. TCP_MODE_CLIENT: this application acts as a client and connects to a server, sending data to that server.";
+} tcp_mode;
+
+paramdef string {
+  p_default = "freq_control";
+  p_descr = "Name of host for frequency control server. This can also be the IP address.";
+  p_help = "Applies to TCP_MODE_CLIENT.";
+} remote_server_host;
+
+paramdef int {
+  p_default = "10000";
+  p_descr = "Port number for frequency control device server.";
+  p_help = "Applies to TCP_MODE_CLIENT.";
+} remote_server_port;
+
+paramdef int {
+  p_default = "10000";
+  p_descr = "Port in which to listen for connections.";
+  p_help = "Applies to TCP_MODE_SERVER.";
+} local_listening_port;
+

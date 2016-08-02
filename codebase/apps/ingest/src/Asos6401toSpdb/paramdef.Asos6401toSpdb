@@ -1,0 +1,209 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Asos6401toSpdb
+ *
+ * This file contains the TDRP parameter definitions for
+ * NrlTpw2Mdv
+ */
+
+commentdef
+{
+  p_header = "Asos6401toSpdb";
+  p_text = "This program converts the ASOS 6401 data format (the format of "
+           "the 5-minute data in the NCDC archive) into an SPDB station "
+           "database.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  FILE_LIST,
+  INPUT_DIR,
+  INPUT_DIR_RECURSE,
+  LATEST_DATA
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tIn FILE_LIST mode, the program operates on the files specified "
+           "on the command line.\n"
+           "\tIn INPUT_DIR mode, the program will process new files as they "
+           "appear in the input_dir directory.\n"
+           "\tIn INPUT_DIR_RECURSE mode, the program will process new files "
+           "as they appear in the input_dir directory or in any "
+           "subdirectory.\n"
+           "\tIn LATEST_DATA mode, the program will process new files as they "
+           "appear in the _latest_data_info file in the input_dir directory.\n";
+  p_default = "FILE_LIST";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_default = "$(RAP_DATA_DIR)/raw/asos";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Input filename substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will only process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} input_substring;
+
+paramdef string
+{
+  p_descr = "Input filename exclude substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will not process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} exclude_substring;
+
+paramdef long
+{
+  p_descr = "Maximum number of seconds input files are valid.";
+  p_help = "Used only if trigger_mode is set to LATEST_DATA.";
+  p_default = 600;
+} max_valid_secs;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "spdbp:://localhost::spdb/asos";
+} output_url;
+
+typedef enum
+{
+  OUTPUT_METAR_REPORT,
+  OUTPUT_STATION_REPORT,
+  OUTPUT_PRESSURE_STATION_REPORT,
+  OUTPUT_METAR_WITH_REMARKS_REPORT
+} output_report_type_t;
+
+paramdef enum output_report_type_t
+{
+  p_descr = "Type of station report to put in the output SPDB database";
+  p_default = OUTPUT_METAR_REPORT;
+} output_report_type;
+
+paramdef long
+{
+  p_descr = "Number of seconds each station report is valid";
+  p_default = 3600;
+} expire_secs;
+
+typedef enum
+{
+  STATION_FILE_ANC,
+  STATION_FILE_NWS
+} station_file_type_t;
+
+paramdef enum station_file_type_t
+{
+  p_descr = "Type of file containing the station information";
+  p_help = "\tSTATION_FILE_ANC - This is the same station file that is used "
+           "for other AutoNowcast applications. "
+           "It contains lines of the following format:\n"
+           "\t\t<station id>, <lat>, <lon>, <alt>\n"
+           "where:\n"
+           "\t<station id> is the 4-character station identifier\n"
+           "\t<lat> is the latitude in degrees\n"
+           "\t<lon> is the longitude in degrees\n"
+           "\t<alt> is the altitude in meters\n\n"
+           "\tSTATION_FILE_NWS - This is the station file that can be "
+           "downloaded from http://weather.noaa.gov/tg/site.shtml. "
+           "This is the file keyed by location indicator.\n";
+  p_default = STATION_FILE_ANC;
+} station_file_type;
+
+paramdef string
+{
+  p_descr = "File containing the station location information";
+  p_default = "station_location.txt";
+} station_file;
+
+typedef enum
+{
+  ALT_UNITS_METERS,
+  ALT_UNITS_FEET
+} alt_units_t;
+
+paramdef enum alt_units_t
+{
+  p_descr = "Flag indicating the units used for the altitude values in the "
+            "station file.";
+  p_help = "Currently only used for ANC station files.";
+  p_default = ALT_UNITS_METERS;
+} stn_file_alt_units;

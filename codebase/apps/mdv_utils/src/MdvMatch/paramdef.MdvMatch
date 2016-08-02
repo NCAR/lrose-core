@@ -1,0 +1,133 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+////////////////////////////////////////////////////////////////////////////////
+// parameter definitions for MdvMatch
+//
+// Terri Betancourt, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// January 2000
+//
+// $Id: paramdef.MdvMatch,v 1.2 2016/03/07 01:32:30 dixon Exp $
+//
+////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode (NOTE: REALTIME mode is not currently supported)";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "MDV INPUT DATASET A (independent dataset times)";
+};
+
+paramdef string {
+  p_default = "mdvp:://$(HOST)::mdv/inputA";
+  p_descr = "URL for input dataset A, e.g., mdvp:://$(HOST)::mdv/inputA";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line. NOTE: application processing is triggered from data times from this dataset.";
+} input_url_A;
+
+paramdef string {
+  p_default = "fieldA";
+  p_descr = "Field name for input from dataset A.";
+  p_help = "The data from this field is matched to the data from field_name_B.";
+} field_name_A;
+
+paramdef long {
+  p_descr = "Max age (in minutes) of input dataset A";
+  p_help = "Used in REALTIME mode only.  Max age of input data for it to be valid";
+  p_min = {0};
+  p_max = {1440};
+  p_default = {6};
+} max_valid_age_min;
+
+commentdef {
+  p_header = "MDV INPUT DATASET B (dependent dataset times)";
+};
+
+paramdef string {
+  p_default = "mdvp:://$(HOST)::mdv/inputB";
+  p_descr = "URL for input dataset B, e.g., mdvp:://$(HOST)::mdv/inputB";
+  p_help = "Data times for this dataset are determined from the data time of dataset A + offset_min.";
+} input_url_B;
+
+paramdef string {
+  p_default = "fieldB";
+  p_descr = "Field name for input from dataset B.";
+  p_help = "The data from this field is matched to the data from field_name_A.";
+} field_name_B;
+
+paramdef long {
+  p_descr = "Time offset (in minutes) from input dataset A for corresponding request time of input datatset B";
+  p_help = "Used for comparing forecast data with validation data.  The offset can be positive or negative depending on whether you trigger (input_url_A) from forecast data or validation data.";
+  p_min = {-1440};
+  p_max = {1440};
+  p_default = {0};
+} offset_min;
+
+paramdef long {
+  p_descr = "Time margin (in minutes) for request time of input datatset B";
+  p_min = {0};
+  p_max = {1440};
+  p_default = {6};
+} margin_min;
+
+commentdef {
+  p_header = "DATA SPECIFICATIONS";
+};
+
+paramdef struct RANGE_A {
+  p_descr = "Dynamic range of interest for dataset A";
+  p_help = "";
+  p_field_type = {float, float, float};
+  p_field_name = {min, max, interval};
+} dynamic_range_A;
+
+paramdef struct RANGE_B {
+  p_descr = "Dynamic range of interest for dataset B";
+  p_help = "";
+  p_field_type = {float, float, float};
+  p_field_name = {min, max, interval};
+} dynamic_range_B
+

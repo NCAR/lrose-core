@@ -1,0 +1,64 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.01b6C [en] (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY>
+<A HREF="index.html"><IMG SRC="rsl.gif" HEIGHT=100 WIDTH=100></A><A HREF="index.html">&nbsp;</A>
+<HR>
+<BR>&nbsp;
+<BR>&nbsp;
+<H1>
+RSL_read_these_sweeps</H1>
+
+<HR>
+<H3>
+Synopsis</H3>
+<B>#include "rsl.h"</B>
+<BR><B>void RSL_read_these_sweeps(char *sweep#, [char *sweep#...], NULL);</B>
+<BR>
+<HR>
+<H3>
+Description</H3>
+Call this routine prior to any ingest routine and only the sweeps specified
+will be stored in memory.&nbsp; This drastically reduces memory requirements
+and speeds up the ingest, especially, if you're only interesed in a few
+sweeps.&nbsp; This function is useful, for instance, when you're making
+images of the base sweeps.&nbsp; Why bother reading the entire file when
+you only need the first sweep? By default, all sweeps are ingested.&nbsp;
+The sweep# is a character string representing the sweep number, "4" for
+instance.&nbsp; Order does not matter.&nbsp; Specify NULL as the last argument.
+This signals this routine when to stop parsing&nbsp; for sweep numbers.&nbsp;
+The first sweep is "0".
+
+<P>The list of possible sweep numbers is: "all", "none", "0", "1", ...
+
+<P>Action or side-effects: A second call to this function over-rides any
+previous settings. In other words, multiple calls are not additive.&nbsp;
+Therefore, you must list all the sweeps you want in a single call.
+
+<P>RSL_read_these_sweeps("1", "2", NULL);
+
+<P>which&nbsp; reads the second and third sweep is not the same as:
+
+<P>RSL_read_these_sweeps("1", NULL);
+<BR>RSL_read_these_sweeps("2", NULL);
+
+<P>wherein, only the third (index 2) sweep is ingested.
+<BR>&nbsp;
+
+<P>
+<HR>
+<H3>
+Return value</H3>
+Upon successful completion, RSL_read_these_sweeps silently sets a hidden
+array that each of the specific radar format ingest routines access.
+<BR>
+<HR>
+<H3>
+See also</H3>
+<A HREF="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</A>.
+<BR>
+<HR>Author: <A HREF="john.merritt.html">John H. Merritt</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,35 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_bscan_...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>void RSL_bscan_ray(</b><a href=RSL_ray_struct.html>Ray</a><b> *r, FILE *fp);<br>
+void RSL_bscan_sweep(</b><a href=RSL_sweep_struct.html>Sweep</a><b> *s, char *outfile);<br>
+void RSL_bscan_volume(</b><a href=RSL_volume_struct.html>Volume</a><b> *v, char *basename);</b> 
+
+<h3>
+<hr>Description</h3>
+Output image format is PPM. If <b>basename</b> is &quot;bscan&quot;, RSL_bscan_volume outputs filenames bscan.01.gif, bscan.02.gif, etc. as PPM images. These are simple ray dumps; aka, B-SCANS. The output file is specified as the <b>outfile</b> parameter to RSL_bscan_sweep. These routines assume the color table has been loaded, otherwise you will get a black image. The output image dimensions are nbins by nrays which are determined from sweep and first-ray-of-the-sweep header information. 
+<hr>
+
+<h3>Return value</h3>
+None. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_sweep_to.html>RSL_sweep_to_gif</a>, <a href=RSL_sweep_to.html>RSL_sweep_to_pict</a>, <a href=RSL_sweep_to.html>RSL_sweep_to_pgm</a>, <a href=RSL_sweep_to.html>RSL_sweep_to_ppm</a>,<br>
+<a href=RSL_load_color_table.html>RSL_load_color_table</a>, <a href=RSL_load_color_table.html>RSL_load_green_table</a>, <a href=RSL_load_color_table.html>RSL_load_red_table</a>, <a href=RSL_load_color_table.html>RSL_load_blue_table</a>,<br>
+<a href=RSL_load_color_table.html>RSL_load_refl_color_table</a>, <a href=RSL_load_color_table.html>RSL_load_sw_color_table</a>, <a href=RSL_load_color_table.html>RSL_load_vel_color_table</a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

@@ -1,0 +1,272 @@
+/*********************************************************
+ * parameter definitions for Tstorms2Symprod
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * Oct 2007
+ */
+
+commentdef {
+  p_header = "Tstorms2Symprod program";
+  p_text = "Tstorms2Symprod reads native TITAN data files, converts the data into XML format, and writes the data out to XML files or SPDB.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST, XML
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "In REALTIME mode, the program is run on output from each volume scan as it becomes available. In ARCHIVE mode, all of the scans in a series of track files are processed. In FILELIST mode, the program processes a list of files specified on the command line. In XML mode, an XML string is specified on the command line, along with a valid time, and this string is stored to SPDB. XML mode is used to take XML data stored in plain files and store it into SPDB.";
+} input_mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "titan/storms";
+  p_descr = "Directory for input TITAN storm data.";
+  p_help = "If this path is not absolute (starts with /) or relative (starts with .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.";
+} input_dir;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Max valid age of input data in realtime mode (secs).";
+  p_help = "REALTIME mode only. This the max valid age for input data. In REALTIME mode, the program will wait for data more recent than this.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "XML DETAILS";
+  p_text = "Details for the XML file.";
+}
+	
+typedef enum {
+  TSTORMS_FORMAT, WXML_FORMAT
+} xml_format_t;
+  
+paramdef enum xml_format_t {
+  p_default = WXML_FORMAT;
+  p_descr = "Formal of XML output.";
+  p_help = "TSTORMS_FORMAT is a simple format. WXML is the Australian BOM output format.";
+} xml_format;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Indent per level (spaces).";
+  p_help = "Number of spaces per indent level";
+} xml_indent_per_level;
+
+paramdef string {
+  p_descr = "XML schema instance.";
+  p_default = "http://www.w3.org/2001/XMLSchema-instance";
+} schema_instance;
+
+paramdef string {
+  p_descr = "XML version.";
+  p_default = "3.0";
+} version;
+
+paramdef string {
+  p_descr = "XML schema location.";
+  p_default = "http://www.cawcr.gov.au/WxML http://www.cawcr.gov.au/WxML/wxml.3.0.xsd";
+} schema_location;
+
+paramdef string {
+  p_descr = "XML namespace location.";
+  p_default = "http://www.cawcr.gov.au/WxML";
+} namespace_location;
+
+xmlns="http://www.cawcr.gov.au/WxML"
+paramdef string {
+  p_descr = "operational-mode - experimental, operational etc.";
+  p_default = "experimental";
+} operational_mode;
+
+paramdef string {
+  p_descr = "product -> description";
+  p_default = "TITAN";
+} product_description;
+
+paramdef string {
+  p_descr = "product -> refresh-frequency";
+  p_default = "PT10M";
+} refresh_frequency;
+
+paramdef string {
+  p_descr = "Radar site name.";
+  p_help = "Sets radar name for output to XML file.";
+  p_default = "not-set";
+} radar_name;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Radar latitude (deg)";
+} radar_latitude_deg;
+
+paramdef double {
+  p_default = 0.0;
+    p_descr = "Radar laongitude (deg)";
+} radar_longitude_deg;
+
+paramdef string {
+  p_descr = "product-source -> more-information";
+  p_default = "http://www.cawcr.gov.au/WxML";
+} more_information;
+
+paramdef string {
+  p_descr = "product-source -> production-center";
+  p_default = "Australian Bureau of Meteorology<sub-center>Centre for Australian Weather and Climate Research</sub-center>";
+} production_center;
+
+paramdef string {
+  p_descr = "product-source -> disclaimer";
+  p_default = "http://www.bom.gov.au/other/disclaimer.shtml";
+} disclaimer;
+
+paramdef string {
+  p_descr = "product-source -> credit";
+  p_default = "http://www.bom.gov.au";
+} credit;
+
+paramdef string {
+  p_descr = "product-source -> credit-logo";
+  p_default = "http://www.bom.gov.au/images/bom_logo.gif";
+} credit_logo;
+
+commentdef {
+  p_header = "ELLIPSES";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to include ellipse data.";
+  p_help = "Ellipses are used for a simple storm shape and size description.";
+} include_ellipse;
+
+commentdef {
+  p_header = "POLYGONS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to include polygon data.";
+  p_help = "Polygons are used for a more complex storm shape and size description.";
+} include_polygon;
+
+paramdef boolean {
+  p_descr = "Smooth the storm polygon";
+  p_help = "If TRUE, the storm polygon will be smoothed within the boundaries defined by polygon_smooth_inner_mult and polygon_smooth_outer_mult.";
+  p_default = FALSE;
+} smooth_polygon;
+
+paramdef double {
+  p_descr = "Inner boundary multiplier for storm polygon smoothing";
+  p_help = "Multipliers less than 1.0 produce an inner boundary smaller than the original storm. Multipliers greater than 1.0 produce an inner boundary larger than the original storm. inner_mult must be <= outer_mult";
+  p_min = 0.0;
+  p_default = 1.0;
+} polygon_smooth_inner_mult;
+
+paramdef double {
+  p_descr = "Outer boundary multiplier for storm smoothing";
+  p_help = "Multipliers less than 1.0 produce an outer boundary smaller "
+    "than the original storm. Multipliers greater than 1.0 "
+    "produce an outer boundary larger than the original storm. "
+    "outer_bnd_multiplier must be >= inner_bnd_multiplier";
+  p_min = 0.0;
+  p_default = 3.0;
+} polygon_smooth_outer_mult;
+
+commentdef {
+  p_header = "HISTORY";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to include history data";
+  p_help = "If true, storm data from the past will be included. The program will look back in time from the valid time, by 'history_secs'.";
+} include_history;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "How far to look for history (secs)";
+  p_help = "If set to 0, the program only considers the latest scan. If greater than 0, we look back by that number of seconds.";
+} history_secs;
+
+commentdef {
+  p_header = "FORECASTS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to generate forecast shapes";
+  p_help = "If true, forecast shape data will be produced. These will be polygons, ellipses or both, depending on the settings above.";
+} generate_forecasts;
+
+paramdef int {
+  p_descr = "Lead times for forecasts - secs.";
+  p_help = "Array of forecast lead times. Forecast shapes will be produced at each of these times. See 'generate_forecasts'.";
+  p_default = { 1800, 3600 };
+} forecast_lead_times[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Allow growth and decay on forecasts";
+  p_help = "If true, forecast shapes will be allowed to grow and decay according to TITAN trends. If false, the shapes will stay the same size.";
+} forecast_growth_and_decay;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to write XML files.";
+} write_to_xml_files;
+
+paramdef string {
+  p_default = "./output/xml";
+  p_descr = "Dir for XML files. See write_to_xml_files.";
+  p_help = "Files will be written to dated subdirectories. See xml_name";
+} xml_dir;
+
+paramdef string {
+  p_default = "titan";
+  p_descr = "Name used to create the file name.";
+  p_help = "Files name will be yyyymmdd/yyyymmdd_hhmmss_{xml_name}.xml.";
+} xml_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write data to SPDB data base.";
+} write_to_spdb;
+
+paramdef string {
+  p_default = "./output/spdb/tstorms_xml";
+  p_descr = "URL for TITAN XML SPDB data.";
+  p_help = "The XML will be stored in SPDB in exactly the same format as is written to XML files.";
+} spdb_url;
+

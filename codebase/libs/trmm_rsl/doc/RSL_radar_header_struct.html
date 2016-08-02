@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.0b5aGold (X11; I; Linux 1.3.91 i586) [Netscape]">
+</HEAD>
+<BODY>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+<PRE>typedef struct { 
+  int month, day, year; 
+  int hour, minute; 
+  float sec; /* Second plus fractional part. */
+  char radar_type[50]; /* Type of radar. Use for QC-ing the data.
+                        * Supported types are:
+                        * &quot;wsr88d&quot;, &quot;lassen&quot;, &quot;uf&quot;,
+                        * &quot;nsig&quot;, &quot;nsig2&quot;, &quot;mcgill&quot;,
+                        * &quot;kwajalein&quot;, &quot;rsl&quot;, &quot;toga&quot;.
+                        * Set by appropriate ingest routine.
+                        */ 
+  int nvolumes;
+  int number;        /* arbitrary number of this radar site */
+  char name[8];      /* Nexrad site name */
+  char radar_name[8]; /* Radar name. */
+  char city[15];     /* nearest city to radaar site */
+  char state[2];     /* state of radar site */
+  int latd;   /* degrees of latitude of site */
+  int latm;   /* minutes of latitude of site */
+  int lats;   /* seconds of latitude of site */
+  int lond;   /* degrees of longitude of site */
+  int lonm;   /* minutes of longitude of site */
+  int lons;   /* seconds of longitude of site */
+  int height; /* height of site in meters above sea level*/
+  int spulse; /* length of short pulse (ns)*/
+  int lpulse; /* length of long pulse (ns) */
+} Radar_header; </PRE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,6 @@
+set title "SPECTRUM WIDTH, GMAP using real spectra, CWR 0 dB"
+set xlabel "Width truth (m/s)" 
+set ylabel "Width filtered (m/s)"
+set xrange [0:6]
+set yrange [0:6]
+plot 'gmap_real_cwr_0.out' using 5:14 title ''

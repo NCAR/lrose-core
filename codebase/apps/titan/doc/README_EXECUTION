@@ -1,0 +1,109 @@
+RUNNING TITAN
+=============
+
+Mike Dixon
+RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+(303)-497-8440
+dixon@ncar.ucar.edu
+
+December 1994
+
+A series of scripts have been set up to show how the TITAN system
+may be used. After installation is complete, these scripts should be
+found in $TITAN_HOME/scripts.
+
+The programs run by these scripts make use of the parameter files
+copied to $TITAN_HOME/scripts during installation.
+
+You will need an NCAR format tape to run these scripts, or a
+tape format supported by rdata_to_socket.
+
+Hardware requirements
+=====================
+
+The TITAN system requires UNIX and X-Windows.
+
+The TITAN processes may be run on a single machine with about 64 Mbytes
+of memory, or two machines with about 32 Mbytes of memory each.
+
+Many of the programs require shared memory segments for communication.
+The kernel must be compiled for the shared memory option, preferably
+with at least 4 Mbyte segments. If you have smaller segments, you may need
+to cut down on the size of the Cartesian volume grid.
+
+Overview of script examples
+===========================
+
+A machine (in this example called 'tornado') with a tape drive reads
+an NCAR format radar tape. Data is read from this tape by
+rdata_to_socket and is transmitted across the network to a second
+machine. All of the remaining processes run on the second machine,
+which is referred to as 'local' in the parameter files. The actual
+machine name could be substituted for 'local'.
+
+The data transmitted by rdata_to_socket is ingested by rdata_to_shmem
+and placed into a shared memory buffer. dobson_from_shmem reads this
+buffer, transforms the data into Cartesian space and stores files in
+the $TITAN_HOME/cdata directory. dobson_from_shmem also transmits the
+data beam-by-beam to cart_slave which keeps an up-to-date volume in
+shared memory for real-time display purposes.
+
+The dobson_server program reads both the up-to-date volume and the
+Cartesian disk files and makes them available to the display. A
+second dobson_server serves out precip forecast data.
+
+The program storm_ident reads the Cartesian volumes and identifies
+storms in them. It starts up storm_track which tracks the storms.
+The program track_server serves out this track data to the display, and
+also provides a shared memory area for communication between storm_ident
+and storm_track. Storm and track files reside in directory
+$TITAN_HOME/storms.
+
+The program precip_map reads the storm track files and produces a
+precipitation forecast in a file, in directory
+$TITAN_HOME/precip_forecast.
+
+The display programs rview and time hist access the dobson_server and
+track_server programs via sockets, and display the data.
+
+Optionally, the programs clutter_compute and clutter_table_generate may
+be run to prepare the system for clutter removal.
+
+Adjusting parameter files
+=========================
+
+To use these scripts, you need to change the name 'tornado' to
+that of the machine which you will use to run rdata_to_socket.
+You may also need to change the name of the tape drive, which 
+is set to /dev/rst0.
+
+The scripts
+===========
+
+run_rctable_generate generates the radar-to-Cartesian lookup tables.
+
+start_tape starts reading the tape.
+
+start_ingest starts the ingest and Cartesian transformation programs.
+
+start_servers starts up the data servers.
+
+start_tracking starts up the storm tracking.
+
+start_display starts the display.
+
+
+Optional - clutter removal
+==========================
+
+setup_clutter_table copies some radar files to the clutter directory
+and runs the clutter table generation programs. This example expects
+that the NCAR data tape from July 10 1990 is used. It uses the files
+between 1700 and 2000 GMT for clutter computations. If you are using a
+different tape, edit the script to copy over about 20 files without
+weather activity in them.
+
+If the clutter computations have been done, you can use
+start_ingest_remove_clutter instead of start_ingest.
+
+

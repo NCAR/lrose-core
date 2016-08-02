@@ -1,0 +1,193 @@
+/**********************************************************************
+ * TDRP params for NcRadarSplit
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: NcRadarSplit.
+//
+// NcRadarSplit splits a netCDF radar file into PPI files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "sim";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In SIMULATE mode, the program moves repeatedly through 
+//   the file list, creating output files with times set to now. This is 
+//   useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = SIMULATE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE mode, the file paths 
+//   are specified on the command line.
+// Type: string
+//
+
+input_dir = "$(DATA_DIR)/nc/combined";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+//======================================================================
+//
+// FILE CONVERSION.
+//
+//======================================================================
+ 
+///////////// time_dim_name ///////////////////////////
+//
+// Name of the time dimension.
+// Some files use 'time', so we need this to be general.
+// Type: string
+//
+
+time_dim_name = "time";
+
+///////////// elev_limits /////////////////////////////
+//
+// Elevation limits for each PPI.
+// When splitting the file, these limits indicate which beams belong to 
+//   which PPI. The lower limit is exclusive, the upper limit is 
+//   enclusive.
+//
+// Type: struct
+//   typedef struct {
+//      double lower_elev;
+//      double upper_elev;
+//   }
+//
+// 1D array - variable length.
+//
+
+elev_limits = {
+  { 0, 1},
+  { 1, 2},
+  { 2, 3},
+  { 3, 4},
+  { 4, 5},
+  { 5, 6},
+  { 6, 7},
+  { 7, 8},
+  { 8, 9},
+  { 9, 10},
+  { 10, 11},
+  { 11, 12},
+  { 12, 14},
+  { 14, 16},
+  { 16, 18},
+  { 18, 20}
+};
+
+//======================================================================
+//
+// OUTPUT FILE.
+//
+//======================================================================
+ 
+///////////// tmp_dir /////////////////////////////////
+//
+// Temporary directory.
+// Output files are written to this directory first, and then renamed to 
+//   the correct path.
+// Type: string
+//
+
+tmp_dir = "./tmp";
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory for split files.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// output_file_ext /////////////////////////
+//
+// File extension for output files.
+// Type: string
+//
+
+output_file_ext = "nc";
+
+///////////// write_ldata_info_file ///////////////////
+//
+// Option to write _latest_data_info file in output dir.
+// If TRUE, _latest_data_info is written to the output directory.
+// Type: boolean
+//
+
+write_ldata_info_file = TRUE;
+

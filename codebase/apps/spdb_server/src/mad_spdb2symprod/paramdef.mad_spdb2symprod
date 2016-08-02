@@ -1,0 +1,289 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.mad_spdb2symprod
+ *
+ * This file contains the TDRP parameter definitions for
+ * mad_spdb2symprod.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+paramdef enum debug_t
+{
+  p_descr = "debug level";
+  p_options = { DEBUG_OFF,
+                DEBUG_ERRORS,
+                DEBUG_MSGS,
+                DEBUG_ROUTINES,
+                DEBUG_ALL };
+  p_default = { DEBUG_OFF };
+} debug;
+
+paramdef long
+{
+  p_descr = "malloc debug level";
+  p_help = "0 = none, 1 = corruption checking, 2 = record all malloc blocks and checks, 3 = printout of all mallocs, etc.";
+  p_default = { 0 };
+  p_min = { 0 };
+  p_max = { 3 };
+} malloc_debug_level;
+
+
+/***********************************************************************
+ * Operational parameters
+ */
+
+paramdef long
+{
+  p_descr = "wait msecs";
+  p_help = "Number of milliseconds to wait before timing out socket operations.";
+  p_default = { 100 };
+} wait_msecs;
+
+
+/***********************************************************************
+ * Input parameters
+ */
+
+paramdef string
+{
+  p_descr = "database directory";
+  p_help = "Directory containing SPDB database.";
+  p_default = { "." };
+} database_dir;
+
+paramdef string
+{
+  p_descr = "product label";
+  p_help = "The product label used in the SPDB database to uniquely identify this product.";
+  p_default = { "MAD Family" };
+} product_label;
+
+paramdef long
+{
+  p_descr = "product id";
+  p_help = "Number which uniquely identifies this product in the SPDB database.";
+  p_default = { 20100 };
+} product_id;
+
+/***********************************************************************
+ * Output parameters
+ */
+
+paramdef long
+{
+  p_descr = "port";
+  p_help = "Server port number.";
+  p_default = { 62000 };
+} port;
+
+paramdef string
+{
+  p_descr = "servmap type";
+  p_help = "Server mapper type for this server.";
+  p_default = { "Spdb" };
+} servmap_type;
+
+paramdef string
+{
+  p_descr = "servmap subtype";
+  p_help = "Server mapper subtype for this server.  The type is always Spdb.";
+  p_default = { "Symprod" };
+} servmap_subtype;
+
+paramdef string
+{
+  p_descr = "servmap instance";
+  p_help = "Server mapper instance for this server.  The type is always Spdb.";
+  p_default = { "Test" };
+} servmap_instance;
+
+paramdef boolean
+{
+  p_descr = "realtime available flag";
+  p_help = "Flag indicating if realtime data is available from this server.";
+  p_default = { TRUE };
+} realtime_avail;
+
+/***********************************************************************
+ * Display parameters
+ */
+
+paramdef string
+{
+  p_descr = "microburst polygon color";
+  p_help = "Name of color suggested for rendering the microburst polygons.";
+  p_default = { "red" };
+} mb_polygon_color;
+
+paramdef enum fill_t
+{
+  p_descr = "microburst polygon fill style";
+  p_help = "Fill style suggested for rendering the microburst polygons.";
+  p_options = { FILL_NONE,
+                FILL_STIPPLE10,
+                FILL_STIPPLE20,
+                FILL_STIPPLE30,
+                FILL_STIPPLE40,
+                FILL_STIPPLE50,
+                FILL_STIPPLE60,
+                FILL_STIPPLE70,
+                FILL_STIPPLE80,
+                FILL_STIPPLE90,
+                FILL_SOLID };
+  p_default = { FILL_NONE };
+} mb_polygon_fill;
+
+paramdef enum line_type_t
+{
+  p_descr = "microburst polygon line type";
+  p_help = "Line type suggested for rendering the microburst polygons.";
+  p_options = { LINETYPE_SOLID,
+                LINETYPE_DASH,
+                LINETYPE_DOT_DASH };
+  p_default = { LINETYPE_SOLID };
+} mb_polygon_linetype;
+
+paramdef long
+{
+  p_descr = "microburst polygon line width";
+  p_help = "Line width suggested for rendering the microburst polygons.";
+  p_default = { 1 };
+} mb_polygon_line_width;
+
+paramdef string
+{
+  p_descr = "convergence polygon color";
+  p_help = "Name of color suggested for rendering the convergence polygons.";
+  p_default = { "red" };
+} conv_polygon_color;
+
+paramdef enum fill_t
+{
+  p_descr = "convergence polygon fill style";
+  p_help = "Fill style suggested for rendering the convergence polygons.";
+  p_default = { FILL_NONE };
+} conv_polygon_fill;
+
+paramdef enum line_type_t
+{
+  p_descr = "convergence polygon line type";
+  p_help = "Line type suggested for rendering the convergence polygons.";
+  p_default = { LINETYPE_SOLID };
+} conv_polygon_linetype;
+
+paramdef long
+{
+  p_descr = "convergence polygon line width";
+  p_help = "Line width suggested for rendering the convergence polygons.";
+  p_default = { 1 };
+} conv_polygon_line_width;
+
+paramdef string
+{
+  p_descr = "turbulence polygon color";
+  p_help = "Name of color suggested for rendering the turbulence polygons.";
+  p_default = { "red" };
+} turb_polygon_color;
+
+paramdef enum fill_t
+{
+  p_descr = "turbulence polygon fill style";
+  p_help = "Fill style suggested for rendering the turbulence polygons.";
+  p_default = { FILL_NONE };
+} turb_polygon_fill;
+
+paramdef enum line_type_t
+{
+  p_descr = "turbulence polygon line type";
+  p_help = "Line type suggested for rendering the turbulence polygons.";
+  p_default = { LINETYPE_SOLID };
+} turb_polygon_linetype;
+
+paramdef long
+{
+  p_descr = "turbulence polygon line width";
+  p_help = "Line width suggested for rendering the turbulence polygons.";
+  p_default = { 1 };
+} turb_polygon_line_width;
+
+paramdef enum capstyle_t
+{
+  p_descr = "display capstyle";
+  p_help = "Capstyle suggested for using on the display.";
+  p_options = { CAPSTYLE_BUTT,
+                CAPSTYLE_NOT_LAST,
+                CAPSTYLE_PROJECTING,
+                CAPSTYLE_ROUND };
+  p_default = { CAPSTYLE_BUTT };
+} display_capstyle;
+
+paramdef enum joinstyle_t
+{
+  p_descr = "display joinstyle";
+  p_help = "Joinstyle suggested for using on the display.";
+  p_options = { JOINSTYLE_BEVEL,
+                JOINSTYLE_MITER,
+                JOINSTYLE_ROUND };
+  p_default = { JOINSTYLE_BEVEL };
+} display_joinstyle;
+
+paramdef boolean
+{
+  p_descr = "Display label flag";
+  p_help = "If TRUE, a label containing the shape magnitude will be rendered at the centroid of each shape.";
+  p_default = { FALSE };
+} render_label;
+
+paramdef string
+{
+  p_descr = "microburst polygon label color";
+  p_help = "The X color suggested for using for the microburst polygon label on the display.";
+  p_default = { "red" };
+} mb_label_color;
+
+paramdef string
+{
+  p_descr = "convergence polygon label color";
+  p_help = "The X color suggested for using for the convergence polygon label on the display.";
+  p_default = { "red" };
+} conv_label_color;
+
+paramdef string
+{
+  p_descr = "turbulence polygon label color";
+  p_help = "The X color suggested for using for the turbulence polygon label on the display.";
+  p_default = { "red" };
+} turb_label_color;
+
+paramdef string
+{
+  p_descr = "Label font";
+  p_help = "The X font suggested for using for the label on the display.";
+  p_default = { "8x13" };
+} label_font;

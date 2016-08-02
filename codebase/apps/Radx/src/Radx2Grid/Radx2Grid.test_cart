@@ -1,0 +1,1863 @@
+/**********************************************************************
+ * TDRP params for ./Radx2Grid
+ **********************************************************************/
+
+//======================================================================
+//
+// Radx2Grid reads moments from Radx-supported format files, 
+//   interpolates onto a Cartesian grid, and writes out the results to 
+//   Cartesian files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This application registers with procmap. This is the instance used 
+//   for registration.
+// Type: string
+//
+
+instance = "cart_test";
+
+//======================================================================
+//
+// THREADING FOR SPEED.
+//
+//======================================================================
+ 
+///////////// use_multiple_threads ////////////////////
+//
+// Option to use multiple compute threads to improve performance.
+// The read and write stages occur in the main thread, since netCDF is 
+//   not thread safe. The compute stage can be multi-threaded to improve 
+//   performance.
+// Type: boolean
+//
+
+use_multiple_threads = TRUE;
+
+///////////// n_compute_threads ///////////////////////
+//
+// The number of compute threads.
+// The moments computations are segmented in range, with each thread 
+//   computing a fraction of the number of gates. For maximum performance, 
+//   n_threads should be set to the number of processors multiplied by 4. 
+//   For further tuning, use top to maximize CPU usage while varying the 
+//   number of threads.
+// Minimum val: 1
+// Type: int
+//
+
+n_compute_threads = 8;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+// Files will be searched for in this directory.
+// Type: string
+//
+
+input_dir = "$(DATA_DIR)/qc2/cfradial/moments/sband/sur";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+// Only data less old than this will be used.
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// FILE READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+// If true, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = FALSE;
+
+///////////// ignore_idle_scan_mode_on_read ///////////
+//
+// Option to ignore data taken in IDLE mode.
+// If true, on read will ignore files with an IDLE scan mode.
+// Type: boolean
+//
+
+ignore_idle_scan_mode_on_read = TRUE;
+
+///////////// remove_rays_with_antenna_transitions ////
+//
+// Option to remove rays taken while the antenna was in transition.
+// If true, rays with the transition flag set will not be used. The 
+//   transiton flag is set when the antenna is in transtion between one 
+//   sweep and the next.
+// Type: boolean
+//
+
+remove_rays_with_antenna_transitions = FALSE;
+
+///////////// transition_nrays_margin /////////////////
+//
+// Number of transition rays to include as a margin.
+// Sometimes the transition flag is turned on too early in a transition, 
+//   on not turned off quickly enough after a transition. If you set this 
+//   to a number greater than 0, that number of rays will be included at 
+//   each end of the transition, i.e. the transition will effectively be 
+//   shorter at each end by this number of rays.
+// Type: int
+//
+
+transition_nrays_margin = 0;
+
+///////////// remove_long_range_rays //////////////////
+//
+// Option to remove long range rays.
+// Applies to NEXRAD data. If true, data from the non-Doppler long-range 
+//   sweeps will be removed.
+// Type: boolean
+//
+
+remove_long_range_rays = TRUE;
+
+///////////// remove_short_range_rays /////////////////
+//
+// Option to remove short range rays.
+// Applies to NEXRAD data. If true, data from the Doppler short-range 
+//   sweeps will be removed.
+// Type: boolean
+//
+
+remove_short_range_rays = FALSE;
+
+///////////// trim_surveillance_sweeps_to_360deg //////
+//
+// Option to trip surveillance sweeps so that they only cover 360 
+//   degrees.
+// Some sweeps will have rays which cover more than a 360-degree 
+//   rotation. Often these include antenna transitions. If this is set to 
+//   true, rays are trimmed off either end of the sweep to limit the 
+//   coverage to 360 degrees. The median elevation angle is computed and 
+//   the end ray which deviates from the median in elevation is trimmed 
+//   first.
+// Type: boolean
+//
+
+trim_surveillance_sweeps_to_360deg = FALSE;
+
+///////////// override_fixed_angle_with_mean_measured_angle 
+//
+// Option to override the fixed angle with the mean angle for a sweep.
+// If true, for each sweep the mean pointing angle is computed and then 
+//   this is used to override the fixed angle.
+// Type: boolean
+//
+
+override_fixed_angle_with_mean_measured_angle = FALSE;
+
+//======================================================================
+//
+// SETTING LIMITS ON THE VALID DATA.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+// Type: boolean
+//
+
+set_max_range = TRUE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+// Gates beyond this range are removed.
+// Type: double
+//
+
+max_range_km = 147;
+
+///////////// set_elevation_angle_limits //////////////
+//
+// Option to set elevation angle limits.
+// Only use rays within the specified elevation angle limits.
+// Type: boolean
+//
+
+set_elevation_angle_limits = FALSE;
+
+///////////// lower_elevation_angle_limit /////////////
+//
+// Lower elevation angle limit (deg).
+// Type: double
+//
+
+lower_elevation_angle_limit = 0;
+
+///////////// upper_elevation_angle_limit /////////////
+//
+// Upper elevation angle limit (deg).
+// Type: double
+//
+
+upper_elevation_angle_limit = 90;
+
+///////////// set_azimuth_angle_limits ////////////////
+//
+// Option to set azimuth angle limits.
+// Only use rays within the specified azimuth angle limits. This 
+//   essentially specifies a sector for valid data. Rays outside this 
+//   sector are ignored.
+// Type: boolean
+//
+
+set_azimuth_angle_limits = FALSE;
+
+///////////// lower_azimuth_angle_limit ///////////////
+//
+// Counter-clockwise azimuth angle limit (deg).
+// Type: double
+//
+
+lower_azimuth_angle_limit = 0;
+
+///////////// upper_azimuth_angle_limit ///////////////
+//
+// Clockwise azimuth angle limit (deg).
+// Type: double
+//
+
+upper_azimuth_angle_limit = 360;
+
+///////////// check_fixed_angle_error /////////////////
+//
+// Option to limit the fixed angle error to a specfied maximum value.
+// If true, we compute the error between the actual pointing angle and 
+//   the fixed angle for the sweep. If the error exceeds the specified 
+//   limit, we reject the ray. For PPIs, we check th elevation angle 
+//   against the fixed angle. For RHIs, we check the azimuth against the 
+//   fixed angle.
+// Type: boolean
+//
+
+check_fixed_angle_error = FALSE;
+
+///////////// max_fixed_angle_error ///////////////////
+//
+// Maximum permissable error in the pointing angle (deg).
+// Type: double
+//
+
+max_fixed_angle_error = 2;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE RADAR LOCATION.
+//
+//======================================================================
+ 
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+// Type: boolean
+//
+
+override_radar_location = TRUE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_latitude_deg = -0.630447;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_longitude_deg = 73.1028;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+// See override_radar_location.
+// Type: double
+//
+
+radar_altitude_meters = 2000;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE RADAR BEAM WIDTH.
+//
+// The beam width is used to decide how far to extend the interpolated 
+//   data beyond the observed data. The data is extended below the lowest 
+//   tilt and above the highest tilt, and in the case of sector scans it 
+//   is extended slightly beyond the sector limits.
+//
+//======================================================================
+ 
+///////////// override_beam_width /////////////////////
+//
+// Option to override radar beam width.
+// If TRUE, the program will use beam width specified in the 
+//   'beam_width_deg' parameter.
+// Type: boolean
+//
+
+override_beam_width = FALSE;
+
+///////////// beam_width_deg_h ////////////////////////
+//
+// Horizontal beam width if override is set true (deg).
+// Used for extending the data to the left or right of sector limits, if 
+//   applicable. This is only used if 'override_beam_width' is set true. 
+//   Otherwise the metadata in the input data stream is used.
+// Type: double
+//
+
+beam_width_deg_h = 1;
+
+///////////// beam_width_deg_v ////////////////////////
+//
+// Vertical beam width if override is set true (deg).
+// Used for extending data above or below the observed region. This only 
+//   used if 'override_beam_width' is set true. Otherwise the metadata in 
+//   the input data stream is used.
+// Type: double
+//
+
+beam_width_deg_v = 1;
+
+//======================================================================
+//
+// If the start range and/or gate spacing is not correct in the data, 
+//   you can override it using the parameters below.
+//
+//======================================================================
+ 
+///////////// override_gate_geometry //////////////////
+//
+// Option to override gate geometry.
+// If TRUE, the program will use the start range and gate spacing 
+//   specified here.
+// Type: boolean
+//
+
+override_gate_geometry = FALSE;
+
+///////////// start_range_km //////////////////////////
+//
+// Start range (km).
+// Used for overriding the start range in the data.
+// Type: double
+//
+
+start_range_km = 0.125;
+
+///////////// gate_spacing_km /////////////////////////
+//
+// Gate spacing (km).
+// Used for overriding the gate spacing in the data.
+// Type: double
+//
+
+gate_spacing_km = 0.25;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE THE NYQUIST VELOCITY.
+//
+//======================================================================
+ 
+///////////// override_nyquist ////////////////////////
+//
+// Option to override nyquist velocity in incoming data.
+// If true, the nyquist_velocity parameter is used to specify the 
+//   nyquist. If false, the nyquist is computed from the incoming radar 
+//   data stream. The nyquist is used for velocity interpolation, to 
+//   ensure that folded values are treated correctlty.
+// Type: boolean
+//
+
+override_nyquist = FALSE;
+
+///////////// nyquist_velocity ////////////////////////
+//
+// Specify nyquist velocity (m/s).
+// See 'override_nyquist'.
+// Type: double
+//
+
+nyquist_velocity = 25;
+
+//======================================================================
+//
+// APPLYING ANGLE CORRECTIONS.
+//
+//======================================================================
+ 
+///////////// azimuth_correction_deg //////////////////
+//
+// Add this value to the azimuth.
+// Normally only used for testing, but can be used if there is a 
+//   constant azimuth error in the data.
+// Type: double
+//
+
+azimuth_correction_deg = 0;
+
+///////////// elevation_correction_deg ////////////////
+//
+// Add this value to the elevation.
+// Normally only used for testing, but can be used if there is a 
+//   constant elevation error in the data.
+// Type: double
+//
+
+elevation_correction_deg = 0;
+
+//======================================================================
+//
+// SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS.
+//
+//======================================================================
+ 
+///////////// override_standard_pseudo_earth_radius ///
+//
+// Option to override the standard 4/3 earth radius model for 
+//   refraction.
+// If true, the standard 4/3 earth radius will be overridden. The US NWS 
+//   NEXRAD system uses 1.21 instead of 1.333.
+// Type: boolean
+//
+
+override_standard_pseudo_earth_radius = FALSE;
+
+///////////// pseudo_earth_radius_ratio ///////////////
+//
+// Ratio for computing the pseudo earth radius for beam height 
+//   computations.
+// For standard refraction this is 4/3. For super refraction it will be 
+//   less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 
+//   1.21.
+// Type: double
+//
+
+pseudo_earth_radius_ratio = 1.21;
+
+//======================================================================
+//
+// INTERPOLATION.
+//
+//======================================================================
+ 
+///////////// interp_mode /////////////////////////////
+//
+// Mode for interpolation.
+// CART: interpolate onto a 3-D Cartesian grid. PPI: interpolate onto a 
+//   2-D Cartesian grid, preserving original radar elevation angles in the 
+//   vertical. POLAR: interpolate onto a regular azimuth angle grid, 
+//   preserving the elevation angles. CART_REORDER: interpolate onto 3-D 
+//   Cartesian grid using the reorder strategy. CART_SAT: interpolate 
+//   satellite-based radar or lidar onto Cartesian 3-D grid.
+//
+// Type: enum
+// Options:
+//     INTERP_MODE_CART
+//     INTERP_MODE_PPI
+//     INTERP_MODE_POLAR
+//     INTERP_MODE_CART_REORDER
+//     INTERP_MODE_CART_SAT
+//
+
+interp_mode = INTERP_MODE_CART;
+
+///////////// use_nearest_neighbor ////////////////////
+//
+// Option to use nearest neighbor method instead of interpolation.
+// If true, use the values from the nearest point instead of 
+//   interpolating.
+// Type: boolean
+//
+
+use_nearest_neighbor = FALSE;
+
+///////////// min_nvalid_for_interp ///////////////////
+//
+// Minimum number of valid data points for theinterpolation.
+// The program performs an 8-point linear interpolation. This is the 
+//   number of valid data points, out of the possible 8, which must be 
+//   present for interpolation to proceed. A high number will exclude 
+//   marginal points. A low number will include marginal points.
+// Minimum val: 1
+// Maximum val: 8
+// Type: int
+//
+
+min_nvalid_for_interp = 3;
+
+///////////// use_fixed_angle_for_interpolation ///////
+//
+// Option to use the fixed sweep angle for determining position for 
+//   interpolation.
+// If false, we use the measured elevaiton and azimuth for each ray. If 
+//   true, we use the fixed angle instead of the elevation angle in PPI 
+//   scan mode and the fixed angle instead of azimuth in RHI mode.
+// Type: boolean
+//
+
+use_fixed_angle_for_interpolation = FALSE;
+
+///////////// use_fixed_angle_for_data_limits /////////
+//
+// Option to use the fixed sweep angle for determining the angle limits 
+//   of the data.
+// If true, we use the scan strategy sweep fixed angle for determining 
+//   the angular limits to the data. If false, we use the actual measured 
+//   angles. We need to find the data limits so that we can extend the 
+//   interpolation by a fraction of the beam width beyond the angular 
+//   limits. See also 'beam_width_fraction_for_data_limit_extension'.
+// Type: boolean
+//
+
+use_fixed_angle_for_data_limits = TRUE;
+
+///////////// beam_width_fraction_for_data_limit_extension 
+//
+// Fraction of the beam width used to extend the data beyond the 
+//   observed limits.
+// At the edges of the observed region, the interpolated data is 
+//   extended by an angle computed as beam_width * fraction. For extending 
+//   below the lowest tilt and above the upper tilt, the vertical beam 
+//   width is used. For extended to the left or right of sector limits, 
+//   the horizontal beam width is used.
+// Type: double
+//
+
+beam_width_fraction_for_data_limit_extension = 0.5;
+
+//======================================================================
+//
+// INTERPOLATION USING REORDER METHOD.
+//
+// The following section applies if interp_mode is set to 
+//   INTERP_MODE_CART_REORDER.
+//
+//======================================================================
+ 
+///////////// reorder_npoints_search //////////////////
+//
+// Number of points retrieved around each grid point.
+// We find this number of closest points, and then check that their 
+//   distance is less than the search radius.
+// Type: int
+//
+
+reorder_npoints_search = 40;
+
+///////////// reorder_search_radius_km ////////////////
+//
+// Radius searched around a grid cell for radar points that contribute 
+//   to theinterpolation.
+// We optionally scale this by range, so that the radius increases at 
+//   longer ranges where the rays are more widely spaced.
+// Type: double
+//
+
+reorder_search_radius_km = 5;
+
+///////////// reorder_scale_search_radius_with_range //
+//
+// Option to scale search radius based on range from radar.
+// If true, we treat the specified search radius as a nominal value, and 
+//   adjust it based on the range of the grid point from the radar. See 
+//   also reorder_nominal_range_for_search_radius.
+// Type: boolean
+//
+
+reorder_scale_search_radius_with_range = TRUE;
+
+///////////// reorder_nominal_range_for_search_radius_km 
+//
+// Range at which the xy_margin is equal to the nominal value (km).
+// At ranges other than this, we scale the search radius linearly based 
+//   on range from the radar, provided reorder_scale_xy_margin_with_range 
+//   is TRUE.
+// Type: double
+//
+
+reorder_nominal_range_for_search_radius_km = 60;
+
+///////////// reorder_z_search_ratio //////////////////
+//
+// Ratio of search in Z dimension with respect to the XY dimensions.
+// If this is 1.0, the search space around a grid point is effectively a 
+//   sphere. If this value is less than 1, then the search space is 
+//   flattened, i.e. we look farther out in the XY directions than in the 
+//   Z direction. This has the effect of reducing the ringing effect seen 
+//   in data with higher gradients in Z than XY. If the value is greater 
+//   than 1, the reverse applies.
+// Type: double
+//
+
+reorder_z_search_ratio = 1;
+
+///////////// reorder_bound_grid_point_vertically /////
+//
+// Option to interpolate only if there is valid data both above and 
+//   below the grid point.
+// This enforces boundedness in the vertical coordinate. Essentially it 
+//   prevents extrapolation above the upper sweep and below the lowest 
+//   sweep.
+// Type: boolean
+//
+
+reorder_bound_grid_point_vertically = FALSE;
+
+///////////// reorder_min_valid_wt_ratio //////////////
+//
+// Min ratio of valid weights to total weights.
+// In deciding whether a grid point should be marked as valid or 
+//   missing, we compute the ratio of the sum of the weights of the valid 
+//   points over the weights of all points. If the ratio falls below this 
+//   parameter, the point it marked as missing.
+// Type: double
+//
+
+reorder_min_valid_wt_ratio = 0.5;
+
+///////////// reorder_blocks_nrows ////////////////////
+//
+// Number of rows in which grid is divided for computations, in the x 
+//   direction.
+// Reorder uses a K-dimensional tree for finding the closest radar 
+//   points to a selected Cartesian point. A kd-tree search slows down 
+//   non-linearly as the number of points in the tree increases. To keep 
+//   the number of points to reasonable values, we divide the grid into 
+//   blocks, using the specified number of rows and columns. The tree will 
+//   contain points in the block, plus some surrounding points to avoid 
+//   edge effects. For computational efficieny the blocks should be 
+//   approximately square in shape, so set nrows and ncols accordingly.
+// Type: int
+//
+
+reorder_blocks_nrows = 1;
+
+///////////// reorder_blocks_ncols ////////////////////
+//
+// Number of columns in which grid is divided for computations, in the y 
+//   direction.
+// See reorder_search_nrows.
+// Type: int
+//
+
+reorder_blocks_ncols = 1;
+
+///////////// reorder_min_nvalid_for_interp ///////////
+//
+// Minimum Number of points used in the reorder interpolation.
+// This will make sure the number of points used for least squares fit 
+//   is sufficiently large. If this is too small the least squares fit 
+//   becomes unstable and results become bad.
+// Type: int
+//
+
+reorder_min_nvalid_for_interp = 8;
+
+///////////// reorder_weighted_interpolation //////////
+//
+// Do the original weighted average reorder interpolation if set to 
+//   TRUE, do the least squares reorder interpolation if FALSE.
+// Type: boolean
+//
+
+reorder_weighted_interpolation = FALSE;
+
+//======================================================================
+//
+// INTERPOLATION FOR SAT DATA.
+//
+// Satellite interpolation uses the reorder params above, plus those in 
+//   this section.
+//
+//======================================================================
+ 
+///////////// sat_data_invert_in_range ////////////////
+//
+// Option to invert satellite data in range from the instrument.
+// Since satellite-based instruments look downwards, it is sometimes 
+//   necessary to invert the data, so that it sorts from the ground up.
+// Type: boolean
+//
+
+sat_data_invert_in_range = FALSE;
+
+///////////// sat_data_set_range_geom_from_fields /////
+//
+// Option to use the range geometry from the fields instead of the rays.
+// If true, the field geometry will be copied into the ray metadata.
+// Type: boolean
+//
+
+sat_data_set_range_geom_from_fields = FALSE;
+
+//======================================================================
+//
+// CARTESIAN GRID VERTICAL LEVELS.
+//
+// It is not necessary to specify vertical levels if interp_mode is set 
+//   to INTERP_MODE_PPI, since in that case the vertical levels are the 
+//   PPI elevation angle in degrees.
+//
+//======================================================================
+ 
+///////////// specify_individual_z_levels /////////////
+//
+// Option to specify each Z level individually.
+// If true, you will fill out the z_level array to specify each Z level. 
+//   If false, you will specify Z levels at constant spacing, using 
+//   grid_z_geom.
+// Type: boolean
+//
+
+specify_individual_z_levels = FALSE;
+
+///////////// z_level_array ///////////////////////////
+//
+// Array of grid levels, in km MSL.
+// Applies if specify_individual_z_levels is true.
+// Type: double
+// 1D array - variable length.
+//
+
+z_level_array = {
+ 0,
+ 1,
+ 2.5
+};
+
+///////////// grid_z_geom /////////////////////////////
+//
+// Grid parameters in z.
+// dz is in km. minz is in km MSL. Not used if interp_mode is set to 
+//   INTERP_MODE_PPI. Applies if specify_individual_z_levels is false.
+//
+// Type: struct
+//   typedef struct {
+//      int nz;
+//      double minz;
+//      double dz;
+//   }
+//
+//
+
+grid_z_geom = {
+    nz = 20,
+    minz = 0.5,
+    dz = 0.5
+};
+
+//======================================================================
+//
+// CARTESIAN GRID PROJECTION AND XY DETAILS.
+//
+//======================================================================
+ 
+///////////// grid_projection /////////////////////////
+//
+// Projection for cartesian grid. See projection param below.
+// 	PROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)
+// 	PROJ_FLAT: Azimuthal Equidistant (Radar)
+// 	PROJ_LAMBERT_CONF: Lambert Conformal Conic
+// 	PROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area
+// 	PROJ_MERCATOR: Mercator - EW orientation
+// 	PROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation
+// 	PROJ_POLAR_STEREO: Stereographic- polar aspect
+// 	PROJ_OBLIQUE_STEREO: Stereographic - oblique aspect
+// 	PROJ_ALBERS: Albers Equal Area Conic
+// 	PROJ_VERT_PERSP: Vertical Perspective (satellite view).
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_MERCATOR
+//     PROJ_POLAR_STEREO
+//     PROJ_FLAT
+//     PROJ_OBLIQUE_STEREO
+//     PROJ_TRANS_MERCATOR
+//     PROJ_ALBERS
+//     PROJ_LAMBERT_AZIM
+//     PROJ_VERT_PERSP
+//
+
+grid_projection = PROJ_FLAT;
+
+///////////// grid_xy_geom ////////////////////////////
+//
+// Grid parameters in x,y.
+// Units in km, except for LATLON, which is in degrees.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+grid_xy_geom = {
+    nx = 300,
+    ny = 300,
+    minx = -149.5,
+    miny = -149.5,
+    dx = 1,
+    dy = 1
+};
+
+///////////// grid_rotation ///////////////////////////
+//
+// Grid rotation.
+// This applies only to PROJ_FLAT projections.
+// Type: double
+//
+
+grid_rotation = 0;
+
+///////////// center_grid_on_radar ////////////////////
+//
+// Option to set the grid origin at the radar.
+// If true, the latitude and longitude of the grid origin will be set at 
+//   the radar location. If false, grid_origin_lat and grid_origin_lon 
+//   will be used. This does not apply for moving platforms.
+// Type: boolean
+//
+
+center_grid_on_radar = TRUE;
+
+///////////// grid_origin_lat /////////////////////////
+//
+// Grid origin latitude.
+// This applies to all projections except LATLON. Not used if 
+//   'center_grid_on_radar' is true.
+// Type: double
+//
+
+grid_origin_lat = -0.63;
+
+///////////// grid_origin_lon /////////////////////////
+//
+// Grid origin longitude.
+// This applies to all projections except LATLON. Not used if 
+//   'center_grid_on_radar' is true.
+// Type: double
+//
+
+grid_origin_lon = 78.5;
+
+///////////// grid_lat1 ///////////////////////////////
+//
+// Grid reference latitude 1.
+// This applies to LAMBERT_CONF and ALBERS projections.
+// Type: double
+//
+
+grid_lat1 = 0;
+
+///////////// grid_lat2 ///////////////////////////////
+//
+// Grid reference latitude 2.
+// This applies to LAMBERT_CONF and ALBERS projections.
+// Type: double
+//
+
+grid_lat2 = 0;
+
+///////////// grid_central_scale //////////////////////
+//
+// Central scale for projections.
+// This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR 
+//   projections.
+// Type: double
+//
+
+grid_central_scale = 1;
+
+///////////// grid_tangent_lat ////////////////////////
+//
+// Tangent latitude (deg).
+// This applies to OBLIQUE_STEREO only.
+// Type: double
+//
+
+grid_tangent_lat = 0;
+
+///////////// grid_tangent_lon ////////////////////////
+//
+// Tangent longitude (deg).
+// This applies to OBLIQUE_STEREO and POLAR_STEREO.
+// Type: double
+//
+
+grid_tangent_lon = 0;
+
+///////////// grid_pole_is_north //////////////////////
+//
+// Flag indicating stereogtraphic is over the NORTH pole.
+// This applies to POLAR_STEREO. If false, the projection is over the 
+//   south pole.
+// Type: boolean
+//
+
+grid_pole_is_north = TRUE;
+
+///////////// grid_persp_radius ///////////////////////
+//
+// Radius of perspective point (km).
+// This applies to VERT_PERSP.
+// Type: double
+//
+
+grid_persp_radius = 35786;
+
+///////////// grid_false_northing /////////////////////
+//
+// False northing correction.
+// Occasionally, this is added to the Y coordinate so that all 
+//   coordinates are positive. Normally 0. As an alternative to 
+//   false_northing and false_easting, you can set the offset_latitude and 
+//   offset_longitude.
+// Type: double
+//
+
+grid_false_northing = 0;
+
+///////////// grid_false_easting //////////////////////
+//
+// False easting correction.
+// Occasionally, this is added to the X coordinate so that all 
+//   coordinates are positive. Normally 0.
+// Type: double
+//
+
+grid_false_easting = 0;
+
+///////////// grid_set_offset_origin //////////////////
+//
+// Do you want to specify an offset origin using lat/lon instead of 
+//   false_northing and false_easting?.
+// If true, set grid_offset_origin_latitude and 
+//   grid_offset_origin_longitude.
+// Type: boolean
+//
+
+grid_set_offset_origin = FALSE;
+
+///////////// grid_offset_origin_latitude /////////////
+//
+// Latitude of offset origin.
+// See grid_set_offset_origin.
+// Type: double
+//
+
+grid_offset_origin_latitude = 0;
+
+///////////// grid_offset_origin_longitude ////////////
+//
+// Longitude of offset origin.
+// See grid_set_offset_origin.
+// Type: double
+//
+
+grid_offset_origin_longitude = 0;
+
+//======================================================================
+//
+// SPECIFYING THE FIELDS FOR INTERPOLATION.
+//
+// By default, all fields will be interpolated, using the properties 
+//   stored in the file.
+//
+//======================================================================
+ 
+///////////// select_fields ///////////////////////////
+//
+// Option to select the fields for interpolation.
+// If FALSE, all fields will be processed.
+// Type: boolean
+//
+
+select_fields = TRUE;
+
+///////////// selected_fields /////////////////////////
+//
+// Select the list of fields to be processed.
+// Only applies if 'select_fields' is TRUE.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      boolean process_this_field;
+//   }
+//
+// 1D array - variable length.
+//
+
+selected_fields = {
+  {
+    input_name = "DBZ_F",
+    process_this_field = TRUE
+  }
+  ,
+  {
+    input_name = "VEL_F",
+    process_this_field = TRUE
+  }
+  ,
+  {
+    input_name = "WIDTH_F",
+    process_this_field = TRUE
+  }
+};
+
+///////////// rename_fields ///////////////////////////
+//
+// Option to rename some or all of the fields.
+// If FALSE, no fields will be renamed.
+// Type: boolean
+//
+
+rename_fields = FALSE;
+
+///////////// renamed_fields //////////////////////////
+//
+// Specify the list of fields to be renamed.
+// Only applies if 'rename_fields' is TRUE. The field is changed from 
+//   input_name to output_name.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      string output_name;
+//   }
+//
+// 1D array - variable length.
+//
+
+renamed_fields = {
+  {
+    input_name = "DBZ_F",
+    output_name = "DBZ_S"
+  }
+  ,
+  {
+    input_name = "VEL_F",
+    output_name = "VEL_S"
+  }
+  ,
+  {
+    input_name = "WIDTH_F",
+    output_name = "WIDTH_S"
+  }
+};
+
+///////////// bound_fields ////////////////////////////
+//
+// Option to set limits on some or all of the fields.  This can be 
+//   useful when doing linear least squares REORDER interpolation in which 
+//   there might be unstable situations that lead to very out of range 
+//   values, which will then reduce the resolution of the output data.
+// If FALSE, no fields will be bounded.
+// Type: boolean
+//
+
+bound_fields = FALSE;
+
+///////////// bounded_fields //////////////////////////
+//
+// Specify the list of fields to be constrained within bounds.
+// Only applies if 'bound_fields' is TRUE. At points where the output 
+//   value is out of bounds, it is set to missing.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      double min_value;
+//      double max_value;
+//   }
+//
+// 1D array - variable length.
+//
+
+bounded_fields = {
+  {
+    input_name = "DBZ",
+    min_value = -50,
+    max_value = 100
+  }
+  ,
+  {
+    input_name = "VEL",
+    min_value = -50,
+    max_value = 50
+  }
+};
+
+///////////// set_fold_limits /////////////////////////
+//
+// Option to set the folding limits for individual fields.
+// Type: boolean
+//
+
+set_fold_limits = FALSE;
+
+///////////// folded_fields ///////////////////////////
+//
+// Use this to set the fold limits for a particular field.
+// If this is specified, the interpolation for this field will be 
+//   performed 'on the circle' so that folding is handled correctly. If 
+//   use_global_nyquist_velocity is true, the fold limits are set to plus 
+//   and minus the main nyquist velocity. If false, the specified fold 
+//   limits are used instead.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      boolean field_folds;
+//      boolean use_global_nyquist;
+//      double fold_limit_lower;
+//      double fold_limit_upper;
+//   }
+//
+// 1D array - variable length.
+//
+
+folded_fields = {
+  {
+    input_name = "VEL_S",
+    field_folds = TRUE,
+    use_global_nyquist = TRUE,
+    fold_limit_lower = -25,
+    fold_limit_upper = 25
+  }
+  ,
+  {
+    input_name = "VEL2_S",
+    field_folds = TRUE,
+    use_global_nyquist = TRUE,
+    fold_limit_lower = -5,
+    fold_limit_upper = 5
+  }
+  ,
+  {
+    input_name = "VEL_HV_S",
+    field_folds = TRUE,
+    use_global_nyquist = FALSE,
+    fold_limit_lower = -13.35,
+    fold_limit_upper = 13.35
+  }
+  ,
+  {
+    input_name = "PHIDP_S",
+    field_folds = TRUE,
+    use_global_nyquist = FALSE,
+    fold_limit_lower = -90,
+    fold_limit_upper = 90
+  }
+};
+
+///////////// set_discrete_fields /////////////////////
+//
+// Option to set 'is_discrete' flag for individual fields.
+// Type: boolean
+//
+
+set_discrete_fields = FALSE;
+
+///////////// discrete_fields /////////////////////////
+//
+// Use this to set the 'is_discrete' flag on a field.
+// If this is specified, nearest neighbor will be used for this field. 
+//   You can use this to override the is_discrete flag on a field.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      boolean is_discrete;
+//   }
+//
+// 1D array - variable length.
+//
+
+discrete_fields = {
+  {
+    input_name = "DBZ_S",
+    is_discrete = TRUE
+  }
+};
+
+///////////// transform_fields_for_interpolation //////
+//
+// Option to perform a transform on specified fields for interpolation.
+// Type: boolean
+//
+
+transform_fields_for_interpolation = FALSE;
+
+///////////// transform_fields ////////////////////////
+//
+// Transform fields for interpolation.
+
+// If the output_name is the same as the input_name, this field is 
+//   transformed in-place. Otherwise a copy is made.
+
+// TRANSFORM_DB_TO_LINEAR_AND_BACK: transform a field in dB units to 
+//   linear units, perform the interpolation, and then transform back to 
+//   dB units before writing out.
+
+// TRANSFORM_LINEAR_TO_DB: transform a field from linear units to dB 
+//   units, perform the interpolation, and write out in dB units.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      string output_name;
+//      string output_units;
+//      interp_transform_t transform;
+//        Options:
+//          TRANSFORM_DB_TO_LINEAR_AND_BACK
+//          TRANSFORM_LINEAR_TO_DB
+//   }
+//
+// 1D array - variable length.
+//
+
+transform_fields = {
+  {
+    input_name = "DBZ",
+    output_name = "DBZ",
+    output_units = "dBZ",
+    transform = TRANSFORM_DB_TO_LINEAR_AND_BACK
+  }
+};
+
+//======================================================================
+//
+// CENSORING OUTPUT FIELDS.
+//
+// You have the option of censoring the output data fields - i.e. 
+//   setting the fields to missing values - at gates which meet certain 
+//   criteria. If this is done correctly, it allows you to preserve the 
+//   valid data and discard the noise, thereby improving compression. This 
+//   leads to smaller data files.
+//
+//======================================================================
+ 
+///////////// apply_censoring /////////////////////////
+//
+// Apply censoring based on field values and thresholds.
+// If TRUE, censoring will be performed. See 'censoring_fields' for 
+//   details on how the censoring is applied.
+// Type: boolean
+//
+
+apply_censoring = FALSE;
+
+///////////// censoring_fields ////////////////////////
+//
+// Fields to be used for censoring.
+// Specify the fields to be used to determine whether a gate should be 
+//   censored. The name refers to the input data fields. Valid field 
+//   values lie in the range from min_valid_value to max_valid_value 
+//   inclusive. If the value of a field at a gate lies within this range, 
+//   it is considered valid. Each specified field is examined at each 
+//   gate, and is flagged as valid if its value lies in the valid range. 
+//   These field flags are then combined as follows: first, all of the 
+//   LOGICAL_OR flags are combined, yielding a single combined_or flag 
+//   which is true if any of the LOGICAL_OR fields is true. The 
+//   combined_or flag is then combined with all of the LOGICAL_AND fields, 
+//   yielding a true value only if the combined_or flag and the 
+//   LOGICAL_AND fields are all true. If this final flag is true, then the 
+//   data at the gate is regarded as valid and is retained. If the final 
+//   flag is false, the data at the gate is censored, and all of the 
+//   fields at the gate are set to missing.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      double min_valid_value;
+//      double max_valid_value;
+//      logical_t combination_method;
+//        Options:
+//          LOGICAL_AND
+//          LOGICAL_OR
+//   }
+//
+// 1D array - variable length.
+//
+
+censoring_fields = {
+  {
+    name = "SNR",
+    min_valid_value = 0,
+    max_valid_value = 1000,
+    combination_method = LOGICAL_OR
+  }
+  ,
+  {
+    name = "NCP",
+    min_valid_value = 0.15,
+    max_valid_value = 1000,
+    combination_method = LOGICAL_OR
+  }
+};
+
+///////////// censoring_min_valid_run /////////////////
+//
+// Minimum valid run of non-censored gates.
+// Only active if set to 2 or greater. A check is made to remove short 
+//   runs of noise. Looking along the radial, we compute the number of 
+//   contiguous gates (a 'run') with uncensored data. For the gates in 
+//   this run to be accepted the length of the run must exceed 
+//   censoring_min_valid_run. If the number of gates in a run is less than 
+//   this, then all gates in the run are censored.
+// Type: int
+//
+
+censoring_min_valid_run = 1;
+
+//======================================================================
+//
+// OPTION TO CREATE DERIVED FIELDS.
+//
+// These fields are added to the output gridded files.
+//
+//======================================================================
+ 
+///////////// output_coverage_field ///////////////////
+//
+// Option to output a field depicting radar coverage.
+// If true, a derived field, with the name 'Coverage', is included in 
+//   the output. This is a simple flag field, with a 1 indicating that the 
+//   radar covers that pixel, and a 0 indicating that is does not.
+// Type: boolean
+//
+
+output_coverage_field = TRUE;
+
+///////////// coverage_field_name /////////////////////
+//
+// Name of coverage field, if written.
+// See 'output_coverage_field'.
+// Type: string
+//
+
+coverage_field_name = "Coverage";
+
+///////////// output_time_field ///////////////////////
+//
+// Option to output a field of time since start of volume, in seconds.
+// If true, a derived field, with the name 'time_elapsed', is included 
+//   in the output. This is the time, in seconds, since the start of the 
+//   volume.
+// Type: boolean
+//
+
+output_time_field = TRUE;
+
+///////////// interp_time_field ///////////////////////
+//
+// Option to perform interpolation on the time field.
+// If false, nearest neighbor will be used for the time field.
+// Type: boolean
+//
+
+interp_time_field = TRUE;
+
+///////////// output_test_fields //////////////////////
+//
+// Option to add test fields based on elevation, azimuth, range and 
+//   height.
+// The test fields allow us to ensure that the interpolation is working 
+//   correctly. The field values range from 0 to 10 - we use the fmod() 
+//   math function to compute the modulus of each field, using 10 as the 
+//   divisor. When you plot these fields, you can assess the accuracy of 
+//   the interpolation scheme. The test fields are named 'el', 'az', 
+//   'rng', 'ht'.
+// Type: boolean
+//
+
+output_test_fields = TRUE;
+
+///////////// interp_test_fields //////////////////////
+//
+// Option to perform interpolation on test fields.
+// If false, nearest neighbor will be used for the test fields.
+// Type: boolean
+//
+
+interp_test_fields = TRUE;
+
+///////////// write_search_matrix_files ///////////////
+//
+// Option to write files containing data from the search matrix.
+// The 2D search matrices are computed for INTERP_MODE_CART. If you set 
+//   this to TRUE, the search matrix data will be written to MDV files 
+//   that can be then viewed in CIDD.
+// Type: boolean
+//
+
+write_search_matrix_files = FALSE;
+
+///////////// search_matrix_dir ///////////////////////
+//
+// Output directory for writing search matrix files.
+// See 'output_search_matrix'.
+// Type: string
+//
+
+search_matrix_dir = "./mdv/search_matrix";
+
+//======================================================================
+//
+// OPTION TO IDENTIFY THE CONVECTIVE/STRATIFORM SPLIT.
+//
+// Applies only to INTERP_MODE_CART.
+//
+//======================================================================
+ 
+///////////// identify_convective_stratiform_split ////
+//
+// Option to identify the convective / stratiform split.
+// Uses the standard deviation of reflectivity as a texture field for 
+//   each Cartesian plane. Low variability indicates stratiform 
+//   conditions.
+// Type: boolean
+//
+
+identify_convective_stratiform_split = FALSE;
+
+///////////// conv_strat_dbz_field_name ///////////////
+//
+// Name of reflectivity field in input data.
+// This is used for computing reflectivity texture.
+// Type: string
+//
+
+conv_strat_dbz_field_name = "DBZ";
+
+///////////// conv_strat_texture_radius_km ////////////
+//
+// Radius for texture analysis (km).
+// We determine the reflectivity 'texture' at a point by computing the 
+//   standard deviation of the square of the reflectivity, for all grid 
+//   points within this radius of the central point. We then compute the 
+//   square root of that sdev.
+// Type: double
+//
+
+conv_strat_texture_radius_km = 7;
+
+///////////// conv_strat_texture_depth_km /////////////
+//
+// Depth of region for computing texture (km).
+// We compute the reflectivity 'texture' considering all radar points 
+//   within a specified region, centered on the grid points. This is the 
+//   depth of that region. It does not necessarily match the vertical grid 
+//   spacing - it is likely that the depth will be greater than the grid 
+//   vertical spacing, to allow for more points to be included in 
+//   computing the texture. However, the depth should not exceed 2km or 
+//   so, because the texture is intended to find layers (such as 
+//   bright-band) in the observations.
+// Type: double
+//
+
+conv_strat_texture_depth_km = 1;
+
+///////////// conv_strat_min_valid_fraction_for_texture 
+//
+// Minimum fraction of surroundingpoints for texture computations.
+// For a valid computation of texture, we require at least this fraction 
+//   of points around the central point to have reflectivity in excess of 
+//   min_valid_dbz.
+// Type: double
+//
+
+conv_strat_min_valid_fraction_for_texture = 0.33;
+
+///////////// conv_strat_min_valid_height /////////////
+//
+// Min height used in analysis (km).
+// Only data at or above this altitude is used.
+// Type: double
+//
+
+conv_strat_min_valid_height = 0;
+
+///////////// conv_strat_max_valid_height /////////////
+//
+// Max height used in analysis (km).
+// Only data at or below this altitude is used.
+// Type: double
+//
+
+conv_strat_max_valid_height = 25;
+
+///////////// conv_strat_min_valid_dbz ////////////////
+//
+// Minimum reflectivity threshold for this analysis (dBZ).
+// Reflectivity below this threshold is set to missing.
+// Type: double
+//
+
+conv_strat_min_valid_dbz = 10;
+
+///////////// conv_strat_dbz_threshold_for_definite_convection 
+//
+// Reflectivity value that indicates definite convection.
+// If the reflectivity exceeds this value at a point, we assume 
+//   convection is definitely active at that point. To use this, we first 
+//   compute the column maximum reflectivity. If the column max dbz at a 
+//   point exceeds this threshold, then we flag that point as convective.
+// Type: double
+//
+
+conv_strat_dbz_threshold_for_definite_convection = 53;
+
+///////////// conv_strat_convective_radius_km /////////
+//
+// Radius of convective influence (km).
+// Given definite convection at a point (see above), we set all points 
+//   within this radius to be convective.
+// Type: double
+//
+
+conv_strat_convective_radius_km = 5;
+
+///////////// conv_strat_min_texture_for_convection ///
+//
+// Minimum texture for convection at a point.
+// If the texture at a point exceeds this value, we set the convective 
+//   flag at this point. We then expand the convective influence around 
+//   the point using convetive_radius_km.
+// Type: double
+//
+
+conv_strat_min_texture_for_convection = 15;
+
+///////////// conv_strat_write_partition //////////////
+//
+// Option to write out the convective/stratiform partition.
+// If true, the 2-D partition will be added to the output file.
+// Type: boolean
+//
+
+conv_strat_write_partition = FALSE;
+
+///////////// conv_strat_write_debug_fields ///////////
+//
+// Option to write out the intermediate fields for debug purposes.
+// If true, the intermdiate fields will be written to the output file.
+// Type: boolean
+//
+
+conv_strat_write_debug_fields = FALSE;
+
+//======================================================================
+//
+// DATA OUTPUT DIRECTORY.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory for writing files.
+// Files will be written to this directory.
+// Type: string
+//
+
+output_dir = "$(DATA_DIR)/test/mdv/cart/sband/sur";
+
+///////////// specify_output_filename /////////////////
+//
+// If true, the file will be named 'output_filename'.
+// If false, the file name will be computed from the data time.
+// Type: boolean
+//
+
+specify_output_filename = FALSE;
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+// Applies only if specify_output_filename is true.
+// Type: string
+//
+
+output_filename = "ncfGrid.nc";
+
+//======================================================================
+//
+// DATA OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Set the output format.
+// CF_NETCDF: CF-compliant NetCDF. See 
+//   http://cf-pcmdi.llnl.gov/documents/cf-conventions. ZEBRA_NETCDF: 
+//   NetCDF format specifically for ZEBRA display. This forces a 
+//   conversion to a LATLON projection. MDV: legacy MDV format.
+//
+// Type: enum
+// Options:
+//     CF_NETCDF
+//     ZEBRA_NETCDF
+//     MDV
+//     CEDRIC
+//
+
+output_format = MDV;
+
+///////////// name_file_from_start_time ///////////////
+//
+// If true, name the output file using the start time.
+// If false, the end time is used, in the MDV tradition.
+// Type: boolean
+//
+
+name_file_from_start_time = FALSE;
+
+//======================================================================
+//
+// CF NetCDF OUTPUT DETAILS.
+//
+//======================================================================
+ 
+///////////// netcdf_file_prefix //////////////////////
+//
+// User-specified output file prefix, comes before date_time.
+// Type: string
+//
+
+netcdf_file_prefix = "ncf_";
+
+///////////// netcdf_file_suffix //////////////////////
+//
+// User-specified output file suffix, comes after the date_time and 
+//   before the .nc which gets automatically added on.
+// Type: string
+//
+
+netcdf_file_suffix = "";
+
+///////////// use_iso8601_filename_convention /////////
+//
+// If true the output filename uses the prefix, followed by ISO 8601 
+//   timestamp convention.
+// eg. prefix.2008-05-22T14:00:00.nc.
+// Type: boolean
+//
+
+use_iso8601_filename_convention = FALSE;
+
+//======================================================================
+//
+// NETCDF COMPRESSION.
+//
+//======================================================================
+ 
+///////////// netcdf_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+// Applies to CfRadial netCDF and Dorade.
+// Type: boolean
+//
+
+netcdf_compressed = TRUE;
+
+///////////// netcdf_compression_level ////////////////
+//
+// Level of compression for output data.
+// Valid range is 1 through 9. 1 gives lowest compression, 9 highest. 4 
+//   is a good compromise between speed and compression efficiency. Only 
+//   applies to NetCDF file format.
+// Minimum val: 1
+// Maximum val: 9
+// Type: int
+//
+
+netcdf_compression_level = 4;
+
+//======================================================================
+//
+// NETCDF STYLE.
+//
+//======================================================================
+ 
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4_CLASSIC
+//     NETCDF4
+//
+
+netcdf_style = NETCDF4;
+
+///////////// netcdf_include_latlon_arrays ////////////
+//
+// If true latitude and longitude arrays of each grid point are output.
+// The CF convention requires that these arrays are present in the 
+//   netCDF file; however, the information is redundant since the lat and 
+//   lon arrays could be constructed using the other projection and grid 
+//   information required with a gridded data field.
+// Type: boolean
+//
+
+netcdf_include_latlon_arrays = TRUE;
+
+///////////// netcdf_output_mdv_attributes ////////////
+//
+// Option to output non-CF compliant MDV attributes.
+// If true, MDV attributes which are not CF compliant will be output. 
+//   This will facilitate the translation of the data back into MDV with 
+//   the minimal loss of information.
+// Type: boolean
+//
+
+netcdf_output_mdv_attributes = TRUE;
+
+///////////// netcdf_output_mdv_chunks ////////////////
+//
+// Option to output non-CF compliant MDV chunks.
+// If true, MDV chunks will be included as byte binary variables.
+// Type: boolean
+//
+
+netcdf_output_mdv_chunks = TRUE;
+
+///////////// ncf_title ///////////////////////////////
+//
+// Title string for netCDF file.
+// Type: string
+//
+
+ncf_title = "SPOL radar data";
+
+///////////// ncf_institution /////////////////////////
+//
+// Institution string for netCDF file.
+// Type: string
+//
+
+ncf_institution = "EOL/NCAR";
+
+///////////// ncf_references //////////////////////////
+//
+// References string for netCDF file.
+// Type: string
+//
+
+ncf_references = "";
+
+///////////// ncf_source //////////////////////////////
+//
+// Source string for netCDF file.
+// Type: string
+//
+
+ncf_source = "SPOL radar";
+
+///////////// ncf_history /////////////////////////////
+//
+// History string for netCDF file.
+// Type: string
+//
+
+ncf_history = "";
+
+///////////// ncf_comment /////////////////////////////
+//
+// Comment string for netCDF file.
+// Type: string
+//
+
+ncf_comment = "";
+

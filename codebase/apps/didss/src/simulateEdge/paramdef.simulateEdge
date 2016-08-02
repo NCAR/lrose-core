@@ -1,0 +1,44 @@
+////////////////////////////////////////////////////////
+// parameter definitions for simulateEdge
+///////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "simulateEdge PARAMETER FILE";
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef boolean {
+  p_descr = "Info messaging option";
+  p_help = "If set to true, info messages will be printed";
+  p_default = {TRUE};
+} info;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef char* {
+  p_descr = "Broadcast address";
+  p_default = {"128.117.197.255"};
+} broadcast_address;
+
+paramdef char* {
+  p_descr = "Path for archive file";
+  p_default = {"./archive.txt"};
+} archive_file;
+
+paramdef long {
+  p_descr = "Udp port for output";
+  p_default = {6544};
+} port;
+
+

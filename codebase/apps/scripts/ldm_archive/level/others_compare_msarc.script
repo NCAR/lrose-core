@@ -1,0 +1,171 @@
+#!/bin/csh -x
+#
+# Script to verify that the daily weather data backup tar files were
+# indeed sent and received by the MassStore correctly.  It gets a
+# new listing of MassStore files, compares the entries in that listing
+# to the files on the local disk.  If the files match, then it deletes
+# the local copy, otherwise it resends the file(s) to the MassStore.
+#
+# PNeilley
+###########################################################################
+
+set ARC_home = /home/rapdmg/archive_staging
+set ARC_SCRIPTS_home  = /home/rapdmg/archive_scripts
+set SSG_arc = /archive
+#set SSG_arc = /nids/archive/SSG
+set ARC_nldn = $ARC_home/nldn
+set ARC_prof = $ARC_home/prof
+set ARC_pirep = $ARC_home/pirep
+#set ARC_acars = /nids/archive/acars
+set ARC_acars_ua = $ARC_home/acars_ua
+set ARC_acars_ups = $ARC_home/acars_ups
+set ARC_amdar = $ARC_home/amdar
+set MSS_path = /RAPDMG/LDM/ARCHIVE
+set MS_List = $ARC_home/MSlist/msls.out_others
+set EXE_home = /home/rapdmg/exe
+ 
+set ardate = `date --date="-24 hour" +%Y%m%d`
+set armmdd = `date --date="-24 hour" +%m%d`
+
+if ( $1 != "x" ) $ARC_SCRIPTS_home/get_msls.script $MS_List
+
+cd $ARC_acars_ua
+set files = `ls *.tar*`
+
+foreach file ($files)
+  set local_size = `ls -l $file | awk '{print $5}'`
+  #set msfile = `echo $file | tr "[a-z]" "[A-Z]"`
+  set msfile = `echo $file`
+  set ms_size = `grep $msfile $MS_List | awk '{print $5}'`
+
+  if ( $ms_size >= $local_size ) then
+     cp $file $SSG_arc/acars_ua
+     rm $file
+  else
+     set year = `echo $file | awk '{print substr($0,1,4)}'`
+     set yrmn = `echo $file | awk '{print substr($0,1,6)}'`
+     msrcp -pr 48500002 -pe 4096 $ARC_acars_ua/$file mss:$MSS_path/$year/$armmdd/$msfile
+     msclass -class reliability=economy $MSS_path/$year/$armmdd/$msfile
+  endif
+end
+
+cd $ARC_acars_ups
+set files = `ls *.tar*`
+
+foreach file ($files)
+  set local_size = `ls -l $file | awk '{print $5}'`
+  #set msfile = `echo $file | tr "[a-z]" "[A-Z]"`
+  set msfile = `echo $file`
+  set ms_size = `grep $msfile $MS_List | awk '{print $5}'`
+
+  if ( $ms_size >= $local_size ) then
+     cp $file $SSG_arc/acars_ups
+     rm $file
+  else
+     set year = `echo $file | awk '{print substr($0,1,4)}'`
+     set yrmn = `echo $file | awk '{print substr($0,1,6)}'`
+     msrcp -pr 48500002 -pe 4096 $ARC_acars_ups/$file mss:$MSS_path/$year/$armmdd/$msfile
+     msclass -class reliability=economy $MSS_path/$year/$armmdd/$msfile
+  endif
+end
+
+#cd $ARC_acars
+#set files = `ls *.tar*`
+#
+#foreach file ($files)
+#  set local_size = `ls -l $file | awk '{print $5}'`
+#  set msfile = `echo $file`
+#  #set msfile = `echo $file | tr "[a-z]" "[A-Z]"`
+#  set ms_size = `grep $msfile $MS_List | awk '{print $5}'`
+#
+#  if ( $ms_size >= $local_size ) then
+#     cp $file $SSG_arc/acars
+#     rm $file
+#  else
+#     set year = `echo $file | awk '{print substr($0,1,4)}'`
+#     set yrmn = `echo $file | awk '{print substr($0,1,6)}'`
+#     msrcp -pe 4096 $ARC_acars/$file mss:$MSS_path/$year/$armmdd/$msfile
+#  endif
+#end
+
+cd $ARC_amdar
+set files = `ls *.tar*`
+
+foreach file ($files)
+  set local_size = `ls -l $file | awk '{print $5}'`
+  set msfile = `echo $file`
+  set ms_size = `grep $msfile $MS_List | awk '{print $5}'`
+
+  if ( $ms_size >= $local_size ) then
+     cp $file $SSG_arc/amdar
+     rm $file
+  else
+     set year = `echo $file | awk '{print substr($0,1,4)}'`
+     set yrmn = `echo $file | awk '{print substr($0,1,6)}'`
+     msrcp -pr 48500002 -pe 4096 $ARC_amdar/$file mss:$MSS_path/$year/$armmdd/$msfile
+     msclass -class reliability=economy $MSS_path/$year/$armmdd/$msfile
+  endif
+end
+
+cd $ARC_nldn
+set files = `ls *.tar*`
+
+foreach file ($files)
+  set local_size = `ls -l $file | awk '{print $5}'`
+  set msfile = `echo $file`
+  set ms_size = `grep $msfile $MS_List | awk '{print $5}'`
+
+  if ( $ms_size >= $local_size ) then
+     cp $file $SSG_arc/nldn
+     rm $file
+  else
+     set year = `echo $file | awk '{print substr($0,1,4)}'`
+     set yrmn = `echo $file | awk '{print substr($0,1,6)}'`
+     msrcp -pr 48500002 -pe 4096 $ARC_nldn/$file mss:$MSS_path/$year/$armmdd/$msfile
+     msclass -class reliability=economy $MSS_path/$year/$armmdd/$msfile
+  endif
+end
+cd $ARC_prof
+set files = `ls *.tar*`
+
+foreach file ($files)
+  set local_size = `ls -l $file | awk '{print $5}'`
+  set msfile = `echo $file`
+  set ms_size = `grep $msfile $MS_List | awk '{print $5}'`
+
+  if ( $ms_size >= $local_size ) then
+     cp $file $SSG_arc/prof
+     rm $file
+  else
+     set year = `echo $file | awk '{print substr($0,1,4)}'`
+     set yrmn = `echo $file | awk '{print substr($0,1,6)}'`
+     msrcp -pr 48500002 -pe 4096 $ARC_prof/$file mss:$MSS_path/$year/$armmdd/$msfile
+     msclass -class reliability=economy $MSS_path/$year/$armmdd/$msfile
+  endif
+end
+
+cd $ARC_pirep
+set files = `ls *.tar*`
+
+foreach file ($files)
+  set local_size = `ls -l $file | awk '{print $5}'`
+  set msfile = `echo $file`
+  set ms_size = `grep $msfile $MS_List | awk '{print $5}'`
+
+  if ( $ms_size >= $local_size ) then
+     cp $file $SSG_arc/pirep
+     rm $file
+  else
+     set year = `echo $file | awk '{print substr($0,1,4)}'`
+     set yrmn = `echo $file | awk '{print substr($0,1,6)}'`
+     msrcp -pr 48500002 -pe 4096 $ARC_pirep/$file mss:$MSS_path/$year/$armmdd/$msfile
+     msclass -class reliability=economy $MSS_path/$year/$armmdd/$msfile
+  endif
+end
+
+ $ARC_SCRIPTS_home/get_msls.script $MS_List"_"$ardate
+
+
+
+
+

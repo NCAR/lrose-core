@@ -1,0 +1,36 @@
+#! /bin/sh
+
+if (not_running servmap) then
+  servmap -quiet &
+fi
+
+if (not_running procmap) then
+  procmap -quiet &
+fi
+
+cd $RTEST_HOME/params
+
+#if (not_running "cart_slave -params cart_slave.rtest") then
+#  cart_slave -params cart_slave.rtest &
+#fi
+
+if (not_running "dobson_server -params dobson_server.rtest") then
+  dobson_server -params dobson_server.rtest &
+fi
+
+if (not_running "dobson_server -params dobson_server.refl_fcast") then
+  dobson_server -params dobson_server.refl_fcast &
+fi
+
+if (not_running "dobson_server -params dobson_server.precip_fcast") then
+  dobson_server -params dobson_server.precip_fcast &
+fi
+
+if (not_running "dobson_server -params dobson_server.precip_accum") then
+  dobson_server -params dobson_server.precip_accum &
+fi
+
+if (not_running "track_server -params track_server.rtest") then
+  track_server -params track_server.rtest &
+fi
+

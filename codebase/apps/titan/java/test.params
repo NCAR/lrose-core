@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<!DOCTYPE parameters [
+ <!ELEMENT parameters (collection*) >
+ <!ELEMENT collection (name, label, param*) >
+ <!ELEMENT param (name, label, description, info, value)>
+ <!ELEMENT name (#PCDATA)>
+ <!ELEMENT label (#PCDATA)>
+ <!ELEMENT description (#PCDATA)>
+ <!ELEMENT info (#PCDATA)>
+ <!ELEMENT value (#PCDATA)>
+]>
+
+<parameters>
+
+  <collection>
+    <name>radarParams</name>
+    <label>Radar params</label>
+
+    <param>
+      <name>siteNum</name>
+      <label>Site number</label>
+      <description>The indexed number for this site</description>
+      <info>
+        <![CDATA[
+        You should arrange these numbers with reference to other sites in the area. The number is used identify the radar site if mode than one radar is used in the network
+        ]]>
+      </info>
+      <value>0</value>
+    </param>
+
+
+    <param>
+      <name>siteName</name>
+      <label>Site name</label>
+      <description>The name of the site</description>
+      <info>
+        <![CDATA[
+        The site name must be a text description of the geographical geographical location of the radar installation, such as a farm name or nearby town.
+        ]]>
+      </info>
+      <value>Bethlehem</value>
+    </param>
+
+
+    <param>
+      <name>userName</name>
+      <label>User name</label>
+      <description>The name of the technician or user</description>
+      <info>
+        <![CDATA[
+        The technician or user of the program can put their name in this field. The reason for having it is to keep track of who performed the last calibration.
+        ]]>
+      </info>
+      <value>Unknown</value>
+    </param>
+
+
+    <param>
+      <name>peakXmitPower</name>
+      <label>Peak power</label>
+      <description>Peak transmitter power (dBM)</description>
+      <info>
+        <![CDATA[
+        Peak transmitter power in dBM
+        ]]>
+      </info>
+      <value>250.0</value>
+    </param>
+
+
+    <param>
+      <name>xmitFreq</name>
+      <label>Xmit Frequency</label>
+      <description>Transmitter Frequency (GHz)</description>
+      <info>
+        <![CDATA[
+        Transmitter frequency in GigaHertz
+        ]]>
+      </info>
+      <value>5.66</value>
+    </param>
+
+
+    <param>
+      <name>beamWidth</name>
+      <label>Beam width</label>
+      <description>Antenna beam width (deg)</description>
+      <info>
+        <![CDATA[
+        Half-power beam width in degrees
+        ]]>
+      </info>
+      <value>1.0</value>
+    </param>
+
+
+    <param>
+      <name>antGain</name>
+      <label>Antenna gain</label>
+      <description>Antenna gain (dB)</description>
+      <info>
+        <![CDATA[
+        Antenna gain in dB
+        ]]>
+      </info>
+      <value>44.0</value>
+    </param>
+
+
+    <param>
+      <name>waveguideLoss</name>
+      <label>Waveguide loss</label>
+      <description>One-way waveguide loss (dB)</description>
+      <info>
+        <![CDATA[
+        Typical loss values:
+<p>  C-band: 1.75 dB per 100 ft / 30 m
+<p>  S-band: 0.75 dB per 100 ft / 30 m
+
+        ]]>
+      </info>
+      <value>0.5</value>
+    </param>
+
+
+    <param>
+      <name>radomeLoss</name>
+      <label>Radome loss</label>
+      <description>Two-way radome loss (dB)</description>
+      <info>
+        <![CDATA[
+        If no radome set to 0.
+        ]]>
+      </info>
+      <value>0.5</value>
+    </param>
+
+
+    <param>
+      <name>testCableAtten</name>
+      <label>Test cable attenuation</label>
+      <description>Test cable attenuation (dB)</description>
+      <info>
+        <![CDATA[
+        Typical values:
+<p>C-band: 0.6 dB/ft with RG58 or similar
+<p>S-band: 0.4 dB/ft with RG58 or similar
+
+        ]]>
+      </info>
+      <value>3.8</value>
+    </param>
+
+
+    <param>
+      <name>couplerAtten</name>
+      <label>Coupler attenuation</label>
+      <description>Coupler attenuation (dB)</description>
+      <info>
+        <![CDATA[
+        If the signal generator input is connected directly to the receiver set this to 0
+        ]]>
+      </info>
+      <value>30.75</value>
+    </param>
+
+
+    <param>
+      <name>displaceType</name>
+      <label>Displace type</label>
+      <description>Displace table type</description>
+      <info>
+        <![CDATA[
+        Quadratic should be used unless the user has a specific reason for choosing a different type. Further information on the table types may be found in the RDAS documentation
+        ]]>
+      </info>
+      <value>Quadratic</value>
+    </param>
+
+
+    <param>
+      <name>clutFilter</name>
+      <label>Clutter filter on</label>
+      <description>Is the clutter filter on or off?</description>
+      <info>
+        <![CDATA[
+        Select true to turn clutter filtering on, false to turn it off
+        ]]>
+      </info>
+      <value>false</value>
+    </param>
+
+  </collection>
+
+
+  <collection>
+    <name>scanParams</name>
+    <label>Scan strategy</label>
+
+    <param>
+      <name>nElevations</name>
+      <label>N elevations</label>
+      <description>Number of elevation angles</description>
+      <info>
+        <![CDATA[
+        This is the number of elevation angles in the scan strategy. It should agree with the number of entries in the elevation list.
+        ]]>
+      </info>
+      <value>10</value>
+    </param>
+
+
+    <param>
+      <name>elevationList</name>
+      <label>Elevation list</label>
+      <description>Comma-delimited elevation angle list</description>
+      <info>
+        <![CDATA[
+        Enter the elevation angles in a comma-delimited list.
+        ]]>
+      </info>
+      <value>0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.9</value>
+    </param>
+
+  </collection>
+
+</parameters>
+

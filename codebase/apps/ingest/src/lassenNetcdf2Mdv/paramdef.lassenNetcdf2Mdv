@@ -1,0 +1,137 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Ingest Lassen format radar data that have\n"
+	"been converted to netcdf format at CU. Program\n"
+	"runs only in archive mode, these data are not\n"
+	"available in real time. Niles Oien August 2008";
+
+}
+
+paramdef boolean {
+  p_descr = "Option to print debugging messages.";
+  p_help = "Defaults to TRUE since we run in archive mode."; 
+  p_default = TRUE;
+} debug;
+
+paramdef string {
+  p_descr = "Format for directory where input files are.";
+  p_help = "The fields that are printed into this to construe the\n"
+        "filename are : the last 2 digits of the year, the day of the\n"
+        "year, the location and field characters, the last two digits of\n"
+        "the year and the day of the year (again), the hour, the minute, and\n"
+        "the tilt character.";
+  p_default = "/home/data/ucar/test_data/%02d%03d/Albis/rainrate/%c%c_%02d%03d%02d%02d_%c.nc";
+} dir;
+ 
+paramdef string {
+  p_default = "AP_070010000_I.nc";
+  p_help = "Start file name for program."; 
+  p_descr = "Program will progress from this file.";
+} startFile;
+ 
+paramdef int {
+  p_descr = "Maximum time, seconds, to allow between input files.";
+  p_help = "Used when searching for new files."; 
+  p_default = 900;
+} searchTime;
+
+
+typedef struct {
+	string url;
+	string fieldName;
+	string units;
+} mdvSpec_t;
+
+paramdef struct mdvSpec_t {
+  p_descr = "URL to write mdv data to, and name of field.";
+  p_help = "Set as appropriate."; 
+  p_default = { "mdvp:://localhost::./mdv", "rainRate", "mm/hr" };
+} mdvSpec;
+
+typedef struct {
+	boolean convertToRate;
+	double a;
+	double b;
+	double min;
+} rrConvert_t;
+
+paramdef struct rrConvert_t {
+  p_descr = "If the boolean set to TRUE is is assumed that the input data are\n"
+	"in dBZ and are to be converted to rainfall rate before being written\n"
+	"to the mdv file.";
+  p_help = "The Z-R relation assumed is Z = aR**b and rate values less than\n"
+	"min are set to missing."; 
+  p_default = { FALSE, 316, 1.5, 0.5 };
+} rrConvert;
+
+paramdef boolean {
+  p_descr = "Option to take location from first character in file.";
+  p_help = "The file does have a lat lon in it, but it is occasionally\n"
+	"wrong, and there is no elevation (at least at the time of writing).\n"
+	"If this is set to TRUE (default) then the first character in\n"
+	"the filename determines the location as follows :\n\n"
+	"A => lat=47.28540 & lon=8.51301 & alt = 930 (Albis)\n"
+	"D => lat=46.42616 & lon=6.10016 & alt = 1680 (Dole)\n"
+	"L => lat=46.04179 & lon=8.83436 & alt = 1630 (Lema)\n"
+	"C => lat=46.6733 & lon=7.46555 & alt = 0 (Composite)"; 
+  p_default = TRUE;
+} useLocationChars;
+
+
+
+typedef struct {
+        boolean stopAfterThisTime;
+        int year;
+        int month;
+        int day;
+        int hour;
+        int min;
+        int sec;
+        boolean runStopScript;
+        string stopScript;
+} stopTime_t;
+
+
+paramdef struct stopTime_t {
+  p_descr = "Optional to stop after a certain time.";
+  p_help = "May be useful for after the fact patch jobs.";
+  p_default = { FALSE, 2007, 12, 30, 23, 59, 59, FALSE, "gzipMdvFiles" };
+} stopTime;
+
+typedef struct {
+        boolean doSaveState;
+        string stateFilename;
+        boolean readStateAtStart;
+} saveState_t;
+
+paramdef struct saveState_t {
+  p_descr = "Options to save the last filename processed and use\n"
+        "it on startup. If on startup no state file is found then\n"
+        "the filename specified by startFile is used.";
+  p_help = "May be useful for long runs.";
+  p_default = { FALSE, "./lassenNetcdf2Mdv.state", FALSE };
+} saveState;
+

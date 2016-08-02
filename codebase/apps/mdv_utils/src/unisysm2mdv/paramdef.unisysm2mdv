@@ -1,0 +1,258 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for unisysm2mdv
+ *
+ * Marty Petach, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * March 1999
+ */
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,
+  DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug_level;
+
+paramdef long
+{
+  p_default = 0;
+  p_min = 0;
+  p_max = 3;
+  p_descr = "Malloc debug level";
+  p_help = "THIS PARAMETER IS NO LONGER USED";
+} malloc_debug_level;
+
+paramdef int
+{
+  p_default = 10000;
+  p_descr = "Identifies valid mosaic data file";
+  p_help = "Unisys uses a source ID of 10000 to identify national scale "
+           "mosaics. "
+           "This number is used to check if the requested data file is "
+           "really a Unisys mosaic file";
+} valid_source_id;
+
+paramdef char* 
+{
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum
+{
+  REALTIME,
+  ARCHIVE
+} mode_t;
+
+paramdef enum mode_t 
+{
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; "
+           "archive mode runs on file list";
+} run_mode;
+
+paramdef string
+{
+  p_descr = "Input file substring";
+  p_default = "nat";
+} input_file_substring;
+
+paramdef string 
+{
+  p_default = ".";
+  p_descr = "Input directory";
+  p_help = "Path of input directory - realtime mode only";
+} input_dir;
+
+paramdef string 
+{
+  p_default = "mdvp:://localhost::mdv/unisys";
+  p_descr = "Output URL";
+} output_dir;
+
+paramdef string 
+{
+  p_default = "mdv";
+  p_descr = "Output file extension";
+} output_ext;
+
+paramdef long
+{
+  p_descr = "file start time offset";
+  p_help = "The number of seconds to be subtracted from the Unisys data time "
+           "to get the MDV file start time.  "
+           "Use a negative value if the start time should be later than the "
+           "data time.";
+  p_default = 300;
+} start_time_offset;
+
+paramdef long
+{
+  p_descr = "file centroid time offset";
+  p_help = "The number of seconds to be added to the Unisys data time to get "
+           "the MDV file centroid time.  "
+           "Use a negative number if the file centroid time should precede "
+           "the Unisys data time.";
+  p_default = 0;
+} mid_time_offset;
+
+paramdef long
+{
+  p_descr = "file end time offset";
+  p_help = "The number of seconds to be added to the Unisys data time to get "
+           "the MDV file end time.  "
+           "Use a negative number if the file end time should precede the "
+           "Unisys data time.";
+  p_default = 150;
+} end_time_offset;
+
+paramdef long 
+{
+  p_min = 60;
+  p_default = 300;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_input_data_age;
+
+paramdef long 
+{
+  p_min = 0;
+  p_max = 300;
+  p_default = 10;
+  p_descr = "Delay before processing incoming file (sec)";
+  p_help = "Delay between finding new file and processing it - "
+           "realtime only (sec)";
+} processing_delay;
+
+paramdef string
+{
+  p_descr = "field name for Unisys data -- long form";
+  p_help = "This value is put in the MDV field header.";
+  p_default = "Vertically Integrated Liquid";
+} data_field_name_long;
+
+paramdef string
+{
+  p_descr = "field name for Unisys data -- short form";
+  p_help = "This value is put in the MDV field header.";
+  p_default = "VIL";
+} data_field_name;
+
+paramdef string
+{
+  p_descr = "data units";
+  p_help = "This value is put in the MDV field header.";
+  p_default = "kg m-2";
+} data_units;
+
+paramdef double
+{
+  p_descr = "scale value used to convert MDV data values "
+            "into approriate units";
+  p_help = "Scale factor for data values:\n"
+           "Data_in_appropriate_units = data_file_value * data_scale + bias";
+  p_default = 1.0;
+} data_scale;
+
+paramdef double
+{
+  p_descr = "bias value used to convert MDV data values "
+            "into appropriate units";
+  p_help = "Bias for data values:\n"
+           "Data_in_appropriate_units = data_file_value * data_scale + bias";
+  p_default = 0.0;
+} data_bias;
+
+paramdef double
+{
+  p_descr = "Bad data value.";
+  p_help = "Data with this value (BEFORE applying scale and bias) not valid.";
+  p_default = 0.0;
+} bad_data_value;
+
+paramdef double
+{
+  p_descr = "Missing data value.";
+  p_help = "Data with this value (BEFORE applying scale and bias) "
+           "not measured.";
+  p_default = 0.0;
+} missing_data_value;
+
+typedef struct
+{
+  double min;
+  double delta;
+  long   n;
+} grid_t;
+
+paramdef struct grid_t 
+{
+  p_descr = "X grid params";
+  p_help = "The grid parameters are given in degrees; "
+           "The X min value gives the min value of the lower left-hand corner "
+           "of the grid square.";
+  p_default = { -129.980881, 0.038239, 1830 }; // Match WSI values
+} x_grid;
+
+paramdef struct grid_t 
+{
+  p_descr = "Y grid params";
+  p_help = "The grid parameters are given in degrees; "
+           "The Y min value gives the min value of the lower left-hand corner "
+           "of the grid square.";
+  p_default = { 20.017966, 0.035933, 918 }; //Match WSI values
+} y_grid;
+
+paramdef double 
+{
+  p_min = 0.0;
+  p_max = 90.0;
+  p_default = 33.0;
+  p_descr = "First Standard Parallel";
+  p_help = "First standard parallel for Unisys data in "
+           "Lambert Conformal Projection";
+} std_parallel_1;
+
+paramdef double 
+{
+  p_min = 0.0;
+  p_max = 90.0;
+  p_default = 45.0;
+  p_descr = "Second Standard Parallel";
+  p_help = "Second standard parallel for Unisys data in "
+           "Lambert Conformal Projection";
+} std_parallel_2;
+

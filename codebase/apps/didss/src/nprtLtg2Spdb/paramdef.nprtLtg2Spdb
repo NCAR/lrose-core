@@ -1,0 +1,133 @@
+///////////////////////////////////////////////////////////
+//
+// paramdef.nprtLtg2Spdb
+//
+//
+
+commentdef {
+  p_header = "nprtLtg2Spdb reads lightning data into an SPDB database.\n"
+	     "The input files are ASCII files with the following format :\n\n"
+	     "Unix-time Lon Lat kiloamps decisecs multiplicity quality\n"
+	     "983358008 -94.966888 30.238035 -18 0 3 0\n"
+             "983358017 -91.154785 29.997068 -12 2 8 0\n"
+             "983358023 -95.155945 30.175230 -16 4 2 0\n"
+             "983358034 -91.025543 29.968870 4 1 1 0 \n\n"      
+             "In fact, only the time, latitude, longitude and amplitude\n"
+             "are read into the database. The lightning type is set to UNKNOWN.\n"
+             "If the program encounters any lines that do not have\n"
+             "the time, latitude, longitude and amplitude as the first entries\n"
+             "(like header text in the file) then it prints a warning message\n"
+             "and proceeds. At the time of writing the ATEC project processes\n"
+             "binary NOAAPORT files into ASCII files of this format - hence\n"
+             "the program name, which reflects that NOAAPORT data are being\n"
+             "ingested - but note that the raw binary NOAAPORT files are NOT\n"
+             "suitable as input into this program.\n\n"
+             "Niles Oien March 2001";
+}         
+
+
+////////////////////////////////////////////////////////////////////////
+//
+// Debugging
+//
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = { false };
+} Debug;
+
+////////////////////////////////////////////////////////////////////////
+//
+// Operational information
+//
+
+paramdef string
+{
+  p_descr = "procmap instance";
+  p_default = { "Test" };
+} Instance;
+
+paramdef long
+{
+  p_descr = "processing delay in seconds";
+  p_help = "The number of seconds to wait before processing an input file.  This delay allows activity on the file to finish before we start reading it, realtime mode only.";
+  p_default = { 1 };
+} ProcessingDelay;
+
+paramdef string
+{
+  p_descr = "input directory";
+  p_help = "Directory where NOAAPORT processed ltg files are, realtime mode only.";
+  p_default = { "." };
+} InputDir;
+
+paramdef long
+{
+  p_descr = "lightning data expire seconds";
+  p_help = "Number of seconds the lightning data is valid before it should be expired.";
+  p_default = { 60 };
+} ExpireSecs;
+
+paramdef int
+{
+  p_descr = "Maximum age for an input file to be processed, seconds.";
+  p_help = "Valid for REALTIME mode only.";
+  p_default = 300;
+} MaxRealtimeFileAge;
+
+paramdef string
+{
+  p_descr = "Destination SPDB URL";
+  p_help = "The name of the URL which will be used as the destination for the SPDB data.";
+  p_default = { "spdbp:://localhost::spdb/ltg" };
+} OutputUrl;
+
+paramdef enum runmode_t
+{
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the analysis is performed for each dataset as it becomes available. In archive mode, the file list is obtained from the command line.";
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+} Mode;
+
+
+commentdef {
+  p_header = "-------- Region over which to ingest data.";
+}
+
+paramdef float
+{
+  p_descr = "Minimum latitude for data to be ingested, decimal degrees.";
+  p_help = "Data south of this are not ingested. Default covers Mainland USA.";
+  p_default = 25.0;
+} MinLat;
+
+paramdef float
+{
+  p_descr = "Maximum latitude for data to be ingested, decimal degrees.";
+  p_help = "Data north of this are not ingested. Default covers Mainland USA.";
+  p_default = 50.0;
+} MaxLat;
+
+paramdef float
+{
+  p_descr = "Minimum longitude for data to be ingested, decimal degrees.";
+  p_help = "Data west of this are not ingested. Default covers Mainland USA.\n"
+            "Longitudes cover -180 to 180.";
+  p_default = -125.0;
+} MinLon;
+
+paramdef float
+{
+  p_descr = "Maximum longitude for data to be ingested, decimal degrees.";
+  p_help = "Data east of this are not ingested. Default covers Mainland USA.\n"
+            "Longitudes cover -180 to 180.";
+  p_default = -65.0;
+} MaxLon;
+
+
+
+
+

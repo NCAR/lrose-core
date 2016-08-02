@@ -1,0 +1,167 @@
+/*********************************************************
+ * parameter definitions for bprp_filter
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 1995
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Set options for PACER radar";
+  p_help = "If this is set, processing is done as for the PACER radar data system.";
+} pacer;
+
+paramdef char* {
+  p_default = {"localhost"};
+  p_descr = "Input data host";
+  p_help = "TCP/IP name/address of host for input data";
+} input_host;
+
+paramdef long {
+  p_default = {10000};
+  p_min = {1000};
+  p_max = {65535};
+  p_descr = "Input data port";
+  p_help = "TCP/IP port number for input data";
+} input_port;
+
+paramdef long {
+  p_default = {49000};
+  p_min = {5000};
+  p_max = {65535};
+  p_descr = "Output data port";
+  p_help = "TCP/IP port number for output data";
+} output_port;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option to check radar ID";
+  p_help = "If this is set, only beams with the correct radar id are included in the outptu data stream";
+} check_radar_id;
+
+paramdef enum time_mode_t {
+  p_options = {LOCAL_TO_UCT, AS_IS};
+  p_default = {LOCAL_TO_UCT};
+  p_descr = "Time computation mode";
+  p_help = "If AS_IS, time is accepted as is. Otherwise, it is assumed local and changed to UCT";
+} time_mode;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Target radar ID";
+  p_help = "The radar ID to be used for filtering the input data";
+} target_radar_id;
+
+paramdef double {
+  p_default = {-157.0};
+  p_descr = "Radar constant";
+  p_help = "Value of radar constant for Met type radar";
+} radar_constant;
+
+paramdef double {
+  p_default = {0.014};
+  p_min = {0.0};
+  p_descr = "Atmospheric attenuation";
+  p_help = "Atmospheric attenuation correction (dB/km)";
+} atmos_attenuation;
+
+paramdef double {
+  p_default = {1.0};
+  p_min = {0.01};
+  p_max = {45.0};
+  p_descr = "Beam width";
+  p_help = "Radar half-power beam width (deg)";
+} beam_width;
+
+paramdef long {
+  p_default = {8};
+  p_min = {1};
+  p_descr = "Samples per beam";
+  p_help = "Number of pulse samples used to compute data from a beam";
+} samples_per_beam;
+
+paramdef double {
+  p_default = {2.0};
+  p_min = {0.001};
+  p_descr = "Pulse width";
+  p_help = "Radar pulse width (microsecs)";
+} pulse_width;
+
+paramdef double {
+  p_default = {250.0};
+  p_min = {1.0};
+  p_descr = "PRF";
+  p_help = "Radar pulse repitition frequency (pulses per sec)";
+} prf;
+
+paramdef double {
+  p_default = {5.0};
+  p_min = {0.01};
+  p_max = {1000.0};
+  p_descr = "Wavelength";
+  p_help = "Radar wavelength (cm)";
+} wavelength;
+
+paramdef double {
+  p_default = {0.600};
+  p_min = {0.001};
+  p_max = {100.0};
+  p_descr = "Gate spacing (km)";
+  p_help = "Radar range gate spacing - used for PACER only. For other radars it is determined from the data";
+} gate_spacing;
+
+paramdef double {
+  p_default = {0.300};
+  p_min = {0.001};
+  p_max = {1000.0};
+  p_descr = "Start range (km)";
+  p_help = "Range to center of first radar gate - used for PACER only. For other radars it is determined from the data";
+} start_range;
+
+paramdef double {
+  p_default = {0.0};
+  p_min = {-2.0};
+  p_max = {25.0};
+  p_descr = "Radar altitude";
+  p_help = "Radar altitude (km MSL)";
+} radar_altitude;
+
+paramdef double {
+  p_default = {0.0};
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_descr = "Radar latitude";
+  p_help = "Radar latitude (deg.decimal)";
+} radar_latitude;
+
+paramdef double {
+  p_default = {0.0};
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_descr = "Radar longitude";
+  p_help = "Radar longitude (deg.decimal)";
+} radar_longitude;
+

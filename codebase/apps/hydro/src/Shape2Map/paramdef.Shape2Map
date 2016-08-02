@@ -1,0 +1,105 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Shape2Map
+ *
+ * This file contains the TDRP parameter definitions for
+ * Shape2Map.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Icon definition.
+ */
+
+commentdef
+{
+  p_header = "ICON DEFINITION PARAMETERS";
+  p_text = "Only one icon can be defined for each shape file";
+};
+
+typedef struct
+{
+  long x_offset;
+  long y_offset;
+} icon_point_t;
+
+paramdef struct icon_point_t
+{
+  p_descr = "The points in the icon.";
+  p_help = "Leave empty if the shape file doesn't contain any point data.\n"
+           "Use 32767 for both x_offset and y_offset to indicate a pen-up";
+  p_default = { };
+} icon_points[];
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to include a label with any created icons.";
+  p_help = "If set to TRUE, a label field must be included in the shape file "
+           "for each icon location and the label_field_index parameter must "
+           "be set to the index of the label field in the shape file.  "
+           "Also, the label_offset_x and label_offset_y parameters must be set "
+           "if labels are included in the map file.";
+  p_default = FALSE;
+} include_icon_label;
+
+paramdef long
+{
+  p_descr = "The index in the shape file for the string attribute to be "
+            "used as the label for any icon points in the file.";
+  p_help = "Used only if include_icon_label is set to TRUE.";
+  p_default = 5;
+} label_field_index;
+
+paramdef long
+{
+  p_descr = "X offset, in pixels, for icon labels in the output map file.";
+  p_help = "Used only if include_icon_label is set to TRUE.";
+  p_default = 8;
+} label_offset_x;
+
+paramdef long
+{
+  p_descr = "Y offset, in pixels, for icon labels in the output map file.";
+  p_help = "Used only if include_icon_label is set to TRUE.";
+  p_default = 5;
+} label_offset_y;

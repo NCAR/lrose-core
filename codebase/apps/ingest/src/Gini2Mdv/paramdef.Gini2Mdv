@@ -1,0 +1,389 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * Parameter definitions for Gini2Mdv 
+ *
+ * Steve Mueller, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * June 2006
+ */
+
+commentdef
+   {
+   p_header = "Convert satellite data in GINI format into MDV.\n"
+              "Input data is in uncalibrated counts, and a calibration\n"
+              "table is generated for the interpretation of the data."
+              "Calibration parameters are specified below.";
+   }
+
+paramdef boolean
+   {
+   p_default = FALSE;
+   p_descr = "Debug option";
+   p_help = "If set, debug messages will be printed";
+   } debug;
+
+paramdef string
+   {
+   p_descr = "Path and filename for log of calibration data and curves.";
+   p_help = "Used to debug the generation of calibration curves.";
+   p_default = "calibration.log";
+   } calibration_log_file;
+
+paramdef string
+   {
+   p_default = "Test";
+   p_descr = "Process instance";
+   p_help = "Used for registration with procmap.";
+   } instance;
+
+paramdef enum op_mode
+   {
+   p_options = {ARCHIVE, REALTIME, REALTIME_DIR};
+   p_default = REALTIME_DIR;
+   p_descr = "Operation mode";
+   p_help = "Program may be run in three modes,\n"
+            "ARCHIVE - filelist specified on command line\n"
+            "REALTIME - a directory is monitored for _latest_data_info\n"
+            "REALTIME_DIR - a directory is monitored for newly added files";
+   } mode;
+
+paramdef boolean
+   {
+   p_default = TRUE;
+   p_descr = "Run once for archive mode option";
+   p_help = "If set, archive mode will not traverse backwards to find data";
+   } run_archive_once;
+
+paramdef enum op_search_mode
+   {
+   p_options = {NEAREST, NEAREST_BEFORE, NEAREST_AFTER};
+   p_default = NEAREST;
+   p_descr = "Archive time constraint";
+   p_help = "Archive mode may look for the nearest time, nearest time before, or nearest time after\n"
+            "NEAREST - Find file with data time closest to run time\n"
+            "NEAREST_BEFORE - Find file with data time immediately before run time\n"
+            "NEAREST_AFTER - Find file with data time immediately after run time";
+   } archive_search_mode;
+
+paramdef boolean
+{
+p_default = TRUE;
+p_descr = "If TRUE, when a file does not contain as much data as it's header indicates it should,\n"
+        "the file will still be processed.";
+p_help = "if FALSE, in archive mode, with run_archive_once set to FALSE, incomplete data will trigger a backwards search for a complete set.";
+
+} process_partial_files;
+
+paramdef boolean
+{
+ p_default = FALSE;
+ p_descr = "If you are running in archive mode, but on 'real time' data, you may want to set this to TRUE so that partial files will wait for completion.";
+ p_help = "This option has no effect if you are running in real time mode.";
+} wait_for_archive_data;
+      
+/********************/
+/* INPUT PARAMETERS */
+/********************/
+commentdef
+   {
+   p_header = "DATA INPUT.";
+   }
+
+typedef struct
+   {
+   string  base_directory;
+   string  short_mdv_field_name;
+   string  long_mdv_field_name;
+   string  file_template;
+   string  calibration_curve_name;
+   boolean mandatory_data_status;
+   string  exclusion_str;
+   } input_data_t;
+
+paramdef struct input_data_t
+   {
+   p_descr = "Input data structure\n"
+             "   base_directory: Input directory location (should be one level\n"
+             "      above any date-based subdirectories).\n"
+             "   short_mdv_field_name: Sets the output Mdv field name for the\n"
+             "      data field.\n"
+             "   long_mdv_field_name: Sets a descriptive field name in the output\n"
+             "      Mdv file.\n"
+             "   file_template: Template used to identify input file. Embedded time\n"
+                    " and date stamp follow strftime conventions.\n"
+                    " e.g. VIS_%Y%m%d_%H%M\n"
+              "   calibration_curve_name: Calibration curve name (must correspond to\n"
+             "      an entry in the calibration_data[] array specified below.\n"
+             "   mandatory_data_status: Boolean indicating whether or not\n"
+             "      processing is strictly dependent upon the existence of this\n"
+             "      data set. If false, processing will proceed even if the\n"
+             "      corresponding data file is unavailable. In that case, the field\n"
+             "      will be uniformly populated with values defined by the\n"
+             "      bad_or_missing_output_value parameter in the corresponding\n"
+             "      calibration curve.\n"
+             "   exclusion_str: If this string is part of the file name, the file\n"
+             "      will not be processed (e.g., '.gz').\n";
+   p_help  = "";
+   p_default = {{"gini/east/1km/vis", "VISIBLE", "visible", "VIS_%Y%m%d_%H%M", "vis", false, "gz"}, 
+     {"gini/east/4km/IR", "IR", "infrared", "IR_%Y%m%d_%H%M", "infrared", true, "gz"}, 
+     {"gini/east/4km/SWIR", "SW_IR", "short wave IR", "3.9_%Y%m%d_%H%M", "shortwave", true, "gz"}};
+   } input_data_array[];
+
+
+/*********************/
+/* TIMING PARAMETERS */
+/*********************/
+commentdef
+   {
+   p_header = "TIMING PARAMETERS";
+   }
+
+paramdef boolean
+   {
+   p_default = TRUE;
+   p_descr   = "Flag to add date subdirectory to realtime directories";
+   p_help    = "Used to add a YYYYMMDD subdirectory to the realtime"
+      "directory specified by input_data_array[]";
+   } append_date_subdirectory;
+
+paramdef int
+   {
+   p_min     = 0;
+   p_default = 300;
+   p_descr   = "Seconds to monitor the appearance of additional new data files once the first has appeared.";
+   p_help    = "Gini2Mdv is capable of simultaneously monitoring multiple input directories."
+               " Most input directories are populated with new data within moments of one another."
+               " The Gini2Mdv application attempts to wait for all input directories to be updated"
+               " before processing. The newFileTimeout parameter is the time (in seconds) to monitor"
+               " input directories for new files after the first new file has appeared in another directory.";
+   } new_file_timeout;
+
+paramdef int
+   {
+   p_default = 600;
+   p_descr = "Max age of input data";
+   p_help = "Maximum age (secs) for input file to be valid";
+   } max_valid_age_secs;
+
+paramdef int
+   {
+   p_default = 300;
+   p_descr = "Interval to check for data in archive mode";
+   p_help = "Interval time (secs) to look for data";
+   } lookback_step;
+          
+paramdef boolean
+   {
+   p_default = FALSE;
+   p_descr = "Option to force generation time to values on the minute";
+   p_help = "This option keeps keeps any clock drift for data originator entering "
+            "MDV output. The drift is appearing in the hundredth of a second filed "
+            "in the Product Definition Block";
+   } zero_seconds_on_output;
+
+paramdef int
+   {
+   p_min = 1;
+   p_default = 1;
+   p_descr = "Number of seconds to sleep between attempts to check input directories for new files";
+   p_help = "Input directories are inspected periodically for new files. This parameter determines the "
+            "number of seconds between inspections";
+   } sleep_before_repeating_directory_search;
+
+
+/*********************/
+/* OUTPUT PARAMETERS */
+/*********************/
+commentdef
+   {
+   p_header = "OUTPUT PARAMETERS";
+   }
+
+paramdef string
+   {
+   p_default = ".";
+   p_descr = "Used to build URL for output MDV data.";
+   p_help = "Output URL is mdvp:://<OUTHOST>::<OUTDIR>";
+   } output_url;
+
+paramdef string
+   {
+   p_default = "Gini data";
+   p_descr   = "Name of data set (e.g., GINI Eastern CONUS)";
+   p_help    = "Included in Mdv master header";
+   } data_set_name;
+
+paramdef string
+   {
+   p_default = "Gini";
+   p_descr   = "Name of data source";
+   p_help    = "Included in Mdv master header";
+   } data_set_source;
+
+paramdef string
+   {
+   p_default = "EastCONUS";
+   p_descr = "Determines which sector parameters (EastCONUS or WestCONUS) are used to fill missing data";
+   p_help = "Should be EastCONUS or WestCONUS";
+   } sector_designator_for_data_fill;
+
+
+/**************************/
+/* OUTPUT GRID PARAMETERS */
+/**************************/
+commentdef
+   {
+   p_header = "OUTPUT GRID PARAMETERS";
+   }
+
+paramdef boolean
+   {
+   p_default = FALSE;
+   p_descr = "If set to TRUE then the data are remapped onto another grid.";
+   p_help = "If set to FALSE then the native grid is output.\n"
+            "At the time of writing only Lambert Conformal input grids\n"
+            "are supported.";
+   } GridRemap;
+
+typedef struct
+   {
+   int nx;
+   int ny;
+   double minx;
+   double miny;
+   double dx;
+   double dy;
+   } output_grid_t;
+
+paramdef struct output_grid_t
+   {
+   p_descr = "Output grid parameters.";
+   p_help = "The grid params for the output grid.";
+   p_default = {656, 896, -500.0, -589.2, 5.0795, 5.0795};
+   } GridParams;   
+
+paramdef double
+   {
+   p_default = 25.0;
+   p_descr = "lat 1 value for Lambert conformal projection.";
+   } GridLambert_lat1;
+
+paramdef double
+   {
+   p_default = 25.0;
+   p_descr = "lat 2 value for Lambert conformal projection.";
+   } GridLambert_lat2;   
+
+typedef struct
+   {
+   double lat;
+   double lon;
+   } output_origin_t;
+
+paramdef struct output_origin_t
+   {
+   p_descr = "Origin of output grid.";
+   p_help = "Used with PROJ_FLAT and PROJ_LAMBERT.";
+   p_default = {25.0, -95.0};
+   } GridOrigin;   
+
+typedef enum
+   {
+   PROJ_FLAT, 
+   PROJ_LATLON, 
+   PROJ_LAMBERT
+   } output_projection_t;
+
+paramdef enum output_projection_t
+   {
+   p_default = PROJ_LAMBERT;
+   p_descr = "Projection of output grid.";
+   p_help = "FLAT - (x,y) Cartesian data in km from a given origin.\n"
+            "LATLON - lat/lon grid with constant grid spacing.\n"
+            "LAMBERT - Lambert conformal projection.";
+   } GridProjection;
+
+/********************************/
+/* CALIBRATION CURVE PARAMETERS */
+/********************************/
+commentdef
+   {
+   p_header = "CALIBRATION CURVE PARAMETERS";
+   }
+
+typedef struct
+   {
+   // Parameters used to interpret calibration curve
+   string name;
+   string units;
+   float  bad_or_missing_output_value;
+   float  min_threshold;
+   float  max_threshold;
+
+   string bad_input_values; // Comma-delimited set of bad input values.
+
+   // Parameters used to construct calibration curve
+   string x_values;         // Comma-delimited x values (e.g., 0-255)
+   string offset_coeffs;    // Comma-delimited offsets (e.g., a in "y = a + bx + cx^2")
+   string linear_coeffs;    // Comma-delimited linear coefficients (e.g., b in "y = a + bx + cx^2")
+   string quadratic_coeffs; // Comma-delimited quadratic coefficients (e.g., c in "y = a + bx + cx^2")
+   } calibration_t;
+
+paramdef struct calibration_t
+   {
+   p_default = {
+      { "vis",   "Percent", -9999.0, 0.0, 100.0, "0, 255", "255", "0.0", "0.0", "0.00153787" },
+      { "shortwave",   "Celsius", -9999.0, 0.0, 0.0, "0, 255", "175, 255", "56.84, 144.84", "-0.5, -1.0", "0.0, 0.0" },
+      { "infrared",    "Celsius", -9999.0, 0.0, 0.0, "0, 255", "175, 255", "56.84, 144.84", "-0.5, -1.0", "0.0, 0.0" },
+      { "watervapor",    "Celsius", -9999.0, 0.0, 0.0, "0, 255", "175, 255", "56.84, 144.84", "-0.5, -1.0", "0.0, 0.0" },
+      { "longwave",  "Celsius", -9999.0, 0.0, 0.0, "0, 255", "175, 255", "56.84, 144.84", "-0.5, -1.0", "0.0, 0.0" }
+      };
+   p_descr = "Calibration curve parameters\n"
+             "   name: Calibration curve name (e.g., VIS, IR, WV, etc.).\n"
+             "   units: Calibration curve units (e.g., Percent, Celsius, etc.).\n"
+             "   bad_or_missing_output_value: Float specifying the output\n"
+             "      representation of bad or missing data (e.g., -9999.0).\n"
+             "   min_threshold: Float representing the lower limit of the\n"
+             "      calibrated data. Input (uncalibrated) values that do not\n"
+             "      satisfy this minimum are assigned output (calibrated) values\n"
+             "      based on the bad_or_missing_output_value parameter.\n"
+             "   max_threshold: Float representing the upper limit of the\n"
+             "      calibrated data. Input (uncalibrated) values that exceed this\n"
+             "      limit are assigned output (calibrated) values based on the\n"
+             "      bad_or_missing_output_value parameter.\n"
+             "   bad_input_values (0-255): A comma-delimited string of integers\n"
+             "      representing input values that represent bad data. Some input\n"
+             "      values are reserved to indicate bad or missing data.\n"
+             "   x_values (0-255): A comma-delimited string of integers\n"
+             "      representing the input calibration data.\n"
+             "   offset_coeffs: A comma-delimited string of floats representing\n"
+             "      intercept values (e.g., a in y = a + bx + cx^2).\n"
+             "   linear_coeffs: A comma-delimited string of floats representing\n"
+             "      linear values (e.g., b in y = a + bx + cx^2).\n"
+             "   quadratic_coeffs: A comma-delimited string of floats representing\n"
+             "      quadratic values (e.g., c in y = a + bx + cx^2).";
+   p_help = "";
+   } calibration_data[];

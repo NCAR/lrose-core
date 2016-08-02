@@ -1,0 +1,17 @@
+/.cvsignore/1.1/Fri Oct 23 21:38:31 2015//
+/Args.cc/1.4/Fri Mar  4 02:39:06 2016//
+/Args.hh/1.2/Fri Mar  4 02:39:06 2016//
+/HawkEye.bscan.filt/1.1/Tue Mar 17 00:32:52 2015//
+/HcrVelCorrect.cc/1.33/Wed Mar 23 19:46:48 2016//
+/HcrVelCorrect.hh/1.18/Fri Mar  4 02:39:06 2016//
+/HcrVelCorrect.test/1.2/Tue Mar 17 00:04:19 2015//
+/Hubbert1_filter.txt/1.1/Fri Mar 13 15:23:49 2015//
+/Hubbert2_filter.txt/1.1/Fri Mar 13 15:23:49 2015//
+/Hubbert5_filter.txt/1.1/Fri Mar 13 15:23:49 2015//
+/Main.cc/1.2/Fri Mar  4 02:39:06 2016//
+/Makefile/1.5/Fri Mar  4 03:06:37 2016//
+/Params.cc/1.12/Tue Mar 17 00:04:19 2015//
+/Params.hh/1.12/Tue Mar 17 00:04:19 2015//
+/PlotResults.py/1.1/Mon Mar 16 21:50:07 2015//
+/paramdef.HcrVelCorrect/1.12/Tue Mar 17 00:04:19 2015//
+D

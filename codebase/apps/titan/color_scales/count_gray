@@ -1,0 +1,10 @@
+# gray scale for count
+
+# Mike Dixon, Sept 1993
+
+35	40	#111111
+40	45	#444444
+45	50	#777777
+50	54	#aaaaaa
+54	57	#cccccc
+57	60	#eeeeee

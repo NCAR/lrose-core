@@ -1,0 +1,285 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Refract
+ *
+ * This file contains the TDRP parameter definitions for
+ * Refract
+ */
+
+
+commentdef
+{
+  p_header = "Refract";
+  p_text = "This program calculates the refractivity fields from the "
+           "raw polar radar data.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_EXTRA,
+  DEBUG_VERBOSE
+} debug_level_t;
+
+paramdef enum debug_level_t
+{
+  p_descr = "Debug level";
+  p_default = DEBUG_OFF;
+} debug_level;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program triggers whenever a new input "
+           "file appears.\n"
+           "In TIME_LIST mode, the program operates on every input file "
+           "between the start and end times specified on the command line.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "URL for the input files";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef string
+{
+  p_descr = "URL for the output files";
+  p_default = "mdvp:://localhost::mdv/output";
+} output_url;
+
+
+/***********************************************************************
+ * Input data information
+ */
+
+commentdef
+{
+  p_header = "INPUT DATA PARAMETERS";
+};
+
+paramdef long
+{
+  p_descr = "Number of seconds the input files are valid.";
+  p_help = "Used only if trigger_mode is set to LATEST_DATA.";
+  p_default = 300;
+} max_valid_secs;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the raw I and Q values are included in "
+            "the input stream.";
+  p_help = "If true, the raw fields will be read from the input stream. "
+           "If false, the raw fields will be calculated from the NIQ/AIQ "
+           "values which must be inluded in the input stream instead.";
+  p_default = true;
+} raw_iq_in_input;
+
+paramdef string
+{
+  p_descr = "Raw I field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to TRUE.";
+  p_default = "MeanI";
+} raw_i_field_name;
+
+paramdef string
+{
+  p_descr = "Raw Q field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to TRUE.";
+  p_default = "MeanQ";
+} raw_q_field_name;
+
+paramdef string
+{
+  p_descr = "NIQ field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to FALSE.";
+  p_default = "NIQ";
+} niq_field_name;
+
+paramdef double
+{
+  p_descr = "Input NIQ scale value";
+  p_help = "The NIQ value from the input source is multiplied by this "
+           "value before the data is used. "
+           "For most radars this value should be 0.1. "
+           "For SPOL this value should be 0.025.";
+  p_default = 0.1;
+} input_niq_scale;
+
+paramdef string
+{
+  p_descr = "AIQ field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to FALSE.";
+  p_default = "AIQ";
+} aiq_field_name;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to invert the sign of the target angles.";
+  p_help = "This fix should be done upstream, but is added here "
+           "just in case.\n"
+           "Used only if raw_iq_in_input is set to FALSE.";
+  p_default = false;
+} invert_target_angle_sign;
+
+paramdef string
+{
+  p_descr = "Spectrum width field name in the input stream.";
+  p_default = "SPW";
+} spectrum_width_field_name;
+
+paramdef string
+{
+  p_descr = "Signal-to-noise ratio field name in the input stream.";
+  p_default = "SNR";
+} snr_field_name;
+
+paramdef long
+{
+  p_descr = "Elevation number to use from the MDV files.";
+  p_default = 0;
+} elevation_num;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Reference file name";
+  p_help = "With path, file containing calibration information.";
+  p_default = "refr_calib.mdv";
+} ref_file_name;
+
+paramdef long
+{
+  p_descr = "Number of azimuths used in data processing";
+  p_min = 1;
+  p_default = 360;
+} num_azim;
+
+paramdef long
+{
+  p_descr = "Number of range bins";
+  p_min = 1;
+  p_default = 450;
+} num_range_bins;
+
+paramdef double
+{
+  p_descr = "Frequency in Hz";
+  p_min = 5.0e8;
+  p_max = 2.0e10;
+  p_default = 2.89e9;
+} frequency;
+
+paramdef long
+{
+  p_descr = "Min range gate of ground echo";
+  p_min = 1;
+  p_default = 4;
+} r_min;
+
+paramdef double
+{
+  p_descr = "N smoothing side length";
+  p_help = "Smooth N phases with square of 4-km side lengths";
+  p_default = 4000.0;
+} n_smoothing_side_len;
+
+paramdef double
+{
+  p_descr = "DN smoothing side length";
+  p_help = "Smooth DN dif. phases with square of 4-km side length";
+  p_default = 4000.0;
+} dn_smoothing_side_len;
+
+paramdef double
+{
+  p_descr = "Minimum consistency";
+  p_help = "Minimum consistency of phase to accept N (DN) measurement. "
+           "HIgher means smaller coverage of (hopefully) better data.";
+  p_min = 0.0;
+  p_max = 1.0;
+  p_default = 0.015;
+} min_consistency;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to do the relaxation stage";
+  p_default = false;
+} do_relax;

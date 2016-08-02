@@ -1,0 +1,277 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.NsslNetCDF2Mdv
+ *
+ * This file contains the TDRP parameter definitions for
+ * NsslNetCDF2Mdv
+ */
+
+commentdef
+{
+  p_header = "NsslNetCDF2Mdv";
+  p_text = "This program converts a collection of netCDF sweep files from NSSL to MDV format.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+
+typedef enum
+{NONE, DEBUG, DEBUG_VERBOSE} debug_e;
+
+paramdef enum debug_e
+{
+  p_descr = "debugging mode";
+  p_help = "NONE=as quiet as possible, DEBUG = minimal debug output, DEBUG_VERBOSE=more";
+  p_default = DEBUG;
+} debug_mode;
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_help = "This is a directory with subdirectories for each field. Each field subdirectory is assumed to have 'yyyymmdd' subdirectories and netcdf files below that:   input_dir/<field>/yyyymmdd/<files>";
+  p_default = "$(RAP_DATA_DIR)/raw/sweepNetCDF";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Input filename substring";
+  p_help = "The program will only process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} input_substring;
+
+paramdef string
+{
+  p_descr = "Input filename exclude substring";
+  p_help = "The program will not process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} exclude_substring;
+
+commentdef 
+{
+  p_header = "Output URLs";
+  p_text = "Two choices for output.\n"
+    "output_url_add_radar_name = TRUE:\n"
+    "   out_url_0/<radar>/out_url_1/<field>\n"
+    "output_url_add_radar_name = FALSE:\n"
+    "   output_url/<field>\n"
+    "<field> is one of the output_field_path values in the field[] array\n"
+    "(one such subdirectory for each unique field[i].output_field_path)\n"
+    "<radar> is the radar name pulled from the netCDF data";
+};
+
+paramdef boolean
+{
+  p_descr = "Include radar name in out URL";
+  p_help = "If TRUE, the output url is set to out_url_0/<radar>/out_url_1/field, if false it is set to output_url/field";
+  p_default = FALSE;
+} output_url_add_radar_name;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "Used only when output_url_add_radar_name=FALSE";
+  p_default = "mdvp:://localhost::mdv/sweepNetCDF";
+} output_url;
+
+paramdef string
+{
+  p_descr = "Portion of output URL before radar name";
+  p_help = "Used only when output_url_add_radar_name=TRUE";
+  p_default = "mdvp:://localhost::$(PROJECT)/$(VSN)/";
+} out_url_0;
+
+paramdef string
+{
+  p_descr = "Portion of output URL after radar name";
+  p_help = "Used only when output_url_add_radar_name=TRUE";
+  p_default = "/mdv/radia2";
+} out_url_1;
+
+
+typedef enum {INT8, FLOAT32} encoding_t;
+paramdef enum encoding_t
+{
+  p_descr = "Encoding, default = INT8";
+  p_default = INT8;
+} output_encoding;
+
+/***********************************************************************
+ * netCDF file parameters.
+ */
+
+commentdef
+{
+  p_header = "NETCDF FILE PARAMETERS";
+};
+
+typedef struct
+{
+  string input_field_path;
+  string field_name;
+  string output_field_path;
+  boolean missing_value_is_global;
+  string missing_data_value_att_name;
+  boolean bias_specified;
+  string bias_att_name;
+  string scale_att_name;
+  string units_att_name;
+  boolean override_missing;
+  double missing_data_value;
+  boolean fix_missing_beams;
+} field_t;
+
+paramdef struct field_t
+{
+  p_descr = "field specifications";
+  p_help = 
+    "input_field_path = Name of input subdirectory for this field\n"
+    "field_name = Name of the field in the input/output\n"
+    "output_field_path = Name of output subdirectory for this field\n"
+    "missing_value_is_global = TRUE if missing value is a global attribute\n"
+    "missing_data_value_att_name = Name of missing data attribute\n"
+    "bias_specified = Flag indicating whether a bias is specified\n"
+    "bias_att_name = Name of bias attribute when bias_specified=TRUE\n"
+    "scale_att_name = Name of scale attribute (if there is one)\n"
+    "units_att_name = Name of units attribute\n"
+    "override_missing = TRUE to override the missing value with another value\n"
+    "missing_data_value=actual missing value, used when override_missing=true\n"
+    "fix_missing_beams=true to change beams where data is all zero to missing";
+  p_default = {};
+} field[];
+
+paramdef string
+{
+  p_descr = "Name used for the number of gates dimension in the netCDF file";
+  p_help = "This must be specified because it seems to change between files.";
+  p_default = "maxCells";
+} num_gates_dim_name;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  ELEVATION_VOL_TRIGGER,
+  START_TIME_VOL_TRIGGER,
+  VOL_NUMBER_VOL_TRIGGER,
+  SCAN_VOL_TRIGGER
+} volume_trigger_t;
+
+paramdef enum volume_trigger_t
+{
+  p_descr = "Method used for determining the division between volumes";
+  p_help = "\tELEVATION_VOL_TRIGGER - Volume written when elevation stops "
+           "going up and either goes down or repeats\n"
+           "\tSTART_TIME_VOL_TRIGGER - A volume will be written out when "
+           "the volume_start_time field in the netCDF file changes.\n"
+           "\tVOL_NUMBER_VOL_TRIGGER - A volume will be written out when "
+           "the Volume_Number global attribute in the netCDF file changes.\n"
+           "\tSCAN_VOL_TRIGGER - Each scan is written out as a volume";
+
+  p_default = START_TIME_VOL_TRIGGER;
+} volume_trigger;
+
+paramdef boolean
+{
+  p_descr = "Data driven beam width";
+  p_help = "Output beams must be evenly spaced.  If this parameter is TRUE,"
+           " the data is examined to come up with a reasonable beam spacing,"
+           " if FALSE, the param output_beamwidth is used to force a specific"
+           " spacing";
+  p_default = FALSE;
+} data_driven_beamwidth;
+
+paramdef double
+{
+  p_descr = "Data driven beam width allowed values";
+  p_help = "Output beams must be evenly spaced.  These are the allowed "
+           "(expected) beam widths.  If data_driven_beamwidth = TRUE,"
+           "the average is taken and the item from this array closest to "
+           " the averege is used";
+  p_default = {0.1, 0.25, 0.5, 1.0, 5.0};
+} data_driven_allowed_beamwidth[];
+
+paramdef double
+{
+  p_descr = "Output beam width";
+  p_help = "The output beams must be evenly spaced. "
+           "This parameter is used to define the output beam spacing. "
+           "The input beams will be remapped to the output beam spacing "
+           "by writing each beam to the output azimuth that is closest "
+           "to the input azimuth, where the output azimuths are evenly "
+           "spaced by the bandwidth starting at azimuth 0.0.";
+  p_default = 1.0;
+} output_beamwidth;
+
+paramdef boolean
+{
+  p_descr = "Force longitude to be negative flag";
+  p_help = "If TRUE, the program will force the longitude value to "
+           "be negative. "
+           "This was added to correct an error in the CHILL data "
+           "where they were sending a positive longitude instead "
+           "of negative.";
+  p_default = false;
+} force_negative_longitude;
+

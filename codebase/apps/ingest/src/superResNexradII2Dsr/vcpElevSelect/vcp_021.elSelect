@@ -1,0 +1,13 @@
+#
+# Selects which fields to take from which rotation for VCP 21.
+# The first rotation is number 1. Niles Oien Feb 2008.
+#
+DBZ[1] VEL[2] SW[2] ZDR[1] PHI[1] RHO[1]
+DBZ[3] VEL[4] SW[4] ZDR[3] PHI[3] RHO[3]
+DBZ[5] VEL[5] SW[5] ZDR[5] PHI[5] RHO[5]
+DBZ[6] VEL[6] SW[6] ZDR[6] PHI[6] RHO[6]
+DBZ[7] VEL[7] SW[7] ZDR[7] PHI[7] RHO[7]
+DBZ[8] VEL[8] SW[8] ZDR[8] PHI[8] RHO[8]
+DBZ[9] VEL[9] SW[9] ZDR[9] PHI[9] RHO[9]
+DBZ[10] VEL[10] SW[10] ZDR[10] PHI[10] RHO[10]
+DBZ[11] VEL[11] SW[11] ZDR[11] PHI[11] RHO[11]

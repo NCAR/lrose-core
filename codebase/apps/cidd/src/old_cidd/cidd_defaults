@@ -1,0 +1,462 @@
+# Defaults & parameter data base for the Cartesian radar display program; cidd
+
+# General informational messages
+cidd.debug_flag:            0
+
+# Data flow related messages
+cidd.debug1_flag:           0
+
+# Verbose diagnostics - special debugging info
+cidd.debug2_flag:           0
+
+# Uncomment the next parameter to start up cidd in archival mode
+#  Starting at the indicated time. Enter HH:MM MM/DD/YY format time string
+#  System will startup using field 0.
+#cidd.demo_time:  20:00 6/21/93
+#cidd.demo_time:  00:00 2/12/94
+
+#  MOVIE Related resources
+
+cidd.movie_frame_dir: /tmp
+
+#  This determines how many "high speed" / Starting  movie frames
+cidd.num_pixmaps:     16
+
+# minutes per movie frame on startup
+cidd.time_interval:  10.0
+
+# This parameter set the minutes into the future to look
+cidd.forecast_interval  0.0
+
+# Set this paramet to 1 to get CIDD to check and reject for rendering
+# Any data that valls outside the movie frame interval + the
+# slop/strecch_factor
+cidd.check_data_times:  0
+
+# Sets the allowable time error for data to appear in movie frames
+# (times the time_interval) 
+cidd.stretch_factor:     3.0
+
+# Sets whether Cidd request data closest to the midpoint of a movie
+# frame(time-wise) or the end. Set to 1 to gather data nearest the
+# end, but before the end time of each movie frame 
+# 0= Midpoint requests, 1 = End point requests.
+cidd.gather_data_mode:  0
+
+# Number of milliseconds between checks for images needing redrawn
+# Set this lower on faster hardware - Recommended 50-250
+# This sets the ultimate speed of the movie looping
+cidd.redraw_interval:     100
+
+# Number of seconds between data update requests
+cidd.update_interval:      120
+
+#  Number of seconds to wait for data to come in before giving up
+cidd.data_timeout_secs:    10                                
+
+# Set times to the nearest value divisible by the number of seconds
+cidd.temporal_rounding:    300
+
+# Set to 1 to start up cidd in movie-on mode, 0 = off
+cidd.movie_on:         0
+
+# Set the delay at the end of the movie loop in msec 
+cidd.movie_delay: 3000
+
+# If set to 1 - forces CIDD to reload all data every time the movie frames 
+# rotate one old frame out and generate a new frame.
+cidd.reset_frames:   0
+
+# HTML Generation related resources 
+# Set this to a value to get cidd to output imagery as XWD in this directory
+cidd.html_image_dir: 
+
+# This script will be exec'd if set whenever an html  image is output.
+# The full path name of the xwd image will be sent as the script argument
+cidd.html_convert_script:
+
+
+#                  DOMAIN RELATED RESOURCES 
+# Set the projection for cidd's plan view - Current valid choices are:
+# CARTESIAN, LAT_LON
+cidd.projection_type:    CARTESIAN
+
+# Set this to the amount grids are rotated clockwise to true north.
+# Overlays will rotate counterclockwise. - In Degrees
+# Only valid for CARTESIAN projection
+cidd.north_angle:        0.0
+
+# Set the scale factor and label for Range rings and Distance scales.
+#cidd.units_per_km:          0.5395932
+
+# Set the following to Deg for LAT_LON projections - Default is "km"
+#cidd.scale_units_label:  nm
+
+# When set to 1, always gets full domain, zooms don't force a data request
+cidd.always_get_full_domain:     0
+
+# Set the aspect ratio of the domain for Cidd. Cidd will preserve this aspect
+# ration for all zooms. Ratio is Width/Height.
+cidd.aspect_ratio:   1.3
+
+# ORIGIN  INFO
+
+# CHILL 
+#cidd.origin_longitude:       -104.63700
+#cidd.origin_latitude:        40.44600
+
+# CP4 
+#cidd.origin_longitude:       -104.35700
+#cidd.origin_latitude:        40.10200
+
+# NOAA-K 
+#cidd.origin_longitude:       -105.03500
+#cidd.origin_latitude:        40.09900
+
+# DEN NEXRAD 
+cidd.origin_longitude:       -104.546
+cidd.origin_latitude:        39.78700
+
+# The Outer most domain: Overlays are clipped to this domain and 
+# pan/moves cannot exceed these edge limits.
+cidd.domain_limit_min_x:        -1000.0
+cidd.domain_limit_max_x:         1000.0
+cidd.domain_limit_min_y:        -1000.0
+cidd.domain_limit_max_y:         1000.0
+ 
+# Preset Zoom levels.
+cidd.num_zoom_levels:       5
+cidd.start_zoom_level:      3
+
+cidd.level0_label:              FULL DOMAIN
+cidd.level0_min_xkm:            -450.0
+cidd.level0_min_ykm:            -450.0
+cidd.level0_max_xkm:             450.0
+cidd.level0_max_ykm:             450.0
+
+cidd.level1_label:              TERMINAL AREA
+cidd.level1_min_xkm:            -100.0
+cidd.level1_min_ykm:            -100.0
+cidd.level1_max_xkm:             100.0
+cidd.level1_max_ykm:             100.0
+
+cidd.level2_label:              AIRPORT
+cidd.level2_min_xkm:            -40.0
+cidd.level2_min_ykm:            -20.0
+cidd.level2_max_xkm:             10.0
+cidd.level2_max_ykm:             30.0
+
+cidd.level3_label:              RUNWAYS
+cidd.level3_min_xkm:             -25.0
+cidd.level3_min_ykm:             -5.0
+cidd.level3_max_xkm:              0.0
+cidd.level3_max_ykm:             20.0
+
+cidd.level4_label:              USER Picked
+cidd.level4_min_xkm:             -50.0
+cidd.level4_min_ykm:             -50.0
+cidd.level4_max_xkm:              50.0
+cidd.level4_max_ykm:              50.0
+
+# LAT_LON EXAMPLE
+# NOTE: FOR LAT_LON Porjection - the units will be interpreted as degrees, not km!
+#
+#cidd.level0_label:          FULL DOMAIN
+#cidd.level0_min_xkm:          -126.0
+#cidd.level0_min_ykm:          25.0
+#cidd.level0_max_xkm:          -64.0                           
+#cidd.level0_max_ykm:          50.0                                        
+#
+#cidd.level1_label:          ZOOM 1                                          
+#cidd.level1_min_xkm:          -116.0
+#cidd.level1_min_ykm:          30.0
+#cidd.level1_max_xkm:          -74.0
+#cidd.level1_max_ykm:          45.0
+#
+#cidd.level2_label:          ZOOM 2
+#cidd.level2_min_xkm:          -106.0
+#cidd.level2_min_ykm:          35.0
+#cidd.level2_max_xkm:          -84.0
+#cidd.level2_max_ykm:          40.0
+#
+#cidd.level3_label:          User Picked
+#cidd.level3_min_xkm:          -101.0
+#cidd.level3_min_ykm:          30.0
+#cidd.level3_max_xkm:          -78.0
+#cidd.level3_max_ykm:          45.0
+#
+# Cartesian space limits in km - Vertical Range and Resolution
+cidd.min_ht:                 1.25
+cidd.max_ht:                 12.25
+cidd.ht_interval:            0.5
+cidd.start_ht:               2.0
+
+# Radial data Limits
+cidd.min_rkm:                0.0
+cidd.max_rkm:                400.0
+cidd.min_adeg:               0.0
+cidd.max_adeg:               360.0
+
+cidd.data_info_file:        cidd_grid_data.info
+cidd.wind_info_file:        cidd_wind_data.info
+cidd.overlay_info_file:     cidd_overlays.info
+cidd.status_info_file:      /tmp/cidd_status.info
+cidd.color_file_subdir:     colorscales
+
+
+# Color Preferences - Avoid trailing spaces in color names
+cidd.foreground_color: White
+cidd.background_color: black
+cidd.range_ring_color: gray
+
+# Set to 1 to enable Server mapper querring by default for each field
+cidd.use_servmap:           0
+cidd.servmap_host1:         draft
+cidd.servmap_host2:         babinet
+
+# Set the color of the rubber Zoom box, etc
+cidd.overlay_colorname:        White
+
+# Sets the relative intensity of the image, relative to the overlays on startup
+# Set between 0.2 and 1.0.
+cidd.image_inten:            0.8
+# The number of selectable intensity levels in the slider control
+cidd.inten_levels:            32
+
+# Sets the threshold in drawable grid points where image rendering 
+# is done by a filling method on the client, rather than by rectangles
+# on the Xserver.
+# Set this high if the X server is fast or the comm link to the server is slow.
+# Set this low if the X server is slow. Typical values range from 10,000 to 100,000
+cidd.image_fill_treshold:    20000
+
+# Sets the format for output of Lat, Lon's. 0= Decimal Degrees, 1 = deg min' sec"
+cidd.latlon_mode:        0
+
+# Set the format for the time string in the top margin see 'man strftime' for format options.
+# Can add additional text as part of the Time string. Default is: "%m/%d/%y %H:%M:%S"
+cidd.label_time_format:  "%m/%d/%y %H:%M:%S"
+
+# Set range_ring_spacing to a negative value to dynamically determing spacing.
+cidd.range_ring_spacing:        -1.0
+
+# x_space, y_space determine allowable space for range ring labels
+cidd.range_ring_x_space:    40
+cidd.range_ring_y_space:    13
+cidd.azmith_interval:       30.0
+cidd.azmith_radius:         200.0
+
+
+# Toggles to turn on/off  Extras features on startup
+cidd.range_rings:             1
+cidd.azmith_lines:            1
+
+# Wind vector parameters 
+cidd.barb_shaft_len:         35
+cidd.wind_head_size:         5
+cidd.ideal_x_vectors:        15
+cidd.ideal_y_vectors:        15
+cidd.wind_head_angle:        30.0
+
+# Wind Rendering Options: "arrow" (centered), "vector", "barb", "tuft", "tickvector" 
+
+#cidd.wind_marker_type:      vector
+#cidd.wind_marker_type:      barb
+#cidd.wind_marker_type:      tuft
+cidd.wind_marker_type:       arrow
+cidd.wind_w_scale_factor:    10.0
+cidd.wind_time_scale_interval:    10.0
+
+# Uncomment the following lines to turn on default contour fields
+# Uses the contour levels and the Field Label string in data.info
+# The parameters are Exact_field_label and color and optional "off"
+# Keyword. If "off" param is used, the field will be defined, but will
+# not be acitvated on startup.
+#cidd.contour1_field: SURF_T white off
+#cidd.contour2_field: SURF_T white
+#cidd.contour3_field: SURF_T white
+#cidd.contour4_field: SURF_T white
+#cidd.contour5_field: SURF_T white
+# 
+# Set to 1 to have numeric labels on line contours, 0 = off
+cidd.label_contours:   0           
+# 
+
+# Uncomment the following lines to set up fields on startup that will
+# appear as overlaid fields. Layers are on by default unless the
+optional "off" string appears last. 
+#cidd.layer1_field:  SURF_T off
+#cidd.layer2_field:  SURF_DP
+#cidd.layer3_field:  SURF_DP
+#cidd.layer4_field:  SURF_DP
+#cidd.layer5_field:  SURF_DP
+
+
+# Place Cidd fonts in asending order of size. Cidd will choose the
+# highest font number that will fit in a given screen space.
+# Pick a nice spectrum of font sizes, with all of them readable.
+cidd.num_fonts: 11
+cidd.font1: -misc-fixed-medium-r-normal-*-7-*-*-*-*-*-iso8859-1
+cidd.font2: -misc-fixed-medium-r-normal-*-9-*-*-*-*-*-iso8859-1
+cidd.font3: -misc-fixed-medium-r-normal-*-10-*-*-*-*-*-iso8859-1
+cidd.font4: -misc-fixed-medium-r-normal-*-12-*-*-*-*-*-iso8859-1
+cidd.font5: -misc-fixed-bold-r-normal-*-12-*-*-*-*-*-iso8859-1
+cidd.font6: -misc-fixed-bold-r-normal-*-14-*-*-*-*-*-iso8859-1
+cidd.font7: -misc-fixed-bold-r-normal-*-15-*-*-*-*-*-iso8859-1
+cidd.font8: -misc-fixed-bold-r-normal-*-16-*-*-*-*-*-iso8859-1
+cidd.font9: -misc-fixed-bold-r-normal-*-18-*-*-*-*-*-iso8859-1
+cidd.font10: -misc-fixed-bold-r-normal-*-24-*-*-*-*-*-iso8859-1
+cidd.font11: -misc-fixed-bold-r-normal-*-30-*-*-*-*-*-iso8859-1
+
+# font_display_mode = 1 - Clears background behind label text., 0 - No
+cidd.font_display_mode: 0 
+# 
+# Set this parameter to force the field menu popup to this many columns
+# If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
+# column.
+cidd.num_field_menu_cols: 2
+# 
+# Image Dump resources    
+
+cidd.horiz_image_dir:      /tmp                                    
+cidd.horiz_image_fname:    cidd1.xwd                 
+cidd.horiz_image_command:  convert cidd1.xwd cidd1.ps; lpr -Pmaytagps cidd1.ps
+cidd.vert_image_dir:      /tmp
+cidd.vert_image_fname:    cidd2.xwd                                 
+cidd.vert_image_command:  convert cidd2.xwd cidd2.ps; lpr -Pmaytagps cidd2.ps    
+
+#Toggle for displaying the analog clock
+cidd.show_clock:       1
+
+# Set to 0 to draw the analogue clock using GMT 
+# Normally draws a local time clock
+cidd.draw_clock_local: 1
+
+# GUI RELATED STUFF
+
+# This parameter determines if all of the controls
+# are available. If set to 1, none of the popup
+# control panels are available and minimalist movie controls
+# become available on the front panel 
+cidd.limited:            0
+
+
+cidd.horiz_frame_label:* National Center for Atmospheric Research * (303)497-8413
+
+cidd.overlay_bt_label:        Overlays                             
+cidd.product_bt_label:        Products
+
+
+# Set the message to display when no data is availible
+#cidd.no_data_message:    RADAR LINK DOWN - NO DATA
+cidd.no_data_message:     NO DATA FOUND (in this area at the selected time)
+
+# HELP TEXT LINKS                       
+# These take the form:
+# cidd.widget_name_help:       file_name:file_index_key_string
+# The HELPPATH envoronment variable must be set or the help file
+# must be located in /ussr/lib/help.
+# Note the file name gets expanded to file_name.info
+#
+cidd.loop_button_help:         cidd_help:loop_button
+cidd.view_button_help:         cidd_help:view_button
+cidd.field_button_help:        cidd_help:field_button     
+cidd.movie_button_help:        cidd_help:movie_button
+cidd.overlay_button_help:      cidd_help:overlay_button
+cidd.warnings_button_help:     cidd_help:warnings_button
+cidd.draw_button_help:         cidd_help:draw_button
+cidd.vert_button_help:         cidd_help:vert_button
+cidd.config_button_help:       cidd_help:config_button
+cidd.canvas_help:              cidd_help:canvas
+cidd.frame_message_help:       cidd_help:frame_message
+cidd.speed_slider_help:        cidd_help:speed_slider
+
+cidd.horiz_default_height:    550
+cidd.horiz_min_height:        500
+cidd.horiz_min_width:         560
+cidd.horiz_default_x_pos:     0
+cidd.horiz_default_y_pos:     0
+
+cidd.horiz_top_margin:        25
+cidd.horiz_bot_margin:        25
+cidd.horiz_left_margin:       25
+cidd.horiz_right_margin:      40
+
+cidd.vert_min_height:        120
+cidd.vert_min_width:         120
+cidd.vert_default_height:    240
+cidd.vert_default_width:     500
+
+cidd.vert_top_margin:        25
+cidd.vert_bot_margin:        25
+cidd.vert_left_margin:       25
+cidd.vert_right_margin:      40
+
+# Resources related to EXPRT, EXPT
+
+cidd.expt_feature_scale:   12500
+cidd.expt_font_scale:      45
+cidd.expt_mark_size:       5
+cidd.exprt_command:        exprt -k51600 -a/tmp/prod.archive
+
+# Resources for compatibility with TIME HIST
+
+cidd.track_server_instance:         Operations
+cidd.track_past_plot_period:        0
+cidd.track_future_plot_period:      0
+cidd.track_n_forecast_steps:        5
+cidd.track_forecast_interval:       6
+cidd.track_data_time_margin:        750
+cidd.track_past_color:              yellow
+cidd.track_current_color:           cyan
+cidd.track_future_color:            blue
+cidd.track_forecast_color:          red
+
+#  KEYS for SHARED MEMORY SEGMENTS
+
+# Key for coordinate shared memory
+cidd.coord_key:               61500
+
+# Key for TITAN control shared memory
+cidd.titan_key               61501
+
+# Key for EXPT shared memory
+cidd.expt_key:               51400
+
+# Key for PRDS shared memory
+cidd.prds_key:               51500
+
+# PRDS Related resources
+#  Size of shared memory in K bytes.
+cidd.prds_shmem_size:        500
+# Commands to run to spawn a product selector and exporter    
+cidd.prds_command:         prds -p200000 -k50300 -b50000 -a/tmp/prod.temp -o/tmp
+/prod.out                                          
+
+# PRODUCT Rendering related resources
+# Set to 0 to ignore the products time info when rendering products.
+# Set to 1 to skip over products that aren't valid in the temporal domain
+# of the images 
+# Set to 2 to skip over products that aren't valid in the temporal domain
+# specified by product_time_width 
+cidd.product_time_selection: 0
+
+# Allows products only N seconds away from frame time centroid
+cidd.product_time_width:  120
+
+#  Default width of lines for symbolic products
+cidd.product_line_width: 2
+
+#  Starting Size size of fonts for symbolic products - From above list
+cidd.product_font_size: 2
+
+# PROD_SEL Related resources
+# Shared memory keys - Set these > 0 to enable prod_sel module in CIDD
+cidd.prod_sel_buf_key: 0
+cidd.prod_sel_stat_key: 0
+#
+# Turns on and off the checking of prod_sel for indications that it
+# is done gathering data. This must be set to 1 to get movie loops with
+# products to render corectly. Set to zero to get cidd to avoid waiting
+# for prod_sel to indicate its done. 
+cidd.wait_for_prod_sel: 1

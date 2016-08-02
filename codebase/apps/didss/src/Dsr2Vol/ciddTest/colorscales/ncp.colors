@@ -1,0 +1,25 @@
+# colorscale for ncp
+
+# Mike Dixon, April 1991
+	
+0	0.05	dark olive green
+0.05	0.1	forest green
+0.1 	0.15 	SpringGreen3
+0.15	0.2 	medium sea green
+0.2 	0.25	medium aquamarine
+0.25 	0.3 	medium slate blue
+0.3 	0.35 	blue
+0.35	0.4	blue4
+0.4	0.45	DarkOrchid4
+0.45	0.5	HotPink4
+0.5	0.55 	maroon
+0.55	0.6	VioletRed4
+0.6	0.65	sienna
+0.65	0.7	chocolate
+0.7	0.75	goldenrod
+0.75	0.80	yellow
+0.80	0.85	dark salmon
+0.85	0.9	salmon
+0.9	0.95    firebrick2
+0.95	1.05	gray70
+

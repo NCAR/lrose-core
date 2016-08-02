@@ -1,0 +1,33 @@
+import os
+import distutils.sysconfig
+
+pythonLibPath = distutils.sysconfig.get_config_var('LIBDEST')
+sitePackagePath = os.path.join(pythonLibPath,'site-packages')
+
+buildOptions = Options('buildOpts.py')
+buildOptions.Add(PathOption('ncdir'       ,'Root directory where netcdf library was installed.'       ,'/opt/local'      ,PathOption.PathIsDir ))
+buildOptions.Add(PathOption('foraydir'    ,'Root directory where foray library was installed.'        ,'/opt/local/foray',PathOption.PathIsDir ))
+buildOptions.Add(PathOption('prefix'      ,'Root directory where foray applications will be installed','/opt/local/foray',PathOption.PathAccept))
+buildOptions.Add(PathOption('packagePath' ,'Root directory where python packages will be installed'   ,sitePackagePath   ,PathOption.PathIsDir ))
+buildOptions.Add(PathOption('swigPath'    ,'Path to swig program'                                     ,'swig'            ,PathOption.PathAccept))
+
+env = Environment(options=buildOptions)
+
+Help(buildOptions.GenerateHelpText(env))
+
+env['SWIG'] = env['swigPath']
+
+env.netcdfBin  = os.path.join(env['ncdir'],'bin');
+env.netcdfLib  = os.path.join(env['ncdir'],'lib');
+env.netcdfInc  = os.path.join(env['ncdir'],'include')
+env.netcdfLIBS = ['netcdf']
+
+env.forayBin = os.path.join(env['foraydir'],'bin');
+env.forayLib = os.path.join(env['foraydir'],'lib');
+env.forayInc = os.path.join(env['foraydir'],'include')
+env.forayLIBS = ['rayfilefactory','ncradar','dorade','rayfile','forayutil','netcdf']
+
+Export('env')
+
+SConscript(['SWIG/SConscript'])
+SConscript(['forayversion/SConscript'])

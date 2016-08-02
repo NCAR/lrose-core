@@ -1,0 +1,365 @@
+#! /usr/bin/perl
+#
+# script to kill all processes in the proc_list_file
+# 
+# Usage : procmap_list_kill [options]
+#
+# Options : 
+#   -help         : Print usage
+#
+#   -fast         : Use killall to do a fast kill of the processes
+#
+#   -proc_list    : Process list file, i.e. the name of the file 
+#                   containing the list of processes to kill.  
+#                   This file contains lines of the following format:
+#                       <name> <instance> <start_script> <kill_script> <default_host>
+#                   Comment lines start with #.
+#                   Blank lines are ignored.
+#
+# Example file entries:
+#
+#  rdata_to_shmem     rtest           start_ingest     kill_ingest             kodiak
+#  dobson_from_shmem  rtest           start_ingest     kill_ingest             kodiak
+#  dobson_server      ReflFcast       start_servers    kill_dobson_servers     kodiak
+#  dobson_server      rtest           start_servers    kill_dobson_servers     kodiak
+#  forecast_monitor   Rtest           start_tracking   kill_forecast_monitor   kodiak
+#  precip_map         precip_fcast    start_tracking   kill_precip_maps        kodiak
+#  precip_map         precip_accum    start_tracking   kill_precip_maps        kodiak
+#  storm_track        rtest           start_tracking   kill_storm_track        kodiak
+#  storm_ident        rtest           start_tracking   kill_storm_ident        kodiak
+#  time_hist          rtest           start_display    kill_display            kodiak
+#  rview              rtest           start_display    kill_display            kodiak
+#
+#   -procmap_host : Process mapper host, i.e. the name of the host where 
+#                   procmap is running.
+#                   Default = "local".
+#
+#   -sleep        : Number of seconds to sleep between the two types of kills
+#
+#   -debug        : Print debug messages
+#
+#
+# Jaimi Yee, RAP, NCAR, Boulder, CO, USA June 1997
+#
+
+#
+# Make hostname() available
+#
+
+use Sys::Hostname;
+
+#
+# RAP procmap module
+#
+use Env qw(RAP_INST_LIB_DIR);
+use Env qw(RAP_SHARED_LIB_DIR);
+use Env qw(RAP_LIB_DIR);
+
+use lib "$RAP_INST_LIB_DIR/perl5/";
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+
+# Need this for Operational ADDS, which no longer has compile-time
+# dirs in place for the runtime system. DO NOT REMOVE! - P McCarthy.
+use Env qw(ADDSHOME);
+use lib "$ADDSHOME/perl_lib/";
+
+use Procmap;
+
+# ------------------------ START OF MAIN ---------------------------
+#
+
+use Getopt::Long;
+use Env qw(PROCMAP_HOST);
+
+#
+# Initialize command line arguments
+#
+
+$| = 1;
+
+$opt_help = 0;
+$opt_proc_list = "";
+if ($PROCMAP_HOST)
+{
+   $opt_procmap_host = $PROCMAP_HOST
+}
+else
+{
+   $opt_procmap_host = "local";
+}
+$opt_sleep = 15;
+
+#
+# Define usage
+#
+
+($prog = $0) =~ s%.*/%%;
+
+$usage = "Usage : $prog [options]\n" .
+         "Options: \n" .
+         "  -fast         : Use killall to do a fast kill of the processes\n" .
+         "  -help         : Print usage\n" .
+         "  -proc_list    : Process list file\n" .
+         "  -procmap_host : Process mapper host\n" .
+         "  -sleep        : Number of seconds to sleep between the two types of kills\n" .
+         "  -timeout      : Timeout seconds for remote system commands\n" .
+         "  -debug        : Print debug messages\n";
+
+#
+# Get the command line arguments
+#
+
+$options_result = &GetOptions('fast',
+                              'help',
+                              'proc_list=s',
+                              'procmap_host=s',
+                              'sleep=i',
+                              'debug');
+
+if ($options_result == 0 || $opt_help || $opt_proc_list eq "")
+{
+    print $usage;
+    exit 0;
+}
+
+if ($opt_debug)
+{
+    #
+    # Print command line arguments
+    #
+
+    print "Command line options:\n";
+    print "  fast = $opt_fast\n";
+    print "  help = $opt_help\n";
+    print "  proc_list = $opt_proc_list\n";
+    print "  procmap_host = $opt_procmap_host\n";
+    print "  sleep = $opt_sleep\n";
+    print "  debug = $opt_debug\n";
+
+    #
+    # Print time 
+    #
+
+    $datetime = `date`;
+    chop($datetime);
+
+    print "\nChecking processes at $datetime.\n";
+
+    print "Getting procmap info from host $opt_procmap_host \n";
+}
+
+
+#
+# get expected procs and put them in an array.
+#
+
+($is_ok, $nexpected) = &PMP_read_proc_list_file($opt_proc_list, *expected_entries, *started, (null));
+
+if ($is_ok == 0) {
+    if ($opt_debug)
+    {
+	print "Error opening expected process list file $opt_proc_list at $datetime.\n";
+    }
+
+    exit -1;
+
+}
+
+#
+# do a fast kill, if requested
+#
+if ( $opt_fast ) {
+   kill_all();
+}
+
+else {
+   #
+   # kill via procmap list
+   #
+   kill_print_procmap();
+
+
+   #
+   # kill via process list
+   #
+   kill_process_list();
+}
+
+exit(0);
+
+################################################################################
+
+sub kill_all
+{
+   #
+   # Kill all of the entries in the process list using the system killall utility
+   #
+
+   foreach $i (0..($nexpected - 1))
+   {
+       #
+       # extract the information from the expected process list
+       #
+       ($expected_name, $expected_instance, $expected_start_script,
+        $expected_kill_script, $expected_host) =
+            split(/\s+/, $expected_entries[$i]);
+
+       if ($opt_debug)
+       {
+           print "Killing $expected_name with killall\n";
+       }
+
+       #
+       # Kill process using kill_all
+       #
+       system( "killall $expected_name" );
+   }
+}
+
+################################################################################
+
+sub kill_print_procmap
+{
+   #
+   # get the current processes from procmap.  If you can't get the
+   # process list, log an error and try again after sleeping.
+   #
+
+   unless (open(PROCMAP, "print_procmap -plain -host $opt_procmap_host |"))
+   {
+       $datetime = `date`;
+       chop($datetime);
+
+       if ($opt_debug)
+       {
+      	   print "Error getting print_procmap list from $opt_procmap_host at $datetime.\n";
+       }
+
+       exit -1;
+
+   } # endunless - open print_procmap command
+
+   #
+   # skip the first two entries in the procmap list - these are the
+   # procmap host name and the number of seconds procmap has been running
+   #
+
+   $procmap_entry_host = <PROCMAP>;
+   $procmap_entry_secs = <PROCMAP>;
+
+   #
+   # Set the timeout arg for remote system commands
+   #
+   if ( $opt_timeout ) {
+      $timeout = $opt_timeout;
+   }
+   else {
+      $timeout = 10;
+   }
+
+   #
+   # loop through the lines in the procmap list
+   #
+
+   while ($procmap_entry = <PROCMAP>)
+   {
+       if ($opt_debug)
+       {
+   	   print $procmap_entry;
+       }
+
+       #
+       # Get the pieces of the procmap entry
+       #
+
+       ($procmap_name, $procmap_instance, $procmap_proc_host, $procmap_user,
+        $procmap_pid, $procmap_interval, $procmap_heartbeat,
+        $procmap_uptime, $procmap_nreg, $procmap_status,
+        $procmap_status_str) = split(/\s+/, $procmap_entry);
+
+       #
+       # Make sure the procmap entry is in the process list
+       #
+
+       foreach $i (0..($nexpected - 1))
+       {
+   	   #
+   	   # extract the information from the expected process list
+	   #
+
+	   ($expected_name, $expected_instance, $expected_start_script,
+	    $expected_kill_script, $expected_host) =
+	        split(/\s+/, $expected_entries[$i]);
+ 
+	   #
+	   # See if this is the current entry
+	   #
+
+	   if ($expected_name eq $procmap_name &&
+	       $expected_instance eq $procmap_instance &&
+	       $expected_host eq $procmap_proc_host)
+	   {
+	       #
+	       # Kill the procmap entry using the pid
+	       #
+
+	       printf(STDERR "Killing %s %s\n",$procmap_proc_host,$procmap_pid);
+	       kill_by_pid($procmap_proc_host, $procmap_pid, $timeout);
+
+	       last;
+	   }
+       } # foreach $i
+   }
+
+   #
+   # Close the PROCMAP file
+   #
+
+   close(PROCMAP);
+
+   #
+   # Go to sleep
+   #
+
+   sleep($opt_sleep);
+}
+
+################################################################################
+
+sub kill_process_list
+{
+   #
+   # Now kill all of the entries in the process list using their kill scripts
+   #
+
+   foreach $i (0..($nexpected - 1))
+   {
+       #
+       # extract the information from the expected process list
+       #
+
+       ($expected_name, $expected_instance, $expected_start_script,
+        $expected_kill_script, $expected_host) =
+   	    split(/\s+/, $expected_entries[$i]);
+
+       if ($opt_debug)
+       {
+   	   print "Killing $expected_name $expected_instance with $expected_kill_script\n";
+       }
+
+       #
+       # Kill process using the kill_script
+       #
+
+       if ($expected_kill_script eq "snuff_inst")
+       {
+   	   kill_by_snuff_inst($expected_host, $expected_name, $expected_instance);
+       }
+       else
+       {
+   	   kill_by_script($expected_host, $expected_kill_script);
+       }
+
+   } # foreach $i
+}

@@ -1,0 +1,329 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvCreateConstantFile
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvCreateConstantFile.
+ */
+
+commentdef
+{
+  p_header = "MdvCreateConstantFile";
+  p_text = "This program creates an MDV file that has a data field with a "
+           "constant data value.";
+}
+
+/***********************************************************************
+ * Input/output parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/constant_data";
+} output_url;
+
+
+/***********************************************************************
+ * BASIC FIELD INFORMATION
+ */
+
+commentdef
+{
+  p_header = "BASIC FIELD INFORMATION";
+};
+
+paramdef string
+{
+  p_descr = "The name of the output field";
+  p_default = "field_name";
+} field_name;
+
+paramdef string
+{
+  p_descr = "The long name of the output field";
+  p_default = "long_field_name";
+} field_name_long;
+
+paramdef string
+{
+  p_descr = "The units for the output field";
+  p_default = "none";
+} field_units;
+
+paramdef double
+{
+  p_descr = "The constant field value";
+  p_default = 0.0;
+} field_value;
+
+
+/***********************************************************************
+ * TIME INFORMATION
+ */
+
+commentdef
+{
+  p_header = "TIME INFORMATION";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether this should be output as a forecast file.";
+  p_help = "Set to true for forecast file output, false otherwise.";
+  p_default = false;
+} is_forecast;
+
+paramdef string
+{
+  p_descr = "Data valid time";
+  p_default = "2011/1/1 0:00:00";
+} valid_time;
+
+paramdef string
+{
+  p_descr = "Data generation time";
+  p_help = "Used only if is_forecast is set to true";
+  p_default = "2011/1/1 0:00:00";
+} gen_time;
+
+
+/***********************************************************************
+ * PROJECTION INFORMATION
+ */
+
+commentdef
+{
+  p_header = "PROJECTION INFORMATION";
+};
+
+typedef enum
+{
+  PROJ_FLAT,
+  PROJ_LATLON,
+  PROJ_LC
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  int nx;
+  int ny;
+  double dx;
+  double dy;
+  double dz;
+  double minx;
+  double miny;
+  double minz;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} proj_info_t;
+
+paramdef struct proj_info_t
+{
+  p_descr = "Projection information";
+  p_default = { PROJ_LATLON, 0, 0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0 };
+} proj_info;
+
+typedef enum
+{
+  VERT_TYPE_UNKNOWN,
+  VERT_TYPE_SURFACE,
+  VERT_TYPE_SIGMA_P,
+  VERT_TYPE_PRESSURE,
+  VERT_TYPE_Z,
+  VERT_TYPE_SIGMA_Z,
+  VERT_TYPE_ETA,
+  VERT_TYPE_THETA,
+  VERT_TYPE_MIXED,
+  VERT_TYPE_ELEV,
+  VERT_TYPE_COMPOSITE,
+  VERT_TYPE_CROSS_SEC,
+  VERT_TYPE_SATELLITE_IMAGE,
+  VERT_TYPE_VARIABLE_ELEV,
+  VERT_TYPE_FIELDS_VAR_ELEV,
+  VERT_TYPE_FLIGHT_LEVEL,
+  VERT_TYPE_EARTH_IMAGE,
+  VERT_TYPE_AZ,
+  VERT_TYPE_TOPS,
+  VERT_TYPE_ZAGL_FT,
+  VERT_TYPE_SOIL,
+  VERT_TYPE_WRF_ETA
+} vert_type_t;
+
+typedef struct
+{
+  vert_type_t vert_type;
+  double vert_level;
+} vlevel_info_t;
+
+paramdef struct vlevel_info_t
+{
+  p_descr = "Vertical level information";
+  p_help = "There should be one entry for each vertical level. "
+           "This is where we get the nz value for the projection.";
+  p_default = { { VERT_TYPE_SURFACE, 0.0 } };
+} vlevel_info[];
+
+paramdef enum vert_type_t
+{
+  p_descr = "Native vertical level type";
+  p_default = VERT_TYPE_SURFACE;
+} native_vlevel_type;
+
+paramdef enum vert_type_t
+{
+  p_descr = "Vertical level type";
+  p_default = VERT_TYPE_SURFACE;
+} vlevel_type;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the distance between the vertical levels "
+            "is constant";
+  p_help = "Set to true if constant, false otherwise.";
+  p_default = true;
+} dz_constant;
+
+
+/***********************************************************************
+ * DATA COMPRESSION/SCALING INFORMATION
+ */
+
+commentdef
+{
+  p_header = "DATA COMPRESSION/SCALING INFORMATION";
+};
+
+typedef enum
+{
+  ENCODING_INT8,
+  ENCODING_INT16,
+  ENCODING_FLOAT32
+} encoding_type_t;
+
+paramdef enum encoding_type_t
+{
+  p_descr = "Encoding type to use in the output";
+  p_default = ENCODING_FLOAT32;
+} encoding_type;
+
+typedef enum
+{
+  COMPRESSION_NONE,
+  COMPRESSION_RLE,
+  COMPRESSION_LZO,
+  COMPRESSION_ZLIB,
+  COMPRESSION_BZIP,
+  COMPRESSION_GZIP,
+  COMPRESSION_GZIP_VOL
+} compression_type_t;
+
+paramdef enum compression_type_t
+{
+  p_descr = "Compression type to use in the output";
+  p_default = COMPRESSION_NONE;
+} compression_type;
+
+typedef enum
+{
+  SCALING_NONE,
+  SCALING_ROUNDED,
+  SCALING_INTEGRAL,
+  SCALING_DYNAMIC,
+  SCALING_SPECIFIED
+} scaling_type_t;
+
+paramdef enum scaling_type_t
+{
+  p_descr = "Scaling type to use in the output";
+  p_default = SCALING_NONE;
+} scaling_type;
+
+paramdef double
+{
+  p_descr = "Data scale value";
+  p_help = "Used only if scaling_type is set to SCALING_SPECIFIED";
+  p_default = 1.0;
+} scale;
+
+paramdef double
+{
+  p_descr = "Data bias value";
+  p_help = "Used only if scaling_type is set to SCALING_SPECIFIED";
+  p_default = 0.0;
+} bias;
+
+
+/***********************************************************************
+ * MASTER HEADER INFORMATION
+ */
+
+commentdef
+{
+  p_header = "MASTER HEADER INFORMATION";
+};
+
+typedef struct
+{
+  double lat;
+  double lon;
+  double alt;
+} sensor_position_t;
+
+paramdef struct sensor_position_t
+{
+  p_descr = "The sensor location";
+  p_help = "The altitude value should be specified in km.";
+  p_default = { 0.0, 0.0, 0.0 };
+} sensor_position;
+
+paramdef string
+{
+  p_descr = "Data set information";
+  p_default = "Created by MdvCreateConstantFile";
+} data_set_info;
+
+paramdef string
+{
+  p_descr = "Data set name";
+  p_default = "MdvCreateConstantFile";
+} data_set_name;
+
+paramdef string
+{
+  p_descr = "Data set source";
+  p_default = "MdvCreateConstantFile";
+} data_set_source;

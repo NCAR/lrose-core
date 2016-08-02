@@ -1,0 +1,149 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_routes: Parameter definitions for 
+// Predefined route wind, etc support
+
+commentdef {
+  p_header = "Route Winds Parameters";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_help = "Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output";
+} debug; 
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Default state of the add_waypoints_labels";
+} add_waypoints_labels;
+
+paramdef int {
+  p_default = 1;
+  p_descr = " Maximum height in Pixels of labels";
+} font_height;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Default state of the add_wind_text labels";
+} add_wind_text;
+
+typedef enum {
+  REGUALR_INTERVALS, EQUAL_DIVISIONS
+} label_style_t; 
+
+paramdef enum label_style_t
+{
+    p_default = REGUALR_INTERVALS;
+    p_help = "Set to REGUALR_INTERVALS or EQUAL_DIVISIONS";
+} label_style;
+
+paramdef double {
+    p_default = 55.6;
+    p_help =  "Used if label_style is set to REGUALR_INTERVALS";
+    p_descr = "Distance in km between winds labels";
+} label_interval;
+
+paramdef int {
+  p_default = 10;
+  p_min = 2;
+  p_max = 100;
+  p_descr = "number of route wind labels to plot along the route.";
+  p_help = "Typically this should be set between 5 and 20";
+} num_route_labels; 
+
+paramdef int {
+  p_default = 3;
+  p_min = 1;
+  p_max = 20;
+  p_descr = "Width in pixels of the route winds track";
+} route_track_line_width;
+
+paramdef char* {
+  p_default =  "none";
+  p_descr = "U Wind Componet";
+  p_help = " URL's take the form  mdvp::[paramfile]//host.dom::dir/dir&fieldname\n";
+} u_url;
+
+paramdef char* {
+  p_default =  "none";
+  p_descr = "v Wind Componet";
+} v_url;
+
+paramdef char* {
+  p_default =  "none";
+  p_descr = "Turbulence Index";
+} turb_url;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Value at which the turbulence is considered Low";
+} turb_low_thresh;
+
+paramdef double {
+  p_default = 0.50;
+  p_descr = "Value at which the turbulence is considered Moderate";
+} turb_mod_thresh;
+
+paramdef double {
+  p_default = 0.75;
+  p_descr = "Value at which the turbulence is considered High";
+} turb_hi_thresh;
+
+paramdef char* {
+  p_default =  "none";
+  p_descr = "Icing Index";
+} icing_url;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Value at which the icing is considered Light";
+} icing_low_thresh;
+
+paramdef double {
+  p_default = 0.50;
+  p_descr = "Value at which the icing is considered Moderate";
+} icing_mod_thresh;
+
+paramdef double {
+  p_default = 0.75;
+  p_descr = "Value at which the icing is considered Heavy";
+} icing_hi_thresh;
+
+paramdef char* {
+   p_default = {};
+   p_descr = " Route path strings - Format of each string is"
+      "ROUTE_LABEL NPOINTS  ID_String Lat Lon ID_String LAT Lon ...\n";
+   p_help = "ROUTE_LABEL will be used in the menu, \n"
+      "NPoints = Number of way points in route \n"
+      "ID_string is usually a Airport or VOR \n"
+      "Lat Lon are in decimal degrees\n";
+      "\n";
+      "Make sure spaces exist on the end of each line\n";
+} route_paths[];

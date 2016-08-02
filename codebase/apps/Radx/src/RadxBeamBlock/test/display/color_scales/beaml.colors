@@ -1,0 +1,28 @@
+# NAME dbz.colors
+
+# fhage 	6/9/1993 11:56:22
+
+0.000001 0.000002 	dark green
+0.000002 0.000003 	dark olive green
+0.000003 0.000004 	forest green
+0.000004 0.000005 	SpringGreen3
+0.000005 0.00001	medium sea green
+0.00001	0.00002	medium aquamarine
+0.00002	0.00005	medium slate blue
+0.00005	0.0001 	blue
+0.0001 	0.0002 	blue4
+0.0002	0.0005 	DarkOrchid4
+0.0005 	0.001 	HotPink4
+0.001 	0.002 	maroon
+0.002 	0.005 	VioletRed4
+0.005 	0.01 	sienna
+0.01 	0.02 	chocolate
+0.02 	0.03	goldenrod
+0.03 	0.05 	yellow
+0.05 	0.1 	dark salmon
+0.1 	0.4 	salmon
+0.4 	0.5 	firebrick2
+0.5	0.6 	DeepPink1
+0.6 	0.7 	light grey
+0.7 	0.8	snow
+0.8	0.999	black

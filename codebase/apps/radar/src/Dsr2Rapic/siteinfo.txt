@@ -1,0 +1,182 @@
+# SITE FORMAT IS
+#	stnid name lat long height type typetext SitesDB_ID
+#
+# PLEASE ALWAYS OBTAIN LATEST MAINTAINED VERSION FROM:
+# ftp://gust.bom.gov.au/pub/radar/outgoing/pcrapictx/DefaultFiles/system/siteinfo.txt
+#
+# NOTE
+# The stnids need not be contiguous.
+# name MUST NOT exceed 32 chars
+# lat is +ve south!!
+# height is metres above sea level
+# type corresponds to following radar types
+# typetext is used in 3D Rapic (picked up from type below)
+# SitesDB_ID is used by PC-Rapic Transmitter to deposit meta-data into SitesDB.
+#
+# Changelog:
+# 29/6/2006 
+# - updated West Takone Height to 599m from 400m (rlj)
+# 4/05/2006
+# - updated co-ordinates for Kanign (rlj)
+# 3/03/2006
+# - Allocated #67 for Charleville replacement (Warrego), no details yet (rlj)
+# 8/12/2005
+# - Corrected Mt Stapylton height and location to surveyed values (rlj)
+# 17/10/2005
+# - Corrected Kurnell and Tennant Creek coordinates and height (rlj)
+# 21/09/2005
+# - Corrected Halls Creek & Norfolk Island to be WF100C-8 (rlj)
+# 09/09/2005
+# - added Mt Stapylton (rlj)
+# 07/09/2005
+# - Update coords for Gambier, P_Hedld, Gladstn, CapFlat, Sellick, Marburg, BuckPk
+#   to 4 decimal place, as advised by rjp (rlj)
+# - Add GunnPt (rjp)
+# - added advisory location to correct source of latest file (rlj)
+# 11/07/2005
+# - Added Buckland Park radar settings, Sandy Dance.
+# 27/05/2005
+# - Ewan Mitchell updated LemnTre's lat/long.
+# 23/02/2005
+# - Rod Potts updated siteinfo.txt based on information provided
+#   by OEB (A Apostolou).
+#
+RADAR SITE DATA
+  0 server_   0.000    0.000      0  0 No_Radar    0      
+  1 CampRd_  37.691  144.946    110  4 WSR81C-8    0     
+  2 Melb___  37.852  144.752     14  5 WSR74C-14   087031 
+  3 Sydney_  34.264  150.874    350  7 WSR74S-14   068219 
+  4 LemnTre  32.730  152.025     84  7 WSR74S-14   061281 
+  5 Carnvn_  24.883  113.667      7  3 WF100C-8    006011 
+  6 Gerlton  28.800  114.700     34  3 WF100C-8    008051 
+  7 Wyndham  15.453  128.119      0  3 WF100C-8    001034 
+  8 Kanign_  25.9574 152.5769     0  1 WF44        040625 
+  9 Gove___  12.275  136.823     50  3 WF100C-8    014508 
+ 10 Darwin_  12.425  130.891     38  1 WF44        014015 
+ 11 Adel___  34.950  138.533      4  1 WF44        023034 
+ 12 Perth__  31.953  115.842     10  4 WSR81C-8    009126 
+ 13 Syd_A_P  33.941  151.175     35  7 No_Radar    0     
+ 14 Gambier  37.7477 140.7746    85  3 WF100C-8    026021 
+ 15 Dampier  20.650  116.687      0  4 WSR81C-8    005081 
+ 16 P_Hedld  20.3719 118.6317    24 13 TVDR2500-8  004032 
+ 17 Broome_  17.945  122.225      9  1 WF44        003003 
+ 18 Weipa__  12.671  141.922     23  2 WF100C-6    027045 
+ 19 Cairns_  16.817  145.683    652  4 WSR81C-8    031169 
+ 20 Twnsvl_  19.250  146.767      6  2 WF100C-6    032040 
+ 21 Mt_Strt  19.350  146.783    580  1 WF44        032120 
+ 22 Mackay_  21.117  149.217     31  1 WF44        033119 
+ 23 Gladstn  23.8550 151.2626    93  7 WSR74S-14   039123 
+ 24 Bowen__  19.886  148.075      0  3 WF100C-8    033132 
+ 25 AliceSp  23.796  133.888    564  3 WF100C-8    015590 
+ 26 PrthA/P  31.933  115.967     12  1 WF44        009021 
+ 27 Woomera  31.157  136.803    175  3 WF100C-8    016001 
+ 28 Grafton  29.622  152.951     40  7 WSR74S-14   058077 
+ 29 Lrmonth  22.103  113.999    332 13 TVDR2500-8  005080 
+ 30 Mildura  34.233  142.083     53  2 WF100C-6    076031 
+ 31 Albany_  34.950  117.800     69  3 WF100C-8    009741 
+ 32 Esprnce  33.830  121.892     25  2 WF100C-6    009789 
+ 33 Ceduna_  32.131  133.695     16  2 WF100C-6    018012 
+ 34 CairnAP  16.873  145.746      9  2 WF100C-6    031011 
+ 35 Coffs_H  30.317  153.117      5  2 WF100C-6    059040 
+ 36 GlfCarp  16.666  139.167      7  4 WSR81C-8    029039 
+ 37 Hobart_  42.833  147.510      3  2 WF100C-6    094008 
+ 38 Charlvl  26.417  146.267    304  2 WF100C-6    044021 
+ 39 HallsCk  18.231  127.663      0  3 WF100C-8    002012 
+ 40 CapFlat  35.6613 149.5122     0  7 WSR74S-14   070341 
+ 41 Willis_  16.300  149.983      9  3 WF100C-8    200283     
+ 42 Tindal_  14.513  132.446    131  4 WSR81C-8    014968 
+ 43 BrisA/P  27.392  153.130      6  1 WF44        040842 
+ 44 Giles__  25.030  128.300    599  2 WF100C-6    013017 
+ 45 Eucla__  31.681  128.892    108  3 WF100C-8    011003 
+ 46 Sellick  35.3300 138.5000   395  4 WSR81C-8    023886 
+ 47 R/hmptn  23.383  150.467     14  3 WF100C-8    039083 
+ 48 K/grlie  30.785  121.452    360  3 WF100C-8    012038 
+ 49 NE-Vic_  36.030  146.023    146 12 WSR81C-14   081124 
+ 50 Marburg  27.6080 152.5390   372  7 WSR74S-14   040901 
+ 51 MelbnAP  37.675  144.842    140  3 WF100C-8    086282 
+ 52 WTakone  41.181  145.579    599  4 WSR81C-8    091287 
+ 53 Moree__  29.500  149.850    220  3 WF100C-8    053115 
+ 54 Kurnell  34.0148 151.2263    64  8 WSR81C-12   066016 
+ 55 Wagga__  35.167  147.467    221  3 WF100C-8    072150 
+ 56 Longrch  23.430  144.290    200  3 WF100C-8    036031 
+ 57 E_Sale_  38.120  147.130      0  1 WF44        085072 
+ 58 InverNZ  46.418  168.330      0  3 WF100C-8    0     
+ 59 Gunn_Pt  12.249  131.044     50  4 WSR81C-14   014023
+ 60 Nadi___  17.763  177.432     16  3 WF100C-8    0      
+ 61 Nausori  18.030  178.560      0  9 WSR74S-12   0      
+ 62 Norfolk  29.033  167.933    110  3 WF100C-8    200288 
+ 63 Berrima  12.457  130.925     51  8 WSR81C-12   014004 
+ 64 BuckPk_  34.6169 138.4689    30 14 Meteor1500S 023130      
+ 65 Tennant  19.6422 134.1830   394  3 WF100C-8    015135      
+ 66 MtStapl  27.7178 153.2400   174 14 Meteor1500S 040966 
+ 67 Warrego  26.440  147.3492     0 13 TVDR2500-8  0 
+ 68 #68____   0.000    0.000      0  0 No_Radar    0 
+ 69 #69____   0.000    0.000      0  0 No_Radar    0 
+ 70 #70____   0.000    0.000      0  0 No_Radar    0 
+ 71 #71____   0.000    0.000      0  0 No_Radar    0 
+ 72 #72____   0.000    0.000      0  0 No_Radar    0 
+ 73 #73____   0.000    0.000      0  0 No_Radar    0 
+ 74 #74____   0.000    0.000      0  0 No_Radar    0 
+ 75 #75____   0.000    0.000      0  0 No_Radar    0 
+ 76 #76____   0.000    0.000      0  0 No_Radar    0 
+ 77 #77____   0.000    0.000      0  0 No_Radar    0 
+ 78 #78____   0.000    0.000      0  0 No_Radar    0 
+ 79 #79____   0.000    0.000      0  0 No_Radar    0 
+ 80 #80____   0.000    0.000      0  0 No_Radar    0 
+ 81 #81____   0.000    0.000      0  0 No_Radar    0 
+ 82 #82____   0.000    0.000      0  0 No_Radar    0 
+ 83 #83____   0.000    0.000      0  0 No_Radar    0 
+ 84 #84____   0.000    0.000      0  0 No_Radar    0 
+ 85 #85____   0.000    0.000      0  0 No_Radar    0 
+ 86 #86____   0.000    0.000      0  0 No_Radar    0 
+ 87 #87____   0.000    0.000      0  0 No_Radar    0 
+ 88 #88____   0.000    0.000      0  0 No_Radar    0 
+ 89 #89____   0.000    0.000      0  0 No_Radar    0 
+ 90 #90____   0.000    0.000      0  0 No_Radar    0 
+ 91 #91____   0.000    0.000      0  0 No_Radar    0 
+ 92 #92____   0.000    0.000      0  0 No_Radar    0 
+ 93 #93____   0.000    0.000      0  0 No_Radar    0 
+ 94 #94____   0.000    0.000      0  0 No_Radar    0 
+ 95 #95____   0.000    0.000      0  0 No_Radar    0 
+ 96 #96____   0.000    0.000      0  0 No_Radar    0 
+ 97 #97____   0.000    0.000      0  0 No_Radar    0 
+ 98 CP2Bris   -27.6692 152.862    168  0 No_Radar    0 
+ 99 LabTest   0.000    0.000      0 19 Simulator   0
+128 Beijing  -39.8089 116.4719     61.6 14 Meteor1500S 040966
+129 Tianjin  -39.0439 117.7169     69.8 14 Meteor1500S 040966
+130 ShiJia   -38.3519 114.7119    134.8 14 Meteor1500S 040966
+131 ZhanBei  -41.155  114.6936     36.7 14 Meteor1500S 040966
+257 Subang_  -3.120 101.550     32  6 WSR81S
+258 B'worth  -5.470 100.380     20  6 WSR81S
+259 Kluang_  -2.020 103.320    113 10 MR781S
+260 Kuantn_  -3.780 103.220     32  7 WSR74S-14
+261 K.Bharu  -6.170 102.280     13  7 WSR74S-14
+262 B.Lepas  -5.300 100.270     28  7 WSR74S-14
+263 K.Kina_  -5.930 116.050     27  3 WF100C-8
+264 Kuching  -1.480 110.330     57  3 WF100C-8
+265 Bintulu  -3.218 113.076    151  3 WF100C-8
+266 Sandakn  -5.896 118.072      8  3 WF100C-8
+267 AlorStr  -6.181 100.412      0 14 WSR8500S-14
+END RADAR SITE DATA
+RADAR TYPE DATA
+  0 No_Radar____   0   0   0
+  1 WF44________ 104  30  30
+  2 WF100C-6____  53  20  20
+  3 WF100C-8____  53  16  16
+  4 WSR81C-8____  53  16  16
+  5 WSR74C-14___  53  10  10
+  6 WSR81S______ 100  20  20
+  7 WSR74S-14___ 104  19  19
+  8 WSR81C-12___  53  10  10
+  9 WSR74S-12___ 100  21  21
+ 10 MR781S______ 100  20  20
+ 11 UBS103S_____ 100  20  20
+ 12 WSR81C-14___  53  10  10
+ 13 TVDR2500-8__  50  19  19
+ 14 Meteor1500S_ 100  10  10
+ 15 No_Radar____   0   0   0
+ 16 No_Radar____   0   0   0
+ 17 No_Radar____   0   0   0
+ 18 No_Radar____   0   0   0
+ 19 Simulator___   0   0   0
+END RADAR TYPE DATA

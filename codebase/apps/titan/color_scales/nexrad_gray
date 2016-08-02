@@ -1,0 +1,19 @@
+# gray scale for dbz field - nexrad
+
+# Mike Dixon, April 1991
+
+0	5	#111111
+5	10	#222222
+10	15	#333333
+15	20	#444444
+20	25	#555555
+25	30	#666666
+30	35	#777777
+35	40	#888888
+40	45	#999999
+45	50	#aaaaaa
+50	55	#bbbbbb
+55	60	#cccccc
+60	65	#dddddd
+65	70	#eeeeee
+70	75	#ffffff

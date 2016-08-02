@@ -1,0 +1,404 @@
+/**********************************************************************
+ * TDRP params for ../mdvForecastStatistics
+ **********************************************************************/
+
+//======================================================================
+//
+// This program has a somewhat tortured history.
+
+// The purpose of mdvForecastStatistics is to generate
+// statistics about how susscessful our forecasting is.
+// The input is, fundamentally, two parts - a set of
+// forecast MDV grids (ie. what we said would happen)
+// and a set of set of truth MDV grids (ie. what actually
+// happened). Typically the forecast field will be an
+// interest field or probablility field, depending on the
+// nature of the forecast, and the truth field will be
+// some objective measurement such as a radar grid. Both
+// fields are then thresholded into, essentially, binary
+// storm/no storm grids, and statistics are generated based
+// on these binary fields. The user also has the option of
+// saving out grids that what happened where, ie. where the
+// program decided that the forecast was correct, and where it
+// was not.
+
+// The program has gone through several iterations. Initially,
+// the program VerifyGrid was ussed for this work. VerifyGrid was
+// based on the earlier mdv library (as opposed to Mdv).
+// When a significant bug was found in verifyGrid the decision
+// was made to develop a new program, Validator, that was based
+// on Mdv (the bug in verifyGrid was also fixed).
+
+// Unfortunately, the Mdv library was still evolving as Validator
+// was developed, with the result that Validator did not take full
+// advantage of the Mdv library. Further, at the time that
+// Validator was being developed, there appeared to be strong
+// interest in validating on a county-by-county basis, and this
+// was coded into the Validator (the program can read map files
+// and validate accordingly). This interest largely evaporated.
+
+// As a result, when interest in running with multiple threshold
+// values developed, the decision was made to develop this program
+// rather than modify the Validator.
+
+// The MdvVerify program was also written around this time, but
+// its focus is somewhat different as I understand it, and it
+// does not allow multiple thresholds.
+
+// Niles Oien October 2006.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// The program runs in archive mode only. Realtime mode
+// does not make much sense, since the program triggers when
+// a new forecast is ready for validating and the truth will
+// not have eventuated at that time. The time specified on the
+// command line are, thus, forecast times not truth times.
+
+// Pseudo-realtime operations can be orchestrated with cron.
+//
+//======================================================================
+ 
+///////////// thresholds //////////////////////////////
+//
+// Array of truth, forecast thresholds (thresholds are
+// exclusive)and relaxation values. The name is used in the output
+// file name, so no spaces.
+// Leave the relaxation values set at 0 unless you have
+// a good understaning of relaxation (relaxation windows are 2N+1).
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      double truth_min;
+//      double truth_max;
+//      double forecast_min;
+//      double forecast_max;
+//      int truth_relax;
+//      int forecast_relax;
+//   }
+//
+// 1D array - variable length.
+//
+
+thresholds = {
+  { "perfectForecast", 30, 1000, 30, 1000, 0, 0},
+  { "overForecast",    30, 1000, 25, 1000, 0, 0},
+  { "underForecast",   30, 1000, 35, 1000, 0, 0},
+  { "perfectRelaxed",  30, 1000, 30, 1000, 2, 2}
+};
+
+//======================================================================
+//
+// The specification of the truth and forecast inputs follows.
+
+// Some things to note :
+
+//  * CLUMPING is the process of removing small clumps
+//  from an input dataset. For instance, if the truth dataset is
+//  a radar grid and the radar occasionally erroneously has a small
+//  number of geographically isolated grid points set to a high
+//  dbZ value, the user may want to require that each grid point
+//  be connected to (ie adjacent to) a minimum number of other
+//  grid points.
+
+//  * A MAP FILE can be used to set some regions of the input
+//  data to missing data values prior to proceeding with
+//  the statistics, thereby effectively excluding them from
+//  the calculation. The format of the map file is as follows :
+
+//   OUTSIDE 30 <-- 30 lat/lon points follow. specifying a polygon.
+//   40.1  -100.3   Data must be outside of this polygon to
+//   40.2  -100.4   be considered valid, ie. all data inside
+//   40.3  -100.5   this polygon will be set to missing. The
+//   40.4  -100.6   polygon need not be closed in the file since
+//   40.5  -100.7   closure is assumed.
+//     .       .
+//     .       .
+//     .       .
+//     .       .
+//   40.0  -100.2  <----- last of the 30 points.
+//   INSIDE 25 <---- Start of the next polygon - similar
+//   30.0  -90.0     to the above but here data must be
+//   30.1  -90.1     inside the polygon to be valid, ie.
+//   30.2  -90.2     data ouside the polygon are marked missing.
+//     .       .
+//     .       .
+//     .       .
+//     .       .
+//   29.9  -89.9 <---- Last of the 25 points.
+//
+//======================================================================
+ 
+///////////// inputs //////////////////////////////////
+//
+// Input specifications for truth, forecast fields.
+// Fields have the following significance :
+//  url - mdvp URL from which to read data.
+//  fieldName - field to read.
+//  useMapFile - option to use a map file.
+//  mapFilename - name of map file, if one is being used.
+//  doClumping - option to remove small clumps.
+//  minClumpsize - minimum number of connected points in a clump
+//                 required to avoid removal if we're doing
+//                 clumping.
+//  vertAction - action to take re vertical levels.
+//                  VERT_ACTION_NONE means take no action,
+//                  VERT_ACTION_SET_LIMITS means set limits
+//                  in the vertical according to the vlevelsSpecified,
+//                  verticalMin and verticalMax parameters, ie.
+//                  truncate in the vertical. VERT_ACTION_COMPOSITE
+//                  means do a maximum value composite between the
+//                  verticalMin and verticalMax levels.
+//  vlevelsSpecified - relevant only if vertAction is not NONE.
+//                  If TRUE, the parameters verticalMin and
+//                  verticalMax are taken to be doubles specifying
+//                  the min and max levels. If this
+//                  is FALSE the values are taken as integers
+//                  specifying the min and max plane numbers.
+//  verticalMin - see comments for vlevelsSpecified.
+//  verticalMax - see comments for vlevelsSpecified.
+//  doGridRemap - option to remap grid.
+//  projType - Remapped projection type.  PROJ_FLAT,
+//             PROJ_LATLON, or PROJ_LAMBERT
+//  nx - points in X in remapped grid.
+//  ny - points in Y in remapped grid.
+//  dx - remapped grid X spacing.
+//  dy - remapped grid Y spacing.
+//  trueLambertLat1 - relevant for remapping to Lambert.
+//  trueLambertLat2 - relevant for remapping to Lambert.
+//  flatRotation - relevant only for flat earth remapping.
+//  originLat - latitude of remapped origin.
+//  originLon - longitude of remapped origin.
+//  minX - lower left X offset for remapped grid.
+//  minY - lower left Y offset for remapped grid.
+//
+// Type: struct
+//   typedef struct {
+//      string url;
+//      string fieldName;
+//      boolean useMapFile;
+//      string mapFilename;
+//      boolean doClumping;
+//      int minClumpsize;
+//      vertAction_t vertAction;
+//        Options:
+//          VERT_ACTION_NONE
+//          VERT_ACTION_SET_LIMITS
+//          VERT_ACTION_COMPOSITE
+//      boolean vlevelsSpecified;
+//      double verticalMin;
+//      double verticalMax;
+//      boolean doGridRemap;
+//      projection_t projType;
+//        Options:
+//          PROJ_FLAT
+//          PROJ_LATLON
+//          PROJ_LAMBERT
+//      int nx;
+//      int ny;
+//      double dx;
+//      double dy;
+//      double trueLambertLat1;
+//      double trueLambertLat2;
+//      double flatRotation;
+//      double originLat;
+//      double originLon;
+//      double minX;
+//      double minY;
+//   }
+//
+// 1D array - fixed length - 2 elements.
+//
+
+//
+// Truth first, then forecast.
+//
+
+inputs = {
+  { 	url = "mdvp:://localhost::./radarPpiKNQA", 
+	fieldName ="DBZ", 
+	useMapFile = TRUE, 
+	mapFilename = "KNQA.validationMap", 
+	doClumping = TRUE,
+	minClumpsize = 5,
+	vertAction = VERT_ACTION_SET_LIMITS, 
+	vlevelsSpecified = TRUE, 
+	verticalMin = 0.0, 
+	verticalMax = 2.0, 
+	doGridRemap = FALSE,
+	projType = PROJ_FLAT, 
+	nx = 400, 
+	ny = 400, 
+	dx = 0.5,
+	dy = 0.5,
+	trueLambertLat1 = 35, 
+	trueLambertLat2 = 40,
+	flatRotation = 0,
+	originLat = 40,
+	 originLon = -100,
+	minX = -99.75,
+	minY = -99.75},
+
+  { 	url = "mdvp:://localhost::./radarPpiKNQA", 
+	fieldName ="DBZ", 
+	useMapFile = FALSE, 
+	mapFilename = "KNQA.validationMap", 
+	doClumping = FALSE,
+	minClumpsize = 75,
+	vertAction = VERT_ACTION_SET_LIMITS, 
+	vlevelsSpecified = TRUE, 
+	verticalMin = 0.0, 
+	verticalMax =2.0, 
+	doGridRemap = FALSE,
+	projType = PROJ_FLAT, 
+	nx = 400, 
+	ny = 400, 
+	dx = 0.5,
+	dy = 0.5,
+	trueLambertLat1 = 35, 
+	trueLambertLat2 = 40,
+	flatRotation = 0,
+	originLat = 40,
+	 originLon = -100,
+	minX = -99.75,
+	minY = -99.75}
+};
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_NORM;
+
+///////////// intermediateUrl /////////////////////////
+//
+// Output URL to which intermediate grids will be written.
+// If string is empty, no intermediate grids are written.
+// Type: string
+//
+
+intermediateUrl = "mdvp:://localhost::./mdv";
+
+///////////// outDir //////////////////////////////////
+//
+// Output directory in which ASCII statistics files will be written.
+// Set as appropriate. If empty, no ASCII ouput is generated.
+// Type: string
+//
+
+outDir = "./ascii_out";
+
+///////////// outputInterval //////////////////////////
+//
+// Output interval for statistics files.
+// Relevant only if ASCII output is generated.
+// Type: int
+//
+
+outputInterval = 900;
+
+///////////// badTruthValueAction /////////////////////
+//
+// Determines what to do with bad or missing truth data.
+// BAD_TRUTH_VALUE_IS_STORM - treat the grid point as
+//  having passed the threshold test, ie. it is a storm.
+// BAD_TRUTH_VALUE_IS_NOT_STORM - treat the grid point as
+//  having failed the threshold test, ie. it is not a storm.
+// BAD_TRUTH_VALUE_IS_IGNORED - ignore the point, do not include
+//  it in the calculations. This means that whatever forecast
+//  value is at the grid point location is also ignored.
+//
+// Type: enum
+// Options:
+//     BAD_TRUTH_VALUE_IS_STORM
+//     BAD_TRUTH_VALUE_IS_NOT_STORM
+//     BAD_TRUTH_VALUE_IS_IGNORED
+//
+
+badTruthValueAction = BAD_TRUTH_VALUE_IS_NOT_STORM;
+
+///////////// badForecastValueAction //////////////////
+//
+// Determines what to do with bad or missing forecast data.
+// BAD_FORECAST_VALUE_IS_STORM - treat the grid point as
+//  having passed the threshold test, ie. it is a storm.
+// BAD_FORECAST_VALUE_IS_NOT_STORM - treat the grid point as
+//  having failed the threshold test, ie. it is not a storm.
+// BAD_FORECAST_VALUE_IS_IGNORED - ignore the point, do not include
+//  it in the calculations. This means that whatever truth
+//  value is at the grid point location is also ignored.
+//
+// Type: enum
+// Options:
+//     BAD_FORECAST_VALUE_IS_STORM
+//     BAD_FORECAST_VALUE_IS_NOT_STORM
+//     BAD_FORECAST_VALUE_IS_IGNORED
+//
+
+badForecastValueAction = BAD_FORECAST_VALUE_IS_NOT_STORM;
+
+///////////// temporalTolerance ///////////////////////
+//
+// Maximum time difference between truth and forecast, seconds.
+// Set as appropriate.
+// Type: int
+//
+
+temporalTolerance = 60;
+
+///////////// forecastMode ////////////////////////////
+//
+// Determines if the input forecast data are in forecast
+// mode (filename has generate and lead time) or not.
+// If this is set then intermediate grids written out
+// will also be in forecast mode.
+// Type: boolean
+//
+
+forecastMode = FALSE;
+
+///////////// forecastLeadtime ////////////////////////
+//
+// Forecast lead time, seconds.
+// Ignored if forecastMode is TRUE (the lead time is
+// taken from the forecast data in that case).
+// Type: int
+//
+
+forecastLeadtime = 0;
+
+///////////// model2Model /////////////////////////////
+//
+// Option to compare two model runs by setting the truth
+// to one model run and the forecast to another.
+// By default, mdvForecastStatistics will read forecast times
+// and then read the truth data at the time nearest
+// to the valid time of the forecast. It is assumed that the
+// truth data are actual measurements (ie. radar data) stored in MDV
+// non-forecast mode.
+
+// But if model2Model is set to TRUE, then is is assumed that both
+// the forecast and truth data are model data stored in MDV forecast
+// mode. If a forecast at a certain gen and valid time exists, then
+// it is assumed that truth data at this gen and valid time exists,
+// and this is what is read for truth data.
+
+// Setting model2Model to TRUE causes forecastMode to be set to TRUE
+// internally.
+// Type: boolean
+//
+
+model2Model = FALSE;
+

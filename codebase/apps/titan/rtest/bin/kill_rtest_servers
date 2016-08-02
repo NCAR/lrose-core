@@ -1,0 +1,15 @@
+#! /bin/csh -f
+
+snuff "cart_slave -params cart_slave.rtest"
+snuff "dobson_server -params dobson_server.rtest"
+snuff "dobson_server -params dobson_server.refl_fcast"
+snuff "dobson_server -params dobson_server.precip_fcast"
+snuff "dobson_server -params dobson_server.precip_accum"
+snuff "track_server -params track_server.rtest"
+
+
+
+
+
+
+

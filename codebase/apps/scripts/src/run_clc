@@ -1,0 +1,663 @@
+#! /usr/bin/perl
+#
+# run_clc.pl
+#
+# Function:
+#	Perl script to run the clc program (counts source code
+#       lines) on source code files in input directories.
+#
+# Overview:
+#       Uses 'find' to search for files in specified directories
+#       then runs clc on the files.
+#
+# Usage:
+#       run_clc.pl <pathname-list>
+#
+# Input:
+#       Directories of source code files
+#
+# Output:
+#       Writes to STDOUT the sorted output from clc.
+#
+# Dependencies:
+#	Perl must be available in the location at the top of this file.
+# 	
+# Author: Deirdre Garvey - NCAR/RAP/ESG		12-MAY-2000
+#
+# Modified:
+#
+#---------------------------------------------------------------------------------
+
+# External
+
+use File::Find;
+use Getopt::Std qw( getopts );
+# Need the Perl ctime library to get to the "date" command
+#require 'ctime.pl';
+
+# Program globals
+
+($prog = $0) =~ s%.*/%%;                   # Program name
+@Needed_exes=('clc');                      # programs required for this script
+$User=$ENV{'USER'};                        # User name
+$Tmpdir="/tmp";                            # temporary directory
+$Tmpfile="${Tmpdir}/${User}.${prog}";      # temporary file
+
+# Set command line defaults
+
+$Debug=0;
+$Use_cshell=1;
+$Use_find=0;
+$Verify=0;
+$Do_totals=0;
+
+# Parse input parameters
+
+&getopts('cdfhtv');
+
+if ($opt_h) {
+    print STDERR "Usage: $prog [-cdfhtv] pathname-list\n";
+    print STDERR " Purpose is to go through valid filenames in the pathname-list\n";
+    print STDERR " and run them through clc to count lines of code. $prog will\n";
+    print STDERR " only process plain files (see man find). It will skip binary\n";
+    print STDERR " files.\n";
+    print STDERR "\t-c:\tuse C-shell syntax for pathname-list (default)\n";
+    print STDERR "\t-d:\tprint debug messages\n";
+    print STDERR "\t-f:\tuse find syntax for pathname-list\n";
+    print STDERR "\t-h:\tprint this usage message\n";
+    print STDERR "\t-t:\tdo totals by directory\n";
+    print STDERR "\t-v:\tprint files as they are processed\n";
+    exit 0;
+}
+
+if ($opt_c) {
+    $Use_cshell=1;
+    $Use_find=0;
+}
+
+if ($opt_d) {
+    $Debug = 1;
+}
+
+if ($opt_f) {
+    $Use_cshell=0;
+    $Use_find=1;
+}
+
+if ($opt_t) {
+    $Do_totals=1;
+}
+
+if ($opt_v) {
+    $Verify=1;
+}
+
+@ARGV >= 1    || die "Usage: $prog [-hdcftv] pathname-list\n";
+
+# Error checking
+
+foreach $exe (@Needed_exes) {
+  $is_ok = checkExeExist($exe, $Debug);
+  if (!$is_ok) {
+      print(STDERR "ERROR: $prog: The required executable $exe not found in path\n");
+      exit 0;
+  }
+}
+
+if (!-d $Tmpdir) {
+    print(STDERR "ERROR: $prog: The temporary directory $Tmpdir does not exist\n");
+    exit 0;
+}
+
+# Remove the temporary file if it currently exists
+
+if (-e $Tmpfile) {
+    unlink($Tmpfile);
+}
+
+# Initialize
+
+$Numfound=0;
+$Numdir=0;
+
+# Go through each file on the command line
+# Alternative method is to use: &find(@ARGV) and then use subroutine wanted()
+
+if ($Use_cshell) {
+  FILE: foreach $filename (@ARGV) {
+      $is_ok=&processFile($filename, $filename, $Use_cshell, $Debug, $Verify);
+  }
+} else {
+    &find(@ARGV);
+}
+
+# Sort the global array in numerically descending order
+
+if ($Debug ==2) {
+    print(STDERR "Sorting the files by source code size...\n");
+}
+@Sorted_array = sort {$b <=> $a} @Found_array;
+
+# Check results
+
+$numsorted=@Sorted_array;
+
+if ($Numfound != $numsorted) {
+    print(STDERR "ERROR: Number of sorted lines not equal number found\n");
+}
+
+# Print a header
+
+print(STDOUT "==================================================================\n");
+if ($Debug) {
+    print(STDERR "Results of $prog...\n");
+}
+
+# Print the results
+
+foreach $item (@Sorted_array) {
+    print(STDOUT "$item\n");
+}
+
+# (Debug) Print the original array
+
+if ($Debug == 2) {
+    print(STDOUT "-------------------------- Original array ------------------------\n");
+    foreach $item (@Found_array) {
+	print(STDOUT "$item\n");
+    }
+}
+
+# Print totals (if specified)
+
+if ($Do_totals) {
+    if ($Debug) {
+	print(STDERR "Calculating totals...\n");
+    }
+    &doTotals(*Found_array, $Debug, $Verify);
+}
+
+# Done
+
+exit 1;
+
+# ----------------------------- END OF MAIN ------------------------------
+#
+# Subroutine:  wanted()
+# Function:    This is called by "find"
+# Input:       files that match the "find" parameters
+# Output:
+#
+
+sub wanted {
+    (($dev, $ino, $mode, $nlink, $uid, $gid) = lstat($_))
+	|| warn "stat: $name\n";
+
+    # Local variables
+
+    local($subname);
+    local($is_ok, $skip_file, $filename, $short_name, $full_name);
+
+    # Set defaults
+
+    $subname="wanted";
+
+    # Initialize
+
+    $short_name=$name;
+    $full_name=$name;
+
+    # Is the file a type we want?
+    # Skip directories and binary files
+
+    if (-d $name) {
+	if ($Debug) {
+	    print(STDERR "$prog: $subname: Skipping $name, is a directory\n");
+	}
+	return;
+    }
+
+    if (-B $name) {
+	if ($Debug) {
+	    print(STDERR "$prog: $subname: Skipping $name, is a binary file\n");
+	}
+	return;
+    }
+
+    if (!-f $name) {
+
+	($is_ok, $skip_file, $filename)=&skipFile($name, $Debug, $Verify);
+
+	if ($skip_file) {
+	    if ($Debug) {
+		print(STDERR "$prog: $subname: Skipping $name, not a plain file\n");
+	    }
+	    return;
+	} else {
+	    $short_name=$filename;
+	    $full_name=$name;
+	}
+    }
+
+    # Process the file
+
+    $is_ok=&processFile($short_name, $full_name, $Do_cshell, $Debug, $Verify);
+
+    # Done
+
+    return;
+}
+
+
+#---------------------------------------------------------------------------
+# Subroutine: processFile
+#
+# Usage:      $return_val= processFile($file, $fullname, $use_cshell, $debug, $verify)
+#
+# Function:   Process $file through clc. Update global variables and arrays
+#
+# Input:      $file              file to process
+#             $fullname          filename to put into array for printing
+#             $use_cshell        1 if use C-shell syntax, 0 if use find syntax
+#             $debug             debug flag
+#             $verify            verify flag
+#
+# Output:     $return_val        1 on success, 0 on error
+#
+# Overview:   
+#
+
+sub processFile {
+    local ($file, $fullname, $use_cshell, $debug, $verify) = @_;
+
+     # Local variables
+
+    local($return_val, $subname);
+    local($line, $nlines, $lines, $ncloc, $stmts, $filename, $string);
+    local($dbg2);
+
+    # Set defaults
+
+    $return_val=0;
+    $subname="processFile";
+    $nlines=0;
+
+    $dbg2=0;           # Set to 1 for additional debugging
+
+    # If we are doing cshell, return if not a file or a binary file
+
+    if (($use_cshell) && ((!-f $file) || (-B $file))) {
+	if ($debug) {
+	    print(STDERR "$prog: $subname: Skipping $file, not a valid file\n");
+	}
+	return($return_val);
+    }
+
+    # Run clc
+
+    if ($verify) {
+	print(STDERR "$prog: $subname: Running clc on $file\n");
+    }
+
+    system("clc $file > $Tmpfile");
+
+    # Open the results file
+
+    $is_ok = open(TMPFILE, "< $Tmpfile");
+    if (!$is_ok) {
+	print(STDERR "WARNING: $prog: $subname: Cannot open file $Tmpfile for $file\n");
+	return($return_val);
+    }
+
+    # Parse the output from clc
+    
+    while ($line = <TMPFILE>) {
+
+	# Increment the number of lines
+
+	$nlines++;
+
+	# Skip header lines, totals lines, and blank lines
+
+	if ($line =~ /NCLOC/) {
+	    next;
+	}
+
+	if ($line !~ /\w/) {
+	    next;
+	}
+	
+	if ($line =~ /^-------/) {
+	    next;
+	}
+
+	if ($line =~ /===total==/){
+	    next;
+	}
+
+	# Okay, found something
+	
+	$return_val=1;
+
+	# Parse out the needed items
+
+	($lines, $ncloc, $stmts, $filename)=split(' ', $line);
+	
+	# Add the NCLOC and filename to the global array
+
+	$string="${ncloc} ${fullname}";
+
+	$Found_array[$Numfound]=$string;
+
+	# Increment the global counter
+
+	$Numfound++;
+
+	# Debug
+
+	if ($dbg2) {
+	    print(STDERR "$prog: $subname: string: $string, line: $line");
+	}
+	
+    } #endwhile
+
+    # Remove the tmp file
+
+    unlink($Tmpfile);
+
+    # If the Tmpfile was empty, return an error
+
+    if ($nlines == 0) {
+	print(STDERR "WARNING: $prog: $subname: ERROR from clc on $file\n");
+	print(STDERR "---\n");
+	$return_val=0;
+    }
+
+    # Done
+
+    return($return_val);
+}
+
+
+#---------------------------------------------------------------------------
+# Subroutine: skipFile
+#
+# Usage:      ($return_val, $skip_file, $filename)=skipFile($file, $debug, $verify)
+#
+# Function:   Check $file to see if it is a valid $dir/$file combo. If so
+#             return skip_file=1;
+#
+# Input:      $file              file to process
+#             $debug             debug flag
+#             $verify            verify flag
+#
+# Output:     $return_val        1 on success, 0 on error
+#             $skip_file         1 to skip file, 0 to not skip file
+#             $filename          filename portion of $file if skip_file=0
+#
+# Overview:   
+#
+
+sub skipFile {
+    local ($file, $debug, $verify) = @_;
+
+    # Local variables
+
+    local($return_val, $subname);
+    local($is_ok, $last_slash, $filename, $dirname, $length, $skip_file);
+    local($current_dir);
+    local($dbg2);
+
+    # Set defaults
+
+    $return_val=0;
+    $subname="skipFile";
+
+    $dbg2=0;     # Set to 1 for additional debugging
+
+    # Initialize
+
+    $skip_file = 0;
+    $filename = "NULL";
+
+    # If not a plain file initially, may be a combo of directory and 
+    # plain file. Look for last slash (/) then test just the remaining
+    # portion
+
+    $last_slash=rindex($name, "/");
+
+    if ($last_slash <= 0) {
+	$skip_file=1;
+    } else {
+	$length=length($name);
+	$filename=substr($name, $last_slash + 1);
+	$dirname=substr($name, 0, $last_slash);
+
+	if ($dbg2) {
+	    print(STDERR "length: $length, filename: $filename, dirname:$dirname\n");
+	}
+
+	chdir($dirname);
+	if ((!-f $filename) || (-B $filename)) {
+	    $skip_file=1;
+	}
+    }
+
+    # Debug
+    
+    if ($dbg2) {
+	print(STDERR "$prog: $subname: Returned: skip_file: $skip_file, filename: $filename\n");
+    }
+
+    # Done
+
+    $return_val=1;
+    return($return_val, $skip_file, $filename);
+}
+
+#---------------------------------------------------------------------------
+# Subroutine: doTotals
+#
+# Usage:      ($return_val)= doTotals(*array, $debug)
+#
+# Function:   Parse the *array for directories and do totals for each directory.
+#
+# Input:      *array             array to read
+#             $debug             debug flag
+#
+# Output:     $return_val        1 on success, 0 on error
+#
+# Overview:   
+#
+
+sub doTotals {
+  local (*array, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($item, $num, $fullfilename, $current_dir);
+  local($top_level_total, $dir_total, $last_dir, $total_all);
+  local($last_slash, $length, $dirname, @Dir_array, @Dir_size_array);
+  local(@Sorted_dir_array, $entry, $i, $j);
+  local($dbg2);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="doTotals";
+
+  $dbg2=0;      # Set to 1 for additional debugging
+
+  # Print header
+
+  print(STDOUT "------------------------ Directory totals ----------------\n");
+
+  # Initialize
+
+  $top_level_total=0;
+  $dir_total=0;
+  $total_all=0;
+  $ndirs=0;
+
+  # Calculate the totals
+
+  foreach $item (@array) {
+
+      # Parse the linecount and the fullfilename from the array
+
+      ($num, $fullfilename) = split(' ', $item);
+
+      # Increment the overall total
+
+      $total_all=$total_all+$num;
+
+      # Since find goes through directories alphabetically, need to deal
+      # with files being found in upper level directories after reading
+      # a lower-level directory
+
+      # Find the filename and the directory portion
+
+      $last_slash=rindex($fullfilename, "/");
+
+      if ($last_slash <= 0) {
+	  
+	  if ($dbg2) {
+	      print(STDERR "$prog: $subname: $fullfilename is top-level-dir\n");
+	  }
+
+	  # This is a top-level file, add to the top-level total
+	  
+	  $top_level_total=$top_level_total + $num;
+
+	  # Reset the last-dir
+
+	  $last_dir="";
+
+      } else {
+
+	  # This has directories in the name
+
+	  $length=length($fullfilename);
+	  $dirname=substr($fullfilename, 0, $last_slash);
+
+	  if ($dbg2) {
+	      print(STDERR "\tdirname: $dirname, ndirs: $ndirs, fullfilename: $fullfilename, num: $num\n");
+	  }
+
+	  # Add to the dirs array
+
+	  $found=0;
+	  
+	  for($i=0; $i<=$ndirs; $i++) {
+	      if ($dirname eq $Dir_array[$i]) {
+		  $Dir_size_array[$i]=$Dir_size_array[$i] + $num;
+		  $found=1;
+
+		  if ($dbg2) {
+		      print(STDERR "\tfound match: i: $i, name array: $Dir_array[$i], num array: $Dir_size_array[$i]\n");
+		  }
+
+	      }
+	  }
+
+	  if (!$found) {
+	      $Dir_array[$ndirs]=$dirname;
+	      $Dir_size_array[$ndirs]=$num;
+	      $ndirs++;
+
+	      if ($dbg2) {
+		  print(STDERR "\tnot found: ndirs: $ndirs, name array: $Dir_array[$ndirs-1], num array: $Dir_size_array[$ndirs-1]\n");
+	      }
+	  }
+      }
+  }
+
+  # If the top-level directory was not included in the Dir_array, add it
+
+  if ($top_level_total > 0) {
+      $current_dir=`pwd`;
+      chop($current_dir);
+      $Dir_array[$ndirs]=$current_dir;
+      $Dir_size_array[$ndirs]=$top_level_total;
+      $ndirs++;
+  }
+
+  # Sort the totals size array
+
+  @Sorted_dir_array = sort {$b <=> $a} @Dir_size_array;
+
+  # We have now lost the connection between the name and the size by array
+  # index, need to find the name to go with the size
+
+  # Print the totals
+
+  for ($i=0; $i<$ndirs; $i++) {
+
+      $found=0;
+      $dirname="Unknown";
+
+      for ($j=0; $j<$ndirs; $j++) {
+	  if ($found) {
+	      next;
+	  }
+
+	  if ($Sorted_dir_array[$i] == $Dir_size_array[$j]) {
+	      $found=1;
+	      $dirname=$Dir_array[$j];
+	  }
+      }
+
+      print(STDOUT "$Sorted_dir_array[$i] $dirname\n");
+  }
+
+  print(STDOUT "=============== TOTAL:\t$total_all lines =============\n");
+
+  # Done
+
+  $return_val = 1;
+
+  return($return_val);
+}
+
+#---------------------------------------------------------------------------
+# Subroutine: checkExeExist
+#
+# Usage:      $return_val= checkExeExist($exe, $debug)
+#
+# Function:   Check whether $exe exists in the user's path
+#
+# Input:      $exe               name of exe to search for
+#             $debug             debug flag
+#
+# Output:     $return_val         1 on success, 0 on error
+#
+# Overview:   
+#
+
+sub checkExeExist {
+  local ($exe, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($check);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="checkExeExist";
+
+  # Do the check
+
+  $check=`which $exe`;
+
+  if (!$check) {
+    $return_val = 0;
+  } else {
+    $return_val = 1;
+  }
+
+  return($return_val);
+}
+

@@ -1,0 +1,10 @@
+#! /bin/csh -f
+
+snuff "rview -params rview.rtest"
+snuff "time_hist -params time_hist.rtest"
+
+
+
+
+
+

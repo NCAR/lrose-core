@@ -1,0 +1,268 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:35 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+PROPOSED DESIGN - DIDSS - DATA INGEST AND DISTRIBUTED SERVER SYSTEM
+===================================================================
+
+Mike Dixon, October 1998
+
+Overview.
+---------
+
+This document describes the design of the new DIDSS system of data
+ingest and handling. It includes data servers and a data 'mapper'
+process which will keep track of data availablity within a 'shared
+data region'.
+
+Shared data region.
+-------------------
+
+A shared data region is any networked region with access fast enough
+for distributed access to work properly. Generally this means a 
+fast LAN, such as ethernet, although slower links may be included
+in the region is the performance across those links is deemed
+satisfactory.
+
+Some projects are set up in such a way that each machine is a 
+shared data region. In such cases all data sets reside on each
+machine which requires access to them.
+
+Data types.
+-----------
+
+Any number of main data types may be used. For example, we might
+have:
+
+  mdv    - data in MDV format
+  spdb   - data in SPDB format
+  titan  - data in TITAN storm track format
+  grib   - data in grib format
+  etc. etc.
+
+Server Protocols.
+-----------------
+
+The server protocols will be derived from the data types, with 'p'
+appended. So using the types above we would have:
+
+  mdvp:   MDV data server protocol
+  spdbp:  SPDB data server protocol
+  titanp: TITAN data server protocol
+
+Directory structure.
+--------------------
+
+The top of the data directory tree will be defined by the environment
+variable $DIDSS_DATA_DIR.
+
+The various main data types will be stored in subdirectories of
+$DIDSS_DATA_DIR. For example, you could expect to see the following
+subdirectories:
+
+  $DIDSS_DATA_DIR/mdv    - all mdv data
+  $DIDSS_DATA_DIR/spdb   - all spdb data
+  $DIDSS_DATA_DIR/titan  - all titan data
+  $DIDSS_DATA_DIR/grib   - all grib data
+
+etc.
+
+The various data sets would be stored in subdirectories of these
+main directories. For example:
+
+  $DIDSS_DATA_DIR/mdv/sat/vis        - visible satellite data
+  $DIDSS_DATA_DIR/mdv/radarCart      - cartesian radar data
+  $DIDSS_DATA_DIR/spdb/boundaries    - colide-derived boundaries
+  $DIDSS_DATA_DIR/spdb/ltg           - lightning
+  $DIDSS_DATA_DIR/spdb/surface/metar - METARs
+  $DIDSS_DATA_DIR/titan/tz30         - TITAN 30dBZ storm data
+
+Putting data to disk.
+---------------------
+
+Data may be put to disk by any number of different processes.
+The put function may optionally register information about the
+latest data with the data mapper.
+
+The put function may optionally have a distributed capability. In this
+case the put function would contact a server to perform the put.
+
+The put API should effectively hide the implementation, so that the
+programmer server functionality, if it is implemented, is trasparent.
+
+Getting data from disk.
+-----------------------
+
+The data may be read by any number of processes.
+
+The get function may optionally have a distributed capability. In this
+case the get function would contact a server to perform the get.
+
+The get API should effectively hide the implementation, so that the
+programmer server functionality, if it is implemented, is trasparent.
+
+URL definition.
+---------------
+
+Data location will be specified using a URL-style address.
+
+The URL syntax will be:
+
+  protocol:translator:params//host:port:dir#args
+
+The protocol and dir are required. The translator, params, host, port
+and #args are optional. All delimiters except the # are required.
+
+The optional translator, if present, defines the program to be used to
+translate the data into the desired form.
+
+The optional params, if present, defines the param file to be used by
+the server or the translator.
+
+If the host is missing, the data_mapper must be contacted to determine
+the host.
+
+If the port is present, contact with the server is made via this
+alternative port. This will only be used if multiple users on the
+host are running a server.
+
+The #args is an open-ended mechanism for passing extra information to
+the server API. It will probably not be used in the majority of cases.
+
+URL examples are:
+
+Visible satellite MDV data from virga on the standard port:
+
+  mdvp:://virga::sat/vis
+
+IR satellite MDV data - host to be determined from data_mapper:
+
+  mdvp:://::sat/ir
+
+Visible satellite MDV data from virga using server on port 11000:
+
+  mdvp:://virga:11000:sat/vis
+
+Colide boundaries SPDB data on babinet:
+
+  spdbp:://babinet::boundaries/colide
+
+TITAN tz30 SPDB data, using alternative server on port 14900, the
+Titan2Symprod translation process running from the mult_forecasts
+parameter file:
+
+  spdbp:Titan2Symprod:mult_forecasts//vil:14900:titan/tz30
+
+
+Data mapper.
+------------
+
+The data mapper is a process which listens on a well-known port,
+and receives and serves out information on data sets within the
+shared data region.
+
+Up to 2 data mappers may run in a shared data region. The primay
+mapper will run on $DATAMAP_HOST, and the secondary on $DATAMAP_HOST2.
+The information stored on the secondary will mirror that on the
+primary. The rationale for 2 mappers is redundancy - if the primary
+host fails the secondary will be available.
+
+The data mapper will store the following information on each
+data set:
+
+  host: host on which the data resides
+
+  user: user who owns data
+
+  data_type: major data type, e.g. mdv
+
+  dir: subdirectory for data store
+
+  latest_time: the time of the latest data put to the store.
+               This is not necessarily the most recent data
+               in the store, because in playback-type mode
+               the latest data may precede other data.
+
+  start_time: start time of data in the store
+
+  end_time: end time of data in the store
+
+
+Data mapper clients.
+--------------------
+
+A number of clients will use the data mapper for gathering information
+on the data.
+
+(a) get functions: these use the data mapper to resolve the host name
+if it is missing in the URL.
+
+(b) data monitors: these processes compare the information in the
+data mapper with a list of expected data sets to provide information
+on the status of the data sets. For example, a process may provide
+information on which data sets are late by comparing the data mapper
+information with a list of data sets and the expected frequencies for
+data arrival.
+
+
+Simple servers.
+---------------
+
+A simple server is one which never requires any translation
+processes. For example, if all gridded data sets are stored in MDV
+format, the data may be served out using the MdvServer without
+translation.
+
+A simple server starts up in default mode, without reading any paramter
+file, and then listens on its port for requests. The port may be
+overridden via the command line.
+
+When a simple server receives a request, it creates a new thread of
+execution either using a thread call or by spawning a child, depending
+upon implementation.
+
+The thread uses the URL to find the relevant directory. If the params
+option is set, it reads the params file. It then serves out the data
+and exits.
+
+
+Translating servers.
+--------------------
+
+A translating server is one which sometimes requires a translation
+process. For example, sometimes SPDB data must be translated into 
+graphical objects before being served out to a display.
+
+A translating server acts just like a simple server for any requests
+for which the translator option is not set.
+
+If the translator option is set, the server checks whether it has
+already started the translation process, using the required params
+file if the params option is also set. If necessary, it starts the
+translator. It then passes the request to the translator, which
+processes it and passes back the product data. The product data is
+then served to the client.
+
+Translators.
+------------
+
+The translator processes are themselves servers. When spawned a
+translator reads the relevant param file, if required, and then
+handles any requests passed to it from the translating server.
+Each request is handled in a separate thread.
+
+
+
+
+
+
+
+
+
+
+
+

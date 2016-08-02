@@ -1,0 +1,877 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:48 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+    File: mb.doc
+
+    A description of the message buffer, MB, module
+
+
+    A. General:
+
+	The message buffer (MB) is a message passing tool for developing 
+	distributed applications. The MB described here is implemented using
+	files. Processes send messages (or data sets) to an MB and other processes 
+	can then receive those messages by reading them from the MB. An MB can 
+	hold multiple messages. Multiple writers and readers can access an MB
+	simultaneously. There is no connection (such as socket connections)
+	between communicating processes using the MB. 
+
+	The MB can be used to build reliable group multicasting tools such as 
+	abcast, cbcast and fbcast tools (Refer to Reliable Distributed Computing 
+	with the Isis Toolkit, Kenneth P. Birman and Robert Van Renesse, IEEE 
+	Computer Society Press, 1993), as well as reliable data replication 
+	utilities, in cooperation with the RAICE tool.
+
+	The MB package provides a set of functions for applications to open 
+	(create if necessary), access and close an MB. The MB guarantees the 
+	following:
+
+	1. Any message that is successfully written to an MB will be available
+	   to all processes that want to read it until the message is expired. 
+	   No incomplete or corrupted message can be read by any reader. 
+	   Any reader or writer can access an MB at any time without observing 
+	   an access synchronization requirement.
+
+	2. A writer or a reader can be terminated at any time within an MB 
+	   function call without damaging the MB or leaving corrupted messages in 
+	   the MB. MB integrity is not guaranteed if the termination is caused by 
+	   a hardware or UNIX system failure since file system integrity may be 
+	   compromised in such cases.
+
+	3. The system resources (memory and disk space) used by the MB are kept 
+	   within user specified limits. The efficiency of message read and write 
+	   operations is an important design consideration.
+
+	An MB message is a byte string of a given length. Each message in an MB 
+	has a unique message id, a non-negative integer number, which is used for 
+	identifying the message. When the message is a real time measurement or 
+	product, the data time can be used for the message id. In some applications 
+	a simple sequence number is a natural choice for the message id. In other
+	cases, message attributes, writer's id and other information can also be 
+	encoded in the message id, if necessary. The user must guarantee the 
+	uniqueness of the message ids in writing the MB.
+
+	An MB has a fixed size message buffer and a specified maximum number of 
+	messages. When the free space in the buffer is insufficient or the 
+	message number reaches the maximum number and there is a new incoming 
+	message, messages will be removed in first-in first-out order until there 
+	is room for the new message. 
+
+	The MB supports efficient random message reads and writes in terms of the
+	message ids. In addition, the MB supports sequential message queue
+	and replaceable message pool applications.
+
+	With the MB functions implemented as remotely callable functions, one can
+	access MBs residing on remote hosts in a transparent way. Refer to the
+	RMB module for a detailed description. This renders the MB a useful tool 
+	for building distributed applications.
+
+	The control information in the MB is written in Big Endian byte order.
+	Thus the MB supports distributed applications running in heterogeneous
+	hardware environments. For example, a MB generated on a Big Endian host
+	can be copied to a Little Endian host and read by a process running on 
+	it. Note that, however, the messages themselves are not processed by
+	MB and must be converted by the application processes. The MB module
+	used the BE module for this purpose.
+	
+    B. The MB interface:
+
+	An application using the MB library routines must include "mb.h".
+	The MB library supports the following functions:
+
+	int MB_open (char *name, int flags, int perm,
+                     int msg_size, int maxn_msgs) 
+
+	    This function opens an MB file and returns an MB descriptor for later 
+	    MB accesses. It creates the file first if the named MB file does not 
+	    exist and it is specified to do so. The argument "name" specifies the 
+	    name of the MB file.  "perm" specifies the access permissions
+            of the MB file in exactly the same  way as the "perm" argument
+            in the UNIX "open" system call. This must be 
+	    at least readable and writable for the owner. Refer to UNIX system
+	    call "open" for how to specify this argument. "msg_size" specifies the
+	    expected (mean) size of the messages that will be put in the MB. The 
+	    minimum value for msg_size is 1. "maxn_msgs" is the maximum number of 
+	    messages that can be stored in the MB at any given time. The minimum 
+	    value for maxn_msgs is 2 (1 if replaceable MB) and there can be an 
+	    implementation dependent maximum value for it.
+
+	    The argument "flags" is an "or" of some of the following flags:
+	
+		MB_DEFAULT: This flag indicates that default is used for unspecified
+			flags. This flag has no effect on the MB's behavior and is 
+			used only for making code more readable.
+
+		MB_SEQUENTIAL, MB_REPLACE, MB_RANDOM: An MB is created as of one of 
+			the three MB types: the sequential, the replaceable and the 
+			random. The default (without these flags) is the random MB. 
+			Specifying more than one of these flags simultaneously will 
+			cause an MB_BAD_ARGUMENT error.
+
+			For a random or replaceable MB, the user must specify an id 
+			in MB_write (MB_NEW_ID is not acceptable). For sequential 
+			MB, the user must use sequential ids. Specifically, if the 
+			MB is empty, any number less than MAX_ID (0xfe000000) can 
+			be used as a message id. If the MB is not empty, the only id
+			can be used is the number that is one larger than the id of 
+			the last message in the MB. One can, for sequential MB, 
+			always use MB_NEW_ID in calling MB_write and use an id 
+			assigned by the MB library.
+
+			A message with the same id as that of an existing message
+			in the MB can be written only if the MB is created as the 
+			replaceable MB. Otherwise MB_write will fail and return
+			MB_DUPLICATED. For the replaceable MB, the MB_write will 
+			replace the old message with the same id if the new message 
+			has exactly the same size as the old one. If the size does 
+			not match, MB_write will fail and return MB_DUPLICATED. The
+			MB_REPLACE flag disables the automatic message expiration 
+			which means that no messages in the MB will be expired due to
+			insufficient message space or number. MB_clear can be used to
+			discard all existing messages in an MB regardless of its types. 
+
+		MB_MUST_READ: This flag indicates that messages will not be expired
+			until they are read. This flag can be used only if 	
+			MB_SEQUENTIAL is set. Note that if a message has been read, 
+			all messages coming before it are subject to expire even if 
+			they have never been read.
+
+		MB_INIT: With this flag set, MB_open will create the MB if it does 
+			not exist. This flag automatically turns MB_RDWR on.
+
+		MB_RDWR: This flag enables the MB write. Without this flag the opened 
+			MB is only for read. If the user tries to write to a read only 
+			MB, an MB_READ_ONLY error will return. 
+
+		MB_PARITY: This flag enables a parity check in the MB cache. If the
+			application using MB has a memory leak problem, there is a 
+			chance that it unexpectedly writes to the cache and then
+			updates to the MB file resulting in a corrupted MB file. To 
+			avoid this, on can use this flag. The parity check adds some
+			processing overhead.
+
+	    The flags MB_SEQUENTIAL, MB_REPLACE, MB_RANDOM and MB_MUST_READ, used
+	    in combination, specify the following four different types:
+
+		MB_RANDOM (or nothing):	random MB;
+		MB_REPLACE: replaceable MB;
+		MB_SEQUENTIAL: sequential MB;
+		MB_SEQUENTIAL | MB_MUST_READ: sequential MB in which messages must be 
+					      read before they can be expired.
+
+	    The arguments permissions, msg_size and maxn_msgs are used when a new MB 
+	    needs to be created. If the named MB exists, each of these numbers,
+	    if non-zero, is checked against that of the existing MB. The flags
+	    MB_MUST_READ, MB_SEQUENTIAL and MB_REPLACE specified in "flags" are
+	    also checked against the existing MB's flag setting. If any of these
+	    checks fails, MB_open will return MB_EXIST. Note that the flags are
+	    checked only if they are specified in "flags". Thus one can open an 
+	    existing MB with fewer flags than the existing MB actually has. 
+	    The existing MB's flags then will be used for the open MB descriptor. 
+	    One can retrieve the flags by calling MB_stat ().
+
+	    When an existing MB is opened, an internal consistency check is performed 
+	    for the MB. If the MB is found to be inconsistent internally (the MB 
+	    is corrupted), MB_open will fail and return an error number. However, 
+	    if MB_INIT is set and the existing file is found to be not an MB file 
+	    or not a properly initialized MB file the existing file is removed and a 
+	    new MB file is created. This policy is necessary for resolving a possible
+	    competitive creation problem.
+
+	    The space used for storing messages in the MB is msg_size * maxn_msgs
+	    bytes. The space used for storing control information is approximately
+	    20 * maxn_msgs + 132 bytes. Because the space used for messages are not 
+	    pre-allocated, the file size is smaller than its maximum size initially
+	    when there are fewer messages written to the MB. This is desirable when
+	    the MB is used for archive purpose.
+
+	    This function returns a non-negative MB descriptor on success or one 
+	    of the following negative numbers indicating an error:
+
+		MB_BAD_ARGUMENT: One of the calling arguments does not make sense
+			or is out of range (e.g., MB name is too long or is a null 
+			string, maxn_msgs is too large, and so on).
+		MB_OPEN_FAILED: Failed in creating a new or opening an existing MB
+			file (due to, for instance, a permission problem, or the MB
+			does not exist while the MB_INIT is not set).
+		MB_TOO_MANY: Too many open MBs.
+		MB_LOCK_FAILED: Failed in getting a file lock. This happens if the 
+			UNIX system is not setup correctly (e.g., The lock daemon is 
+			not running).
+		MB_ALLOCATE_FAILED: Failed in allocating work space.
+		MB_UPDATE_FAILED: Failed in updating the MB file (E.g. A permission
+			problem).
+		MB_EXIST: There exists an MB but with different attributes.
+		MB_NONMB_FILE: There exists a file named "name", which is not an MB 
+			file and MB_INIT is not specified.
+		MB_CORRUPTED: The MB file exists but it is corrupted.
+
+	int MB_read (int mbd, char *buffer, int buf_size, unsigned int msg_id, 
+			unsigned int *ret_id)
+
+	    This function reads a message of id "msg_id" in MB "mbd" and copies it
+	    into "buffer" of size "buf_size" bytes. On success, the length of the
+	    message read is returned as the function return value and its id is
+	    returned in "ret_id", if ret_id is not NULL. If the size of the message
+	    is larger than the buffer size (buf_size), the message is not read and
+	    an error value of MB_TOO_SMALL is returned.
+
+	    The argument "msg_id" can also take, instead of a message id, one of the 
+	    following values:
+
+		MB_SMALLEST: the message with the smallest id
+		MB_LARGEST: the message with the largest id
+		MB_CURRENT: the current message pointed to by the read pointer.
+		MB_LATEST: the newcomer message
+
+	    For each open MB descriptor, the MB keeps a read pointer which initially
+	    points to 0. MB_read (..., MB_CURRENT, ...) returns the first message 
+	    at or after the read pointer, if such a message exists. Upon success of
+	    a MB_read call the read pointer is advanced to pointing to after the 
+	    message read in the sorted message list. One thus can call 
+	    MB_read (..., MB_CURRENT, ...) to get the next message after previously 
+	    read message in the list. The read pointer can also be modified by a 
+	    MB_seek call. Refer to MB_seek for a description.
+
+	    This function returns the length of the message on success. If the 
+	    specified message does not exist, it will return MB_NOT_FOUND (0). On 
+	    other failure conditions it returns one of the following negative 
+	    numbers to indicate an error:
+
+		MB_TOO_SMALL: The buffer is too small to hold the message.
+		MB_BAD_ARGUMENT: One of the calling arguments does not make sense
+			or is out of range.
+		MB_INVALID: mbd is not a valid MB descriptor.
+		MB_READ_FAILED: Failed in reading the file.
+		MB_CORRUPTED: The MB is corrupted.
+		MB_LOCK_FAILED: Failed in getting a file lock.
+		MB_ALLOCATE_FAILED: Failed in allocating work space.
+		MB_UPDATE_FAILED: Failed in updating the MB file.
+
+	int MB_write (int mbd, char *msg, int length, unsigned int msg_id, 
+			unsigned int *ret_id)
+
+	    This function writes a message of id "msg_id" and length "length" bytes 
+	    in buffer "msg" into the MB, "mbd".
+
+	    The argument "msg_id" specifies the message id. The id actually used 
+	    is returned in argument "ret_id", if ret_id is not NULL. The argument 
+	    "msg_id" must be a valid message id. For sequential MB, specifically, 
+	    if the MB is empty, any number less than MAX_ID (0xfe000000) can be used 
+	    as a message id. If the MB is not empty, the only id can be used is the 
+	    number that is one larger than the id of the last message in the MB. If 
+	    the MB is created as MB_SEQUENTIAL, the argument "msg_id" can take the 
+	    value of MB_NEW_ID. In this case the MB will assign a new unique 
+	    id for the new message. The new id used will be an increasing integer 
+	    unless an id overflow happens, in which case the new id is reduced by 
+	    a page size (ID_PAGE_SIZE).
+
+	    This function returns the message length on success and one of the
+	    following negative numbers to indicate an error:
+
+		MB_READ_ONLY: The MB is read only.
+		MB_FULL: There is not enough free space for the message because the
+			message is too large or the MB is created in MB_MUST_READ 
+			mode and there are unread messages which cannot be expired.
+		MB_DUPLICATED: There is already a message in the MB having the 
+			same id. Or, the MB is created as MB_REPLACE and the new 
+			message has different size from the old message.
+		MB_BAD_ARGUMENT: One of the calling arguments does not make sense
+			or is out of range.
+		MB_ID_NOT_ACCEPTED: The message id specisied in "msg_id" is not
+			acceptable.
+		MB_NEED_ID: The call needs a user specified message id (in cases the 
+			MB is not sequential).
+		MB_INVALID: mbd is not a valid MB descriptor.
+		MB_TOO_LARGE: The message is too large for the message buffer.
+		MB_CORRUPTED: The MB is corrupted.
+		MB_LOCK_FAILED: Failed in getting a file lock.
+		MB_ALLOCATE_FAILED: Failed in allocating work space.
+		MB_UPDATE_FAILED: Failed in updating the MB file.
+		MB_PARITY_ERROR: The parity check finds an error, which means that
+			the application has a memory leak problem.
+
+	int MB_close (int mbd)
+	
+	    This function closes an open MB "mbd". It releases all resources
+	    allocated when the MB was opened.
+
+	    MB_close returns MB_SUCCESS on success or MB_INVALID if mbd is not a 
+	    valid MB descriptor.
+
+	int MB_clear (int mbd)
+	
+	    This function expires all messages in an open MB "mbd". It moves the
+	    read pointer to the last message before discarding the messages. The
+	    location of the free space is relocated to the beginning of the 
+	    message area. The MB_RDWR flag is needed for this function to clear
+	    messages.
+
+	    MB_clear returns MB_SUCCESS on success, MB_INVALID if mbd is not a valid
+	    MB descriptor, MB_READ_ONLY if the MB is opened as read-only, or
+	    MB_PARITY_ERROR if the parity check finds an error, which means that
+	    the application has a memory leak problem.
+
+	In addition to the above basic functions the MB module also supports the
+	following additional functions. In the following, we consider that the 
+	messages in the MB are placed in a priority queue with increasing ids. Note 
+	that messages do not need to be written to the MB in such an order.
+
+	int MB_stat (int mbd, MB_status *mb_st_buf)
+
+	   This function retrieves the current status of the MB, mbd. On success, 
+	   it sets the data structure in "mb_st_buf". The data structure contains 
+	   the following fields:
+
+	       int size;			/* size of the MB */
+	       int msg_size;			/* average message size */
+	       int maxn_msgs;			/* maximum number of messages */
+	       int perm;			/* MB access perm */
+	       int flags;			/* MB flags */
+	       int n_msgs;			/* number of messages in the MB */
+	       unsigned int latest_id;		/* latest message id */
+
+	    If the latest message is expired or there is no message available 
+	    for reading. The value returned for latest_id is 0.
+
+	    This function returns MB_SUCCESS on success or one of the following
+	    negative numbers to indicate an error:
+
+		MB_BAD_ARGUMENT: mb_st_buf is a NULL pointer.
+		MB_INVALID: mbd is not a valid MB descriptor.
+		MB_CORRUPTED: The MB is corrupted.
+		MB_LOCK_FAILED: Failed in getting a file lock.
+	
+	int MB_get_list (int mbd, MB_List *list, int nmsgs, unsigned int start_id)
+
+	    This function returns a list of available messages in the MB "mbd". 
+	    The list starts from the first message having id >= "start_id". The 
+	    size of the list is limited by "nmsgs" and the list is returned in 
+	    "list" and is sorted based on increasing ids. Each item in the array 
+	    "list" is a structure containing the following members:
+
+		unsigned int id: 		the message id;
+		int size:			size of the message.
+
+	    The caller must allocate the appropriate space for the list. 
+
+	    The argument "start_id" can also take the values of MB_LARGEST,
+	    MB_SMALLEST, MB_CURRENT, MB_LATEST. Refer to MB_read for their meaning.
+
+	    The messages returned in the list are not guaranteed to be available 
+	    after the function call due to potential expiration.   
+
+	    This function returns the number of messages found. If no message is 
+	    found, it returns MB_NOT_FOUND (0). It can return one of the following 
+	    negative numbers to indicate an error:
+
+		MB_BAD_ARGUMENT: One of the calling arguments does not make sense
+			or is out of range.
+		MB_NOT_FOUND: a message with "msg_id" is not found.
+		MB_INVALID: mbd is not a valid MB descriptor.
+		MB_CORRUPTED: The MB is corrupted.
+		MB_LOCK_FAILED: Failed in getting a file lock.
+		MB_ALLOCATE_FAILED: Failed in allocating work space.
+
+	int MB_seek (int mbd, int offset, unsigned int msg_id)
+
+	    This function, like lseek, moves the read pointer by "offset" 
+	    messages, in the sorted message list, started from the message "msg_id". 
+	    A negative offset moves the pointer backward and a positive offset moves 
+	    it forward (toward larger msg_id). For example, MB_seek (mbd, -1, msg_id) 
+	    moves the pointer to point to the message with the largest message id 
+	    that is smaller than "msg_id". If the MB is empty, the function does 
+	    nothing and returns 0.
+
+	    The argument "msg_id" can also take the values of MB_LARGEST,				    MB_SMALLEST, MB_CURRENT, MB_LATEST.
+            Refer to MB_read for their meaning.
+
+	    The pointer can not be set beyond the first message in the sorted list. 
+	    When the pointer movement reaches the first message in the list, the 
+	    pointer stays there. When the pointer moves beyond the last message, it
+	    stops and points right after the last message.
+
+	    Note that MB_seek (mbd, 0, msg_id) followed by 
+	    MB_read (..., MB_CURRENT, ...) gets the message with id "msg_id".
+	    MB_seek (mbd, 1, MB_LARGEST) sets the pointer to point to after the last 
+	    message in the sorted list and the next call of
+	    MB_read (..., MB_CURRENT, ...) will reads a new message after the last
+	    message if the latter exists.
+
+	    The function returns the amount of movement in terms of the number of 
+	    messages. If an error occurs, one of the following negative error numbers 
+	    is returned.
+
+		MB_BAD_ARGUMENT: One of the calling arguments does not make sense
+			or is out of range.
+		MB_NOT_FOUND: a message with "msg_id" is not found.
+		MB_INVALID: mbd is not a valid MB descriptor.
+		MB_CORRUPTED: The MB is corrupted.
+		MB_LOCK_FAILED: Failed in getting a file lock.
+		MB_ALLOCATE_FAILED: Failed in allocating work space.
+
+	    If there is no message, the function returns 0.
+
+	int MB_read_part (int mbd, char *buffer, int offset, int length, 
+			unsigned int msg_id, unsigned int *ret_id)
+
+	    This function is the same as MB_read except that it allows reading of a
+	    part of a message - "length" bytes staring from the "offset"-th byte.
+
+	    Other arguments and return values are identical to that of MB_read. Refer 
+	    to MB_read for further details.
+
+
+    C. Examples of using MB:
+
+	The following section of code tries to open an MB in the current directory 
+	and write a message to it. We use the current time for the message id.
+
+	#include "mb.h"
+	#include <time.h>
+        #include <stdio.h>
+
+	#define MSG_SIZE	100
+	#define MB_PERM 	0660
+	#define MAXN_MSGS	32
+
+	static char mb_name [] = "test_mb";
+	static char message [] = "This is a test message";
+	int mbd;
+	int ret;
+
+	/* open the MB (create it if necessary) */
+	mbd = MB_open (mb_name, MB_INIT, MB_PERM, MSG_SIZE, MAXN_MSGS);
+	if (mbd < 0) {               		/* open failed */
+	    printf ("MB_open failed. The return number is %d\n", mbd);
+	    exit (-1);
+	}
+
+	/* write a message */
+	ret = MB_write (mbd, message, strlen (message) + 1, (unsigned int)time (NULL), 
+			NULL);
+
+	if (ret < 0) {              		/* write failed */
+	    printf ("MB_write failed. The return number is %d\n", ret);
+	    exit (-1);
+	}
+	else { 					/* success */
+	    printf ("Done\n");
+	    exit (0);
+	}
+
+	The following code demonstrates how to access the message with the largest
+	id in an MB.
+	We assume the Mb already exists.
+
+	#include "mb.h"
+
+	#define BUF_SIZE	 	256
+
+	static char mb_name [] = "test_mb";
+	char buf[BUF_SIZE];
+	int mbd;
+	unsigned int msg_id;
+	int i;
+
+	/* open the MB */
+	mbd = MB_open (mb_name, 0, 0, 0, 0);
+	if (mbd < 0) {               		/* open failed */
+	    printf ("MB_open failed. The return number is %d\n", mbd);
+	    exit (-1);
+	}
+
+	/* read the message with the largest id */
+	ret = MB_read (mbd, buf, BUF_SIZE, MB_LARGEST, &msg_id);
+
+	if (ret < 0) {              		/* write failed */
+	    printf ("MB_read failed. The return number is %d\n", ret);
+	    exit (-1);
+	}
+	else if (ret == MB_NOT_FOUND){ 		/* no message available */
+	    printf ("There is no message in the MB\n");
+	    exit (0);
+	}
+	else { 					/* success */
+	    printf ("The message read (id = %x): %s\n", msg_id, buf);
+						/* assume the msg is a c string */
+	    exit (0);
+	}
+
+	The MB tool can be used as a message queue, in which case every
+	message sent has to be received by the receiver. This is accomplished
+	by creating an MB with flags MB_MUST_READ | MB_SEQUENTIAL. With these
+	flags set, a message in the MB will not be expired unless this or a  
+	message after it has been read at least once. If there is no reader 
+	or the reader can not catch up with the writer, unexpired messages will 
+	eventually use up the MB's free space and further MB_write will fail 
+	and return MB_FULL. The message queue style MB is useful mainly for single 
+	reader applications. The following shows how an MB is used as a message
+	queue. 
+
+	The message writer's code:
+
+	#include "mb.h"
+
+	#define MSG_SIZE	100
+	#define MSG_BUF_SIZE	256
+	#define MAXN_MSGS	32
+	#define MB_PERM         0666
+	
+	static char mb_name = "test_mb";	/* MB name */
+	char message[MSG_BUF_SIZE];		/* message buffer */
+	int mbd;				/* MB descriptor */
+	unsigned int ret_id;
+
+
+        /* open an MB for writing. create it if needed. */
+        mbd = MB_open (mb_name, MB_INIT | MB_MUST_READ | MB_SEQUENTIAL, 
+				MB_PERM, MSG_SIZE, MAXN_MSGS);
+        if (mbd < 0) {               		/* open failed */
+            printf ("MB_open failed. The return number is %d\n", mbd);
+            exit (-1);
+        }
+
+        while (1) {
+            int ret;
+	    int msg_len;
+
+	    /* generate the message */
+	    ......
+
+	    /* send the message */
+            ret = MB_write (mbd, message, msg_len, MB_NEW_ID, &ret_id);
+
+            if (ret > 0) {   			/* success */
+	        printf ("Message sent (id = %x)\n", ret_id); 
+	        continue;
+            }
+
+            if (ret == MB_FULL) {    		/* MB is full. We will retry */
+	        printf ("MB is full\n"); 
+	        usleep (300000); 
+	        continue;
+            }
+
+            else {                    		/* other errors */
+	        printf ("MB_write failed. The return number = %d\n", ret);
+	        exit (-1);
+            }
+        }
+
+
+	The message reader's code:
+
+	#include "mb.h"
+
+	#define MSG_BUF_SIZE 256
+	
+	static char mb_name = "test_mb";	/* MB name */
+	char message[MSG_BUF_SIZE];		/* message buffer */
+	int mbd;				/* MB descriptor */
+
+
+        /* open an MB for reading */
+        mbd = MB_open (mb_name, MB_MUST_READ | MB_SEQUENTIAL, 0, 0, 0);
+        if (mbd < 0) {              		/* open failed */
+            printf ("MB_open failed. The return number is %d\n", mbd);
+            exit (-1);
+        }
+
+        while (1) {
+            int ret;
+	    unsigned int msg_id;
+
+	    /* read a message */
+            ret = MB_read (mbd, message, MSG_BUF_SIZE, MB_CURRENT, &msg_id);
+
+            if (ret > 0) {   			/* success */
+	        printf ("Message read (length = %d, id = %x): %s\n", ret, msg_id, 
+			message); 		/* assume message is a c string */
+	        continue;
+            }
+
+            if (ret == MB_NOT_FOUND) {    	/* MB is empty. We will retry */
+	        printf ("MB is empty\n"); 
+	        usleep (300000); 
+	        continue;
+            }
+
+            else {                     		/* other errors */
+	        printf ("MB_read failed. The return number = %d\n", ret);
+	        exit (-1);
+            }
+        }
+
+
+
+    D. MB implementation outlines:
+
+	An MB file contains a control area followed by a message area. In the 
+	beginning of the MB control area there is an MB attribute structure, which 
+	contains the basic MB attributes.
+	After the structure there is a message record table, which records the
+	message ids and their locations in the message area. The message records are
+	stored in the order they are written to the MB. To support efficient message
+	access based on their ids, a sorted index table (SIT) is generated and 
+	stored every time a new message is written to the MB. The contents of the SIT
+	are the index numbers in the record table sorted in terms of the message
+	ids.
+
+	In order to provide crash protection, the message record table and the SIT 
+	are double buffered - two versions of these tables (A and B) are stored in 
+	the control area and are alternatively used by the MB. When one of them is in 
+	use, the other can be updated. This guarantees that no existing message in 
+	the MB is lost if the writer fails before the MB message table updating 
+	is finished. The "update_cnt" field in the MB attribute structure is used 
+	for indicating which table should be used.
+
+	Each version of the message record tables has a header for storing table 
+	related information, such as the number of message records, the free space 
+	location and size and other information for the message record table. 
+
+	To reduce the number of file read/write calls in MB_read and
+	MB_write, the table header, the message record table and the SIT
+	are cached in memory after the MB is opened by the application. The cache
+	is updated only if it is necessary (for example, a new message is written
+	in the MB by another writer). The cache update is trigged by detecting any 
+	change of update_cnt in the attribute structure.
+
+	MB control information cache as well as other control parameters are stored 
+	in a structure called Mb_struct, which is allocated for each open MB 
+	descriptor. Note that the sit buffer location (Mb_struct.sit) is floating, 
+	which allows the SIT update to be more efficient when older messages expire.
+
+	To further reduce the number of file read/write calls, the message record
+	table header and the SIT is stored immediately after the last record in the
+	message record table. By doing this, a single read/write call is sufficient, 
+	for most times, for reading/writing the new records, the header as well as 
+	the SIT. The location information of the header and SIT is over-loaded in
+	update_cnt in the attribute structure.
+
+
+	The flow diagram of the MB_write function:
+
+			|
+		exclusively lock the MB file
+			|
+		read the control info (update cache) if necessary (E.g. It may have 
+		been changed due to other writers or readers)
+			|
+		if the free space is not sufficient for the new message or the 
+		number of messages reaches its maximum:
+		    remove sufficient message entries from the message table and
+		    update the control area in the file (write out the cache)
+			|
+		write the message in the message area
+			|
+		update the message record table and SIT in cache (a new entry is 
+		inserted in the table and free space is reserved for the next message 
+		in the message area by expiring additional messages if necessary)
+			|
+		update the control area in the file (write out the cache)
+			|
+		release the file lock and return
+
+	Note that, if there is sufficient free space reserved in the message area, 
+	the first cache write-out can often be avoided.
+
+	The MB_read flow diagram:
+
+			|
+		lock the MB file
+			|
+		read control information (update cache) if necessary
+			|
+		search for the message using a binary search if necessary
+			|
+		read the message
+			|
+		update read pointer if necessary
+			|
+		update read_id field in the MB file if necessary
+			|
+		release the file lock and return
+
+
+    E. Implementation notes:
+
+	The MB file structure:
+
+	    MB attribute structure (sizeof (Mb_attribute))
+
+	    message record table, header and SIT - version A (Mb_attribute.tbl_size)
+
+	    message record table, header and SIT - version B (Mb_attribute.tbl_size)
+
+	    Message area (Mb_attribute.mb_size)
+
+	The MB attribute structure (Mb_attribute) contains basic MB attributes.
+
+	The update_cnt field in the structure is a 4 byte integer, which contains 
+	critical MB control information and is updated every time after the MB 
+	control area is updated. The higher 29 bits of update_cnt is used for 
+	storing the index of the last message record in the message record table 
+	(further explained later). The value update_cnt is also used for indicating 
+	which version of the message record table should be used: If it is odd 
+	version B is used or, otherwise, version A is used. The value update_cnt 
+	must be increasing to allow a user to reliably detect its change. Since it 
+	is impossible to keep update_cnt increasing without overflow, we must let it 
+	fall back before update_cnt overflows. To maintain reliable cache updates, 
+	we record the previous cache update time (Mb_struct.time) and force a new 
+	update after a certain time interval.
+
+	The update of update_cnt (a 4 byte write) must be atomic to maintain MB's
+	integrity. This is true for 32 bit hardware as we tested. The MB maintains
+	a copy of update_cnt in the message record table header, which is used
+	for verification purpose. If the update_cnt update fails, the MB will 
+	become unaccessible (corrupted).
+
+	The read_id field, updated by the reader, is used for tracking the 
+	messages that have been read. This is used for implementing the 
+	MB_MUST_READ feature.
+
+	Other fields in the MB attribute structure are self-explanatory. Refer
+	to mb.c for descriptions.
+
+	Each version of the message record table is organized as depicted in the
+	following:
+
+		record n - k		- 0-th record slot
+		......
+		record n
+		header			- ((update_cnt >> 3) % n_slots)-th slot
+		SIT
+		......
+		record n - n_msgs + 1
+		......
+		record n - k - 1	- (n_slots - 1)-th slot
+		padding space		- large enough for header and SIT
+
+	The size of each version of the message record table is the size of
+	n_slots records plus a padding area, which must be large enough for
+	the table header and SIT. n_slots is the number of allocated record entries 
+	in a table area. n_slots must be large enough for maxn_msgs message records 
+	plus the header and SIT. Where maxn_msgs is the maximum number of
+	messages of the MB. n_msgs is the number of messages currently in the
+	table.
+
+	Each message record is a structure (Msg_record) containing two fields:
+
+	    umb_t id;			/* message id */
+	    mb_t loc;			/* offset of the msg in the msg area */
+
+	Where "id" is the message id and "loc" is the location (offset) of the 
+	message in the message area. Because the messages are stored consecutively
+	in the message area, we don't need to store the message size information.
+
+	The message record table header is a data structure (Tbl_header) containing 
+	the following fields:
+
+	    mb_t free_loc;		/* free space offset in the msg area */
+	    mb_t free_size;		/* size of the free space */
+	    mb_t n_msgs;		/* total number of messages */
+	    umb_t id_pg;		/* page number of the msg ids */
+	    umb_t max_id;		/* maximum message id ever used */
+	    mb_t sit_base;		/* base value of sit */
+	    mb_t seq_sit;		/* sit is sequential in MB (1/0) */
+	    unsigned long dbloc_bits;	/* each bit in the field specifies which 
+					   message buffer should be used */
+	    mb_t update_cnt;		/* duplicate Mb_attribute.update_cnt for 
+				   	   update_cnt update failure checking */
+	    mb_t reserved;		/* reserved for future use */
+
+	In a MB_SEQUENTIAL type of MB, the MB provides an ever increasing sequence 
+	number as the message id. The max_id is used to track the maximum id 
+	number that has been used. When there is an id overflow, all internal ids 
+	used have to be simultaneously reduced to maintain the message sequence.
+	This is processed in Get_new_id (). The id_pg field in Tbl_header records
+	the number of id fall-back events. The user's read pointer Mb_struct.r_pt 
+	and Mb_struct.r_pg need also to be updated as implemented in 
+	Fix_read_pt_and_r_pt (), which is called every time the control information 
+	cache is updated (and, thus, before the r_pt is used).
+
+	Because the Mb_attribute.read_id is used only if the MB is sequential
+	and "must read", we don't need to record the full id. We record, in
+	this field, only the last 24 bits of the id. We don't even need to update
+	this field when there is a is fall-back as long as the the id page size 
+	is a multiple of 0x1000000.
+
+	The sorted index table (SIT) is an array of sit_t (unsigned short). It 
+	records the indices of the currently available message records in the
+	table sorted in terms of their ids. To increase efficiency,
+	the values in the SIT can start with a non-zero number, sit_base, stored
+	in the table header. Thus, assuming that the sorted message records in the 
+	table are indexed with 0 through n_msgs - 1, the index of the message with 
+	the minimum id is SIT[0] - sit_base, the index of the message with the 
+	second minimum id is SIT[1] - sit_base, and so on.
+
+	If the SIT happens to be a simple sequential table, in which SIT [k] = k 
+	for all k, the SIT is not actually saved in the file and the seq_sit in 
+	the table header is set to TRUE. This saves frequent read/write of the
+	SIT table in case the messages come in order in terms of their ids (e.g.,
+	the MB is created as MB_SEQUENTIAL and other cases). The situation of 
+	sequential SIT is checked and seq_sit is turned on and off dynamically. 
+
+	If an MB is created as MB_SEQUENTIAL, the sit is always sequential and 
+	we don't allocated the space for the SIT in the table areas of the MB 
+	file. This reduces the MB file size.
+
+	Because sit_t is implemented as unsigned short, the number of messages
+	in a MB is limited by 2 ^ 16.
+
+	We set a limit for the message sizes such that they must not be greater 
+	than half of the MB message area size. We also require that the 
+	maxn_msgs >= 2 except in a "replaceable" MB. This will 
+	guarantee that the newest message will not be expired (because of the 
+	first-in-first-expire nature) immediately after it is written to the MB.
+
+	If the MB is created as MB_REPLACE, a second message area is allocated
+	in the MB file for double-buffering the messages. The buffer location of a
+	message (in which buffer) is recored through a bit in "dbloc_bits" in the
+	table header. Because "dbloc_bits" has 32 bits, at most 32 messages are
+	allowed for this type of MB.
+
+	In this implementation, we assume that we can locate some of the 
+	individual fields of a structure and update them while the structure is 
+	stored in a file. 
+
+	This implementation uses a double buffered message record table. A 
+	different implementation could use single buffered table and only
+	double-buffer the header and the SIT. The later technique saves the
+	control area space in the MB file at the expense of lower access speed,
+	because an additional read/write call is required for updating/writing-out 
+	the cache.
+
+	For sequential MB, we don't need to store the id in the message record
+	table if we keep track of the maximum id used. This can further reduce the 
+	space used for the control area. This, however, will introduce
+	additional complexity in the code.
+
+	In the case of a sequential MB, an id value may be reused. Thus if a process
+	holds a id for extremely long time and tries to use it, it may read a new
+	message of the same id. This should be avoided in using the MB. This event
+	happens very unlikely in practice. For example, if there are, on average, 10 
+	messages written to an MB per second, it will take about 10 years before the 
+	MB starts to reuse ids. The lifetimes of most processes are probably shorter
+	than that.
+
+	We could use double or long long for the message ids. Then we would never 
+	have an id overflow problem. To do that:
+
+	redefine mbmsg_t;
+	modify MB public function prototypes;
+	we still use 24 bits in read_id. Related conversions must be provided.
+	We probably still use id_pg and max_id in Tbl_header to simplify the 
+	Big Endian conversions. Appropriate interface to the new id type is needed.
+	Special values for id need to be redefined (MB_NEW_ID, ...).
+	Big Endian conversion for Msg_record is needed.
+
+	It is better to put longer fields, such as double, in the front of a 
+	structure. This can avoid padding bit problem.
+

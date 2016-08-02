@@ -1,0 +1,79 @@
+DESIGN NOTES - procmap
+======================
+
+Mike Dixon, 12/22/96
+
+procmap was redesigned to:
+
+  1: use C++ instead of C
+  2: spawn threads to handle communications, in order to
+     allow blocking IO without risking blocking the main
+     application.
+
+There are 3 classes:
+
+1. Args
+-------
+
+Handles command line args.
+
+  1. Parses the command line args
+
+  2. Stores the args
+
+  3. Provides the args to other routines via its public
+     members.
+
+2. InfoStore
+------------
+
+The InfoStore class handles the storage of the process information.
+
+InfoStore uses the STL map template class to store the process info.
+
+Its member functions allow manipulation of the store.
+
+  1. Maintains the state of all processes.
+
+  2. Registers process.
+
+  3. Unregisters process.
+
+  4. Updates last data for process.
+
+  5. Gets info list of processes matching template of
+     name/instance.
+
+  6. Purges processes which have not registered with the
+     required interval.
+
+3. Procmap
+----------
+
+This is the main class.
+Its members include one Args one InfoStore.
+
+  1. Sets up InfoStore.
+
+  2. Handles communication.
+
+The communication function does the following:
+
+  1. Listens for incoming request, timing out after a short
+     while (say 0.5 secs).
+
+  2. If request received, create thread to handle the comms for
+     that request. If there are too many threads at this time,
+     returns failure. The thread handles the request, and puts any
+     required info into the info store.
+
+  3. If it listen times out, processes which have not registered
+     recently are purged.
+
+4. Main
+-------
+  
+This is the driver.
+
+
+

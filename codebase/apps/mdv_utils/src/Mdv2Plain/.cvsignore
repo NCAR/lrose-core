@@ -1,0 +1,6 @@
+.deps
+Mdv2Plain
+__makefile.template
+makefile
+makefile.am
+makefile.in

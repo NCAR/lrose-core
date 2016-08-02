@@ -1,0 +1,6 @@
+.deps
+MdvComp
+__makefile.template
+makefile
+makefile.am
+makefile.in

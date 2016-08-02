@@ -1,0 +1,590 @@
+########################################################################
+# parameters file for rview - test data
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# April 1991
+#
+#########################################################################
+
+############
+# debugging
+
+Rview.x_sync: false
+Rview.debug: true
+Rview.malloc_debug_level: 0
+
+##########
+# instance
+
+Rview.instance: test
+
+########################################################################
+# mode and requested time
+#
+# mode may be realtime or archive.
+# In archive mode, the time_requested is used.
+#
+
+Rview.time_requested: 2008 11 10 00 20 00
+Rview.mode: archive
+
+######################################################################
+# basic setup
+
+# field_requested is the initial field displayed
+
+Rview.field_requested: 0
+
+# scan_delta_t is number of secs moved in time using time button
+
+Rview.scan_delta_t: $(SCAN_DELTA_T)
+
+# z_requested is initial height
+
+Rview.z_requested: $(RVIEW_START_HT)
+
+# delta_z is change in height using level button
+
+Rview.delta_z: 1.0
+
+# mouse double-clicking delay - secs - set to your taste
+
+Rview.double_click_delay: 0.3
+
+# The display is updated every 'update_interval' secs in case new data
+
+Rview.update_interval: 20
+
+# base_timerinterval' is the basic interval for the interrupt timer
+
+Rview.base_timer_interval: 0.15
+
+# approx number of ticks per axis
+
+Rview.approx_nticks: 7
+
+############################################################
+# Geographical extent
+#
+# projection may be 'flat' for local plots or 'latlon' for 
+# regional or larger plots.
+#
+# The grid origin is always in lat/lon units.
+#
+# min and max values are in km for flat proj,
+# lat/lon for latlon proj
+#
+
+Rview.projection: flat
+
+Rview.grid_lat: $(RADAR_LAT)
+Rview.grid_lon: $(RADAR_LON)
+Rview.grid_rot: 0.0
+
+Rview.full_min_x: -200.0
+Rview.full_min_y: -200.0
+Rview.full_max_x: 200.0
+Rview.full_max_y: 200.0
+
+#######################################################################
+# Initial plot settings
+#
+
+Rview.plot_rings: true
+Rview.plot_cappi_image: on
+Rview.plot_composite: true
+Rview.plot_cappi_contours: false
+
+Rview.plot_vsection_image: on
+Rview.plot_vsection_contours: false
+
+Rview.n_ideal_contourlabels: 5
+Rview.ps_contourlabel_fontsize: 8
+
+################################################
+# plot_maps controls initial map overlay setting
+# Options are false, limited or all.
+#
+# Map conf file lists the map files to be used
+#
+
+Rview.plot_maps: all
+Rview.map_conf_file: $(PROJ_DIR)/display/maps/$(RVIEW_MAP_CONF_FILE)
+
+#######################
+# colorscale directory
+#
+
+Rview.colorscale_dir: $(PROJ_DIR)/display/color_scales
+
+######################################################################
+# cursor bearing computations. If cursor is clicked twice, the bearing
+# between the last two clicks is indicated. If use_magnetic is
+# set, the bearing is given in deg Mag, otherwise in Deg T
+#
+
+Rview.cursor_magnetic: true
+Rview.magnetic_variation: -8.0
+Rview.cursor_dist_nm: true
+
+#######################################################################
+# printing copies
+#
+# The print_command defaults to "lpr -h -P", which works for BSD printing.
+# For ATT printing, set it to "lp -d"
+#
+# The print_command is followed by the printer name and name of the file
+# to be printed
+#
+
+Rview.ps_prologue_file: $(PROJ_DIR)/display/prologues/postscript
+Rview.output_file: $(DATA_DIR)/tmp/Rview.ps
+Rview.ps_printer: lp
+Rview.print_command: lpr -h -P
+
+####################################################################
+# output files for the Web
+#
+# Using the right mouse button on the Copy button on either the
+# main window or the vertical cross-section window will create an
+# output file that can be used on the Web.  You can also specify
+# an interval at which to output Web files continuously.  The interval
+# is specified in minutes.  Web files are then output at that interval
+# starting at the first of that interval after the top of the hour.
+# For example, if the interval is every 10 minutes you will get Web
+# output files at 0, 10, 20, 30, 40 and 50 after the hour.
+#
+# When creating the Web output files, first an XWD file is created
+# from the appropriate pixmap.  Then, the XWD file is converted to
+# another type of file using a system command.  The system command
+# for the main window is:
+#
+#     <web_convert_cmd> <cappi_xwd_file> <cappi_web_file)
+#
+# and for the vertical cross-section window is:
+#
+#     <web_convert_cmd> <vsection_xwd_file> <vsection_web_file>
+#
+
+Rview.web_convert_cmd: convert
+
+Rview.output_cappi_web_files: false
+Rview.cappi_web_output_interval: 5
+Rview.cappi_gif_dir: $(DATA_DIR)/images/cappi
+Rview.cappi_xwd_file: $(DATA_DIR)/tmp/cappi.xwd
+Rview.cappi_web_file: $(DATA_DIR)/tmp/cappi.gif
+
+Rview.output_vsection_web_files: false
+Rview.vsection_web_output_interval: 30
+Rview.vsection_gif_dir: $(DATA_DIR)/images/vsection
+Rview.vsection_xwd_file: $(DATA_DIR)/tmp/vsection.xwd
+Rview.vsection_web_file: $(DATA_DIR)/tmp/vsection.gif
+
+#################################################################
+# auto_advance
+#
+# Option to automatically advance through time, from start to end,
+# at the given delta time, copying or saving gifs of each image
+#
+
+Rview.auto_advance: false
+Rview.auto_advance_start_time: 1995 05 01 18 00 00
+Rview.auto_advance_end_time: 1999 12 31 23 59 59
+Rview.auto_advance_delta_time: 86400
+Rview.save_copy_on_auto_advance: false
+Rview.save_gif_on_auto_advance: true
+Rview.save_if_no_data: false
+
+#######################################################
+# Option to use TimeHist or time_hist
+#
+# Rview starts up TimeHist (or time_hist) using the following command
+#
+
+Rview.use_time_hist: false
+Rview.time_hist_command_line: TimeHist -params $(PROJ_DIR)/display/params/TimeHist.ops &
+
+#######################################################################
+# Storm tracks. A check for new data is made every track_check_interval
+# secs. The data is in shared memory with the given key.
+
+Rview.use_track_data: true
+
+# If you are using the DsTitanServer, you need to specify the url
+
+Rview.titan_server_url: titanp:://$(DATA_HOST)::titan/storms
+
+# If no url is specified, Rview will use the old track_server
+
+Rview.track_server_instance: archive
+Rview.track_server_subtype: MDV
+Rview.track_server_default_host: local
+Rview.track_server_default_port: 44200
+Rview.track_server_all_in_file: false
+Rview.max_message_len: 100000
+Rview.servmap_host1: local
+Rview.servmap_host2: none
+
+# How often to check for new track data (secs)
+
+Rview.track_check_interval: 10
+
+# The shmem key for communicating track data to TimeHist
+
+Rview.track_shmem_key: 46100
+
+# how far in past and future to plot tracks - mins
+
+Rview.track_data_time_margin: 12.0
+Rview.past_plot_period: 30.0
+Rview.future_plot_period: 30.0
+
+# how to plot tracks
+
+Rview.plot_tracks: all_tracks
+Rview.plot_current: true
+Rview.plot_past: limited
+Rview.plot_future: false
+Rview.plot_forecast: limited
+Rview.track_graphic: polygons
+Rview.fill_graphic: false
+Rview.plot_vectors: true
+Rview.annotate_tracks: speed
+
+# Plot track forecasts?
+
+Rview.n_forecast_steps: 1
+Rview.forecast_interval: 30.0
+Rview.arrow_head_km: 2
+
+# Draw in the storm identification runs
+
+Rview.runs_included: true
+Rview.plot_runs: false
+Rview.fill_runs: false
+
+#############################################################################
+# symbolic products.
+#
+# Symbolic product params are specified in the file 'product_params_path_name'
+# which is a TDRP file.
+
+Rview.plot_products: false
+Rview.product_params_path_name: ProdParams.test
+
+#########################################
+# verification data plotting
+#
+# Option to plot verification data, e.g. hail occurrence
+
+Rview.plot_verify: false
+Rview.verify_file: $(DATA_DIR)/verify/hail_pad_data
+Rview.verify_time_margin: 300
+
+##########################################################
+# Aircraft position
+#
+
+Rview.plot_ac_posn: true
+Rview.use_spdb_for_ac_posn: true
+Rview.ac_posn_db_dir: $(DATA_DIR)/spdb/ac_posn
+Rview.ac_posn_archive_dir: $(DATA_DIR)/ascii/ac_posn
+Rview.ac_posn_realtime_file: $(DATA_DIR)/ascii/ac_posn/realtime
+Rview.ac_posn_fwd_time_margin: 300
+Rview.ac_posn_back_time_margin: 300
+Rview.ac_posn_n_ident: 3
+Rview.ac_posn_idents: ZJRA ZJRB ZCAN
+Rview.ac_posn_colors: white orange cyan
+Rview.ac_posn_linestyles: 1 100.0 0.0, 1 4.0 2.0, 1 1.0 4.0, 1 1.0 3.0, 1 4.0 1.0
+Rview.ac_posn_max_speed_kts: 250
+Rview.ac_posn_max_bad_points: 2
+
+# plot flares?
+
+Rview.plot_flares: true
+
+# You can plot ejectables as a cross, plus or both (asterisk)
+
+Rview.plot_ejectables_as_cross: true
+Rview.plot_ejectables_as_plus: true
+Rview.ejectable_icon_size_km: 0.3
+
+# set the colors for the end-burners, burn-in-place, and combination
+
+Rview.end_burn_color: gold
+Rview.burn_in_place_color: blue
+Rview.end_burn_and_bip_color: magenta
+
+# line width varies with the number of flares burning.
+# If width_per_flare is 1, line width will be number of burning flares.
+# If width_per_flare is 2, line width will be 2 * number of burning flares.
+# If width_per_flare is 0, line widths will always be 1.
+
+Rview.line_width_per_flare: 2
+
+# linestyes not yet implemeted
+
+#Rview.end_burn_linestyle: 1 1.0 3.0
+#Rview.burn_in_place_linestyle: 1 4.0 1.0
+#Rview.end_burn_and_bip_linestyle: 1 10.0 10.0
+
+##############
+# X resources
+# ===========
+#
+
+Rview.x_foreground: white
+Rview.x_background: black
+
+# location and size of main window
+
+Rview.x_mainx: 700
+Rview.x_mainy: 0
+Rview.x_mainx_sign: 1
+Rview.x_mainy_sign: 1
+Rview.x_mainwidth: 500
+Rview.x_mainheight: 500
+Rview.x_minmainwidth: 300
+Rview.x_minmainheight: 250
+Rview.x_mainborder: 5
+Rview.x_subborder: 1
+
+# location and size of vert section window
+
+Rview.x_vsection_x_from_main: 600
+Rview.x_vsection_y_from_main: 500
+Rview.x_vsection_width: 500
+Rview.x_vsection_height: 400
+
+# location and size of help popup window
+
+Rview.x_help_x_from_main: 200
+Rview.x_help_y_from_main: 200
+Rview.x_help_width: 500
+Rview.x_help_height: 400
+
+# interface button width
+
+Rview.x_max_button_width: 80
+
+# color scale width
+
+Rview.x_scalewidth: 100
+
+# margins
+
+Rview.x_xaxismargin: 25
+Rview.x_yaxismargin: 35
+Rview.x_xaxisendmargin: 30
+Rview.x_yaxisendmargin: 15
+Rview.x_ticklength: 6
+Rview.x_topmargin: 25
+Rview.x_tick_clearance: 3
+Rview.x_text_margin: 6
+
+# legend dimensions. The legend element height is the height of each
+# color block in the scale window.
+
+Rview.x_max_legend_element_ht: 25
+Rview.x_legend_element_width: 30
+
+# fonts
+
+Rview.x_button_font: 8x13
+Rview.x_title_font: 8x13
+Rview.x_scale_font: 6x10
+Rview.x_ringlabel_font: 6x10
+Rview.x_ticklabel_font: 6x10
+Rview.x_track_annotation_font: 8x13
+Rview.x_text_font: 8x13
+Rview.x_contourlabel_font: 6x10
+
+# colors
+
+Rview.x_xor_color_num: 50000
+
+Rview.x_ring_color: forestgreen
+Rview.x_crosshair_color: #b00
+Rview.x_vsection_pos_color: red
+Rview.x_zoom_box_color: red
+Rview.x_pos_contour_color: red
+Rview.x_zero_contour_color: yellow
+Rview.x_neg_contour_color: blue
+Rview.x_tick_color: yellow
+Rview.x_ticklabel_color: yellow
+Rview.x_track_annotation_color: yellow
+Rview.x_text_color: yellow
+Rview.x_titletext_color: gray
+Rview.x_buttontext_color: red
+Rview.x_scaletext_color: gray
+Rview.x_border_color: CadetBlue
+Rview.x_hlight_background: mediumblue
+Rview.x_contourlabel_color: gray50
+
+Rview.x_current_storm_color: cyan
+Rview.x_past_storm_color: yellow
+Rview.x_past_storm_color_2: gold
+Rview.x_future_storm_color: seagreen2
+Rview.x_future_storm_color_2: seagreen
+Rview.x_forecast_storm_color: red
+Rview.x_forecast_storm_color_2: gray50
+Rview.x_current_storm_line_width: 2
+Rview.x_past_storm_line_width: 1
+Rview.x_future_storm_line_width: 1
+Rview.x_forecast_storm_line_width: 2
+
+Rview.x_past_vector_color: magenta
+Rview.x_future_vector_color: magenta
+Rview.x_forecast_vector_color: red
+Rview.x_storm_vector_width: 2
+
+# dim percentage for unselected tracks
+
+Rview.color_dim_percent: 70.0
+
+#  line widths
+
+Rview.x_vsection_pos_width: 1
+Rview.x_zoom_box_width: 1
+Rview.x_tick_width: 0
+Rview.x_ring_width: 0
+Rview.x_crosshair_width: 0
+
+######################
+# Postscript resources
+# ====================
+#
+
+Rview.draw_copy_title: true
+Rview.draw_copy_header: true
+Rview.ps_unitscale: 72
+
+# paget layout
+
+Rview.ps_pagelength: 11.0
+Rview.ps_pagewidth: 8.5
+
+Rview.ps_printwidth: 8.5
+Rview.ps_maxprintwidth: 11.0
+Rview.ps_minprintwidth: 3.0
+
+# margins
+
+Rview.ps_lengthmargin: 0.7
+Rview.ps_widthmargin: 0.7
+
+# dimensions of main image
+
+Rview.ps_imagewidth: 6.0
+Rview.ps_imageheight: 6.0
+
+# dimensions of color scale and title
+
+Rview.ps_scalewidth: 1.5
+Rview.ps_titleheight: 0.5
+
+Rview.ps_plot_to_scale_margin: 0.25
+Rview.ps_title_to_plot_margin: 0.4
+
+# axis margins in main image
+
+Rview.ps_xaxismargin: 0.5
+Rview.ps_yaxismargin: 0.5
+Rview.ps_xaxisendmargin: .3
+Rview.ps_yaxisendmargin: .25
+Rview.ps_ticklength: 0.06
+Rview.ps_topmargin: 0.5
+Rview.ps_tick_clearance: 0.05
+Rview.ps_text_margin: 0.07
+
+# legend dimensions. The legend element height is the height of each
+# color block in the scale window.
+
+Rview.ps_max_legend_element_ht: 0.4
+Rview.ps_legend_element_width: 0.5
+
+#
+# linestyles
+#
+#  width dash_length space_length <graylevel>
+#
+# graylevel is optional - if not specified, will be set to 0 (black)
+#
+
+Rview.ps_current_storm_linestyle: 2 100.0 0.0 0.8
+
+Rview.ps_past_storm_linestyle: 1 100.0 0.0 0.6
+Rview.ps_past_storm_linestyle_2: 1 100.0 0.0 0.9
+
+Rview.ps_future_storm_linestyle: 1 1.0 1.0 0.4
+Rview.ps_future_storm_linestyle_2: 1 1.0 1.0 0.7
+
+Rview.ps_forecast_storm_linestyle: 1 4.0 2.0 0.2
+Rview.ps_forecast_storm_linestyle_2: 1 4.0 2.0 0.5
+
+Rview.ps_past_vector_linestyle: 1 100.0 0.0
+Rview.ps_future_vector_linestyle: 1 100.0 0.0
+Rview.ps_forecast_vector_linestyle: 2 100.0 0.0
+
+Rview.ps_pos_contour_linestyle: 1 100.0 0.0
+Rview.ps_zero_contour_linestyle: 1 1.0 1.0
+Rview.ps_neg_contour_linestyle: 1 4.0 2.0
+
+# line widths
+
+Rview.ps_border_width: 1
+Rview.ps_crosshair_width: 0
+Rview.ps_ring_width: 0
+Rview.ps_tick_width: 0
+
+# fonts
+
+Rview.ps_fontname: Helvetica
+Rview.ps_title_fontsize: 18
+Rview.ps_scale_fontsize: 12
+Rview.ps_ringlabel_fontsize: 8
+Rview.ps_ticklabel_fontsize: 8
+Rview.ps_track_annotation_fontsize: 8
+Rview.ps_text_fontsize: 12
+
+##########################################################################
+# Data fields and their servers.
+#
+# These are not treated in the same way as the other params.
+# They are read in by read_field_control().
+# Lines start with '#fc' - '##fc' comments them out
+
+#-------------------------------------------------------------------------
+#  Field controls
+#
+# #fc Label URL         Field        Time  X Color  Ps Color  Contours
+#                   name or number  window  file      file    lo-hi-int
+#-------------------------------------------------------------------------
+
+# if field_name_from_params is true, the program will use the label from
+# the param file as the field name. If false, it will use the field name
+# from the data.
+
+Rview.field_name_from_params: true
+
+#fc dBZ mdvp:://$(DATA_HOST)::$(RADAR_CART_DIR) 0 720 dbz_color dbz_gray 0.0 100.0 5.0
+
+## #fc dBZ mdvp:://$(DATA_HOST)::$(RADAR_CART_DIR) DBZ 720 dbz_color dbz_gray 0.0 100.0 5.0
+
+## #fc Vel mdvp:://$(DATA_HOST)::$(RADAR_CART_DIR) VEL 720 vel_color vel_gray 0.0 100.0 5.0
+
+#fc 1hr_Precip_Accum mdvp:://$(DATA_HOST)::mdv/precip/1hr precip 720 precip_color precip_gray 0.0 100.0 5.0
+
+#fc 24hr_Precip_Accum  mdvp:://$(DATA_HOST)::mdv/precip/24hr precip 720 precip_color precip_gray 0.0 100.0 5.0
+
+#fc 1hr_Precip_Rate mdvp:://$(DATA_HOST)::mdv/precip/1hr rate 720 precip_color precip_gray 0.0 100.0 5.0
+
+#fc Vil mdvp:://$(DATA_HOST)::mdv/vil vil 720 vil_color vil_gray 0.0 100.0 5.0
+
+#fc Vil_Overhang mdvp:://$(DATA_HOST)::mdv/vil dVil 720 vil_diff_color vil_diff_gray 0.0 100.0 5.0
+
+#fc SSS mdvp:://$(DATA_HOST)::mdv/vil SSS 720 sss_color sss_gray 0.0 100.0 5.0
+
+
+

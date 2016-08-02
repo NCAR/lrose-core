@@ -1,0 +1,151 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions RawIQ2NetCDF
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Jan 2003
+//
+
+commentdef {
+  p_header = "Program name: RawIQ2NetCDF";
+  p_text = "RawIQ2NetCDF reads raw IQ data from a file, and writes it to a netCDF file.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "$(HOME)/data/iq/raw";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE mode, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+commentdef {
+  p_header = "FILE CONVERSION.";
+}
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of dates in data set";
+  p_help = "This number is needed in order to be able to split the data into individual beams.";
+} ngates;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "The start gate number in the data set";
+} start_gate;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "The starting azimuith for the data (deg)";
+} start_az;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "The delta azimuth between samples (deg)";
+} delta_az;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "The elevation angle of the data (deg)";
+} elevation;
+
+paramdef double {
+  p_default = 0.001;
+  p_descr = "The delta time between samples (sec)";
+} delta_time;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "The PRT of the data (miscro-secs)";
+} prt;
+
+commentdef {
+  p_header = "OUTPUT FILE.";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory for NetCDF files.";
+  p_help = "";
+} output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write _latest_data_info file in output dir.";
+  p_help = "If TRUE, _latest_data_info is written to the output directory.";
+} write_ldata_info_file;
+

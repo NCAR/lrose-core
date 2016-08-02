@@ -1,0 +1,237 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions MdvRadarShear
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// May 2009
+//
+
+commentdef {
+  p_header = "MdvRadarShear reads in radial velocity data in MDV polar radar format, computes the shear and writes out shear fields in MDV format.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./input/mdv";
+  p_descr = "Directory for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set elevation limits";
+} set_elev_limits;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Lower elev limit (deg).";
+} lower_elev;
+
+paramdef float {
+  p_default = 0;
+  p_descr = "Upper elev limit (deg).";
+} upper_elev;
+
+commentdef {
+  p_header = "INPUT FIELD INFORMATION";
+  p_text = "Names of input fields in the Dsr queue.";
+}
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for DBZ in the input file.";
+} DBZ_field_name;
+
+paramdef string {
+  p_default = "SNR";
+  p_descr = "Field name for SNR in the input file.";
+} SNR_field_name;
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "Field name for radial velocity in the input file.";
+} VEL_field_name;
+
+commentdef {
+  p_header = "SMOOTHING INPUT FIELDS";
+  p_text = "This section gives you the option of smoothing the fields in range by applying a median filter.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter DBZ with median filter.";
+  p_help = "The filter is computed in range.";
+} apply_median_filter_to_DBZ;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for DBZ - gates.";
+  p_help = "See 'apply_median_filter_to_DBZ'";
+} DBZ_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter VEL with median filter.";
+  p_help = "The filter is computed in range.";
+} apply_median_filter_to_VEL;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for VEL - gates.";
+  p_help = "See 'apply_median_filter_to_VEL'";
+} VEL_median_filter_len;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter SNR with median filter.";
+  p_help = "The filter is computed in range, and affects PID only.";
+} apply_median_filter_to_SNR;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for SNR - gates.";
+  p_help = "See 'apply_median_filter_to_SNR'";
+} SNR_median_filter_len;
+
+commentdef {
+  p_header = "CENSORING";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to censor the output using set thresholds.";
+  p_help = "If TRUE, the thresholding fields will be examined to see if it is within the desired range. Examples are SNR (Signal-to-noise) and NCP (normalized coherent power). If the specified field at a gate falls outside the specified range, all output fields will be set to missing for that gate.";
+} censor_using_thresholds;
+
+paramdef string {
+  p_default = "NCP";
+  p_descr = "Name of field for thresholding";
+  p_help = "This is the DSR (input) field name for the thresholding field. If this field is available, it is used for thresholding. If not, thresholding will not be performed.";
+} censor_field_name;
+
+paramdef double {
+  p_default = 0.3;
+  p_descr = "Minimum threshold - see 'censor_output_using_thresholds'.";
+  p_help = "The specified field at a gate must exceed this value for the gate to be accepted.";
+} censor_min_value;
+
+paramdef double {
+  p_default = 1.1;
+  p_descr = "Maximum threshold - see 'censor_output_using_thresholds'.";
+  p_help = "The specified field at a gate must be less than this value for the gate to be accepted.";
+} censor_max_value;
+
+commentdef {
+  p_header = "COMPUTING SHEAR";
+}
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Size of kernel for computing shear.";
+} shear_kernel_size;
+
+paramdef double {
+  p_default = 3;
+  p_descr = "Max width of azimuth arc (km).";
+  p_help = "This limits the smearing of the data in azimuth at longer ranges.";
+} max_arc_width;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "./output/mdv/radar_shear";
+  p_descr = "Output URL.";
+  p_help = "Output MDV data is written to this URL.";
+} output_url;
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+typedef struct {
+  string name;
+  string long_name;
+  string units;
+  encoding_type_t encoding;
+  boolean write;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = { "RADIAL_SHEAR", "RADIAL_SHEAR", "m/s/km", ENCODING_INT16, TRUE };
+  p_descr = "If write is TRUE, RADIAL_SHEAR is included in the output MDV file.";
+  p_help = "This is the shear along the radial.";
+} RADIAL_SHEAR_output_field;
+
+paramdef struct output_field_t {
+  p_default = { "AZIMUTHAL_SHEAR", "AZIMUTHAL_SHEAR", "m/s/km", ENCODING_INT16, TRUE };
+  p_descr = "If write is TRUE, AZIMUTHAL_SHEAR is included in the output MDV file.";
+  p_help = "This is the shear is radial velocity, but computed in azimuth.";
+} AZIMUTHAL_SHEAR_output_field;
+
+paramdef struct output_field_t {
+  p_default = { "MAX_SHEAR", "MAX_SHEAR", "m/s/km", ENCODING_INT16, TRUE };
+  p_descr = "If write is TRUE, MAX_SHEAR is included in the output MDV file.";
+  p_help = "This is the max of RADIAL_SHEAR and AZIMUTHAL_SHEAR.";
+} MAX_SHEAR_output_field;
+
+paramdef struct output_field_t {
+  p_default = { "MEAN_VEL", "MEAN_VEL", "m/s", ENCODING_INT16, FALSE };
+  p_descr = "If write is TRUE, MEAN_VEL is included in the output MDV file.";
+  p_help = "This is a smoothed velocity.";
+} MEAN_VEL_output_field;
+
+commentdef {
+  p_header = "ECHO INPUT FIELDS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to copy some of the input fields into the output file.";
+  p_help = "If TRUE, the listed fields will be copied to the output MDV file. See 'echo_field_names'";
+} echo_input_fields_in_output_file;
+
+paramdef string {
+  p_default = {"DBZ", "VEL"};
+  p_descr = "List of field names to be copied from the input file to the output file.";
+  p_help = "See 'echo_input_fields_in_output_file'";
+} echo_field_names[];
+

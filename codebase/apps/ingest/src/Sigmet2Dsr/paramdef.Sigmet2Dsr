@@ -1,0 +1,249 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use latest data info file in realtime.";
+  p_help = "Set to TRUE if it is workable to do so.";
+} ldataInfoAvailable;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to process latest file only on startup in realtime.";
+  p_help = "This is the default.";
+} latestFileOnly;
+
+paramdef int {
+  p_default = 0;
+  p_min = 0;
+  p_descr = "Number of seconds the size of the incoming file must remain "
+            "unchanged before the file is processed.";
+  p_help = "Used on slow networks to allow the input file to be fully "
+           "written before processing.";
+} fileQuiescentSecs;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time offset for data, seconds. This is an offset that\n"
+  "is added to the input time to get the output time.";
+  p_help = "Useful if the data are timestamped in local time and\n"
+  "we want to go to UTC.";
+} time_offset;
+
+paramdef string {
+  p_default = "SAO PAUL";
+  p_descr = "Name of the radar.";
+  p_help = "Used in MDV files, apparently.";
+} radarName;
+
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_DATA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Info option";
+  p_help = "Print info messages";
+} info;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+      
+
+
+commentdef {
+  p_header = "LOGGING";
+}
+ 
+paramdef char* {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} msgLog_dir;
+
+
+paramdef boolean {
+  p_descr = "Option to send start,end of tilt,volume flags.";
+  p_help = "Typically these flags are sent, however sometimes the\n"
+	"input datastream is such that they are not correct.";
+  p_default = TRUE;
+} sendStartEndFlags;
+
+paramdef char* {
+  p_descr = "output fmq url";
+  p_help = "Path for FMQ output data.";
+  p_default = {"fmqp:://localhost::./fmq.dsRadar"};
+} output_fmq_url;
+ 
+paramdef long {
+  p_default = {2000000};
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} output_fmq_size;
+ 
+paramdef long {
+  p_default = {3600};
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_descr = "How many beams to process before sending radar header message.";
+  p_help = "Header messages are also sent at the end of tilts if\n"
+	"the radar parameters change.";
+  p_default = 60;
+} beamsPerMessage;
+ 
+
+
+commentdef {
+  p_header = "DELAY OPTIONS FOR ARCHIVE MODE";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of seconds to sleep between volumes.";
+  p_help = "May be useful to to this in archive mode.";
+} sleepBetweenVolumes;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of seconds to sleep between tilts.";
+  p_help = "May be useful to to this ion archive mode.";
+} sleepBetweenTilts;
+
+commentdef {
+  p_header = "FIELD PARAMETERS";
+}
+
+
+typedef struct {
+	string fieldName;
+	string units;
+	double scale;
+	double bias;
+} scale_t;
+
+paramdef struct scale_t {    
+  p_default = {
+		{"DZ", "dBz",  0.5,  -32.0 },
+		{"VR", "m/s",  0.15, -19.0 },
+		{"SW", "m/s",  0.15, -19.0 }
+  };
+  p_private = FALSE;
+  p_descr = "Scaling parameters for data on a field-by-field basis.";
+  p_help = "The defaults are very probably fine. The field name\n"
+	"is two characters andshould be one of :\n\n"
+           "           DZ = reflectivity.\n"
+           "           VR = velocity.\n"
+           "           SW = spectrum_width.\n"
+           "           CZ = corrected reflectivity.\n"
+           "           ZT = total reflectivity.\n"
+           "           DR = differential refl.\n"
+           "           LR = another differential refl.\n"
+           "           ZD = another refl form.\n"
+           "           DM = recieved power.\n"
+           "           RH = Rho coefficient.\n"
+           "           PH = Phi (MCTEX parameter).\n"
+           "           XZ = X-band reflectivity.\n"
+           "           CR = Corrected DR.\n"
+           "           MZ = DZ mask for 1C-51 HDF.\n"
+           "           MR = DR mask for 1C-51 HDF.\n"
+           "           ZE = Edited reflectivity.\n"
+           "           VE = Edited velocity.\n"
+           "           KD = KDP (unknown)  for MCTEX data.\n"
+           "           TI = TIME (unknown)  for MCTEX data.\n\n"
+	"This two character key will be used to identify the field.\n"
+	"The appropriate units, scale and bias will then be used.\n";
+} scales[];
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to mask based on one field (typically DBZ).";
+  p_help = "Used typically to mask velocity data where there is\n"
+  "no dbz data. These velocity data are usually junk.";
+} maskOnField;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Field number to use as a mask - indexed by\n"
+  "its number in the scales array above. First entry is zero.";
+  p_help = "Only relevant if maskOnField is TRUE.";
+} maskOnFieldNum;
+
+
+

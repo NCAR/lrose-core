@@ -1,0 +1,61 @@
+#! /usr/bin/perl
+
+#
+# script to cleanup ipcs
+#
+
+#	
+# get the current ipc list
+#
+
+open(IPCLIST, "ipcs |");
+
+{
+
+  $shm_mode = 0;
+  $sem_mode = 0;
+  $msg_mode = 0;
+ 
+  while ($line = <IPCLIST>) {
+
+    chop($line);
+
+    if ($line =~ /Shared Memory Segments/) {
+
+      $shm_mode = 1;
+      $sem_mode = 0;
+      $mdg_mode = 0;
+
+    } elsif ($line =~ /Semaphore Arrays/) {
+
+      $shm_mode = 0;
+      $sem_mode = 1;
+      $mdg_mode = 0;
+
+    } elsif ($line =~ /Message Queues/) {
+
+      $shm_mode = 0;
+      $sem_mode = 0;
+      $mdg_mode = 1;
+
+    } else {
+
+      $id = substr($line, 0, 6);
+
+    }
+
+#    print "******", $line, " ****\n";
+
+#    print ">>>>", $id, $shm_mode, " ", $sem_mode, " ", $msg_mode, "<<<<", "\n";
+
+    if ($shm_mode == 1) {
+      system("ipcrm shm $id");
+    } elsif ($sem_mode == 1) {
+      system("ipcrm sem $id");
+    } elsif ($msg_mode == 1) {
+      system("ipcrm msg $id");
+    }
+
+  }
+
+}

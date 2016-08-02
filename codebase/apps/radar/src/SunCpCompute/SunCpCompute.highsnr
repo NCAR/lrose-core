@@ -1,0 +1,187 @@
+/**********************************************************************
+ * TDRP params for SunCpCompute
+ **********************************************************************/
+
+//======================================================================
+//
+// SunCpCompute computes the S1 and S2 ratios for the ZDR Cross-Polar 
+//   (CP) calibration method.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "highsnr";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or time series API.
+// If TS_API_INPUT, the application will read the time series API and 
+//   process the pulses as they come in. If FILE_INPUT, the application 
+//   will process all the files specified on the command line.
+//
+// Type: enum
+// Options:
+//     FILE_INPUT
+//     TS_API_INPUT
+//
+
+input_mode = FILE_INPUT;
+
+///////////// invert_hv_flag //////////////////////////
+//
+// Option to invert H/V flag in pulse data.
+// Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the 
+//   data has the opposite sense, set this to true.
+// Type: boolean
+//
+
+invert_hv_flag = FALSE;
+
+///////////// n_samples ///////////////////////////////
+//
+// Number of pulse samples in a beam.
+// Type: int
+//
+
+n_samples = 64;
+
+///////////// min_snr /////////////////////////////////
+//
+// Min SNR for computing S1 and S2 values (dB).
+// S1 and S2 are computed as the mean ratio of the cross-polar power in 
+//   H and V. This is the minimum SNR for including points in the mean 
+//   ratio. SNR is computed relative to the minimum noise value measured.
+// Type: double
+//
+
+min_snr = 12;
+
+///////////// max_snr /////////////////////////////////
+//
+// Max SNR for computing S1 and S2 values (dB).
+// S1 and S2 are computed as the mean ratio of the cross-polar power in 
+//   H and V. This is the minimum SNR for including points in the mean 
+//   ratio.
+// Type: double
+//
+
+max_snr = 15;
+
+///////////// max_delta_az ////////////////////////////
+//
+// Max delta azimuth for including data points (deg).
+// The beam azimuth and sun azimuth must be within this delta for the 
+//   beam to be included in the analysis.
+// Type: double
+//
+
+max_delta_az = 2;
+
+///////////// max_delta_el ////////////////////////////
+//
+// Max delta elevation for including data points (deg).
+// The beam elevation and sun elevation must be within this delta for 
+//   the beam to be included in the analysis.
+// Type: double
+//
+
+max_delta_el = 2;
+
+///////////// start_gate //////////////////////////////
+//
+// Start gate for analysis.
+// Type: int
+//
+
+start_gate = 50;
+
+///////////// n_gates /////////////////////////////////
+//
+// Number of gates for analysis.
+// Type: int
+//
+
+n_gates = 500;
+
+//======================================================================
+//
+// RADAR PARAMETERS.
+//
+//======================================================================
+ 
+///////////// radar_lat ///////////////////////////////
+//
+// Latiitude of radar location (deg).
+// North is positive, South is negative.
+// Type: double
+//
+
+radar_lat = 39.9502;
+
+///////////// radar_lon ///////////////////////////////
+//
+// Longitude of radar location (deg).
+// East is positive, West is negative.
+// Type: double
+//
+
+radar_lon = -105.195;
+
+//======================================================================
+//
+// OUTPUT RESULTS.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Dir for output files.
+// The results will be written to sub-directories named from the cal 
+//   time.
+// Type: string
+//
+
+output_dir = "./output/highsnr";
+

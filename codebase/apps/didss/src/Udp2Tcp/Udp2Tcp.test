@@ -1,0 +1,120 @@
+/**********************************************************************
+ * TDRP params for Udp2Tcp
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: int
+//
+
+malloc_debug_level = 0;
+
+///////////// nmessages_for_data_rate /////////////////
+//
+// Number of messages for computing data rate.
+// In debug mode, the data rate is computed by summing the number of 
+//   bytes sent and dividing by the time takes. This is done by summing 
+//   over the number of messages specified here.
+// Type: int
+//
+
+nmessages_for_data_rate = 4;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_udp_port //////////////////////////
+//
+// Port number for input UDP data.
+// The program reads the UDP data from this port.
+// Type: int
+//
+
+input_udp_port = 3280;
+
+///////////// assemble_ridds_packets //////////////////
+//
+// Option to combine multiple UDP packets into a single message.
+// If TRUE, multiple packets of RIDDS-type data will be assembled before 
+//   writing to TCP port. Only assembly of RIDDS UDP packets is supported.
+// Type: boolean
+//
+
+assemble_ridds_packets = TRUE;
+
+///////////// npackets_per_message ////////////////////
+//
+// Number of packets per TCP message.
+// Assembling multiple packets into a single message allows the 
+//   compression to be more effective.
+// Type: int
+//
+
+npackets_per_message = 50;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_tcp_port /////////////////////////
+//
+// Port number for output TCP data.
+// The program listens for a connection on this port. Once a connection 
+//   is established, it starts to read the UDP data, optionally compress 
+//   it, and then write it out on the TDP port.
+// Type: int
+//
+
+output_tcp_port = 10000;
+
+///////////// compression /////////////////////////////
+//
+// Compression options.
+// The data may be optionally compressed for transmission.
+//
+// Type: enum
+// Options:
+//   NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION
+//
+//
+
+compression = ZLIB_COMPRESSION;
+

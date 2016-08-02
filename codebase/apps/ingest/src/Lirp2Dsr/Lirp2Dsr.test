@@ -1,0 +1,1013 @@
+/**********************************************************************
+ * TDRP params for Lirp2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// Lirp2Dsr reads raw LIRP IQ time-series data, computes the moments and 
+//   writes the contents into a DsRadar FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// print_summary ///////////////////////////
+//
+// Print summary to stdout.
+// If set, a summary for each beam is printed to stdout. No data is sent 
+//   to the FMQ.
+// Type: boolean
+//
+
+print_summary = FALSE;
+
+///////////// compute_noise ///////////////////////////
+//
+// Compute and print out average IQ noise value.
+// If set, the average IQ noise value for the input files will be 
+//   computed and printed out. No data is sent to the FMQ.
+// Type: boolean
+//
+
+compute_noise = FALSE;
+
+///////////// print_phase_drift ///////////////////////
+//
+// Option to print phase drift to stdout.
+// Use this for debugging phase drift issues.
+// Type: boolean
+//
+
+print_phase_drift = FALSE;
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In SIMULATE mode, the program moves repeatedly through 
+//   the file list, creating output files with times set to now. This is 
+//   useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// TIME-SERIES FILE DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "./input";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// RADAR PARAMS.
+//
+// If any of the params are set in the input data files, the values in 
+//   those params will be taken from the input data stream rather than 
+//   from the parameter file.
+//
+//======================================================================
+ 
+///////////// radar ///////////////////////////////////
+//
+// Default radar params. If any of the params are set in the input data 
+//   files, the values in those params will be taken from the input data 
+//   stream rather than from the parameter file.
+// ========== Radar params ==========
+// 	
+// polarization: polarization type
+// altitude: km
+// latitude: degrees
+// longitude: degrees
+// gate_spacing: km
+// start_range: km
+// horiz_beam_width: half-power beam width - degrees
+// vert_beam_width: half-power beam width - degrees
+// pulse_width: micro-secs
+// wavelength: cm
+// radar_constant: dB
+// xmit_peak_pwr: watts
+// receiver_mds: dBm
+// receiver_gain: dB
+// antenna_gain: dB
+// system_gain: dB
+// noise_value: dBM - system noise
+// min_dbz_at_1km: dBZ - min detectable dBZ at 1km range
+// 	.
+//
+// Type: struct
+//   typedef struct {
+//      int radar_id;
+//      string radar_name;
+//      string site_name;
+//      polar_t polarization;
+//        Options:
+//          HORIZONTAL
+//          VERTICAL
+//          CIRCULAR
+//          ELLIPTICAL
+//      double altitude;
+//      double latitude;
+//      double longitude;
+//      double horiz_beam_width;
+//      double vert_beam_width;
+//      double wavelength;
+//      double radar_constant;
+//      double xmit_peak_pwr;
+//      double receiver_mds;
+//      double receiver_gain;
+//      double antenna_gain;
+//      double system_gain;
+//      double noise_value;
+//      double min_dbz_at_1km;
+//   }
+//
+//
+
+radar = {
+    radar_id = 0,
+    radar_name = "SPOL",
+    site_name = "Boulder",
+    polarization = HORIZONTAL,
+    altitude = 1.742,
+    latitude = 39.9321,
+    longitude = -105.182,
+    horiz_beam_width = 0.91,
+    vert_beam_width = 0.91,
+    wavelength = 10.68,
+    radar_constant = 70.1652,
+    xmit_peak_pwr = 8e+06,
+    receiver_mds = -113,
+    receiver_gain = 46.05,
+    antenna_gain = 45.2,
+    system_gain = 46.05,
+    noise_value = -83.76,
+    min_dbz_at_1km = -42.66
+};
+
+///////////// scan_type_id ////////////////////////////
+//
+// Scan type id.
+// Unique identifier for scan strategy.
+// Type: int
+//
+
+scan_type_id = 0;
+
+///////////// scan_type_name //////////////////////////
+//
+// Scan type name.
+// Descriptive name for scan strategy.
+// Type: string
+//
+
+scan_type_name = "Default";
+
+///////////// atmos_attenuation ///////////////////////
+//
+// Atmospheric attenuation (dB/km).
+// Reflectivity is corrected for this.
+// Type: double
+//
+
+atmos_attenuation = 0.016;
+
+///////////// ifd_sampling_freq ///////////////////////
+//
+// Sampling frequency of Sigmet IFD (Mhz).
+// Type: double
+//
+
+ifd_sampling_freq = 36;
+
+//======================================================================
+//
+// MOMENTS COMPUTATIONS.
+//
+//======================================================================
+ 
+///////////// index_beams_in_azimuth //////////////////
+//
+// Option to index the beams to azimuth.
+// If true, moments are computed for IQ series centered around azimuths 
+//   at a specified spacing.
+// Type: boolean
+//
+
+index_beams_in_azimuth = TRUE;
+
+///////////// azimuth_resolution //////////////////////
+//
+// Resolution in azimuth for beam indexing.
+// See index_beams_in_azimuth. This is the azimuth resolution for 
+//   computing the location at which to compute the moments. The azimuths 
+//   always start at 0.0 and increase at this resolution.
+// Minimum val: 0.001
+// Maximum val: 360
+// Type: double
+//
+
+azimuth_resolution = 1;
+
+///////////// filter_clutter //////////////////////////
+//
+// Option to filter clutter using SSEF.
+// If true, the Spectral Stationary Echo Filter (SSEF) will be applied 
+//   to the spectra before computing moments.
+// Type: boolean
+//
+
+filter_clutter = FALSE;
+
+///////////// H2V_phase_differential //////////////////
+//
+// Phase differential between H and V receiving circuits (deg).
+// For dual pol operation only. Used to normalize phidp around 0.
+// Type: double
+//
+
+H2V_phase_differential = 175;
+
+///////////// moments_params //////////////////////////
+//
+// Algorithm geometry - based on PRF.
+// Sets the moments algorithm parameters based on PRF. This is a 
+//   temporary solution until this information is available directly from 
+//   the data. UNITS: pulse width: microsecs. start_range: km. 
+//   gate_spacing: km. The algorithm indicates whether Pulse-Pair or FFT 
+//   method should be used. The window is applied upstream of the moments 
+//   computation. For SZ, no window should be used upstream. apply_sz 
+//   indicates whether to apply SZ decoding. n_samples is the number of 
+//   samples to be used for computing moments. If apply_sz is true, this 
+//   will be forced to 64.
+//
+// Type: struct
+//   typedef struct {
+//      double lower_prf;
+//      double upper_prf;
+//      double pulse_width;
+//      double start_range;
+//      double gate_spacing;
+//      algorithm_t algorithm;
+//        Options:
+//          ALG_PP
+//          ALG_FFT
+//      fft_window_t window;
+//        Options:
+//          WINDOW_HANNING
+//          WINDOW_BLACKMAN
+//          WINDOW_NONE
+//      boolean apply_sz;
+//      boolean dual_pol;
+//      int n_samples;
+//   }
+//
+// 1D array - variable length.
+//
+
+moments_params = {
+  {
+    lower_prf = 0,
+    upper_prf = 500,
+    pulse_width = 1,
+    start_range = 0.15,
+    gate_spacing = 0.3,
+    algorithm = ALG_FFT,
+    window = WINDOW_BLACKMAN,
+    apply_sz = FALSE,
+    dual_pol = FALSE,
+    n_samples = 32
+  }
+  ,
+  {
+    lower_prf = 500,
+    upper_prf = 2000,
+    pulse_width = 1,
+    start_range = 0.075,
+    gate_spacing = 0.15,
+    algorithm = ALG_FFT,
+    window = WINDOW_HANNING,
+    apply_sz = TRUE,
+    dual_pol = FALSE,
+    n_samples = 64
+  }
+};
+
+///////////// use_c_for_sz ////////////////////////////
+//
+// Option to use C implementation for SZ.
+// If true, the sz864.c module will be used for the SZ implementation.
+// Type: boolean
+//
+
+use_c_for_sz = FALSE;
+
+///////////// negate_phase_codes //////////////////////
+//
+// Option to multiple phase codes by -1.
+// In some data sets the phase codes are negated. Set this to true for 
+//   such data cases.
+// Type: boolean
+//
+
+negate_phase_codes = FALSE;
+
+///////////// signal_to_noise_ratio_threshold /////////
+//
+// Signal-to-noise value for thresholding (dB).
+// This is the signal-to-noise ratio used to thresholding based on the 
+//   noise.
+// Type: double
+//
+
+signal_to_noise_ratio_threshold = 3;
+
+///////////// sz_strong_to_weak_power_ratio_threshold /
+//
+// Strong-to-weak power ratio censoring threshold (dB).
+// SZ decoding only. If the strong to weak trip power ratio is greater 
+//   than this, we censor the weak trip.
+// Type: double
+//
+
+sz_strong_to_weak_power_ratio_threshold = 50;
+
+///////////// sz_out_of_trip_power_ratio_threshold ////
+//
+// Ratio of peak power to off-peak replica power (dB).
+// SZ decoding only. When checking for out-of-trip power after 
+//   deconvolution, this is the threshold to be used. The power of the 
+//   spectral peak is compared with the peak for the 6 lowest replicas. If 
+//   the ratio is less that this for a given number of replicas, it is 
+//   assumed that out-of-trip power is present. See 
+//   'sz_out_of_trip_power_n_replicas'.
+// Type: double
+//
+
+sz_out_of_trip_power_ratio_threshold = 6;
+
+///////////// sz_out_of_trip_power_n_replicas /////////
+//
+// Number of replicas used for checking for out-of-trip power.
+// SZ decoding only. When checking for out-of-trip power after 
+//   deconvolution, this is the number of peaks to check. See 
+//   'sz_out_of_trip_power_ratio_threshold'.
+// Minimum val: 1
+// Maximum val: 6
+// Type: int
+//
+
+sz_out_of_trip_power_n_replicas = 3;
+
+///////////// sz_window ///////////////////////////////
+//
+// Window type for SZ864.
+// Window type to be applied to strong trip before computing spectra.
+//
+// Type: enum
+// Options:
+//     NO_WINDOW
+//     HANNING
+//     BLACKMAN
+//
+
+sz_window = HANNING;
+
+//======================================================================
+//
+// SPECTRAL PRINTS FOR DEBUGGING.
+//
+//======================================================================
+ 
+///////////// selected_region /////////////////////////
+//
+// Region for selected prints and spectra files.
+// See do_selected_print and write_spectra_files.
+//
+// Type: struct
+//   typedef struct {
+//      double min_el;
+//      double max_el;
+//      double min_az;
+//      double max_az;
+//      double min_range;
+//      double max_range;
+//   }
+//
+//
+
+selected_region = {
+    min_el = 0,
+    max_el = 1,
+    min_az = 0,
+    max_az = 1,
+    min_range = 0,
+    max_range = 1
+};
+
+///////////// do_selected_print ///////////////////////
+//
+// Option to print info for a selected region.
+// If true, debug info for a selected region will be printed to stderr.
+// Type: boolean
+//
+
+do_selected_print = FALSE;
+
+///////////// spectra_dir /////////////////////////////
+//
+// Directory to which spectra are written.
+// Type: string
+//
+
+spectra_dir = "/tmp/spectra";
+
+///////////// write_individual_spectra_files //////////
+//
+// Option to write individual spectral files.
+// If true, ASCII files with the spectra are written to the specified 
+//   directory, for the selected region. A separate file is written for 
+//   each spectrum.
+// Type: boolean
+//
+
+write_individual_spectra_files = FALSE;
+
+///////////// write_combined_spectra_file /////////////
+//
+// Option to write combined spectra file.
+// If true, a single file is written, with one line per spectrum.
+// Type: boolean
+//
+
+write_combined_spectra_file = FALSE;
+
+///////////// min_snr_for_combined_spectra_file ///////
+//
+// Minimum SNR for writing combined spectra to file (dB).
+// The spectrum will only be added if the SNR exceeds this value.
+// Type: double
+//
+
+min_snr_for_combined_spectra_file = 10;
+
+//======================================================================
+//
+// REC - RADAR ECHO CLASSIFIER.
+//
+// Option to use the compute and use REC fields. Note that the REC can 
+//   only be used if beams are indexed in azimuth. Set 
+//   'index_beams_in_azimuth' to true.
+//
+//======================================================================
+ 
+///////////// apply_rec ///////////////////////////////
+//
+// Option to apply the REC for filtering.
+// If true, the REC will be used to determine to which gates filtering 
+//   should be applied.
+// Type: boolean
+//
+
+apply_rec = TRUE;
+
+///////////// rec_kernel_range_len ////////////////////
+//
+// Length of REC kernel in range (km).
+// All REC features are computed over a kernel in range. This is the 
+//   length of the kernel in range.
+// Type: int
+//
+
+rec_kernel_range_len = 2;
+
+///////////// rec_kernel_azimuth_width ////////////////
+//
+// Width of REC kernel in azimuth (deg).
+// Some of the REC features are computed over a kernel in azimuth as 
+//   well as range. This is the width of the kernel in azimuth. The number 
+//   of beams in the kernel is computed as the azimuth_width divided by 
+//   the azimuth_resolution.
+// Type: int
+//
+
+rec_kernel_azimuth_width = 5;
+
+///////////// rec_spin_dbz_threshold //////////////////
+//
+// Threshold for computing spin change in the REC (dBZ).
+// The SPIN change variable is computed using the difference in dBZ 
+//   between adjacent gates. If the difference exceeds this threshold, the 
+//   change counter is incremented.
+// Type: double
+//
+
+rec_spin_dbz_threshold = 3.5;
+
+//======================================================================
+//
+// REC - INTEREST MAPS and WEIGHTS.
+//
+// Each map should hold at least 2 points. The points should be 
+//   increasing in value, i.e. the value should increase for each 
+//   subsequent point. The various interest values are combined using the 
+//   specified weights in a weighted mean to produce the final REC value.
+//
+//======================================================================
+ 
+///////////// dbz_texture_interest_map ////////////////
+//
+// Interest mapping for dBZ texture.
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+dbz_texture_interest_map = {
+  {
+    value = 0,
+    interest = 0
+  }
+  ,
+  {
+    value = 45,
+    interest = 1
+  }
+  ,
+  {
+    value = 100,
+    interest = 1
+  }
+};
+
+///////////// dbz_texture_interest_weight /////////////
+//
+// Weight for for dBZ texture.
+// Type: double
+//
+
+dbz_texture_interest_weight = 1;
+
+///////////// dbz_spin_interest_map ///////////////////
+//
+// Interest mapping for dBZ spin.
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+dbz_spin_interest_map = {
+  {
+    value = 0,
+    interest = 0
+  }
+  ,
+  {
+    value = 50,
+    interest = 1
+  }
+  ,
+  {
+    value = 100,
+    interest = 0
+  }
+};
+
+///////////// dbz_spin_interest_weight ////////////////
+//
+// Weight for for dBZ spin.
+// Type: double
+//
+
+dbz_spin_interest_weight = 1;
+
+///////////// vel_interest_map ////////////////////////
+//
+// Interest mapping for velocity.
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+vel_interest_map = {
+  {
+    value = -2.3,
+    interest = 0
+  }
+  ,
+  {
+    value = 0,
+    interest = 1
+  }
+  ,
+  {
+    value = 2.3,
+    interest = 0
+  }
+};
+
+///////////// vel_interest_weight /////////////////////
+//
+// Weight for for velocity.
+// Type: double
+//
+
+vel_interest_weight = 1;
+
+///////////// width_interest_map //////////////////////
+//
+// Interest mapping for spectrum width.
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+width_interest_map = {
+  {
+    value = 0,
+    interest = 1
+  }
+  ,
+  {
+    value = 3.2,
+    interest = 0
+  }
+};
+
+///////////// width_interest_weight ///////////////////
+//
+// Weight for for spectrum width.
+// Type: double
+//
+
+width_interest_weight = 1;
+
+///////////// vel_sdev_interest_map ///////////////////
+//
+// Interest mapping for standard deviation of velocity.
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+vel_sdev_interest_map = {
+  {
+    value = 0,
+    interest = 1
+  }
+  ,
+  {
+    value = 3.2,
+    interest = 0
+  }
+};
+
+///////////// vel_sdev_interest_weight ////////////////
+//
+// Weight for for standard deviation of velocity.
+// Type: double
+//
+
+vel_sdev_interest_weight = 1;
+
+//======================================================================
+//
+// OUTPUT FIELDS.
+//
+// Only the following fields will included in the output. If the field 
+//   is not in the input file, it will be left out.
+//
+//======================================================================
+ 
+///////////// output_power ////////////////////////////
+//
+// Option to output power in dBM.
+// Type: boolean
+//
+
+output_power = FALSE;
+
+///////////// output_dbz_total ////////////////////////
+//
+// Option to output DBZ total - before clutter removal.
+// Type: boolean
+//
+
+output_dbz_total = TRUE;
+
+///////////// output_dbz //////////////////////////////
+//
+// Option to output DBZ.
+// Type: boolean
+//
+
+output_dbz = TRUE;
+
+///////////// output_velocity /////////////////////////
+//
+// Option to output radial VEL (m/s).
+// Type: boolean
+//
+
+output_velocity = TRUE;
+
+///////////// output_width ////////////////////////////
+//
+// Option to output spectral width (m/s).
+// Type: boolean
+//
+
+output_width = TRUE;
+
+///////////// output_filtered /////////////////////////
+//
+// Option to output filtered fields.
+// Type: boolean
+//
+
+output_filtered = FALSE;
+
+///////////// output_infilled /////////////////////////
+//
+// Option to output infilled fields.
+// Type: boolean
+//
+
+output_infilled = FALSE;
+
+///////////// output_flags ////////////////////////////
+//
+// Option to output moments flags.
+// Type: boolean
+//
+
+output_flags = FALSE;
+
+///////////// output_trip_flag ////////////////////////
+//
+// Option to output trip indicator flag.
+// Type: boolean
+//
+
+output_trip_flag = FALSE;
+
+///////////// output_infill_flags /////////////////////
+//
+// Option to output infill flags.
+// Type: boolean
+//
+
+output_infill_flags = FALSE;
+
+///////////// output_censoring_debug //////////////////
+//
+// Option to output censoring debug fields.
+// Type: boolean
+//
+
+output_censoring_debug = FALSE;
+
+///////////// output_infill_debug /////////////////////
+//
+// Option to output infill debug fields.
+// Type: boolean
+//
+
+output_infill_debug = FALSE;
+
+///////////// output_dual_pol_fields //////////////////
+//
+// Option to output dual-pol fields.
+// Type: boolean
+//
+
+output_dual_pol_fields = FALSE;
+
+///////////// output_rec //////////////////////////////
+//
+// Option to output REC field.
+// Type: boolean
+//
+
+output_rec = TRUE;
+
+///////////// output_rec_debug ////////////////////////
+//
+// Option to output REC debug fields.
+// This will output the fields from which REC is computed, for example 
+//   dbZTexture and Spin.
+// Type: boolean
+//
+
+output_rec_debug = TRUE;
+
+//======================================================================
+//
+// OUTPUT DsRadar FMQ.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for DsRadar data via FMQ.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::fmq/lirp";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 50000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 7200;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+///////////// beam_wait_msecs /////////////////////////
+//
+// Wait per beam (milli-secs).
+// ARCHIVE and SIMULATE modes only.
+// Type: int
+//
+
+beam_wait_msecs = 0;
+
+///////////// set_end_of_vol_from_elev_angle //////////
+//
+// Option to set the end of vol flag based on elevation angle.
+// If true, the program will look for changes in antenna angle to 
+//   compute the end of volume.
+// Type: boolean
+//
+
+set_end_of_vol_from_elev_angle = TRUE;
+
+///////////// vol_starts_at_bottom ////////////////////
+//
+// Flag to indicate that elevation angles increase in the volume.
+// If the volume starts at the top, i.e. elevations decrease during the 
+//   volume, set this to FALSE.
+// Type: boolean
+//
+
+vol_starts_at_bottom = TRUE;
+
+///////////// elev_change_for_end_of_vol //////////////
+//
+// Change in elevation which triggers and end of volume.
+// If the elevation angle changes by this amount, and end of volume flag 
+//   will be set.
+// Minimum val: 0.1
+// Type: double
+//
+
+elev_change_for_end_of_vol = 1.5;
+
+///////////// min_beams_per_vol ///////////////////////
+//
+// Min number of beams per volume.
+// Used to prevent end-of-volume conditions being determined during 
+//   antenna transition to the start of the next volume. Only used for 
+//   set_end_of_vol_from_elev_angle.
+// Type: int
+//
+
+min_beams_per_vol = 360;
+
+///////////// set_end_of_vol_on_prf_change ////////////
+//
+// Option to set the end-of-vol flag when the PRF changes.
+// Type: boolean
+//
+
+set_end_of_vol_on_prf_change = TRUE;
+

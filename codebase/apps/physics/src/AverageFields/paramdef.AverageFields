@@ -1,0 +1,276 @@
+/**********************************************************
+ * paramdef.AverageFields
+ *
+ * This file contains the TDRP parameter definitions for
+ * AverageFields.
+ */
+
+
+commentdef
+{
+  p_header = "AverageFields";
+  p_text = "This program calculates the weighted average of each grid "
+           "position in a list of fields.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  MULTIPLE_URL
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+           "In MULTIPLE_URL mode, the program will not run until data "
+           "is available for all of the given URLs. "
+           "This is a realtime mode. "
+           "The parameters for this mode are given in the "
+           "multiple_url_trigger.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "URL for triggering in latest data mode";
+  p_default = "mdvp:://localhost::mdv/derived_ruc";
+} latest_data_trigger;
+
+typedef struct
+{
+  string url;
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "mdvp:://localhost::mdv/derived_ruc",
+                 "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "List of URLs for triggering in latest data mode";
+  p_default = { "mdvp:://localhost::mdv/derived_ruc" };
+} multiple_url_trigger[];
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use the field_name or the field_num "
+            "field in the input_fields array to identify the input fields.";
+  p_default = true;
+} use_field_name;
+
+typedef struct
+{
+  string url;
+  string field_name;
+  long field_num;
+  double weight;
+} input_info_t;
+
+paramdef struct input_info_t
+{
+  p_descr = "Information about the fields to be averaged";
+  p_help = "If use_field_name is true, uses the field_name field to "
+           "identify the input fields.  "
+           "Otherwise, uses field_num to identify the input fields.";
+  p_default = { { "mdvp:://localhost::./mdv/derived_ruc", "RH", 0, 1.0 } };
+} input_fields[];
+
+paramdef long
+{
+  p_descr = "Maximum input valid age in seconds";
+  p_help = "Once the algorithm is triggered, it will not use any input data "
+           "older than this value.";
+  p_default = 1800;
+} max_input_valid_secs;
+
+typedef enum
+{
+  REMAP_LATLON,
+  REMAP_FLAT,
+  REMAP_LAMBERT_CONFORMAL2
+} remap_type_t;
+
+typedef struct
+{
+  remap_type_t remap_type;
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} remap_info_t;
+
+paramdef struct remap_info_t
+{
+  p_descr = "Information for remapping the input fields";
+  p_help = "If remap_type is REMAP_LATLON, the following fields are used:\n"
+           "\tnx, ny, minx, miny, dx, dy\n\n"
+           "If remap_type is REMAP_FLAT, the following fields are used:\n"
+           "\tnx, ny, minx, miny, dx, dy, origin_lat, origin_lon, rotation\n\n"
+           "If remap_type is REMAP_LAMBERT_CONFORMAL2, the following fields "
+           "are used:\n"
+           "\tnx, ny, minx, miny, dx, dy, origin_lat, origin_lon, "
+           "lat1, lat2";
+} remap_info;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::./mdv/output";
+} output_url;
+
+typedef struct
+{
+  string field_name;
+  string field_name_long;
+  string units;
+  double missing_data_value;
+} output_field_info_t;
+
+paramdef struct output_field_info_t
+{
+  p_descr = "Information for the output field";
+} output_field_info;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to do the specified calculations if a "
+            "field cannot be read in for some reason";
+  p_help = "If a field can't be read in and this flag is set to true, the "
+           "available fields will be used in the calculations. "
+           "For MEAN calculations, in this case the missing input field "
+           "is completely ignored "
+           "and the field's value is not used in the average.";
+  p_default = false;
+} calc_with_fields_missing;
+
+typedef enum
+{
+  MEAN,
+  STDDEV,
+  SUM
+} calc_t;
+
+paramdef enum calc_t
+{
+  p_descr = "Calculation to perform on the input fields.";
+  p_help = "\tMEAN - Calculate the mean of the input fields at each "
+           "grid square.  If include_missing_in_avg is set to true, "
+           "the missing data values are included in the mean calculation "
+           "using the missing_avg_value as their data value.\n"
+           "\tSTDDEV - Calculate the standard deviation of the input fields at each "
+           "grid square.  If include_missing_in_avg is set to true, "
+           "the missing data values are included in the mean calculation "
+           "using the missing_avg_value as their data value.\n"
+           "\tSUM - Calculate the sum of the input fields at each "
+           "grid square.\n";
+  p_default = MEAN;
+} calculation;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to include missing/bad data in "
+            "the averages.";
+  p_help = "If this flag is true, the missing_avg_value parameter will "
+           "be used as the data value in the average calculations for any "
+           "missing or bad data value in the input field.\n"
+           "If this flag is false, missing data will be ignored and only "
+           "non-missing data fields will be included in the average and "
+           "in the weighting.";
+  p_default = false;
+} include_missing_in_avg;
+
+paramdef double
+{
+  p_descr = "Value to use in place of missing/bad data in the input field.";
+  p_help = "Only used if include_missing_in_avg is set to TRUE.";
+  p_default = 0.0;
+} missing_avg_value;

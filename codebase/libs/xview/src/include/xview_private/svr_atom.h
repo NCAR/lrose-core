@@ -1,0 +1,84 @@
+/*	@(#)svr_atom.h 1.25 93/06/28 SMI	*/
+
+/*	
+ *	(c) Copyright 1989 Sun Microsystems, Inc. Sun design patents 
+ *	pending in the U.S. and foreign countries. See LEGAL_NOTICE 
+ *	file for terms of the license. 
+ */
+
+#ifndef _server_atom_h_already_included
+#define _server_atom_h_already_included
+
+/* Maximum number of atom types */
+#ifdef OW_I18N
+#define MAX_NUM_ATOMS		46
+#else
+#define MAX_NUM_ATOMS		45
+#endif /* OW_I18N */
+
+typedef enum {		/* values for server_atom_type */
+    SERVER_WM_WIN_ATTR_TYPE,
+    SERVER_WM_ADD_DECOR_TYPE,
+    SERVER_WM_DELETE_DECOR_TYPE,
+    SERVER_WM_DECOR_CLOSE_TYPE,
+    SERVER_WM_DECOR_FOOTER_TYPE,
+    
+    SERVER_WM_DECOR_RESIZE_TYPE,
+    SERVER_WM_DECOR_HEADER_TYPE,
+    SERVER_WM_DECOR_OK_TYPE,
+    SERVER_WM_DECOR_PIN_TYPE,
+    SERVER_WM_SCALE_SMALL_TYPE,
+    
+    SERVER_WM_SCALE_MEDIUM_TYPE,
+    SERVER_WM_SCALE_LARGE_TYPE,
+    SERVER_WM_SCALE_XLARGE_TYPE,
+    SERVER_WM_PIN_STATE_TYPE,
+    SERVER_WM_WIN_BUSY_TYPE,
+    
+    SERVER_WM_WINMSG_STATE_TYPE,
+    SERVER_WM_WINMSG_ERROR_TYPE,
+    SERVER_WM_WT_BASE_TYPE,
+    SERVER_WM_WT_CMD_TYPE,
+    SERVER_WM_WT_PROP_TYPE,
+    
+    SERVER_WM_WT_HELP_TYPE,
+    SERVER_WM_WT_NOTICE_TYPE,
+    SERVER_WM_WT_OTHER_TYPE,
+    SERVER_WM_MENU_FULL_TYPE,
+    SERVER_WM_MENU_LIMITED_TYPE,
+    
+    SERVER_WM_NONE_TYPE,
+    SERVER_WM_PIN_IN_TYPE,
+    SERVER_WM_PIN_OUT_TYPE,	
+    SERVER_WM_TAKE_FOCUS_TYPE,
+    SERVER_DO_DRAG_MOVE_TYPE,
+    
+    SERVER_DO_DRAG_COPY_TYPE,
+    SERVER_DO_DRAG_LOAD_TYPE,   
+    SERVER_JOURNAL_SYNC_ATOM_TYPE,
+    SERVER_WM_DISMISS_TYPE,   
+    SERVER_WM_SAVE_YOURSELF_TYPE, 
+       
+    SERVER_WM_PROTOCOLS_TYPE,
+    SERVER_WM_DELETE_WINDOW_TYPE,    
+    SERVER_WM_COMMAND_TYPE,
+    SERVER_WM_CHANGE_STATE_TYPE,
+    
+    SERVER_WM_DEFAULT_BUTTON_TYPE,
+    SERVER_WM_DRAGDROP_INTEREST_TYPE,
+    SERVER_WM_DRAGDROP_PREVIEW_TYPE,
+    SERVER_WM_DRAGDROP_TRIGGER_TYPE,
+    SERVER_WM_DRAGDROP_ACK_TYPE,
+    SERVER_WM_DRAGDROP_DONE_TYPE,
+    SERVER_WM_UNKNOWN_TYPE,
+
+#ifdef OW_I18N
+    SERVER_COMPOUND_TEXT_TYPE,
+#endif /* OW_I18N */
+
+} Server_atom_type;
+
+
+extern Server_atom_type server_get_atom_type();
+
+#endif

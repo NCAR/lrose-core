@@ -1,0 +1,145 @@
+#! /bin/bash -f
+#
+# prepare a LROSE release
+#
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Usage: prepare_lrose_release [options below]"
+    echo "  -h:  produce this usage list"
+    echo "  -d:  turn debugging on"
+    echo "  -v:  turn verbose debugging on"
+    echo "  -f:  force, do not request user to check it is OK to proceed"
+    echo "  -s:  produce distribution for static linking"
+    echo "       default is dynamic linking"
+    echo
+}
+
+#--------------------------------------------------------------------
+
+# defaults
+
+package=lrose
+dist_dir=$WORK/src/${package}
+release_dir=$WORK/releases
+debug=true
+verbose=false
+static=false
+force=false
+
+# Parse command line options.
+while getopts hdfsv OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        v)
+            verbose=true
+            ;;
+        f)
+            force=true
+            ;;
+        s)
+            static=true
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running create_lrose_release"
+  echo "  package: $package"
+  echo "  dist_dir: $dist_dir"
+  echo "  release_dir: $release_dir"
+  echo "  debug: $debug"
+  echo "  verbose: $verbose"
+  echo "  static: $static"
+  echo "  force: $force"
+fi
+
+# Remove the switches we parsed above.
+shift `expr $OPTIND - 1`
+
+# delete contents of dist_dir
+
+if [ -d $dist_dir ]
+then
+
+# go to release dir
+
+    cd $dist_dir
+
+# check that we should proceed
+
+    if [ "$force" != "true" ]
+    then
+        echo "WARNING: you are about to remove all contents in dir: `pwd`"
+        echo "========================================================="
+        ls -al
+        echo "========================================================="
+        read -ep "WARNING: do you wish to proceed (y/n)? " answer
+        test "$answer" || answer=n
+        if [ "$answer" != "y" ]
+        then
+            echo "Aborted"
+            exit 1
+        fi
+    fi
+
+    echo "Proceeding ......."
+    echo "  Removing all contents in dir: `pwd`"
+
+    cd ..
+    echo /bin/rm -rf $dist_dir
+    /bin/rm -rf $dist_dir
+
+fi
+
+# mkdir again, go there
+
+mkdir -p $dist_dir
+cd $dist_dir
+
+# perform checkout
+
+cvs co distribs/$package
+./distribs/$package/do_src_checkout
+
+# prepare src release
+
+if [ "$static" == "true" ]
+then
+    if [ "$verbose" == "true" ]
+    then
+        ./distribs/$package/prepare_src_release -s -v
+    else
+        ./distribs/$package/prepare_src_release -s -d
+    fi
+else
+    if [ "$verbose" == "true" ]
+    then
+        ./distribs/$package/prepare_src_release -v
+    else
+        ./distribs/$package/prepare_src_release -d
+    fi
+fi
+
+# install src release
+
+./distribs/$package/install_src_release $package $package $release_dir
+
+exit 0

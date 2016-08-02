@@ -1,0 +1,20 @@
+#! /bin/csh
+
+#
+# kill if running
+#
+
+kill_servers
+
+#
+# start data servers
+#
+
+cart_slave -params $TITAN_HOME/params/cart_slave.test &
+dobson_server -params $TITAN_HOME/params/dobson_server.test &
+dobson_server -params $TITAN_HOME/params/dobson_server.precip_forecast &
+
+
+
+
+

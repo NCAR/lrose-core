@@ -1,0 +1,140 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions Mdv2SweepNetCDF
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Feb 2003
+//
+
+commentdef {
+  p_header = "Program name: Mdv2SweepNetCDF";
+  p_text = "Mdv2SweepNetCDF reads and MDV file and converts it into NetCDF sweep files.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in FILELIST mode, at least) MUST contain a day-directory below the data file -- ./data_file.mdv will not work as a file path";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./mdv/input";
+  p_descr = "URL for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "OUTPUT FILE.";
+}
+
+typedef enum {
+  ENCODING_INT8,
+  ENCODING_INT16,
+  ENCODING_FLOAT32
+} output_encoding_t;
+
+paramdef enum output_encoding_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Encoding type for output data.";
+  p_help = "Output can be in scaled 1-byte integers (INT8), scaled 2-byte integers (INT16) or 4-byte floating point (FLOAT32)";
+} output_encoding;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Radar name";
+  p_help = "This is the instrument name in the netCDF file.";
+} radar_name;
+
+paramdef string {
+  p_default = "NEXRAD Data Quality Optimization";
+  p_descr = "Radar name";
+  p_help = "This is the instrument name in the netCDF file.";
+} project_name;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory for netCDF files.";
+  p_help = "";
+} output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field names for output file";
+  p_help = "If TRUE, only the output_field_names will be written to the output file. If FALSE, all fields will be written to the output file.";
+} specify_output_field_names;
+
+paramdef string {
+  p_default = {"DBZ"};
+  p_descr = "Field name list.";
+} output_field_names[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write _latest_data_info file in output dir.";
+  p_help = "If TRUE, _latest_data_info is written to the output directory.";
+} write_ldata_info_file;
+

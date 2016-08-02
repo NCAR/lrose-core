@@ -1,0 +1,35 @@
+import os
+import distutils.sysconfig
+
+buildOptions = Options('buildOpts.py')
+buildOptions.Add(PathOption('swigPath','Path to swig program','swig',PathOption.PathAccept))
+
+env = Environment(options=buildOptions)
+Help(buildOptions.GenerateHelpText(env))
+
+env['SWIG'] = env['swigPath']
+
+cppSandLibrary   = env.Library('cppsand',['Sand.cpp'])
+
+cppFaultLibrary  = env.Library('cppfault',['Fault.cpp'])
+
+pyFaultLibrary   = env.SharedLibrary('_fault.so', ['fault.i'],
+                                     SWIGFLAGS=['-c++','-python'],
+                                     CPPPATH=[distutils.sysconfig.get_python_inc()],
+                                     LIBPATH=[distutils.sysconfig.get_config_var('LIBPL'),'.'],
+                                     LIBS=[distutils.sysconfig.get_config_var('LIBS').split(),distutils.sysconfig.get_config_var('LIBRARY'),'cppfault'],
+                                     SHLIBPREFIX="")
+env.Clean(pyFaultLibrary,['fault.pyc'])
+
+pySandLibrary    = env.SharedLibrary('_sand.so', ['sand.i'],
+                                     SWIGFLAGS=['-c++','-python'],
+                                     CPPPATH=[distutils.sysconfig.get_python_inc()],
+                                     LIBPATH=[distutils.sysconfig.get_config_var('LIBPL'),'.'],
+                                     LIBS=[distutils.sysconfig.get_config_var('LIBS').split(),distutils.sysconfig.get_config_var('LIBRARY'),'cppfault','cppsand'],
+                                     SHLIBPREFIX="")
+env.Clean(pySandLibrary,['sand.pyc'])
+
+
+env.Default([pySandLibrary,pyFaultLibrary,cppFaultLibrary,cppSandLibrary])
+
+

@@ -1,0 +1,347 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SpolTs2Fmq
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Feb 2011
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SpolTs2Fmq reads raw time-series data via TCP/IP. It saves the time series data out to a file message queue (FMQ), which can be read by multiple clients. It optionally merges in angles from the S2D system, and scan information from syscon.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to only register with the process mapper during the write.";
+  p_help = "Sometimes the reader keeps registering, but no data is being written to the FMQ. If this parameter is true, we only register with procmap during the write. So if no writes are occurring, no registrations will occur and the auto_restarter will kill and restart this application. This makes it robust when the reading hangs for some reason.";
+} do_not_register_on_read;
+
+commentdef {
+  p_header = "READING TIME SERIES VIA TCP";
+};
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Host name on which time series server is running.";
+} ts_tcp_server_host;
+
+paramdef int {
+  p_default = 12000;
+  p_descr = "TCP/IP port on which time series server is running.";
+} ts_tcp_server_port;
+
+commentdef {
+  p_header = "MERGING SYSCON INFORMATION";
+  p_text = "The syscon information is written to an FMQ by SpolSysconRelay. This information is optionally read in by this application and merged with the time series data. Generally this is scan information and transmit power.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to merge syscon information with the time series.";
+  p_help = "TCP mode only. If true, the latest scan and other information will be read from an FMQ. This data is in IWRF format. This information will be merged with the time series data.";
+} merge_syscon_info;
+
+paramdef string {
+  p_default = "/tmp/fmq/syscon";
+  p_descr = "Path for syscon FMQ.";
+  p_help = "Data in this FMQ is written by SpolSysconRelay";
+} syscon_fmq_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to synchronize the syscon info with the pulse stream.";
+  p_help = "The syscon info packets arrive somewhat delayed with respect to the pulses. If this is true, the times of the syscon packets and pulse packets are inspected, and an appropriate delay is inserted into the pulse reading to synchronize the info with the pulses.";
+} sync_syscon_info_with_pulses;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to in xmit_power from syscon data.";
+  p_help = "If true, any xmit_power packets coming from syscon will be merged in.";
+} merge_xmit_power_from_syscon;
+
+commentdef {
+  p_header = "MERGING ANGLES FROM S2D";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to merge in angle information from the S2D system.";
+  p_help = "Some data streams (e.g. kband) do not contain angles, only time. Time-stamped angles are broadcast in UDP. These are read in, and the angles are merged with the data stream, using time to synchronize the two streams.";
+} merge_antenna_angles;
+
+paramdef string {
+  p_default = "/tmp/fmq/angles";
+  p_descr = "Name of input FMQ for angle data.";
+} angle_fmq_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to position the angle FMQ at the start of the queue.";
+  p_help = "If false, we start reading at the end of the angle queue. This is the default behavior. If true, we position the read pointer at the start of the angle queue, and read all data available in the queue before starting to read new data. This is generally only used in debug mode.";
+} position_angle_fmq_at_start;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Time adjustment to correct time on incoming pulses (secs).";
+  p_help = "This value is ADDED to the incoming pulse time, to correct it as necessary. Accurate time is required to match angles correctly with the incoming pulses.";
+} pulse_time_adjustment_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print angle errors between time-stamped angles and those in the time series data.";
+  p_help = "This is useful for testing the accuracy of the time-stamped angles relative to a second source of angles, e.g. the RVP8. If set to true, the angle errors will be printed out.";
+} print_angle_errors;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compare the time series angles with the S2D angles, and write the angle error statistics to the status XML.";
+  p_help = "This is used to check the RVP8 angles against the S2D angles. Differences between these indicate a timing problem either on the RVP8 or the S2D ARM computer.";
+} check_angles_for_status_xml;
+
+paramdef string {
+  p_default = "SBandAngleErrors";
+  p_descr = "Tag to delineate angle errors in output XML.";
+} angle_errors_xml_tag;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Number of pulses for computing angle error stats.";
+} n_samples_for_angle_error_stats;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to correct the angle if the error exceeds a specified value.";
+  p_help = "If the angles in the time series data differ from the S2D angles by more than the specified amount, correct the angles in the data, using the S2D angles as truth. This assumes that merge_antenna_angles is FALSE, since it makes no sense to do this if merging is active.";
+} correct_data_angles_using_s2d_angles;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Angle error threshold for correction (deg).";
+  p_help = "Applies if correct_data_angles_using_s2d_angles it TRUE. If the error exceeds this amount, the data angle(s) will be overwritten using the S2D angles instead.";
+} angle_error_correction_threshold;
+
+commentdef {
+  p_header = "OVERRIDE CALIBRATION";
+  p_text = "Limited calibration information is passed down from the drx. This option allows you to override this calibration information with that from a file on disk.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override calibration, with values from local xml file.";
+  p_help = "If true, the calibration will be read in from an xml file. Calibration packets arriving from the drx will be replaced with the local information.";
+} override_calibration;
+
+paramdef string {
+  p_default = "./cal.xml";
+  p_descr = "File path for calibration to be used for override.";
+  p_help = "See 'override_calibration'.";
+} cal_xml_file_path;
+
+commentdef {
+  p_header = "AUGMENTING THE STATUS XML";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to augment any status XML packets with extra information.";
+  p_help = "If true, extra information may be appended to status XML packets. Test pulse details and transmitter power will be added if available.";
+} augment_status_xml;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Maximum interval between status XML packets (secs).";
+  p_help = "If no status XML packets have been received in this interval, we will generate a status packet based on available information.";
+} status_xml_interval;
+
+paramdef int {
+  p_default = 120;
+  p_descr = "Maximum age for information put into the status XML (secs).";
+  p_help = "When we augment the status XML, we only add information which is younger than the specified age. Older information is ignored.";
+} status_xml_max_age;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to augment status XML with transmit power.";
+} append_xmit_power_to_status_xml;
+
+paramdef string {
+  p_default = "SBandXmitPower";
+  p_descr = "Tag to delineate xmit power in output XML.";
+} xmit_power_xml_tag;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to augment status XML with test pulse information.";
+  p_descr = "Note: monitor_test_pulse must be set to TRUE for this to be available.";
+} append_test_pulse_to_status_xml;
+
+paramdef string {
+  p_default = "SBandTestPulse";
+  p_descr = "Tag to delineate test pulse block in output XML.";
+} test_pulse_xml_tag;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to augment status XML with secondary data from an FMQ.";
+  p_help = "This data is monitoring information provided by a specialized server - for example the sixnet monitoring system.";
+} merge_secondary_status_from_fmq;
+
+paramdef string {
+  p_default = "/tmp/data/fmq/secondary_status";
+  p_descr = "Path to FMQ for secondary status information";
+} secondary_status_fmq_path;
+
+commentdef {
+  p_header = "MONITOR TEST PULSE POWER";
+  p_text = "If test pulse monitoring is active, an extra XML block will be generate to hold the test pulse powers. The main tag for this block is specified in test_pulse_tag. Within the test pulse block, the following values will the stored, as applicable:\n\tTestPulsePowerHcDb\n\tTestPulsePowerVcDb\n\tTestPulsePowerHxDb\n\tTestPulsePowerVxDb.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute test pulse power and add to monitoring.";
+} monitor_test_pulse;
+
+paramdef double {
+  p_default = 145.0;
+  p_descr = "Range to test pulse (km).";
+  p_help = "We compute the gate number from this range. The power at this gate is averaged over the monitoring interval.";
+} test_pulse_range_km;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Number of samples used to compute test pulse power.";
+} test_pulse_n_samples;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If this is a dual-polarization system, is it operating in fast alternating mode?";
+  p_help = "If true, the HV flag is used to determine which receiver path to use.";
+} dual_pol_alternating_mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If this is a dual-polarization system, does it have switching receivers?";
+  p_help = "If true, then there is a co-pol receiver path and a cross-pol receiver path. If false, there is an H and V receiver path.";
+} dual_pol_switching_receivers;
+
+commentdef {
+  p_header = "SWEEP NUMBER";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to correct the sweep number relative to the start of a volume.";
+  p_help = "Some radars set the sweep number to always increase, without resetting to 0 when a new volume starts. If this parameter is TRUE, the sweep number will be corrected so that it is zero at the start of each volume.";
+} zero_sweep_number_at_start_of_vol;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to delay the change of the sweep number in sector scan mode.";
+  p_help = "On some systems (e.g. those which use a PMAC) the scan flags are updated at the start of the antenna transition. This means that the entire transition is included in the new sweep. If this parameter is set to TRUE, and the scan mode is SECTOR, the sweep num change is delayed until the antenna  changes direction. This means that the first half of the transition will be flagged as the previous sweep, and the second half as the next sweep. In non-sector mode, this parameter is ignored."; 
+} delay_sweep_num_change_in_sector_scan;
+
+commentdef {
+  p_header = "IQ DATA SCALING";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply a scale and bias to each I and Q value before writing.";
+} apply_scale;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Scale constant for I and Q data. Applied if apply_scale == TRUE";
+  p_help = "Value written = Value_in * scale + bias";;
+} scale;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Bias for I and Q data. Applied if apply_scale == TRUE";
+  p_help = "Value written = Value_in * scale + bias";
+} bias;
+
+commentdef {
+  p_header = "OUTPUT FMQ DETAILS";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "Path to output FMQ.";
+  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
+} output_fmq_path;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+commentdef {
+  p_header = "OUTPUT FMQ MESSAGE DETAILS";
+  p_text = "The output messages are written to the FMQ. To improve performance, each message contains a number of time series pulses.";
+};
+
+paramdef int {
+  p_default = "200";
+  p_descr = "Number of pulses per output message.";
+  p_help = "The actual number will sometimes be 1 less than this, because an info data part may will be written once in a while.";
+} n_pulses_per_message;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "The xmit_power packet will be written each time this number of pulses is written.";
+} n_pulses_per_power_info;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Write end of vol event when data stops.";
+  p_descr = "This will be written if no data arrives for a certain period of time.";
+} write_end_of_vol_when_data_stops;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of secs before writing end of vol.";
+  p_help = "See 'write_end_of_vol_when_data_stops'";
+} nsecs_no_data_for_end_of_vol;
+

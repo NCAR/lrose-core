@@ -1,0 +1,6 @@
+.deps
+SpectraPrint
+__makefile.template
+makefile
+makefile.am
+makefile.in

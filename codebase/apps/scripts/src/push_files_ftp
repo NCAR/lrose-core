@@ -1,0 +1,383 @@
+#!/usr/bin/perl
+# push_files_ftp: Push input files from an input directory to another
+# directory using the ftp command.
+#
+# Usage:
+#   push_files_ftp <options>
+#
+# Options:
+#   -help                : Print usage
+#   -instance <instance> : PMU instance (default = "test")
+#   -input_dir <dir>     : Input directory (default = ".")
+#   -output_host <host>  : Output host (default = "localhost")
+#   -output_dir <dir>    : Output directory (default = ".")
+#   -output_filename <name>
+#                        : Output filename to use, if a constant filename is desired
+#                          (default = "")
+#   -auth_file <file>    : Authorization file (default = "auth_file")
+#   -prefix <prefix>     : Input file prefix (default = "")
+#   -suffix <suffix>     : Input file suffix (default = "")
+#   -interval <interval> : Data dir polling interval (default = 2)
+#   -debug               : Print debug messages
+#   -delete              : Delete in the input file after pushing
+#
+# N. Rehak  June 1997 NCAR/RAP
+#
+
+#
+# Get the needed PERL supplied library modules.
+#
+
+require 'stat.pl';
+require 'ftplib.pl';
+
+use Getopt::Long;
+use Cwd;
+
+#
+# Get the RAP library modules
+#
+
+use Env qw(RAP_LIB_DIR);
+use Env qw(RAP_SHARED_LIB_DIR);
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+use Toolsa;
+
+# Get the program basename.
+($prog = $0) =~ s|.*/||;
+
+# Unbuffer output.
+$| = 1;
+
+# Initialize command line arguments
+$opt_instance = "test";            # PMU instance name
+$opt_input_dir = ".";              # Local input data directory.
+$opt_output_host = "localhost";    # Remote output host
+$opt_output_dir = ".";             # Remote output data directory.
+$opt_output_filename = "";         # Remote output filename
+$opt_auth_file = "auth_file";      # Authorization file - user & password
+$opt_prefix = "";                  # Prefix of files we want
+$opt_suffix = "";                  # Suffix of new files
+$opt_interval = 2;		   # Data directory polling interval.
+$opt_debug = 0;                    # Debug mode
+$opt_delete = 0;                   # Delete input file after pushing
+
+# Save the usage to print to the user if there is a problem
+$usage =
+    "Usage: $prog [options]\n" .
+    "Options:\n" .
+    "   -help                : Print usage\n" .
+    "   -instance <instance> : PMU instance name (default = $opt_instance)\n" .
+    "   -input_dir <dir>     : Local input dir (default = $opt_input_dir)\n" .
+    "   -output_host <host>  : Remote output host (default = $opt_output_host)\n" .
+    "   -output_dir <dir>    : Remote output dir (default = $opt_output_dir)\n" .
+    "   -output_filename <name>\n" .
+    "                        : Output filename to use, if a constant filename is desired\n" .
+    "                          (default = $opt_output_filename)\n" .
+    "   -auth_file <file>    : Authorization file, contains remote username\n" .
+    "                          and password (default = $opt_auth_file)\n" .
+    "   -prefix <prefix>     : Input file prefix (default = $opt_prefix)\n" .
+    "   -suffix <suffix>     : Input file suffix (default = $opt_suffix)\n" .
+    "   -interval <interval> : Data dir polling interval (default = $opt_interval\n" .
+    "   -debug               : Print debug messages\n" .
+    "   -delete              : Delete the input file after pushing\n";
+
+# Get the arguments from the command line
+
+$result = &GetOptions('help',
+		      'instance=s',
+		      'input_dir=s',
+		      'output_host=s',
+		      'output_dir=s',
+		      'output_filename=s',
+		      'auth_file=s',
+		      'prefix=s',
+		      'suffix=s',
+		      'interval=i',
+		      'debug',
+		      'delete');
+
+if ($result == 0 ||
+    $opt_help)
+{
+    print $usage;
+    exit 0;
+}
+
+if ($opt_debug)
+{
+    print "Command Line Options:\n";
+    print "   help = $opt_help\n";
+    print "   instance = $opt_instance\n";
+    print "   input_dir = $opt_input_dir\n";
+    print "   output_host = $opt_output_host\n";
+    print "   output_dir = $opt_output_dir\n";
+    print "   output_filename = $opt_output_filename\n";
+    print "   auth_file = $opt_auth_file\n";
+    print "   prefix = $opt_prefix\n";
+    print "   suffix = $opt_suffix\n";
+    print "   interval = $opt_interval\n";
+    print "   debug = $opt_debug\n";
+    print "   delete = $opt_delete\n";
+    print "\n";
+}
+
+# Verify the local directory.
+die "$opt_input_dir: no such file or directory" unless -d $opt_input_dir;
+
+# Read the username and password in from the authorization file.
+open (AUTHFILE, "$opt_auth_file") ||
+    die "Error opening authorization file $opt_auth_file";
+
+$username_found = 0;
+$passwd_found = 0;
+
+while ($auth_line = <AUTHFILE>)
+{
+    # Ignore comments
+    unless ($auth_line =~ /^#/)
+    {
+	if (!$username_found)
+	{
+	    $remote_user = $auth_line;
+	    $username_found = 1;
+	}
+	else
+	{
+	    $remote_passwd = $auth_line;
+	    $passwd_found = 1;
+	    last;
+	}
+    }
+
+} # endwhile
+
+close(AUTHFILE);
+
+if (!$username_found)
+{
+    die "No username specified in authorization file $opt_auth_file";
+}
+
+if (!$passwd_found)
+{
+    die "No password specified in authorization file $opt_auth_file";
+}
+
+# Take the leading and trailing blanks off of the strings
+
+$_ = $remote_user;
+s/^\s*(.*?)\s*$/$1/;
+$remote_user = $_;
+
+$_ = $remote_passwd;
+s/^\s*(.*?)\s*$/$1/;
+$remote_passwd = $_;
+
+if ($opt_debug)
+{
+    print "user_name = '$remote_user'\n";
+    print "passwd = '$remote_passwd'\n";
+}
+
+#
+# Initialize use of PMU functions
+#
+
+&Toolsa::PMU_auto_init($prog, $opt_instance, 60);
+
+#
+# Set up signal handlers so we unregister from the process mapper
+# when we quit
+#
+
+$SIG{INT} = \&tidy_and_exit;
+$SIG{KILL} = \&tidy_and_exit;
+$SIG{HUP} = \&tidy_and_exit;
+$SIG{TERM} = \&tidy_and_exit;
+
+# Change directories to operate from the specified local directory.
+# This is done because I'm not sure how to change the local directory
+# within the FTP module
+
+chdir($opt_input_dir);
+$local_dir = ".";
+
+# Monitor the data directory for new files.
+while ()
+{
+    # Register with the process mapper
+    &Toolsa::PMU_auto_register("Waiting for data");
+
+    # Get the directory's modification time.
+    ($mtime = (stat($local_dir))[$ST_MTIME]) ||
+	die "stat: $!";
+
+    if ($mtime > $old_mtime)
+    {
+	opendir(DIR, $local_dir) ||
+	    die "Can't open directory $opt_input_dir";
+
+	# Skip the current and parent directory entries.
+	@files = grep(!/^\.\.?$/, readdir(DIR));
+	closedir(DIR);
+
+	# Exclude subdirectories.
+	@files = grep(!-d, @files);
+
+	# If the prefix is specified, pull out files without the prefix
+	if ($opt_prefix ne "")
+	{
+	    @files = grep(/^$opt_prefix/, @files);
+	}
+
+	# Also weed out based on the suffix
+	if ($opt_suffix ne "")
+	{
+	    @files = grep(/$opt_suffix$/, @files);
+	}
+
+	# Look for new files.  We'll always send what's lying around
+	# initially.
+	grep($mark{$_}++, @old_files);
+	@new_files = grep(!$mark{$_}, @files);
+
+	if ($opt_debug)
+	{
+	    $s = @new_files == 1 ? '' : 's';
+	    print join("\n  ", "New file$s:", @new_files), "\n"
+		if @new_files;
+	}
+
+	# Copy the files to the new directory
+	&copy_files(*new_files);
+
+	# Prepare for the next iteration of the loop.
+	$old_mtime = $mtime;
+	@old_files = @files;
+	undef %mark;
+	undef @new_files;
+    }
+    sleep($opt_interval);
+}
+
+
+# Copy the files to the new directory
+sub copy_files
+{
+    local(*files) = @_;
+
+    local($command);
+
+    foreach $filename (@files)
+    {
+	# Make sure the file is complete
+	$prev_file_size = -1;
+	$curr_file_size = (stat($opt_input_dir/$filename))[$ST_SIZE];
+
+	while ($curr_file_size != $prev_file_size)
+        {
+	    if ($opt_debug)
+	    {
+		print "Waiting for file to stabilize....\n";
+	    }
+
+            sleep(1);
+            $prev_file_size = $curr_file_size;
+	    $curr_file_size = (stat($opt_input_dir/$filename))[$ST_SIZE];
+	}
+
+	if ($opt_output_filename eq "")
+	{
+	    $output_filename = $filename;
+	}
+	else
+	{
+	    $output_filename = $opt_output_filename;
+	}
+
+	# Register with the process mapper
+	&Toolsa::PMU_force_register("Sending file $opt_input_dir/$filename");
+
+	if ($opt_debug)
+	{
+	    print "\n" .
+		"Sending: $opt_input_dir/$filename to " .
+		    "$opt_output_host:$opt_output_dir/$output_filename\n";
+	}
+	
+	# Open the FTP connection
+	$o_attempt = 0;
+	unless (&ftp'open($opt_output_host, $remote_user,
+                          $remote_passwd))
+        {
+            &fail if ++$o_attempt > 10;
+            local($error) = &ftp'error;
+            warn "Error: $error";
+            &fail unless $error =~ /Timeout/;
+            sleep 30;
+
+	    # Register with the process mapper
+	    &Toolsa::PMU_force_register("Sending file $opt_input_dir/$filename");
+
+            redo;
+	}
+
+	# Set the transfer parameters
+	&ftp'binary || &fail;
+
+        # Move to the remote directory
+        &ftp'cwd($opt_output_dir) || &fail;
+
+	# Send the file
+	$p_attempt = 0;
+        unless (&ftp'put($filename, $output_filename))
+        {
+            &fail if ++$p_attempt > 10;
+            local($error) = &ftp'error;
+            warn "Error: $error";
+            &fail unless $error =~ /Timeout/;
+            sleep 30;
+
+	    # Register with the process mapper
+	    &Toolsa::PMU_force_register("Sending file $opt_input_dir/$filename");
+
+            redo;
+	}
+
+	# End the FTP session
+	&ftp'close;
+
+	# Delete the input file, if requested
+        if ($opt_delete)
+        {
+	  $command = "rm -f $filename";
+
+	  ((system($command) >> 8) == 0) ||
+	      warn "system: $command: error";
+        }
+
+    } # end foreach - $filename
+}
+
+# Exit with an error message on an FTP command failure.
+
+sub fail
+{
+    local($error) = &ftp'error;
+    &ftp'close;
+    &Toolsa::PMU_auto_unregister();
+    die "$error\n";
+}
+
+#
+# Exit in a "tidy" fashion
+#
+
+sub tidy_and_exit
+{
+    my $signame = shift;
+    &Toolsa::PMU_auto_unregister();
+    die "Exiting on signal SIG$signame";
+}

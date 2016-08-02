@@ -1,0 +1,460 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MdvMerge2
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 2004
+ * 
+ */
+
+commentdef {
+  p_header = "MdvMerge2 takes MDV data from a number of separate input directories and merges them into a single MDV file as a mosaic.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "OPERATIONAL MODE AND TRIGGERING.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME.\n\nIn REALTIME mode, the analysis is performed at regular times or as new data arrives.\n\nIn ARCHIVE mode, the file list is obtained from the command line or a start and end time are specified.";
+} mode;
+
+typedef enum {
+  TIME_TRIGGER, FILE_TRIGGER, FCST_FILES_TRIGGER
+} trigger_t;
+
+paramdef enum trigger_t {
+  p_default = TIME_TRIGGER;
+  p_descr = "Trigger mechanism.";
+  p_help = "\nTIME_TRIGGER: program is triggered at constant time intervals - see time_trigger_interval.\n\nFILE_TRIGGER: the program triggers when all the URLs that must update have updated, and the requisite number of URLs have updated, and the required minimum time between triggers has elapsed.\n\nFCST_FILES_TRIGGER: program triggers when all lead times listed in fcstLeadTimes[] are available in the fcst_file_trigger_url, and then attempts to process these lead times for the input_urls.";
+} trigger;
+
+paramdef string
+{
+  p_descr = "Trigger URL";
+  p_help = "URL for triggering in latest_data mode\n";
+  p_default = "mdvp:://localhost::./mdv/vil";
+} fcst_file_trigger_url;
+
+paramdef double
+{
+  p_default = {0,300,600,900,1200};
+  p_descr = "Forecast lead times, in seconds, that are available in forecast directory input url";
+  p_help =  "Only used if mode is set to FCST_FILES_TRIGGER.";
+} fcstLeadTimes[];
+
+paramdef int {
+  p_default = 300;
+  p_min = 1;
+  p_descr = "Interval for TIME_TRIGGER - secs.";
+  p_help = "For TIME_TRIGGER, this is the interval between trigger events. Time triggers are synchronized to the hour, and occur at constant intervals thereafter.";
+} time_trigger_interval;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time trigger offset - secs.";
+  p_help = "Time triggers occur on the hour and at constant intervals thereafter until the next hour. This parameters allows you to schedule the trigger to be offset from the anchored time by the specified number of secs. For example, if you set time_trigger_interval to 600 (10 mins) and time_trigger_offset to 420 (7 minutes), the trigger will occur at 7, 17, 27, 37, 47 and 57 mins after the hour.";
+} time_trigger_offset;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Max time diff for searching for files relative to the trigger time - secs.";
+  p_help = "When matching files up with the trigger time, the difference between the trigger time and file time must be less than this margin.";
+} time_trigger_margin;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Only search in the past when matching files with the trigger time.";
+  p_help = "If TRUE, the search is forced to look for files before the trigger time. "
+    "This is helpful when running in archive mode and you don't want to get data "
+    "that has a future time stamp.";
+} past_only;
+
+paramdef int {
+  p_default = 120;
+  p_descr = "Minimum time between triggering in REALTIME FILE_TRIGGER mode, in seconds.";
+  p_help = "This prevents the arrival of files in FILE_TRIGGER mode from triggering at intervals less than this amount.";
+} min_time_between_file_triggers;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Minumum number of URLs to update for trigger.";
+  p_descr = "In REALTIME file triggered mode, MdvMerge2 will not trigger until at least this number of input URLs have updated. If set to 0 this will not affect the triggering.";
+} min_number_updated_urls;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Maximum file age in REALTIME file triggered mode, seconds.";
+  p_help = "Applies to all URLs specified.";
+} max_realtime_valid_age;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of seconds to sleep after triggering before processing the data. The intent is to allow realtime URLs that come in nearly simultaneously (satellite) to have a chance to catch up.";
+  p_help = "Only applies in REALTIME mode.";
+} sleepAfterTrigger;
+
+commentdef {
+  p_header = "FIELD SPECIFICATIONS.";
+}
+
+typedef enum {
+  MERGE_MIN, MERGE_MAX, MERGE_MEAN, MERGE_SUM, MERGE_LATEST, MERGE_CLOSEST
+} merge_method_t;
+
+typedef enum {
+  INT8 = 1,   // unsigned 8 bit IEEE integer 
+  INT16 = 2,  // unsigned 16 bit IEEE integer
+  FLOAT32 = 5 // 32-bit IEEE float
+} encoding_t;
+
+typedef struct {
+  boolean applyVlevelLimits;
+  double vlevelMin;
+  double vlevelMax;
+} vlevelLimits_t;
+
+paramdef struct vlevelLimits_t {
+  p_descr = "Option to apply vlevel limits prior to reading MDV data.";
+  p_help = "Default is not to do this. If this option is selected,\n"
+    "only selected levels are included in the MDV read, which\n"
+    "can be handy when making a composite of 0.5 degree scans\n"
+    "from a multi-layered dataset.";
+  p_default = { FALSE, 0.45, 0.55 };
+} vlevelLimits;
+
+typedef struct {
+  boolean applyPlaneNumLimits;
+  int planeNumMin;
+  int planeNumMax;
+} planeNumLimits_t;
+
+paramdef struct planeNumLimits_t {
+  p_descr = "Option to apply inclusive vertical plane number\n"
+    "limits prior to reading MDV data. Lowest plane is 0.";
+  p_help = "Default is not to do this. If this option is selected,\n"
+    "only the selected plane numbers are included in the\n"
+    "MDV read. This can be handy when the desired output\n"
+    "is a merge of the lowest elevation angle\n"
+    "from a multi-layered dataset.";
+  p_default = { FALSE, 0, 0 };
+} planeNumLimits;
+
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output unevenly-spaced vertical levels.";
+  p_help  = "Created to handle meteorological data sets with denser vertical\n"
+    "spacing near the surface. If TRUE, must set 'vlevel_array[] values'.";
+} use_specified_vlevels;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "vlevel values associated with use_specified_levels.";
+  p_help  = "Only used when 'use_specified_vlevels' is TRUE.";
+} vlevel_array[];
+
+typedef struct {
+  string name;
+  merge_method_t merge_method;
+  encoding_t merge_encoding;
+  double merge_scale;
+  double merge_bias;
+  encoding_t output_encoding;
+} merge_field_t;
+
+paramdef struct merge_field_t {
+
+  p_default = {
+    {
+      name = "DBZ",
+      merge_method = MERGE_MAX,
+      merge_encoding = FLOAT32,
+      merge_scale = 0.5,
+      merge_bias = -32.0,
+      output_encoding = INT8
+    }
+  };
+
+  p_descr = "Specifications for merged output field.";
+
+  p_help = "\n'name': specify the name of this field in the output MDV file. "
+    "This is also probably the name of the fields in the input files. "
+    "However, you may specify a different field name for the input - "
+    "see input_url for details.\n\n"
+    "'merge_method': "
+    "MERGE_MIN - take the minimum value at a grid point; "
+    "MERGE_MAX - take the maximum value at a grid point; "
+    "MERGE_MEAN - take the mean value at a point; "
+    "MERGE_SUM - sum all values at a point; "
+    "MERGE_LATEST - take the latest valid data value at a grid point\n\n"
+    "MERGE_CLOSEST - use the data with the closet origin to the grid point. CLOSEST requires a range field in the data so that for overlapping points we can determine which data set is closest to the grid point\n\n"
+    "'merge_encoding': the type of data used to perform the merge. "
+    "For best results FLOAT32 is recommended, especially for MERGE_SUM. "
+    "However, this uses more memory. "
+    "To conserve memory, use INT8 or INT16. "
+    "If you select INT8 or INT16 you must also specify 'merge_scale' and "
+    "'merge_bias' to be used to represent the data in the merge.\n\n"
+    "'output_encoding': determines the type for storing the merged "
+    "data in the output file. "
+    "This affects the size of the output file. "
+    "Use FLOAT32 for maximum precision, INT8 for smallest files.";
+} merge_fields[];
+
+paramdef string
+{
+  p_default = "range";
+  p_descr = "Name of range field in data set, giving range from the instrument to the grid point.";
+  p_help = "If MERGE_CLOSEST is used, we require a range field, from which to determine which data set origin is closest to the grid point. This is mostly used for radar data, and the range will be the range from the radar.\n";
+} range_field_name;
+
+typedef enum {
+  GENTIME, VALIDTIME
+} fcst_data_time_type_t;
+
+paramdef enum fcst_data_time_type_t {
+  p_default = VALIDTIME;
+  p_descr = "This parameter defines what time to put in the time array when using MERGE_LATEST. If one or more of the inputs is forecast data this gives the option to use its gen time or its valid time. The default is set to valid time in order for the algorithm to have the same behavior as it had before this parameter was added.";
+  p_help = "If set to GENTIME, then the forecast_delta is subtracted from the forecast time (valid time) and this time is used in the time array. If set to VALIDTIME the forecast time (valid time) is used in the time array. This option was added for the times where you want the non-forecast data to take priority over the forecast data. ";
+} fcst_data_time_type;
+
+commentdef {
+  p_header = "INPUT DATA SPECIFICATIONS.";
+}
+
+typedef struct {
+  string url;
+  string field_names;
+  boolean is_required;
+  boolean must_update;
+} input_url_t;
+
+paramdef struct input_url_t {
+  p_default = {
+    {
+      url = "mdvp:://localhost::mdv/radar/cart",
+      field_names = "",
+      is_required = false,
+      must_update = false
+    }
+  };
+  p_descr = "Array of input data URLs and related information.";
+  p_help = "\n'url': specify the URL for the input data. For data on local disk, the URL this can just be the directory containing the input MDV data files. For data retrieved from a server, it is the URL for the server. A server URL takes the following form: 'mdvp:://host:port:directory_path'. The directory path is relative to $DATA_DIR or $RAP_DATA_DIR.\n\n'field_names': If the field names in the input file match those in the 'merge_fields' parameter you should set field_names to an empty string. If the field names differ, specify the input field names as a comma-delimted list. If you wish to specify field numbers instead of names, use a comma-delimited list of numbers. Do not mix names and numbers.\n\n'is_required': if true, the merge will only be performed if data from this URL is available. If false, the merge will go ahead even if no data is available from this URL.\n\n'must_update': if true, data from this URL must have updated since the previous merge before the merge can go ahead.";
+} input_urls[];
+
+
+commentdef {
+  p_header = "OUTPUT DATA SPECIFICATIONS.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/radar/merged";
+  p_descr = "Output data URL.";
+  p_help = "URL for output data files. Has the form mdvp:://host:port:directory_path.";
+} output_url;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Correction to the output time relative to the trigger time - secs.";
+  p_help = "You may need to correct for latency in the data system. For example, the NEXRAD data arrives about 5 mins late, so we need to correct the trigger time to account for this latency in the data. The correction is ADDED to the trigger time, so to correct for latency you need to use a negative correction.";
+} output_timestamp_correction;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Write Ldata info file, when in not in REALTIME mode";
+  p_help = "";
+} write_ldata;
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to true to write as forecast data (g_HHMMSS/f_00000000.mdv\n "
+    "Otherwise, output will just be written to a day dir.\n ";
+  p_help = "Defaults to FALSE";
+} write_as_forecast;
+
+typedef enum {
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON, OUTPUT_PROJ_LAMBERT
+} output_projection_t;
+
+paramdef enum output_projection_t {
+  p_default = OUTPUT_PROJ_LATLON;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT: (x,y) Cartesian data in km from a given origin, typical of local radar data.\n\nLATLON - lat/lon grid with constant grid spacing (Mercator).\n\nLAMBERT - Lambert Conformal projection.";
+} output_projection;
+
+typedef struct {
+  double lat;
+  double lon;
+} output_origin_t;
+
+paramdef struct output_origin_t {
+  p_descr = "Origin of output grid.";
+  p_help = "Applies to OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT.";
+  p_default = {40.0, -104.0};
+} output_origin;
+
+paramdef double {
+  p_descr = "Rotation of output grid.";
+  p_help = "Applicable to OUTPUT_PROJ_FLAT.";
+  p_default = 0.0;
+} output_rotation;
+
+typedef struct {
+  double lat_1;
+  double lat_2;
+} output_std_parallels_t;
+
+paramdef struct output_std_parallels_t {
+  p_default = {20.0, 45.0};
+  p_descr = "Standard parallels.";
+  p_help = "Applicable to OUTPUT_PROJ_LAMBERT only.";
+} output_std_parallels;
+
+typedef struct {
+  long nx;
+  long ny;
+  long nz;
+  double minx;
+  double miny;
+  double minz;
+  double dx;
+  double dy;
+  double dz;
+} grid_t;
+
+paramdef struct grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "For OUTPUT_PROJ_LATLON, minx, miny, dx and dy are in degrees. Otherwise they are in km.";
+  p_default = {
+    nx = 360,
+    ny = 180,
+    nz = 1,
+    minx = -180,
+    miny = -90,
+    minz = 1.0,
+    dx = 1.0,
+    dy = 1.0,
+    dz = 1.0
+  };
+} output_grid;
+
+typedef enum {
+  COMPRESSION_NONE = 0,
+  COMPRESSION_RLE = 1,
+  COMPRESSION_ZLIB = 3,
+  COMPRESSION_GZIP = 5
+} output_compression_t;
+
+paramdef enum output_compression_t {
+  p_default = COMPRESSION_ZLIB;
+  p_descr = "Compression method for output fields.";
+} output_compression;
+
+paramdef string {
+  p_default = "Unknown";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} output_data_set_name;
+
+paramdef string {
+  p_default = "Merged data created by MdvMerge2.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} output_data_set_source;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to copy data set name, source and info strings\n"
+    "from the last master header read.";
+  p_help = "May be useful for tracking data sets. If set to TRUE then\n"
+    "the output_data_set_name and output_data_set_source entries\n"
+    "in this param file are ignored.";
+} copyMetaDataFromInput;
+
+
+typedef struct {
+  string url;
+  string gridType;
+  long nx;
+  long ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  double lambertTruelat1;
+  double lambertTruelat2;
+  double flatEarthRotation;
+  double originLat;
+  double originLon;
+} remap_input_grids_t;
+
+paramdef struct remap_input_grids_t {
+  p_descr = "Option to do remapping on input URLs. For the vast majority\n"
+    "of cases this should be an empty array. The default given is\n"
+    "simply an example, and unless the urls given are actually used\n"
+    "(which is unlikely) it will have no effect.";
+  p_help = "For lat/lon projections, minx, miny, dx and dy are in degrees.\n"
+    "Otherwise they are in km. The url string must match one of the input\n"
+    "URLs specified. The gridType string should be set to one of FLAT,\n"
+    "LATLON or LAMBERT. originLat and originLon are not used for\n"
+    "LATLON projections.";
+  p_default = {
+    { "mdvp:://exampleHost::example/dir/struct1", "FLAT", 
+      400, 400, -199.5, -199.5, 1, 1, 60, 40, 0, 40, -105 },
+    { "mdvp:://exampleHost::example/dir/struct2", "FLAT",
+      400, 400, -199.5, -199.5, 1, 1, 60, 40, 0, 41, -107 }
+  };
+} remap_input_grids[];
+

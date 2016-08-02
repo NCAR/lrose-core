@@ -1,0 +1,28 @@
+####################################################################################################
+# Expected processes for TITAN
+# 
+# process          instance        start_script             kill_script                      host
+#
+####################################################################################################
+
+polar_ingest       rtest           start_rtest_ingest       kill_rtest_ingest                local
+polar2mdv          rtest           start_rtest_ingest       kill_rtest_ingest                local
+
+#cart_slave        rtest           start_rtest_servers      kill_cart_slave.rtest            local
+dobson_server      PFcast          start_rtest_servers      kill_dobson_server_pfcast.rtest  local
+dobson_server      ZFcast          start_rtest_servers      kill_dobson_server_zfcast.rtest  local
+dobson_server      rtest           start_rtest_servers      kill_dobson_server_rtest.rtest   local
+dobson_server      PAccum          start_rtest_servers      kill_dobson_server_paccum.rtest  local
+track_server       rtest           start_rtest_servers      kill_track_server.rtest          local
+
+storm_ident        rtest           start_rtest_tracking     kill_storm_ident.rtest           local
+storm_track        rtest           start_rtest_tracking     kill_storm_track.rtest           local
+
+#forecast_monitor  Rtest           start_rtest_tracking     kill_forecast_monitor.rtest      local
+
+precip_map         Pfcast          start_rtest_tracking     kill_precip_map_pfcast.rtest     local
+precip_map         Paccum          start_rtest_tracking     kill_precip_map_paccum.rtest     local
+precip_map         Zfcast          start_rtest_tracking     kill_precip_map_zfcast.rtest     local
+
+#rview             rtest           start_rtest_display      kill_rtest_display               local
+#time_hist         rtest           start_rtest_display      kill_rtest_display               local

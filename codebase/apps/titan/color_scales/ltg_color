@@ -1,0 +1,21 @@
+# colorscale for lightning strikes
+
+# Nancy Rehak, January 1997
+	
+1	2	dark slate blue
+2 	3 	#005a00
+3	4 	#007000
+4 	6	#087fdb
+6 	8 	#1c47e8
+8 	10 	#6e0dc6
+10	13	#c80f86
+13	16	#c06487
+16	20	#d2883b
+20	25 	#fac431
+25	30	#fefa03
+30	40	#fe9a58
+40	50	#fe5f05
+50	60	#fd341c
+60	80	gray
+80	100	light gray
+

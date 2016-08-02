@@ -1,0 +1,20 @@
+# dbz color scale
+
+# Mike Dixon, April 1991
+
+5       10      dark slate blue
+10	15	#005a00
+15	20	#007000
+20	25	#087fdb
+25	30	#1c47e8
+30	35	#6e0dc6
+35	40	#c80f86
+40	45	#c06487
+45	50	#d2883b
+50	55	#fac431
+55	60	#fefa03
+60	65	#fe9a58
+65	70	#fe5f05
+70	75	#fd341c
+75	80	gray
+80	85	light gray

@@ -1,0 +1,206 @@
+/**********************************************************************
+ * TDRP params for DsrMerge
+ **********************************************************************/
+
+//======================================================================
+//
+// DsrMerge reads moments data from 2 Dsr file message queues, which 
+//   contain data from 2 channels of the same radar system, in which there 
+//   are differences. For example, there may be 2 transmitters operating 
+//   at different frequencies, each of which has a separate moments data 
+//   set. DsrMerge merges these two data streams, and produces a single 
+//   combined data stream. In doing so, some fields are copied unchanged 
+//   into the output queue. Other fields may be combined using the mean of 
+//   the two incoming fields.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = TRUE;
+
+//======================================================================
+//
+// FMQ INPUT - file message queues.
+//
+//======================================================================
+ 
+///////////// input_fmq_name_chan1 ////////////////////
+//
+// Name for first input FMQ.
+// Type: string
+//
+
+input_fmq_name_chan1 = "$(DATA_DIR)/fmq/moments_s";
+
+///////////// input_fmq_name_chan2 ////////////////////
+//
+// Name for second input FMQ.
+// Type: string
+//
+
+input_fmq_name_chan2 = "$(DATA_DIR)/fmq/moments_s2";
+
+///////////// start_reading_at_fmq_start //////////////
+//
+// Option to start reading at beginning of input FMQs.
+// Normally, we start reading at the end of the queues. For debugging, 
+//   however, it is sometimes helpful to start at the beginning of the 
+//   queues.
+// Type: boolean
+//
+
+start_reading_at_fmq_start = TRUE;
+
+//======================================================================
+//
+// CONSTRAINTS FOR MATCHING BEAMS BETWEEN CHANNELS.
+//
+//======================================================================
+ 
+///////////// max_beam_time_difference ////////////////
+//
+// The maximum difference in time between beams in the 2 channels - 
+//   secs.
+// If the difference in the times in the two channels is less than this 
+//   number, the two beams are considered candidates for merging.
+// Type: double
+//
+
+max_beam_time_difference = 0.001;
+
+///////////// max_beam_azimuth_difference /////////////
+//
+// The maximum difference in azimuth between beams in the 2 channels - 
+//   degrees.
+// If the difference in the azimuths in the two channels is less than 
+//   this number, the two beams are considered candidates for merging.
+// Type: double
+//
+
+max_beam_azimuth_difference = 0.005;
+
+///////////// max_beam_elevation_difference ///////////
+//
+// The maximum difference in elevation between beams in the 2 channels - 
+//   degrees.
+// If the difference in the elevations in the two channels is less than 
+//   this number, the two beams are considered candidates for merging.
+// Type: double
+//
+
+max_beam_elevation_difference = 0.005;
+
+//======================================================================
+//
+// FIELD LIST - which fields to copy.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Specify which derived fields are to be included in the output.
+// Only the selected fields will be written to the output queue. The 
+//   output field names will be computed from the input filed name, with a 
+//   suffix as specified.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      boolean output_from_queue_1;
+//      boolean output_from_queue_2;
+//      boolean output_mean;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  { "DBZ", TRUE, TRUE, TRUE},
+  { "VEL", TRUE, TRUE, FALSE}
+};
+
+///////////// field_name_suffix_1 /////////////////////
+//
+// Suffix for computing names of fields copied from queue 1.
+// Type: string
+//
+
+field_name_suffix_1 = "_chan1";
+
+///////////// field_name_suffix_2 /////////////////////
+//
+// Suffix for computing names fields copied from queue 2.
+// Type: string
+//
+
+field_name_suffix_2 = "_chan2";
+
+///////////// field_name_suffix_mean //////////////////
+//
+// Suffix for computing names of mean fields.
+// Type: string
+//
+
+field_name_suffix_mean = "_mean";
+
+//======================================================================
+//
+// FMQ OUTPUT for merged data.
+//
+//======================================================================
+ 
+///////////// output_fmq_name /////////////////////////
+//
+// Name for output FMQ.
+// Type: string
+//
+
+output_fmq_name = "$(DATA_DIR)/fmq/moments_merged";
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+

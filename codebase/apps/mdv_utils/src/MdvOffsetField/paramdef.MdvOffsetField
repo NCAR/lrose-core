@@ -1,0 +1,207 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvOffsetField
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvOffsetField
+ */
+
+commentdef
+{
+  p_header = "MdvOffsetField";
+  p_text = "This program offsets the specified fields in an MDV file in the "
+           "X and Y directions.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to only process the indicated fields.";
+  p_help = "If true, only the indicated fields will be processed. "
+           "If false, all of the fields in the input file will be processed.";
+  p_default = false;
+} process_indicated_fields;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether input fields are specified by name or "
+            "by number.";
+  p_default = true;
+} use_field_names;
+
+paramdef string
+{
+  p_descr = "The names of the input fields to process.";
+  p_help = "Used only if process_indicated_fields and use_field_names are "
+           "both set to TRUE.";
+  p_default = { "DBZ" };
+} field_names[];
+
+paramdef int
+{
+  p_descr = "The numbers of the input fields to process.";
+  p_help = "Used only if process_indicated_fields is set to true and "
+           "use_field_names is set to FALSE. "
+	   "Field numbers start with 0";
+  p_default = { 0 };
+} field_numbers[];
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/output";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  HEADER_MINX_MINY_OFFSET,
+  REMAP_OFFSET
+} offset_type_t;
+
+paramdef enum offset_type_t
+{
+  p_descr = "Method to use for offsetting the data fields.";
+  p_help = "\tHEADER_MINX_MINY_OFFSET - Offset the data by simply changing "
+           "the grid_minx and grid_miny values in the field headers. "
+           "This is the fastest way to perform the offsets, but doesn't work "
+           "for cases where downstream processes need the projections to "
+           "remain the same.\n"
+           "\tREMAP_OFFSET - The data is offset by moving it and then "
+           "remapping it back to the original projection. "
+           "In this case, data along the edges where the movement of the "
+           "grid causes locations that were outside of the original grid to "
+           "be pulled in will be set to missing data values.\n";
+  p_default = HEADER_MINX_MINY_OFFSET;
+} offset_type;
+
+paramdef double
+{
+  p_descr = "X direction offset in km.";
+  p_help = "Positive values move the grid to the east, negative values "
+           "move the grid to the west.";
+  p_default = 0.0;
+} x_offset;
+
+paramdef double
+{
+  p_descr = "Y direction offset in km.";
+  p_help = "Positive values move the grid to the north, negative values "
+           "move the grid to the south.";
+  p_default = 0.0;
+} y_offset;

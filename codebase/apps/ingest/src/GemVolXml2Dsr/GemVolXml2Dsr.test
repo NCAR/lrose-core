@@ -1,0 +1,365 @@
+/**********************************************************************
+ * TDRP params for GemVolXml2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// GemVolXml2Dsr reads in volume scan files in Gematronik XML format and 
+//   reformats the contents into a DsRadar FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In SIMULATE mode, the program moves repeatedly through 
+//   the file list, creating output files with times set to now. This is 
+//   useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = ARCHIVE;
+// mode = REALTIME;
+
+///////////// simulate_sleep_secs /////////////////////
+//
+// Sleep between files in simulate mode (secs).
+// Type: int
+//
+
+simulate_sleep_secs = 180;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input volume scan files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "$(HOME)/scratch/karel";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// dir_scan_interval_secs //////////////////
+//
+// Sleep between scan of input directory (secs).
+// REALTIME mode only. Only applies if use_ldata_info_file is FALSE. 
+//   This is the interval at which the input directory is scanned for new 
+//   data.
+// Type: int
+//
+
+dir_scan_interval_secs = 2;
+
+///////////// input_file_quiescence_secs //////////////
+//
+// File quiescence for input data (secs).
+// REALTIME mode only. Only applies if use_ldata_info_file is FALSE. 
+//   This is the number of seconds for which the size of an input file 
+//   must not change before it is considered completely written to disk.
+// Type: int
+//
+
+input_file_quiescence_secs = 2;
+
+///////////// input_file_time_offset_secs /////////////
+//
+// File time offset - for correcting file timestamps to UTC.
+// REALTIME mode only.  Add this number of seconds to the file name time 
+//   to get to UTC.
+// Type: int
+//
+
+input_file_time_offset_secs = 0;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// fields //////////////////////////////////
+//
+// List of fields to be included in output.
+// List of fields expected in input data files. You also set the field 
+//   name and units in the output DsRadar queue. If this field MUST be 
+//   present, set 'required' to TRUE. In that case a set of files will not 
+//   be processed until that field is available.
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      string output_field_name;
+//      string output_units;
+//      boolean required;
+//   }
+//
+// 1D array - variable length.
+//
+
+fields = {
+  { "dBZ", "DBZ", "dBZ", TRUE},
+  { "Vel", "VEL", "m/s", TRUE}
+  // { "Vvu", "VELvu", "m/s", TRUE},
+  // { "W", "SPW", "m/s", TRUE}
+};
+
+//======================================================================
+//
+// RADAR PARAMETERS.
+//
+// These parameters are not available in the input data file.
+//
+//======================================================================
+ 
+///////////// polarization_mode ///////////////////////
+//
+// Polarization mode.
+//
+// Type: enum
+// Options:
+//     POLAR_HORIZONTAL
+//     POLAR_VERTICAL
+//     POLAR_CIRCULAR
+//     POLAR_ELLIPTICAL
+//     POLAR_DUAL
+//
+
+polarization_mode = POLAR_HORIZONTAL;
+
+///////////// short_pulse_width_us ////////////////////
+//
+// Short pulse width (micro-secs).
+// Type: double
+//
+
+short_pulse_width_us = 1;
+
+///////////// long_pulse_width_us /////////////////////
+//
+// Long pulse width (micro-secs).
+// Type: double
+//
+
+long_pulse_width_us = 1;
+
+///////////// receiver_gain ///////////////////////////
+//
+// Receiver gain value (dB).
+// Type: double
+//
+
+receiver_gain = 45;
+
+///////////// antenna_gain ////////////////////////////
+//
+// Antenna gain value (dB).
+// Type: double
+//
+
+antenna_gain = 44;
+
+///////////// system_gain /////////////////////////////
+//
+// System gain value (dB).
+// Type: double
+//
+
+system_gain = 40;
+
+//======================================================================
+//
+// RADAR LOCATION.
+//
+//======================================================================
+ 
+///////////// override_radar_location /////////////////
+//
+// Option to override input data stream with user-specified latitude, 
+//   longitude and altitude.
+// If TRUE, these values will be used instead of the values in the input 
+//   files.
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_altitude //////////////////////////
+//
+// Radar altitude (km).
+// ALWAYS used. No altitude available in data.
+// Type: double
+//
+
+radar_altitude = 0;
+
+///////////// radar_latitude //////////////////////////
+//
+// Radar latitude (deg).
+// Used if override_radar_location is TRUE.
+// Type: double
+//
+
+radar_latitude = 0;
+
+///////////// radar_longitude /////////////////////////
+//
+// Radar longitude (deg).
+// Used if override_radar_location is TRUE.
+// Type: double
+//
+
+radar_longitude = 0;
+
+//======================================================================
+//
+// SCAN INFORMATION.
+//
+// May be used by downstream processes. Can normally safely use the 
+//   defaults.
+//
+//======================================================================
+ 
+///////////// scan_type_id ////////////////////////////
+//
+// Scan type id.
+// Unique identifier for scan strategy.
+// Type: int
+//
+
+scan_type_id = 0;
+
+///////////// scan_type_name //////////////////////////
+//
+// Scan type name.
+// Descriptive name for scan strategy.
+// Type: string
+//
+
+scan_type_name = "Surveillance";
+
+//======================================================================
+//
+// OUTPUT FILE MESSAGE QUEUE - FMQ.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for DsRadar data via FMQ.
+// Type: string
+//
+
+output_fmq_url = "/tmp/fmq/gematronik";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 10000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 4800;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// beam_wait_msecs /////////////////////////
+//
+// Wait per beam (milli-secs).
+// Type: int
+//
+
+beam_wait_msecs = 0;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+// Type: boolean
+//
+
+write_blocking = TRUE;
+

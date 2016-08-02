@@ -1,0 +1,468 @@
+/**********************************************************************
+ * TDRP params for CP2Udp2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// CP2Udp2Fmq reads CP2 time series data from UDP and writes the 
+//   contents into a time series FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// regWithProcmap //////////////////////////
+//
+// regWithProcmap option.
+// Type: boolean
+//
+
+regWithProcmap = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance name.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// udp_port ////////////////////////////////
+//
+// Port number for UDP input.
+// Type: int
+//
+
+udp_port = 3100;
+
+///////////// udp_host ////////////////////////////////
+//
+// Initial UDP source host name.
+// Type: string
+//
+
+udp_host = "cp2exec";
+
+//======================================================================
+//
+// PULSE TIME CORRECTION.
+//
+// The time on the pulses from the PIRAQ lage real-time, because of a 
+//   delay which occurs in the PIRAQ start sequence in cp2exec. We correct 
+//   for this, optionally, using the S-band pulses, since they are the 
+//   first ones to be received. We compare the piraq pulse times to the 
+//   time of the host computer, over a number of pulses (10000), and 
+//   compute a time error. This correction is applied to the time in the 
+//   pulse header.
+//
+//======================================================================
+ 
+///////////// apply_computed_time_correction //////////
+//
+// Apply the computed time correction to the pulse headers.
+// Type: boolean
+//
+
+apply_computed_time_correction = FALSE;
+
+///////////// pulse_time_latency //////////////////////
+//
+// Estimated latency for receiving pulses from the PIRAQ computer 
+//   (secs).
+// In correcting the pulse times, we need to account for the latency in 
+//   the communications between the PIRAQ computer and the host computer. 
+//   This value, in seconds, is subtracted from the computed time error.
+// Type: double
+//
+
+pulse_time_latency = 0.005;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// outFmqName_s ////////////////////////////
+//
+// FMQ default S-Band path.
+// Type: string
+//
+
+outFmqName_s = "$(DATA_DIR)/fmq/ts_s";
+
+///////////// outFmqName_x ////////////////////////////
+//
+// FMQ default X-Band path.
+// Type: string
+//
+
+outFmqName_x = "$(DATA_DIR)/fmq/ts_x";
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+
+///////////// fmqNBytes ///////////////////////////////
+//
+// FMQ buffer size.
+// Type: int
+//
+
+fmqNBytes = 100000000;
+
+///////////// fmqNSlots ///////////////////////////////
+//
+// FMQ number of slots.
+// Type: int
+//
+
+fmqNSlots = 1000;
+
+///////////// nPartsPerMsg ////////////////////////////
+//
+// FMQ parts per message.
+// Type: int
+//
+
+nPartsPerMsg = 200;
+
+///////////// nPulsesPerInfo //////////////////////////
+//
+// Time series pulses per info message.
+// Type: int
+//
+
+nPulsesPerInfo = 1000;
+
+///////////// udpRxBuffsz /////////////////////////////
+//
+// UDP rx packet buffer size.
+// Type: int
+//
+
+udpRxBuffsz = 65534;
+
+///////////// applyPulseScaling ///////////////////////
+//
+// Apply PIRAQ3D_SCALE pulse scaling.
+// Type: boolean
+//
+
+applyPulseScaling = TRUE;
+
+///////////// swapIQ_s ////////////////////////////////
+//
+// S-Band IQ swap flag.
+// Type: boolean
+//
+
+swapIQ_s = TRUE;
+
+///////////// swapIQ_x ////////////////////////////////
+//
+// X-Band IQ swap flag.
+// Type: boolean
+//
+
+swapIQ_x = TRUE;
+
+///////////// invertQ_s ///////////////////////////////
+//
+// S-Band IQ inverrt flag.
+// Type: boolean
+//
+
+invertQ_s = FALSE;
+
+///////////// invertQ_x ///////////////////////////////
+//
+// X-Band IQ invert flag.
+// Type: boolean
+//
+
+invertQ_x = FALSE;
+
+//======================================================================
+//
+// RADAR OPERATIONS INFO.
+//
+// If any of the params are set in the input data files, the values in 
+//   those params will be taken from the input data stream rather than 
+//   from the parameter file.
+//
+//======================================================================
+ 
+///////////// ts_ops_info_sband ///////////////////////
+//
+//
+// Type: struct
+//   typedef struct {
+//      int version;
+//      int radarId;
+//      float altitudeM;
+//      float latitudeDeg;
+//      float longitudeDeg;
+//      float startRangeM;
+//      float gateSpacingM;
+//      ts_scan_mode_t scanMode;
+//        Options:
+//          TS_SCAN_MODE_CALIBRATION
+//          TS_SCAN_MODE_SECTOR
+//          TS_SCAN_MODE_COPLANE
+//          TS_SCAN_MODE_RHI
+//          TS_SCAN_MODE_VERTICAL_POINTING
+//          TS_SCAN_MODE_TARGET
+//          TS_SCAN_MODE_MANUAL
+//          TS_SCAN_MODE_IDLE
+//          TS_SCAN_MODE_SURVEILLANCE
+//          TS_SCAN_MODE_VERTICAL_SWEEP
+//          TS_SCAN_MODE_SUNSCAN
+//          TS_SCAN_MODE_POINTING
+//          TS_SCAN_MODE_UNKNOWN
+//      ts_xmit_rcv_mode_t xmitRcvMode;
+//        Options:
+//          TS_SINGLE_POL
+//          TS_ALT_HV_CO_ONLY
+//          TS_ALT_HV_CO_CROSS
+//          TS_ALT_HV_FIXED_HV
+//          TS_SIM_HV_FIXED_HV
+//          TS_SIM_HV_SWITCHED_HV
+//          TS_H_ONLY_FIXED_HV
+//          TS_V_ONLY_FIXED_HV
+//          TS_XMIT_RCV_MODE_UNKNOWN
+//      ts_prf_mode_t prfMode;
+//        Options:
+//          TS_PRF_MODE_FIXED
+//          TS_PRF_MODE_STAGGERED_2_3
+//          TS_PRF_MODE_STAGGERED_3_4
+//          TS_PRF_MODE_STAGGERED_4_5
+//          TS_PRF_MODE_UNKNOWN
+//      ts_xmit_phase_mode_t xmitPhaseMode;
+//        Options:
+//          TS_XMIT_PHASE_MODE_FIXED
+//          TS_XMIT_PHASE_MODE_RANDOM
+//          TS_XMIT_PHASE_MODE_SZ864
+//          TS_XMIT_PHASE_MODE_UNKNOWN
+//      string radarName;
+//      string siteName;
+//   }
+//
+//
+
+ts_ops_info_sband = {
+    version = 0,
+    radarId = 98,
+    altitudeM = $(RADAR_ALT_M),
+    latitudeDeg = $(RADAR_LAT),
+    longitudeDeg = $(RADAR_LON),
+    startRangeM = 0,
+    gateSpacingM = 150,
+    scanMode = TS_SCAN_MODE_UNKNOWN,
+    xmitRcvMode = TS_ALT_HV_CO_ONLY,
+    prfMode = TS_PRF_MODE_FIXED,
+    xmitPhaseMode = TS_XMIT_PHASE_MODE_FIXED,
+    radarName = "CP2_S",
+    siteName = "Redbank Plains"
+};
+
+///////////// ts_ops_info_xband ///////////////////////
+//
+//
+// Type: struct
+//   typedef struct {
+//      int version;
+//      int radarId;
+//      float altitudeM;
+//      float latitudeDeg;
+//      float longitudeDeg;
+//      float startRangeM;
+//      float gateSpacingM;
+//      ts_scan_mode_t scanMode;
+//        Options:
+//          TS_SCAN_MODE_CALIBRATION
+//          TS_SCAN_MODE_SECTOR
+//          TS_SCAN_MODE_COPLANE
+//          TS_SCAN_MODE_RHI
+//          TS_SCAN_MODE_VERTICAL_POINTING
+//          TS_SCAN_MODE_TARGET
+//          TS_SCAN_MODE_MANUAL
+//          TS_SCAN_MODE_IDLE
+//          TS_SCAN_MODE_SURVEILLANCE
+//          TS_SCAN_MODE_VERTICAL_SWEEP
+//          TS_SCAN_MODE_SUNSCAN
+//          TS_SCAN_MODE_POINTING
+//          TS_SCAN_MODE_UNKNOWN
+//      ts_xmit_rcv_mode_t xmitRcvMode;
+//        Options:
+//          TS_SINGLE_POL
+//          TS_ALT_HV_CO_ONLY
+//          TS_ALT_HV_CO_CROSS
+//          TS_ALT_HV_FIXED_HV
+//          TS_SIM_HV_FIXED_HV
+//          TS_SIM_HV_SWITCHED_HV
+//          TS_H_ONLY_FIXED_HV
+//          TS_V_ONLY_FIXED_HV
+//          TS_XMIT_RCV_MODE_UNKNOWN
+//      ts_prf_mode_t prfMode;
+//        Options:
+//          TS_PRF_MODE_FIXED
+//          TS_PRF_MODE_STAGGERED_2_3
+//          TS_PRF_MODE_STAGGERED_3_4
+//          TS_PRF_MODE_STAGGERED_4_5
+//          TS_PRF_MODE_UNKNOWN
+//      ts_xmit_phase_mode_t xmitPhaseMode;
+//        Options:
+//          TS_XMIT_PHASE_MODE_FIXED
+//          TS_XMIT_PHASE_MODE_RANDOM
+//          TS_XMIT_PHASE_MODE_SZ864
+//          TS_XMIT_PHASE_MODE_UNKNOWN
+//      string radarName;
+//      string siteName;
+//   }
+//
+//
+
+ts_ops_info_xband = {
+    version = 0,
+    radarId = 72,
+    altitudeM = $(RADAR_ALT_M),
+    latitudeDeg = $(RADAR_LAT),
+    longitudeDeg = $(RADAR_LON),
+    startRangeM = 0,
+    gateSpacingM = 150,
+    scanMode = TS_SCAN_MODE_UNKNOWN,
+    xmitRcvMode = TS_H_ONLY_FIXED_HV,
+    prfMode = TS_PRF_MODE_FIXED,
+    xmitPhaseMode = TS_XMIT_PHASE_MODE_RANDOM,
+    radarName = "CP2_X",
+    siteName = "Redbank Plains"
+};
+
+//======================================================================
+//
+// PULSE HEADER INFORMATION.
+//
+//======================================================================
+ 
+///////////// ts_pulse_info_s /////////////////////////
+//
+// Default S-Band radar pulse params. If any of the params are set in 
+//   the input UDP timeseries data, the values in those params will be 
+//   taken from the input data stream rather than from the parameter file.
+//
+// Type: struct
+//   typedef struct {
+//      int version;
+//      int nChannels;
+//      ts_iq_encoding_t iqEncoding;
+//        Options:
+//          TS_IQ_ENCODING_FLOAT32
+//          TS_IQ_ENCODING_SCALED_INT16
+//          TS_IQ_ENCODING_SIGMET_INT16
+//          TS_IQ_ENCODING_UNKNOWN
+//      int hvTxFlag;
+//      boolean phaseCohered;
+//      float txmitPowerDbmH;
+//      float txmitPowerDbmV;
+//   }
+//
+//
+
+ts_pulse_info_s = {
+    version = 0,
+    nChannels = 1,
+    iqEncoding = TS_IQ_ENCODING_FLOAT32,
+    hvTxFlag = 1,
+    phaseCohered = TRUE,
+    txmitPowerDbmH = 89,
+    txmitPowerDbmV = 0
+};
+
+///////////// ts_pulse_info_x /////////////////////////
+//
+// Default X-Band radar pulse params. If any of the params are set in 
+//   the input UDP timeseries data, the values in those params will be 
+//   taken from the input data stream rather than from the parameter file.
+//
+// Type: struct
+//   typedef struct {
+//      int version;
+//      int nChannels;
+//      ts_iq_encoding_t iqEncoding;
+//        Options:
+//          TS_IQ_ENCODING_FLOAT32
+//          TS_IQ_ENCODING_SCALED_INT16
+//          TS_IQ_ENCODING_SIGMET_INT16
+//          TS_IQ_ENCODING_UNKNOWN
+//      int hvTxFlag;
+//      boolean phaseCohered;
+//      float txmitPowerDbmH;
+//      float txmitPowerDbmV;
+//   }
+//
+//
+
+ts_pulse_info_x = {
+    version = 0,
+    nChannels = 2,
+    iqEncoding = TS_IQ_ENCODING_FLOAT32,
+    hvTxFlag = 1,
+    phaseCohered = FALSE,
+    txmitPowerDbmH = 83,
+    txmitPowerDbmV = 0
+};
+
+//======================================================================
+//
+// CALIBRATION FILES.
+//
+//======================================================================
+ 
+///////////// cal_file_s //////////////////////////////
+//
+// XML file name for s-band calibration.
+// Type: string
+//
+
+cal_file_s = "$(PROJ_DIR)/ingest/params/cal_cp2_s.xml";
+
+///////////// cal_file_x //////////////////////////////
+//
+// XML file name for x-band calibration.
+// Type: string
+//
+
+cal_file_x = "$(PROJ_DIR)/ingest/params/cal_cp2_x.xml";
+

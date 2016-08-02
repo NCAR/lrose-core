@@ -1,0 +1,6 @@
+.deps
+Dsr2Vol
+__makefile.template
+makefile
+makefile.am
+makefile.in

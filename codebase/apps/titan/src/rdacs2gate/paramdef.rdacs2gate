@@ -1,0 +1,156 @@
+/*********************************************************
+ * parameter definitions for rdacs2gate
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Jan 1997
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+	       DEBUG_VERBOSE, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Is the input data big-endian?";
+  p_help = "Normally the input data will come from an Intel machine, so it will be small-endian.";
+} input_big_endian;
+
+paramdef char* {
+  p_default = {"localhost"};
+  p_descr = "Input data host";
+  p_help = "TCP/IP name/address of host for input data";
+} input_host;
+
+paramdef long {
+  p_default = {14998};
+  p_min = {1};
+  p_max = {65535};
+  p_descr = "Input data port";
+  p_help = "TCP/IP port number for input data from RDACS";
+} input_port;
+
+paramdef char* {
+  p_default = {"tom"};
+  p_descr = "Radar login user name";
+  p_help = "User name for logging in to RDACS.";
+} user;
+
+paramdef char* {
+  p_default = {"tomt"};
+  p_descr = "Radar login password name";
+  p_help = "Password name for logging in to RDACS.";
+} password;
+
+paramdef boolean {
+  p_default = {true};
+  p_descr = "Output data to client?";
+  p_help = "Option to turn off output while debugging.";
+} output_data;
+
+paramdef long {
+  p_default = {49000};
+  p_min = {5000};
+  p_max = {65535};
+  p_descr = "Output data port";
+  p_help = "TCP/IP port number for output data";
+} output_port;
+
+paramdef enum time_mode_t {
+  p_options = {LOCAL, UCT};
+  p_default = {UCT};
+  p_descr = "Time storage";
+  p_help = "The time with which the data is tagged.";
+} time_mode;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Target radar ID";
+  p_help = "The radar ID - this is added to the data stream";
+} radar_id;
+
+paramdef boolean {
+  p_default = {true};
+  p_descr = "Option to use elevation table.";
+  p_help = "If TRUE, elevation table is used to determine tilt number.";
+} use_elev_table;
+
+paramdef double {
+  p_descr = "Elevation angle table";
+  p_help = "Array of expected elevation angles (deg).These are used to determine the tilt number for a beam.";
+} elev_table[];
+
+paramdef double {
+  p_default = {1.0};
+  p_min = {0.01};
+  p_max = {45.0};
+  p_descr = "Beam width";
+  p_help = "Radar half-power beam width (deg)";
+} beam_width;
+
+paramdef long {
+  p_default = {8};
+  p_min = {1};
+  p_descr = "Samples per beam";
+  p_help = "Number of pulse samples used to compute data from a beam";
+} samples_per_beam;
+
+paramdef double {
+  p_default = {2.0};
+  p_min = {0.001};
+  p_descr = "Pulse width";
+  p_help = "Radar pulse width (microsecs)";
+} pulse_width;
+
+paramdef double {
+  p_default = {250.0};
+  p_min = {1.0};
+  p_descr = "PRF";
+  p_help = "Radar pulse repitition frequency (pulses per sec)";
+} prf;
+
+paramdef double {
+  p_default = {5.0};
+  p_min = {0.01};
+  p_max = {1000.0};
+  p_descr = "Wavelength";
+  p_help = "Radar wavelength (cm)";
+} wavelength;
+
+paramdef struct fields
+{
+  p_descr = "Array of data fields.";
+  p_help = "The type should be set to: DBZ, VEL or WIDTH. DBZ must always be the first field. If there are 2 fields, the second should be VEL. If there are 3 fields, the third should be WIDTH.";
+  p_field_name = { type, scale, bias };
+  p_field_type = { string, double, double};
+} fields[];
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Use the log receiver for reflectivity.";
+  p_help = "Some radars have both a log and linear receiver, and in some cases either may be used for reflectivity. This option selects whether to use the log receiver for reflectivity.";
+} log_receiver_for_dbz;
+
+paramdef double {
+  p_default = {30.0};
+  p_min = {-10.0};
+  p_max = {180.0};
+  p_descr = "Last elevation angle in volume (deg)";
+  p_help = "This is the final elevation angle in the volume sequence. It is used to trigger the end-of-vol.";
+} last_el_in_vol;
+
+
+

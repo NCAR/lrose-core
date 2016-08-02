@@ -1,0 +1,22 @@
+info on fields:
+
+magnitude (wind speed) is in m/s
+phase (direction) is in degrees
+rainflag is 1 or 0
+
+SCT     -45.72 -102.62 358.00   9.00 0 0 2006/08/09 13:21:14 281
+
+"obs_name, lat, lon, phase, mag, bit13 (rain flag), bit14 (number of solutions), obs_date, obs_time sat_id"
+
+sat_id or sensor number was added to allow distinction between different satellites. If the sensor is unkonwn it will be 999.
+
+From Rob Wade: The nsolflag tells you which number the solution is for that single solution. Fleet puts out a ambiguity file that shows all the directions and they label them 0,1, 2 etc.. They typically use the 0 or 1 solution and I have no idea how they make these choices.
+
+ftp server:   ftp.nrlmry.navy.mil (use ftp ftp.nrlmry.navy.mil)
+files under:  receive/wade/cathy
+
+should be latitude limits:  15 South to 35 North
+          longitude limits: 100 West to 30 West
+
+Information came from Rob Wade (wade@nrlmry.navy.mil)
+

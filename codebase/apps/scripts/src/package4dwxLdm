@@ -1,0 +1,179 @@
+#!/bin/csh
+
+#
+# Script to prepare a directory which can be copied to an
+# LDM to set up the etc directory and the .cshrc for a range
+# as part of the 4dwx project. User must be logged in to CVS.
+# Niles Oien June 2007.
+#
+# Updates made by Bcky Ruttenberg in Oct 2010:
+#   -> updated gempak version
+#   -> updated cvs location for ucnids.c
+#   -> compile ucnids.c (needs to be done on build machine)
+
+#
+# Check for required command line arguments
+#
+if ($#argv < 1) then
+  echo USAGE : $0 rangeName [cvs co options], eg. 
+  echo   $0 DPG -t 4dwx_release_2.0 
+  echo User must be logged in to CVS. LDM setup is written
+  echo to ./forDelivery/etc
+  echo
+  exit
+endif
+
+set range=$1
+
+#
+# Assemble the cvs checkout command.
+#
+set checkOutCommand = "cvs co"
+
+#
+# Skip the range name
+#
+shift
+
+#
+# Append other args to the checkout command
+#
+while ($#argv > 0)
+	set checkOutCommand = "$checkOutCommand $1"
+        shift
+end
+
+
+echo Checkout command is $checkOutCommand
+
+#
+# Check latest ldm setups out of CVS
+#
+$checkOutCommand projects/4dwx/ldm/etc
+
+#
+# Prepare destination directory
+#
+/bin/rm -rf forDelivery
+/bin/mkdir -p ./forDelivery/etc
+
+# Do some record keeping
+date -u > ./forDelivery/etc/DateOfCheckout.dat
+echo $checkOutCommand > ./forDelivery/etc/CheckoutCommand.dat
+
+#
+# Loop through the list of required files
+#
+foreach file (DotCshrc.ldm crontab.ldm ldmadmin-pl.conf \
+            ldmd.conf pqact.conf scour.conf )
+
+  echo searching for $file
+
+#
+# See if there is a default file, if so, copy it in.
+#
+  if (-e projects/4dwx/ldm/etc/$file) then
+     cp -v projects/4dwx/ldm/etc/$file forDelivery/etc/$file
+  endif
+
+#
+# See if there is a range specific file, if so, copy
+# it in, obliterating any default file.
+#
+  if (-e projects/4dwx/ldm/etc/$file\_$range) then
+     cp -v projects/4dwx/ldm/etc/$file\_$range forDelivery/etc/$file
+  endif
+
+end
+
+echo
+
+#
+# Check that all the required files were indeed in CVS.
+#
+
+set allOk = 1
+foreach file (DotCshrc.ldm crontab.ldm ldmadmin-pl.conf \
+            ldmd.conf pqact.conf scour.conf )
+
+  if (!(-e forDelivery/etc/$file )) then
+    echo ERROR: $file not found for range $range
+    set allOk = 0
+  endif
+
+end
+
+if ( $allOk == 0) then
+  echo Errors need to be rectified in CVS
+  exit
+endif
+
+#
+# Check out apps/scripts/src/config4dwxLdm and copy it into the etc dir
+#
+$checkOutCommand apps/scripts/src/config4dwxLdm
+cp apps/scripts/src/config4dwxLdm ./forDelivery
+
+if (!(-e ./forDelivery/config4dwxLdm )) then
+  echo ERROR : Failed to find apps/scripts/src/config4dwxLdm in CVS
+  exit
+endif
+
+
+#
+# Check out apps/scripts/src/ldmMgr and copy it into the etc dir
+#
+$checkOutCommand apps/scripts/src/ldmMgr
+cp apps/scripts/src/ldmMgr ./forDelivery/etc/
+
+if (!(-e ./forDelivery/etc/ldmMgr )) then
+  echo ERROR : Failed to find apps/scripts/src/ldmMgr in CVS
+  exit
+endif
+
+#
+# Get the stuff we'll need for decoding. 
+#
+# Get the mcidas decoders.  Unknown if still being used - check in
+# pqact file
+#
+$checkOutCommand projects/4dwx/ldm/ldm-mcidas-2003.tar.gz
+cp projects/4dwx/ldm/ldm-mcidas-2003.tar.gz ./forDelivery/ldm-mcidas-2003.tar.gz
+if (!(-e ./forDelivery/ldm-mcidas-2003.tar.gz )) then
+  echo ERROR : Checkout of mcidas decoders failed.
+  exit
+endif
+
+#
+# Get the gempack package. These are 64 bit linux, gempak 5.11.1
+# These may be moved to the cvs/data location
+#
+$checkOutCommand projects/4dwx/ldm/gempak_upc5.11.1_linux64.tar.gz
+cp projects/4dwx/ldm/gempak_upc5.11.1_linux64.tar.gz ./forDelivery/gempak_upc5.11.1_linux64.tar.gz
+if (!(-e ./forDelivery/gempak_upc5.11.1_linux64.tar.gz )) then
+  echo ERROR : Checkout of gempak failed.
+  exit
+endif
+
+#
+# Get NIDS (ucnids) and compile it - being used in pqact
+#
+$checkOutCommand projects/4dwx/ldm/exe/nids/ucnids.c
+mkdir -p ./forDelivery/exe/nids/
+cp projects/4dwx/ldm/exe/nids/ucnids.c ./forDelivery/exe/nids/ucnids.c
+if (!(-e ./forDelivery/exe/nids/ucnids.c )) then
+  echo ERROR : Checkout of ucnids.c failed.
+  exit
+endif
+
+cd ./forDelivery/exe/nids
+gcc ucnids.c -o ucnids -lz
+if (!(-e ucnids )) then
+  echo ERROR : ./forDelivery/exe/nids/ucnids.c did not compile.
+  exit 1
+endif
+
+endif
+
+echo Normal termination.
+#

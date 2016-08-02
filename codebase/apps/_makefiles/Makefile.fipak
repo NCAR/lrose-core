@@ -1,0 +1,32 @@
+#
+# Recursive make - Makes the applications required for the CIPAK processing
+#		   chain. 
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
+
+#	filters \
+#	scripts
+
+SUB_DIRS = \
+	didss \
+	icing \
+	mdv_utils \
+	tdrp
+
+$(TARGETS): FORCE
+	$(MAKE) $(SUB_DIRS) TARGET=$@
+
+$(SUB_DIRS): FORCE
+	cd $@; $(MAKE) $(TARGET)
+
+FORCE:
+
+
+
+
+
+
+

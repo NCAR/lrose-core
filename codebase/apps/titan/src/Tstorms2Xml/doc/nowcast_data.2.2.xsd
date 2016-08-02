@@ -1,0 +1,1485 @@
+<?xml version="1.0"?>
+<!--   **********************************************************************   
+                                                                           
+       nowcast_data.2.2.xsd - XML Schema for WxML   
+
+       Sandy Dance                                         Feb 2006
+       Elena Dozortseva	and Beth Ebert	various mods  	   Apr 2006
+       David Scurrah    Locations are optional in cases    July 2006
+                          so we can have blank cases      
+       David Scurrah    Time elements added to cases,      Aug 2006
+       & Beth Ebert       timestamp removed from cases,
+                          locations required again
+       Beth Ebert       More variables added for CARDS     March 2007
+       Beth Ebert       More variables added for SWIRLS    July 2007
+       Beth Ebert       observation-time added,            Oct 2007
+                          more variable added for TITAN
+
+      *************************************************************************   -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML" 
+targetNamespace="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML" elementFormDefault="qualified">
+
+
+	<xsd:include schemaLocation="location.xsd"/>
+	<xsd:include schemaLocation="time_layout.xsd"/>
+	<xsd:include schemaLocation="definitions.xsd"/>
+
+	<xsd:complexType name="nowcast-dataType">
+		<xsd:sequence>
+			<xsd:element name="observation-time" type="timeType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="time-layout" type="time-layoutElementType" minOccurs="1" maxOccurs="unbounded"/>
+			<xsd:element name="event" type="eventType" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="conversion-definitions" type="conversion-definitionsType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="categorical-definitions" type="categorical-definitionsType" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="eventType">
+		<xsd:sequence>
+			<xsd:element name="case" type="caseType" minOccurs="1" maxOccurs="unbounded" nillable="true"/>
+		</xsd:sequence>
+		<xsd:attribute name="ID" type="xsd:string" use="required"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="caseType">
+		<xsd:sequence>
+			<xsd:element name="time" type="timeType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="location" type="locationType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="nowcast-parameters" type="nowcast-parametersType" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+        <xsd:complexType name="timeType">
+		<xsd:simpleContent>
+			<xsd:extension base="start-valid-timeType">
+     				<xsd:attribute name="time-coordinate" type="time-coordinateType" use="optional"/>
+				<xsd:attribute name="period" type="xsd:duration" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="nowcast-parametersType">
+		<xsd:all>
+			<xsd:element name="ID_parent" minOccurs="0" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:string">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="none"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="ID_child" minOccurs="0" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:string">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="none"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="age" minOccurs="0" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="none"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="last_storm_number_used" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:string">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="none"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="number_of_storms" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="none"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="storm_number" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:string">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="none"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="track_status" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:string">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="none"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="number_of_pattern_vectors" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="none"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="area_threshold" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km2"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="height_threshold" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="reflectivity_threshold" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="reflectivity_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="reflectivity_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="volume_threshold" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km3"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="x_loc" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="y_loc" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="speed" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km h-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="direction_from" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees true"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="direction_to" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees true"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="u_motion" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="v_motion" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="w_motion" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="original_speed" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km h-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="original_direction" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees true"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="cell_base" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="cell_top" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="cell_volume" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km3"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="diameter" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="mean_area" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km2"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="projected_area" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km2"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="max_dbz" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="height_max_dbz" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="storm_intensity" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="VIL" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="kg m-2"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="VIL_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="kg m-2"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="VIL_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="kg m-2"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_VIL_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_VIL_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="VIL_density_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="kg m-3"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="VIL_density_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="kg m-3"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_VIL_density_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_VIL_density_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="visible" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:string">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="none"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_reflectivity_threshold" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_base" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_top" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_volume" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km3"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_mass" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="kg"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_type" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_intensity" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_rate" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="mm h-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_rate_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="mm h-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_rate_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="mm h-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rain_probability" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="value" minOccurs="0" maxOccurs="unbounded">
+							<xsd:complexType>
+								<xsd:simpleContent>
+									<xsd:extension base="xsd:decimal">
+										<xsd:attribute name="threshold_value" type="xsd:decimal" use="required"/>
+										<xsd:attribute name="threshold_units" type="xsd:string" use="optional" default="mm h-1"/>
+									</xsd:extension>
+								</xsd:simpleContent>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+					<xsd:attribute name="units" type="xsd:string" use="optional" default="percent"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_reflectivity_threshold" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_base" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_top" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_volume" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km3"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_mass" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="kg"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_mass_aloft" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="kg"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_type" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_intensity" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_size_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="mm"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_size_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="mm"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_hail_size_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_hail_size_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="hail_probability" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="value" minOccurs="0" maxOccurs="unbounded">
+							<xsd:complexType>
+								<xsd:simpleContent>
+									<xsd:extension base="xsd:decimal">
+										<xsd:attribute name="threshold_value" type="xsd:decimal" use="required"/>
+										<xsd:attribute name="threshold_units" type="xsd:string" use="optional" default="mm"/>
+									</xsd:extension>
+								</xsd:simpleContent>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+					<xsd:attribute name="units" type="xsd:string" use="optional" default="percent"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="lightning_reflectivity_threshold" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="lightning_base" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="lightning_top" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="lightning_volume" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km3"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="lightning_type" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="lightning_intensity" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="lightning_flash_density_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km-2 h-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="lightning_flash_density_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km-2 h-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="lightning_probability" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="value" minOccurs="0" maxOccurs="unbounded">
+							<xsd:complexType>
+								<xsd:simpleContent>
+									<xsd:extension base="xsd:decimal">
+										<xsd:attribute name="threshold_value" type="xsd:decimal" use="required"/>
+										<xsd:attribute name="threshold_units" type="xsd:string" use="optional" default="km-2 h-1"/>
+									</xsd:extension>
+								</xsd:simpleContent>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+					<xsd:attribute name="units" type="xsd:string" use="optional" default="percent"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="meso_shear_threshold" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="s-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="meso_base" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="meso_top" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="meso_volume" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km3"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="meso_type" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="meso_intensity" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="mesocyclone_shear_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1 km-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="mesocyclone_shear_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1 km-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_mesocyclone_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_mesocyclone_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_mesocyclone_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_mesocyclone_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="meso_probability" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="value" minOccurs="0" maxOccurs="unbounded">
+							<xsd:complexType>
+								<xsd:simpleContent>
+									<xsd:extension base="xsd:decimal">
+										<xsd:attribute name="threshold_value" type="xsd:decimal" use="required"/>
+										<xsd:attribute name="threshold_units" type="xsd:string" use="optional" default="s-1"/>
+									</xsd:extension>
+								</xsd:simpleContent>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+					<xsd:attribute name="units" type="xsd:string" use="optional" default="percent"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="tornado_type" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="tornado_intensity" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="tornado_probability" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="value" minOccurs="0" maxOccurs="unbounded">
+							<xsd:complexType>
+								<xsd:simpleContent>
+									<xsd:extension base="xsd:decimal">
+										<xsd:attribute name="threshold_value" type="xsd:decimal" use="required"/>
+										<xsd:attribute name="threshold_units" type="xsd:string" use="optional" default="none"/>
+									</xsd:extension>
+								</xsd:simpleContent>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+					<xsd:attribute name="units" type="xsd:string" use="optional" default="percent"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="turbulence_shear_threshold" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="s-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="turbulence_base" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="turbulence_top" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="turbulence_volume" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km3"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="turbulence_type" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="turbulence_intensity" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="turbulence_shear_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="s-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="turbulence_shear_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="s-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="turbulence_probability" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="value" minOccurs="0" maxOccurs="unbounded">
+							<xsd:complexType>
+								<xsd:simpleContent>
+									<xsd:extension base="xsd:decimal">
+										<xsd:attribute name="threshold_value" type="xsd:decimal" use="required"/>
+										<xsd:attribute name="threshold_units" type="xsd:string" use="optional" default="s-1"/>
+									</xsd:extension>
+								</xsd:simpleContent>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+					<xsd:attribute name="units" type="xsd:string" use="optional" default="percent"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="down_draft_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="down_draft_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_down_draft_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_down_draft_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="echo_top_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="echo_top_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_echo_top_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_echo_top_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="echo_top_45dbz_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="echo_top_45dbz_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_echo_top_45dbz_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_echo_top_45dbz_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="low_level_gradient_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz km-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="low_level_gradient_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz km-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_low_level_gradient_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_low_level_gradient_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="mid_level_gradient_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz km-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="mid_level_gradient_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="dbz km-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_mid_level_gradient_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_mid_level_gradient_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="bwer_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="bwer_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_bwer_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_bwer_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_bwer_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_bwer_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="downburst_shear_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1 km-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="downburst_shear_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1 km-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_downburst_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_downburst_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_downburst_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_downburst_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="gust_front_diameter" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="gust_front_velocity_differential" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="gust_front_shear_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1 km-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="gust_front_shear_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="m s-1 km-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_gust_front_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_gust_front_mean" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="latitude_gust_front_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="longitude_gust_front_max" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="degrees"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="maximum_possible_gust" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:decimal">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="km h-1"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="downburst_type" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:integer">
+							<xsd:attribute name="units" type="xsd:string" use="optional" default="category"/>
+							<xsd:attribute name="categorical-table" type="xsd:string" use="optional"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="weather-conditions" minOccurs="0" maxOccurs="1" nillable="true">
+				<xsd:complexType>
+					<xsd:sequence minOccurs="1" maxOccurs="unbounded">
+						<xsd:element name="value" minOccurs="0" maxOccurs="5" nillable="true">
+							<xsd:complexType>
+								<xsd:attribute name="weather-type" use="required">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:enumeration value="damaging winds"/>
+											<xsd:enumeration value="freezing drizzle"/>
+											<xsd:enumeration value="freezing rain"/>
+											<xsd:enumeration value="snow showers"/>
+											<xsd:enumeration value="blowing snow"/>
+											<xsd:enumeration value="blowing dust"/>
+											<xsd:enumeration value="rain showers"/>
+											<xsd:enumeration value="ice pellets"/>
+											<xsd:enumeration value="frosts"/>
+											<xsd:enumeration value="rain"/>
+											<xsd:enumeration value="hail"/>
+											<xsd:enumeration value="snow"/>
+											<xsd:enumeration value="thunderstorms"/>
+											<xsd:enumeration value="drizzle"/>
+											<xsd:enumeration value="fog"/>
+											<xsd:enumeration value="haze"/>
+											<xsd:enumeration value="smoke"/>
+											<xsd:enumeration value="lightning"/>
+											<xsd:enumeration value="downburst"/>
+											<xsd:enumeration value="mesocyclone"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:attribute>
+								<xsd:attribute name="coverage" use="optional">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:enumeration value="slight chance"/>
+											<xsd:enumeration value="chance"/>
+											<xsd:enumeration value="likely"/>
+											<xsd:enumeration value="occasional"/>
+											<xsd:enumeration value="definitely"/>
+											<xsd:enumeration value="isolated"/>
+											<xsd:enumeration value="scattered"/>
+											<xsd:enumeration value="numerous"/>
+											<xsd:enumeration value="patchy"/>
+											<xsd:enumeration value="areas"/>
+											<xsd:enumeration value="widespread"/>
+											<xsd:enumeration value="periods of"/>
+											<xsd:enumeration value="frequent"/>
+											<xsd:enumeration value="intermittent"/>
+											<xsd:enumeration value="none"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:attribute>
+								<xsd:attribute name="intensity" use="optional">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:enumeration value="very light"/>
+											<xsd:enumeration value="light"/>
+											<xsd:enumeration value="moderate"/>
+											<xsd:enumeration value="mild"/>
+											<xsd:enumeration value="heavy"/>
+											<xsd:enumeration value="strong"/>
+											<xsd:enumeration value="severe"/>
+											<xsd:enumeration value="none"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:attribute>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:all>
+	</xsd:complexType>
+</xsd:schema>

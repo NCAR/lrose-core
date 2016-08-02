@@ -1,0 +1,59 @@
+&1a
+&2a
+#include "spoldefm.h"
+close
+open prog 310
+clear
+&1
+ta1300
+ts 300
+a10
+dwell 1
+while (2>1)
+;p115=step size
+;compute az basic parameters
+azacmax=360.*(i117/i127)*1000000.;get max az acceleration from i variables
+azvmax=360.*(i116/i127)*1000     ;get az max velocity deg/sec
+azts0=i121/1000                  ;get ts0
+azts03=azts0*azts0*azts0         ;TS0^3
+azk=azacmax/azts0                ;get az K value
+
+;compute azimuth parameters for step transitions
+aztam=azvmax/azacmax+azts0       ;az max perf TA to max velocity
+aztlm=aztam-2*azts0              ;max perf TL
+temp2=azts0*aztlm*aztlm          ;ts0tl^2
+azxmv=3*azts0*azts0*aztlm+temp2+2*azts03
+azxmv=(azk/2)*azxmv
+azxts=azk*azts03                 ;x for TS
+
+;compute azimuth transition time at maximum performance
+if (azstep>2*azxmv)      ;bigsteps
+        azta=aztam
+        azts=azts0
+        aztm=azta+(azstep/2-azxmv)/azvmax
+        azttt=aztm+azta
+else 
+   if (azstep>2*azxts)    ;medium steps
+        azts=azts0
+        temp1=9*azts03*azts0
+ temp1=temp1-4*azts0*(2*azts03-(azstep/azk))
+ temp2=(-3*azts0*azts0+sqrt(temp1))/(2*azts0)
+        azta=2*azts+temp2
+        aztm=azta
+        azttt=2*azta
+   else                  ;tiny steps
+        temp1=.333333*ln(azstep/(2*azk))
+        azts=exp(temp1)
+        azta=2*azts
+        aztm=azta
+        azttt=2*azta
+   endif
+endif
+ta(azta*1000) ts(azts*1000)
+;while (2>1)
+a10
+dwell(azta*2000)
+a(10+azstep)
+dwell(azta*2000)
+endwhile
+close

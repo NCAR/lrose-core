@@ -1,0 +1,22 @@
+#
+# Recursive make for relay
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	Fmq2MultMsgFmq \
+	Fmq2Fmq \
+	FmqMon \
+	Janitor \
+	MultMsgFmq2Fmq \
+	RadMon \
+	Scout \
+	Test2Dsr \
+	didss_print \
+	fmq_print \
+	ridds2mom
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

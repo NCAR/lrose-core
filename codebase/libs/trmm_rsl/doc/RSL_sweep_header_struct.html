@@ -1,0 +1,22 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<pre>typedef struct {
+  int sweep_num; /* Integer sweep number. This may be
+                  * redundant,since this will be the same as
+                  * the Volume.sweep array index.*/
+  float elev;         /* Elevation angle (mean) for the sweep. */
+  float beam_width;   /* This is in the ray header too. */
+  float vert_half_bw; /* Vertical beam width divided by 2 */
+  float horz_half_bw; /* Horizontal beam width divided by 2 */
+  int nrays;
+  float (*f)(Range x); /* Data conversion function. f(x). */
+  Range (*invf)(float x); /* Data conversion function. invf(x). */ 
+} Sweep_header; </pre>
+
+</body>

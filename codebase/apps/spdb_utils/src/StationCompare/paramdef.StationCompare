@@ -1,0 +1,143 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "StationCompare is a simple program that\n"
+	"reads an SPDB database of surface reports and\n"
+	"for each point reads the corresponding gridded field\n"
+	"and outputs an ASCII file with the field values at\n"
+	"that point.\n\n"
+	"The program must be given a start and end time to\n"
+	"run, usually with the -start and -end options.\n"
+	"There is also a -yesterday option that can be used\n"
+	"to run the program from 00:00:00 to 23:59:59 on\n"
+	"yesterday's data (allowing it to be run by cron).\n\n"
+	"The output ASCII file contains white space separated\n"
+	"colums of data, hopefully suitable for processing in\n"
+	"other software packages.\n\n"
+	"The output colums have the following format :\n\n"
+	"YYYY MM DD HH MM SS lat lon U V \n"
+	"temp pres v1 v2 .. vN\n\n"
+	"Where : \n\n"
+	"YYYY MM DD HH MM SS are the year, month day, hour minute and\n"
+	"second of the SPDB station record.\n\n"
+	"lat and lon are the latitude and longitude of the station.\n\n"
+	"U and V are the station winds, temp and pres are from the station.\n"
+	"v1 v2 .. vN are the data values extracted from the gridded\n"
+	"data at that space/time.\n\nNiles Oien October 2003.";
+
+}
+
+paramdef string {
+  p_descr = "Input SPDB URL";
+  p_help = "The METAR structures that drive the program\n"
+	"are read from this SPDB URL."; 
+  p_default = {"spdbp:://localhost::spdb/surface"};
+} spdbUrl;
+
+paramdef boolean {
+  p_descr = "Option to only read MDV data before\n"
+	"the SPDB data time.";
+  p_help = "If not set, the closest MDV data time is used, even\n"
+	"if it is after the SPDB time. This may be more accurate\n"
+	"if the program is run post facto, but it does not\n"
+	"reflect realtime operations."; 
+  p_default = FALSE;
+} readFirstBefore;
+
+paramdef long {
+  p_descr = "Maximum time difference between SPDB and MDV data, secs.";
+  p_help = "Program will not find any data if this is too small."; 
+  p_default = 1800;
+} searchMargin;
+
+typedef struct {
+  string  URL;
+  string  FieldName;
+  boolean applyVlevelLimits;
+  int     minVlevelPlaneNum;
+  int     maxVlevelPlaneNum;
+  int     gridWindow;
+} MDV_Field_t;
+
+paramdef struct MDV_Field_t {
+  p_descr = "List of MDV fields to output.";
+  p_help = "This is a list of structures with the following entries :\n\n"
+	" * The URL to read the MDV data from,\n"
+	" * The field name to read from that URL,\n"
+	" * A boolean determining if vertical limits are to be applied,\n"
+	" * The lower vertical plane number limit for that field,\n"
+	"   which is only relevant if vertical limits are being applied,\n"
+	" * The upper vertical plane number limit for that field,\n"
+	"   which is only relevant if vertical limits are being applied,\n"
+	" * The number of grid points to average over. Averaging is done by\n"
+	"    +/- gridWindow, so setting gridWindow=0 means no averaging,\n"
+	"    gridWindow=1 => 3x3 window, gridWindow=2 => 5x5 window, etc."; 
+  p_default = {
+    { "mdvp:://localhost::mdv/someData", "FieldName", FALSE, 0, 0, 0},
+    { "mdvp:://localhost::mdv/someData", "FieldName", TRUE,  0, 1, 1}
+  };
+} MDV_Fields[];
+ 
+paramdef double {
+  p_descr = "Value to output when data are bad/missing.";
+  p_help = "Set to something physical values cannot reach.";
+  p_default = -999.0;
+} badVal;
+ 
+paramdef string {
+  p_descr = "Output directory.";
+  p_help = "Data files are written here, stamped with the start time\n"
+	"of the run."; 
+  p_default = {"./some/directory/structure"};
+} outDir;
+ 
+paramdef boolean {
+  p_descr = "Set to print more messages as data are processed.";
+  p_help = "Can usually be FALSE"; 
+  p_default = FALSE;
+} debug;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef int {
+  p_descr = "Time offset, seconds.";
+  p_help = "The time that MDV data are fetched for is the surface\n"
+	"station time plus this time, so that if a station\n"
+	"reported at 13:00 then :\n"
+	"Setting this to -3600 would make the MDV search time 12:00\n"
+	"Setting this to 3600  would make the MDV search time 14:00\n"; 
+  p_default = 0;
+} timeOffset;
+ 
+paramdef string {
+  p_descr = "List of 4 character station IDs to process.";
+  p_help = "Default is to do them all - a single station\n"
+  "in the list named NONE does this."; 
+  p_default = {"NONE"};
+} stationIDs[];

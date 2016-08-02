@@ -1,0 +1,130 @@
+/**********************************************************************
+ * TDRP params for TerrainHtServer
+ **********************************************************************/
+
+//======================================================================
+//
+// TerrainHtServer reads requests from a client, providing a lat/lon 
+//   position. It returns the terrain height, and whether the location is 
+//   water or not. XmlRpc protool is used for communication.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// reg_with_procmap ////////////////////////
+//
+// Register with procmap.
+// Type: boolean
+//
+
+reg_with_procmap = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// XMLRPC SERVER PORT.
+//
+//======================================================================
+ 
+///////////// xmlrpc_server_port //////////////////////
+//
+// Port for XmlRpc server to listen on.
+// Type: int
+//
+
+xmlrpc_server_port = 8088;
+
+//======================================================================
+//
+// DIGITAL ELEVATION MAP FILES.
+//
+//======================================================================
+ 
+///////////// srtm30_dem_dir //////////////////////////
+//
+// Directory for digital elevation files.
+// This is the SRTM30 data set, in tiles. The data resolution is 30 
+//   arc-seconds, or 120 per degree in lat/lon.
+// Type: string
+//
+
+srtm30_dem_dir = "$(HOME)/data/terrain/DEM/uncompressed";
+
+///////////// water_layer_dir /////////////////////////
+//
+// Directory for water layer data in netCDF format.
+// These files match the SRTM30 data set in spatial extent. The data 
+//   resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data 
+//   is in bytes: 1 for water, 0 for not water.
+// Type: string
+//
+
+water_layer_dir = "$(HOME)/data/terrain/WATER";
+
+//======================================================================
+//
+// MEMORY MANAGEMENT.
+//
+//======================================================================
+ 
+///////////// secs_before_freeing_memory //////////////
+//
+// Time to wait before freeing memory (secs).
+// If a height tile has not been accessed within this time, it will be 
+//   freed.
+// Type: int
+//
+
+secs_before_freeing_memory = 600;
+
+//======================================================================
+//
+// SERVER OPTIONS.
+//
+//======================================================================
+ 
+///////////// check_adjacent_grid_cells ///////////////
+//
+// Option to check terrain and water in adjacent grid cells.
+// Type: boolean
+//
+
+check_adjacent_grid_cells = TRUE;
+
+///////////// search_margin_km ////////////////////////
+//
+// Margin width in checking for adjacent grid points (km).
+// We search around the selected point by this distance.
+// Type: double
+//
+
+search_margin_km = 2;
+

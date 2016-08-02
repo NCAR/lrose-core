@@ -1,0 +1,123 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1990 - 2016                                         
+# ** University Corporation for Atmospheric Research (UCAR)                 
+# ** National Center for Atmospheric Research (NCAR)                        
+# ** Boulder, Colorado, USA                                                 
+# ** BSD licence applies - redistribution and use in source and binary      
+# ** forms, with or without modification, are permitted provided that       
+# ** the following conditions are met:                                      
+# ** 1) If the software is modified to produce derivative works,            
+# ** such modified software should be clearly marked, so as not             
+# ** to confuse it with the version available from UCAR.                    
+# ** 2) Redistributions of source code must retain the above copyright      
+# ** notice, this list of conditions and the following disclaimer.          
+# ** 3) Redistributions in binary form must reproduce the above copyright   
+# ** notice, this list of conditions and the following disclaimer in the    
+# ** documentation and/or other materials provided with the distribution.   
+# ** 4) Neither the name of UCAR nor the names of its contributors,         
+# ** if any, may be used to endorse or promote products derived from        
+# ** this software without specific prior written permission.               
+# ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+# ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+# ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+###########################################################################
+#
+# Makefile for TsArchive2Dsr program
+#
+# Mike Dixon, RAP, NCAR
+# POBox 3000, Boulder, CO, 80307, USA
+#
+# May 2006
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGET_FILE = TsArchive2Dsr
+
+LOC_INCLUDES = $(NETCDF4_INCS)
+
+LOC_LIBS = -lSpdb -lFmq -ldsserver -ldidss \
+	-lrapformats -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lfftw3 $(NETCDF4_LIBS) -lbz2 \
+	-lz
+
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+
+LOC_CPPC_CFLAGS = -ansi
+#LOC_LIBS = -lSpdb -lFmq -ldsserver -ldidss -lrapformats -lrapmath -ltoolsa -ldataport -ltdrp -lfftw3 -lgmap
+
+HDRS = \
+	$(PARAMS_HH) \
+	Args.hh \
+	Beam.hh \
+	ClutFilter.hh \
+	ClutProb.hh \
+	Fft.hh \
+	Fields.hh \
+	GateSpectra.hh \
+	InterestMap.hh \
+	Moments.hh \
+	MomentsMgr.hh \
+	OpsInfo.hh \
+	OutputFmq.hh \
+	PhidpKdp.hh \
+	Pulse.hh \
+	TsArchive2Dsr.hh
+
+CPPC_SRCS = \
+	$(PARAMS_CC) \
+	Args.cc \
+	Beam.cc \
+	ClutFilter.cc \
+	ClutProb.cc \
+	Fft.cc \
+	Fields.cc \
+	GateSpectra.cc \
+	InterestMap.cc \
+	Moments.cc \
+	MomentsMgr.cc \
+	Main.cc \
+	OpsInfo.cc \
+	OutputFmq.cc \
+	PhidpKdp.cc \
+	Pulse.cc \
+	TsArchive2Dsr.cc
+
+#
+# tdrp macros
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+
+#
+# standard C++ targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+
+#
+# tdrp targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+
+#
+# local targets
+#
+
+#GmapFilter: FORCE
+#	$(RM) ClutFilter.o
+#	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" \
+#	DBUG_OPT_FLAGS="-O2 -DUSE_GMAP" ClutFilter.o \
+#	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LOC_LD_LIBRARY_PATH):$(SYS_LD_LIBRARY_PATH)
+#	$(RM) GmapFilter
+#	$(_CPPC) $(DBUG_OPT_FLAGS) -o GmapFilter -static \
+#	$(OBJS) $(DEBUG_LDFLAGS) $(LDFLAGS) $(LIBS)
+#	$(RM) ClutFilter.o
+
+#FORCE:
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

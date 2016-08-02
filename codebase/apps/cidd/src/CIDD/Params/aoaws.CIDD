@@ -1,0 +1,1448 @@
+#####################################################################################
+#  CIDD.aoaws - Main MDS display  parameters
+#  Configurable Interactive Data Display Master Params
+#
+#
+#  The order of the various sections of the param file is arbitrary and are delimited by
+#   <SECTION_NAME> ...Content... </SECTION_NAME>    tags
+#
+# Currently Supported sections:
+#  GRIDS   - Describe each source of data and which color scales to use, etc.
+#  WINDS   - Describe each source of wind data.
+#  MAPS    - Describeseach map overlay source
+#  MAIN_PARAMS - Controls most of the features of the Display - Sets domains, menu bars, etc.
+#  DRAW_EXPORT - (TDRP syntax) Describes possible products to manually draw.
+#  SYMPRODS    - (TDRP syntax) Describes the sources of Symbolic Product Data
+#  TERRAIN     - (TDRP syntax) Describes the of Land Use and Terrain Data
+#  ROUTE_WINDS  - (TDRP syntax) Describes the Pre-defined Route's Features
+#  GUI_CONFIG -   (TDRP syntax)  Describes New GUI Feature Parameters for CIDD
+#
+#####################################################################################
+
+<SYMPRODS>
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+
+debug = DEBUG_OFF;
+
+///////////// use_domain_limits ///////////////////////
+//
+// Control to set domain based clip requests on.
+// Gathers data only in the visible domain when set to true.
+// Type: boolean
+//
+
+use_domain_limits = TRUE;
+
+///////////// short_requests //////////////////////////
+//
+// Gather Data Frame by Frame, Otherwise by loop span.
+// Gathers Products valid for the current frame only.
+// Type: boolean
+//
+
+short_requests = TRUE;
+
+///////////// prod_info ///////////////////////////////
+//
+// Product Source and Rendering Information Array
+// The fields in the structure are as follows:
+//   menu_label: Label to be used for the product in menu.
+//
+//   url: for retrieving the data.
+//
+//   data_type: data type used when querying the SPDB data server
+//     (set to 0 to retrieve all data regardless of type).
+//
+//   url: URL for the data. -
+//
+//   render_type: Select how temporal clipping is done:
+//      RENDER_ALL: Do no temporal clipping.
+//      RENDER_ALL_VALID: Render all Valid in frame
+//      RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame
+//      RENDER_LATEST_IN_FRAME: Render the latest product in the frame.
+//      RENDER_LATEST_IN_LOOP:  Render the latest product valid in the movie loop
+//
+//   on_by_default: True or False
+//
+//   minutes_allow_before: Stretch the frame time this many minutes - prior
+//   minutes_allow_after: Stretch the frame time this many minutes - after
+//
+//  text_off_threshold: Threshold where text disappears. Uses the function:
+//         log10(scale_constant /km_distance_across_screen ) + 1.0
+//         Use 0 to disable the off feature. (always displayed)
+//         Note: scale_constant set in MAIN_PARAM section.
+
+prod_info = {
+  {
+    menu_label = "METARS - plot",
+    url = "spdbp:Metar2Symprod:simple//tempest:0:taiwan/spdb/metar",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 0.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.8
+  },
+  {
+    menu_label = "METARS - labels",
+    url = "spdbp:Metar2Symprod:labels//tempest:0:taiwan/spdb/metar",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = FALSE,
+    minutes_allow_before = 0.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.8
+  },
+  {
+    menu_label = "Lightning",
+    url = "spdbp:Ltg2Symprod://tempest:0:taiwan/spdb/ltg",
+    data_type = 0,
+    render_type = RENDER_ALL_VALID,
+    on_by_default = TRUE,
+    minutes_allow_before = 0.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.4
+  },
+  {
+    menu_label = "AIREPS",
+    url = "spdbp:Pirep2Symprod://tempest:0:taiwan/spdb/airep",
+    data_type = 0,
+    render_type = RENDER_ALL_VALID,
+    on_by_default = FALSE,
+    minutes_allow_before = 0.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.2
+  },
+  {
+    menu_label = "ACARS",
+    url = "spdbp:Acars2Symprod://tempest:0:taiwan/spdb/acars",
+    data_type = 0,
+    render_type = RENDER_ALL_VALID,
+    on_by_default = FALSE,
+    minutes_allow_before = 0.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.2
+  },
+  {
+    menu_label = "SIGMET",
+    url = "spdbp:SigAirMet2Symprod://tempest:0:taiwan/spdb/sigmet",
+    data_type = 0,
+    render_type = RENDER_GET_VALID,
+    on_by_default = FALSE,
+    minutes_allow_before = 0.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.8
+  }
+};
+
+</SYMPRODS>
+
+<GRIDS>
+# Legend Label: used for all on-screen labels and for movie/html file naming.
+#           An Empty grid field can be obtained by using the keyword "None"
+# Button Label:  used for all menus.
+# URL:  is of the form:  mdvp:://host.domain:[port]:dir/dir&Field_name.
+#                          (Run the DsServerMgr executable for mdvp service)
+#                    OR: cdatap://host.domain/dir/dir&Field_name.
+#                           (Run the mdv_server executable for cdatap service)
+#   Spaces can be in field names by substituting a Caret character for the space:
+#
+#   Field^Name = "Field Name"
+#   Field Index can alternatively be specified by prepending a '#' character to the field
+#   name part: cdatap://host.domain/dir/dir&#Field_number -> cdatap://venus/radar&#3   
+# Colorscale:  Name of the file containing the value to color mapping for this field.
+# Units:  A label used on the colorscales, etc.
+# Cont-lo-hi-interv:  Default/Starting Contour low and high limits and interval.
+# Rendering Format: The style to render the grid. Current options are:
+#  cart:  - Rectangle fills of gridded data.
+#  radial:  - Filled Polygons of radial radar data - (contouring NOT currently available on this t
+ype of data)
+#  cont:  - False color filled  contours.
+#  lcont:  - Line contours.
+#  dcont:  - Dynamic Contours - Automatically switches between cart & cont.
+#          - Uses the 'cidd.dynamic_contour_treshold:' parameter
+#  Note: Add the word "comp" to the format keyword to turn on composite request by default:
+#     example:  cont,comp for a composite color filled contours.
+#     example:  radial,comp for a composite radial rendering
+#        Add the word "autoscale" to the format keyword to turn on automatic colorscale scaling
+#     example:  cont,comp,autoscale for a composite color filled contours, that is autoscaled.
+# Display_in_menu: Display this field in the main menu. (1 = Yes 0 = No)
+# Bkgnd_Render: Render this field automatically in the background. (1 = Yes 0 = No)
+#  Note: This is used to set up "toggleable" field images for comparing two fields,
+#  and to select which fields get generated in HTML output mode. 
+#----------------------------------------------------------------------------------------------------------
+#
+#Legend Button
+#Label  Label       URL                     Colorscale units Cont-lo-hi-interv format Display_in_menu Bkgnd_Render
+#----------------------------------------------------------------------------------------------------------
+#
+#
+#  GMS Satellite Data
+#
+Tuttle Tuttle mdvp:://tempest:0:tuttle/&V   vel.colors m/sec 0 70 5 dcont 1 0
+Radar_2D Radar_2D mdvp:://tempest:0:taiwan/mdv/radar/mosaic&MOSA   dbz_cwb.colors dBZ 0 70 5 dcont 1 0
+
+Radar_3D Radar_3D mdvp:://tempest:0:taiwan/mdv/radar/mosaic3d&MOSA dbz_cwb.colors dBZ 0 70 5 contcomp 1 0
+
+CldTopHgt CldTopHgt mdvp::zoom_mds//tempest:0:taiwan/mdv/CloudHt&IRHeight CloudHeightFL.colors FL -50 40 2 cont 1 0
+
+Visible_Sat Visible_Sat mdvp::zoom_mds//tempest:0:taiwan/mdv/sat&gms_v_0.65 sat_cloud.colors albedo 0 100 10 dcont 1 0
+
+Infrared_Sat_MB Infrared_Sat_MB mdvp::zoom_mds//tempest:0:taiwan/mdv/sat&gms_t_11 sat_temp_MB_rev.colors C 0 100 10 cont 1 0
+
+Infrared_Sat_BD Infrared_Sat_BD mdvp::zoom_mds//tempest:0:taiwan/mdv/sat&gms_t_11 sat_temp_BD_rev.colors C 0 100 10 cont 1 0
+
+Infrared_Gray Infrared_Gray mdvp::zoom_mds//tempest:0:taiwan/mdv/sat&gms_t_11 sat_temp_grey_reverse.colors C 0 100 10 cont 1 0
+
+WaterVapor WaterVapour mdvp::zoom_mds//tempest:0:taiwan/mdv/sat&gms_t_6.5 wv_rev.colors C 0 100 10 cont 1 0
+
+Wind_Speed Wind_Speed mdvp::zoom_mds_fill//tempest:0:taiwan/mdv/mm5&Speed wind.colors kts -50 50 10 cart 1 0
+
+Temperature Temp_Contours mdvp::zoom_mds//tempest:0:taiwan/mdv/mm5&Temp temp.colors C -80 40 0
+lcont 1 0
+
+Freezing_Level Freezing_Level mdvp::zoom_mds//tempest:0:taiwan/mdv/mm5&FZLevel fzlevel.colors FL 0 400 0 lcont 1 0
+
+Humidity Humidity mdvp::zoom_mds_fill//tempest:0:taiwan/mdv/mm5&RH rh.colors % 0 100 5 cont 1 0
+
+Turbulence_probability Turbulence mdvp::d3_d4//tempest:0:taiwan/mdv/mm5&Turb turb.colors Prob 0.5 4 1 cont 1 0
+
+Turbulence_probability Turb_all_levels mdvp::d3_d4//tempest:0:taiwan/mdv/mm5&Turb turb.colors Prob 0.5 4 1 cont,comp 1 0
+
+Icing_severity Icing mdvp::d3_d4//tempest:0:taiwan/mdv/mm5&Icing icing.colors Indx 1 4 1 cont 1 0
+
+Icing_severity Icing_all_levels mdvp::d3_d4//tempest:0:taiwan/mdv/mm5&Icing icing.colors Indx 1 4 1 cont,comp 1 0
+
+Flight_Category Flight_Category mdvp:://tempest:0:taiwan/mdv/fltcat&Flight_Cat flt_cat.colors Cat 0.5 6 1 dcont 1 0
+
+Lightning Lightning mdvp:://tempest:0:taiwan/mdv/ltg&Ltg_Strikes ltg.colors count 0 100 10 cart 1 0
+
+Terrain Terrain mdvp::static//tempest:0:taiwan/mdv/terrain&Elevation terrain.colors m 0. 5000 100 dcont 1 0
+Relief Relief mdvp:://tempest:0:topo/relief/mdv/&RGBA  terrain.colors m 0. 5000 100 cart  1 0
+
+None None mdvp:://tempest:0:taiwan/mdv/none&none none.colors count 0 100 10 cart 1 0
+
+
+</GRIDS>
+
+<WINDS>
+
+#----------------------------------------------------------------------------
+# Note:
+# Legend_label: Used for Image Labels and Menus
+# URL: should be of the form "protocol://host:port/dir/&"
+#   The U,V and W field names will be appended to complete the URL
+#   Use the name "None" to indicate no W field componet.
+# U: The  East-West Wind componet Field name
+#   Spaces can be in field names by substituting a Caret character for the space:
+#   Example: Field^Name = "Field Name"
+#   Field Index can alternatively be specified by prepending a '#' character to the field
+#   (Use this if there are duplicate field names in the data files)
+#   Example: First field in file = "#1"
+# V: North-South Wind componet Field name
+# W: Up-Down  Wind componet Field name - Use "None" to indicate no W field
+#
+#  Units: Labels append this (for barbs and reference lines)
+#
+# Style: This column is broken in to several componets for backward compatibility
+# 1. A mandantory number must be first.
+#     Absolute value of the number is the starting Line width.
+#     Values <= 0 Turns it off to begin with
+# 2. Second componet is a comma followed by the rendering style:
+#     Wind Rendering Style  Options:
+#     "arrow" (centered at data point),
+#     "vector",(Vertex at data point )
+#     "barb" (N Hemisp),
+#     "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)
+#     "tuft", (like a piece of yarn - the least obtrusive - like a headless vector)
+#     "tickvector" (Cross ticks at wind_time_scale_interval  minutes)
+#     "metbarb" (Calcs latitude - works for both hemispheres and
+#     adds a label of the 10's digit off the end of the barb, ala winds aloft charts)
+#     "barb_sh" (S Hemisphere),
+#     "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)
+#     NOTE: When using arrow,vector,tuft,tickvector,  the data must be in
+#     m/sec for the scaling to work correctly. For the others (Barbs),
+#     the units are arbitrary, but the flag units on the barbs will reflect
+#     the data's native units.
+# Example: "-2,metbarb" -->  Width 2, off to start, using winds aloft chart barbs
+# Example: "1"  --> Width 1, On to start, Uses cidd.wind_marker_type: defined in main section
+#
+# Color: Any Legal X color name - Can be several words, Example: dark green
+#
+# Legend_label  URL U V W_fieldnames units  Style [Color]
+#----------------------------------------------------------------------------
+
+MM5_winds  mdvp::zoom_mds//tempest:0:taiwan/mdv/mm5&  U V None  m/s  1,metbarb lightgreen
+
+</WINDS>
+
+<MAPS>
+#
+# MAP_CODE Must be less than 16 characters, Color must be regualr X color name
+# Complete map file name used is  map_file_subdir/Map_file_name
+# 0 = OFF, > 0 = ON, line of width N
+# Detail thresholds are in Km across the image.#
+#
+# MAP_CODE Control_Label   Map_File_Name   On/OFF Detail__min Detail_max Color     
+#------------------------------------------------------------------------------------------
+
+US_states  US_states       usa_states.map         1  .0 1000000.0  darkslateblue
+
+Coasts      Coasts         world_states.map       2  .0 1000000.0  white
+
+Taiwan      Taiwan         taiwan_coast.map       2  0.0 1000000.0  white
+
+ARP_domain1 Airports       arp_domain1.map        0  0.0 2000.0  white
+
+FIR         FIR            taiwan_fir.map         1  0.0 10000.0  blue
+
+Airways     Airways        taiwan_airways.map     1  0.0 2000.0  blue
+
+Sectors     Sectors        taiwan_sectors.map     1  0.0 2000.0  cyan
+
+Restricted  Restricted     taiwan_restricted.map  0  0.0 2000.0  red
+
+CTR         CTR            taiwan_ctr.map         0  0.0 2000.0  cyan
+
+VHF_domain1 VHFs           vhf_domain1.map        0  0.0 2000.0  white
+
+WYP_domain1 Waypoints      wyp_domain1.map        0  0.0 2000.0  white
+
+NDB_domain1 NDBs           ndb_domain1.map        0  0.0 2000.0  white
+
+CKS          CKS           cks_airport.map        1  0.0 100.0  yellow
+
+SS           SS            ss_airport.map         1  0.0 100.0  yellow
+
+KH           KH            kh_airport.map         1  0.0 100.0  yellow
+
+Cities      Cities         taiwan_cities.map      0  0.0 2000.0  white
+
+MdsDomains  MdsDomains     mds_domains.map        1  0.0 1000000.0  blue
+
+MM5Domains  MM5Domains     mm5_domains.map        0  0.0 10000000.0  red
+MM5_D1_Grid MM5_D1_Grid    domain1_grid.map       0  0.0 10000000.0  red
+MM5_D2_Grid MM5_D2_Grid    domain2_grid.map       0  0.0 10000000.0  red
+MM5_D3_Grid MM5_D3_Grid    domain3_grid.map       0  0.0 10000000.0  red
+
+#Grid_1deg   Grid_1deg      grid_1deg.map          0  0.0 10000000.0  darkblue
+#Grid_5deg   Grid_5deg      grid_5deg.map          0  0.0 10000000.0  darkblue
+
+#NDB_named NDB_named     ndb_domain1_named.map     0  0.0 1000000.0  white
+#VHF_named VHF_named     vhf_domain1_named.map     0  0.0 1000000.0  white
+#WYP_named WYP_named     wyp_domain1_named.map     0  0.0 1000000.0  white
+#ARP_named ARP_named     arp_domain1_named.map     0  0.0 1000000.0  white
+
+#NDB_world   NDB_world      ndb.map                0  0.0 1000000.0  white
+#VHF_world   VHF_world      vhf.map                0  0.0 1000000.0  white
+#WYP_world   WYP_world      wyp.map                0  0.0 1000000.0  white
+#ARP_world   ARP_world      arp.map                0  0.0 1000000.0  white
+
+</MAPS>
+
+<DRAW_EXPORT>
+///////////// dexport_info ///////////////////////////////
+// Draw/Export Parameters
+//
+// Each Entry needs:
+// ID_Label FMQ_URL Valid_Minutes Default_ID_no
+//    ID_LABEL - This is used to designate Product types
+//    FMQ_URL: example: fmqp:://host::dir/file
+//    Valid_Minutes: How many minutes the product is valid by default
+//    Default_ID_no: Default Data Type (Enumerated ID)
+//
+
+dexport_info = {
+    {"Boundry",         "/tmp/mds.fmq",     60, 0, "A"},
+    {"Turb_Sigmet",     "/tmp/mds.fmq",     60, 0, "A"}
+};
+</DRAW_EXPORT>
+
+
+
+<MAIN_PARAMS>
+
+# Parameter data base for the Configurable Interactive Data Display; CIDD
+
+#cidd.http_tunnel_url: http://tempest/didss/DsServerTunnel
+
+# General informational messages
+cidd.debug_flag:            0
+
+# Data flow related messages
+cidd.debug1_flag:           0
+
+# Verbose diagnostics - special debugging info
+cidd.debug2_flag:           0
+
+# Uncomment the next parameter to start up cidd in archival mode
+#  Starting at the indicated time. Enter HH:MM MM/DD/YY format time string
+#  System will startup using field 0.
+#cidd.demo_time:  20:00 4/05/99
+cidd.demo_time:  6:00 04/13/05
+
+#  MOVIE Related resources
+
+cidd.movie_frame_dir: /tmp
+
+#  This determines how many movie frames are in the loop to start with
+#  Setting this high will cause the X server to hog memory.
+cidd.starting_movie_frames:  12
+
+# minutes per movie frame on startup
+cidd.time_interval:  60.0
+
+# This parameter set the hours into the future to look
+cidd.forecast_interval: 24
+
+# This parameter sets the maximum number of hours in the PAST a user can select
+# from the quick forecast menu. See SHOW_PAST_MENU menu bar button
+cidd.past_interval:  96
+
+# When a Forecast hour is chosen, magnify the time interval by this factor.
+# This adjusts the frame time_interval to be more appropriate for
+# forecast (model) data, which is often output on a more coarse time interval.
+# When "Now" is selected the magnification is undone. Default is 1.0
+#
+cidd.movie_magnify_factor:  1.0
+
+
+# Set this paramet to 1 to get CIDD to check and reject for rendering
+# Any data that valls outside the movie frame interval + the
+# slop/strecch_factor - Used to reject "out of date" data.
+cidd.check_data_times:  0
+
+# Sets the allowable time error for data to appear in movie frames
+# (times the time_interval) 
+cidd.stretch_factor:     3.0
+
+# Sets whether Cidd request data closest to the midpoint of a movie
+# frame(time-wise) or the end. Set to 1 to gather data nearest the
+# end, but before the end time of each movie frame 
+# 0= Midpoint requests, 1 = End point requests.
+cidd.gather_data_mode:  1
+
+# Number of milliseconds between checks for images needing redrawn
+# Set this lower on faster hardware - Recommended 50-250
+# This sets the ultimate speed of the movie looping
+cidd.redraw_interval:     20
+
+# Number of seconds between data update requests
+cidd.update_interval:      30
+
+# Data Mapper Host - Host to check for data updates
+cidd.datamap_host:  tempest
+
+#  Number of seconds to wait for data to come in before giving up
+#  On very slow networks this may need to go as high as 180 seconds!
+cidd.data_timeout_secs: 10
+
+# Length of time to wait before killing simple external commands
+# Used When running single image convert scripts and driving
+# Browsers to web pages.
+cidd.simple_command_timeout_secs: 30
+
+# Length of time to wait before killing complex external commands
+# Used when spawining animation building script
+cidd.complex_command_timeout_secs: 180
+
+# Set times to the nearest value divisible by the number of seconds
+cidd.temporal_rounding:    3600
+
+# Set to 1 to start up cidd in movie-on mode, 0 = off
+cidd.movie_on:         0
+
+# Set the delay at the end of the movie loop in msec 
+cidd.movie_delay: 3000
+
+# If set to 1 - forces CIDD to reload all data every time the movie frames 
+# rotate one old frame out and generate a new frame.
+cidd.reset_frames:   0
+
+# Gather model run times within these number of hours from the end
+# of the movie loop. More hours means more Model runs wll appear in the menu.
+cidd.model_run_list_hours:  24 
+
+# After this period of inactivity, the display
+# will reset itself to a known starting point
+# Set this <= 0 to essentially turn off.
+cidd.idle_reset_seconds: 900
+
+
+# HTML Generation related resources 
+# Set this to a value to get cidd to output imagery in this directory
+cidd.html_image_dir: 
+
+# Image extension - Sets the output image types
+# Legal image types are png,jpg,xpm,pgm,ppm,eim
+cidd.image_ext: png
+
+# This script will be exec'd if set whenever an html  image is output.
+# The full path name of the xwd image will be sent as the script argument
+cidd.html_convert_script:
+
+
+#                  DOMAIN RELATED RESOURCES 
+# Set the projection for cidd's plan view - Current valid choices are:
+# CARTESIAN, LAT_LON
+cidd.projection_type:    LAT_LON
+
+# Set this to the amount grids are rotated clockwise to true north.
+# Overlays will rotate counterclockwise. - In Degrees
+# Only valid for CARTESIAN projection
+cidd.north_angle:        0.0
+
+# Set the scale factor and label for Range rings and Distance scales.
+cidd.units_per_km:          0.5395932
+
+# Set the following to Deg for LAT_LON projections - Default is "km"
+cidd.scale_units_label:  nm
+
+# When set to 1, always gets full domain, zooms don't force a data request
+cidd.always_get_full_domain:     0
+
+# Set the aspect ratio of the domain for Cidd. Cidd will preserve this aspect
+# ration for all zooms. Ratio is Width/Height.
+cidd.aspect_ratio:   1.0
+
+#  Apply A  correction  to the Y coords, making LAT_LON grids
+# appear to be equi-distant in Latitude and Longitude.
+# Based on the cos(origin_latitude);
+#
+cidd.aspect_correct_lat_lon: 1
+
+# ORIGIN  INFO
+
+cidd.origin_longitude:       121.0
+cidd.origin_latitude:        25.0
+
+# 
+# On startup and each time the reset button is pressed, the display
+# will indicate a click at this point, as if the user had clicked.
+# 
+cidd.reset_click_longitude: 121.2232
+cidd.reset_click_latitude:  25.0816
+
+# Select the data fields/page to start on.
+cidd.planview_start_page:   3
+cidd.xsect_start_page:      7
+
+# The Outer most domain: Overlays are clipped to this domain and 
+# pan/moves cannot exceed these edge limits.
+cidd.domain_limit_min_x:         -30
+cidd.domain_limit_max_x:         330
+cidd.domain_limit_min_y:        -90
+cidd.domain_limit_max_y:         90
+ 
+# Preset Zoom levels.
+cidd.num_zoom_levels:       9
+cidd.start_zoom_level:      6
+
+# LAT_LON EXAMPLE
+# NOTE: FOR LAT_LON Projection - the units will be interpreted as degrees, not km
+#
+
+#  Note: index starts at 1
+
+cidd.level1_label:            WORLD
+cidd.level1_min_xkm:          -330
+cidd.level1_min_ykm:          -90
+cidd.level1_max_xkm:          330
+cidd.level1_max_ykm:          90
+
+cidd.level2_label:            WIDE
+cidd.level2_min_xkm:          80
+cidd.level2_min_ykm:          -60
+cidd.level2_max_xkm:          200
+cidd.level2_max_ykm:          60
+
+cidd.level3_label:            DOMAIN1
+cidd.level3_min_xkm:          84.5
+cidd.level3_min_ykm:          -7.5
+cidd.level3_max_xkm:          157.5
+cidd.level3_max_ykm:          57.5
+
+cidd.level4_label:            DOMAIN2
+cidd.level4_min_xkm:          102.2
+cidd.level4_min_ykm:          8.2
+cidd.level4_max_xkm:          139.8
+cidd.level4_max_ykm:          41.8
+
+cidd.level5_label:            DOMAIN3
+cidd.level5_min_xkm:          113.2
+cidd.level5_min_ykm:          18
+cidd.level5_max_xkm:          128.8
+cidd.level5_max_ykm:          32
+
+cidd.level6_label:            FIR
+cidd.level6_min_xkm:          116.75
+cidd.level6_min_ykm:          20.75
+cidd.level6_max_xkm:          125.25
+cidd.level6_max_ykm:          29.25
+
+cidd.level7_label:            REGION
+cidd.level7_min_xkm:          117.6
+cidd.level7_min_ykm:          21.2
+cidd.level7_max_xkm:          123.9
+cidd.level7_max_ykm:          26.9
+
+cidd.level8_label:            TAIWAN
+cidd.level8_min_xkm:          118.5
+cidd.level8_min_ykm:          21.5
+cidd.level8_max_xkm:          122.5
+cidd.level8_max_ykm:          26
+
+cidd.level9_label:            TAIPEI
+cidd.level9_min_xkm:          121
+cidd.level9_min_ykm:          24.5
+cidd.level9_max_xkm:          122
+cidd.level9_max_ykm:          25.5
+
+# Cartesian space limits in km - Vertical Range and Resolution
+cidd.min_ht:                 0.0
+cidd.max_ht:                 450.0
+cidd.ht_interval:            10.0
+cidd.start_ht:               250.0
+
+# Radial data Limits
+cidd.min_rkm:                0.0
+cidd.max_rkm:                400.0
+cidd.min_adeg:               0.0
+cidd.max_adeg:               360.0
+
+cidd.color_file_subdir:   http://www.rap.ucar.edu/colorscales
+cidd.map_file_subdir:     http://www.rap.ucar.edu/maps
+
+#
+# Station locator features
+#
+# Maximum allowed  Distance in km between request point and station
+# 93 km = 50 nm
+cidd.locator_margin_km:   93
+# Full Path File name or http URL to a station data file.
+# The format of each line is:  ID, LAT, LON, ALT(m), TYPE
+cidd.station_loc_url: http://www.rap.ucar.edu/maps/world_stations.dat
+
+
+# Color Preferences - Avoid trailing spaces in color names
+# Legends, scales, etc use this color
+cidd.foreground_color: white
+
+# Background of Images use this color
+cidd.background_color: black
+
+# Background of margins will be this color
+cidd.margin_color: black
+
+# Color of the cross section reference line
+cidd.route_path_color: yellow
+
+# Range rings and azmiuth lines
+cidd.range_ring_color: gray
+
+# Text in the time axis margins are this color
+cidd.time_axis_color: pink
+
+# A solid rectangle  showing the movie frame extent is drawn in this color
+cidd.time_frame_color: gray50
+
+# The text in the height selector margin is rendered in this color
+cidd.height_axis_color: pink
+
+# A solid rectangle showing the height extent of the data plane is drawn in this color
+cidd.height_indicator_color: gray50
+#
+
+# Set the follwing colors to 'transparent' to avoid having these
+# plotted. (This is the default) Otherwise, these data will be
+# plotted in the indicated color
+#cidd.missing_data_color: gray30
+cidd.missing_data_color: green
+cidd.bad_data_color: gray30
+
+#
+# Render values outside the data range of the color scale in this color
+# 'transparent' is the default
+cidd.out_of_range_color: transparent
+
+#
+#
+#
+# Time Control (Movie) Popup Colors
+#
+cidd.epoch_indicator_color: orange
+cidd.now_time_color: red
+cidd.time_tick_color1: cyan
+cidd.time_tick_color2: yellow
+cidd.time_tick_color3: magenta
+cidd.time_tick_color4: green
+cidd.time_tick_color5: red
+cidd.time_tick_color6: blue 
+
+#Toggle for displaying the height Selector in Right Margin
+# Note Right Margin shoud be at least 50 pixels wide
+cidd.show_height_sel:       1  
+
+# Display data access and rendering messages - This is probably not
+# necessary in situations where all data is small and local.
+cidd.show_data_messages: 1
+
+# Sets the relative intensity of the image, relative to the overlays on startup
+# Set between 0.2 and 1.0.
+cidd.image_inten:            0.8
+# The number of selectable intensity levels in the slider control
+cidd.inten_levels:            32
+
+# Sets the threshold in drawable grid points where image rendering 
+# is done by a filling method on the client, rather than by rectangles
+# on the Xserver.
+# Set this high if the X server is fast or the comm link to the server is slow.
+# Set this low if the X server is slow. Typical values range from 10,000 to 100,000
+cidd.image_fill_threshold:    80000
+
+# This sets the threshold in grid cells when the the display will
+# render a grid as contours or as filled rectangles. Grids contining
+# less than the threshold cells will be rendered as filled contours.
+# used for 'dcont' style rendering
+cidd.dynamic_contour_threshold:    75000
+
+
+# Sets the format for output of Lat, Lon's. 0= Decimal Degrees, 1 = deg min' sec"
+cidd.latlon_mode:        0
+
+# Set the format for the time strings. See 'man strftime' for format options.
+# Can add additional text as part of the Time string.
+# Default is: "%m/%d/%Y %H:%M:%S"
+cidd.label_time_format:  %Y/%m/%d %H:%M
+
+# Plot a Legend for each Grid overlay; 0=Off, 1=On
+cidd.layer_legends_on: 1
+
+# Plot a Legend for each Contour overlay; 0=Off, 1=On
+cidd.cont_legends_on: 1
+
+# Plot a Legend for each Wind overlay; 0=Off, 1=On
+cidd.wind_legends_on: 1
+   
+# Switch to turn off all data labels on the display
+cidd.display_labels: 1
+
+# Set the format for the frame time in the names of output xwd images.
+# Can add additional text as part of the Time string. Default is: "%H%M"
+# File naming convention is: cidd_fieldname_zoomlevel_time.xwd
+cidd.movieframe_time_format:  "%H%M"
+
+
+# Set range_ring_spacing to a negative value to dynamically determing spacing.
+cidd.range_ring_spacing:        -1.0
+# x_space, y_space in pixels determine allowable space for range ring labels
+cidd.range_ring_x_space:    40
+cidd.range_ring_y_space:    13
+cidd.azmith_interval:       30.0
+cidd.azmith_radius:         200.0
+
+
+# Toggles to turn on/off  Extras features on startup
+cidd.range_rings:             0
+cidd.azmith_lines:            0
+
+# Wind vector parameters 
+cidd.barb_shaft_len:         30
+cidd.wind_head_size:         5
+cidd.ideal_x_vectors:        8
+cidd.ideal_y_vectors:        8
+cidd.wind_head_angle:        30.0
+# Wind Rendering Style  Options:
+# "arrow" (centered at data point), 
+# "vector",(Vertex at data point ) 
+# "barb" (N Hemisp),
+# "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)
+# "tuft", (like a piece of yarn - the least obtrusive - like a headless vector)
+# "tickvector" (Cross ticks at wind_time_scale_interval  minutes)
+# "metbarb" (Calcs latitude - works for both hemispheres and
+# adds a label of the 10's digit off the end of the barb, ala winds aloft charts)
+# "barb_sh" (S Hemisphere),
+# "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)
+
+cidd.wind_marker_type:     metbarb
+
+# Starting state of the All Winds ON/OFF feature
+cidd.all_winds_on: 0
+
+# Scale Vertical winds by this much when plotting to emphasize the vertical
+# motion.
+cidd.wind_w_scale_factor:    1.0
+
+# Scale horizontal winds by this much
+cidd.wind_units_scale_factor:    1.0
+cidd.wind_units_label: kts
+
+# Uncomment the following lines to turn on default contour fields
+# Uses the contour levels and the Field Label string in data.info
+# The parameters are Exact_field_label and color and optional "off"
+# Keyword. If "off" param is used, the field will be defined, but will
+# not be acitvated on startup.
+cidd.contour1_field: FzLevel red off
+#cidd.contour2_field: SURF_T white
+#cidd.contour3_field: SURF_T white
+#cidd.contour4_field: SURF_T white
+#cidd.contour5_field: SURF_T white
+# 
+# Set to 1 to have numeric labels on line contours, 0 = off
+cidd.label_contours:   1           
+# Use Alternate Contouring Routines (MDVX) -
+# Slower - Nicer labeling 
+cidd.use_alt_contours: 1
+#
+# 
+# Contours Render this value using a wider line.
+cidd.special_contour_value: 0.0
+
+# Width in pixels of line contours.
+cidd.contour_line_width: 2
+
+# Apply smoothing to data grids before contouring
+# 0 = Off, 1 = single pass, 2 = double pass
+cidd.smooth_contours: 0
+
+# Uncomment the following lines to set up fields on startup that will
+# appear as overlaid fields. Layers are on by default unless the
+optional "off" string appears last. 
+#cidd.layer1_field:  SURF_T off
+#cidd.layer2_field:  SURF_DP
+#cidd.layer3_field:  SURF_DP
+#cidd.layer4_field:  SURF_DP
+#cidd.layer5_field:  SURF_DP
+
+
+# Place Cidd fonts in asending order of size. Cidd will choose the
+# highest font number that will fit in a given screen space.
+# Pick a nice spectrum of font sizes, with all of them readable.
+cidd.num_fonts: 8
+cidd.font1: 6x9
+cidd.font2: -*-courier-medium-r-normal-*-10-*-*-*-*-*-*-*
+cidd.font3: -*-courier-medium-r-normal-*-12-*-*-*-*-*-*-*
+cidd.font4: -*-courier-bold-r-normal-*-12-*-*-*-*-*-*-*
+cidd.font5: -*-courier-bold-r-normal-*-14-*-*-*-*-*-*-*
+cidd.font6: -*-courier-bold-r-normal-*-15-*-*-*-*-*-*-*
+cidd.font7: -*-courier-bold-r-normal-*-16-*-*-*-*-*-*-*
+cidd.font8: -*-courier-bold-r-normal-*-18-*-*-*-*-*-*-*
+#cidd.font7: -*-courier-bold-r-normal-*-24-*-*-*-*-*-*-*
+#cidd.font8: -*-courier-bold-r-normal-*-30-*-*-*-*-*-*-*
+
+# font_display_mode = 1 - Clears background behind label text., 0 - No
+cidd.font_display_mode: 1
+# 
+# Set this parameter to force the field menu popup to this many columns
+# If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
+# column.
+cidd.num_field_menu_cols: 1
+# 
+# Image Dump resources    
+
+cidd.horiz_image_dir:   /tmp
+cidd.horiz_image_fname:    ciddH.xwd
+#cidd.horiz_image_command:  convert +negate -page letter+40+40 ciddH.xwd ciddH.ps; lpr -h ciddH.ps
+cidd.horiz_image_command:  convert +negate -page $(AOAWS_PAPER_SIZE) ciddH.xwd ciddH.ps; lpr -h ciddH.ps
+
+
+cidd.vert_image_dir:      /tmp
+cidd.vert_image_fname:    ciddV.xwd
+#cidd.vert_image_command:  convert +negate -page letter+40+40 ciddV.xwd ciddV.ps; lpr -h ciddV.ps    
+cidd.vert_image_command:  convert +negate -page $(AOAWS_PAPER_SIZE) ciddV.xwd ciddV.ps; lpr -h ciddV.ps    
+
+
+
+#Toggle for displaying the analog clock
+cidd.show_clock:       0
+# Set to 0 to draw the analogue clock using GMT 
+# Normally draws a GMT time clock
+cidd.draw_clock_local: 0
+
+# GUI RELATED STUFF
+
+# This parameter determines if all of the controls
+# are available. If set to 1, none of the popup
+# control panels are available and minimalist movie controls
+# become available on the front panel 
+cidd.limited:            0
+
+#####################################################################################
+# Defines for the Menu Bar at the top of the main window. Functions are:
+#
+#    --- One Shot Functions ---
+# RELOAD - (Force all data to be reloaded)
+# RESET - (Set display to starting zoom, field, products on/off state, etc)
+# SET_TO_NOW - (Sets the display to current time - canceling forecast mode)
+# SET_DRAW_MODE - (Enable the Human entered feature drawing mode)
+# PRINT_BUTTON - (Save and Print the plan view image) 
+# HELP_BUTTON - (Send Netscape to a useful help Page)
+# EXIT_BUTTON - Kills the Display
+# CLONE_CIDD - Starts another instance of the same display
+#
+#    --- Toggle things on and off ----
+# LOOP_ONOFF - (Turn the movie loop on/off)
+# WINDS_ONOFF - (Turn all winds on/off)
+# SYMPRODS_ONOFF - (Turn all Symbolic Products on/off)
+# REPORT_MODE_ONOFF - (Turn on/off COntinious REport Mode )
+#
+#    --- Display Panels ---
+# SHOW_DPD_PANEL - (Show/Hide Page Definition Panel which configures individual pages)
+# SHOW_XSECT_PANEL - (Show/Hide the Cross Section Display View Panel)
+# SHOW_GRID_PANEL - (Show/Hide the Data Source Configuration Panel)
+# SHOW_STATUS_PANEL - (Show/Hide a Status message window)
+# SHOW_TIME_PANEL - (Show/Hide the Movie loop control Panel) 
+# CLOSE_POPUPS  - (Close all Popup panels)
+#
+#    --- Display Additional Menus ---
+# SHOW_DPD_MEN - (Show/Hide the field/page description menu)
+# SHOW_VIEW_MENU - (Show/Hide the zoom level menu)
+# SHOW_MAP_MENU - (Show/Hide the map overlay menu)
+# SHOW_PRODUCT_MENU - (Show/Hide the symbolic product menu)
+# SHOW_FORECAST_MENU - (Show/Hide the forecast time menu)
+# SHOW_PAST_MENU -    (Show/Hide the Past/Archive time menu)
+# SHOW_BOOKMARK_MEN - (Show/Hide the helpful bookmark menu)
+# SHOW_GENTIME_MENU - (Show/Hide the Model Generation Time menu)
+# 
+#
+cidd.num_menu_bar_cells: 18
+#
+cidd.menu_bar_label1: Page...
+cidd.menu_bar_funct1: SHOW_DPD_MENU
+# 
+cidd.menu_bar_label2: View...
+cidd.menu_bar_funct2: SHOW_VIEW_MENU
+#
+cidd.menu_bar_label3: Maps...
+cidd.menu_bar_funct3: SHOW_MAP_MENU
+#
+cidd.menu_bar_label4: Products...
+cidd.menu_bar_funct4: SHOW_PRODUCT_MENU
+#
+cidd.menu_bar_label5: Winds
+cidd.menu_bar_funct5: WINDS_ONOFF
+#
+cidd.menu_bar_label6: Movie...
+cidd.menu_bar_funct6: SHOW_TIME_PANEL
+#
+cidd.menu_bar_label7: Loop
+cidd.menu_bar_funct7: LOOP_ONOFF
+#
+cidd.menu_bar_label8: Past...
+cidd.menu_bar_funct8: SHOW_PAST_MENU
+#
+cidd.menu_bar_label9: Now
+cidd.menu_bar_funct9: SET_TO_NOW
+#
+cidd.menu_bar_label10: Fcast...
+cidd.menu_bar_funct10: SHOW_FORECAST_MENU
+#
+cidd.menu_bar_label11: Reload
+cidd.menu_bar_funct11: RELOAD
+#
+cidd.menu_bar_label12: Reset
+cidd.menu_bar_funct12: RESET
+#
+cidd.menu_bar_label13: Route...
+cidd.menu_bar_funct13: SHOW_XSECT_PANEL
+#
+cidd.menu_bar_label14: URL...
+cidd.menu_bar_funct14: SHOW_BOOKMARK_MENU
+#
+cidd.menu_bar_label15: Report
+cidd.menu_bar_funct15: REPORT_MODE_ONOFF
+#
+cidd.menu_bar_label16: Help
+cidd.menu_bar_funct16: HELP_BUTTON
+#
+cidd.menu_bar_label17: Model_Run...
+cidd.menu_bar_funct17: SHOW_GENTIME_MENU
+#
+#cidd.menu_bar_label17: Grid_Config...
+#cidd.menu_bar_funct17: SHOW_GRID_PANEL
+#
+cidd.menu_bar_label18: Page_Config...
+cidd.menu_bar_funct18: SHOW_DPD_PANEL
+#
+cidd.menu_bar_label20: Print
+cidd.menu_bar_funct20: PRINT_BUTTON
+#
+#
+
+cidd.horiz_frame_label: MDS Version 2.2 (c) UCAR/NCAR/RAP 2001
+
+# Set the message to display when no data is availible
+#cidd.no_data_message:    RADAR LINK DOWN - NO DATA
+cidd.no_data_message:     Data Source/Link DOWN
+#cidd.no_data_message:     NO DATA FOUND (in this area at the selected time)
+
+# HELP TEXT LINKS                       
+# These take the form:
+# cidd.widget_name_help:       file_name:file_index_key_string
+# The HELPPATH envoronment variable must be set or the help file
+# must be located in /ussr/lib/help.
+# Note the file name gets expanded to file_name.info
+#
+cidd.canvas_help:              cidd_help:canvas
+cidd.frame_message_help:       cidd_help:frame_message
+
+cidd.help_command:   netscape_starter -remote 'openURL(file://$(PROJ_DIR)/doc/mds_user_manual/mds_v2.2.html)'
+
+cidd.status_info_file: $(PROJ_DIR)/data/_aoaws_status.txt
+
+#
+# This command is run whenever a BOOKMARK_MENU button is pressed.
+# The characters; %U are replaced with the url text from the
+# parameters; cidd.bookmarkN below.
+cidd.bookmark_command:  netscape_starter -remote 'openURL(%U)'
+
+# BOOKMARKS FOR Quick Reference
+# Create N Bookmark and Label parameters
+# cidd.bookmarkN: - The exact URL text for use in the cidd.bookmark_command.
+# cidd.bookmark_labelN: The Label that appears in the menu
+#
+
+cidd.num_bookmarks: 3
+
+cidd.bookmark1: http://$(AOAWS_WMDS_SERVER)/wmds/content/aoaws/wmds.html
+cidd.bookmark_label1: AOAWS WMDS
+cidd.bookmark2: http://$(AOAWS_WMDS_SERVER)/~mm5caa/
+cidd.bookmark_label2: AOAWS MODEL DISPLAY
+cidd.bookmark3: http://cdfsv
+cidd.bookmark_label3: TAMC WWW
+
+cidd.horiz_default_height:    1155
+cidd.horiz_min_height:        400
+cidd.horiz_min_width:         560
+cidd.horiz_default_x_pos:     0
+cidd.horiz_default_y_pos:     0
+
+cidd.horiz_top_margin:        20
+cidd.horiz_bot_margin:        20
+cidd.horiz_left_margin:       20
+cidd.horiz_right_margin:      60
+
+cidd.vert_min_height:        120
+cidd.vert_min_width:         120
+cidd.vert_default_height:    600
+cidd.vert_default_width:     800
+cidd.vert_default_x_pos:     790
+cidd.vert_default_y_pos:     535
+
+cidd.vert_top_margin:        20
+cidd.vert_bot_margin:        20
+cidd.vert_left_margin:       30
+cidd.vert_right_margin:      30
+
+# Resources related to EXPRT, EXPT
+
+cidd.expt_feature_scale:   12500
+cidd.expt_font_scale:      45
+cidd.expt_mark_size:       5
+cidd.exprt_command:
+
+# Resources for compatibility with TITAN-TIME HISTORY Program
+
+cidd.track_server_instance:         Operations
+cidd.track_past_plot_period:        0
+cidd.track_future_plot_period:      0
+cidd.track_n_forecast_steps:        5
+cidd.track_forecast_interval:       6
+cidd.track_data_time_margin:        750
+cidd.track_past_color:              orange
+cidd.track_current_color:           cyan
+cidd.track_future_color:            blue
+cidd.track_forecast_color:          red
+
+#  KEYS for SHARED MEMORY SEGMENTS
+
+# Key for coordinate shared memory
+cidd.coord_key:               61500
+
+# Key for TITAN control shared memory
+cidd.titan_key               61501
+
+# Key for EXPT shared memory
+cidd.expt_key:               51400
+
+# Key for PRDS shared memory
+#cidd.prds_key:               0
+
+# PRDS Related resources
+#  Size of shared memory in K bytes.
+#cidd.prds_shmem_size:        500
+# Commands to run to spawn a product selector 
+#cidd.prds_command:
+
+# PRDS Product rendering related resources
+# Set to 0 to ignore the products time info when rendering products.
+# Set to 1 to skip over products that aren't valid in the temporal domain
+# of the images 
+# Set to 2 to skip over products that aren't valid in the temporal domain
+# specified by product_time_width 
+cidd.product_time_selection: 1
+
+# Allows products only N seconds away from frame time centroid
+cidd.product_time_width:  3600
+
+#  Default width of lines for symbolic products
+cidd.product_line_width: 1
+
+#  Starting Size size of fonts for symbolic products , contour labels and
+# wind barb labels - From above list - Note cross sections use this font size and
+# generally do not adjust the sizes up. (From above list)
+cidd.product_font_size: 8
+
+# Detail thresholds and font adjustment parameters. First implicit threshold is 0.0
+# If the current distance acrossa domain is between the thresholds, then an adjustment is made to the
+# default/selected font  size. This is used to change the size of the fonts
+# automatically as the users zooms in and out. Threshold values are in km across the
+# viewing domain
+cidd.product_detail_threshold1: 200.0
+cidd.product_detail_adjustment1: -2
+#
+cidd.product_detail_threshold2: 800.0
+cidd.product_detail_adjustment2: -4
+#
+cidd.product_detail_threshold3: 1600.0
+cidd.product_detail_adjustment3: -6
+
+# Product Scaling Constant. - Set this constant to determine
+# at what zoom icons and will have a scale factor of 1.0
+# Default = 300. Function = log10(Constant /km_across_screen) + 1.0;
+cidd.scale_constant: 1000.0
+#
+
+</MAIN_PARAMS>
+
+
+<TERRAIN>
+/**********************************************************************
+ * TDRP params for Cterrain_P
+ * Note: Terrain Fields must be on the same projection as the Display
+ **********************************************************************/
+///////////// id_label ////////////////////////////////
+//
+// Label used for legends.
+// Type: string
+//
+
+id_label = "Terrain";
+
+///////////// terrain_url /////////////////////////////
+//
+// Used to located gridded terrain data.
+// Terrain_URL
+//  Note URL is of the form
+//   mdvp::[param_file]//host.dom::dir/dir&field_name.
+// Type: string
+//
+
+terrain_url = "mdvp::static//tempest:0:taiwan/mdv/terrain&Elevation";
+
+///////////// height_scaler ///////////////////////////
+//
+// Conversion from terrain units to local coords.
+// Choose a scaler which converts plane height values.
+// Type: double
+//
+//  Hecto-feet (FL) per meter
+height_scaler = 0.03280834;
+# Convert from feet to hecto-feet (FL)
+#height_scaler = 0.01;
+
+///////////// landuse_url /////////////////////////////
+//
+// Used to located gridded land use data.
+// Land Use URL
+//  Note URL is of the form
+//   mdvp::[param_file]//host.dom::dir/dir&field_name.
+// Type: string
+//
+
+//landuse_url = "mdvp::static//tempest:0:taiwan/mdv/terrain&Elevation";
+landuse_url = "";
+
+ ///////////// landuse_colorscale //////////////////////
+//
+// Color lookup table for Land use.
+// Land Use colorscale file name
+//  Note: CIDD looks in the colorscale dir, then in the current dir for
+//   this file.
+// Type: string
+//
+
+//landuse_colorscale = "terrain.colors";
+landuse_colorscale = "land_sea.colors";
+
+///////////// land_use_render_method //////////////////
+//
+// Land Use rendering style.
+// Use Contours only for continious data like elevation.
+//
+// Type: enum
+// Options:
+//   RENDER_FILLED_CONT, RENDER_RECTANGLES
+//
+//
+land_use_render_method = RENDER_RECTANGLES;
+
+///////////// earth_color1 ////////////////////////////
+//
+// Earth's skin color.
+// Type: string
+//
+earth_color1 = "red4";
+
+
+///////////// earth_color2 ////////////////////////////
+//
+// Earth's core color.
+// Type: string
+//
+earth_color2 = "OrangeRed4";
+</TERRAIN> 
+
+<ROUTE_WINDS>
+/**********************************************************************
+ * TDRP params for Croutes_P
+ **********************************************************************/
+
+//======================================================================
+//
+// Route Winds Parameters.
+//
+//======================================================================
+
+///////////// debug //////////////////////////////////
+//
+//
+debug = DEBUG_OFF;
+
+///////////// font_height /////////////////////////////
+//
+//  Maximum height in Pixels of labels.
+// Type: int
+//
+
+font_height = 14;
+
+///////////// add_waypoints_labels ////////////////////
+//
+// Default state of the add_waypoints_labels.
+// Type: int
+// 0 = off, 1 = on
+
+add_waypoints_labels = 1;
+
+///////////// add_wind_text ///////////////////////////
+//
+// Default state of the add_wind_text labels.
+// Type: int
+// 0 = off, 1 = on
+
+add_wind_text = 0;
+
+///////////// label_style /////////////////////////////
+//
+// Set to REGUALR_INTERVALS or EQUAL_DIVISIONS.
+//
+// Type: enum
+// Options:
+//     REGULAR_INTERVALS
+//     EQUAL_DIVISIONS
+//
+
+label_style = EQUAL_DIVISIONS; 
+
+///////////// label_interval //////////////////////////
+//
+// Distance in km between winds labels.
+// Used if label_style is set to REGUALR_INTERVALS.
+// Type: double
+//
+
+label_interval = 55.6;
+
+///////////// num_route_labels ////////////////////////
+//
+// number of route wind labels to plot along the route.
+// Typically this should be set between 5 and 20.
+// Minimum val: 2
+// Maximum val: 100
+// Type: int
+//
+
+num_route_labels = 10;
+
+///////////// route_track_line_width //////////////////
+//
+// Width in pixels of the route winds track.
+// Minimum val: 1
+// Maximum val: 20
+// Type: int
+//
+
+route_track_line_width = 2;
+ 
+///////////// u_url ///////////////////////////////////
+//
+// U Wind Componet.
+//  URL's take the form  mdvp::[paramfile]//host.dom::dir/dir&fieldname.
+// Type: string
+//
+
+u_url = "mdvp::zoom_mds//tempest:0:taiwan/mdv/mm5&U";
+
+///////////// v_url ///////////////////////////////////
+//
+// v Wind Componet.
+// Type: string
+//
+
+v_url = "mdvp::zoom_mds//tempest:0:taiwan/mdv/mm5&V";
+
+///////////// turb_url ////////////////////////////////
+//
+// Turbulence Index.
+// Type: string
+//
+
+turb_url = "mdvp::d3_d4//tempest:0:taiwan/mdv/mm5&Turb";
+
+///////////// icing_url ///////////////////////////////
+//
+// Icing Index.
+// Type: string
+//
+
+icing_url = "mdvp::d3_d4//tempest:0:taiwan/mdv/mm5&Icing";
+
+///////////// route_paths[] ///////////////////////////////
+//   Route path strings - Format of each string is
+// ROUTE_LABEL NPOINTS  ID_String Lat Lon ID_String LAT Lon ..x
+//
+// ROUTE_LABEL will be used in the menu,
+// NPoints = Number of way points in route
+//   Followed by NPoint triplets of the following:
+// ID_string -> usually a Airport or VOR
+// Lat Lon :   decimal degrees
+//
+// Note: Make sure white space separates the fields!
+//
+
+route_paths = {
+  "A-1 8 "
+  "BULAN 27.0917 124.0000 "
+  "OSTAR 26.3317 123.0000 "
+  "SHARK 25.8333 122.3583 "
+  "ANNNA 25.5717 122.0217 "
+  "APU 25.1767 121.5233 "
+  "HLG 24.6400 120.7833 "
+  "MKG 23.5583 119.6283 "
+  "ELATO 22.3333 117.5000 ",
+
+  "M-750 12 "
+  "MOLKA 26.6583 124.0000 "
+  "MORSU 25.9100 123.0000 "
+  "LEKOS 25.5100 122.4717 "
+  "ROBIN 25.4200 122.2083 "
+  "NOKAS 25.1317 121.9917 "
+  "SANAS 24.8967 121.6917 "
+  "PILOX 24.4150 121.0250 "
+  "ANLOT 23.9417 120.5233 "
+  "TOROX 23.3533 119.9083 "
+  "RENOT 22.5683 118.5117 "
+  "DADON 22.2767 118.0033 "
+  "ENVAR 21.9917 117.5000 ",
+
+  "G-581 7 "
+  "IGURU 23.9500 124.0000 "
+  "TULTO 23.3233 123.0000 "
+  "HCN 21.9283 120.8433 "
+  "PARPA 22.0150 120.1683 "
+  "CYRUS 22.2167 118.5317 "
+  "DADON 22.2767 118.0033 "
+  "ELATO 22.3333 117.5000 ",
+
+  "B-591 9 "
+  "APU 25.1767 121.5233 "
+  "SANAS 24.8967 121.6917 "
+  "TINHO 24.3533 122.0283 "
+  "TITUS 23.8283 121.8517 "
+  "TACLE 22.9933 121.5867 "
+  "GID 22.6733 121.4867 "
+  "TUNNY 22.3600 121.2150 "
+  "HCN 21.9283 120.8433 ",
+
+  "R-583 5 "
+  "BORDO 26.0167 124.0000 "
+  "KIKIT 25.8817 123.5917 "
+  "PABSO 25.6517 122.8750 "
+  "LEKOS 25.5100 122.4717 "
+  "APU 25.1767 121.5233 ",
+
+  "G-86 3 "
+  "HCN 21.9283 120.8433 "
+  "ANDRE 21.7783 120.1683 "
+  "KAPLI 21.1667 117.5000 ",
+
+  "B-576 3 "
+  "SALMI 28.3150 124.0000 "
+  "BERBA 27.0783 123.0000 "
+  "APU 25.1767 121.5233 ",
+
+  "W2 5 "
+  "APU 25.176944 121.522222 "
+  "RONEY 25.830833 121.675833 "
+  "CHOMA 26.051389 121.728056 "
+  "DUMAS 26.140833 121.706667 "
+  "MTS 26.201111 119.968611 ",
+
+  "W4 4 "
+  "APU 25.176944 121.522222 "
+  "HLG 24.640000 120.783333 "
+  "TNN 23.135556 120.206389 "
+  "HCN 21.928056 120.843889 ",
+
+  "W6 5 "
+  "CHINMEN 24.246389 118.349167 "
+  "INDIA 24.001389 119.011944 "
+  "HOTEL 23.683611 119.502222 "
+  "MKG 23.595556 119.637222 "
+  "TNN 23.135556 120.206389 ",
+
+  "MT2 5 "
+  "APU 25.176944 121.522222 "
+  "TONNY 25.422222 121.150000 "
+  "DEFOE 25.802778 120.566111 "
+  "HAPPY 26.053611 120.193333 "
+  "MTS 26.201111 119.968611 ",
+
+  "A577 5 "
+  "TNN 23.135556 120.206389 "
+  "NN 23.124722 120.202222 "
+  "PARPA 22.0325 120.036389 "
+  "ANDRE 21.741111 119.992222 "
+  "KABAM 21 119.88 ",
+ 
+  "N892 3 "
+  "HCN 21.928056 120.843889 "
+  "KW 21.931667 120.838611 "
+  "KABAM 21 119.88 ",
+ 
+  "B348 3 "
+  "HCN 21.928056 120.843889 "
+  "KW 21.931667 120.838611 "
+  "POTIB 21 120.758333 ",
+
+};
+
+</ROUTE_WINDS>

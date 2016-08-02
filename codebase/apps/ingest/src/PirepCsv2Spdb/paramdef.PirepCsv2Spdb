@@ -1,0 +1,283 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.PirepCsv2Spdb
+ *
+ * George McCabe, RAL, NCAR, Boulder, Colorado
+ * Paul Prestopnik
+ *
+ * June 2013
+ *
+ * Based on twnairep2spdb.
+ */
+
+commentdef {
+  p_header = "Program PirepCsv2Spdb";
+  p_text = "This program reads pirep/airep data from ascii input and stores it in spdb data base. You can write the data out in decoded binary format or ascii format. For binary format, the struct pirep_t in include/rapformats/pirep.h will be used.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_descr = "Process instance for procmap.";
+  p_help = "This program uses this instance when registering with the process mapper.";
+  p_default = "test";
+} instance;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST, STDIN
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode: (REALTIME, ARCHIVE, FILELIST, or STDIN)";
+  p_help = "Realtime mode - waits for new data; archive mode runs on single file";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default = "raw/pireps";
+  p_descr = "Path for directory to the input files.";
+  p_help = "If possible, the file names should include date/time information. Acceptable options are: yyyymmdd/hhmmss*, *yyyymmdd?hhmmss*, *yyyymmddhhmmss*, *yyyymmddhhmm*, *yyyymddhh*, *yyyymmdd?hhmm, *yyyymmdd?hh, *yyyymmdd*";
+} input_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DECODERS";
+};
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string {
+  p_descr = "Spdb URL for decoded pirep data.";
+  p_help = "The name of the URL which will be used as the destination for the SPDB data. If the dir does not start with / or ., it is relative to $DATA_DIR.  Leave an empty string to not write decoded PIREPs to SPDB.";
+  p_default = "spdbp:://localhost::spdb/pirep";
+} decoded_spdb_url;
+
+paramdef string {
+  p_descr = "Spdb URL for ASCII pirep data.";
+  p_help = "The name of the URL which will be used as the destination for the ASCII SPDB data. If the dir does not start with / or ., it is relative to $DATA_DIR.  Leave an empty string to not write ASCII PIREPs to SPDB.";
+  p_default = "spdbp:://localhost::spdb/airep";
+} ascii_spdb_url;
+
+typedef enum
+{
+  COMPRESSION_NONE,
+  COMPRESSION_GZIP,
+  COMPRESSION_BZIP2
+} compression_t;
+
+paramdef enum compression_t {
+  p_default = COMPRESSION_NONE;
+  p_descr = "Option to compress the chunks in the SPDB output.";
+  p_help = "Set desired output compression. Compression should only be done for data in which the individual chunks are large.";
+} output_compression;
+
+paramdef int {
+  p_descr = "Data expire period - seconds";
+  p_help = "In the SPDB data base, the data is set as expired after this period.";
+  p_default = 21600;
+} expire_secs;
+
+typedef struct {
+  string time_n;
+  int time_i;
+  string lat_n;
+  int lat_i;
+  string lon_n;
+  int lon_i;
+  string altitude_n;
+  int altitude_i;
+  string raw_n;
+  int raw_i;
+  string aircraft_n;
+  int aircraft_i;
+  string type_n;
+  int type_i;
+  string ice_type_n;
+  int ice_type_i;
+  string ice_int_n;
+  int ice_int_i;
+  string ice_top_n;
+  int ice_top_i;
+  string ice_base_n;
+  int ice_base_i;
+  string ice_type2_n;
+  int ice_type2_i;
+  string ice_int2_n;
+  int ice_int2_i;
+  string ice_top2_n;
+  int ice_top2_i;
+  string ice_base2_n;
+  int ice_base2_i;
+  string turb_type_n;
+  int turb_type_i;
+  string turb_int_n;
+  int turb_int_i;
+  string turb_freq_n;
+  int turb_freq_i;
+  string turb_top_n;
+  int turb_top_i;
+  string turb_base_n;
+  int turb_base_i;
+  string turb_type2_n;
+  int turb_type2_i;
+  string turb_int2_n;
+  int turb_int2_i;
+  string turb_freq2_n;
+  int turb_freq2_i;
+  string turb_top2_n;
+  int turb_top2_i;
+  string turb_base2_n;
+  int turb_base2_i;
+  string sky_cover_n;
+  int sky_cover_i;
+  string cloud_top_n;
+  int cloud_top_i;
+  string cloud_base_n;
+  int cloud_base_i;
+  string sky_cover2_n;
+  int sky_cover2_i;
+  string cloud_top2_n;
+  int cloud_top2_i;
+  string cloud_base2_n;
+  int cloud_base2_i;
+  string temp_n;
+  int temp_i;
+  string wind_dir_n;
+  int wind_dir_i;
+  string wind_speed_n;
+  int wind_speed_i;
+  string visibility_n;
+  int visibility_i;
+} field_names_t;
+
+
+paramdef struct field_names_t {
+  p_descr = "Names of CSV fields";
+  p_help = "";
+  p_default = {"time", 0,
+               "latitude(decimal deg)", 0, 
+               "longitude(decimal deg)", 0, 
+               "altitude/flightLevel(100 ft MSL)", 0, 
+               "rawObservation", 0, 
+               "aircraftType", 0, 
+               "reportType", 0, 
+               "icingType1", 0, 
+               "icingIntensity1", 0, 
+               "icingTop1(100 ft MSL)", 0, 
+               "icingBase1(100 ft MSL)", 0, 
+               "icingType2", 0, 
+               "icingIntensity2", 0, 
+               "icingTop2(100 ft MSL)", 0, 
+               "icingBase2(100 ft MSL)", 0, 
+               "turbulenceType1", 0, 
+               "turbulenceIntensity1", 0, 
+               "turbulenceFrequency1", 0, 
+               "turbulenceTop1(100 ft MSL)", 0, 
+               "turbulenceBase1(100 ft MSL)", 0, 
+               "turbulenceType2", 0, 
+               "turbulenceIntensity2", 0, 
+               "turbulenceFrequency2", 0, 
+               "turbulenceTop2(100 ft MSL)", 0, 
+               "turbulenceBase2(100 ft MSL)", 0, 
+               "cloudCoverage1(100 ft MSL)", 0, 
+               "cloudTop1(100 ft MSL)", 0, 
+               "cloudBase1(100 ft MSL)", 0, 
+               "cloudCoverage2(100 ft MSL)", 0, 
+               "cloudTop2(100 ft MSL)", 0, 
+               "cloudBase2(100 ft MSL)", 0, 
+               "airTemperature(C)", 0, 
+               "windDirection", 0, 
+               "windSpeed(kts)", 0, 
+               "visibility(mi)", 0
+              };
+} field_names;
+
+
+typedef struct {
+  float scale;
+  float bias;
+
+} unit_conversion_info_t;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The altitude fields are first multiplied by the scale and then the result is added to the bias";
+  p_help = "This is used for altitude, ice/turb/cloud top1/base1/top2/base2";
+  p_default = {100,0};
+} altitude_conversions;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The temperature field is first multiplied by the scale and the result is added to the bias";
+  p_help = "";
+  p_default = {1,0};
+} temperature_conversion;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The wind speed field is first multiplied by the scale and the result is added to the bias";
+  p_help = "";
+  p_default = {1,0};
+} wind_speed_conversion;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The visibility field is first multiplied by the scale and the result is added to the bias";
+  p_help = "";
+  p_default = {1,0};
+} visibility_conversion;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to true to generate icing base and top from other data.";
+  p_help = "";
+} assumptions;

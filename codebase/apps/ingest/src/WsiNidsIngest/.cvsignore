@@ -1,0 +1,6 @@
+.deps
+WsiNidsIngest
+__makefile.template
+makefile
+makefile.am
+makefile.in

@@ -1,0 +1,6 @@
+.deps
+StormInit2Field
+__makefile.template
+makefile
+makefile.am
+makefile.in

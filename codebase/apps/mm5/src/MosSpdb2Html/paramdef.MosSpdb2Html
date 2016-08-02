@@ -1,0 +1,283 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MosSpdb2Html reads an SPDB database of METAR staiton\n"
+	     "reports and produces HTML output. The program triggers\n"
+	     "at regular intervals and uses the LookBack and LookAhead\n"
+	     "parameters to get a temporal window to process data in.\n\n"
+	     "Data are written to an output directory where they are\n"
+             "overwritten as new data become available, and to an\n"
+             "archive directory where the file name have both the valid\n"
+	     "time and the archive time, and so are not overwritten.\n\n"
+             "Niles Oien, February 2001";
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "spdbp:://host.domain:[port]:dir/dir";
+  p_help = "This parameter is also used in the generation of the\n"
+           "total MOS tables."; 
+  p_default = {"spdbp:://localhost::spdb/ExtractedFromModel"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output directory";
+  p_help = "Forecast HTML files are written here."; 
+  p_default = "$(RAP_DATA_DIR)/web/mos/html";
+} OutDir;
+
+paramdef string {
+  p_descr = "Archive directory";
+  p_help = "Archived HTML files are written here."; 
+  p_default = "$(RAP_DATA_DIR)/web/mos/archive";
+} ArchiveDir;
+  
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique.";
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;        
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Look back time, seconds.";
+  p_help = "Program will look back by this time from trigger time.";
+} LookBack;        
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Look ahead time, seconds.";
+  p_help = "Program will look ahead by this time from trigger time.";
+} LookAhead;        
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Trigger interval, seconds.";
+  p_help = "Program will trigger regularly at this interval.";
+} TriggerInterval;        
+
+paramdef string {
+  p_default = "Waiting for data";
+  p_descr = "PMU registration string.";
+  p_help = "While waiting for data the program registers with this string.";
+} PMU_String;        
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug flag.";
+  p_help = "Set for debug output.";
+} Debug;        
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Verbose debug flag.";
+  p_help = "Set for more verbose output.";
+} Verbose;        
+
+paramdef float {
+  p_default = { 0, 10000 };
+  p_descr = "Replacement values for Ceiling, Km";
+  p_help = "If a ceiling value is in this list, then the actual value\n"
+           "is not printed out to the web page - instead, the string\n"
+           "from the CeilingReplaceString array is used. Thus, values\n"
+           "that have special meaning (like missing or unlimited visibility\n"
+           "values) are not printed to the web.";
+} CeilingReplaceValues[];        
+
+paramdef string {
+  p_default = { "UNKNOWN", "UNLIMITED" };
+  p_descr = "Replacement strings for CeilingReplaceValues - the\n"
+            "CeilingReplaceValues and CeilingReplaceStrings arrays\n"
+            "should be the same length.";
+  p_help = "These strings are used to replace special values for ceiling.";
+} CeilingReplaceStrings[];   
+
+
+paramdef float {
+  p_default = { 0, 10000 };
+  p_descr = "Replacement values for Visibility, Km";
+  p_help = "If a Visibility value is in this list, then the actual value\n"
+           "is not printed out to the web page - instead, the string\n"
+           "from the VisibilityReplaceString array is used. Thus, values\n"
+           "that have special meaning (like missing or unlimited visibility\n"
+           "values) are not printed to the web.";
+} VisibilityReplaceValues[];        
+
+paramdef string {
+  p_default = { "UNKNOWN", "UNLIMITED" };
+  p_descr = "Replacement strings for VisibilityReplaceValues - the\n"
+            "VisibilityReplaceValues and VisibilityReplaceStrings arrays\n"
+            "should be the same length.";
+  p_help = "These strings are used to replace special values for Visibility.";
+} VisibilityReplaceStrings[];   
+
+
+paramdef float {
+  p_default = { 10.0 };
+  p_descr = "Max value for Visibility, Km.";
+  p_help = "Similar to MaxCeiling parameter, see below.";
+} MaxVisibility;        
+
+paramdef float {
+  p_default = { 0.25 };
+  p_descr = "Min value for Visibility, Km.";
+  p_help = "If vis is less than this, it is simply described\n"
+            "as being less than this rather than giving a\n"
+            "numerical value. Similar to MaxVisibility";
+} MinVisibility;        
+
+
+paramdef float {
+  p_default = { 10000.0 };
+  p_descr = "Max value for Ceiling, feet.";
+  p_help = "Values greater than this are described as being greater than this\n"
+	"as opposed to being listed directly, ie. if this is set to 10000.0\n"
+	"feet and the actual ceiling is 11000 feet then the display shows\n"
+        "GREATER THAN 10000 feet as opposed to 11000 feet.";
+} MaxCeiling;        
+
+
+paramdef float {
+  p_default = { 2.5 };
+  p_descr = "Calm wind threshold, knots.";
+  p_help = "If the wind speed is less than this, the display simply describes\n"
+           "conditions as calm. This parameter is used for the generation\n"
+           "of the total output table as well.";
+} CalmWindThreshold;        
+
+
+commentdef {
+  p_header = " QUALITY CONTROL PARAMETERS ";
+}
+
+typedef struct {
+  float Min;
+  float Max;
+} MinMax_t;
+
+paramdef struct MinMax_t {
+  p_default = { 0.0, 100.0 };
+  p_descr = "Accepted range for relative humidity, percent.";
+  p_help = "If the values are outside this range then they are\n"
+           "marked as missing. Note that the relative humidity\n"
+           "is not now displayed, but it is used in the computation of the\n"
+           "dew point, which is displayed.";
+} RelHumRange;        
+
+paramdef struct MinMax_t {
+  p_default = { 950.0, 1050.0 };
+  p_descr = "Accepted range for pressure, hPa.";
+  p_help = "If the values are outside this range then they are marked as missing.";
+} PressureRange;        
+
+paramdef struct MinMax_t {
+  p_default = { -20.0, 30.0 };
+  p_descr = "Accepted range for temperature, degrees celcius.";
+  p_help = "If the values are outside this range then they are marked as missing.";
+} TempRange;        
+
+paramdef float {
+  p_default = 250.0;
+  p_descr = "Maximum wind speed, knots.";
+  p_help = "If the wind speed exceeds this value it is marked as missing.";
+} MaxWindSpeed;
+
+commentdef {
+  p_header = "Parameters pertaining to the Total Tables which\n"
+             "show the trend in the weather. Only generated in REALTIME mode.";
+}
+
+paramdef string {
+  p_descr = "URL to read actual station reports from.";
+  p_help = "The form the first half of the output page.\n"
+           "The second half is formed by the forecasts."; 
+  p_default = {"spdbp:://localhost::spdb/ExtractedFromModel"};
+} MetarUrl;
+ 
+
+paramdef int {
+  p_default = 14400;
+  p_descr = "Time to look back from trigger time for METAR data, seconds.";
+  p_help = "Default is four hours.";
+} TableLookBack;
+
+paramdef int {
+  p_default = 43200;
+  p_descr = "Time to look ahead from trigger time for forecast data, seconds.";
+  p_help = "Default is twelve hours.";
+} TableLookAhead;
+
+paramdef int {
+  p_default = 86400;
+  p_descr = "Maximum lead time, in seconds, for a forecast to be considered\n"
+            "valid for the table. Only has effect if MinimumLeadTimeOnly is false.";
+  p_help = "Default is twenty four hours.";
+} TableMaxLeadTime;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "If set, only the most recent lead time is\n"
+            "displayed for each model run.";
+  p_help = "Typically set to TRUE except for debugging.";
+} MinimumLeadTimeOnly;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set, the actual and METAR times will attempt\n"
+            "to cover the same period in time in the table.";
+  p_help = "Typically set to FALSE except for debugging.";
+} Overlap;
+
+paramdef string {
+  p_descr = "Output directory where Total Tables are written.";
+  p_help = "Data are written under a YYYYMMDD directory structure."; 
+  p_default = "$(RAP_DATA_DIR)/www_content/MosTrendTable";
+} TableOutDir;
+ 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to copy files to archive dir.";
+  p_help = "Archive files are writtent to subdirectories which preserve the generate time. Normal output uses valid time, so later forecasts will overwrite earlier forecasts.";
+} CopyToArchiveDir;        
+
+paramdef string {
+  p_descr = "Output directory where Total Tables are written for archival.";
+  p_help = "Data are written under a YYYYMMDD directory structure."; 
+  p_default = "$(RAP_DATA_DIR)/www_content/archive/MosTrendTable";
+} TableArchiveDir;
+ 
+
+
+
+
+
+

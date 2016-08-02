@@ -1,0 +1,118 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for GtsSockIngest
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 2003
+ */
+
+commentdef {
+  p_header = "GtsSockIngest reads family of services data from a GTS socket and writes the data to files at regular intervals";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "SERIAL DATA INPUT.";
+}
+
+paramdef int {
+  p_default = 12000;
+  p_descr = "Number of port to listen on.";
+  p_help = "This GTS server will connect to this port.";
+} input_port;
+
+commentdef {
+  p_header = "DATA FILE OUTPUT.";
+}
+
+typedef enum {
+  EOM_CHECK_NONE,
+  EOM_CHECK_NNNN,
+  EOM_CHECK_CTRLC,
+  EOM_CHECK_CTRLKC,
+  EOM_CHECK_EQUALS
+} end_of_message_check_t;
+
+paramdef enum end_of_message_check_t
+{
+  p_default = EOM_CHECK_CTRLC;
+  p_descr = "Option to check for end of message before closing an output file.";
+  p_help = "Some of the incoming data streams have special characters for indicating the end of a message. The following EOM conditions are used: (a) EOM_CHECK_NNNN: the 4 characters NNNN; (b) EOM_CHECK_CTRLC: Ctrl-C; (c) EOM_CHECK_CTRLKC: Ctrl-K Ctrl-C; (d) EOM_CHECK_EQUALS: an equals-sign followed by a line-feed.";
+} end_of_message_check;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Interval at which output files are created (secs).";
+  p_help = "The program reads the incoming data and stores it in a temporary file. At regular intervals, the file is renamed - see output_dir_path.";
+} output_interval;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flag for forcing the file output if the input stream in stalled.";
+  p_help = "If TRUE, on output file will be written at the appropriate time, even if no data is coming in. If FALSE, the output file will only be written when message data indicates that an appropriate end-of-message condition has been met.";
+} force_output_if_stalled;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag for discarding 0-length files.";
+  p_help = "If TRUE, output files will be ignored if they are empty. If FALSE, files will be output even if empty.";
+} discard_zero_length_files;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Name of output directory.";
+  p_help =
+    "The output files will be stored in this level directory.\n"
+    "The file path is computed as follows:\n"
+    "\t output_dir_path/yyyymmdd/hhmmss.ext\n";
+} output_dir_path;
+
+paramdef string {
+  p_default = "gts";
+  p_descr = "Extension for output file.";
+  p_help = "See output_dir_path.";
+} output_file_ext;

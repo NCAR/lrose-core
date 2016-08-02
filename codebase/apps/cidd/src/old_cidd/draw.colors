@@ -1,0 +1,36 @@
+# This file contains a list of colors to be used for drawing products, etc
+#
+# 0. Product overlay color BLACK
+black
+# 1. Product overlay color RED
+red
+# 2. Product overlay color GREEN
+green
+# 3. Product overlay color BLUE
+blue
+# 4. Product overlay color YELLOW
+yellow
+# 5. Product overlay color CYAN
+cyan
+# 6. Product overlay color MAGENTA
+magenta
+# 7. Product overlay color WHITE
+white
+# 8. Background for display windows
+Black
+# 9. Forground colors for borders, text in labels, etc
+White
+# 10. Color to draw Range rings, azmith/elevation lines, county lines etc
+Gray
+# 11. RHI/CAP Cross reference lines	
+Yellow
+# 12. Wind set 1
+Yellow
+# 13. Wind set 2
+Green
+# 14. Wind set 3
+Gold
+# 15. Contours
+White
+# 16. Color for user drawings via expt
+Magenta

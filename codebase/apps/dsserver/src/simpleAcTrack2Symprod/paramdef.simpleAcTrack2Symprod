@@ -1,0 +1,300 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for simpleAcTrack2Symprod
+// 
+// Niles Oien, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// May 2004
+//
+
+commentdef
+{
+  p_header = "As the name suggests, this is a simplified version of\n"
+	"AcTrack2Symprod. Niles Oien.";
+}
+
+
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef
+{
+  p_header = "DEBUGGING";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { DEBUG_OFF };
+} debug;
+
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string
+{
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean
+{
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef
+{
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int
+{
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5477;
+} port;
+  
+paramdef int
+{
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = -1;
+} max_clients;
+
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef
+{
+  p_header = "TEXT RENDERING PARAMETERS";
+};
+
+paramdef boolean
+{	
+  p_descr = "Option to label points with callsign.";
+
+  p_default = FALSE;
+} do_text_labelling;
+
+paramdef boolean
+{	
+  p_descr = "Option to label points with time.";
+
+  p_default = FALSE;
+} do_time_labelling;
+
+
+paramdef string
+{
+  p_descr = "Text color. Also determines color of cross\n"
+	 "icons.";
+  p_default = "red";
+} text_color;
+
+paramdef string
+{
+  p_descr = "Text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} text_background_color;
+
+paramdef string
+{
+  p_descr = "Font name.";
+  p_default = "";
+} font_name;
+
+typedef struct
+{
+  long x;
+  long y;
+} text_offset_t;
+
+paramdef struct text_offset_t
+{
+  p_descr = "Pixel offset values for starting the text";
+  p_default = { 0, 0 };
+} text_offset;
+
+typedef enum
+{
+  VERT_ALIGN_TOP,
+  VERT_ALIGN_CENTER,
+  VERT_ALIGN_BOTTOM
+} vert_align_t;
+
+paramdef enum vert_align_t
+{
+  p_descr = "Vertical alignment for the text";
+  p_default = VERT_ALIGN_CENTER;
+} text_vert_align;
+
+typedef enum
+{
+  HORIZ_ALIGN_LEFT,
+  HORIZ_ALIGN_CENTER,
+  HORIZ_ALIGN_RIGHT
+} horiz_align_t;
+
+paramdef enum horiz_align_t
+{
+  p_descr = "Horizontal alignment for the text";
+  p_default = HORIZ_ALIGN_CENTER;
+} text_horiz_align;
+
+paramdef long
+{
+  p_descr = "Size of font to use for text";
+  p_default = 0;
+} text_font_size;
+
+typedef enum
+{
+  TEXT_NORM,
+  TEXT_BOLD,
+  TEXT_ITALICS,
+  TEXT_SUBSCRIPT,
+  TEXT_SUPERSCRIPT,
+  TEXT_UNDERLINE,
+  TEXT_STRIKETHROUGH
+} font_style_t;
+
+paramdef enum font_style_t
+{
+  p_descr = "Font style for the text";
+  p_default = TEXT_NORM;
+} text_font_style;
+
+
+
+paramdef int
+{
+  p_descr = "Line thickness of icon lines used in drawing crosses.";
+  p_help = "Default should be fine.";
+  p_default = 1;
+} cross_line_width;
+
+paramdef int
+{
+  p_descr = "Length of each arm of the cross in pixels.";
+  p_help = "Default should be OK.";
+  p_default = 4;
+} cross_icon_size;
+
+paramdef boolean
+{
+  p_descr = "Option to color by the callsign.";
+  p_help = "Default is not to do this.";
+  p_default = FALSE;
+} color_by_callsign;
+
+typedef struct {
+	string callsignSubString;
+	string color;
+} callsign_color_t;
+
+paramdef struct callsign_color_t {
+
+  p_descr = "List of callsigns and corresponding colors. Relevant only\n"
+	"if color_by_callsign is TRUE.";
+  p_help = "If the start of the callsign matches the specified\n"
+	"callsignSubString, then the specified color will be\n"
+	"used - that is, if the callsignSubString is UA and\n"
+	"the color is cyan then all callsigns starting with UA will\n"
+	"be colored cyan. If no match is found then the default\n"
+	"color is the text_color.";
+
+  p_default = {
+	{ "UA", "cyan" },
+	{ "GA", "green" }
+  };
+
+} callsign_colors[];
+
+
+
+
+paramdef boolean
+{
+  p_descr = "Option to do temporal pruning on data.";
+  p_help = "Default is not to do this.";
+  p_default = FALSE;
+} do_temporal_pruning;
+
+
+typedef struct {
+	int temporalRound;
+	int temporalTolerance;
+} temporal_pruning_t;
+
+paramdef struct temporal_pruning_t {
+
+  p_descr = "Settings for temporal pruning. Relevant only\n"
+	"if do_temporal_pruning is TRUE.";
+  p_help = "Setting temporalRound to 300 and temporalTolerance to 30\n"
+	"translates to only taking those points which occur at\n"
+	"five minute intervals (ie. 13:05, 13:10, 13:15...) plus\n"
+	"or minus 30 seconds.";
+
+  p_default = { 300, 30 };
+
+} temporal_pruning;

@@ -1,0 +1,62 @@
+/*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+ ** Copyright UCAR (c) 1992 - 1997
+ ** University Corporation for Atmospheric Research(UCAR)
+ ** National Center for Atmospheric Research(NCAR)
+ ** Research Applications Program(RAP)
+ ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
+ ** All rights reserved. Licenced use only.
+ ** Do not copy or distribute without authorization
+ ** 1997/9/26 13:58:59
+ *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
+/*********************************************************
+ * parameter definitions for GenStormIdentList
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 1997
+ *	
+ */
+
+commentdef {
+  p_text = "GenStormIdentList generates a list suitable for inclusion "
+    "into a script for running StormIdent in archive mode.";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;	
+  p_descr = "Debug option";	
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef int {
+  p_default = 0;
+  p_min = 0;
+  p_max = 3;
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "storm_ident.params";
+  p_descr = "Params file path for StormIdent.";
+  p_help = "This path is inserted into the script for running StormIdent.";
+} storm_ident_params_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to output list for storm_ident instead of StormIdent.";
+  p_help = "Included for backward compatibility.";
+} make_old_list;
+
+

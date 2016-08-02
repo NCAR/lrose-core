@@ -1,0 +1,446 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for PrecipAccum
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 1998
+ * 
+ * PrecipAccum accumulates precip data from MDV files containing
+ * radar reflectivity data.
+ */
+
+commentdef {
+  p_text = "PrecipAccum calculates accumulated precipitation depth from radar files in MDV format. The 2-D precipitation fields are written out to MDV files.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+  p_text = "Modes and trigger mechanism.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive, and realtime. In realtime mode, the analysis is performed for each volume scan as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+
+typedef enum {
+  TIME_TRIGGER, FILE_TRIGGER
+} trigger_t;
+
+paramdef enum trigger_t {
+  p_default = TIME_TRIGGER;
+  p_descr = "Trigger mechanism. REALTIME mode only.";
+  p_help = "TIME_TRIGGER: the program is triggered at constant time intervals - see time_trigger_interval. FILE_TRIGGER: the program watches the first input_dir and triggers based on data in that directory.";
+} trigger;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Interval for TIME_TRIGGER - secs.";
+  p_help = "For TIME_TRIGGER, this is the interval between trigger events. In REALTIME mode, a time trigger always occurs on the hour, and at constant intervals thereafter. In ARCHIVE mode the trigger starts at start_time and at constant intervals thereafter.";
+} time_trigger_interval;
+
+paramdef int {
+  p_min = 0;
+  p_default = 600;
+  p_descr = "Max time diff for searching for files relative to the trigger time - secs.";
+  p_help = "When matching files up with the trigger time, the difference between the trigger time and file time must be less than this margin. This value is also used as the max age of the latest data info file when in REALTIME mode with FILE_TRIGGER.";
+} trigger_time_margin;
+
+commentdef {
+  p_header = "INPUT DATA.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Directory for input radar data.";
+  p_help = "Input data is in MDV format, and must contain a reflectivity field. The reflectivity data is used for computing the precip rate.";
+} input_rdata_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check that the input grid geometry does not change.";
+  p_help = "If this is TRUE, the input grid geometry is checked. If it changes, the accumulation routine will return an error.";
+} check_input_geom;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of dBZ field in input MDV files.";
+  p_help = "If empty, the dbz_field parameter is used instead.";
+} dbz_field_name;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "dBZ field position in input MDV files.";
+  p_help = "Position of reflectivity (dBZ) data in the radar volumes.";
+} dbz_field;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "The input data is precip rate (mm/hr) instead of dBZ.";
+  p_help = "If TRUE, the input data has already been converted to precip rate in mm/hr. In this case, the data in the 'precip_field_name' field is interpreted as precip rate instead of DBZ. The following parameters are ignored: composite_min_altitude, composite_max_altitude, low_dbz_threshold, hail_dbz_threshold, zr";
+} input_is_rate;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "The input data is precip depth (mm) instead of dBZ.";
+  p_help = "If TRUE, the input data has already been converted to precip. In this case, the data in the 'precip_field_name' field is accumulated without any translation. The following parameters are ignored: composite_min_altitude, composite_max_altitude, low_dbz_threshold, hail_dbz_threshold, zr";
+} input_is_precip;
+
+paramdef string {
+  p_default = "precip";
+  p_descr = "Name of precip field in input MDV files.";
+  p_help = "Used if 'input_is_precip' is true.";
+} precip_field_name;
+
+commentdef {
+  p_header = "ACCUMULATION METHOD.";
+}
+
+typedef enum {
+  RUNNING_ACCUM, 
+  ACCUM_FROM_TIME_OF_DAY, 
+  TOTAL_ACCUM, 
+  SINGLE_FILE, 
+  SINGLE_FILE_FORECAST, 
+  CLIMO_ACCUM
+} accum_method_t;
+
+paramdef enum accum_method_t {
+  p_default = RUNNING_ACCUM;
+  p_descr = "Accumulation method.";
+  p_help = "Two methods are available: "
+  "RUNNING_ACCUM: preform a running accumulation over a given period "
+  "prior to the trigger time.\n "
+  "ACCUM_FROM_TIME_OF_DAY: perform an accumulation from a given time of "
+  "day until the trigger time. When the selected time of day is reached, "
+  "the accumulation starts again at zero. The time of day is stored in "
+  "an array, so that multiple restarts may be set for each day.\n"
+  "TOTAL_ACCUM: accumulate for the entire period, output result at the "
+  "end of the period. ARCHIVE mode only.\n";
+  "CLIMO_ACCUM: accumulate for specified periods of the year. See CLIMATOLOGY."
+  "SINGLE_FILE: accumulate precip for each file. FILE_TRIGGER only"
+} accum_method;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 0;
+  p_descr = "Accumulation duration (secs).";
+  p_help = "For RUNNING ACCUM method only. This is the duration of the "
+    "period over which the accumulation is computed.";
+} running_duration;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to force the use of elapsed time.";
+  p_help = "PrecipAccum usually adjusts the precip amount based on the observed times from the data files. However, sometimes these times are not correctly placed in the files. Therefore we may need to override and use elapsed time instead.";
+} use_elapsed_time;
+
+typedef struct {
+  int hour;
+  int min;
+  int sec;
+} restart_time_of_day_t;
+
+paramdef struct restart_time_of_day_t {
+  p_default = {{0, 0, 0}};
+  p_descr = "The times in the day (UCT/GMT) at which accumulation "
+  "restart occurs.";
+  p_help = "For ACCUM_FROM_TIME_OF_DAY method only. The program cycles "
+  "through the times of day, zeroing out the accumulation at each "
+  "specified time.";
+} restart_time_of_day[];
+
+commentdef {
+  p_header = "CLIMATOLOGY";
+  p_help = "Compute accumulation for given times of year. The user specifies the start month/day and end month/day, as well as the number of seasons. The global start and end times are specifed as for TOTAL_ACCUM, ";
+}
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Start month for climotology.";	
+} climo_start_month;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Start day for climotology.";	
+} climo_start_day;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "End month for climotology.";	
+} climo_end_month;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "End day for climotology.";	
+} climo_end_day;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to normalize the total accumulation by the number of seasons.";
+  p_help = "In CLIMATOLOGY mode, divide the total by the number of seasons.";
+} normalize_by_number_of_seasons;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Number of seasons for climatology.";	
+} climo_n_seasons;
+
+commentdef {
+  p_header = "DATA VOLUME DURATION.";
+  p_text = "By default, the volume duration is computed by taking the difference between the start and end times in the MDV file header. This behavior may be modified by the parameters below.";
+}
+
+paramdef int  {
+  p_default = 1800;
+  p_descr = "Maximum allowed volume duration";
+  p_help = "When taking the difference between start and end times in MDV file headers, if that difference exceeds this value, the default volume duration is instead set to the volume_duration parameter value - see below.";
+} max_duration_seconds;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute vol duration by the spacing of the data in time.";
+  p_help = "If TRUE, the duration for each volume is computed as the time difference between the current volume and the previous volume. This option takes precedence over 'override_volume_duration' - see below.";
+} compute_volume_duration_from_data_times;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Specify the max computed volume duration - secs.";	
+  p_help = "Used in conjunction with 'compute_volume_duration_from_data_times'. If the computed volume duration exceeds this, we revert to the default behavior, i.e. computing it from the start and end times in the volume.";
+} max_computed_volume_duration;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override volume duration in input MDV files.";
+  p_help = "If TRUE, the duration for each volume is set to the parameter volume_duration. This parameter is overridden by 'compute_volume_duration_from_data_times'.";
+} override_volume_duration;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Specified volume duration - secs.";	
+  p_help = "If override_volume_duration is TRUE, this value is used instead of computing the volume duraiton from the MDV file header.";
+} volume_duration;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to adjust the precip accum for the expected total duration.";
+  p_help = "If TRUE, the computed accumulation is adjusted for the total expected duration. This corrects for the problem of incorrect volume duration in the file headers, or missing data. This correction is not done if either 'override_volume_duration' or 'compute_volume_duration_from_data_times' is TRUE.";
+} adjust_for_expected_total_duration;
+
+commentdef {
+  p_header = "PRECIP ESTIMATION.";
+}
+
+typedef enum {
+  VERT_MAX, VERT_MEAN_Z, VERT_MEAN_DBZ
+} vert_method_t;
+
+paramdef enum vert_method_t {
+  p_default = VERT_MAX;
+  p_descr = "Method for computing the dbz value from the vertical column data.";
+  p_help = "All vert methods apply to the layers between (and including) composite_min_altitude and composite_max_altitude. For VERT_MAX, the max reflecivity in the layers is used. To use a single layer, set the min and max altitudes to the same value. For VERT_MEAN_Z, the mean Z value for the layers is computed, and converted into dBZ. For VERT_MEAN_DBZ, the mean of the dBZ values in the layers is computed. NOTE: these methods do NOT apply if input_is_precip is true.";
+} vert_method;
+
+paramdef float {
+  p_default = -1.0;
+  p_descr = "Min altitude CAPPI used in composite (km).";	
+  p_help = "All precip estimates are computed from composite reflectivity, "
+    "i.e. the max reflectivity over a given point between two height limits. "
+    "This is the altitude of lower CAPPI for the composite. "
+    "If you want to use reflectivity at a single height only, set this "
+    "equal to composite_max_altitude.";
+} composite_min_altitude;
+
+paramdef float {
+  p_default = 25.0;
+  p_descr = "Max altitude CAPPI used in composite (km).";	
+  p_help = "All precip estimates are computed from composite reflectivity, "
+    "i.e. the max reflectivity over a given point between two height limits. "
+    "This is the altitude of upper CAPPI for the composite. "
+    "If you want to use reflectivity at a single height only, set this "
+    "equal to composite_min_altitude.";
+} composite_max_altitude;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to contrain precip depth to a max value.";
+  p_help = "If set, the precip depth at any point will be constrained to max_precip_depth. The reason to do this is to prevent certain points, normally ground clutter, from causing large apparent precip depths, thereby losing precision for the lower depths.";
+} set_max_precip_depth;
+
+paramdef float {
+  p_default = 1000.0;
+  p_descr = "Max precip depth (mm) if set_max_precip_depth is TRUE.";	
+  p_help = "See set_max_precip_depth.";
+} max_precip_depth;
+
+paramdef float {
+  p_default = 10.0;
+  p_min = -40.0;
+  p_max = 90.0;
+  p_descr = "Low reflectivity threshold (dBZ).";
+  p_help = "Reflectivity below this threshold is ignored in "
+    "making the computations. This prevents clear air returns from "
+    "creating areas of low precipitation.";
+} low_dbz_threshold;
+
+paramdef float {
+  p_default = 53.0;
+  p_min = 40.0;
+  p_max = 90.0;
+  p_descr = "Hail reflectivity threshold (dBZ).";
+  p_help = "The reflectivity threshold between rain and hail. "
+    "dBZ values above this threshold are truncated to the threshold prior "
+    "to the computation of precipitation rate.";
+} hail_dbz_threshold;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use ZR from SPDB data base.";
+  p_help = "If set, the Z-R parameters are obtained from the closest "
+    "entry in the ZR data base. This option is not yet implemented.";
+} get_zr_from_database;
+
+paramdef string {
+  p_default = "zr";
+  p_descr = "URL for ZR SPDB data.";
+  p_help = "The ZR data is obtained from a server at this URL.";
+} zr_spdb_url;
+
+typedef struct {
+  float coeff;
+  float expon;
+} zr_t;
+
+paramdef struct zr_t {
+  p_default = {200.0, 1.6};
+  p_descr = "ZR function parameters.";
+  p_help = "These are used if the ZR function is considered constant "
+  "and is not obtained from the data base.";
+} zr;
+
+commentdef {
+  p_header = "FILE LABEL DETAILS";
+}
+
+paramdef string {
+  p_default = "Precipitation accumulation.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "Computed by applying ZR function to dBZ data and integrating.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set missing data values to 0.";
+  p_help = "If set, any point in the grid with a missing data value will be set to zero.";
+} set_missing_to_zero;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to generate additional MDV field for precip rate.";
+  p_help = "If set, the precip rate is computed and added to the MDV output file.";
+} generate_rate_grid;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to generate additional MDV field for max_dbz.";
+  p_help = "If set, the max_dbz is computed in addition to the precip. This field appears in the output MDV file.";
+} generate_max_dbz_grid;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to generate additional MDV field for max_vil.";
+  p_help = "If set, the max_vil is computed in addition to the precip. This field appears in the output MDV file.";
+} generate_max_vil_grid;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/mdv/precip_accum";
+  p_descr = "Output directory.";
+  p_help = "The precipitation accumulation data is output to this directory in MDV format.";
+} output_precip_dir;
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to true to write as forecast data (g_HHMMSS/f_00000000.mdv\n "
+            "Otherwise, output will just be written to a day dir.\n ";
+  p_help = "Defaults to FALSE";
+} write_as_forecast;
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Set encoding type.";
+} output_encoding_type;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to take the log of the precip accum before storing in the file.";
+} store_precip_as_log;
+
+

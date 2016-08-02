@@ -1,0 +1,6 @@
+.deps
+StormModel
+__makefile.template
+makefile
+makefile.am
+makefile.in

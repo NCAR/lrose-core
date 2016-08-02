@@ -1,0 +1,467 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/////////////////////////////////////////////////////////////////////////////
+// parameter definitions for application
+//
+// Jaimi Yee, RAP, NCAR, Boulder, CO, USA, 80307-3000
+// July 2004
+//
+// Adapted from nexrad2dsr application by Terri Betancourt 
+// RAP, NCAR, Boulder, CO, 80307, USA
+//
+// $Id: paramdef.Nexrad2Netcdf,v 1.8 2016/03/07 01:25:07 dixon Exp $
+//
+//////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Verbose Debug option";
+  p_help = "If set, verbose debug messages will be printed";
+} verbose;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Info option";
+  p_help = "If set, information messages will be printed";
+} info;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option for build 5 data.";
+  p_help = "If set, build 5 level II nexrad data are expected.";
+} build5;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option for dealing with input for which there\n"
+  "is one input file per volume. Only relevant if build5 is true.\n"
+  "If these files are delivered via LDM they will typically have\n"
+  "the extension .raw";
+  p_help = "Typically this should be FALSE for realtime LDM\n"
+  "operations. Relevant only if delivery method is LDM.";
+} oneFilePerVolume;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option for dealing with input PPI files";
+  "operations. Relevant only if delivery method is LDM.";
+} ppiFiles;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Print summary";
+  p_help = "If TRUE, summary information will be printed";
+} printSummary;
+
+paramdef long {
+  p_min = 0;
+  p_default = {90};
+  p_descr = "Summary interval (in #beams) for printing information on "
+            "radar data written to the output radar queue";
+  p_help = "Used only if printSummary is set to TRUE";
+} summaryInterval;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting";
+} instance;
+
+commentdef {
+  p_header = "RADAR DATA INPUT";
+};
+
+typedef enum {
+  LDM, TAPE, TCP_IP
+} input_stream_t;
+
+paramdef enum input_stream_t {
+  p_descr = "Type of radar input stream";
+  p_default = {LDM};
+} input_mechanism;
+
+paramdef boolean {   
+  p_default = FALSE;
+  p_descr = "Option to override actual data time with wall clock time.";
+  p_help = "Setting this option to TRUE provides a mechanism for simulating "
+           "a realtime data stream from archive data.";
+} use_wallclock_time;
+
+paramdef long {
+  p_default = 0;
+  p_descr = "Offset in seconds to add to actual data time.";
+  p_help = "Used for testing.";
+} offset_sec;
+
+commentdef {
+  p_header = "LDM INPUT PARAMETERS";
+};
+
+paramdef char* {
+  p_descr = "Directory location of LDM input";
+  p_help = "Used only if 'input_mechanism' is set to LDM";
+  p_default = {"$(DATA_DIR)/$(PROJECT)/ldm/radarSite"};
+} radar_input_dir;
+
+typedef enum {
+  REALTIME, START_END, FILE_LIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = {REALTIME};
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the 'radar_input_dir' is watched for new "
+           "incoming files.  In START_END mode input files are specified "
+           "using the -start/-end command line options, and in FILE_LIST "
+           "mode input files are specified using the -f command line option "
+           "for processing a specified list of input files. "
+           "Used only if 'input_mechanism' is set to LDM";
+} mode;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Maximum valid age (in min) of input data files.";
+  p_help = "Input files older than this will not be processed.\n"
+           "Used only if 'input_mechanism' is set to LDM. Note that\n"
+	   "The age of a file is computed by subtracting the time\n"
+	   "represented in the filaname from the current time, NOT\n"
+	   "by subracting the time the file was written to disk from\n"
+	   "the current time. The latter requires that a stat be done\n"
+	   "each file, which is not practical (the program cannot\n"
+	   "keep up in realtime if it has to do this in some cases).";
+} max_valid_age_min;
+
+commentdef {
+  p_header = "TCP/IP INPUT PARAMETERS";
+};
+
+paramdef char* {
+  p_descr = "Host name of machine providing TCP/IP input data.";
+  p_help = "Used only if 'input_mechanism' is set to TCP_IP";
+  p_default = {""};
+} hostname;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Port number for TCP/IP socketing.";
+  p_help = "Used only if 'input_mechanism' is set to TCP_IP";
+} port;
+
+commentdef {
+  p_header = "TAPE INPUT PARAMETERS";
+};
+paramdef string {
+  p_default = "/dev/nst0";
+  p_descr = "Tape device name for input.";
+  p_help = "Used only if 'input_mechanism' is set to TAPE." ;
+} input_tape_device;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Short tape option.";
+  p_help = "Set to FALSE if reading a standard NCDC Nexrad Level 2 archive tape.  Set to TRUE if reading a RAP generated Level 2 archive tape.  Used only if 'input_mechanism' is TAPE.";
+} short_tape;
+
+commentdef {
+  p_header = "CONSTANT RADAR CHARACTERISTICS";
+};
+
+paramdef char* {
+  p_default = {"KFTG"};
+  p_descr = "Radar name";
+} radarName;
+
+paramdef char* {
+  p_default = {"Denver"};
+  p_descr = "Site name";
+} siteName;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Radar ID";
+  p_help = "Project-specific ID for the radar";
+} radarId;
+
+paramdef struct radar_location_t {
+  p_descr = "Radar location";
+  p_help = "Latitude and longitued in degrees, altitude in km.";
+  p_default = { 39.787, -104.546, 1.71 };
+  p_field_type = {double, double, double};
+  p_field_name = {latitude, longitude, altitude};
+} radarLocation;
+
+commentdef {
+  p_header = "RADAR DATA PROCESSING";
+};
+
+paramdef float {
+  p_descr = "Factor used in snr computation";  
+  p_help = "Snr is calculated according to the following expression:\n"
+           "   snr = dz + 20*log10(f/radialDistance)/dbzScale\n"
+           "This parameter provides the value of f in the above "
+           "expression";
+  p_default = {230};
+} snrFactor;
+
+paramdef float {
+  p_decsr = "Value that indicates there was only one unambiguous range "
+            "available when computing the power ratio at the current point";
+  p_help = "If the data at all the other multiples of the unambiguous "
+           "range from the current gate are missing, or if there is no data "
+           "past the unambiguous range, use this value to indicate a high "
+           "power ratio. The value would normally be infinity, but that is "
+           "a difficult value for applications to deal with";
+  p_default = {99.0};
+} powerRatioDefault;
+
+paramdef int {
+  p_descr = "Maximum number of cells";
+  p_help = "Maximum number of cells allowed in output file";
+  p_default = {960};
+} maxCells;
+
+paramdef boolean {
+  p_descr = "Use range cutoff table";
+  p_help = "If set to TRUE, the range cutoff table specified in the "
+           "rangeCutoffTablePath parameter will be used to trim the "
+           "data so that data beyond the specified range for the given "
+           "elevation will not be written to the output netcdf file. "
+           "If set to FALSE, a maximum range will be applied to all "
+           "elevations that will allow all data that is within the "
+           "maxCells dimension specified in the cdl file to be written "
+           "to the output file";
+} useRangeCutoff;
+
+paramdef string {
+  p_descr = "Range cutoff table path";
+  p_help = "Path to range cutoff table. This is a text file with "
+           "elevation to nearest 0.1 degrees and the associated "
+           "maximum range for that elevation in km. NOTE: This "
+           "table MUST contain every 0.1 degrees of elevation "
+           "between 0 and the desired maximum elevation. Any elevation "
+           "greater than the maximum will be treated the same way as "
+           "the maximum, but the application cannot handle missing data "
+           "between zero and the maximum";
+  p_default = {"./RangeCutoffTable"};
+} rangeCutoffTablePath;
+
+paramdef boolean {
+  p_descr = "Combine reflectivity only and velocity sweeps on "
+            "lower tilts?";
+  p_help = "If set to TRUE, the reflectivity only sweep will be "
+           "combined with the following sweep, which should be "
+           "velocity and spectrum width only.  If set to FALSE, "
+           "the reflectivity only sweep will be written to its own "
+           "file, as will the velocity and spectrum width only sweep";
+  p_default = {TRUE};
+} combineSweeps;
+
+paramdef double {
+  p_descr = "Azimuth tolerance in degrees";
+  p_help = "If the difference in azimuths is greater than this "
+           "amount, the current reflectivity azimuth will not be "
+           "considered for the match to the velocity azimuth";
+  p_default = {1.0};
+} azimuthTolerance;
+
+paramdef double {
+  p_descr = "Elevation tolerance in degrees";
+  p_help = "Rays in the reflectivity sweep with an elevation more than "
+           "this tolerance off of the target elevation will not be used";
+  p_default = {1.0};
+} elevationTolerance;
+
+paramdef double {
+  p_descr = "Time tolerance in seconds";
+  p_help = "Rays in the reflectivity sweep with a time more than this " 
+           "tolerance off the time of the first ray in the sweep will "
+           "not be used";
+  p_default = {120};
+} timeTolerance;
+
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Length of REC kernel in range (km).";
+  p_help = "All REC features are computed over a kernel in range. "
+           "This is the length of the kernel in range.";
+} recKernelRangeLen;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Width of REC kernel in azimuth (deg).";
+  p_help = "Some of the REC features are computed over a kernel in "
+           "azimuth as well as range. This is the width of the kernel "
+           "in azimuth in terms of number of beams";
+} recKernelAzimuthWidth;
+ 
+paramdef double {
+  p_default = 3.5;
+  p_descr = "Threshold for computing spin change in the REC (dBZ).";
+  p_help = "The SPIN change variable is computed using the difference "
+           "in dBZ between adjacent gates. If the difference exceeds "
+           "this threshold, the change counter is incremented.";
+} recSpinDbzThreshold;
+
+commentdef {
+  p_header = "REC - INTEREST MAPS and WEIGHTS";
+  p_text = "Each map should hold at least 2 points. The points should "
+           "be increasing in value, i.e. the value should increase for "
+           "each subsequent point. The various interest values are combined "
+           "using the specified weights in a weighted mean to produce the "
+           "final REC value.";
+};
+
+typedef struct {
+  double value;
+  double interest;
+} interestMapPoint_t;
+
+paramdef struct interestMapPoint_t {
+  p_default = {{0.0, 0.0}, {45.0, 1.0}};
+  p_descr = "Interest mapping for dBZ texture.";
+} dbzTextureInterestMap[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for dBZ texture.";
+} dbzTextureInterestWeight;
+
+paramdef struct interestMapPoint_t {
+  p_default = {{0.0, 0.0}, {50.0, 1.0}, {100.0, 0.0}};
+  p_descr = "Interest mapping for dBZ spin.";
+} dbzSpinInterestMap[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for dBZ spin.";
+} dbzSpinInterestWeight;
+
+paramdef struct interestMapPoint_t {
+  p_default = {{-2.3, 0.0}, {0, 1.0}, {2.3, 0.0}};
+  p_descr = "Interest mapping for velocity.";
+} velInterestMap[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for velocity.";
+} velInterestWeight;
+
+paramdef struct interestMapPoint_t {
+  p_default = {{0.0, 1.0}, {3.2, 0.0}};
+  p_descr = "Interest mapping for spectrum width.";
+} widthInterestMap[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for spectrum width.";
+} widthInterestWeight;
+
+paramdef struct interestMapPoint_t {
+  p_default = {{0.0, 1.0}, {0.7, 0.0}};
+  p_descr = "Interest mapping for standard deviation of velocity.";
+} velSdevInterestMap[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for for standard deviation of velocity.";
+} velSdevInterestWeight;
+
+commentdef {
+  p_header = "RADAR DATA OUTPUT";
+};
+
+paramdef string {
+  p_descr = "Path to cdl file";
+  p_help = "The cdl file will be used to define dimensions, global "
+           "attributes and variables and their attributes in the "
+           "netcdf output files";
+  p_default = {"./example.cdl"};
+} cdlPath;
+
+paramdef string {
+  p_descr = "Output path";
+  p_help = "Path for directory for netcdf output data.  The path must"
+           "be fully qualified or relative to RAP_DATA_DIR";
+  p_default = {"./"};
+} outputPath;
+
+paramdef string {
+  p_descr = "Output file base name";
+  p_help = "Netcdf output file names will have the following format "
+           "<base name>_YYYYMMDD_HHMMSS.<millisecond>_"
+           "u<volume num>_s<sweep num>_<elevation num>_SUR_.nc "
+           "This parameter provides the base name described in that "
+           "format";
+  p_default = {"ncswp"};
+} baseName;
+
+typedef enum {
+  DZ, VE, SW, ZDR, PHI, RHO, CMAP, BMAP
+} momentField_t;
+
+typedef struct {
+  momentField_t outputField;
+  string        longName;
+} momentFieldDefs_t;
+
+paramdef struct momentFieldDefs_t {
+  p_descr = "Output field definitions for moment data from the nexrad stream";
+  p_help = "Give information to be used to reformat and store data "
+           "from the input nexrad stream in output netCDF file";
+  p_default = { {DZ, "Reflectivity factor"},
+                {VE, "Velocity" },
+                {SW, "Spectral width" },
+                {CMAP, "Clutter Map" },
+                {BMAP, "Bypass Map" } };
+} momentFieldDefs[];
+
+typedef enum {
+  PR, SNR, REC
+} derivedField_t;
+
+typedef struct {
+  derivedField_t outputField;
+  string         longName;
+  double         scale;
+  double         bias;
+} derivedFieldDefs_t;
+
+paramdef struct derivedFieldDefs_t {
+  p_descr = "Output field definitions for derived fields";
+  p_help = "Give information to be used to reformat and store data "
+           "derived from the input nexrad stream in output netCDF file";
+  p_default = { {SNR, "Signal to noise ratio", 0.5, -32.0},
+                {PR, "Power ratio", 0.5, -32.0} };
+} derivedFieldDefs[];

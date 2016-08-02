@@ -1,0 +1,58 @@
+###########################################################################
+#
+# Makefile for Mdv2NetCDF program
+#
+# RAP, NCAR, Boulder, CO, 80307, USA
+#
+# September 2007 
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGET_FILE = Mdv2NetCDF 
+
+LOC_INCLUDES = -I/opt/netcdf-4.0-gcc/include -I/opt/hdf5/include
+LOC_CPPC_CFLAGS =
+LOC_LDFLAGS = -L/opt/netcdf-4.0-gcc/lib -L/opt/hdf5/lib 
+
+LOC_LIBS =  -ldsdata -lMdv -leuclid -lSpdb -ldsserver -ldidss -lrapformats  \
+	    -ltoolsa  -ldataport -lNcfMdv -leuclid -ltdrp -lm  \
+	-lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz
+
+HDRS = \
+	$(PARAMS_HH) \
+	Args.hh \
+	Mdv2NetCDF.hh 
+
+CPPC_SRCS = \
+	$(PARAMS_CC) \
+	Args.cc \
+	Main.cc \
+	Mdv2NetCDF.cc 
+
+#
+# tdrp macros
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+
+#
+# standard targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+
+#
+# tdrp targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+
+#
+# local targets
+#
+
+depend: depend_generic
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

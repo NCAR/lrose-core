@@ -1,0 +1,32 @@
+#! /bin/sh
+
+cd $RTEST_HOME/params
+
+if (not_running "storm_ident -params storm_ident.rtest") then
+  kill_storm_track.rtest
+  storm_ident -params storm_ident.rtest &
+fi
+
+sleep 5
+
+if (not_running "storm_track -params storm_track.rtest") then
+  kill_storm_ident.rtest
+  storm_ident -params storm_ident.rtest &
+fi
+
+if (not_running "precip_map -params precip_map.refl_fcast") then
+  precip_map -params precip_map.refl_fcast &
+fi
+
+if (not_running "precip_map -params precip_map.precip_fcast") then
+  precip_map -params precip_map.precip_fcast &
+fi
+
+if (not_running "precip_map -params precip_map.precip_accum") then
+  precip_map -params precip_map.precip_accum &
+fi
+
+if (not_running "forecast_monitor -params forecast_monitor.rtest") then
+  forecast_monitor -params forecast_monitor.rtest &
+fi
+

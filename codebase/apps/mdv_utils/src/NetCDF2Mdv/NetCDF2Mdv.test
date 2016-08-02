@@ -1,0 +1,138 @@
+/**********************************************************************
+ * TDRP params for NetCDF2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// Param file for Mdv2netCDF.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This program registers with procmap. This is the instance used for 
+//   registration.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     FILELIST
+//     TIME_INTERVAL
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Type: string
+//
+
+input_dir = "/tmp/netCDF";
+
+///////////// max_valid_realtime_age_min //////////////
+//
+// Maximum age of file in minutes.
+// Used in REALTIME mode only.
+// Type: int
+//
+
+max_valid_realtime_age_min = 15;
+
+///////////// ldata_info_avail ////////////////////////
+//
+// Latest data info file available.
+// Type: boolean
+//
+
+ldata_info_avail = FALSE;
+
+///////////// file_quiescence_sec /////////////////////
+//
+// Set wait for file to be written to disk before being served.
+// Used in REALTIME mode only.
+// Type: int
+//
+
+file_quiescence_sec = 5;
+
+///////////// check_input_sec /////////////////////////
+//
+// Set wait for file between checks for new data.
+// Used in REALTIME mode only.
+// Type: int
+//
+
+check_input_sec = 5;
+
+///////////// start_time //////////////////////////////
+//
+// yyyymmddhhMMss.
+// Set for TIME_INTERVAL mode only.
+// Type: string
+//
+
+start_time = "";
+
+///////////// end_time ////////////////////////////////
+//
+// yyyymmddhhMMss.
+// Set for TIME_INTERVAL mode only.
+// Type: string
+//
+
+end_time = "";
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for the output MDV files.
+// Type: string
+//
+
+output_url = "$(DATA_DIR)/cfradial/mdv/test";
+
+///////////// field_names /////////////////////////////
+//
+// List of field names to be read and transferred to the output file.
+// If empty, all fields in the input file will be used.
+// Type: string
+// 1D array - variable length.
+//
+
+field_names = { };
+

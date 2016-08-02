@@ -1,0 +1,15 @@
+########################################################################
+# parameters file for track_print
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# April 1991
+#
+#########################################################################
+
+track_print.malloc_debug_level: 0
+
+track_print.min_duration_in_scans: 5
+
+track_print.track_file_path: /data/dixon/kav_storms/19920521.tr1
+

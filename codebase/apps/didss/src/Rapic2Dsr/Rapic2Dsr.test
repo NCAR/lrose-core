@@ -1,0 +1,355 @@
+/**********************************************************************
+ * TDRP params for Rapic2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: Rapic2Dsr.
+//
+// Rapic2Dsr reads Rapic radar volume files and writes the data to a 
+//   DsRadarQueue beam by beam.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL AND DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "./input";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data - REALTIME mode.
+// For realtime only - max age of input data for it to be valid. If the 
+//   input file is older than this, the program waits for new data.
+// Minimum val: 0
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+///////////// use_latest_data_info ////////////////////
+//
+// Option to watch for _latest_data_info file in input dir.
+// For realtime only. If true the program watches for the 
+//   _latest_data_info file to change. If false, it scans the directory 
+//   for new file.
+// Type: boolean
+//
+
+use_latest_data_info = FALSE;
+
+///////////// latest_file_only ////////////////////////
+//
+// Option to only process the latest file in the directory.
+// For realtime mode only, and only if use_latest_data_info is false, 
+//   which implies that the program is scanning the input_dir for new 
+//   files. If true, only the latest file will be processed. If false, all 
+//   files younger than max_realtime_valid_age will be processed.
+// Type: boolean
+//
+
+latest_file_only = TRUE;
+
+///////////// dbz_field_name //////////////////////////
+//
+// Name of DBZ field.
+// Type: string
+//
+
+dbz_field_name = "Refl";
+
+///////////// vel_field_name //////////////////////////
+//
+// Name of VEL field.
+// Type: string
+//
+
+vel_field_name = "Vel";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// radar_name //////////////////////////////
+//
+// Radar site name.
+// Only images with names matching the radar name will be processed. If 
+//   the string is empty, no check is done.
+// Type: string
+//
+
+radar_name = "";
+
+///////////// volume_id ///////////////////////////////
+//
+// Option to only process specified VOLUMEID.
+// Only data with VOLUMEID matching that specified will be processed. If 
+//   volume_id is not defined then volume_id = 0 is assumed.
+// Minimum val: 0
+// Type: int
+//
+
+volume_id = 0;
+
+///////////// output_url //////////////////////////////
+//
+// Output URL for DsRadarQueue fmq.
+// The URL is of the form 'fmqp:://host::dir/name'. If the output is to 
+//   the local host you can use just 'dir/name'.
+// Type: string
+//
+
+output_url = "/tmp/fmq/rapic";
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQs are written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to block on write when the radar queue fills up.
+// If false, the program writes data to the output queue without regard 
+//   to whether the reader is keeping up. This mode should usually be used 
+//   in realtime, to avoid holding things up if a client becomes slow. If 
+//   true, the program will not overwrite data in the queue which has not 
+//   been read by the reader. This is recommended for ARCHIVE and FILELIST 
+//   mode. In this mode there should be only one reader. If you need to 
+//   service more than one reader, use Fmq2Fmq in write blocking mode with 
+//   multiple output urls to multiplex the queue.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+///////////// write_delay_msecs ///////////////////////
+//
+// Delay between writing output beams - millisecs.
+// Should normally be 0. Can be set to positive values to simulate the 
+//   rate at which data would arrive from a radar on a beam-by-beam basis.
+// Minimum val: 0
+// Type: int
+//
+
+write_delay_msecs = 0;
+
+///////////// output_compression //////////////////////
+//
+// Output compression options.
+// The data may be optionally compressed for output. BZIP is generally 
+//   the slowest but most compact. ZLIB uses the gzip compression 
+//   algorithm, which is faster than BZIP, and for some data more compact 
+//   as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is 
+//   simple run-length encoding compression, which is the fastest and 
+//   least compact.
+//
+// Type: enum
+// Options:
+//     NO_COMPRESSION
+//     RLE_COMPRESSION
+//     LZO_COMPRESSION
+//     ZLIB_COMPRESSION
+//     BZIP_COMPRESSION
+//
+
+output_compression = NO_COMPRESSION;
+
+///////////// output_n_slots //////////////////////////
+//
+// Number of slots in output FMQ.
+// Type: int
+//
+
+output_n_slots = 7200;
+
+///////////// output_buf_size /////////////////////////
+//
+// Size of buffer in output FMQ.
+// Type: int
+//
+
+output_buf_size = 10000000;
+
+///////////// scan_type ///////////////////////////////
+//
+// Scan strategy type.
+// Indicates which scan strategy is in use.
+// Type: int
+//
+
+scan_type = 0;
+
+///////////// time_correction /////////////////////////
+//
+// Time correction (secs).
+// Data time is adjusted by this number of seconds before output.
+// Type: int
+//
+
+time_correction = 0;
+
+///////////// use_wallclock_time //////////////////////
+//
+// Wallclock time override option.
+// If set, wallclock time will be used to override data time.
+// Type: boolean
+//
+
+use_wallclock_time = FALSE;
+
+///////////// change_latitude_sign ////////////////////
+//
+// Change the sign of the latitude.
+// The Rapic files seem to have Southern latitudes as positive. If this 
+//   flag is set, the sign of the latitude is changed.
+// Type: boolean
+//
+
+change_latitude_sign = TRUE;
+
+///////////// radar_constant //////////////////////////
+//
+// Radar constant.
+// Value of radar constant for Met type radar.
+// Type: double
+//
+
+radar_constant = -157;
+
+///////////// samples_per_beam ////////////////////////
+//
+// Samples per beam.
+// Number of pulses used to compute data from a beam.
+// Minimum val: 1
+// Type: int
+//
+
+samples_per_beam = 64;
+
+///////////// polarization_code ///////////////////////
+//
+// Radar polarization code.
+// 1 = hor, 2 = ver, 3 = circ, 4 = ellip. Should be 3; 1 for Jing 
+//   compatibility.
+// Type: int
+//
+
+polarization_code = 1;
+
+///////////// beam_width //////////////////////////////
+//
+// Beam width.
+// Radar half-power beam width (deg).
+// Minimum val: 0.01
+// Maximum val: 45
+// Type: double
+//
+
+beam_width = 0.95;
+
+///////////// avg_xmit_pwr ////////////////////////////
+//
+// Average transmitter power (kW).
+// For output_format = LL_FORMAT only.
+// Type: double
+//
+
+avg_xmit_pwr = 7;
+
+///////////// receiver_mds ////////////////////////////
+//
+// Receiver MDS (dBM).
+// Receiver minimum detectable signal (dMD) - for DS_FORMAT only.
+// Type: double
+//
+
+receiver_mds = -113;
+
+///////////// receiver_gain ///////////////////////////
+//
+// Gain of the receiver (dB) - for DS_FORMAT only.
+// Type: double
+//
+
+receiver_gain = 0;
+
+///////////// antenna_gain ////////////////////////////
+//
+// Gain of the antenna (dB) - for DS_FORMAT only.
+// Type: double
+//
+
+antenna_gain = 45;
+
+///////////// system_gain /////////////////////////////
+//
+// Gain of the system (dB) - for DS_FORMAT only.
+// Type: double
+//
+
+system_gain = 0;
+

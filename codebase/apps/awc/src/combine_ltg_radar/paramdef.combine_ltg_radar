@@ -1,0 +1,253 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for combine_ltg_radar
+ *
+ * Nancy Rehak, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * February 1997
+ */
+
+/*********************************************************
+ * Debug parameters
+ */
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,
+  DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = DEBUG_OFF;
+} debug_level;
+
+
+/*********************************************************
+ * Operational parameters
+ */
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+typedef enum
+{
+  REALTIME_MODE,
+  ARCHIVE_MODE,
+  TIME_LIST_MODE
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "operation mode";
+  p_help = "In REALTIME_MODE, processing is triggered by a change in the "
+           "_latest_data_info file associated with the triggering URL.  "
+           "In ARCHIVE_MODE, processing is triggered by the file list "
+           "specified with the -if command line argument.  "
+           "In TIME_LIST_MODE, processing is triggered for each data time "
+           "available for the triggering URL between the times specified "
+           "by the -start and -end command line parameters.";
+  p_default = REALTIME_MODE;
+} mode;
+
+typedef enum
+{
+  RADAR,
+  LIGHTNING
+} trigger_t;
+
+paramdef enum trigger_t
+{
+  p_descr = "file trigger";
+  p_help = "Used to specify the data set used to trigger combined "
+           "file generation.";
+  p_default = RADAR;
+} trigger;
+
+paramdef int
+{
+  p_descr = "input wait msecs";
+  p_help = "Number of msecs to wait when checking for a new radar data file.";
+  p_min = 1;
+  p_default = 1000;
+} input_wait_msecs;
+
+paramdef int
+{
+  p_descr = "maximum valid file age in seconds";
+  p_help = "If an input file is older than this, it will not be processed.";
+  p_min = 0;
+  p_default = 300;
+} max_valid_file_age;
+
+/*********************************************************
+ * Input parameters
+ */
+
+paramdef string
+{
+  p_descr = "Radar data input URL";
+  p_default = "mdvp:://localhost::mdv/radar";
+} radar_input_url;
+
+paramdef string
+{
+  p_descr = "Lightning data input URL";
+  p_default = "mdvp:://localhost::mdv/ltg";
+} ltg_input_url;
+
+paramdef string
+{
+  p_descr = "Name of radar data field.";
+  p_help = "If empty, radar_field_pos will be used.";
+  p_default = "";
+} radar_field_name;
+
+paramdef int
+{
+  p_descr = "radar data field position";
+  p_help = "Position of the radar data field within the MDV data file.";
+  p_default = 0;
+  p_min = 0;
+} radar_field_pos;
+
+paramdef string
+{
+  p_descr = "Name of ltg data field.";
+  p_help = "If empty, ltg_field_pos will be used.";
+  p_default = "";
+} ltg_field_name;
+
+paramdef int
+{
+  p_descr = "lightning data field position";
+  p_help = "Position of the lightning data field within the MDV data file.";
+  p_default = 0;
+  p_min = 0;
+} ltg_field_pos;
+
+paramdef int
+{
+  p_descr = "max data offset time in seconds";
+  p_help = "In REALTIME mode, the maximum amount of time between the "
+           "time the radar data was GENERATED and the valid time of the "
+           "lightning grid.  "
+           "In ARCHIVE mode, maximum amount of time allowed between "
+           "the lightning data time and the radar data time for the "
+           "files to be combined to form an output grid.";
+  p_min = 0;
+  p_default = 0;
+} time_offset_max;
+
+paramdef boolean
+{
+  p_descr = "Option to request composite fields for radar and lightning data.";
+  p_help = "If true, both radar and lightning grids will be requested as a composite.";
+  p_default = false;
+} request_composite_fields;
+
+paramdef boolean
+{
+  p_descr = "Option to produce output even if no lightning data is available.";
+  p_help = "If true, the program will generate an output field based only on the radar data if lightning data is not available.";
+  p_default = false;
+} process_if_no_lightning;
+
+/*********************************************************
+ * Output parameters
+ */
+
+typedef struct
+{
+  int num_strikes;
+  double ltg_value;
+} ltg_factor_t;
+
+paramdef struct ltg_factor_t
+{
+  p_descr = "lightning factor table";
+  p_help = "This table gives the step function used to assign data values "
+           "to the lightning information.  When assigning a data value, the "
+           "program will step through this table in order and assign the "
+           "value for the first entry where the actual number of strikes is "
+           ">= to num_strikes but < num_strikes for the next entry.";
+  p_default = { { 0,  0.0 },
+                { 1, 20.0 },
+                { 2, 40.0 },
+                { 3, 50.0 } };
+} ltg_factors[];
+
+typedef enum
+{
+  USE_RADAR_DATA_TIME,
+  USE_LTG_DATA_TIME,
+  USE_CURRENT_TIME
+} data_time_stamp_flag_t;
+
+paramdef enum data_time_stamp_flag_t
+{
+  p_descr = "flag indicating which time stamp to use for the output data";
+  p_help = "Note that you cannot use USE_CURRENT_TIME when in ARCHIVE_MODE "
+           "since this doesn't make sense.";
+  p_default = USE_RADAR_DATA_TIME;
+} data_time_stamp_flag;
+
+paramdef int
+{
+  p_descr = "data start time offset";
+  p_help = "When data_time_stamp_flag is set to USE_CURRENT_TIME, this is "
+           "the number of seconds to subtract from the current time to get "
+           "the data begin time.  This value is ignored for any other setting "
+           "of data_time_stamp_flag.";
+  p_min = 0;
+  p_default = 150;
+} data_start_time_offset;
+
+paramdef int
+{
+  p_descr = "data end time offset";
+  p_help = "When data_time_stamp_flag is set to USE_CURRENT_TIME, this is "
+           "the number of seconds to add to the current time to get "
+           "the data end time.  This value is ignored for any other setting "
+           "of data_time_stamp_flag.";
+  p_min = 0;
+  p_default = 150;
+} data_end_time_offset;
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_help = "Path of output directory";
+  p_default = "mdvp:://localhost::mdv/output";
+} output_url;
+

@@ -1,0 +1,117 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/****************************************************************
+ * parameter definitions for Nmsu2Spdb
+ *  
+ * Kay Levesque
+ * March 2003
+ */
+
+/****************************************************************
+ * Debugging and process control.
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,		
+  DEBUG_VERBOSE	
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+           "appropriate level of detail.";
+  p_default = DEBUG_OFF;
+} debug;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/*********************************************************
+ * Input and output data
+ */
+
+commentdef
+{
+  p_header = "INPUT AND OUTPUT DATA.";
+}
+
+paramdef long
+{
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+  p_min = 0;
+  p_default = 7200;
+} max_realtime_valid_age;
+
+paramdef string
+{
+  p_descr = "Output SPDB URL.";
+  p_help = "Output data is in spdb format.";
+  p_default = "spdbp:://localhost:port:directory";
+} output_spdb_url;
+
+paramdef long
+{
+  p_descr = "Number of seconds before the SPDB product expires";
+  p_default = 1200;
+} spdb_expire_secs;
+
+/*********************************************************
+ * Station information
+ */
+
+commentdef
+{
+  p_header = "STATION INFORMATION.";
+}
+
+typedef struct
+{
+  string station_id;
+  double latitude;
+  double longitude;
+  double altitude;
+}station_info_t;
+
+paramdef struct station_info_t
+{
+  p_descr = "Station name and location information.";
+  p_help = "The station_id field is the identifier that "
+	"uniquely identifies each of the stations.";
+  p_default = {"Alcade", 36.090, -106.055, 1745};
+} station_info;

@@ -1,0 +1,3 @@
+#! /bin/sh
+
+snuff "procmap_auto_restart rtest_procs"

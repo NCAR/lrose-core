@@ -1,0 +1,36 @@
+/*********************************************************
+ * parameter definitions for bprp_filter
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 1995
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef struct origin_t {
+  p_descr = "Origin";
+  p_help = "The origin about which the bearings were taken.";
+  p_field_type = {double, double};
+  p_field_name = {latitude, longitude};
+} origin;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Input file";
+} input_file;
+

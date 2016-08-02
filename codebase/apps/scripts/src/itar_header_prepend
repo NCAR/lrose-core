@@ -1,0 +1,881 @@
+#! /usr/bin/perl
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2001 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Program(RAP) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2001/11/20 0:2:45 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+#
+# Function: Script to prepend ITAR notice to source code files. Tries
+#           to determine the type of file so can use the correct comment
+#           character to enclose the ITAR notice in. The character strings
+#           used above and below the ITAR notice are used by the
+#           itar_header_remove script to remove the ITAR notice from source
+#           code files so DO NOT CHANGE the special character strings.
+#           Note that the ITAR header special character strings are not
+#           the same as those used for copyrights, this is intentional
+#           so they can be removed and replaced separately.
+#
+# Usage:    itar_header_prepend target_files
+#
+# IMPORTANT: This script is very similar to copyright_prepend. If you fix
+#            a bug in this script, please fix it in copyright_prepend as
+#            well. Thank you.
+#
+#
+#============================================================================
+#
+# Externals
+#
+use Getopt::Std qw( getopts );
+
+#
+# Globals
+#
+$Exit_success=0;
+$Exit_failure=-1;
+$C_start_comment_char="\/\*";
+$C_end_comment_char="\*\/";
+$Cplus_start_comment_char="\/\/";
+$Cplus_end_comment_char="";
+$F90_start_comment_char="\!";
+$F90_end_comment_char="";
+$Fortran_start_comment_char="C   ";
+$Fortran_end_comment_char="";
+$Script_start_comment_char="\#";
+$Script_end_comment_char="";
+$Matlab_start_comment_char="%";
+$Matlab_end_comment_char="";
+$Html_start_comment_char="\<\!--";
+$Html_end_comment_char="--\>";
+$Man_start_comment_char="\.\\";
+$Man_end_comment_char="";
+
+($prog = $0) =~ s%.*/%%;                   # Program name
+
+# Set command line defaults
+
+$Debug=0;                                  # Flag for debug
+$Debug_level=0;                            # Flag for debug level
+$Cleanup=1;                                # Flag for cleanup temp files
+$Test=0;                                   # Flag for test mode
+$Do_force=0;                               # Flag for force mode
+$Backward_compat=1;                        # Flag for backward compatibility mode
+$Use_std_itar_header=1;                    # Flag for standard or alternate ITAR header text
+
+# Parse input parameters
+
+&getopts('a:bcdfhlmnopstvx');
+
+if ($opt_h) {
+    print STDERR "Usage: $prog [-dhbcflmnopstvx] [-a <file>] target-files\n";
+    print STDERR "Purpose: Go through the list of target-files and add an\n";
+    print STDERR "   ITAR header statement as a comment to the top of each file.\n";
+    print STDERR "   Also adds the flag search lines to the top and bottom of the ITAR text\n";
+    print STDERR "   By default, tries to determine the filetype based on the filename\n";
+    print STDERR "   extension or the output of the \'file\' command:\n";
+    print STDERR "     .c, .h, .css, files              use the C comment character: $C_start_comment_char\n";
+    print STDERR "     .cc, .hh, .cdl, .php files       use the C\+\+ comment character: $Cplus_start_comment_char\n";
+    print STDERR "     .f, .F, .incl files              use the FORTRAN comment character: $Fortran_start_comment_char\n";
+    print STDERR "     .f90, .F90, .inc files           use the F90 comment character: $F90_start_comment_char\n";
+    print STDERR "     .m files                         use the Matlab comment character: $Matlab_start_comment_char\n";
+    print STDERR "     .l files                         use the man comment character: $Man_start_comment_char\n";
+    print STDERR "     .sh, .csh, .pl, .py, .pm, .mif   use the script comment character: $Script_start_comment_char\n";
+    print STDERR "     .html, .xml files                use the HTML comment character: $Html_start_comment_char, $Html_end_comment_char\n";
+    print STDERR "Options:\n";
+    print STDERR "\t-a <file>:\tUse alternate ITAR header text from <file>\n";
+    print STDERR "\t\tWill not prepend an ITAR header if cannot\n";
+    print STDERR "\t\tdetermine which comment character to use.\n";
+    print STDERR "\t\tDefault is the prior behavior of this script\n";
+    print STDERR "\t\twhich forces use of a C-style comment\n";
+    print STDERR "\t\tcharacter if cannot determine the file type.\n";
+    print STDERR "\t-c:\tForce use of the C comment character: $C_start_comment_char for all target-files\n";
+    print STDERR "\t-d:\tPrint debug messages\n";
+    print STDERR "\t-f:\tForce use of the F90 comment character: $F90_start_comment_char for all target-files\n";
+    print STDERR "\t-h:\tPrint this usage message\n";
+    print STDERR "\t-l:\tForce use of the HTML comment character: $Html_start_comment_char for all target-files\n";
+    print STDERR "\t-m:\tForce use of the Matlab comment character: $Matlab_start_comment_char for all target-files\n";
+    print STDERR "\t-n:\tDo not cleanup the backup tmp files\n";
+    print STDERR "\t-o:\tForce use of the old FORTRAN comment character: $Fortran_start_comment_char for all target-files\n";
+    print STDERR "\t-p:\tForce use of the C\+\+ comment character: $Cplus_start_comment_char for all target-files\n";
+    print STDERR "\t-s:\tForce use of the script comment character: $Script_start_comment_char for all target-files\n";
+    print STDERR "\t-t:\t(Test mode) do not actually modify the files\n";
+    print STDERR "\t-v:\tPrint verbose debug messages\n";
+    print STDERR "\t-x:\tDo not check each target-file for existing ITAR header.\n" ;
+    print STDERR "\t\tDefault is to check for an existing ITAR text\n";
+    print STDERR "\t\tand not prepend a new one if one already exists.\n";
+    exit $Exit_failure;
+}
+
+if ($opt_a) {
+    $Non_std_itar_header_file=$opt_a;
+    $Use_std_itar_header=0;
+}
+
+if ($opt_b) {
+    $Backward_compat=0;
+}
+
+if ($opt_c) {
+    $Do_force=1;
+    $Force_start_char=$C_start_comment_char;
+    $Force_end_char=$C_end_comment_char;
+}
+
+if ($opt_d) {
+    $Debug = 1;
+    $Debug_level =1;
+}
+
+if ($opt_f) {
+    $Do_force=1;
+    $Force_start_char=$F90_start_comment_char;
+    $Force_end_char=$F90_end_comment_char;
+}
+
+if ($opt_l) {
+    $Do_force=1;
+    $Force_start_char=$Html_start_comment_char;
+    $Force_end_char=$Html_end_comment_char;
+}
+
+if ($opt_m) {
+    $Do_force=1;
+    $Force_start_char=$Matlab_start_comment_char;
+    $Force_end_char=$Matlab_end_comment_char;
+}
+
+if ($opt_n) {
+    $Cleanup=0;
+}
+
+if ($opt_o) {
+    $Do_force=1;
+    $Force_start_char=$Fortran_start_comment_char;
+    $Force_end_char=$Fortran_end_comment_char;
+}
+
+if ($opt_p) {
+    $Do_force=1;
+    $Force_start_char=$Cplus_start_comment_char;
+    $Force_end_char=$Cplus_end_comment_char;
+}
+
+if ($opt_s) {
+    $Do_force=1;
+    $Force_start_char=$Script_start_comment_char;
+    $Force_end_char=$Script_end_comment_char;
+}
+
+if ($opt_t) {
+    $Test=1;
+}
+
+if ($opt_v) {
+    $Debug=1;
+    $Debug_level=2;
+}
+
+if ($opt_x) {
+    $Check_for_itar_header=0;
+}
+
+@ARGV >= 1    || die "Usage: $prog [-hdabcfmnopstvx] target-files\n";
+
+#
+# ----------------------- Initialization -----------------------
+#
+# Does the file command exist?
+#
+
+$check_file=`which file`;
+if (!$check_file) {
+    print(STDERR "ERROR: Cannot find the file command\n");
+    if ($Backward_compat) {
+	print(STDERR "\tWill use the $C_start_comment_char for all files\n");
+    }
+}
+
+#
+# If a non-standard itar_header, does the input file exist?
+#
+
+if (!$Use_std_itar_header) {
+    if (!-f $Non_std_itar_header_file) {
+	print(STDERR "ERROR: The non-standard itar_header text file to read does not exist: $Non_std_itar_header_file\n");
+	exit($Exit_failure);
+    }
+}
+
+# Get the itar_header text
+
+($is_ok, $Nlines_itar_header_text)=getItarHeaderText($Use_std_itar_header, $Non_std_itar_header_file, 
+						     *Itar_Header_text_arr, $Debug_level);
+if (!$is_ok) {
+    exit($Exit_failure);
+}
+    
+# Set default comment characters
+
+if (!$Do_force) {
+    $start_comment_char=$C_start_comment_char;
+    $end_comment_char=$C_end_comment_char;
+} else {
+    $start_comment_char=$Force_start_char;
+    $end_comment_char=$Force_end_char;
+}
+
+# -------------------------- Main ---------------------------
+#
+# loop through all the args as filenames
+#
+
+ FILE:
+
+foreach $filename (@ARGV) {
+
+  # Skip the filename if it is not a file
+
+  if (!-f $filename) {
+      print(STDERR "Skipping $filename - not a file\n");
+      next FILE;
+  }
+
+  # Skip the filename if it is a CVS file
+
+  if ($filename =~ /CVS/) {
+      print(STDERR "Skipping $filename - is a CVS file\n");
+      next FILE;
+  }
+
+  # Skip the filename if it is a binary file
+
+  if (-B $filename) {
+      print(STDERR "Skipping $filename - is a binary file\n");
+      next FILE;
+  }
+
+  # Print info
+
+  print(STDERR "Prepending itar_header to $filename\n");
+
+  # Try to determine the type of file so know which comment character
+  # to use. Look for a filename extension or some specific name
+  # (i.e., Makefile). Use the file command if we still cannot determine
+  # the type of file.
+
+  if (($check_file) && (!$Do_force)) {
+      ($is_ok, $is_script, $do_itar_header, $start_comment_char, $end_comment_char)=&get_comment_char($filename, $Debug_level);
+      if ((!$is_ok) && (!$Backward_compat)) {
+	  print(STDERR "Skipping $filename - cannot determine filetype\n");
+	  next FILE;
+      }
+      if (!$do_itar_header) {
+	  print(STDERR "Skipping $filename - should not have a itar_header?\n");
+	  next FILE;
+      }
+  }
+
+  # If specified, check for a itar_header on the file
+
+  if ($Check_for_itar_header) {
+      ($is_ok, $is_itar_header)=&check_itar_header_exist($filename, $Debug_level);
+      if (!$is_ok) {
+	  next FILE;
+      }
+      if ($is_itar_header) {
+	  print(STDERR "Skipping $filename - already has a itar_header!\n");
+	  next FILE;
+      }
+  }
+
+  # Debug
+
+  if ($Debug) {
+      print(STDERR "\twill use comment char: $start_comment_char  $end_comment_char\n");
+  }
+
+  # If in test mode, do not continue
+
+  if ($Test) {
+      next FILE;
+  }
+
+  # Copy the input file to a backup name
+  
+  $backup_file="$filename.bak-$prog";
+  system("/bin/cp $filename $backup_file");
+
+  # Set the output filename
+
+  $outfile="$filename.modified-$prog";
+  
+  # If this IS a script file, need to put the itar_header below the 
+  # script definition at the top of the file
+
+  if ($is_script) {
+      ($is_ok, $did_itar_header)=&put_itar_header_below_scriptdefn($backup_file, $outfile, $start_comment_char, $end_comment_char, $Nlines_itar_header_text, *Itar_Header_text_arr, $Debug_level);
+      if (!$is_ok) {
+	  next FILE;
+      }
+      if (!$did_itar_header) {
+	  unlink($outfile);
+      }
+  }
+
+  # If this is NOT a script file, or if we failed to write the itar_header
+  # below the script definition (perhaps because we could not find it),
+  # write the itar_header at the top then cat the file contents to the output file.
+
+   if ((!$is_script) || (($is_script) && (!$did_itar_header))) {
+
+       if (!open(OUTFILE, ">$outfile")) {
+	   print(STDERR "Cannot open file $outfile - continuing ... \n");
+	   next FILE;
+       }
+
+       $is_ok=&print_itar_header(OUTFILE, $start_comment_char, $end_comment_char, $Nlines_itar_header_text,
+			       *Itar_Header_text_arr, $Debug_level);
+       if (!$is_ok) {
+	  print(STDERR "ERROR: Could not prepend itar_header to $filename!\n");
+      }
+
+      # Close the file
+      
+      close(OUTFILE);
+
+      # Append the input file to the itar_header in the output file
+
+      system("cat $filename >> $outfile");
+  }
+
+  # Copy the output file to the input filename
+  # Need to do a copy, not a move to preserve file permissions
+
+  system("/bin/cp $outfile $filename");
+
+  # Delete the backup files
+
+  if ($Cleanup) {
+      unlink($backup_file);
+      unlink($outfile);
+  }
+
+} #endforeach
+  
+# Done
+
+exit $Exit_success;
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: getItarHeaderText
+#
+# Usage: ($return_val, $narr)=getItarHeaderText($use_std_text, $alt_file, 
+#                                               *arr, $debug)
+#
+# Function: Put the itar_header text into the output array
+#
+# Input:  $use_std_text    flag to use standard itar_header text or not
+#         $alt_file        if use_std_text is false, the file to read the text from
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#         $narr            size of arr
+#         *arr             array of itar_header text lines
+#
+#
+sub getItarHeaderText {
+  local ($use_std_text, $alt_file, *arr, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname, $narr);
+  local($line, $found_errors, $i);
+
+  # Set defaults
+
+  $return_val=0;
+  $narr=0;
+  $subname="getItar_HeaderText";
+  
+  if ($debug > 1) {
+      print(STDERR "$subname: Input...\n");
+      print(STDERR "\tuse_std_text: $use_std_text, alt_file: $alt_file\n");
+  }
+
+  # Print chars
+
+  $found_errors=0;
+  
+  # Set array of text lines
+  # Print search text at top
+
+  $narr=0;
+  $arr[$narr]="*===*===*===*===*===*===*===*===*===*===*===*===*===*===*===*";
+  $narr++;
+
+  # Print itar_header text
+
+  if ($use_std_text) {
+      $arr[$narr]="** EXPORT CONTROL WARNING.  This document, technology and/or software";
+      $narr++;
+      $arr[$narr]="** are export-controlled.  Access without authorization is prohibited.";
+      $narr++;
+      $arr[$narr]="** Export or diversion outside the United States or to a foreign";
+      $narr++;
+      $arr[$narr]="** national within the United States is illegal and may subject you to";
+      $narr++;
+      $arr[$narr]="** severe criminal penalties, unless such export is pre-approved by the";
+      $narr++;
+      $arr[$narr]="** Department of State.";
+      $narr++;
+  } else {
+      if (!open(INFILE, "< $alt_file")) {
+	   print(STDERR "Cannot open file $altfile\n");
+	   $found_errors=1;
+	   $narr=0;
+       }
+      while ($line = <INFILE>) {
+	  chop($line);
+	  $arr[$narr]=$line;
+	  $narr++;
+      }
+      close(INFILE);
+  } #end else (use_std_text)
+
+  # Add end text
+
+  $narr++;
+  $arr[$narr]="*===*===*===*===*===*===*===*===*===*===*===*===*===*===*===*";
+
+  # Debug
+
+  if ($debug > 1) {
+      print(STDERR "$subname: narr: $narr\n");
+      for ($i=0; $i<$narr; $i++) {
+	  print(STDERR "\ti: $i, arr: $arr[$i]\n");
+      }
+  }
+
+  # Done
+  
+  if ($found_errors) {
+      $return_val=0;
+  } else {
+      $return_val=1;
+  }
+
+  return($return_val, $narr);
+}
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: print_itar_header
+#
+# Usage: $return_val=&print_itar_header($filehandle, $start_cchar,
+#                                     $end_cchar, $ntextarr,
+#                                     *text_arr, $debug)
+#
+# Function: Print the itar_header to the output $filehandle using
+#           the input start and end comment characters.
+#
+# Input:  $filehandle      file handle for output file to print to,
+#                              must be already opened for writing
+#         $start_cchar     comment character to start a comment
+#         $end_cchar       comment character to end a comment
+#         $ntextarr        size of *text_arr
+#         *text_arr        array of itar_header text lines
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#
+#
+sub print_itar_header {
+  local ($filehandle, $start_cchar, $end_cchar, $ntextarr, *text_arr, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($sc, $ec, $is_ok, $found_errors, $i, $counter, *arr);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="print_itar_header";
+
+  # Debug
+
+  if ($debug > 1) {
+      print(STDERR "$subname: Input...\n");
+      print(STDERR "\tstart_cchar: $start_cchar, end_cchar: $end_cchar, ntextarr: $ntextarr\n");
+  }
+
+  # Print chars
+
+  $sc=$start_cchar;
+  $ec=$end_cchar;
+  $found_errors=0;
+  
+  # Loop through text array and print lines
+
+  for ($i=0; $i<=$ntextarr; $i++) {
+      $is_ok=print (OUTFILE "$start_cchar $text_arr[$i] $end_cchar\n");
+      if (!$is_ok) {
+	  $found_errors=1;
+      }
+  }
+
+  # Done
+  
+  if ($found_errors) {
+      $return_val=0;
+  } else {
+      $return_val=1;
+  }
+
+  return($return_val);
+}
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: get_comment_char
+#
+# Usage: ($return_val, $is_script, $do_prepend, $start_cchar, $end_cchar)
+#                     =&get_comment_char($filename, $debug)
+#
+# Function: Try to determine the comment characters to use for the
+#           input $filename. Uses the globally defined comment chars
+#           from the top of the file.
+#
+# Input:  $filename        filename to determine the comment chars for
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#         $is_script       1 if $filename is a script, 0 if not
+#         $do_prepend      1 to do prepend of itar_header, 0 to skip
+#         $start_cchar     comment character to start a comment
+#         $end_cchar       comment character to end a comment
+#
+#
+sub get_comment_char {
+  local ($filename, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($start_cchar, $end_cchar, $do_prepend, $is_script);
+  local($last_dot, $fname_len, $ext);
+  local($dbg2);
+
+  # Set defaults
+
+  $return_val=0;
+  $do_prepend=0;
+  $is_script=0;
+  $subname="get_comment_char";
+
+  # Debugging
+
+  if ($debug == 2) {
+      $dbg2=1;
+  } else {
+      $dbg2=0;
+  }
+
+  # Set return defaults for the comment characters
+
+  $start_cchar=$C_start_comment_char;
+  $end_cchar=$C_end_comment_char;
+
+  # Get the filename extension if we can
+
+  $last_dot = rindex($filename, ".");
+  $fname_len = length($filename);
+
+  if (($last_dot <= 0) || ($last_dot >= $fname_len)) {
+      $ext="UNKNOWN";
+  } else {
+      $ext=substr($filename, $last_dot);
+  }
+
+  if ($dbg2) {
+      print(STDERR "\t$subname: $filename has extension: $ext\n");
+  }
+
+  # Look for a match with the filename extension
+
+  $return_val = 1;
+  $do_prepend = 1;
+
+  if (($ext eq ".c") || ($ext eq ".h")) {
+      $start_cchar=$C_start_comment_char;
+      $end_cchar=$C_end_comment_char;
+  } elsif ($ext eq ".css") {
+      $start_cchar=$C_start_comment_char;
+      $end_cchar=$C_end_comment_char;
+  } elsif ($ext eq ".php") {
+      $start_cchar=$Cplus_start_comment_char;
+      $end_cchar=$Cplus_end_comment_char;
+      $is_script=1;
+  } elsif (($ext eq ".cc") || ($ext eq ".hh") || ($ext eq ".cdl")) {
+      $start_cchar=$Cplus_start_comment_char;
+      $end_cchar=$Cplus_end_comment_char;
+  } elsif (($ext eq ".f90") || ($ext eq ".F90") || ($ext eq ".inc")) {
+      $start_cchar=$F90_start_comment_char;
+      $end_cchar=$F90_end_comment_char;
+  } elsif (($ext eq ".f") || ($ext eq ".F") || ($ext eq ".incl")) {
+      $start_cchar=$Fortran_start_comment_char;
+      $end_cchar=$Fortran_end_comment_char;
+  } elsif ($ext eq ".m") {
+      $start_cchar=$Matlab_start_comment_char;
+      $end_cchar=$Matlab_end_comment_char;
+  } elsif (($filename =~ /akefile/) || 
+	   ($ext eq ".sh") || ($ext eq ".csh") ||
+	   ($ext eq ".py") || ($ext eq ".pl") ||
+	   ($ext eq ".pm") || ($ext eq ".mif")) {
+      $start_cchar=$Script_start_comment_char;
+      $end_cchar=$Script_end_comment_char;
+      $is_script=1;
+  } elsif (($ext eq ".html") || ($ext eq ".xml")) {
+      $start_cchar=$Html_start_comment_char;
+      $end_cchar=$Html_end_comment_char;
+      $is_script=1;
+  } elsif ($ext eq ".l") {
+      $start_cchar=$Man_start_comment_char;
+      $end_cchar=$Man_end_comment_char;
+  } else {
+
+      # Okay, we will try to figure out the type of file using the
+      # file command
+
+      $filetype=`file $filename`;
+
+      if ($filetype =~ /C\+\+ program/) {
+	  $start_cchar=$C_start_comment_char;
+	  $end_cchar=$C_end_comment_char;
+      } elsif ($filetype =~ /C program/) {
+	  $start_cchar=$C_start_comment_char;
+	  $end_cchar=$C_end_comment_char;
+      } elsif ($filetype =~ /script/) {
+	  $start_cchar=$Script_start_comment_char;
+	  $end_cchar=$Script_end_comment_char;
+	  $is_script=1;
+      } elsif (($filetype =~ /fortran/) || ($filetype =~ /FORTRAN/)) {
+	  $start_cchar=$Fortran_start_comment_char;
+	  $end_cchar=$Fortran_end_comment_char;
+      } elsif ($filetype =~ /HTML/) {
+	  $start_cchar=$Html_start_comment_char;
+	  $end_cchar=$Html_end_comment_char;
+      } elsif (($filetype =~ /executable/) || ($filetype =~ /data/)) {
+	  print(STDERR "Warning: This is a binary file, should not be modified\n");
+	  $do_prepend=0;
+      } else {
+	  print(STDERR "Warning: Unable to determine file type for $filename\n");
+	  $return_val = 0;
+      }
+  }
+
+  # Debug
+
+  if ($dbg2) {
+      print(STDERR "\t$subname: $filename\n");
+      print(STDERR "\t\tstart_comment_char: $start_cchar, end_comment_char: $end_cchar, is_script: $is_script, do_prepend: $do_prepend\n");
+  }
+
+  # Done
+
+  return($return_val, $is_script, $do_prepend, $start_cchar, $end_cchar);
+}
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: put_itar_header_below_scriptdefn
+#
+# Usage: $return_val
+#       =&put_itar_header_below_scriptdefn($source_file, $out_file,
+#                                 $start_cchar, $end_cchar, 
+#                                 $ntextarr, *text_arr, $debug)
+#
+# Function: Put the itar_header below the script definition at the top
+#           of the file.
+#
+# Input:  $source_file     input file to read
+#         $out_file        output file to create
+#         $start_cchar     comment character to start a comment
+#         $end_cchar       comment character to end a comment
+#         $ntextarr        size of *text_arr
+#         *text_arr        array of itar_header text lines
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#         $did_itar_header   1 if found the script definition and put
+#                               the itar_header on
+#
+#
+sub put_itar_header_below_scriptdefn {
+  local ($source_file, $out_file, $start_cchar, $end_cchar, $ntextarr, *text_arr, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($is_ok, $did_itar_header, $found, $line);
+  local($dbg2);
+
+  # Set defaults
+
+  $return_val=0;
+  $did_itar_header=0;
+  $subname="put_itar_header_below_scriptdefn";
+
+  if ($debug == 2) {
+      $dbg2=1;
+  } else {
+      $dbg2=0;
+  }
+
+  # Open the input file so we can read it line by line looking for
+  # script definition
+
+  if (!open(SRCFILE, $source_file)) {
+      print(STDERR "Cannot open source file $source_file - continuing ... \n");
+      return($return_val, $did_itar_header);
+  }
+
+  # Open the output file
+
+  if (!open(OUTFILE, ">$out_file")) {
+      print(STDERR "Cannot open file $out_file - continuing ... \n");
+      return($return_val, $did_itar_header);
+   }
+
+   $found=0;
+   while ($line = <SRCFILE>) {
+
+       # Look for the script definition at the top of the file
+
+       if (($found == 0) && 
+	   (($line =~ /^\#\!/) || ($line =~ /^\<\?php/) || 
+	    ($line =~ /^\<\?xml/) || ($line =~ /\<\html/))) {
+	   $found=1;
+	   print(OUTFILE $line);
+	   $is_ok=&print_itar_header(OUTFILE, $start_cchar, $end_cchar, $ntextarr, 
+				   *text_arr, $debug);
+	   next;
+       }
+
+       # Print all lines in the file to the output file
+
+       print(OUTFILE $line);
+   }
+
+  # Close the files
+
+  close(OUTFILE);
+  close(SRCFILE);
+
+  # Debug
+
+  if ($dbg2) {
+      print(STDERR "$subname: source_file $source_file, outfile: $out_file, found: $found\n");
+  }
+  
+  # Done
+
+  $did_itar_header=$found;
+  $return_val=1;
+
+  return($return_val, $did_itar_header);
+}
+
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: check_itar_header_exist
+#
+# Usage: ($return_val, $found_itar_header) =
+#             &check_itar_header_exist($file, $debug)
+#
+# Function: Open the $filename and see if an ITAR header exists on the file
+#
+# Input:  $file            file to check
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#         $found_itar_header 1 if a itar_header in the file, 0 if not
+#
+#
+sub check_itar_header_exist {
+  local ($file, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($line, $orig_line, $found_itar_header);
+  local($dbg2, $dbg3);
+
+  # Set defaults
+
+  $return_val=0;
+  $found_itar_header=0;
+  $subname="check_itar_header_exist";
+
+  # Debugging
+
+  $dbg2=0;
+  $dbg3=0;
+  if ($debug == 2) {
+      $dbg2=1;
+  } elsif ($debug == 3) {
+      $dbg2=1;
+      $dbg3=1;
+  }
+
+  # Open the file
+
+  if (!open(CHKFILE, $file)) {
+      print(STDERR "Cannot open file $filename...\n");
+      return($return_val, $found_itar_header);
+  }
+
+  # Look for a itar_header
+
+  while ($line = <CHKFILE>) {
+
+      # Convert the line to upper case so can find matches
+
+      $orig_line=$line;
+      $line =~ tr/[a-z]/[A-Z]/;     
+
+      if ($dbg3) {
+	  print(STDERR "line: $line");
+      }
+
+      # Look for ITAR Header (standard text only)
+
+      if ($line =~ /EXPORT CONTROL WARNING/) {
+	  $found_itar_header=1;
+	  print(STDERR "\t$file -- Found a itar_header in the file: $orig_line");
+      }
+  }
+  
+  # Close the file
+
+  close(CHKFILE);
+
+  # Debug
+
+  if ($dbg2) {
+      print(STDERR "\t$subname: file: $file, found itar_header: $found_itar_header\n");
+  }
+
+  # Done
+
+  $return_val=1;
+  return($return_val, $found_itar_header);
+}
+
+#------------------------------------ EOF ------------------------------------
+

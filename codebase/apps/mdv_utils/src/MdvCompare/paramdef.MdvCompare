@@ -1,0 +1,102 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+
+p_header = "MdvCompare is a small program for Andrew Crook that\n"
+        "reads two MDV fields, possibly from two different\n"
+        "files, and does some statistics on the differences\n"
+        "between the two fields over a subgrid. The differences are\n"
+	"computed as the first field specified minus the second.\n\n"
+        "The subgrid is defined by grid points, specified in\n"
+        "the param file. The file and field names are specified\n"
+        "on the command line. The usage is : \n\n"
+        "MdvCompare file1 field1 file2 field2 -params User.params\n\n"
+	"Note that the arguments must be specified IN ORDER,\n"
+        "which is rather archaic but OK for a simple program.\n\n"
+        "The output is statistics on the differences between\n"
+        "the two files for that subgrid (missing/bad values\n"
+        "are not counted). The output (printed to stdout) is :\n\n"
+	"The time of the data for field one, unix time (long int)\n"
+	"Min, Mean and Max\n"
+        "Bottom tenth percentile, Median and Top tenth percentile\n"
+        "RMS error, standard deviation of errors.\n\n"
+	"Niles Oien 23 October 2001";
+
+}
+
+
+paramdef double {
+
+  p_descr = "Value to use for bad data";
+  p_help = "Bad data usually happens if all the data in the\n"
+	   "subgrid are bad or missing. In this case, the BadVal\n"
+           "will be printed out."; 
+  p_default = -999.0;
+} BadValue;
+
+commentdef {
+
+  p_header = "Parameters that define the sub-grid";
+
+}
+
+paramdef int {
+  p_descr = "Minimum grid point in X for the subgrid.";
+  p_help = "The grid runs from 0 to NX-1 not 1 to NX."; 
+  p_default = "20";
+} MinX;
+
+paramdef int {
+  p_descr = "Minimum grid point in Y for the subgrid.";
+  p_help = "The grid runs from 0 to NY-1 not 1 to NY."; 
+  p_default = "20";
+} MinY;
+
+paramdef int {
+  p_descr = "Minimum grid point in Z for the subgrid.";
+  p_help = "The grid runs from 0 to NZ-1 not 1 to NZ."; 
+  p_default = "0";
+} MinZ;
+
+
+paramdef int {
+  p_descr = "Maximum grid point in X for the subgrid.";
+  p_help = "The grid runs from 0 to NX-1 not 1 to NX."; 
+  p_default = "40";
+} MaxX;
+
+paramdef int {
+  p_descr = "Maximum grid point in Y for the subgrid.";
+  p_help = "The grid runs from 0 to NY-1 not 1 to NY."; 
+  p_default = "40";
+} MaxY;
+
+paramdef int {
+  p_descr = "Maximum grid point in Z for the subgrid.";
+  p_help = "The grid runs from 0 to NZ-1 not 1 to NZ."; 
+  p_default = "0";
+} MaxZ;
+
+

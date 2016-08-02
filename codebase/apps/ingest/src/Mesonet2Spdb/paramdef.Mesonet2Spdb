@@ -1,0 +1,288 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for Mesonet2Spdb
+ *
+ */
+
+commentdef {
+  p_header = "Mesonet2Spdb reads mesonet surface observations in ASCII format, converts them and writes them to an SPDB data base. The intended data format is modeled after that used by the Oklahoma mesonet. For details on the mesonet.org format, see http://www.mesonet.org/wiki/Public:MDF_Format. Extensions to this are supported as documented by this parameter file. Also see http://www.mesonet.org/index.php/dataMdfMts/dataController/getFile/201011220000/mdf/HTML/ for more details on some of the fields.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In this mode it is optional to watch for a latest_data_info file. In ARCHIVE mode, it processes all of the data files in the input directory between the start and end times set on the command line. In FILELIST mode, it processes all of the files in the list specified on the command line. In FILELIST mode paths must be fully qualified with respect to the date and time - so if each date has a separate subdirectory the date part of the path must be included.";
+} mode;
+
+commentdef {
+  p_header = "DATA FILE INPUT.";
+}
+
+paramdef string {
+  p_default = "./raw/aws";
+  p_descr = "Input directory";
+  p_help = "Directory where input data files can be found.";
+} input_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, only checks input_dir for subdirs of the form YYYYMMDD";
+  p_help = "Only in REALTIME mode with latest_data_info_avail FALSE.";
+} strict_subdir_check;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, check file name contains specified sub-string.";
+  p_help = "See file_match_string.";
+} file_name_check;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input filename match string";
+  p_help = "Files must contain this string to be processed";
+} file_match_string;
+
+commentdef {
+  p_header = "DATA FORMAT.";
+  p_text = "The input data is in an ASCII file based on the mesonet.org format. See http://www.mesonet.org/wiki/Public:MDF_Format. The file is space-delimited and is organized by rows and columns. A single observation is stored per row. The fields are stored by columns, one column per field. If a row begins with '#' it is ignored as a comment. A row containing a '!' will be ignored as a version number line. A row containing 7 integers will be interpreted as the base time line: 'nfields base_year base_month base_day base_hour base_min base_sec'. This will be followed by a line containing a series of field labels, which will be used to interpret the data in each column.";
+}
+
+typedef enum {
+  STATION_ID,
+  STATION_NUM,
+  SECS_SINCE_BASE_TIME,
+  MINS_SINCE_BASE_TIME,
+  YEAR,
+  MONTH,
+  DAY,
+  HOUR,
+  MIN,
+  SEC,
+  LATITUDE,
+  LONGITUDE,
+  ELEVATION_M,
+  TEMP_C,
+  MIN_TEMP_C,
+  MAX_TEMP_C,
+  DEWPOINT_C,
+  RH_PERCENT,
+  WIND_DIRN_DEGT,
+  WIND_SPEED_MPS,
+  WIND_GUST_MPS,
+  VISIBILITY_KM,
+  EXTINCTION_PER_KM,
+  VERT_VIS_KM,
+  CEILING_KM,
+  RVR_KM,
+  PRESSURE_MB,
+  MSL_PRESSURE_MB,
+  MSL_PRESSURE_IN_HG,
+  PRESS_TEND_MB,
+  PRECIP_LIQUID_MM,
+  PRECIP_RATE_MMPH,
+  SNOW_DEPTH_MM,
+  FIELD_UNKNOWN
+} field_type_t;
+
+typedef struct {
+  string label;
+  field_type_t ftype;
+} field_def_t;
+
+paramdef struct field_def_t {
+  p_default = {
+    { "STID", STATION_ID },
+    { "STNM", STATION_NUM },
+    { "TIME", MINS_SINCE_BASE_TIME },
+    { "SECS_SINCE_BASE_TIME", SECS_SINCE_BASE_TIME },
+    { "YEAR", YEAR },
+    { "MONTH", MONTH },
+    { "DAY", DAY },
+    { "HOUR", HOUR },
+    { "MIN", MIN },
+    { "SEC", SEC },
+    { "LATITUDE", LATITUDE },
+    { "LONGITUDE", LONGITUDE },
+    { "ELEVATION_M", ELEVATION_M },
+    { "TAIR", TEMP_C },
+    { "MIN_TEMP_C", MIN_TEMP_C },
+    { "MAX_TEMP_C", MAX_TEMP_C },
+    { "DEWPOINT_C", DEWPOINT_C },
+    { "RELH", RH_PERCENT },
+    { "WDIR", WIND_DIRN_DEGT },
+    { "WVEC", WIND_SPEED_MPS },
+    { "WMAX", WIND_GUST_MPS },
+    { "VISIBILITY_KM", VISIBILITY_KM },
+    { "EXTINCTION_PER_KM", EXTINCTION_PER_KM },
+    { "VERT_VIS_KM", VERT_VIS_KM },
+    { "CEILING_KM", CEILING_KM },
+    { "RVR_KM", RVR_KM },
+    { "PRES", PRESSURE_MB },
+    { "MSL_PRESSURE_MB", MSL_PRESSURE_MB },
+    { "MSL_PRESSURE_IN_HG", MSL_PRESSURE_IN_HG },
+    { "PRESS_TEND_MB", PRESS_TEND_MB },
+    { "RAIN", PRECIP_LIQUID_MM },
+    { "PRECIP_RATE_MMPH", PRECIP_RATE_MMPH },
+    { "SNOW_DEPTH_MM", SNOW_DEPTH_MM }
+  };
+  p_descr = "List of field definitions, associating the labels in the file with the field types. There can be more definitions than fields in the file - so you can use a master list even if some of the fields are absent in the files. Either SECS_SINCE_BASE_TIME or YEAR,MONTH,DAY,HOUR,MIN,SEC must appear, otherwise we do not know the observation time. Obs time is computed as the base time plus SECS_SINCE_BASE_TIME, if this is specified. Otherwise the YYYY,MM,DD,HH,MM,DD data it used to compute the time. If the LATITUDE,LONGITUDE,ELEVATION_M is not included in the data file, the station position information must be made available from a separate file - see station_location_file_path.";
+} field_defs[];
+
+commentdef {
+  p_header = "STATION LOCATION FILE";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to obtain the lat/lon form a station location file.";
+  p_help = "If FALSE, the LATITUDE,LONGITUDE,ELEVATION_M must be set in the data.";
+} use_station_location_file;
+
+paramdef string {
+  p_default = "./station_loc.txt";
+  p_descr = "Path to station location file";
+  p_help = "If the do not contain lat/lon information, we must determine this from a separate file. The station location file should contain a four letter station identification followed by the latitude and longitude for each station to be processed, and the elevation in meters. Stations not in this file will be ignored.";
+} station_location_file_path;
+
+commentdef {
+  p_header = "STATION FILTERING";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the acceptedStations list (below)";
+  p_help = "Only accept stations in this list.";
+} use_accepted_stations_list;
+
+paramdef string {
+  p_default = {
+    "KDEN", "KTLX",
+  };
+  p_descr = "List of accepted station IDs";
+  p_help = "If a station is not on this list, it is not stored.";
+} accepted_stations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the rejectedStations list (below)";
+  p_help = "Reject stations in this list.";
+} use_rejected_stations_list;
+
+paramdef string {
+  p_default = {
+    "KDEN", "KTLX",
+  };
+  p_descr = "List of rejected station IDs";
+  p_help = "If a station is not on this list, it is not stored.";
+} rejected_stations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to check that observations are within a bounding box.";
+} check_bounding_box;
+
+typedef struct {
+  double min_lat;
+  double max_lat;
+  double min_lon;
+  double max_lon;
+} bbox_t;
+
+paramdef struct bbox_t {
+  p_default = { -90.0, 90.0, -180.0, 180.0 };
+  p_descr = "Bounding box to check if checkBoundingBox is TRUE.";
+  p_help = "Only observations which fall inside this box will be stored.";
+} bounding_box;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/mesonet";
+  p_descr = "Output URL for decoded station data.";
+} output_url;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Expire time in seconds for each observation";
+  p_help = "This value will be added to the observation time to determine the expire time.";
+} expire_seconds;
+
+typedef enum
+{
+  STATION_REPORT,
+  XML
+} output_format_t;
+
+paramdef enum output_format_t
+{
+  p_default = XML;
+  p_descr = "Format for data in SPDB";
+  p_help = "(a) STATION_REPORT - C-style struct. (b) WX_XML: XML";
+} output_format;
+

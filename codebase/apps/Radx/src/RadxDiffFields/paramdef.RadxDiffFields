@@ -1,0 +1,207 @@
+/*********************************************************
+ * parameter definitions for RadxDiffFields
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Jan 2016
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "RadxDiffFields computes statistics about the difference between fields in Radx files. The fields can be in the same file, or in different files. The results are written to SPDB as XML.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "/tmp/primary";
+  p_descr = "Input directory for searching for primary files.";
+  p_help = "The main input files are in this directory (or are specified on the command line with -f). If we are diffing fields that are in the same files, we only read from this directory. If we are diffing fields in separate files we also need to read data from the secondary directories.";
+} primary_input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+commentdef {
+  p_header = "READ OPTIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only use sweeps within the specified fixed angle limits.";
+} set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower fixed angle limit - degrees.";
+} lower_fixed_angle_limit;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Upper fixed angle limit - degrees.";
+} upper_fixed_angle_limit;
+
+commentdef {
+  p_header = "FIELD DETAILS";
+}
+
+typedef struct {
+  string primary_field_name; 
+  string secondary_field_name; 
+  boolean fields_are_in_same_file;
+  string secondary_input_dir;
+} field_pair_t;
+
+paramdef struct field_pair_t {
+  p_default = {
+    {
+      primary_field_name = "DBZ_F",
+      secondary_field_name = "DBZ_NAA_F",
+      fields_are_in_same_file = false,
+      secondary_input_dir = "/tmp/secondary"
+    }
+    ,
+    {
+      primary_field_name = "ZDR_F",
+      secondary_field_name = "ZDR_F",
+      fields_are_in_same_file = true,
+      secondary_input_dir = "/tmp/secondary"
+    }
+  };
+  p_descr = "Specify which fields are to be compared.";
+  p_help = "You need to specify both the primary and secondary field names. If the fields are in the same file, set 'fields_are_in_same_file' to true. If this is false, specify the secondary_input_dir to point to the location of the secondary files.";
+} field_pairs[];
+
+paramdef double {
+  p_default = 30;
+  p_descr = "Time tolerance for finding the secondary file (secs).";
+  p_help = "We search secondary_input_dir for a file within this tolerance of the primary data set.";
+} secondary_file_time_tolerance_sec;
+
+paramdef double {
+  p_default = 30;
+  p_descr = "Time tolerance for matching rays between the primary and secondary data sets (secs).";
+  p_help = "We match up rays between the primary and secondary volumes, and require that the rays must match in time by this tolerance or less.";
+} secondary_ray_time_tolerance_sec;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Elevation tolerance for matching rays between the primary and secondary data sets (deg).";
+  p_help = "We match up rays between the primary and secondary volumes, and require that the rays must match in elevation by this tolerance or less.";
+} secondary_ray_elevation_tolerance_deg;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Azimuth tolerance for matching rays between the primary and secondary data sets (deg).";
+  p_help = "We match up rays between the primary and secondary volumes, and require that the rays must match in azimuth by this tolerance or less.";
+} secondary_ray_azimuth_tolerance_deg;
+
+commentdef {
+  p_header = "LIMITING ANALYSIS BASED ON CONDITION FIELD";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to constrain the results based on the value of a conditioning field.";
+  p_help = "For example, you can limit the analysis to a range of SNR values.";
+} apply_condition_check;
+
+paramdef string {
+  p_default = "SNR";
+  p_descr = "Name of field for limiting analysis.";
+  p_help = "This field must exist in the primay data set. See 'check_condition_field'.";
+} condition_field_name;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Minimum valid value of the condition field.";
+  p_help = "See 'check_condition_field'.";
+} condition_field_min_value;
+
+paramdef double {
+  p_default = 60.0;
+  p_descr = "Maximum valid value of the condition field.";
+  p_help = "See 'check_condition_field'.";
+} condition_field_max_value;
+
+commentdef {
+  p_header = "STATS";
+  p_text = "We compute the mean difference, and a specified set of percentiles.";
+}
+
+paramdef int {
+  p_default = { 25, 50, 75 };
+  p_descr = "Percentiles to be computed in addition to mean.";
+} result_percentiles[];
+
+commentdef {
+  p_header = "WRITE RESULTS";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out analysis results to SPDB.";
+  p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
+} write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/diff_fields";
+  p_descr = "URL for writing results to SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} spdb_output_url;
+

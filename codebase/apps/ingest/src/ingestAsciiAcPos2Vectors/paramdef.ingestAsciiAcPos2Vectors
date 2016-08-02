@@ -1,0 +1,64 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "ingestAsciiAcPos2Vectors param file.";
+  p_text = "Simple program that reads ASCII aircraft positions\n"
+	"and outputs a set of aircraft position vectors. Only\n"
+	"operates in archive mode for now. File format is :\n\n"
+	"KA,2002,6,14,10,19,17,35.398300,-97.602100,393.053500\n"
+	"KA,2002,6,14,10,20,17,35.398300,-97.602100,392.923900\n"
+	"KA,2002,6,14,10,21,17,35.398300,-97.602100,392.830000\n"
+	"KA,2002,6,14,10,22,17,35.398300,-97.602100,392.728500\n\n"
+	"callsign (two characters),year,month,day,hour,min,sec(UTC),\n"
+	"lat,lon,alt\n\n"
+	"ONLY ONE CALLSIGN PER FILE\n"
+	"Niles Oien May 2006.";
+};
+
+
+paramdef boolean {
+   p_header = "Option to print messages."; 
+   p_help = "Set to debug.";
+   p_default = FALSE;
+} debug;
+
+paramdef string {
+   p_header = "Instance to check in with."; 
+   p_help = "Used in procmap.";
+   p_default = "sim";
+} instance;
+
+paramdef string {
+   p_header = "List of input files."; 
+   p_help = "Set as appropriate.";
+   p_default = { "a.dat", "b.dat" };
+} inFilenames[];
+
+paramdef string {
+   p_header = "Output URL"; 
+   p_help = "SPDB data are written here.";
+   p_default = "spdbp:://localhost::./spdb/posnVec";
+} outUrl;
+

@@ -1,0 +1,31 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<pre>#include &quot;rsl.h&quot;
+
+main()
+{
+Radar *radar;
+Volume *dz_copy;
+Sweep *s1_copy;
+Ray r33_copy;
+
+radar = RSL_wsr88d_to_radar(&quot;nex.file.2&quot;, &quot;KMLB&quot;);
+
+/* Copy of Volume for DZ. */
+dz_copy = RSL_copy_volume(radar-&gt;v[DZ_INDEX]);
+
+/* Copy of Sweep 1. */
+s1_copy = RSL_copy_sweep(dz_copy-&gt;sweep[0]);
+
+/* Copy of Ray 33. */
+r33_copy = RSL_copy_ray(s1_copy-&gt;ray[32]);
+}
+</pre>
+
+</body>

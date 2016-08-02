@@ -1,0 +1,57 @@
+/**********************************************************
+ * paramdef.multi_filter_app
+ *
+ * This file contains the TDRP parameter definitions for multi_filter_app
+ * 
+ */
+
+commentdef
+{
+  p_header = "multi_filter_app";
+  p_text = "This program is an example of 3 filters";
+};
+
+typedef enum
+{
+  UNKNOWN,
+  FILTER_1,
+  FILTER_2,
+  FILTER_3
+} app_filter_t;
+
+typedef struct
+{
+  double parm;
+} filt_1_t;
+
+paramdef struct filt_1_t
+{
+  p_descr = "filt_1 params";
+  p_help = "";
+  p_default = {}; 
+} parm_filt_1[];
+ 
+typedef struct
+{
+  double parm;
+} filt_2_t;
+
+paramdef struct filt_2_t
+{
+  p_descr = "filt_2 params";
+  p_help = "";
+  p_default = {}; 
+} parm_filt_2[];
+ 
+typedef struct
+{
+  double parm;
+} filt_3_t;
+
+paramdef struct filt_3_t
+{
+  p_descr = "filt_3 params";
+  p_help = "";
+  p_default = {}; 
+} parm_filt_3[];
+ 

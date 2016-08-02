@@ -1,0 +1,59 @@
+/**********************************************************************
+ * TDRP params for UpdateMdvOrigin
+ **********************************************************************/
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Directory to use for input data.
+// Type: string
+//
+
+input_dir = "/home/oien/rap/apps/aoaws/src/Gms2Mdv";
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+// Directory to use for storing results.
+// Type: string
+//
+
+output_dir = ".";
+
+///////////// NewLatitude /////////////////////////////
+//
+// New origin - latitude.
+// Set to the latitude of the new origin.
+// Type: double
+//
+
+NewLatitude = 33.0758;
+
+///////////// NewLongitude ////////////////////////////
+//
+// New origin - longitude.
+// Set to the longitude of the new origin.
+// Type: double
+//
+
+NewLongitude = -106.122;
+
+///////////// NewGridMinx /////////////////////////////
+//
+// New grid minimum in X.
+// Set to the desired grid_minx.
+// Type: double
+//
+
+NewGridMinx = -229.5;
+
+///////////// NewGridMiny /////////////////////////////
+//
+// New grid minimum in Y.
+// Set to the desired grid_miny.
+// Type: double
+//
+
+NewGridMiny = -229.5;
+
+

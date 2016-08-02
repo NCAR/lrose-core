@@ -1,0 +1,19 @@
+ 
+
+&1a
+&2a
+close
+open prog 200
+clear
+delete gather
+
+cmd "&1"
+cmd "&2b200r"
+ta 2000
+ts 1000
+while (2>1)
+p302=0
+a(p51) b(p52)
+endwhile
+cmd "&1"
+close

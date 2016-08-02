@@ -1,0 +1,256 @@
+#include "rapic.defs"
+
+#undefine USE_RAINFIELDS_CLIENT
+
+
+RDRCLASSES = \
+    expbuff.C \
+    radlcnvt.C \
+    radlpnt.C \
+    rdrglb.C \
+    scanmng.C \
+    threadobj.C \
+    replay.C \
+    version.C \
+    levelTable.C \
+    rdrscan.C \
+    rapicThread.C
+
+RDRUTILS = \
+    juldate.C \
+    rdrutils.C \
+    utils.C \
+    memStatus.C \
+    siteinfo.C \
+    latlong.C \
+    log.C \
+    rdrxlat.C \
+    histogram.C \
+    freelist.C \
+    rdrfilter.C \
+    rdrInvent.C \
+    signals.C \
+    rpEventTimer.C \
+    spinlock.C
+
+RAPICUNUSED = \
+    $(RAPICHOME)/rapic/signals.C \
+    $(RAPICHOME)/rapic/cappi.C \
+    $(RAPICHOME)/rapic/vil.C \
+    $(RAPICHOME)/rapic/vxsect.C \
+    $(RAPICHOME)/rapic/playaifc.C \
+    $(RAPICHOME)/rapic/soundmng.C \
+    $(RAPICHOME)/rapic/rain_acc.C \
+    $(RAPICHOME)/rapic/writegif.C \
+    draw.C \
+    $(RAPICHOME)/rapic/histogram.C
+
+COMMS     = \
+    rxdevice.C \
+    txdevice.C \
+    commmng.C \
+    ipnamerescache.C \
+    comms.C
+
+DB     = \
+    db.C
+
+NEXRAD	= \
+    NexRad.C \
+    NexRadMgr.C \
+    NexRadStnHdlr.C
+
+UF = \
+	uf.C \
+	ufStnHdlr.C \
+	ufMgr.C
+
+FAM_MON = \
+	fam_mon.C \
+	urlReqObj.C \
+	fileReader.C \
+	fileReaderRapic.C \
+	fileReaderNexrad.C \
+	fileReaderObsAXF.C \
+	ltningUrlReqObj.C \
+	fileReaderLightningAXF.C 
+
+FILE_READERS = \
+	readNexRad.C \
+	boundbox.C \
+	obsData.C \
+	lightningData.C \
+	readObsAXF.C \
+	readLightningAXF.C	
+
+#RPCONVERTCLASSES = \
+#    rapicConvert.C
+#    rapicConvert.C
+#    rapic_data_range.C
+
+#SRCS       = $(RDRCLASSES) $(RDRUTILS) $(COMMS) $(DB) $(NEXRAD)
+SRCS       = $(RDRCLASSES) $(RDRUTILS) $(COMMS) $(DB) $(NEXRAD) $(UF) \
+	$(FAM_MON) $(FILE_READERS)
+
+OBJS       = $(SRCS:.C=.o)
+
+PROGRAMS = \
+           rapicDataServer
+
+#           rapicConvert \
+#           rapicToNexrad \
+#	   rapic_data_range
+
+PROGRAM_SRC = \
+           rapicDataServer.C \
+	fam_mon.C
+#           rapicConvert.C \
+#           rapicToNexrad.C \
+#	   rapic_data_range.C
+
+
+
+# rapicConvert: $(SRCS) rapicConvert.o
+
+# rapic_data_range: $(SRCS) rapic_data_range.o
+
+# rapicToNexrad: $(SRCS) $(NEXRAD) rapicToNexrad.o
+
+
+#ifdef LINUX
+vpath %.C ../rapic
+RAPIC++FLAGS            = -Dlinux -DLINUX -DSTDCPPHEADERS -DNO_XWIN_GUI \
+	                  -D_PTHREAD -D_REENTRANT -g -Wall \
+                          $(OPTIMIZER) $(SERVER_OPTION_DEFS)
+RAPICONVERTFLAGS	= -DNO_XWIN_GUI
+RAPIC++INCLUDES         = -I/usr/include/bsd -I$(STL_INCLUDE_DIR) -I../include -I$(CT_INCLUDE_67) -I./include
+CXX		        = g++
+CC			= g++
+LOCAL_LIBRARIES = \
+	$@.o -L$(RAPICHOME)/lib -L../lib -L./ -lpthread   --enable_threads=posix \
+	-lctreestd -lfam -lcurl
+#endif
+
+
+#ifdef SGI
+DEPENDFILE              = Makedepend
+WOFFS                   = -woff 3262,3201,1552,1355,1174,1681,1682,1424
+ABITYPE                 = -n32
+RAPIC++FLAGS            = -Dsgi -DHAVE_MALLINFO  $(CPPHEADERSDEF) \
+                          -fullwarn $(WOFFS) $(ABITYPE) $(OPTION_DEFS) \
+                          -G 0 $(OPTIMIZER) -ptused -FE:template_in_elf_section \
+                          -LANG:std
+#                         -LANG:std -ptnone -ptused -prelink -auto_include -MDupdate $(DEPENDFILE) -I../jpeg-6b
+#RAPIC++FLAGS            = -Dsgi -DIRIX6 -DNEED_BOOL_H +w -fullwarn $(WOFFS) -g -G 0 -g3 -kpicopt -ptused $(SERVER_OPTION_DEFS) -LANG:std
+RAPIC++INCLUDES         = -Dsgi -I/usr/include/CC -I/usr/include -I$(RAPIC_INCLUDE) \
+        -I$(CT_INCLUDE_64) -LANG:std
+#RAPIC++INCLUDES         = -I../include -I/usr/include/CC -I$(CT_INCLUDE_64)
+RAPICCFLAGS             = -signed -float -G 0 -cckr $(OPTIMIZER) \
+                          $(WOFFS) $(ABITYPE) $(OPTION_DEFS)
+RAPICONVERTFLAGS	= -DNO_XWIN_GUI -DIRIX6 
+RAPICCINCLUDES          = -I$(RAPIC_INCLUDE)
+CXX		        = CC
+CC                      = cc
+#CC			= CC
+include $(DEPENDFILE)
+LDFLAGS                = -ptused -FE:template_in_elf_section -v \
+                        -FE:eliminate_duplicate_inline_copies
+
+#LLDLIBS                 = -limage -lsun -lbsd -lmld -lPW -lGLC \
+#                          -lgl -lfastm -lm -lfm -lctpflib -lmalloc -lC -lc $(MIGFALIB)
+LOCAL_LIBRARIES = \
+	$(LDFLAGS) $@.o -L../lib -L/usr/lib32 -lCio -lC -lc -lm -lmalloc -lgen -lctpflib -lpthread
+#endif	
+
+#ifdef AIX 
+vpath %.C ../rapic
+RAPIC++FLAGS            = -Daix -DAIX -DSTDCPPHEADERS -DNO_XWIN_GUI -qtempinc -g $(OPTIMIZER) $(SERVER_OPTION_DEFS)
+RAPIC++INCLUDES         = -I$(CT_INCLUDE_64) \
+	 -I/usr/vacpp/include -I/usr/include -I../include
+
+RAPICONVERTFLAGS	= -DNO_XWIN_GUI
+CXX		        = xlC_r
+CC			= xlC_r
+.SUFFIXES : .C
+.C.o :
+	$(CXX) $(CXXOPTS) $(CXXFLAGS) -c $<
+LOCAL_LIBRARIES = \
+	$@.o -L$(RAPICHOME)/lib -L../lib -lpthread -lctpflib_aix -lc
+#endif				
+
+#ifdef SUN
+RAPIC++FLAGS            = -Dlinux -DLINUX -DSUN -DSTDCPPHEADERS -DNO_XWIN_GUI -DNEED_BOOL_H -D_REENTRANT -g \
+                          $(OPTIMIZER)
+RAPICONVERTFLAGS	= -DNO_XWIN_GUI
+RAPIC++INCLUDES         = -I/usr/include/bsd -I/usr/include/g++-3 -I../include -I../include/ct_include_6.4
+CXX		        = g++
+CC			= g++
+LOCAL_LIBRARIES = \
+	$@.o -L$(RAPICHOME)/lib -L../lib -lpthread -lctpflib
+#endif
+
+CXXFLAGS                = $(RAPIC++FLAGS) $(RAPIC++INCLUDES) $(RAPICONVERTFLAGS)
+
+DEP_LIBRARIES    =
+
+UNUSED_LIBRARIES  = \
+	-L$(RAPICHOME)/lib -L$(TITANHOME)/lib \
+	-lrapic -lrpuimx -lctpflib -ltitanui \
+	 -laudio -laudiofile -ljpeg -lGLC \
+	 -ltitan -lcdata_util -ltoolsa \
+	 -lrapmath -lmdv -ldataport -leuclid -ltdrp  -ltoolsa \
+	-lm -lfm -lgl -lmalloc -lC -lc
+
+#LOCAL_LIBRARIES = \
+#	$@.o -L$(RAPICHOME)/lib -L$(TITANHOME)/lib \
+#	 -ltitanui -ltitan -lcdata_util \
+#	 -lrapmath -lmdv -ldataport -ltoolsa \
+#	-lm -lmalloc -lgl -lgen -lctpflib
+
+
+# Use this for THREAD_SPROC compiles
+# NOTE: ****THREAD_SPROC compiles won't run with -lpthread linked in
+#LOCAL_LIBRARIES = \
+#	$@.o -L$(RAPICHOME)/lib -lgen -lctpflib
+# Use this for THREAD_PTHREAD compiles
+# NOTE: ****THREAD_SPROC compiles won't run with -lpthread linked in
+
+RAPIC++DEPEND           = $(RAPIC++INCLUDES) $(DEPENDFILE) 
+
+RAPICDEPEND             = $(RAPICCINCLUDES) $(SERVER_OPTION_DEFS)
+
+DEPEND_DEFINES          = $(RAPICDEPEND) $(RAPIC++DEPEND) $(SERVER_OPTION_DEFS) $(MIGFADEF) $(MDVINCLUDE) \
+	$(NEXRADINCLUDE) $(TITAN_CLIENT_DEFS) $(WDSS_CLIENT_DEFS) -DNO_XWIN_GUI
+
+#ifdef SGI
+rapicDataServer: $(SRCS) $(NEXRAD) rapicDataServer.o
+	CC -g -n32 -o rapicDataServer $(OBJS) $(LOCAL_LIBRARIES)
+#else
+rapicDataServer: $(SRCS) $(NEXRAD) rapicDataServer.o
+AllTarget($(PROGRAMS))
+NormalProgramTarget($(PROGRAMS),$(OBJS),$(DEP_LIBRARIES),$(LOCAL_LIBRARIES),-lm)
+#endif
+DependTarget()
+CleanTarget()
+
+sourcetar:
+	tar cvfh rapic_utils_source.tar $(SRCS) $(NEXRAD) rapicDataServer.C Imakefile* make* include
+
+
+source_links:
+	sh make_links $(SRCS)
+
+remove_links:
+	sh remove_links $(SRCS)
+
+fam_mon: fam_mon.C
+	g++ -c -g -O2 -o fam_mon.o fam_mon.C
+	g++ -g -O2 -o fam_mon -lfam fam_mon.o
+
+cov_convert: cov_convert.C
+	g++ -c -g -o cov_convert.o cov_convert.C
+	g++ -g -o cov_convert cov_convert.o
+
+lib: $(OBJS)
+	ar r lib/librapic.a $(OBJS)
+	cp faircom/lib.sgl/libctreestd.a lib

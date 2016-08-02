@@ -1,0 +1,118 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ *  parameters for Sounding2Sndg
+ *
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Param file for Sounding2Sndg. Ingests SNDG_spdb_product_t  and converts to spdb Sndg objects";
+}
+
+
+typedef enum {
+  DEBUG_OFF, DEBUG_ON
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Program instance for process registration.";
+  p_help = "This program registers with procmap. This is the instance used for registration.";
+} instance;
+
+
+commentdef {
+  p_header = "RUN MODES";
+};
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Modes of running the program. In realtime mode the
+  program is triggered by the latest data info file in the input spdb
+  directory. In ARCHIVE mode, you must enter start and end times on
+  the command line";
+} mode;
+
+commentdef {
+  p_header = "INPUT DATA";
+};
+
+paramdef char* {
+  p_descr = "Input url";
+  p_default = "";
+} input_url;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for ARCHIVE mode only.";
+} start_time;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for ARCHIVE mode only.";
+} end_time;
+
+paramdef int {
+  p_default = 54000;
+  p_descr = "maximum age of data that will be processed in realtime mode.";
+}max_valid_age;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Time in milliseconds  between checks for new data";
+} sleep_time;
+
+
+commentdef {
+  p_header = "OUTPUT DATA";
+};
+
+paramdef char* {
+  p_descr = "Output url";
+  p_default = "spdbp:://localhost::$(PROJECT)/spdb/Sndg";
+} output_url;
+
+paramdef int {
+  p_descr = "Number of seconds to sleep after each sounding write.";
+  p_help = "May be useful to avoid overloading a DsSpdbServer\n"
+  "since each sounding is a separate SPDB write.";
+  p_default = 0;
+} postWriteDelay;
+
+
+

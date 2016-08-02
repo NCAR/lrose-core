@@ -1,0 +1,261 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.RefrMerge
+ *
+ * This file contains the TDRP parameter definitions for
+ * RefrMerge.
+ */
+
+
+commentdef
+{
+  p_header = "RefrMerge";
+  p_text = "This program merges refractivity N fields using the associated "
+           "sigma N fields as weights.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  MULTIPLE_URL,
+  INTERVAL_REALTIME,
+  INTERVAL_ARCHIVE
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+           "In MULTIPLE_URL mode, the program will not run until data "
+           "is available for all of the given URLs. "
+           "This is a realtime mode. "
+           "The parameters for this mode are given in the "
+           "multiple_url_trigger."
+           "In INTERVAL_REALTIME mode, the program will trigger at constant "
+           "intervals starting at the top of the current hour based on "
+           "the parameters specified in the interval_realtime parameter..\n"
+           "In INTERVAL_ARCHIVE mode, the program will trigger at constant "
+           "intervals starting at the specified time. "
+           "These parameters are specified in the interval_archive parameter.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "URL for triggering in latest data mode";
+  p_default = "mdvp:://localhost::mdv/derived_ruc";
+} latest_data_trigger;
+
+typedef struct
+{
+  string url;
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "mdvp:://localhost::mdv/derived_ruc",
+                 "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "List of URLs for triggering in latest data mode";
+  p_default = { "mdvp:://localhost::mdv/derived_ruc" };
+} multiple_url_trigger[];
+
+paramdef long
+{
+  p_descr = "Triggering parameters used in INTERVAL_REALTIME mode.";
+  p_help = "This is the triggering interval in seconds.";
+  p_default = 300;
+} interval_realtime;
+
+typedef struct
+{
+  long interval_secs;
+  string start_time;
+  string end_time;
+} interval_archive_t;
+
+paramdef struct interval_archive_t
+{
+  p_descr = "Triggering parameters used in INTERVAL_ARCHIVE mode.";
+  p_help = "\tinterval_secs - Triggering interval in seconds.\n"
+           "\tstart_time - Archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "\tend_time - Archive end time in any format recognized "
+           "by the DateTime class.\n";
+  p_default = { 300,
+                "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} interval_archive;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef struct
+{
+  string url;
+  string n_field_name;
+  string sigma_n_field_name;
+} merge_info_t;
+
+paramdef struct merge_info_t
+{
+  p_descr = "Information about the fields to be merged";
+  p_help = "\turl - Merge field URL.\n"
+           "\tn_field_name - The field name for the N field. "
+           "This must match the field name in the MDV file exactly.\n"
+           "\tsigma_n_field - The field name for the Sigma N field. "
+           "This must match the field name in the MDV file exactly.\n";
+  p_default = { { "mdvp:://localhost::mdv/merge1", "N", "SigmaN" },
+                { "mdvp:://localhost::mdv/merge2", "N", "SigmaN" },
+                { "mdvp:://localhost::mdv/merge3", "N", "SigmaN" } };
+} merge_fields[];
+
+paramdef long
+{
+  p_descr = "Maximum input valid age in seconds";
+  p_help = "Once the algorithm is triggered, it will not use any input data "
+           "older than this value.";
+  p_default = 1800;
+} max_input_valid_secs;
+
+typedef enum
+{
+  REMAP_LATLON,
+  REMAP_FLAT,
+  REMAP_LAMBERT_CONFORMAL2
+} remap_type_t;
+
+typedef struct
+{
+  remap_type_t remap_type;
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} remap_info_t;
+
+paramdef struct remap_info_t
+{
+  p_descr = "Information for remapping the input fields";
+  p_help = "If remap_type is REMAP_LATLON, the following fields are used:\n"
+           "\tnx, ny, minx, miny, dx, dy\n\n"
+           "If remap_type is REMAP_FLAT, the following fields are used:\n"
+           "\tnx, ny, minx, miny, dx, dy, origin_lat, origin_lon, rotation\n\n"
+           "If remap_type is REMAP_LAMBERT_CONFORMAL2, the following fields "
+           "are used:\n"
+           "\tnx, ny, minx, miny, dx, dy, origin_lat, origin_lon, "
+           "lat1, lat2";
+} remap_info;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::./mdv/output";
+} output_url;
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};

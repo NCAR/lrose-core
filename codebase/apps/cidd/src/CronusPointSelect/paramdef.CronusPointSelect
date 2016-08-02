@@ -1,0 +1,185 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "CronusPointSelect is a small program that enables the display\n"
+	"of Cronus data in ascii format based on CIDD click points. It is\n"
+	"typically run in an xterm. The user gives a list of MDV url\n"
+	"sources, and every time the user clicks in the CIDD window\n"
+	"data from these sources are displayed.\n\n"
+	"Niles Oien January 2004.";
+
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+////////////////////////////////////////////////////////////////////////
+// user interface
+
+commentdef {
+  p_header = "USER INTERFACE";
+}
+
+paramdef boolean {
+  p_descr = "Use Cidd time";
+  p_help = "Use times from Cidd to retrieve data";
+  p_default = false;
+} use_cidd_time;
+
+paramdef int {
+  p_descr = "mouse button recognized";
+  p_help = "0 = any, 1 = left button, 2 = middle, 3 = right button.";
+  p_default = 0;
+} mouse_button;
+
+paramdef int {
+  p_descr = "sleep milli-seconds";
+  p_help = "Number of milli-seconds to sleep between checks for mouse clicks.";
+  p_min = 20;
+  p_default = 250;
+} sleep_msecs;
+
+paramdef int {
+  p_descr = "Automatic click interval - secs";
+  p_help = "Number of seconds between automatic clicks.  If the user hasn't clicked anywhere after this number of seconds, we will simulate a user click in the same place as before and will update the information.  If <= 0, no automatic updates of the display are done.";
+  p_default = 60;
+} auto_click_interval;
+
+paramdef struct origin_t {
+  p_descr = "startup click location";
+  p_help = "Lat/lon position to display if the user hasn't clicked on a location.";
+  p_field_name = { lat,
+                   lon };
+  p_field_type = { double,    /* lat */
+                   double };  /* lon */
+} startup_location;
+
+////////////////////////////////////////////////////////////////////////
+// Shared memory information
+
+commentdef {
+  p_header = "SHARED MEMORY WITH DISPLAY";
+}
+
+paramdef int {
+  p_descr = "Shared memory status key";
+  p_help = "Id for the shared memory status segment used for communicating with the display.";
+  p_default = 61500;
+} coord_shmem_key;
+
+paramdef boolean {
+  p_descr = "Flag to not wait for display shared memory.";
+  p_help = "If set, this program will not wait for shared memory segment from the display to be set ready.";
+  p_default = false;
+} no_wait_for_shmem;
+
+paramdef int {
+  p_descr = "Don't collect new data until last request was this old (secs)";
+  p_default = 10;
+} max_data_age;
+
+
+typedef struct {
+	 string label;
+
+         string url;
+	 string fieldName;
+
+	 string cronusUrl;
+	 string cronusFieldName;
+
+         double cronusWeight;
+
+         int lookBack;
+} source_t;
+ 
+paramdef struct source_t {
+  p_default = {
+
+	{"Radar",
+	 "mdvp:://localhost::mdv/radarPPI",
+	"DBZ",
+	"mdvp:://localhost::mdv/cronus",
+	"DBZ",
+	0.12,
+	720 },
+	
+	{"Sat",
+	 "mdvp:://localhost::mdv/sat",
+	"albedo",
+	"mdvp:://localhost::mdv/cronus",
+	"albedo",
+	0.35,
+	1800 }
+
+	};
+  p_private = FALSE;
+
+  p_descr = "Defines the MDV data sources.";
+
+  p_help = "";
+} sources[];
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of blank lines to print before starting a new printout.";
+  p_help = "Used to clear the screen of data before starting on a new click.";
+} numHeaderBlanks;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to print the time for each field.";
+  p_help = "May be useful if data age is an issue.";
+} printFieldTimes;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Number of decmal places to go to when printing out values.";
+  p_help = "The default should be fine.";
+} numDecimalPlaces;
+
+paramdef string {
+  p_default = "%7.2f";
+  p_descr = "The C-style format string used for printing values.";
+  p_help = "The default should be fine.";
+} formatString;

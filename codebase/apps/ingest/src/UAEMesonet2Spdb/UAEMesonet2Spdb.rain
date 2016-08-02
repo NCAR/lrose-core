@@ -1,0 +1,286 @@
+/**********************************************************************
+ * TDRP params for UAEMesonet2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// UAEMesonet2Spdb reads surface weather observations from the UAE 
+//   Mesonet, converts them to station_report_t format and writes them to 
+//   an SPDB data base.
+//
+// The input files are csv ASCII, with the following contents per line:
+//
+// FORMAT_ONE:
+// Station,Year,Month,Day,Hour (GMT),Minute,Wind.Dir [°],Wind.Speed 
+//   [m/s],Temp.Dry [°C],RelHumidity [%],Radiation.Global [Wh/m2].
+//
+// FORMAT_TWO:
+// Station,Year,Month,Day,Hour (GMT),Minute,Precip [mm/24hr].
+//
+// Comment lines begin with ':'.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_NORM;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "rain";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file. In this 
+//   mode it is optional to watch for a latest_data_info file. In ARCHIVE 
+//   mode, it processes all of the data files in the input directory 
+//   between the start and end times set on the command line. In FILELIST 
+//   mode, it processes all of the files in the list specified on the 
+//   command line. In FILELIST mode paths must be fully qualified with 
+//   respect to the date and time - so if each date has a separate 
+//   subdirectory the date part of the path must be included.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// format //////////////////////////////////
+//
+// Input data file format.
+//
+// FORMAT_ONE: :Station,Year,Month,Day,Hour (GMT),Minute,Wind.Dir 
+//   [?],Wind.Speed [m/s],Temp.Dry [?C],RelHumidity [%],Radiation.Global 
+//   [Wh/m2]
+//
+//  FORMAT_TWO: :Station,Year,Month,Day,Hour (GMT),Minute,Precip 
+//   [mm/24hr].
+//
+//
+// Type: enum
+// Options:
+//     FORMAT_ONE
+//     FORMAT_TWO
+//
+
+format = FORMAT_TWO;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+//
+// Directory where input data files can be found.
+//
+//
+// Type: string
+//
+
+input_dir = "./";
+
+///////////// latest_data_info_avail //////////////////
+//
+// Set to true if there is a latest_data_info file available in the 
+//   input directory.
+//
+// REALTIME mode only.
+//
+//
+// Type: boolean
+//
+
+latest_data_info_avail = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+//
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// strict_subdir_check /////////////////////
+//
+// When set, only checks input_dir for subdirs of the form YYYYMMDD.
+//
+// Only in REALTIME mode with latest_data_info_avail FALSE.
+//
+//
+// Type: boolean
+//
+
+strict_subdir_check = FALSE;
+
+///////////// file_name_check /////////////////////////
+//
+// When set, check file name contains specified sub-string.
+//
+// See file_match_string.
+//
+//
+// Type: boolean
+//
+
+file_name_check = FALSE;
+
+///////////// file_match_string ///////////////////////
+//
+// Input filename match string.
+//
+// Files must contain this string to be processed.
+//
+//
+// Type: string
+//
+
+file_match_string = "txt";
+
+///////////// input_delimiter /////////////////////////
+//
+// Delimiter for input data.
+//
+// Input data uses this between values.
+//
+//
+// Type: string
+//
+
+input_delimiter = ",";
+
+//======================================================================
+//
+// STATION LOCATION DETAILS.
+//
+//======================================================================
+ 
+///////////// station_location_path ///////////////////
+//
+// Path to station location file.
+//
+// Since the UAE Mesonet reports do not contain lat/lon/height 
+//   information, we must determine this from a separate file. The station 
+//   location file is a comma-delimited file containing station names, 
+//   lat, lon, height msl, etc. We read this file and then use it to look 
+//   up the location of stations based on their names.
+//
+//
+// Type: string
+//
+
+station_location_path = "./station_list";
+
+//======================================================================
+//
+// CORRECTING FOR TIME ZONE.
+//
+//======================================================================
+ 
+///////////// utc_correction_secs /////////////////////
+//
+// Adjustment to UTC (secs).
+//
+// This is the number of seconds to be added to the observation time to 
+//   get UTC.
+//
+//
+// Type: int
+//
+
+utc_correction_secs = 86400;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_report_type //////////////////////
+//
+// Type of station report to put in the output SPDB database.
+//
+//
+// Type: enum
+// Options:
+//     STATION_REPORT
+//     XML
+//
+
+output_report_type = STATION_REPORT;
+
+///////////// output_url //////////////////////////////
+//
+// Output URL for decoded metars.
+//
+// See the DIDSS docs for details on URL usage.
+//
+//
+// Type: string
+//
+
+output_url = "spdbp:://localhost::./spdb/UAE_rain";
+
+///////////// expire_seconds //////////////////////////
+//
+// Expire time in seconds for each metar.
+//
+// This value will be added to the metar time to determine the expire 
+//   time for the metar.
+//
+//
+// Type: int
+//
+
+expire_seconds = 86400;
+

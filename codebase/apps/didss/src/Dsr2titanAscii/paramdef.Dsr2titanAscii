@@ -1,0 +1,38 @@
+/*********************************************************
+ * parameter definitions for Dsr2titanAscii
+ *
+ * Niles Oien, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * December 2008
+ */
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "Print debug messages";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with the process mapper";
+} instance;
+
+paramdef string {
+  p_descr = "URL for DsRadar data via FMQ";
+  p_default = "fmqp:://localhost::./fmq.dsRadar";
+} fmq_url;
+
+paramdef string {
+  p_descr = "Output directory";
+  p_default = "/some/directory/structure";
+} output_dir;
+
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If FALSE, the program will seek to the end of the fmq and only read in new data. If TRUE, it will start reading from the beginning of the FMQ.";
+} seek_to_start_of_input;
+

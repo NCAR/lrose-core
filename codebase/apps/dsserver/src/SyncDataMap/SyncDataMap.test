@@ -1,0 +1,64 @@
+/**********************************************************************
+ * TDRP params for SyncDataMap
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for procmap registration and auto restarting.
+// Type: string
+//
+
+instance = "primary";
+
+//======================================================================
+//
+// POLLIING DETAILS.
+//
+//======================================================================
+ 
+///////////// polling_interval_secs ///////////////////
+//
+// Polling interval (secs).
+// This is the interval at which the remote DataMappers will be queried 
+//   for their latest information.
+// Type: int
+//
+
+polling_interval_secs = 15;
+
+///////////// remote_host_list ////////////////////////
+//
+// Remote host list.
+// This is the list of hosts SyncDataMap will poll. You can request a 
+//   DataMapper on a host to relay the request to another host. This 
+//   allows you to get past firewalls provided you can run a DataMapper on 
+//   a host which has access across the firewall. To request a relay, put 
+//   the hosts in order separated by colons. For example host5:host6:host7 
+//   will ask host5 to relay to host6 which will relay to host7.
+// Type: string
+// 1D array - variable length.
+//
+
+remote_host_list = { "jupiter", "earth", "europa:junta" };
+

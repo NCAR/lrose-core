@@ -1,0 +1,99 @@
+/**********************************************************************
+ * TDRP params for Tstorms2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// Tstorms2Symprod program.
+//
+// Tstorms2Symprod reads native TITAN data files, converts the data into 
+//   rapformats/tstorm_spdb.h style structs and writes the data out to 
+//   SPDB.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operational mode.
+// Program may be run in two modes, ARCHIVE and REALTIME. In REALTIME 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In ARCHIVE mode, all of the scans in a series of track 
+//   files are processed.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input TITAN storm data.
+// If this path is not absolute (starts with /) or relative (starts with 
+//   .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.
+// Type: string
+//
+
+input_dir = "/d1/dixon/data/mexico/titan/storms";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of input data in realtime mode (secs).
+// REALTIME mode only. This the max valid age for input data. In 
+//   REALTIME mode, the program will wait for data more recent than this.
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for output SPDB data.
+// Type: string
+//
+
+output_url = "./spdb/tstorms";
+

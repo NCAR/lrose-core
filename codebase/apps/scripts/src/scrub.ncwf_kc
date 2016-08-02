@@ -1,0 +1,81 @@
+#!/usr/bin/perl --
+# scrub: Scrub directories, based on modification time.
+# Tres Hofmeister <tres@ncar.ucar.edu>
+# CVS: $Id: scrub.ncwf_kc,v 1.2 2015/08/21 22:35:45 dixon Exp $
+
+# The -d option causes directories to be removed as well as files.
+# The -n option causes scrub to not unlink files/directories, and
+#   automatically sets the -v option.
+# The -p option causes scrub to remove only files/directories matching the
+#   Perl regular expression [pattern].
+# The -v option causes file/directory names to be removed to be printed.
+# age-in-days is any valid Perl expression which results in a numeric
+#   value, e.g. "1/24" equals one hour.  Note: the granularity is quite
+#   fine, unlike find(1), which has a granularity of one day.
+
+use File::Find;
+use Getopt::Std qw( getopts );
+
+($prog = $0) =~ s%.*/%%;
+
+$usage = <<EOF;
+Usage: $prog [-dnv] [-p pattern] age-in-days pathname ...
+  -d  Remove directories as well as files.
+  -n  Do not actually remove anything.
+  -v  Print file/directory names to be removed.
+  -p  Remove only files/directories matching pattern.
+[age-in-days may be fractional; pattern is a Perl regular expression.]
+EOF
+
+&getopts('dnp:v') || die $usage;
+@ARGV >= 2        || die $usage;
+
+# The -n option implies the -v option.
+$opt_v = 1 if $opt_n;
+
+# Verify that the specified age is valid.
+($age = eval shift) =~ /^[.\d]+/ || die "$prog: bad age\n";
+
+# Quote any (unlikely, but...) "/" characters in the pattern.
+$opt_p =~ s|/|\\/|g if $opt_p;
+
+# Traverse the desired directories.
+&find(@ARGV);
+
+# Remove old directories if so desired, simply failing if they're not
+# empty.  Do so in reverse order, so subdirectories will be removed
+# first.
+
+if ($opt_d) {
+    my(%mark);
+
+    # Exclude the top level directories from the list to be removed.
+    map($mark{$_}++, @ARGV);
+    @old_dirs = grep(!$mark{$_}, @old_dirs);
+
+    foreach $dir (reverse @old_dirs) {
+	print "$dir\n" if $opt_v;
+	rmdir $dir || warn "rmdir: $dir: $!\n" unless $opt_n;
+    }
+}
+
+
+sub wanted {
+    (($dev, $ino, $mode, $nlink, $uid, $gid) = lstat($_))
+	|| warn "stat: $name: $!\n";
+
+    return unless -M _ > $age;
+
+    # If a pattern has been specified, check for it.
+    !/$opt_p/o && return if $opt_p;
+
+    # If the directory is old but contains files, it can't be removed.
+    # Save its name for possible removal later, when all files to be
+    # removed have been removed, and return.
+
+    -d _ && (push(@old_dirs, $name), return);
+
+    # Not a directory.
+    print "$name\n" if $opt_v;
+    unlink($_) || warn "unlink: $name: $!\n" unless $opt_n;
+}

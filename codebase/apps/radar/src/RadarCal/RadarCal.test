@@ -1,0 +1,149 @@
+/**********************************************************************
+ * TDRP params for RadarCal
+ **********************************************************************/
+
+//======================================================================
+//
+// RadarCal analyses radar calibration data.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// CAL CIRCUIT PARAMETERS.
+//
+//======================================================================
+ 
+///////////// circuit_gain_h //////////////////////////
+//
+// Gain through the H circuit, dBm.
+// Type: double
+//
+
+circuit_gain_h = 20.5;
+
+///////////// circuit_gain_v //////////////////////////
+//
+// Gain through the V circuit, dBm.
+// Type: double
+//
+
+circuit_gain_v = 20.1;
+
+///////////// coupling_factor_h ///////////////////////
+//
+// Coupling factor H pipe, dBm.
+// Type: double
+//
+
+coupling_factor_h = -36.92;
+
+///////////// coupling_factor_v ///////////////////////
+//
+// Coupling factor H pipe, dBm.
+// Type: double
+//
+
+coupling_factor_v = -37;
+
+//======================================================================
+//
+// ANALYSIS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// linear_region_min_dbm ///////////////////
+//
+// dBm value at low end of linear region.
+// Type: double
+//
+
+linear_region_min_dbm = -60;
+
+///////////// linear_region_max_dbm ///////////////////
+//
+// dBm value at upper end of linear region.
+// Type: double
+//
+
+linear_region_max_dbm = -20;
+
+///////////// noise_region_max_dbm ////////////////////
+//
+// dBm value at upper end of noise region.
+// Type: double
+//
+
+noise_region_max_dbm = -125;
+
+//======================================================================
+//
+// OUTPUT RESULTS.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Dir for output files.
+// The results will be written to sub-directories named from the cal 
+//   time.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// append_to_global_results_file ///////////
+//
+// Option to append results to global file.
+// Type: boolean
+//
+
+append_to_global_results_file = TRUE;
+
+///////////// global_file_name ////////////////////////
+//
+// Name for global output file.
+// Type: string
+//
+
+global_file_name = "RadarCal.global_results.txt";
+

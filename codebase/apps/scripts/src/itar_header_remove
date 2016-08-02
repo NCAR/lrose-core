@@ -1,0 +1,188 @@
+#! /usr/bin/perl
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2001 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Program(RAP) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2001/11/20 0:2:45 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+#
+# Function: Script to remove the ITAR header text from source code files.
+#           The ITAR header text is found using the special character strings
+#           placed around the ITAR header notice by itar_header_prepend.
+#
+# Usage:    itar_header_remove target_files
+#
+#==============================================================================
+#
+# Externals
+#
+use Getopt::Std qw( getopts );
+
+# Globals
+
+$Start_pattern="*===*===*===*===*===*===*===";       # Pattern to match itar_header_prepend
+$End_pattern=$Start_pattern;                         # Pattern to match itar_header_prepend
+
+($prog = $0) =~ s%.*/%%;                    # Program name
+
+# Set command line defaults
+
+$Debug=0;
+$Debug_level=0;
+$Cleanup=1;
+$Test=0;
+
+# Parse input parameters
+
+&getopts('dhnt');
+
+if ($opt_h) {
+    print STDERR "Usage: $prog [-dhnt] target-files\n";
+    print STDERR " Purpose is to go through the list of target-files and remove the\n";
+    print STDERR " ITAR header notice from the top of each file. Requires the special\n";
+    print STDERR " characters placed around the ITAR header text by itar_header_prepend\n";
+    print STDERR " on each file.\n";
+    print STDERR "\t-d:\tprint debug messages\n";
+    print STDERR "\t-h:\tprint this usage message\n";
+    print STDERR "\t-n:\tdo not cleanup the backup tmp files\n";
+    print STDERR "\t-t:\t(test mode) do not actually modify the files\n";
+    exit 0;
+}
+
+if ($opt_d) {
+    $Debug = 1;
+    $Debug_level =1;
+}
+
+if ($opt_n) {
+    $Cleanup=0;
+}
+
+if ($opt_t) {
+    $Test=1;
+}
+
+@ARGV >= 1    || die "Usage: $prog [-hdtn] target-files\n";
+
+#
+# loop through all the args as filenames
+#
+
+ FILE:
+foreach $filename (@ARGV) {
+
+    # Skip the filename if it is not a file
+
+    if (!-f $filename) {
+	print(STDERR "Skipping $filename - not a file\n");
+	next FILE;
+    }
+
+    # Skip the filename if it is a CVS file
+
+    if ($filename =~ /CVS/) {
+	print(STDERR "Skipping $filename - is a CVS file\n");
+	next FILE;
+    }
+
+    # Skip the filename if it is a binary file
+
+    if (-B $filename) {
+	print(STDERR "Skipping $filename - is a binary file\n");
+	next FILE;
+    }
+
+    # Print info
+
+    print(STDERR "Removing itar_header from $filename\n");
+
+    # Open the input and output files
+
+    $outfile = $filename . ".modified-$prog";
+
+    if (!open(SRCFILE, $filename)) {
+	print(STDERR "Cannot open source file $filename - continuing ... \n");
+	next FILE;
+    }
+
+    if (!open(OUTFILE, ">$outfile")) {
+	print(STDERR "Cannot open output file $outfile - continuing ... \n");
+	next FILE;
+    }
+
+    # Initialize for each file before reading it line by line
+
+    $linenum = 0;
+    $in_itar_header = 0;
+    $found_itar_header_start = 0;
+    $found_itar_header_end = 0;
+
+    # loop through the lines in the file
+
+    while ($line = <SRCFILE>) {
+
+	##$linenum++;
+
+	# If not in itar_header, look for start of itar_header. If inside
+	# the itar_header, do not print the lines to the output file.
+	# If outside the itar_header, print the lines to the output file.
+
+	if (!$in_itar_header) {
+
+	    # If find the start of the itar_header, set a flag, 
+	    # else print the line to the output file.
+
+	    $string_loc=index($line, $Start_pattern);
+	    if ($string_loc >= 0) {
+		$in_itar_header = 1;
+		$found_itar_header_start = 1;
+	    } else {
+		print (OUTFILE $line);
+	    }
+
+	} else {
+
+	    # Look for the end of the itar_header
+
+	    $string_loc=index($line, $End_pattern);
+	    if ($string_loc >= 0) {
+		$in_itar_header = 0;
+		$found_itar_header_end=1;
+	    } 
+	}
+
+    } # while 
+
+    # Close the files
+
+    close(SRCFILE);
+    close(OUTFILE);
+
+    # If successful, copy the output file to the source file name
+
+    $backup_file=$filename . ".bak-$prog";
+    if (($found_itar_header_start) && ($found_itar_header_end)) {
+
+	if (!$Test) {
+	    system("/bin/cp $filename $backup_file");
+	    system("/bin/cp $outfile $filename");
+	}
+
+    } else {
+	print (STDERR "Warning: in file $filename - itar_header not removed\n");
+    }
+    
+    # Cleanup 
+    
+    if ($Cleanup) {
+	unlink($backup_file);
+	unlink($outfile);
+    }
+
+} # foreach
+
+# Done
+
+exit 0;

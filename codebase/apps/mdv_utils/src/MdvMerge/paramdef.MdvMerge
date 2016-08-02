@@ -1,0 +1,415 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MdvMerge
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 1998
+ * 
+ * MdvMerge takes MDV data from a number of input directories and merges
+ * them into a single mosaic.
+ *
+ * Optionally a trigger can be sent to an FMQ, similar to what
+ * RadarTrigger does, to start nowcasting operations. Added by Niles.
+ *
+ */
+
+commentdef {
+  p_header = "MdvMerge takes MDV data from a number of input\n"
+	"directories and merges them into a single mosaic. Mike Dixon.\n\n"
+	"Optionally a trigger can be sent to an FMQ, similar to what\n"
+	"RadarTrigger does, to start nowcasting operations. "
+        "Added by Niles.\n\n"
+        "*** Note that if you are merging 3-dimensional datasets, the input "
+        "datasets and the output dataset must have a constant dz and the "
+        "same type of vertical levels.  This is not checked by the program "
+        "but is assumed.";
+}
+
+
+typedef enum {
+  DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate "
+           "level of detail.";
+} debug;
+
+paramdef string {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+           "In realtime mode, the analysis is performed for each volume scan "
+           "as it becomes available. "
+           "In archive mode, the file list is obtained from the command line.";
+} mode;
+
+typedef enum {
+  TIME_TRIGGER, FILE_TRIGGER
+} trigger_t;
+
+paramdef enum trigger_t {
+  p_default = TIME_TRIGGER;
+  p_descr = "Trigger mechanism.";
+  p_help = "TIME_TRIGGER: the program is triggered at constant time intervals "
+           "- see time_trigger_interval.\n"
+           "FILE_TRIGGER: the program watches the first input_dir and "
+           "triggers based on data in that directory.";
+} trigger;
+
+paramdef long {
+  p_min = {0};
+  p_default = {300};
+  p_descr = "Interval for TIME_TRIGGER - secs.";
+  p_help = "For TIME_TRIGGER, this is the interval between trigger events. "
+           "In REALTIME mode, a time trigger always occurs on the hour, and "
+           "at constant intervals thereafter. "
+           "In ARCHIVE mode the trigger starts at start_time and at constant "
+           "intervals thereafter.";
+} time_trigger_interval;
+
+paramdef long {
+  p_min = {0};
+  p_default = {600};
+  p_descr = "Max time diff for searching for files relative to the "
+            "trigger time - secs.";
+  p_help = "When matching files up with the trigger time, the difference "
+           "between the trigger time and file time must be less than this "
+           "margin. This value is also used as the max age of the latest data "
+           "info file when in REALTIME mode with FILE_TRIGGER.";
+} trigger_time_margin;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Array of input URLs.";
+  p_help = "For data on local disk, this can just be the directory containing "
+           "the input MDV data files.  For data retrieved from a server, it "
+           "is the URL for the server.  A server URL looks like the "
+           "following:\n"
+           "\tmdvp:://host:port:directory_path\n"
+           "This URL specifies a DsMdvServer process running on the specified "
+           "host and using the specified port.  The data would reside on the "
+           "specified host under $RAP_DATA_DIR/directory_path.";
+} input_urls[];
+
+//
+//  urls_that_must_have_updated - added by Niles Oien September 2002.
+//
+paramdef int {
+  p_default = { 0 };
+  p_descr = "Array of input URL numbers as listed above in the\n"
+	"input_urls array. The first URL in input_urls is referenced\n"
+	"as number 0.";
+  p_help = "This is an array of integers, representing URLs in the\n"
+	"order listed above.\n"
+	"The user can list the URLs that must have updated before MdvMerge\n"
+	"triggers. By default, only the first URL needs to be updated\n"
+	"before MdvMerge triggers. If, for example, the user lists\n"
+	"five URLs that are to be merged, viz. :\n\n"
+	"input_urls = {ua, ub, uc, ud, ue};\n\n"
+	"And wants to trigger only when the three URLs ua, uc and ue\n"
+	"have updated, then the appropriate setting for this parameter\n"
+	"would be :\n\n"
+	"urls_that_must_have_updated = { 0, 2, 4};";
+} urls_that_must_have_updated[];
+
+//
+// min_time_between_triggers - added by Niles Oien September 2002.
+//
+paramdef int {
+  p_default =  0 ;
+  p_descr = "Minimum time between triggering in realtime file triggered\n"
+	"mode, seconds.";
+  p_help = "This allows the user to ensure that MdvMerge does not\n"
+	"trigger at intervals less than this amount in realtime\n"
+	"file triggered mode.";
+} min_time_between_triggers;
+
+//
+// min_number_updated_urls - added by Niles Oien September 2002.
+//
+paramdef int {
+  p_default =  0;
+  p_descr = "In realtime file triggered mode, MdvMerge will not\n"
+	 "trigger until at least this number of input URLs have\n"
+	"updated. Specified in seconds.";
+  p_help = "The default is 0 which means that this parameter will\n"
+	"not affect the triggering.";
+} min_number_updated_urls;
+//
+// Added max_valid_age - was hardcoded at 600. Niles. 
+//
+paramdef int {
+  p_default =  600;
+  p_descr = "Maximum file age in realtime file triggered mode, seconds.";
+  p_help = "Applies to all URLs specified.";
+} max_valid_age;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Output URL.";
+  p_help = "For data on local disk, this can just be the directory containing "
+           "the input MDV data files.  For data retrieved from a server, it "
+           "is the URL for the server.  A server URL looks like the "
+           "following:\n"
+           "\tmdvp:://host:port:directory_path\n"
+           "This URL specifies a DsMdvServer process running on the specified "
+           "host and using the specified port.  The data would reside on the "
+           "specified host under $RAP_DATA_DIR/directory_path.";
+} output_url;
+
+typedef enum {
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON, OUTPUT_PROJ_LAMBERT
+} output_projection_t;
+
+paramdef enum output_projection_t {
+  p_default = OUTPUT_PROJ_FLAT;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT - (x,y) Cartesian data in km from a given origin.\n"
+           "LATLON - lat/lon grid with constant grid spacing.\n";
+           "LAMBERT - Lambert Conformal projection with constant grid spacing.\n";
+} output_projection;
+
+typedef struct {
+  double lat;
+  double lon;
+} output_origin_t;
+
+paramdef struct output_origin_t {
+  p_descr = "Origin of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT.";
+  p_default = {40.0, -104.0};
+} output_origin;
+
+paramdef double {
+  p_descr = "Rotation of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT.";
+  p_default = 0.0;
+  p_min = 0.0;
+  p_max = 360.0;
+} output_rotation;
+
+typedef struct {
+  double lat_1;
+  double lat_2;
+} output_std_parallels_t;
+
+paramdef struct output_std_parallels_t {
+  p_descr = "Standard parallels of the output grid.";
+  p_help = "Used with OUTPUT_PROJ_LAMBERT only.";
+  p_default = {20.0, 45.0};
+} output_std_parallels;
+
+typedef struct {
+  long nx;
+  long ny;
+  long nz;
+  double minx;
+  double miny;
+  double minz;
+  double dx;
+  double dy;
+  double dz;
+} grid_t;
+
+paramdef struct grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "The grid params for the output grid.";
+  p_default = {300, 300, 1, -149.5, -149.5, 0.5, 1.0, 1.0, 1.0};
+} output_grid;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to set field numbers";
+} set_field_nums;
+
+paramdef int {
+  p_descr = "List of field number arrays to be processed from input URLs.";
+  p_help = "Each URL has an array of field numbers. If all URL's field numbers"
+	   "are the same one field number array can be used";
+  p_default = {{0}};
+} field_nums[][];
+
+paramdef string {
+  p_descr = "Field name list.";
+  p_help = "Each URL has an array of field names. If all URL's field namess"
+	   "are the same one field name array can be used";
+  p_default = {{"DBZ"}};
+} field_names[][];
+
+paramdef boolean {
+  p_descr = "Flag indicating whether the scaling_info parameter will be used.";
+  p_help = "If TRUE, the scale and bias values in the scaling_info parameter "
+           "will be used to scale the output fields.  If FALSE, the scale and "
+           "bias values will be dynamically calculated for each output "
+           "volume.";
+  p_default = false;
+} use_scaling_info;
+
+typedef struct {
+  double scale;
+  double bias;
+} scaling_info_t;
+
+paramdef struct scaling_info_t {
+  p_descr = "Scaling information to be used for the output fields.";
+  p_help = "This parameter gives a scale and bias to be used for each of the "
+           "output fields.  This parameter is only used if use_scaling_info "
+           "is set to TRUE.  If used, there must be the same number of "
+           "entries in this array as there are in the field_list array and "
+           "the values will be used in the same order as in that array.";
+} scaling_info[];
+
+paramdef boolean {
+  p_descr = "Flag indicating whether the compression_info parameter will be used.";
+  p_help = "If TRUE, the data for each output field will be compressed using the "
+           "scheme specified for that field.  "
+           "If FALSE, zlib compression will be used for all of the output fields.";
+  p_default = false;
+} use_compression_info;
+
+typedef enum {
+  COMPRESSION_NONE,
+  COMPRESSION_RLE,
+  COMPRESSION_LZO,
+  COMPRESSION_ZLIB,
+  COMPRESSION_BZIP,
+  COMPRESSION_GZIP
+} compression_t;
+
+paramdef enum compression_t {
+  p_descr = "Compression information to be used for the output fields.";
+  p_help = "This parameter gives compression method to be used for each of the "
+           "output fields.  This parameter is only used if use_compression_info "
+           "is set to TRUE.  If used, there must be the same number of "
+           "entries in this array as there are in the field_list array and "
+           "the values will be used in the same order as in that array.";
+  p_default = { COMPRESSION_ZLIB };
+} compression_info[];
+
+paramdef string {
+  p_default = {"Unknown"};
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation "
+           "purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = {"Merged data created by MdvMerge."};
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation "
+           "purposes.";
+} data_set_source;
+
+
+typedef enum {
+  MERGE_INT8, MERGE_FLOAT32
+} merge_type_t;
+
+paramdef enum merge_type_t {
+  p_default = MERGE_INT8;
+  p_descr = "encoding type used to perform the data merging.";
+  p_help = "INT8 - select 8-bit integer merge.\n"
+           "FLOAT32 - select 32-bit floating point merge.\n";
+} merge_type;
+
+typedef enum {
+  MERGE_MIN, MERGE_MAX,MERGE_SUM
+} merge_operator_t;
+
+paramdef enum merge_operator_t {
+  p_default = MERGE_MAX;
+  p_descr = "operator to use in merge overlap areas.";
+  p_help = "MAX - select maximum value at grid point.\n"
+           "MIN - select minimum value at grid point.\n"
+           "SUM - SUM values at grid point.\n";
+} merge_operator;
+
+typedef enum {
+  FILL_MISSING_VALUE, FILL_BAD_VALUE
+} fill_value_t;
+
+paramdef enum fill_value_t {
+  p_default = FILL_BAD_VALUE;
+  p_descr = "value to use as initializer for output field.";
+  p_help = "MISSING_VALUE - use the missing data value for each grid point.\n"
+           "BAD_VALUE - use the bad data value for grid point.\n";
+} fill_value;
+
+commentdef {
+  p_header = "PARAMETERS TO FIRE FMQ TRIGGER - REALTIME FILE-BASED MODE ONLY";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to send message to FMQ when triggering in realtime file\n"
+	"based mode.";
+  p_help = "May be useful for triggering nowcast operation.";
+} fire_fmq_trigger;
+
+paramdef string {
+  p_default = "fmqp:://localhost::./fmq.dsRadar";
+  p_descr = "FMQ to write trigger to.";
+  p_help = "Only relevant if fire_fmq_trigger is TRUE";
+} fmq_url;
+
+paramdef long {
+  p_descr = "Number of nowcasts to issue";
+  p_min = {0};
+  p_max = {1000};
+  p_default = {1};
+} nowcast_count;
+
+paramdef long {
+  p_descr = "Frequency (in minutes) of multiple nowcasts";
+  p_min = {1};
+  p_max = {60};
+  p_default = {6};
+} nowcast_frequency;
+
+paramdef long {
+  p_descr = "Time to delay, seconds, before sending trigger\n"
+	"message to FMQ.";
+  p_help = "The trigger will be fired after the output MDV file is written.";
+  p_min = {0};
+  p_default = {0};
+} sleep_before_trigger;
+
+
+
+

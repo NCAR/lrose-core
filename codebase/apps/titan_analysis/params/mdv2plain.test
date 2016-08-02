@@ -1,0 +1,157 @@
+/****************************************************
+ * TDRP params for mdv2plain
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_NORM;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 2;
+
+/*
+ * Operational mode.
+ * Realtime mode - waits for new data; archive mode runs on file
+ *   list.
+ *
+ * Type: enum
+ * Default: REALTIME 
+ * Legal values: REALTIME, ARCHIVE.
+ */
+mode = ARCHIVE;
+
+/*
+ * Input file extension.
+ *
+ * Type: string
+ * Default: "mcg" 
+ */
+input_file_ext = ".dob";
+
+/*
+ * Input directory.
+ * Path of input directory - realtime mode only.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+input_dir = "/home/dixon/titan/cdata/kav_raw";
+
+/*
+ * Output file extension.
+ *
+ * Type: string
+ * Default: "dob" 
+ */
+output_file_ext = "jcksn";
+
+/*
+ * Output directory.
+ * Path of output directory.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+output_dir = "/home/dixon/titan/cdata/jackson";
+
+/*
+ * Data origin position.
+ * Data origin - data may be output starting at bottom left corner
+ *   (BOTLEFT) or top left corner (TOPLEFT).
+ *
+ * Type: enum
+ * Default: BOTLEFT 
+ * Legal values: BOTLEFT, TOPLEFT.
+ */
+output_data_origin = BOTLEFT;
+
+/*
+ * Max age of input data.
+ * For realtime only - max age of input data for it to be valid.
+ *
+ * Type: long
+ * Default: 300 
+ * Min value: 60 
+ */
+max_input_data_age = 600;
+
+/*
+ * Delay before processing incoming file (sec).
+ * Delay between finding new file and processing it - realtime
+ *   only (sec).
+ *
+ * Type: long
+ * Default: 10 
+ * Min value: 0 
+ * Max value: 300 
+ */
+processing_delay = 0;
+
+/*
+ * Start plane number.
+ * Number of first plane to be output.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ */
+start_plane = 0;
+
+/*
+ * End plane number.
+ * Number of last plane to be output.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ */
+end_plane = 0;
+
+/*
+ * Field number.
+ * Number of field to be output.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ */
+field_num = 0;
+
+/*
+ * Option to output file with FORTRAN record markers.
+ * If this is set, the output file will have a leading and trailing
+ *   4-byte word indicating the array length. This allows FORTRAN
+ *   to read the array as Unformatted Sequential.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+fortran_output = TRUE;
+
+/*
+ * Option to output file in vip levels.
+ * If this is set, the output data will be in vip levels instead of
+ *   dbz.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+vip_output = FALSE;
+
+

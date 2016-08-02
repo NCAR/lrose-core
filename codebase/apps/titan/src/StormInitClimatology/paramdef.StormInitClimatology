@@ -1,0 +1,198 @@
+
+commentdef {
+  p_header = "StormInitClimatology reads the storm initialization\n"
+	"data written by StormInitLocation and writes a climatology\n"
+	"gridded field to an MDV database. The -yesterday option\n"
+	"can be used to run the program with cron on yesterday's\n"
+	"data in near realtime. Niles Oien September 2002";
+}
+
+paramdef string {
+  p_descr = "Input SPDB URL";
+  p_help = "The GenPt structures that drive the program\n"
+	"are read from this SPDB URL."; 
+  p_default = {"spdbp:://localhost::spdb/StormInitLoc"};
+} spdbUrl;
+
+paramdef string {
+  p_descr = "Output MDV URL";
+  p_help = "The climatology is written here."; 
+  p_default = {"mdvp:://localhost::mdv/Climatology"};
+} mdvUrl; 
+
+paramdef boolean {
+  p_descr = "Set to print more messages as data are processed.";
+  p_help = "Can usually be FALSE"; 
+  p_default = FALSE;
+} debug;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+
+paramdef enum weighting_t
+{
+  p_descr = "Weight to give storms";
+  p_help = "The option to weight entries in the storm initiation\n"
+	"climatology. Entries can be weighted by the duration\n"
+	"of the storm, the maximum area the storm reached,"
+	"or no weight (all storms count equally).";
+  p_options = { WEIGHT_NONE, WEIGHT_DURATION, WEIGHT_AREA };
+  p_default = { WEIGHT_NONE };
+} weighting;
+
+paramdef double {
+  p_descr = "Radius of influence to apply to gaussians at\n"
+	"storm init points, Km.";
+  p_help = "For each storm initialization point, the program adds\n"
+	"a truncated gaussian of this radius to the output grid. The spatial\n"
+	"decay of the gaussian is controled by the halfLife parameter.\n"
+	"The extent of the gaussian - ie. where it is truncated - is\n"
+	"contolled by this parameter.";
+  p_default = 25.0;
+} radius;
+
+paramdef double {
+  p_descr = "Half life of gaussians at storm init points, Km.";
+  p_help = "For each storm initialization point, the program adds\n"
+	"a gaussian of this radius to the output grid. The spatial\n"
+	"decay of the gaussian is controled by the halfLife parameter.";
+  p_default = 10.0;
+} halfLife;
+
+paramdef boolean {
+  p_descr = "Option to use a previous run as the initial state.";
+  p_help = "By default, the program produces a climatology from a zero\n"
+	"initial state. Setting this parameter will cause the program\n"
+	"to use the last output from a previous run as the initial state,"
+	"if that last output is recent enough.";
+  p_default = FALSE;
+} cumulative;
+
+paramdef double {
+  p_descr = "Time to look back for last output to use as initial state, days.";
+  p_help = "Has no effect if cumulative is FALSE.";
+  p_default = 7.0;
+} cumulativeLookbackDays;
+
+commentdef {
+  p_header = "Start and end times if the -yesterday option is invoked."
+	"If the start time is after the end time, ie.\n\n"
+	"yesterdayStart = 23:00:00; \n"
+	"yesterdayEnd = 01:00:00; \n\n"
+	"Then the end time will be computed by taking the start time\n"
+	"and adding the time difference assuming a dat wrap (two\n"
+	"hours in this case). The deault is to process all of yesterday (UTC).";
+}
+
+paramdef string {
+  p_descr = "Start time if -yesterday invoked, hours, minutes and seconds.";
+  p_help = "Has no effect if -yesterday is not invoked.";
+  p_default = "00:00:00";
+} yesterdayStart;
+
+paramdef string {
+  p_descr = "End time if -yesterday invoked, hours, minutes and seconds.";
+  p_help = "Has no effect if -yesterday is not invoked.";
+  p_default = "23:59:59";
+} yesterdayEnd;
+
+
+
+
+commentdef {
+  p_header = "AREA, DURATION THESHOLDS";
+}
+
+typedef struct {
+  double min;
+  double max;
+} thresh_t;
+
+paramdef boolean {
+  p_descr = "Option to apply thresholds to maximum storm area.";
+  p_help = "By default all areas are included.";
+  p_default = FALSE;
+} applyAreaThresholds;
+
+paramdef struct thresh_t {
+  p_descr = "Threshold to apply to maximum storm area.";
+  p_help = "Relevant only if applyAreaThresholds is TRUE.";
+  p_default = {0, 30000};
+} areaThresholds;
+
+paramdef boolean {
+  p_descr = "Option to apply thresholds to maximum storm duration.";
+  p_help = "By default all durations are included.";
+  p_default = FALSE;
+} applyDurationThresholds;
+
+paramdef struct thresh_t {
+  p_descr = "Threshold to apply to maximum storm duration.";
+  p_help = "Relevant only if applyDurationThresholds is TRUE.";
+  p_default = {0, 30000};
+} durationThresholds;
+
+commentdef {
+  p_header = "PARAMETERS DEFINING THE OUTPUT GRID";
+}
+
+typedef enum {
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON, OUTPUT_PROJ_LAMBERT
+} output_projection_t;
+ 
+paramdef enum output_projection_t {
+  p_default = OUTPUT_PROJ_FLAT;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT - (x,y) Cartesian data in km from a given origin.\n"
+           "LATLON - lat/lon grid with constant grid spacing.\n";
+           "LAMBERT - Lambert Conformal projection with constant grid spacing.\n";
+} output_projection;
+
+typedef struct {
+  double lat;
+  double lon;
+} output_origin_t;
+ 
+paramdef struct output_origin_t {
+  p_descr = "Origin of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT.";
+  p_default = {40.0, -104.0};
+} output_origin;
+
+paramdef double {
+  p_descr = "Rotation of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT.";
+  p_default = 0.0;
+  p_min = 0.0;
+  p_max = 360.0;
+} output_rotation;
+
+typedef struct {
+  double lat_1;
+  double lat_2;
+} output_std_parallels_t;
+ 
+paramdef struct output_std_parallels_t {
+  p_descr = "Standard parallels of the output grid.";
+  p_help = "Used with OUTPUT_PROJ_LAMBERT only.";
+  p_default = {20.0, 45.0};
+} output_std_parallels;
+
+typedef struct {
+  long nx;
+  long ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_t;
+ 
+paramdef struct grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "The grid params for the output grid.";
+  p_default = {300, 300, -149.5, -149.5, 1.0, 1.0};
+} output_grid;

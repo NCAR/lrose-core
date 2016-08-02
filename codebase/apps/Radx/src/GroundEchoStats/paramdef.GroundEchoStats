@@ -1,0 +1,230 @@
+/*********************************************************
+ * parameter definitions for GroundEchoStats
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 2012
+ */
+
+commentdef {
+  p_header = "GroundEchoStats compute stats from ground echo in nadir-pointing airborne radar.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with the process mapper";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  FMQ_INPUT, TCP_INPUT, FILE_LIST, FILE_REALTIME
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = FMQ_INPUT;
+  p_descr = "Input mode - how the data is read.";
+  p_help = "\tFMQ_INPUT: read moments from a file message queue./n/tTCP_INPUT: read the moments data from a server, via a socket./n/tFILE_LIST: read data from files specified on the command line.\n\tFILE_REALTIME: watch an input directory, read each new file as it arrives.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/moments";
+  p_descr = "FMQ url. For FMQ_INPUT only.";
+  p_help = "URL to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions. For local FMQ, this can be the file path. For a remote FMQ, this will be a full URL: 'fmqp:://host::dir'.";
+} fmq_url;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If FALSE, the program will seek to the end of the fmq and only read in new data. If TRUE, it will start reading from the beginning of the FMQ.";
+} seek_to_start_of_fmq;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Name of host for TCP server. For TCP_INPUT only.";
+} input_tcp_host;
+
+paramdef int {
+  p_default = 12000;
+  p_descr = "Port for TCP server. For TCP_INPUT only.";
+} input_tcp_port;
+
+paramdef string {
+  p_default = "/tmp/files/moments";
+  p_descr = "Input dir for files. For FILE_REALTIME only.";
+  p_help = "Will watch this directory for new data.";
+} files_input_dir;
+
+commentdef {
+  p_header = "COMPUTING GROUND ECHO STATS";
+};
+
+paramdef double {
+  p_default = 25;
+  p_descr = "Number of rays required for computing statistics.";
+  p_help = "The stats are computed from this number of beams.";
+} nrays_for_stats;
+
+paramdef double {
+  p_default = -30;
+  p_descr = "Minimum dbz for computing statistics.";
+  p_help = "If the max DBZ is less than this, the beam is discarded.";
+} min_dbz_for_stats;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minimum range to ground (km).";
+  p_help = "Gates closer than this are not checked.";
+} min_range_for_ground;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for reflectivity.";
+  p_help = "This is used for finding the max echo, which is interpreted as the ground.";
+} dbz_field_name;
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "Field name for radial velocity.";
+  p_help = "This is used for computing the mean velocity of the ground echo.";
+} vel_field_name;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to tilt measurement.";
+  p_help = "This value is added to the tilt in the data.";
+} tilt_correction;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to rotation measurement.";
+  p_help = "This value is added to the rotation in the data.";
+} rotation_correction;
+
+commentdef {
+  p_header = "CHECKING LIMITS";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check elevation angle is within limits.";
+  p_help = "If TRUE, the elevation angle (in earth-centric coords) will be checked to ensure it is within the specified limits.";
+} check_elevation;
+
+paramdef double {
+  p_default = -92;
+  p_descr = "Minimum limit for elevation angle in earth coords.";
+} min_elevation;
+
+paramdef double {
+  p_default = -88;
+  p_descr = "Maximum limit for elevation angle in earth coords.";
+} max_elevation;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check roll angle is within limits.";
+  p_help = "If TRUE, the roll angle will be checked to ensure it is within the specified limits.";
+} check_roll;
+
+paramdef double {
+  p_default = 5;
+  p_descr = "Maximum absolute limit for roll angle.";
+} max_abs_roll;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check tilt angle is within limits.";
+  p_help = "If TRUE, the tilt angle will be checked to ensure it is within the specified limits. This helps detect when the tilt is at the stops.";
+} check_tilt;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "Maximum absolute limit for tilt angle.";
+} max_abs_tilt;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check drift angle is within limits.";
+  p_help = "If TRUE, the drift angle will be checked to ensure it is within the specified limits.";
+} check_drift;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Minimum absolute limit for drift angle.";
+} min_abs_drift;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Maximum absolute limit for drift angle.";
+} max_abs_drift;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check vert velocity is within limits.";
+  p_help = "If TRUE, the vertvelocity will be checked to ensure it is within the specified limits.";
+} check_vert_velocity;
+
+paramdef double {
+  p_default = 2;
+  p_descr = "Maximum absolute limit for vert_velocity angle.";
+  p_help = "Maximum absolute limit for vert_velocity angle.";
+} max_abs_vert_velocity;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check the standard deviation of measured radial velocity.";
+  p_help = "If TRUE, the standard deviation of the measured radial velocity will be checked to ensure it is below the threshold. This ensures the plane is not in turbulence.";
+} check_sdev_vr_measured;
+
+paramdef double {
+  p_default = 1;
+  p_descr = "Maximum absolute limit for vert_velocity angle.";
+} max_sdev_vr_measured;
+
+commentdef {
+  p_header = "CONTROLLING OUTPUT";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print detailed results as a table to stdout.";
+  p_help = "If TRUE, the stats are printed to stdout, as a space-delimited text table, with one line per result. The fields printed are:\n"
+    "\tyear\n"
+    "\tmonth\n"
+    "\tday\n"
+    "\thour\n"
+    "\tmin\n"
+    "\tsec\n"
+    "\tmsecs\n"
+    "\tmeanTime\n"
+    "\tmeanRangeToGround\n"
+    "\tmeanDbzOfGround\n"
+    "\tmeanVrPlatform\n"
+    "\tmeanVrMeasured\n"
+    "\tmeanVrCorrected\n"
+    "\ttiltErrorDeg\n"
+    "\tpitch\n"
+    "\t-tilt\n"
+    "\tsdevVrMeasured\n";
+} print_table_to_stdout;
+
+paramdef int {
+  p_default = 31;
+  p_descr = "Number of results in computing median.";
+  p_help = "We compute the median value of the corrected velocity and tilt error, and print those out. This is the number of results that are used to compute the median.";
+} n_results_for_median;
+

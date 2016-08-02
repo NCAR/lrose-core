@@ -1,0 +1,50 @@
+/**********************************************************************
+ * TDRP params for LtgSim
+ **********************************************************************/
+
+//======================================================================
+//
+// Small program to simulate NOAAPORT ltg file generation.
+// Cant use file_repeat_day due to the time being in the
+// actual files. Currently only works for White Sands,
+// locations are hard coded. Only used for testing in a mock-up.
+
+// Niles Oien March 2001.
+//
+//======================================================================
+ 
+///////////// Debug ///////////////////////////////////
+//
+// debug flag.
+// Debug flag.
+// Type: boolean
+//
+
+Debug = TRUE;
+
+///////////// Instance ////////////////////////////////
+//
+// procmap instance.
+// Type: string
+//
+
+Instance = "Test";
+
+///////////// TimeStep ////////////////////////////////
+//
+// Generation timestep.
+// Approximate time step, seconds, for generating files.
+// Type: long
+//
+
+TimeStep = 10;
+
+///////////// OutputDir ///////////////////////////////
+//
+// Output directory.
+// Directory to write pseudo-noaaport ltg output files to.
+// Type: string
+//
+
+OutputDir = ".";
+

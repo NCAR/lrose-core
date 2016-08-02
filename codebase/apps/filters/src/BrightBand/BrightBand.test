@@ -1,0 +1,341 @@
+/**********************************************************************
+ * TDRP params for BrightBand
+ **********************************************************************/
+
+//======================================================================
+//
+// BrightBand filters bright-band refelectivies from radar data in a 
+//   Cartesian grid MDV file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+// Type: boolean
+//
+
+debug = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Minimum val: 0
+// Type: long
+//
+
+max_realtime_valid_age = 300;
+
+///////////// input_data_dir //////////////////////////
+//
+// URL for input mdv files.
+// The program will trigger off files in this directory when in realtime 
+//   mode.
+// Type: string
+//
+
+input_data_dir = "/tmp/mdv/radar/cart/bauru";
+
+///////////// dbz_label ///////////////////////////////
+//
+// Reflectivity field label.
+// Name found in input mdv files for reflectivity field.
+// Type: string
+//
+
+dbz_label = "DBZ";
+
+//======================================================================
+//
+// ALGORITHM CONTROL.
+//
+//======================================================================
+ 
+///////////// max_down ////////////////////////////////
+//
+// Brightband will not be found below this height.
+// Given in km.
+// Type: double
+//
+
+max_down = 2;
+
+///////////// max_up //////////////////////////////////
+//
+// Brightband will not be found above this height.
+// Given in km.
+// Type: double
+//
+
+max_up = 7;
+
+///////////// input_template1 /////////////////////////
+//
+// The following values describe a template to be used to detect bright 
+//   band.
+// Specify reflectivity values for each grid point in dBZ.
+// Type: double
+// 1D array - variable length.
+//
+
+input_template1 = {
+ 30,
+ 30,
+ 45,
+ 45,
+ 25,
+ 25
+};
+
+///////////// input_template1_info ////////////////////
+//
+// The following contains information pertaining to input_template1.
+// Note that band_base_idex and band_top_idex describe which number in 
+//   the template above are the band base and band top respectively.  The 
+//   first number in the template has an index of 1.
+//
+// Type: struct
+//   typedef struct {
+//      boolean compute_interest;
+//      long band_base_idex;
+//      long band_top_idex;
+//      double min_refl_in_band;
+//      double max_refl_in_band;
+//   }
+//
+//
+
+input_template1_info = {
+    compute_interest = TRUE,
+    band_base_idex = 3,
+    band_top_idex = 4,
+    min_refl_in_band = 20,
+    max_refl_in_band = 45
+};
+
+///////////// input_template2 /////////////////////////
+//
+// The following values describe a template to be used to detect bright 
+//   band.
+// Specify reflectivity values for each grid point in dBZ.
+// Type: double
+// 1D array - variable length.
+//
+
+input_template2 = {
+ 30,
+ 30,
+ 45,
+ 25,
+ 25
+};
+
+///////////// input_template2_info ////////////////////
+//
+// The following contains information pertaining to input_template2.
+// Note that band_base_idex and band_top_idex describe which number in 
+//   the template above are the band base and band top respectively.  The 
+//   first number in the template has an index of 1.
+//
+// Type: struct
+//   typedef struct {
+//      boolean compute_interest;
+//      long band_base_idex;
+//      long band_top_idex;
+//      double min_refl_in_band;
+//      double max_refl_in_band;
+//   }
+//
+//
+
+input_template2_info = {
+    compute_interest = TRUE,
+    band_base_idex = 3,
+    band_top_idex = 3,
+    min_refl_in_band = 20,
+    max_refl_in_band = 45
+};
+
+///////////// input_template3 /////////////////////////
+//
+// The following values describe a template to be used to detect bright 
+//   band.
+// Specify reflectivity values for each grid point in dBZ.
+// Type: double
+// 1D array - variable length.
+//
+
+input_template3 = {
+ 30,
+ 45,
+ 45,
+ 45,
+ 45,
+ 25
+};
+
+///////////// input_template3_info ////////////////////
+//
+// The following contains information pertaining to input_template3.
+// Note that band_base_idex and band_top_idex describe which number in 
+//   the template above are the band base and band top respectively.  The 
+//   first number in the template has an index of 1.
+//
+// Type: struct
+//   typedef struct {
+//      boolean compute_interest;
+//      long band_base_idex;
+//      long band_top_idex;
+//      double min_refl_in_band;
+//      double max_refl_in_band;
+//   }
+//
+//
+
+input_template3_info = {
+    compute_interest = FALSE,
+    band_base_idex = 2,
+    band_top_idex = 5,
+    min_refl_in_band = 20,
+    max_refl_in_band = 45
+};
+
+///////////// interest_threshold //////////////////////
+//
+// Interest threshold.
+// Interest values below this threshold will not be used in identifying 
+//   areas of brightband.
+// Type: double
+//
+
+interest_threshold = 0.6;
+
+///////////// area_threshold_sq_km ////////////////////
+//
+// Area threshold.
+// The smallest area in square km that should be considered brightband.
+// Type: long
+//
+
+area_threshold_sq_km = 50;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// URL for output mdv files.
+// Filtered data written to mdv files in this URL.
+// Type: string
+//
+
+output_dir = "/tmp/mdv/radar/bb/bauru";
+
+//======================================================================
+//
+// ENCODING AND COMPRESSION CONVERSION.
+//
+//======================================================================
+ 
+///////////// output_encoding /////////////////////////
+//
+// Set encoding type for output files.
+//
+// Type: enum
+// Options:
+//     ENCODING_ASIS
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding = ENCODING_INT8;
+
+///////////// output_compression //////////////////////
+//
+// Set compression type for output files.
+//
+// Type: enum
+// Options:
+//     COMPRESSION_ASIS
+//     COMPRESSION_NONE
+//     COMPRESSION_BZIP2
+//     COMPRESSION_GZIP
+//
+
+output_compression = COMPRESSION_GZIP;
+
+//======================================================================
+//
+// WRITING INTERMEDIATE FIELDS.
+//
+//======================================================================
+ 
+///////////// write_interest //////////////////////////
+//
+// Describes when to write interest fields to an mdv file.
+// Options are to always write the interest fields to an mdv file, to 
+//   only write interest fields to an mdv file when areas of brightband 
+//   are identified and filtered, or to never write the interest fields to 
+//   an mdv file.
+//
+// Type: enum
+// Options:
+//     ALWAYS
+//     BRIGHTBAND_FOUND
+//     NEVER
+//
+
+write_interest = NEVER;
+
+///////////// interest_dir ////////////////////////////
+//
+// URL for interest mdv files.
+// Interest values written to mdv files in this URL.
+// Type: string
+//
+
+interest_dir = "mdvp:://localhost::mdv/interest";
+

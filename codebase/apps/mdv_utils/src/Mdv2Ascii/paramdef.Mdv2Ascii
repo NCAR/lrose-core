@@ -1,0 +1,337 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Mdv2Ascii
+ *
+ * This file contains the TDRP parameter definitions for
+ * Mdv2Ascii.
+ */
+
+
+commentdef
+{
+  p_header = "Mdv2Ascii";
+  p_text = "This program converts MDV files to a simple ASCII format. "
+           "It runs in realtime, unlike the old mdv2ascii.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  FILE_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n";
+           "In FILE_LIST mode, the user enters a list of files on the "
+           "command line using the -f option.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "URL for input files";
+  p_default = "mdvp:://localhost::./mdv/derived_ruc";
+} input_url;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use the field_name or the field_num "
+            "field in the input_fields array to identify the input fields.";
+  p_default = false;
+} use_field_name;
+
+typedef struct
+{
+  string field_name;
+  long field_num;
+} input_info_t;
+
+paramdef struct input_info_t
+{
+  p_descr = "Information about the field to be converted to ASCII";
+  p_help = "If use_field_name is true, uses the field_name field to "
+           "identify the input field.  "
+           "Otherwise, uses field_num to identify the input field.";
+  p_default = { "RH", 0 };
+} input_field;
+
+paramdef long
+{
+  p_descr = "Maximum input valid age in seconds";
+  p_help = "Once the algorithm is triggered, it will not use any input data "
+           "older than this value.";
+  p_default = 1800;
+} max_input_valid_secs;
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = "./ascii/output";
+} output_dir;
+
+
+/***********************************************************************
+ * Printing Parameters
+ */
+
+commentdef
+{
+  p_header = "PRINTING PARAMETERS";
+  p_text = "Parameters describing how to print the ASCII output.";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the bad/missing data value is specified "
+            "in the paramter file";
+  p_help = "If set to TRUE, the value of the bad_data_value parameter will be "
+           "used for all bad and missing data in the field. "
+           "If false, the missing_data_value from the MDV field header will "
+           "be used for all bad and missing data in the field.";
+  p_default = false;
+} specify_bad_data_value;
+
+paramdef double
+{
+  p_descr = "See description for specify_bad_data_value parameter";
+  p_default = 0.0;
+} bad_data_value;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to constrain the minimum output value";
+  p_help = "If set to TRUE, the minimum output value will be constrained to "
+           "the value of the min_output_value parameter.";
+  p_default = false;
+} constrain_min_output_value;
+
+paramdef double
+{
+  p_descr = "See description for constrain_min_output_value parameter";
+  p_default = 0.0;
+} min_output_value;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to constrain the maximum output value";
+  p_help = "If set to TRUE, the maximum output value will be constrained to "
+           "the value of the max_output_value parameter.";
+  p_default = false;
+} constrain_max_output_value;
+
+paramdef double
+{
+  p_descr = "See description for constrain_max_output_value parameter";
+  p_default = 0.0;
+} max_output_value;
+
+typedef enum
+{
+  PROCESS_VOLUME,
+  PROCESS_PLANE,
+  PROCESS_COMPOSITE
+} process_type_t;
+
+paramdef enum process_type_t
+{
+  p_descr = "Flag indicating how much of the data to process";
+  p_help = "\tPROCESS_VOLUME - The entire volume of data will be processed.\n"
+           "\tPROCESS_PLANE - A single plane, indicated by the plane_num "
+           "parameter, will be processed.\n"
+           "\tPROCESS_COMPOSITE - The entire volume will be composited before "
+           "being processed.";
+  p_default = PROCESS_VOLUME;
+} process_type;
+
+paramdef long
+{
+  p_descr = "The plane number to be processed";
+  p_help = "Used only when process_type is set to PROCESS_PLANE.";
+  p_default = 0;
+} plane_num;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use only a portion of each plane";
+  p_default = false;
+} use_subplane;
+
+typedef struct
+{
+  double min_x;
+  double max_x;
+  double min_y;
+  double max_y;
+} subplane_limits_t;
+
+paramdef struct subplane_limits_t
+{
+  p_descr = "Limits for the subplane to process.\n"
+            "Used only if subplane_flag is set to true";
+  p_help = "Specify the x/y limits in the units used for the underlying data "
+           "projection. "
+           "E.g. For polar radar specify X in km and Y in degrees; "
+           "for flat projection specify X and Y in km.";
+  p_default = { 0.0, 0.0, 0.0, 0.0 };
+} subplane_limits;
+
+typedef enum
+{
+  START_TOP,
+  START_BOTTOM
+} start_row_t;
+
+paramdef enum start_row_t
+{
+  p_descr = "Flag indicating whether to start at the top row or the bottom row";
+  p_default = START_BOTTOM;
+} start_row;
+
+paramdef string
+{
+  p_descr = "Output format string";
+  p_help = "This is the fprintf() format string used for printing the "
+           "data values.";
+  p_default = " %7.2f";
+} format_string;
+
+paramdef long
+{
+  p_descr = "Number of columns in each line of output";
+  p_min = 1;
+  p_default = 10;
+} num_print_columns;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to include ESRI-compatible header info "
+            "in the output file";
+  p_help = "If set to TRUE, the output file can be imported into ArcGIS "
+           "via the 'ASCII to GRID' utility in ArcToolbox.";
+  p_default = false;
+} include_ESRI_header;
+
+paramdef double
+{
+  p_descr = "Cell size (in km)";
+  p_help = "Used only when include_ESRI_header is set to TRUE."
+           "Given: km/deg = 111.12*cos(latitude) "
+           "default is set for a lat/lon mdv file centered on Denver";
+  p_default = 0.01;
+} cell_size;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to include the USDA Bird Radar project "
+            "metadata at the beginning of the files.";
+  p_default = false;
+} include_USDA_header;
+
+paramdef string
+{
+  p_descr = "Raw data file name.";
+  p_help = "This is part of the information for the USDA Bird Radar project "
+           "metadata. "
+           "It is only used if include_USDA_header is set to true. "
+           "It can be overridden by using the -data_file command line "
+           "argument.";
+  p_default = "input_file.dat";
+} data_file_name;
+
+paramdef boolean
+{
+  p_descr = "Set to TRUE to put the gen time on the end of the\n"
+	"output file names.";
+  p_help = "May be necessary in event of forecast input.";
+  p_default = false;
+} filenames_with_gentime;

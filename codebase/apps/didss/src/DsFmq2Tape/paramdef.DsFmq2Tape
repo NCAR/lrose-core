@@ -1,0 +1,50 @@
+/*********************************************************
+ *
+ * Originally written as fmq2tape
+ * Jaimi Yee, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ * June 1997
+ *
+ * Converted to DsFmq2Tape (using C++ and DsFmq)
+ * Terri Betancourt
+ * March 1999
+ */
+
+paramdef char* {
+  p_default = {"DsFmq"};
+  p_descr = "Process instance.";
+  p_help = " ";
+} instance;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug messaging option.";
+  p_help = "Print debug messages.";
+} debug;
+
+paramdef char* {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} log_dir;
+
+paramdef char* {
+  p_descr = "URL for fmq communication";
+  p_default = {"fmqp:://localhost::./fmq.dsr"};
+} fmq_url;
+
+paramdef long {
+  p_default = {65536};
+  p_descr = "Maximum block size.";
+  p_help = "Maximum number of bytes for block to be written to tape.";
+} max_block_size;
+
+paramdef long {
+  p_default = {10};
+  p_descr = "Maxinum number of messages.";
+  p_help = "Maxinum number of messages per block to be written to tape.";
+} max_message_per_block;
+
+paramdef char* {
+  p_default = {"/dev/tape"};
+  p_descr = "Tape device name.";
+  p_help = "Name of tape device to which the fmq will be written.";
+} tape_device_name;

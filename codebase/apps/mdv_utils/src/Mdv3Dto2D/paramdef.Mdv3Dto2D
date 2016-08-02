@@ -1,0 +1,214 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Mdv3Dto2D
+ *
+ * This file contains the TDRP parameter definitions for
+ * Mdv3Dto2D.
+ */
+
+
+commentdef
+{
+  p_header = "Mdv3Dto2D";
+  p_text = "This program collapses a 3D MDV field into a 2D field using "
+           "the specified computation.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "If true, verbose debug messages will be printed.";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  TIME_LIST,
+  LATEST_DATA
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+           "In LATEST_DATA mode, the program will trigger every time a "
+           "new input file appears.\n";
+  p_default = TIME_LIST;
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef long
+{
+  p_descr = "Maximum valid age for input files in seconds.";
+  p_help = "Used only if trigger_mode is set to LATEST_DATA.";
+  p_default = 300;
+} max_valid_age;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef struct
+{
+  string url;
+  boolean use_field_name;
+  string field_name;
+  long field_num;
+  long max_input_secs;
+} input_field_t;
+
+paramdef struct input_field_t
+{
+  p_descr = "Information about the input fields for the scatter plot.";
+  p_help = "\turl - The URL for retrieving the field.\n"
+           "\tuse_field_name - Flag indicating whether to identify the "
+           "field based on its name or number in the MDV file.\n"
+           "\tfield_name - The name of the field in the MDV file. "
+           "Used only if use_field_name is set to true.\n"
+           "\tfield_num - The number of the field in the MDV file. "
+           "Field numbers start at 0. "
+           "Used only iif use_field_name is set to false.\n"
+           "\tmax_input_secs - The maximum number of seconds that this "
+           "input field is valid. "
+           "If there is no data available for this field within this number "
+           "of seconds of the trigger time, no scatter plot will be produced "
+           "for this time period.\n";
+  p_default = { "mdvp:://localhost::mdv/field1",
+                true,
+                "field1",
+                0,
+                3600 };
+} input_field;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/2d";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  COMPUTE_SUM,
+  COMPUTE_MEAN,
+  COMPUTE_MAX,
+  COMPUTE_MIN,
+  COMPUTE_FIRST
+} computation_t;
+
+paramdef enum computation_t
+{
+  p_descr = "Type of computation to use to collapse the 3D field into a "
+            "2D field.";
+  p_help = "\tCOMPUTE_SUM - The 2D field contains the sum of all non-missing "
+           "data values in the column.\n"
+           "\tCOMPUTE_MEAN - The 2D field contains the mean of all non-missing "
+           "data values in the column.\n"
+           "\tCOMPUTE_MAX - The 2D field contains the maximum data value in "
+           "the column.\n"
+           "\tCOMPUTE_MIN - The 2D field contains the minimum data value in "
+           "the column.\n"
+           "\tCOMPUTE_FIRST - The 2D field contains the first (lowest) "
+           "non-missing data value in the column.\n";
+  p_default = COMPUTE_SUM;
+} computation;

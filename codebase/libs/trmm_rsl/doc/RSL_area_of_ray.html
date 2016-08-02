@@ -1,0 +1,31 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_area_of_ray</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>float RSL_area_of_ray(<a href=RSL_ray_struct.html>Ray</a> *r, float lo, float hi, float min_range, float max_range); </b>
+
+<h3>
+<hr>Description</h3>
+Compute the volumetric area of a sweep given a range of dBZ, a minimum range and a maximum range in km. Ranges are specified in km. lo and hi are the minimum and maximum dBZ values within which the fractional area is computed. The name of this routine is unfortunately misleading. The area is really a volume. The total volume for pixels present within the range of <b>lo</b> to <b>hi</b> is computed and returned. This routine is used by the routine <a href=RSL_fractional_area_of_sweep.html>RSL_fractional_area_of_sweep</a>.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a valid floating point number is returned. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_fractional_area_of_sweep.html><a href=RSL_fractional_area_of_sweep.html>RSL_fractional_area_of_sweep</a></a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

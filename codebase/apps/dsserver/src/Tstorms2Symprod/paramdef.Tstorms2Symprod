@@ -1,0 +1,557 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for Tstorms2Symprod
+//
+// Nancy Rehak, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// March 1999
+//
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = DEBUG_OFF;
+} debug;
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string {
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean {
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef {
+  p_header = "SERVER MANAGER";
+};
+
+paramdef int {
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5460;
+} port;
+  
+paramdef int {
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int {
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef {
+  p_header = "PLOT CURRENT SHAPE";
+};
+
+paramdef boolean {
+  p_descr = "Plot current shape";
+  p_help = "If set, the current storm shape will be sent.";
+  p_default = TRUE;
+} plot_current;
+
+paramdef string {
+  p_descr = "current color";
+  p_help = "Color for current storm shapes.";
+  p_default = "yellow";
+} current_color;
+
+commentdef {
+  p_header = "PLOT FORECAST SHAPE";
+};
+
+paramdef boolean {
+  p_descr = "Plot forecast shape";
+  p_help = "If set, the forecast storm shape will be sent.";
+  p_default = TRUE;
+} plot_forecast;
+
+paramdef string {
+  p_descr = "forecast color";
+  p_help = "Color for forecast storm shapes.";
+  p_default = "red";
+} forecast_color;
+
+paramdef string {
+  p_descr = "motion vector color";
+  p_help = "Color for forecast motion vector.";
+  p_default = "orange";
+} vector_color;
+
+commentdef {
+  p_header = "FORECASTS IN NON-XML data";
+  p_text = "Data created by Tstorms2Spdb";
+};
+
+paramdef long {
+  p_descr = "Forecast lead time (secs).";
+  p_help = "Lead time for forecast shapes and positions. Does not apply to XML data - XML data has the forecasts pre-defined by Tstorms2Xml.";
+  p_default = 1800;
+} forecast_lead_time;
+
+paramdef boolean {
+  p_descr = "Forecast line dashed";
+  p_help = "If set, the forecast will be rendered using a dashed line "
+           "rather than a solid line. Does not apply to XML data.";
+  p_default =  FALSE;
+} forecast_dashed;
+
+paramdef boolean {
+  p_descr = "Plot valid forecasts only";
+  p_help = "If set, only valid forecasts will be sent. "
+    "If not, all forecasts will be sent. "
+    "Does not apply to XML data.";
+  p_default = TRUE;
+} valid_forecasts_only;
+
+paramdef boolean {
+  p_descr = "Grow the storm when plotting the forecast";
+  p_help = "If set, the growth rate information provided by TITAN "
+           "will be used to modify the storm area.  If not set, the "
+           "storm will be moved to the extrapolated position without "
+           "changing the area. Does not apply to XML data. "
+           "XML forecasts are pre-defined by Tstorms2Xml.";
+  p_default = TRUE;
+} grow_forecast;
+
+commentdef {
+  p_header = "PLOT PAST SHAPES";
+  p_text = "XML data only";
+};
+
+paramdef boolean {
+  p_descr = "Plot past shape.";
+  p_help = "Only applies to XML data.";
+  p_default = FALSE;
+} plot_past;
+
+paramdef string {
+  p_descr = "past color";
+  p_help = "Color for past shapes.";
+  p_default = "cyan";
+} past_color;
+
+commentdef {
+  p_header = "TEXT PLOTTING";
+  p_text = "Text plotted relative to the storm location.";
+};
+
+paramdef boolean {
+  p_descr = "Plot text labels?";
+  p_help = "Allows you to turn all text products off. This controls all non-hidden text plotting. The default is TRUE for backward compatibility.";
+  p_default = TRUE;
+} plot_text;
+
+paramdef string {
+  p_descr = "Color of text plotted next to storm position";
+  p_default = "yellow";
+} text_color;
+
+paramdef string {
+  p_descr = "text background color";
+  p_help = "Color for text background. "
+    "Set to blank string (the default) to plot the text with no background.";
+  p_default = "";
+} text_background_color;
+
+paramdef int {
+  p_descr = "Vertical line spacing, pixels.";
+  p_help = "Optionally, the user may choose to plot various "
+	"parameters (storm speed, simple and complex track number, "
+	"trend etc). The selected poltting elements are then draw vertically "
+	"above each other on the display, separated by plot_text_line_offset "
+	"pixels in the vertical. If this is negative then the column of "
+	"numbers will ascend rather than descend on the display. "
+        "Does not apply to XML data.";
+  p_default = 10;
+} plot_text_line_offset;
+
+paramdef int {
+  p_descr = "Horizontal offset, pixels.";
+  p_help = "Option to move text to either side of the centroid. "
+	"If this is negative the  text moves to the left rather than the right.";
+  p_default = 10;
+} plot_text_horizontal_offset;
+
+paramdef string {
+  p_descr = "text font name";
+  p_help = "The name of the X font to be used when rendering the text.";
+  p_default = "8x13";
+} text_font;
+
+paramdef int {
+  p_descr = "text font size";
+  p_help = "The size of the font to be used when rendering the text.";
+  p_default = 13;
+} text_font_size;
+
+paramdef boolean {
+  p_descr = "Plot trend";
+  p_help = "If set, the storm size and intensity trend will be included "
+           "as text: '+', '-' or '0'.";
+  p_default = FALSE;
+} plot_trend;
+
+paramdef boolean {
+  p_descr = "Plot speed";
+  p_help = "If set, speed is placed at the head of the vector.";
+  p_default = TRUE;
+} plot_speed;
+
+typedef enum {
+  SPEED_KMH, SPEED_KNOTS, SPEED_MPH
+} speed_units_t;
+
+paramdef enum speed_units_t {
+  p_default = SPEED_KMH;
+  p_descr = "Units for plotting speed.";
+  p_help = "The speed is computed in kmh. The speed will be converted and plotted in these units.";
+} speed_units;
+
+paramdef boolean {
+  p_descr = "Plot speed rounded to nearest 5.";
+  p_help = "Default is not rounded.";
+  p_default = FALSE;
+} speed_round;
+
+paramdef boolean {
+  p_descr = "Plot top";
+  p_help = "If set, top value is placed at the head of the vector.";
+  p_default = FALSE;
+} plot_top;
+
+paramdef boolean {
+  p_descr = "Plot top value in kilometers";
+  p_help = "If FALSE, top value is plotted in 100s of feet.";
+  p_default = TRUE;
+} top_km;
+
+paramdef boolean { 
+  p_descr = "Plot track numbers";
+  p_help = "If TRUE, track numbers are plotted.";
+  p_default = FALSE;
+} plot_track_numbers;
+
+paramdef boolean {
+  p_descr = "Plot storm volume in km3.";
+  p_help = "XML data only.";
+  p_default = FALSE;
+} plot_volume;
+
+paramdef boolean {
+  p_descr = "Plot storm area in km.";
+  p_help = "XML data only.";
+  p_default = FALSE;
+} plot_area;
+
+paramdef boolean {
+  p_descr = "Plot max DBZ - radar reflectivity.";
+  p_help = "XML data only.";
+  p_default = FALSE;
+} plot_max_dbz;
+
+paramdef boolean {
+  p_descr = "Plot VIL - vertically integrated liquid.";
+  p_help = "XML data only.";
+  p_default = FALSE;
+} plot_vil;
+
+paramdef boolean {
+  p_descr = "Plot storm intensity.";
+  p_help = "XML data only.";
+  p_default = FALSE;
+} plot_storm_intensity;
+
+paramdef boolean {
+  p_descr = "Plot hail probability - %.";
+  p_help = "XML data only.";
+  p_default = FALSE;
+} plot_hail_probability;
+
+paramdef boolean {
+  p_descr = "Plot hail mass - %.";
+  p_help = "XML data only.";
+  p_default = FALSE;
+} plot_hail_mass;
+
+paramdef boolean {
+  p_descr = "Plot hail mass aloft - %.";
+  p_help = "XML data only.";
+  p_default = FALSE;
+} plot_hail_mass_aloft;
+
+paramdef boolean {
+  p_descr = "Option to plot each storm as an individual product.";
+  p_help = "Non-XML data only. Can be useful for CIDD.";
+  p_default = FALSE;
+} plot_individual_storms;
+
+
+
+commentdef {
+  p_header = "STORM SHAPE";
+}
+
+typedef enum {
+  ELLIPSE_SHAPE,
+  POLYGON_SHAPE
+} storm_shape_t;
+
+paramdef enum storm_shape_t {
+  p_descr = "Shape type";
+  p_help = "Determines the way in which the storm is represented.";
+  p_default = POLYGON_SHAPE;
+} storm_shape;
+
+commentdef {
+  p_header = "POLYGON SMOOTHING";
+}
+
+paramdef boolean {
+  p_descr = "Smooth the storm polygon";
+  p_help = "If TRUE and storm_shape is POLYGON_SHAPE, the storm polygon will "
+           "be smoothed within the boundaries defined by inner_bnd_multiplier "
+           "and outer_bnd_multiplier. Does NOT apply to XML data.";
+  p_default = FALSE;
+} hull_smooth;
+
+paramdef double {
+  p_descr = "Inner boundary multiplier for storm smoothing";
+  p_help = "Multipliers less than 1.0 produce an inner boundary smaller "
+           "than the original storm. Multipliers greater than 1.0 "
+           "produce an inner boundary larger than the original storm. "
+           "inner_bnd_multiplier must be <= outer_bnd_multiplier";
+  p_min = 0.0;
+  p_default = 1.0;
+} inner_bnd_multiplier;
+
+paramdef double {
+  p_descr = "Outer boundary multiplier for storm smoothing";
+  p_help = "Multipliers less than 1.0 produce an outer boundary smaller "
+           "than the original storm. Multipliers greater than 1.0 "
+           "produce an outer boundary larger than the original storm. "
+           "outer_bnd_multiplier must be >= inner_bnd_multiplier";
+  p_min = 0.0;
+  p_default = 1.0;
+} outer_bnd_multiplier;
+
+commentdef {
+  p_header = "VECTOR RENDERING";
+}
+
+paramdef boolean {
+  p_descr = "Plot vector";
+  p_help = "If set, the forecast vector be sent.";
+  p_default = TRUE;
+} plot_vectors;
+
+paramdef boolean {
+  p_descr = "Define arrow head length in pixels.";
+  p_help = "If false, head length is in km.";
+  p_default = FALSE;
+} arrow_head_len_in_pixels;
+
+paramdef double {
+  p_descr = "Length of arrow head.";
+  p_help = "Units can be either km or pixels. See 'arrow_head_len_in_pixels'.";
+  p_default = 2.0;
+  p_min = 0.0;
+} arrow_head_len;
+
+paramdef double {
+  p_descr = "Half angle of arrow head (deg).";
+  p_default = 20.0;
+  p_min = 0.0;
+  p_max = 90.0;
+} arrow_head_half_angle;
+
+paramdef boolean {
+  p_descr = "Fixed length arrows";
+  p_help = "If flag set, direction arrows are of fixed lenght. "
+            "If not set, arrows are scaled to length for time "
+            "forecast_lead_time.";
+  p_default = FALSE;
+} fixed_length_arrows;
+
+paramdef double {
+  p_descr = "Shaft length arrow head (km).";
+  p_help = "This is used if 'fixed_length_arrows' is TRUE.";
+  p_default = 20.0;
+  p_min = 0.0;
+} arrow_shaft_length;
+
+commentdef {
+  p_header = "LINE STYLES";
+  p_text = "For polygons, ellipses and vectors";
+}
+
+typedef enum {
+  LINETYPE_SOLID,
+  LINETYPE_DASH,
+  LINETYPE_DOT_DASH
+} line_type_t;
+
+paramdef enum line_type_t {
+  p_descr = "display line type";
+  p_help = "Line type suggested for using on the display.";
+  p_default = LINETYPE_SOLID;
+} suggested_line_type;
+
+paramdef long {
+  p_descr = "display line width";
+  p_help = "Line width suggested for using on the display.";
+  p_default = 1;
+} suggested_line_width;
+
+typedef enum {
+  CAPSTYLE_BUTT,
+  CAPSTYLE_NOT_LAST,
+  CAPSTYLE_PROJECTING,
+  CAPSTYLE_ROUND
+} capstyle_t;
+
+paramdef enum capstyle_t {
+  p_descr = "display capstyle";
+  p_help = "Capstyle suggested for using on the display.";
+  p_default = CAPSTYLE_BUTT;
+} suggested_capstyle;
+
+typedef enum {
+  JOINSTYLE_BEVEL,
+  JOINSTYLE_MITER,
+  JOINSTYLE_ROUND
+} joinstyle_t;
+
+paramdef enum joinstyle_t {
+  p_descr = "display joinstyle";
+  p_help = "Joinstyle suggested for using on the display.";
+  p_default = JOINSTYLE_BEVEL;
+} suggested_joinstyle;
+
+commentdef {
+  p_header = "HIDDEN TEXT";
+}
+
+paramdef boolean {
+  p_descr = "Option to include hidden text instead of plotting it directly";
+  p_help = "If set, text will be hidden. Mouse-over events reveal the text.";
+  p_default = FALSE;
+} plot_hidden_text;
+
+paramdef int {
+  p_descr = "X offset for hidden text (pixels).";
+  p_default = 0;
+} hidden_text_x_offset;
+
+paramdef int {
+  p_descr = "Y offset for hidden text (pixels).";
+  p_default = 0;
+} hidden_text_y_offset;
+
+paramdef string {
+  p_descr = "hidden text font name";
+  p_help = "The name of the X font to be used when rendering the text.";
+  p_default = "8x13";
+} hidden_text_font_name;
+
+paramdef int {
+  p_descr = "Font size for hidden text (pixels).";
+  p_default = 10;
+} hidden_text_font_size;
+
+typedef enum {
+  VERT_ALIGN_TOP,
+  VERT_ALIGN_CENTER,
+  VERT_ALIGN_BOTTOM
+} vert_align_t;
+
+paramdef enum vert_align_t {
+  p_descr = "Vertical alignment hidden text.";
+  p_default = VERT_ALIGN_CENTER;
+} hidden_text_vert_align;
+
+typedef enum {
+  HORIZ_ALIGN_LEFT,
+  HORIZ_ALIGN_CENTER,
+  HORIZ_ALIGN_RIGHT
+} horiz_align_t;
+
+paramdef enum horiz_align_t {
+  p_descr = "Horizontal alignment for hidden text.";
+  p_default = HORIZ_ALIGN_CENTER;
+} hidden_text_horiz_align;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use SIGMET product color.";
+  p_default = "";
+} hidden_text_foreground_color;
+
+paramdef string {
+  p_descr = "Hidden text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} hidden_text_background_color;
+

@@ -1,0 +1,181 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.SweepNetCDF2Mdv
+ *
+ * This file contains the TDRP parameter definitions for
+ * SweepNetCDF2Mdv
+ */
+
+commentdef
+{
+  p_header = "SweepNetCDF2Mdv";
+  p_text = "This program converts netCDF sweep files into MDV format.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  FILE_LIST,
+  INPUT_DIR,
+  INPUT_DIR_RECURSE,
+  LATEST_DATA
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tIn FILE_LIST mode, the program operates on the files specified "
+           "on the command line.\n"
+           "\tIn INPUT_DIR mode, the program will process new files as they "
+           "appear in the input_dir directory.\n"
+           "\tIn INPUT_DIR_RECURSE mode, the program will process new files "
+           "as they appear in the input_dir directory or in any "
+           "subdirectory.\n"
+           "\tIn LATEST_DATA mode, the program will process new files as they "
+           "appear in the _latest_data_info file in the input_dir directory.\n";
+  p_default = "FILE_LIST";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_default = "$(RAP_DATA_DIR)/raw/sweepNetCDF";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Input filename substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will only process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} input_substring;
+
+paramdef string
+{
+  p_descr = "Input filename exclude substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will not process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} exclude_substring;
+
+paramdef long
+{
+  p_descr = "Maximum number of seconds input files are valid.";
+  p_help = "Used only if trigger_mode is set to LATEST_DATA.";
+  p_default = 600;
+} max_valid_secs;
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = "/data/clean";
+} output_dir;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef long
+{
+  p_descr = "Number of gates to delete at the beginning of each beam of data";
+  p_help = "Gates are only deleted from variables with a gates_dim_name "
+           "dimension";
+  p_default = 0;
+} num_begin_delete_gates;
+
+paramdef string
+{
+  p_descr = "Name of the number of gates dimension in the netCDF file.";
+  p_default = "maxCells";
+} gates_dim_name;
+
+typedef struct
+{
+  string variable_name;
+  string missing_value_attr_name;
+} negate_vars_t;
+
+paramdef struct negate_vars_t
+{
+  p_descr = "List of variabless to negate";
+  p_help = "The data values in the output file for these variabless will "
+           "all be the negatives of the data values in the input file.";
+  p_default = {};
+} negate_var_list[];

@@ -1,0 +1,337 @@
+/**********************************************************************
+ * TDRP params for SimCpCompute
+ **********************************************************************/
+
+//======================================================================
+//
+// SimCpCompute analyses data from tsarchive time series files taken 
+//   during vertical pointing scans.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "rvp8";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or time series API.
+// If TS_API_INPUT, the application will read the time series API and 
+//   process the pulses as they come in. If FILE_INPUT, the application 
+//   will process all the files specified on the command line.
+//
+// Type: enum
+// Options:
+//     FILE_INPUT
+//     TS_API_INPUT
+//
+
+input_mode = TS_API_INPUT;
+
+///////////// invert_hv_flag //////////////////////////
+//
+// Option to invert H/V flag in pulse data.
+// Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the 
+//   data has the opposite sense, set this to true.
+// Type: boolean
+//
+
+invert_hv_flag = FALSE;
+
+//======================================================================
+//
+// AZIMUTH LIMITS.
+//
+// Only beams between these azimuths will be used.
+//
+//======================================================================
+ 
+///////////// start_az ////////////////////////////////
+//
+// Starting azimuth (deg).
+// Type: double
+//
+
+start_az = 45;
+
+///////////// end_az //////////////////////////////////
+//
+// Ending azimuth (deg).
+// Type: double
+//
+
+end_az = 315;
+
+///////////// delta_az ////////////////////////////////
+//
+// Beam width (dwell) for indexed beams (deg).
+// Type: double
+//
+
+delta_az = 1;
+
+///////////// clockwise_rotation //////////////////////
+//
+// Which rotation sense gives us good data?.
+// true - clockwise, false - counter-clockwise.
+// Type: boolean
+//
+
+clockwise_rotation = TRUE;
+
+//======================================================================
+//
+// RANGE LIMITS.
+//
+//======================================================================
+ 
+///////////// start_range /////////////////////////////
+//
+// Start range for analysis (km).
+// Type: double
+//
+
+start_range = 20;
+
+///////////// end_range ///////////////////////////////
+//
+// End range for analysis (km).
+// Type: double
+//
+
+end_range = 100;
+
+///////////// expected_gate_spacing ///////////////////
+//
+// Expected gate spacing (km).
+// Type: double
+//
+
+expected_gate_spacing = 0.25;
+
+//======================================================================
+//
+// SNR LIMITS.
+//
+//======================================================================
+ 
+///////////// min_snr /////////////////////////////////
+//
+// Minimum SNR for analysis.
+// Gates with SNR below this will be ignored.
+// Type: double
+//
+
+min_snr = 20;
+
+///////////// max_snr /////////////////////////////////
+//
+// Maximum SNR for analysis.
+// Gates with SNR above this will be ignored.
+// Type: double
+//
+
+max_snr = 80;
+
+///////////// delta_snr ///////////////////////////////
+//
+// SNR interval for the analysis.
+// The data is partitioned into SNR intervals, and statistics are 
+//   computed for each interval as well as for all values between the min 
+//   and max snr.
+// Type: double
+//
+
+delta_snr = 10;
+
+//======================================================================
+//
+// VEL AND WIDTH LIMITS.
+//
+//======================================================================
+ 
+///////////// max_vel /////////////////////////////////
+//
+// Maximum velocity for analysis (m/s).
+// Set this close to zero to select clutter points.
+// Type: double
+//
+
+max_vel = 200;
+
+///////////// max_width ///////////////////////////////
+//
+// Maximum width for analysis (m/s).
+// Set this close to zero to select clutter points.
+// Type: double
+//
+
+max_width = 200;
+
+//======================================================================
+//
+// MOMENTS COMPUTATION.
+//
+//======================================================================
+ 
+///////////// n_samples ///////////////////////////////
+//
+// Number of pulse samples in a beam.
+// Type: int
+//
+
+n_samples = 64;
+
+///////////// hc_receiver /////////////////////////////
+//
+// Properties of horiz co-polar receiver.
+// bsky_noise_at_ifd: the blue-sky noise measured at the ifd, in dBm. 
+//   gain: the gain from the measurement plane to the ifd, in dB.
+//
+// Type: struct
+//   typedef struct {
+//      double bsky_noise_at_ifd;
+//      double gain;
+//      double radar_constant;
+//   }
+//
+//
+
+hc_receiver = {
+    bsky_noise_at_ifd = -77.192,
+    gain = 37.1712,
+    radar_constant = -68.1627
+};
+
+///////////// hx_receiver /////////////////////////////
+//
+// Properties of horiz cross-polar receiver.
+//
+// Type: struct
+//   typedef struct {
+//      double bsky_noise_at_ifd;
+//      double gain;
+//      double radar_constant;
+//   }
+//
+//
+
+hx_receiver = {
+    bsky_noise_at_ifd = -77.882,
+    gain = 37.0979,
+    radar_constant = -68.3172
+};
+
+///////////// vc_receiver /////////////////////////////
+//
+// Properties of vertical co-polar receiver.
+//
+// Type: struct
+//   typedef struct {
+//      double bsky_noise_at_ifd;
+//      double gain;
+//      double radar_constant;
+//   }
+//
+//
+
+vc_receiver = {
+    bsky_noise_at_ifd = -77.405,
+    gain = 37.4876,
+    radar_constant = -68.3172
+};
+
+///////////// vx_receiver /////////////////////////////
+//
+// Properties of vertical cross-polar receiver.
+//
+// Type: struct
+//   typedef struct {
+//      double bsky_noise_at_ifd;
+//      double gain;
+//      double radar_constant;
+//   }
+//
+//
+
+vx_receiver = {
+    bsky_noise_at_ifd = -78.153,
+    gain = 37.4225,
+    radar_constant = -68.1627
+};
+
+///////////// atmos_attenuation ///////////////////////
+//
+// Atmospheric attenuation (dB/km).
+// Reflectivity is corrected for this.
+// Type: double
+//
+
+atmos_attenuation = 0.012;
+
+//======================================================================
+//
+// OUTPUT RESULTS.
+//
+//======================================================================
+ 
+///////////// write_output_files //////////////////////
+//
+// Option to write detailed output to files.
+// If true, files will be written to output_dir.
+// Type: boolean
+//
+
+write_output_files = TRUE;
+
+///////////// output_dir //////////////////////////////
+//
+// Dir for output files.
+// The results will be written to sub-directories named from the data 
+//   time.
+// Type: string
+//
+
+output_dir = "./output";
+

@@ -1,0 +1,7 @@
+Import('env')
+
+cp2config = env.Library('cp2config',
+Split("""
+CP2Config.cpp
+"""))
+

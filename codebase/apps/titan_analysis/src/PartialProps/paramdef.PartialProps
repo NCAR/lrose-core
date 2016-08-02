@@ -1,0 +1,55 @@
+/*********************************************************
+ * parameter definitions for PartialProps
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 1997
+ */
+
+commentdef {
+  p_header = "Computes the properties for partial storm tracks defined in the case tracks file. A 'partial track' is that part of a track considered relevant when analyzing storm track cases, for example in weather modification evaluation. A partial track consists of all elements of a track which exist between a specified period before the seeding decision time and a specified period after seeding decision time. The partial track is intended to capture that part of a track which (a) characterizes the track before seeding and (b) allows analysis of the effects of seeding, but does not include effects which are not attributable to seeding.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";	
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Storm and track file data directory.";
+  p_help = "The directory in which to find the storm and track data files for use in this analysis.";
+} storm_data_dir;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "File path for seed/no-seed cases.";
+  p_help = "This file indicates the time and track numbers for each seeded case. In addition the environmental conditions, such as cloud base and CAPE are input from this file.";
+} case_file_path;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Path for output directory.";
+  p_help = "Case data is written to files in this directory.";
+} output_dir;
+
+paramdef double {
+  p_default = 6.0;
+  p_min = 0.0;
+  p_max = 30.0;
+  p_descr = "Altitude threshold for computing altitude-thresholded properties.";
+  p_help = "There are a number of properties, e.g. volume, which are computed for the whole storm and for the region above an altitude threshold. This threshold is used for those computations.";
+} altitude_threshold;
+
+

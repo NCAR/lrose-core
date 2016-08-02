@@ -1,0 +1,136 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for SunCpCompute
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Jan 2007
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SunCpCompute computes the S1 and S2 ratios for the ZDR Cross-Polar (CP) calibration method.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILE_INPUT, TS_FMQ_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FILE_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to invert H/V flag in pulse data.";
+  p_help = "Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the data has the opposite sense, set this to true.";
+} invert_hv_flag;
+
+paramdef int {
+  p_default = 128;
+  p_descr = "Number of pulse samples in a beam.";
+} n_samples;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Min SNR for computing S1 and S2 values (dB).";
+  p_help = "S1 and S2 are computed as the mean ratio of the cross-polar power in H and V. This is the minimum SNR for including points in the mean ratio. SNR is computed relative to the minimum noise value measured.";
+} min_snr;
+
+paramdef double {
+  p_default = 15.0;
+  p_descr = "Max SNR for computing S1 and S2 values (dB).";
+  p_help = "S1 and S2 are computed as the mean ratio of the cross-polar power in H and V. This is the minimum SNR for including points in the mean ratio.";
+} max_snr;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Max delta azimuth for including data points (deg).";
+  p_help = "The beam azimuth and sun azimuth must be within this delta for the beam to be included in the analysis.";
+} max_delta_az;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Max delta elevation for including data points (deg).";
+  p_help = "The beam elevation and sun elevation must be within this delta for the beam to be included in the analysis.";
+} max_delta_el;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Start gate for analysis.";
+} start_gate;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of gates for analysis.";
+} n_gates;
+
+commentdef {
+  p_header = "RADAR PARAMETERS";
+};
+
+paramdef double {
+  p_default = 39.950199;
+  p_descr = "Latiitude of radar location (deg).";
+  p_help = "North is positive, South is negative.";
+} radar_lat;
+
+paramdef double {
+  p_default = -105.195099;
+  p_descr = "Longitude of radar location (deg).";
+  p_help = "East is positive, West is negative.";
+} radar_lon;
+
+paramdef double {
+  p_default = 1.704;
+  p_descr = "MSL altitde of radar (km).";
+} radar_altitude_km;
+
+commentdef {
+  p_header = "OUTPUT RESULTS";
+};
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output files.";
+  p_help = "The results will be written to sub-directories named from the cal time.";
+} output_dir;
+

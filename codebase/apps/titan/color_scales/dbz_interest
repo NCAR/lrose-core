@@ -1,0 +1,16 @@
+# colorscale for precip
+
+# Cindy Mueller, 1997
+	
+0	25	darkgreen
+25 	30 	forestgreen
+30 	35	darkolivegreen3
+35	40 	darkolivegreen1
+40	45 	goldenrod3
+45	50	gold2
+50	55	yellow
+55	60	coral2
+60	80 	pink
+
+
+

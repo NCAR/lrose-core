@@ -1,0 +1,239 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for SimCpCompute
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Sept 2006
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SimCpCompute analyses data from tsarchive time series files taken during vertical pointing scans.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILE_INPUT, TS_FMQ_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FILE_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Mode for stationary antenna.";
+  p_help = "In pointing mode, the antenna is stationary, and the transmit mode is switched manually between H and V. Two sets of time series files are created, one for H transmssion and one for V transmission. The statistics are computed between these two sets file files. You cannot use TS_API_INPUT for this mode.";
+} pointing_mode;
+
+commentdef {
+  p_header = "AZIMUTH LIMITS";
+  p_text = "Only beams between these azimuths will be used.";
+};
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Starting azimuth (deg).";
+} start_az;
+
+paramdef double {
+  p_default = 340.0;
+  p_descr = "Ending azimuth (deg).";
+} end_az;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Beam width (dwell) for indexed beams (deg).";
+} delta_az;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Which rotation sense gives us good data?.";
+  p_help = "true - clockwise, false - counter-clockwise.";
+} clockwise_rotation;
+
+commentdef {
+  p_header = "RANGE LIMITS";
+};
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Start range for analysis (km).";
+} start_range;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "End range for analysis (km).";
+} end_range;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Expected gate spacing (km).";
+} expected_gate_spacing;
+
+commentdef {
+  p_header = "SNR LIMITS";
+};
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Minimum SNR for analysis.";
+  p_help = "Gates with SNR below this will be ignored.";
+} min_snr;
+
+paramdef double {
+  p_default = 70.0;
+  p_descr = "Maximum SNR for analysis.";
+  p_help = "Gates with SNR above this will be ignored.";
+} max_snr;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "SNR interval for the analysis.";
+  p_help = "The data is partitioned into SNR intervals, and statistics are computed for each interval as well as for all values between the min and max snr.";
+} delta_snr;
+
+commentdef {
+  p_header = "VEL AND WIDTH LIMITS";
+};
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Maximum velocity for analysis (m/s).";
+  p_help = "Set this close to zero to select clutter points.";
+} max_vel;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Maximum width for analysis (m/s).";
+  p_help = "Set this close to zero to select clutter points.";
+} max_width;
+
+commentdef {
+  p_header = "MOMENTS COMPUTATION";
+};
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Number of pulse samples in a beam.";
+} n_samples;
+
+typedef struct {
+  double bsky_noise_at_ifd;
+  double gain;
+  double radar_constant;
+} receiver_props_t;
+
+paramdef struct receiver_props_t {
+  p_default = {
+    bsky_noise_at_ifd = -77.1736,
+    gain  = 37.1712,
+    radar_constant = -68.1627
+  };
+  p_descr = "Properties of horiz co-polar receiver.";
+  p_help = "bsky_noise_at_ifd: the blue-sky noise measured at the ifd, in dBm. gain: the gain from the measurement plane to the ifd, in dB.";
+} hc_receiver;
+
+paramdef struct receiver_props_t {
+  p_default = {
+    bsky_noise_at_ifd = -77.8509,
+    gain  = 37.0979,
+    radar_constant = -68.3172
+  };
+  p_descr = "Properties of horiz cross-polar receiver.";
+} hx_receiver;
+
+paramdef struct receiver_props_t {
+  p_default = {
+    bsky_noise_at_ifd = -77.4253,
+    gain  = 37.4876,
+    radar_constant = -68.3172
+  };
+  p_descr = "Properties of vertical co-polar receiver.";
+} vc_receiver;
+
+paramdef struct receiver_props_t {
+  p_default = {
+    bsky_noise_at_ifd = -78.1237,
+    gain  = 37.4225,
+    radar_constant = -68.1627
+  };
+  p_descr = "Properties of vertical cross-polar receiver.";
+} vx_receiver;
+
+paramdef double {
+  p_default = 0.012;
+  p_descr = "Atmospheric attenuation (dB/km).";
+  p_help = "Reflectivity is corrected for this.";
+} atmos_attenuation;
+
+commentdef {
+  p_header = "COMPUTING CROSS-POLAR POWER";
+};
+
+paramdef double {
+  p_default = 2;
+  p_descr = "Threshold for determining H or V transmit (dB).";
+  p_help = "For each PPI, we compute the mean difference between Hc and Vc. If Hc exceeds Vc by this threshold, we assume H transmit. If Vc exceeds Hc by this threshold, we assume V transmit. If the absolute difference is less than or equal to this threshold, we assume simultaneous transmit.";
+} hc_minus_vc_threshold;
+
+paramdef int {
+  p_default = 90;
+  p_descr = "Maximum time interval between PPIs for computing the CP difference (secs)";
+  p_help = "We only compute the CP difference if the time between successive PPIs is less than this amount.";
+} max_time_between_ppis;
+
+commentdef {
+  p_header = "OUTPUT RESULTS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write detailed output to files.";
+  p_help = "If true, files will be written to output_dir.";
+} write_output_files;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output files.";
+  p_help = "The results will be written to sub-directories named from the data time.";
+} output_dir;
+

@@ -1,0 +1,6 @@
+.deps
+MdvArithmetic
+__makefile.template
+makefile
+makefile.am
+makefile.in

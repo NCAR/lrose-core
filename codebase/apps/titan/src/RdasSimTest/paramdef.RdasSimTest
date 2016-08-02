@@ -1,0 +1,62 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for RdasSimTest
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// June 2002
+//
+
+commentdef {
+  p_header = "Program name: RdasSimTest";
+  p_text = "RdasSimTest connects to RdasSim to test out the socket protocol.";
+}
+
+commentdef {
+  p_header = "PROCESS CONTROL AND DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Input data host";
+  p_help = "TCP/IP name/address of host for input data";
+} input_host;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Input data port";
+  p_help = "TCP/IP port number for input data";
+} input_port;
+
+commentdef {
+  p_header = "COMMAND OUTPUT";
+}
+
+paramdef string {
+  p_default = "./commands";
+  p_descr = "Path to command file";
+  p_help = "When a SIGHUP signal is received, the program will read commands from this file and send them to the server.";
+} commands_file_path;
+
+

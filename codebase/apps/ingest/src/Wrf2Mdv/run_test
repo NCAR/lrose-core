@@ -1,0 +1,1 @@
+./Wrf2Mdv -mode ARCHIVE -f data/wrf/domain2/d2.2007050219.tm0200.wrf -params Wrf2Mdv.test

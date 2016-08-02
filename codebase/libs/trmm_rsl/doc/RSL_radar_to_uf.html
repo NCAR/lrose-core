@@ -1,0 +1,39 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_radar_to_uf</h1>
+
+
+<h1>RSL_radar_to_uf_fp</h1>
+
+
+<h1>RSL_radar_to_uf_gzip</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>void RSL_radar_to_uf(<a href=RSL_radar_struct.html>Radar</a> *r, char *outfile);</b> <br>
+<b>void RSL_radar_to_uf_fp(<a href=RSL_radar_struct.html>Radar</a> *r, FILE *fp);</b> <br>
+<b>void RSL_radar_to_uf_gzip(<a href=RSL_radar_struct.html>Radar</a> *r, char *outfile);</b> 
+
+<h3>
+<hr>Description</h3>
+Output the Radar structure, pointed to by <b>r</b>, to disk. The output filename is specified in <b>outfile</b>. The output UF file incorporates the NON-UF conforming NCAR record structure. Each UF record is surrounded by a 4 byte integer leading the UF buffer and a 4 byte integer trailing the UF buffer. The integer value represents the number of bytes for the UF buffer. This comes from the unformatted Fortran record descriptors. No UF library needed; the UF code in part of RSL. The routine <b>RSL_radar_to_uf_fp</b> takes a file pointer and is called by <b>RSL_radar_to_uf</b> and <b>RSL_radar_to_uf_gzip</b>. <b>RSL_radar_to_uf_gzip</b> passes the UF output through the GNU <b>gzip</b> compression filter; basically compressing the output on the fly.
+<hr>
+
+<h3>Return value</h3>
+None. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_uf_to_radar.html>RSL_uf_to_radar</a>, <a href=RSL_write_radar.html>RSL_write_radar</a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

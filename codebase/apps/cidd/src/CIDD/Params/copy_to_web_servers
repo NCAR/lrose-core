@@ -1,0 +1,8 @@
+#! /bin/csh
+#
+#
+#  Copy the test files to the web servers
+
+rsync -Cavze ssh CIDD.master *.CIDD *.txt content:/www/htdocs/CIDD
+#
+#rsync -Cavze ssh CIDD.master *.CIDD *.txt tempest:/var/www/CIDD

@@ -1,0 +1,24 @@
+# colorscale for rhohv
+
+# Mike Dixon, April 1991
+	
+0	0.05	DarkSlateBlue
+0.05	0.1	SlateBlue
+0.1 	0.15 	NavyBlue
+0.15	0.2 	Blue
+0.2 	0.25	MediumBlue
+0.25 	0.3 	SkyBlue
+0.3 	0.35 	DarkGreen
+0.35	0.4	ForestGreen
+0.4	0.45	YellowGreen
+0.45	0.5	Gold
+0.5	0.55 	Yellow
+0.55	0.6	Coral
+0.6	0.65	Orange
+0.65	0.7	MediumVioletRed
+0.7	0.75	OrangeRed
+0.75	0.80	Pink
+0.80	0.85	Red
+0.85	0.9	Gray50
+0.9	0.95    Gray80
+0.95	1.00	White

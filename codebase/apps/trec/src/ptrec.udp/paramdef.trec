@@ -1,0 +1,435 @@
+/******************************************************************************
+**                                                                           **
+**  File name:   paramdef.trec                                               **
+**                                                                           **
+**  Written by:  Laura Stoltz                                                **
+**                                                                           **
+**  Contents:    parameter definitions for trec_95                           **
+**                                                                           **
+******************************************************************************/
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_NORM, DEBUG_EXTRA, DEBUG_VERBOSE};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef char* {
+  p_descr = "Process instance";
+  p_descr = "This is used by the process mapper, procmap";
+  p_default = {"test"};
+} instance;
+
+paramdef long {
+  p_descr = "udp port";
+  p_min = {0};
+  p_max = {100000000};
+  p_default = {54321};
+} udp_port;
+
+paramdef enum udp_pkt_format {
+  p_options = {LL_UDP, NCAR_UDP};
+  p_default = {NCAR_UDP};
+  p_descr = "Udp packet format";
+  p_help = "NCAR and LL have different udp packet formats.";
+} udp_pkt_format;
+
+paramdef boolean {
+  p_descr = "option to print beam summary";
+  p_default = {FALSE};
+} print_summary;
+
+paramdef long {
+  p_descr = "Beam interval for summary prints.";
+  p_min = {1};
+  p_default = {90}; 
+} summary_interval;
+
+paramdef boolean {
+  p_descr = "option to print beam header";
+  p_default = {FALSE};
+} print_header;
+
+paramdef long {
+  p_descr = "Beam interval for header prints.";
+  p_min = {1};
+  p_default = {360}; 
+} header_interval;
+
+paramdef long {
+  p_descr = "Input data time correction (secs).";
+  p_help = "This allows you to correct for time errors in the input data stream. Pos values add to the input time, and vice versa.";
+  p_default = {0}; 
+} time_correction;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {10.0};
+  p_default = {0.05}; 
+} read_delay;
+
+paramdef long {
+  p_descr = "number of fields in the data";
+  p_min = {0};
+  p_max = {20};
+  p_default = {4}; 
+} nfields_raw;
+
+paramdef long {
+  p_descr = "number of gates dropped at start of beam buffer to correct for range errors";
+  p_min = {0};
+  p_max = {20};
+  p_default = {0};
+} ngates_dropped_start;
+
+paramdef long {
+  p_descr = "pos of vel in moments data";
+  p_min = {0};
+  p_max = {10};
+  p_default = {3}; 
+} vel_field_pos;
+
+paramdef long {
+  p_descr = "pos of dbz in moments data";
+  p_min = {0};
+  p_max = {10};
+  p_default = {2}; 
+} dbz_field_pos;
+
+paramdef long {
+  p_descr = "pos of flags in moments data";
+  p_min = {0};
+  p_max = {10};
+  p_default = {4}; 
+} flg_field_pos;
+
+paramdef double {
+  p_descr = "range gate spacing";
+  p_min = {0.0};
+  p_max = {10.0};
+  p_default = {0.225}; 
+} gate_spacing;
+
+paramdef long {
+  p_descr = "number of gates expected";
+  p_min = {1};
+  p_max = {10000};
+  p_default = {664}; 
+} ngates;
+
+paramdef boolean {
+  p_descr = "option for analytical functions";
+  p_default = {FALSE};
+} anal_fun;
+
+paramdef double {
+  p_descr = "max target elevation";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {5.0}; 
+} el_max;
+
+paramdef long {
+  p_descr = "maximum number of elevation angles to read";
+  p_min = {1};
+  p_max = {90};
+  p_default = {4}; 
+} nel;
+
+paramdef long {
+  p_descr = "maximum number of azimuths in PPI";
+  p_min = {90};
+  p_max = {500};
+  p_default = {420}; 
+} max_naz;
+
+paramdef double {
+  p_descr = "maximum dbz value to trec";
+  p_min = {0.0};
+  p_max = {1000.0};
+  p_default = {75.0}; 
+} dbz_max;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {10.0};
+  p_default = {0.25}; 
+} fract;
+
+paramdef double {
+  p_descr = "fraction of second trip flags allowed";
+  p_min = {0.0};
+  p_max = {10.0};
+  p_default = {0.20}; 
+} fractst;
+
+paramdef double {
+  p_descr = "Radar latitude (decimal degrees)";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = {0.0}; 
+} radar_lat;
+
+paramdef double {
+  p_descr = "Radar longitude (decimal degrees)";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = {0.0}; 
+} radar_lon;
+
+paramdef double {
+  p_descr = "radar altitude (in km)";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {1.710}; 
+} radar_altitude;
+
+paramdef double {
+  p_descr = "min x coordinate of analysis grid, wrt radar";
+  p_min = {-1000.0};
+  p_max = {1000.0};
+  p_default = {0.0}; 
+} grid_min_x;
+
+paramdef double {
+  p_descr = "min y coordinate of analysis grid";
+  p_min = {-1000.0};
+  p_max = {1000.0};
+  p_default = {0.0}; 
+} grid_min_y;
+
+paramdef double {
+  p_descr = "min z coordinate of analysis grid";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {0.0}; 
+} grid_min_z;
+
+paramdef double {
+  p_descr = "grid spacing in x direction (km)";
+  p_min = {0.01};
+  p_max = {20.0};
+  p_default = {1.0}; 
+} grid_del_x;
+
+paramdef double {
+  p_descr = "grid spacing in y direction (km)";
+  p_min = {0.01};
+  p_max = {20.0};
+  p_default = {1.0}; 
+} grid_del_y;
+
+paramdef double {
+  p_descr = "grid spacing in z direction (km)";
+  p_min = {0.01};
+  p_max = {5.0};
+  p_default = {1.0}; 
+} grid_del_z;
+
+paramdef long {
+  p_descr = "number of grid points in x direction (km)";
+  p_min = {1};
+  p_max = {1000};
+  p_default = {80}; 
+} grid_nx;
+
+paramdef long {
+  p_descr = "number of grid points in y direction (km)";
+  p_min = {1};
+  p_max = {1000};
+  p_default = {80}; 
+} grid_ny;
+
+paramdef long {
+  p_descr = "number of grid points in z direction (km)";
+  p_min = {1};
+  p_max = {20};
+  p_default = {7}; 
+} grid_nz;
+
+paramdef double {
+  p_descr = "grid rotation from True North (deg)";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = {0.0}; 
+} grid_rotation;
+
+paramdef long {
+  p_descr = "bad data value";
+  p_min = {-100000};
+  p_max = {100000};
+  p_default = {-32768}; 
+} bad;
+
+paramdef boolean {
+  p_descr = "";
+  p_default = {TRUE};
+} local_files;
+
+paramdef boolean {
+  p_descr = "";
+  p_default = {FALSE};
+} remote_files;
+
+paramdef char* {
+  p_descr = "target machine name for the output files";
+  p_default = {""};
+} target_machine_name;
+
+paramdef char* {
+  p_descr = "target machine login for the output files";
+  p_default = {"awdl"};
+} target_machine_login;
+
+paramdef char* {
+  p_descr = "local dir of output files";
+  p_default = {"."};
+} local_dir;
+
+paramdef char* {
+  p_descr = "remote dir of output files";
+  p_default = {"."};
+} remote_dir;
+
+paramdef char* {
+  p_descr = "suffix of output files";
+  p_default = {".trec"};
+} file_suffix;
+
+paramdef long {
+  p_descr = "";
+  p_min = {0};
+  p_max = {100};
+  p_default = {3}; 
+} rng_skip;
+
+paramdef double {
+  p_descr = "size of correlation boxes (in km)";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {7.0}; 
+} box_size;
+
+paramdef double {
+  p_descr = "space bewteen correlation boxes (in km)";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {4.0}; 
+} box_spacing;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {10.0}; 
+} max_vel;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {4.0}; 
+} vel_rad;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {10.0};
+  p_default = {0.3}; 
+} cor_min_thr;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {0.9}; 
+} cor_max_thr;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {1000.0};
+  p_default = {20.0}; 
+} var_thr;
+
+paramdef double {
+  p_descr = "max difference allowed between the measured Doppler velocity and the TREC radial velocity";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {3.0}; 
+} vel_dif_thr;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {2.0}; 
+} dif_mean_thr;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {10.0};
+  p_default = {0.5}; 
+} mag_thr;
+
+paramdef double {
+  p_descr = "radius of influence to use when interpolating vectors to a Cartesian grid";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {10.0}; 
+} horz_rad;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {1.0}; 
+} vert_rad;
+
+paramdef long {
+  p_descr = "constraint used during the interpolation process specifying the minimum number of vectors influencing a grid point";
+  p_min = {0};
+  p_max = {100};
+  p_default = {12}; 
+} num_vectors;
+
+paramdef long {
+  p_descr = "constraint used during the interpolation process specifying the minimum number of quadrants that must have data values in them; Trec does a 2d interpolation, so max number of quadrants is 4";
+  p_min = {0};
+  p_max = {4};
+  p_default = {4}; 
+} num_oct;
+
+paramdef long {
+  p_descr = "";
+  p_min = {0};
+  p_max = {100};
+  p_default = {1}; 
+} track_fld;
+
+paramdef long {
+  p_descr = "";
+  p_min = {0};
+  p_max = {100};
+  p_default = {3}; 
+} delta;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {2.0}; 
+} despike_dif;
+
+paramdef long {
+  p_descr = "";
+  p_min = {0};
+  p_max = {100};
+  p_default = {5}; 
+} cntmin;
+

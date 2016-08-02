@@ -1,0 +1,8 @@
+OUTPUT_FIELD_NAME: V
+#
+# INPUT FIELD URL                              FIELDNAME  LOOKBACK     WEIGHT     FILTER FUNCTION URL - FIRST FIELD IS USED                                              LEVEL (STARTS AT 0)
+#
+mdvp:://localhost::/d2/oien/jason/vlas/mdv     vwind      300           10.0    mdvp::vlas//localhost:0:/home/oien/rap/apps/mdv_utils/src/MdvGenerateSpatialFilter/mdv     3 20 29 
+mdvp:://localhost::/d2/oien/jason/vdras/mdv    vwind      300           1.0     mdvp::vdras//localhost:0:/home/oien/rap/apps/mdv_utils/src/MdvGenerateSpatialFilter/mdv    0 2 4
+mdvp:://localhost::/d2/oien/jason/rtfdda/mdv   V          86400         1.0     mdvp::mm5//localhost:0:/home/oien/rap/apps/mdv_utils/src/MdvGenerateSpatialFilter/mdv      4 11 13
+#

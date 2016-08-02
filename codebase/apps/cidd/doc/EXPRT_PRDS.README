@@ -1,0 +1,575 @@
+README for use of EXPRT and PRDS for product verification
+=========================================================
+M. Dixon Sept 1994.
+
+The product exporter (exprt) and product selector (prds)
+are now configured to deal with file-based products for
+verification.
+
+Examples are set up in babinet:~awdl/cidd_generic.
+
+When run in this mode, the behavior is as follows:
+
+exprt
+-----
+
+exprt writes products to a temporary file, the name of which is
+specified at startup.
+
+On export, the message field may be filled out. Remember to hit ENTER
+to store the message.
+
+The file exprt.conf is used to configure exprt. The exp_time field
+sets the number of seconds after which a product expires and is no
+longer considered valid.
+
+The abr (abbreviated name) field, of 3 letter or less, names the
+product.
+
+An example for the startup for exprt:
+
+  exprt -k50400 -aprod.tmp &
+
+-k specifies the shared memory key for communicating  with cidd/rdi.
+-a specifies the temp product file name.
+-h gives you help.
+
+
+
+DON'T FORGET TO HIT ENTER AFTER ENTERING TEXTUAL INFORMATION.
+
+
+prds
+----
+
+prds reads the products from the temporary file and ingests them into
+it's memory-based data base. The temporary file is then erased so that
+exprt can write to a clean file.
+
+prds appends the products onto a permanent output file. The
+(temporary) input file and output file names are specified at startup.
+
+The file prds.conf configures prds. The life_exp_time field in this
+file is ignored. The disp_exp_time sets the number of seconds a
+product will remain on the display. For archive use this should be set
+to a high value, say 1000000. The short_name field in prds.conf must
+correspond to the abr field in exprt.conf.
+
+An example for the startup for prds:
+
+  prds -k50500 -aprod.tmp -oprod.data &
+
+-k specifies the shared memory key for communicating  with cidd/rdi.
+-a specifies the temp product file name.
+-o specifies the output product file name.
+-h gives you help.
+
+To start prds up with an old file, copy the file to the temporary name
+first. prds will ingest the products and copy the contents to the
+output file name again.
+
+
+
+cidd 
+----
+
+cidd will display the products relevant to a given image. The start
+and end times for the image are displayed in the movie control
+widget. The product will be plotted if ANY of its valid period
+coincides with the image time. Suppose an image spans 10:00 to
+10:10. If a product spans 9:55 to 10:05 or 10:05 to 10:15, it will be
+plotted. If it spans 9:45 to 9:55 or 10:15 to 10:25 it will not be
+plotted.
+
+To Set the temporal domain for CIDD,PRDS,EXPRT, pop-up the
+movie control panel. Tripple click on the Start: HH:MM MM/DD/YYYY field
+and enter a new time and date. You may use free form input; 
+just enter the numbers separated by spaces, in the given order
+You may also change the time span of each image in this panel.
+
+DON'T FORGET TO HIT ENTER AFTER ENTERING TEXTUAL INFORMATION.
+ 
+Remember, the product lifetime is specified in exprt.conf.
+
+The message stored via exprt will be plotted over the first point of
+the product.
+
+Since you will set the disp_exp_time to a large number in prds.conf, the
+products will not time out, and all will remain selected. You may select
+or deselect them in the normal manner.
+
+The cidd configuration is governed by .cidd_defaults. The relevant 
+entries are:
+
+Datum position:
+
+  cidd.origin_longitude:       -104.75900
+  cidd.origin_latitude:        39.87823
+
+Select archive mode:
+
+  cidd.product_time_selection: 1
+
+Shared memory keys and sizes:
+
+  cidd.expt_key:               50400
+  cidd.prds_key:               50500
+  cidd.prds_shmem_size:        500
+
+Cidd now deals with map files directly. You can still use prds to select
+maps, but it is probably better to use the overlays.info file instead.
+
+rdi
+---
+
+We have not yet configured rdi for using this mode. That is still
+to be done.
+
+
+
+Editing products.
+-----------------
+
+You can only edit a product in exprt prior to exporting it. 
+
+If you wish to alter a product, draw a new one over the old one, and
+edit the new one. Put in a suitable message. Then, after exporting it,
+you may edit the products file manually, and replace the old one with
+the new one.
+
+You should quit prds before editing the products output file.
+
+
+
+
+Product file format.
+--------------------
+
+Below is an example of products in the file.
+
+The format is:
+
+PRODUCT type(short_name) sub_type n_objects group_id event_id 
+PRODUCT_TIME data_time valid_time expire_time
+PRODUCT_DESCRIPTION message
+n_objects * object description
+
+For now all products are polylines:
+POLYLINE label n_points
+	lat lon
+	lat lon
+	...
+
+PRODUCT  BD  ALL  1  0  14
+PRODUCT_TIME  1993 6 21 21 2 12  1993 6 21 21 2 12  1993 6 21 21 2 42
+PRODUCT_DESCRIPTION  medium
+POLYLINE  Boundary  13
+     40.272734    -104.510285
+     40.204195    -104.554941
+     40.161831    -104.565490
+     40.145730    -104.568069
+     40.107413    -104.565490
+     40.081239    -104.573343
+     40.061091    -104.589166
+     40.052996    -104.599597
+     40.030779    -104.641675
+     39.998578    -104.667930
+     39.960261    -104.715282
+     39.932018    -104.744115
+     39.899727    -104.780801
+
+PRODUCT  BD  ALL  1  0  15
+PRODUCT_TIME  1993 6 21 21 8 17  1993 6 21 21 8 17  1993 6 21 21 8 47
+PRODUCT_DESCRIPTION  medium
+POLYLINE  Boundary  9
+     40.272734    -104.523412
+     40.210222    -104.570764
+     40.141683    -104.586470
+     40.089244    -104.589166
+     40.034826    -104.636401
+     39.996509    -104.678478
+     39.970335    -104.723134
+     39.954145    -104.767673
+     39.942092    -104.804477
+
+PRODUCT  BD  ALL  1  0  16
+PRODUCT_TIME  1993 6 21 21 14 30  1993 6 21 21 14 30  1993 6 21 21 15 0
+PRODUCT_DESCRIPTION  weak
+POLYLINE  Boundary  10
+     40.278761    -104.533961
+     40.236486    -104.576039
+     40.175952    -104.602293
+     40.115508    -104.615420
+     40.067117    -104.633822
+     40.020705    -104.660077
+     39.982388    -104.702154
+     39.958192    -104.741536
+     39.946139    -104.780801
+     39.936065    -104.820182
+
+
+
+
+Example of exprt.conf
+---------------------
+
+# the window locations
+#main window 0  0
+#new-copy window 200 200
+#export window 200 200
+#warning window 500 100
+feature size 10
+period interval  2 minutes
+
+origin 39.87823 -104.75900 Radar location (lat, lon)
+use_RAP_map                used for archive file
+
+# prod  abr. exportable  v_time vt_round  parms   value  init symbol data_chk exp_time pid 16
+
+Nowcast    NC      1        20     1       No      No     2     0     1        1800    14  0
+
+Boundary   BD      1        -1     -1   intensity  10     2     0     3        30      2   0
+
+Microburst MB      1        -1     -1   intensity  30     2     0     3        30      2   0
+
+Rotation   RT      1        -1     1       No      0      3     1     2        180     23  1
+
+Scratch    SC      0        -1     -1      No      No     2     0     4        60      5   1
+
+#prod - product (object) name
+#abr. - short name
+#ex_tbl - exportability: 1 for yes; 0 for no;
+#v_time - default valid time: >=0, -1 for not defined; 
+
+#vt_round (round value for valid time): 1 - no round; 
+#	>1 - round to nearest multiple of vt_round.
+#parms,value:  name and default value of user defined parameters
+#	2 char strings
+
+#init - initial graphics: 0 - circle; 1 - rectangle; 2 - point; 3 - symbol;
+#symbol: used only when init=3; >=0 an id of the symbol;
+#use 0 for products without a symbol
+
+#data_chk - data checking code before exporting of the drawing: 
+#	0: One closed area and a point (Core/Cell)
+#	1: Several areas (Nowcast/Forecast)
+#	2: A symbol (Tornado, rotation ...)
+#	3. A line plus a point (gust front ...)
+#	4. Arbitrary (No check)
+
+#exp_time - expiring time.
+
+#pid - an id number for the object.
+
+#16 - switch for accelerated exporting (1 for yes; 0 for no).
+
+
+
+
+Example of prds.conf
+--------------------
+
+# PRDS.CONF : Configuration info for PRDS
+#
+# Parameter PID:
+#
+# Parameter DISP_EXP_TIME:
+#   Life time of a product on the display (seconds)
+#
+# Parameter	lIFE_EXP_TIME:
+#    Life time of the product in the database (seconds)
+#
+# Parameter SELECT:
+#  1 means product is turned on at startup
+#
+# Parameter TSS:
+# -1 means the item is a map. The fields short_name=L means using local
+#     map file prds_maps. Otherwise, read from the product server. The selected
+#     bits are used for default selected. There can be only one maps row.
+# 0 means it is a not a time sequence.
+# 1 means it is a time sequence. Any products with identical type and index
+#    will be assumed to be in the same time sequence.
+# 2 means it is a group. Any products with identical type and index
+#    will be assumed to be in the same group.
+#
+# Parameter DFLAG: 
+#  1: means that any new product with the same
+#       type will supercede the previous one (one time sequence, or group)
+#       with the same type.
+#
+# Parameter T_SEL:
+# 1: listing valid time;
+# 2: listing expire time;
+# other:  listing generate time;
+# configuration file for imports
+
+Rows in lists  10
+Background color Gray
+Foreground color Black
+Font Screen-12
+Window at 0 0
+Initially closed
+Volume time 300
+Loop available
+
+origin 39.87823 -104.75900 Radar location (lat, lon)
+use_RAP_map                used for archive file
+
+# WARNING: SHORT NAMES must be 3 chars or less!
+#  pid   short_name  full_name   disp_exp_time  life_exp_time     select tss dflag t_sel color
+#--------------------------------------------------------------------------------------
+
+# Human Generated products
+
+ 1      NC     Nowcast          32767  1000000           1     0   1       0     1
+ 2      BD     Human_Bndry      32767  1000000           1     1   0       0     5
+ 3      MB     Microburst       32767  1000000           1     1   0       0     6
+ 4      RT     Rotation         32767  1000000           1     1   0       0     3
+ 5      SC     Scratch          32767  1000000           1     1   0       0     7
+
+
+
+
+Example of .cidd_defaults file
+------------------------------
+# Defaults & parameter data base for the Cartesian radar display program; cidd
+#
+cidd.debug_flag:            0
+cidd.debug1_flag:           0
+cidd.debug2_flag:           0
+# This parameter determines if all of the controls
+# are available. If set to 1, none of the popup
+# control panels are available and minimalist movie controls
+# become available on the front panel 
+cidd.limited:            0
+#
+# Set to 0 to ignore the products time info when rendering products.
+# Set to 1 to skip over products that aren't valid in the temporal domain of the images 
+# Set to 1 to skip over products that aren't valid in the temporal domain specified by product_time_width 
+cidd.product_time_selection: 0
+#
+# Allows products only N seconds away from frame time centroid
+cidd.product_time_width:  120
+#
+# Turns on(1) and 0ff(0) the composite mode on startup
+# Uncomment the next parameter to start up cidd in archival mode
+#  Starting at the indicated time. Enter HH:MM MM/DD/YY format time string
+#  System will startup using field 0.
+#cidd.demo_time:  20:00 6/21/93
+#cidd.demo_time:  00:00 2/12/94
+#
+# Set to 1 to start up cidd in movie-on mode, 0 = off
+cidd.movie_on:           0
+#
+# If set to 1 - forces CIDD to reload all data every time the movie frames 
+# rotate one old frame out and generate a new frame.
+cidd.reset_frames:       0
+#
+# MHR location
+#cidd.origin_longitude:       -104.75900
+#cidd.origin_latitude:        39.87823
+#
+#
+# CHILL location
+#cidd.origin_longitude:       -104.63700
+#cidd.origin_latitude:        40.44600
+#
+# CP4 location
+#cidd.origin_longitude:       -104.35700
+#cidd.origin_latitude:        40.10200
+#
+# DEN NEXRAD location
+cidd.origin_longitude:       -104.546
+cidd.origin_latitude:        39.78700
+#
+# NOAA-K location
+#cidd.origin_longitude:       -105.03500
+#cidd.origin_latitude:        40.09900
+#
+# The Outer most domain:
+cidd.num_zoom_levels:       5
+cidd.start_zoom_level:      3
+#
+cidd.level0_label:              FULL DOMAIN
+cidd.level0_min_xkm:                -250.0
+cidd.level0_min_ykm:                -250.0
+cidd.level0_max_xkm:                250.0
+cidd.level0_max_ykm:                250.0
+#
+cidd.level1_label:              TERMINAL AREA
+cidd.level1_min_xkm:                -100.0
+cidd.level1_min_ykm:                -100.0
+cidd.level1_max_xkm:                100.0
+cidd.level1_max_ykm:                100.0
+#
+cidd.level2_label:              AIRPORT
+cidd.level2_min_xkm:                -40.0
+cidd.level2_min_ykm:                -20.0
+cidd.level2_max_xkm:                10.0
+cidd.level2_max_ykm:                30.0
+#
+cidd.level3_label:              RUNWAYS
+cidd.level3_min_xkm:                -25.0
+cidd.level3_min_ykm:                -5.0
+cidd.level3_max_xkm:                0.0
+cidd.level3_max_ykm:                20.0
+#
+cidd.level4_label:              USER Picked
+cidd.level4_min_xkm:                -50.0
+cidd.level4_min_ykm:                -50.0
+cidd.level4_max_xkm:                50.0
+cidd.level4_max_ykm:                50.0
+#
+# Cartesian space limits in km - Vertical Range and Resolution
+cidd.min_ht:                 1.25
+cidd.max_ht:                 12.25
+cidd.ht_interval:            0.5
+cidd.start_ht:               2.0
+#
+# Set the scale factor and label for Range rings and Distance scales.
+cidd.units_per_km:          0.5395932
+cidd.scale_units_label:  nm
+#
+cidd.data_info_file:        data.info
+cidd.wind_info_file:        wind.info
+cidd.draw_colors_file:      draw.colors
+cidd.overlay_info_file:     overlays.info
+cidd.color_file_subdir:     colorscales
+#
+# Set to 1 to enable Server mapper querring
+cidd.use_servmap:           0
+cidd.servmap_host1:         draft
+cidd.servmap_host2:         babinet
+#
+# Set times to the nearest value divisible by the number of seconds
+cidd.temporal_rounding:      300
+#
+cidd.movie_frame_dir:        ./movie_frames
+#
+#  This determines how many "high speed" movie frames
+cidd.num_pixmaps:            16
+# minutes per default movie frame
+cidd.time_interval:          10.0
+# This parameter set the minutes into the future to look
+cidd.forecast_interval:      0.0
+# Sets the allowable time error for movie frames (times the time_interval)
+cidd.stretch_factor:         3.0
+# Number of milliseconds between checks for images needing redrawn
+cidd.redraw_interval:        100
+# Number of seconds between data update requests
+cidd.update_interval:        60
+#    Number of polling periods to wait for data before giving up
+cidd.data_retry_attempts:    100
+#
+cidd.overlay_colorname:        White
+# Sets the relative intensity of the image, relative to the overlays on startup
+# Set between 0.2 and 1.0.
+cidd.image_inten:            0.8
+# THe number of selectable intensity levels in the slider control
+cidd.inten_levels:            32
+# Sets the threshold in drawable grid points where image rendering 
+# is done by a filling method on the client, rather than by rectangles on the Xserver.
+# Set this high if the X server is fast or the comm link to the server is slow.
+# Set this low if the X server is slow. Typical values range from 10,000 to 100,000
+cidd.image_fill_treshold:    20000
+#
+# Radial data Limits
+cidd.min_rkm:                0.0
+cidd.max_rkm:                400.0
+cidd.min_adeg:               0.0
+cidd.max_adeg:               360.0
+#
+# Set range_ring_spacing to a negative value to dynamically determing spacing.
+cidd.range_ring_spacing:        -1.0
+# x_space, y_space determine allowable space for range ring labels
+cidd.range_ring_x_space:    40
+cidd.range_ring_y_space:    13
+cidd.azmith_interval:       30.0
+cidd.azmith_radius:         200.0
+#
+#
+# Uncomment the followine line to set up and turn on a default contour field
+# Uses the contour levels and the Field Label string in data.info
+cidd.contour_field_label:      SURF_T
+#
+# Toggles to turn on/off  Extras features on startup
+#
+cidd.range_rings:             1
+cidd.azmith_lines:            1
+cidd.wind_vectors:            0
+#
+# Wind vector parameters 
+#
+cidd.wind_head_size:         5.0
+cidd.ideal_x_vectors:        15
+cidd.ideal_y_vectors:        15
+cidd.wind_head_angle:        30.0
+#
+# Wind Rendering Options: "arrow" (centered), "vector", "barb", "tuft"
+#
+#cidd.wind_marker_type:      vector
+#cidd.wind_marker_type:      barb
+#cidd.wind_marker_type:      tuft
+cidd.wind_marker_type:       arrow
+cidd.wind_w_scale_factor:    10.0
+#
+cidd.num_fonts:                5
+cidd.font1:                    -schumacher-clean-medium-r-normal--6-60-75-75-c-60-iso8859-1
+cidd.font2:                    -misc-fixed-medium-r-normal--8-80-75-75-c-50-iso8859-1
+cidd.font3:                    -misc-fixed-medium-r-normal--10-70-100-100-c-60-iso8859-1
+cidd.font4:                    -misc-fixed-bold-r-normal--13-120-75-75-c-70-iso8859-1
+cidd.font5:                    -misc-fixed-bold-r-normal--13-120-75-75-c-70-iso8859-1
+#
+# GUI RELATED STUFF
+#
+cidd.horiz_frame_label:       * National Center for Atmospheric Research * (303)497-8413
+cidd.horiz_default_height:    550
+cidd.horiz_min_height:        500
+cidd.horiz_min_width:         560
+#
+cidd.horiz_top_margin:        25
+cidd.horiz_bot_margin:        25
+cidd.horiz_left_margin:       25
+cidd.horiz_right_margin:      40
+#
+cidd.vert_min_height:        120
+cidd.vert_min_width:         120
+cidd.vert_default_height:    240
+cidd.vert_default_width:     500
+#
+cidd.vert_top_margin:        25
+cidd.vert_bot_margin:        25
+cidd.vert_left_margin:       25
+cidd.vert_right_margin:      40
+#
+# Resources related to exprt, expt
+#
+cidd.expt_feature_scale:            12500
+cidd.expt_font_scale:               45
+cidd.expt_mark_size:                5
+#
+# Resources for compatibility with TIME HIST
+#
+cidd.track_server_instance:         Operations
+cidd.track_past_plot_period:        0
+cidd.track_future_plot_period:      0
+cidd.track_n_forecast_steps:        5
+cidd.track_forecast_interval:       6
+cidd.track_data_time_margin:        750
+cidd.track_past_color:              yellow
+cidd.track_current_color:           cyan
+cidd.track_future_color:            blue
+cidd.track_forecast_color:          red
+#
+#  KEYS for SHARED MEMORY SEGMENTS
+#
+# Key for coordinate shared memory
+cidd.coord_key:               61500
+# Key for TITAN control shared memory
+cidd.titan_key               61501
+# Key for EXPT shared memory
+cidd.expt_key:               51400
+# Key for PRDS shared memory
+cidd.prds_key:               51500
+#  Size of shared memory in K bytes.
+cidd.prds_shmem_size:        500

@@ -1,0 +1,207 @@
+/**********************************************************************
+ * TDRP params for SurfaceAscii2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// SurfaceAscii2Spdb reads surface weather observations, converts them 
+//   to station_report_t format and writes them to an SPDB data base.
+//
+// The input file should contain space-delimited ASCII.
+// Comment lines start with '#'
+// There should be one line for each station for each time
+// If a value is unknown or missing, set to -9999
+// The input fields should be as follows
+
+// 	00 year
+// 	01 month
+// 	02 day
+// 	03 hour
+// 	04 min
+// 	05 sec
+// 	06 station-id - integer - set to -9999 if missing
+// 	07 station-name - string - set to 'unknown' if missing
+// 	08 latitude (deg)
+// 	09 longitude (deg)
+// 	10 height (m MSL)
+// 	11 temp (C)
+// 	12 dewpoint (C)
+// 	13 RH (%)
+// 	14 pressure (hPa)
+// 	15 windspeed (m/s)
+// 	16 winddirn (degT)
+// 	17 windgust (m/s)
+// 	18 precip_accum (mm)
+// 	19 precip_rate (mm/hr)
+// 	20 visibility (m)
+// 	21 rvr (m)
+// 	22 ceiling (m).
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In this 
+//   mode it is optional to watch for a latest_data_info file. In ARCHIVE 
+//   mode, it processes all of the data files in the input directory 
+//   between the start and end times set on the command line. In FILELIST 
+//   mode, it processes all of the files in the list specified on the 
+//   command line. In FILELIST mode paths must be fully qualified with 
+//   respect to the date and time - so if each date has a separate 
+//   subdirectory the date part of the path must be included.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Directory where input data files can be found.
+// Type: string
+//
+
+input_dir = "./raw/aws";
+
+///////////// latest_data_info_avail //////////////////
+//
+// Set to true if there is a latest_data_info file available in the 
+//   input directory.
+// REALTIME mode only.
+// Type: boolean
+//
+
+latest_data_info_avail = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// strict_subdir_check /////////////////////
+//
+// When set, only checks input_dir for subdirs of the form YYYYMMDD.
+// Only in REALTIME mode with latest_data_info_avail FALSE.
+// Type: boolean
+//
+
+strict_subdir_check = FALSE;
+
+///////////// file_name_check /////////////////////////
+//
+// When set, check file name contains specified sub-string.
+// See file_match_string.
+// Type: boolean
+//
+
+file_name_check = FALSE;
+
+///////////// file_match_string ///////////////////////
+//
+// Input filename match string.
+// Files must contain this string to be processed.
+// Type: string
+//
+
+file_match_string = "txt";
+
+///////////// input_delimiter /////////////////////////
+//
+// Delimiter for input data.
+// Input data uses this between values.
+// Type: string
+//
+
+input_delimiter = " ";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_report_type //////////////////////
+//
+// Type of station report to put in the output SPDB database.
+//
+// Type: enum
+// Options:
+//     STATION_REPORT
+//     XML
+//
+
+output_report_type = STATION_REPORT;
+
+///////////// output_url //////////////////////////////
+//
+// Output URL for decoded metars.
+// See the DIDSS docs for details on URL usage.
+// Type: string
+//
+
+output_url = "/tmp/spdb/surface";
+
+///////////// expire_seconds //////////////////////////
+//
+// Expire time in seconds for each metar.
+// This value will be added to the metar time to determine the expire 
+//   time for the metar.
+// Type: int
+//
+
+expire_seconds = 7200;
+

@@ -1,0 +1,115 @@
+#include <XView.tmpl>
+
+/**/########################################################################
+/**/# @(#)Imakefile	1.5	90/07/17
+/**/# Imakefile for images directory.  XView release 2.0.
+
+CORE_ICONS = default.icon mglass.icon mglass_mask.icon
+
+ICONS = $(CORE_ICONS) \
+	terminal.icon terminal_mask.icon cmdtool.icon cmdtool_mask.icon \
+	PSdoc.icon bind.icon black.icon boggle.icon calctool.icon \
+	canfield.icon canvas_demo.icon cardback.icon chess.clock.icon \
+	chesstool.icon clock.icon clock.rom.icon \
+	compose.icon compress.icon console.icon console_mask.icon core_eye.icon \
+	coredoc.icon cursor_demo.icon dbxtool.icon dead.icon \
+	defaultsedit.icon dos.icon draw.icon drawdoc.icon empty_letter.icon \
+	equal.icon filemgr.icon fm_clock.icon fm_cmdtool.icon fm_dbxtool.icon \
+	fm_fontedit.icon fm_iconedit.icon fm_mailtool.icon fm_textedit.icon \
+	fm_traffic.icon fontdoc.icon fontedit.icon framedoc.icon fv.icon \
+	gammon.icon gfxtool.icon hello_world.icon icondoc.icon iconedit.icon \
+	indentdefaults.icon jump1.icon jump2.icon jump3.icon jump4.icon \
+	jump5.icon jump6.icon life.icon lockscreen.icon mail.icon \
+	maildoc.icon mailseen.icon maze.icon \
+	nautilus.icon nomail.icon overview.icon paintdoc.icon perfmeter.icon \
+	plus.icon printer.icon puzzle.icon reply.icon rolo.icon \
+	rspeedometer.icon sched.icon scrollbar_demo.icon snapshot.icon \
+	speedometer.icon spreadsheet.icon sun30.icon sundraw.icon \
+	sunpaint.icon sunview_manual.icon sunwrite.icon switcher.icon \
+	tapetool.icon tektool.icon template.icon \
+	textedit.icon traffic.icon vitool.icon \
+	white.icon writedoc.icon xsol.icon
+
+CORE_BITMAPS = bg1.xbm bg2.xbm bg3.xbm \
+		fl_arrow.xbm fl_doc.xbm fl_folder.xbm  
+
+BITMAPS = $(CORE_BITMAPS) 
+
+CORE_PIXRECTS = square_17.pr square_25.pr square_75.pr dup_cursor.pr \
+	text_move_cursor.pr
+
+PIXRECTS = $(CORE_PIXRECTS) \
+	abc.pr abstk.pr abstk_up.pr alert_bang32.pr alert_qmark32.pr \
+	basic_cursor.pr basic_text_cursor.pr blank.pr box.pr button_stack.pr \
+	choice_12_off.pr choice_12_on.pr choice_14_off.pr choice_14_on.pr \
+	choice_16_off.pr choice_16_on.pr choice_19_off.pr choice_19_on.pr \
+	choice_24_off.pr choice_24_on.pr choice_32_off.pr choice_32_on.pr \
+	choice_stack.pr circle.pr circle_0.pr circle_25.pr circle_50.pr \
+	circle_75.pr circle_black.pr circle_root.pr cmrb14.pr cmrr14.pr \
+	confirm.pr confirm_left.pr confirm_middle.pr confirm_right.pr \
+	copy_cursor.pr copyletter.pr copyletters.pr cycle.pr \
+	default_pin_out.pr down_arrow.pr down_button_10.pr down_button_12.pr \
+	down_button_14.pr down_button_19.pr folder.pr gallant19.pr \
+	gallantr19.pr grey_stencil_50.pr grid.pr k1.pr k2.pr k3.pr k4.pr k5.pr \
+	letter.pr letters.pr line.pr mouse_left_hand.pr \
+	mouse_left_hand_grey.pr mouse_mid_hand.pr mouse_mid_hand_grey.pr \
+	move_cursor.pr moveletter.pr moveletters.pr off.pr on.pr \
+	painting_hand.pr panel_button.pr panel_button_arrow.pr  \
+	panel_check_choice.pr panel_check_off.pr panel_check_on.pr \
+	panel_choice_off.pr panel_choice_on.pr panel_choose_many.pr \
+	panel_choose_one.pr panel_default_button.pr panel_flush.pr \
+	panel_left_arrow.pr panel_menu_on.pr panel_pulldown.pr \
+	panel_pullright.pr panel_right_arrow.pr panel_switch.pr panel_text.pr \
+	pin_in.pr pin_out.pr point.pr quick_move_cursor.pr screenb12.pr \
+	screenb14.pr screenr11.pr screenr12.pr screenr14.pr screenr7.pr \
+	shine.pr size_pointer.pr square_0.pr square_50.pr square_80.pr \
+	square_black.pr square_root.pr toggle_12_off.pr toggle_12_on.pr \
+	toggle_14_off.pr toggle_14_on.pr toggle_16_off.pr toggle_16_on.pr \
+	toggle_19_off.pr toggle_19_on.pr toggle_24_off.pr toggle_24_on.pr \
+	toggle_32_off.pr toggle_32_on.pr tri_down.pr tri_left.pr tri_right.pr \
+	tri_up.pr up_button_10.pr up_button_12.pr up_button_14.pr \
+	up_button_19.pr white.pr
+
+CORE_CURSORS = focus_up.cursor focus_right.cursor qmark.cursor
+
+CURSORS = $(CORE_CURSORS) \
+	black.cursor bullseye.cursor busy.cursor confirm.cursor copy.cursor \
+	copyletter.cursor copyletters.cursor dup.cursor glass.cursor \
+	gr_25.cursor gr_50.cursor gr_75.cursor gr_root.cursor hglass.cursor \
+	ibeam.cursor move.cursor move_h.cursor move_v.cursor moveletter.cursor \
+	moveletters.cursor none.cursor stretchNE.cursor stretchNW.cursor \
+	stretchSE.cursor stretchSW.cursor stretch_h.cursor stretch_v.cursor
+
+CORE_IMAGES =
+
+IMAGES = $(CORE_IMAGES) \
+	undelete.image
+
+INCLUDES_SRCS = \
+	$(CORE_BITMAPS) $(CORE_ICONS) $(CORE_PIXRECTS) $(CORE_CURSORS) \
+	$(CORE_IMAGES)
+
+#if InstallAllImages
+SRCS =  $(BITMAPS) $(ICONS) $(PIXRECTS) $(CURSORS) $(IMAGES)
+#else
+SRCS =  \
+	$(CORE_BITMAPS) $(CORE_ICONS) $(CORE_PIXRECTS) $(CORE_CURSORS) \
+	$(CORE_IMAGES)
+#endif
+
+ALLFILES = $(BITMAPS) $(ICONS) $(PIXRECTS) $(CURSORS) $(IMAGES)
+
+all: $(SRCS)
+
+BuildIncludes($(INCLUDES_SRCS),$(IMAGE_INCDIR),/**/)
+
+install:: $(SRCS)
+	$(MKDIRHIER) $(DESTDIR)$(HEADER_DEST)/$(IMAGEINC)
+	
+InstallMultiple($(SRCS),$(HEADER_DEST)/$(IMAGEINC))
+
+PopulateSCCSTree(h,$(ALLFILES))
+
+clean::
+
+depend::

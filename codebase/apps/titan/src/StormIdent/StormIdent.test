@@ -1,0 +1,755 @@
+/**********************************************************************
+ * TDRP params for StormIdent
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: int
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In realtime mode, storm_ident waits for a new input file. In archive 
+//   mode, it moves through the files between the times set by the user.
+//
+// Type: enum
+// Options:
+//   ARCHIVE, REALTIME
+//
+//
+
+mode = ARCHIVE;
+
+///////////// max_missing_data_gap ////////////////////
+//
+// Max missing data gap (secs).
+// In realtime mode, if auto_restart is false, storm_ident looks back 
+//   from latest data time for the first gap exceeding 
+//   max_missing_data_gap. Files since this gap are processed.
+// Minimum val: 1
+// Type: int
+//
+
+max_missing_data_gap = 3600;
+
+//======================================================================
+//
+// TRACKING OPTIONS.
+//
+// Options for using and/or starting storm tracking.
+//
+//======================================================================
+ 
+///////////// perform_tracking ////////////////////////
+//
+// Option to run tracking automatically.
+// If this is set, StormIdent will communicate with the storm tracking 
+//   program, so that the tracking is performed after each scan.
+// Type: boolean
+//
+
+perform_tracking = FALSE;
+
+///////////// start_storm_track ///////////////////////
+//
+// Option to start storm_track automatically.
+// If this is set, storm_track will be started from within storm_ident.
+// Type: boolean
+//
+
+start_storm_track = TRUE;
+
+///////////// storm_track_command_line ////////////////
+//
+// Command line for starting storm_track.
+// The storm tracking program MUST be started in the BACKGROUND. 
+//   Therefore make sure you include an '&' at the end of the command 
+//   line.
+// Type: string
+//
+
+storm_track_command_line = "storm_track -params $TITAN_HOME/params/storm_track.test &";
+
+///////////// shmem_key ///////////////////////////////
+//
+// Shared mem key.
+// This key is used for shared memory communication with storm_track.
+// Type: int
+//
+
+shmem_key = 44000;
+
+//======================================================================
+//
+// DATA DIRECTORIES.
+//
+//======================================================================
+ 
+///////////// rdata_dir ///////////////////////////////
+//
+// Radar data directory - input.
+// The input MDV files are stored in this directory. In REALTIME mode 
+//   the program watches the latest_data_info file in this directory and 
+//   processes a new scan each time the info file updates.
+// Type: string
+//
+
+rdata_dir = "$(TITAN_HOME)/cdata";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+///////////// vel_to_m_per_sec_scale //////////////////
+//
+// Factor to convert velocity field units to m/s.
+// This is included in case the velocity is not in m/s units.
+// Minimum val: 0
+// Type: float
+//
+
+vel_to_m_per_sec_scale = 1;
+
+///////////// storm_data_dir //////////////////////////
+//
+// Storms data directory - output.
+// The storm files are placed in this directory.
+// Type: string
+//
+
+storm_data_dir = "$(TITAN_HOME)/Storms";
+
+//======================================================================
+//
+// DATA FIELDS IN INPUT FILES.
+//
+//======================================================================
+ 
+///////////// dbz_field ///////////////////////////////
+//
+// dBZ field number.
+// Field number for dBZ data in radar volumes.
+// Minimum val: 0
+// Type: int
+//
+
+dbz_field = 0;
+
+///////////// vel_field ///////////////////////////////
+//
+// Velocity field number.
+// Field number for velocity data in radar volumes.
+// Minimum val: 0
+// Type: int
+//
+
+vel_field = 1;
+
+///////////// vel_available ///////////////////////////
+//
+// Flag to indicate if velocity data is available.
+// If this is set, velocity data is available in the radar volumes. 
+//   Velocity-based computations will be carried out. If not, 
+//   velocity-based computations will be omitted.
+// Type: boolean
+//
+
+vel_available = TRUE;
+
+//======================================================================
+//
+// STORM IDENTIFICATION PARAMETERS.
+//
+//======================================================================
+ 
+///////////// low_dbz_threshold ///////////////////////
+//
+// Lower dBZ threshold for storm identification (dBZ).
+// Storms are defined as regions with reflectivity values in excess of 
+//   this value.
+// Minimum val: -30
+// Maximum val: 99
+// Type: float
+//
+
+low_dbz_threshold = 35;
+
+///////////// high_dbz_threshold //////////////////////
+//
+// Upper dBZ threshold (dBZ).
+// If a storm contains reflectivity in excess of this value, it will not 
+//   be processed.
+// Minimum val: -30
+// Maximum val: 99
+// Type: float
+//
+
+high_dbz_threshold = 80;
+
+///////////// min_grid_overlap ////////////////////////
+//
+// Min overlap between storm fragments.
+// A storm is made up of a series of adjacent 'runs' of data in the EW 
+//   direction. When testing for overlap, some minimum number of overlap 
+//   grids must be used. This is that minimum overlap in grid units.
+// Minimum val: 1
+// Type: int
+//
+
+min_grid_overlap = 1;
+
+///////////// use_dual_threshold //////////////////////
+//
+// Option to perform identification using dual thresholds.
+// If set, the identification is performed in multiple stages. First, an 
+//   outer storm envelope is computed, using the low_dbz_threshold. This 
+//   is the default method which has always been used in TITAN. Then, 
+//   using the dual_threshold parameters, a search is performed for storms 
+//   within the envelope exceeding the dbz_threshold. If there is only one 
+//   region at the higher reflectivity, the entire outer envelope is used. 
+//   If there are two or more regions which meet or exceed the required 
+//   characteristics, these regions are grown back out to the original 
+//   envelop, but stop growing where they meet between the 
+//   higher-reflectivity areas. The final storms are computed by breaking 
+//   the original storm into regions based upon these secondary areas.
+// Type: boolean
+//
+
+use_dual_threshold = TRUE;
+
+///////////// dual_threshold //////////////////////////
+//
+// Parameters for dual threshold identification.
+// See 'use_dual_threshold'. dbz_threshold: threshold for this stage. A 
+//   number of regions may be identified at the higher threshold. 
+//   min_frction_all_parts: we sum the sizes of the parts at the higher 
+//   threshold, and the sum divided by the original size of the envelope 
+//   must exceed this fraction. If it does not the original envelope is 
+//   used. min_fraction_each_part: for any part to be valid its size as a 
+//   fraction of all of the parts must exceed this value. 
+//   min_area_each_part: for any part to be valid its area must exceed 
+//   this value. If it does not the part is ignored. If only 1 part is 
+//   valid, the entire envelope is used.
+//
+// Type: struct
+//   typedef struct {
+//      float dbz_threshold;
+//      float min_fraction_all_parts;
+//      float min_fraction_each_part;
+//      float min_area_each_part;
+//   }
+//
+//
+
+dual_threshold = { 45, 0.15, 0.05, 20 };
+
+///////////// create_dual_threshold_files /////////////
+//
+// Option to create dual threshold files for debugging.
+// If this is set, dual threshold files will be stored in 
+//   dual_threshold_dir.
+// Type: boolean
+//
+
+create_dual_threshold_files = TRUE;
+
+///////////// dual_threshold_dir //////////////////////
+//
+// Dual_threshold data directory.
+// If create_dual_threshold_files is TRUE, the dual_threshold debugging 
+//   files are stored in this directory.
+// Type: string
+//
+
+dual_threshold_dir = "$(TITAN_HOME)/dualt";
+
+///////////// base_threshold //////////////////////////
+//
+// Storm base threshold (km).
+// Storms identification is only performed using CAPPIs at or above this 
+//   threshold. Reflectivity values in CAPPIs below the base are ignored.
+// Minimum val: 0
+// Maximum val: 25
+// Type: float
+//
+
+base_threshold = 3;
+
+///////////// top_threshold ///////////////////////////
+//
+// Storm top threshold (km).
+// Storms identification is only performed using CAPPIs at or below this 
+//   threshold. Reflectivity values in CAPPIs above the top are ignored.
+// Minimum val: 0
+// Maximum val: 30
+// Type: float
+//
+
+top_threshold = 25;
+
+///////////// min_storm_size //////////////////////////
+//
+// Minimum storm size (km2 or km3 depending on input grid type).
+// Storms must exceed this size to be considered valie.  If the data is 
+//   2D (i.e. nz == 1), the units are km2; if the data is 3D, units are 
+//   km3.
+// Minimum val: 0
+// Type: float
+//
+
+min_storm_size = 30;
+
+///////////// max_storm_size //////////////////////////
+//
+// Maximum storm size (km2 or km3 depending on input grid type).
+// Storms must not exceed this size to be considered valid.  If the data 
+//   is 2D (i.e. nz == 1), the units are km2; if the data is 3D, the units 
+//   are km3.
+// Minimum val: 1
+// Type: float
+//
+
+max_storm_size = 1e+08;
+
+//======================================================================
+//
+// OPTIONS TO CHECK SECOND TRIP.
+//
+//======================================================================
+ 
+///////////// check_range_limits //////////////////////
+//
+// Option to check for storm range limits.
+// If the storm is at the limit of radar range, a flag is set.
+// Type: boolean
+//
+
+check_range_limits = FALSE;
+
+///////////// check_second_trip ///////////////////////
+//
+// Option to check for second trip characteristics.
+// If set, the storm orientation and shape are checked for second trip 
+//   characteristics. An elongated, low storm with a major axis lined up 
+//   with the radar indicates a likely second-trip echo. For a storm to be 
+//   considered second-trip, all 3 of the following tests must be passwd: 
+//   (a) the horizontal aspect ratio exceeds the given parameter; (b) the 
+//   vertical aspect ratio exceeds the given parameter; (c) the horizontal 
+//   orientation lies close to the line from the radra. If the storm is 
+//   thought to be second-trip, the second-trip flag is set.
+// Type: boolean
+//
+
+check_second_trip = FALSE;
+
+///////////// sectrip_vert_aspect /////////////////////
+//
+// Second trip detection vertical aspect threshold.
+// If the vertical aspect ratio exceeds this value, the storm may be 
+//   flagged as second-trip.
+// Minimum val: 1
+// Maximum val: 20
+// Type: float
+//
+
+sectrip_vert_aspect = 4;
+
+///////////// sectrip_horiz_aspect ////////////////////
+//
+// Second trip detection horizontal aspect threshold.
+// If the horizontal aspect ratio (based on the ellipse) exceeds this 
+//   value, the storm may be flagged as second-trip.
+// Minimum val: 1
+// Maximum val: 20
+// Type: float
+//
+
+sectrip_horiz_aspect = 4;
+
+///////////// sectrip_orientation_error ///////////////
+//
+// Allowable second trip orientation error.
+// For a storm to be flagged as second-trip, the orientation must be 
+//   aligned with the storm azimuth from the radar, within this allowable 
+//   error.
+// Minimum val: 1
+// Maximum val: 90
+// Type: float
+//
+
+sectrip_orientation_error = 10;
+
+//======================================================================
+//
+// PRECIP RATE AND MASS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// hail_dbz_threshold //////////////////////
+//
+// Hail reflectivity threshold.
+// The threshold between rain and hail (dBZ).
+// Minimum val: 40
+// Maximum val: 70
+// Type: float
+//
+
+hail_dbz_threshold = 55;
+
+///////////// ZR //////////////////////////////////////
+//
+// Z-R parameters.
+// Parameters in Z-R relationship.
+//
+// Type: struct
+//   typedef struct {
+//      float coeff;
+//      float expon;
+//   }
+//
+//
+
+ZR = { 200, 1.6 };
+
+///////////// ZM //////////////////////////////////////
+//
+// Z-M parameters.
+// Parameters in Z-M relationship.
+//
+// Type: struct
+//   typedef struct {
+//      float coeff;
+//      float expon;
+//   }
+//
+//
+
+ZM = { 20465, 1.75 };
+
+///////////// dbz_hist_interval ///////////////////////
+//
+// Dbz histogram interval.
+// Reflectivity interval for histogram computations related to the 
+//   reflectivity distribution.
+// Minimum val: 0.01
+// Type: float
+//
+
+dbz_hist_interval = 3;
+
+//======================================================================
+//
+// OPTIONS TO STORE STORM RUNS IN OUTPUT FILE.
+//
+//======================================================================
+ 
+///////////// store_storm_runs ////////////////////////
+//
+// Option to store runs in storm file.
+// If set, the raw storm runs are stored in the storm file. A run is a 
+//   contiguous block of reflectivity in the X direction for a given Y and 
+//   Z. This is a useful way of storing storm grid locations reasonably 
+//   efficiently. If the runs are stored, the exact 3D storm shape can be 
+//   recreated from the storm file.
+// Type: boolean
+//
+
+store_storm_runs = TRUE;
+
+///////////// store_proj_runs /////////////////////////
+//
+// Option to store projected area runs in storm file.
+// If set, the raw storm projected area runs are stored in the storm 
+//   file. A run is a contiguous block of reflectivity in the X direction 
+//   for a given Y. If these runs are stored, the exact 2D projected area 
+//   storm shape can be recreated from the storm file.
+// Type: boolean
+//
+
+store_proj_runs = TRUE;
+
+//======================================================================
+//
+// OPTION TO CREATE VERIFICATION FILES.
+//
+//======================================================================
+ 
+///////////// create_verification_files ///////////////
+//
+// Option to create verification files.
+// If this is set, verification files will be stored in verify_dir. The 
+//   verification files allow forecast verification against the regions 
+//   which were actually used by the program to compute the storms. There 
+//   are 2 fields: field 0 is the ALL_STORMS_FIELD - all storms above 
+//   threshold are stored even if they do not meet other criteria such as 
+//   minimum storm volume. Field 1 is the VALID_STORMS_FIELD, which only 
+//   include the valid storms included in the storm file.
+// Type: boolean
+//
+
+create_verification_files = FALSE;
+
+///////////// verify_dir //////////////////////////////
+//
+// Verify data directory.
+// If create_verification_files is TRUE, the verification files are 
+//   stored in this directory.
+// Type: string
+//
+
+verify_dir = "$(TITAN_HOME)/Verify";
+
+//======================================================================
+//
+// OPTION TO CHECK STORM MORPHOLOGY.
+//
+// The storm morphology check allows you to erode minor connections 
+//   between storms when these connections really have no phyical 
+//   significance.
+//
+//======================================================================
+ 
+///////////// check_morphology ////////////////////////
+//
+// Option to check morphology.
+// If this is set, morphology will be used for storm definition. A check 
+//   is performed on storm morphology to reduce apparent mergers. The 
+//   technique is as follows: 1. Compute euclidean distance (ed) of each 
+//   point from edge of storm clump 2. Compute reflectivity excess above 
+//   threshold, and divide by morphology_refl_divisor (in dbz/km). 3. Add 
+//   ed to refl excess, to get interest map 4. Threshold interest map 
+//   using morphology_erosion_threshold (in km). 5. Erode points which do 
+//   not exceed the threshold, and which are not adjacent to a point which 
+//   exceeds the threshold.
+// Type: boolean
+//
+
+check_morphology = FALSE;
+
+///////////// create_morphology_files /////////////////
+//
+// Option to create morphology files for debugging.
+// If this is set, morphology files will be stored in morphology_dir.
+// Type: boolean
+//
+
+create_morphology_files = TRUE;
+
+///////////// morphology_dir //////////////////////////
+//
+// Morphology data directory.
+// If create_morphology_files is TRUE, the morphology files are stored 
+//   in this directory.
+// Type: string
+//
+
+morphology_dir = "$(TITAN_HOME)/Morph";
+
+///////////// morphology_erosion_threshold ////////////
+//
+// Erosion threshold for morphology check (km).
+// Threshold to which morphology erosion is performed.
+// Minimum val: 0
+// Maximum val: 100
+// Type: float
+//
+
+morphology_erosion_threshold = 5;
+
+///////////// morphology_refl_divisor /////////////////
+//
+// Reflectivity divisor for morphology check (dbz/km).
+// The morphology value for a point (km) is obtained by adding the 
+//   euclidean distance to storm edge (km) to the reflectivity excess 
+//   (above threshold) divided by this value (dbz/km).
+// Minimum val: 0.1
+// Maximum val: 100
+// Type: float
+//
+
+morphology_refl_divisor = 10;
+
+//======================================================================
+//
+// OPTION TO CHECK STORM TOPS.
+//
+// The storm tops check allows you to remove areas with low tops prior 
+//   to performing the storm identification. In this manner you can ignore 
+//   regions of stratiform rain.
+//
+//======================================================================
+ 
+///////////// check_tops //////////////////////////////
+//
+// Option to check tops.
+// If this is active, areas with radar tops below min_radar_tops will be 
+//   removed from the data prior to storm identification. The 
+//   tops_edge_margin parameter allows you to account for tilted storms, 
+//   leaving a  margin around the area to be removed.
+// Type: boolean
+//
+
+check_tops = TRUE;
+
+///////////// create_tops_files ///////////////////////
+//
+// Option to create tops files for debugging.
+// If this is set, tops files will be stored in tops_dir.
+// Type: boolean
+//
+
+create_tops_files = TRUE;
+
+///////////// tops_dir ////////////////////////////////
+//
+// Radar tops data directory.
+// If create_tops_files is TRUE, the tops files are stored in this 
+//   directory.
+// Type: string
+//
+
+tops_dir = "$(TITAN_HOME)/Tops";
+
+///////////// min_radar_tops //////////////////////////
+//
+// Minimum radar tops (km).
+// Minimum radar tops for valid radar data - see check_tops.
+// Minimum val: 0
+// Maximum val: 25
+// Type: float
+//
+
+min_radar_tops = 4.5;
+
+///////////// tops_edge_margin ////////////////////////
+//
+// Margin placed around tops when computing min_tops field (km).
+// This takes into account the fact that some storms may be tilted. Grid 
+//   points within this margin are left intact.
+// Minimum val: 0
+// Maximum val: 10
+// Type: float
+//
+
+tops_edge_margin = 1.5;
+
+//======================================================================
+//
+// AUTO-RESTART OPTION.
+//
+// This allows you to automatically restart the program at a given time 
+//   of day (GMT). This keeps the output files simple - there is one 
+//   series of files per day. If storm tracking is running it is also 
+//   restarted.
+//
+//======================================================================
+ 
+///////////// auto_restart ////////////////////////////
+//
+// Auto-restart option.
+// If set, the program restarts at restart_time (GMT). The data from the 
+//   previous 'restart_overlap_period' is copied into the new file, so 
+//   that tracks at restart time will have some history. Use of this 
+//   option ensures that the storm and track files will not grow forever.
+// Type: boolean
+//
+
+auto_restart = FALSE;
+
+///////////// restart_time ////////////////////////////
+//
+// The time in the day (UCT/GMT) at which restart occurs.
+// The program will check for the passing of this time. Once data beyond 
+//   this time is found, restart will occur.
+//
+// Type: struct
+//   typedef struct {
+//      int hour;
+//      int min;
+//   }
+//
+//
+
+restart_time = { 0, 0 };
+
+///////////// restart_overlap_period //////////////////
+//
+// The period copied to the new file on restart (secs).
+// On restart, the program copies some of the previous file, to provide 
+//   history for storm_track. This is the duration of the copied data.
+// Minimum val: 0
+// Type: int
+//
+
+restart_overlap_period = 3600;
+
+///////////// remove_old_files_on_restart /////////////
+//
+// Cleanup on restart option.
+// If set, the program will delete old storm files on restart. This 
+//   allows the program to keep the disk usage low.
+// Type: boolean
+//
+
+remove_old_files_on_restart = FALSE;
+
+///////////// restart_no_delay ////////////////////////
+//
+// Flag to force restart at first opportunity.
+// Normally the restart time will be set so that at least one day 
+//   elapses before the restart. This flag forces the restart at the first 
+//   opportunity. This option is normally only used for debugging.
+// Type: boolean
+//
+
+restart_no_delay = FALSE;
+

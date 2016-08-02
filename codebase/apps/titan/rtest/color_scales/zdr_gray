@@ -1,0 +1,12 @@
+# gray scale for zdr field
+
+# Mike Dixon, April 1991
+
+-4 	-1 	#373737
+-1 	0 	#5a5a5a
+0 	1 	#7d7d7d
+1  	2 	#0a0a0a
+2  	5 	#8c8c8c
+5  	10 	#bebebe
+10  	20 	#ffffff
+

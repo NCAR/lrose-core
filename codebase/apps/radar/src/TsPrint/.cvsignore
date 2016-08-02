@@ -1,0 +1,6 @@
+.deps
+TsPrint
+__makefile.template
+makefile
+makefile.am
+makefile.in

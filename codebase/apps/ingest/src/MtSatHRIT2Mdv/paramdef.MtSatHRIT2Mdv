@@ -1,0 +1,261 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "Reads MTSAT HRIT data for AOAWS Taiwan project, writes\n"
+	"it in MDV format.\n\nNiles Oien late March 2007";
+}
+
+
+typedef enum {
+  OUTPUT_VIS, OUTPUT_IR, OUTPUT_ALL
+} outputFields_t;
+
+paramdef enum outputFields_t {
+  p_default = OUTPUT_ALL;
+  p_descr = "Which fields to output.";
+  p_help = "OUTPUT_ALL outputs all visible, ir fields in one mdv file.\n"
+	"OUTPUT_VIS should still trigger off ir1 but outputs only visible.\n"
+	"OUTPUT_IR outputs only the ir fields, skipping the visible.\n"
+	"If vis takes a long time to come in then it may be worth\n"
+	"having seperate streams for vis and ir.";
+} outputFields;
+
+typedef struct {
+	string dir;
+	string filenameSubString;
+} inputSpec_t;
+
+
+paramdef struct inputSpec_t {
+  p_default = { "/Some/Directory/structure/IR1", "ir1" };
+  p_descr = "Input IR1 data directory and filename substring.";
+  p_help = "Program triggers when data are written here.";
+} ir1Input;
+
+paramdef struct inputSpec_t {
+  p_default = { { "/Some/Directory/structure/VIS", "vis" },
+	        { "/Some/Directory/structure/IR2", "ir2" },
+	        { "/Some/Directory/structure/IR3", "ir3" },
+	        { "/Some/Directory/structure/IR4", "ir4" } };
+  p_descr = "Input visible and other infra red data input.";
+  p_help = "Directory paths for visible, remaining 3 input IR channels.";
+} input[4];
+
+paramdef string {
+  p_default = "";
+  p_descr = "Required extension for input files";
+  p_help = "Only consider files with this extension. Inactive if empty string.";
+} required_file_ext;
+
+paramdef string {
+  p_default = "tmp";
+  p_descr = "Ignore input files with this extension";
+  p_help = "Do not consider files with this extension. Inactive if empty string.";
+} ignored_file_ext;
+
+typedef struct {
+        double lowerLeftLat;
+        double lowerLeftLon;
+        double upperRightLat;
+	double upperRightLon;
+	double delLat;
+	double delLon;
+	boolean writeVisAtFullRes;
+	boolean requireNorthDisk;
+	boolean requireSouthDisk;
+	string url;
+} domain_t;
+
+paramdef struct domain_t {
+        p_descr = "List of domains we want, and where they should go.";
+        p_help = "Pretty self explanitory. If writeVisAtFullRes is\n"
+	"FALSE, then the IR and VIS fields are all at the same\n"
+	"resolution. If it is TRUE then the visible field is at\n"
+	"four times the resolution of the IR. The resolution specified here\n"
+	"is that of the IR. Setting requireNorthDisk to TRUE means\n"
+	"that only scans that cover the nothern hemisphere will be ingested.";
+        p_default = {
+                      { -40.0, 140.0, 40.0, -140.0, 0.1,   0.1, FALSE, FALSE, FALSE, "mdvp:://localhost::mdv/sat/lowRes" },
+                      { -10.0, 170.0, 10.0, -170.0, 0.01, 0.01, TRUE, FALSE, FALSE,  "mdvp:://localhost::mdv/sat/highRes" }
+                    };
+} domains[];
+
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean
+{
+  p_default = TRUE;
+  p_descr = "Option to make up visible data (which will be\n"
+	"all missing) at night. Results in a blank display, but\n"
+	"does avoid NO DATA FOUND being plastered across the display.";
+  p_help = "Default is to do this.";
+} fillMissingVis;
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Verbose debug option";
+  p_help = "If set, verbose debug messages will be printed";
+} verbose;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In\n"
+	"realtime mode, the conversion is performed for each input\n"
+	"file as it becomes available. In archive mode, the file\n"
+	"list is obtained from the command line.";
+} mode;
+  
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to take data time from filename rather than\n"
+	"from data.";
+  p_help = "Filename time is end of scan, data time seems to be start.";
+} useFilenameTime;
+
+commentdef {
+  p_header = "DATA CALIBRATION";
+}
+
+typedef enum {
+  CALIBRATE_NONE, CALIBRATE_SCALE_OFFSET, CALIBRATE_LUT 
+} cal_t;
+
+
+paramdef enum cal_t {
+  p_default = CALIBRATE_SCALE_OFFSET;
+  p_descr = "Option as to how to scale the data.";
+  p_help = "CALIBRATE_NONE => No calibration, save counts.\n"
+	"CALIBRATE_SCALE_OFFSET => Use specified scale, bias (default).\n"
+	"CALIBRATE_LUT => Use Look Up Table (LUT) that was delivered in\n"
+	"the input data file. Surprisingly, for the data RAL is currently\n"
+	"dealing with, this is not ideal.";
+} calOption;
+
+
+typedef struct {
+        double visScale;
+        double visBias;
+        double irScale;
+        double irBias;
+} scaleBias_t;
+
+paramdef struct scaleBias_t {
+        p_descr = "Values to use in calibration for CALIBRATE_SCALE_OFFSET.";
+        p_help = "Default should be fine.";
+        p_default = { 0.01, 0.0, 0.01, -273.16  };
+} scaleBias;
+
+typedef struct {
+        string shortFieldname;
+	string longFieldname;
+} fieldName_t;
+
+paramdef struct fieldName_t {
+        p_descr = "Field names to use in MDV data.";
+        p_help = "Order is IR1, IR2, IR#, IR4, VIS.\n"
+	"Default matches existing system, but is a little\n"
+	"odd in that the long field name is shorter than\n"
+	"the field name.";
+        p_default = { 
+		{"gms_t_11", "IR1"},
+		{"gms_t_12", "IR2"},
+		{"gms_t_6.5", "IR3"},
+		{"gms_t_3.5", "IR4"},
+		{"gms_v_0.65", "VIS"} };
+} fieldNames[5];
+
+typedef struct {
+        int numTries;
+        int sleepBetweenTries;
+	int qTime;
+} timeout_t;
+
+paramdef struct timeout_t {
+        p_descr = "Number of times that an attempt is made to\n"
+        "find a file, delay between attempts in seconds, and\n"
+	"length of time a file's size needs to be constant\n"
+	"before opening it (in seconds).\n"
+        "Applies to realtime operation only.";
+        p_help = "Total delay is the number of tries times\n"
+	"the delay per try.";
+        p_default = { 80, 15, 15 };
+} fileFindTimeout;
+
+typedef struct {
+        int hour;
+        int min;
+} timeOfDay_t;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Realtime option to only expect vis data between\n"
+	"the times specified by visMinTime and visMaxTime.";
+  p_help = "Handy in realtime since it means that we don't\n"
+	"wait around for files that are not going to arrive.";
+} useVisExpectedTimes;
+
+paramdef struct timeOfDay_t {
+        p_descr = "If the data time is less than this time, no\n"
+	"vis data are expected if useVisExpectedTimes is TRUE.";
+        p_help = "If time of day is greater than or equal to this,\n"
+	"a vis file will be expected.";
+        p_default = { 18, 0 };
+} visMinTime;
+
+paramdef struct timeOfDay_t {
+        p_descr = "If the data time is greater than this time, no\n"
+	"vis data are expected if useVisExpectedTimes is TRUE.";
+        p_help = "If time of day is less than or equal to this,\n"
+	"a vis file will be expected.";
+        p_default = { 10, 0 };
+} visMaxTime;
+

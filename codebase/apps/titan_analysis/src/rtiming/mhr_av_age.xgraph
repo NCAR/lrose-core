@@ -1,0 +1,35 @@
+Device: Postscript
+Disposition: To Device
+FileOrDev: nec3
+Geometry: 920x500+0+0
+TitleFont: Helvetica12
+StyleMarkers: False
+XUnitText: Time (mins)
+YUnitText: Mean age (mins)
+XLowLimit: 0
+XHighLimit: 6
+YLowLimit: 0
+YHighLimit: 4
+BoundBox: True
+TitleText: MHR - Mean data age vs. time from start of volume: 0 - 150km range, 0 - 40000' ht.
+
+"Mean age"
+-0.15      2.82
+0.45       3.30
+1.05       3.45
+1.35       3.64
+1.65       2.69
+2.25       1.94
+2.55       2.09
+2.85       1.70
+3.15       1.64
+3.45       1.73
+3.75       1.88
+4.05       1.73
+4.35       1.83
+4.65       2.01
+4.95       2.16
+5.25       2.36
+5.55       2.55
+5.85       2.82
+6.45       3.30

@@ -1,0 +1,200 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.QPESum2Dsr
+ *
+ * This file contains the TDRP parameter definitions for
+ * QPESum2Dsr.
+ */
+
+commentdef
+{
+  p_header = "QPESum2Dsr";
+  p_text = "This program reads a QPESum radar raw data file and writes the "
+           "beams to an FMQ where they can be read by Dsr2Vol and put into "
+           "MDV volumes.";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+  p_default = FALSE;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Instance";
+  p_help = "Used for process registration";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Input/output parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT PARAMETERS";
+};
+
+typedef enum
+{
+  REALTIME,
+  FILE_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In FILE_LIST mode, the program operates on the input files "
+           "specified on the command line.\n"
+           "In REALTIME mode, the realtimeInput, InputDir is watched for "
+           "new incoming files.\n";
+  p_default = REALTIME;
+} trigger_mode;
+
+typedef struct {
+	string InputDir;
+	string IncludeSubString;
+	string ExcludeSubString;
+	boolean ProcessOldFiles;
+} realtimeInput_t;
+
+
+paramdef struct realtimeInput_t {
+  p_default = { "/d1/data/raw", "", "", FALSE };
+  p_descr = "If mode is REALTIME then use these parameters.";
+  p_help = "Directory to watch, substring in filenames to include,\n"
+	   "substring in filenames to exclude, and boolean \n"
+           "indicating if old files should be processed.";
+} realtimeInput;
+
+paramdef string
+{
+  p_descr = "Output fmq url";
+  p_default = {"fmqp:://localhost::fmq/dsRadar"};
+} output_fmq_url;
+ 
+paramdef long
+{
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+  p_default = 2000000;
+} output_fmq_size;
+ 
+paramdef long
+{
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages "
+           "which may be written to the buffer before overwrites occur. "
+           "However, overwrites may occur sooner if the size is not set "
+           "large enough.";
+  p_default = 3600;
+} output_fmq_nslots;
+
+paramdef boolean
+{
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+  p_default = FALSE;
+} output_fmq_compress;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use a blocking write on the output "
+            "FMQ";
+  p_help = "You always want to use blocking write when working with archive "
+           "data. "
+           "I don't know if we'll want blocking write in realtime.";
+  p_default = TRUE;
+} use_blocking_write;
+
+paramdef long
+{
+  p_descr = "Frequency for including the radar parameters in the radar "
+            "messages.";
+  p_help = "The default value for this should be fine, but I've put this "
+           "here in case there are situations where this should be done more "
+           "or less frequently.";
+  p_minimum = 1;
+  p_default = 50;
+} output_radar_param_freq;
+
+
+/***********************************************************************
+ * Radar information
+ */
+
+commentdef
+{
+  p_header = "RADAR INFORMATION";
+};
+
+typedef struct
+{
+  string name;
+  string units;
+  double scale;
+  double bias;
+} field_info_t;
+
+paramdef struct field_info_t
+{
+  p_descr = "Information about the field contained in the radar files.";
+  p_default = { "DBZ", "dBZ", 0.5, -32.0 };
+} field_info;
+
+paramdef double
+{
+  p_descr = "Horizontal beam width of the radar";
+  p_default = 1.0;
+} horiz_beam_width;
+
+paramdef double
+{
+  p_descr = "Vertical beam width of the radar";
+  p_default = 1.0;
+} vert_beam_width;

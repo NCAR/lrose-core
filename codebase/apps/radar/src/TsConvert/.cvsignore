@@ -1,0 +1,6 @@
+.deps
+TsConvert
+__makefile.template
+makefile
+makefile.am
+makefile.in

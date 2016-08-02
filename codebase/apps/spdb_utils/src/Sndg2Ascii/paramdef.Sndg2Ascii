@@ -1,0 +1,174 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Sndg2Ascii
+ *
+ * This file contains the TDRP parameter definitions for
+ * Sndg2Ascii.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the URL to use to get the available data times.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "Input URL.";
+  p_help = "URL for the input MDV files.";
+  p_default = "spdbp:://localhost::spdb/sndg";
+} input_url;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to create separate output files for "
+            "each time period.";
+  p_help = "If true, a separate file will be created for each trigger time. "
+           "The file will be named output_path/YYYYMMDD/HHMMSS.txt.\n"
+           "If false, the soundings will all be put into a single file. "
+           "The file will be named output_path.\n"
+	   "If separate_sounding_output_files is set to true, then this "
+	   "will be ignored.\n";
+  p_default = true;
+} create_separate_output_files;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to create separate output files for "
+            "each sounding at each time.";
+  p_help = "If true, a separate file will be created for each sounding. "
+           "The file will be named output_path/siteName/YYYYMMDD/HHMMSS.txt.\n"
+           "If false, the soundings will all be put into a single file "
+	   "named output_path unless create_separate_output_files is set "
+           "to true.\n";
+  p_default = false;
+} separate_sounding_output_files;
+
+paramdef string
+{
+  p_descr = "Output path";
+  p_help = "See create_separate_output_files parameter description.";
+  p_default = "./sounding/output";
+} output_path;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  HUAQING_FORMAT,
+  CLASS_FORMAT
+} output_format_t;
+
+paramdef enum output_format_t
+{
+  p_descr = "Format of the output file";
+  p_help = "\tHUAQING_FORMAT - Format the output so that it can be used "
+           "by the sounding skewT displayer that Huaqing has.\n"
+	   "\tCLASS_FORMAT - Format the output into the class format so "
+           "it can be used by suds.\n";
+  p_default = HUAQING_FORMAT;
+} output_format;

@@ -1,0 +1,134 @@
+/**********************************************************************
+ * TDRP params for MdvArithmetic
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING PARAMETERS.
+//
+// Parameters controlling debug outputs.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// debug flag.
+// Debug flag.
+// Type: boolean
+//
+
+debug = TRUE;
+
+//======================================================================
+//
+// PROCESS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "prob240";
+
+//======================================================================
+//
+// PROCESS I/O PARAMETERS.
+//
+// Parameters describing the input and output locations.
+//
+//======================================================================
+ 
+///////////// trigger_mode ////////////////////////////
+//
+// Input triggering mode.
+// In LATEST_DATA mode, the program waits for new data from the MDV 
+//   location specified by the latest_data_trigger parameter.
+// In TIME_LIST mode, the program operates on archive data as specified 
+//   in the time_list_trigger parameter.
+//
+// Type: enum
+// Options:
+//     LATEST_DATA
+//     TIME_LIST
+//
+
+trigger_mode = TIME_LIST;
+
+///////////// time_list_trigger ///////////////////////
+//
+// Trigger information used when using the TIME_LIST trigger.
+// start_time specifies the archive start time in any format recognized 
+//   by the DateTime class.
+// end_time specifies the archive end time in any format recognized by 
+//   the DateTime class.
+//
+// Type: struct
+//   typedef struct {
+//      string start_time;
+//      string end_time;
+//   }
+//
+//
+
+time_list_trigger = {
+    start_time = "2005/10/31 20:10:00",
+    end_time = "2005/10/31 20:30:00"
+};
+
+///////////// input_url ///////////////////////////////
+//
+// Input URL.
+// This must be a URL for RUC pressure files.
+// Type: string
+//
+
+input_url = "mdvp:://ncwf-3::ncwf6/mdv/fcst_240/smoothProbFcst";
+
+///////////// field_num ///////////////////////////////
+//
+// field number to use for algorithm.
+// The algorithm will only be run on this field.
+// Minimum val: 0
+// Type: long
+//
+
+field_num = 0;
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// Type: string
+//
+
+//output_url = "mdvp:://localhost::./mdv/output";
+output_url = "./output";
+
+///////////// arithmetic_operator /////////////////////
+//
+// Arithmetic operator to apply to the data.
+// ADDITION
+// SUBTRACTION
+// MULTIPLICATION.
+//
+// Type: enum
+// Options:
+//     ADDITION
+//     SUBTRACTION
+//     MULTIPLICATION
+//
+
+arithmetic_operator = SUBTRACTION;
+
+///////////// apply_constant //////////////////////////
+//
+// Constant to apply to data.
+// arithmetic_operator is applied to data using this value.
+// Type: float
+//
+
+apply_constant = 0.1;
+

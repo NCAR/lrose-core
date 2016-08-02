@@ -1,0 +1,11 @@
+#!/bin/csh -x
+#
+echo "Starting2"
+
+
+
+set time2 = `date`
+echo "End time2: " $time2
+
+  exit
+

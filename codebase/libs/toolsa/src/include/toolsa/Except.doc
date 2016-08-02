@@ -1,0 +1,66 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2001 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Program(RAP) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2001/11/19 23:15:6 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+This implementation of Exception handling is intended for use on systems/
+Compilers that lack support for the standarad C++  exceptions. The syntax
+and usage is implemented using similar syntax . The major deviation is in the
+exception identifiers. This implementation uses enumerated exception codes
+and an ascii reason string, whereas standard strings use member funcions.
+
+-F. Hage Nov 1994
+ 
+	Except:
+	-------
+	A simple exception mechanism is implemented by defining a couple
+	of macros: TRY ... END_EXCEPT embrace a critical piece of
+	code and the exception buckets following. The exception catch
+	macros are: CATCH and CATCH_ALL. A complete template
+	of the usage of these macros reads as follows:
+
+	TRY {
+
+		/* 
+		 * Any code that can (possibly) perform a
+		 * THROW(<code>,"reason"); call, to abort the
+		 * normal control flow 
+		 */
+	
+	} // END of TRY block
+		
+	CATCH(<code>) {
+
+		/* 
+		 * This section is optional but if present, it catches
+		 * any exception raised with completion code <code>
+		 * This section may be repeated more than once.
+		 */
+        }
+
+	CATCH_ALL {
+
+		/*
+		 * This section is optional but if present, it catches
+		 * all execeptions raised in the code block embraced
+		 * by the TRY ... END_TRY macros.
+		 */
+	}
+
+	END_EXCEPT
+
+		/*
+		 * This macro is mandatory. It pairs the TRY
+		 * macro. Normal control flow continues here after
+		 * completing the last statement before the END_TRY
+		 * macro or one of the CATCH blocks.
+		 */
+
+	Uncought exeptions (i.e. an THROW has been issued in 
+	a block of code, not embraced by the TRY ... END_EXCEPT
+	macros) terminate the current process and print the exeception
+	code on stderr. 
+

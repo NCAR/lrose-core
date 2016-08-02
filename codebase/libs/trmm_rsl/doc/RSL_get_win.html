@@ -1,0 +1,34 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_window_from_...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href=RSL_ray_struct.html>Ray</a> *RSL_get_window_from_ray(<a href=RSL_ray_struct.html>Ray</a> *r, float min_range, float max_range, float low_azim, float hi_azim);<br>
+<a href=RSL_sweep_struct.html>Sweep</a> *RSL_get_window_from_sweep(<a href=RSL_sweep_struct.html>Sweep</a> *s, float min_range, float max_range, float low_azim, float hi_azim);<br>
+<a href=RSL_volume_struct.html>Volume</a> *RSL_get_window_from_volume(<a href=RSL_volume_struct.html>Volume</a> *v, float min_range, float max_range, float low_azim, float hi_azim);</b> <br>
+<a href=RSL_radar_struct.html><b>Radar</b></a> <b>*RSL_get_window_from_radar</b>(<a href=RSL_radar_struct.html><b>Radar</b></a> <b>*r, float min_range, float max_range, float low_azim, float hi_azim</b>); 
+
+<h3>
+<hr>Description</h3>
+<b>RSL_get_window_from_radar </b>calls<b> RSL_get_window_from_volume </b>for the number of volumes. <b>RSL_get_window_from_volume</b> calls <b>RSL_get_window_from_sweep</b> for the number of sweeps. <b>RSL_get_window_from_sweep</b> calls <b>RSL_get_window_from_ray</b> for the number of rays. And <b>RSL_get_window_from_ray</b> gets window, between low_azim and hi_azim, from min_range to max_range.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. 
+<hr>
+
+<h3>See also</h3>
+<a href=../examples/test_get_win.c>Example</a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

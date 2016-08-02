@@ -1,0 +1,3 @@
+#! /bin/csh
+
+SimCpCompute -params SimCpCompute.test -nsamples 512 -f ~/data/time_series/tsarchive/spol/vert/20060709/20060709_* -debug

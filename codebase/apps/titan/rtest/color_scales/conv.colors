@@ -1,0 +1,21 @@
+# NAME conv.colors
+
+# fhage 	6/9/1993 12:40:43
+
+-20 	-7 	cornflower blue
+-7 	-5 	medium sea green
+-5 	-4 	lime green
+-4 	-3 	forest green
+-3 	-2 	dark olive green
+-2 	-1 	dark green
+-1 	1 	dim gray
+1 	2 	saddle brown
+2 	3 	sienna
+3 	4 	dark goldenrod
+4 	5 	goldenrod
+5 	7 	gold1
+7 	9 	orange
+9 	11 	salmon
+11 	13 	tomato
+13 	15 	red
+15 	20 	firebrick

@@ -1,0 +1,273 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.AcarsNc2GenPt
+ *
+ * This file contains the TDRP parameter definitions for
+ * AcarsNc2GenPt
+ */
+
+commentdef
+{
+  p_header = "AcarsNc2GenPt";
+  p_text = "This program converts netCDF ACARS files into a GenPt SPDB "
+           "database.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  FILE_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for the _latest_data_info "
+           "file in the given input_dir to be updated and then processes the "
+           "file specified there.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.";
+  p_default = "FILE_LIST";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_default = "$(RAP_DATA_DIR)/raw/acars";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::spdb/genpt/acars";
+} output_url;
+
+
+/***********************************************************************
+ * netCDF file parameters
+ */
+
+commentdef
+{
+  p_header = "NETCDF FILE PARAMETERS";
+};
+
+commentdef
+{
+  p_header = "Dimension names";
+};
+
+paramdef string
+{
+  p_descr = "String used for num records dimension name in netCDF file";
+  p_default = "recNum";
+} num_recs_dim_name;
+
+paramdef string
+{
+  p_descr = "String used for tail number length dimension name in netCDF file";
+  p_default = "tailLen";
+} tail_len_dim_name;
+
+commentdef
+{
+  p_header = "Attribute names";
+};
+
+paramdef string
+{
+  p_descr = "String used for missing data value attribute name in netCDF file";
+  p_help = "It is assumed that all of the variables in the netCDF file use "
+           "the same attribute name for missing data values. "
+           "The missing data value attribute is ignored for the tail number, "
+           "data source, sounding flag and launch times variables.";
+  p_default = "_FillValue";
+} missing_data_value_att_name;
+
+commentdef
+{
+  p_header = "Variable names";
+};
+
+paramdef string
+{
+  p_descr = "String used for latitude variable name in netCDF file";
+  p_help = "These values are assumed to be stored in the netCDF file "
+           "in degree_N.";
+  p_default = "latitude";
+} latitude_var_name;
+
+paramdef string
+{
+  p_descr = "String used for longitude variable name in netCDF file";
+  p_help = "These values are assumed to be stored in the netCDF file "
+           "in degree_E.";
+  p_default = "longitude";
+} longitude_var_name;
+
+paramdef string
+{
+  p_descr = "String used for altitude variable name in netCDF file";
+  p_help = "These values are assumed to be stored in the netCDF file "
+           "in meters (pressure altitude, msl).";
+  p_default = "altitude";
+} altitude_var_name;
+
+paramdef string
+{
+  p_descr = "String used for data source variable name in the netCDF file";
+  p_default = "dataSource";
+} data_source_var_name;
+
+paramdef string
+{
+  p_descr = "String used for tail number variable name in netCDF file";
+  p_default = "tailNumber";
+} tail_number_var_name;
+
+paramdef string
+{
+  p_descr = "String used for data times variable name in netCDF file";
+  p_default = "timeObs";
+} data_times_var_name;
+
+
+/***********************************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to save data from all data sources "
+            "or just from a single data source.";
+  p_help = "If TRUE, all data is saved without regard to the indicated data "
+           "source. "
+           "If FALSE, only data with the data source indicated in the "
+           "data_source parameter is saved.";
+  p_default = TRUE;
+} save_all_data_sources;
+
+paramdef long
+{
+  p_descr = "Data source value. "
+            "If save_all_data_sources is FALSE, only data from this data "
+            "source will be saved.";
+  p_help = "In my sample file, the following data sources are defined:\n"
+           "\t0 = ACARS (direct to FSL from airlines)\n"
+           "\t1 = MDCRS (from TG's BUFR file from ARINC)\n"
+           "\t2 = appeared in both ACARS and MDCRS data streams\n"
+           "\t3 = AMDAR data, including LH BUFR data\n"
+           "\t4 = TAMDAR data from AriDat, LLC\n"
+           "\t5 = Canadian AMDAR data from CMC\n";
+  p_default = 4;
+} data_source;
+
+typedef enum
+{
+  CONVERT_NONE,
+  CONVERT_K_TO_C
+} conversion_type_t;
+
+typedef struct
+{
+  string netcdf_field_name;
+  string genpt_field_name;
+  string genpt_units;
+  conversion_type_t conversion_type;
+} data_field_t;
+
+paramdef struct data_field_t
+{
+  p_descr = "List of data fields to pull from the netCDF file";
+  p_help = "\tnetcdf_field_name - The name of the field in the netCDF file. "
+           "This string must match the variable name in the netCDF file "
+           "exactly.\n";
+           "\tgenpt_field_name - The name to give the data field in the "
+           "GenPt database.\n"
+           "\tgenpt_units - The units that the data will be in when it is "
+           "put into the GenPt database.\n"
+           "\tconversion_type - Type of conversion to perform on the netCDF "
+           "value before putting it into the GenPt database.\n"
+           "Note that data values that are missing from the netCDF file "
+           "won't be included in the output GenPt database. "
+           "You can see the contents of a netCDF file by using the ncdump "
+           "command.\n";
+  p_default = { { "temperature",  "temperature", "C",   CONVERT_K_TO_C },
+                { "windDir",      "windDir",     "deg", CONVERT_NONE },
+                { "windSpeed",    "windSpeed",   "m/s", CONVERT_NONE },
+                { "relHumidity",  "rh",          "%",   CONVERT_NONE },
+                { "dewpoint",     "dewpoint",    "C",   CONVERT_K_TO_C } };
+} data_fields[];

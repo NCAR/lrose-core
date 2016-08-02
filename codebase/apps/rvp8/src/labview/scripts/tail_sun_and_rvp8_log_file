@@ -1,0 +1,8 @@
+#! /bin/csh
+
+set logfile=/tmp/run_sun_and_rvp8_cal.log
+
+tail -f $logfile
+
+
+

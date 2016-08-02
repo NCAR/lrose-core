@@ -1,0 +1,147 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*
+ * Parameter definitions for sweepMerge application
+ *
+ * $Id: paramdef.sweepMerge,v 1.3 2016/03/07 01:25:08 dixon Exp $
+ *
+ */
+
+commentdef {
+  p_header = "sweepMerge PARAMETER FILE";
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean {
+  p_descr = "Info messaging option";
+  p_default = {TRUE};
+} info;
+
+paramdef boolean {
+  p_descr = "Debug messaging option";
+  p_default = {FALSE};
+} debug;
+
+commentdef {
+  p_header = "LOGS";
+}
+
+paramdef string {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} log_dir;
+
+commentdef {
+  p_header = "INPUT";
+}
+
+paramdef string {
+  p_descr = "Input directory path";
+  p_help = "Path for directory that contains files to be processed";
+  p_default = {""};
+} input_dir;
+
+paramdef double {
+  p_descr = "Elevations to process";
+  p_help = "List of elevations for which two scans need to be combined";
+  p_default = {0.5};
+} elevations[];
+
+commentdef {
+  p_header = "PROCESSING";
+}
+
+paramdef double {
+  p_descr = "Azimuth tolerance in degrees";
+  p_help = "If the difference in azimuths is greater than this "
+           "amount, the current reflectivity azimuth will not be "
+           "considered for the match to the velocity azimuth";
+  p_default = {1.0};
+} azimuth_tolerance;
+
+paramdef double {
+  p_descr = "Elevation tolerance in degrees";
+  p_help = "Rays in the reflectivity scan with an elevation more than "
+           "this tolerance off of the target elevation will not be used";
+  p_default = {1.0};
+} elevation_tolerance;
+
+paramdef double {
+  p_descr = "Time tolerance in seconds";
+  p_help = "Rays in the reflectivity scan with a time more than this " 
+           "tolerance off the time of the first ray in the scan will "
+           "not be used";
+  p_default = {120};
+} time_tolerance;
+
+paramdef string {
+  p_descr = "Name of azimuth field in netCDF files";
+  p_help = "Lists the name of the azimuth data field in the "
+           "input netCDF files.  This name is assumed to be "
+           "constant over all of the input files";
+  p_default = {"Azimuth"};
+} azimuth_name;
+
+paramdef string {
+  p_descr = "Name of elevation field in netCDF files";
+  p_help = "Lists the name of the elevation data field in the "
+           "input netCDF files.  This name is assumed to be "
+           "constant over all of the input files";
+  p_default = {"Elevation"};
+} elevation_name;
+
+paramdef string {
+  p_descr = "Name of the time field in the netCDF files";
+  p_help = "Lists the name of the time data field in the "
+           "input netCDF files.  This name is assumed to be "
+           "constant over all of the input files";
+  p_default = {"time_offset"};
+} time_name;
+
+paramdef string {
+  p_descr = "Name of the reflectivity field in the netCDF files";
+  p_help = "Lists the name of the reflectivity data field in the "
+           "input netCDF files.  This name is assumed to be "
+           "constant over all of the input files";
+  p_default = {"DZ"};
+} refl_name;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef string {
+  p_descr = "Backup location";
+  p_help = "Path of directory to be used to store original sweep files";
+  p_default = {"./"};
+} backup_path;
+
+
+
+
+
+

@@ -1,0 +1,9 @@
+# gray scale for width field
+
+# Mike Dixon, April 1991
+
+0 	1 	#232323
+1 	2 	#5a5a5a
+2 	5 	#919191
+5 	10 	#c8c8c8
+10 	50 	#ffffff

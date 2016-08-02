@@ -1,0 +1,216 @@
+#include "platform.defs.local"
+#include "modules.defs.local"
+
+#ifdef _RH73
+PLATFORM_LIB = /RH7
+#endif
+#ifdef _RH9
+PLATFORM_LIB = /RH9
+#endif
+#ifdef _FC4	
+PLATFORM_LIB = /FC4
+#endif
+#ifdef _ES4	
+PLATFORM_LIB = /ES4
+#endif
+
+#ifdef LINUX
+XCOMM PROFILER_FLAG = -pg
+#endif
+
+NOWCAST_HOME = $(HOME)/src/nowcast
+RAPIC_HOME = $(NOWCAST_HOME)/rapic
+RAPIC_INCLUDE = $(RAPIC_HOME)/include
+RAPIC_LIB = $(RAPIC_HOME)/lib
+RAPIC_RUNTIME = $(RAPIC_HOME)/runtime
+TITAN_BASE = $(TITAN_HOME)
+#define HAS_TITAN_COMPRESSION
+TITAN_API_HOME = $(TITAN_BASE)/libs/apiTitan/src/
+XCOMM TITAN_LIB = ../lib$(PLATFORM_LIB)
+TITAN_LIB = $(TITAN_BASE)/lib
+TITAN_INCLUDE= $(TITAN_BASE)/include/
+#ifdef _RH73
+WDSS_HOME = $(NOWCAST_HOME)/wdss/W2-04102003RH73
+WDSS_INCLUDE = -I$(WDSS_HOME)/include/CODE -I$(WDSS_HOME)/include \
+-I$(WDSS_HOME)/orpginfr/include -I$(WDSS_HOME)/include/w2algs
+WDSS_LIB = ../lib/wdss/RH73
+#endif
+#ifdef _RH9
+WDSS_HOME = $(NOWCAST_HOME)/wdss/W2
+WDSS_INCLUDE = -I$(WDSS_HOME)/include/CODE -I$(WDSS_HOME)/include \
+-I$(WDSS_HOME)/include/orpginfr/include -I$(WDSS_HOME)/include/w2algs
+WDSS_LIB = $(WDSS_HOME)/lib
+XCOMM WDSS_HOME = $(NOWCAST_HOME)/wdss/W2-08152003RH9
+XCOMM WDSS_HOME = $(NOWCAST_HOME)/wdss/W2RH9
+XCOMM WDSS_HOME = $(NOWCAST_HOME)/wdss/W2_RH9_realtime_20040316_BMRC-build
+XCOMM WDSS_LIB = ../lib/wdss/RH9
+#endif
+#ifdef _FC4
+WDSS_HOME = $(NOWCAST_HOME)/wdss/wdss_20050921
+WDSS_LIB = $(WDSS_HOME)/lib
+WDSS_INCLUDE = -I$(WDSS_HOME)/include/CODE -I$(WDSS_HOME)/include \
+-I$(WDSS_HOME)/include/orpginfr/include -I$(WDSS_HOME)/include/w2algs
+#endif
+#ifdef _ES4
+WDSS_HOME = $(NOWCAST_HOME)/wdss/wdss_20050921
+WDSS_LIB = $(WDSS_HOME)/lib
+WDSS_INCLUDE = -I$(WDSS_HOME)/include/CODE -I$(WDSS_HOME)/include \
+-I$(WDSS_HOME)/include/orpginfr/include -I$(WDSS_HOME)/include/w2algs
+#endif
+RAINFIELDS_HOME = $(NOWCAST_HOME)/rainfields_2/source_dir/src/clientlib
+XCOMM RAINFIELDS_HOME = $(RAPIC_HOME)/rainfields/clientlib.V2
+XCOMM RAINFIELDS_HOME = $(RAPIC_HOME)/rainfields/clientlib.V1
+RAINFIELDS_INCLUDE = $(RAINFIELDS_HOME)
+RAINFIELDS_LIB = $(RAINFIELDS_HOME)
+XCOMM RAINFIELDS_LIB = ../lib$(PLATFORM_LIB)
+CT_INCLUDE_64 = $(RAPIC_HOME)/include/ct_include.6.4
+CT_INCLUDE_67 = ./include/ct_include.6.7
+VK_HOME = /usr/local/bxpro-6.1
+XCOMM VK_HOME = $(RAPIC_HOME)/viewkit
+XCOMM VK_INCLUDE = $(VK_HOME)/include
+VK_INCLUDE = $(RAPIC_INCLUDE)/bxpro
+XCOMM VK_LIB = $(VK_HOME)/lib
+VK_LIB = ../lib$(PLATFORM_LIB)
+
+#undef USE_VIEWKLASS
+#ifdef USE_VIEWKLASS
+VK_HOME = $(RAPIC_HOME)/ViewKlass/ViewKlass-0.6.0
+VK_INCLUDE = $(VK_HOME)
+VK_LIB = $(VK_HOME)
+#endif
+
+#undef USE_GIF
+
+XCOMM STL_INCLUDE_DIR = /opt/gcc-2.95.3/include/g++-3
+#ifdef _RH73
+STL_INCLUDE_DIR = /usr/include/g++-3
+#endif
+#ifdef _RH9
+STL_INCLUDE_DIR = /usr/include/c++/3.2.2
+#endif
+#ifdef _FC4
+STL_INCLUDE_DIR = /usr/include/c++/4.0.0
+#endif
+#ifdef _ES4
+STL_INCLUDE_DIR = .
+#endif
+
+#ifdef SGI_GCC
+#define SGI
+#endif
+
+#ifdef SGI
+#undef IRIS_GL
+#define OPEN_GL
+#define USE_SIGACTION
+#define USE_SOUND
+#define USE_GLF
+#undef USE_GLC
+#define USE_STDCPPHEADERS
+#undef USE_INVENTOR
+#undef Nexrad
+#undef Uf
+#endif
+
+#ifdef LINUX
+#define OPEN_GL
+#define USE_SIGACTION
+#undef USE_INVENTOR
+#define USE_GLF
+#define USE_STDCPPHEADERS
+#define USE_MALLINFO
+#define USE_DEFRAG_FN_ORIDE
+
+XCOMM following for bug introduced when /RXTIME: DB header added
+XCOMM DBs written with this bug have short rec sizes in db index
+XCOMM This caused errors when copying DB records. Only ever existed on linux version
+#define CHECK_RECSIZE_BUG
+#define Nexrad
+#define Uf
+#define USE_CG
+#endif
+
+#ifdef AIX
+#define USE_STDCPPHEADERS
+#define USE_SIGACTION
+#endif
+
+#ifdef IRIS_GL
+IGLDEF = -DIRIS_GL
+#endif
+
+#ifdef OPEN_GL
+OGLDEF = -DOPEN_GL
+#endif
+
+#ifdef USE_INVENTOR
+INVDEF = -DUSE_INVENTOR
+#endif
+
+#ifdef USE_TITAN_CLIENT
+TITAN_CLIENT_DEF = -DUSE_TITAN_CLIENT
+#endif
+
+#ifdef HAS_TITAN_COMPRESSION
+TITAN_COMP_DEF = -DHAS_TITAN_COMPRESSION
+#endif
+
+#ifdef USE_WDSS_CLIENT
+WDSS_CLIENT_DEF = -DUSE_WDSS_CLIENT
+#endif
+
+#ifdef USE_RAINFIELDS_CLIENT
+XCOMM RAINFIELDS_CLIENT_DEF = -DUSE_RAINFIELDS_CLIENT -DWITH_THREADS
+RAINFIELDS_CLIENT_DEF = -DUSE_RAINFIELDS_CLIENT
+#endif
+
+#ifdef USE_GLC
+GLCDEF = -DUSE_GLC
+#endif
+
+#ifdef USE_GLF
+GLFDEF = -DUSE_GLF
+#endif
+
+#ifdef USE_GIF
+GIFDEF = -DUSE_GIF
+#endif
+
+#ifdef USE_CG
+CGDEF = -DUSE_CG
+#endif
+
+#ifdef USE_STDCPPHEADERS
+CPPHEADERSDEF = -DSTDCPPHEADERS
+#endif
+
+#ifdef USE_MALLINFO
+MALLINFO_DEF = -DHAVE_MALLINFO
+#endif
+
+#ifdef CHECK_RECSIZE_BUG
+CHECK_RECSIZE_BUG_DEF = -DCHECK_RECSIZE_BUG
+#endif
+
+#ifdef USE_DEFRAG_FN_ORIDE
+DEFRAG_DEF   = -DUSE_DEFRAG_FN_ORIDE
+#endif
+
+#ifdef USE_VIEWKLASS
+VIEWKLASS_DEF   = -DUSE_VIEWKLASS
+#endif
+
+#ifdef USE_SIGACTION
+SIGACTIONDEF = -DUSE_SIGACTION
+#endif
+
+OPTION_DEFS =  $(OGLDEF) $(INVDEF) $(IGLDEF) $(TITAN_CLIENT_DEF) \
+$(TITAN_COMP_DEF)  \
+$(RAINFIELDS_CLIENT_DEF) $(WDSS_CLIENT_DEF) $(GLFDEF) $(GIFDEF) $(CGDEF) \
+$(GLCDEF) $(CPPHEADERSDEF) $(MALLINFO_DEF) $(CHECK_RECSIZE_BUG_DEF) \
+$(DEFRAG_DEF) $(VIEWKLASS_DEF) $(SIGACTIONDEF)
+
+SERVER_OPTION_DEFS =  $(OGLDEF) $(INVDEF) $(IGLDEF) \
+$(CPPHEADERSDEF) $(MALLINFO_DEF) $(CHECK_RECSIZE_BUG_DEF) \
+$(DEFRAG_DEF) $(SIGACTIONDEF)
+

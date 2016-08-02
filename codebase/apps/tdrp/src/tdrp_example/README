@@ -1,0 +1,38 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2001 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Program(RAP) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2001/11/19 23:31:42 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+tdrp_example
+------------
+
+This is an example program using the tdrp (Table-driven Runtime
+Parameters) package.
+
+The program demonstrates most of tdrp's features, both from a 
+programmer's perspective and a user's perspective.
+
+The usage is:
+
+Usage: tdrp_example [options as below]
+options:
+       [ --, -h, -help, -man, -usage] produce this list.
+       [ -check_params ] check parameter usage
+       [ -debug ] print debug messages
+       [ -o ?] set params override
+       [ -params path ] specify params file
+
+Typical usage would be:
+
+  tdrp_example -h
+
+  tdrp_example -params params.good -debug
+
+  tdrp_example -params params.good -check_params
+
+  tdrp_example -params params.good -check_params -o 'scan_interval=400;'
+
+

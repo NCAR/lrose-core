@@ -1,0 +1,19 @@
+# -*- python -*-
+#
+#
+
+Import('env')
+
+sources  = ['RayFile.cpp','RayConst.cpp']
+
+hFiles   = ['RayFile.h','RayConst.h','vectorDefs.h']
+
+libNode  = env.Library('rayfile',source = sources, 
+                       CPPPATH=[env.installLocalInc]);
+
+localInstallLibNode = env.Install(env.installLocalLib ,libNode);
+localInstallIncNode = env.Install(env.installLocalInc ,hFiles);
+
+env.Default([libNode,localInstallLibNode,localInstallIncNode])
+env.Install(env.installLib,libNode);
+env.Install(env.installInc,hFiles);

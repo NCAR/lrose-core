@@ -1,0 +1,108 @@
+/*********************************************************
+ * parameter definitions for dsr2mmq
+ *
+ * Jaimi Yee, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 1998
+ */
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option";
+  p_help = "Print debug messages";
+} debug;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with the process mapper";
+} instance;
+
+paramdef char* {
+  p_descr = "Input URL for DsRadar data via FMQ";
+  p_default = {"fmqp:://localhost::./fmq.dsRadar"};
+} fmq_url;
+
+paramdef long {
+  p_default = {3740201};
+  p_descr = "Key for shared memory with RDI";
+  p_help = " ";
+} rdi_mmq_key;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to print summary";
+  p_help = "If set to true, ray header information will be printed to standard output";
+} print_summary;
+
+paramdef long {
+  p_default = {360};
+  p_descr = "Summary interval";
+  p_help = "Beam interval at which the summary is printed";
+} summary_interval;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Use constant number of gates";
+  p_help = "If set to true, a constant number of gates per beam will be sent to the mmq.  If there are less gates than this number, the beam will be padded with zeros.  If there are more gates than this number, the beam will be truncated";
+} use_ngates;
+
+paramdef long {
+  p_default = {460};
+  p_descr = "Number of gates";
+  p_help = "If use_ngates is set to true, this is the number of gates per beam that will be sent to the mmq";
+} ngates;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Clip beams";
+  p_help = "If set to true, each beam will be clipped";
+} clip_beams;
+
+paramdef double {
+  p_default = {1000.0};
+  p_descr = "Altitude (in km) above which data will be clipped";
+  p_help = "For each beam with an elevation angle greater than or equal to min_clipping_elev (see below), data above this altitude will be clipped";
+} clipping_alt;
+
+paramdef double {
+  p_default = {1.0};
+  p_descr = "Minimum elevation for which clipping will be applied";
+  p_help = "Each beam with an elevation angle greater than or equal to this value wil be clipped (if clipping is activated)";
+} min_clipping_elev;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Check elevation";
+  p_help = "If set to true, the elevation angle will be checked for each beam";
+} check_elev;
+
+paramdef double {
+  p_default = {0.0};
+  p_descr = "Minimum elevation";
+  p_help = "If checking elevation, beams with elevation angles less than this will not be sent on to the mmq";
+} min_elev;
+
+paramdef double {
+  p_default = {90.0};
+  p_descr = "Maximum elevation";
+  p_help = "If checking elevation, beams with elevation angles greater than this will not be sent on to the mmq";
+} max_elev;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Check prf";
+  p_help = "If set to true, the prf will be checked for each beam";
+} check_prf;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Minimum prf";
+  p_help = "If checking prf, beams with prf values less than this will not be sent on to the mmq";
+} min_prf;
+
+paramdef long {
+  p_default = {100000};
+  p_descr = "Maximum prf";
+  p_help = "If checking prf, beams with prf values less than this will not be ssent on to the mmq";
+} max_prf;

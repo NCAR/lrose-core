@@ -1,0 +1,9 @@
+This application performs GRIB-to-MDV data conversion.
+
+Author:         Carl Drews
+Created:        March 1, 2004
+Last revised:	March 1, 2004
+
+The test code for this application is in:
+~/cvs/test/apps/ingest/src/Grib2Mdv
+

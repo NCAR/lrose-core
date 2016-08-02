@@ -1,0 +1,270 @@
+/**********************************************************************
+ * TDRP params for tstorm_refl_fcst
+ **********************************************************************/
+
+//======================================================================
+//
+//======================================================================
+ 
+///////////// debug_level /////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_EXTRA
+//
+
+debug_level = DEBUG_EXTRA;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none,
+// 1 - corruption checking,
+// 2 - records all malloc blocks and checks,
+// 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: long
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "small_storms";
+
+///////////// mode ////////////////////////////////////
+//
+// Operational mode.
+// Realtime mode - waits for new data;
+// archive mode runs on file list.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//
+
+mode = ARCHIVE;
+
+///////////// storm_data_url //////////////////////////
+//
+// Input URL for storm data.
+// The is the SPDB database directory for the storm data for which we'll 
+//   keep the storm shapes but update the vectors.
+// Type: string
+//
+
+storm_data_url = "spdbp:://localhost::./data/small_storms/spdb/storms";
+
+///////////// gridded_data_url ////////////////////////
+//
+// Input URL for gridded data.
+// The is the directory which contains the gridded data, in MDV format, 
+//   that will be extrapolated based on the storms and their motions.
+// Type: string
+//
+
+gridded_data_url = "mdvp::static//localhost:60000:./data/small_storms/mdv/static";
+
+///////////// gridded_field_num ///////////////////////
+//
+// Field number for gridded data in MDV files.
+// Minimum val: 0
+// Type: long
+//
+
+gridded_field_num = 0;
+
+///////////// max_valid_age ///////////////////////////
+//
+// Maximum valid age in seconds for input data.
+// Minimum val: 0
+// Type: long
+//
+
+max_valid_age = 3600;
+
+///////////// time_offset_max /////////////////////////
+//
+// Maximum data offset time in seconds.
+// Maximum amount of time allowed between the base storm data time and 
+//   the gridded data time for the data to be used together.
+// Type: long
+//
+
+time_offset_max = 300;
+
+///////////// sleep_msecs /////////////////////////////
+//
+// Sleep msecs between checks for new data.
+// Minimum val: 0
+// Type: long
+//
+
+sleep_msecs = 1000;
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// Type: string
+//
+
+output_url = "mdvp:://localhost::./data/small_storms/mdv/gridded_growth";
+
+///////////// output_empty_grids //////////////////////
+//
+// Flag indicating whether a forecast grid should be created if no 
+//   storms in the forecast are valid.  This flag was added because we 
+//   were having data outage problems with the system that were adversely 
+//   affecting our statistics.
+// Type: boolean
+//
+
+output_empty_grids = TRUE;
+
+///////////// output_time_offsets /////////////////////
+//
+// Number of seconds to add to the storm time to get the begin and end 
+//   times for the output grid. The centroid time for the grid will be the 
+//   storm time and the expire time for the grid will be the same as the 
+//   end time.
+//
+// Type: struct
+//   typedef struct {
+//      long begin_time_offset;
+//      long end_time_offset;
+//   }
+//
+//
+
+output_time_offsets = {
+    begin_time_offset = -150,
+    end_time_offset = 150
+};
+
+//======================================================================
+//
+//======================================================================
+ 
+///////////// file_time_stamp /////////////////////////
+//
+// File time stamp.
+// If GENERATE_TIME, file names match generate data time.
+// If FORECAST_TIME, file names match forecast time.
+//
+// Type: enum
+// Options:
+//     GENERATE_TIME
+//     FORECAST_TIME
+//
+
+file_time_stamp = GENERATE_TIME;
+
+///////////// forecast_durations //////////////////////
+//
+// Forecast durations (secs).
+// Array of duration of precip forecast map.  If file_time_stamp is 
+//   GENERATE_TIME, only the first duration is used, the rest are ignored.
+// Minimum val: 0
+// Maximum val: 10800
+// Type: long
+// 1D array - variable length.
+//
+
+forecast_durations = {
+ 3600
+};
+
+///////////// round_forecast_times ////////////////////
+//
+// Option to round the forecast times.
+// The interval used is given by the rounding_interval parameter.
+// Type: boolean
+//
+
+round_forecast_times = FALSE;
+
+///////////// rounding_interval ///////////////////////
+//
+// Rounding interval for forecast times (secs).
+// If round_forecast_times is TRUE, the forecast times are rounded to 
+//   this interval.
+// Minimum val: 10
+// Maximum val: 86400
+// Type: long
+//
+
+rounding_interval = 600;
+
+///////////// thresholded_forecast ////////////////////
+//
+// Option to produce thresholded forecast.
+// Thresholded forecast uses individual storm motion. Unthresholded 
+//   forecast uses area-weighted mean storm motion.
+// Type: boolean
+//
+
+thresholded_forecast = TRUE;
+
+///////////// valid_forecasts_only ////////////////////
+//
+// Valid forecasts only flag.
+// If set, only valid forecasts will be mapped. If not, all forecasts 
+//   will be mapped.
+// Type: boolean
+//
+
+valid_forecasts_only = FALSE;
+
+//======================================================================
+//
+//======================================================================
+ 
+///////////// smooth_polygons /////////////////////////
+//
+// polygon smoothing flag.
+// If TRUE, the polygons will be smoothed using the constrained convex 
+//   hull smoothing algorithm before being added to the output file.
+// Type: boolean
+//
+
+smooth_polygons = FALSE;
+
+///////////// smooth_inner_multiplier /////////////////
+//
+// polygon smoothing inner hull multiplier.
+// The original polygon radial lengths are multiplied by this value to 
+//   get the inner polygon for the constrained convex hull smoothing 
+//   algorithm. This parameter is only used if smooth_polygons is set to 
+//   TRUE.
+// Minimum val: 0.001
+// Type: double
+//
+
+smooth_inner_multiplier = 1;
+
+///////////// smooth_outer_multiplier /////////////////
+//
+// polygon smoothing outer hull multiplier.
+// The original polygon radial lengths are multiplied by this value to 
+//   get the outer polygon for the constrained convex hull smoothing 
+//   algorithm. This parameter is only used if smooth_polygons is set to 
+//   TRUE.
+// Minimum val: 0.001
+// Type: double
+//
+
+smooth_outer_multiplier = 2;
+

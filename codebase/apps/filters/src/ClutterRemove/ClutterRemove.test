@@ -1,0 +1,308 @@
+/**********************************************************************
+ * TDRP params for ClutterRemove
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: ClutterRemove.
+//
+// ClutterRemove removes clutter from an MDV file. The clutter is 
+//   obtained from a clutter file, which is normally a median-filtered DBZ 
+//   file. The result is stored in an MDV file. The usage is 
+//   'ClutterRemove -params params_file'.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. When a new 
+//   file arrives, it computes the median of the files from the latest 
+//   time and back by the parameter 'past_secs'. In ARCHIVE mode, it moves 
+//   through the data between the start and end times set on the command 
+//   line. In FILELIST mode, it moves through the list of file names 
+//   specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_url = "mdv/input";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age on input file - secs.
+// REALTIME mode only. If, on starup, no file is younger than this, the 
+//   program will wait for the next file to come in.
+// Type: int
+//
+
+max_realtime_valid_age = 600;
+
+///////////// input_dbz_field_name ////////////////////
+//
+// Name of the dBZ field in the input file.
+// Type: string
+//
+
+input_dbz_field_name = "DBZ";
+
+//======================================================================
+//
+// FILTERING THE CLUTTER.
+//
+//======================================================================
+ 
+///////////// clutter_path_url ////////////////////////
+//
+// Path URL for clutter directory or file.
+// If use_latest_clutter_file is TRUE, this points to the directory. If 
+//   FALSE, this points to the actual clutter file.
+// Type: string
+//
+
+clutter_path_url = "mdv/clutter";
+
+///////////// use_latest_clutter_file /////////////////
+//
+// Option to use latest available clutter file.
+// If true, the clutter_path_url must point to the directory in which 
+//   the clutter files reside. If false, the clutter_path_url must point 
+//   to the actual clutter file.
+// Type: boolean
+//
+
+use_latest_clutter_file = TRUE;
+
+///////////// clutter_dbz_field_name //////////////////
+//
+// Name of the dBZ field in the clutter file.
+// Type: string
+//
+
+clutter_dbz_field_name = "DBZ";
+
+///////////// remove_from_all_fields //////////////////
+//
+// Option to remove data at clutter points from all fields.
+// If true, when clutter is found at a point, all of the fields at that 
+//   point are set to missing. If false, cluter is only removed from the 
+//   dBZ field. If this option is set, make sure the geometry of all the 
+//   fields is identical.
+// Type: boolean
+//
+
+remove_from_all_fields = TRUE;
+
+///////////// clutter_threshold ///////////////////////
+//
+// Clutter dBZ threshold.
+// Clutter data is only considered valid if it exceeds this threshold.
+// Type: double
+//
+
+clutter_threshold = 0;
+
+///////////// dbz_threshold ///////////////////////////
+//
+// Input dBZ threshold.
+// Input data is only considered a candidate for clutter removal if it 
+//   exceeds this threshold.
+// Type: double
+//
+
+dbz_threshold = 0;
+
+///////////// dbz_margin //////////////////////////////
+//
+// Input data dBZ margin.
+// Data which exceeds the clutter value by this margin is not condidered 
+//   clutter.
+// Type: double
+//
+
+dbz_margin = 5;
+
+///////////// remap_xy ////////////////////////////////
+//
+// Option to remap clutter grid in x,y.
+// If true, set the remap parameters below.
+// Type: boolean
+//
+
+remap_xy = FALSE;
+
+///////////// remap_projection ////////////////////////
+//
+// Projection for remapping in x,y.
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_FLAT
+//
+
+remap_projection = PROJ_FLAT;
+
+///////////// remap_grid //////////////////////////////
+//
+// Grid parameters for remapping in x,y.
+// These params apply to all projection types.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+remap_grid = { 1, 1, 0, 0, 1, 1 };
+
+///////////// remap_rotation //////////////////////////
+//
+// Remapped grid rotation.
+// This applies only to PROJ_FLAT projections.
+// Type: double
+//
+
+remap_rotation = 0;
+
+///////////// remap_origin_lat ////////////////////////
+//
+// Remapped grid origin latitude.
+// This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_origin_lat = 0;
+
+///////////// remap_origin_lon ////////////////////////
+//
+// Remapped grid origin longitude.
+// This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_origin_lon = 0;
+
+///////////// remap_lat1 //////////////////////////////
+//
+// Remapped grid reference latitude 1.
+// This applies only to PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_lat1 = 0;
+
+///////////// remap_lat2 //////////////////////////////
+//
+// Remapped grid reference latitude 2.
+// This applies only to PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_lat2 = 0;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// specify_field_names /////////////////////
+//
+// Option to specify field names for the output file.
+// If true, only the specified field names are included in the output 
+//   file.
+// Type: boolean
+//
+
+specify_field_names = FALSE;
+
+///////////// field_names /////////////////////////////
+//
+// List of field names for filtering.
+// Type: string
+// 1D array - variable length.
+//
+
+field_names = { "dBZ" };
+
+///////////// output_url //////////////////////////////
+//
+// Output dir URL.
+// Output data is written to this URL.
+// Type: string
+//
+
+output_url = "mdv/noClutter";
+
+///////////// output_compression //////////////////////
+//
+// Set compression type.
+//
+// Type: enum
+// Options:
+//     COMPRESSION_ASIS
+//     COMPRESSION_NONE
+//     COMPRESSION_RLE
+//     COMPRESSION_ZLIB
+//     COMPRESSION_BZIP
+//
+
+output_compression = COMPRESSION_ZLIB;
+

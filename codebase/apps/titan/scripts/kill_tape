@@ -1,0 +1,8 @@
+#! /bin/csh
+
+#
+# kill tape program
+#
+
+snuff rdata_to_socket
+

@@ -1,0 +1,6 @@
+.deps
+MdvRadarShear
+__makefile.template
+makefile
+makefile.am
+makefile.in

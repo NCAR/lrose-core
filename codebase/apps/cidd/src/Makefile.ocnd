@@ -1,0 +1,29 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS =  $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	CIDD \
+	mdv_server
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+
+# ---------------------------------------------------------
+# Special cases
+
+install_include:
+install_lib:
+install_profile_lib:
+install_debug_lib:
+
+install_doc:
+	$(CP) ../doc/*.doc $(RAP_DOC_DIR)
+
+install: install_bin
+
+clean_lib:
+clean_all: clean clean_lib clean_bin clean_insure

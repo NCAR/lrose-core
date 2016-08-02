@@ -1,0 +1,189 @@
+/****************************************************
+ * TDRP params for TrackGridStats
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_VERBOSE.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Note for stats file.
+ * Note to go in track stats grid file.
+ *
+ * Type: string
+ * Default: "Track grid statistics" 
+ */
+note = "Radar track stats, Denver, CO";
+
+/*
+ * Type of input track data.
+ * Two track data types are permissable: (a) TITAN track files,
+ *   (b) track files generated from the stochastic model StormModel.
+ *
+ * Type: enum
+ * Default: TITAN_TRACKS 
+ * Legal values: TITAN_TRACKS, MODEL_TRACKS.
+ */
+track_data_type = MODEL_TRACKS;
+
+/*
+ * Track grid stats directory.
+ * Upper level directory for output grid stats files.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+grid_stats_dir = "./output";
+
+/*
+ * Output file extension.
+ * File name extension for output cartesian files.
+ *
+ * Type: string
+ * Default: "mdv" 
+ */
+output_file_ext = "mdv";
+
+/*
+ * Number of seasons for stats.
+ * The number of seasons for computing the seasonal means, such
+ *   as precip.
+ *
+ * Type: long
+ * Default: 1 
+ */
+n_seasons = 6;
+
+/*
+ * Radar vol scan interval (secs).
+ * Interval between radar volume scans (secs).
+ *
+ * Type: double
+ * Default: 360 
+ * Min value: 0 
+ * Max value: 1800 
+ */
+scan_interval = 360;
+
+/*
+ * Min track duration (secs).
+ * The minimum duration for including a track in the analysis (secs).
+ *
+ * Type: double
+ * Default: 900 
+ * Min value: 0 
+ * Max value: 10000 
+ */
+min_duration = 1500;
+
+/*
+ * Grid parameters.
+ * The grid params for the track stats.
+ *
+ * Type: struct
+ */
+grid = {
+  39.78, /* origin_lat:double */
+  -104.546, /* origin_lon:double */
+  120, /* nx:long */
+  120, /* ny:long */
+  -148.75, /* minx:double */
+  -148.75, /* miny:double */
+  2.5, /* dx:double */
+  2.5  /* dy:double */
+};
+
+/*
+ * Z-R coefficient.
+ * The coefficient in the Z-R relationship.
+ *
+ * Type: double
+ * Default: 200 
+ * Min value: 1 
+ * Max value: 2000 
+ */
+z_r_coeff = 500;
+
+/*
+ * Z-R exponent.
+ * The exponent in the Z-R relationship.
+ *
+ * Type: double
+ * Default: 1.6 
+ * Min value: 0.1 
+ * Max value: 10 
+ */
+z_r_exponent = 1.3;
+
+/*
+ * Hail dBZ threshold.
+ * The reflectivity threshold above which hail is assumed.
+ *
+ * Type: double
+ * Default: 55 
+ * Min value: 40 
+ * Max value: 80 
+ */
+hail_dbz_threshold = 55;
+
+/*
+ * Dbz histogram interval.
+ * Reflectivity interval for histogram computations related
+ *   to the reflectivity distribution. Used for MODEL_TRACKS only.
+ *
+ * Type: double
+ * Default: 3 
+ * Min value: 1 
+ * Max value: 10 
+ */
+dbz_hist_interval = 3;
+
+/*
+ * Option to override the storm ellipse shapes with circles of
+ *   constant radius.
+ * If set the same weight is given to all storms for those properties
+ *   which are computed spatially. See circle_radius.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+override_ellipse = TRUE;
+
+/*
+ * Radius of circle for overriding the ellipses.
+ * See override_ellipse.
+ *
+ * Type: double
+ * Default: 10 
+ * Min value: 0 
+ */
+circle_radius = 15;
+

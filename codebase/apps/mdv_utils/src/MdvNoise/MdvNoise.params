@@ -1,0 +1,158 @@
+/**********************************************************************
+ * TDRP params for ./MdvNoise
+ **********************************************************************/
+
+//======================================================================
+//
+// MdvNoise is a highly specific program. It generates
+// a noise field and puts it onto an MDV grid. The noise is a
+// Von Karman field defined by a length scale and a sigma beta
+// over mean beta field. These noise fields are necessary for the
+// DHS OSSE project.
+
+// The program operation will make software engineers cringe, but
+// it is not suitable for me to spend time improving it. What the
+// program does is to repeatedly run another program written
+// in Fortran 90 by Rod Frehlich, re-direct the output of that
+// program (the noise) to an ascii file, then read these data
+// and put them on an MDV grid.
+
+// Niles Oien May 2005.
+//
+//======================================================================
+ 
+///////////// OutUrl //////////////////////////////////
+//
+// Output mdv URL, typically of the form
+// mdvp:://host.domain:[port]:dir/dir.
+// Noise fields are written here.
+// Type: string
+//
+
+OutUrl = "mdvp:://localhost::/d2/oien/OSSE/data/mdv/noise";
+
+///////////// nx //////////////////////////////////////
+//
+// Number of points in X.
+// Depends on desired coverage.
+// Type: int
+//
+
+nx = 1501;
+
+///////////// ny //////////////////////////////////////
+//
+// Number of points in Y.
+// Depends on desired coverage.
+// Type: int
+//
+
+ny = 1501;
+
+///////////// dx //////////////////////////////////////
+//
+// Spacing in X, Km.
+// Depends on desired coverage.
+// Type: double
+//
+
+dx = 0.002;
+
+///////////// dy //////////////////////////////////////
+//
+// Spacing in Y, Km.
+// Depends on desired coverage.
+// Type: double
+//
+
+dy = 0.002;
+
+///////////// sigmaBetaOverMeanBeta ///////////////////
+//
+// Used in nose generation scheme.
+// Determined elsewhere.
+// Type: double
+//
+
+sigmaBetaOverMeanBeta = 0.2;
+
+///////////// L0 //////////////////////////////////////
+//
+// Length scale, meters.
+// Used in noise generation.
+// Type: double
+//
+
+L0 = 100;
+
+///////////// grid_origin_lat /////////////////////////
+//
+// Latitude of grid origin.
+// Must be specified.
+// Minimum val: -90
+// Maximum val: 90
+// Type: double
+//
+
+grid_origin_lat = 38.8937;
+
+///////////// grid_origin_lon /////////////////////////
+//
+// Longitude of grid origin.
+// Must be specified.
+// Minimum val: -180
+// Maximum val: 180
+// Type: double
+//
+
+grid_origin_lon = -77.0229;
+
+///////////// startTime ///////////////////////////////
+//
+// Start time.
+// Format is YYYY MM DD hh mm ss.
+// Type: string
+//
+
+startTime = "2004 12 17 10 00 00";
+
+///////////// endTime /////////////////////////////////
+//
+// End time.
+// Format is YYYY MM DD hh mm ss.
+// Type: string
+//
+
+endTime = "2004 12 17 10 10 00";
+
+///////////// timeStep ////////////////////////////////
+//
+// Time step, seconds.
+// Defines temporal resolution.
+// Type: int
+//
+
+timeStep = 5;
+
+///////////// scale ///////////////////////////////////
+//
+// The data from Rod's program are normalized. We
+// apply a scale and a bias.
+// Defines the scale.
+// Type: double
+//
+
+scale = 1;
+
+///////////// bias ////////////////////////////////////
+//
+// The data from Rod's program are normalized. We
+// apply a scale and a bias.
+// Defines the bias.
+// Type: double
+//
+
+bias = 0.0;
+
+
+

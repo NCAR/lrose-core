@@ -1,0 +1,6 @@
+OUTPUT_FIELD_NAME: temp
+#
+# INPUT FIELD URL                              FIELDNAME  LOOKBACK     WEIGHT  FILTER FUNCTION URL - FIRST FIELD IS USED                                              LEVEL (STARTS AT 0)
+#
+mdvp:://localhost::/d2/oien/jason/rtfdda/mdv   Temp       86400        1.0     mdvp::mm5//localhost:0:/home/oien/rap/apps/mdv_utils/src/MdvGenerateSpatialFilter/mdv    4 11 13   
+#

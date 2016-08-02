@@ -1,0 +1,198 @@
+/*********************************************************
+ * parameter definitions for RadxMon
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 2012
+ */
+
+commentdef {
+  p_header = "Read moments data, print out in a variety of ways.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with the process mapper";
+} instance;
+
+commentdef {
+  p_header = "OPS MODE";
+};
+
+typedef enum {
+  OPS_MODE_PRINT, OPS_MODE_SERVER
+} ops_mode_t;
+
+paramdef enum ops_mode_t {
+  p_default = OPS_MODE_PRINT;
+  p_descr = "How the app operates.";
+  p_help = "\tMODE_PRINT: read moments, print to stdout. MODE_SERVER: reads moments and keeps current state. Serves out current data in response to request for information.";
+} ops_mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  FMQ_INPUT, TCP_INPUT, FILE_LIST, FILE_REALTIME
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = FMQ_INPUT;
+  p_descr = "Input mode - how the data is read.";
+  p_help = "\tFMQ_INPUT: read moments from a file message queue./n/tTCP_INPUT: read the moments data from a server, via a socket./n/tFILE_LIST: read data from files specified on the command line.\n\tFILE_REALTIME: watch an input directory, read each new file as it arrives.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/moments";
+  p_descr = "FMQ url. For FMQ_INPUT only.";
+  p_help = "URL to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions. For local FMQ, this can be the file path. For a remote FMQ, this will be a full URL: 'fmqp:://host::dir'.";
+} fmq_url;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If FALSE, the program will seek to the end of the fmq and only read in new data. If TRUE, it will start reading from the beginning of the FMQ.";
+} seek_to_start_of_fmq;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Name of host for TCP server. For TCP_INPUT only.";
+} input_tcp_host;
+
+paramdef int {
+  p_default = 12000;
+  p_descr = "Port for TCP server. For TCP_INPUT only.";
+} input_tcp_port;
+
+paramdef string {
+  p_default = "/tmp/files/moments";
+  p_descr = "Input dir for files. For FILE_REALTIME only.";
+  p_help = "Will watch this directory for new data.";
+} files_input_dir;
+
+commentdef {
+  p_header = "PRINT MODE";
+};
+
+typedef enum {
+  PRINT_MONITOR,
+  PRINT_SUMMARY, 
+  PRINT_FULL, 
+  PRINT_DATA, 
+  PRINT_SINGLE_GATE,
+  PRINT_POWER_AND_FREQ,
+  PRINT_PLATFORM_GEOREF
+} print_mode_t;
+
+paramdef enum print_mode_t {
+  p_default = PRINT_SUMMARY;
+  p_descr = "Sets the type of printout. All information will be printed to stdout.";
+  p_help = "\nMONITOR: single line which overwrites itself. Suitable for a small window with a single output line. SUMMARY: scrolling summary. \n\nFULL: radar, field and beam params in full. \n\nDATA: data as well - very verbose. \n\nSINGLE_GATE: data for a single gate at specficied range. \n\nPOWER_AND_FREQ: power and frequency summary \n\nPLATFORM_GEOREF: platform georeference info with each beam, if available";
+} print_mode;
+
+paramdef double {
+  p_default = 1.0; 
+  p_descr = "Range for printing out data for single gate - km.";
+  p_help = "For print_type = SINGLE_GATE.";
+} range_for_single_gate;
+
+commentdef {
+  p_header = "PRINT DETAILS";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print label line in monitor mode.";
+  p_help = "If TRUE, a line containing labels is printed ahead of the data line in monitor mode.";
+} labels_in_monitor_mode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print volume number in monitor mode.";
+  p_help = "If TRUE, the volume number is printed at the start of the line in monitor mode.";
+} volume_num_in_monitor_mode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print start of tilt, end of volume, etc. flags in monitor mode.";
+  p_help = "If TRUE, a 3-letter string is added to the end of the line. The strings are EOT (end-of-tilt), EOV (end-of-volume), SOT (start-of-tilt), SOV (start-of-volume) and NST (new-scan-type).";
+} flags_in_monitor_mode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print start/end of tilt flags in summary mode.";
+  p_help = "If TRUE, the start and end of tilts will be printed in summary mode.";
+} flags_in_summary_mode;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of decimals for partial secs in summary mode.";
+  p_help = "If TRUE, the time will be printed out to this number of decimals.";
+} subsecs_precision_in_summary_mode;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Number of lines between headers in summary mode.";
+  p_help = "A line header will be printed at regular intervals.";
+} header_interval_in_summary_mode;
+
+paramdef int {
+  p_default = -1; 
+  p_descr = "Update interval for display in secs.";
+  p_help = "Set to negative values to update based on count rather than seconds between beam timestamps. If 0, prints on every beam.";
+} update_interval;
+
+paramdef int {
+  p_default = 0; 
+  p_descr = "Number of line feeds in monitor mode.";
+  p_help = "The number of line feeds inserted before refreshing the line in monitor mode.";
+} n_monitor_line_feeds;
+
+commentdef {
+  p_header = "CHECK FOR MISSING DATA";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check for missing beams.";
+  p_help = "If TRUE, RadxMon will check for missing beams by computing the change in angle since the previous beam. If this exceeds 'max_delta_angle', a warning message will be printed.";
+} check_for_missing_beams;
+
+paramdef double {
+  p_default = 1.0; 
+  p_descr = "Max delta angle for missing beam check (deg).";
+  p_help = "If the angle of the latest beam differs from the angle of the previous beam by more than this value, it will be assumed that one or more beams are missing. For RHI scans, the 'angle' referred to here is the 'elevation angle'. For other scans, it is the 'azimuth angle'.";
+} max_delta_angle;
+
+commentdef {
+  p_header = "SERVER MODE";
+};
+
+paramdef int {
+  p_default = 10000; 
+  p_descr = "TCP port for server mode.";
+  p_help = "Listens for connections on this port.";
+} output_tcp_port;
+
+paramdef double {
+  p_default = 2;
+  p_descr = "Time for computing antenna rate (sec).";
+  p_help = "The rate computed over this time period. The rate is used to adjust for latency in the angles.";
+} nsecs_for_antenna_rate;
+
+
+
+
+

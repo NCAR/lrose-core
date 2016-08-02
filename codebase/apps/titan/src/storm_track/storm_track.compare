@@ -1,0 +1,291 @@
+/**********************************************************************
+ * TDRP params for storm_track
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_EXTRA
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: long
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "compare";
+
+///////////// mode ////////////////////////////////////
+//
+// Tracking mode.
+// In realtime and archive mode, tracking is performed for each volume 
+//   scan as it is made available by storm_ident. In retrack mode, 
+//   tracking is done on an existing storm file.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     RE_TRACK
+//
+
+mode = ARCHIVE;
+
+///////////// forecast_type ///////////////////////////
+//
+// Forecast mode.
+// TREND - linear trend. PARABOLIC - parabolic trend on growth, linear 
+//   trend on decay. The parabola peaks at time parabolic_growth_period 
+//   from present. REGRESSION - uses regression equations for forecast 
+//   (experimental).
+//
+// Type: enum
+// Options:
+//     TREND
+//     PARABOLIC
+//     REGRESSION
+//
+
+forecast_type = TREND;
+
+///////////// parabolic_growth_period /////////////////
+//
+// Parabolic growth period (secs).
+// Time at which parabolic growth curve becomes flat.
+// Minimum val: 0
+// Maximum val: 10800
+// Type: double
+//
+
+parabolic_growth_period = 1800;
+
+///////////// zero_growth /////////////////////////////
+//
+// Option to force storm growth to be zero.
+// If this is set, the storm growth will be forced to zero. Storm decay 
+//   will be normal. Forecast movement will be normal.
+// Type: boolean
+//
+
+zero_growth = FALSE;
+
+///////////// zero_decay //////////////////////////////
+//
+// Option to force storm decay to be zero.
+// If this is set, the storm decay will be forced to zero. Storm growth 
+//   will be normal. Forecast movement will be normal.
+// Type: boolean
+//
+
+zero_decay = FALSE;
+
+///////////// max_tracking_speed //////////////////////
+//
+// Maximum allowable speed for tracks.
+// This value is used to limit the search for a match in the tracking 
+//   algorithm.
+// Minimum val: 5
+// Maximum val: 200
+// Type: double
+//
+
+max_tracking_speed = 100;
+
+///////////// weight_distance /////////////////////////
+//
+// Matching parameter.
+// The weight for distance moved in the matching algorithm.
+// Minimum val: 0
+// Maximum val: 10
+// Type: double
+//
+
+weight_distance = 1;
+
+///////////// weight_delta_cube_root_volume ///////////
+//
+// Matching parameter.
+// The weight for delta_cube_root_volume in the matching algorithm.
+// Minimum val: 0
+// Maximum val: 10
+// Type: double
+//
+
+weight_delta_cube_root_volume = 1;
+
+///////////// max_delta_time //////////////////////////
+//
+// Max allowable time between scans (secs).
+// Max delta time (secs) for valid tracking - if there is a larger break 
+//   than this in the data, all tracks are terminated and new ones 
+//   started.
+// Minimum val: 60
+// Maximum val: 86400
+// Type: double
+//
+
+max_delta_time = 1200;
+
+///////////// forecast_weights ////////////////////////
+//
+// Weights for making the trend forecast.
+// A trend forecast is made using a weighted linear fit to the storm 
+//   history. These are the weights used. The first applies to the most 
+//   recent scan, and the last to the earliest scan used.
+// Minimum val: 0
+// Maximum val: 1
+// Type: double
+// 1D array - variable length.
+//
+
+forecast_weights = { 1, 0.9, 0.8, 0.7, 0.6, 0.5 };
+
+///////////// max_speed_for_valid_forecast ////////////
+//
+// Max allowable speed for valid forecast (km/hr).
+// If the speed exceeds this value, the forecast is marked invalid.
+// Minimum val: 5
+// Maximum val: 300
+// Type: double
+//
+
+max_speed_for_valid_forecast = 80;
+
+///////////// min_history_for_valid_forecast //////////
+//
+// Min history for valid forecast (secs).
+// If the history is less than this value, the forecast is marked 
+//   invalid.
+// Minimum val: 0
+// Maximum val: 7200
+// Type: double
+//
+
+min_history_for_valid_forecast = 1500;
+
+///////////// scale_forecasts_by_history //////////////
+//
+// Option to scale forecasts by history.
+// If this is set, forecasts are scaled by the ratio of history over 
+//   min_history_for_scaling.
+// Type: boolean
+//
+
+scale_forecasts_by_history = TRUE;
+
+///////////// history_for_scaling /////////////////////
+//
+// History value for scaling forecasts (secs).
+// If a storm has a history less than this value, the forecast values 
+//   are scaled by the ratio of history over history_for_scaling. If the 
+//   storm history exceeds this value, the scale factor is 1.0.
+// Minimum val: 0
+// Type: double
+//
+
+history_for_scaling = 1200;
+
+///////////// use_runs_for_overlaps ///////////////////
+//
+// Option to use storm runs for overlaps.
+// If this is set, runs are used to compute the overlaps for identifying 
+//   mergers and splits. If not, the storm polygons are used.
+// Type: boolean
+//
+
+use_runs_for_overlaps = TRUE;
+
+///////////// min_fraction_overlap ////////////////////
+//
+// Min fraction for valid overlap.
+// When detetmining the overlap of a storm at successive times, we 
+//   consider the overlap as a fraction of the storm area at time1 and 
+//   time2. This is the min overlap for a valid match.
+// Minimum val: 0.01
+// Maximum val: 1
+// Type: double
+//
+
+min_fraction_overlap = 0.3;
+
+///////////// min_sum_fraction_overlap ////////////////
+//
+// Min sum fraction for valid overlap.
+// When detetmining the overlap of a storm at successive times, we 
+//   consider the sum of the overlaps as a fraction of the storm area at 
+//   time1 and time2. This is the min overlap for a valid match.
+// Minimum val: 0.01
+// Maximum val: 3
+// Type: double
+//
+
+min_sum_fraction_overlap = 0.6;
+
+///////////// spatial_smoothing ///////////////////////
+//
+// Option to perform spatial smoothing.
+// If this is set, the motion forecasts are smoothed using an 
+//   inverse-distance weighting scheme. The max radius considered is given 
+//   by the parameter smoothing_radius.
+// Type: boolean
+//
+
+spatial_smoothing = TRUE;
+
+///////////// smoothing_radius ////////////////////////
+//
+// Radius for forecast smoothing.
+// This is the maximum radius which the forecast algorithm will use when 
+//   searching for candidates for smoothing data.
+// Minimum val: 0
+// Type: double
+//
+
+smoothing_radius = 100;
+
+///////////// smooth_invalid_forecasts ////////////////
+//
+// Option to perform spatial smoothing for storms which are not yet old 
+//   enough for a valid forecast.
+// If this is set, the motion smoothing is performed for young storms. 
+//   The history is set to a weighted mean of the histories of the storms 
+//   from which the smoothed motion was obtained.
+// Type: boolean
+//
+
+smooth_invalid_forecasts = FALSE;
+
+///////////// shmem_key ///////////////////////////////
+//
+// Shared mem key.
+// This key is used for shared memory communication with storm_ident and 
+//   the track_server.
+// Minimum val: 10000
+// Type: long
+//
+
+shmem_key = 44000;
+

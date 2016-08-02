@@ -1,0 +1,9 @@
+# gray scale for mean dbz field
+
+# Mike Dixon, Sept 1993
+
+30	48	#111111
+48	51	#444444
+51	54	#777777
+54	57	#aaaaaa
+57	60	#cccccc

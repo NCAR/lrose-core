@@ -1,0 +1,9 @@
+
+
+This is a small program to read some ASCII files for Andrew Crook from
+Lincoln Labs that contain wind information and write them out as an
+SPDB database. I have no idea how representitive this is of the
+way in which Lincoln store their data.
+
+Niles.
+

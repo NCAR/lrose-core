@@ -1,0 +1,44 @@
+////////////////////////////////////////////////////////
+// parameter definitions for edgeRead
+///////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "edgeRead PARAMETER FILE";
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef boolean {
+  p_descr = "Info messaging option";
+  p_help = "If set to true, info messages will be printed";
+  p_default = {TRUE};
+} info;
+
+commentdef {
+  p_header = "INPUT";
+}
+
+paramdef long {
+  p_descr = "Udp port for beam data packets";
+  p_default = {6544};
+} port;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef char* {
+  p_descr = "Path for log file";
+  p_help = "If set to empty string, log file will not be generated";
+  p_default = {"./log"};
+} log_file_path;
+
+

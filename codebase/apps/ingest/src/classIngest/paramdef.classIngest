@@ -1,0 +1,161 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for classIngest
+ *
+ */
+
+commentdef {
+  p_header = "classIngest reads sounding data files in NCAR CLASS format, and writes them to an SPDB data base.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In this mode it is optional to watch for a latest_data_info file. In ARCHIVE mode, it processes all of the data files in the input directory between the start and end times set on the command line. In FILELIST mode, it processes all of the files in the list specified on the command line. In FILELIST mode paths must be fully qualified with respect to the date and time - so if each date has a separate subdirectory the date part of the path must be included.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./raw/aws";
+  p_descr = "Input directory";
+  p_help = "Directory where input data files can be found.";
+} input_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, only checks input_dir for subdirs of the form YYYYMMDD";
+  p_help = "Only in REALTIME mode with latest_data_info_avail FALSE.";
+} strict_subdir_check;
+
+paramdef char* {
+  p_default = "class";
+  p_descr = "Input file suffix or extension.";
+  p_help = "Input file suffixes will be checked against this string. Ignored if empty. Should not include the period before the extension.";
+} file_suffix;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input filename match string";
+  p_help = "Files must contain this string to be processed. Ignored if empty string.";
+} file_match_string;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Depth of directories to search for files.";
+  p_help = "Only applies if latest_data_info_avail is FALSE.";
+} dir_search_recursion_depth;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Only process the latest file found.";
+  p_help = "Applies on startup. If FALSE, all files younger than max_realtime_valid_age will be processed.";
+} latest_file_only;
+
+paramdef long {
+  p_default = 180;
+  p_descr = "File check frequency";
+  p_help = "Number of seconds to wait before we check the input directory for a new file again.";
+} check_seconds;
+
+commentdef {
+  p_header = "READING THE FILE";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to take the site ID from the class file.";
+  p_help = "The default is to do this, from the line that reads :\n\n"
+	"Launch Site Type/Site ID\n\n"
+	"If this line is not numeric, this may result in the siteID\n"
+	"being 0 which is not desirable.";
+} take_siteID_from_file;
+
+paramdef int {
+  p_default = 1;
+  p_min = 1;
+  p_descr = "siteID to use if take_siteID_from_file is FALSE, or if siteId not available in file.";
+  p_help = "Also used if the siteID is not available from the file. If the Site ID is found in the file, it is hashed into an integer which is used as the SPDB data_type."; 
+} specified_siteID;
+
+commentdef {
+  p_header = "SPDB OUTPUT";
+}
+
+paramdef string {
+  p_descr = "List of URLs for spdb output";
+  p_help = "Example URL syntax spdbp:://$(HOST)::spdb/soundings/profiler";
+} spdb_urls[];
+
+paramdef long {
+  p_default = 14400;
+  p_descr = "Number of seconds before sounding data should considered expired.";
+  p_help = "This is an 'advisory number - it indicates to the data user how long they can consider the sounding to be valid."; 
+} expire_secs;
+

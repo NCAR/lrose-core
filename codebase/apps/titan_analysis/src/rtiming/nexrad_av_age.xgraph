@@ -1,0 +1,32 @@
+Device: Postscript
+Disposition: To Device
+FileOrDev: fast
+Geometry: 920x500+0+0
+TitleFont: Helvetica12
+StyleMarkers: False
+XUnitText: Time (mins)
+YUnitText: Mean age (mins)
+XLowLimit: 0
+XHighLimit: 5
+YLowLimit: 0
+YHighLimit: 4
+BoundBox: True
+TitleText: NEXRAD - Mean data age vs. time from start of volume: 0 - 230km range, 0 - 40000' ht.
+
+"Mean age"
+-0.13      3.65
+0.16       2.75
+0.84       2.23
+1.52       1.87
+1.73       1.53
+2.43       1.92
+2.80       2.11
+3.00       2.17
+3.32       2.34
+3.57       2.53
+3.83       2.73
+4.10       2.96
+4.37       3.20
+4.65       3.45
+4.87       3.65
+5.16       2.75

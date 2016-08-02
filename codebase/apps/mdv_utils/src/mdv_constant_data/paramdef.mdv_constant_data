@@ -1,0 +1,103 @@
+/*********************************************************
+ * parameter definitions for mdv_constant_data
+ *
+ * Marty Petach, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 1999
+ */
+
+paramdef boolean
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = FALSE;
+} debug_flag;
+
+typedef enum
+{
+  ARCHIVE,
+  REALTIME
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operational mode";
+  p_default = ARCHIVE;
+} mode;
+
+paramdef string
+{
+  p_descr = "Process instance name";
+  p_help = "Used when registering the process with procmap.";
+  p_default = "Test";
+} instance;
+
+paramdef long
+{
+  p_descr = "maximum input file valid age";
+  p_help = "This is the maximum age of valid input files, in seconds.  This "
+           "parameter is only used when mode is set to REALTIME.";
+  p_default = 3600;
+} max_valid_age;
+
+paramdef long
+{
+  p_descr = "realtime sleep seconds";
+  p_help = "The number of seconds to sleep before looking for more realtime "
+           "data.  This parameter is only used when mode is set to REALTIME.";
+  p_default = 2;
+} sleep_secs;
+
+typedef enum
+{
+  OUTPUT_INT8,
+  OUTPUT_INT16,
+  OUTPUT_FLOAT32,
+  OUTPUT_PLANE_RLE8
+} output_type_t;
+
+paramdef enum output_type_t
+{
+  p_descr = "Type to use for writing data to output file";
+  p_default = OUTPUT_PLANE_RLE8;
+} output_type;
+
+paramdef double
+{
+  p_descr = "new data value";
+  p_help = "All data values in the input file will be changed to this "
+           "data value in the output file.";
+  p_default = 0.0;
+} new_data_value;
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_default = {"mdvp:://localhost::mdv/input"};
+} input_url;
+
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = { "mdvp:://localhost::mdv/output" };
+} output_url;
+
+paramdef string
+{                   
+  p_descr = "start time";                                              
+  p_help = "Data files between the start and end times will be used for "
+           "processing.  This parameter is only used if mode is set to "
+           "ARCHIVE.";
+  p_default = "1998/06/18_00:00:00";
+} begtime;
+
+paramdef string
+{
+  p_descr = "End time";
+  p_help = "Data files between the start and end times will be used for "
+           "processing.  This parameter is only used if mode is set to "
+           "ARCHIVE.";
+  p_default = "1998/06/19_00:00:00";
+} endtime;
+

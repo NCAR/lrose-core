@@ -1,0 +1,128 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Parameter definitions for axfSurface
+//
+//  Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
+//  August 1999
+//
+////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Runtime Management";
+} 
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME.";
+} mode;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Information option";
+  p_help = "If set, station observation data will be printed";
+} info;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef char* {
+  p_descr = "Directory for debug message output if debug is set to TRUE";
+  p_help = "Set to an empty string to prevent debug file logging.  If log_dir is empty and debug is TRUE, debug messages will appear in stdout.";
+  p_default = {""};
+} log_dir;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Instance";
+  p_help = "Process instance for registration with process mapper";
+} instance;
+
+
+commentdef {
+  p_header = "Input Data";
+} 
+
+paramdef char* {
+  p_default = {"./latest.data"};
+  p_descr = "File path of surface input data.";
+} input_file_path;
+
+paramdef char* {
+  p_descr = "Directory for ldata index management.";
+  p_help = "If set to an empty string, the ldata index file will be written to the directory of the input_file_path.  Use a separate index_dir if the input_file_path is cross mounted on a read only partition.";
+  p_default = {""};
+} index_dir;
+
+paramdef long {
+  p_default = {180};
+  p_descr = "Sounding file check frequency";
+  p_help = "Number of seconds to wait before we check the input directory for a new file again";
+} check_seconds;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option for ingesting observations from a limited data region";
+  p_help = "The extent of the region is defined by the data_region parameter";
+} limit_data_region;
+
+paramdef struct data_region {
+  p_descr = "Limited region of surface data ingest (lat/lon in degrees)";
+  p_help  = "If two points are set, they are assumed to be lower left and upper rith; otherwise, an explicit list of data region points must be specified. Relevant only if limit_data_region is true.";
+  p_field_type = {double,  double};
+  p_field_name = {lat,     lon};
+} data_region[];
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Time override option";
+  p_help = "If set, ingest time will be set to the current time";
+} set_time_now;
+
+commentdef {
+  p_header = "Surface Database Output";
+}
+
+paramdef char* {
+  p_default = {"."};
+  p_descr = "Source strings for spdb destinations";
+  p_help = "List of destinations for spdb surface data.";
+} spdb_destinations[];
+
+paramdef long {
+  p_default = {180};
+  p_min = {0};
+  p_max = {720};
+  p_descr = "Number of seconds before surface data should expired";
+  p_help = ""; 
+} expire_secs;

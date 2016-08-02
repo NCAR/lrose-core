@@ -1,0 +1,155 @@
+/*********************************************************
+ * parameter definitions for tstorms2ascii_awc
+ *
+ * Dan Megenhardt, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 2005
+ */
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_options = { DEBUG_OFF,
+                DEBUG_WARNINGS,
+                DEBUG_NORM,
+                DEBUG_EXTRA };
+  p_default = { DEBUG_OFF };
+} debug_level;
+
+paramdef long
+{
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+  p_min = { 0 };
+  p_max = { 3 };
+  p_default = { 0 };
+} malloc_debug_level;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = { "Test" };
+} instance;
+
+paramdef enum mode_t 
+{
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; archive mode runs on file list";
+  p_options = { REALTIME,
+                ARCHIVE };
+  p_default = { REALTIME };
+} mode;
+
+paramdef string 
+{
+  p_descr = "Input directory for storm data";
+  p_help = "The is the SPDB database directory for the storm data.";
+  p_default = { "." };
+} input_dir;
+
+paramdef string 
+{
+  p_descr = "Output directory for ASCII storm data";
+  p_default = { "." };
+} output_dir;
+
+paramdef string 
+{
+  p_descr = "Output file extension";
+  p_default = { "txt" };
+} output_ext;
+
+paramdef long
+{
+  p_descr = "Maximum valid age in seconds for input data";
+  p_help = "This parameter is only used in REALTIME mode.";
+  p_min = { 0 };
+  p_default = { 3600 };
+} max_valid_age;
+
+paramdef long
+{
+  p_descr = "Sleep msecs between checks for new data";
+  p_min = { 0 };
+  p_default = { 1000 };
+} sleep_msecs;
+
+paramdef long
+{
+  p_descr = "Forecasts to extract (secs).";
+  p_help = "List of forecast lead times to extract from file.";
+  p_min = 0.0;
+  p_default = { 3600 };
+} forecast_lead_times[];
+
+paramdef boolean
+{
+  p_descr = "print header flag";
+  p_help = "If TRUE, a header will be printed at the beginning of each output file describing the file format.";
+  p_default = { TRUE };
+} print_header;
+
+paramdef boolean
+{
+  p_descr = "valid storms only flag";
+  p_help = "If TRUE, only storms whose forecast_valid flag is TRUE will be put in the output file.";
+  p_default = { TRUE };
+} valid_forecasts_only;
+
+paramdef boolean
+{
+  p_descr = "output valid time flag";
+  p_help = "If TRUE, the valid time for the storm will be included on "
+           "the STORM line. ";
+  p_default = { FALSE };
+} output_valid_time;
+
+paramdef boolean
+{
+  p_descr = "compress output file flag";
+  p_help = "If TRUE, the output file will be compressed using the command "
+           "specified in the compress_cmd parameter.";
+  p_default = { FALSE };
+} compress_file;
+
+/*************************************************************
+ * Polygon smoothing parameters
+ */
+
+commetdef
+{
+  p_title = "POLYGON SMOOTHING PARAMETERS";
+}
+
+paramdef boolean
+{
+  p_descr = "polygon smoothing flag";
+  p_help = "If TRUE, the polygons will be smoothed using the constrained "
+           "convex hull smoothing algorithm before being added to the output "
+           "file.";
+  p_default = FALSE;
+} smooth_polygons;
+
+paramdef double
+{
+  p_descr = "polygon smoothing inner hull multiplier";
+  p_help = "The original polygon radial lengths are multiplied by this value "
+           "to get the inner polygon for the constrained convex hull "
+           "smoothing algorithm. This parameter is only used if "
+           "smooth_polygons is set to TRUE.";
+  p_min = 0.001;
+  p_default = 1.0;
+} smooth_inner_multiplier;
+
+paramdef double
+{
+  p_descr = "polygon smoothing outer hull multiplier";
+  p_help = "The original polygon radial lengths are multiplied by this value "
+           "to get the outer polygon for the constrained convex hull "
+           "smoothing algorithm. This parameter is only used if "
+           "smooth_polygons is set to TRUE.";
+  p_min = 0.001;
+  p_default = 1.0;
+} smooth_outer_multiplier;

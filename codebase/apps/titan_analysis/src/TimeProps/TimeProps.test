@@ -1,0 +1,225 @@
+/****************************************************
+ * TDRP params for TimeProps
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Mode of operation.
+ * If DELTA_TIME, output is a list of time differences between
+ *   storm starts in a period of activity. In ACTIVITY mode, the output
+ *   list contains start times, durations for and times between
+ *   periods of activity. The system is considered active if at least
+ *   one entry is active at the time. A period of activity will span
+ *   the activity_gap_max, but no greater gap.
+ *
+ * Type: enum
+ * Default: DELTA_TIME_MODE 
+ * Legal values: DELTA_TIME_MODE, ACTIVITY_MODE.
+ */
+mode = DELTA_TIME_MODE;
+
+/*
+ * Min number of storms to define an activity period.
+ * If the number of storms in an active period is less than this number,
+ *   the period is discarded.
+ *
+ * Type: long
+ * Default: 1 
+ */
+activity_nstorms_min = 10;
+
+/*
+ * Max value for activity gap (secs).
+ * An active period will end if there is a gap in excess of this time.
+ *
+ * Type: double
+ * Default: 0 
+ */
+activity_gap_max = 7200;
+
+/*
+ * Offset (hr) applied when computing activity relative to the
+ *   time of day.
+ * When the end of the day in UCT tends to occur during periods of
+ *   activity, the histogram for time_of_day will be bimodal. To
+ *   remove this effect, an offset is added to the times so that the
+ *   mode of the histogram occurs somewhere in the middle of the day,
+ *   which makes the fitting of a statistical distribution meaningful.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: -24 
+ * Max value: 24 
+ */
+activity_time_of_day_offet = -7;
+
+/*
+ * Label for time data.
+ * Used to identify column for time data.
+ *
+ * Type: string
+ * Default: "time" 
+ */
+time_label = "Unixtime";
+
+/*
+ * Label for duration data.
+ * Used to identify column for duration data.
+ *
+ * Type: string
+ * Default: "duration" 
+ */
+dur_label = "Duration";
+
+/*
+ * Apply conditions to input data.
+ * If TRUE, the input data values are conditioned on a given field,
+ *   which lie in a given intervals - see cond_min, cond_max.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+condition_input_data = FALSE;
+
+/*
+ * Label for conditional data.
+ * Used to identify column for conditional data.
+ *
+ * Type: string
+ * Default: "cond" 
+ */
+conditional_label = "cond";
+
+/*
+ * Min value for conditional field.
+ * See condition_input_data.
+ *
+ * Type: double
+ * Default: 0 
+ */
+cond_min = 0;
+
+/*
+ * Max value for conditional field.
+ * See condition_input_data.
+ *
+ * Type: double
+ * Default: 0 
+ */
+cond_max = 0;
+
+/*
+ * Apply limits to time data.
+ * If TRUE, the input data values are limited to between time_min
+ *   and time_max.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+limit_time_data = FALSE;
+
+/*
+ * Min value for time field.
+ * See limit_time_data.
+ *
+ * Type: double
+ * Default: 0 
+ */
+time_min = 0;
+
+/*
+ * Max value for time field.
+ * See limit_time_data.
+ *
+ * Type: double
+ * Default: 0 
+ */
+time_max = 0;
+
+/*
+ * Apply limits to dur data.
+ * If TRUE, the input data values are limited to between dur_min
+ *   and dur_max.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+limit_dur_data = FALSE;
+
+/*
+ * Min value for dur field.
+ * See limit_dur_data.
+ *
+ * Type: double
+ * Default: 0 
+ */
+dur_min = 0;
+
+/*
+ * Max value for dur field.
+ * See limit_dur_data.
+ *
+ * Type: double
+ * Default: 0 
+ */
+dur_max = 0;
+
+/*
+ * In DELTA_TIME mode, Apply limits to delta time data.
+ * If TRUE, the delta time values are limited to between dtime_min
+ *   and dtime_max.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+limit_dtime_data = FALSE;
+
+/*
+ * Min value for dtime field.
+ * See limit_dtime_data.
+ *
+ * Type: double
+ * Default: 0 
+ */
+dtime_min = 0;
+
+/*
+ * Max value for dtime field.
+ * See limit_dtime_data.
+ *
+ * Type: double
+ * Default: 0 
+ */
+dtime_max = 0;
+
+

@@ -1,0 +1,430 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions XpolScanControl
+//
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Nov 2012
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "XpolScanControl controls the XPOL antenna. It creates PAXI files and uploads them to the DRX. From one FMQ it reads the data coming from the DRX, to monitor the antenna behavior. It then adds the scan information as appropriate, and writes the modified data to an output FMQ.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "FMQ INPUT - file message queues";
+};
+
+paramdef string {
+  p_default = "$(DATA_DIR)/fmq/moments/xpol_raw";
+  p_descr = "Name of input fmq.";
+  p_help = "Data in this FMQ does not contain scan information.";
+} input_fmq_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to start reading at beginning of input FMQs.";
+  p_help = "Normally, we start reading at the end of the queues. For debugging, however, it is sometimes helpful to start at the beginning of the queues.";
+} start_reading_at_fmq_start;
+
+commentdef {
+  p_header = "FMQ OUTPUT for modified data";
+};
+
+paramdef string {
+  p_default = "$(DATA_DIR)/fmq/moments/xpol_with_scan_info";
+  p_descr = "Name of output fmq.";
+  p_help = "This contains a duplicate of the input data, but with scan information attached.";
+} output_fmq_path;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to set the FMQ size equal to the input FMQ.";
+  p_help = "If FALSE, size will be set from output_fmq_size and output_fmq_nslots.";
+} set_output_size_equal_to_input_size;
+
+paramdef int {
+  p_default = 50000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+#SetConfig
+#        server_state=running
+#        server_mode=0 # pulse pair
+#        recording=false
+#        pri_1_usec=1200
+#        pri_2_usec=1200
+#        group_interval_usec=2400
+#        n_gates=800
+#        clutter_n_ave=15
+#        clutter_filter_width_m_sec=1.0
+#        post_n_ave=1
+#        freq_track_mode=0 # manual
+#        lo_freq_mhz=17.00
+#        filter_bw_mhz=2.0
+#        pulse_len_m=75
+#        range_gate_spacing_m=75
+#        sum_powers=0;
+        
+commentdef {
+  p_header = "DRX PROCESSING OPTIONS";
+  p_text = "Use this section to set up processing modes. These are then referred to in the scanning section below.";
+};
+
+typedef enum {
+  PROC_MODE_PULSE_PAIR,
+  PROC_MODE_PULSE_PAIR_SUM_POWERS,
+  PROC_MODE_DUAL_PULSE_PAIR,
+  PROC_MODE_DUAL_PULSE_PAIR_SUM_POWERS
+} proc_mode_t;
+
+typedef enum {
+  RANGE_RES_15_m,
+  RANGE_RES_30_m,
+  RANGE_RES_75_m,
+  RANGE_RES_105_m,
+  RANGE_RES_150_m
+} range_res_t;
+
+typedef enum {
+  PULSE_LEN_7pt5_m,
+  PULSE_LEN_15_m,
+  PULSE_LEN_30_m,
+  PULSE_LEN_45_m,
+  PULSE_LEN_75_m
+} pulse_len_t;
+
+typedef enum {
+  FILTER_BW_1_mhz,
+  FILTER_BW_1pt5_mhz,
+  FILTER_BW_2_mhz,
+  FILTER_BW_5_mhz,
+  FILTER_BW_10_mhz,
+  FILTER_BW_20_mhz,
+} filter_bw_t;
+
+typedef struct {
+  int conf_id;
+  proc_mode_t proc_mode;
+  double pri_1_usec;
+  double pri_2_usec;
+  double group_interval_usec;
+  int n_gates;
+  int clutter_n_ave;
+  int post_n_ave;
+  range_res_t range_res;
+  pulse_len_t pulse_len;
+  filter_bw_t filter_bw;
+  boolean use_clutter_filter;
+} drx_conf_t;
+
+paramdef struct drx_conf_t {
+  p_default = {
+    {
+      conf_id = 0,
+      proc_mode = PROC_MODE_PULSE_PAIR,
+      pri_1_usec = 1000,
+      pri_2_usec = 1000,
+      group_interval_usec = 2000,
+      n_gates = 800,
+      clutter_n_ave = 32,
+      post_n_ave = 1,
+      range_res = RANGE_RES_75_m,
+      pulse_len = PULSE_LEN_75_m,
+      filter_bw = FILTER_BW_2_mhz,
+      use_clutter_filter = FALSE
+    }
+    ,
+    {
+      conf_id = 1,
+      proc_mode = PROC_MODE_DUAL_PULSE_PAIR,
+      pri_1_usec = 1000,
+      pri_2_usec = 1500,
+      group_interval_usec = 2000,
+      n_gates = 800,
+      clutter_n_ave = 32,
+      post_n_ave = 1,
+      range_res = RANGE_RES_75_m,
+      pulse_len = PULSE_LEN_75_m,
+      filter_bw = FILTER_BW_2_mhz,
+      use_clutter_filter = FALSE
+    }
+  };
+  p_descr = "Processing options for the digital receiver.";
+  p_help = "Generally the filter bandwidth should be set to the reciprocal of the pulse length, expressed in seconds. For example, if PULSE_LEN_75m is used, this translates to a 0.5 microsecond pulse, so a bandwidth of 2 mHz should be specified. If the pulse width is 30m, the filter should be set to 5 mHz. To keep the duty cycle below 0.1%, make sure the group interval is set appropriately.";
+} drx_conf[];
+
+commentdef {
+  p_header = "SCAN DETAILS";
+  p_text = "This is a sequence of scans to be run one after the other, in order. After all scans have been run once, the sequence is repeated.";
+};
+
+typedef enum {
+  SCAN_MODE_SECTOR = 1,
+  SCAN_MODE_RHI = 3,
+  SCAN_MODE_VERTICAL_POINTING = 4,
+  SCAN_MODE_IDLE = 7,
+  SCAN_MODE_SURVEILLANCE = 8,
+  SCAN_MODE_SUNSCAN = 11,
+  SCAN_MODE_POINTING = 12,
+  SCAN_MODE_SUNSCAN_RHI = 15
+} scan_mode_t;
+
+typedef struct {
+  int drx_conf_id;
+  scan_mode_t scan_mode;
+  double az_rate_deg_per_sec;
+  double el_rate_deg_per_sec;
+  double start_az_deg;
+  double end_az_deg;
+  double delta_az_deg;
+  double start_el_deg;
+  double end_el_deg;
+  double delta_el_deg;
+  int n_sweeps;
+  double transition_tolerance_deg;
+  double nsecs_wait;
+} scan_params_t;
+
+paramdef struct scan_params_t {
+  p_default = {
+    {
+      drx_conf_id = 0,
+      scan_mode = SCAN_MODE_POINTING,
+      az_rate_deg_per_sec = 10,
+      el_rate_deg_per_sec = 10,
+      start_az_deg = 0.0,
+      end_az_deg = 20.0,
+      delta_az_deg = 1.0,
+      start_el_deg = 45.0,
+      end_el_deg = 10.0,
+      delta_el_deg = 1.0,
+      n_sweeps = 1,
+      transition_tolerance_deg = 0.1,
+      nsecs_wait = 10
+    }
+    ,
+    {
+      drx_conf_id = 1,
+      scan_mode = SCAN_MODE_SURVEILLANCE,
+      az_rate_deg_per_sec = 20,
+      el_rate_deg_per_sec = 5,
+      start_az_deg = 0.0,
+      end_az_deg = 20.0,
+      delta_az_deg = 1.0,
+      start_el_deg = 1.0,
+      end_el_deg = 10.0,
+      delta_el_deg = 1.0,
+      n_sweeps = 1,
+      transition_tolerance_deg = 0.35,
+      nsecs_wait = 0
+    }
+    ,
+    {
+      drx_conf_id = 1,
+      scan_mode = SCAN_MODE_SECTOR,
+      az_rate_deg_per_sec = 10,
+      el_rate_deg_per_sec = 5,
+      start_az_deg = 315.0,
+      end_az_deg = 45.0,
+      delta_az_deg = 1.0,
+      start_el_deg = 1.0,
+      end_el_deg = 10.0,
+      delta_el_deg = 1.0,
+      n_sweeps = 1,
+      transition_tolerance_deg = 0.2,
+      nsecs_wait = 0
+    }
+    ,
+    {
+      drx_conf_id = 1,
+      scan_mode = SCAN_MODE_RHI,
+      az_rate_deg_per_sec = 10,
+      el_rate_deg_per_sec = 10,
+      start_az_deg = 90.0,
+      end_az_deg = 110.0,
+      delta_az_deg = 1.0,
+      start_el_deg = 0.0,
+      end_el_deg = 30.0,
+      delta_el_deg = 1.0,
+      n_sweeps = 1,
+      transition_tolerance_deg = 0.2,
+      nsecs_wait = 0
+    }
+    ,
+    {
+      drx_conf_id = 0,
+      scan_mode = SCAN_MODE_VERTICAL_POINTING,
+      az_rate_deg_per_sec = 6,
+      el_rate_deg_per_sec = 5,
+      start_az_deg = 0.0,
+      end_az_deg = 0.0,
+      delta_az_deg = 1.0,
+      start_el_deg = 89.0,
+      end_el_deg = 90.0,
+      delta_el_deg = 0.2,
+      n_sweeps = 1,
+      transition_tolerance_deg = 0.2,
+      nsecs_wait = 0
+    }
+    ,
+    {
+      drx_conf_id = 0,
+      scan_mode = SCAN_MODE_SUNSCAN,
+      az_rate_deg_per_sec = 1,
+      el_rate_deg_per_sec = 1,
+      start_az_deg = -5,
+      end_az_deg = 5,
+      delta_az_deg = 1.0,
+      start_el_deg = -1.5,
+      end_el_deg = 1.5,
+      delta_el_deg = 0.1,
+      n_sweeps = 1,
+      transition_tolerance_deg = 0.1,
+      nsecs_wait = 0
+    }
+  };
+  p_descr = "Scan sequence.";
+  p_help = "\n\nSets up the scan sequence. Each entry in the sequence is run in order. When the end of the sequence is reached, the entire sequence is repeated. \n\naz_rate_deg_per_sec and el_rate_deg_per_sec apply to all scan modes except for IDLE.\n\nnsecs_wait applies to POINTING and IDLE modes only.\n\nThe number of sweeps (n_sweeps) applies to VERTICAL_POINTING mode only.\n\nPOINTING: move to (start_az_deg, start_el_deg) and point for nsecs_wait.\n\nSURVEILLANCE: starts at (start_az_deg, start_el_deg). Rotation is clockwise. Lowest elevation is start_el_deg, each sweep increases by delta_el_deg until end_el_deg is reached. \n\nSECTOR: starts at (start_az_deg, start_el_deg). Sweeps clockwise to end_az_deg and then back again. Lowest elevation is start_el_deg, each sweep increases by delta_el_deg until end_el_deg is reached. \n\nRHI: starts at (start_az_deg, start_el_deg). Sweeps up to end_el_deg and then back down again. First azimuth is at start_az_deg, each sweep increases by delta_az_deg until end_az_deg is reached. \n\nVERTICAL_POINTING: starts at (start_az_defg, start_el_deg). Elevation stays fixed. Rotation is clockwise. Each sweep is 370 degrees in azimuth arc. A volume is made up of n_sweeps.\n\nSUNSCAN: starts at start_az_deg to left of sun and start_el_deg below sun. Sweeps clockwise across sun to end_az_deg and then back again. Each sweep increases by delta_el_deg until end_el_deg above sun is reached.\n\nSUNSCAN_RHI: starts at start_az_deg to left of sun and start_el_deg below sun. Sweeps up across sun to end_az_deg and then back down again. Each sweep increases by delta_az_deg until end_az_deg reached.\n\nIDLE: stop at the current antenna position, and wait for nsecs_wait.";
+} scan_sequence[];
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Tolerance for checking a requested angle has been reached (deg).";
+  p_help = "We check the antenna angles against the requested values. This applies, for example, to pointing scans.";
+} requested_angle_tolerance;
+
+paramdef double {
+  p_default = 0.2;
+  p_descr = "Angle tolerance for flagging a beam in transition (deg).";
+  p_help = "We check the actual antenna angles against the nominal fixed angle for the scan. If the difference differs by more than tolerance, the beam will be flagged as in transition.";
+} transition_angle_tolerance;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to raw azimuth to align data to True North (deg).";
+  p_help = "This value is ADDED to the raw azimuth to get the corrected value. Note that for the XPOL radar, the raw azimuth of the direction in which the trailer is pointing is 120 degrees.";
+} azimuth_correction_deg;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Widen a sector by this number of seconds.";
+  p_help = "In order to prevent transitions within the sector, we optionally widen the sector by a number of degrees equal to the specified time multiplied by the antenna azimuth rate.";
+} sector_widen_secs;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Widen rhi elevation range by this number of seconds.";
+  p_help = "In order to prevent transitions within the rhi, we optionally widen the rhi vertical sector by a number of degrees equal to the specified time multiplied by the antenna elevation rate.";
+} rhi_widen_secs;
+
+paramdef double {
+  p_default = 15.0;
+  p_descr = "Antenna speed for normal moves (deg/sec).";
+  p_help = "This speed will be used to position the antenna to the start of each scan.";
+} default_antenna_speed;
+
+commentdef {
+  p_header = "WRITING PAXI SCRIPTS";
+  p_text = "This program creates a PAXI file with commands for the relevant scan. This file is uploaded to the DRX server using a script. The script takes one argument, which is the path of the PAXI file.";
+};
+
+paramdef string {
+  p_default = "run_paxcon";
+  p_descr = "Name of script to call to upload paxi file to server.";
+  p_help = "This should be in the path.";
+} upload_paxi_script_name;
+
+paramdef string {
+  p_default = "/tmp/paxi.txt";
+  p_descr = "Path to paxi file to be uploaded.";
+  p_help = "This app writes the relevant commands to the paxi file, and then uploads it using the above script.";
+} paxi_file_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run upload script in background.";
+  p_help = "If TRUE, the upload script will be run in the background. Therefore, the system call will return immediately. If FALSE, this app will register with procmap while waiting for the script to complete.";
+} run_script_in_background;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to terminate upload script if it hangs.";
+  p_help = "If TRUE, the script will be killed if it does not return within 'script_max_run_secs'.";
+} terminate_script_if_hung;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Max time allowed for script - secs.";
+  p_help = "If 'terminate_script_if_hung' is TRUE, the script will be killed if it does not complete withing this number of secs.";
+} script_max_run_secs;
+

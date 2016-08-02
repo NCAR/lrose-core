@@ -1,0 +1,185 @@
+/**********************************************************************
+ * TDRP params for ./MdvThreat
+ **********************************************************************/
+
+//======================================================================
+//
+// MdvThreat.
+//
+// This program generates a threat zone. A threat zone is defined as the 
+//   arrival time of a field based upon a list of input files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING PARAMETERS.
+//
+// Parameters controlling debug outputs.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// debug flag.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// verbose /////////////////////////////////
+//
+// verbose debug flag.
+// If true, verbose debug messages will be printed.
+// Type: boolean
+//
+
+verbose = TRUE;
+
+//======================================================================
+//
+// PROCESS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROCESS TRIGGERING PARAMETERS.
+//
+// Parameters describing the process triggering.
+//
+//======================================================================
+ 
+///////////// trigger_mode ////////////////////////////
+//
+// Input triggering mode.
+// In LATEST_DATA mode, the program waits for new data from the MDV 
+//   location specified by the latest_data_trigger parameter.
+// In TIME_LIST mode, the program operates on archive data as specified 
+//   in the time_list_trigger parameter.
+//
+// Type: enum
+// Options:
+//     LATEST_DATA
+//     TIME_LIST
+//
+
+trigger_mode = TIME_LIST;
+
+///////////// time_list_trigger ///////////////////////
+//
+// Trigger information used when using the TIME_LIST trigger.
+// url specifies the triggering url.
+// start_time specifies the archive start time in any format recognized 
+//   by the DateTime class.
+// end_time specifies the archive end time in any format recognized by 
+//   the DateTime class.
+//
+// Type: struct
+//   typedef struct {
+//      string start_time;
+//      string end_time;
+//   }
+//
+//
+
+time_list_trigger = { "2008/3/10 10:00:00", "2008/3/10 11:00:00" };
+
+//======================================================================
+//
+// PROCESS I/O PARAMETERS.
+//
+// Parameters describing the input and output locations.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// Input URL.
+// Type: string
+//
+
+input_url = "mdvp:://shield-data::/d1/copeland/SF6_new/mdv/quicPlume2D";
+
+///////////// input_field_name ////////////////////////
+//
+// Input Field Name.
+// This is the field that will be used to generate the threat zone.
+// Type: string
+//
+
+input_field_name = "dose";
+
+///////////// threat_url //////////////////////////////
+//
+// Threat URL.
+// This is the URL where the threat zone is written.
+// Type: string
+//
+
+threat_url = "mdvp:://localhost::./mdv/threat";
+
+
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+//======================================================================
+ 
+///////////// remap_data //////////////////////////////
+//
+// Remap data flag.
+// If true, the output data will be remapped to the given projection. If 
+//   false, the output data will be written to the same projection as is 
+//   used by the input data.
+// Type: boolean
+//
+
+remap_data = FALSE;
+
+///////////// remap_info //////////////////////////////
+//
+// Information for remapping the input fields.
+// If remap_type is REMAP_LATLON, the following fields are used:
+// 	nx, ny, minx, miny, dx, dy
+
+// If remap_type is REMAP_FLAT, the following fields are used:
+// 	nx, ny, minx, miny, dx, dy, origin_lat, origin_lon, rotation
+
+// If remap_type is REMAP_LAMBERT_CONFORMAL2, the following fields are 
+//   used:
+// 	nx, ny, minx, miny, dx, dy, origin_lat, origin_lon, lat1, lat2.
+//
+// Type: struct
+//   typedef struct {
+//      remap_type_t remap_type;
+//        Options:
+//          REMAP_LATLON
+//          REMAP_FLAT
+//          REMAP_LAMBERT_CONFORMAL2
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//      double origin_lat;
+//      double origin_lon;
+//      double rotation;
+//      double lat1;
+//      double lat2;
+//   }
+//
+//
+
+remap_info = { REMAP_LATLON, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+

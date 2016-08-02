@@ -1,0 +1,106 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SzPrint
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2004
+//
+
+commentdef {
+  p_header = "Program name: SzPrint";
+  p_text = "SzPrint prints out MDV data in table format for performing SZ comparisons. Output is to stdout.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./mdv/rph/example.mdv";
+  p_descr = "Path for Sigmet Random Phase MDV file.";
+} rph_mdv_path;
+
+paramdef string {
+  p_default = "./mdv/msz/example.mdv";
+  p_descr = "Path for Mike's SZ MDV file.";
+} msz_mdv_path;
+
+paramdef string {
+  p_default = "./mdv/long/example.mdv";
+  p_descr = "Path for LONG PRT MDV file.";
+} long_mdv_path;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Path for LONG PRT PP MDV file.";
+  p_help = "NCAR processing, not RVP8.";
+} ncar_long_pp_mdv_path;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Path for SHORT PRT PP MDV file.";
+  p_help = "NCAR processing, not RVP8.";
+} ncar_short_pp_mdv_path;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Path for SHORT PRT FFT MDV file.";
+  p_help = "NCAR processing, not RVP8.";
+} ncar_short_fft_mdv_path;
+
+commentdef {
+  p_header = "PROCESSING OPTIONS";
+}
+
+typedef enum {
+  STRONG_TRIP,
+  WEAK_TRIP,
+  FIRST_TRIP,
+  SECOND_TRIP,
+} trip_t;
+
+paramdef enum trip_t {
+  p_default = STRONG_TRIP;
+  p_descr = "Which trips should be printed?.";
+} trip;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to include missing data in the output.";
+  p_help = "If TRUE, missing fields will be included in the output, using the string 'NaN'.";
+} include_missing;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply velocity-based censoring to RPH data.";
+  p_help = "If TRUE, Scott Ellis' style of censoring, using the velocity field, will be applied to RPH fields.";
+} censor_rph;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply velocity-based censoring to MSZ data.";
+  p_help = "If TRUE, Scott Ellis' style of censoring, using the velocity field, will be applied to MSZ fields.";
+} censor_msz;
+

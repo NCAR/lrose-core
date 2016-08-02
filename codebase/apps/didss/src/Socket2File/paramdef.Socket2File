@@ -1,0 +1,59 @@
+
+
+commentdef {
+  p_header = "Socket2File is a small program that reads from a\n"
+             "socket and dumps the result to a file. Niles Oien.";
+
+}
+
+
+paramdef boolean
+{
+  p_default = TRUE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed.";
+} debug;
+
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+      
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "ramp";
+  p_descr = "Host name to read data from.";
+  p_help = "Set to the machine which is producing the input stream.";
+} hostname;
+
+paramdef int {
+  p_default = 10141;
+  p_descr = "Port number to read from.";
+  p_help = "Set to the port which is producing the input stream.";
+} port;
+
+
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "SocketDump.dat";
+  p_descr = "Output file name.";
+} OutFile;
+
+paramdef int {
+  p_default = 100000;
+  p_descr = "Number of bytes to read before exiting.";
+} NumBytesToRead;
+
+
+

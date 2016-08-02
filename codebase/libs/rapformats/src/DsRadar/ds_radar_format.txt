@@ -1,0 +1,557 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:51 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+DSRADAR FORMAT README
+=====================
+
+Mike Dixon, June 2002.
+----------------------
+
+1. Overview.
+------------
+
+The DsRadar format includes 4 message types:
+
+  1. Radar params - properties of the radar
+  2. Field params - properties of the fields
+  3. Beam - beam header and data
+  4. Flags - end of tilt flag, end of vol flag, etc
+
+To keep the required bandwidth down, we only send the radar
+params and field params every now and again:
+
+  1. If a radar param changes, like PRF, gate spacing, ngates,
+      nfields, resend the radar params.
+
+  2. If field params change, resend the field params.
+
+  3. ALWAYS send both the radar params and field params at
+      the start of each tilt.
+
+Since generally things are not changing during a tilt, rule
+3 above is normally used.
+
+Then, for each beam, you send one beam message.
+
+You send a flags message to indicate end of volume etc. There
+is space in the flags message for more than one condition, such
+as end of tilt and end of volume, but this is not used. You
+send a full flags message for each one.
+
+So, for a typical volume, here are the messages you would
+normally send:
+
+  Flags - start of volume
+
+    Flags - start of tilt 0
+    Radar params
+    Field params
+    Beam 0
+    Beam 1
+      ...
+    Beam 359
+    Flags - end of tilt 0
+
+    Flags - start of tilt 1
+    Radar params
+    Field params
+    Beam 0
+    Beam 1
+      ...
+    Beam 359
+    Flags - end of tilt 1
+
+    Flags - start of tilt 2
+    Radar params
+    Field params
+    Beam 0
+    Beam 1
+      ...
+    Beam 359
+    Flags - end of tilt 2
+      ....
+      ....
+
+    Flags - start of tilt n-1
+    Radar params
+    Field params
+    Beam 0
+    Beam 1
+      ...
+    Beam 359
+    Flags - end of tilt n-1
+
+  Flags - end of volume
+
+
+2. Message definition.
+----------------------
+
+The files ds_message.h is the basic header file for describing the
+DsMessage format. The comments in this file are reasonably good
+at describing the message format.
+
+Basically, a DsMessage is a buffer containing a number of headers and
+a number of 'parts'. The parts contain the data in the message. The
+headers allow you to find the data parts.
+
+What is not shown in the ds_message.h is the socket message header.
+This precedes the main message, so that the reader knows how long
+it is.
+
+A couple of basic rules:
+
+  1. All messages start with a socket message header.
+
+  2. All mulit-byte data is swapped to big-endian. See the header file
+     port_types.h for the type definitions. Here we are only concerned
+     with byte data, si32 (signed), ui32 (unsigned) and fl32 floating
+     point 32-bit data.
+
+  3. All structs and parts should begin on an 8-byte boundary from the
+     start of the real message (not including socket message header).
+
+The message looks something like this:
+
+  socket_msg_header_t
+  DsMsgHdr_t
+  nParts * DsMsgPart_t
+  nParts * data
+
+All of the headers are multiples of 8-bytes long, so you can pack them
+together. With the data parts, you need to compute where to put them
+to get them on an 8-byte boundary, so there may be some spare bytes
+between the parts. This is not really a big deal, because the only
+message with multiple parts is the field params, and the field params
+struct is at a multiple of 8 bytes.
+
+3. Socket header.
+-----------------
+
+All messages start with the socket header:
+
+  typedef struct {
+    ui32 magik1;
+    ui32 magik2;
+    si32 id;
+    si32 len; /* message size in bytes, not including this header */
+    si32 seq_no;
+  } socket_msg_header_t;
+
+magik1 and magik2 are both 0xf0f0f0f0.
+
+id can be anything, normally left 0.
+
+len is the length of the following buffer in bytes, not including
+this header.
+
+seq_no should increase by one for each message sent, and can wrap.
+
+4. DsMessage header.
+--------------------
+
+See ds_message.h and ds_radar.h.
+
+  typedef struct {
+
+    si32 type;
+    si32 subType;
+    si32 mode;
+    si32 flags;
+    si32 majorVersion;
+    si32 minorVersion;
+    si32 serialNum;
+    si32 category;
+    si32 error;
+    si32 nParts;
+    si32 spare[6];
+
+  } DsMsgHdr_t;
+
+type should be DS_MESSAGE_TYPE_DSRADAR = 1001
+
+nParts wil generally be one, because there is only one part per
+message, except for the field params message, in which case
+nParts will be set to nFields.
+
+The following defaults should be used for the other members:
+
+  _subType = -1;
+  _mode = -1;
+  _flags = 0;
+  _majorVersion = 1;
+  _minorVersion = 0;
+  _serialNum = -1;
+  _category = 0;
+  _error = 0;
+
+5. Part headers.
+----------------
+
+See ds_message.h and ds_radar.h.
+
+These follow immediately after the message header.
+
+  typedef struct {
+
+    si32 dataType;
+    si32 offset;
+    si32 len;
+    si32 spare[3];
+
+  } DsMsgPart_t;
+
+There will normally only be one, but with the field params there will
+be one for each field.
+
+
+'dataType' is set as follows:
+
+  DS_DATA_TYPE_RADAR_PARAMS = 1             radar params
+  DS_DATA_TYPE_RADAR_FIELD_PARAMS = 2       field params
+  DS_DATA_TYPE_RADAR_BEAM_DATA = 4          beam data
+  DS_DATA_TYPE_RADAR_FLAGS = 8              flags
+
+
+'offset' is the number of bytes from the start of the DsMessage to
+the start of the data part. This does NOT include the socket header.
+
+So, for single part messages:
+
+  offset = sizeof(DsMsgHdr_t) + sizeof(DsMsgPart_t);
+
+For the field params message with 2 fields, offset for the FIRST field
+params struct will be:
+
+  offset = sizeof(DsMsgHdr_t) + 2 * sizeof(DsMsgPart_t);
+
+For the field params message with 2 fields, offset for the SECOND field
+params struct will be:
+
+  offset = sizeof(DsMsgHdr_t) + 2 * sizeof(DsMsgPart_t) + sizeof(DsFieldParams_t);
+
+
+'len' is the length of the data part in bytes.
+
+  For radar params, len = sizeof(DsRadarParams_t);
+
+  For field params, len = sizeof(DsFieldParams_t);
+
+  For a beam, len = sizeof(DsBeamHdr_t) + (nfields * ngates);
+
+  For flags, len = sizeof(DsRadarFlags_t);
+
+
+6. Radar params.
+----------------
+
+The radar params struct is in ds_radar.h.
+
+typedef struct {
+  
+  si32 radar_id;		/* unique number */
+
+  si32 radar_type;              /* use radar type defs above */
+
+  si32 nfields;                 /* number of fields */
+
+  si32 ngates;                  /* number of range gates */
+
+  si32 samples_per_beam;        /* number of pulse samples per
+				 * data beam */
+
+  si32 scan_type;		/* the current scan strategy */
+  
+  si32 scan_mode;		/* use scan type defs above */
+  
+  si32 nfields_current;	        /* the number of fields currently being
+				 * sent - the positions of the fields
+				 * are indicated by the
+				 * bits set in the field_flag */
+  
+  si32 field_flag;		/* for each field included in the beam data,
+				 * the relevant bit is set in this long.
+				 * For example, suppose there are a total
+				 * of 6 fields referred to in the params
+				 * struct, and only fields
+				 * 0, 1, 3, and 5 are currently in
+				 * the data stream.
+				 * Then, field_flag = 00.....0101011 */
+
+  si32 polarization;            /* use polarization type defs above */
+
+  si32 spare_ints[4];
+
+  fl32 radar_constant;          /* radar constant */
+  fl32 altitude;		/* km */
+  fl32 latitude;		/* degrees */
+  fl32 longitude;		/* degrees */
+  fl32 gate_spacing;		/* km */
+  fl32 start_range;		/* km */
+  fl32 horiz_beam_width;	/* degrees */
+  fl32 vert_beam_width;         /* degrees */
+  fl32 pulse_width;		/* micro-seconds */
+  fl32 prf;			/* pulse repitition freq (/s) */
+  fl32 wavelength;		/* cm */
+  fl32 xmit_peak_pwr;           /* watts */
+  fl32 receiver_mds;            /* dBm */
+  fl32 receiver_gain;           /* dB */
+  fl32 antenna_gain;            /* dB */
+  fl32 system_gain;             /* dB */
+  fl32 unambig_vel;             /* m/s */
+  fl32 unambig_range;           /* km */
+   
+  fl32 spare_floats[8];
+
+  char radar_name[DS_LABEL_LEN];
+  char scan_type_name[DS_LABEL_LEN];
+  
+} DsRadarParams_t;
+
+Most of it is self-explanatory.
+
+'radar_type' - choose from:
+
+  DS_RADAR_GROUND_TYPE = 0
+  DS_RADAR_AIRBORNE_FORE_TYPE = 1 (scanning forward)
+  DS_RADAR_AIRBORNE_AFT_TYPE = 2 (scanning aft)
+  DS_RADAR_AIRBORNE_TAIL_TYPE = 3 (ELDORA)
+  DS_RADAR_AIRBORNE_LOWER_TYPE = 4 (belly)
+  DS_RADAR_SHIPBORNE_TYPE = 5
+  DS_RADAR_VEHICLE_TYPE = 6
+  DS_RADAR_AIRBORNE_UPPER_TYPE = 7 (roof)
+
+  Probably 0.
+
+'scan_type' - this should be set uniquely for each scan strategy. If you 
+are only using a single strategy, you can use 0. If you have more
+than one strategy and are switching between them, use a unique id
+for each strategy,
+
+'scan_mode' - choose from:
+
+  DS_RADAR_UNKNOWN_MODE = -1
+  DS_RADAR_CALIBRATION_MODE = 0
+  DS_RADAR_SECTOR_MODE = 1
+  DS_RADAR_COPLANE_MODE = 2
+  DS_RADAR_RHI_MODE = 3
+  DS_RADAR_VERTICAL_POINTING_MODE = 4
+  DS_RADAR_TARGET_MODE = 5
+  DS_RADAR_MANUAL_MODE = 6
+  DS_RADAR_IDLE_MODE = 7
+  DS_RADAR_SURVEILLANCE_MODE = 8
+  DS_RADAR_VERTICAL_SWEEP_MODE = 9
+
+'nfields_current' - the number of fields currently being sent, if 
+less than nfields. Seldom used.
+
+'field_flag' - used in conjunction with nfields_current. Each bit
+indicates which fields are currently being sent. Seldom used.
+
+'polarization' = choose from:
+
+  DS_POLARIZATION_HORIZ_TYPE = 0
+  DS_POLARIZATION_VERT_TYPE = 1
+  DS_POLARIZATION_RIGHT_CIRC_TYPE = 2
+  DS_POLARIZATION_ELLIPTICAL_TYPE = 3
+  DS_POLARIZATION_LEFT_CIRC_TYPE = 4
+  DS_POLARIZATION_DUAL_TYPE = 5
+  DS_POLARIZATION_DUAL_HV_ALT = 6
+  DS_POLARIZATION_DUAL_HV_SIM = 7
+  DS_POLARIZATION_DUAL_H_XMIT = 8
+  DS_POLARIZATION_DUAL_V_XMIT = 9
+
+As mentioned above, in the part header:
+
+  offset = sizeof(DsMsgHdr_t) + sizeof(DsMsgPart_t);
+  len = sizeof(DsRadarParams_t);
+
+
+7. Field params.
+----------------
+
+The field params struct is in ds_radar.h.
+
+If you have more than 1 field, you will have more than 1 part in the
+message.
+
+typedef struct {
+
+  si32 byte_width;                    /* width of data in bytes */
+  si32 missing_data_value;            /* value used for missing data */
+   
+  fl32 scale;			      /* gain of the data */
+  fl32 bias;			      /* offset of zero value */
+
+  fl32 spare_floats[2];
+
+  char name[DS_FIELD_NAME_LEN];       /* field name */
+  char units[DS_FIELD_UNITS_LEN];     /* field units */
+  
+} DsFieldParams_t;
+
+byte_width:
+
+  only 1 is supported for now.
+
+missing_data_value:
+
+  suggest using 0 for missing data
+
+scale and bias:
+
+  field val = bias + byteval * scale;
+
+name:
+
+  Suggest DBZ, VEL, SPW, SNR
+          (refl, velocity, spectral width, signal-to-noise)
+
+units:
+
+  Suggest dBZ, m/s, m/s, dB
+
+
+As mentioned above, in the part header:
+
+For field n: (n starts at 0)
+
+  offset = sizeof(DsMsgHdr_t) + nfields * sizeof(DsMsgPart_t) + n * sizeof(DsFieldParams_t);
+
+  len = sizeof(DsFieldParams_t);
+
+8. Beam.
+--------
+
+The beam header struct is in ds_radar.h.
+
+typedef struct {
+  
+  si32 time;               /* secs since Jan 1 1970 */
+  si32 nano_secs;          /* nano-second time */
+  si32 reference_time;     /* epoch - not used yet, set to 0 */
+
+  si32 vol_num;            /* the volume scan number */
+  si32 tilt_num;	   /* the tilt number in the volume scan */
+
+  si32 byte_width;         /* data byte width
+                            * 1 = ui08, 2 = ui16, 4 = fl32 */
+
+
+  si32 scan_mode;          /* use scan type defs above */
+  si32 beam_is_indexed;    /* 0: not indexed, 1: indexed */
+  
+  si32 antenna_transition; /* 1 = antenna is in transition, 0 = not */
+
+  si32 n_samples;          /* number of pulse (time series) samples per
+                            * dwell for this data beam.
+                            * Same as samples_per_beam in radar params */
+
+  si32 spare_ints[2];
+
+  fl32 txmitPowerDbmH;     /* H power in dBm */
+  fl32 txmitPowerDbmV;     /* V power in dBm */
+
+  fl32 azimuth;		   /* deg */
+  fl32 elevation;	   /* deg */
+  fl32 target_elev;	   /* deg - PPI mode */
+  fl32 target_az;          /* deg - RHI mode */
+
+  fl32 angular_resolution; /* deg - resolution of beam (dwell) indexing */
+
+  fl32 spare_floats[3];
+  
+} DsBeamHdr_t;
+
+time:
+
+  unix time - secs since 1 Jan 1970
+
+reference_time:
+
+  set to same as time
+
+A beam message has a single part, which is the beam header followed
+by the byte data.
+
+The data is ordered gate-by-gate. So the beam part will look like:
+
+  DsBeamHdr_t
+  byte for gate 0 field 0
+  byte for gate 0 field 1
+  byte for gate 0 field 2
+  byte for gate 1 field 0
+  byte for gate 1 field 1
+  byte for gate 1 field 2
+  byte for gate 2 field 0
+  byte for gate 2 field 1
+  byte for gate 2 field 2
+  etc.
+
+As mentioned above, in the part header:
+
+  offset = sizeof(DsMsgHdr_t) + sizeof(DsMsgPart_t);
+  len = sizeof(DsBeamHdr_t) + (nfields * ngates);
+
+9. Flags.
+---------
+
+The flag struct is in ds_radar.h.
+
+typedef struct {
+  
+  si32 time;              /* secs since Jan 1 1970 */
+
+  si32 vol_num;           /* the volume scan number */
+  si32 tilt_num;	  /* the tilt number in the volume scan */
+  si32 scan_type;		/* the current scan strategy */
+  
+  si32 start_of_tilt;
+  si32 end_of_tilt;
+
+  si32 start_of_volume;
+  si32 end_of_volume;
+
+  si32 new_scan_type;
+
+  si32 spare_ints[4];
+
+} DsRadarFlags_t;
+
+Always set time, vol_num, tilt_num and scan_type. See the radar params
+for scan_type.
+
+Only set one of 
+
+  start_of_tilt
+  end_of_tilt
+  start_of_volume
+  end_of_volume
+  new_scan_type - if scan type changes
+
+The rest should be 0. 
+
+This seems a bit of a waste - for example, we could use a single
+message for handling end_of_tilt and end_of_volume at the end of a
+volume. But this leads to some difficulties, so always use one
+message per type of flag.
+
+As mentioned above, in the part header:
+
+  offset = sizeof(DsMsgHdr_t) + sizeof(DsMsgPart_t);
+  len = sizeof(DsRadarFlags_t);
+
+
+
+
+
+
+ 
+
+
+

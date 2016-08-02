@@ -1,0 +1,57 @@
+# av age of mhr data
+#
+@with g0
+@g0 autoscale type AUTO
+@    world xmin 0.0
+@    world xmax 6.0
+@    world ymin 0.0
+@    world ymax 4.0
+@    view xmin 0.30000
+@    view xmax 0.70000
+@    view ymin 0.35000
+@    view ymax 0.65000
+@    title font 0
+@    title "mhr av data age"
+@    title font 0
+@    title size 1.0
+@    s0 type xy
+@    s0 symbol size 0.200000
+@    s0 symbol fill 0
+@    s0 symbol 0
+@    s0 linestyle 1
+@    xaxis  label font 0
+@    xaxis  ticklabel font 0
+@    xaxis  label char size 0.75
+@    xaxis  ticklabel char size 0.75
+@    xaxis  tick on
+@    xaxis  tick major 1
+@    xaxis  tick minor 0.5
+@    xaxis  label "Time from start of volume (mins)"
+@    yaxis  label font 0
+@    yaxis  ticklabel font 0
+@    yaxis  label char size 0.75
+@    yaxis  ticklabel char size 0.75
+@    yaxis  tick on
+@    yaxis  tick major 1
+@    yaxis  tick minor 0.5
+@    yaxis  label "Mean age (mins)"
+@g0 type xy
+-0.15      2.82
+0.45       3.30
+1.05       3.45
+1.35       3.64
+1.65       2.69
+2.25       1.94
+2.55       2.09
+2.85       1.70
+3.15       1.64
+3.45       1.73
+3.75       1.88
+4.05       1.73
+4.35       1.83
+4.65       2.01
+4.95       2.16
+5.25       2.36
+5.55       2.55
+5.85       2.82
+6.45       3.30

@@ -1,0 +1,51 @@
+; Auto stow for High winds
+; this routine is started from masterb and is restarted as necessary
+
+#include "spoldefm.h"
+close
+open prog 220
+clear
+delete gather
+ temp1=m162-m161                      ;grab following error
+ temp2=m262-m261
+ clock0=m0                            ;reset clock
+;spin Az for 10 min with El pointing vertically.
+  i112=0                              ;turn off checking for azimuth following error
+
+ ; cmd"#1o16384"                            ;spin azimuth at 1/2 speed Does this work?
+
+ i117=.005			      ;3 DEG/SEC^2  low acceleration limit
+ i122=1.01*10*(i127/360)/1000         ;counts/ms  @10 deg/sec
+ I121=300 
+ I120=1300
+ cmd "#1j+"   
+
+  While ((clock)<1.) wait	 ;wait 1 min
+ i212=23296			 ;set vertical following error warning to 1 deg
+ While ((clock)<6.) wait	 ;wait until 6 min
+ 
+;if it got this far there were no el folowing errors in 6 min
+ i112=23296*5.0			 ;5 deg vertical+ horizontal following error limit.
+ i212=23296*5.0
+ p302=1000    ;bad
+ i117=.025
+ i217=.017                       ;restore accelerations
+ 
+ running=0			 ;go back to where we came from
+ close
+
+
+
+ ;slowly point vertically
+ close
+ open prog221
+ clear
+ delete gather
+ ta1
+ i217=.005		;3 DEG/SEC^2
+ while (2>1)
+ b(90)
+ m202=4             ;vertically pointing
+ dwell 20000
+ endwhile
+ close

@@ -1,0 +1,277 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "LdarPointProcess is a simple program to ingest ltg data from\n"
+  "the Kennedy Space Center's LDAR system.\n"
+  "Files are ASCII with (roughly) the following format :\n\n"
+  "The following Lightning Detection and Ranging (LDAR) and Cloud to Ground Lightning\n"
+  "Surveillance (CGLSS) data sets are displayed in a tab delimited format:\n"
+  "\n"
+  "The EVENT TYPE field will display the data type as an LDAR EVENT, GGLSS EVENT or\n"
+  "CAL EVENT. A CAL EVENT is a locally generated simulated lightning event used to\n"
+  "validate the operation status of the Kennedy Space Center's LDAR System.\n"
+  "\n"
+  "The X, Y and Z coordinates are in reference to the Kennedy Space Center's LDAR\n"
+  "Central Site located at Latitude 28 32 18.55N and Longitude 80 38 33.48W\n"
+  "\n"
+  "JDAY	TIME(UTC)       	X(M)     	Y(M)      	Z(M)  	EVENT TYPE\n"
+  "\n"
+  "109	03:00:00:010007  	+0050431	+0047426	+13249	LDAR EVENT\n"
+  "109	03:00:00:018755  	+0049489	+0047438	+08848	4DLSS EVENT\n"
+  "109	03:00:00:020457  	+0049351	+0046647	+12848	4DLSS EVENT\n"
+  "\n\n";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::./mdv/LdarFlashExtent";
+  p_descr = "Output url, of form mdvp:://host.domain:[port]:dir/dir ";
+  p_help = "Data are written here.";
+} output_url;
+
+paramdef enum output_timestamp {
+  p_options = {BEGIN, MIDDLE, END};
+  p_default = END;
+  p_descr = "Time stamp given to output file.";
+  p_help =  "Defines what timestamp is given based on the outputInterval. If the "
+            "interval start time is 04:00 and the outputInterval is 300 seconds, "
+            "then a timeStamp set to END, will give 04:05:00, a timeStamp set to "
+            "BEGIN will give 04:00:00, and a timeStamp set to MIDDLE will give a "
+            "time of 04:02:30.";
+} timeStamp;
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef string {
+  p_default = ".txt";
+  p_descr = "Input file extension.";
+} fileExtension;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug rejection option";
+  p_help = "If set, print messages about why data are being rejected.";
+} debugRejects;
+
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME, TIME_INTERVAL};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line. In TIME_INTERVAL mode, a list of files is gathered between start and end times.";
+} mode;
+ 
+typedef struct {
+	double latOrigin;
+	double lonOrigin;
+} LDAR_Central_Site_Loc_t;
+
+paramdef struct LDAR_Central_Site_Loc_t {
+        p_descr = "Latitude and Longitude of the LDAR.";
+        p_help = "Used to compute the Lat and Lon of the\n"
+	         "strokes.";
+        p_default = { 28.538486, -80.642633 };
+} LDAR_Central_Site_Loc;
+
+paramdef double {
+  p_descr = "Minimum altitude to accept, m.";
+  p_help = "Set to define the ingest region.";
+  p_default = 0.0;
+} minAlt;
+ 
+paramdef double {
+  p_descr = "Maximum altitude to accept, m.";
+  p_help = "Set to define the ingest region. May also be used for\n"
+  "quality control - occasionally data with clearly erroneously high\n"
+  "altitudes come in.";
+  p_default = 20000.0;
+} maxAlt;
+ 
+paramdef double {
+  p_descr = "The maximum allowable distance, Km,\n"
+	"between succesive points for LDAR entries to\n"
+  "be bundled into the same event.";
+  p_help = "May be horizontal distance only, or may be 3D distance,\n"
+  "depending on the setting of considerVerticalDistance.";
+  p_default = 30.0;
+} maxAllowedDist;
+
+paramdef double {
+  p_descr = "The maximum allowable time, seconds, betwen successive\n"
+	"points, for LDAR entries to\n"
+  "be bundled into the same event.";
+  p_help = "The default seemed to work well for the STEPS case the program\n"
+  "was tested on.";
+  p_default = 1.5;
+} maxAllowedTime;
+
+paramdef double {
+  p_descr = "The maximum allowable time duration (in seconds) for \n"
+  	    "a flash .";
+  p_help = "If the time between the first point and current point exceeds\n"
+           "this threshold, the current point will be considered the start\n"
+           "of a new flash.";
+  p_default =3.0;
+} maxDuration;
+
+paramdef boolean {
+  p_descr = "Option to consider the vertical component in the\n"
+  "calculation of distance. Default is not to do this.";
+  p_help = "For the STEPS data I have, it turned out not to make much\n"
+  "difference anyway.";
+  p_default = FALSE;
+} considerVerticalDistance;
+
+
+paramdef boolean {
+  p_descr = "Option to use 0 as the bad/missing value.";
+  p_help = "Good for the display. If FALSE then -1.0 is used.";
+  p_default = FALSE;
+} useZeroForMissing;
+
+paramdef int {
+  p_descr = "The minimum number of LDAR entires in a bundle for that\n"
+   "bundle to be written out.";
+  p_help = "The default was developed for a STEPS case in which there\n"
+  "was a lot of ltg activity, so it might be a bit high. The danger in\n"
+  "making it too low is that too much data results.";
+  p_default = 20;
+} minNumEntries;
+
+paramdef int {
+  p_descr = "Output interval, seconds.";
+  p_help = "MDV output happens over this interval.";
+  p_default = 300;
+} outputInterval;
+
+paramdef enum in_format {
+  p_options = {FORMAT_ONE};
+  p_default = FORMAT_ONE;
+  p_descr = "Input data file format.";
+  p_help = "See comments at top of param file.";
+} format;
+  
+typedef struct {
+        int nx;
+        int ny;
+	double dx;
+	double dy;
+	double latOrigin;
+	double lonOrigin;
+	double minx;
+	double miny;
+} gridDef_t;
+
+paramdef struct gridDef_t {
+        p_descr = "Definition of MDV grid.";
+        p_help = "The grid can be either a cartesian grid with\n"
+                  "the minx, miny, dx and dy in Km\n"
+                  "or a lat/lon grid with the minx, miny, and dx,\n"
+		  "and dy in degrees and the extent determined by\n"
+		  "nx,ny,dx and dy. See the useLatlon parameter.";
+        p_default = { 400, 400, 1, 1, 28.538486, -80.642633, -200, -200 };
+} gridDef;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use a latlon grid rather than a flat one.";
+  p_help = "See comments for the gridDef parameter.";
+} useLatlon;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to normalize spatially.";
+  p_help = "If TRUE, output values are divided by grid size, that\n"
+           "is, val = val / (dx*dy). Can be used in conjunction with\n"
+           "normTemporal";
+} normSpatial;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to normalize temporally.";
+  p_help = "If TRUE, output values are divided by output interval, that\n"
+           "is, val = val / (outputInterval). Can be used in\n"
+	   "conjunction with normSpatial";
+} normTemporal;
+
+paramdef double {
+  p_descr = "Minimum latitude to accept, decimal degrees.";
+  p_help = "Set to define the ingest region.";
+  p_default = -90.0;
+} minLat;
+
+paramdef double {
+  p_descr = "Maximum latitude to accept, decimal degrees.";
+  p_help = "Set to define the ingest region.";
+  p_default = 90.0;
+} maxLat;
+
+paramdef double {
+  p_descr = "Minimum longitude to accept, decimal degrees.";
+  p_help = "Set to define the ingest region.";
+  p_default = -180.0;
+} minLon;
+
+paramdef double {
+  p_descr = "Maximum longitude to accept, decimal degrees.";
+  p_help = "Set to define the ingest region.";
+  p_default = 180.0;
+} maxLon;
+
+paramdef boolean {
+  p_descr = "Flag to indicate availability of latest data info files";
+  p_default = false;
+} ldata_available;
+

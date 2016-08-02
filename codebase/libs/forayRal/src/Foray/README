@@ -1,0 +1,24 @@
+Foray
+Copyright 2007, University Corporation for Atmospheric Research
+
+Author: Dennis Flanigan, dennisf@ucar.edu.
+
+Foray is a set of C++ classes to read and write remotely
+sensed scientific data collected in spherical coordinates.
+Right now foray only works with ground based meteorological radars.
+
+SCons is required to build:
+
+        http://www.scons.org
+
+Foray is dependent on the netCDF library from unidata:
+
+        http://www.unidata.ucar.edu/software/netcdf
+
+
+README files in ForayLibs/trunk and ForayApps have instructions
+for building and installing.  There is also a set of wiki pages
+on the EOL Software Engineering wiki:
+
+        http://wiki.eol.ucar.edu/sew/Foray.
+

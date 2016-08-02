@@ -1,0 +1,545 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+//
+// parameter definitions for Sigwx2Symprod
+//
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef
+{
+  p_header = "DEBUGGING";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { DEBUG_OFF };
+} debug;
+
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string
+{
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean
+{
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+
+paramdef boolean
+{
+  p_descr = "Flag to turn on processing of clouds.";
+  p_help = ".";
+  p_default = TRUE;
+} process_cloud;
+
+paramdef boolean
+{
+  p_descr = "Flag to turn on processing of jet streams.";
+  p_help = ".";
+  p_default = TRUE;
+} process_jetstream;
+
+paramdef boolean
+{
+  p_descr = "Flag to turn on processing of turbulence.";
+  p_help = ".";
+  p_default = TRUE;
+} process_turbulence;
+
+paramdef boolean
+{
+  p_descr = "Flag to turn on processing of volocano.";
+  p_help = ".";
+  p_default = TRUE;
+} process_volcano;
+
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef
+{
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int
+{
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5483;
+} port;
+  
+paramdef int
+{
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+
+//////////////////////////////////////////////////////////
+// Jetstram rendering
+
+commentdef
+{
+  p_header = "JETSTREAM RENDERING PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "jetstream line color";
+  p_help = "Name of color for jetstream lines.";
+  p_default = "magenta";
+} jetstream_line_color;
+
+paramdef int
+{
+  p_descr = "jetstream line width";
+  p_help = "Width in pixels of jetstream lines.";
+  p_default = 1;
+} jetstream_line_width;
+
+paramdef string
+{
+  p_descr = "jetstream text color";
+  p_help = "Name of color for jetstream text.";
+  p_default = "magenta";
+} jetstream_text_color;
+
+paramdef string
+{
+  p_descr = "jetstream text background color";
+  p_help = "Set to empty string to use display background color";
+  p_default = "gray20";
+} jetstream_text_bg_color;
+
+paramdef int
+{
+  p_descr = "jetstream wind barb height, pixels";
+  p_help = p_descr;
+  p_default = 11;
+} jetstream_wind_barb_height;
+
+paramdef int
+{
+  p_descr = "jetstream wind barb triangle width, pixels";
+  p_help = p_descr;
+  p_default = 7;
+} jetstream_wind_barb_width;
+
+paramdef int
+{
+  p_descr = "jetstream wind barb gap between fleche marks, pixels";
+  p_help = p_descr;
+  p_default = 5;
+} jetstream_wind_barb_gap;
+
+paramdef int
+{
+  p_descr = "Minimum space required between fleches along the jet stream, "
+            "given in number of characters.";
+  p_help = "This parameter is specified in number of characters to match the "
+           "WAFS representation documentation found on the Web.";
+  p_default = 15;
+} jetstream_min_fleche_distance;
+
+
+//////////////////////////////////////////////////////////
+// Turbulence rendering
+
+commentdef
+{
+  p_header = "TURBULENCE RENDERING PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "turbulence line color";
+  p_help = "Name of color for turbulence lines.";
+  p_default = "yellow";
+} turbulence_line_color;
+
+paramdef int
+{
+  p_descr = "turbulence line width";
+  p_help = "Width in pixels of turbulence lines.";
+  p_default = 1;
+} turbulence_line_width;
+
+paramdef string
+{
+  p_descr = "turbulence text color";
+  p_help = "Name of color for turbulence text.";
+  p_default = "yellow";
+} turbulence_text_color;
+
+paramdef string
+{
+  p_descr = "turbulence text background color";
+  p_help = "Set to empty string to use display background color";
+  p_default = "gray20";
+} turbulence_text_bg_color;
+
+
+//////////////////////////////////////////////////////////
+// Cloud rendering
+
+commentdef
+{
+  p_header = "CLOUD RENDERING PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to display the cloud outline.";
+  p_default = true;
+} cloud_display_outline;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to display the cloud text box.";
+  p_default = false;
+} cloud_display_text_box;
+
+paramdef string
+{
+  p_descr = "cloud line color";
+  p_help = "Name of color for cloud lines.";
+  p_default = "lightgray";
+} cloud_line_color;
+
+paramdef int
+{
+  p_descr = "cloud line width";
+  p_help = "Width in pixels of cloud lines.";
+  p_default = 1;
+} cloud_line_width;
+
+paramdef int
+{
+  p_descr = "screen size, pixels";
+  p_help = "Approx screen height in pixels.";
+  p_default = 1000;
+} cloud_screen_size;
+
+paramdef int
+{
+  p_descr = "cloud scallop size, pixels";
+  p_help = "Approx width in pixels of each scallop in cloud rendering.";
+  p_default = 6;
+} cloud_scallop_size;
+
+paramdef string
+{
+  p_descr = "cloud text color";
+  p_help = "Name of color for cloud text.";
+  p_default = "lightgray";
+} cloud_text_color;
+
+paramdef string
+{
+  p_descr = "cloud text background color";
+  p_help = "Set to empty string to use display background color";
+  p_default = "gray20";
+} cloud_text_bg_color;
+
+paramdef int
+{
+  p_descr = "Cloud text box X offset in pixels.";
+  p_help = "This is the distance between the lower-left corner of the text "
+           "box and the upper-right corner of the box containing the "
+           "cloud outline in the X direction in pixels.";
+  p_default = 20;
+} cloud_text_box_x_offset;
+
+paramdef int
+{
+  p_descr = "Cloud text box Y offset in pixels.";
+  p_help = "This is the distance between the lower-left corner of the text "
+           "box and the upper-right corner of the box containing the "
+           "cloud outline in the Y direction in pixels.";
+  p_default = 20;
+} cloud_text_box_y_offset;
+
+
+//////////////////////////////////////////////////////////
+// Volcano rendering
+
+commentdef
+{
+  p_header = "VOLCANO RENDERING PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "volcano line color";
+  p_help = "Name of color for volcano lines.";
+  p_default = "magenta";
+} volcano_line_color;
+
+paramdef int
+{
+  p_descr = "volcano line width";
+  p_help = "Width in pixels of volcano lines.";
+  p_default = 2;
+} volcano_line_width;
+
+paramdef int
+{
+  p_descr = "volcano icon size, pixels";
+  p_help = p_descr;
+  p_default = 20;
+} volcano_icon_size;
+
+paramdef string
+{
+  p_descr = "volcano text color";
+  p_help = "Name of color for volcano text.";
+  p_default = "magenta";
+} volcano_text_color;
+
+paramdef string
+{
+  p_descr = "volcano text background color";
+  p_help = "Set to empty string to use display background color";
+  p_default = "gray20";
+} volcano_text_bg_color;
+
+
+//////////////////////////////////////////////////////////
+// Cyclone rendering
+
+commentdef
+{
+  p_header = "CYCLONE RENDERING PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "cyclone line color";
+  p_help = "Name of color for cyclone lines.";
+  p_default = "yellow";
+} cyclone_line_color;
+
+paramdef int
+{
+  p_descr = "cyclone line width";
+  p_help = "Width in pixels of cyclone lines.";
+  p_default = 2;
+} cyclone_line_width;
+
+paramdef string
+{
+  p_descr = "cyclone text color";
+  p_help = "Name of color for cyclone text.";
+  p_default = "yellow";
+} cyclone_text_color;
+
+paramdef string
+{
+  p_descr = "cyclone text background color";
+  p_help = "Set to empty string to use display background color";
+  p_default = "gray20";
+} cyclone_text_bg_color;
+
+
+//////////////////////////////////////////////////////////
+// Radiation rendering
+
+commentdef
+{
+  p_header = "RADIATION RENDERING PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "radiation line color";
+  p_help = "Name of color for radiation lines.";
+  p_default = "red";
+} radiation_line_color;
+
+paramdef int
+{
+  p_descr = "radiation line width";
+  p_help = "Width in pixels of radiation lines.";
+  p_default = 2;
+} radiation_line_width;
+
+paramdef string
+{
+  p_descr = "radiation text color";
+  p_help = "Name of color for radiation text.";
+  p_default = "red";
+} radiation_text_color;
+
+paramdef string
+{
+  p_descr = "radiation text background color";
+  p_help = "Set to empty string to use display background color";
+  p_default = "gray20";
+} radiation_text_bg_color;
+
+
+commentdef
+{
+  p_header = "FONT OPTIONS";
+};
+
+paramdef string
+{
+  p_descr = "Font name.";
+  //p_default = "7x13";
+  p_default = "-*-helvetice-bold-r-*-*-*-140-*-*-*-*-*-*";
+} font_name;
+
+paramdef int
+{
+  p_descr = "x offset of start of text";
+  p_default = 0;
+} text_x_offset;
+
+paramdef int
+{
+  p_descr = "y offset of start of text";
+  p_default = -25;
+} text_y_offset;
+
+paramdef int
+{
+  p_descr = "Size of font to use for text (apparently ignored by CIDD)";
+  p_default = 12;
+} font_size;
+
+paramdef float
+{
+  p_descr = "Line spacing as a multiple of font size";
+  p_default = 1.5;
+} line_space_factor;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether whether popup text should be "
+	    "generated.";
+  p_help = "Currently, only the JMDS display has the ability to display "
+           "hidden text. "
+           "If using CIDD or MDS, this should always be set to false.\n"
+	   "Only affects Clouds & Turbulence";
+  p_default = FALSE;
+} hidden_text_flag;
+
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether whether basic text should be "
+	    "generated.";
+  p_help = "Only affects Clouds & Turbulence";
+  p_default = TRUE;
+} basic_text_flag;
+
+
+typedef struct {
+  string icon_name;
+  string icon_points;
+} icon_defs_t;
+
+paramdef struct icon_defs_t {
+
+  p_descr = "Definitions for all of the icons used by the server.";
+
+  p_help = "The icon_points string contains the points used to define the "
+           "icon in a space delimited string like the following:\n"
+           "\t\"x1 y1 x2 y2 .... xn yn\"\n"
+           "Use the value 32767 for both X and Y to indicate a pen up.\n"
+	   "The turb_icon is the standard turbulence symbol.\n"; 
+
+  p_default = {
+    {
+      icon_name = "turb_icon",
+      icon_points = "-10 0 0 20 10 0 32767 32767 -10 -10 0 10 10 -10 32767 32767 -20 -10 -10 -10 32767 32767 -5 -10 5 -10 32767 32767 10 -10 20 -10"
+    }
+    ,
+    {
+      icon_name = "cloud_icon",
+      icon_points = "  0  20    4  20    8  18   12  16   15  13   18   9   19   5   20   1   20  -3   19  -7   17 -11   14 -15   10 -17    6 -19    2 -20   -2 -20   -6 -19  -10 -17  -14 -15  -17 -11  -19  -7  -20  -3  -20   1  -19   5  -18   9  -15  13  -12  16   -8  18   -4  20   -0  20"
+    }
+    ,
+    {
+      icon_name = "unknown",
+      icon_points = "-6 6 -6 8 -4 10 -2 12 2 12 4 10 6 8 8 4 4 2 2 0 0 0 0 -5 32767 32767 -2 -10 0 -10 0 -12 -2 -12 -2 -10"
+    }
+  }
+} icon_defs[];
+
+
+paramdef float
+{
+  p_descr = "float scale of turbulence icon";
+  p_default = 0.5;
+} turb_icon_scale;
+
+
+paramdef float
+{
+  p_descr = "float scale of cloud icon";
+  p_default = 0.3;
+} cloud_icon_scale;

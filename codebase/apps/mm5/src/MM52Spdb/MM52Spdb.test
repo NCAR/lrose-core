@@ -1,0 +1,195 @@
+/**********************************************************************
+ * TDRP params for MM52Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// MM52Spdb.
+//
+// MM52Spdb interpolates MM5 data to specified points and saves out the 
+//   data to an SPDB database as a ComboPt buffer.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_NORM;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//   ARCHIVE, REALTIME
+//
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// realtime_input_dir //////////////////////
+//
+// Directory for input MM5 data - REALTIME mode.
+// The latest_data_info file in this directory is updated each time the 
+//   model adds a forecast time step to the output file.
+// Type: string
+//
+
+realtime_input_dir = ".";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data - REALTIME mode.
+// For realtime only - max age of input data for it to be valid. If the 
+//   latest_data_info file is older than this, the program waits for new 
+//   data.
+// Minimum val: 0
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// The interpolated point data is output to this URL in SPDB format.
+// Type: string
+//
+
+output_url = "./spdb/mm5";
+
+///////////// output_fields_3d ////////////////////////
+//
+// 3D Output fields.
+// In the output there will be one value for each of these fields for 
+//   each height available at each point.
+//
+// Type: enum
+// Options:
+//   U_3D, V_3D, W_3D, TEMP_3D, HUMIDITY_3D, CLW_3D, RNW_3D, ICE_3D, SNOW_3D, RAD_TEND_3D
+//
+// 1D array - variable length.
+//
+
+output_fields_3d = { U_3D, V_3D, W_3D, TEMP_3D, HUMIDITY_3D, CLW_3D, RNW_3D, ICE_3D, SNOW_3D, RAD_TEND_3D };
+
+///////////// output_fields_2d ////////////////////////
+//
+// 2D Output fields.
+// In the output there will be one value for each of these fields at 
+//   each  point.
+//
+// Type: enum
+// Options:
+//   GROUND_T_2D, RAIN_CON_2D, RAIN_NON_2D, TERRAIN_2D, CORIOLIS_2D, RES_TEMP_2D, LAND_USE_2D, SNOWCOVR_2D, TSEASFC_2D, PBL_HGT_2D, REGIME_2D, SHFLUX_2D, LHFLUX_2D, UST_2D, SWDOWN_2D, LWDOWN_2D, SOIL_T_1_2D, SOIL_T_2_2D, SOIL_T_3_2D, SOIL_T_4_2D, SOIL_T_5_2D, SOIL_T_6_2D
+//
+// 1D array - variable length.
+//
+
+output_fields_2d = { GROUND_T_2D, RAIN_CON_2D, RAIN_NON_2D, TERRAIN_2D, CORIOLIS_2D, RES_TEMP_2D, LAND_USE_2D, SNOWCOVR_2D, TSEASFC_2D, PBL_HGT_2D, REGIME_2D, SHFLUX_2D, LHFLUX_2D, UST_2D, SWDOWN_2D, LWDOWN_2D, SOIL_T_1_2D, SOIL_T_2_2D, SOIL_T_3_2D, SOIL_T_4_2D, SOIL_T_5_2D, SOIL_T_6_2D };
+
+///////////// output_points ///////////////////////////
+//
+// Name and location of output points.
+// The model data will be interpolated to each of these locations.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      double lat;
+//      double lon;
+//      double alt;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_points = {
+  { "RCTP", 25.08, 121.22, 33},
+  { "RCFG", 26.17, 119.93, 91},
+  { "RCSS", 25.07, 121.55, 6},
+  { "RCGM", 25.07, 121.23, 45},
+  { "RCNO", 23.27, 119.67, 45},
+  { "RCQC", 23.58, 119.62, 31},
+  { "RCBS", 24.43, 118.37, 9},
+  { "RCUK", 24.93, 121.3, 141},
+  { "RCKH", 22.58, 120.35, 9},
+  { "RCFN", 22.77, 121.08, 42},
+  { "RCNN", 22.95, 120.2, 19},
+  { "RCAY", 22.78, 120.27, 10},
+  { "RCKU", 23.47, 120.38, 25},
+  { "RCMJ", 22.47, 120.43, 8},
+  { "RCDC", 22.68, 120.47, 24},
+  { "RCLG", 24.18, 120.65, 112},
+  { "RCKW", 21.93, 120.83, 13},
+  { "RCPO", 24.82, 120.93, 8},
+  { "RCSQ", 22.7, 120.48, 29},
+  { "RCQS", 22.8, 121.18, 37},
+  { "RCLY", 22.03, 121.55, 325},
+  { "RCYU", 24.03, 121.62, 16},
+  { "RCMS", 24.75, 121.77, 9},
+  { "RCDI", 24.87, 121.23, 241},
+  { "RCMQ", 24.27, 120.62, 5},
+  { "RCFS", 22.42, 120.55, 20},
+  { "RCGI", 22.67, 121.46, 25},
+  { "RCMT", 26.23, 119.99, 50},
+  { "RCLM", 20.67, 116.72, 6}
+};
+
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+// This text is placed in the product info part of the output data 
+//   buffer for documentation purposes.
+// Type: string
+//
+
+data_set_info = "MM5 output data interpolated to this point.";
+

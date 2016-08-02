@@ -1,0 +1,1299 @@
+#####################################################################################
+# sydney.CIDD
+#####################################################################################
+
+
+<GRIDS>
+# Legend Label: used for all on-screen labels and for movie/html file naming.
+#           An Empty grid field can be obtained by using the keyword "None"
+# Button Label:  used for all menus.
+# URL:  is of the form:  mdvp:://host.domain:[port]:dir/dir&Field_name.
+#                          (Run the DsServerMgr executable for mdvp service)
+#                    OR: cdatap://host.domain/dir/dir&Field_name.
+#                           (Run the mdv_server executable for cdatap service)
+#   Spaces can be in field names by substituting a Caret character for the space:
+#
+#   Field^Name = "Field Name"
+#   Field Index can alternatively be specified by prepending a '#' character to the field
+#   name part: cdatap://host.domain/dir/dir&#Field_number -> cdatap://venus/radar&#3   
+# Colorscale:  Name of the file containing the value to color mapping for this field.
+# Units:  A label used on the colorscales, etc.
+# Cont-lo-hi-interv:  Default/Starting Contour low and high limits and interval.
+# Rendering Format: The style to render the grid. Current options are:
+#  cart:  - Rectangle fills of gridded data.
+#  radial:  - Filled Polygons of radial radar data - (contouring NOT currently available on this type of data)
+#  cont:  - False color filled  contours.
+#  lcont:  - Line contours.
+#  Note: Add the word "comp" to the format keyword to turn on composite request by default:
+#     example:  cont,comp for a composite color filled contours.
+#     example:  radial,comp for a composite radial rendering
+#        Add the word "autoscale" to the format keyword to turn on automatic colorscale scaling
+#     example:  cont,comp,autoscale for a composite color filled contours, that is autoscaled.
+# Display_in_menu: Display this field in the main menu. (1 = Yes 0 = No)
+# Bkgnd_Render: Render this field automatically in the background. (1 = Yes 0 = No)
+#  Note: This is used to set up "toggleable" field images for comparing two fields,
+#  and to select which fields get generated in HTML output mode. 
+
+#----------------------------------------------------------------------------------------------------------
+#Legend Button                                                                 Rendering
+#Label  Label       URL                     Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
+#----------------------------------------------------------------------------------------------------------
+
+#
+# Kurnell Radar -- with both BOM and NCAR colorscales
+#
+# ***PLEASE***  It is much easier to read, maintain, and fix errors
+#               if you use tabs to keep the columns lined up!
+#
+#
+KURN_cart_dbz		Kurnell_(cart)_reflectivity	mdvp:://tempest::sydney/mdv/brightBand&DBZ		rapic.dbz	dBZ	0 0 0	cart	1 0
+KURN_raw_dbz		Kurnell_(raw)_reflectivity	mdvp:://tempest::sydney/mdv/radarRaw.kurnell&DBZ		rapic.dbz	dBZ	0 0 0	radial	1 0
+KURN_raw_dbz2		Kurnell_(raw)_reflectivity2	mdvp:://tempest::sydney/mdv/radarRaw.kurnell&DBZ		dbz.colors	dBZ	0 0 0	radial	1 0
+
+KURN_raw_vel		Kurnell_(raw)_velocity		mdvp:://tempest::sydney/mdv/radarRaw.kurnell&VEL		rapic.vel	m/s	0 0 0	radial	1 0
+KURN_raw_vel2		Kurnell_(raw)_velocity2		mdvp:://tempest::sydney/mdv/radarRaw.kurnell&VEL		vel.colors	m/s	0 0 0	radial	1 0
+
+KURN_radial_dbz		Kurnell_(radial)_reflectivity	mdvp:://tempest::sydney/mdv/radarRadial.kurnell&DBZ		rapic.dbz	dBZ	0 0 0	radial	0 0
+KURN_radial_dbz2	Kurnell_(radial)_reflectivity2	mdvp:://tempest::sydney/mdv/radarRadial.kurnell&DBZ		dbz.colors	dBZ	0 0 0	radial	0 0
+
+KURN_radial_vel		Kurnell_(radial)_velocity	mdvp:://tempest::sydney/mdv/radarRadial.kurnell&VEL		rapic.vel	m/s	0 0 0	radial	0 0
+KURN_radial_vel2	Kurnell_(radial)_velocity2	mdvp:://tempest::sydney/mdv/radarRadial.kurnell&VEL		vel.colors	m/s	0 0 0	radial	0 0
+
+KURN_ppi_dbz		Kurnell_(ppi)_reflectivity	mdvp:://tempest::sydney/mdv/radarPPI.kurnell&DBZ	rapic.dbz	dBZ	0 0 0	cart	0 0
+KURN_ppi_dbz2		Kurnell_(ppi)_reflectivity2	mdvp:://tempest::sydney/mdv/radarPPI.kurnell&DBZ	dbz.colors	dBZ	0 0 0	cart	0 0
+
+KURN_ppi_vel		Kurnell_(ppi)_velocity		mdvp:://tempest::sydney/mdv/radarPPI.kurnell&VEL	rapic.vel	m/s	0 0 0	cart	0 0
+KURN_ppi_vel2		Kurnell_(ppi)_velocity2		mdvp:://tempest::sydney/mdv/radarPPI.kurnell&VEL	vel.colors	m/s	0 0 0	cart	0 0
+
+KURN_cart_dbz		Kurnell_(cart)_reflectivity	mdvp:://tempest::sydney/mdv/brightBand&DBZ		rapic.dbz	dBZ	0 0 0	cart	1 0
+KURN_cart_dbz2		Kurnell_(cart)_reflectivity2	mdvp:://tempest::sydney/mdv/brightBand&DBZ			dbz.colors	dBZ	0 0 0	cart	1 0
+
+KURN_cart_vel		Kurnell_(cart)_velocity		mdvp:://tempest::sydney/mdv/radarCart.kurnell&VEL   	        rapic.vel	m/s	0 0 0	cart	1 0
+KURN_cart_vel2		Kurnell_(cart)_velocity2	mdvp:://tempest::sydney/mdv/radarCart.kurnell&VEL		vel.colors	m/s	0 0 0	cart	1 0
+
+stratiform		Stratiform_filter		mdvp:://tempest::sydney/mdv/stratiform&conv^partitione	dbz.colors	dBZ	0 0 0	cart	1 0
+strat_composite		Stratiform_composite		mdvp:://tempest::sydney/mdv/stratiform&DBZ			dbz.colors	dBZ	0 0 0	cart	0 0
+VIL			VIL				mdvp:://tempest::sydney/mdv/vil&vil				vil.color	Kg/m2	0 0 0	cart	1 0
+Precip_00		Precip_Rate			mdvp:://tempest::sydney/mdv/precip00&Rain^Rate		Olympics2000_precip.colors	mm/hr	0 0 0	cart	1 0
+terrain			Terrain				mdvp::static//tempest::sydney/mdv/terrain&Elevation 	terrain.colors  m       1 2 5   cart    1 0
+
+#
+# C-Pol Radar -- with both BOM and NCAR colorscales
+#
+CPOL_raw_dbz		C-Pol_(raw)_reflectivity	mdvp:://tempest::sydney/mdv/radarRaw.cpol&DBZ	rapic.dbz	dBZ	0 0 0	radial	0 0
+CPOL_raw_dbz2		C-Pol_(raw)_reflectivity2	mdvp:://tempest::sydney/mdv/radarRaw.cpol&DBZ	dbz.colors	dBZ	0 0 0	radial	1 0
+
+CPOL_raw_vel		C-Pol_(raw)_velocity		mdvp:://tempest::sydney/mdv/radarRaw.cpol&VEL	rapic.vel	m/s	0 0 0	radial	0 0
+CPOL_raw_vel2		C-Pol_(raw)_velocity2		mdvp:://tempest::sydney/mdv/radarRaw.cpol&VEL	vel.colors	m/s	0 0 0	radial	1 0
+
+CPOL_radial_dbz		C-Pol_(radial)_reflectivity	mdvp:://tempest::sydney/mdv/radarRadial.cpol&DBZ	rapic.dbz	dBZ	0 0 0	radial	0 0
+CPOL_radial_dbz2	C-Pol_(radial)_reflectivity2	mdvp:://tempest::sydney/mdv/radarRadial.cpol&DBZ	dbz.colors	dBZ	0 0 0	radial	1 0
+
+CPOL_radial_vel		C-Pol_(radial)_velocity		mdvp:://tempest::sydney/mdv/radarRadial.cpol&VEL	rapic.vel	m/s	0 0 0	radial	0 0
+CPOL_radial_vel2	C-Pol_(radial)_velocity2	mdvp:://tempest::sydney/mdv/radarRadial.cpol&VEL	vel.colors	m/s	0 0 0	radial	1 0
+
+CPOL_ppi_dbz		C-Pol_(ppi)_reflectivity	mdvp:://tempest::sydney/mdv/radarPPI.cpol&DBZ	rapic.dbz	dBZ	0 0 0	cart	0 0
+CPOL_ppi_dbz2		C-Pol_(ppi)_reflectivity2	mdvp:://tempest::sydney/mdv/radarPPI.cpol&DBZ	dbz.colors	dBZ	0 0 0	cart	0 0
+CPOL_ppi_hiRes_dbz      C-Pol_(ppi)_hiRes_reflectivity  mdvp:://tempest::sydney/mdv/radarPPI.cpol.hiRes&DBZ dbz.colors  dBZ     0 0 0   cart    0 0 
+
+CPOL_ppi_vel		C-Pol_(ppi)_velocity		mdvp:://tempest::sydney/mdv/radarPPI.cpol&VEL	rapic.vel	m/s	0 0 0	cart	0 0
+CPOL_ppi_vel2		C-Pol_(ppi)_velocity2		mdvp:://tempest::sydney/mdv/radarPPI.cpol&VEL	vel.colors	m/s	0 0 0	cart	0 0
+CPOL_ppi_hiRes_vel      C-Pol_(ppi)_hiRes_velocity      mdvp:://tempest::sydney/mdv/radarPPI.cpol.hiRes&VEL vel.colors  m/s     0 0 0   cart    0 0  
+
+#
+# Storms (from titanGrid)
+#
+Storm_area		Storm_area			mdvp:://tempest::sydney/mdv/storms&Area			storm_area.colors	km2	0 0 0	cart	1 0
+Storm_growth_rate	Storm_growth			mdvp:://tempest::sydney/mdv/storms&Growth^Rate		growth_rate.colors	km2	0 0 0	cart	1 0
+
+#
+# Advection
+#
+Storm_area_advect30	Storm_area_advect_30		mdvp:://tempest::sydney/mdv/stormAdvect30&Area		storm_area.colors	km2	0 0 0	cart	0 0
+Storm_area_advect60	Storm_area_advect_60		mdvp:://tempest::sydney/mdv/stormAdvect60&Area		storm_area.colors	km2	0 0 0	cart	0 0
+
+Storm_growth_advect30	Storm_growth_rate_30		mdvp:://tempest::sydney/mdv/stormAdvect30&Growth^Rate	growth_rate.colors	km2/hr	0 0 0	cart	0 0
+Storm_growth_advect60	Storm_growth_rate_60		mdvp:://tempest::sydney/mdv/stormAdvect60&Growth^Rate	growth_rate.colors	km2/hr	0 0 0	cart	0 0
+
+dBZ_advect30		Reflectivity_advect_30		mdvp:://tempest::sydney/mdv/dbzAdvect30&DBZ			dbz.colors		dBZ	0 0 0	cart	1 0
+dBZ_advect60		Reflectivity_advect_60		mdvp:://tempest::sydney/mdv/dbzAdvect60&DBZ			dbz.colors		dBZ	0 0 0	cart	1 0
+
+Strat_advect30		Stratiform_advect_30		mdvp:://tempest::sydney/mdv/stratAdvect30&#	                dbz.colors	        dBZ	0 0 0	cart	1 0
+rs
+Strat_advect60		Stratiform_advect_60		mdvp:://tempest::sydney/mdv/stratAdvect60&#0			dbz.colors		dBZ	0 0 0	cart	1 0
+
+#
+# Adjoint model
+#
+Adjoint_bouy		Adjoint_bouyancy		mdvp:://tempest::sydney/mdv/adjoint&temp		temp.colors		deg_C	0 0 0	cart	1 0
+Adjoint_conv		Adjoint_convergence		mdvp:://tempest::sydney/mdv/adjoint&div			conv.colors		m/s/km	0 0 0	cart	1 0
+Adjoint_w		Adjoint_w		        mdvp:://tempest::sydney/mdv/adjoint&#2			wvel.colors		m/s/km	0 0 0	cart	1 0
+
+
+#
+# WDSS grids
+#
+Prob_hail      Prob_hail               mdvp:://tempest:0:sydney/mdv/wdss_hailgrids&#0          percent.colors           %     0       0       0       cart    1       0
+Prob_>50%hail      Prob_>50%hail       mdvp:://tempest:0:sydney/mdv/wdss_hailgrids&#0          percent_50up.colors           %     0       0       0       cart    1       0
+Prob_svrhail   Prob_svrhail            mdvp:://tempest:0:sydney/mdv/wdss_hailgrids&#1          percent.colors           %     0       0       0       cart    1       0
+Prob_>50%svrhail   Prob_>50%svrhail    mdvp:://tempest:0:sydney/mdv/wdss_hailgrids&#1          percent_50up.colors           %     0       0       0       cart    1       0
+Hailsize       Hailsize                mdvp:://tempest:0:sydney/mdv/wdss_hailgrids&#2          hailsize.colors         in*100     0       0       0       cart    1       0
+#Helicity       Helicity                mdvp:://tempest:0:sydney/mdv/wdss_hailgrids&#3          helicity.colors         circ     0       0       0       cart    1       0
+ll_shear       ll_shear                mdvp:://tempest:0:sydney/mdv/wdss_mesogrids&#3          tvs.colors      m/s/km     0       0       0       cart    1       0
+Max_shear      Max_shear               mdvp:://tempest:0:sydney/mdv/wdss_mesogrids&#4          tvs.colors      m/s/km     0       0       0       cart    1       0
+Max_dvel       Max_dvel                mdvp:://tempest:0:sydney/mdv/wdss_mesogrids&#2          lowlevel_dvel.colors      m/s     0       0       0       cart    1       0
+tvs_lldvel     tvs_lldvel              mdvp:://tempest:0:sydney/mdv/wdss_tvsgrids&#0          lowlevel_dvel.colors      m/s     0       0       0       cart    1       0
+tvs_maxdvel    tvs_maxdvel             mdvp:://tempest:0:sydney/mdv/wdss_tvsgrids&#1          lowlevel_dvel.colors      m/s     0       0       0       cart    1       0
+tvs_llshear    tvs_llshear             mdvp:://tempest:0:sydney/mdv/wdss_tvsgrids&#2          tvs.colors      m/s/km     0       0       0       cart    1       0
+tvs_maxshear   tvs_maxshear            mdvp:://tempest:0:sydney/mdv/wdss_tvsgrids&#3          tvs.colors      m/s/km     0       0       0       cart    1       0
+
+#
+# BdryGrid
+#
+Bdry_steer_flow30	Boundary_steering_flow_30	mdvp:://tempest:0:sydney/mdv/bdryGrid30&Steering^Flow		bdryRelFlow.colors	m/s	0 0 0	cart	1 0
+run1BRSF30	run1BRSF30	mdvp:://tempest:0:sydney/mdv/run1_bdryGrid30&Steering^Flow		bdryRelFlow.colors	m/s	0 0 0	cart	1 0
+run2BRSF30	run2BRSF30	mdvp:://tempest:0:sydney/mdv/run2_bdryGrid30&Steering^Flow		bdryRelFlow.colors	m/s	0 0 0	cart	1 0
+run3BRSF30	run3BRSF30	mdvp:://tempest:0:sydney/mdv/run3_bdryGrid30&Steering^Flow		bdryRelFlow.colors	m/s	0 0 0	cart	1 0
+Bdry_steer_flow60	Boundary_steering_flow_60	mdvp:://tempest:0:sydney/mdv/bdryGrid60&Steering^Flow		bdryRelFlow.colors	m/s	0 0 0	cart	1 0
+
+Bdry_speed30		Boundary_speed_30		mdvp:://tempest:0:sydney/mdv/bdryGrid30&Speed			bdrySpeed.colors	m/s	0 0 0	cart	1 0
+Bdry_speed60		Boundary_speed_60		mdvp:://tempest:0:sydney/mdv/bdryGrid60&Speed			bdrySpeed.colors	m/s	0 0 0	cart	1 0
+
+Bdry_shear30		Boundary_shear_30		mdvp:://tempest:0:sydney/mdv/bdryGrid30&Shear			bdryShear.colors	m/s	0 0 0	cart	1 0
+run1shear30		run1shear_30		mdvp:://tempest:0:sydney/mdv/run1_bdryGrid30&Shear			bdryShear.colors	m/s	0 0 0	cart	1 0
+run2shear30		run2shear_30		mdvp:://tempest:0:sydney/mdv/run2_bdryGrid30&Shear			bdryShear.colors	m/s	0 0 0	cart	1 0
+run3shear30		run3shear_30		mdvp:://tempest:0:sydney/mdv/run3_bdryGrid30&Shear			bdryShear.colors	m/s	0 0 0	cart	1 0
+Bdry_shear60		Boundary_shear_60		mdvp:://tempest:0:sydney/mdv/bdryGrid60&Shear			bdryShear.colors	m/s	0 0 0	cart	1 0
+
+Bdry_maxW30		Boundary_maxW_30		mdvp:://tempest:0:sydney/mdv/bdryGrid30&Max^W			wvel.colors		m/s	0 0 0	cart	1 0
+run1maxW30		run1maxW_30		mdvp:://tempest:0:sydney/mdv/run1_bdryGrid30&Max^W			wvel.colors		m/s	0 0 0	cart	1 0
+run1maxW30		run2maxW_30		mdvp:://tempest:0:sydney/mdv/run2_bdryGrid30&Max^W			wvel.colors		m/s	0 0 0	cart	1 0
+run1maxW30		run3maxW_30		mdvp:://tempest:0:sydney/mdv/run3_bdryGrid30&Max^W			wvel.colors		m/s	0 0 0	cart	1 0
+Bdry_maxW60		Boundary_maxW_60		mdvp:://tempest:0:sydney/mdv/bdryGrid60&Max^W			wvel.colors		m/s	0 0 0	cart	1 0
+
+#
+# BdryCollision
+#
+Bdry_collision30	Boundary_collision_30		mdvp:://tempest::sydney/mdv/bdryCollision30&Collision		collisionInterest.colors	m/s	0 0 0	cart	1 0
+Bdry_collision60	Boundary_collision_60		mdvp:://tempest::sydney/mdv/bdryCollision60&Collision		collisionInterest.colors	m/s	0 0 0	cart	1 0
+
+Bdry_lifting30		Boundary_lifting_30		mdvp:://tempest::sydney/mdv/bdryCollision30&Lifting^Area		collisionInterest.colors	m/s	0 0 0	cart	1 0
+Bdry_lifting60		Boundary_lifting_60		mdvp:://tempest::sydney/mdv/bdryCollision60&Lifting^Area		collisionInterest.colors	m/s	0 0 0	cart	1 0
+
+Bdry_col_speed30	Boundary_collision_speed_30	mdvp:://tempest:0:sydney/mdv/bdryCollision30&Speed			collisionSpeed.colors		m/s	0 0 0	cart	1 0
+Bdry_col_speed60	Boundary_collision_speed_60	mdvp:://tempest:0:sydney/mdv/bdryCollision60&Speed			collisionSpeed.colors		m/s	0 0 0	cart	1 0
+
+#
+# BdryStormCollision
+#
+Bdry_storm_col30	Bdry_storm_collision_30		mdvp:://tempest:0:sydney/mdv/bdryStormCol30&Collision		time.colors		s	0 0 0	cart 1 0
+Bdry_storm_col60	Bdry_storm_collision_60		mdvp:://tempest:0:sydney/mdv/bdryStormCol60&Collision		time.colors		s	0 0 0	cart 1 0
+
+#
+# mcolided tests
+Colide_veldata          Colide_veldata                  mdvp:://tempest:0:sydney/mdv/colide&VEL_data                  vel.colors             m/s      0 0 0   cart 0 0
+Colide_veldetect        Colide_veldetect                mdvp:://tempest:0:sydney/mdv/colide&VEL_detect                vel.colors             m/s      0 0 0   cart 0 0
+Colide_veldirect        Colide_veldirect                mdvp:://tempest:0:sydney/mdv/colide&VEL_direct                vel.colors             m/s      0 0 0   cart 0 0
+Colide_velmc            Colide_velmc                    mdvp:://tempest:0:sydney/mdv/colide&VEL_mc                    vel.colors             m/s      0 0 0   cart 0 0
+Colide_dbzdata          Colide_dbzdata                  mdvp:://tempest:0:sydney/mdv/colide&DBZ_data                  dbz.colors             dbz      0 0 0   cart 0 0
+Colide_dbzdetect        Colide_dbzdetect                mdvp:://tempest:0:sydney/mdv/colide&DBZ_detect                dbz.colors             dbz      0 0 0   cart 0 0
+Colide_dbzdirect        Colide_dbzdirect                mdvp:://tempest:0:sydney/mdv/colide&DBZ_direct                dbz.colors             dbz      0 0 0   cart 0 0
+Colide_dbzmc            Colide_dbzmc                    mdvp:://tempest:0:sydney/mdv/colide&DBZ_mc                    dbz.colors             dbz      0 0 0   cart 0 0
+Detection               Detection                       mdvp:://tempest:0:sydney/mdv/colide&detection                 fuzzy_v2.colors             dbz      0 0 0   cart 0 0
+Motioncancel            Motioncancel                    mdvp:://tempest:0:sydney/mdv/colide&motion_cancel             fuzzy_v2.colors             dbz      0 0 0   cart 0 0
+CMotioncancel           CMotioncancel                   mdvp:://tempest:0:sydney/mdv/colide&cmotion_cancel            fuzzy_v2.colors             dbz      0 0 0   cart 0 0
+FinalMotioncancel       FinalMotioncancel               mdvp:://tempest:0:sydney/mdv/colide&final_motion_cancel       fuzzy_v2.colors             dbz      0 0 0   cart 0 0
+emcsmoothed             emcsmoothed                     mdvp:://tempest:0:sydney/mdv/colide&emc_smoothed_dilated      fuzzy_v2.colors             dbz      0 0 0   cart 0 0
+line_final              line_final                      mdvp:://tempest:0:sydney/mdv/colide&line_final                fuzzy_v2.colors             dbz      0 0 0   cart 0 0
+#
+# Cronus Initiation
+#
+Init_steer_flow30	Init_steering_flow_30		mdvp:://tempest:0:sydney/mdv/cronusInit30&Steering^Flow	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Init_steer_flow60	Init_steering_flow_60		mdvp:://tempest:0:sydney/mdv/cronusInit60&Steering^Flow	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Init_lifting30		Init_lifting_30			mdvp:://tempest:0:sydney/mdv/cronusInit30&Lifting^Area	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Init_lifting60		Init_lifting_60			mdvp:://tempest:0:sydney/mdv/cronusInit60&Lifting^Area	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Init_radarCu30		Init_radarCu_30			mdvp:://tempest:0:sydney/mdv/cronusInit30&RadarCu		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Init_radarCu60		Init_radarCu_60			mdvp:://tempest:0:sydney/mdv/cronusInit60&RadarCu		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Init_maxW30		Init_maxW_30			mdvp:://tempest:0:sydney/mdv/cronusInit30&Max^W		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Init_maxW60		Init_maxW_60			mdvp:://tempest:0:sydney/mdv/cronusInit60&Max^W		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Init_30			Init_Forecast_30		mdvp:://tempest:0:sydney/mdv/cronusInit30&Initiation30	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Init_60			Init_Forecast_60		mdvp:://tempest:0:sydney/mdv/cronusInit60&Initiation60	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+
+#
+# Cronus Growth
+#
+Grow_steer_flow30	Grow_steering_flow_30		mdvp:://tempest:0:sydney/mdv/cronusGrow30&Steering^Flow		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Grow_steer_flow60	Grow_steering_flow_60		mdvp:://tempest:0:sydney/mdv/cronusGrow60&Steering^Flow		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Grow_storm_area30	Grow_storm_area_30		mdvp:://tempest:0:sydney/mdv/cronusGrow30&Storm^Area		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Grow_storm_area60	Grow_storm_area_60		mdvp:://tempest:0:sydney/mdv/cronusGrow60&Storm^Area		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Grow_positive30		Grow_positive_30		mdvp:://tempest:0:sydney/mdv/cronusGrow30&PosStorm^Growth	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Grow_positive60		Grow_positive_60		mdvp:://tempest:0:sydney/mdv/cronusGrow60&PosStorm^Growth	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Grow_negative30		Grow_negative_30		mdvp:://tempest:0:sydney/mdv/cronusGrow30&NegStorm^Growth	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Grow_negative60		Grow_negative_60		mdvp:://tempest:0:sydney/mdv/cronusGrow60&NegStorm^Growth	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Grow_bdry_shear30	Grow_bdry_shear_30		mdvp:://tempest:0:sydney/mdv/cronusGrow30&Boundary^Shear	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Grow_bdry_shear60	Grow_bdry_shear_60		mdvp:://tempest:0:sydney/mdv/cronusGrow60&Boundary^Shear	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Grow_lifting30		Grow_lifting_30			mdvp:://tempest:0:sydney/mdv/cronusGrow30&Lifting^Area	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Grow_lifting60		Grow_lifting_60			mdvp:://tempest:0:sydney/mdv/cronusGrow60&Lifting^Area	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Grow_bdryStorm30	Grow_bdry_storm_30		mdvp:://tempest:0:sydney/mdv/cronusGrow30&BdryStorm^Colli	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Grow_bdryStorm60	Grow_bdry_storm_60		mdvp:://tempest:0:sydney/mdv/cronusGrow60&BdryStorm^Colli	fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Grow_maxW30		Grow_maxW_30			mdvp:://tempest:0:sydney/mdv/cronusGrow30&Max^W		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Grow_maxW60		Grow_maxW_60			mdvp:://tempest:0:sydney/mdv/cronusGrow60&Max^W		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+Grow_30			Grow_Forecast_30		mdvp:://tempest:0:sydney/mdv/cronusGrow30&Growth30		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+Grow_60			Grow_Forecast_60		mdvp:://tempest:0:sydney/mdv/cronusGrow60&Growth60		fuzzy_v2.colors		interest	0 0 0	cart	1 0
+
+#
+# Gandi
+#
+gandi_state30		gandi_state_30			mdvp:://tempest:0:sydney/mdv/gandi30&State			gandi_state.colors	state		0 0 0	cart	1 0
+gandi_state60		gandi_state_60			mdvp:://tempest:0:sydney/mdv/gandi60&State			gandi_state.colors	state		0 0 0	cart	1 0
+
+DBZ_FCAST30		30min_REFLECTIVITY_FORECAST	mdvp:://tempest:0:sydney/mdv/gandi30&DBZ			dbz.colors		dBZ		34 100 70	cart	1 0
+DBZ_FCAST60		60min_REFLECTIVITY_FORECAST	mdvp:://tempest:0:sydney/mdv/gandi60&DBZ			dbz.colors		dBZ		34 100 70	cart	1 0
+
+Precip_FCAST30		30min_PRECIP_RATE_FORECAST	mdvp:://tempest:0:sydney/mdv/gandi30&Precip^Rate		Olympics2000_precip.colors		mm/hr		0 0 0	cart	1 0
+Precip_FCAST60		60min_PRECIP_RATE_FORECAST	mdvp:://tempest:0:sydney/mdv/gandi60&Precip^Rate		Olympics2000_precip.colors		mm/hr		0 0 0	cart	1 0
+
+#
+# Example of autoscaling...
+#
+#TREC-DBZ    TREC-DBZ_0.5    mdvp:://tempest::dia/mdv/trec/ftg&dBZ   dbz.colors    dBZ     -5   80  5  cart   1 0
+#TREC-U    TREC-U    mdvp:://tempest::dia/mdv/trec/ftg&U^comp   vel.colors    dBZ     -5   80  5  cart,autoscale   1 0
+#TREC-V    TREC-V    mdvp:://tempest::dia/mdv/trec/ftg&V^comp   vel.colors    dBZ     -5   80  5  cart,autoscale   1 0
+#
+</GRIDS>
+
+<WINDS>
+
+# Note: URL should be of the form "protocol://host:port/dir/&" 
+# The U,V and W field names will be appended to complete the URL
+#   Use the name "None" to indicate no W field componet.
+#
+#----------------------------------------------------------------------------
+# Legend_label  URL U V W_fieldnames units  ON/OFF [Color]
+#----------------------------------------------------------------------------
+
+Model		mdvp:://tempest::sydney/mdv/adjoint&		#0 #1	None	km/hr	1	white
+CTREC		mdvp:://tempest::sydney/mdv/ctrec&		#1 #2	None	m/s	1	yellow
+Advect		mdvp:://tempest::sydney/mdv/dbzAdvect30&	#1 #2	None	m/s	1	pink
+Surface		mdvp:://tempest::sydney/mdv/adjoint&		#7 #8	None	m/s	1	turquoise
+
+</WINDS>
+
+<MAPS>
+#
+# MAP_CODE Must be less than 16 characters, Color must be regualr X color name
+# Complete map file name used is  map_file_subdir/Map_file_name
+# 0 = OFF, > 0 = ON, line of width N
+# Detail thresholds are in Km across the image.#
+#
+#------------------------------------------------------------------------------------------
+# MAP_CODE Control_Label   Map_File_Name   On/OFF Detail__min Detail_max Color     
+#------------------------------------------------------------------------------------------
+
+Venue_Sites  Venue_Sites    OlympicIcons.map         2  121.0    250.0  white
+Venue_Names  Venue_Names    OlympicVenues_major.map  2    0.0    120.0  yellow
+NSWCoast     NSWCoast       NSWCoast.map             2    0.0  10000.0  white
+NSW_CITIES   NSW_CITIES     NSW_cities.map           0    0.0  10000.0  cyan
+NSW_ALLCITIES NSW_ALLCITIES NSW_allcities.map        0    0.0  10000.0  red
+Govt_Areas   Govt_Areas     NSW_govt_area.map        0    0.0  10000.0  green
+CPOL_20kmRings CPOL_20kmRings cpol_range_rings_small.map   0   0.0   10000.0  wheat 
+CPOL_50kmRings CPOL_50kmRings cpol_range_rings_big.map   0   0.0   10000.0  wheat 
+#SAMUFIRBdry    SAMUFIRBdry  SAMUFIRBdry.map          0    0.0  10000.0  white
+</MAPS>
+
+######################################################################################
+######################################################################################
+######################################################################################
+######################################################################################
+######################################################################################
+<MAIN_PARAMS>
+
+# Parameter data base for the Configurable Interactive Data Display; CIDD
+
+# General informational messages - Initialisation messages
+cidd.debug_flag:            0
+
+# Data flow related messages  - More verbose
+cidd.debug1_flag:           0
+
+# Verbose diagnostics - special debugging info
+cidd.debug2_flag:           0
+
+# Uncomment the next parameter to start up cidd in archival mode
+#  Starting at the indicated time. Enter HH:MM MM/DD/YY format time string
+#  System will startup using field 0, requesting data closest to the
+# demo time. The movie frame will be centered on the time after applying
+# temporal rounding. 
+cidd.demo_time:  03:30 11/3/2000
+
+# Set times to the nearest value divisible by the number of seconds
+cidd.temporal_rounding:    360
+
+#  MOVIE Related resources
+
+cidd.movie_frame_dir: $(HOME)/tmp
+
+#  This determines how many movie frames are in the loop to start with
+#  Setting this high will cause the X server to hog memory.
+cidd.starting_movie_frames:     16
+
+# minutes per movie frame on startup
+# The display will atomatically update every this interval, throwing away its
+# oldest movie frame and creating and drawing a new one.
+cidd.time_interval:  5.0
+
+# This parameter sets the maximum number of hours to look into the future
+cidd.forecast_interval:  0
+
+# Set this paramet to 1 to get CIDD to check and reject for rendering
+# Any data that falls outside the movie frame interval + the
+# slop/strecch_factor - Used to reject "out of date" data.
+cidd.check_data_times:  0
+
+# Sets the allowable time error for data to appear in movie frames
+# (times the time_interval) (6 min * 6 = 36 minutes before or after
+# the beginning or end of the movie frame times
+cidd.stretch_factor:     10.0
+
+# Sets whether Cidd request data closest to the midpoint of a movie
+# frame(time-wise) or the end. Set to 1 to gather data nearest the
+# end, but before the end time of each movie frame 
+# 0= Midpoint requests, 1 = End point requests.
+cidd.gather_data_mode:  1
+
+# Number of milliseconds between checks for images needing redrawn
+# Set this lower on faster hardware - Recommended 50-250
+# This sets the ultimate speed of the movie looping
+cidd.redraw_interval:     100
+
+# Number of seconds between data update requests - The display will check for
+# new data every interval. Setting this below 3 seconds is not advised.
+# Every N seconds the system will check for updates to each field of data.
+# In many circumstances then, display will reload data every
+# interval. Set this wisely. Values of 10-900 are typical. Default=120
+# 
+cidd.update_interval:      30
+
+#  Number of seconds to wait for data to come in before giving up
+#  On very slow networks this may need to go as high as 180 seconds!
+cidd.data_timeout_secs: 10
+
+# Set to 1 to start up cidd in movie-on mode, 0 = off
+cidd.movie_on:         0
+
+# Set the delay at the end of the movie loop in msec 
+cidd.movie_delay: 3000
+
+# If set to 1 - forces CIDD to reload all data every time the movie frames 
+# rotate one old frame out and generate a new frame.
+cidd.reset_frames:   0
+
+# After this period of inactivity, the display
+# will reset itself to a known starting point
+# Set this <= 0 to essentially turn off.
+cidd.idle_reset_seconds: -1
+
+# When set to 1 foarces the output filename to contain height
+# information in it's file name. In this case the naming convention
+# is: ->>>  cidd_fieldname_zoomlevel_height_time.xwd
+# make sure to see: cidd.movieframe_time_format parameter
+cidd.add_height_to_filename: 0
+
+# Set the format for the frame time in the names of output xwd images.
+# Can add additional text as part of the Time string. Default is: %H%M
+# File naming convention is: ->>>  cidd_fieldname_zoomlevel_time.xwd
+cidd.movieframe_time_format:  %Y%m%d%H%M%S
+
+# This script will be exec'd if set whenever the user selects the Output Loop
+# Button, after the last image has output. The arguments will be a list
+# of each output file in the series. CIDD will prepends the cidd.image_dir to each
+# files name which takes the form: cidd_field_name_zoom_name.xwd 
+cidd.series_convert_script:
+
+# Image gEneration related resources 
+# Set this to a value to get cidd to output imagery in this directory
+# HTML and Series Output use this directory
+cidd.image_dir: $(HOME)/tmp
+
+# Image extension - Sets the output image types
+# Legal image types are png,jpg,xpm,pgm,ppm,eim
+cidd.image_ext: png
+
+# This script will be exec'd if set whenever an image is output for html mode.
+# The full path name of the xwd image will be sent as the script argument
+cidd.image_convert_script:
+
+# HTML Mode - Set this to 1 to put CIDD into the automatic HTML output mode.
+# Note: cidd.image_dir MUST be set.
+cidd.html_mode: 0
+
+# Set to 1 if one wants CIDD to run once through it's HTML output
+# plot list and then exit - Currently all fields at each zoom level
+cidd.run_once_and_exit: 0
+
+# Set to 1 to ask that data be compressed during the MDV Protocol
+# data requests. Default is = 0
+cidd.request_compressed_data: 0
+ 
+
+#                  DOMAIN RELATED RESOURCES 
+#
+# Sets the projection for cidd's plan view - Current valid choices are:
+# CARTESIAN, LAT_LON, LAMBERT
+cidd.projection_type:    CARTESIAN
+
+# These must be set if using a Lambert conformal projection - Ignored otherwise
+#cidd.lambert_lat1: 20.0
+#cidd.lambert_lat2: 60.0 
+
+# Set this to the amount grids are rotated clockwise to true north.
+# Overlays will rotate counterclockwise. - In Degrees
+# Only valid for CARTESIAN projection
+cidd.north_angle:        0.0
+
+# Set the scale factor and label for Range rings and Distance scales.
+#cidd.units_per_km:          0.5395932
+
+# Set the following to Deg for LAT_LON projections - Default is "km"
+#cidd.scale_units_label:  nm
+
+# When set to 1, always gets full domain, zooms don't force a data request
+cidd.always_get_full_domain:  0
+
+# Set the aspect ratio of the domain for Cidd. Cidd will preserve this aspect
+# ration for all zooms. Ratio is Width/Height.
+cidd.aspect_ratio:   1.0
+
+# Switch to enable the status window. 0 = off
+cidd.enable_status_window: 1
+ 
+# On startup and each time the reset button is pressed, the display
+# will indicate a click at this point, as if the user had clicked..
+cidd.reset_click_longitude: 151.230
+cidd.reset_click_latitude:  -34.017
+#
+# The Outer most domain: Overlays are clipped to this domain and 
+# pan/moves cannot exceed these edge limits.
+cidd.domain_limit_min_x:        -500
+cidd.domain_limit_max_x:         500
+cidd.domain_limit_min_y:        -500
+cidd.domain_limit_max_y:         500
+ 
+# The Lat, Long of the center of the display. Internal range rings
+# are relative to this point.
+# Kurnel Radar Location
+cidd.origin_longitude:       151.230
+cidd.origin_latitude:        -34.017
+#
+#
+# The Outer most domain:
+cidd.num_zoom_levels:       5
+cidd.start_zoom_level:      1
+#
+#
+# The number of Cached images for zooms.
+cidd.num_cache_zooms:       4
+#
+# Note, the Domain labels are used for automated output imagery.
+# It's suggested that names without spaces be used when running
+# in.
+#
+cidd.level1_label:              REGIONAL VIEW
+cidd.level1_min_xkm:                -200.0
+cidd.level1_min_ykm:                -200.0
+cidd.level1_max_xkm:                200.0
+cidd.level1_max_ykm:                200.0
+#
+cidd.level2_label:              NOWCAST DOMAIN
+cidd.level2_min_xkm:                -125.0
+cidd.level2_min_ykm:                -125.0
+cidd.level2_max_xkm:                125.0
+cidd.level2_max_ykm:                125.0
+#
+cidd.level3_label:              WWRP DOMAIN
+cidd.level3_min_xkm:                -90.0
+cidd.level3_min_ykm:                -80.0
+cidd.level3_max_xkm:                60.0
+cidd.level3_max_ykm:                70.0
+#
+cidd.level4_label:              OLYMPIC VENUES
+cidd.level4_min_xkm:                -80.0
+cidd.level4_min_ykm:                -40.0
+cidd.level4_max_xkm:                30.0
+cidd.level4_max_ykm:                70.0
+#
+cidd.level5_label:              STATE DOMAIN 
+cidd.level5_min_xkm:                -500.0
+cidd.level5_min_ykm:                -500.0
+cidd.level5_max_xkm:                500.0
+cidd.level5_max_ykm:                500.0
+
+# Vertical Range and Resolution - Establishes a vertical frame of reference.
+# All data must map correctly into this frame. min_ht  is value nearest the ground
+#  Typicaly km or FL, but could be sigma or pressure. (ht_interval can be negative)
+#  
+cidd.min_ht:                 0.25
+cidd.max_ht:                 22.25
+cidd.ht_interval:            1.0
+cidd.start_ht:               0.18
+
+# Radial data Limits
+cidd.min_rkm:                0.0
+cidd.max_rkm:                400.0
+cidd.min_adeg:               0.0
+cidd.max_adeg:               360.0
+
+# Note these can either be a local directory or a HTTP URL
+cidd.color_file_subdir:   http://www.rap.ucar.edu/colorscales 
+cidd.map_file_subdir:     http://www.rap.ucar.edu/maps
+
+# Tunnel for all DsServer (mdvp,spdbp,etc) Protocols
+# USE THIS TO CROSS A FIREWALL ON THE SERVER END OF THE CHAIN 
+#Set this to the special http tunnel that resides in the same local
+#network as the  data server hosts. This allows "tunneling" the MDV and
+#Spdb data protocols through a host, running apache:httpd that is visible
+#from the internet or intranet. Note: a special  "Apache::Mod_perl"
+#extension (The tunnel - it's similar to a cgi mechanism) must be
+#installed on the http server for this to work.
+#
+cidd.http_tunnel_url: http://www.rap.ucar.edu/DsServerTunnel
+#
+# Tunnel for the CDATA Protocol -
+# This is distinct from the DsServerTunnel, but works the same way.
+#cidd.cdata_tunnel_url: http://www.rap.ucar.edu/CdataTunnel
+#
+# USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain
+# Set this to the url of a http forwarding proxy to pass 
+# http requests through the proxy. 
+# This is usually the same as the HTTP proxy URL in your browser.
+# Note. If you need the data to flow through the proxy
+# the http_tunnel_url must be enabled
+#
+# This is NCAR's internal HTTP proxy
+#cidd.http_proxy_url: http://webcache.ucar.edu:3128/  
+#
+
+# Color Preferences - Avoid trailing spaces in color names
+cidd.foreground_color: white 
+#cidd.foreground_color: Dark Slate Gray 
+cidd.background_color: black
+cidd.range_ring_color: gray
+cidd.route_path_color: yellow
+cidd.time_axis_color: pink
+cidd.time_frame_color: gray50
+cidd.epoch_indicator_color: orange
+cidd.now_time_color: red
+cidd.time_tick_color1: cyan
+cidd.time_tick_color2: yellow
+cidd.time_tick_color3: magenta
+cidd.time_tick_color4: green
+cidd.time_tick_color5: red
+cidd.time_tick_color6: blue
+cidd.height_axis_color: pink
+cidd.height_indicator_color: gray50
+cidd.earth_reference_color: brown
+
+#Toggle for displaying the height Selector in Right Margin
+# Note Right Margin shoud be at least 50 pixels wide
+cidd.show_height_sel:       1  
+
+# Sets the relative intensity of the image, relative to the overlays on startup
+# Set between 0.2 and 1.0.
+cidd.image_inten:            0.8
+# The number of selectable intensity levels in the slider control
+cidd.inten_levels:            32
+
+# Sets the threshold in drawable grid points where image rendering 
+# is done by a filling method on the client, rather than by rectangles
+# on the Xserver.
+# Set this high if the X server is fast or the comm link to the server is slow.
+# Set this low if the X server is slow. Typical values range from 10,000 to 100,000
+cidd.image_fill_treshold:    80000
+
+# Sets the format for output of Lat, Lon's. 0= Decimal Degrees, 1 = deg min' sec"
+cidd.latlon_mode:        0
+
+# Set the format for the time strings. See 'man strftime' for format options.
+# Can add additional text as part of the Time string.
+# Default is: "%m/%d/%Y %H:%M:%S"
+cidd.label_time_format:  %Y/%m/%d %H:%M
+
+# Plot a Legend for each Grid overlay; 0=Off, 1=On
+cidd.layer_legends_on: 0
+
+# Plot a Legend for each Contour overlay; 0=Off, 1=On
+cidd.cont_legends_on: 0
+
+# Plot a Legend for each Wind overlay; 0=Off, 1=On
+cidd.wind_legends_on: 0
+    
+# Switch to turn off all data labels on the display
+cidd.display_labels: 1  
+# 
+
+# Set range_ring_spacing to a negative value to dynamically determing spacing.
+cidd.range_ring_spacing:        50.0
+# x_space, y_space in pixels determine allowable space for range ring labels
+cidd.range_ring_x_space:    40
+cidd.range_ring_y_space:    13
+cidd.azmith_interval:       30.0
+cidd.azmith_radius:         200.0
+
+
+# Toggles to turn on/off  Extras features on startup
+cidd.range_rings:             1
+cidd.azmith_lines:            1
+
+# Wind vector parameters 
+cidd.barb_shaft_len:         30
+cidd.wind_head_size:         5
+cidd.ideal_x_vectors:        20
+cidd.ideal_y_vectors:        20
+idd.wind_head_angle:        30.0
+
+# Wind Rendering Style  Options:
+# "arrow" (centered at data point),
+# "vector",(Vertex at data point )
+# "barb" (N Hemisp),
+# "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)
+# "tuft", (like a piece of yarn - the least obtrusive - like a headless vector)
+# "tickvector" (Cross ticks at wind_time_scale_interval  minutes)
+# "metbarb" (Calcs latitude - works for both hemispheres and
+# adds a label of the 10's digit off the end of the barb, ala winds aloft charts)
+# "barb_sh" (S Hemisphere),
+# "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)       
+# NOTE: When using arrow,vector,tuft,tickvector,  the data must be in
+# m/sec for the scaling to work correctly. For the others (Barbs),
+# the units are arbitrary, but the flag units on the barbs will reflect
+# the data's native units.
+cidd.wind_marker_type:      vector
+cidd.wind_w_scale_factor:    10.0
+#
+# Set this value to convert from the your reference speed units
+# to m/sec.  ie wind_units_scale_factor =  m/sec / chosen units
+# default = 1.0
+#cidd.wind_units_scale_factor:     0.2778
+cidd.wind_units_scale_factor:     1.0 
+#cidd.wind_units_scale_factor:     0.51479
+
+# Sets the length of the wind vector reference speed legend.
+cidd.wind_reference_speed: 30.0
+
+# Select the label to be printed next to the reference bar
+# Default = m/sec
+#cidd.wind_units_label:   km/hr 
+cidd.wind_units_label:    m/s 
+#cidd.wind_units_label:    kt 
+                             
+# Uncomment the following lines to turn on default contour fields
+# Uses the contour levels and the Field Label string in data.info
+# The parameters are Exact_field_label and color and optional "off"
+# Keyword. If "off" param is used, the field will be defined, but will
+# not be acitvated on startup.
+cidd.contour1_field: 30min_REFLECTIVITY_FORECAST white
+cidd.contour2_field: 60min_REFLECTIVITY_FORECAST yellow
+cidd.contour3_field: Terrain wheat
+
+# Set to 1 to have numeric labels on line contours, 0 = off
+cidd.label_contours:   0           
+
+# Uncomment the following lines to set up fields on startup that will
+# appear as overlaid fields. Layers are on by default unless the
+#optional "off" string appears last. 
+#cidd.layer5_field:  KCYS-DBZ 
+#cidd.layer4_field:  KPUX-DBZ
+#cidd.layer3_field:  KGJX-DBZ
+#cidd.layer2_field:  KGLD-DBZ
+#cidd.layer1_field:  KLNX-DBZ
+
+
+# Place Cidd fonts in asending order of size. Cidd will choose the
+# highest font number that will fit in a given screen space.
+# Pick a nice spectrum of font sizes, with all of them readable.
+cidd.num_fonts: 7
+#
+cidd.font1: 6x9
+cidd.font2: -*-courier-medium-r-normal-*-10-*-*-*-*-*-*-*
+cidd.font3: -*-courier-medium-r-normal-*-12-*-*-*-*-*-*-*
+cidd.font4: -*-courier-bold-r-normal-*-12-*-*-*-*-*-*-*
+cidd.font5: -*-courier-bold-r-normal-*-14-*-*-*-*-*-*-*
+cidd.font6: -*-courier-bold-r-normal-*-15-*-*-*-*-*-*-*
+cidd.font7: -*-courier-bold-r-normal-*-16-*-*-*-*-*-*-*
+#cidd.font8: -*-courier-bold-r-normal-*-18-*-*-*-*-*-*-*
+#cidd.font9: -*-courier-bold-r-normal-*-24-*-*-*-*-*-*-*
+#cidd.font10: -*-courier-bold-r-normal-*-30-*-*-*-*-*-*-*
+
+# font_display_mode = 1 - Clears background behind label text., 0 - No
+cidd.font_display_mode: 0 
+
+# 
+# 
+# Image Dump resources    
+cidd.horiz_image_dir:      $(HOME)/tmp
+cidd.horiz_image_fname:    ciddH.xwd
+cidd.horiz_image_command:  convert ciddH.xwd ciddH.gif;
+cidd.vert_image_dir:       $(HOME)/tmp
+cidd.vert_image_fname:     ciddV.xwd
+cidd.vert_image_command:   convert ciddV.xwd ciddV.gif;
+
+#Toggle for displaying an analog clock in the upper right hand corner of the image
+cidd.show_clock:       0
+# Set to 0 to draw the analogue clock using GMT, 1 = local time.
+cidd.draw_clock_local: 0
+
+#####################################################################################
+# GUI RELATED STUFF
+#
+# Set this parameter to force the field menu popup to this many columns
+# If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
+# column.
+cidd.num_field_menu_cols: 3
+
+# This parameter sets WSDDM specific behavior On -
+# - Go to end of loop when movie stops.
+# - No on-image no-data message when winds are missing
+cidd.wsddm_mode:            0
+
+# 
+#####################################################################################
+# Defines for the Menu Bar at the top of the main window. Functions are:
+#
+#    --- One Shot Functions ---
+# RELOAD - (Force all data to be reloaded)
+# RESET - (Set display to starting zoom, field, products on/off state, etc)
+# SET_TO_NOW - (Sets the display to current time - canceling forecast mode)
+# SET_DRAW_MODE - (Enable the Human entered feature drawing mode)
+# PRINT_BUTTON - (Save and Print the plan view image) 
+# HELP_BUTTON - (Send Netscape to a useful help Page)
+#
+#    --- Toggle things on and off ----
+# LOOP_ONOFF - (Turn the movie loop on/off)
+# WINDS_ONOFF - (Turn all winds on/off)
+# SYMPRODS_ONOFF - (Turn all Symbolic Products on/off)
+# REPORT_MODE_ONOFF - (Turn on/off COntinious REport Mode )
+#
+#    --- Display Panels ---
+# SHOW_DPD_PANEL - (Show/Hide Page Definition Panel which configures individual pages)
+# SHOW_XSECT_PANEL - (Show/Hide the Cross Section Display View Panel)
+# SHOW_GRID_PANEL - (Show/Hide the Data Source Configuration Panel)
+# SHOW_STATUS_PANEL - (Show/Hide a Status message window)
+# SHOW_TIME_PANEL - (Show/Hide the Movie loop control Panel) 
+# CLOSE_POPUPS  - (Close all Popup panels)   
+#
+#    --- Display Additional Menus ---
+# SHOW_DPD_MENU - (Show/Hide the field/page description menu)
+# SHOW_VIEW_MENU - (Show/Hide the zoom level menu)
+# SHOW_MAP_MENU - (Show/Hide the map overlay menu)
+# SHOW_PRODUCT_MENU - (Show/Hide the symbolic product menu)
+# SHOW_FORECAST_MENU - (Show/Hide the forecast mode menu)
+# SHOW_BOOKMARK_MEN - (Show/Hide the helpful bookmark menu)
+# 
+#    -- Deprecated functions ---
+# SHOW_PRODSEL - (Show/Hide Prodsel98)
+# SHOW_EXPRT - (Show/Hide exprt)
+#
+#####################################################################################
+#
+# When changing: cidd.num_menu_bar_cells
+# Don't forget to change the index numbers!
+#
+#####################################################################################
+cidd.num_menu_bar_cells: 15
+#
+cidd.menu_bar_label1: Fields...
+cidd.menu_bar_funct1: SHOW_DPD_MENU
+# 
+cidd.menu_bar_label2: Symprods...
+cidd.menu_bar_funct2: SHOW_PRODUCT_MENU
+#
+cidd.menu_bar_label3: Draw...
+cidd.menu_bar_funct3: SET_DRAW_MODE
+#
+cidd.menu_bar_label4: Maps...
+cidd.menu_bar_funct4: SHOW_MAP_MENU
+#
+cidd.menu_bar_label5: View...
+cidd.menu_bar_funct5: SHOW_VIEW_MENU
+#
+cidd.menu_bar_label6: Movie...
+cidd.menu_bar_funct6: SHOW_TIME_PANEL
+#
+cidd.menu_bar_label7: Now
+cidd.menu_bar_funct7: SET_TO_NOW
+#
+cidd.menu_bar_label8: Overlays...
+cidd.menu_bar_funct8: SHOW_DPD_PANEL
+#
+cidd.menu_bar_label9: Config...
+cidd.menu_bar_funct9: SHOW_GRID_PANEL
+#
+cidd.menu_bar_label10: X-Section...
+cidd.menu_bar_funct10: SHOW_XSECT_PANEL
+#
+cidd.menu_bar_label11: Reload
+cidd.menu_bar_funct11: RELOAD
+#
+cidd.menu_bar_label12: Reset
+cidd.menu_bar_funct12: RESET
+#
+cidd.menu_bar_label13: Close Popups
+cidd.menu_bar_funct13: CLOSE_POPUPS
+#
+cidd.menu_bar_label14: Report Mode
+cidd.menu_bar_funct14: REPORT_MODE_ONOFF 
+#  
+cidd.menu_bar_label15: Products
+cidd.menu_bar_funct15: SYMPRODS_ONOFF
+
+##########################################
+
+cidd.horiz_frame_label:  SYDNEY 2000 OLYMPICS
+
+# Set the message to display when no data is availible
+cidd.no_data_message:     NO DATA FOUND (in this area at the selected time)
+
+# HELP TEXT LINKS                       
+# These take the form:
+# cidd.widget_name_help:       file_name:file_index_key_string
+# The HELPPATH envoronment variable must be set or the help file
+# must be located in /ussr/lib/help.
+# Note the file name gets expanded to file_name.info
+#
+cidd.canvas_help:              cidd_help:canvas
+cidd.frame_message_help:       cidd_help:frame_message
+
+cidd.help_command:   netscape_starter -remote 'openURL(http://www.rap.ucar.edu/projects/nowcast)'
+
+#
+# This command is run whenever a BOOKMARK_MENU button is pressed.
+# The characters; %U are replaced with the url text from the
+# parameters; cidd.bookmarkN below.
+cidd.bookmark_command:  netscape_starter -remote 'openURL(%U)'
+
+# Number of bookmarks in the Menu
+cidd.num_bookmarks: 10
+
+# BOOKMARKS FOR Quick Reference
+# Create N Bookmark and Label parameters
+# cidd.bookmarkN: - The exact URL text for use in the cidd.bookmark_command.
+# cidd.bookmark_labelN: The Label that appears in the menu
+#
+cidd.bookmark1:       http://www.sydney.olympic.org
+cidd.bookmark_label1: Olympics 2000
+
+cidd.bookmark2:       http://www.bom.gov.au/info/wmd/olympic
+cidd.bookmark_label2: BOM at Olympics 2000
+
+cidd.bookmark3:       http://www.bom.gov.au
+cidd.bookmark_label3: BOM
+
+cidd.bookmark4:       http://www.nsw.bom.gov.au/web
+cidd.bookmark_label4: BOM NSW Region
+
+cidd.bookmark5:       http://www.nsw.bom.gov.au/web/menu/nswmenu.htm
+cidd.bookmark_label5: BOM NSW Forecasting
+
+cidd.bookmark6:       http://www.nsw.bom.gov.au
+cidd.bookmark_label6: BOM AIFS Master Index
+
+cidd.bookmark7:       http://ncaifs.nsw.bom.gov.au/wwrp/html/wwrpload.html
+cidd.bookmark_label7: WWRP at BOM
+
+cidd.bookmark8:       http://www.ucar.edu
+cidd.bookmark_label8: NCAR
+
+cidd.bookmark9:       http://www.rap.ucar.edu
+cidd.bookmark_label9: RAP
+
+cidd.bookmark10:       http://www.rap.ucar.edu/projects/nowcast
+cidd.bookmark_label10: autoNowcasting
+
+
+cidd.horiz_default_height:    885
+cidd.horiz_min_height:        400
+cidd.horiz_min_width:         400
+cidd.horiz_default_x_pos:     0
+cidd.horiz_default_y_pos:     0
+
+cidd.horiz_top_margin:        20
+cidd.horiz_bot_margin:        20
+cidd.horiz_left_margin:       20
+cidd.horiz_right_margin:      60
+
+cidd.vert_min_height:        120
+cidd.vert_min_width:         120
+cidd.vert_default_height:    240
+cidd.vert_default_width:     500
+
+cidd.vert_top_margin:        20
+cidd.vert_bot_margin:        20
+cidd.vert_left_margin:       20
+cidd.vert_right_margin:      30
+
+# Resources related to EXPRT, EXPT
+
+cidd.expt_feature_scale:   12500
+cidd.expt_font_scale:      45
+cidd.expt_mark_size:       5
+cidd.exprt_command:
+
+# Resources for compatibility with TITAN-TIME HISTORY Program
+
+cidd.track_server_instance:         Operations
+cidd.track_past_plot_period:        0
+cidd.track_future_plot_period:      0
+cidd.track_n_forecast_steps:        5
+cidd.track_forecast_interval:       6
+cidd.track_data_time_margin:        750
+cidd.track_past_color:              yellow
+cidd.track_current_color:           cyan
+cidd.track_future_color:            blue
+cidd.track_forecast_color:          red
+
+#  KEYS for SHARED MEMORY SEGMENTS
+
+# Key for coordinate shared memory
+cidd.coord_key:               61500
+
+# Key for TITAN control shared memory
+cidd.titan_key               61501
+
+# PRDS Product rendering related resources
+# Set to 0 to ignore the products time info when rendering products.
+# Set to 1 to skip over products that aren't valid in the temporal domain
+# of the images 
+# Set to 2 to skip over products that aren't valid in the temporal domain
+# specified by product_time_width 
+cidd.product_time_selection: 1
+
+# Allows products only N seconds away from frame time centroid
+cidd.product_time_width:  3600
+
+#  Default width of lines for symbolic products
+cidd.product_line_width: 2
+cidd.contour_line_width: 2
+
+#  Starting Size size of fonts for symbolic products - From above list
+cidd.product_font_size: 2
+
+#Detail thresholds and font adjustment parameters. First implicit threshold is 0.0
+# If the current distance across a domain is between the thresholds, then an adjustment is made to the
+# default/selected font size. This is used to change the size of the fonts
+# automatically as the users zooms in and out. Threshold values are in km across the
+# viewing domain
+cidd.product_detail_threshold1: 50.0
+cidd.product_detail_adjustment1: +3
+#
+cidd.product_detail_threshold2: 200.0
+cidd.product_detail_adjustment2: +2
+#
+cidd.product_detail_threshold3: 400.0
+cidd.product_detail_adjustment3: +1
+
+# Product Scaling Constant. - Set this constant to determine
+# at what zoom icons and will have a scale factor of 1.0
+# Default = 300. Function = log10(Constant /km_across_screen) + 1.0;
+cidd.scale_constant: 300.0 
+	 
+
+# PROD_SEL related resources. - Cidd has little control over prod_sel products
+# except to specify a time of interest. - This interest time can either follow the
+# movie frame time or can be set to the end frame time. Typically archival use
+# sets the interest time to each frames, while for real-time, the users often like
+# the latest products. Use Prod_sel.params to change all other prod_sel product
+# behaviors.
+#
+# Key for PROD_SEL shared memory
+#cidd.prod_sel_stat_key:   13333
+#cidd.prod_sel_buf_key:    13334
+
+</MAIN_PARAMS>
+
+<DRAW_EXPORT>
+///////////// dexport_info ///////////////////////////////
+// Draw/Export Parameters
+//
+// Each Entry needs:
+// ID_Label FMQ_URL Valid_Minutes Default_ID_no
+//    ID_LABEL - This is used to designate Product types
+//    FMQ_URL: example: fmqp:://host::dir/file
+//    Valid_Minutes: How many minutes the product is valid by default
+//    Default_ID_no: Default Data Type (Enumerated ID)
+//
+
+dexport_info = {
+    {"Boundary", "fmqp:://localhost::/tmp/humanBdry",  20, 0}
+};
+</DRAW_EXPORT>
+
+
+<SYMPRODS>
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+
+///////////// use_domain_limits ///////////////////////
+//
+// Control to set domain based clip requests on.
+// Gathers data only in the visible domain when set to true.
+// Type: boolean
+//
+ 
+use_domain_limits = TRUE;
+  
+  ///////////// short_requests //////////////////////////
+  //
+  // Gather Data Frame by Frame, Otherwise by loop span.
+  // Gathers Products valid for the current frame only.
+  // Type: boolean
+  //
+   
+short_requests = TRUE;
+///////////// prod_info ///////////////////////////////
+//
+// Product Source and Rendering Information Array
+// The fields in the structure are as follows:
+//   menu_label: Label to be used for the product in menu.
+//
+//   url: for retrieving the data.
+//
+//   data_type: data type used when querying the SPDB data server
+//     (set to 0 to retrieve all data regardless of type).
+//
+//   url: URL for the data. -
+//     example: spdbp:transform_executable:[param_file]//host.dom:[port]:dir1/dir2
+//
+//   render_type: Select how temporal clipping is done:
+//      RENDER_ALL: Do no temporal clipping.
+//      RENDER_ALL_VALID: Render all Valid in frame
+//      RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame
+//      RENDER_LATEST_IN_FRAME: Render the latest product in the frame.
+//      RENDER_LATEST_IN_LOOP:  Render the latest product valid in the movie loop
+//      RENDER_FIRST_BEFORE_DATA_TIME: Render the latest product before the data time in each frame.
+//      RENDER_FIRST_AFTER_DATA_TIME:Render the earliest product after the data time in each frame.
+//      RENDER_ALL_BEFORE_DATA_TIME: Render all valid products before the data time in each frame.
+//      RENDER_ALL_AFTER_DATA_TIME:  Render all valid products after the data time in each frame.
+//        Note: all comparisions are less than or equal or greater than or equal  
+//
+//   on_by_default: True or False
+//
+//   minutes_allow_before: Stretch the frame time this many minutes - prior
+//   minutes_allow_after: Stretch the frame time this many minutes - after
+//        When using data time modes, these allowances effectively widen
+//        The temporal limits.
+//
+//  text_off_threshold: Threshold where text disappears. Usees the function:
+//         log10(scale_constant /km_distance_across_screen ) + 1.0
+//         Use 0 to disable the off feature. (always displayed)
+//         Note: scale_constant set in MAIN_PARAM section.      
+
+prod_info = {
+  {
+    menu_label = "Auto-Detection Boundaries",
+    url = "spdbp:Bdry2Symprod:bdryDetect//tempest::sydney/spdb/colide",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "30 Minute Colide Extrapolations",
+    url = "spdbp:Bdry2Symprod:bdryExtrap30//tempest::sydney/spdb/colide",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "60 Minute Colide Extrapolations",
+    url = "spdbp:Bdry2Symprod:bdryExtrap60//tempest::sydney/spdb/colide",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "Human-Detection Boundaries",
+    url = "spdbp:Bdry2Symprod:bdryHuman//tempest::sydney/spdb/humanBdry",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_LOOP,
+    on_by_default = TRUE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "Verification Boundaries",
+    url = "spdbp:Bdry2Symprod:bdryVerify//tempest::sydney/spdb/verifyBdry",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "Bhit Boundaries",
+    url = "spdbp:Bdry2Symprod:bdryBhit//tempest::sydney/spdb/virtualBdry",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "Analysis Boundaries",
+    url = "spdbp:Bdry2Symprod:bdryDetect//tempest::sydney/spdb/boundaries",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "30 Minute Boundary Extrapolations",
+    url = "spdbp:Bdry2Symprod:bdryExtrap30//tempest::sydney/spdb/boundaries",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "60 Minute Boundary Extrapolations",
+    url = "spdbp:Bdry2Symprod:bdryExtrap60//tempest::sydney/spdb/boundaries",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "Titan Storm Detections",
+    url = "spdbp:Tstorms2Symprod:titanDetect//tempest::sydney/spdb/storms",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = FALSE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "30 Minute Titan Extrapolations",
+    url = "spdbp:Tstorms2Symprod:titanExtrap30//tempest::sydney/spdb/storms",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = FALSE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "60 Minute Titan Extrapolations",
+    url = "spdbp:Tstorms2Symprod:titanExtrap60//tempest::sydney/spdb/storms",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = FALSE,
+    minutes_allow_before = 10.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "Surface Observations",
+    url = "spdbp:Metar2Symprod:surface//tempest::sydney/spdb/surface",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 60.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0
+  },
+
+  {
+    menu_label = "Surface Wind Observations",
+    url = "spdbp:Metar2Symprod:surface//tempest::sydney/spdb/surface",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = FALSE,
+    minutes_allow_before = 60.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 1000
+  },
+ {
+    menu_label ="NSSL HAIL",  
+    url = "spdbp:GenPt2Symprod://tempest::sydney/spdb/hail",
+    data_type = 0,  
+    render_type = RENDER_LATEST_IN_FRAME,  
+    on_by_default = TRUE,  
+    minutes_allow_before = 10.0,  
+    minutes_allow_after = 0.0,  
+    text_off_threshold = 0.0  
+  },  
+ {
+    menu_label ="NSSL Meso Cyclones",  
+    url = "spdbp:GenPt2Symprod://tempest::sydney/spdb/meso",
+    data_type = 0,  
+    render_type = RENDER_LATEST_IN_FRAME,  
+    on_by_default = TRUE,  
+    minutes_allow_before = 10.0,  
+    minutes_allow_after = 0.0,  
+    text_off_threshold = 0.0  
+  },  
+  {
+    menu_label ="NSSL TVS",  
+    url = "spdbp:GenPt2Symprod://tempest::sydney/spdb/tvs",
+    data_type = 0,  
+    render_type = RENDER_LATEST_IN_FRAME,  
+    on_by_default = TRUE,  
+    minutes_allow_before = 10.0,  
+    minutes_allow_after = 0.0,  
+    text_off_threshold = 0.0  
+  }  
+};
+
+</SYMPRODS> 

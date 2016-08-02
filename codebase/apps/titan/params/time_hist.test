@@ -1,0 +1,311 @@
+########################################################################
+# parameters file for time_hist
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# April 1991
+#
+#########################################################################
+
+#
+# debugging
+#
+
+time_hist.x_sync: false
+time_hist.debug: false
+time_hist.malloc_debug_level: 0
+time_hist.instance: test
+
+#
+# realtime_only mode makes certain time-related buttons inoperable
+#
+
+time_hist.realtime_only: false
+
+#
+# mouse double-click control
+#
+
+time_hist.double_click_delay: 0.3
+
+#
+# time loop has base interval, upon which other actions are
+# based (secs). 
+
+time_hist.base_timer_interval: 0.15
+
+#
+# communication with rview, which starts up this program
+#
+
+time_hist.track_shmem_key: 46000
+
+#
+# storm track data:
+#   server mapper for track server
+#   max message len for track data
+#   interval (secs) at which data is checked
+#
+
+time_hist.servmap_host1: local
+time_hist.servmap_host2: none
+time_hist.max_message_len: 30000
+time_hist.track_check_interval: 5.0
+
+#
+# case tracks
+#
+
+time_hist.use_case_tracks: false
+time_hist.case_tracks_file_path: none
+
+#
+# partial tracks
+#
+
+time_hist.partial_track_past_period: 10.0
+time_hist.partial_track_future_period: 60.0
+
+#
+# printing copies
+#
+# The print_command defaults to "lpr -h -P", which works for BSD printing.
+# For ATT printing, set it to "lp -d"
+#
+# The print_command is followed by the printer name and name of the file
+# to be printed
+#
+
+time_hist.ps_prologue_file: $(TITAN_HOME)/prologues/postscript
+time_hist.output_file: $(TITAN_HOME)/output/time_hist.ps
+time_hist.ps_printer: ps
+time_hist.print_command: lpr -h -P
+
+#
+# color scales
+#
+
+time_hist.colorscale_dir: $(TITAN_HOME)/color_scales
+
+time_hist.x_dbz_color_scale: dbz_color
+time_hist.x_vorticity_color_scale: vorticity_color
+time_hist.x_percent_color_scale: percent_color
+
+time_hist.ps_dbz_color_scale: dbz_gray
+time_hist.ps_vorticity_color_scale: vorticity_gray
+time_hist.ps_percent_color_scale: percent_gray
+
+#
+# X window geometry
+#
+
+time_hist.x_min_width: 310
+time_hist.x_min_height: 250
+time_hist.x_tscale_min_height: 50
+time_hist.x_max_button_width: 80
+
+time_hist.x_tscale_x: 0
+time_hist.x_tscale_y: 710
+time_hist.x_tscale_width: 700
+time_hist.x_tscale_height: 105
+
+time_hist.x_thist_x: 705
+time_hist.x_thist_y: 0
+time_hist.x_thist_width: 310
+time_hist.x_thist_height: 250
+
+time_hist.x_timeht_x: 705
+time_hist.x_timeht_y: 292
+time_hist.x_timeht_width: 310
+time_hist.x_timeht_height: 250
+time_hist.x_timeht_scale_width: 80
+
+time_hist.x_rdist_x: 705
+time_hist.x_rdist_y: 567
+time_hist.x_rdist_width: 310
+time_hist.x_rdist_height: 250
+time_hist.x_rdist_scale_width: 50
+
+time_hist.x_help_x: 100
+time_hist.x_help_y: 200
+time_hist.x_help_width: 400
+time_hist.x_help_height: 250
+time_hist.x_help_min_height: 150
+
+#
+# margins and clearances  - pixels
+#
+
+time_hist.x_xaxis_margin: 25
+
+time_hist.x_tscale_yaxis_margin: 0
+time_hist.x_thist_yaxis_margin: 45
+time_hist.x_timeht_yaxis_margin: 30
+time_hist.x_rdist_yaxis_margin: 30
+
+time_hist.x_top_margin: 22
+time_hist.x_xaxis_endmargin: 40
+time_hist.x_yaxis_endmargin: 10
+time_hist.x_tick_length: 6
+time_hist.x_header_clearance: 5
+
+time_hist.x_text_margin: 8
+
+#
+# X scale dimensions. The scale element height is the height of each
+# color block in the scale window.
+#
+
+time_hist.x_max_scale_element_ht: 20
+time_hist.x_scale_element_width: 20
+
+#
+# X line widths - pixels
+#
+
+time_hist.x_tick_line_width: 0
+time_hist.x_crosshair_line_width: 0
+time_hist.x_divider_line_width: 0
+time_hist.x_main_border_width: 5
+time_hist.x_sub_border_width: 1
+
+#
+# X fonts
+#
+
+time_hist.x_text_font: 8x13
+time_hist.x_button_font: 8x13
+time_hist.x_title_font: 8x13
+time_hist.x_scale_font: 6x10
+time_hist.x_ticklabel_font: 6x10
+time_hist.x_header_font: 8x13
+
+#
+# X colors
+#
+
+time_hist.x_foreground: white
+time_hist.x_background: black
+
+time_hist.x_thist_graph_color: gray
+time_hist.x_thist_forecast_color: red
+time_hist.x_ht_maxdbz_color: blue
+time_hist.x_top_base_color: yellow
+time_hist.x_ht_centroid_color: green
+time_hist.x_ht_refl_centroid_color: cyan
+
+time_hist.x_crosshair_color: red
+time_hist.x_tick_color: yellow
+time_hist.x_ticklabel_color: yellow
+
+time_hist.x_text_color: yellow
+time_hist.x_header_color: yellow
+time_hist.x_titletext_color: gray
+time_hist.x_buttontext_color: red
+time_hist.x_scaletext_color: gray
+
+time_hist.x_divider_color: CadetBlue
+time_hist.x_border_color: CadetBlue
+time_hist.x_hlight_background: mediumblue
+
+#
+# Postscript COPIES
+# =================
+#
+
+time_hist.draw_copy_title: true
+
+#
+# postscript scale - all dimensions in inches, so scale up by
+# 72 from points to inches
+#
+
+time_hist.ps_unitscale: 72
+
+#
+# postscript page details
+#
+
+time_hist.ps_page_length: 11.0
+time_hist.ps_page_width: 8.5
+time_hist.ps_length_margin: 0.5
+time_hist.ps_width_margin: 0.7
+
+#
+# print width - the max width of the postscript output
+#
+
+time_hist.ps_print_width: 4.0
+
+#
+# limits to be placed on the print width
+#
+
+time_hist.ps_max_print_width: 11.0
+time_hist.ps_min_print_width: 2.0
+
+#
+# postscript plot sizes and relevant dimensions - the plot sizes
+# refer to the main plot area. The scale element height is the height of each
+# block in the scale, and the scale width is the width of the scale window
+#
+
+time_hist.ps_plot_width: 8.0
+time_hist.ps_plot_height: 6.0
+time_hist.ps_max_scale_element_ht: 0.4
+time_hist.ps_scale_element_width: 0.3
+time_hist.ps_timeht_scale_width: 1.0
+time_hist.ps_rdist_scale_width: 1.0
+time_hist.ps_title_height: 0.5
+
+#
+# margins and clearances in inches
+#
+
+time_hist.ps_xaxis_margin: 0.3
+
+time_hist.ps_tscale_yaxis_margin: 0.5
+time_hist.ps_thist_yaxis_margin: 0.7
+time_hist.ps_timeht_yaxis_margin: 0.5
+time_hist.ps_rdist_yaxis_margin: 0.5
+
+time_hist.ps_top_margin: 0.35
+time_hist.ps_text_margin: 0.1
+time_hist.ps_xaxis_endmargin: .3
+time_hist.ps_yaxis_endmargin: .05
+time_hist.ps_tick_length: 0.06
+time_hist.ps_header_clearance: 0.05
+time_hist.ps_plot_to_scale_margin: 0.25
+time_hist.ps_title_to_plot_margin: 0.3
+
+
+#
+# postscript line widths
+#
+
+time_hist.ps_border_line_width: 1.0
+time_hist.ps_divider_line_width: 0.0
+time_hist.ps_tick_line_width: 1.0
+time_hist.ps_crosshair_line_width: 1.0
+
+#
+# postscript linestyles
+#
+
+time_hist.ps_thist_graph_linestyle: 1.0 100.0 0.0
+time_hist.ps_thist_forecast_linestyle: 0.0 5.0 5.0
+time_hist.ps_ht_maxdbz_linestyle: 1.0 100.0 0.0
+time_hist.ps_top_base_linestyle: 1.0 100.0 0.0
+time_hist.ps_ht_centroid_linestyle: 1.0 4.0 2.0
+time_hist.ps_ht_refl_centroid_linestyle: 1.0 8.0 4.0
+
+#
+# postscript font name and sizes
+#
+
+time_hist.ps_fontname: Helvetica
+time_hist.ps_title_fontsize: 14
+time_hist.ps_scale_fontsize: 10
+time_hist.ps_ticklabel_fontsize: 8
+time_hist.ps_header_fontsize: 12
+

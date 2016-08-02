@@ -1,0 +1,23 @@
+#!/bin/csh
+#
+# Small script that concatenates all the medoc files (which
+# have the extension .fmt) in a certain directory into an output file.
+#
+# Niles Oien April 2005
+#
+if ($#argv != 2) then
+  echo USAGE : MedocCat inputDir outputFile
+  exit
+endif
+#
+# Remove the output file.
+#
+if ( -e $argv[2] ) then
+  \rm $argv[2]
+endif
+#
+# Do the cat
+#
+cat $argv[1]/*.fmt > $argv[2]
+#
+#

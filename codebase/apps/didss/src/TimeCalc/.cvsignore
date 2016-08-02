@@ -1,0 +1,6 @@
+.deps
+TimeCalc
+__makefile.template
+makefile
+makefile.am
+makefile.in

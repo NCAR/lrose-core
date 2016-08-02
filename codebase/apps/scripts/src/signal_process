@@ -1,0 +1,102 @@
+#!/bin/sh
+# signal_process: signal a process, by name,
+# with USR1, or specified signal
+
+PATH=/bin:/usr/bin:/usr/ucb
+
+prog=`basename $0`
+usage="Usage: $prog [-l] [-s siglist] process[es]"
+
+# Default signal list.
+signals="USR1"
+
+# Process command line.
+while getopts ls: opt
+do
+    case $opt in
+        s)  # Allow commas as signal list separator.
+            signals=`echo $OPTARG | sed 's/,/ /g'`
+            ;;
+        l)  # Loose match.
+	    loose=true
+	    ;;
+        \?) echo $usage >&2
+            exit 1
+            ;;
+        esac
+done
+shift `expr $OPTIND - 1`
+
+# Remaining arguments are process names.
+if [ $# -eq 0 ]; then
+    echo $usage >&2
+    exit 1
+fi
+
+# Is this BSD or SysV?
+if [ -f /vmunix ]; then
+    BSD="true"
+fi
+
+if [ -f /vmlinuz ]; then
+    BSD="true"
+fi
+
+# Loop over each pattern on the command line.
+for proc in "$@"
+do
+    # Quote any '/' characters in the pattern.
+    pat=`echo "$proc" | sed 's%/%\\\/%g'`
+
+    # Is this a loose match?
+    if [ ! "$loose" ]; then
+	pat="( |\/)$pat( |$)"
+    fi
+
+    # A process name is considered to start with either
+    # a space or '/', and end with either a space or newline.
+    if [ "$BSD" ]; then
+        pids=`ps axww | awk '/'"$pat"'/ && \
+            $0 !~ / awk |'$prog'/ {print $1}'`
+    else
+        pids=`ps -ef  | awk '/'"$pat"'/ && \
+            $0 !~ / awk |'$prog'/ {print $2}'`
+    fi
+
+    # Do any processes match this pattern?
+    if [ "$pids" ]; then
+        inst=`echo $pids | wc -w`
+        echo "Instances of \`$proc':" $inst
+
+        # Loop over each instance of this pattern.
+        for pid in $pids
+        do
+            echo " signalling $proc, PID $pid"
+
+            # Is this process killable by this UID?
+            error=`kill -0 $pid 2>&1`
+            if [ "$error" ]; then
+                echo " $prog: $error" >&2
+                # Next PID.
+                continue
+            fi
+
+            # Try each signal in the list.
+            for sig in $signals
+            do
+                echo "    kill -$sig $pid"
+                kill -$sig $pid
+                sleep 1
+                # Next PID.
+                continue 2
+            done
+
+            
+        done
+    else
+        # No processes match this pattern.
+        echo "$proc: no such process" >&2
+    fi
+done
+
+exit 0

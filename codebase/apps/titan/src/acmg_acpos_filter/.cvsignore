@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+acmg_acpos_filter
+makefile
+makefile.am
+makefile.in

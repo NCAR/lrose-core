@@ -1,0 +1,6 @@
+set title "POWER, SSEF using reconstructed spectra, CWR 10 dB"
+set xlabel "Power truth (dB)" 
+set ylabel "Power filtered (dB)"
+set xrange [-80:-10]
+set yrange [-80:-10]
+plot 'ssef_sim_cwr_10.out' using 3:12 title ''

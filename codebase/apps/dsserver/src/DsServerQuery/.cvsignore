@@ -1,0 +1,6 @@
+.deps
+DsServerQuery
+__makefile.template
+makefile
+makefile.am
+makefile.in

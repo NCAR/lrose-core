@@ -1,0 +1,410 @@
+########################################################################
+# parameters file for rview - test data
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# April 1991
+#
+#########################################################################
+
+#
+# debugging
+#
+
+rview.x_sync: false
+rview.debug: false
+rview.malloc_debug_level: 0
+rview.instance: rtest
+
+#
+# mode may be realtime or  archive. In archive mode, the time_requested
+# is used.
+#
+
+rview.time_requested: 1997/03/26_00:27:00
+rview.mode: archive
+
+#
+# basic setup
+#
+# field_requested is the initial field displayed
+# z_requested is initial height
+# delta_z is change in height using level button
+# scan_delta_t is number of secs moved in time using time button
+#
+
+rview.field_requested: 0
+rview.z_requested: 4.0
+rview.delta_z: 1.0
+rview.scan_delta_t: 500
+
+#
+# plot_rings controls initila range ring setting
+# plot_map controls initial map overlay setting
+# plot_image controls initial image plot setting
+# plot_cappi_contours controls initial cappi contour setting
+# plot_vsection_contours controls initial vert section contour setting
+# interpolate_vsection controls initial ver section interp setting
+# vsection_interp_res gives the interpolated resolution in km
+#
+
+rview.plot_rings: true
+rview.plot_map: true
+rview.plot_image: true
+rview.plot_cappi_contours: false
+rview.plot_vsection_contours: false
+rview.interpolate_vsection: false
+rview.vsection_interp_res: 0.2
+
+#
+# plot_maps controls initial map overlay setting
+# Options are false, limited or all.
+#
+# Map conf file lists the map files to be used
+#
+
+rview.plot_maps: limited
+rview.map_conf_file: $(RTEST_HOME)/maps/denver.conf
+
+#
+# rview starts up time hist using the following command
+#
+
+rview.use_time_hist: false
+rview.time_hist_command_line: time_hist -params time_hist.rtest &
+
+#
+# colorscale directory
+#
+
+rview.colorscale_dir: $(RTEST_HOME)/color_scales
+
+#
+# copies
+#
+
+rview.ps_prologue_file: $(RTEST_HOME)/prologues/postscript
+rview.output_file: $(RTEST_HOME)/output/rview.ps
+rview.ps_printer: jet
+
+#
+# projection may be 'flat' for local plots or 'latlon' for 
+# regional or larger plots.
+#
+# The grid origin is always in lat/lon units.
+#
+# min and max values are in km for flat proj,
+# lat/lon for latlon proj
+#
+
+rview.projection: flat
+
+rview.grid_lat: 39.87823
+rview.grid_lon: -104.75900
+rview.grid_rot: 0.0
+
+#rview.grid_lat: 39.787
+#rview.grid_lon: -104.546
+
+rview.full_min_x: -150.0
+rview.full_min_y: -150.0
+rview.full_max_x: 150.0
+rview.full_max_y: 150.0
+
+#
+# storm tracks. A check for new data is made every track_check_interval
+# secs. The data is in shared memory with the given key. The track
+# server is specified by a sub-type and instance, with a default
+# host and port. If the server mapper is running, the sub-type and
+# instance are used.
+#
+
+rview.use_track_data: false
+rview.plot_tracks: all_tracks
+rview.plot_tracks_current_only: false
+
+rview.track_check_interval: 5
+rview.track_shmem_key: 46100
+
+rview.track_data_time_margin: 12.0
+rview.past_plot_period: 30.0
+rview.future_plot_period: 30.0
+
+rview.n_forecast_steps: 3
+rview.forecast_interval: 10.0
+
+rview.track_server_instance: rtest
+rview.track_server_subtype: Dobson
+rview.track_server_default_host: local
+rview.track_server_default_port: 44105
+rview.max_message_len: 100000
+rview.servmap_host1: local
+rview.servmap_host2: none
+
+rview.plot_current: true
+rview.plot_forecast: limited
+rview.plot_forecast_shape: true
+rview.plot_past: limited
+rview.plot_future: false
+rview.annotate_tracks: speed
+rview.track_graphic: ellipses
+
+rview.runs_included: true
+
+#
+# flight tracks
+#
+
+rview.plot_flight_tracks: false
+rview.flight_tracks_file: $(RTEST_HOME)/ftracks/flight_tracks
+
+#
+# verification (chase-car) data plotting
+#
+
+rview.plot_verify: false
+rview.verify_file: $(RTEST_HOME)/lightning/test
+rview.verify_time_margin: 60
+
+#
+# mouse double-clicking delay - set to your taste
+#
+
+rview.double_click_delay: 0.3
+
+#
+# The display is updated every 'update_interval' secs in case new data
+# has arrived.
+
+rview.update_interval: 15
+
+#
+# base_timerinterval' is the basic interval for the interrupt timer
+#
+
+rview.base_timer_interval: 0.15
+
+#
+# approx number of ticks per axis
+#
+
+rview.approx_nticks: 7
+
+#
+# X resources
+# ===========
+#
+
+rview.x_foreground: white
+rview.x_background: black
+
+# location and size of main window
+
+rview.x_mainx: 0
+rview.x_mainy: 0
+rview.x_mainx_sign: 1
+rview.x_mainy_sign: 1
+rview.x_mainwidth: 700
+rview.x_mainheight: 700
+rview.x_minmainwidth: 200
+rview.x_minmainheight: 150
+rview.x_mainborder: 5
+rview.x_subborder: 1
+
+# location and size of vert section window
+
+rview.x_vsection_x_from_main: 402
+rview.x_vsection_y_from_main: 567
+rview.x_vsection_width: 300
+rview.x_vsection_height: 250
+
+# location and size of help popup window
+
+rview.x_help_x_from_main: 100
+rview.x_help_y_from_main: 200
+rview.x_help_width: 400
+rview.x_help_height: 350
+
+# interface button width
+
+rview.x_max_button_width: 80
+
+# color scale width
+
+rview.x_scalewidth: 100
+
+# margins
+
+rview.x_xaxismargin: 25
+rview.x_yaxismargin: 35
+rview.x_xaxisendmargin: 30
+rview.x_yaxisendmargin: 15
+rview.x_ticklength: 6
+rview.x_topmargin: 25
+rview.x_tick_clearance: 3
+rview.x_text_margin: 6
+
+# legend dimensions. The legend element height is the height of each
+# color block in the scale window.
+
+rview.x_max_legend_element_ht: 25
+rview.x_legend_element_width: 30
+
+# fonts
+
+rview.x_button_font: 8x13
+rview.x_title_font: 8x13
+rview.x_scale_font: 6x10
+rview.x_ringlabel_font: 6x10
+rview.x_maplabel_font: 6x10
+rview.x_ticklabel_font: 6x10
+rview.x_track_annotation_font: 8x13
+rview.x_text_font: 8x13
+
+# colors
+
+rview.x_ring_color: forestgreen
+rview.x_map_color: yellow
+rview.x_crosshair_color: #b00
+rview.x_vsection_pos_color: red
+rview.x_zoom_box_color: red
+rview.x_pos_contour_color: red
+rview.x_zero_contour_color: yellow
+rview.x_neg_contour_color: blue
+rview.x_tick_color: yellow
+rview.x_ticklabel_color: yellow
+rview.x_track_annotation_color: yellow
+rview.x_text_color: yellow
+rview.x_titletext_color: gray
+rview.x_buttontext_color: red
+rview.x_scaletext_color: gray
+rview.x_border_color: CadetBlue
+rview.x_hlight_background: mediumblue
+
+rview.x_past_storm_color: yellow
+rview.x_current_storm_color: cyan
+rview.x_future_storm_color: blue
+rview.x_forecast_storm_color: red
+rview.x_current_storm_line_width: 2
+rview.x_forecast_storm_line_width: 1
+
+rview.x_past_vector_color: magenta
+rview.x_future_vector_color: cyan
+rview.x_forecast_vector_color: red
+
+# dim percentage for unselected tracks
+
+rview.color_dim_percent: 70.0
+
+#  line widths
+
+rview.x_vsection_pos_width: 1
+rview.x_zoom_box_width: 1
+rview.x_tick_width: 0
+rview.x_ring_width: 0
+rview.x_map_width: 0
+rview.x_crosshair_width: 0
+
+#
+# Postscript resources
+# ====================
+#
+
+rview.draw_copy_title: true
+rview.draw_copy_header: true
+rview.ps_unitscale: 72
+
+# paget layout
+
+rview.ps_pagelength: 11.0
+rview.ps_pagewidth: 8.5
+
+rview.ps_printwidth: 6.5
+rview.ps_maxprintwidth: 11.0
+rview.ps_minprintwidth: 3.0
+
+# margins
+
+rview.ps_lengthmargin: 0.5
+rview.ps_widthmargin: 0.7
+
+# dimensions of main image
+
+rview.ps_imagewidth: 6.0
+rview.ps_imageheight: 6.0
+
+# dimensions of color scale and title
+
+rview.ps_scalewidth: 1.5
+rview.ps_titleheight: 0.5
+
+rview.ps_plot_to_scale_margin: 0.25
+rview.ps_title_to_plot_margin: 0.4
+
+# axis margins in main image
+
+rview.ps_xaxismargin: 0.5
+rview.ps_yaxismargin: 0.5
+rview.ps_xaxisendmargin: .3
+rview.ps_yaxisendmargin: .25
+rview.ps_ticklength: 0.06
+rview.ps_topmargin: 0.5
+rview.ps_tick_clearance: 0.05
+rview.ps_text_margin: 0.07
+
+# legend dimensions. The legend element height is the height of each
+# color block in the scale window.
+
+rview.ps_max_legend_element_ht: 0.4
+rview.ps_legend_element_width: 0.5
+
+# linestyles
+
+rview.ps_prev_storm_linestyle: 0 100.0 0.0
+rview.ps_current_storm_linestyle: 2 100.0 0.0
+rview.ps_future_storm_linestyle: 1 1.0 1.0
+rview.ps_forecast_storm_linestyle: 1 4.0 2.0
+
+rview.ps_past_vector_linestyle: 1 100.0 0.0
+rview.ps_future_vector_linestyle: 0 1.0 1.0
+rview.ps_forecast_vector_linestyle: 0 100.0 0.0
+
+rview.ps_pos_contour_linestyle: 1 100.0 0.0
+rview.ps_zero_contour_linestyle: 1 1.0 1.0
+rview.ps_neg_contour_linestyle: 1 4.0 2.0
+
+# line widths
+
+rview.ps_border_width: 1
+rview.ps_crosshair_width: 0
+rview.ps_ring_width: 0
+rview.ps_map_width: 0
+rview.ps_tick_width: 0
+
+# fonts
+
+rview.ps_fontname: Helvetica
+rview.ps_title_fontsize: 18
+rview.ps_scale_fontsize: 12
+rview.ps_ringlabel_fontsize: 8
+rview.ps_maplabel_fontsize: 10
+rview.ps_ticklabel_fontsize: 8
+rview.ps_track_annotation_fontsize: 8
+rview.ps_text_fontsize: 12
+
+#
+# data fields and their servers. These are not treated in the same way as
+# the other params. They are read in by read_field_control().
+# Lines start with '#fc' - '##fc' comments them out
+#
+
+#-------------------------------------------------------------------------
+#  Field controls
+#
+# Label    Server         Defaults    Fld  Time  X Color  Ps Color  Contours
+#       vvvvvvvvvvvvvvvv  vvvvvvvvvvv     vvvvvv vvvvvv   vvvvvvv   vvvvvvvvv
+#       subtype instance  Host   Port     window  file      file    lo-hi-int
+#-------------------------------------------------------------------------
+
+
+#fc dbz Cidd MDV ppi local 43900 0 1800 dbz_color dbz_gray 0.0 70.0 5.0

@@ -1,0 +1,139 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.SweepNetCDF2Mdv
+ *
+ * This file contains the TDRP parameter definitions for
+ * SweepNetCDF2Mdv
+ */
+
+commentdef
+{
+  p_header = "SweepNetCDF2Mdv";
+  p_text = "This program converts netCDF sweep files into MDV format.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  FILE_LIST,
+  INPUT_DIR
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+           "In INPUT_DIR mode, the program will process new files as they "
+           "appear in the input_dir directory.\n";
+  p_default = "FILE_LIST";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_default = "$(RAP_DATA_DIR)/raw/chill";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = "$(RAP_DATA_DIR)/ncd/sweep";
+} output_dir;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef struct
+{
+  double radar_lat;
+  double radar_lon;
+  double radar_alt;
+  double radar_constant;
+  double wave_length;
+} radar_info_t;
+
+paramdef struct radar_info_t
+{
+  p_descr = "Constant information about the radar";
+  p_help = "\tradar_lat - Radar latitude in degrees.\n"
+           "\tradar_lon - Radar longitude in degrees.\n"
+           "\tradar_alt - Radar altitude in km.\n"
+           "\tradar_constant - Radar constant.\n"
+           "\twave_length - Radar wave length in cm.\n";
+  p_default = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+} radar_info;

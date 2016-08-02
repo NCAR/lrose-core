@@ -1,0 +1,308 @@
+/*********************************************************
+ * parameter definitions for VerifyGrid
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 1993
+ */
+
+commentdef {
+  p_header = "Computes verification statistics for gridded forecasts. The forecast and truth grids are read in from MDV files. Output is printed to stdout.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the analysis is performed for each volume scan as it becomes available. In archiv mode, the file list is obtained from the command line.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+typedef enum {
+  GRID_CONT_METHOD, REGION_CONT_METHOD, STATS_METHOD, REGRESSION_METHOD, MAP_CONT_METHOD
+} method_t;
+
+paramdef enum method_t {
+  p_default = GRID_CONT_METHOD;
+  p_descr = "Method of operation.";
+  p_help = "Methods are (1) CONT - contingency table analysis for a grid, with text output. (2) REGION method, in which contingency data for a series of circular areas is computed and printed to stdout. (3) STATS analysis, printing stats to stdout and an xgraph output option. (4) REGRESSION method - data pairs for plotting with ascii_to_xgraph, output to stdout. (5) MAP - Added by Niles - use a set of map files.";
+} method;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "ARCHIVE mode only. Directory for forecast grid files";
+  p_help = "The files in this directory are sampled to get the data for this program.";
+} forecast_dir;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Forecast lead time (secs)";
+  p_help = "Number of seconds by which the forecast lies in the future.";
+} forecast_lead_time;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Forecast field number";
+  p_help = "Field number of forecast data in cartesian grid (0-based)";
+} forecast_field;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Forecast plane height (km).";
+  p_help = "This is the height of the forecast data to be used. The closest available plane will be selected. Set to -1 to select composite (column-max) data.";
+} forecast_ht;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Lower value for forecast level";
+  p_help = "Only include forecast data above this value in the contingency "
+           "table analysis";
+} forecast_level_lower;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Upper value for forecast level";
+  p_help = "Only include forecast data below this value in the contingency "
+           "table analysis.";
+} forecast_level_upper;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Truth data directory";
+  p_help = "Directory for dobson cartesian radar data files - truth";
+} truth_data_dir;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Truth field number";
+  p_help = "Field number of truth data in cartesian grid (0-based)";
+} truth_field;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Truth plane height (km).";
+  p_help = "This is the height of the truth data to be used. The closest available plane will be selected. Set to -1 to select composite (column-max) data.";
+} truth_ht;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Lower value for truth level";
+  p_help = "Only include truth data above this value in the contingecy table analysis";
+} truth_level_lower;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Upper value for truth level";
+  p_help = "Only include truth data below this value in the contingecy table analysis";
+} truth_level_upper;
+
+paramdef int {
+  p_default = 180;
+  p_descr = "Time margin (secs)";
+  p_help = "Margin around actual file time used when determining time match";
+} file_time_margin;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to output SPDB data for REGION_CONT_METHOD.";
+  p_help = "If set, the region contingency data is stored in an SPDB database. See 'region_spdb_dir'.";
+} output_region_spdb;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "REGION_CONT_METHOD only. Output directory for SPDB data.";
+  p_help = "The region contingency data is optionally stored as SPDB data. See 'output_region_spdb'.";
+} region_spdb_dir;
+
+paramdef int {
+  p_min = 0;
+  p_default = 600;
+  p_descr = "Period for which the SPBD products remain valid (secs).";
+  p_help = "This is used by the displays to decide when to age off products which are no longer valid.";
+} spdb_valid_period;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "REGRESSION_METHOD only. Check grid geometry.";
+  p_help = "If set to FALSE, the program will assume that the grids which are being used are effectively the same, and no checking will be done.";
+} check_grid_geom;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use the specified grid for the analysis.";
+  p_help = "If set, the grid specified by the 'specified_grid' param is used for evaluation. Otherwise the native data grid is used.";
+} use_specified_grid;
+
+typedef struct {
+  double origin_lat;
+  double origin_lon;
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_t;
+
+paramdef struct grid_t {
+  p_descr = "Grid parameters";
+  p_help = "The grid params for the regression method";
+} specified_grid;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to load up the specified grid with means instead of nearest neighbor values.";
+  p_help = "If set, the value stored at each grid location is the mean of the native points which fall within that grid block. Otherwise the nearest neighbor is used to load the grid.";
+} load_means_in_specified_grid;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check range from radar";
+  p_help = "If set, the range from the radar is checked. Only points at less than the maximum range are used";
+} check_range;
+
+paramdef double {
+  p_default = 150.0;
+  p_descr = "Max range (km)";
+  p_help = "Max. range (km) for analysis - data beyond this is ignored";
+} max_range;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "GRID_CONT_METHOD only. Option to use a relaxed algorithm to compute the contingencies";
+  p_help = "If set, a relaxed algorithm is used. This means that surrounding points are used in determining the contingency values. The contingency_search_margin governs the search limits. See the code for details";
+} relaxed_contingency;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "GRID_CONT_METHOD with relaxed_contingency only. Option to relax the forecast grid.";
+  p_help = "If set, a relaxed algorithm is used for both forecast and truth gids, else thruth only.";
+} relax_forecast;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "GRID_CONT_METHOD only. Search margin (grid units)";
+  p_help = "Number of adjacent grids searched for contingency match. See relaxed_contingency";
+} relaxed_margin;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to only regard truth as filled relaxed grid.";
+  p_help = "If set, a truth point is only considered as active if ALL of the points within the relaxed grid are set. If not set, a truth point is active if any point in the relaxed grid is set.";
+} truth_must_fill_relaxed;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "GRID_CONT_METHOD only. Option to output scan-by-scan contingency data to named dir";
+  p_help = "If set, the contingency table data computed for each scan will be output to a file in the named directory. The file name will comprise the date and the specified file extension";
+} output_scan_cont;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Dir path for scan-by-scan contingency data";
+} scan_cont_dir;
+
+paramdef string {
+  p_default = "cont";
+  p_descr = "Extension for scan-by-scan contingency data";
+} scan_cont_ext;
+
+typedef enum {
+  PROJ_FLAT, PROJ_LATLON
+} projection_t;
+
+paramdef enum projection_t
+{
+  p_default = PROJ_FLAT;
+  p_descr = "GRID_CONT_METHOD only. Projection type for intermediate grid file";
+  p_help = "Projection type to put in intermediate grid file so it can be displayed.  See output_intermediate_grids parameter.";
+} projection;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "GRID_CONT_METHOD only. Option to output intermediate grids to an MDV file";
+  p_help = "If set, the intermediate grids are output in an MDV file.  The intermediate grids are the truth and forecast grids mapped onto the specified contingency grid and set to 1 if the input grid is between the specified limits, 0 otherwise.  The intermediate grids will only be output if this is set and use_native_grid and relaxed_contingency are both FALSE and you are in CONT method.";
+} output_intermediate_grids;
+
+paramdef string {
+  p_default =  "." ;
+  p_descr = "Intermediate grid output directory";
+  p_help = "The directory to be used for intermediate grids.  Only used if output_intermediate_grids is TRUE.  The files in this directory are named YYYYMMDD/hhmmss.mdv using the centroid time of the truth file as the time used in naming the file.";
+} intermediate_dir;
+
+typedef struct {
+  string name;
+  double lat;
+  double lon;
+  double radius;
+  double percent_covered;
+} regions_t;
+
+paramdef struct regions_t {
+  p_descr = "REGION_CONT_METHOD only. Details of circular regions.";
+  p_help = "In REGION_CONT_METHOD, statistics are computed for a series of circular regions. The region is centered on the given lat and lon point, with the radius as given in km. The percent coverage for an event is also given per region.";
+} regions[];
+
+typedef struct {
+  string filename;
+  double percent_covered;
+} map_list_t;
+
+paramdef struct map_list_t {
+  p_descr = "MAP_CONT_METHOD only. List of map files.";
+  p_help = "In MAP_CONT_METHOD, statistics are computed for a series of user-defined regions. The regions are defined by map files. The percent coverage must be specified along with the file names.";
+} MapList[];
+
+paramdef double {
+  p_default = 1.0;
+  p_min = -1000.0;
+  p_max = 1000.0;
+  p_descr = "REGRESSION_METHOD only. Min regression data value";
+  p_help = "Only points with data above this value are included in the regresion analysis";
+} min_regression_val;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "REGRESSION_METHOD only. Option to include missing data values in the output.";	
+  p_help = "If set, missing values are included in the output. Missing values appear as -9999.999.";	
+} regression_include_missing;
+
+typedef struct {
+  int n_intervals;
+  double low_limit;
+  double interval_size;
+} hist_t;
+
+paramdef struct hist_t {
+  p_descr = "STATS_METHOD only. Histogram parameters";
+  p_help = "The params for the histogram in stats method. "
+           "This is a histogram of all of the truth data values for which "
+           "the corresponding forecast data value falls between the "
+           "forecast_level_lower and forecast_level_upper parameters.";
+} hist;
+

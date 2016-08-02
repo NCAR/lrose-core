@@ -1,0 +1,6 @@
+.deps
+MdvGrad
+__makefile.template
+makefile
+makefile.am
+makefile.in

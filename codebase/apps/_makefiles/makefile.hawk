@@ -1,0 +1,42 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	scripts \
+	procmap \
+	tdrp \
+	titan \
+	titan_analysis \
+	radar \
+        Radx \
+	spol \
+	didss \
+	dsserver \
+	mdv_utils \
+	spdb_utils \
+	awc \
+	filters \
+	hydro \
+	ingest \
+        interp \
+	refractt \
+	satApps \
+	trec
+
+# comment out cidd
+#	cidd \
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+
+
+
+
+
+
+
+

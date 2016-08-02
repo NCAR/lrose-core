@@ -1,0 +1,299 @@
+/**********************************************************************
+ * TDRP params for Sigmet2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// InDir ///////////////////////////////////
+//
+// Input directory.
+// Directory path for input data files.
+// Type: string
+//
+
+InDir = "./";
+
+///////////// ldataInfoAvailable //////////////////////
+//
+// Option to use latest data info file in realtime.
+// Set to TRUE if it is workable to do so.
+// Type: boolean
+//
+
+ldataInfoAvailable = FALSE;
+
+///////////// latestFileOnly //////////////////////////
+//
+// Option to process latest file only on startup in realtime.
+// This is the default.
+// Type: boolean
+//
+
+latestFileOnly = TRUE;
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+// If string is NULL, all extensions are valid.
+// Type: string
+//
+
+fileExtension = "";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 7200;
+
+///////////// time_offset /////////////////////////////
+//
+// Time offset for data, seconds. This is an offset that
+// is added to the input time to get the output time.
+// Useful if the data are timestamped in local time and
+// we want to go to UTC.
+// Type: int
+//
+
+time_offset = 0;
+
+///////////// radarName ///////////////////////////////
+//
+// Name of the radar.
+// Used in MDV files, apparently.
+// Type: string
+//
+
+radarName = "BAURU";
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_DATA
+//
+
+debug = DEBUG_OFF;
+
+///////////// info ////////////////////////////////////
+//
+// Info option.
+// Print info messages.
+// Type: boolean
+//
+
+info = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// LOGGING.
+//
+//======================================================================
+ 
+///////////// msgLog_dir //////////////////////////////
+//
+// Directory for log file output.
+// Type: string
+//
+
+msgLog_dir = "";
+
+///////////// sendStartEndFlags ///////////////////////
+//
+// Option to send start,end of tilt,volume flags.
+// Typically these flags are sent, however sometimes the
+// input datastream is such that they are not correct.
+// Type: boolean
+//
+
+sendStartEndFlags = TRUE;
+
+///////////// output_fmq_url //////////////////////////
+//
+// output fmq url.
+// Path for FMQ output data.
+// Type: string
+//
+
+output_fmq_url = "/tmp/fmq/sigmet";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message.
+// Type: long
+//
+
+output_fmq_size = 10000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: long
+//
+
+output_fmq_nslots = 7200;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// beamsPerMessage /////////////////////////
+//
+// How many beams to process before sending radar header message.
+// Header messages are also sent at the end of tilts if
+// the radar parameters change.
+// Type: int
+//
+
+beamsPerMessage = 180;
+
+//======================================================================
+//
+// DELAY OPTIONS FOR ARCHIVE MODE.
+//
+//======================================================================
+ 
+///////////// sleepBetweenVolumes /////////////////////
+//
+// Number of seconds to sleep between volumes.
+// May be useful to to this in archive mode.
+// Type: int
+//
+
+sleepBetweenVolumes = 0;
+
+///////////// sleepBetweenTilts ///////////////////////
+//
+// Number of seconds to sleep between tilts.
+// May be useful to to this ion archive mode.
+// Type: int
+//
+
+sleepBetweenTilts = 0;
+
+//======================================================================
+//
+// FIELD PARAMETERS.
+//
+//======================================================================
+ 
+///////////// scales //////////////////////////////////
+//
+// Scaling parameters for data on a field-by-field basis.
+// The defaults are very probably fine. The field name
+// is two characters andshould be one of :
+
+//            DZ = reflectivity.
+//            VR = velocity.
+//            SW = spectrum_width.
+//            CZ = corrected reflectivity.
+//            ZT = total reflectivity.
+//            DR = differential refl.
+//            LR = another differential refl.
+//            ZD = another refl form.
+//            DM = recieved power.
+//            RH = Rho coefficient.
+//            PH = Phi (MCTEX parameter).
+//            XZ = X-band reflectivity.
+//            CR = Corrected DR.
+//            MZ = DZ mask for 1C-51 HDF.
+//            MR = DR mask for 1C-51 HDF.
+//            ZE = Edited reflectivity.
+//            VE = Edited velocity.
+//            KD = KDP (unknown)  for MCTEX data.
+//            TI = TIME (unknown)  for MCTEX data.
+
+// This two character key will be used to identify the field.
+// The appropriate units, scale and bias will then be used.
+//
+// Type: struct
+//   typedef struct {
+//      string fieldName;
+//      string units;
+//      double scale;
+//      double bias;
+//   }
+//
+// 1D array - variable length.
+//
+
+scales = {
+  { "DZ", "dBz", 0.5, -32},
+  { "VR", "m/s", 0.15, -19},
+  { "SW", "m/s", 0.15, -19}
+};
+
+///////////// maskOnField /////////////////////////////
+//
+// Option to mask based on one field (typically DBZ).
+// Used typically to mask velocity data where there is
+// no dbz data. These velocity data are usually junk.
+// Type: boolean
+//
+
+maskOnField = FALSE;
+
+///////////// maskOnFieldNum //////////////////////////
+//
+// Field number to use as a mask - indexed by
+// its number in the scales array above. First entry is zero.
+// Only relevant if maskOnField is TRUE.
+// Type: int
+//
+
+maskOnFieldNum = 0;
+

@@ -1,0 +1,41 @@
+###########################################################################
+#
+# Makefile for print_procmap program
+#
+# Mike Dixon, RAP, NCAR, Boulder, CO, 80307, USA
+#
+# May 2000
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGET_FILE = print_procmap
+
+LOC_INCLUDES = -I../include
+LOC_CPPC_CFLAGS = -DNO_LDATAINFO
+LOC_LDFLAGS = -L..
+LOC_LIBS = -ldidss -ltoolsa -ldataport
+
+HDRS = \
+	Args.hh \
+	print_procmap.hh
+
+CPPC_SRCS = \
+	Args.cc \
+	Main.cc \
+	print_procmap.cc
+
+#
+# C++ targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+
+#
+# local targets
+#
+
+depend: depend_generic
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

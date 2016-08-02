@@ -1,0 +1,171 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for NidsVad2Spdb
+ *
+ * Niles Oien, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * January 2002
+ */
+
+
+commentdef {
+  p_header = "Small program to write MDV files from simple\n"
+	"ASCII files that specify circular regions to be filled\n"
+	"in in the MDV grid (which is asumed to be LAT_LON and\n"
+	"is specified in the param file).\n\n"
+	"The format of these simple ASCII files is : \n\n"
+	"LAT LON VALUE RADIUS HALF_DISTANCE OVERWRITE\n\n"
+	"Where LAT and LON specify the center of the circle,\n"
+	"VALUE is the value to be placed at the center\n"
+	"of the circle,\n"
+	"RADIUS is the radius of the circle, in Km,\n"
+	"HALF_LIFE is used to decay the VALUE from the\n"
+	"value at the center of the circle - at a distance\n"
+	"of HALF_LIFE from the center the value will be\n"
+	"half what it is in the center. Decay is exponential.\n"
+	"Set to a large value to have no effect.\n"
+	"OVERWRITE is an integer. If non-zero then the\n"
+	"circle is put in place irrespective of what was there\n"
+	"before, if it is zero then the circle is added to previously\n"
+	"existing circles. Note that all OVERWRITE circles\n"
+	"are drawn in first, then the ADD circles are added.\n\n"
+	"If the input filenames follow a YYYYMMDD_hhmmss.ext\n"
+	"filename convention then the filename will set the date,\n"
+	"otherwise the input file time will set the date.\n\n"
+	"Niles Oien February 2002.";
+
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed.";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+      
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/$(PROJECT)/other/circleFiles";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef string {
+  p_default = ".cir";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::$(PROJECT)/mdv/fromCircles";
+  p_descr = "URL for output SPDB data.";
+} OutUrl;
+
+paramdef int {
+  p_default = 43400;
+  p_descr = "How long data are valid, seconds.";
+} expiry;
+
+
+
+commentdef {
+  p_header = "PROCESSING PARAMETERS.";
+}
+
+
+paramdef double {
+  p_default = 37.0;
+  p_descr = "Lower left latitude for lat/lon grid.";
+} lowerLeftLat;
+
+paramdef double {
+  p_default = -109.0;
+  p_descr = "Lower left longitude for lat/lon grid.";
+} lowerLeftLon;
+
+paramdef int {
+  p_default = 481;
+  p_descr = "Number of points in longitude for lat/lon grid.";
+} Nx;
+
+paramdef int {
+  p_default = 481;
+  p_descr = "Number of points in latitude for lat/lon grid.";
+} Ny;
+
+paramdef double {
+  p_default = 0.008333333333;
+  p_descr = "Stepsize in Longitude, degrees, for lat/lon grid.";
+} Dx;
+
+paramdef double {
+  p_default = 0.008333333333;
+  p_descr = "Stepsize in Latitude, degrees, for lat/lon grid.";
+} Dy;
+
+paramdef string {
+  p_default = "Interest";
+  p_descr = "Field name for output MDV field.";
+} FieldName;
+
+paramdef string {
+  p_default = "Percent";
+  p_descr = "Field units for output MDV field.";
+} FieldUnits;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to replace 0.0 with missing.";
+} replaceZeroWithMissing;
+

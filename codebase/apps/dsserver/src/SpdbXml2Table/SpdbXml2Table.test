@@ -1,0 +1,242 @@
+/**********************************************************************
+ * TDRP params for ./SpdbXml2Table
+ **********************************************************************/
+
+//======================================================================
+//
+// SpdbXml2Table reads XML entries from an SPDB data base, and based on 
+//   the specified parameters in the file, it reformats these into a text 
+//   table.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL to spdb data.
+// This can either be (a) the path to the directory or (b) a url of the 
+//   form 'spdbp:://hostname::dir'. For (a), if the path starts with '/' 
+//   or '.', it will be treated as an absolute path. If not, it will be 
+//   relative to DATA_DIR. For (b) the dir is relative to DATA_DIR on the 
+//   host specified by hostname.
+// Type: string
+//
+
+input_url = "$(DATA_DIR)/spdb/monitor/kband";
+
+///////////// start_time //////////////////////////////
+//
+// The start time for extracting the data.
+// Can be overridden by specifying -start on the command line.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+start_time = { 2011, 12, 4, 0, 0, 0 };
+
+///////////// end_time ////////////////////////////////
+//
+// The end time for extracting the data.
+// Can be overridden by specifying -end on the command line.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+end_time = { 2011, 12, 6, 0, 0, 0 };
+
+///////////// data_type ///////////////////////////////
+//
+// Spdb data type, for constraining search.
+// If non-zero, only entries with this data_type will be retrieved.
+// Type: int
+//
+
+data_type = 0;
+
+///////////// data_type_2 /////////////////////////////
+//
+// Spdb data type 2, for constraining search.
+// If non-zero, only entries with this data_type_2 will be retrieved.
+// Type: int
+//
+
+data_type_2 = 0;
+
+//======================================================================
+//
+// Specify XML entries to be printed out.
+//
+//======================================================================
+ 
+///////////// xml_entries /////////////////////////////
+//
+// Specify which XML entries to include in table.
+// 	xml_tag_list: list of XML tags used to identify entry. These should 
+//   be delimited in xml format, using < and >
+// 	specify_label: do you want to use a label instead of the tags to 
+//   comment the table?
+// 	label: the label to use if specify_label is true
+// .
+//
+// Type: struct
+//   typedef struct {
+//      string xml_tag_list;
+//      boolean specify_label;
+//      string label;
+//   }
+//
+// 1D array - variable length.
+//
+
+xml_entries = {
+  { "<KaTransmitterStatus><HvpsVoltage>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsVoltage>", FALSE, ""},
+  { "<KaTransmitterStatus><SerialConnected>", FALSE, ""},
+  { "<KaTransmitterStatus><FaultSummary>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsRunup>", FALSE, ""},
+  { "<KaTransmitterStatus><Standby>", FALSE, ""},
+  { "<KaTransmitterStatus><HeaterWarmup>", FALSE, ""},
+  { "<KaTransmitterStatus><Cooldown>", FALSE, ""},
+  { "<KaTransmitterStatus><UnitOn>", FALSE, ""},
+  { "<KaTransmitterStatus><MagnetronCurrentFault>", FALSE, ""},
+  { "<KaTransmitterStatus><BlowerFault>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsOn>", FALSE, ""},
+  { "<KaTransmitterStatus><RemoteEnabled>", FALSE, ""},
+  { "<KaTransmitterStatus><SafetyInterlock>", FALSE, ""},
+  { "<KaTransmitterStatus><ReversePowerFault>", FALSE, ""},
+  { "<KaTransmitterStatus><PulseInputFault>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsCurrentFault>", FALSE, ""},
+  { "<KaTransmitterStatus><WaveguidePressureFault>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsUnderVoltage>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsOverVoltage>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsVoltage>", FALSE, ""},
+  { "<KaTransmitterStatus><MagnetronCurrent>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsCurrent>", FALSE, ""},
+  { "<KaTransmitterStatus><Temperature>", FALSE, ""},
+  { "<KaTransmitterStatus><G0PowerDbm>", FALSE, ""},
+  { "<KaTransmitterStatus><G0PhaseDeg>", FALSE, ""},
+  { "<KaTransmitterStatus><G0FreqHz>", FALSE, ""},
+  { "<KaTransmitterStatus><MagnetronCurrentFaultCount>", FALSE, ""},
+  { "<KaTransmitterStatus><BlowerFaultCount>", FALSE, ""},
+  { "<KaTransmitterStatus><SafetyInterlockCount>", FALSE, ""},
+  { "<KaTransmitterStatus><ReversePowerFaultCount>", FALSE, ""},
+  { "<KaTransmitterStatus><PulseInputFaultCount>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsCurrentFaultCount>", FALSE, ""},
+  { "<KaTransmitterStatus><WaveguidePressureFaultCount>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsUnderVoltageCount>", FALSE, ""},
+  { "<KaTransmitterStatus><HvpsOverVoltageCount>", FALSE, ""},
+  { "<KaTransmitterStatus><AutoPulseFaultResets>", FALSE, ""},
+  { "<KaReceiverStatus><ProcEnclosureTemp>", FALSE, ""},
+  { "<KaReceiverStatus><ProcEnclosureTemp>", FALSE, ""},
+  { "<KaReceiverStatus><ProcDrxTemp>", FALSE, ""},
+  { "<KaReceiverStatus><TxEnclosureTemp>", FALSE, ""},
+  { "<KaReceiverStatus><RxTopTemp>", FALSE, ""},
+  { "<KaReceiverStatus><RxBackTemp>", FALSE, ""},
+  { "<KaReceiverStatus><RxFrontTemp>", FALSE, ""},
+  { "<KaReceiverStatus><HTxPowerRaw>", FALSE, ""},
+  { "<KaReceiverStatus><HTxPowerCorrected>", FALSE, ""},
+  { "<KaReceiverStatus><VTxPowerRaw>", FALSE, ""},
+  { "<KaReceiverStatus><VTxPowerCorrected>", FALSE, ""},
+  { "<KaReceiverStatus><TestTargetPowerRaw>", FALSE, ""},
+  { "<KaReceiverStatus><TestTargetPowerCorrected>", FALSE, ""},
+  { "<KaReceiverStatus><PsVoltage>", FALSE, ""},
+  { "<KaReceiverStatus><WgPressureGood>", FALSE, ""},
+  { "<KaReceiverStatus><Locked100MHz>", FALSE, ""},
+  { "<KaReceiverStatus><GpsTimeServerGood>", FALSE, ""},
+  { "<KaReceiverStatus><Oscillator0Frequency>", FALSE, ""},
+  { "<KaReceiverStatus><Oscillator1Frequency>", FALSE, ""},
+  { "<KaReceiverStatus><Oscillator2Frequency>", FALSE, ""},
+  { "<KaReceiverStatus><Oscillator3Frequency>", FALSE, ""},
+  { "<KaReceiverStatus><BurstPower>", FALSE, ""},
+  { "<KaReceiverStatus><TransmitterFrequency>", FALSE, ""},
+  { "<KaBandTestPulse><TestPulsePowerDbHc>", FALSE, ""},
+  { "<KaBandTestPulse><TestPulsePowerDbVc>", FALSE, ""},
+  { "<KaBandTestPulse><TestPulseVelHc>", FALSE, ""},
+  { "<KaBandTestPulse><TestPulseVelVc>", FALSE, ""},
+  { "<AntennaMovement><AntennaIsMoving>", FALSE, ""}
+};
+
+//======================================================================
+//
+// OUTPUT DETAILS.
+//
+//======================================================================
+ 
+///////////// add_commented_header ////////////////////
+//
+// If true, write a commented header at the start of the output.
+// Type: boolean
+//
+
+add_commented_header = TRUE;
+
+///////////// comment_character ///////////////////////
+//
+// Character at start of comment lines.
+// Each comment line will be start with this character.
+// Type: string
+//
+
+comment_character = "#";
+
+///////////// column_delimiter ////////////////////////
+//
+// Delimiter between columns.
+// Type: string
+//
+
+column_delimiter = ",";
+
+///////////// convert_boolean_to_integer //////////////
+//
+// If true, a 'false' value will be converted to 0, and a 'true' value 
+//   to 1.
+// Type: boolean
+//
+
+convert_boolean_to_integer = TRUE;
+

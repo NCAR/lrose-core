@@ -1,0 +1,39 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.05 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</HEAD>
+<BODY>
+<A HREF="index.html"><IMG SRC="rsl.gif" ></A>&nbsp;
+<HR>
+<H1>
+RSL_fix_time</H1>
+
+<HR>
+<H3>
+Synopsis</H3>
+<B>#include "rsl.h"</B>
+<BR><B>void RSL_fix_time(<A HREF="RSL_ray_struct.html">Ray</A> *ray);</B>&nbsp;
+<HR>
+<H3>
+Description</H3>
+Fixes possible overflow values in <B>month</B>, <B>day</B>, <B>year</B>,
+<B>hh</B>, <B>mm</B>, <B>ss</B>.&nbsp; Normally, <B>ss</B> should be the
+overflow.&nbsp; This code ensures end of&nbsp; <B>month</B>, <B>year</B>
+and century are handled correctly by using the Unix time(2) functions.
+<BR>
+<HR>
+<H3>
+Return value</H3>
+None.
+<BR>
+<HR>
+<H3>
+See also</H3>
+mktime(3)
+<BR>
+<HR>
+
+<P>Author: <A HREF="john.merritt.html">John H. Merritt</A>.
+</BODY>
+</HTML>

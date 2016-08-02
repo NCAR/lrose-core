@@ -1,0 +1,8 @@
+#!/bin/csh
+\rm -rf output
+
+
+./mdvWindRose -params test.params -interval 20060601220000 20060606000000
+
+
+#

@@ -1,0 +1,15 @@
+#!/bin/csh
+#
+# Small script to run the renameLidarFile program on a directory.
+# Directory should be specified on the command line, i.e.
+#
+# renameLidarDirectoryFiles /some/data/directory
+#
+# Niles Oien December 2007
+#
+foreach i ($1/*.dat)
+ echo $i
+ renameRealLidarFile $i $2 REAL_ONE
+end
+
+#

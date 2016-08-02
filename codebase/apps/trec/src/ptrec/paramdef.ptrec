@@ -1,0 +1,257 @@
+/******************************************************************************
+**                                                                           **
+**  File name:   paramdef.trec                                               **
+**                                                                           **
+**  Written by:  Laura Stoltz                                                **
+**  Modified by:  Terri Betancourt (Apr. 1997)                               **
+**                                                                           **
+**  Contents:    parameter definitions for polar trec                        **
+**                                                                           **
+******************************************************************************/
+
+paramdef boolean {                                                             
+  p_descr = "Option to print debugging messages";
+  p_default = {FALSE};
+  p_help = "Output debugging messages during execution (TRUE/FALSE).";
+} debug;
+
+paramdef char* {
+  p_descr = "Process instance";
+  p_descr = "This is used by the process mapper, procmap";
+  p_default = {"P-TREC"};
+} instance;
+
+paramdef boolean {
+  p_descr = "option for analyzing synthetic data";
+  p_default = {FALSE};
+  p_help = "Used for testing";
+} use_synthetic_data;
+
+paramdef double {
+  p_descr = "maximum dbz value to trec";
+  p_min = {0.0};
+  p_max = {1000.0};
+  p_default = {75.0}; 
+} dbz_max;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {10.0};
+  p_default = {0.25}; 
+} fract;
+
+paramdef double {
+  p_descr = "min x coordinate of analysis grid, with respect to radar";
+  p_min = {-1000.0};
+  p_max = {1000.0};
+  p_default = {0.0}; 
+} grid_min_x;
+
+paramdef double {
+  p_descr = "min y coordinate of analysis grid, with respect to radar";
+  p_min = {-1000.0};
+  p_max = {1000.0};
+  p_default = {0.0}; 
+} grid_min_y;
+
+paramdef double {
+  p_descr = "grid spacing in x direction (km)";
+  p_min = {0.01};
+  p_max = {20.0};
+  p_default = {1.0}; 
+} grid_del_x;
+
+paramdef double {
+  p_descr = "grid spacing in y direction (km)";
+  p_min = {0.01};
+  p_max = {20.0};
+  p_default = {1.0}; 
+} grid_del_y;
+
+paramdef long {
+  p_descr = "number of grid points in x direction (km)";
+  p_min = {1};
+  p_max = {1000};
+  p_default = {80}; 
+} grid_nx;
+
+paramdef long {
+  p_descr = "number of grid points in y direction (km)";
+  p_min = {1};
+  p_max = {1000};
+  p_default = {80}; 
+} grid_ny;
+
+paramdef double {
+  p_descr = "grid rotation from True North (deg)";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = {0.0}; 
+} grid_rotation;
+
+paramdef long {
+  p_descr = "";
+  p_min = {1};
+  p_max = {100};
+  p_default = {4}; 
+} rng_skip;
+
+paramdef double {
+  p_descr = "size of correlation boxes (in km)";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {7.0}; 
+} box_size;
+
+paramdef double {
+  p_descr = "space bewteen correlation boxes (in km)";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {4.0}; 
+} box_spacing;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {10.0}; 
+} max_vel;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {4.0}; 
+} vel_rad;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {10.0};
+  p_default = {0.3}; 
+} cor_min_thr;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {0.9}; 
+} cor_max_thr;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {1000.0};
+  p_default = {20.0}; 
+} var_thr;
+
+paramdef double {
+  p_descr = "max difference allowed between the measured Doppler velocity and the TREC radial velocity";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {3.0}; 
+} vel_dif_thr;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {2.0}; 
+} dif_mean_thr;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {10.0};
+  p_default = {0.5}; 
+} mag_thr;
+
+paramdef double {
+  p_descr = "radius of influence to use when interpolating vectors to a Cartesian grid";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {10.0}; 
+} horz_rad;
+
+paramdef double {
+  p_descr = "";
+  p_min = {0.0};
+  p_max = {100.0};
+  p_default = {1.0}; 
+} vert_rad;
+
+paramdef long {
+  p_descr = "constraint used during the interpolation process specifying the minimum number of vectors influencing a grid point";
+  p_min = {0};
+  p_max = {100};
+  p_default = {12}; 
+} num_vectors;
+
+paramdef long {
+  p_descr = "constraint used during the interpolation process specifying the minimum number of quadrants that must have data values in them; Trec does a 2d interpolation, so max number of quadrants is 4";
+  p_min = {0};
+  p_max = {4};
+  p_default = {4}; 
+} num_quadrants;
+
+paramdef long {
+  p_descr = "";
+  p_min = {0};
+  p_max = {100};
+  p_default = {5}; 
+} cntmin;
+
+paramdef char* {     
+  p_descr = "Reflectivity field name in mdv dataset";
+  p_help = "Field name of data used for cross-correlation calculations in TREC";
+  p_default = {"DBZ"};
+} dbz_field_name;     
+
+paramdef char* {     
+  p_descr = "Velocity field name in mdv dataset";
+  p_help = "Field name of data used for comparison against TREC results";
+  p_default = {"VEL"};
+} vel_field_name;     
+
+paramdef long {                       
+  p_descr = "Maximum time (in seconds) allowed between images used for TREC analysis";    
+  p_default = {3600};
+  p_max = {7200};                      
+  p_min = {60};
+} max_time_between_images;     
+  
+paramdef enum mode_t {                                  
+  p_descr = "Operational Mode";
+  p_help = "Realtime mode waits for new data; archive mode runs on a static list of files specified using either -if or -dir command line options";
+  p_default = {ARCHIVE};   
+  p_options = {REALTIME,ARCHIVE};
+} mode;         
+
+paramdef char* {   
+  p_descr = "Input file directory";        
+  p_default = {"./"};
+  p_help = "Directory which contains input mdv files to analyze.";
+} input_dir;
+
+paramdef char* {
+  p_descr = "Output file directory (top directory)";
+  p_default = {"./output/"};
+  p_help = "Name of directory where output mdv files will be placed.";
+} output_dir;
+
+paramdef boolean {                                                             
+  p_descr = "Option to avoid overwriting existing ptrec output files.";
+  p_default = {FALSE};
+  p_help = "Valid only in ARCHIVE mode.";
+} noupdate;
+
+paramdef char* {       
+  p_descr = "input file suffix";
+  p_default = {"mdv"};
+} input_file_suffix;      
+  
+paramdef char* {                                       
+  p_descr = "output file suffix";     
+  p_default = {"mdv"};
+} output_file_suffix;

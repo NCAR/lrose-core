@@ -1,0 +1,21 @@
+OPTIONS=""
+PATH=PATH:/www/apacxhe/bin
+
+case "$1" in
+	start) 
+			echo -n "Starting s2dspol..."
+			(sleep 5; /root/s2dspol -addr 192.168.4.22) >/dev/null 2>&1 &
+			;;
+	restart)
+			echo -n "Restarting s2dspol..."
+			killall -9 s2dspol
+			/root/s2dspol -addr 192.168.4.22 >/dev/null 2>&1 &
+			;;
+	stop)
+			echo -n "Stopping s2dspol"
+			killall s2dspol
+			;;
+	*)
+			echo "usage: start|restart|stop"
+			;;
+esac	

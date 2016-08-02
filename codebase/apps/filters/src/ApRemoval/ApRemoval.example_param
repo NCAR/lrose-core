@@ -1,0 +1,666 @@
+/**********************************************************************
+ * TDRP params for ApRemoval
+ **********************************************************************/
+
+//======================================================================
+//
+// ApRemoval PARAMETER FILE.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// Print debug messages.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// info ////////////////////////////////////
+//
+// Info option.
+// Print info messages.
+// Type: boolean
+//
+
+info = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with the process mapper.
+// Type: string
+//
+
+instance = "$(RADAR)";
+
+//======================================================================
+//
+// LOGS.
+//
+//======================================================================
+ 
+///////////// log_dir /////////////////////////////////
+//
+// Directory for log file output.
+// Type: string
+//
+
+log_dir = "";
+
+//======================================================================
+//
+// INPUT.
+//
+//======================================================================
+ 
+///////////// input_fmq_url ///////////////////////////
+//
+// Input URL for DsRadar data via FMQ.
+// Type: string
+//
+
+input_fmq_url = "fmqp:://$(HOST)::$(PROJECT)/fmq/dealias.$(RADAR)";
+
+///////////// vel_field_name //////////////////////////
+//
+// Velocity field name.
+// Type: string
+//
+
+vel_field_name = "VEL";
+
+///////////// refl_field_name /////////////////////////
+//
+// Reflectivity field name.
+// Type: string
+//
+
+refl_field_name = "DBZ";
+
+///////////// sw_field_name ///////////////////////////
+//
+// Spectrum Width field name.
+// Type: string
+//
+
+sw_field_name = "SW";
+
+///////////// use_terrain /////////////////////////////
+//
+// Use terrain data?.
+// Type: boolean
+//
+
+use_terrain = TRUE;
+
+///////////// terrain_url /////////////////////////////
+//
+// Terrain url.
+// Url for terrain data.  Must be cartesian data.
+// Type: string
+//
+
+terrain_url = "mdvp:://$(HOST)::/d3/fieldData/$(PROJECT)/mdv/terrain/500km/T500KmFlat.mdv";
+
+///////////// terrain_field_name //////////////////////
+//
+// Terrain field name.
+// Field name for the field to use from the terrain file.
+// Type: string
+//
+
+terrain_field_name = "Elevation";
+
+//======================================================================
+//
+// OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for filtered radar data via FMQ.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::$(PROJECT)/fmq/ap.$(RADAR)";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output fmq, in bytes.
+// This is the total size of the output fmq buffer. Some of this buffer 
+//   will be used for control bytes - 12 bytes per message.
+// Type: int
+//
+
+output_fmq_size = 50000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output fmq.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 86400;
+
+//======================================================================
+//
+// FILTERING PARAMETERS.
+//
+//======================================================================
+ 
+///////////// filter_field_names //////////////////////
+//
+// Names of fields to be filtered.
+// List the names of the fields you want to be filtered.
+// Type: string
+// 1D array - variable length.
+//
+
+filter_field_names = { "DBZ", "VEL" };
+
+///////////// filter_range ////////////////////////////
+//
+// Elevation range for data that should be filtered.
+// Data from tilts not in this range will not be filtered.
+//
+// Type: struct
+//   typedef struct {
+//      double min_elev;
+//      double max_elev;
+//   }
+//
+//
+
+filter_range = { 0, 3.5 };
+
+///////////// gate_spacing ////////////////////////////
+//
+// Expected gate spacing in meters.
+// If gate spacing is different than this value, the tilt will be 
+//   ignored.
+// Type: double
+//
+
+gate_spacing = 250;
+
+///////////// max_num_gates ///////////////////////////
+//
+// Maximum number of gates expected.
+// This will be used to construct the terrain mask.
+// Type: long
+//
+
+max_num_gates = 1200;
+
+///////////// delta_azimuth ///////////////////////////
+//
+// Delta azimuth for filtering.
+// The internal representation of a given tilt will assume this delta 
+//   azimuth.
+// Type: double
+//
+
+delta_azimuth = 1.0;
+
+///////////// radar_location //////////////////////////
+//
+// Latitude and longitude of radar.
+//
+// Type: struct
+//   typedef struct {
+//      double latitude;
+//      double longitude;
+//   }
+//
+//
+
+radar_location = { $(RADAR_LAT), $(RADAR_LON) };
+
+///////////// dbz_radius_info /////////////////////////
+//
+// Radius in azimuth and gates for area used in computation of interest 
+//   fields related to the reflectivity field.
+// If the azimuth radius is set to 2 and the gate radius is set to 4, 
+//   for example, the area used to compute the interest functions below 
+//   will be a wedge in polar space consisting of the 45 gates that fall 
+//   within 2 azimuths on each side of the given azimuth and 4 gates on 
+//   each side of the given gate.
+//
+// Type: struct
+//   typedef struct {
+//      int azimuth_radius;
+//      int gate_radius;
+//   }
+//
+//
+
+//dbz_radius_info = { 2, 4 };  default
+dbz_radius_info = { 2, 8 };
+
+///////////// vel_radius_info /////////////////////////
+//
+// Radius in azimuth and gates for area used in computation of interest 
+//   fields related to the velocity and spectral width fields.
+// If the azimuth radius is set to 2 and the gate radius is set to 4, 
+//   for example, the area used to compute the interest functions below 
+//   will be a wedge in polar space consisting of the 45 gates that fall 
+//   within 2 azimuths on each side of the given azimuth and 4 gates on 
+//   each side of the given gate.
+//
+// Type: struct
+//   typedef struct {
+//      int azimuth_radius;
+//      int gate_radius;
+//   }
+//
+//
+
+vel_radius_info = { 1, 1 };
+
+///////////// range_weight_func ///////////////////////
+//
+// Range weight function.
+// Apply a range weight to given feature fields below according to this 
+//   function.  X coordinates are given in km.
+//
+// Type: struct
+//   typedef struct {
+//      double x1;
+//      double y1;
+//      double x2;
+//      double y2;
+//      double x3;
+//      double y3;
+//      double x4;
+//      double y4;
+//      double x5;
+//      double y5;
+//      double x6;
+//      double y6;
+//   }
+//
+//
+
+range_weight_func = { 0, 1, 40, 1, 95, 0.75, 150, 0.5, 300, 0, 500, 0 };
+//range_weight_func = { 0, 1, 10, 0.8, 20, 0.6, 30, 0.4, 40, 0.2, 50, 0 }; default
+
+///////////// ap_interest_func ////////////////////////
+//
+// Interest function description for ap filtering.
+//
+// Type: struct
+//   typedef struct {
+//      interest_field_t interest_field;
+//        Options:
+//          TDBZ
+//          GDZ
+//          MVE
+//          MSW
+//          SDVE
+//          SDSW
+//          SPIN
+//          SIGN
+//          RGDZ
+//          SRDZ
+//          RSINZ
+//      double weight;
+//      double x1;
+//      double y1;
+//      double x2;
+//      double y2;
+//      double x3;
+//      double y3;
+//      double x4;
+//      double y4;
+//      double x5;
+//      double y5;
+//      double x6;
+//      double y6;
+//   }
+//
+// 1D array - variable length.
+//
+
+//ap_interest_func = {
+//  { TDBZ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//  { MVE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//  { SPIN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//  { SIGN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+//};
+
+ap_interest_func = {
+  { TDBZ,  1, -100, 0, 0, 0, 55, 1, 60, 1, 100, 1, 10000, 1},
+  { GDZ,   1, -1000, 1, -100, 1, -15, 1, 0, 0, 50, 0, 100, 0},
+  { MVE,   1, -50, 0, -30, 0, -2.3, 0, 0, 1, 2.3, 0, 50, 0},
+  { MSW,   0, -50, 0, 0, 1, 6, 0, 10, 0, 20, 0, 50, 0},
+  { SDVE,  1, -50, 0, 0, 1, 0.7, 0, 10, 0, 20, 0, 50, 0},
+  { SDSW,  0, -50, 0, 0, 1, 0.7, 0, 10, 0, 20, 0, 50, 0},
+  { SPIN,  1, -100, 0, -50, 0, 0, 0, 50, 1, 100, 1, 200, 1},
+  { SIGN,  0, -10, 0, -0.3, 0, 0, 1, 0.3, 0, 10, 0, 50, 0},
+  { RGDZ,  0, -1000, 1, -100, 1, -8, 1, 0, 0, 50, 0, 100, 0},
+  { SRDZ,  0, -100, 1, -10, 1, 0, 0, 10, 1, 50, 1, 100, 1},
+  { RSINZ, 1, -10000, 1, -60, 1, 0, 0, 60, 1, 500, 1, 10000, 1}
+};
+
+///////////// sc_interest_func ////////////////////////
+//
+// Interest function description for sea clutter filtering.
+//
+// Type: struct
+//   typedef struct {
+//      interest_field_t interest_field;
+//        Options:
+//          TDBZ
+//          GDZ
+//          MVE
+//          MSW
+//          SDVE
+//          SDSW
+//          SPIN
+//          SIGN
+//          RGDZ
+//          SRDZ
+//          RSINZ
+//      double weight;
+//      double x1;
+//      double y1;
+//      double x2;
+//      double y2;
+//      double x3;
+//      double y3;
+//      double x4;
+//      double y4;
+//      double x5;
+//      double y5;
+//      double x6;
+//      double y6;
+//   }
+//
+// 1D array - variable length.
+//
+
+//sc_interest_func = {
+//  { TDBZ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//  { MVE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//  { SPIN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//  { SIGN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+//};
+
+sc_interest_func = {
+  { TDBZ, 0.5, -100, 0, 0, 0, 55, 1, 60, 1, 100, 1, 10000, 1},
+  { GDZ, 1, -1000, 1, -100, 1, -20, 1, 0, 0.2, 0.5, 0, 100, 0},
+  { MVE, 0, -50, 0, -4, 0, -1, 1, 1, 1, 4, 0, 50, 0},
+  { MSW, 1, -50, 0, -1, 0, 0, 1, 1, 1, 3.5, 0, 50, 0},
+  { SDVE, 0.5, -50, 0, -1, 0, 0, 1, 0.5, 0, 20, 0, 50, 0},
+  { SDSW, 0, -50, 0, -1, 0, 0, 1, 0.7, 0, 20, 0, 50, 0},
+  { SPIN, 1, -100, 0, -50, 0, 0, 0, 30, 0, 50, 1, 200, 1},
+  { SIGN, 0, -10, 0, -0.6, 0, 0, 1, 0.6, 0, 10, 0, 50, 0},
+  { RGDZ, 1, -1000, 1, -100, 1, -20, 1, 0, 0.2, 0.5, 0, 100, 0},
+  { SRDZ, 0, -500, 1, -40, 1, 0, 0, 40, 1, 200, 1, 500, 1},
+  { RSINZ, 1, -10000, 1, -80, 1, -20, 1, 0, 0, 80, 0, 10000, 0}
+};
+
+///////////// slant_range_dist ////////////////////////
+//
+// Distance for slant range gdz (SRDZ) field.
+// Type: double
+//
+
+slant_range_dist = 20;
+
+///////////// ap_terrain_use_type /////////////////////
+//
+// Where to filter AP.
+// This parameter tells us how to use the terrain data for AP removal.  
+//   If set to LAND, we will only filter data over the land.  If set to 
+//   WATER, we will only filter data over the water.  If set to ALL, we 
+//   will filter data everywhere, without reguard to the terrain data.
+//
+// Type: enum
+// Options:
+//     LAND
+//     WATER
+//     ALL
+//
+
+ap_terrain_use_type = ALL;
+
+///////////// sc_terrain_use_type /////////////////////
+//
+// Where to filter sea clutter.
+// This parameter tells us how to use the terrain data for sea clutter 
+//   removal.  If set to LAND, we will only filter data over the land.  If 
+//   set to WATER, we will only filter data over the water.  If set to 
+//   ALL, we will filter data everywhere, without reguard to the terrain 
+//   data.
+//
+// Type: enum
+// Options:
+//     LAND
+//     WATER
+//     ALL
+//
+
+sc_terrain_use_type = WATER;
+
+///////////// sc_spin_threshold ///////////////////////
+//
+// Spin threshold for sea clutter.
+// Differences in reflectivity between adjacent gates will be counted 
+//   for the spin calculation if they are greater than this value.
+// Type: double
+//
+
+sc_spin_threshold = 2;
+
+///////////// ap_spin_threshold ///////////////////////
+//
+// Spin threshold for AP.
+// Differences in reflectivity between adjacent gates will be counted 
+//   for the spin calculation if they are greater than this value.
+// Type: double
+//
+
+//ap_spin_threshold = 5;
+ap_spin_threshold = 3;
+
+///////////// ap_interest_threshold ///////////////////
+//
+// Interest threshold for AP removal.
+// A final interest value greater than this value will indicate the 
+//   presence of ap.
+// Type: double
+//
+
+ap_interest_threshold = 0.5;
+
+///////////// sc_interest_threshold ///////////////////
+//
+// Interest threshold for sea clutter removal.
+// A final interest value greater than this value will indicate the 
+//   presence of sea clutter.
+// Type: double
+//
+
+sc_interest_threshold = 0.5;
+
+///////////// eov_trigger /////////////////////////////
+//
+// Trigger filtering by the end of volume flag.
+// Filtering will always be triggered when two tilts are buffered and 
+//   the next tilt starts coming in.  If this flag is set to TRUE, 
+//   filtering will also be triggered when an end of volume flag is 
+//   detected.  In this case, all remaining tilts in the volume will be 
+//   filtered, if they are within the filtering range, and written out 
+//   before the next volume is processed. Note that if you do not have a 
+//   delay at the end of a volume, and you are filtering all the tilts in 
+//   a volume, you may want to set this to FALSE to insure that beams are 
+//   not dropped in the next scan.
+// Type: boolean
+//
+
+eov_trigger = TRUE;
+
+//======================================================================
+//
+// INTEREST OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_ap_interest ///////////////////////
+//
+// Write interest fields to fmq.
+// If set to true, the interest fields will be written to an fmq .
+// Type: boolean
+//
+
+write_ap_interest = TRUE;
+
+///////////// ap_interest_fmq_url /////////////////////
+//
+// Output URL for interest fields via FMQ.
+// Type: string
+//
+
+ap_interest_fmq_url = "fmqp:://localhost::$(PROJECT)/fmq/interest.$(RADAR)";
+
+///////////// ap_interest_fmq_size ////////////////////
+//
+// Size of interest fmq, in bytes.
+// This is the total size of the interest fmq buffer. Some of this 
+//   buffer will be used for control bytes - 12 bytes per message.
+// Type: int
+//
+
+ap_interest_fmq_size = 48000000;
+
+///////////// ap_interest_fmq_nslots //////////////////
+//
+// Number of slots in interest fmq.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+ap_interest_fmq_nslots = 86400;
+
+///////////// write_sc_interest ///////////////////////
+//
+// Write interest fields to fmq.
+// If set to true, the interest fields will be written to an fmq .
+// Type: boolean
+//
+
+write_sc_interest = TRUE;
+
+///////////// sc_interest_fmq_url /////////////////////
+//
+// Output URL for interest fields via FMQ.
+// Type: string
+//
+
+//sc_interest_fmq_url = "fmqp:://localhost::./fmq.interest";
+sc_interest_fmq_url = "fmqp:://localhost::$(PROJECT)/fmq/scint.$(RADAR)";
+
+///////////// sc_interest_fmq_size ////////////////////
+//
+// Size of interest fmq, in bytes.
+// This is the total size of the interest fmq buffer. Some of this 
+//   buffer will be used for control bytes - 12 bytes per message.
+// Type: int
+//
+
+sc_interest_fmq_size = 48000000;
+
+///////////// sc_interest_fmq_nslots //////////////////
+//
+// Number of slots in interest fmq.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+sc_interest_fmq_nslots = 86400;
+
+//======================================================================
+//
+// FEATURE DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_feature_data //////////////////////
+//
+// Write feature data fields to fmq.
+// If set to true, the feature data fields will be written to an fmq.
+// Type: boolean
+//
+
+write_feature_data = TRUE;
+
+///////////// feature_fmq_url /////////////////////////
+//
+// Output URL for feature data fields via FMQ.
+// Type: string
+//
+
+//feature_fmq_url = "fmqp:://localhost::./fmq.feature";
+feature_fmq_url = "fmqp:://localhost::$(PROJECT)/fmq/feature.$(RADAR)";
+
+///////////// feature_fmq_size ////////////////////////
+//
+// Size of feature data fmq, in bytes.
+// This is the total size of the feature data fmq buffer. Some of this 
+//   buffer will be used for control bytes - 12 bytes per message.
+// Type: int
+//
+
+feature_fmq_size = 48000000;
+
+///////////// feature_fmq_nslots //////////////////////
+//
+// Number of slots in feature data fmq.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+feature_fmq_nslots = 86400;
+
+//======================================================================
+//
+// TERRAIN DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_terrain ///////////////////////////
+//
+// Write out terrain data mask to an mdv file.
+// This will only apply if we are using the mask.
+// Type: boolean
+//
+
+write_terrain = TRUE;
+
+///////////// terrain_output_path /////////////////////
+//
+// File path for output terrain data mask mdv file.
+// Type: string
+//
+
+//terrain_output_path = "./terrainMask.mdv";
+terrain_output_path = "mdvp:://$(OUTPUT_HOST)::/d1/data/$(PROJECT)/mdv/radar$(RADAR)/terrain/terrainMask.mdv";

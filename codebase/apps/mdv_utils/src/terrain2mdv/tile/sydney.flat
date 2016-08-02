@@ -1,0 +1,24 @@
+
+proj = FLAT;
+
+output_type = MDV;
+input_type = GTOPO30;
+
+lon =  151.0000;
+lat =   -34.0000;
+
+xmin = -250;
+xmax =  250;
+ymin = -250;
+ymax =  250;
+
+outfname = "sydney.mdv";
+output_dir = ".";
+
+tile_lat = -60.0;
+tile_lon = 140.0;
+tile_delta = 30;
+tile_nlats = 6000;
+tile_nlons = 4800;
+
+output_grid_size = 3000;

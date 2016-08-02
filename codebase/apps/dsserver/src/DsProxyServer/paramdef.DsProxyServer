@@ -1,0 +1,116 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for DsProxyServer
+ *
+ * April 1999
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DsProxyServer will listen for incoming messages. It examines the URL, and depending on the translator and/or protocol, it will contact the relevant server on the local host, or on a host as specified in the startup parameters.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress the use of threads. Set no_threads to TRUE for this type of debugging.";
+} no_threads;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+} instance;
+
+commentdef {
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int {
+  p_default = 5442;
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+} port;
+  
+paramdef int {
+  p_default = -1;
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, it will die gracefully.";
+} qmax;
+  
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 128;
+} max_clients;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Host to which messages are forwarded.";
+} target_host;
+
+commentdef {
+  p_header = "SECURITY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run in secure mode.";
+  p_help = "If TRUE, the server will reject any URLs which specify an absolute path, or a path with .. in it. This prevents the server from writing any files which are not below DATA_DIR in the directory tree.";
+} run_secure;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run in read-only mode.";
+  p_help = "If TRUE, the server will respond only to read requests, and will ignore write requests.";
+} run_read_only;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to allow http requests.";
+  p_help = "If TRUE, the server will strip off header in request message.";
+} allow_http;
+

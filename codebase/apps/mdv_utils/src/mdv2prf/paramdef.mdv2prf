@@ -1,0 +1,225 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "mdv2prf extracts profiles from multiple URLs and\n"
+	"writes them to a single ASCII output prf file.\n\nNiles Oien";
+
+}
+
+
+
+commentdef {
+  p_header = "TRIGGERING SPECIFICATIONS.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If FALSE we trigger right away, if TRUE we do not.";
+  p_help = "FALSE is better for debugging.";
+} current_at_startup;
+
+
+paramdef int {
+  p_default = 120;
+  p_descr = "Minimum time between triggering, seconds.";
+  p_help = "This prevents overly frequent triggering.";
+} min_time_between_file_triggers;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Maximum file age in REALTIME file triggered mode, seconds.";
+  p_help = "Applies to all URLs specified.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Minumum number of URLs to update for trigger.";
+  p_descr = "Program will not trigger until at least this number of input URLs have updated. If set to 0 this will not affect the triggering.";
+} min_number_updated_urls;
+
+typedef struct {
+  string url;
+  boolean is_required;
+  boolean must_update;
+} input_url_t;
+
+paramdef struct input_url_t {
+  p_default = {
+    {
+      url = "mdvp:://localhost::mdv/radar/cart",
+      is_required = false,
+      must_update = false
+    }
+  };
+  p_descr = "Array of input data URLs and related information.";
+  p_help = "\n'url': specify the URL for the input data. For data on local disk, the URL this can just be the directory containing the input MDV data files. For data retrieved from a server, it is the URL for the server. A server URL takes the following form: 'mdvp:://host:port:directory_path'. The directory path is relative to $DATA_DIR or $RAP_DATA_DIR.\n\n'is_required': if true, the program will only trigger if data from this URL is available. If false, program will trigger even if no data is available from this URL.\n\n'must_update': if true, data from this URL must have updated since the previous merge before triggering.";
+} input_urls[];
+
+typedef struct {
+	boolean applyFutureLimit;
+	int futureLimitTime;
+} future_limit_t;
+
+paramdef struct future_limit_t {
+   p_descr = "Option to not allow trigger times in the future.";
+   p_help = "The future is after now plus futureLimitTime (in seconds)";
+   p_default = {TRUE, 0};
+} futureLimit;
+
+
+paramdef string {
+  p_descr = "Name of file that specifies the input URLs and lat\n"
+	"lon points to extract for each URL.";
+  p_help = "The format of this file is as follows. Lines\n"
+	"that start with a # or whos length is less than 5\n"
+	"characters are ignored. The first line that is\n"
+	"relevant is taken as specifying a URL, followed by\n"
+	"an optional data source string (only first 3 characters\n"
+	"are used. The next line\n"
+	"is an integer, the number of seconds back from\n"
+	"the trigger time that data from that URL are to\n"
+	"be considered valid, in seconds. The next line lists\n"
+	"the MDV field names to be extracted. After that is a line\n"
+	"listing a set of scale factors to apply to the data, one factor\n"
+	"for each MDV field. Similarly the following line is\n"
+	"a set of offsets. The intent of these scale and bias\n"
+	"values is to allow a change of units if needed. For the\n"
+	"first input source only, the next two lines list the\n"
+	"output field names and units. These are assumed to apply\n"
+	"to all input sources. Subsequent\n"
+	"lines listing two floating point numbers and an optional"
+	"boolean are taken as being lat/lon points to be applied\n"
+	"to that URL, the boolean (defaulting to TRUE) is set to\n"
+	"indicate that the point should be extracted no matter what,\n"
+	"FALSE means it should only be extracted if the last URL\n"
+	"failed to give data. For the first URL, this boolean is\n"
+	"internally set to TRUE despite the user settings since that\n"
+	"is the only setting that makes sense. Finally, there is\n"
+	"A line which either looks like this :\n\n"
+	"   height 1000.0 0.0\n\n"
+	"in which case height is taken from the MDV vlevel header\n"
+	"with a scale of 1000.0 and a bias of 0.0, or looks like this :\n\n"
+	"   heightName_z 1.0 0.0\n\n"
+	"in which case the hight is taken from the MDV field named z\n"
+	"with a scale of 1.0 and a bias of 0.0.\n"
+	"Thus this file might look like :\n\n"
+	"#\n"
+	"# VLAS - take heights from MDV header, multiply by 100.0, add 0.0\n"
+	"# Convert from K to C by setting bias for that field to -273.1\n"
+	"#\n"
+	"mdvp:://vlasHost::mdv/vlas VLA\n"
+	"900\n"
+	"uwind vwind temp rh\n"
+	"1.0   1.0   1.0  1.0\n"
+	"0.0   0.0   -273.1  0.0\n"
+	"U     V     T    H\n"
+	"M/S   M/S   C    %\n"
+	"40 -90\n"
+	"41 -91\n"
+	"42 -92\n"
+	"height 1000.0 0.0\n"
+	"#\n"
+	"#\n"
+	"# VDRAS - similar to VLAS. Note that the extraction\n"
+	"# for point 41 -91 has the boolean set to FALSE indicating\n"
+	"# that that point should only be extracted from VDRAS\n"
+	"# if the VLAS extraction failed.\n"
+	"#\n"
+	"mdvp:://vdrasHost::mdv/vdras VDR\n"
+	"1200\n"
+	"uwind vwind temp rh\n"
+	"1.0   1.0   1.0  1.0\n"
+	"0.0   0.0   -273.1  0.0\n"
+	"30 -100\n"
+	"41 -91 FALSE\n"
+	"52 -82\n"
+	"height 1000.0 0.0\n"
+	"#\n"
+	"#\n"
+	"# Model data. Use MDV field named 'z' for height.\n"
+	"# \n"
+	"mdvp:://modelHost::mdv/model RTF\n"
+	"1200\n"
+	"U   V   T   RH\n"
+	"1.0 1.0 1.0 1.0\n"
+	"0.0 0.0 0.0 0.0\n"
+	"30 -100\n"
+	"41 -91 FALSE\n"
+	"52 -82 FALSE\n"
+	"62 -72\n"
+	"heightName_z 1.0 0.0\n"
+	"NOTE : If a field name is set to 'missingField' then it is taken\n"
+	"to mean that that field is not available for this input and\n"
+	"missing values are produced.";
+  p_default = "/Some/file/name.dat";
+} inputPointsFile;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+typedef struct {
+	string outDir;
+	string outFileName;
+	boolean timestampOutput;
+} out_t;
+
+paramdef struct out_t {
+  p_default = { "/Some/output/dir", "blend",  TRUE };
+  p_private = FALSE;
+  p_descr = "Name of the output directory, name of the output\n"
+	"file, and option to append the timestamp string\n"
+	"_YYYYMMDD_hhmmss.prf to the output filename.";
+ p_help = "If the timestamping is not used then succesive\n"
+	"runs will overwrite.";
+} output;
+
+typedef struct {
+	boolean runScript;
+	string scriptName;
+} script_t;
+
+paramdef struct script_t {
+	p_descr = "Option to run a script after an output file is written.";
+	p_help = "The output filename will be an option to the script.\n"
+	"Script should be in the users path.";
+	p_private = FALSE;
+	p_default = { FALSE, "processPrfFile" };
+} script;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If FALSE we print missing values for data.";
+  p_help = "Set to TRUE to never print missing data";
+} noMissingData;

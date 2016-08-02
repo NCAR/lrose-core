@@ -1,0 +1,662 @@
+<HTML>
+<HEAD>
+<TITLE>Title</TITLE>
+<!--Created by Applixware HTML Author, Release 4.4 on Fri Dec 17 12:56:02 1999-->
+<!--Ax:WP:DocVar:HTMLOriginalPath@:"/tmp/ex26970t.aw"-->
+</HEAD>
+<BODY BGCOLOR=white>
+<P><B>Cartesian Interactive Data Display (CIDD)</B></P>
+<P><B>User Manual </B></P>
+<P></P>
+<P><B>National Center for Atmospheric Research </B></P>
+<P><B>P. O. Box 3000</B></P>
+<P><B>Boulder, Colorado 80307-3000 </B></P>
+<P>Copyright 1997. </P>
+<P>The University Corporation for Atmospheric Research (UCAR)  </P>
+<P>All rights reserved. </P>
+
+
+<P><B><I><FONT SIZE=4> Part I:  Using CIDD </FONT></I></B></P>
+<P><B><FONT SIZE=4>1.0 Introduction to CIDD</FONT></B></P>
+<H1>1.1.  What Is CIDD<SUP><FONT SIZE=1>1</FONT></SUP>? </H1>
+<P>CIDD software was developed for displaying real-time gridded data in
+National Center for Atmospheric Research (NCAR) field research projects.  This
+program has been used for forecasting experiments for thunderstorms, hail, and
+icing; aviation weather product verification; and coordination of research
+aircraft and vehicles. It has been used for displaying real-time data from
+radars, models, surface analysis, satellite imagery, and tracking algorithms. 
+</P>
+<H1>1.2.  What Does CIDD DO?</H1>
+<P>CIDD's display capabilities include PPI/plan views, RHI/cross sections, and
+CAPPI (see Section 3.2). Both RHI scans and reconstructed RHI from volume
+scans can be displayed.</P>
+<P>In addition to real-time display, the software provides archival data
+access and movie looping capability.  It also provides extensive overlay
+display capabilities, including geographic maps (state and county borders,
+roads, terrain), wind vector sets, icons (radars, PAM stations, airports,
+airplanes, vehicles), and real-time weather alerts or symbolic products (gust
+fronts, station plots, microbursts, storm tracking, precipitation, weather
+forecasting). </P>
+<P>CIDD provides a simple graphic editing tool, allowing the user to draw
+features over the data display and export them on a network for analysis and
+forecasting. </P>
+<H1>1.3.  Key Features of the Program</H1>
+<P>An arbitrary number of fields can be accessed and the user can quickly
+switch between the displayed fields. The user can zoom in to preset domains in
+an arbitrary sub-area in both real-time and movie displays (see Section 6.0). 
+</P>
+<P>Other features include:  </P>
+<P><FONT FACE="symbol">&#183;</FONT>  Ability to layer multiple grids together
+onto each image. </P>
+<P><FONT FACE="symbol">&#183;</FONT>  Modular, distributed design
+client-server for accessing data. </P>
+<P><FONT FACE="symbol">&#183;</FONT>  Flexible interface design allows CIDD to
+be easily adapted to different project needs and weather product environment. 
+</P>
+<P><FONT FACE="symbol">&#183;</FONT>  CIDD allows point and click reading of
+field values and locations.</P>
+<P><FONT FACE="symbol">&#183;</FONT>  CIDD can be set up to operate in a
+simplified, pre-configured mode for non-meteorologist use. </P>
+<P><FONT FACE="symbol">&#183;</FONT>  CIDD provides a shared-memory interface
+to auxillary programs, allowing specialized applications to be integrated with
+the main display. </P>
+<P><FONT FACE="symbol">&#183;</FONT>  CIDD  has a highly configurable design.
+It can be set up to behave primarily as a real-time display or as an archival
+data analysis display. </P>
+<P><FONT FACE="symbol">&#183;</FONT>  The display can gather and integrate
+data from geographically distant sights via internet connections. </P>
+<H1>1.4.  Limitations</H1>
+<P>CIDD is an X-windows-based display requiring a local X-server supporting at
+least 256 colors.  </P>
+<H1>1.5.  Who should Use CIDD?</H1>
+<P>Radar operators can use CIDD for monitoring radar operations and product
+generation. Research meteorologists can use CIDD for examining real-time or
+archived radar data, weather product validation, coordinating field airplanes
+and vehicles, and forecast experiments.</P>
+<P>Operational meteorologists can use CIDD for weather monitoring, operational
+forecasting, situation display, and product verification. End-users can use
+CIDD to display pre-configured weather-related products. </P>
+<H1>1.6.  The Parts of the User Manual </H1>
+<P>The <I>CIDD User Manual</I> explains how to use, install, and customize
+CIDD. Part I of the <I>User Manual</I> gives instructions for anyone who
+intends to use CIDD. The program has many features and not all of them will be
+apparent without reading Part I of the manual. </P>
+<P>Part I of the manual starts with a brief review of mouse functions. It
+assumes that the user has some experience using a mouse. The next section
+explains the functions accessible from the Main Control panel of CIDD and the
+pop-up panels. </P>
+<P>The following chapters explain all functions of the program in detail. Part
+I is the only part of the manual that the typical CIDD user needs to read. 
+</P>
+<P>Part II of the <I>User Manual</I> explains how to install and set up the
+program. Only people who install the program or want to add new data sources
+need to read this part of the manual. </P>
+<P>The Installation Section consists of steps that an experienced Unix user
+can perform and one step, <I>Writing a Server</I>, requires C programming
+experience. </P>
+<P>Part III of the <I>User Manual</I> consists of appendices that describe
+each of the parameters used to customize CIDD. Customization involves
+modifying text configuration files.  </P>
+<P><B><FONT SIZE=4>2.0 Getting Started </FONT></B></P>
+<H1>2.1.  Review of Mouse Functions </H1>
+<P>This section briefly reviews mouse actions for working with an X-window
+application. It is assumed that the user is familiar with the X-window system,
+so does not go into great detail. </P>
+<P>If the user is instructed to click on a selection, s/he positions the
+pointer over the selection and presses and releases the left button on the
+mouse. The left button is used for most actions; if the user needs to press a
+different button, the instructions will indicate which button is needed. 
+</P>
+<P>The main CIDD window's size and position on the screen is controlled
+through standard X-window manager controls.  See your window manager
+documentation. </P>
+<P>If the user is instructed to drag an object, move the pointer over the
+object, press the button when the mouse is positioned over the object,
+continue to hold the button while moving the object and release the button
+when the object is correctly positioned. </P>
+<P>If instructions indicate that a left click is needed, position the mouse
+and then press and release the left mouse button. </P>
+<P><B>In review:</B></P>
+<P>LEFT<B>    =   </B><I>select - use to select buttons, text, zoom or report
+data values</I></P>
+<P>MID<B>     =   </B><I>move/adjust - moves image display area</I></P>
+<P>RIGHT<B>  =   </B><I>menu or select a vertical cross section </I></P>
+<P></P>
+<H2>2.1.1  Quitting the Program</H2>
+<P>Select Quit from the window manager controls. </P>
+<H1>2.2.  Regions of the CIDD Screen</H1>
+<P>The main CIDD screen consists of two regions.  Along the top is a control
+panel which controls movie looping and the display of the auxillary control
+panels.  Below is the imaging area for data.  Another region is the thin
+border line around the display. Clicking the right mouse button on this border
+displays the window's menu; this feature is window manager dependent, however.
+The menu offers the choice of closing the CIDD window (it becomes an icon) or
+quitting from the program (also window manager dependent). </P>
+<P><IMG SRC="cidd_manual.gif" ALT="cidd_manual.gif"></P>
+<P></P>
+<P>2.2.1 An example of the CIDD full screen display window. </P>
+<H1>2.3.  The Main Control Panel </H1>
+<P>The Main Control Panel contains buttons to control what is displayed. The
+first of these is the <I>loop</I> button.  A window containing information
+about the radar, such as altitude, beam width, longitude, and latitude appears
+in the display area. </P>
+<P>The radar button is a toggle, meaning that by clicking once, the Radar Data
+window appears and clicking a second time makes the window disappear.</P>
+<H2>2.3.1  Data Field Choices</H2>
+<P>The next group of choices is the data field selections, i.e., reflectivity,
+velocity, and signal-to-noise ratio. The number of fields that can be
+displayed is customizable and dependent on the capabilities of the radar. To
+select one of the fields, move the mouse so the pointer is over the button and
+left click the mouse. This action de-selects whatever other field had
+previously selected. </P>
+<P>As a shortcut, keep the pointer in the display area and click the middle
+mouse button. This action toggles back and forth between the two most recently
+selected fields. </P>
+<H2>2.3.2  Vertical Cross Section Display</H2>
+<P>The next button of the control panel is the Vertical display button. RHI
+gives a vertical cross section display along an arbitrary line.  </P>
+<P><IMG SRC="cidd_manual1.gif" ALT="cidd_manual1.gif"></P>
+<P> </P>
+<P>2.3.3 Example, vertical cross section display window. </P>
+<P>A display with range on the horizontal axis and height on the vertical axis
+is placed on the screen. Fields are selected independently from the plan view
+window, using the menu (right) button. To remove the display, left click the
+vertical button a second time. Details about using the control window can be
+found in ``Using Vertical Cross Section'' in this manual (see Section 5.0). 
+</P>
+<H2>2.3.4  CAPPI (vs RHI)<SUP>2</SUP> Display </H2>
+<P>CIDD is capable of displaying constant altitude PPI and surface and
+satellite imagery.  CIDD shows the data in its native state.  In order to
+determine the type of plan view needed, look at the units next to the height
+slider.  </P>
+<H2>2.3.5  Zoom Capability</H2>
+<P>CIDD has preset zooms. The user can click and drag on ``custom'' zoom
+preset by using the left button.  Unzoom by picking one of the predefined
+domains. </P>
+<P><IMG SRC="cidd_manual2.gif" ALT="cidd_manual2.gif"></P>
+<P> </P>
+<P>2.3.6 Example, defining the area to zoom. </P>
+<P>CIDD will preserve its aspect ratio by adjusting the zoom area to fit the
+window.  </P>
+<H2>2.3.7  Information Display</H2>
+<P> </P>
+<H2>2.3.8  More Controls</H2>
+<P>The next control in the Main Control Panel is a slider for adjusting the
+brightness of the displayed radar data. To use the slider, drag the slider by
+holding down the left mouse button. To dim the display, move the slider to the
+left. The primary purpose of dimming the display is to make overlays more
+easily visible. </P>
+<P>Clicking the Overlay button creates a window which displays various overlay
+choices to be placed over the radar display area. The overlays may include
+roads, other maps, grids, or weather products. At the left of the window are
+categories of overlay and at the right are specific overlays. See Section 4.0,
+``Using `PRDS' Product Selection'' for more information on this feature. 
+</P>
+<P>Clicking the Draw button on the Main Control panel displays options for
+drawing. See Section 7.0, ``Using Draw'' for more information on this feature.
+</P>
+<P>The last button on the Main Control panel is the on-line help button.
+Clicking this button (using the left mouse button) displays a window
+containing basic instructions from this manual. A slider bar at the left of
+the window lets you scroll quickly through the information to find answers to
+your questions. To move quickly to a particular point, drag the slider up or
+down using the mouse. To move backward or forward one page at a time, click on
+the bar either above or below the slider. </P>
+<H2>2.3.9  Reading Values</H2>
+<P>An additional feature of the main display area and the cross section
+display is the ability to obtain numeric values for a point. To do this, move
+the mouse so that the pointer points to the location for the reading desired.
+Click the left button on the mouse. A readout of numerical values appears on
+the top of the display area. The readout includes the latitude and longitude
+data value for the field (reflectivity, velocity, etc.) being displayed.  This
+data is written to its shared memory area for auxillary programs to use.  For
+example, a satellite image registration tool was built using this interface. 
+</P>
+<P><B><FONT SIZE=4>3.0 Using Zoom </FONT></B></P>
+<P></P>
+<P><B><FONT SIZE=4>4.0 Using ``PRDS'' (Product Selection) </FONT></B></P>
+<P>To use overlays, click on the Overlay button in the Main Control panel. A
+menu window will pop up displaying the symbolic product (alerts) selections. 
+</P>
+<P><IMG SRC="cidd_manual3.gif" ALT="cidd_manual3.gif"></P>
+<P></P>
+<P>4.1. Example of overlay menu window. </P>
+<H1>4.2.  Products </H1>
+<P>The menu window contains three separate lists. The list at the far left is
+a listing of overlay classes. Some examples of classes include maps,
+microburst products, and tornado products. Each of these may contain a number
+of objects. The objects in a class are listed in the middle list. Examples of
+objects in the Map class are a road map, a county map, or a rectangular grid.
+Objects in a product class have a different naming convention, e.g., they have
+a short text name followed by the time that the product originated. </P>
+<P>Objects may have a further subdivision in the third list. For weather
+products, the third list may have a time sequence tracking a particular
+prediction. For example, if the class is microburst products, and the object
+is a particular microburst prediction, the third list may have a time sequence
+tracking the microburst. The third list is also used more generally for
+providing a third level of subdivision.</P>
+<P>Objects often have no third level list. For example, a county map in the
+class Maps would not usually have any subdivision in the third list. </P>
+<H1>4.3.  Using the Product Menu</H1>
+<P>To use the overlay menu, first choose a class of overlays from the left
+list. Items in the left list have a face symbol to the left, a name in the
+center, and end with a number. A smiling face symbol indicates that overlays
+in that class are available, and a frown indicates that overlays in that class
+are not available (the product source has been turned off). The number
+indicates how many objects are available in that class. To select a class,
+click at the left of the overlay name, near the face symbol. To obtain a
+sublist of objects in the class, click at the right side of the class name,
+over the number, using the mouse button. </P>
+<P>To choose an object, use the same procedure. Click at the left side of the
+object name for object selection. To view a sublist for the object, click near
+the right side of the name. </P>
+<P>To choose an item within an object, obtain the list of items by clicking at
+the right of the object name. Select the item or items by clicking on the
+names of the items. </P>
+<P>An object must be selected (the object name is highlighted) for all 2 or 3
+levels before the object will be displayed over the radar data area as an
+overlay. CIDD can support as many overlays, simultaneously, as the user wishes
+to use. </P>
+<P>By clicking on the Cut button, objects or subitems of objects (but not
+classes) can be removed easily. The pointer changes shape and any object or
+subitem clicked on will permanently be removed from the database.  <I>There is
+no way to restore an object once it has been cut.</I></P>
+<P>The Loop button is currently not a supported function.</P>
+<P>CIDD can be run without overlay capability if desired. The overlay function
+is a separate process called ``prds'' that is independent of CIDD. The
+functioning of the overlay program is controlled by a file called
+``prds.conf''. Whether or not prds will be active depends upon whether it is
+included in the cidd script file. CIDD also works with <I>prod_sel</I>. 
+</P>
+<H2>4.3.1  prod_sel </H2>
+<P><I>(description here) </I></P>
+<P></P>
+<H1>4.4.  Overlays </H1>
+<P>The Overlay Panel options are:</P>
+<P><FONT FACE="symbol">&#183;</FONT>  Maps</P>
+<P><FONT FACE="symbol">&#183;</FONT>  Range rings, azimuth lines</P>
+<P><FONT FACE="symbol">&#183;</FONT>  Contours of selected fields </P>
+<P><FONT FACE="symbol">&#183;</FONT>  Gridded fields - ``Layering'' with
+thresholding </P>
+<P><FONT FACE="symbol">&#183;</FONT>  Display winds (vectors, barbs, etc.)
+</P>
+<P><FONT FACE="symbol">&#183;</FONT>  Dim - gridded data to highlight
+overlays, products </P>
+<P><FONT FACE="symbol">&#183;</FONT>  Control product look (line width, fonts, etc.)
+</P>
+<P><FONT FACE="symbol">&#183;</FONT>  Save image feature </P>
+<P></P>
+<P><B><FONT SIZE=4>5.0 Using Vertical Cross Section</FONT></B></P>
+<P>To obtain the cross section display, either click on the ``vert'' button or
+click and drag the right button over the plan view image. A window pops up.
+The window contains a graph with the range on the X-axis and the height on the
+Y-axis.  </P>
+<P><IMG SRC="cidd_manual4.gif" ALT="cidd_manual4.gif"></P>
+<P></P>
+<P>5.1. Example of cross section display. </P>
+<P><B>5.2.  Selecting the Cross Section</B></P>
+<P>Click and drag the right mouse button. Change fields by selecting a field
+in the menu with the right mouse button. </P>
+<P><B><FONT SIZE=4>6.0 Movies</FONT></B></P>
+<P>In real-time mode, CIDD automatically updates the imagery and movie loops. 
+</P>
+<P>To display data in Archive mode, click on the Movie button in the Main
+Control panel. A Movie Control panel appears on the screen.  The image will
+move according to the times that are indicated for the Movie Frame Time
+Interval (minutes) and Number of Frames (per second).  </P>
+<P><IMG SRC="cidd_manual5.gif" ALT="cidd_manual5.gif"></P>
+<P></P>
+<P>6.1.  The Movie Control panel. </P>
+<H1>6.2.  Real-Time Use for Movie</H1>
+<P></P>
+<H1>6.3.  More on Time Mode</H1>
+<P>By dragging the Speed slider to the left (slower) or right (faster) the
+user can change the speed at which data is displayed.</P>
+<P>If Step is selected while in Time mode and the user clicks on the bar to
+the right of the Frame slider, the next frame at the specified tilt will be
+displayed. Clicking on the bar to the left of the Frame slider will jump back
+one frame in time. The A (All) and V (Volume) buttons also affect display of
+data in both Auto and Step. By Clicking on A, all frames at the specified
+elevation, including repeats of an elevation in a volume, are displayed. By
+clicking on V, only one frame per volume is displayed. </P>
+<P><B><FONT SIZE=4>7.0 Using Draw - ``Expt''-  The Exporter</FONT></B>
+</P>
+<P>CIDD supports a screen drawing capability. This capability can be used to
+draw weather products or other graphic overlays. CIDD is also capable of
+exporting the weather products drawn in CIDD to other programs. CIDD can also
+receive weather products from itself for addition to its product overlay database.
+</P>
+<P>Knowledge of the drawing methods is not needed for learning other functions
+of CIDD. Since the use of the drawing function is for limited purposes,
+reading this section is optional. </P>
+<H1>7.1.  The Draw Menus</H1>
+<P>To use the drawing capability, move the mouse so that the pointer is over
+the Draw button in the Main Control panel and left click the mouse. A pop-up
+menu is displayed in the data display area. </P>
+<P><IMG SRC="cidd_manual6.gif" ALT="cidd_manual6.gif"></P>
+<P></P>
+<P>7.1.1 Example, of the Draw pop-up menu.</P>
+<P>The pop-up menu has four buttons: New, Copy, Export, and Cut. The menu also
+has a list box which shows the names of drawings as they are created. When
+Draw is first selected, the box is empty (no drawings have been created yet).
+To start, click on New using the left mouse button. A second menu is
+displayed. This menu has choices for type of object. For example, in the
+diagram there are choices of Nowcast, Boundary, and Rotation among the six
+choices. On the menu there is also a set of choices for choosing the initial
+shape of an object. Choices for initial shape are a circle, a rectangle, a
+line, and a sym (symbol), and an unrelated choice of mdf (modify). </P>
+<P>Click on one of the choices for object type. Then click on a choice for
+initial shape. Move the pointer into the radar data display area and click the
+right (not left) button. A shape appears near the pointer. Next to the shape
+is a square control box.</P>
+<H1>7.2.  Using the Control Box</H1>
+<P>Each shape that is created has a square control box nearby. The square
+control box is composed of four small squares each holding a symbol. The four
+squares provide four different functions. </P>
+<P></P>
+<P>7.2.1 Example of an active drawing with its control box. </P>
+<P><B>Note:</B> To use these functions, and for other drawing tasks, use the
+right mouse button, not the left button as is done for most other actions.
+Continue to use the left button in the pop-up menus. </P>
+<P>To move an object, move the pointer onto the upper left square in the
+control box. Press and hold the right mouse button and drag the control box,
+tied to the drawing, to its new location and release the mouse button. 
+</P>
+<P>To change the size of a drawing, use the square at the lower left of the
+control box, marked with a +/- symbol. Move the pointer onto this square,
+press the right mouse button, and drag the control box toward the drawing to
+decrease its size, or away from the drawing to increase its size. Release the
+mouse button when the drawing is the correct size. </P>
+<P><B>Note:</B> For a symbol, changing the size or location are the only
+changes possible. Changing the points or shape is not possible. </P>
+<P>If a line is chosen as the initial shape, the user can add line segments by
+moving the pointer to new locations and clicking the right mouse button. If
+the user wants to terminate one set of line segments and start a new line,
+click on the square at the lower right of the control box, marked with an X.
+The next point clicked on will not be attached to the previous segments.
+</P>
+<P>When drawing line segments, instead of clicking the mouse, press the mouse
+button and drag the point to its final location. By dragging the point close
+to the end point of another segment, the two end points will join and the line
+segments will form a closed shape. </P>
+<P>Use the termination square, the upper right square of the control box, to
+terminate drawing. This action may automatically select Export, as if selected
+from the first pop-up menu. The configuration file for drawing, <I>exprt.conf
+</I>, determines whether termination automatically selects export. Using
+Export is explained further below. </P>
+<H1>7.3.  More Draw Features</H1>
+<P>For any shape except a symbol, move the pointer near to a point in the
+shape and press the right mouse button. This action grabs the point, splitting
+the line into two segments on each side of the point. It is possible to drag
+the point and attach line segments to a new location. </P>
+<P>After creating a circle or rectangle, it is possible to modify these
+objects. Move the pointer into the data display area and press and hold the
+right button instead of clicking it. For a rectangle, drag the mouse near the
+marked corner and drag the corner to change the shape and size. For a circle,
+drag the mouse to change the size of the circle. </P>
+<P>By selecting ``New'' several times you will have several separate drawings
+on the display. The drawings are listed in the pop-up menu. Only one drawing
+is active at any time. The active drawing has the control box located nearby.
+The active drawing is the only drawing that can be modified. </P>
+<P>Drawings listed in the pop-up menu are identified by an abbreviation for
+the type of object followed by the data time. The data time is the time
+displayed for the data when the object is drawn.</P>
+<P>By clicking on the left part of the drawing name in the list box, you make
+the drawing active. Clicking over the letter ``S'' at the right of the name
+toggles the drawing between being invisible and visible. </P>
+<P>By selecting ``Cut'' from the pop-up menu, the active drawing is erased. 
+<I>There is no way to restore a drawing once it has been cut. </I></P>
+<H1>7.4.  Using Copy</H1>
+<P>By selecting ``Copy'' from the pop-up menu, the secondary pop-up menu
+appears. There are two types of copy to choose from; one type copies only the
+name of the active drawing and the other type copies the shape but not the
+name. </P>
+<P>To copy the shape, select the type of object from the secondary pop-up menu
+and from the same menu, select mdf (modify). The active shape is copied. The
+copy is difficult to see because it is placed on top of the original. To move
+the copy, move the pointer onto the upper left square of the control box and
+drag the copy to a new location.</P>
+<P>To copy the name only, don't change the object type. Select an initial
+shape. Move the pointer into the data display area and click the right mouse
+button. A new shape appears with the name copied from the last active drawing. 
+</P>
+<H1>7.5.  Using Export</H1>
+<P>To export a drawing from CIDD, select the Export button. The exported
+drawing can be imported for use in other programs or it can be imported back
+into CIDD to be added to the overlay database.</P>
+<P>Selecting export causes a pop-up window for Export to be displayed. (If the
+configuration file specified that the type of object is not exportable, an
+error message is displayed.) The pop-up window shows the issue time of the
+drawing and a default valid time. If the configuration file permits, select a
+different length of time that the object is valid. The valid time is not used
+within CIDD. </P>
+<P>The pop-up window allows space for entering a comment. The comment is part
+of the data exported with the drawing. </P>
+<P>When all changes have been completed to user changeable fields, click on
+Export to export the overlay from CIDD. Exports must be imported by CIDD or
+other programs to be of any use. See Section _____ ``Files for Programming'',
+later in this manual for information about writing a program to import
+drawings for use in other programs. </P>
+<H1>7.6.  Exporting Back to CIDD</H1>
+<P>It is possible to take drawings exported from CIDD and import them back for
+use as overlays. This process does not require programming. To import drawings
+back into CIDD, start the drawing program with the command: </P>
+<P>exprt -oprds_in_pope &amp;</P>
+<P>(in the script file ``cidd'' to replace the command ``exprt &amp;''). Then
+output from the Draw program is directed into the input of the overlay
+program. </P>
+<P><B><FONT SIZE=4>8.0 Configuration Files</FONT></B></P>
+<P><IMG SRC="cidd_manual7.gif" ALT="cidd_manual7.gif"></P>
+<P></P>
+<P>8.1.  Example, configuration files. </P>
+<H1>8.2.  Fields</H1>
+<P><IMG SRC="cidd_manual8.gif" ALT="cidd_manual8.gif"></P>
+<P></P>
+<P>8.2.1  Example, field choices (configuration files). </P>
+<P></P>
+<P><B><I><FONT SIZE=4> Part II:   Installation</FONT></I></B></P>
+<P><B><FONT SIZE=4>9.0 Installing Files </FONT></B></P>
+<P></P>
+<H1>9.1.  Overview</H1>
+<P></P>
+<H1>9.2.  Copying Files</H1>
+<P></P>
+<H1>9.3.  Adding the Path</H1>
+<P></P>
+<H1>9.4.  Checking for Shared Memory</H1>
+<P></P>
+<P></P>
+<P><B><FONT SIZE=4>10.0 Programming an Interface</FONT></B></P>
+<P></P>
+<P><B><FONT SIZE=4>11.0 Changing Configuration Files</FONT></B></P>
+<H1>11.1.  File Information</H1>
+<H1>11.2.  More Files:  Configuration, Script, and text</H1>
+<P></P>
+<P></P>
+<P></P>
+<P></P>
+<P></P>
+<P></P>
+<P></P>
+<P></P>
+<P></P>
+<P></P>
+<P><B><I><FONT SIZE=4> Part III:   Appendices</FONT></I></B></P>
+<P><B><FONT SIZE=4>A.     Configuration Files</FONT></B></P>
+<P>A.1  cidd_defaults</P>
+<P></P>
+<P>A.2 data.info</P>
+<P></P>
+<P>A.3 wind.info</P>
+<P></P>
+<P>A.4 overlays.info</P>
+<P><B><FONT SIZE=4>B.     Changing file perameters </FONT></B></P>
+<P><B><FONT SIZE=4>C.     How To:</FONT></B></P>
+<P></P>
+<P>C.1   Start the system.</P>
+<P></P>
+<P>C.2 Make sense of mouse button options. </P>
+<P></P>
+<P>C.3 Add/Delete Data fields</P>
+<P></P>
+<P>C.4 Change Domains (areas of coverage)</P>
+<P></P>
+<P>C.5 Change Overlays/Add Maps</P>
+<P></P>
+<P>C.6 Change Colorscales</P>
+<P></P>
+<P>C.7 Add/Delete Products for ``import''</P>
+<P></P>
+<P>C.8 Add/Delete Products for export</P>
+<P></P>
+<P>C.9 Add/Delete Wind Fields</P>
+<P></P>
+<P>C.10 Set up a Demo</P>
+<P></P>
+<P>C.11 Add a new product. </P>
+<P></P>
+<P></P>
+<P></P>
+<P></P>
+<P><B><FONT SIZE=4>D.     CIDD Features </FONT></B></P>
+<P></P>
+<P><B><FONT SIZE=2>LOOP</FONT></B><I> </I><B><FONT SIZE=2> - </FONT></B>
+<I>start/stop looping data</I></P>
+<P></P>
+<P><B><FONT SIZE=2>FIELD  </FONT></B><I>- allows you to select one of the
+following fields for display.</I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>OPTIONS: Polar-dbz Cart</FONT><I>(esian)
+</I><FONT SIZE=2>-1km-dbz</FONT></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>Polar-vel</FONT><I>(ocity)</I><FONT SIZE=2> Cart
+</FONT><I>(esian)</I><FONT SIZE=2>-1km-vel</FONT><I>(ocity)</I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>Polar-dbz(</FONT><I>w/</I><FONT SIZE=2> TITAN 
+</FONT><I>color scale</I><FONT SIZE=2>) Cart</FONT><I>(esian)</I><FONT SIZE=2>-1km-dbz(
+</FONT><I>w/</I><FONT SIZE=2>TITAN</FONT><I>color scale</I><FONT SIZE=2>)
+</FONT></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>TREC-U,V&amp;W  </FONT><I>wind components 
+</I><FONT SIZE=2> TREC-conv</FONT><I>(ergence)</I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>TREC-R</FONT><I>(adial)</I><FONT SIZE=2>VEL
+</FONT><I>(ocity)</I><FONT SIZE=2> SURF</FONT><I>(ace)</I><FONT SIZE=2>-U 
+</FONT><I>wind component</I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>SURF</FONT><I>(ace)</I><FONT SIZE=2>-V   
+</FONT><I>wind component</I><FONT SIZE=2> SURF-T</FONT><I>(emperature)
+</I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>SURF-P</FONT><I>(otential)</I><FONT SIZE=2>T
+</FONT><I>(emperature) </I><FONT SIZE=2> SURF-L</FONT><I>(ifted)</I><FONT SIZE=2>I
+</FONT><I>(ndex)</I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>SURF-D</FONT><I>(ew)</I><FONT SIZE=2>P</FONT>
+<I>(oin)</I><FONT SIZE=2>T SURF-CONV</FONT><I>(ergence)</I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>A</FONT><I>(uto)</I><FONT SIZE=2>N</FONT>
+<I>(owcast)</I><FONT SIZE=2>-MinMax </FONT><I>(e.g if/then rules forecast)
+</I><FONT SIZE=2> A</FONT><I>(uto)</I><FONT SIZE=2>N</FONT><I>(owcast)
+</I><FONT SIZE=2>-MinMax-filtered </FONT><I>(remove small fcst) </I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>A</FONT><I>(uto)</I><FONT SIZE=2>N</FONT>
+<I>(owcast)</I><FONT SIZE=2>-MinMax-v</FONT><I>(alid)</I><FONT SIZE=2>time A
+</FONT><I>(uto)</I><FONT SIZE=2>N</FONT><I>(owcast)</I><FONT SIZE=2>-combined
+</FONT><I>(e.g. fuzzy forecast)</I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>A</FONT><I>(uto)</I><FONT SIZE=2>N</FONT>
+<I>(owcast)</I><FONT SIZE=2>-Cu</FONT><I>(mulus)</I><FONT SIZE=2>-congestus A
+</FONT><I>(uto)</I><FONT SIZE=2>N</FONT><I>(owcast)</I><FONT SIZE=2>-Sta
+</FONT><I>(tionaryboundary)</I><FONT SIZE=2>-lifting </FONT><I>(zone)</I>
+</P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>AA</FONT><I>(uto)</I><FONT SIZE=2>N</FONT>
+<I>(owcast)</I><FONT SIZE=2>-Mov</FONT><I>(ing boundary)</I><FONT SIZE=2>-lifting
+</FONT><I>(zone)</I><FONT SIZE=2> A</FONT><I>(uto)</I><FONT SIZE=2>N</FONT>
+<I>(owcast)</I><FONT SIZE=2>-large-t</FONT><I>(hunder)</I><FONT SIZE=2>storm   
+</FONT><I>(fromTITAN)</I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>A</FONT><I>(uto)</I><FONT SIZE=2>N</FONT>
+<I>(owcast)</I><FONT SIZE=2>-small-t</FONT><I>(hunder)</I><FONT SIZE=2>storm   
+</FONT><I>(fromTITAN)</I><FONT SIZE=2>   A</FONT><I>(uto)</I><FONT SIZE=2>N
+</FONT><I>(owcast)</I><FONT SIZE=2>-Trec-conv</FONT><I>(ergence)</I></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>A</FONT><I>(uto)</I><FONT SIZE=2>N</FONT>
+<I>(owcast)</I><FONT SIZE=2>-B</FONT><I>(oundary)</I><FONT SIZE=2>-rel
+</FONT><I>(ative)</I><FONT SIZE=2>-flow V</FONT><I>(ertically)</I><FONT SIZE=2>I
+</FONT><I>(ntegrated)</I><FONT SIZE=2>L</FONT><I>(iquid)</I></P>
+<P></P>
+<P><B><FONT SIZE=2>VIEW  </FONT></B><I>- allows you to select the scale to
+view data.</I></P>
+<P><FONT SIZE=2>OPTIONS: FULL DOMAIN; </FONT></P>
+<P><FONT SIZE=2>INNER DOMAIN; </FONT></P>
+<P ALIGN=JUSTIFY><FONT SIZE=2>USER PICKED </FONT><I>- User can magnify a
+certain region by putting cursor on the image, holding down the left button
+and stretching the box over the area you want to magnify.</I></P>
+<P></P>
+<P><B><FONT SIZE=2>MOVIE  </FONT></B><I>- allows you to change the movie options.
+</I></P>
+<P><FONT SIZE=2>OPTIONS: start/stop movie loop; display real-time data (if
+you're in archive mode); </FONT></P>
+<P><FONT SIZE=2>display archive data by entering a past time (hh:mm  - in UTC)
+and date (mm/dd/yy) and hitting return;</FONT></P>
+<P><FONT SIZE=2>change time interval of movie loop;  change number of frames
+you want to loop; </FONT></P>
+<P><FONT SIZE=2>increase/decrease movie loop speed;  go to specific frame # by
+dragging bar to desired place</FONT></P>
+<P></P>
+<P><B><FONT SIZE=2>OVERLAYS  </FONT></B><I>- allows you to select/de-select
+overlays listed in pop-up menu</I></P>
+<P></P>
+<P><B><FONT SIZE=2>PRODUCTS  </FONT></B><I>- allows you to turn products
+available for display on/off</I></P>
+<P><B><FONT SIZE=2>METHOD: - Turn all overlays (associated with a given
+product) on/off by clicking on the product name with the left? button.
+</FONT></B></P>
+<P><B><FONT SIZE=2>- Click on the number of products with the left? button to
+get a list of ... </FONT></B></P>
+<P><B><FONT SIZE=2>- Turn individual pro</FONT></B></P>
+<P></P>
+<P><B><FONT SIZE=2>DRAW  </FONT></B><I>- no functionality for this particular system
+</I></P>
+<P></P>
+<P><B><FONT SIZE=2>VERT(ical)  </FONT></B><I>- displays vertical cross
+sections of the selected field</I></P>
+<P></P>
+<P><B><FONT SIZE=2>CONFIG(uration)  </FONT></B><I>- allows you to reconfigure
+CIDD data fields</I></P>
+<P></P>
+<P></P>
+<P><B><FONT SIZE=2>INCREASE/DECREASE LOOPING SPEED BY DRAGGING SPEED BAR TO
+THE RIGHT/LEFT, respectively.</FONT></B></P>
+<P></P>
+<P><B><FONT SIZE=2>MOVE UP/DOWN IN ELEVATION LEVEL BY DRAGGING BAR or BY USING
+UP/DOWN ARROW KEYS.</FONT></B></P>
+<P></P>
+<P><B><FONT SIZE=4>E.     FAQ (Frequently Asked Questions): </FONT></B>
+</P>
+<P>E.1 I entered the date and time and nothing happened. Why?</P>
+<P><I>Answ:</I>  <I>Hit return to enter the new date/time.</I></P>
+<P>E.2 My data didn't show up.  Why?</P>
+<P><I>Answ:  Check the server to see if it died and then check date, times,
+etc. </I></P>
+<P>E.3 What does it mean when CIDD changes my requested ``movie loop start
+time''?  For example, I might request a start time of 22:07 because I know I
+have a data file at that time, cidd changes the start time to 22:05 and then
+displays the 22:07 file.</P>
+<P><I>Answ:</I></P>
+<P>E.4 How is the description field (first field) of the data.info file used
+in CIDD? </P>
+<P><I>Answ: </I> </P>
+<P>E.5 What format do I use to:</P>
+<P><FONT FACE="symbol">&#183;</FONT> Get gridded data into CIDD?</P>
+<P><I>Answ:</I></P>
+<P><FONT FACE="symbol">&#183;</FONT> Get overlays into CIDD?</P>
+<P><I>Answ:</I></P>
+<P><FONT FACE="symbol">&#183;</FONT> Get symbolic products into CIDD?</P>
+<P><I>Answ: </I> </P>
+<P>E.6 What needs to be running in order to:</P>
+<P><FONT FACE="symbol">&#183;</FONT> Get gridded data onto CIDD?</P>
+<P><I>Answ:</I></P>
+<P><FONT FACE="symbol">&#183;</FONT> Get wind vectors onto CIDD?</P>
+<P><I>Answ:</I></P>
+<P><FONT FACE="symbol">&#183;</FONT> Get live and archive products onto CIDD?
+</P>
+<P><I>Answ:</I></P>
+<P><FONT FACE="symbol">&#183;</FONT> Export products off of CIDD?</P>
+<P><I>Answ: </I> </P>
+<P><FONT FACE="symbol">&#183;</FONT> Is there need/use for a new colorscale
+for CIDD?</P>
+<P><I>Answ:</I></P>
+<P><B><FONT SIZE=4>F.     </FONT></B></P>
+<P><B><FONT SIZE=4>G.     </FONT></B></P>
+<P></P>
+</BODY>
+</HTML>

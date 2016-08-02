@@ -1,0 +1,58 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:        procmap
+# Short-Description: Start procmap daemon
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/opt/bin
+
+. /lib/lsb/init-functions
+
+NAME=procmap
+DAEMON=/opt/bin/procmap
+PIDFILE=/var/run/procmap.pid
+
+test -x $DAEMON || exit 5
+
+if [ -e /opt/bin/procmap ]; then
+	PROCMAP_OPTS="/opt/bin/procmap -daemon"
+fi
+
+RUNASUSER=root
+UGID=$(getent passwd $RUNASUSER | cut -f 3,4 -d:) || true
+
+case $1 in
+	start)
+		log_daemon_msg "Starting process mapper" "procmap"
+		if [ -z "$UGID" ]; then
+			log_failure_msg "user \"$RUNASUSER\" does not exist"
+			exit 1
+		fi
+  		start-stop-daemon --start --oknodo --name $NAME --startas $DAEMON -- -u $UGID $PROCMAP_OPTS
+		log_end_msg $?
+  		;;
+	stop)
+		log_daemon_msg "Stopping process mapper" "procmap"
+  		start-stop-daemon --stop --quiet --oknodo --name $NAME
+		log_end_msg $?
+		rm -f $PIDFILE
+  		;;
+	restart|force-reload)
+		$0 stop && sleep 2 && $0 start
+  		;;
+	status)
+		pidofproc -p $PIDFILE $DAEMON >/dev/null
+		status=$?
+		if [ $status -eq 0 ]; then
+			log_success_msg "procmap is running."
+		else
+			log_failure_msg "procmap is not running."
+		fi
+		exit $status
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart|force-reload|status}"
+		exit 2
+		;;
+esac

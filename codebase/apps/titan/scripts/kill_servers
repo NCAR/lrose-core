@@ -1,0 +1,10 @@
+#! /bin/csh
+
+#
+# kill server processes
+#
+
+snuff cart_slave dobson_server
+
+
+

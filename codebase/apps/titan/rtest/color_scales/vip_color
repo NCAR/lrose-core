@@ -1,0 +1,10 @@
+# NAME precip.colors
+#
+#
+# burry         10/20/94
+0       30       SpringGreen4 
+30      36       darkgreen 
+36      41       goldenrod 
+41      46       darkorange 
+46      51       orangered 
+51      80       firebrick

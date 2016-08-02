@@ -1,0 +1,417 @@
+/**********************************************************************
+ * TDRP params for RapidDow2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: RapidDow2Dsr.
+//
+// RapidDow2Dsr reads radial moments data from the RapidDow, corrects 
+//   the data appropriately for pointing angles and range, and writes the 
+//   data to a DsRadarQueue beam by beam.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL AND DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = FILELIST;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+// This is watched for input files. The files for the various channels 
+//   are found in the directories specified in the channel parameters.
+// Type: string
+//
+
+input_dir = "$(HOME)/data/rapidDow/ch0";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data - REALTIME mode.
+// For realtime only - max age of input data for it to be valid. If the 
+//   input file is older than this, the program waits for new data.
+// Minimum val: 0
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+///////////// use_latest_data_info ////////////////////
+//
+// Option to watch for _latest_data_info file in input dir.
+// For realtime only. If true the program watches for the 
+//   _latest_data_info file to change. If false, it scans the directory 
+//   for new file.
+// Type: boolean
+//
+
+use_latest_data_info = FALSE;
+
+///////////// latest_file_only ////////////////////////
+//
+// Option to only process the latest file in the directory.
+// For realtime mode only, and only if use_latest_data_info is false, 
+//   which implies that the program is scanning the input_dir for new 
+//   files. If true, only the latest file will be processed. If false, all 
+//   files younger than max_realtime_valid_age will be processed.
+// Type: boolean
+//
+
+latest_file_only = TRUE;
+
+//======================================================================
+//
+// CHANNEL DETAILS.
+//
+//======================================================================
+ 
+///////////// channels ////////////////////////////////
+//
+// Details for each channel.
+// 	name: name for the channel. 
+// 	dir: directory for the data files. 
+// 	frequency: in Ghz. 	
+// elevation_offset: offset relative to elevation in file (deg). 
+// 	azimuth_offset: offset relative to azimuth in file (deg). 
+// 	start_range: range to center of first gate (km). 
+// 	gate_spacing: spacing between gates (km).
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string dir;
+//      double frequency;
+//      double elevation_offset;
+//      double azimuth_offset;
+//      double start_range;
+//      double gate_spacing;
+//   }
+//
+// 1D array - variable length.
+//
+
+channels = {
+  {
+    name = "ch0",
+    dir = "$(HOME)/data/rapidDow/ch0",
+    frequency = 9.31,
+    elevation_offset = -10.9,
+    azimuth_offset = 0,
+    start_range = 0.0375,
+    gate_spacing = 0.075
+  }
+  ,
+  {
+    name = "ch1",
+    dir = "$(HOME)/data/rapidDow/ch1",
+    frequency = 9.394,
+    elevation_offset = -9.78,
+    azimuth_offset = -0.66,
+    start_range = 0.0375,
+    gate_spacing = 0.075
+  }
+  ,
+  {
+    name = "ch2",
+    dir = "$(HOME)/data/rapidDow/ch2",
+    frequency = 9.478,
+    elevation_offset = -8.66,
+    azimuth_offset = -1.32,
+    start_range = 0.0375,
+    gate_spacing = 0.075
+  }
+  ,
+  {
+    name = "ch3",
+    dir = "$(HOME)/data/rapidDow/ch3",
+    frequency = 9.562,
+    elevation_offset = -7.54,
+    azimuth_offset = -1.98,
+    start_range = 0.0375,
+    gate_spacing = 0.075
+  }
+  ,
+  {
+    name = "ch4",
+    dir = "$(HOME)/data/rapidDow/ch4",
+    frequency = 9.646,
+    elevation_offset = -6.42,
+    azimuth_offset = -2.64,
+    start_range = 0.0375,
+    gate_spacing = 0.075
+  }
+  ,
+  {
+    name = "ch5",
+    dir = "$(HOME)/data/rapidDow/ch5",
+    frequency = 9.73,
+    elevation_offset = -5.3,
+    azimuth_offset = -3.3,
+    start_range = 0.0375,
+    gate_spacing = 0.075
+  }
+};
+
+//======================================================================
+//
+// RADAR PARAMETERS.
+//
+//======================================================================
+ 
+///////////// override_radar_name /////////////////////
+//
+// Option to override the radar name in the data.
+// Type: boolean
+//
+
+override_radar_name = FALSE;
+
+///////////// radar_name //////////////////////////////
+//
+// Radar name for output data.
+// Type: string
+//
+
+radar_name = "DOWR";
+
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+// Type: boolean
+//
+
+override_radar_location = TRUE;
+
+///////////// radar_latitude //////////////////////////
+//
+// Radar latitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_latitude = 40.1307;
+
+///////////// radar_longitude /////////////////////////
+//
+// Radar longitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_longitude = -105.254;
+
+///////////// radar_altitude_km ///////////////////////
+//
+// Radar altitude (meters).
+// See override_radar_location.
+// Type: double
+//
+
+radar_altitude_km = 1.7;
+
+///////////// correct_for_azimuth_error ///////////////
+//
+// Option to apply an extra correction to azimuth.
+// This is intended to correct for a north-pointing error.
+// Type: boolean
+//
+
+correct_for_azimuth_error = FALSE;
+
+///////////// azimuth_correction //////////////////////
+//
+// Azimuth correction (deg).
+// This value will be ADDED to the recorded azimuths, to correct for 
+//   north-pointing error.
+// Type: double
+//
+
+azimuth_correction = 0;
+
+///////////// set_transition_flag /////////////////////
+//
+// Option to set transition flag when elevation error is excessive.
+// The flag will be set if the difference between the actual elevation 
+//   and target elevation exceeds max_elevation_error.
+// Type: boolean
+//
+
+set_transition_flag = TRUE;
+
+///////////// max_elevation_error /////////////////////
+//
+// Max valid elevation error (deg).
+// If the actual elevation differs from the target elevation by more 
+//   than this, the transition flag will be set.
+// Type: double
+//
+
+max_elevation_error = 3;
+
+//======================================================================
+//
+// DETERMINING END OF VOLUME.
+//
+//======================================================================
+ 
+///////////// locate_end_of_volume ////////////////////
+//
+// Option to find the end of volume.
+// If true, the end of volume will be determined by a drop in the 
+//   elevation angle.
+// Type: boolean
+//
+
+locate_end_of_volume = TRUE;
+
+///////////// elev_change_for_end_of_volume ///////////
+//
+// Change in elevation to indicate end of volume (deg).
+// If negative, we will look for a decrease in elevation angle. If 
+//   positive, we will look for an increase in elevation angle.
+// Type: double
+//
+
+elev_change_for_end_of_volume = -30;
+
+///////////// min_beams_in_volume /////////////////////
+//
+// Min number of beams in a volume.
+// After an end-of-volume is found, at least this number of beams must 
+//   be found before we look for the subsequent end of volume.
+// Type: int
+//
+
+min_beams_in_volume = 10000;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL for DsRadarQueue fmq.
+// The URL is of the form 'fmqp:://host::dir/name'. If the output is to 
+//   the local host you can use just 'dir/name'.
+// Type: string
+//
+
+output_url = "$(DATA_DIR)/fmq/dowr";
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQs are written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to block on write when the radar queue fills up.
+// If false, the program writes data to the output queue without regard 
+//   to whether the reader is keeping up. This mode should usually be used 
+//   in realtime, to avoid holding things up if a client becomes slow. If 
+//   true, the program will not overwrite data in the queue which has not 
+//   been read by the reader. This is recommended for ARCHIVE and FILELIST 
+//   mode. In this mode there should be only one reader. If you need to 
+//   service more than one reader, use Fmq2Fmq in write blocking mode with 
+//   multiple output urls to multiplex the queue.
+// Type: boolean
+//
+
+write_blocking = TRUE;
+
+///////////// output_compression //////////////////////
+//
+// Output compression options.
+// The data may be optionally compressed for output. BZIP is generally 
+//   the slowest but most compact. ZLIB uses the gzip compression 
+//   algorithm, which is faster than BZIP, and for some data more compact 
+//   as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is 
+//   simple run-length encoding compression, which is the fastest and 
+//   least compact.
+//
+// Type: enum
+// Options:
+//     NO_COMPRESSION
+//     RLE_COMPRESSION
+//     LZO_COMPRESSION
+//     ZLIB_COMPRESSION
+//     BZIP_COMPRESSION
+//
+
+output_compression = NO_COMPRESSION;
+
+///////////// output_n_slots //////////////////////////
+//
+// Number of slots in output FMQ.
+// Type: int
+//
+
+output_n_slots = 500;
+
+///////////// output_buf_size /////////////////////////
+//
+// Size of buffer in output FMQ.
+// Type: int
+//
+
+output_buf_size = 1000000000;
+

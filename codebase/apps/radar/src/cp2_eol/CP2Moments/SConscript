@@ -1,0 +1,46 @@
+# use the predefined qt environment
+Import('env')
+
+# apply uic to the form
+env.Uic4('CP2Moments.ui')
+
+# sources:
+sources=Split("""
+BiQuad.cpp
+CP2Moments.cpp
+CP2PulseBiQuad.cpp
+Filter.cpp
+main.cpp
+MomentThread.cpp
+Stk.cpp
+""")
+
+# libraries:
+libs = Split("""
+moments
+cp2net
+cp2lib
+cp2config
+QtCore
+QtGui
+QtNetwork
+fftw3
+fftw3_threads
+""")
+
+# library paths:
+libpaths=Split("""
+../CP2Net
+../CP2Lib
+../CP2Config
+../Moments
+$QTDIR/lib
+$FFTWDIR/lib
+""")
+
+# Build cp2moments
+cp2moments = env.Program('cp2moments', sources, LIBS=libs, LIBPATH=libpaths)
+
+# install cp2moments
+env.InstallBin(cp2moments)
+

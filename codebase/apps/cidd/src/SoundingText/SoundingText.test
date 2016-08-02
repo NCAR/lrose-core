@@ -1,0 +1,253 @@
+/**********************************************************************
+ * TDRP params for SoundingText
+ **********************************************************************/
+
+//======================================================================
+//
+// SoundingText.
+//
+// SoundingText samples model data from an MDV file and produces text 
+//   output. The program responds to user clicks in the associated display 
+//   (CIDD), and produces ASCII output for the point the user clicked on.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// log_data_errors /////////////////////////
+//
+// Option to log data get errors to log directory.
+// If true, data errors will be logged to the directory specified by 
+//   errors_log_dir. The reason for dealing with errors in this way is 
+//   that stdout from this program is displayed as the main product. It is 
+//   difficult to separate stderr from stdout and pipe stderr to a logging 
+//   filter. Therefore we log the spdb errors directly.
+// Type: boolean
+//
+
+log_data_errors = TRUE;
+
+///////////// errors_log_dir //////////////////////////
+//
+// Errors log directory.
+// See log_data_errors.
+// Type: string
+//
+
+errors_log_dir = "$(ERRORS_LOG_DIR)";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input MDV data.
+// The program expects model data in MDV format.
+// Type: string
+//
+
+input_url = "mdvp::domains//localhost::mdv/mm5";
+
+///////////// coord_key ///////////////////////////////
+//
+// Display coordinates shared memory Key.
+// This must match that set in CIDD's parameter file.
+// Type: int
+//
+
+coord_key = 61500;
+
+///////////// read_search_margin //////////////////////
+//
+// Time margin for searching on read (sec).
+// The program searches for data from the sample time, back be the 
+//   read_search_margin.
+// Type: int
+//
+
+read_search_margin = 7200;
+
+///////////// default_point ///////////////////////////
+//
+// The point at which we gather the data in the absence of user clicks 
+//   from the display.
+// This point is used at startup, and at set intervals. If no user input 
+//   has been found, we sample this point.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+default_point = { 25, 121.5 };
+
+///////////// default_interval ////////////////////////
+//
+// Sampling rate (sec).
+// If no user input is detected in this interval, we go ahead and sample 
+//   at the default_point.
+// Type: int
+//
+
+default_interval = 900;
+
+//======================================================================
+//
+// VARIABLE FIELD NAMES.
+//
+// Define U, V, temperature and humidity.
+//
+//======================================================================
+ 
+///////////// u_field_name ////////////////////////////
+//
+// Field name in MDV file for U.
+// Set to 'none' if no U wind data available.
+// Type: string
+//
+
+u_field_name = "U";
+
+///////////// v_field_name ////////////////////////////
+//
+// Field name in MDV file for V.
+// Set to 'none' if no V wind data available.
+// Type: string
+//
+
+v_field_name = "V";
+
+///////////// temp_field_name /////////////////////////
+//
+// Field name in MDV file for temperature.
+// Set to 'none' if no temperature data available.
+// Type: string
+//
+
+temp_field_name = "Temp";
+
+///////////// rh_field_name ///////////////////////////
+//
+// Field name in MDV file for RH.
+// Set to 'none' if no RH data available.
+// Type: string
+//
+
+rh_field_name = "RH";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// lowest_first ////////////////////////////
+//
+// Option to print lowest pressure levels first.
+// If TRUE, the output starts at the lowest pressure level and 
+//   progresses upwards. If FALSE, the output starts at the uppermost 
+//   pressure level and progresses downwards.
+// Type: boolean
+//
+
+lowest_first = FALSE;
+
+///////////// print_dewpoint //////////////////////////
+//
+// Option to print the dewpoint value.
+// If TRUE, the dewpoint is printed in addition to the RH.
+// Type: boolean
+//
+
+print_dewpoint = TRUE;
+
+///////////// round_wind_dirn /////////////////////////
+//
+// Option to round the wind direction values.
+// If TRUE, wind direction is rounded to the nearest 10 degrees.
+// Type: boolean
+//
+
+round_wind_dirn = TRUE;
+
+///////////// find_closest_waypoint ///////////////////
+//
+// Option to find the waypoint closest to the point clicked.
+// If TRUE, we search for the closest data point in the waypoint file, 
+//   and print out the waypoint name alongside the lat/lon position.
+// Type: boolean
+//
+
+find_closest_waypoint = TRUE;
+
+///////////// waypoint_data_file //////////////////////
+//
+// Name of the file that lists the waypoint locations.
+// Format is StationType Lat Lon StationName.
+// Type: string
+//
+
+waypoint_data_file = "$(PROJ_DIR)/display/params/maps/Station.loc";
+
+///////////// max_dist_from_waypoint //////////////////
+//
+// Maximum distance from waypoint.
+// If click point is further away than this, no station name is printed.
+// Type: double
+//
+
+max_dist_from_waypoint = 100;
+
+///////////// write_class_file ////////////////////////
+//
+// Option to write the data set to a CLASS format file.
+// If true, the data is written in CLASS format to the file specified in 
+//   class_file_path.
+// Type: boolean
+//
+
+write_class_file = TRUE;
+
+///////////// class_file_path /////////////////////////
+//
+// Path to the CLASS format file.
+// See 'write_class_file'.
+// Type: string
+//
+
+class_file_path = "$(RAP_DATA_DIR)/tmp/sounding.class";
+class_file_path = "./sounding.class";
+

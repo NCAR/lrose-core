@@ -1,0 +1,485 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for DeTectGenPoly2Symprod
+//
+// Nancy Rehak, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// September 2011
+//
+
+commentdef
+{
+  p_header = "DeTectGenPoly2Symprod";
+  p_text = "This program serves the DeTect GenPoly database information to a "
+           "client in Symprod format.\n"
+           "To use this server with CIDD, you need to set short_requests to "
+           "TRUE and set render_type to RENDER_ALL_VALID.";
+}
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef
+{
+  p_header = "DEBUGGING";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { DEBUG_OFF };
+} debug;
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string
+{
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean
+{
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef
+{
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int
+{
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5488;
+} port;
+  
+paramdef int
+{
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef
+{
+  p_header = "RENDERING PARAMETERS";
+};
+
+
+//////////////////////////////////////////////////////////
+// Data request
+
+commentdef
+{
+  p_header = "Data request";
+};
+
+paramdef long
+{
+  p_descr = "Lookback period for tracks in seconds";
+  p_help = "When accumulating tracks, the program will request data back "
+           "this number of seconds from the request time. "
+           "Set this to the longest tracks you think are available.";
+  p_default = 600;
+} track_lookback_secs;
+
+paramdef long
+{
+  p_descr = "Expire seconds";
+  p_help = "The number of seconds past the data time that the track is "
+           "considered valid.";
+  p_default = 300;
+} expire_secs;
+
+//////////////////////////////////////////////////////////
+// Track rendering
+
+commentdef
+{
+  p_header = "Track rendering";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to render the track.";
+  p_default = true;
+} render_track;
+
+paramdef string
+{
+  p_descr = "Track color";
+  p_help = "Name of color suggested for rendering the tracks.";
+  p_default = "yellow";
+} track_color;
+
+paramdef string
+{
+  p_descr = "Coasted locations color";
+  p_help = "Name of color suggested for rendering the coasted locations.";
+  p_default = "red";
+} coasted_location_color;
+
+
+//////////////////////////////////////////////////////////
+// Line styles
+
+commentdef
+{
+  p_header = "Line styles";
+}
+
+typedef enum
+{
+  LINETYPE_SOLID,
+  LINETYPE_DASH,
+  LINETYPE_DOT_DASH
+} line_type_t;
+
+paramdef enum line_type_t
+{
+  p_descr = "display line type";
+  p_help = "Line type suggested for using on the display.";
+  p_default = { LINETYPE_SOLID };
+} suggested_line_type;
+
+paramdef long
+{
+  p_descr = "display line width";
+  p_help = "Line width suggested for using on the display.";
+  p_default = { 1 };
+} suggested_line_width;
+
+paramdef long
+{
+  p_descr = "display arrow line width";
+  p_help = "Line width suggested for using on the arrow display.";
+  p_default = { 2 };
+} suggested_arrow_line_width;
+
+typedef enum
+{
+  CAPSTYLE_BUTT,
+  CAPSTYLE_NOT_LAST,
+  CAPSTYLE_PROJECTING,
+  CAPSTYLE_ROUND
+} capstyle_t;
+
+paramdef enum capstyle_t
+{
+  p_descr = "display capstyle";
+  p_help = "Capstyle suggested for using on the display.";
+  p_default = { CAPSTYLE_BUTT };
+} suggested_capstyle;
+
+typedef enum
+{
+  JOINSTYLE_BEVEL,
+  JOINSTYLE_MITER,
+  JOINSTYLE_ROUND
+} joinstyle_t;
+
+paramdef enum joinstyle_t
+{
+  p_descr = "display joinstyle";
+  p_help = "Joinstyle suggested for using on the display.";
+  p_default = { JOINSTYLE_BEVEL };
+} suggested_joinstyle;
+
+
+//////////////////////////////////////////////////////////
+// Vector rendering
+
+commentdef
+{
+  p_header = "Vector rendering";
+}
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to render target vector";
+  p_default = false;
+} render_vector;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use the predicted heading for the "
+            "vector.";
+  p_help = "If set to true, the predicted heading is used. "
+           "If set to false, the actual heading is used.";
+  p_default = false;
+} use_predicted_heading;
+
+paramdef string
+{
+  p_descr = "Suggested color to use for rendering the vectors.";
+  p_default = "yellow";
+} vector_color;
+
+paramdef boolean
+{
+  p_descr = "Fixed length vectors flag";
+  p_help = "If flag set, vectors are of fixed length. "
+           "If not set, the length of the vector will be the distance the "
+           "target would travel in vector_lead_time seconds.";
+  p_default = false;
+} fixed_length_vectors;
+
+paramdef double
+{
+  p_descr = "Vector length in kilometers.";
+  p_help = "Used only if fixed_length_vectors is set to true.";
+  p_default = 20.0;
+  p_min = 0.0;
+} vector_length;
+
+paramdef long
+{
+  p_descr = "Number of seconds to use for determining the length of the "
+            "vectors";
+  p_default = 30;
+} vector_lead_time;
+
+paramdef double
+{
+  p_descr = "Length of arrow head (km).";
+  p_default = 2.0;
+  p_min = 0.0;
+} arrow_head_len;
+
+paramdef double
+{
+  p_descr = "Half angle of arrow head (deg).";
+  p_default = 20.0;
+  p_min = 0.0;
+  p_max = 90.0;
+} arrow_head_half_angle;
+
+
+//////////////////////////////////////////////////////////
+// Ellipse rendering
+
+commentdef
+{
+  p_header = "Ellipse rendering";
+}
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to render target ellipse";
+  p_default = false;
+} render_ellipse;
+
+paramdef string
+{
+  p_descr = "Color to use when rendering the ellipse";
+  p_default = "yellow";
+} ellipse_color;
+
+
+//////////////////////////////////////////////////////////
+// Field values
+
+commentdef
+{
+  p_header = "Field values";
+}
+
+typedef enum {
+  VERT_ALIGN_TOP           =  1,
+  VERT_ALIGN_CENTER        =  2,
+  VERT_ALIGN_BOTTOM        =  3
+} vert_align_t;
+
+typedef enum {
+  HORIZ_ALIGN_LEFT         =  1,
+  HORIZ_ALIGN_CENTER       =  2,
+  HORIZ_ALIGN_RIGHT        =  3
+} horiz_align_t;
+
+typedef enum
+{
+  AREA_FIELD,
+  AREA_KM_FIELD,
+  MAX_SEGMENT_FIELD,
+  MAX_SEGMENT_KM_FIELD,
+  PERIMETER_FIELD,
+  PERIMETER_KM_FIELD,
+  ORIENTATION_FIELD,
+  ELLIPSE_MAJOR_FIELD,
+  ELLIPSE_MAJOR_KM_FIELD,
+  ELLIPSE_MINOR_FIELD,
+  ELLIPSE_MINOR_KM_FIELD,
+  ELLIPSE_RATIO_FIELD,
+  TARGET_WIDTH_FIELD,
+  TARGET_WIDTH_KM_FIELD,
+  TARGET_HEIGHT_FIELD,
+  TARGET_HEIGHT_KM_FIELD,
+  AV_REFLECTIVITY_FIELD,
+  MAX_REFLECTIVITY_FIELD,
+  MIN_REFLECTIVITY_FIELD,
+  STD_DEV_REFLECTIVITY_FIELD,
+  RANGE_REFLECTIVITY_FIELD,
+  RANGE_FIELD,
+  BEARING_FIELD,
+  TRACK_DISTANCE_FIELD,
+  HEADING_FIELD,
+  SPEED_FIELD,
+  P_HEADING_FIELD
+} field_id_t;
+
+typedef struct
+{
+  field_id_t field_id;
+  string format_string;
+  boolean display_units;
+  string text_color;
+  string background_color;
+  int x_offset;
+  int y_offset;
+  string font_name;
+  int font_size;
+  vert_align_t vert_align;
+  horiz_align_t horiz_align;
+} field_display_t;
+
+paramdef struct field_display_t
+{
+  p_descr = "Value fields to display with each polygon";
+  p_help = "\tfield_name - The name of the field in the GenPoly database. "
+           "This name must match the name in the database exactly. "
+           "If the field isn't found, nothing is displayed.\n"
+           "\tformat_string - The printf format string to use when "
+           "displaying the field.\n";
+           "\tdisplay_units - Flag indicating whether to display the units "
+           "as stored in the database. "
+           "If you don't like the text used for the units in the database, "
+           "you can specify the units to display in the format_string field.\n"
+           "\ttext_color - Color to use for the text.\n"
+           "\tbackground_color - Color to use for the background.\n"
+           "\tx_offset - X offset, in pixels, of the location to display the "
+           "text. "
+           "The text is displayed at this offset from the polygon centroid.\n"
+           "\ty_offset - Y offset, in pixels, of the location to display the "
+           "text. "
+           "The text is displayed at this offset from the polygon centroid.\n"
+           "\tfont_name - Name of the font to use for the text.\n"
+           "\tfont_size - Size of the font to use for the text.\n"
+           "\tvert_align - Vertical alignment to use for the text.\n"
+           "\thoriz_align - Horizontal alignment to use for the text.\n";
+  p_default = { };
+} display_fields[];
+
+paramdef boolean
+{
+  p_descr = "Option to make field names part of the displayed fields.";
+  p_help = "Default is not to do this, but it does "
+      "help differentiate between the fields.";
+  p_default = FALSE;
+} show_field_names;
+
+
+//////////////////////////////////////////////////////////
+// Valid time
+
+commentdef
+{
+  p_header = "Valid time";
+}
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to display the valid time of the "
+            "latest location in the track";
+  p_default = false;
+} display_valid_time;
+
+typedef struct
+{
+  string text_color;
+  string background_color;
+  int x_offset;
+  int y_offset;
+  string font_name;
+  int font_size;
+  vert_align_t vert_align;
+  horiz_align_t horiz_align;
+} time_display_t;
+
+paramdef struct time_display_t
+{
+  p_descr = "Value fields to display with each polygon";
+  p_help = "\ttext_color - Color to use for the text.\n"
+           "\tbackground_color - Color to use for the background.\n"
+           "\tx_offset - X offset, in pixels, of the location to display the "
+           "text. "
+           "The text is displayed at this offset from the polygon centroid.\n"
+           "\ty_offset - Y offset, in pixels, of the location to display the "
+           "text. "
+           "The text is displayed at this offset from the polygon centroid.\n"
+           "\tfont_name - Name of the font to use for the text.\n"
+           "\tfont_size - Size of the font to use for the text.\n"
+           "\tvert_align - Vertical alignment to use for the text.\n"
+           "\thoriz_align - Horizontal alignment to use for the text.\n";
+  p_default = { "red", "", 0, 0, "fixed", 12, VERT_ALIGN_CENTER, HORIZ_ALIGN_LEFT };
+} display_time;

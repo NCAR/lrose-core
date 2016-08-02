@@ -1,0 +1,207 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for PointingCpCompute
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Oct 2010
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "PointingCpCompute analyses time series data from pointing operations. This is part of the ZDR calibration procedure.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILE_INPUT, TS_FMQ_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FILE_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+commentdef {
+  p_header = "H/V flag availability";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Flag to indicate that the H/V flag is set in the data.";
+  p_help = "If true, the H/V flag will be 1 for H, 0 for V, toggling for simultaneous. If false, the flag is not set and you need to use -fh and -fv on the command line.";
+} hv_flag_set;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Flag to set H or V from the file path.";
+  p_help = "If true, the H/V flag will be 1 for H for paths with 'horiz_' in them, and 0 for V for paths with 'vert_' in them.";
+} set_hv_from_file_path;
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} time_t;
+
+paramdef struct time_t {
+  p_default = { 1970, 1, 1, 0, 0, 0 };
+  p_help = "Start time for V data";
+  p_descr = "If H/V flag is not set, you need to specify the start and end times for V data. Data outside this interval will be assumed to be H.";
+} v_data_start_time;
+
+paramdef struct time_t {
+  p_default = { 1970, 1, 1, 0, 0, 0 };
+  p_help = "End time for V data";
+  p_descr = "If H/V flag is not set, you need to specify the start and end times for V data. Data outside this interval will be assumed to be H.";
+} v_data_end_time;
+
+commentdef {
+  p_header = "RANGE LIMITS";
+};
+
+paramdef double {
+  p_min = 0.0;
+  p_default = 20.0;
+  p_descr = "Start range for analysis (km).";
+} analysis_start_range;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "End range for analysis (km).";
+} analysis_end_range;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Expected gate spacing for pulse data (km).";
+} data_gate_spacing;
+
+paramdef double {
+  p_default = 0.125;
+  p_descr = "Expected gate spacing for pulse data (km).";
+} data_start_range;
+
+commentdef {
+  p_header = "SNR LIMITS";
+};
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Minimum x-polar SNR for analysis.";
+  p_help = "Gates with SNR below this will be ignored.";
+} min_snr;
+
+paramdef double {
+  p_default = 50.0;
+  p_descr = "Maximum x-polar SNR for analysis.";
+  p_help = "Gates with SNR above this will be ignored.";
+} max_snr;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "SNR interval for the analysis.";
+  p_help = "The data is partitioned into SNR intervals, and statistics are computed for each interval as well as for all values between the min and max snr.";
+} delta_snr;
+
+commentdef {
+  p_header = "CPA LIMITS";
+};
+
+paramdef double {
+  p_default = 0.95;
+  p_descr = "Mimimum clutter phase alignment value.";
+} min_cpa;
+
+commentdef {
+  p_header = "RATIO LIMITS";
+  p_text = "When computing the ratio, exclude gates at which the ratio is not reasonable.";
+};
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Minimum valid Vx/Hx ratio.";
+  p_help = "Sometimes, odd data leads to bogus ratios. This puts limits on the ratios at a gate to be used in the analysis.";
+} min_valid_ratio;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Maximum valid Vx/Hx ratio.";
+  p_help = "Sometimes, odd data leads to bogus ratios. This puts limits on the ratios to be used in the analysis.";
+} max_valid_ratio;
+
+commentdef {
+  p_header = "CALIBRATION XML PATH";
+};
+
+paramdef string {
+  p_default = "./cal.xml";
+  p_descr = "Path for XML calibration file.";
+  p_help = "At a minimum, the calibration file should contain noiseDbm and receiverGainDbm values for each channel.";
+} cal_xml_file_path;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to subtract the noise before computing the power ratio.";
+} subtract_noise_power;
+
+commentdef {
+  p_header = "OUTPUT RESULTS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write line-by-line results to stdout.";
+  p_help = "If true, the gate-by-gate results are written to stdout.";
+} write_results_to_stdout;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write detailed output to files.";
+  p_help = "If true, files will be written to output_dir.";
+} write_output_files;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output files.";
+  p_help = "The results will be written to sub-directories named from the data time.";
+} output_dir;
+

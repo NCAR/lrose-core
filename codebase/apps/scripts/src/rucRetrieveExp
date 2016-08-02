@@ -1,0 +1,709 @@
+#!/usr/bin/perl
+#
+# Retrieve experimental RUC2 model output files from the Forecast Systems
+# Lab (FSL) experimental FTP server.  Note that this is not an anonymous
+# FTP server so you must get a login from FSL before you can retrieve any
+# data.
+# 
+
+########################################################
+# Includes
+########################################################
+use Net::FTP;
+use Time::Local;
+use Env qw( RAP_LIB_DIR );
+use Env qw( RAP_SHARED_LIB_DIR );
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+use Toolsa;
+ 
+#######################################################
+# Misc.
+#######################################################
+( $prog = $0 ) =~ s%.*/%%;               # Determine program basename.
+$| = 1;                                  # Unbuffer standard output.
+umask 002;                               # Set file permissions.
+
+#######################################################
+# Global variables
+#######################################################
+$rapDataDir = $ENV{'RAP_DATA_DIR'};
+$ftpTimeout = 240;                       # Time to allow for single file transfer
+$defaultRegInterval = 120;               # Expected Heartbeat rate in seconds.
+$sysTimeout = 10;                        # Timeout for system calls
+
+#############################################################
+# Command line defaults
+#############################################################
+use Getopt::Long;
+use Env;
+use Cwd;
+Env::import();
+
+sub badArg;
+sub translateDataDir;
+sub verifyDataDir;
+
+$ftpHost = "eftp.fsl.noaa.gov";          # The Experimental FSL FTP server's domain name.
+$user = "anonymous";                     # The remote username.
+$pass = "rehak\@ucar.edu";               # The remote password.
+$ncepDir = "20kmrucx/ruc_presm";         # The remote directory.
+
+$OutputDir = "$rapDataDir/other/ruc/hybrid";  # Local data directory.
+$TmpDir    = "$OutputDir/.$prog.tmp";         # Local temporary directory.
+$Instance  = "test";                          # Instance
+$OverWrite = 0;                               # Do not overwrite existing files
+@ModelTimes = ( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 );
+@ForecastTimes = ( 0,3 );
+$ModelDelay = 0 * 60;
+$ModelWaitTime = 60 * 2;
+$ModelNumTries = 2;
+$MoveWaitTime = 1 * 60; 
+$UpdateFreq = 1 * 3600; 
+$RapDirStruct = 1;
+
+#############################################################
+# Save the usage to print to the user if there is a problem
+#############################################################
+$usage =
+    "\nrucRetrieveExp is used for retrieving experimental RUC datasets from\n" .
+    "an FTP site.  The datasets on the experimental site are assumed to be\n" .
+    "located in the FTP directory specified on the command line using the\n" .
+    "following naming convention:\n" .
+    "\n" .
+    "      YYJULHH0000FF.grib\n" .
+    "\n" .
+    "where:\n" .
+    "\n" .
+    "     YY = last 2 digits of year\n" .
+    "     JUL = Julian day (10 July is 191)\n" .
+    "     HH = model init hour (UTC)\n" .
+    "     FF = model fcst length (h)\n" .
+    "\n" .
+    "Usage: $prog [-h] [-cdfghilmnorstuw]\n" .
+    "   -a  --aa                         : Use for non Rap directory structure output\n" .
+    "   -c  --checkDataWait <num seconds>  : Wait between checks for data\n" .
+    "   -d  --debug                    : Print extra debugging messages\n" .
+    "       --expFtpHost <host>        : The experimental data FTP host\n" .
+    "       --expFtpUser <user>        : The FTP login user\n" .
+    "       --expFtpPasswd <passwd>    : The FTP login password\n" .
+    "       --expFtpDir <directory>    : The experimental data directory on the FTP host\n" .
+    "   -f  --forecasts <comma delimited forecast hours> : retrieve ruc files at these forcast times\n" .
+    "   -g  --generationTimes <comma delimited assimilation hours> : retrieve ruc files at these assimilation or generation times.\n" .
+    "   -h  --help                     : Print this usage message\n" .
+    "   -i  --instance <instance-name> : Instance name\n" .
+    "   -l  --lagTime  <num seconds>   : Model delay or lag time\n" .
+    "   -m  --moveWait <num seconds>   : wait time before moving data to final outdir\n" .
+    "   -n  --numTries  <num tries >   : Number of times to attempt retrieval\n" .
+    "   -o  --outdir <output-dir-name> : Output directory for retrieved files\n" .
+    "   -t  --tmpdir <tmp-dir-name>    : Directory name for temporary files\n" .
+    "   -u  --updateFreq <num seconds> : Update frequency of model\n" .
+    "   -w  --writeover                : Overwrite existing files\n" ;
+
+############################################################
+# Get the arguments from the command line
+############################################################
+
+@modelTimes = ();
+@forecastHours = ();
+
+$result = &GetOptions('aa',
+		      'checkDataWait=i' => \$ModelWaitTime,
+		      'debug',
+		      'expFtpDir=s' => \$ncepDir,
+		      'expFtpHost=s' => \$ftpHost,
+		      'expFtpPasswd=s' => \$pass,
+		      'expFtpUser=s' => \$user,
+		      'forecasts=s' => \@forecastTimes,
+		      'generationTimes=s'=> \@modelTimes,
+		      'help', 
+		      'instance=s' => \$Instance,
+		      'lagTime=i' => \$ModelDelay,
+		      'moveWait=i' => \$MoveWaitTime,
+		      'numTries=i' => \$ModelNumTries,
+		      'outdir=s' => \$OutputDir,
+		      'tmpdir=s' => \$TmpDir,
+		      'updateFreq=i' => \$UpdateFreq,
+		      'writeover' => \$OverWrite,
+		      '<>', \&badArg );
+
+if ( $result == 0 || $opt_help ) {
+   print( STDERR $usage );
+   exit 0;
+}
+
+#
+# I dont know what to call this variable!
+# Since this variable is used in the opposite sense of
+# normal boolean command line options, it must be set
+# by hand.
+#
+if ($opt_aa)
+{
+  $RapDirStruct = 0; 
+}
+
+#
+# Convert the comma delimited lists in the command line options
+# into the appropriate arrays.
+#
+
+if( $#modelTimes > -1 ) {
+   @ModelTimes = split(/,/,join(',',@modelTimes));
+}
+
+if ($#forecastTimes > -1 ) {
+   @ForecastTimes = split(/,/,join(',',@forecastTimes));
+}
+
+#
+# Print out the retrieval information we are using.
+#
+
+if ( $opt_debug ) {
+    print( STDERR "Input options specified: \n" );
+    print( STDERR "  aa: $opt_aa\n");
+    print( STDERR "  checkDataWait: $ModelWaitTime\n");
+    print( STDERR "  debug: $opt_debug\n" );
+    print( STDERR "  expFtpDir: $ncepDir\n");
+    print( STDERR "  expFtpHost: $ftpHost\n");
+    print( STDERR "  expFtpPasswd: $pass\n");
+    print( STDERR "  expFtpUser: $user\n");
+    print( STDERR "  generationTimes: @modelTimes\n");
+    print( STDERR "  forecasts: @forecastTimes\n");
+    print( STDERR "  instance: $Instance\n" );
+    print( STDERR "  lagTime: $ModelDelay\n");
+    print( STDERR "  moveWait: $MoveWaitTime\n");
+    print( STDERR "  numTries: $ModelNumTries\n");
+    print( STDERR "  output dir: $OutputDir\n" );
+    print( STDERR "  tmp dir: $TmpDir\n" );
+    print( STDERR "  updateFreq: $UpdateFreq\n");
+    print( STDERR "  overwrite: $OverWrite\n" );
+    $debug = 1;
+}
+  
+
+#######################################################################
+# Start of main
+#######################################################################
+
+#
+# Set up signal handling
+#
+$SIG{'INT'} = $SIG{'QUIT'} = $SIG{'KILL'} = $SIG{'TERM'} = 'sigHandler'; 
+
+#
+# Create a clean temporary directory, if it does not exist.
+#
+if (!(-e $TmpDir))
+{
+    $cmd = "mkdir -p -m 0755 $TmpDir";
+    $status = Toolsa::safe_system( $cmd, $sysTimeout, $debug );
+    unless (defined($status))
+    {
+	tidyAndExit("Could not create temporary directory\n", -1);
+    }
+}
+
+#
+# Make sure the output directory exists
+#
+if (!(-e $OutputDir))
+{
+    $cmd = "mkdir -p -m 0755 $OutputDir";
+    $status = Toolsa::safe_system($cmd, $sysTimeout, $debug);
+    unless (defined($status))
+    {
+	tidyAndExit("Could not create output directory\n", -1 );
+    }
+}
+
+    # Get the current directory listing from the FTP site
+
+    @dirListing = &dirList($ncepDir, "*.grib");
+    
+    # Process each of the files on the FTP site
+
+    foreach $listItem (@dirListing)
+    {
+	if ($debug)
+	{
+	    print( STDERR "$listItem\n");
+	}
+
+	# Extract the filename from the list item
+
+	$file_name = &extractFileName($listItem);
+
+	if ($debug)
+	{
+	    print( STDERR "   file name = <$file_name>\n");
+	}
+
+	# Extract the file times from the file name
+
+	($year, $month, $day, $hour, $minute, $second, $forecast_period) =
+	    &extractFileTimes($file_name);
+
+	if ($debug)
+	{
+	    print(STDERR "     year = $year\n");
+	    print(STDERR "     month = $month\n");
+	    print(STDERR "     day = $day\n");
+	    print(STDERR "     hour = $hour\n");
+	    print(STDERR "     minute = $minute\n");
+	    print(STDERR "     second = $second\n");
+	    print(STDERR "     forecast period = $forecast_period\n");
+	}
+
+	# If this isn't a model time or forecast period that we want,
+	# skip the file.
+
+	$model_time_found = 0;
+	foreach $testModelTime(@ModelTimes)
+	{
+	    if ($testModelTime == $hour)
+	    {
+		$model_time_found = 1;
+		last;
+	    }
+	}
+
+	if ($model_time_found == 0)
+	{
+	    if ($debug)
+	    {
+		print(STDERR "    Model time $hour not found in model time list\n");
+	    }
+	    next;
+	}
+
+	$forecast_period_found = 0;
+	foreach $testForecastPeriod(@ForecastTimes)
+	{
+	    if ($testForecastPeriod == $forecast_period)
+	    {
+		$forecast_period_found = 1;
+		last;
+	    }
+	}
+
+	if ($forecast_period_found == 0)
+	{
+	    if ($debug)
+	    {
+		print(STDERR "    Forecast period $forecast_period not found in forecast period list\n");
+	    }
+
+	    next;
+	}
+
+	# Copy the file to the correct location
+
+	&copyFile($file_name, $year, $month, $day,
+		  $hour, $minute, $second, $forecast_period);
+    }
+
+
+    tidyAndExit( "Done\n", 0 );
+
+
+############################################################
+# End of Main
+############################################################
+               
+
+############################################################
+# Start of Subroutines
+############################################################
+
+
+######################################################################
+# &extractFileName
+# Package: main
+# Returns: The file name portion of the given line from an FTP ls
+######################################################################
+sub extractFileName {
+    local($list_item) = @_;
+    local($file_name);
+
+    $file_name = substr($list_item, rindex($list_item, " ") + 1);
+
+    return $file_name;
+}
+
+######################################################################
+# &copyFile
+# Package: main
+# Returns: Nothing.  Copies the file to the local destination.  First
+#          checks to see if the file already exists locally.
+######################################################################
+sub copyFile {
+    local($file_name, $year, $month, $day,
+	  $hour, $minute, $second, $forecast_period) = @_;
+    local($dest_path, $dest_filename);
+
+    # Generate the local filepath
+
+    ($dest_path, $dest_filename, $ldata_path, $ldata_info2) =
+	getDestFilePath($file_name, $year, $month, $day,
+			$hour, $minute, $second, $forecast_period);
+
+    if ($debug)
+    {
+	print(STDERR "    dest path = $dest_path\n");
+	print(STDERR "    dest file name = $dest_filename\n");
+    }
+
+    # Don't get the file again if it already exists locally
+
+    if (!$OverWrite &&
+	(-e $dest_path . "/" . $dest_filename ||
+	 -e $dest_path . "/" . $dest_filename . ".gz"))
+    {
+	if ($debug)
+	{
+	    print(STDERR "   File already exists: $dest_path/$dest_filename\n");
+	}
+	return;
+    }
+
+    # If we get here, we need to get the file. Put it into a temporary
+    # location just in case the retrieval fails for some reason, then
+    # copy the file to the final location.
+
+    &ftpRetrieve($ftpHost, $ftpTimeout, $user, $pass,
+		 $ncepDir, $file_name, $TmpDir);
+
+    if (!(-e $dest_path))
+    {
+	$command = "mkdir -p $dest_path";
+	if ($debug)
+	{
+	    print(STDERR "    command: $command\n");
+	}
+	$status = Toolsa::safe_system($command, $sysTimeout, $debug);
+	unless (defined($status))
+	{
+	    tidyAndExit("Could not create destination path\n", -1);
+	}
+    }
+
+    $command = "mv $TmpDir/$file_name $dest_path/$dest_filename";
+    if ($debug)
+    {
+	print(STDERR "     command: $command\n");
+    }
+    $status = Toolsa::safe_system($command, $sysTimeout, $debug);
+    unless (defined($status))
+    {
+	tidyAndExit("Could not move temp file to final destination\n", -1);
+    }
+
+    # Write an ldata info file
+
+    $ltime = sprintf("%04d%02d%02d%02d%02d%02d",
+		     $year, $month, $day, $hour, $minute, $second);
+    $lead = $forecast_period * 60 * 60;
+
+    $command = "LdataWriter -dir $ldata_path " .
+	"-dtype grib " .
+	"-ext grib " .
+	"-info2 $ldata_info2 " .
+	"-lead $lead " .
+	"-ltime $ltime ";
+
+    system($command);
+
+    return;
+}
+
+######################################################################
+# &getDestFilePath
+# Package: main
+# Returns: The destination path and filename for the given file on the
+#          FTP site.
+######################################################################
+sub getDestFilePath {
+    local($file_name, $year, $month, $day, $hour, $minute, $second, $forecast_period) = @_;
+    local($dest_path, $dest_filename, $ldata_path, $ldata_info2);
+    local($date_dir, $fcst_secs);
+
+    # Construct the output path and file names
+
+    $date_dir = sprintf("%04d%02d%02d",
+			$year, $month, $day);
+
+    if ($RapDirStruct)
+    {
+	# Use the rap directory structure and filenaming convention  
+	# $OutputDir/yyyymmdd/g_hh0000/f_nnnnnnnnn where hh is the 
+	# hour (ie. 030000, 060000 ) and nnnnnnnnn is the forecast 
+	# hour in seconds.
+         
+	$fcst_secs = $forecast_period * 60 * 60;
+
+	$dest_path = sprintf("%s/%s/g_%02d%02d%02d",
+			     $OutputDir, $date_dir, $hour, $minute, $second);
+    
+	$dest_filename = sprintf("f_%09d.grib", $fcst_secs);
+
+	$ldata_path = $OutputDir;
+	
+	$ldata_info2 = sprintf("%s/g_%02d%02d%02d/%s",
+			       $date_dir, $hour, $minute, $second,
+			       $dest_filename);
+    }
+    else
+    {
+	$modelTimeStr = sprintf( "%02d", $model_time );
+   
+	# Use the following directory structure and filenaming pattern:
+	# $output_dir/fhh/yyyymmdd/
+
+	$ldata_path = sprintf("%s/f%02d",
+			      $OutputDir, $forecast_period);
+
+	$dest_path = sprintf("%s/%s",
+                             $ldata_path, $date_dir);
+
+	$dest_filename = sprintf("%02d%02d%02d.grib",
+				 $hour, $minute, $second);
+
+	$ldata_info2 = $date_dir . "/" . $dest_filename;
+    }
+
+    if ($ldata_path =~ m/^$rapDataDir/)
+    {
+	$begin_pos = length($rapDataDir) + 1;
+	$ldata_dir = substr($ldata_dir, $begin_pos);
+    }
+
+    return($dest_path, $dest_filename, $ldata_path, $ldata_info2);
+}
+
+######################################################################
+# &extractFileTimes
+# Package: main
+# Returns: The file times extracted from the file name of the file on
+#          the FTP site.
+######################################################################
+sub extractFileTimes {
+    local($file_name) = @_;
+    local($year, $month, $day, $hour, $minute, $second, $forecast_period);
+    local($julian_day, $bad_year);
+
+    # Initialize the year so that we can signal an error with this value
+
+    $bad_year = 0;
+
+    # Extract the information from the file name
+
+    if ($file_name !~ m/(\d\d)(\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)\.grib/)
+    {
+	if ($debug)
+	{
+	    print(STDERR "    Filename doesn't match\n");
+	}
+
+	return($bad_year, $month, $day, $hour, $minute, $second, $forecast_period);
+    }
+    else
+    {
+	if ($debug)
+	{
+	    print(STDERR "    Filename matches\n");
+	}
+    }
+
+    $year = $1 + 2000;
+    $julian_day = $2;
+    $hour = $3;
+    $minute = $4;
+    $second = $5;
+    $forecast_period = $6;
+
+    # Convert the given Julian date into a normal date
+
+    $gen_time = timegm($second, $minute, $hour,
+		       1, 1, $year);
+
+    $gen_time += ($julian_day - 1) * 86400;
+    
+    ($second, $minute, $hour, $day, $month, $year) = gmtime($gen_time);
+
+    $year += 1900;
+
+    return ($year, $month, $day, $hour, $minute, $second, $forecast_period);
+}
+
+######################################################################
+# &dirList 
+# Package: pollFtp
+# Returns: a listing of files in the directory which 
+#          match the pattern string from a remote host
+#          Each entry in the array is a single line of 
+#          ftp's dir command.
+######################################################################
+sub dirList {
+    local($rdir, $matchString) = @_;
+
+    local($ftp, @listings);
+
+    if ($debug)
+    {
+	($curr_sec, $curr_min, $curr_hour, $curr_day, $curr_mon, $curr_year) =
+	    (gmtime())[0...5];
+	$curr_year = $curr_year + 1900;
+	$curr_mon = $curr_mon + 1;
+	print(STDERR "Looking for files in directory: $rdir\n");
+        print(STDERR "    Matching string: $matchString\n");
+	print(STDERR "    Current time: $curr_year $curr_mon $curr_day $curr_hour $curr_min $curr_sec\n");
+    }
+
+    #
+    # Initialize the listings variable to an empty list in case
+    # we need it for an error return
+    #
+
+    @listings = ();
+
+    #
+    # Log in to ftp site
+    #
+    $ftp = Net::FTP->new($ftpHost, Passive=>true, 
+			 Timeout=>$ftpTimeout);
+    if (!$ftp)
+    {
+	print(STDERR "Could not create ftp connection\n");
+	return (@listings);
+    }
+
+    if (!$ftp->login( $user, $pass ))
+    {
+	print(STDERR "ftp-login failure\n");
+	return (@listings);
+    }
+
+    if (!$ftp->binary)
+    {
+	print(STDERR "ftp-binary mode failure\n");
+	return (@listings);
+    }
+
+    if (!$ftp->cwd( $rdir ))
+    {
+	print "$rdir\n";
+	print(STDERR "ftp-cwd failure\n");
+	return (@listings);
+    }
+
+    #
+    # Do a directory listing and capture the output
+    #
+    @listings = $ftp->dir( $matchString );
+    $ftp->quit;
+
+    return (@listings);
+}
+
+########################################################################
+# &ftpRetrieve: Retrieve the given file from the FTP site
+# Package: main
+# Returns: nothing
+########################################################################
+sub ftpRetrieve {
+    local($ftp_host, $ftp_timeout, $ftp_user, $ftp_pass,
+	  $ftp_dir, $ftp_fname, $local_dir) = @_;
+
+
+    if ($debug)
+    {
+	print(STDERR "     ftp_dir = <$ftp_dir>\n");
+	print(STDERR "     ftp_fname = <$ftp_fname>\n");
+    }
+
+    #
+    # Connect to the ftp server
+    #
+    if( $debug ) {
+	print( STDERR "Connecting to the ftp server\n" );
+    }
+
+    $ftp = Net::FTP->new( $ftp_host, Passive=>true, 
+			 Timeout=>$ftp_timeout );
+
+    if (! $ftp)
+    {
+        print(STDERR "Could not create ftp connection\n");
+        return;
+    }
+
+    if (! $ftp->login( $ftp_user, $ftp_pass ) )
+    {
+	print(STDERR "Could not log into ftp server\n");
+	return;
+    }
+
+    if (! $ftp->binary )
+    {
+	print (STDERR "ftp-binary mode failed\n");
+	return;
+    }
+
+    if( $debug ) {
+	print( STDERR "Changing to FTP directory $ftp_dir\n" );
+    }
+
+    if (! $ftp->cwd( $ftp_dir )) 
+    {
+	print (STDERR "ftp-cwd failure\n");
+	return;
+    }
+
+    #
+    # Get the file
+    #
+    if( $debug ) {
+	print(STDERR "Retrieving $ftp_fname\n" );
+	print(STDERR "     local name = ${local_dir}/${ftp_fname}\n");
+    }
+    
+    $ftp->get( $ftp_fname, "${local_dir}/${ftp_fname}" ) 
+	or tidyAndExit( "ftp-get failure for $ftp_fname\n", -1 );
+
+    #
+    # End the ftp session
+    #
+    $ftp->quit;
+    
+}
+
+########################################################################
+# &tidyAndExit
+# Package: main
+# Returns: nothing
+########################################################################
+sub tidyAndExit {
+   local( $errStr, $errCode ) = @_;
+
+   print( STDERR $errStr );
+
+   exit $errCode;
+}
+
+######################################################################
+# &sigHandler
+# Package: main
+# Returns: nothing
+######################################################################
+sub sigHandler {
+   local( $sig ) = @_;
+   
+   print( STDERR "Exiting\n" );
+
+   exit(0);
+}
+            
+
+

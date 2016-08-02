@@ -1,0 +1,177 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SpdbXml2Table
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Dec 2011
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SpdbXml2Table reads XML entries from an SPDB data base, and based on the specified parameters in the file, it reformats these into a text table.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default = "/tmp/spdb/test";
+  p_descr = "URL to spdb data.";
+  p_help = "This can either be (a) the path to the directory or (b) a url of the form 'spdbp:://hostname::dir'. For (a), if the path starts with '/' or '.', it will be treated as an absolute path. If not, it will be relative to DATA_DIR. For (b) the dir is relative to DATA_DIR on the host specified by hostname.";
+} input_url;
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} date_time_t;
+
+paramdef struct date_time_t {
+  p_default = { 2011, 01, 01, 00, 00, 00 };
+  p_descr = "The start time for extracting the data";
+  p_help = "Can be overridden by specifying -start on the command line.";
+} start_time;
+
+paramdef struct date_time_t {
+  p_default = { 2011, 01, 01, 00, 00, 00 };
+  p_descr = "The end time for extracting the data";
+  p_help = "Can be overridden by specifying -end on the command line.";
+} end_time;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Spdb data type, for constraining search.";
+  p_help = "If non-zero, only entries with this data_type will be retrieved.";
+} data_type;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Spdb data type 2, for constraining search.";
+  p_help = "If non-zero, only entries with this data_type_2 will be retrieved.";
+} data_type_2;
+
+commentdef {
+  p_header = "Specify XML entries to be printed out";
+};
+
+typedef struct {
+  string xml_tag_list;
+  boolean specify_label;
+  string label;
+  boolean required;
+} xml_entry_t;
+
+paramdef struct xml_entry_t {
+  p_default = {
+    {
+      xml_tag_list = "<tag1><tag2><tag3>",
+      specify_label = true,
+      label = "myLabel",
+      required = TRUE
+    }
+    ,
+    {
+      xml_tag_list = "<tag4><tag5>",
+      specify_label = false,
+      label = "",
+      required = TRUE
+    }
+  };
+  p_descr = "Specify which XML entries to include in table.";
+  p_help =
+    "\txml_tag_list: list of XML tags used to identify entry. These should be delimited in xml format, using < and >\n"
+    "\tspecify_label: do you want to use a label instead of the tags to comment the table?\n"
+    "\tlabel: the label to use if specify_label is true\n"
+    ".";
+} xml_entries[];
+
+commentdef {
+  p_header = "OUTPUT DETAILS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, write a commented header at the start of the output.";
+} add_commented_header;
+
+paramdef string {
+  p_default = "#";
+  p_descr = "Character at start of comment lines.";
+  p_help = "Each comment line will be start with this character.";
+} comment_character;
+
+paramdef string {
+  p_default = ",";
+  p_descr = "Delimiter between columns.";
+} column_delimiter;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, a 'false' value will be converted to 0, and a 'true' value to 1";
+} convert_boolean_to_integer;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Do not print a line if all string values are 'nan'.";
+} ignore_if_all_nans;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, change the specified string to the given replacement.";
+  p_help = "This is done in the output, prior to the values being written to the table. It allows you to replace strings that might be problematic for processes that use the table for analysis.";
+} replace_string_in_output;
+
+paramdef string {
+  p_default = " ";
+  p_descr = "String to be replaced in output table.";
+  p_help = "See 'replace_string_in_output'.";
+} old_string;
+
+paramdef string {
+  p_default = "_";
+  p_descr = "'new_string' will replace 'old_string'.";
+  p_help = "See 'replace_string_in_output'.";
+} new_string;
+

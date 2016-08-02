@@ -1,0 +1,18 @@
+# Makefile.wsddm
+# Recursive make - 
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	FixStationAltitudes \
+	PrintSpdbMetar \
+	extractStationLocationList \
+	spdb_merge \
+	spdb_repair \
+	spdbIntervalCount \
+	station2ascii
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

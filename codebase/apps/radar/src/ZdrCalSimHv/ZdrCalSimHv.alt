@@ -1,0 +1,329 @@
+/**********************************************************************
+ * TDRP params for ZdrCalSimHv
+ **********************************************************************/
+
+//======================================================================
+//
+// ZdrCalSimHv computes the cross-polar ratios between H and V returns, 
+//   in simulataneous mode. This is used for the cross-polar method of ZDR 
+//   calibration, in conjunction with SunScan analysis - see SunCal.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "alt";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or time series API.
+// If TS_FMQ_INPUT, the application will read the time series from a 
+//   file message queue and process the pulses as they come in. If 
+//   TS_FILE_INPUT, the application will process all the files specified 
+//   on the command line.
+//
+// Type: enum
+// Options:
+//     TS_FILE_INPUT
+//     TS_FMQ_INPUT
+//
+
+input_mode = TS_FILE_INPUT;
+
+///////////// input_fmq_name //////////////////////////
+//
+// FMQ name. For TS_FMQ_INPUT only.
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+// Type: string
+//
+
+input_fmq_name = "/tmp/fmq/ts";
+
+///////////// max_pulse_queue_size ////////////////////
+//
+// Max size of pulse queue.
+// The input queue is trimmed to this size. This keeps memory usage 
+//   under control.
+// Type: int
+//
+
+max_pulse_queue_size = 512;
+
+///////////// max_data_interval_secs //////////////////
+//
+// Max time between pulses for valid data (secs).
+// If the interval between pulses exceeds this value, the power 
+//   accumulation arrays will be reset to 0.
+// Type: int
+//
+
+max_data_interval_secs = 60;
+
+//======================================================================
+//
+// ANALYSIS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// azimuth_resolution //////////////////////
+//
+// Resolution of the analysis in azimuth (deg).
+// The data is analyzed in evenly-spaced azimuth dwells. This is the 
+//   angular resolution of the dwells.
+// Type: double
+//
+
+azimuth_resolution = 1;
+
+//======================================================================
+//
+// RANGE LIMITS.
+//
+//======================================================================
+ 
+///////////// start_range /////////////////////////////
+//
+// Start range for analysis (km).
+// Type: double
+//
+
+start_range = 20;
+
+///////////// end_range ///////////////////////////////
+//
+// End range for analysis (km).
+// Type: double
+//
+
+end_range = 80;
+
+///////////// gate_spacing ////////////////////////////
+//
+// Gate spacing for analysis (km).
+// Type: double
+//
+
+gate_spacing = 0.15;
+
+//======================================================================
+//
+// CPA LIMITS.
+//
+// CPA - clutter phase alignment - is a good indicator of clutter.
+//
+//======================================================================
+ 
+///////////// min_cpa /////////////////////////////////
+//
+// Minimum CPA for analysis.
+// Type: double
+//
+
+min_cpa = 0.90;
+
+///////////// max_cpa /////////////////////////////////
+//
+// Maximum CPA for analysis.
+// Type: double
+//
+
+max_cpa = 1;
+
+//======================================================================
+//
+// NOISE LEVELS AND SNR LIMITS.
+//
+//======================================================================
+ 
+///////////// min_snr /////////////////////////////////
+//
+// Minimum SNR for analysis (dB).
+// Type: double
+//
+
+min_snr = 20;
+
+///////////// max_snr /////////////////////////////////
+//
+// Maximum SNR for analysis (dB).
+// Type: double
+//
+
+max_snr = 60;
+
+///////////// noise_dbm_h /////////////////////////////
+//
+// Noise power at digitizer, H channel (dB).
+// Type: double
+//
+
+noise_dbm_h = -75.5;
+
+///////////// noise_dbm_v /////////////////////////////
+//
+// Noise power at digitizer, V channel (dB).
+// Type: double
+//
+
+noise_dbm_v = -75.5;
+
+//======================================================================
+//
+// DETERMINING H or V transmit.
+//
+//======================================================================
+ 
+///////////// h_minus_v_threshold /////////////////////
+//
+// Threshold for determining H or V transmit (dB).
+// For each beam, we compute the mean difference between Hc and Vc. If 
+//   Hc exceeds Vc by this threshold, we assume H transmit. If Vc exceeds 
+//   Hc by this threshold, we assume V transmit. If the absolute 
+//   difference is less than or equal to this threshold, we do not use the 
+//   beam.
+// Type: double
+//
+
+h_minus_v_threshold = 4.5;
+
+//======================================================================
+//
+// COMPUTING CROSS-POLAR POWER RATIO.
+//
+//======================================================================
+ 
+///////////// min_nvalid_for_ratio ////////////////////
+//
+// Minimum number of valid values at a point for computing ratio.
+// The Vx/Hx ratio is computed at each point in space. The data for each 
+//   comes from different PPIs. This is the minimum number of valid powers 
+//   for computing the ratio.
+// Type: int
+//
+
+min_nvalid_for_ratio = 2;
+
+///////////// min_valid_ratio_db //////////////////////
+//
+// Minimum valid Vx/Hx ratio (dB).
+// Sometimes, odd data leads to inappropriate ratios. This puts limits 
+//   on the ratios to be used in the analysis.
+// Type: double
+//
+
+min_valid_ratio_db = -6;
+
+///////////// max_valid_ratio_db //////////////////////
+//
+// Maximum valid Vx/Hx ratio (dB).
+// Sometimes, odd data leads to inappropriate ratios. This puts limits 
+//   on the ratios to be used in the analysis.
+// Type: double
+//
+
+max_valid_ratio_db = 6;
+
+//======================================================================
+//
+// OUTPUT RESULTS.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Dir for output files.
+// The results will be written to sub-directories named from the data 
+//   time.
+// Type: string
+//
+
+output_dir = "./output_spol";
+
+///////////// write_results ///////////////////////////
+//
+// Option to write summary results to files.
+// If true, files will be written to output_dir.
+// Type: boolean
+//
+
+write_results = TRUE;
+
+///////////// write_data_pairs ////////////////////////
+//
+// Option to write individual hx/vx data pairs to an output file.
+// The raw pairs can then be used for generating plots. The file appears 
+//   in output_dir, and the file name includes the start time for the 
+//   analysis.
+// Type: boolean
+//
+
+write_data_pairs = TRUE;
+
+///////////// radar_name //////////////////////////////
+//
+// Used in file names.
+// Type: string
+//
+
+radar_name = "spol";
+
+//======================================================================
+//
+// TESTING IN ALTERNATING H/V mode.
+//
+//======================================================================
+ 
+///////////// alternating_hv_mode /////////////////////
+//
+// Radar operation is alternating H/V mode.
+// This is only used for testing. If true, the HV flag in the time 
+//   series indicates which transmission path was in use for each pulse.
+// Type: boolean
+//
+
+alternating_hv_mode = TRUE;
+

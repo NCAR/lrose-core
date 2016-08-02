@@ -1,0 +1,261 @@
+<?xml version="1.0"?>
+<!--   **********************************************************************   
+                                                                           
+       location.xsd -                     XML Schema for WxML Markup Language   
+
+       John L. Schattel          MDL                            4 August 2004  
+               
+       Sandy Dance               modify for WxML                     Feb 2006
+       Elena Dozortseva	                                             Apr 2006
+       Beth Ebert and David Scurrah                                 July 2006
+       Beth Ebert         direction_to added to polar_motionType    Sept 2006
+       
+      *************************************************************************   -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML"
+targetNamespace="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML"
+elementFormDefault="qualified">
+
+	<xsd:include schemaLocation="definitions.xsd"/>
+	<xsd:complexType name="locationType">
+		<xsd:sequence>
+			<xsd:element name="location-key" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:choice>
+				<xsd:element name="point" type="pointType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="city" type="cityType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="district" type="districtType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="station" type="stationType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="site" type="siteType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="nws-zone" type="nws-zoneType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="zone" type="zoneType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="area" type="areaType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="moving-point" type="moving-pointType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="polyline" type="polylineType" minOccurs="0" maxOccurs="1"/>
+			</xsd:choice>
+			<xsd:choice>
+				<xsd:element name="height" type="heightType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="level" type="levelType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="layer" type="layerType" minOccurs="0" maxOccurs="1"/>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="pointType">
+		<xsd:attribute name="latitude" type="xsd:decimal" use="required"/>
+		<xsd:attribute name="longitude" type="xsd:decimal" use="required"/>
+		<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="cityType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="state" type="xsd:string" use="required"/>
+				<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="siteType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="latitude" type="xsd:decimal" use="required"/>
+				<xsd:attribute name="longitude" type="xsd:decimal" use="required"/>
+				<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="districtType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="state" type="xsd:string" use="required"/>
+				<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="stationType">
+		<xsd:attribute name="stn-num" type="xsd:nonNegativeInteger" use="required"/>
+		<xsd:attribute name="state" type="xsd:string" use="required"/>
+		<xsd:attribute name="elevation" type="xsd:decimal" use="required"/>
+		<xsd:attribute name="latitude" type="xsd:decimal" use="required"/>
+		<xsd:attribute name="longitude" type="xsd:decimal" use="required"/>
+		<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+	</xsd:complexType>
+	<xsd:complexType name="nws-zoneType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="state" type="xsd:string" use="required"/>
+				<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="zoneType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="state" type="xsd:string" use="required"/>
+				<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="areaType">
+		<xsd:sequence>
+			<xsd:element name="circle" type="circleType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="rectangle" type="rectangleType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="ellipse" type="ellipseType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="polygon" type="polygonType" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="circleType">
+		<xsd:sequence>
+			<xsd:choice>
+				<xsd:element name="point" type="pointType" minOccurs="1" maxOccurs="1"/>
+				<xsd:element name="moving-point" type="moving-pointType" minOccurs="1" maxOccurs="1"/>
+			</xsd:choice>
+			<xsd:element name="radius" type="radiusType" minOccurs="1" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="ellipseType">
+		<xsd:sequence>
+			<xsd:choice>
+				<xsd:element name="point" type="pointType" minOccurs="1" maxOccurs="1"/>
+				<xsd:element name="moving-point" type="moving-pointType" minOccurs="1" maxOccurs="1"/>
+			</xsd:choice>
+			<xsd:element name="major_axis" type="radiusType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="minor_axis" type="radiusType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="orientation" type="orientationType" minOccurs="1" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="radiusType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:decimal">
+				<xsd:attribute name="units" type="xsd:string" use="required"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+
+	<xsd:complexType name="orientationType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:decimal">
+				<xsd:attribute name="units" type="xsd:string" use="required"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="rectangleType">
+		<xsd:sequence>
+			<xsd:element name="point" type="pointType" minOccurs="4" maxOccurs="4"/>
+		</xsd:sequence>
+		<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="polylineType">
+		<xsd:sequence>
+			<xsd:choice>
+				<xsd:element name="moving-point" type="moving-pointType" minOccurs="2" maxOccurs="unbounded"/>
+				<xsd:element name="point" type="pointType" minOccurs="2" maxOccurs="unbounded"/>
+			</xsd:choice>
+		</xsd:sequence>
+		<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="polygonType">
+		<xsd:sequence>
+			<xsd:element name="moving-point" type="moving-pointType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="point" type="pointType" minOccurs="3" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="heightType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:nonNegativeInteger">
+				<xsd:attribute name="datum" type="datumType" use="required"/>
+				<xsd:attribute name="height-units" type="height-unitsType" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="levelType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:nonNegativeInteger">
+				<xsd:attribute name="vertical-coordinate" type="xsd:string" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="layerType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:nonNegativeInteger">
+				<xsd:attribute name="vertical-coordinate" type="xsd:string" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:simpleType name="datumType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="surface"/>
+			<xsd:enumeration value="mean sea level"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="height-unitsType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="feet"/>
+			<xsd:enumeration value="meters"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="moving-pointType">
+		<xsd:sequence>
+			<xsd:element name="latitude" type="xsd:decimal" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="longitude" type="xsd:decimal" minOccurs="1" maxOccurs="1"/>
+			<xsd:choice>
+				<xsd:element name="cartesian_motion" type="cartesian_motionType" minOccurs="1" maxOccurs="1"/>
+				<xsd:element name="polar_motion" type="polar_motionType" minOccurs="1" maxOccurs="1"/>
+			</xsd:choice>
+		</xsd:sequence>
+		<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+		<xsd:attribute name="type" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="cartesian_motionType">
+		<xsd:all>
+			<xsd:element name="u_motion" type="motionType"/>
+			<xsd:element name="v_motion" type="motionType"/>
+		</xsd:all>
+	</xsd:complexType>
+
+	<xsd:complexType name="polar_motionType">
+		<xsd:sequence>
+			<xsd:element name="speed" type="motionType" minOccurs="1" maxOccurs="1"/>
+			<xsd:choice>
+				<xsd:element name="direction_from" type="motionType" minOccurs="1" maxOccurs="1"/>
+				<xsd:element name="direction_to" type="motionType" minOccurs="1" maxOccurs="1"/>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<xsd:complexType name="motionType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:decimal">
+				<xsd:attribute name="units" use="required">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:enumeration value="km h-1"/>
+							<xsd:enumeration value="knots"/>
+							<xsd:enumeration value="m s-1"/>
+							<xsd:enumeration value="degrees true"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+</xsd:schema>

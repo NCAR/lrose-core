@@ -1,0 +1,595 @@
+/**********************************************************************
+ * TDRP params for XpolScanControl
+ **********************************************************************/
+
+//======================================================================
+//
+// XpolScanControl controls the XPOL antenna. It creates PAXI files and 
+//   uploads them to the DRX. From one FMQ it reads the data coming from 
+//   the DRX, to monitor the antenna behavior. It then adds the scan 
+//   information as appropriate, and writes the modified data to an output 
+//   FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "ops";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = TRUE;
+
+//======================================================================
+//
+// FMQ INPUT - file message queues.
+//
+//======================================================================
+ 
+///////////// input_fmq_path //////////////////////////
+//
+// Name of input fmq.
+// Data in this FMQ does not contain scan information.
+// Type: string
+//
+
+input_fmq_path = "$(DATA_DIR)/fmq/moments/xpol_raw";
+
+///////////// start_reading_at_fmq_start //////////////
+//
+// Option to start reading at beginning of input FMQs.
+// Normally, we start reading at the end of the queues. For debugging, 
+//   however, it is sometimes helpful to start at the beginning of the 
+//   queues.
+// Type: boolean
+//
+
+start_reading_at_fmq_start = FALSE;
+
+//======================================================================
+//
+// FMQ OUTPUT for modified data.
+//
+//======================================================================
+ 
+///////////// output_fmq_path /////////////////////////
+//
+// Name of output fmq.
+// This contains a duplicate of the input data, but with scan 
+//   information attached.
+// Type: string
+//
+
+output_fmq_path = "$(DATA_DIR)/fmq/moments/xpol";
+
+///////////// set_output_size_equal_to_input_size /////
+//
+// Option to set the FMQ size equal to the input FMQ.
+// If FALSE, size will be set from output_fmq_size and 
+//   output_fmq_nslots.
+// Type: boolean
+//
+
+set_output_size_equal_to_input_size = TRUE;
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 50000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 7200;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+
+//======================================================================
+//
+// DRX PROCESSING OPTIONS.
+//
+// Use this section to set up processing modes. These are then referred 
+//   to in the scanning section below.
+//
+//======================================================================
+ 
+///////////// drx_conf ////////////////////////////////
+//
+// Processing options for the digital receiver.
+// Generally the filter bandwidth should be set to the reciprocal of the 
+//   pulse length, expressed in seconds. For example, if PULSE_LEN_75m is 
+//   used, this translates to a 0.5 microsecond pulse, so a bandwidth of 2 
+//   mHz should be specified. If the pulse width is 30m, the filter should 
+//   be set to 5 mHz. To keep the duty cycle below 0.1%, make sure the 
+//   group interval is set appropriately.
+//
+// Type: struct
+//   typedef struct {
+//      int conf_id;
+//      proc_mode_t proc_mode;
+//        Options:
+//          PROC_MODE_PULSE_PAIR
+//          PROC_MODE_PULSE_PAIR_SUM_POWERS
+//          PROC_MODE_DUAL_PULSE_PAIR
+//          PROC_MODE_DUAL_PULSE_PAIR_SUM_POWERS
+//      double pri_1_usec;
+//      double pri_2_usec;
+//      double group_interval_usec;
+//      int n_gates;
+//      int clutter_n_ave;
+//      int post_n_ave;
+//      range_res_t range_res;
+//        Options:
+//          RANGE_RES_15_m
+//          RANGE_RES_30_m
+//          RANGE_RES_75_m
+//          RANGE_RES_105_m
+//          RANGE_RES_150_m
+//      pulse_len_t pulse_len;
+//        Options:
+//          PULSE_LEN_7pt5_m
+//          PULSE_LEN_15_m
+//          PULSE_LEN_30_m
+//          PULSE_LEN_45_m
+//          PULSE_LEN_75_m
+//      filter_bw_t filter_bw;
+//        Options:
+//          FILTER_BW_1_mhz
+//          FILTER_BW_1pt5_mhz
+//          FILTER_BW_2_mhz
+//          FILTER_BW_5_mhz
+//          FILTER_BW_10_mhz
+//          FILTER_BW_20_mhz
+//   }
+//
+// 1D array - variable length.
+//
+
+drx_conf = {
+  {
+    conf_id = 0,
+    proc_mode = PROC_MODE_PULSE_PAIR,
+    pri_1_usec = 500,
+    pri_2_usec = 500,
+    group_interval_usec = 2000,
+    n_gates = 800,
+    clutter_n_ave = 32,
+    post_n_ave = 1,
+    range_res = RANGE_RES_75_m,
+    pulse_len = PULSE_LEN_75_m,
+    filter_bw = FILTER_BW_2_mhz,
+    use_clutter_filter = TRUE
+  }
+  ,
+  {
+    conf_id = 1,
+    proc_mode = PROC_MODE_PULSE_PAIR,
+    pri_1_usec = 1000,
+    pri_2_usec = 1000,
+    group_interval_usec = 2000,
+    n_gates = 1000,
+    clutter_n_ave = 32,
+    post_n_ave = 1,
+    range_res = RANGE_RES_75_m,
+    pulse_len = PULSE_LEN_75_m,
+    filter_bw = FILTER_BW_2_mhz,
+    use_clutter_filter = FALSE
+  }
+  ,
+  {
+    conf_id = 2,
+    proc_mode = PROC_MODE_DUAL_PULSE_PAIR,
+    pri_1_usec = 600,
+    pri_2_usec = 800,
+    group_interval_usec = 2000,
+    n_gates = 800,
+    clutter_n_ave = 22,
+    post_n_ave = 1,
+    range_res = RANGE_RES_75_m,
+    pulse_len = PULSE_LEN_75_m,
+    filter_bw = FILTER_BW_2_mhz,
+    use_clutter_filter = FALSE
+  }
+};
+
+//======================================================================
+//
+// SCAN DETAILS.
+//
+// This is a sequence of scans to be run one after the other, in order. 
+//   After all scans have been run once, the sequence is repeated.
+//
+//======================================================================
+ 
+///////////// scan_sequence ///////////////////////////
+//
+// Scan sequence.
+
+
+// Sets up the scan sequence. Each entry in the sequence is run in 
+//   order. When the end of the sequence is reached, the entire sequence 
+//   is repeated. 
+
+// az_rate_deg_per_sec and el_rate_deg_per_sec apply to all scan modes 
+//   except for IDLE.
+
+// nsecs_wait applies to POINTING and IDLE modes only.
+
+// The number of sweeps (n_sweeps) applies to VERTICAL_POINTING mode 
+//   only.
+
+// POINTING: move to (start_az_deg, start_el_deg) and point for 
+//   nsecs_wait.
+
+// SURVEILLANCE: starts at (start_az_deg, start_el_deg). Rotation is 
+//   clockwise. Lowest elevation is start_el_deg, each sweep increases by 
+//   delta_el_deg until end_el_deg is reached. 
+
+// SECTOR: starts at (start_az_deg, start_el_deg). Sweeps clockwise to 
+//   end_az_deg and then back again. Lowest elevation is start_el_deg, 
+//   each sweep increases by delta_el_deg until end_el_deg is reached. 
+
+// RHI: starts at (start_az_deg, start_el_deg). Sweeps up to end_el_deg 
+//   and then back down again. First azimuth is at start_az_deg, each 
+//   sweep increases by delta_az_deg until end_az_deg is reached. 
+
+// VERTICAL_POINTING: starts at (start_az_defg, start_el_deg). Elevation 
+//   stays fixed. Rotation is clockwise. Each sweep is 370 degrees in 
+//   azimuth arc. A volume is made up of n_sweeps.
+
+// SUNSCAN: starts at start_az_deg to left of sun and start_el_deg below 
+//   sun. Sweeps clockwise across sun to end_az_deg and then back again. 
+//   Each sweep increases by delta_el_deg until end_el_deg above sun is 
+//   reached.
+
+// SUNSCAN_RHI: starts at start_az_deg to left of sun and start_el_deg 
+//   below sun. Sweeps up across sun to end_az_deg and then back down 
+//   again. Each sweep increases by delta_az_deg until end_az_deg reached.
+
+// IDLE: stop at the current antenna position, and wait for nsecs_wait.
+//
+// Type: struct
+//   typedef struct {
+//      int drx_conf_id;
+//      scan_mode_t scan_mode;
+//        Options:
+//          SCAN_MODE_SECTOR
+//          SCAN_MODE_RHI
+//          SCAN_MODE_VERTICAL_POINTING
+//          SCAN_MODE_IDLE
+//          SCAN_MODE_SURVEILLANCE
+//          SCAN_MODE_SUNSCAN
+//          SCAN_MODE_POINTING
+//          SCAN_MODE_SUNSCAN_RHI
+//      double az_rate_deg_per_sec;
+//      double el_rate_deg_per_sec;
+//      double start_az_deg;
+//      double end_az_deg;
+//      double delta_az_deg;
+//      double start_el_deg;
+//      double end_el_deg;
+//      double delta_el_deg;
+//      int n_sweeps;
+//      double transition_tolerance_deg;
+//      double nsecs_wait;
+//   }
+//
+// 1D array - variable length.
+//
+
+scan_sequence = {
+  {
+    drx_conf_id = 1,
+    scan_mode = SCAN_MODE_SURVEILLANCE,
+    az_rate_deg_per_sec = 10,
+    el_rate_deg_per_sec = 10,
+    start_az_deg = 0,
+    end_az_deg = 0,
+    delta_az_deg = 1,
+    start_el_deg = 45,
+    end_el_deg = 60,
+    delta_el_deg = 5,
+    n_sweeps = 4,
+    transition_tolerance_deg = 0.6,
+    nsecs_wait = 0
+  }
+  ,
+  {
+    drx_conf_id = 1,
+    scan_mode = SCAN_MODE_SECTOR,
+    az_rate_deg_per_sec = 10,
+    el_rate_deg_per_sec = 1,
+    start_az_deg = 300,
+    end_az_deg = 10,
+    delta_az_deg = 1,
+    start_el_deg = 1,
+    end_el_deg = 8,
+    delta_el_deg = 1,
+    n_sweeps = 8,
+    transition_tolerance_deg = 0.2,
+    nsecs_wait = 0
+  }
+  ,
+  {
+    drx_conf_id = 1,
+    scan_mode = SCAN_MODE_VERTICAL_POINTING,
+    az_rate_deg_per_sec = 10,
+    el_rate_deg_per_sec = 10,
+    start_az_deg = 0,
+    end_az_deg = 0,
+    delta_az_deg = 1,
+    start_el_deg = 90,
+    end_el_deg = 90,
+    delta_el_deg = 0.5,
+    n_sweeps = 3,
+    transition_tolerance_deg = 0.2,
+    nsecs_wait = 0
+  }
+  // ,
+  // {
+  //   drx_conf_id = 0,
+  //   scan_mode = SCAN_MODE_RHI,
+  //   az_rate_deg_per_sec = 15,
+  //   el_rate_deg_per_sec = 6,
+  //   start_az_deg = 120,
+  //   end_az_deg = 126,
+  //   delta_az_deg = 2,
+  //   start_el_deg = 1,
+  //   end_el_deg = 25,
+  //   delta_el_deg = 1,
+  //   n_sweeps = 4,
+  //   transition_tolerance_deg = 0.2,
+  //   nsecs_wait = 0
+  // }
+  // ,
+  // {
+  //   drx_conf_id = 0,
+  //   scan_mode = SCAN_MODE_SECTOR,
+  //   az_rate_deg_per_sec = 15,
+  //   el_rate_deg_per_sec = 15,
+  //   start_az_deg = 180,
+  //   end_az_deg = 270,
+  //   delta_az_deg = 1,
+  //   start_el_deg = 1,
+  //   end_el_deg = 4,
+  //   delta_el_deg = 1,
+  //   n_sweeps = 4,
+  //   transition_tolerance_deg = 0.2,
+  //   nsecs_wait = 0
+  // }
+  // ,
+  // {
+  //   drx_conf_id = 0,
+  //   scan_mode = SCAN_MODE_POINTING,
+  //   az_rate_deg_per_sec = 15,
+  //   el_rate_deg_per_sec = 15,
+  //   start_az_deg = 180,
+  //   end_az_deg = 90,
+  //   delta_az_deg = 1,
+  //   start_el_deg = 10,
+  //   end_el_deg = 10,
+  //   delta_el_deg = 1,
+  //   n_sweeps = 1,
+  //   transition_tolerance_deg = 0.1,
+  //   nsecs_wait = 5
+  // }
+  // ,
+  // {
+  //   drx_conf_id = 0,
+  //   scan_mode = SCAN_MODE_POINTING,
+  //   az_rate_deg_per_sec = 15,
+  //   el_rate_deg_per_sec = 15,
+  //   start_az_deg = 270,
+  //   end_az_deg = 90,
+  //   delta_az_deg = 1,
+  //   start_el_deg = 70,
+  //   end_el_deg = 10,
+  //   delta_el_deg = 1,
+  //   n_sweeps = 1,
+  //   transition_tolerance_deg = 0.1,
+  //   nsecs_wait = 5
+  // }
+  // ,
+  // {
+  //   drx_conf_id = 0,
+  //   scan_mode = SCAN_MODE_IDLE,
+  //   az_rate_deg_per_sec = 20,
+  //   el_rate_deg_per_sec = 20,
+  //   start_az_deg = 30,
+  //   end_az_deg = 0,
+  //   delta_az_deg = 1,
+  //   start_el_deg = 25,
+  //   end_el_deg = 10,
+  //   delta_el_deg = 1,
+  //   n_sweeps = 1,
+  //   transition_tolerance_deg = 0,
+  //   nsecs_wait = 20
+  // }
+};
+
+///////////// requested_angle_tolerance ///////////////
+//
+// Tolerance for checking a requested angle has been reached (deg).
+// We check the antenna angles against the requested values. This 
+//   applies, for example, to pointing scans.
+// Type: double
+//
+
+requested_angle_tolerance = 0.1;
+
+///////////// transition_angle_tolerance //////////////
+//
+// Angle tolerance for flagging a beam in transition (deg).
+// We check the actual antenna angles against the nominal fixed angle 
+//   for the scan. If the difference differs by more than tolerance, the 
+//   beam will be flagged as in transition.
+// Type: double
+//
+
+transition_angle_tolerance = 0.25;
+
+///////////// azimuth_correction_deg //////////////////
+//
+// Correction to raw azimuth to align data to True North (deg).
+// This value is ADDED to the raw azimuth to get the corrected value. 
+//   Note that for the XPOL radar, the raw azimuth of the direction in 
+//   which the trailer is pointing is 120 degrees.
+// Type: double
+//
+
+azimuth_correction_deg = -43.15;
+
+///////////// sector_widen_secs ///////////////////////
+//
+// Widen a sector by this number of seconds.
+// In order to prevent transitions within the sector, we optionally 
+//   widen the sector by a number of degrees equal to the specified time 
+//   multiplied by the antenna azimuth rate.
+// Type: double
+//
+
+sector_widen_secs = 0.3;
+
+///////////// rhi_widen_secs //////////////////////////
+//
+// Widen rhi elevation range by this number of seconds.
+// In order to prevent transitions within the rhi, we optionally widen 
+//   the rhi vertical sector by a number of degrees equal to the specified 
+//   time multiplied by the antenna elevation rate.
+// Type: double
+//
+
+rhi_widen_secs = 0.2;
+
+///////////// default_antenna_speed ///////////////////
+//
+// Antenna speed for normal moves (deg/sec).
+// This speed will be used to position the antenna to the start of each 
+//   scan.
+// Type: double
+//
+
+default_antenna_speed = 15;
+
+//======================================================================
+//
+// WRITING PAXI SCRIPTS.
+//
+// This program creates a PAXI file with commands for the relevant scan. 
+//   This file is uploaded to the DRX server using a script. The script 
+//   takes one argument, which is the path of the PAXI file.
+//
+//======================================================================
+ 
+///////////// upload_paxi_script_name /////////////////
+//
+// Name of script to call to upload paxi file to server.
+// This should be in the path.
+// Type: string
+//
+
+upload_paxi_script_name = "run_paxcon";
+
+///////////// paxi_file_path //////////////////////////
+//
+// Path to paxi file to be uploaded.
+// This app writes the relevant commands to the paxi file, and then 
+//   uploads it using the above script.
+// Type: string
+//
+
+paxi_file_path = "/tmp/paxi.txt";
+
+///////////// run_script_in_background ////////////////
+//
+// Option to run upload script in background.
+// If TRUE, the upload script will be run in the background. Therefore, 
+//   the system call will return immediately. If FALSE, this app will 
+//   register with procmap while waiting for the script to complete.
+// Type: boolean
+//
+
+run_script_in_background = FALSE;
+
+///////////// terminate_script_if_hung ////////////////
+//
+// Option to terminate upload script if it hangs.
+// If TRUE, the script will be killed if it does not return within 
+//   'script_max_run_secs'.
+// Type: boolean
+//
+
+terminate_script_if_hung = TRUE;
+
+///////////// script_max_run_secs /////////////////////
+//
+// Max time allowed for script - secs.
+// If 'terminate_script_if_hung' is TRUE, the script will be killed if 
+//   it does not complete withing this number of secs.
+// Type: int
+//
+
+script_max_run_secs = 3600;
+

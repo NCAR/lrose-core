@@ -1,0 +1,31 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_cappi_to_carpi</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href=RSL_carpi_struct.html>Carpi</a> *RSL_cappi_to_carpi(<a href=RSL_cappi_struct.html>Cappi</a> *cappi, float dx, float dy, float lat, float lon, int nx, int ny, int radar_x, int radar _y);</b>
+
+<h3>
+<hr>Description</h3>
+Produce a <b>C</b>onstant <b>A</b>ltitude <b>R</b>ectangular from <b>P</b>olar<b> I</b>mage at <b>h</b> out to the maximum ground range <b>grnd_range</b>. <b>h</b> and <b>grnd_range</b> are expressed in km. The dimensions of the <b>Carpi</b> are given by <b>nx</b> and <b>ny</b>. <b>radar_x</b> and <b>radar_y</b> are the location of the radar within the <b>Carpi</b> structure (the rectangular grid). <b>lat</b> and <b>lon</b> represent the lower left corner (SE) of the rectangular grid. The routine allocates space for the resulting <b>Carpi</b>.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. Otherwise, a NULL pointer is returned and errno is set. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_free_cappi.html>RSL_free_cappi</a>, <a href=RSL_volume_to_carpi.html>RSL_volume_to_carpi</a>, <a href=RSL_carpi_struct.html>Carpi</a>, <a href=RSL_cappi_struct.html>Cappi</a>, <a href=RSL_new_cappi.html>RSL_new_cappi</a>. 
+
+<p>
+<hr>Author: <a href=mike.kolander.html>Mike Kolander</a> 
+</body>

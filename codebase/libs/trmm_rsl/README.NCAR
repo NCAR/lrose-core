@@ -1,0 +1,110 @@
+
+This is a record of changes to the trmm_rsl library
+that have been made at UCAR. The intent is that if a new
+version of the library is downloaded the same changes can
+be made to the updated version. This is cumbersome, but
+necessary.
+
+
+
+Note that the file rsl.h was edited at NCAR - the variables
+'scale' and 'bias' have been added to facilitate the JamesD
+dealiaser in the Ray_header struct. This change should be repeated
+if a new version is downloaded. Also, the rsl.h file
+needs to start with :
+
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+and end with :
+
+#ifdef __cplusplus
+}
+#endif
+
+ -- this needs to be added
+
+Niles Oien August 2003.
+
+
+
+The file 'anyformat_to_radar.c' was edited and the line :
+
+fp = uncompress_pipe(fp);
+
+was commented out. The call to
+uncompress_pipe() resulted in the input file 
+never being closed, which caused problems.
+The way we work at RAL is to uncompress the file
+before reading it anyway.
+
+Also in the file
+
+nsig_to_radar.c
+
+the calls to nsig_open() and nsig_close() were replaced
+with calls to fopen() and fclose(). Again, files were being left
+open.
+
+
+Niles Oien July 2009
+
+
+The file  gzip.c was edited - there was a fork() call
+without a corresponding wait() call. So the code :
+
+void rsl_readflush(FILE *fp)
+{
+  if (fork() == 0) { /* Child */
+    char buf[1024];
+    while(fread(buf, sizeof(char), sizeof(buf), fp)) continue;
+    exit(0);
+  }
+}
+
+
+
+was replaced with :
+
+
+
+void rsl_readflush(FILE *fp)
+{
+  if (fork() == 0) { /* Child */
+    char buf[1024];
+    while(fread(buf, sizeof(char), sizeof(buf), fp)) continue;
+    exit(0);
+  } else { /* Parent - just waits for child to terminate. This
+              is thus a rather pointless fork() but I will leave it here
+              mostly as a record of the modification - Niles Oien, UCAR. */
+    int status;
+    wait( &status );
+  }
+}
+
+Niles Oien May 2010
+
+
+-------------------------------------------------------
+
+In anyformat_to_radar.c, in the routine 
+
+enum File_type RSL_filetype(char *infile)
+
+the first 11 bytes of the file are read into a char array
+named 'magic' (for magic ID number) and then the file needs to
+be closed. Around line 79 there is a call :
+
+rsl_readflush(fp);
+
+which was not closing the file - this was replaced with :
+
+fclose(fp);
+
+due to files being left open -
+
+Niles Oien December 2010
+
+

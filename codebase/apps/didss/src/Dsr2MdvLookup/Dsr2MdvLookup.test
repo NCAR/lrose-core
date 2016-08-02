@@ -1,0 +1,215 @@
+/****************************************************
+ * TDRP params for gen_polar2mdv_lookup
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Geometry type for MDV grid.
+ * There are 3 geometry types: CART_GEOM - Cartesian volume grid
+ *   (km x km x km) (default), PPI_GEOM - Cartesian ppi grid (deg x
+ *   km x km), and POLAR_GEOM - polar grid [el x az x gate] (deg x deg
+ *   x km).
+ *
+ * Type: enum
+ * Default: CART_GEOM 
+ * Legal values: CART_GEOM, PPI_GEOM, POLAR_GEOM.
+ */
+geom_type = CART_GEOM;
+
+/*
+ * File path for lookup table - output.
+ * The generated lookup table file has this file path.
+ *
+ * Type: string
+ * Default: "polar2mdv_lookup" 
+ */
+lookup_table_path = "$(TITAN_HOME)/tables/polar2mdv_lookup.test";
+
+/*
+ * Target elevation array (deg).
+ * Array of target radar elevations. The actual elevation data
+ *   is rounded to the values in this array.
+ *
+ * Type: double
+ * Default: 0.5 
+ * Min value: -10 
+ * Max value: 180 
+ * Array elem size: 8 bytes
+ * Array has no max number of elements
+ */
+elev_target = {1.5, 2.5, 3.5, 4.5, 5.5, 6.7, 8.0, 9.6, 11.5, 13.7,
+	       16.2, 19.2, 22.6, 26.5, 30.8, 35.5, 40.5, 45.6};
+
+/*
+ * Number of radar beam azimuths in the azimuth array.
+ * This is the expected number of radar azimuths. See also start_azimuth
+ *   and delta_azimuth.
+ *
+ * Type: long
+ * Default: 360 
+ * Min value: 10 
+ * Max value: 36000 
+ */
+nazimuths = 360;
+
+/*
+ * Azimuth of first entry in azimith array (deg).
+ * The azimuths in the array are determined using this start value
+ *   and the delta_azimuth. See also nazimuths and delta_azimuth.
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -360 
+ * Max value: 360 
+ */
+start_azimuth = 0;
+
+/*
+ * Delta azimuth between entries in the azimith array (deg).
+ * The azimuths in the array are determined using the start_azimuth
+ *   value and this delta_azimuth value. See also nazimuths and
+ *   start_azimuth.
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: -90 
+ * Max value: 90 
+ */
+delta_azimuth = 1;
+
+/*
+ * Option to use irregular azimuth array.
+ * This option allows the user to set up an irregular azimuth array
+ *   instead of the regular one using nazimuths, start_azimuth
+ *   and delta_azimuth. If set, the file specified by azimuth_table_file
+ *   is read in to create the irregular azimuth array.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+use_azimuth_table = TRUE;
+
+/*
+ * File path for irregular azimuth table - input.
+ * The scan strategy for an irregular azimuth pattern in stored
+ *   in this file. See also use_azimuth_table.
+ *
+ * Type: string
+ * Default: "azimuth_table" 
+ */
+azimuth_table_path = "$(TITAN_HOME)/params/dtass_scan_table";
+
+/*
+ * Radar beam-width.
+ * The beam-width specifies how far to spread the influence of
+ *   the data from the target elevations.
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0.0001 
+ * Max value: 90 
+ */
+beam_width = 1.0;
+
+/*
+ * Number of gates along a radial.
+ * polar2mdv only supports constant gate spacing.
+ *
+ * Type: long
+ * Default: 500 
+ * Min value: 1 
+ * Max value: 100000 
+ */
+ngates = 224;
+
+/*
+ * Range to center of first gate (km).
+ *
+ * Type: double
+ * Default: 0.1 
+ * Min value: -100 
+ * Max value: 10000 
+ */
+start_range = 0.9;
+
+/*
+ * Distance between centers of adjacent gates (km).
+ * Polar2mdv only supports constant gate spacing.
+ *
+ * Type: double
+ * Default: 0.1 
+ * Min value: 0 
+ * Max value: 100 
+ */
+gate_spacing = 0.6;
+
+/*
+ * Radar location.
+ * Lat and lon in degrees, altitude in km MSL.
+ *
+ * Type: struct
+ */
+radar_location = {
+  -28.2500, /* latitude:double */
+  28.3333, /* longitude:double */
+  1.687  /* altitude:double */
+};
+
+/*
+ * MDV output grid parameters.
+ * For CART_GEOM, all fields are used. For PPI_GEOM, nelevations
+ *   (from elevation array) overrides nz. For POLAR_GEOM, nelevations
+ *   overrides nz, nazimuths overrides ny, start_azimuth overrides
+ *   miny, delta_azimuth overrides dy, ngates overrides nx, start_range
+ *   overrides minx and gate_spacing overrides dx.
+ *
+ * Type: struct
+ */
+output_grid = {
+  -28.2500, /* origin_lat:double */
+  28.3333, /* origin_lon:double */
+  0.0, /* rotation:double */
+  260, /* nx:long */
+  260, /* ny:long */
+  18, /* nz:long */
+  -129.5, /* minx:double */
+  -129.5, /* miny:double */
+  2.0, /* minz:double */
+  1.0, /* dx:double */
+  1.0, /* dy:double */
+  1.0  /* dz:double */
+};
+
+/*
+ * Option to extend the data below the lowest PPI.
+ * If set, data from the lowest PPI is used to populate all points
+ *   below that PPI in the grid. Only applies to CART_GEOM.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+extend_below = FALSE;
+
+

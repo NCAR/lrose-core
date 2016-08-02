@@ -1,0 +1,226 @@
+/*********************************************************
+ * parameter definitions for km2mdv
+ *
+ * Nancy Rehak, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * January 1997
+ */
+
+paramdef enum debug_t
+{
+  p_options = { DEBUG_OFF,
+                DEBUG_WARNINGS,
+                DEBUG_NORM,
+                DEBUG_EXTRA };
+  p_default = { DEBUG_OFF };
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long
+{
+  p_default = { 0 };
+  p_min = { 0 };
+  p_max = { 3 };
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* 
+{
+  p_default = { "Test" };
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum mode_t 
+{
+  p_options = { REALTIME,
+                ARCHIVE };
+  p_default = { REALTIME };
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; archive mode runs on file list";
+} mode;
+
+paramdef boolean
+{
+  p_descr = "update archive header date flag";
+  p_help = "If this flag is set, the date in the header of the Kavouras mosaic file will be assumed to be one day behind the true date of the data.  Thus, one day will be added to the header date before the input file is processed.  This is done because some of the files received from Kavouras did not have the date field in the header updated when 0000Z was passed, so they were one day off.  This parameter is ignored in REALTIME mode.";
+  p_default = { FALSE };
+} update_archive_date;
+
+paramdef char* 
+{
+  p_default = { "mcg" };
+  p_descr = "Input file extension";
+} input_file_ext;
+
+paramdef string 
+{
+  p_default = { "." };
+  p_descr = "Input directory";
+  p_help = "Path of input directory - realtime mode only";
+} input_dir;
+
+paramdef string 
+{
+  p_default = { "mdv" };
+  p_descr = "Output file extension";
+} output_file_ext;
+
+paramdef string 
+{
+  p_default = { "." };
+  p_descr = "Output directory";
+  p_help = "Path of output directory";
+} output_dir;
+
+paramdef string 
+{
+  p_default = { "local" };
+  p_descr = "Output host name";
+  p_help = "Host name for output files - set to 'local' for local host";
+} output_host;
+
+paramdef string 
+{
+  p_default = { "/tmp" };
+  p_descr = "Local dir for tmp files";
+  p_help = "If the output_host is not 'local', this must be set to a writeable directory.";
+} local_tmp_dir;
+
+paramdef enum output_type_t 
+{
+  p_options = { DOBSON,
+                PLAIN,
+                MDV };
+  p_default = { MDV };
+  p_descr = "Output file type";
+  p_help = "Can output MDV file, Dobson file or plain grid";
+} output_type;
+
+paramdef enum mdv_encoding_type_t
+{
+  p_options = { ENCODE_NATIVE,
+                ENCODE_INT8,
+                ENCODE_INT16,
+                ENCODE_FLOAT32,
+                ENCODE_PLANE_RLE8 };
+  p_default = { ENCODE_INT8 };
+  p_descr = "MDV output encoding type";
+  p_help = "Can output the MDV file in any of the supported formats.";
+} mdv_encoding_type;
+
+paramdef enum output_data_origin_t 
+{
+  p_options = { BOTLEFT,
+                TOPLEFT };
+  p_default = { BOTLEFT };
+  p_descr = "Data origin position";
+  p_help = "Data origin - data may be output starting at bottom left corner (BOTLEFT) or top left corner (TOPLEFT)";
+} output_data_origin;
+
+paramdef boolean 
+{
+  p_default = { false };
+  p_descr = "Option to output file with FORTRAN record markers";
+  p_help = "If this is set, the output file will have a leading and trailing      4-byte word indicating the array length. This allows FORTRAN to read the array as Unformatted Sequential";
+} fortran_output;
+
+paramdef long 
+{
+  p_min = { 60 };
+  p_default = { 300 };
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_input_data_age;
+
+paramdef long 
+{
+  p_min = { 0 };
+  p_max = { 300 };
+  p_default = { 10 };
+  p_descr = "Delay before processing incoming file (sec)";
+  p_help = "Delay between finding new file and processing it - realtime only (sec)";
+} processing_delay;
+
+paramdef double 
+{
+  p_descr = "vip -> dbz lookup array";
+  p_help = "Array for translating vip level into dBZ";
+} vip2dbz[];
+
+paramdef boolean 
+{
+  p_descr = "Flag for resampling native grid";
+  p_descr = "If set, kavouras grid is resampled onto grid specified by projection, x_grid and y_grid. If not set, native grid is output.";
+  p_default = { false };
+} resample_grid;
+
+paramdef enum proj_t
+{
+  p_descr = "Output projection";
+  p_help = "Desired output projection.  For PROJ_LATLON, the x_grid and y_grid parameters are given in degrees; for PROJ_FLAT, the x_grid and y_grid parameters are given in km.  This is only used if resample_grid is TRUE.";
+  p_options = { PROJ_FLAT,
+                PROJ_LATLON };
+  p_default = { PROJ_LATLON };
+} output_projection;
+
+paramdef struct origin_t
+{
+  p_descr = "Flat projection origin";
+  p_help = "This is only used if resample_grid is TRUE and output_projection is PROJ_FLAT.";
+  p_field_type = { double,
+                   double };
+  p_field_name = { lat,
+                   lon };
+} flat_origin;
+
+typedef struct {
+  double min;
+  double delta;
+  long n;
+} grid_t;
+
+paramdef struct grid_t 
+{
+  p_descr = "Resampled X grid params";
+  p_help = "For PROJ_LATLON, the grid parameters are given in degrees; for PROJ_FLAT, the grid parameters are given in km.  The X min value gives the min value of the lower left-hand corner of the grid square (not the middle of the square like MDV files give).";
+} x_grid;
+
+paramdef struct grid_t 
+{
+  p_descr = "Resampled Y grid params";
+  p_help = "For PROJ_LATLON, the grid parameters are given in degrees; for PROJ_FLAT, the grid parameters are given in km.  The Y min value gives the min value of the lower left-hand corner of the grid square (not the middle of the square like MDV files give).";
+} y_grid;
+
+paramdef double 
+{
+  p_min = { -50.0 };
+  p_max = { 90.0 };
+  p_default = { 0.0 };
+  p_descr = "Reflectivity threshold";
+  p_help = "No data below this threshold is considered when creating output grid";
+} dbz_threshold;
+
+paramdef double 
+{
+  p_min = { 0.0 };
+  p_max = { 100.0 };
+  p_default = { 0.0 };
+  p_descr = "Min fraction coverage for resampled grid";
+  p_help = "The minimum fraction coverage for a given output grid area. If the coverage is less than this, the output is set to zero.";
+} coverage_threshold;
+
+paramdef enum filter_type_t 
+{
+  p_options = { MAX_FILTER,
+                MEAN_DBZ_FILTER,
+                MEAN_Z_FILTER };
+  p_default = { MAX_FILTER };
+  p_descr = "Filter type";
+  p_help = "The type of filter applied during resampling.  This filtering will only be done if the output_projection is PROJ_LATLON.  For PROJ_FLAT projections, the data is resampled by using the closest grid centroids.";
+} filter_type;
+
+
+

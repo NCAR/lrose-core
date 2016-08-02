@@ -1,0 +1,110 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for Rdas2Dsr
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// May 2004
+
+commentdef {
+  p_header = "Program name: Rdas2Dsr";
+  p_text = "Rdas2Dsr reads radar data from the RDAS relay server over a socket and writes the data to a DsRadarQueue beam by beam.";
+}
+
+commentdef {
+  p_header = "PROCESS CONTROL AND DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "RDAS relay server host.";
+  p_help = "Rdas data is read from the RDAS relay server.";
+} relay_host;
+
+paramdef int {
+  p_default = 11000;
+  p_descr = "Port for RDAS relay server.";
+  p_help = "Rdas data is read from the RDAS relay server.";
+} relay_port;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "fmq/rdas";
+  p_descr = "Output URL for DSR radar data FMQ.";
+  p_help = "This program outputs beam-by-beam data to a file message queue (FMQ). This is the URL for that queue. It is of the form 'fmqp:://host::dir/name'. If the output is to the local host you can use just 'dir/name'.";
+} output_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to block on write when the radar queue fills up.";
+  p_help = "If false, the program writes data to the output queue without regard to whether the reader is keeping up. If the FMQ fills without being read it will overflow and overwrite data which has not been read. This is the normal mode for REALTIME operations. If true, the program will not overwrite data in the queue which has not been read by the reader. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.";
+} write_blocking;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compress output infor FMQ.";
+  p_help = "If compression is on, this increases the amount of data you can store in the output FMQ before overflow. However, this causes increased CPU load.";
+} output_compression;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Number of slots in output FMQ.";
+} output_n_slots;
+
+paramdef int {
+  p_default = 10000000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_buf_size;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override data time with current time.";
+  p_help = "If true, the data will be time-stamped with the current time set on the host computer.";
+} override_time;
+

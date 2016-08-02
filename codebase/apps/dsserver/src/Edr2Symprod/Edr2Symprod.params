@@ -1,0 +1,362 @@
+/**********************************************************************
+ * TDRP params for Edr2Symprod
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for procmap registration and auto restarting.
+// Type: string
+//
+
+instance = "";
+
+///////////// no_threads //////////////////////////////
+//
+// Option to prevent server from using a thread per client.
+// For debugging purposes it it sometimes useful to suppress the use of 
+//   threads. Set no_threads to TRUE for this type of debugging.
+// Type: boolean
+//
+
+no_threads = FALSE;
+
+//======================================================================
+//
+// Server details for support from ServerMgr.
+//
+//======================================================================
+ 
+///////////// port ////////////////////////////////////
+//
+// Port number.
+// The server listens on this port for client requests.
+// Type: int
+//
+
+port = 5467;
+
+///////////// qmax ////////////////////////////////////
+//
+// Max quiescent period (secs).
+// If the server does not receive requests for this time period, it will 
+//   die gracefully. If set to -1, the server never exits.
+// Type: int
+//
+
+qmax = -1;
+
+///////////// max_clients /////////////////////////////
+//
+// Maximum number of clients.
+// This is the maximum number of threads the application will produce to 
+//   handle client requests.  If the maximum is reached, new clients will 
+//   receive a SERVICE_DENIED error message and will have to request the 
+//   data again.  If set to -1, no maximum is enforced.
+// Type: int
+//
+
+max_clients = 64;
+
+//======================================================================
+//
+// CLIPPING PARAMETERS.
+//
+//======================================================================
+ 
+///////////// apply_flight_level_limits ///////////////
+//
+// Option to only include edr within certain flight level limits.
+// Type: boolean
+//
+
+apply_flight_level_limits = FALSE;
+
+///////////// apply_qcConf_filtering //////////////////
+//
+// Option to only include edr with qcConf == 1.
+// Type: boolean
+//
+
+apply_qcConf_filtering = FALSE;
+
+///////////// min_flight_level ////////////////////////
+//
+// Min flight level (altitude(ft)/100).
+// See apply_flight_level_limits.
+// Type: int
+//
+
+min_flight_level = 0;
+
+///////////// max_flight_level ////////////////////////
+//
+// Max flight level (altitude(ft)/100).
+// See apply_flight_level_limits.
+// Type: int
+//
+
+max_flight_level = 0;
+
+///////////// apply_lat_lon_limits ////////////////////
+//
+// Option to only include edr within given bounding box.
+// Type: boolean
+//
+
+apply_lat_lon_limits = FALSE;
+
+///////////// min_lat /////////////////////////////////
+//
+// Min latitude (deg).
+// See apply_lat_lon_limits.
+// Type: int
+//
+
+min_lat = 0;
+
+///////////// min_lon /////////////////////////////////
+//
+// Min longitude (deg).
+// See apply_lat_lon_limits.
+// Type: int
+//
+
+min_lon = 0;
+
+///////////// max_lat /////////////////////////////////
+//
+// Max latitude (deg).
+// See apply_lat_lon_limits.
+// Type: int
+//
+
+max_lat = 0;
+
+///////////// max_lon /////////////////////////////////
+//
+// Max longitude (deg).
+// See apply_lat_lon_limits.
+// Type: int
+//
+
+max_lon = 0;
+
+//======================================================================
+//
+// RENDERING PARAMETERS.
+//
+//======================================================================
+ 
+///////////// plot_unscaled ///////////////////////////
+//
+// Option to not scale the product with zoom state.
+// If true, the product is always rendered at the same scale, regardless 
+//   of zoom state. If false, the product is scaled down on the screen as 
+//   the zoome expands, and is scaled up as you zoom in.
+// Type: boolean
+//
+
+plot_unscaled = TRUE;
+
+//======================================================================
+//
+// POSITION ICONS.
+//
+//======================================================================
+ 
+///////////// plot_icon ///////////////////////////////
+//
+// Option to plot icons.
+// If true, a triangle-shaped icon is drawn first, and then text is put 
+//   over it. This is useful for large domains because you can see the 
+//   icon even when the text is not displayed.
+// Type: boolean
+//
+
+plot_icon = TRUE;
+
+///////////// icon_size ///////////////////////////////
+//
+// Size of icon in pixels.
+// Edr is represented by a triangle. This is the distance from the 
+//   center to each extremity of the triangle shape.
+// Type: int
+//
+
+icon_size = 5;
+
+///////////// icon_color //////////////////////////////
+//
+// Color for icon.
+// Name of color suggested for rendering acars icon.
+// Type: string
+//
+
+icon_color = "orange";
+
+//======================================================================
+//
+// TEXT.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// Text labels.
+//
+// The following are specified for each text label:
+// 	do_draw: option to draw the label, true or false
+// 	color: foreground color
+// 	background_color: background color - if empty, no background
+// 	font_name: name of font family
+// 	font_size: suggest size in pixels
+// 	x_offset: x offset from station location in pixels
+// 	y_offset: y offset from station location in pixels
+// 	vert_align: vert justification of text relative to offset point
+// 	horiz_align: horiz justification of text relative to offset point.
+//
+//======================================================================
+ 
+///////////// flight_num_label ////////////////////////
+//
+// Details for flight num label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+flight_num_label = { TRUE, "green", "", "8x13", 10, -2, -2, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+
+///////////// flight_level_label //////////////////////
+//
+// Details for flight level label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+flight_level_label = { TRUE, "green", "", "8x13", 10, 2, -2, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+
+///////////// edr_ave_label ///////////////////////////
+//
+// Details for temperature label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+edr_ave_label = { TRUE, "", "", "8x13", 10, 2, -15, VERT_ALIGN_TOP, HORIZ_ALIGN_LEFT };
+
+///////////// edr_peak_label //////////////////////////
+//
+// Details for wind label.
+//
+// Type: struct
+//   typedef struct {
+//      boolean do_draw;
+//      string color;
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+edr_peak_label = { TRUE, "", "", "8x13", 10, -2, -15, VERT_ALIGN_TOP, HORIZ_ALIGN_RIGHT };
+

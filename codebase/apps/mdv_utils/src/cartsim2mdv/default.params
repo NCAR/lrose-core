@@ -1,0 +1,183 @@
+/****************************************************
+ * TDRP params for sim2mdv
+ ****************************************************/
+
+/*
+ * Option to print debugging messages.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+debug = FALSE;
+
+/*
+ * Option to check if parameters are set.
+ * If this is true, a check will be made on which parameters is set.
+ *   A report will be generated for those params which are using the
+ *   defaults.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_params = FALSE;
+
+/*
+ * Option to print parameters.
+ * If this is true, used parameters will be printed at the beginning
+ *   of the run.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+print_params = TRUE;
+
+/*
+ * output file suffix.
+ *
+ * Type: string
+ * Default: "mdv" 
+ */
+output_file_suffix = "mdv";
+
+/*
+ * Output File directory (top directory).
+ * Name of directory where mdv files will be placed.
+ *
+ * Type: string
+ */
+output_dir = ".";
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Output Encoding Type.
+ * 0 - None (data written as unsigned char), 1 - URL 8bit encoding.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 1 
+ */
+output_encoding_type = 0;
+
+/*
+ * Projection Type.
+ * Options are: -1-Native, 0-Lat/Lon, 1-Artcc, 2-Stereographic,
+ *   3-Lambert conformal, 4-Mercator 5-Polar stereo, 6-Polar
+ *   stereo elliptic, 7-Cylindrical equidist, 8-Flat (cartesian),
+ *   9-Shperical.
+ *
+ * Type: long
+ * Default: -2 
+ * Min value: -2 
+ * Max value: 9 
+ */
+projection_type = -2;
+
+/*
+ * Vertical Type.
+ * Options are: 0-Unknown, 1-Surface, 2-sigma-p, 3-Pressure
+ *   , 4-Z (Constant Altitude) 5-sigma-z , 6-eta , 7-theta, 8-Mixed
+ *   , 9-Elevation, 10-Composite, 11-Cross-section, 12- satelite.
+ *
+ * Type: long
+ * Default: 4 
+ * Min value: 0 
+ * Max value: 12 
+ */
+vertical_type = 4;
+
+/*
+ * cartesian simulation parameter file.
+ *
+ * Type: string
+ * Default: "csim.conf" 
+ */
+csim_config_file = "csim.conf";
+
+/*
+ * Data Collection Type.
+ * Options are: 0 - Measured, 1 - Extrapolated, 2 - Forecast, 3 -
+ *   Synthesis, 4 - Mixed.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 4 
+ */
+collection_type = 0;
+
+/*
+ * Sensor Latitude.
+ * Sensor Latitude (if different than what is in gint header).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -90 
+ * Max value: 90 
+ */
+sensor_latitude = 39.7914;
+
+/*
+ * Sensor Longitude.
+ * Sensor Longitude (if different than what is in gint header).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -180 
+ * Max value: 180 
+ */
+sensor_longitude = -104.5683;
+
+/*
+ * Sensor Altitude (KM).
+ * Sensor Altitude (in KM - not in gint header).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: 0 
+ */
+sensor_altitude = 0;
+
+/*
+ * Data Source.
+ * Data Source (ie. NIDS/LOT).
+ *
+ * Type: string
+ * Default: "NIDS/LOT" 
+ */
+data_source = "TASS sim file";
+
+/*
+ * Maximum time.
+ * Time at which simulation stops (seconds from start).
+ *
+ * Type: long
+ * Default: 300 
+ * Min value: 60 
+ * Max value: 9000 
+ */
+maximum_time = 6000;
+
+/*
+ * delta time.
+ * Time between simulation steps (seconds).
+ *
+ * Type: long
+ * Default: 60 
+ * Min value: 1 
+ * Max value: 1500 
+ */
+delta_time = 120;
+
+

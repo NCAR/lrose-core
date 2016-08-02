@@ -1,0 +1,130 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for Taf2Spdb
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// May 2000
+//
+
+commentdef {
+  p_header = "Program name: twntaf2psdb";
+  p_text = "Taf2Spdb reads TAF data from text files and stores in SPDB.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "OPERATIONAL MODE.";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; archive mode runs on single file";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "raw/gts";
+  p_descr = "Name of input data directory.";
+  p_help = "Raw TAF data files are stored in this directory.";
+} input_dir_path;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data";
+  p_help = "For REALTIME only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+typedef enum {
+  GTS, NNNN
+} taf_format_t;
+
+paramdef enum taf_format_t
+{
+  p_descr = "taf format : GTS or NNNN";
+  p_help = "Set to the format appropriate for the input stream.";
+  p_default = GTS;
+} taf_format;
+
+paramdef boolean
+{
+  p_descr = "site_filter flag";
+  p_help = "Set to true to filter according to station location list.";
+  p_default = true;
+} site_filter;
+
+paramdef char* {
+  p_default = "./station_location.txt";
+  p_descr = "Path to station location file";
+  p_help = "The station location file should contain a station identification followed by the latitude and longitude for each station that should be added to the airep SPDB";
+} st_location_path;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef int {
+  p_descr = "data expire seconds";
+  p_help = "Number of seconds the data is valid before it should be expired.";
+  p_default = 10800;
+} expire_secs;
+
+paramdef string {
+  p_descr = "Output URL.";
+  p_help = "Data will be put to the SPDB data base at this URL.";
+  p_default = "spdb/taf";
+} output_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include header with the TAF.";
+  p_help = "Sometimes there is a header, starting with FT, at the start of a TAF block. If store_header is true, the header is added to the start of the TAF message before storing it.";
+} store_header;

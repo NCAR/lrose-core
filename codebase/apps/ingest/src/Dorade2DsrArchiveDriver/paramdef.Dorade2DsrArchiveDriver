@@ -1,0 +1,79 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions Dorade2DsrArchiveDriver
+//
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Dorade2DsrArchiveDriver scans a directory looking\n"
+	"for Dorade sweepfiles conforming to the\n"
+	"swp.1070630141414.DOW2cops.64.4.0_SUR_v7 naming convention.\n"
+	"The volume number is parsed out, and once an entire\n"
+	"volume's worth of data is obtained, the command\n\n"
+	"Dorader2Dsr -params pFile -f files....\n\n"
+	"is executed. This is a good method of processing\n"
+	"archived dorade sweep files and getting the\n"
+	"end of volume flag in the right place.\n\n"
+	"Niles Oien July 2007";
+}
+
+
+
+
+
+paramdef string {
+  p_default = "$(HOME)/data/raw/radar/dorade";
+  p_descr = "Dir for input data files.";
+  p_help = "Not realtime, archive only.";
+} inputDir;
+
+paramdef string {
+  p_default = "./Dorade2Dsr.params";
+  p_descr = "Param file for Dorade2Dsr";
+  p_help = "Use Dorade2Dsr -print_params and edit to set this up.";
+} doradeParamFile;
+
+
+paramdef string {
+  p_default = "./start_Dsr2Vol";
+  p_descr = "Script that checks if Dsr2Vol is running and\n"
+	"if it is not, starts it.";
+  p_help = "Called initially and after every Dorade2Dsr command so that\n"
+	"Dsr2Vol keeps going.";
+} keepDsr2VolRunningScript;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Time, seconds, to sleep after each Dorade2Dsr command.";
+  p_help = "Set so that your system is not overloaded and no\n"
+	"beams get skipped in the fmq.";
+} sleepTime;
+
+paramdef string {
+  p_default = "/tmp/Dorade2DsrArchiveDriver.$(USER)";
+  p_descr = "Temp file.";
+  p_help = "Temporary file used to list sweep files in order.";
+} tempFile;

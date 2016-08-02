@@ -1,0 +1,45 @@
+#!/usr/bin/tcsh
+#
+# Piece of nearly nothing to test the Janitor program.
+#
+# Niles Oien December 1998
+#
+# Tell it where to look.
+#
+setenv RAP_DATA_DIR /home/oien/JanitorTest
+#
+#
+# Set up the test directory - this is
+# done by copying an already set up directory
+# tree into the correct place, and then
+# setting the times on the files to now
+# with touch.
+#
+echo cleaning...
+/bin/rm -rf /home/oien/JanitorTest/*
+#
+echo copying...
+cp -r ./JanitorTest/* /home/oien/JanitorTest
+#
+echo touching...
+find /home/oien/JanitorTest  -exec touch {} \;
+#
+echo sleeping....
+sleep 5
+#
+# Spawn the janitor.
+#
+echo Spawning....
+nohup Janitor >&! ./Janitor.log &
+#
+#
+echo Processing...
+ps -ef | grep Janitor
+ps -ef | grep Janitor >&! JanitorSpawn.log
+date >&! JanitorSpawnTime.log
+#
+# That's it.
+#
+
+
+

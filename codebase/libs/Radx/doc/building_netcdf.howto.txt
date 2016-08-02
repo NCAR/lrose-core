@@ -1,0 +1,71 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:35 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+Building netCDF - HOWTO
+=======================
+
+To build the latest release of netCDF (4.0), you optionally can include
+support for HDF5, in which case you also need the udunits2 package.
+
+Downloading:
+------------
+
+  netcdf: http://www.unidata.ucar.edu/downloads/netcdf/
+
+  udunits2: http://www.unidata.ucar.edu/downloads/udunits
+
+  hdf5: http://www.hdfgroup.org/HDF5/release
+
+Building HDF5:
+--------------
+
+Put this in /usr/local
+
+  tar xvfz hdf5-1.8.2.tar.gz
+  cd hdf5-1.8.2
+  ./configure --prefix=/usr/local
+  make 
+  make check
+  make install
+  make clean
+
+Building udunits2:
+------------------
+
+Put this in /usr/local
+
+  cd udunits-2.1.5
+  ./configure --prefix=/usr/local
+  make
+  make check
+  make install
+  make install-info install-html install-pdf
+  make clean
+
+Building netcdf
+---------------
+
+It is recommended that you do 2 builds, one netcdf3 vanilla (without HDF5 support)
+and one with full netCDF4 and HDF5 support.
+
+  cd netcdf-4.0
+  FC=gfortran
+  export FC
+
+  ./configure --enable-netcdf-4 --with-hdf5=/usr/local --prefix=/usr/local/netcdf4
+  make
+  make check
+  make install
+  make clean
+
+  ./configure --prefix=/usr/local
+  make
+  make check
+  make install
+  make clean
+

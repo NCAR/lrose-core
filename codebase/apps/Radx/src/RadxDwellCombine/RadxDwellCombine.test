@@ -1,0 +1,695 @@
+/**********************************************************************
+ * TDRP params for RadxDwellCombine
+ **********************************************************************/
+
+//======================================================================
+//
+// Combines multiple dwells from CfRadial files, writes out combined 
+//   dwell files. The goal is to summarize dwells in pointing data - for 
+//   example from vertically-pointing instruments. This can make 
+//   displaying the data in a BSCAN quicker and more efficient.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This application registers with procmap. This is the instance used 
+//   for registration.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+// Files will be searched for in this directory.
+// Type: string
+//
+
+input_dir = "/scr/eldora1/hcr-test/cfradial/moments/wband";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+// Only data less old than this will be used.
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+///////////// latest_data_info_avail //////////////////
+//
+// Is _latest_data_info file available?.
+// If TRUE, will watch the latest_data_info file. If FALSE, will scan 
+//   the input directory for new files.
+// Type: boolean
+//
+
+latest_data_info_avail = TRUE;
+
+///////////// search_recursively //////////////////////
+//
+// Option to recurse to subdirectories while looking for new files.
+// If TRUE, all subdirectories with ages less than max_dir_age will be 
+//   searched. This may take considerable CPU, so be careful in its use. 
+//   Only applies if latest_data_info_avail is FALSE.
+// Type: boolean
+//
+
+search_recursively = TRUE;
+
+///////////// max_recursion_depth /////////////////////
+//
+// Maximum depth for recursive directory scan.
+// Only applies search_recursively is TRUE. This is the max depth, below 
+//   input_dir, to which the recursive directory search will be carried 
+//   out. A depth of 0 will search the top-level directory only. A depth 
+//   of 1 will search the level below the top directory, etc.
+// Type: int
+//
+
+max_recursion_depth = 5;
+
+///////////// wait_between_checks /////////////////////
+//
+// Sleep time between checking directory for input - secs.
+// If a directory is large and files do not arrive frequently, set this 
+//   to a higher value to reduce the CPU load from checking the directory. 
+//   Only applies if latest_data_info_avail is FALSE.
+// Minimum val: 1
+// Type: int
+//
+
+wait_between_checks = 2;
+
+///////////// file_quiescence /////////////////////////
+//
+// File quiescence when checking for files - secs.
+// This allows you to make sure that a file coming from a remote machine 
+//   is complete before reading it. Only applies if latest_data_info_avail 
+//   is FALSE.
+// Type: int
+//
+
+file_quiescence = 5;
+
+///////////// search_ext //////////////////////////////
+//
+// File name extension.
+// If set, only files with this extension will be processed.
+// Type: string
+//
+
+search_ext = "";
+
+///////////// gematronik_realtime_mode ////////////////
+//
+// Set to TRUE if we are watching for Gematronik XML volumes.
+// Gematronik volumes (for a given time) are stored in multiple files, 
+//   one for each field. Therefore, after the time on a volume changes and 
+//   a new field file is detected, we need to wait a while to ensure that 
+//   all of the files have had a chance to be writted to disk. You need to 
+//   set gematronik_realtime_wait_secs to a value in excess of the time it 
+//   takes for all of the files to be written.
+// Type: boolean
+//
+
+gematronik_realtime_mode = FALSE;
+
+///////////// gematronik_realtime_wait_secs ///////////
+//
+// Number of seconds to wait, so that all field files can be written to 
+//   disk before we start to read.
+// See 'gematronik_realtime_mode'.
+// Type: int
+//
+
+gematronik_realtime_wait_secs = 5;
+
+//======================================================================
+//
+// READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+// If true, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = FALSE;
+
+///////////// aggregate_all_files_on_read /////////////
+//
+// Option to aggregate all files in the file list on read.
+// If true, all of the files specified with the '-f' arg will be 
+//   aggregated into a single volume as they are read in. This only 
+//   applies to FILELIST mode. Overrides 'aggregate_sweep_files_on_read'.
+// Type: boolean
+//
+
+aggregate_all_files_on_read = FALSE;
+
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+// Gates beyond this range are removed.
+// Type: double
+//
+
+max_range_km = 9999;
+
+//======================================================================
+//
+// SET THE DWELL DETAILS.
+//
+//======================================================================
+ 
+///////////// dwell_time_secs /////////////////////////
+//
+// Specify the output dwell time (secs).
+// Dwells from the input data will be combined to form dwells covering 
+//   the specified time.
+// Type: double
+//
+
+dwell_time_secs = 0.1;
+
+///////////// dwell_stats_method //////////////////////
+//
+// Method for computing stats on the dwell.
+// MIDDLE refers to the middle ray in the dwell sequence.
+//
+// Type: enum
+// Options:
+//     DWELL_STATS_MEAN
+//     DWELL_STATS_MEDIAN
+//     DWELL_STATS_MAXIMUM
+//     DWELL_STATS_MINIMUM
+//     DWELL_STATS_MIDDLE
+//
+
+dwell_stats_method = DWELL_STATS_MEAN;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES.
+//
+//======================================================================
+ 
+///////////// title_override //////////////////////////
+//
+// Option to override the title global attribute.
+// If empty, no effect. If not empty, this string is used to override 
+//   the title attribute.
+// Type: string
+//
+
+title_override = "";
+
+///////////// institution_override ////////////////////
+//
+// Option to override the institution global attribute.
+// If empty, no effect. If not empty, this string is used to override 
+//   the institution attribute.
+// Type: string
+//
+
+institution_override = "";
+
+///////////// references_override /////////////////////
+//
+// Option to override the references global attribute.
+// If empty, no effect. If not empty, this string is used to override 
+//   the references attribute.
+// Type: string
+//
+
+references_override = "";
+
+///////////// source_override /////////////////////////
+//
+// Option to override the source global attribute.
+// If empty, no effect. If not empty, this string is used to override 
+//   the source attribute.
+// Type: string
+//
+
+source_override = "";
+
+///////////// history_override ////////////////////////
+//
+// Option to override the history global attribute.
+// If empty, no effect. If not empty, this string is used to override 
+//   the history attribute.
+// Type: string
+//
+
+history_override = "";
+
+///////////// comment_override ////////////////////////
+//
+// Option to override the comment global attribute.
+// If empty, no effect. If not empty, this string is used to override 
+//   the comment attribute.
+// Type: string
+//
+
+comment_override = "";
+
+///////////// author_override /////////////////////////
+//
+// Option to override the author global attribute.
+// If empty, no effect. If not empty, this string is used to override 
+//   the author attribute.
+// Type: string
+//
+
+author_override = "";
+
+//======================================================================
+//
+// OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING.
+//
+//======================================================================
+ 
+///////////// set_output_fields ///////////////////////
+//
+// Set the field names and output encoding.
+// If false, all fields will be used.
+// Type: boolean
+//
+
+set_output_fields = FALSE;
+
+///////////// output_fields ///////////////////////////
+//
+// Output field details.
+// Set the details for the output fields. The output_field_name is the 
+//   ndtCDF variable name. Set the long name to a more descriptive name. 
+//   Set the standard name to the CF standard name for this field. If the 
+//   long name or standard name are empty, the existing names are used. If 
+//   SCALING_SPECIFIED, then the scale and offset is used.
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      string output_field_name;
+//      string long_name;
+//      string standard_name;
+//      string output_units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_ENCODING_ASIS
+//          OUTPUT_ENCODING_FLOAT32
+//          OUTPUT_ENCODING_INT32
+//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_INT08
+//      output_scaling_t output_scaling;
+//        Options:
+//          SCALING_DYNAMIC
+//          SCALING_SPECIFIED
+//      double output_scale;
+//      double output_offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    input_field_name = "DBZ",
+    output_field_name = "DBZ",
+    long_name = "reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
+    output_units = "dBZ",
+    encoding = OUTPUT_ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_field_name = "VEL",
+    output_field_name = "VEL",
+    long_name = "radial_velocity",
+    standard_name = "radial_velocity_of_scatterers_away_from_instrument",
+    output_units = "m/s",
+    encoding = OUTPUT_ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+};
+
+///////////// exclude_specified_fields ////////////////
+//
+// Option to exclude fields in the specified list.
+// If true, the specified fields will be excluded. This may be easier 
+//   than specifiying all of the fields to be included, if that list is 
+//   very long.
+// Type: boolean
+//
+
+exclude_specified_fields = FALSE;
+
+///////////// excluded_fields /////////////////////////
+//
+// List of fields to be excluded.
+// List the names to be excluded.
+// Type: string
+// 1D array - variable length.
+//
+
+excluded_fields = {
+ "DBZ",
+ "VEL"
+};
+
+//======================================================================
+//
+// OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS.
+//
+//======================================================================
+ 
+///////////// set_output_encoding_for_all_fields //////
+//
+// Option to set output encoding for all fields.
+// Type: boolean
+//
+
+set_output_encoding_for_all_fields = FALSE;
+
+///////////// output_encoding /////////////////////////
+//
+// Output encoding for all fields, if requested.
+//
+// Type: enum
+// Options:
+//     OUTPUT_ENCODING_ASIS
+//     OUTPUT_ENCODING_FLOAT32
+//     OUTPUT_ENCODING_INT32
+//     OUTPUT_ENCODING_INT16
+//     OUTPUT_ENCODING_INT08
+//
+
+output_encoding = OUTPUT_ENCODING_ASIS;
+
+//======================================================================
+//
+// OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.
+//
+// These transforms are fixed. The same transform is applied to all 
+//   files.
+//
+//======================================================================
+ 
+///////////// apply_linear_transforms /////////////////
+//
+// Apply linear transform to specified fields.
+// If true, we will apply a linear transform to selected fields.
+// Type: boolean
+//
+
+apply_linear_transforms = FALSE;
+
+///////////// transform_fields ////////////////////////
+//
+// transform field details.
+// Set the field name, scale and offset to be applied to the selected 
+//   fields. NOTE: the field name is the INPUT field name.
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      double transform_scale;
+//      double transform_offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+transform_fields = {
+  {
+    input_field_name = "DBZ",
+    transform_scale = 1,
+    transform_offset = 0
+  }
+  ,
+  {
+    input_field_name = "VEL",
+    transform_scale = 1,
+    transform_offset = 0
+  }
+};
+
+//======================================================================
+//
+// OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+// If false, data will be byte-swapped as appropriate on output.
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+// Applies to netCDF and Dorade. UF does not support compression.
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+//======================================================================
+//
+// OUTPUT OPTIONS FOR CfRadial FILES.
+//
+//======================================================================
+ 
+///////////// output_force_ngates_vary ////////////////
+//
+// Option to force the use of ragged arrays for CfRadial files.
+// Only applies to CfRadial. If true, forces the use of ragged arrays 
+//   even if the number of gates for all rays is constant.
+// Type: boolean
+//
+
+output_force_ngates_vary = FALSE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+// Files will be written to this directory.
+// Type: string
+//
+
+output_dir = "/tmp/dwellCombine";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name. SPECIFY_FILE_NAME: file of this 
+//   name will be written to output_dir.
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename_prefix //////////////////
+//
+// Optional prefix for output filename.
+// If empty, the standard prefix will be used.
+// Type: string
+//
+
+output_filename_prefix = "";
+
+///////////// include_instrument_name_in_file_name ////
+//
+// Option to include the instrument name in the file name.
+// Only applies to CfRadial files. If true, the instrument name will be 
+//   included just before the volume number in the output file name.
+// Type: boolean
+//
+
+include_instrument_name_in_file_name = TRUE;
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+// Path will be output_dir/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+// Type: boolean
+//
+
+write_individual_sweeps = FALSE;
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+

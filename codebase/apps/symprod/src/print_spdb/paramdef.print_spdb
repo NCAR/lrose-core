@@ -1,0 +1,63 @@
+/*********************************************************
+ * parameter definitions for load_spdb
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 1996
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Directory for data base";
+} data_base_dir;
+
+paramdef long {
+  p_default = {32};
+  p_descr = "Max length of any string in the input file";
+  p_help = "If an input string exceeds this length, it will be truncated.";
+} string_len;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to decode chunk data";
+  p_help = "If set, chunks will be decoded accroding to the data_format.";
+} decode_chunks;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option for full printout";
+  p_help = "If set, valid and expire times are printed, along with chunk number and size. If not set, only valid time is printed.";
+} full_printout;
+
+paramdef char* {
+  p_default = {"float"};
+  p_descr = "Format template - specifies the product format in the text file";
+  p_help = "The template specifies the order and type of the fields in the input file. Legal values are 'int', 'float' and 'string'. Strings must be shorter than max_string_len. Multi-word strings must be separated by underscores. The fields in the data line must be delimited by spaces or tabs.";
+} data_format[];
+
+paramdef long {
+  p_default = {86400};
+  p_min = {1};
+  p_descr = "Time search margin";
+  p_help = "This is used in searching for the closest data entry. The search is confined to the margin interval around the requested time.";
+} time_margin;
+
+
+
+

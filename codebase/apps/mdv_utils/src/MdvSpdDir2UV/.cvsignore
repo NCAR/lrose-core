@@ -1,0 +1,6 @@
+.deps
+MdvSpdDir2UV
+__makefile.template
+makefile
+makefile.am
+makefile.in

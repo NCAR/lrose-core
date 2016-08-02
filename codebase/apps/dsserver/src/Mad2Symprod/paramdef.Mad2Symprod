@@ -1,0 +1,327 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for Mad2Symprod
+//
+// Niles Oien, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// Jan 2000
+//
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef
+{
+  p_header = "Mad2Symprod";
+  p_text = "This program will read SPDB and by interpreting the content will render alert shapes, runway boxes, or runways in GSD style";
+}
+
+commentdef
+{
+  p_header = "DEBUGGING";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { DEBUG_OFF };
+} debug;
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string
+{
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean
+{
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef
+{
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int
+{
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5455;
+} port;
+  
+paramdef int
+{
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef
+{
+  p_header = "RENDERING PARAMETERS";
+};
+
+/***********************************************************************
+ * Display parameters
+ */
+
+typedef enum 
+{
+  FILL_NONE,
+  FILL_STIPPLE10,
+  FILL_STIPPLE20,
+  FILL_STIPPLE30,
+  FILL_STIPPLE40,
+  FILL_STIPPLE50,
+  FILL_STIPPLE60,
+  FILL_STIPPLE70,
+  FILL_STIPPLE80,
+  FILL_STIPPLE90,
+  FILL_SOLID
+} Fill_t;
+
+typedef enum 
+{
+  LINETYPE_SOLID,
+  LINETYPE_DASH,
+  LINETYPE_DOT_DASH
+} Linetype_t;
+
+typedef struct
+{
+  Fill_t  fill_style;
+  Linetype_t  line_type;
+  long line_width;
+  string color;
+  string label_color;
+} rendering_t;
+
+typedef struct
+{
+  Linetype_t  line_type;
+  long line_width;
+  string color;
+} line_rendering_t;
+
+commentdef
+{
+  p_header = "Rendering";
+  p_text = "Each type of shape has its own rendering params, namely the fill_style, the line_type, the line_width, color, and label color.  Label color is the empty string if the shape has no text magnitude label";
+};
+
+
+commentdef
+{
+  p_header = "Shapes";
+};
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for microburst shapes";
+  p_default = {FILL_STIPPLE50, LINETYPE_SOLID, 3, "red", "white"};
+} mb_render;
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for windshear with loss shapes";
+  p_default = {FILL_NONE, LINETYPE_SOLID, 2, "red", "red"};
+} ws_loss_render;
+
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for windshear with gain shapes";
+  p_default = {FILL_NONE, LINETYPE_SOLID, 2, "yellow", "yellow"};
+} ws_gain_render;
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for moderate turbulence shapes";
+  p_default = {FILL_NONE, LINETYPE_SOLID, 2, "tan", "tan"};
+} turb_render;
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for severed turbulence shapes";
+  p_default = {FILL_STIPPLE50, LINETYPE_SOLID, 3, "tan", "white"};
+} severe_turb_render;
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for the Red X";
+  p_default = {FILL_SOLID, LINETYPE_SOLID, 3, "red", "red"};
+} red_x_render;
+
+commentdef
+{
+  p_header = "Non-GSD box arenas";
+};
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for empty arena boxes (no alerts)";
+  p_help = "This is arena rendering for non-GSD style boxes";
+  p_default = {FILL_NONE, LINETYPE_SOLID, 2, "white", ""};
+} arena_none_render;
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for arena boxes with microbursts";
+  p_help = "This is arena rendering for non-GSD style boxes";
+  p_default = {FILL_STIPPLE70, LINETYPE_SOLID, 3, "red", ""};
+} arena_mb_render;
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for arenas with windshear with loss";
+  p_help = "This is arena rendering for non-GSD style boxes";
+  p_default = {FILL_STIPPLE10, LINETYPE_SOLID, 2, "red", ""};
+} arena_ws_loss_render;
+
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for arenas with windshear with gain";
+  p_help = "This is arena rendering for non-GSD style boxes";
+  p_default = {FILL_STIPPLE10, LINETYPE_SOLID, 2, "yellow", ""};
+} arena_ws_gain_render;
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for arenas with moderate turbulence";
+  p_help = "This is arena rendering for non-GSD style boxes";
+  p_default = {FILL_STIPPLE10, LINETYPE_SOLID, 2, "tan", ""};
+} arena_turb_render;
+
+
+paramdef struct rendering_t
+{
+  p_descr = "Rendering params for arenas with severe turbulence";
+  p_help = "This is arena rendering for non-GSD style boxes";
+  p_default = {FILL_STIPPLE70, LINETYPE_SOLID, 3, "tan", ""};
+} arena_severe_turb_render;
+
+commentdef
+{
+  p_header = "GSD style arenas";
+};
+
+paramdef struct line_rendering_t
+{
+  p_descr = "Rendering params for the GSD on runway box, the off runway center lines, and off runway cross lines";
+  p_help = "This is arena rendering for GSD style runway depiction, which remains the same with or without alerting\n"
+    "The runway itself is a rectangle, and off runway arenas are center lines with cross lines at each end";
+  p_default = {LINETYPE_SOLID, 2, "black"};
+} line_render;
+
+paramdef struct line_rendering_t
+{
+  p_descr = "Rendering params for GSD compute or alert boxes";
+  p_help = "This is arena rendering for GSD style runway depiction, where the runway and off runway arenas are surrounded by a polygonal box.  This is the rendering for these boxes";
+  p_default = {LINETYPE_DASH, 1, "yellow"};
+} compute_box_render;
+
+paramdef enum capstyle_t
+{
+  p_descr = "display capstyle";
+  p_help = "Capstyle suggested for using on the display.";
+  p_options = { CAPSTYLE_BUTT,
+                CAPSTYLE_NOT_LAST,
+                CAPSTYLE_PROJECTING,
+                CAPSTYLE_ROUND };
+  p_default = { CAPSTYLE_BUTT };
+} display_capstyle;
+
+paramdef enum joinstyle_t
+{
+  p_descr = "display joinstyle";
+  p_help = "Joinstyle suggested for using on the display.";
+  p_options = { JOINSTYLE_BEVEL,
+                JOINSTYLE_MITER,
+                JOINSTYLE_ROUND };
+  p_default = { JOINSTYLE_BEVEL };
+} display_joinstyle;
+
+paramdef boolean
+{
+  p_descr = "Display label flag";
+  p_help = "If TRUE, a label containing the shape magnitude will be rendered at the centroid of each shape.";
+  p_default = { FALSE };
+} render_label;
+
+
+paramdef string
+{
+  p_descr = "Label font";
+  p_help = "The X font suggested for using for the label on the display.";
+  p_default = { "8x13" };
+} label_font;
+
+paramdef double
+{
+  p_descr = "Windshear threshold";
+  p_help = "Do not display windshear loss or gain below this magnitude, -1 for ddisplay all";
+  p_default = -1;
+} windshear_threshold; 

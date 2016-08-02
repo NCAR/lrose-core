@@ -1,0 +1,66 @@
+########################################################################
+# parameters file for dobson_server
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# MArch 1993
+#
+#########################################################################
+
+#
+# debugging
+#
+
+dobson_server.debug: false
+dobson_server.malloc_debug_level: 0
+
+#
+# data location
+#
+
+dobson_server.rdata_dir: $(RTEST_HOME)/precip_accum
+dobson_server.dobson_file_ext: mdv
+
+#
+# projection - 'flat' or 'latlon'
+#
+# For local data, the flat projection is used. This is the most
+# frequent usage. latlon is specified for latlon grids such as
+# the kavouras radar mosaic.
+#
+
+dobson_server.projection: flat
+
+#
+# port number
+#
+
+dobson_server.port: 43400
+
+#
+# If realtime_avail is false, server will not provide
+# data for new_data requests. If shmem_avail is true,
+# realtime data will be provided from the shared memory
+# updated by cart_slave. If shmem_avail is false, the
+# realtime data will be provided from the latest available file
+#
+
+dobson_server.realtime_avail: true
+dobson_server.shmem_avail: false
+dobson_server.shmem_key: 43100
+
+#
+# compression - is set, data is run-lenght encoded before transmission
+#
+
+dobson_server.compress_data: true
+
+#
+# server mapper regsitration
+#
+
+dobson_server.info: Cart data
+dobson_server.instance: Paccum
+dobson_server.servmap_host1: local
+dobson_server.servmap_host2: none
+

@@ -1,0 +1,177 @@
+/**********************************************************************
+ * TDRP params for AdvectPolygon
+ **********************************************************************/
+
+//======================================================================
+//
+// AdvectPolygon creates a circle with the centroid of a polygon as its 
+//   center and uses the average wind in this circle to advect that 
+//   polygon.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program triggers off of new radar data volumes. 
+//   In ARCHIVE mode, it processes all tracks for each radar volume 
+//   between start and end times set on the command line. .
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// wind_url ////////////////////////////////
+//
+// Url of wind dataset.
+// Type: string
+//
+
+wind_url = "mdvp:://localhost::/d1/fieldData/bari_2004/mdv/ctrec";
+
+///////////// u_field_name ////////////////////////////
+//
+// Name of the u component of the wind.
+// Type: string
+//
+
+u_field_name = "U comp";
+
+///////////// v_field_name ////////////////////////////
+//
+// Name of the v component of the wind.
+// Type: string
+//
+
+v_field_name = "V comp";
+
+///////////// dbz_url /////////////////////////////////
+//
+// Url of dbz data.
+// Type: string
+//
+
+dbz_url = "mdvp:://localhost::/d1/fieldData/bari_2004/mdv/radar/cart_no_clutter";
+
+///////////// dbz_field_name //////////////////////////
+//
+// Name of the dbz field.
+// Type: string
+//
+
+dbz_field_name = "DBZ";
+
+///////////// polygon_url /////////////////////////////
+//
+// Url of unadvected polygons.
+// Type: string
+//
+
+polygon_url = "spdbp:://localhost::/d1/fieldData/bari_2004/spdb/AcTrackPolygon";
+
+///////////// lookback ////////////////////////////////
+//
+// Lookback time (secs) for polygons to be advected.
+// We gather polygons in the interval [trigger time - lookback, trigger 
+//   time] advect them.
+// Type: int
+//
+
+lookback = 240;
+
+///////////// max_valid_realtime_age //////////////////
+//
+// Maximum age(secs) of wind dataset that will trigger processing of 
+//   polygons.
+// Type: int
+//
+
+max_valid_realtime_age = 600;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output url.
+// Location of polygon output.
+// Type: string
+//
+
+output_url = "spdbp:://localhost::/d1/fieldData/bari_2004/spdb/AdvectPolygon";
+
+///////////// expire_seconds //////////////////////////
+//
+// Expire time in seconds of polygons.
+// This value will be added to the polygon time to determine the expire 
+//   time for the object.
+// Type: int
+//
+
+expire_seconds = 240;
+
+//======================================================================
+//
+// PROCESSING.
+//
+//======================================================================
+ 
+///////////// radius //////////////////////////////////
+//
+// Radius in km from the centroid of a polygon.
+// The circle defined by the radius and centroid center will be used to 
+//   find average wind.
+// Type: float
+//
+
+radius = 10;
+

@@ -1,0 +1,67 @@
+/*********************************************************
+ * parameter definitions for radmon_monitor
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 1996
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with servmap and procmap.";
+} instance;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Server subtype";
+  p_help = "Used for registration with servmap.";
+} subtype;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Server info";
+  p_help = "Used for registration with servmap.";
+} info;
+
+paramdef long {
+  p_default = {44000};
+  p_min = {5000};
+  p_max = {65535};
+  p_descr = "Shmem key";
+  p_help = "Base key for rdata_to_shmem shared memory and sempahores";
+} shmem_key;
+
+paramdef long {
+  p_default = {44000};
+  p_min = {5000};
+  p_max = {65535};
+  p_descr = "Port number";
+  p_help = "Port number for output";
+} port;
+
+paramdef long {
+  p_default = {1};
+  p_min = {1};
+  p_max = {3600};
+  p_descr = "Update interval (secs)";
+  p_help = "Interval between beam prints";
+} update_interval;
+
+

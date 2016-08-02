@@ -1,0 +1,177 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MdvBlend
+ *
+ * Yan Chen, RAL, NCAR 
+ *
+ * Dec. 2007
+ * 
+ */
+
+commentdef {
+  p_header = "MdvBlend takes one MDV data from northern hemisphere and one MDV data from southern hemisphere, and blends them into a single MDV file representing the global data.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the blending is processed when new data arrives. In ARCHIVE mode, the program moves through the data between the start and end times. In FILELIST mode, it moves through the list of file names specified.";
+} mode;
+
+commentdef {
+  p_header = "LATEST DATA INFO HANDLING DETAILS";
+}
+
+paramdef int {
+  p_default = 10;
+  p_descr = "REALTIME mode only. Maximum age for files, in seconds";
+  p_help = "Default is 10 seconds.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "REALTIME mode only. Sleeping time to wait for data arriving, in seconds.";
+  p_help = "Default is 1 seconds.";
+} sleep_secs;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/SH_LL";
+  p_descr = "URL directory for SH input data.";
+} input_sh_url;
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/NH_LL";
+  p_descr = "URL directory for NH input data.";
+} input_nh_url;
+
+typedef struct {
+  string sh_file;
+  string nh_file;
+} input_files_t;
+
+paramdef struct input_files_t {
+  p_default = {
+    {"19850101/000000.mdv", "19850101/000000.mdv"}
+  };
+  p_descr = "FILELIST mode only. Two file path need to be read in.";
+} input_files[];
+
+paramdef string {
+  p_default = "1985 01 01 00 00 00";
+  p_descr = "Start date time string.";
+  p_help = "ARCHIVE mode only. Start date time for data requested. Format is YYYY MM DD HH MM SS";
+} start_date_time;
+
+paramdef string {
+  p_default = "1985 01 01 00 00 00";
+  p_descr = "End date time string.";
+  p_help = "ARCHIVE mode only. End date time for data requested. Format is YYYY MM DD HH MM SS";
+} end_date_time;
+
+commentdef {
+  p_header = "BLENDING INFORMATION";
+}
+
+typedef struct {
+  double southern_limit;
+  double northern_limit;
+} blending_zone_t;
+
+paramdef struct blending_zone_t {
+  p_default = { -1.6, 1.6 };
+  p_descr = "Degree range to apply blending.";
+  p_help = "The degree range is for latitude. So the blending area will be within this range along the equator.";
+} blending_zone;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Maximum blending weight.";
+  p_help = "The blending weight will go from 0 to the max value specified here.";
+} max_blending_weight;
+
+typedef enum {
+  WEIGHT_LINEAR, WEIGHT_LOG
+} weight_method_t;
+
+paramdef enum weight_method_t {
+  p_default = WEIGHT_LINEAR;
+  p_descr = "Linear or logarithmic weighing method.";
+} weight_method;
+
+paramdef string {
+  p_default = { };
+  p_descr = "Field name list.";
+  p_help = "If the list is empty, all fields will be blended. Use short field names";
+} field_names[];
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/GLOBE";
+  p_descr = "Output URL directory.";
+  p_help = "Output data is written to this URL directory. The output file name is based on the time of the input files.";
+} output_url_dir;
+
+paramdef string {
+  p_default = "blended.mdv";
+  p_descr = "Output file name.";
+  p_help = "FILELIST mode only. Output data is written to this file in the URL directory indicated in 'output_url_dir'.";
+} output_file_name;
+
+paramdef string {
+  p_default = "Blended data created by MdvBlend.";
+  p_descr = "Data set information.";
+  p_help = "This will be placed in the MDV master header for documentation purposes.";
+} output_data_set_info;

@@ -1,0 +1,386 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MetarCsv2Spdb
+ *
+ * George McCabe, RAL, NCAR, Boulder, Colorado
+ * Paul Prestopnik
+ *
+ * June 2013
+ *
+ * Based on twnairep2spdb.
+ */
+
+commentdef {
+  p_header = "Program MetarCsv2Spdb";
+  p_text = "This program reads metar data from ascii input and stores it in spdb data base.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_descr = "Process instance for procmap.";
+  p_help = "This program uses this instance when registering with the process mapper.";
+  p_default = "test";
+} instance;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST, STDIN
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode: (REALTIME, ARCHIVE, FILELIST, or STDIN)";
+  p_help = "Realtime mode - waits for new data; archive mode runs on single file";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default = "raw/metars";
+  p_descr = "Path for directory to the input files.";
+  p_help = "If possible, the file names should include date/time information. Acceptable options are: yyyymmdd/hhmmss*, *yyyymmdd?hhmmss*, *yyyymmddhhmmss*, *yyyymmddhhmm*, *yyyymddhh*, *yyyymmdd?hhmm, *yyyymmdd?hh, *yyyymmdd*";
+} input_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Expire time in seconds for each metar";
+  p_help = "This value will be added to the metar time to determine the expire time for the metar";
+} expire_seconds;
+
+commentdef {
+  p_header = "DECODERS";
+};
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string {
+  p_descr = "Spdb URL for decoded metar data.";
+  p_help = "The name of the URL which will be used as the destination for the SPDB data. If the dir does not start with / or ., it is relative to $DATA_DIR.  Leave an empty string to not write decoded METARs to SPDB.";
+  p_default = "spdbp:://localhost::spdb/metar";
+} decoded_spdb_url;
+
+paramdef string {
+  p_descr = "Spdb URL for ASCII metar data.";
+  p_help = "The name of the URL which will be used as the destination for the ASCII SPDB data. If the dir does not start with / or ., it is relative to $DATA_DIR.  Leave an empty string to not write ASCII METARs to SPDB.";
+  p_default = "";
+} ascii_spdb_url;
+
+typedef enum
+{
+  COMPRESSION_NONE,
+  COMPRESSION_GZIP,
+  COMPRESSION_BZIP2
+} compression_t;
+
+paramdef enum compression_t {
+  p_default = COMPRESSION_NONE;
+  p_descr = "Option to compress the chunks in the SPDB output.";
+  p_help = "Set desired output compression. Compression should only be done for data in which the individual chunks are large.";
+} output_compression;
+
+paramdef int {
+  p_descr = "Data expire period - seconds";
+  p_help = "In the SPDB data base, the data is set as expired after this period.";
+  p_default = 21600;
+} expire_secs;
+
+typedef struct {
+  string icao_n;
+  int icao_i;
+  string lat_n;
+  int lat_i;
+  string lon_n;
+  int lon_i;
+  string altitude_n;
+  int altitude_i;
+  string obs_time_n;
+  int obs_time_i;
+  string report_time_n;
+  int report_time_i;
+  string surface_temp_n;
+  int surface_temp_i;
+  string dew_pt_temp_n;
+  int dew_pt_temp_i;
+  string wind_dir_n;
+  int wind_dir_i;
+  string wind_speed_n;
+  int wind_speed_i;
+  string wind_gust_n;
+  int wind_gust_i;
+  string horiz_visibility_n;
+  int horiz_visibility_i;
+  string altimeter_n;
+  int altimeter_i;
+  string sea_lvl_pressure_n;
+  int sea_lvl_pressure_i;
+  string qc_field_n;
+  int qc_field_i;
+  string corrected_n;
+  int corrected_i;
+  string auto_n;
+  int auto_i;
+  string auto_station_n;
+  int auto_station_i;
+  string maintenance_n;
+  int maintenance_i;
+  string no_signal_n;
+  int no_signal_i;
+  string lightning_off_n;
+  int lightning_off_i;
+  string freezing_rain_off_n;
+  int freezing_rain_off_i;
+  string present_weather_off_n;
+  int present_weather_off_i;
+  string present_weather_n;
+  int present_weather_i;
+  string cloud_coverage1_n;
+  int cloud_coverage1_i;
+  string cloud_coverage2_n;
+  int cloud_coverage2_i;
+  string cloud_coverage3_n;
+  int cloud_coverage3_i;
+  string cloud_coverage4_n;
+  int cloud_coverage4_i;
+  string cloud_coverage5_n;
+  int cloud_coverage5_i;
+  string cloud_coverage6_n;
+  int cloud_coverage6_i;
+  string cloud_base1_n;
+  int cloud_base1_i;
+  string cloud_base2_n;
+  int cloud_base2_i;
+  string cloud_base3_n;
+  int cloud_base3_i;
+  string cloud_base4_n;
+  int cloud_base4_i;
+  string cloud_base5_n;
+  int cloud_base5_i;
+  string cloud_base6_n;
+  int cloud_base6_i;
+  string pressure_tendency_n;
+  int pressure_tendency_i;
+  string maxT_n;
+  int maxT_i;
+  string minT_n;
+  int minT_i;
+  string maxT24hr_n;
+  int maxT24hr_i;
+  string minT24hr_n;
+  int minT24hr_i;
+  string precip_n;
+  int precip_i;
+  string precip3hr_n;
+  int precip3hr_i;
+  string precip6hr_n;
+  int precip6hr_i;
+  string precip24hr_n;
+  int precip24hr_i;
+  string snow_n;
+  int snow_i;
+  string vertical_visibility_n;
+  int vertical_visibility_i;
+  string ceiling_low_n;
+  int ceiling_low_i;
+  string metar_type_n;
+  int metar_type_i;
+  string raw_n;
+  int raw_i;
+} field_names_t;
+
+
+paramdef struct field_names_t {
+  p_descr = "Names of CSV fields";
+  p_help = "";
+  p_default = {"icaoId", -1,
+               "latitude", -1,
+               "longitude", -1,
+               "altitude_m", -1,
+               "observationTime", -1,
+               "timeReportReceived", -1,
+               "surfaceTemperature(C)", -1,
+               "dewpointTemperature(C)", -1,
+               "windDirection(deg)", -1,
+               "windSpeed(kts)", -1,
+               "windGust(kts)", -1,
+               "horizontalVisibility(mi)", -1,
+               "altimeter(in)", -1,
+               "seaLevelPressure(hPa)", -1,
+               "qcField", -1,
+               "", -1,
+               "", -1,
+               "", -1,
+               "", -1,
+               "", -1,
+               "", -1,
+               "", -1,
+               "", -1,
+               "presentWeather", -1,
+               "cloudCoverage1", -1,
+               "cloudCoverage2", -1,
+               "cloudCoverage3", -1,
+               "cloudCoverage4", -1,
+               "cloudCoverage5", -1,
+               "cloudCoverage6", -1,
+               "cloudBase1(ft AGL)", -1,
+               "cloudBase2(ft AGL)", -1,
+               "cloudBase3(ft AGL)", -1,
+               "cloudBase4(ft AGL)", -1,
+               "cloudBase5(ft AGL)", -1,
+               "cloudBase6(ft AGL)", -1,
+               "pressureTendency(1/10 hPa)", -1,
+               "maximumT(C)", -1,
+               "minmumT(C)", -1,
+               "maximumTemperature24hr(C)", -1,
+               "minimumTemperature24hr(C)", -1,
+               "precipitation(in)", -1,
+               "precipitation3hr(in)", -1,
+               "precipitation6hr(in)", -1,
+               "precipitation24hr(in)", -1,
+               "snow(in)", -1,
+               "verticalVisibility(ft)", -1,
+               "ceilingLow(ft AGL)", -1,
+               "metarType", -1,
+               "rawText", -1
+              };
+} field_names;
+
+
+paramdef string {
+  p_default = { "FAKE", "K123", "K789" };
+  p_descr = "List of rejected station IDs";
+  p_help = "If a station is on this list, it is not stored.";
+} rejectedStations[]; 
+
+paramdef string {
+  p_default = { "FAKE", "K123", "K789" };
+  p_descr = "List of accepted station IDs";
+  p_help = "If a station is on this list, it is stored.";
+} acceptedStations[]; 
+
+
+typedef enum
+{
+  REPORT_PLUS_METAR_XML,
+  REPORT_PLUS_FULL_XML,
+  XML_ONLY
+} output_report_type_t;
+
+paramdef enum output_report_type_t
+{
+  p_descr = "Type of station report to put in the output SPDB database";
+  p_default = REPORT_PLUS_FULL_XML;
+} output_report_type;
+
+
+typedef struct {
+  float scale;
+  float bias;
+
+} unit_conversion_info_t;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The altitude fields are first multiplied by the scale and then the result is added to the bias";
+  p_help = "This is used for altitude, ice/turb/cloud top1/base1/top2/base2";
+  p_default = {100,0};
+} altitude_conversions;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The temperature field is first multiplied by the scale and the result is added to the bias";
+  p_help = "";
+  p_default = {1,0};
+} temperature_conversion;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The wind speed field is first multiplied by the scale and the result is added to the bias";
+  p_help = "";
+  p_default = {1,0};
+} wind_speed_conversion;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The wind gust field is first multiplied by the scale and the result is added to the bias";
+  p_help = "Default is knots to m/s";
+  p_default = {0.514444,0};
+} wind_gust_conversion;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The visibility field is first multiplied by the scale and the result is added to the bias";
+  p_help = "";
+  p_default = {1,0};
+} visibility_conversion;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The cloud coverage field is first multiplied by the scale and the result is added to the bias";
+  p_help = "Default scale is feet to km";
+  p_default = {0.0003048,0};
+} cloud_coverage_conversion;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The precipitation field is first multiplied by the scale and the result is added to the bias";
+  p_help = "Default scale is inches to mm";
+  p_default = {25.4,0};
+} precip_conversion;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The pressure field is first multiplied by the scale and the result is added to the bias";
+  p_help = "Default scale is 1/10 hPa to mbar";
+  p_default = {0.1,0};
+} pressure_conversion;
+
+paramdef struct unit_conversion_info_t {
+  p_descr = "The pressure field is first multiplied by the scale and the result is added to the bias";
+  p_help = "Default scale is hPa to mbar";
+  p_default = {1.0,0};
+} pressure_sea_conversion;
+

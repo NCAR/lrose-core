@@ -1,0 +1,19 @@
+# colorscale for volume
+
+# Mike Dixon, Sept 1993
+	
+0	50	DarkSlateBlue
+50	100 	Blue
+100	200	MediumBlue
+200 	300 	SkyBlue
+300 	500 	DarkGreen
+500	600	ForestGreen
+600	800	YellowGreen
+800	1000	Gold
+1000	1200 	Yellow
+1200	1500	Coral
+1500	2000	Orange
+2000	2500	MediumVioletRed
+2500	3000	Pink
+3000	4000	Red
+4000	5000	Gray

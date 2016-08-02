@@ -1,0 +1,213 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+////////////////////////////////////////////////////////////////////////////////
+// 
+// Parameter definitions for ascii2mdv application
+//
+// Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
+// June 1999
+//
+// $Id: paramdef.ascii2mdv,v 1.8 2016/03/07 01:32:31 dixon Exp $
+//
+////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "MODES OF OPERATION.";
+}
+
+paramdef char* {
+  p_descr = "Process instance";
+  p_descr = "This is used by the process mapper, procmap";
+  p_default = {"Ascii2Mdv"};
+} instance;
+
+paramdef boolean {
+  p_descr = "Informational messaging option";
+  p_default = {TRUE};
+} info;
+
+paramdef boolean {
+  p_descr = "Debug messaging option";
+  p_default = {FALSE};
+} debug;
+
+paramdef boolean {
+  p_descr = "Error handling option";
+  p_default = {TRUE};
+} continue_on_error;
+
+commentdef {
+  p_header = "ASCII INPUT.";
+}
+
+paramdef char* {
+  p_descr = "Paths to input ascii data.";
+  p_default = {""};
+} input_ascii_files[];
+
+paramdef long
+{
+  p_desc = "Number of header lines at the beginning of the file";
+  p_help = "This number of header lines will be skipped before reading "
+           "actual data from each input file.";
+  p_default = 0;
+  p_min = 0;
+} num_header_lines;
+
+paramdef char* {
+  p_desc = "Units of input data values.";
+  p_default = {""};
+} data_units;
+
+paramdef float {
+  p_desc = "Missing value representation in input data.";
+  p_default = {"MAX"};
+} missing_value;
+
+typedef enum {
+  LOWER_LEFT, UPPER_LEFT
+} origin_t;
+
+paramdef enum origin_t {
+  p_default = LOWER_LEFT;
+  p_descr = "Location of input data origin.";
+} input_origin;
+
+commentdef {
+  p_header = "MDV OUTPUT.";
+}
+
+paramdef char* {
+  p_descr = "Output directory for resampled grid data";
+  p_default = {"."};
+} output_data_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Force the output data to be scaled as integral values.";
+  p_help  = "Input data is always represented internally as a float, but the output data may be scaled to integral values by setting this parameter to TRUE.";
+} force_integral_scaling;
+
+paramdef char* {
+  p_descr = "Field name in mdv file";
+  p_default = {"asciiData"};
+} mdv_field_name;
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Set to MAX to duplicate the value from the input data";
+  p_min = {-1000.0};
+  p_default = {MAX};
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Set to MAX to duplicate the value from the input data";
+  p_min = {-1000.0};
+  p_default = {MAX};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Set to MAX to duplicate the value from the input data";
+  p_min = {-360.0};
+  p_default = {MAX};
+} grid_rotation;
+
+typedef enum {
+  FLAT, LATLON
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT and LATLON";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the output grid";
+  p_help = "Set to MAX to duplicate the value from the input data";
+  p_min = {1};
+  p_default = {MAX};
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the output grid";
+  p_help = "Set to MAX to duplicate the value from the input data";
+  p_min = {1};
+  p_default = {MAX};
+} grid_ny;
+
+paramdef int { 
+  p_descr = "Number of vertical levels in the output grid or to be composited.";
+  p_help = "Set to MAX to duplicate the value from the input data";
+  p_min = {1};
+  p_default = {MAX};
+} grid_nz;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid";
+  p_help = "Set to MAX to duplicate the value from the input data ONLY IF the projection of the input and output grids are identical.  An explicit paramter value is required if the grid_projection is changing.  Units for this parameter will depend upon the output grid_projection.";
+  p_min = 0.0;
+  p_default = {MAX};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid";
+  p_help = "Set to MAX to duplicate the value from the input data ONLY IF the pr ojection of the input and output grids are identical.  An explicit paramter value is required if the grid_projection is changing.  Units for this parameter will depend upon the output grid_projection.";
+  p_min = 0.0;
+  p_default = {MAX};
+} grid_dy;
+
+paramdef float {
+  p_descr = "Change in altitude between vertical levels of the output grid";
+  p_help = "Applicable only when grid_nz > 1.  Set to MAX to duplicate the value from the input data.";
+  p_min = 0.0;
+  p_default = {MAX};
+} grid_dz;
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Set to MAX to duplicate the value from the input data ONLY IF the pr ojection of the input and output grids are identical.  An explicit paramter value is required if the grid_projection is changing.  Units for this parameter will depend upon the output grid_projection.";
+  p_default = {MAX};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Set to MAX to duplicate the value from the input data ONLY IF the pr ojection of the input and output grids are identical.  An explicit paramter value is required if the grid_projection is changing.  Units for this parameter will depend upon the output grid_projection.";
+  p_default = {MAX};
+} grid_miny;
+
+paramdef float {
+  p_descr = "Beginning vertical level of the output grid";
+  p_help = "Set to MAX to duplicate the value from the input data";
+  p_min = {0.0};
+  p_default = {MAX};
+} grid_minz;
+
+paramdef char* {
+  p_descr = "Data time used for naming and date/time stamping the output MDV file.  Syntax: \"YYYY/MM/DD HH:MM:SS\"";
+  p_help = "If no data_time is specified the output MDV file will have the same name as the input MDV file.";
+  p_default = {""};
+} data_time;

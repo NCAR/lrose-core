@@ -1,0 +1,411 @@
+;DOW3 and XPOL version
+
+close
+delete gather delete trace
+#include "spoldefm.h"
+open plc20
+clear
+
+if (p302<0)
+p302=0
+endif
+
+if (p49!=1234) 
+p302=p302+1    ;about 32 hz I think  Turn off for for fake antenna
+endif
+
+;soft following eror limit check for high winds
+; High wind routine points vertically for 6 min. Restarts as long as high wind is present.
+
+
+if (p48=1234)       ;turn wind check on
+ 	if (p302>3500)	;don't recheck for a while wind check on
+
+
+
+
+		if (m141>0 or m241>0) ; az and el warning following error flags
+cmd"&1a &2a &3a"           ;stop
+
+
+
+
+
+;wait a while for antenna to stop under abort conditions 1 deg/sec
+	while (abs(m166)>imstopped)
+p302=p302-1
+	endwhile
+	while (abs(m266)>imstopped)
+p302=p302-1
+	endwhile
+
+cmd "&3b220r"         ;start high wind routine
+cmd "&2b221r"
+p302=0
+		endif
+	endif
+endif
+
+clock=((m0-clock0)/2259)/60    ; clock in min  this is set by the control software p50=99
+rtsync=clock % rtsyncm         ; rtsync contains decimal minutes past the modulo rtsyncm
+
+
+
+;master reset
+if (p50=0)
+
+
+
+syncon=0                       ;turn off real time synchronization
+
+
+
+
+;The following are hard coded antenna specific parameters put different values here for different radars
+;These are only used on SPOL for the high wind routine
+
+;i117=.0205
+;i217=.017
+;i112=23292*5.0
+;i212=23292*5.0
+
+
+
+
+
+
+
+cmd "&1a&2a&3a"
+
+CMD"wx$e009,$d,$45"
+p302=0
+;wait a while for antenna to stop under abort conditions 1 deg/sec
+while (abs(m166)>imstopped)
+p302=p302-1
+endwhile
+while (abs(m266)>imstopped)
+p302=p302-1
+endwhile
+
+;then zero the dacs
+cmd "#1o0"
+cmd "#2o0"
+cmd "#1j/"
+cmd "#2j/"
+m202=7      ;set idle flag or scan type
+m207=123    ;set number of hits so processor runs
+p50=-1
+p51=0
+p52=0
+run1=0
+running=0
+;set real or fake antenna
+if (p49=1234) 
+cmd "m170->d:$0028"
+cmd "m270->d:$0064"
+else
+cmd "m170->d:$002b"
+cmd "m270->d:$0067"
+endif
+endif
+								if (syncon<1) ; if sync isn't turned on? 
+										;run scans normally
+										;otherwise skip everything               
+;start the sequence #1
+if (p50=10)
+scanid=560
+repeet=10
+volpnt=p(scanid)
+if (p(volpnt+1)=5)       ;Is this a sync volume?
+rtsyncm=p(volpnt+2)
+syncon=1                 ;set sync flag
+else
+m207=p(volpnt+10)        ;send over the number of hits
+if(p(volpnt+1)=1)
+cmd "&1b100r"            ;start a ppi
+endif
+if (p(volpnt+1)=2)
+cmd "&2b104r"            ;start a rhi
+endif
+if(p(volpnt+1)=3)	 ;start a surv
+cmd"&1a&2a&3ab103r"
+endif
+endif
+run1=1     ;running a scan
+running=1
+p50=-1
+endif
+
+;start the sequence #2
+if (p50=11)
+scanid=570
+repeet=11
+volpnt=p(scanid)
+if (p(volpnt+1)=5)       ;Is this a sync volume?
+rtsyncm=p(volpnt+2)
+syncon=1                 ;set sync flag
+else
+m207=p(volpnt+10)        ;send over the number of hits
+if(p(volpnt+1)=1)
+cmd "&1b100r"            ;start a ppi
+endif
+if (p(volpnt+1)=2)
+cmd "&2b104r"            ;start a rhi
+endif
+if(p(volpnt+1)=3)
+cmd"&1a&2a&3ab103r"	 ;start a surv
+endif
+
+
+endif
+run1=1     ;running a scan
+running=1
+p50=-1
+endif
+
+;start the sequence #3
+if (p50=12)
+scanid=580
+repeet=12
+volpnt=p(scanid)
+if (p(volpnt+1)=5)       ;Is this a sync volume?
+rtsyncm=p(volpnt+2)
+syncon=1                 ;set sync flag
+else                      
+m207=p(volpnt+10)        ;send over the number of hits
+if(p(volpnt+1)=1)
+cmd "&1b100r"            ;start a ppi
+endif
+if (p(volpnt+1)=2)
+cmd "&2b104r"            ;start a rhi
+endif
+if(p(volpnt+1)=3)
+cmd"&1a&2a&3ab103r"	 ;start a surv
+endif
+endif
+run1=1     ;running a scan
+running=1
+p50=-1
+endif
+
+;start the sequence #4
+if (p50=13)
+scanid=590
+repeet=13
+volpnt=p(scanid)
+if (p(volpnt+1)=5)       ;Is this a sync volume?
+rtsyncm=p(volpnt+2)
+syncon=1                 ;set sync flag
+else
+m207=p(volpnt+10)        ;send over the number of hits
+if(p(volpnt+1)=1)
+cmd "&1b100r"            ;start a ppi
+endif
+if (p(volpnt+1)=2)
+cmd "&2b104r"            ;start a rhi
+endif
+if(p(volpnt+1)=3)
+cmd"&1a&2a&3ab103r"	 ;start a surv
+endif
+
+
+endif
+run1=1     ;running a scan
+running=1
+p50=-1
+endif
+
+;start the sequence #5
+if (p50=14)
+    scanid=600
+    repeet=14
+    volpnt=p(scanid)
+    if (p(volpnt+1)=5)       ;Is this a sync volume?
+    rtsyncm=p(volpnt+2)
+    syncon=1                 ;set sync flag
+    else
+    m207=p(volpnt+10)        ;send over the number of hits
+    if(p(volpnt+1)=1)
+    cmd "&1b100r"            ;start a ppi
+    endif
+    if (p(volpnt+1)=2)
+    cmd "&2b104r"            ;start a rhi
+    endif
+    if(p(volpnt+1)=3)
+    cmd"&1a&2a&3ab103r"	 ;start a surv
+    endif
+    endif
+    run1=1     ;running a scan
+    running=1
+    p50=-1
+endif
+
+
+;start the sequence #6
+if (p50=15)
+scanid=610
+repeet=15
+volpnt=p(scanid)
+if (p(volpnt+1)=5)       ;Is this a sync volume?
+rtsyncm=p(volpnt+2)
+syncon=1                 ;set sync flag
+else
+m207=p(volpnt+10)        ;send over the number of hits
+if(p(volpnt+1)=1)
+cmd "&1b100r"            ;start a ppi
+endif
+if (p(volpnt+1)=2)
+cmd "&2b104r"            ;start a rhi
+endif
+if(p(volpnt+1)=3)
+cmd"&1a&2a&3ab103r"	 ;start a surv
+endif
+
+
+endif
+run1=1     ;running a scan
+running=1
+p50=-1
+endif
+
+;start the sequence #7
+if (p50=16)
+scanid=620
+repeet=16
+volpnt=p(scanid)
+if (p(volpnt+1)=5)       ;Is this a sync volume?
+rtsyncm=p(volpnt+2)
+syncon=1                 ;set sync flag
+else
+m207=p(volpnt+10)        ;send over the number of hits
+if(p(volpnt+1)=1)
+cmd "&1b100r"            ;start a ppi
+endif
+if (p(volpnt+1)=2)
+cmd "&2b104r"            ;start a rhi
+endif
+if(p(volpnt+1)=3)
+cmd"&1a&2a&3ab103r"	 ;start a surv
+endif
+
+
+endif
+run1=1     ;running a scan
+running=1
+p50=-1
+endif
+
+;this is the run one only and ping-pong sequence
+;start the sequence #10
+if (p50=17)
+scanid=630
+repeet=17                ;this tells which sequence was started
+volpnt=p(scanid)
+m207=p(volpnt+10)        ;send over the number of hits
+if(p(volpnt+1)=1)
+cmd "&1b100r"            ;start a ppi
+endif
+if (p(volpnt+1)=2)
+cmd "&2b104r"            ;start a rhi
+endif
+if(p(volpnt+1)=3)
+cmd"&1a&2a&3ab103r"	 ;start a surv
+endif
+run1=1     ;running a scan
+running=1
+p50=-1
+endif
+
+
+
+;continue a sequence
+If (run1=1 and running=0)
+ cmd "&1a &2a &3a"            ;kill everyone
+m202=7                        ;idle
+;wait a while for antenna to stop under abort conditions    1 deg/sec
+	while (abs(m166)>imstopped)
+	p302=p302-1
+	endwhile
+	while (abs(m266)>imstopped)
+	p302=p302-1
+	endwhile
+
+ 	cmd "#1o0 #2o0"
+ 	cmd "#1j/#2j/"
+      	scanid=scanid+1          ;next volume
+     	if (p(scanid)>0)          ;end of sequence?
+     	volpnt=p(scanid)
+     if (p(volpnt+1)=5)         ;Is this a sync volume?
+	   rtsyncm=p(volpnt+2)
+       syncon=1                 ;set sync flag,  sync modulo has been set by the control program
+       running=1
+       else
+       m207=p(volpnt+10)   ;send over the number of hits
+           If (p(volpnt+1)=1)
+           cmd "&1b100r"       ;start a ppi
+           Endif
+           If (p(volpnt+1)=2)
+           cmd "&2b104r"       ;start a rhi
+           Endif
+           If(p(volpnt+1)=3)
+           cmd"&1a&2a&3ab103r" ;start a surv
+           Endif
+           running=1
+     
+     endif
+     running=1
+     else
+         If (P(scanid)=-1)     ;-1 ends everything
+         run1=0
+         p50=0
+         Else                  ;-2 restarts the just ending sequence
+         run1=0
+         cmd "&1a &2a &3a"     ;kill everyone
+
+;wait a while for antenna to stop under abort conditions   1/deg/sec
+        while (abs(m166)>imstopped)
+        p302=p302-1
+        endwhile
+        while (m266>8034)
+        p302=p302-1
+        endwhile
+        cmd "#1o0 #2o0"
+        cmd "#1j/#2j/"
+        p50=repeet             ;restart the sequence next time around
+    endif  
+endif
+Endif
+
+
+  								else              ;sychronize?
+								if (rtsync<.0333) ;within 2 sec of modulo
+								syncon=0
+								running=0 ;end of sync "scan"
+								endif
+								endif
+
+
+
+;set the clock ;p53=min past the hour
+if (p50=99)
+clock0=m0-p53*60*2259
+p50=-1
+endif
+
+
+;stow or point the antenna at the locations in p51 and p52
+if(p50=3)
+;p51=0
+;p52=90			;these are the stow locations
+cmd"&3a&2a&1ab200r#2b200r"
+p50=-1
+endif
+; solar scans
+IF(P50=4)
+    COMMAND"&3a&2a&1ab210r&2b211r"
+    P50=-1
+ENDIF
+close
+
+enable plc20
+

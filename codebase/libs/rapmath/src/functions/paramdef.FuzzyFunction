@@ -1,0 +1,41 @@
+commentdef
+{
+  p_header = "Fuzzy Function";
+  p_text = "A fuzzy function mapping X to Y";
+}
+
+typedef struct
+{
+  double x;
+  double y;
+} Xy_t;
+
+paramdef string
+{
+  p_descr = "Identifier";
+  p_help = "Name associated with this particular fuzzy function";
+  p_default = "Default";
+} identifier;
+
+paramdef string
+{
+  p_descr = "X units";
+  p_help = "Units for X";
+  p_default = "Default";
+} x_units;
+
+paramdef string
+{
+  p_descr = "Y units";
+  p_help = "Units for Y";
+  p_default = "Default";
+} y_units;
+
+paramdef struct Xy_t
+{
+  p_descr = "The fuzzy mapping";
+  p_default = { {0, 0}, {10, 1}};
+} fuzzy[];
+
+
+

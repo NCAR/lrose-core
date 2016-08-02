@@ -1,0 +1,113 @@
+/**********************************************************************
+ * TDRP params for SzPrint
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: SzPrint.
+//
+// SzPrint prints out MDV data in table format for performing SZ 
+//   comparisons. Output is to stdout.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// rph_mdv_path ////////////////////////////
+//
+// Path for Sigmet Random Phase MDV file.
+// Type: string
+//
+
+rph_mdv_path = "./mdv/rph/example.mdv";
+
+///////////// msz_mdv_path ////////////////////////////
+//
+// Path for Mike's SZ MDV file.
+// Type: string
+//
+
+msz_mdv_path = "./mdv/msz/example.mdv";
+
+///////////// long_mdv_path ///////////////////////////
+//
+// Path for LONG PRT MDV file.
+// Type: string
+//
+
+long_mdv_path = "./mdv/long/example.mdv";
+
+//======================================================================
+//
+// PROCESSING OPTIONS.
+//
+//======================================================================
+ 
+///////////// dbz_threshold ///////////////////////////
+//
+// Lower limit for valid DBZ values.
+// Print out only if all DBZ values exceed this.
+// Type: float
+//
+
+dbz_threshold = 0;
+
+///////////// trip ////////////////////////////////////
+//
+// Which trips should be printed?.
+//
+// Type: enum
+// Options:
+//     STRONG_TRIP
+//     WEAK_TRIP
+//     FIRST_TRIP
+//     SECOND_TRIP
+//     BOTH_TRIPS
+//
+
+trip = BOTH_TRIPS;
+
+///////////// use_adjacent_azimuths ///////////////////
+//
+// Option to use data from adjacent azimiths.
+// If true, the application will search for the closest agreement 
+//   between data of adjacent azimuths. If false, only data from the exact 
+//   azimuth will be used.
+// Type: boolean
+//
+
+use_adjacent_azimuths = FALSE;
+

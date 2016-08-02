@@ -1,0 +1,202 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions TsOverlay
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Nov 2012
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsOverlay reads raw time-series data from two sets of files. It combines these time series by summing the I and Q data, to create an overlaid data set. Typically this is used for combining clutter and weather data together, for testing the clutter mitigation algorithms.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "INPUT DATA";
+};
+
+paramdef string {
+  p_default = {
+    "/d1/dixon/data/tsarchive/overlay/weather/20111221_091607_005_153.sur_trans.iwrf_ts",
+    "/d1/dixon/data/tsarchive/overlay/weather/20111221_091608_015_162.sur.iwrf_ts",
+    "/d1/dixon/data/tsarchive/overlay/weather/20111221_091644_015_163.sur_trans.iwrf_ts",
+    "/d1/dixon/data/tsarchive/overlay/weather/20111221_091645_025_172.sur.iwrf_ts"
+  };
+  p_descr = "Primary time series data files.";
+  p_help = "This is an array of file paths, that are read in sequence, for the primary data set.";
+} primary_file_paths[];
+
+paramdef string {
+  p_default = {
+    "/d1/dixon/data/tsarchive/overlay/clutter/20110107_155619_005_131.sur.iwrf_ts",
+    "/d1/dixon/data/tsarchive/overlay/clutter/20110107_155621_005_150.sur.iwrf_ts"
+  };
+  p_descr = "Secondary time series data files.";
+  p_help = "This is an array of file paths, that are read in sequence, for the secondary data set.";
+} secondary_file_paths[];
+
+paramdef string {
+  p_default = "./primary_cal.xml";
+  p_descr = "Path to XML calibration file for primary data.";
+} primary_cal_file_path;
+
+paramdef string {
+  p_default = "./secondary_cal.xml";
+  p_descr = "Path to XML calibration file for secondary data.";
+} secondary_cal_file_path;
+
+commentdef {
+  p_header = "CONFIGURING THE INPUT DATA";
+};
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Starting azimuth for the primary time series (deg).";
+  p_help = "Only pulses between the start and end azimuths will be used. Assumes clockwise rotation - i.e. this is the couterclockwise limit.";
+} primary_start_azimuth;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Ending azimuth for the primary time series (deg).";
+  p_help = "Only pulses between the start and end azimuths will be used. Assumes clockwise rotation - i.e. this is the clockwise limit.";
+} primary_end_azimuth;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Starting range for the primary data (km).";
+  p_help = "Gates before this range will be discarded.";
+} primary_start_range;
+
+paramdef double {
+  p_default = 150.0;
+  p_descr = "Ending range for the primary data (km).";
+  p_help = "Gates after this range will be discarded.";
+} primary_end_range;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Starting azimuth for the secondary time series (deg).";
+  p_help = "Only pulses between the start and end azimuths will be used. Assumes clockwise rotation - i.e. this is the couterclockwise limit.";
+} secondary_start_azimuth;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Ending azimuth for the secondary time series (deg).";
+  p_help = "Only pulses between the start and end azimuths will be used. Assumes clockwise rotation - i.e. this is the clockwise limit.";
+} secondary_end_azimuth;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Starting range for the secondary data (km).";
+  p_help = "Gates before this range will be discarded.";
+} secondary_start_range;
+
+paramdef double {
+  p_default = 150.0;
+  p_descr = "Ending range for the secondary data (km).";
+  p_help = "Gates after this range will be discarded.";
+} secondary_end_range;
+
+commentdef {
+  p_header = "TIME, SCAN RATE FOR OUTPUT DATA";
+};
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} datetime_t;
+
+paramdef struct datetime_t {
+  p_default = { 2014, 05, 20, 20, 00, 00 };
+  p_descr = "Start time for output data.";
+  p_help = "The pulse times will start at this time, and the time will then be incremented to simulate the reqested scan rate (see below).";
+} output_start_time;
+
+paramdef double {
+  p_default = 15.0;
+  p_descr = "Antenna rate for output data (deg/s)";
+  p_help = "The pulses will be time-tagged to yield this rate.";
+} output_scan_rate;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Starting azimuth for output pulses (deg)";
+  p_help = "The azimuth for each pulse will be computed from this starting point, the scan rate and the elapsed time.";
+} output_azimuth_start;
+
+paramdef double {
+  p_default = 360.0;
+  p_descr = "Coverage of output scan in azimuth (deg)";
+  p_help = "The output data will cover this angular width in azimuth.";
+} output_azimuth_coverage;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Elevation angle for tagging the output data (deg)";
+  p_help = "The measured elevation angles will be overwritten.";
+} output_elevation_angle;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Number of volumes to generate";
+  p_help = "The app keeps going until this number of volumes has been created.";
+} output_n_volumes;
+
+paramdef double {
+  p_default = 300;
+  p_descr = "Time between volumes (sec)";
+  p_help = "As each volume is written, the time is incremented by this value.";
+} output_delta_volume_time;
+
+commentdef {
+  p_header = "OUTPUT FILES";
+};
+
+paramdef string {
+  p_default = "/tmp/time_series/primary";
+  p_descr = "Path to output directory for primary data.";
+  p_help = "Files will be written under this directory in a sub-directory computed from the date/time.";
+} primary_output_dir;
+
+paramdef string {
+  p_default = "/tmp/time_series/secondary";
+  p_descr = "Path to output directory for secondary data.";
+  p_help = "Files will be written under this directory in a sub-directory computed from the date/time.";
+} secondary_output_dir;
+
+paramdef string {
+  p_default = "/tmp/time_series/combined";
+  p_descr = "Path to output directory for combined data.";
+  p_help = "Files will be written under this directory in a sub-directory computed from the date/time.";
+} combined_output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to use the fixed angle (el or az) to compute the file name.";
+  p_help = "If false, the actual measured angle will be used.";
+} use_fixed_angle_for_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to add a string indicating the scan mode to the file name.";
+} add_scan_mode_to_file_name;
+

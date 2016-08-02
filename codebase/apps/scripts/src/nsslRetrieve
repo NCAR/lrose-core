@@ -1,0 +1,606 @@
+#!/usr/bin/perl
+#
+# Retrieve nssl radar mosaic data. Based on rucRetrieve.
+# Niles Oien May 2003
+#
+
+########################################################
+# Includes
+########################################################
+use Net::FTP;
+use Time::Local;
+use Env qw( RAP_LIB_DIR );
+use Env qw( RAP_SHARED_LIB_DIR );
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+use Toolsa;
+ 
+#######################################################
+# Misc.
+#######################################################
+( $prog = $0 ) =~ s%.*/%%;               # Determine program basename.
+$| = 1;                                  # Unbuffer standard output.
+umask 002;                               # Set file permissions.
+
+#######################################################
+# Global variables
+#######################################################
+$rapDataDir = $ENV{'RAP_DATA_DIR'};
+
+$ftpTimeout = 240;               # Time to allow for single file transfer
+$sysTimeout = "120";              # Time before system commands time out
+
+#############################################################
+# Command line defaults
+#############################################################
+use Getopt::Long;
+use Env;
+use Cwd;
+Env::import();
+
+sub badArg;
+sub translateDataDir;
+sub verifyDataDir;
+
+# Default value for remote directory is tile 1 of the NE corridor
+# dataset.  The NE corridor tiles are found in the following directories:
+#     /mnt2/ncarftp/mosaic_grid/faa1
+#     /mnt2/ncarftp/mosaic_grid/faa2
+#     /mnt2/ncarftp/mosaic_grid/faa3
+
+$opt_ftp_host = "qpesumsfaa.nssl.noaa.gov";   # The NCEP FTP server's domain name.
+$opt_ftp_user = "ncarftp";
+$opt_ftp_passwd = "n\@W!sh";
+$opt_remdir = "/mnt2/ncarftp/mosaic_grid/faa1";
+
+$opt_sleeptime = 120;
+$opt_max_valid_hrs = 5;
+
+$opt_outdir = "./other/nsslMosaic";            # Local data directory.
+$TmpDir    = "$opt_outdir/.$prog.tmp";         # Local temporary directory.
+$opt_instance  = "test";                       # Instance
+
+# Set the file naming convention to use.  The possible naming
+# conventions are:
+#     faa = MREF3D21L.yyyymmdd.hhmm.nc
+#     awips = yyyymmdd_hhmm
+$opt_naming_type = "faa";
+
+#############################################################
+# Save the usage to print to the user if there is a problem
+#############################################################
+$usage =                                                 
+    "\nUsage: $prog [-h] [-sdori]                   Niles Oien May 2003\n\n" .
+    "   -s  --sleeptime               : Time to sleep between checks, seconds, default is $opt_sleeptime\n" .
+    "   -d  --debug                   : Print debugging messages.\n" .
+    "   --ftp_host                    : FTP host, default is $ftp_host.\n" .
+    "   --ftp_user                    : FTP user name, default is $opt_ftp_user.\n" .
+    "   --ftp_passwd                  : FTP password, default is $opt_ftp_passwd.\n" .
+    "   -n  --naming_type             : Input file naming type:\n" .
+    "                                    faa = NE corridor datasets (default)\n" .
+    "   -m  --max_valid_hrs           : Data older than this number of hours won't be retrieved\n" .
+    "                                    default is $opt_max_valid_hrs\n" .
+    "                                    awips = CONUS datasets\n" .
+    "   -o  --outdir                  : Output directory, relative to RAP_DATA_DIR, default is $opt_outdir.\n" .
+    "   -r  --remdir                  : Remote directory, defaults to $opt_remdir.\n" .
+    "   -i  --instance                : Set process instance, defaults to $opt_instance\n\n";
+
+
+############################################################
+# Get the arguments from the command line
+############################################################
+
+$result = &GetOptions( 'sleeptime=i',
+                       'instance=s',
+		       'ftp_host=s',
+		       'ftp_user=s',
+		       'ftp_passwd=s',
+		       'max_valid_hrs=i',
+		       'naming_type=s',
+		       'outdir=s',
+		       'remdir=s',
+                       'debug',
+                       '<>', \&badArg );
+
+
+
+if ( $result == 0 || $opt_help ) {
+   print( STDERR $usage );
+   exit 0;
+}
+
+if ($opt_naming_type ne "faa" && $opt_naming_type ne "awips")
+{
+    print( STDERR "Invalid value for --naming_type: $opt_naming_type\n");
+    print( STDERR $usage);
+    exit 0;
+}
+
+if ( $opt_debug ) {
+    print( STDERR "Input options specified: \n" );
+    print( STDERR "  Lookback (seconds) : $Lookback\n");
+    print( STDERR "  Sleep time between retrieves : $opt_sleeptime\n");
+    print( STDERR "  Instance : $opt_instance\n");
+    print( STDERR "  FTP host : $opt_ftp_host\n");
+    print( STDERR "  FTP user : $opt_ftp_user\n");
+    print( STDERR "  FTP passwd : $opt_ftp_passwd\n");
+    print( STDERR "  Max valid hrs : $opt_max_valid_hrs\n");
+    print( STDERR "  Naming type : $opt_naming_type\n");
+    print( STDERR "  Output directory : $opt_outdir\n");
+    print( STDERR "  Remote directory : $opt_remdir\n");
+    print( STDERR "  debug: $opt_debug\n" );
+    $debug = 1;
+}
+
+$max_valid_secs = $opt_max_valid_hrs * 3600;
+
+#######################################################################
+# Start of main
+#######################################################################
+
+
+
+    #
+    # Initialize the Process Manager
+    #
+    Toolsa::PMU_auto_init( $prog, $opt_instance, 60 ); 
+
+    #
+    # Set up signal handling
+    #
+    $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'KILL'} = $SIG{'TERM'} = 'sigHandler'; 
+
+    #
+    # Make sure the output directory exists
+    #
+    if( ! ( -e $opt_outdir)) {   
+      $cmd = "mkdir -p -m 0755 $opt_outdir";
+      $status = Toolsa::safe_system( $cmd, $sysTimeout, $debug );
+      unless( defined( $status ) ) {
+        tidyAndExit( "Could not create output directory $opt_outdir\n", -1 );
+      }
+    }
+ 
+   if( $debug ) {
+       print( STDERR "Starting up ... \n" );
+   }
+
+    $forever = 1;
+    while ($forever){
+
+    Toolsa::PMU_auto_register( "Looking for data....");
+
+    # Get the current time
+
+    ($curr_sec, $curr_min, $curr_hour, $curr_day, $curr_mon, $curr_year) =
+	(gmtime())[0...5];
+    $current_time = timegm($curr_sec, $curr_min, $curr_hour,
+			   $curr_day, $curr_mon, $curr_year);
+
+    $curr_year = $curr_year + 1900;
+    $curr_mon = $curr_mon + 1;
+
+    #
+    # Poll the ftp site for a current directory listing
+    # for files for this hour.
+    #
+
+    Toolsa::PMU_force_register( "Polling for current directory listing");
+
+    @files = dirList( $opt_remdir, "*" );
+#    if( $debug ) {
+#       foreach $listItem (@files ) {
+#       	print( STDERR "$listItem\n" );
+#       }
+#    }
+
+    #
+    # Loop through the files on the FTP site.
+    #
+    foreach $listItem (@files ) {
+        Toolsa::PMU_auto_register( "Checking for file on FTP site");
+
+	if ($debug){
+	    print( STDERR "Processing list item $listItem\n" );
+	}
+
+	# Pull the filename out of the list entry.  The filename is the
+	# last entry so it is the string following the last space character
+
+	$space_pos = rindex($listItem, " ");
+	if ($space_pos < 0)
+	{
+	    $fileName = $listItem;
+	}
+	else
+	{
+	    $fileName = substr($listItem, $space_pos+1);
+	}
+
+	if ($debug)
+	{
+	    print( STDERR "Filename from FTP listing: $fileName\n");
+	}
+
+	# Extract the data time from the file name.
+
+	if ($opt_naming_type eq "faa")
+	{
+	    $date_start_pos = 10;
+	}
+	elsif ($opt_naming_type eq "awips")
+	{
+	    if ($fileName !~ m/\d\d\d\d\d\d\d\d_\d\d\d\d.*/)
+	    {
+		if ($debug)
+		{
+		    print( STDERR "File name doesn't match expected format -- skipping\n");
+		}
+		next;
+	    }
+
+	    $date_start_pos = 0;
+	}
+
+	$data_year = substr($fileName, $date_start_pos + 0, 4);
+	$data_month = substr($fileName, $date_start_pos + 4, 2);
+	$data_day = substr($fileName, $date_start_pos + 6, 2);
+	$data_hour = substr($fileName, $date_start_pos + 9, 2);
+	$data_min = substr($fileName, $date_start_pos + 11, 2);
+
+	if ($debug)
+	{
+	    print( STDERR "Date extracted from filename:\n");
+	    print( STDERR "    year = $data_year\n");
+	    print( STDERR "    month = $data_month\n");
+	    print( STDERR "    day = $data_day\n");
+	    print( STDERR "    hour = $data_hour\n");
+	    print( STDERR "    min = $data_min\n");
+	}
+
+	$data_time = timegm(0, $data_min, $data_hour,
+			    $data_day, $data_month - 1, $data_year);
+
+	# See if this file is recent enough to be retrieved
+
+	if ($current_time - $data_time > $max_valid_secs)
+	{
+	    if ($debug)
+	    {
+		print( STDERR "File too old -- skipping\n");
+	    }
+	    next;
+	}
+
+	# Construct the string for the date subdirectory name
+
+	$dateString = "$data_year" . "$data_month" . "$data_day";
+
+	# Construct the local file path
+
+	$datedDir = $opt_outdir . "/" . $dateString;
+	$localName = $datedDir . "/" . $fileName;
+
+	($nameUnzipped, $junk) = split('\.gz', $fileName);
+	$nameZipped = $nameUnzipped . ".gz";
+
+	$pathUnzipped = $datedDir . "/" . $nameUnzipped;
+	$pathZipped = $datedDir . "/" . $nameZipped;
+
+	# Make sure the dated subdirectory exists.
+
+	if ($debug ){
+	    print( STDERR "Attempting to make directory $datedDir\n" );
+	}
+
+	if( ! ( -e $datedDir )) {
+	    $cmd = "mkdir -p -m 0755 $datedDir";
+	    $status = Toolsa::safe_system( $cmd, $sysTimeout, $debug );
+	    unless( defined( $status ) ) {
+		tidyAndExit( "Could not create dated directory\n", -1 );
+	    }
+	}
+
+        # See if that file exists locally already. Look for
+        # the unzipped name since we will have unzipped it
+        # on retrieval.
+
+	if ($debug){
+	    print( STDERR "Remote name is $fileName\n" );
+	    print( STDERR "Local name is $localName\n" );
+	    print( STDERR " nameUnzipped is $nameUnzipped\n" );
+	    print( STDERR " nameZipped is $nameZipped\n" );
+	    print( STDERR " pathUnzipped is $pathUnzipped\n" );
+	    print( STDERR " pathZipped is $pathZipped\n" );
+	}
+
+        if ( -e $pathUnzipped ) {
+        #
+        # Uncompressed file exists locally already, no need to get it.
+        #
+	    if (  $debug ){
+		 print( STDERR "Uncompressed file already exists locally.\n" );
+	    }
+        } elsif ( -e $pathZipped ) {
+
+        #
+        # Compressed file exists locally already, no need to get it.
+        #
+	    if (  $debug ){
+		 print( STDERR "Compressed file already exists locally.\n" );
+	    }
+
+        } else {
+        #
+        # File does not exist locally, go get it.
+        #
+	Toolsa::PMU_force_register( "Retrieving file $fileName" );
+
+	ftpRetrieve($opt_ftp_host, $ftpTimeout, $opt_ftp_user, $opt_ftp_passwd, $opt_remdir,
+		    $fileName, $localName);
+
+	Toolsa::PMU_force_register( "File $fileName retrieved" );
+
+	#
+        # Unzip the file, if a zipped one came in.
+        #
+	if ( -e $pathZipped ) {
+	    sleep(1);
+	    Toolsa::PMU_force_register( "Unzipping file $pathZipped" );
+	    $cmd = "gunzip -f $pathZipped";
+	    $status = Toolsa::safe_system( $cmd, $sysTimeout, $debug );
+	    unless( defined( $status ) ) {
+		tidyAndExit( "Could not unzip file $pathZipped with gzip\n", -1 );
+		Toolsa::PMU_force_register( "File $pathZipped unzipped" );
+	    }
+	}
+
+        # Write the latest data info file. Need to get the data time
+	# differently for the different naming conventions.
+
+	$timeString = "$data_hour" . "$data_min";
+
+	$YYYYMMDDhhmmssString = $dateString . $timeString . "00";
+
+        $info2 = $dateString . "/" . $nameUnzipped; 
+	$dot_pos = rindex($info2, ".");
+	if ($dot_pos < 0)
+	{
+	    $ext = " ";
+	    $info1 = $info2;
+	}
+	else
+	{
+	    $ext = substr($info2, $dot_pos+1);
+	    $info1 = substr($info2, 0, $dot_pos)
+	}
+
+        $cmd = "LdataWriter -dir $opt_outdir -dtype nc -ext nc ";
+	$cmd = $cmd . "-ltime " . $YYYYMMDDhhmmssString;
+	$cmd = $cmd . " -info1 $info1 -info2 $info2";
+
+        $status = Toolsa::safe_system( $cmd, $sysTimeout, $debug );
+        unless( defined( $status ) ) {
+          print( STDERR "Failed to write latest data info with command : $cmd\n");
+        }
+
+      } # End of if we had to retrieve a file.
+    } # end of loop through remote files.
+
+    #
+    # Sleep for the specified time before trying again.
+    # Register every 15 seconds.
+    #
+    if ($debug){
+	print( STDERR "Sleeping for $opt_sleeptime seconds...\n");
+    }
+
+    $icount = 0;
+    for ($isleep=0; $isleep < $opt_sleeptime; $isleep++){
+	sleep(1);
+	$icount++;
+        if ($icount == 15){
+	    $icount = 0;
+	    Toolsa::PMU_force_register( "Sleeping between runs.");
+#            if ($debug){
+#	       print( STDERR "$isleep seconds so far...\n");
+#            }
+        }
+    }
+
+   } # End of while-forever loop.
+
+
+
+
+
+    #
+    # Should not get here.
+    #
+
+    tidyAndExit( "Early exit.\n", 0 );
+
+
+
+############################################################
+# End of Main
+############################################################
+               
+
+############################################################
+# Start of Subroutines
+############################################################
+ 
+######################################################################
+# &dirList 
+# Package: pollFtp
+# Returns: a listing of files in the directory which 
+#          match the pattern string from a remote host
+#          Each entry in the array is a single line of 
+#          ftp's dir command.
+######################################################################
+sub dirList {
+    local($rdir, $matchString) = @_;
+    local($ftp, @listings);
+
+    if ($debug)
+    {
+	($curr_sec, $curr_min, $curr_hour, $curr_day, $curr_mon, $curr_year) =
+	    (gmtime())[0...5];
+	$curr_year = $curr_year + 1900;
+	$curr_mon = $curr_mon + 1;
+	print(STDERR "Looking for files in directory: $rdir\n");
+        print(STDERR "    Matching string: $matchString\n");
+	print(STDERR "    Current time: $curr_year $curr_mon $curr_day $curr_hour $curr_min $curr_sec\n");
+    }
+
+    #
+    # Initialize the listings variable to an empty list in case
+    # we need it for an error return
+    #
+
+    @listings = ();
+
+    #
+    # Log in to ftp site
+    #
+    $ftp = Net::FTP->new($opt_ftp_host, Passive=>true, 
+			 Timeout=>$ftpTimeout);
+    if (!$ftp)
+    {
+	print(STDERR "Could not create ftp connection\n");
+	return (@listings);
+    }
+
+    if (!$ftp->login( $opt_ftp_user, $opt_ftp_passwd ))
+    {
+	print(STDERR "ftp-login failure\n");
+	$ftp->quit;
+	return (@listings);
+    }
+
+    if (!$ftp->binary)
+    {
+	print(STDERR "ftp-binary mode failure\n");
+	$ftp->quit;
+	return (@listings);
+    }
+
+    if (!$ftp->cwd( $rdir ))
+    {
+	print(STDERR "ftp-cwd failure: $rdir\n");
+	$ftp->quit;
+	return (@listings);
+    }
+
+    #
+    # Do a directory listing and capture the output
+    #
+    @listings = $ftp->dir( $matchString );
+    $ftp->quit;
+
+    return (@listings);
+}
+
+
+########################################################################
+# &ftpRetrieve: Retrieve the given file from the FTP site
+# Package: main
+# Returns: nothing
+########################################################################
+sub ftpRetrieve {
+    local($ftp_host, $ftp_timeout, $ftp_user, $ftp_pass,
+	  $ftp_dir, $ftp_fname, $local_path) = @_;
+
+
+    #
+    # Connect to the ftp server
+    #
+    Toolsa::PMU_force_register( "Connecting to the ftp server" );
+    if( $debug ) {
+	print( STDERR "Connecting to the ftp server\n" );
+    }
+
+    $ftp = Net::FTP->new( $ftp_host, Passive=>true, 
+			 Timeout=>$ftp_timeout );
+
+    if (! $ftp)
+    {
+        print(STDERR "Could not create ftp connection\n");
+        return;
+    }
+
+    if (! $ftp->login( $ftp_user, $ftp_pass ) )
+    {
+	print(STDERR "Could not log into ftp server\n");
+	$ftp->quit;
+	return;
+    }
+
+    if (! $ftp->binary )
+    {
+	print (STDERR "ftp-binary mode failed\n");
+	$ftp->quit;
+	return;
+    }
+
+    if (! $ftp->cwd( $ftp_dir )) 
+    {
+	print (STDERR "ftp-cwd failure\n");
+	$ftp->quit;
+	return;
+    }
+
+    #
+    # Get the file
+    #
+    if( $debug ) {
+	print( STDERR "Retrieving $ftp_fname\n" );
+    }
+    
+    if (!$ftp->get( $ftp_fname, "${local_path}" ) )
+    {
+	$ftp->quit;
+	print( STDERR "ftp-get failure for $ftp_fname\n" );
+	return;
+    }
+
+    #
+    # End the ftp session
+    #
+    $ftp->quit;
+    
+    Toolsa::PMU_force_register( "FTP $fname complete" );
+
+}
+
+########################################################################
+# &tidyAndExit
+# Package: main
+# Returns: nothing
+########################################################################
+sub tidyAndExit {
+   local( $errStr, $errCode ) = @_;
+
+   print( STDERR $errStr );
+   Toolsa::PMU_auto_unregister();
+
+   exit $errCode;
+}
+
+######################################################################
+# &sigHandler
+# Package: main
+# Returns: nothing
+######################################################################
+sub sigHandler {
+   local( $sig ) = @_;
+   
+   print( STDERR "Exiting\n" );
+   Toolsa::PMU_auto_unregister();
+
+   exit(0);
+}
+            
+
+

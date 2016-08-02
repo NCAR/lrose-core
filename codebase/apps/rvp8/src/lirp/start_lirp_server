@@ -1,0 +1,10 @@
+#! /bin/csh
+
+running lirpServer
+if ($status == 1) then
+  lirpServer >& /dev/null &
+endif
+
+
+
+

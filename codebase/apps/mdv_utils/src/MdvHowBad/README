@@ -1,0 +1,19 @@
+
+This is a small program that takes an MDV file and prints,
+for each plane in each field, what percentage of the data
+is either bad or missing.
+
+The intention is to avoid having to run CIDD to establish
+if any valid data has been produced. This may be useful when
+connecting to a very remote machine, or for debugging in a
+development environment.
+
+Usage : MdvHowBad <filename>
+
+The filename is prompted for if it is not supplied on
+the command line.
+
+The minimum and maximum of the data are also displayed.
+
+Niles Oien July 1999.
+

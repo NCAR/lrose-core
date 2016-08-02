@@ -1,0 +1,32 @@
+#
+# Recursive make - makes the subdirectory code
+#
+# Broken - Won't build
+#	kavm2mdv \
+#	Tdwr2Dsr \
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	didss_compress \
+	Dsr2Mdv \
+	Dsr2MdvLookup \
+	Dsr2Vol \
+	Fmq2Fmq \
+	Fmq2MultMsgFmq \
+	FmqExecute \
+	FmqMon \
+	GenPt2Spdb \
+	Janitor \
+	LdataInformer \
+	LdataWriter \
+	VerifyGrid \
+	Scout \
+	fmq_print \
+	ridds2mom \
+	wsi_ingest \
+	wsim2mdv
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

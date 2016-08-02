@@ -1,0 +1,55 @@
+/****************************************************
+ * TDRP params for rescale_mdv
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_NORM;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Field for rescaling.
+ * Field to be rescaled.
+ *
+ * Type: long
+ * Min value: 0 
+ */
+field_num = 0;
+
+/*
+ * Output scale for field.
+ * The selected field is reset to this scale.
+ *
+ * Type: double
+ * Default: 1 
+ */
+output_scale = 0.4;
+
+/*
+ * Output bias for field.
+ * The selected field is reset to this bias.
+ *
+ * Type: double
+ * Default: 0 
+ */
+output_bias = -30.0;
+
+

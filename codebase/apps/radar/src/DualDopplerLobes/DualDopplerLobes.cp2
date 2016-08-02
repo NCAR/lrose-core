@@ -1,0 +1,38 @@
+/**********************************************************************
+ * TDRP params for ./DualDopplerLobes
+ **********************************************************************/
+
+//======================================================================
+//
+// Create a map of the dual doppler region for radar pairs.
+// The radar pairs are listed in the param file. The output map
+// files are suitable for display in CIDD.
+// Niles Oien December 2007.
+//
+//======================================================================
+ 
+///////////// geometries //////////////////////////////
+//
+// List of geometries of radar pairs to create map files for, and output 
+//   map file names.
+// Set as appropriate.
+//
+// Type: struct
+//   typedef struct {
+//      double latRadar1;
+//      double lonRadar1;
+//      double latRadar2;
+//      double lonRadar2;
+//      double minDiffAngleDegrees;
+//      int nPointsPerLobe;
+//      string outMapFile;
+//   }
+//
+// 1D array - variable length.
+//
+
+geometries = {
+  { -27.6692, 152.862, -27.7181, 153.24, 30, 50, "$(RAP_DIR)/projects/titan/cp2/projDir/display/maps/CP2MtStaplDualDoppler30.map"},
+  { -27.6692, 152.862, -27.7181, 153.24, 45, 50, "$(RAP_DIR)/projects/titan/cp2/projDir/display/maps/CP2MtStaplDualDoppler45.map"}
+};
+

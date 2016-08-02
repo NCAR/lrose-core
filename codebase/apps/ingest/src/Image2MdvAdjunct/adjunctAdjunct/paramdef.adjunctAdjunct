@@ -1,0 +1,74 @@
+
+commentdef {
+  p_header = "adjunctAdjunct is an adjunct to Image2MdvAdjunct, which\n"
+	"in turn is an adjunct to Image2Mdv. Run adjunctAdjunct to\n"
+	"get part of the param file for Image2Mdv, and param files\n"
+	"for DsMdvServer (which are written directly under\n"
+	"RAP_DATA_DIR) and a script to copy the MDV files into\n"
+	"the data tree (called copyScript). Tiles are in lat/lon space\n"
+	"and overlap by half.\n\n"
+	"Niles Oien October 2006";
+}
+
+
+paramdef string {
+	p_descr = "Output mdv directory for background imagery.";
+	p_help = "Relative to $RAP_DATA_DIR. Param files for\n"
+	"DsMdvServer are written here after the subdirectory\n"
+	"structure is set up. NOTE - if you are copying this stuff\n"
+	"to a remote project (and if you're not, why are you\n"
+	"reading this?) then make sure to use the directory\n"
+	"name as it will appear in the project, ie. if you\n"
+	"are going to send it to a directory called\n"
+	"wsmr-anc/mdv/landUse then that is what you have to\n"
+	"set this string to - dont set it to be 'temp' and then\n"
+	"copy the files to wsmr-anc/mdv/landUse since the temp\n"
+	"directory will be in all the _DsMdvServer files.";
+	p_default = "mdv/images";
+} mdvOutDir;
+
+typedef struct {
+	string name;
+	double latitudeExtent;
+	double longitudeExtent;
+	int nx;
+	boolean isGlobal;
+} aTile_t;
+
+paramdef struct aTile_t {
+  p_descr = "Specifications for overlapping tiles.";
+  p_help = "Default is a set of overlapping tiles that\n"
+	"double in extent. Tiles MUST be listed in order from\n"
+	"most fine-grained to most coarse. If the isGlobal\n"
+	"parameter is set (typically on the last one) then\n"
+	"only one tile is generated, its extent being the\n"
+	"whole region."; 
+  p_default = {
+	{ "twoDegree", 2.0, 2.0, 600, FALSE },
+	{ "threeDegree", 3.0, 3.0, 800, FALSE },
+	{ "fullView", 2.0, 2.0, 800, TRUE } };
+} tile[];
+
+
+typedef struct {
+	double minLat;
+	double minLon;
+	double maxLat;
+	double maxLon;
+} region_t;
+
+paramdef struct region_t {
+  p_descr = "Region to be covered.";
+  p_help = "Default is (roughly) Colorado, an inner region of an obscure\n"
+	"nation known as the United States."; 
+  p_default = { 37.0, -107.0, 41.0, -103.0  };
+} region;
+
+paramdef boolean {
+  p_descr = "Allow tiles to overlap outside of region.";
+  p_help = "Default is to do this but it does mean that\n"
+	"the input image has to be big enough to handle\n"
+	"it, ie. you have to have a big enough palette\n"
+	"to draw from."; 
+  p_default = TRUE;
+} allowTilesOutsideRegion;

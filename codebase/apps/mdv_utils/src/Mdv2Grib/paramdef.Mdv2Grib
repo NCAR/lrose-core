@@ -1,0 +1,485 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Mdv2Grib
+ *
+ * This file contains the TDRP parameter definitions for
+ * Mdv2Grib.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  LATEST_DATA_FCST,
+  TIME_LIST,
+  FILE_LIST,
+  DS_INPUT_PATH,
+  LOCAL_FILEPATH_REALTIME,
+  SPECIFIC_GEN_TIME_LDATA
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+           "In FILE_LIST mode, the files listed on the command line using "
+           "the -f command line option are processed and then Mdv2Grib "
+           "exits. "
+           "FILE_LIST mode is automatically invoked by -f option on the "
+           "command line and if the FILE_LIST mode is specified, the -f "
+           "option is required on the command line.\n"
+           "In DS_INPUT_PATH and LOCAL_FILEPATH_REALTIME modes (these are "
+           "equivalent) the program watches for new files in a DS directory "
+           "and triggers when a new file appears. "
+           "The DS directories are the ones named like "
+           "<dir>/yyyymmdd/hhmmss.<ext>. "
+           "This is needed in addition to the LATEST_DATA trigger to handle "
+           "cases where the  data is coming in too fast to be seen in the "
+           "DataMapper.\n"
+           "In SPECIFIC_GEN_TIME_LDATA mode, the application will trigger "
+           "whenever the latest data info file indicates a new file from "
+           "the specified generation time is received. "
+           "The specific_gen_time_ldata parameter specifies the desired "
+           "generation time.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "URL to use when using a LATEST_DATA trigger";
+  p_default = "mdvp:://localhost::./mdv/ruc";
+} latest_data_trigger;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the URL to use to get the available data times.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef int
+{
+  p_descr = "The desired generation time when using the "
+            "SPECIFIC_GEN_TIME_LDATA triggering mode.";
+  p_help = "This is the number of seconds after 0:00 for the desired "
+           "generation time.";
+  p_default = 0;
+} specific_gen_time_ldata_trigger;
+
+paramdef string
+{
+  p_descr = "Input URL.";
+  p_help = "URL for the input MDV files.";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = "./grib/output";
+} output_dir;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to put output files into a RAL-style "
+            "subdirectory structure.";
+  p_help = "If true and is_forecast_data is set to false, the files will "
+           "appear in <output_dir>/<YYYYMMDD> where <YYYYMMDD> is the "
+           "date of the valid time of the data.\n"
+           "If true and is_forecast_data is set to true, the files will "
+           "appear in <output_dir>/<YYYYMMDD>/g_<HHMMSS> where <YYYYMMDD> "
+           "and <HHMMSS> are the forecast generation date and time.\n";
+  p_default = false;
+} use_ral_subdirs;
+
+paramdef string
+{
+  p_descr = "Output file prefix";
+  p_default = "";
+} output_file_prefix;
+
+paramdef boolean
+{
+  p_descr = "If true the output filename uses the basename, followed by "
+            "ISO 8601 timestamp convention";
+  p_help = "eg. prefix.2008-05-22T14:00:00.nc";
+  p_default = false;
+} use_iso8601_filename_convention;
+
+paramdef boolean
+{
+  p_descr = "If use_iso8601_filename_convention is true and "
+            "is_forecast_data is true, ISO 8601 timestamp will contain "
+            "forecast period in terms of hours and minutes";
+  p_help = "eg. prefix.2008-05-22T14:00:00.PT01:00.nc";
+  p_default = false;
+} is_forecast_data;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to write an ldata info file in the "
+            "output directory.";
+  p_default = false;
+} write_ldata_info;
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to remap the output fields.";
+  p_help = "If TRUE, the output fields will be remapped according to "
+           "the information in the remap_info parameter.";
+  p_default = FALSE;
+} remap_output;
+
+typedef enum
+{
+  PROJ_LATLON,
+  PROJ_LAMBERT_CONF
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  long nx;
+  long ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  double origin_lat;
+  double origin_lon;
+  double lat1;
+  double lat2;
+} remap_info_t;
+
+paramdef struct remap_info_t
+{
+  p_descr = "Information on how to remap the output fields. "
+            "Used only if remap_output is set to TRUE.";
+  p_help = "\tproj_type - specifies the output projection to use. "
+           "Can be either PROJ_LATLON or PROJ_LAMBERT_CONF. "
+           "Currently, only PROJ_LAMBERT_CONF is supported.\n"
+           "\tnx, ny - specify the output grid dimensions.\n"
+           "\tminx, miny - specify the output grid location.\n"
+           "\tdx, dy - specify the output grid resolution.\n"
+           "\torigin_lat, origin_lon - specify the output grid origin. "
+           "Used only if proj_type is set to PROJ_LAMBERT_CONF.\n"
+           "lat1, lat2 - specify the output grid parameters. "
+           "Used only if proj_type is set to PROJ_LAMBERT_CONF.";
+  p_default = { PROJ_LAMBERT_CONF,
+                301, 225,
+                -3332.139893, -588.890015,
+                20.318001, 20.318001,
+                25.0, -95.0,
+                25.0, 25.0 };
+} remap_info;
+
+paramdef double
+{
+  p_descr = "Offset latitude degrees";
+  p_help = "Used only when remap_output=TRUE and projection is PROJ_LAMBERT_CONF. Set to 0.0 for no offset latitude adjustment. Not used when use_horiz_limits = TRUE";
+  p_default = 0.0;
+} offset_latitude;
+
+paramdef double
+{
+  p_descr = "Offset longitude degrees";
+  p_help = "Used only when remap_output=TRUE and projection is PROJ_LAMBERT_CONF. Set to 0.0 for no offset longitude adjustment. Not used when use_horiz_limits=TRUE";
+  p_default = 0.0;
+} offset_longitude;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to apply horizontal limits instead"
+            " of remapping the output fields using the remap_info.";
+  p_help = "If TRUE and Lambert Conformal projection, the output fields will"
+           " be limited by the horizontal boundary (minLat/maxLat/minLon/maxLon).";
+  p_default = FALSE;
+} use_horiz_limits;
+
+typedef struct
+{
+  double min_lat;
+  double max_lat;
+  double min_lon;
+  double max_lon;
+} horiz_limits_t;
+
+paramdef struct horiz_limits_t
+{
+  p_descr = "Bounding box which defines the horizontal limits of the target data."
+            "Used only if use_horiz_limits is set to TRUE.";
+  p_help = "\tmin_lat - specifies the minimum latitude.\n"
+           "\tmax_lat - specifies the maximum latitude.\n"
+           "\tmin_lon - specifies the minimum longitude.\n"
+           "\tmax_lon - specifies the maximum longitude.";
+  p_default = { -90, 90, -180, 180 };
+} horiz_limits;
+
+paramdef long
+{
+  p_descr = "GRIB tables version number";
+  p_default = 2;
+} grib_tables_version;
+
+paramdef long
+{
+  p_descr = "GRIB originating center";
+  p_help = "See WMO code table 0. "
+           "Here are a couple of useful center IDs:\n"
+           "\t0 = WMO Secretariat\n"
+           "\t7 = NCEP\n"
+           "\t8 = NWS Telecommunications Gateway\n"
+           "\t9 = NWS other\n"
+           "\t59 = NOAA FSL\n"
+           "\t60 = NCAR\n";
+  p_default = 60;
+} originating_center;
+
+paramdef long
+{
+  p_descr = "GRIB subcenter id";
+  p_help = "See WMO code table 0, Part 2. "
+           "Here are a couple of useful subcenter IDs:\n"
+           "\t7 = US Weather Service - National Met. Center\n"
+           "\t8 = US Weather Service - NWS Telecomms Gateway\n"
+           "\t9 = US Weather Service - Field Stations\n"
+           "\t57 = US Air Force - Global Weather Center\n"
+           "\t58 = US Navy - Fleet Numerical Oceanography Center\n"
+           "\t59 = NOAA Forecast Systems Lab\n";
+  p_default = 0;
+} subcenter_id;
+
+paramdef long
+{
+  p_descr = "Generating process identification number.";
+  p_help = "This is a number allocated by the originating "
+           "center. "
+           "I'm not sure how this is used operationally.";
+  p_default = 0;
+} generating_process_id;
+
+paramdef long
+{
+  p_descr = "Grid identification number.";
+  p_help = "This is a number identifies a predefined grid. "
+           "See the GRIB documentation for help setting value.";
+  p_default = 0;
+} grid_id;
+
+paramdef long
+{
+  p_descr = "time range indicator.";
+  p_help = "This number sets the time range indicator, PDS octet 21. "
+           "See the GRIB documentation for help setting value.\n"
+           "This value is automatically set to 4 for fields where the "
+           "is_accum flag is set to true.\n";
+  p_default = 0;
+} time_range_id;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use the mdv_field_name or the "
+            "mdv_field_num to identify the output fields.";
+  p_default = true;
+} use_mdv_field_name;
+
+typedef enum
+{
+  DATA_CONVERT_NONE,
+  DATA_CONVERT_MULTIPLY
+} data_convert_type_t;
+
+typedef enum
+{
+  FORECAST_INTERVAL_SECONDS,
+  FORECAST_INTERVAL_MINUTES,
+  FORECAST_INTERVAL_HOURS
+} forecast_interval_type_t;
+
+paramdef enum forecast_interval_type_t
+{
+  p_descr = "Forecast interval type";
+  p_help = "";
+  p_default = FORECAST_INTERVAL_SECONDS;
+} forecast_interval_type;
+
+typedef enum
+{
+  FIELD_TYPE_NORMAL,
+  FIELD_TYPE_ACCUM,
+  FIELD_TYPE_AVG
+} field_type_t;
+
+typedef struct
+{
+  string mdv_field_name;
+  int mdv_field_num;
+  int grib_code;
+  int precision;
+  int max_bit_length;
+  data_convert_type_t data_convert_type;
+  double data_convert_parameter;
+  boolean override_vert_level;
+  int vert_level_type;
+  int vert_level_bottom;
+  int vert_level_top;
+  double data_addend;
+  field_type_t field_type;
+  int accum_secs;
+  int override_grib_tables_version;
+
+} output_field_t;
+
+paramdef struct output_field_t
+{
+  p_descr = "List of fields to write to the GRIB file.";
+  p_help = "\tmdv_field_name - Field name of the field in the MDV file. "
+           "Used only if use_mdv_field_name is set to TRUE.\n"
+           "\tmdv_field_num - Field number (the first field is 0) of the "
+           "field in the MDV file."
+           "Used only if use_mdv_field_name is set to FALSE.\n"
+           "\tgrib_code - GRIB code to use for the field in the output file.\n"
+           "\tprecision - Number of decimal places to store in the "
+           "GRIB file.\n"
+           "\tmax_bit_length - Maximum number of bits used to store data in the\n"
+           "GRIB file. If a smaller number of bits can represent the data, it\n"
+           "will be used. If value is -1, the width is dynamiclly determined."
+           "\tdata_convert_type - Flag indicating what type of units "
+           "conversion to perform on the MDV data before writing it to "
+           "the GRIB file.\n"
+           "\tdata_convert_parameter - Parameter used in data conversion:\n"
+           "\t\tDATA_CONVERT_NONE - parameter not used.\n"
+           "\t\tDATA_CONVERT_MULTIPLY - the MDV values are multiplied by "
+           "this value before being written to the GRIB file.\n"
+           "\toverride_vert_level - flag indicating whether to override "
+           "the vertical level information (octets 10-12 of the PDS) in "
+           "the output file.\n"
+           "\tvert_level_type - the value to use for octet 10 (the vertical "
+           "level type) of the PDS. "
+           "Used only if override_vert_level is set to true.\n"
+           "\tvert_level_bottom - the vertical level bottom value for the "
+           "output PDS. "
+           "How this value is used depends on how the vert_level_type "
+           "value is set -- see GRIB documentation. "
+           "Used only if override_vert_level is set to true.\n"
+           "\tvert_level_top - the vertical level top value for the "
+           "output PDS. "
+           "How this value is used depends on how the vert_level_type "
+           "value is set -- see GRIB documentation. "
+           "Used only if override_vert_level is set to true.\n"
+           "\tdata_addend - This value will be added to the data values;"
+           " the default addend is 0.\n"
+           "\tfield_type - Value indicating type of field. "
+           "If this is a FIELD_TYPE_ACCUM or FIELD_TYPE_AVG field, "
+           "the GRIB file forecast period 1 "
+           "field contains the offset of the field start time from the "
+           "timestamp of the file and the forecast period 2 field "
+           "contains the offset of the end time.\n"
+	   "\taccum_secs - The accumulation period in seconds. "
+           "Used only if is_accum_field is set to true.\n"
+	   "\toverride_grib_tables_version - Used to assign a different\n "
+	   "grib_table_version number for a particular field. If set to -1\n "
+	   "the the parameter is ignored.\n";
+ 
+  p_default = { { "radar/ltg", 0, 257, 2, -1, DATA_CONVERT_NONE, 0,
+                  false, 0, 0, 0, 0, FIELD_TYPE_NORMAL, 0,-1} };
+} output_fields[];
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to create the output GRIB file if not "
+            "all of the fields are available in the MDV file.";
+  p_help = "If true, all fields specified in the output_fields list must be "
+           "present for the GRIB file to be created.";
+  p_default = true;
+} all_fields_required;

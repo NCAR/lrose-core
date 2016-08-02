@@ -1,0 +1,90 @@
+/.cvsignore/1.1/Fri Oct 23 21:52:49 2015//
+/Makefile/1.49/Mon Mar  7 17:24:53 2011//
+/Makefile.ThorRemote/1.1/Mon May 16 22:54:17 2005//
+/Makefile.dsadmin/1.2/Mon Jun 30 21:07:01 2008//
+/Makefile.jaws/1.1/Fri Feb 20 23:34:23 2009//
+/Makefile.juneau/1.2/Tue Apr  6 21:19:21 2004//
+/Makefile.relay/1.1/Tue Nov 30 22:00:42 1999//
+/Makefile.thornMit/1.1/Tue Jan 29 01:02:44 2002//
+/Makefile.vdras/1.1/Wed Jun 13 20:18:29 2001//
+/Makefile.wsddm/1.5/Thu May 29 18:26:58 2003//
+/start_testing/1.1/Tue Jan 12 21:43:33 1999//
+D/AcTrack2Symprod////
+D/Acars2Symprod////
+D/Amdar2Symprod////
+D/Bdry2Symprod////
+D/Bdry2Xml////
+D/Chunk2Symprod////
+D/ComboPt2Symprod////
+D/Contour2Symprod////
+D/DataMapper////
+D/DeTectGenPoly2Symprod////
+D/DissectURL////
+D/DsFCopyServer////
+D/DsFile2Server////
+D/DsFileDist////
+D/DsFileServer////
+D/DsFmqServer////
+D/DsLdataServer////
+D/DsMdvSerialize////
+D/DsMdvServer////
+D/DsProxyServer////
+D/DsServerMgr////
+D/DsServerQuery////
+D/DsServerTunnel////
+D/DsSpdbServer////
+D/DsTitanServer////
+D/Edr2Symprod////
+D/ExtractXml////
+D/File2Spdb////
+D/FltPath2Symprod////
+D/GenPoly2Symprod////
+D/GenPolyStats2Symprod////
+D/GenPt2Symprod////
+D/GenPtField2Symprod////
+D/GetPortNumber////
+D/HydroStation2Symprod////
+D/IcingAirmet2Symprod////
+D/InspectDataMapperFile////
+D/Ltg2Symprod////
+D/LtgGroup2Symprod////
+D/Mad2Symprod////
+D/Metar2Symprod////
+D/NcMdvServer////
+D/Pirep2Symprod////
+D/Polygon2Xml////
+D/PosnRpt2Symprod////
+D/PrintDataMap////
+D/PrintDsMsgFile////
+D/ResolveUrl////
+D/Rhi2Symprod////
+D/SigAirMet2Symprod////
+D/Sigmet2Symprod////
+D/Sigwx2Symprod////
+D/Sndg2Sounding////
+D/Sndg2Symprod////
+D/Sounding2Sndg////
+D/SpdbQuery////
+D/SpdbXml2Table////
+D/StnAscii2Symprod////
+D/SunCal2Symprod////
+D/SyncDataMap////
+D/Taf2Symprod////
+D/TestDataMap////
+D/TestFileIo////
+D/TestFmq////
+D/TestMdv////
+D/TestSpdb////
+D/TrecGauge2Symprod////
+D/Tstorms2Symprod////
+D/Vergrid2Symprod////
+D/WMS2MdvServer////
+D/WWA2Symprod////
+D/WxHazards2Symprod////
+D/XSpdbQuery////
+D/acPosVector2Symprod////
+D/print_server_mgr////
+D/resolve_host////
+D/simpleAcTrack2Symprod////
+D/sysViewAssist////
+D/_makefiles////

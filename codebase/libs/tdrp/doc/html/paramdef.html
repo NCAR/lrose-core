@@ -1,0 +1,458 @@
+<html>
+
+<head>
+<title>paramdef</title>
+</head>
+
+<body>
+
+<h3>The paramdef file</h3>
+
+The paramdef - Parameter Definition - file specifies the parameters of
+the client program. From the programmer's perspective understanding
+this file is one of the keys to the TDRP system.<p>
+
+An example paramdef file, showing examples all of the possible
+parameter types, is included in 
+<a href="paramdef.example.html">paramdef.example</a>.<p>
+
+<h4>Supported parameter types</h4>
+
+The following parameter types are supported:<p>
+<ul>
+  <li>boolean
+  <li>string (or char*)
+  <li>int
+  <li>long
+  <li>float
+  <li>double
+  <li>enum
+  <li>struct
+</ul>
+
+Booleans are of type <code>enum tdrp_bool_t</code>, which can take
+values of <code>TRUE</code> (1) and <code>FALSE</code> (0).<p>
+
+Enums and structs are defined by typedefs in the paramdef file.<p>
+
+1D arrays are supported for all types, and 2D arrays for all types
+except structs. Arrays may be variable or fixed in length. 2D
+arrays are available to the programmer through both 1D and 2D
+pointers.<p>
+
+Struct members may be of the following types:<p>
+<ul>
+  <li>boolean
+  <li>string (or char*)
+  <li>int
+  <li>long
+  <li>float
+  <li>double
+  <li>enum
+</ul>
+
+Only single-valued struct members are supported - arrays are not supported
+within structs, nor are structs, i.e. you cannot nest a struct within
+a struct.<p>
+
+<h4>White space</h4>
+
+The position of white space in the file is unimportant except in
+strings. New-lines, tabs and spaces are ignored except within
+double-quoted strings.<p>
+
+<h4>Comments</h4>
+
+You may insert comments into a parameter file using either the C /* */
+or C++ // style.<br> Lines starting with # are also considered
+comments.<p>
+
+These comments are local to the paramdef file, they are not carried
+forward into any code files.<p>
+
+<h4>Commentdefs</h4>
+
+Comment definitions may be placed between the parameter definitions.
+Commentdefs are carried forward into the generated code files.  They
+provide a mechanism for inserting comments into the <a
+href="command_line.html">automatically printed parameter files</a>.<p>
+
+ A commentdef has the following form:<p>
+
+<pre>
+commentdef {
+  p_header = "BOOLEAN PARAMETERS";
+  p_text = "Testing boolean parameter behavior.";
+};
+</pre>
+
+When the parameter files are automatically printed, this comment will
+appear as follows:<p>
+
+<pre>
+//======================================================================
+//
+// BOOLEAN PARAMETERS.
+//
+// Testing boolean parameter behavior.
+//
+//======================================================================
+</pre>
+
+This provides a way of separating the parameter files into sections
+delimited by the comments definded in commentdefs.<p>
+
+
+<h4><a name=strings>String types</a></h4>
+
+String types are quoted in double quotes. Strings may be continued
+over multiple lines in the same style as in C and C++, i.e. the
+substrings appear on subsequent lines without any characters between
+the substrings except for white space.<p>
+
+For example, the following sub-strings:
+<pre> 
+  "This is line 1. "
+  "This is line 2. "
+  "this is line 3. "
+</pre>
+will be concatenated into:
+<pre>
+  "This is line 1. This is line 2. this is line 3."
+</pre>
+Note that no spaces are added between the lines.<p>
+
+A double quote within a string may be escaped using a back-slash in
+the usual fashion, i.e. \".<p>
+
+<h4><a name=env_vars>Embedded environment variables</a></h4>
+
+Environment variables may be imbedded in string values, using the
+syntax $(ENV_VAR), for example $(HOME) or $(USER). The environment
+variable will be expanded before its use by the client program.<p>
+
+For example,
+<pre>
+  "$(HOME)/data"
+</pre>
+might expand to
+<pre>
+  /home/dixon/data.
+</pre>
+
+<h4>Full parameter definition</h4>
+
+The following example shows a full parameter definition for the integer
+parameter 'age':
+
+<pre>
+paramdef int {
+  p_min = 0;
+  p_max = 120;
+  p_default = 30;
+  p_private = FALSE;
+  p_descr = "The age of the individual (yrs).";
+  p_help = "The age is used to compute life-expectancy.";
+} age;
+</pre>
+
+<h4>Single-valued parameters</h4>
+
+The following example shows a full parameter definition for the integer
+parameter 'age':
+
+<pre>
+paramdef int {
+  p_min = 0;
+  p_max = 120;
+  p_default = 30;
+  p_private = FALSE;
+  p_descr = "The age of the individual (yrs).";
+  p_help = "The age is used to compute life-expectancy.";
+} age;
+</pre>
+
+<h4>Descriptors</h4>
+
+The 'p_xxx' in the paramdef are descriptors which add information
+about the parameter. All are optional. p_min and p_max are
+applicable only to numeric parameters.<p>
+
+<ul>
+<li><b>p_min, p_max</b>:</li><p>
+
+The min and max legal value for the parameter. If omitted, all values
+are legal. If set, TDRP will check that the requested value, both the
+default and any value set by the user in the parameter file, is within
+the given limits. p_min and p_max may be used separately if you wish
+to provide a lower or upper limit and leave the other limit
+unspecified. p_min and p_max are only relevant for int, long, float
+and double types. Use with any other types will produce an error.<p>
+
+<li><b>p_default</b>:</li><p>
+ 
+This is the default value specied by the programmer. If this is
+omitted TDRP will provide a default, as follows:<p>
+<pre>
+  boolean: FALSE
+  string: "not-set"
+  int, long: 0
+  float, double: 0.0
+  enum: the first option in the enum list
+</pre>
+
+<li><b>p_private</b>:</li><p>
+
+If TRUE, a parameter is fixed by its default and may not be altered by
+the user. This is a useful mechanism for program
+development. Sometimes the programmer needs access to a large number
+of parameters during development, but wishes to restrict the number of
+parameters the user can change at run-time. Setting p_private to TRUE
+prevents the user from changing a parameter which the programmer
+wishes to have remain at its default value. It also removes the
+parameter from the automatically printed parameter files.<p>
+
+<li><b>p_descr</b>:</li><p>
+
+A short description of the parameter. It is preferable to include units
+in the description if appropriate. The description is echoed in the
+automatically generated parameter files.<p>
+
+<li><b>p_help</b>:</li><p>
+
+A long description of the parameter, adding to the information in the
+description. The help is echoed in the automatically generated
+parameter files.<p>
+
+</ul>
+
+<h4>Simplest parameter definition</h4>
+
+It is perfectly legal to reduce the paramdef to the following:<p>
+
+<pre>
+paramdef int {
+} age;
+</pre>
+
+However, this will be less useful than the more complete version. 
+You should at least include a description, and usually a default.<p>
+
+<h4>1D arrays</h4>
+
+The following defines a 1D array parameter:<p>
+
+<pre>
+paramdef int {
+  p_min = 0;
+  p_max = 120;
+  p_default = {30, 32, 33};
+  p_descr = "Our ages (yrs).";
+} our_age[];
+</pre>
+
+This is a variable length array, the size is inferred from the
+default, in this case 3 items. If the user overrides the default in
+the parameter file the array will be resized to the number of values
+specified by the user.<p>
+
+A fixed length array is specified by placing an array length in the
+square brackets, for example:<p>
+
+<pre>
+paramdef int {
+  p_default = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  p_descr = "Number of days in each month of the year.";
+  p_help = "Testing fixed length int array.";
+} days_in_month[12];
+</pre>
+
+In this case the array length is fixed. If the number of items specified does not match the fixed length an error will be generated.<p>
+
+Note the default - it is a list of numbers enclosed in curly braces.
+Items in the list are separated by commas.<p>
+
+<h4>2D arrays</h4>
+
+The following defines a 2D array parameter:<p>
+
+<pre>
+paramdef int {
+  p_min = 0;
+  p_max = 1;
+  p_default = {{0, 0, 1, 1, 1},
+	       {0, 0, 0, 0, 1}, 
+	       {0, 1, 0, 1, 0},
+	       {0, 0, 0, 1, 1}};
+  p_descr = "Variable length 2-D array.";
+} icon[][];
+</pre>
+
+This is a variable length array. Once again, putting a size in the
+square brackets will fix the array size. For fixed arrays you must
+specify a value for both dimensions.<p>
+
+Note that the default is a 2D nested list of numbers enclosed in curly
+braces. Items in the list are separated by commas.<p>
+
+<h4>Other types</h4>
+
+The following are examples of the various simple types, not
+including enums and structs.<p>
+
+<pre>
+paramdef long {
+  p_default = 1;
+  p_min = 0;
+  p_descr = "Single long value";
+  p_help = "Testing single long actions.";
+} number_of_radars;
+
+paramdef float {
+  p_default = {101.1, 102.1, 103.1, 104.1, 105.1,
+	       106.1, 107.1, 108.1, 109.1, 110.1};
+  p_private = FALSE;
+  p_descr = "Fixed length float array.";
+} storm_volume[10];
+
+paramdef double {
+  p_default = {{0.9, 0.9, 1.9, 1.9, 1.9, 100.3},
+	       {0.9, 1.9, 0.9, 1.9, 0.9, -100.1},
+	       {0.9, 0.9, 0.9, 1.9, 1.9, -99.9}};
+  p_descr = "variable length 2-D array.";
+} length_factor[][];
+
+paramdef boolean {
+  p_default = {TRUE, FALSE, TRUE, TRUE};
+  p_private = FALSE;
+  p_descr = "Bool array - variable length.";
+} allow_outliers[];
+
+paramdef string {
+  p_default = "mcg";
+  p_descr = "Input file extension";
+  p_help = "Testing single-valued string parameter.";
+} input_file_ext;
+
+paramdef string {
+  p_default = {{"$(USER)/path11", "$(USER)/path21", "$(USER)/path31"},
+	       {"$(USER)/path12", "$(USER)/path22", "$(USER)/path32"},
+	       {"$(USER)/path13", "$(USER)/path23", "$(USER)/path33"},
+	       {"$(USER)/path14", "$(USER)/path24", "$(USER)/path34"},
+	       {"$(USER)/path15", "$(USER)/path25", "$(USER)/path35"},
+	       {"$(USER)/path16", "$(USER)/path26", "$(USER)/path36"}};
+  p_descr = "Output file paths.";
+  p_help = "Testing variable length 2D array of strings."
+    "Note imbedded environment variables.";
+} output_file_paths[][];
+</pre>
+
+Note the <a href=#strings>strings</a> in double quotes. Also note the
+use of the <a href=#env_vars>environment variables</a> in the string
+values.<p>
+
+<h4>Enums</h4>
+
+An enum requires a typedef before its use in a parameter. Here is an
+example:<p>
+
+<pre>
+typedef enum {
+  BOTLEFT, TOPLEFT, BOTRIGHT, TOPRIGHT
+} origin_t ;
+
+paramdef enum origin_t {
+  p_default = {BOTLEFT, TOPLEFT};
+  p_descr = "Data origin position";
+  p_help = "Testing variable length enum array.";
+} data_origin[];
+</pre>
+
+The typedef will appear in the generated header file for use by
+the client program.<p>
+
+Enums can specify the integer value of each element, as follows:<p>
+
+<pre>
+typedef enum {
+  ETI = 1, GEONOR = 4, CAMPBELL = 5
+} gauge_t;
+</pre>
+
+Enums values are assumed to be sequential if not otherwise
+specified. The following typedef is equivalent to the one above.<p>
+
+<pre>
+typedef enum {
+  ETI = 1, GEONOR = 4, CAMPBELL
+} gauge_t;
+</pre>
+
+Enums may be used in 2D arrays:<p>
+
+<pre>
+typedef enum {
+  REALTIME, ARCHIVE, OTHER
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = {{REALTIME, REALTIME, ARCHIVE, OTHER},
+	       {OTHER, ARCHIVE, ARCHIVE, REALTIME}};
+  p_descr = "Testing fixed length 2-D enum array.";
+} mode[2][4];
+</pre>
+
+<h4>Structs</h4>
+
+Structs require a typedef prior to their use as a parameter type.<p>
+
+As an example of a single-valued struct:<p>
+
+<pre>
+typedef struct {
+  long nx;
+  long ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_t;
+
+paramdef struct grid_t {
+  p_default = {100, 100, -50.0, -50.0, dx = 2.0, 2.5};
+  p_descr = "Grid parameters.";
+  p_help = "Testing single-valued struct."
+  "Struct Definition occurs within the paramdef.";
+} grid;
+</pre>
+
+The following is an example of a 1D struct array. Note that it makes
+use of an enum, gauge_t, which is defined above. Enums must be defined
+before their use in a struct typedef.<p>
+
+<pre>
+typedef struct {
+  double lat;
+  double lon;
+  double wind_sensor_ht;
+  gauge_t gauge_make;
+  boolean has_humidity;
+} surface_station_t;
+
+paramdef struct surface_station_t {
+  p_descr = "Surface station information.";
+  p_help = "Test of variable length struct array."
+  "Note that the struct is defined in a typedef before the paramdef."
+  "Also, the struct includes an enum which is pre-defined. Enums included"
+  "in this manned MUST be defined in a typedef.";
+  p_default = {
+    {40.1012, -104.2309, 10.0, ETI, TRUE},
+    {40.2109, -104.5764, 10.0, GEONOR, FALSE},
+    {39.1379, -104.9080, 3.00, CAMPBELL, FALSE}
+  };
+} surface_stations[3];
+</pre>
+
+</body>
+</html>
+

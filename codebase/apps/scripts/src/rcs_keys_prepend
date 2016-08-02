@@ -1,0 +1,92 @@
+#! /usr/bin/perl
+
+#
+# script to prepend rcs keywords to source code files
+#
+
+#
+# usage rcs_keys_prepend target_files
+#
+
+#
+# loop through all the args as filenames
+#
+
+ FILE:
+foreach $filename (@ARGV) {
+
+  print(STDERR "Prepending rcs keywords to $filename\n");
+
+  $bakfile = $filename . ".bak";
+  system ('/bin/mv', $filename, $bakfile);
+
+  if (!open(SRCFILE, $bakfile)) {
+    print(STDERR "Cannot open source file $bakfile - continuing ... \n");
+    next FILE;
+  }
+
+  if (!open(STDOUT, ">$filename")) {
+    print(STDERR "Cannot open file $filename - continuing ... \n");
+    next FILE;
+  }
+	
+  #
+  # write copyright at top of file
+  #
+
+  print ("/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/\n");
+  print ("\n");
+  print ("/* SCCS info\n");
+  print (" *   %W% %D% %T%\n");
+  print (" *   %F% %E% %U%\n");
+  print (" *\n");
+  print (" * RCS info\n");
+  print (" *   \$Author\$\n");
+  print (" *   \$Locker\$\n");
+  print (" *   \$Date\$\n");
+  print (" *   \$Id\$\n");
+  print (" *   \$Revision\$\n");
+  print (" *   \$State\$\n");
+  print (" *\n");
+  print (" *   \$Log\$\n");
+  print (" */\n");
+  print (" \n");
+
+  if ($filename =~ /\.c$/) {
+
+    #
+    # only put statics in .c modules, not .h files
+    #
+
+    print ("#ifndef LINT\n");
+    print ("static char RCS_id[] = \"\$Id\$\";\n");
+    print ("static char SCCS_id[] = \"%W% %D% %T%\";\n");
+    print ("#endif /* not LINT */\n");
+    print ("\n");
+
+  }
+
+  print ("/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/\n");
+
+  #
+  # loop through the lines in the file
+  #
+
+  while ($line = <SRCFILE>) {
+
+    #
+    # copy to STDOUT
+    #
+
+    print ($line);
+
+  } # while 
+
+#
+# remove bak file
+#
+	
+unlink ($bakfile);
+
+} # foreach
+

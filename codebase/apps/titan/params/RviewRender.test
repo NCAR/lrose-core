@@ -1,0 +1,396 @@
+/*
+ * RviewRender.test
+ *
+ * Parameter file for the RviewRender application.
+ */
+
+/*
+ * Debugging
+ */
+
+x_sync = false;
+debug = true;
+malloc_debug_level = 0;
+
+/*
+ * Basic setup
+ *
+ * scan_delta_t is number of secs moved in time using time button
+ */
+
+scan_delta_t = 360;
+
+/*
+ * Command strings
+ */
+
+use_time_hist = true;
+time_hist_command_line = "time_hist -params $(TITAN_HOME)/params/time_hist.test &";
+
+/*
+ * Colorscale directory and map file name
+ */
+
+colorscale_dir = "$(TITAN_HOME)/color_scales";
+map_file = "$(TITAN_HOME)/maps/rview.map";
+
+/*
+ * Hard copies
+ */
+
+ps_prologue_file = "$(TITAN_HOME)/prologues/postscript";
+output_file = "$(TITAN_HOME)/output/RviewRender.ps";
+ps_printer = "jet";
+
+/*
+ * Projection information
+ *
+ * Projection may be PROJ_FLAT for local plots or PROJ_LATLON for
+ * regional or larger plots.
+ *
+ * The grid origin is always in lat/lon units.
+ *
+ * min and max values are in km for flat proj, lat/lon for
+ * latlon proj.
+ */
+
+projection = PROJ_FLAT;
+
+grid_lat = 39.946;
+grid_lon = -105.194;
+
+full_min_x = -250.0;
+full_min_y = -250.0;
+full_max_x = 250.0;
+full_max_y = 250.0;
+
+
+/*
+ * Storm tracks
+ *
+ * A check for new data is made every track_check_interval secs.
+ * The data is in shared memory with the given key.  The track server
+ * is specified by a subtype and instance, with a default host and
+ * port.  If the server mapper is running, the subtype and instance
+ * are used.
+ */
+
+use_track_data = true;
+plot_tracks_current_only = false;
+
+track_check_interval = 5.0;
+track_shmem_key = 46000;
+
+track_data_time_margin = 12.0;
+past_plot_period = 30.0;
+future_plot_period = 30.0;
+
+n_forecast_steps = 5;
+forecast_interval = 6.0;
+
+track_server_subtype = "Dobson";
+track_server_instance = "Archive_40";
+track_server_default_host = "babinet";
+track_server_default_port = 44040;
+max_message_len = 100000;
+servmap_host1 = "babinet";
+servmap_host2 = "local";
+
+plot_current = true;
+plot_forecast_shape = true;
+
+runs_included = false;
+
+/*
+ * Flight tracks
+ */
+
+plot_flight_tracks = false;
+flight_tracks_file = "$(TITAN_HOME)/ftracks/flight_tracks";
+
+/*
+ * Verification (chase car) plotting
+ */
+
+plot_verify = false;
+verify_file = "$(TITAN_HOME)/verify/chase_car_data";
+verify_time_margin = 300;
+
+/*
+ * Mouse double-clicking delay in milliseconds.
+ */
+
+double_click_delay = 0.3;
+
+/*
+ * The display is updated every update_interval seconds in
+ * case new data has arrived.
+ */
+
+update_interval = 20.0;
+
+/*
+ * base_timer_interval is the basic interval for the interrupt timer.
+ */
+
+base_timer_interval = 0.15;
+
+/*
+ * Approximate number of ticks per axis.
+ */
+
+approx_nticks = 7;
+
+/*
+ * Aircraft positions.
+ */
+
+plot_ac_posn = true;
+ac_posn_archive_dir = "$(TITAN_HOME)/ac_posn/archive";
+ac_posn_realtime_file = "$(TITAN_HOME)/ac_posn/realtime";
+ac_posn_time_margin = 300;
+ac_posn_render = { { "JRB", "white",  1, 100.0, 0.0 },
+                   { "CAN", "orange", 1,   4.0, 2.0 },
+                   { "MAG", "cyan",   1,   1.0, 4.0 } };
+
+/*
+ * Cursor bearing computations.  If cursor is clicked twice, the
+ * bearing between the last two clicks is indicated.  If
+ * cursor_magnetic is set, the bearing is given in deg Mag, otherwise
+ * in Deg T.
+ */
+
+cursor_magnetic = true;
+magnetic_variation = 18.3;
+
+/*
+ * X resources
+ * ===========
+ */
+
+x_foreground = "white";
+x_background = "black";
+
+/*
+ * Margins in pixels.
+ */
+
+x_xaxismargin = 25;
+x_yaxismargin = 35;
+x_xaxisendmargin = 30.0;
+x_yaxisendmargin = 15.0;
+x_ticklength = 6.0;
+x_topmargin = 25;
+x_tick_clearance = 3.0;
+x_text_margin = 6.0;
+
+/*
+ * Legend dimensions.  The legend element height is the height of each
+ * color block in the scale window.
+ */
+
+x_max_legend_element_ht = 25;
+x_legend_element_width = 30;
+
+/*
+ * Fonts.
+ */
+
+x_title_font = "8x13";
+x_scale_font = "6x10";
+x_ringlabel_font = "6x10";
+x_maplabel_font = "6x10";
+x_ticklabel_font = "6x10";
+x_track_annotation_font = "8x13";
+x_text_font = "8x13";
+
+/*
+ * Colors.
+ */
+
+x_ring_color = "forestgreen";
+x_map_color = "yellow";
+x_crosshair_color = "#b00";
+x_vsection_pos_color = "red";
+x_zoom_box_color = "red";
+x_pos_contour_color = "red";
+x_zero_contour_color = "yellow";
+x_neg_contour_color = "blue";
+x_tick_color = "yellow";
+x_ticklabel_color = "yellow";
+x_track_annotation_color = "yellow";
+x_text_color = "yellow";
+x_titletext_color = "gray";
+x_scaletext_color = "gray";
+x_border_color = "CadetBlue";
+x_hlight_background = "mediumblue";
+
+x_past_storm_color = "yellow";
+x_current_storm_color = "cyan";
+x_future_storm_color = "blue";
+x_forecast_storm_color = "red";
+
+x_current_storm_line_width = 2;
+x_forecast_storm_line_width = 1;
+
+x_past_vector_color = "magenta";
+x_future_vector_color = "cyan";
+x_forecast_vector_color = "red";
+
+/*
+ * Dim percentage for unselected tracks.
+ */
+
+color_dim_percent = 70.0;
+
+/*
+ * Line widths.
+ */
+
+x_vsection_pos_width = 1;
+x_zoom_box_width = 1;
+x_tick_width = 0;
+x_ring_width = 0;
+x_map_width = 0;
+x_crosshair_width = 0;
+
+/*
+ * PostScript resources
+ * ====================
+ */
+
+draw_copy_title = true;
+draw_copy_header = true;
+ps_unitscale = 72;
+
+/*
+ * Page layout.
+ */
+
+ps_pagelength = 11.0;
+ps_pagewidth = 8.5;
+
+ps_printwidth = 6.5;
+ps_maxprintwidth = 11.0;
+ps_minprintwidth = 3.0;
+
+/*
+ * Margins.
+ */
+
+ps_lengthmargin = 0.5;
+ps_widthmargin = 0.7;
+
+/*
+ * Dimensions of main image.
+ */
+
+ps_imagewidth = 6.0;
+ps_imageheight = 6.0;
+
+/*
+ * Dimensions of color scale and title.
+ */
+
+ps_scalewidth = 1.5;
+ps_titleheight = 0.5;
+
+ps_plot_to_scale_margin = 0.25;
+ps_title_to_plot_margin = 0.4;
+
+/*
+ * Axis margins in main image.
+ */
+
+ps_xaxismargin = 0.5;
+ps_yaxismargin = 0.5;
+ps_xaxisendmargin = 0.3;
+ps_yaxisendmargin = 0.25;
+ps_ticklength = 0.06;
+ps_topmargin = 0.5;
+ps_tick_clearance = 0.05;
+ps_text_margin = 0.07;
+
+/*
+ * Legend dimensions.  The legend element height is the height
+ * of each color block in the scale window.
+ */
+
+ps_max_legend_element_ht = 0.4;
+ps_legend_element_width = 0.5;
+
+/*
+ * Linestyles.
+ */
+
+ps_past_storm_linestyle = { 0, 100.0, 0.0 };
+ps_current_storm_linestyle = { 2, 100.0, 0.0 };
+ps_future_storm_linestyle = { 1, 1.0, 1.0 };
+ps_forecast_storm_linestyle = { 1, 4.0, 2.0 };
+
+ps_past_vector_linestyle = { 1, 100.0, 0.0 };
+ps_future_vector_linestyle = {0, 1.0, 1.0 };
+ps_forecast_vector_linestyle = { 0, 100.0, 0.0 };
+
+ps_pos_contour_linestyle = { 1, 100.0, 0.0 };
+ps_zero_contour_linestyle = { 1, 1.0, 1.0 };
+ps_neg_contour_linestyle = { 1, 4.0, 2.0 };
+
+/*
+ * Line widths.
+ */
+
+ps_border_width = 1;
+ps_crosshair_width = 0;
+ps_ring_width = 0;
+ps_map_width = 0;
+ps_tick_width = 0;
+
+/*
+ * Fonts.
+ */
+
+ps_fontname = "Helvetica";
+ps_title_fontsize = 18.0;
+ps_scale_fontsize = 12.0;
+ps_ringlabel_fontsize = 8.0;
+ps_maplabel_fontsize = 10.0;
+ps_ticklabel_fontsize = 8.0;
+ps_track_annotation_fontsize = 8.0;
+ps_aircraft_fontsize = 8.0;
+ps_text_fontsize = 12.0;
+
+/*
+ * Data fields and their servers.
+ */
+
+field_info = { { "dbz",  "Cidd", "Dobson", "Archive", "babinet", 43000,
+                  0, 360, "dbz_color", "dbz_gray", 0.0, 70.0, 5.0 },
+               { "sdbz", "Cidd", "Dobson", "Test", "local", 43851,
+                  0, 360, "dbz_color", "dbz_gray", 0.0, 70.0, 5.0 },
+               { "srp",  "Cidd", "Dobson", "Test", "local", 43851,
+                  1, 360, "ret_pow_color", "ret_pow_gray", 0.0, 70.0, 5.0 },
+               { "xdbzh",  "Cidd", "Dobson", "Test", "local", 43851,
+                  2, 360, "dbz_color", "dbz_gray", 0.0, 70.0, 5.0 },
+               { "xrph",  "Cidd", "Dobson", "Test", "local", 43851,
+                  3, 360, "ret_pow_color", "ret_pow_gray", 0.0, 70.0, 5.0 },
+               { "xdbzv",  "Cidd", "Dobson", "Test", "local", 43851,
+                  4, 360, "dbz_color", "dbz_gray", 0.0, 70.0, 5.0 },
+               { "xrpv",  "Cidd", "Dobson", "Test", "local", 43851,
+                  5, 360, "ret_pow_color", "ret_pow_gray", 0.0, 70.0, 5.0 },
+               { "zdr",  "Cidd", "Dobson", "Test", "local", 43851,
+                  6, 360, "zdr_color", "zdr_gray", 0.0, 70.0, 5.0 },
+               { "hdr",  "Cidd", "Dobson", "Test", "local", 43851,
+                  7, 360, "hdr_color", "hdr_gray", 0.0, 70.0, 5.0 },
+               { "att",  "Cidd", "Dobson", "Test", "local", 43851,
+                  8, 360, "atten_color", "atten_gray", 0.0, 70.0, 5.0 },
+               { "dwr",  "Cidd", "Dobson", "Test", "local", 43851,
+                  9, 360, "dwr_color", "dwr_gray", 0.0, 70.0, 5.0 },
+               { "ldr",  "Cidd", "Dobson", "Test", "local", 43851,
+                 10, 360, "ldr_color", "ldr_gray", 0.0, 70.0, 5.0 },
+               { "vel",  "Cidd", "Dobson", "Test", "local", 43851,
+                 11, 360, "vel_color", "vel_gray", -30.0, 30.0, 5.0 } };
+
+
+path_delim = "/";
+

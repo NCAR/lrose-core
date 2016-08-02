@@ -1,0 +1,751 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body>
+<a href="index.html"><img SRC="rsl.gif" height=100 width=100></a>
+<hr>
+<br>&nbsp;
+<br>&nbsp;
+<h1>
+Users Guide to RSL.</h1>
+
+<h2>
+What is RSL good for?</h2>
+The best feature of RSL is the ability to ingest many different RADAR data
+file formats with a single library call. It can, also, read compressed
+files -- compressed with GZIP or the older COMPRESS. The routine is called
+<a href="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</a>.
+You give it a filename and it will return a pointer to a C structure called
+<a href="RSL_radar_struct.html">Radar</a>.
+The structure Radar contains all the information found in the input file.
+The structure is intended to represent a superset of all RADAR data formats.
+<p>Below, is a table listing the input/output routines supplied in RSL.
+You will notice that there are only two output routines. RSL, by design,
+is not a format converter, but, a library to facilitate reading and manipulation
+of RADAR data. Output for UF and HDF are supplied because of the popularity
+of those two formats.
+<br>&nbsp;
+<table BORDER CELLPADDING=0 >
+<tr>
+<td>
+<h4>
+Data format</h4>
+</td>
+
+<td>
+<h4>
+Input routine</h4>
+</td>
+
+<td>
+<h4>
+Output routine</h4>
+</td>
+</tr>
+
+<tr>
+<td>HDF 1B-51 and 1C-51</td>
+
+<td><a href="RSL_hdf_to_radar.html">RSL_hdf_to_radar</a></td>
+
+<td><a href="RSL_radar_to_hdf.html">RSL_radar_to_hdf</a></td>
+</tr>
+
+<tr>
+<td>Lassen (Darwin)</td>
+
+<td><a href="RSL_lassen_to_radar.html">RSL_lassen_to_radar</a></td>
+
+<td>None</td>
+</tr>
+
+<tr>
+<td>WSR-88d (Nexrad)</td>
+
+<td><a href="RSL_wsr88d_to_radar.html">RSL_wsr88d_to_radar</a></td>
+
+<td>None</td>
+</tr>
+
+<tr>
+<td>UF (Universal Format from NCAR)</td>
+
+<td><a href="RSL_uf_to_radar.html">RSL_uf_to_radar</a></td>
+
+<td><a href="RSL_radar_to_uf.html">RSL_radar_to_uf</a></td>
+</tr>
+
+<tr>
+<td>SIGMET (Version 1)</td>
+
+<td><a href="RSL_nsig_to_radar.html">RSL_nsig_to_radar</a></td>
+
+<td>None</td>
+</tr>
+
+<tr>
+<td>SIGMET (Version 2)</td>
+
+<td><a href="RSL_nsig_to_radar.html">RSL_nsig2_to_radar</a></td>
+
+<td>None</td>
+</tr>
+
+<tr>
+<td>McGill&nbsp;</td>
+
+<td><a href="RSL_mcgill_to_radar.html">RSL_mcgill_to_radar</a></td>
+
+<td>None</td>
+</tr>
+
+<tr>
+<td>TOGA&nbsp;</td>
+
+<td><a href="RSL_toga_to_radar.html">RSL_toga_to_radar</a></td>
+
+<td>None</td>
+</tr>
+
+<tr>
+<td>RAPIC (Berrimah)&nbsp;</td>
+
+<td><a href="RSL_rapic_to_radar.html">RSL_rapic_to_radar</a></td>
+
+<td>None</td>
+</tr>
+
+<tr>
+<td>RADTEC (SPANDAR)</td>
+
+<td><a href="RSL_radtec_to_radar.html">RSL_radtec_to_radar</a></td>
+
+<td>None</td>
+</tr>
+
+<tr>
+<td>EDGE</td>
+
+<td><a href="RSL_edge_to_radar.html">RSL_edge_to_radar</a></td>
+
+<td>None</td>
+</tr>
+</table>
+RSL is designed to provide you with a uniform data structure so that you
+can design RADAR independent science applications. You no longer need to
+wrestle over the input data format and have a different version of your
+algorithm for each different RADAR format you may need to analyze.
+<p>This paper presents RSL from a science application developer's point
+of view. It will present some of the more useful routines and which fields
+in the <a href="RSL_radar_struct.html">Radar</a> structure that will be
+important to you and it will attempt to cover some of the programming pitfalls
+associated with RSL usage. One of the most difficult hurdles to overcome
+is that RSL makes extensive use of pointer syntax. You will find yourself
+becoming expert with C pointers. However, the design of RSL makes it possible
+to use C pointers painlessly.
+<h2>
+Ok, I have some data, how do I look at it?</h2>
+Let's first make some images. To do that you need only 3 RSL functions:
+<p><tt><a href="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</a></tt>
+<br><tt><a href="RSL_load_color_table.html">RSL_load_refl_color_table</a></tt>
+<br><tt><a href="RSL_volume_to.html">RSL_volume_to_gif</a></tt>
+<p>The C program you need is incredibly short. It illustrates how to ingest
+radar data and create a GIF image of the DZ (reflectivity) field:
+<pre>#include "rsl.h"
+void main(int argc, char **argv)
+{
+&nbsp; Radar *radar;
+&nbsp; radar = RSL_anyformat_to_radar("radar.dat", NULL);
+&nbsp; RSL_load_refl_color_table();
+&nbsp; RSL_volume_to_gif(radar->v[DZ_INDEX], "dz_sweep", 400, 400, 200.0);
+}</pre>
+The line:
+<p><tt>#include "rsl.h"</tt>
+<p>is required when using the RSL. It defines important constants and declares
+all the RSL functions that your application may need.
+<p>The line:
+<pre>Radar *radar;</pre>
+declares the radar pointer. Only a pointer to a radar should be declared,
+because, the ingest routines allocate all the space to hold all the appropriate
+substructures: <a href="RSL_volume_struct.html">Volume</a>, <a href="RSL_sweep_struct.html">Sweep</a>,
+<a href="RSL_ray_struct.html">Ray</a>,
+and <a href="RSL_range_struct.html">Range</a>.
+<p>The line:
+<pre>radar = RSL_anyformat_to_radar("radar.dat", NULL);</pre>
+performs the actual ingest of data. The input file is called <tt>radar.dat</tt>.
+<a href="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar
+</a>automatically
+determines the type of radar data being read. It can handle *.gz or *.Z
+files transparently. Reading gzip or compress files is faster, especially
+over NFS.&nbsp;&nbsp; Generally, reading compressed radar files is faster
+because of how UNIX pipes are implemented and that the compression is nearly
+90%.&nbsp;&nbsp; The second argument, NULL, is optional. A second argument
+is needed only when reading WSR-88D data. The WSR-88D site information
+is provided in the first physical file on the 8mm tape, but, it is used
+to fill lat/lon and other radar-site specific information when reading
+the 2<sup>nd</sup> through last physical files on the tape.
+<p>Note: <a href="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</a>
+can't handle every radar format for which there is an RSL ingest routine.
+But, it does a good job at recognizing most formats. Currently, TOGA and
+MCGILL files cannot be automatically detected. In those cases, use: <a href="RSL_toga_to_radar.html">RSL_toga_to_radar</a>
+and <a href="RSL_mcgill_to_radar.html">RSL_mcgill_to_radar</a>.
+<p>While basic image generation is provided in RSL, it is never intended
+to be anything more than a diagnostic tool. Several assumptions are made,
+but, the image generation functions provided are useful. This is what the
+last two lines illustrate. First you must define a color table. That is
+done with:
+<pre>RSL_load_refl_color_table();</pre>
+then, to generate disk files, gif images, you must call one of the image
+generation functions, as in:
+<pre>RSL_volume_to_gif(radar->v[DZ_INDEX], "dz_sweep", 400, 400, 200.0);</pre>
+This routine will generate several images, one for each sweep, mapping
+the image to a 400 x 400 km grid, using a 1 x 1 km spacing, by collecting
+data out to 200 km.
+<p>Making images of velocity data, <tt>VR_INDEX</tt>, involves two more
+steps that are not very obvious. Because of the limited range of the values
+presented in velocity data, you must re-bin the data. Do that with any
+one of the following:
+<pre><a href="RSL_rebin_velocity.html">RSL_rebin_velocity_sweep</a>,
+<a href="RSL_rebin_velocity.html">RSL_rebin_velocity_volume</a></pre>
+The second step is that you must call:
+<pre><a href="RSL_load_color_table.html">RSL_load_vel_color_table()</a>;</pre>
+The nyquist velocity is used to determine the limits of the re-binning.
+<i>These
+functions modify the data in a sweep, or volume.</i> So, it is wise to
+make copies of the sweep, or volume, if you plan on using the data later
+in your application. Normally, though, making velocity images is the last
+step of a program, therefore, you don't need to copy the velocity volume
+as your program will be exiting shortly. RSL provides a number of color
+table manipulation functions. You are not limited by the default settings
+for DZ, VR, and SW color tables. You can specify any color table mapping
+you wish.
+<h2>
+Whoopty doo, I really wanted to examine the values.</h2>
+In order to get to values in the <a href="RSL_radar_struct.html">Radar</a>
+structure, you have to trickle down all the substructues. The structures,
+in order of nesting are: <a href="RSL_radar_struct.html">Radar</a>, <a href="RSL_volume_struct.html">Volume</a>,
+<a href="RSL_sweep_struct.html">Sweep</a>,
+<a href="RSL_ray_struct.html">Ray</a>,
+<a href="RSL_range_struct.html">Range</a>.
+Each of these structures is presented in that order. You will notice a
+common organization across all of the structures -- each structure contains
+a header and contains an array of pointers to the next substructure.
+<h4>
+The Radar structure</h4>
+Ok, make the call to <tt><a href="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</a></tt>
+as above, so that you get a pointer to a radar. The structure <tt><a href="RSL_radar_struct.html">Radar</a></tt>
+is the most general structure in RSL. Radar is composed of two parts:
+<ul>
+<li>
+Radar header.</li>
+
+<li>
+Array of pointers to <a href="RSL_volume_struct.html">Volume</a>s.</li>
+</ul>
+The radar header, will be presented and described fully later, but, it
+contains general information about the entire structure. To access the
+radar header use the syntax:
+<pre>Radar *radar;
+radar->h.<i>member</i>;</pre>
+The array of pointers to <a href="RSL_volume_struct.html">Volume</a>s contains
+either pointers to <a href="RSL_volume_struct.html">Volume</a>s of data
+or NULL. The number of possible <a href="RSL_volume_struct.html">Volume</a>s
+in the radar is specified by radar->h.nvolumes. This number represents
+the length of the array of pointers to <a href="RSL_volume_struct.html">Volume</a>s
+and not the number of actual (non-NULL) volumes in the radar. The index
+of this array of pointers to <a href="RSL_volume_struct.html">Volume</a>s
+is the field type index. There are MAX_RADAR_VOLUMES (currently set to
+19) field types defined in RSL. Each field type index has a specific value.
+That value is illustrated in the table below. RSL ingest routines guarentee
+that the length of the array of pointers to <a href="RSL_volume_struct.html">Volume</a>s,
+<tt>radar->v</tt>,
+is exactly the maximum number of field types, MAX_RADAR_VOLUMES. This is
+done so that you can check for the existance of a field type with the syntax:
+<pre>if (radar->v[XZ_INDEX]) /* XZ exists */</pre>
+Normally, <tt>radar->h.nvolumes</tt> is set to the length of the array
+of pointers to <a href="RSL_volume_struct.html">Volume</a>s, <tt>radar->v</tt>.
+Because C array indexes start at 0, you should use a test similiar to:
+ivol &lt; radar->h.nvolumes. The maximum value for <tt>radar->h.nvolumes</tt>
+is MAX_RADAR_VOLUMES which is a constant in RSL. The value for <tt>radar->h.nvolumes</tt>
+could be less though. But, you can rest assured that you can test for the
+existance of a field type simply by using the hard coded index name as
+specified in the table below.
+<p>There are basically two methods for indexing the array of pointers to
+<a href="RSL_volume_struct.html">Volume</a>s:
+<ul>
+<li>
+Use the index name, eg. CZ_INDEX or its value.</li>
+
+<li>
+Use a variable that ranges from 0 to <tt>radar->h.nvolumes</tt>-1.</li>
+</ul>
+Here are two coding examples that demonstrate how to access the array of
+pointers to volumes.
+<p>Example 1:
+<pre>Radar *radar;
+Volume *volume;
+
+volume = radar->v[CZ_INDEX];
+if (volume != NULL) {
+&nbsp;&nbsp; /* Do something with volume. */
+}</pre>
+Example 2:
+<pre>Radar *radar;
+Volume *volume;
+int i;
+
+for (i=0; i&lt;radar->h.nvolumes) {
+&nbsp;&nbsp; volume = radar->v[i];
+&nbsp;&nbsp; if (volume == NULL) continue; /* skip this NULL volume */
+&nbsp;&nbsp; /* Do something with volume. */
+}</pre>
+It is very important that you check for the volume pointer being NULL.
+It is very common that <tt>radar->h.nvolumes</tt> is larger than the number
+of non-NULL volumes present in radar. By default, <tt>radar->h.nvolumes</tt>
+is the length of array of pointers to <a href="RSL_volume_struct.html">Volume</a>s.
+The volumes are also known as field types. There are several field types
+and a <a href="RSL_volume_struct.html">Volume</a> can be only one field
+type. The entire list of field types is presented in the table below. To
+reference a particular field, you use a simple syntax:
+<p><tt>radar->v[DZ_INDEX]</tt>
+<br><tt>radar->v[VR_INDEX]</tt>
+<p>Each field type encountered has a specific index within the <tt>radar->v</tt>
+array of pointers to <a href="RSL_volume_struct.html">Volume</a>s. The
+field type indexes are hard-coded and are defined to be specific numbers
+starting at 0. Hard-coded field type indexes simplifies the syntax for
+accessing volumes. When there is no volume for a particular field type,
+the volume pointer is NULL. This is ok, as NULL is a perfectly acceptable,
+albeit useless, volume. Here is a table of all the field type indexes used
+in RSL.
+<br>&nbsp;
+<table BORDER CELLPADDING=0 >
+<tr>
+<td>
+<h4>
+INDEX NAME</h4>
+</td>
+
+<td>
+<h4>
+Value</h4>
+</td>
+
+<td>
+<h4>
+Description</h4>
+</td>
+</tr>
+
+<tr>
+<td>DZ_INDEX</td>
+
+<td>0</td>
+
+<td>Reflectivity (dBZ)</td>
+</tr>
+
+<tr>
+<td>VR_INDEX</td>
+
+<td>1</td>
+
+<td>Radial Velocity (m/s)</td>
+</tr>
+
+<tr>
+<td>SW_INDEX</td>
+
+<td>2</td>
+
+<td>Spectral Width (m<sup><font size=-2>2</font></sup>/s<sup><font size=-2>2</font></sup>)</td>
+</tr>
+
+<tr>
+<td>CZ_INDEX</td>
+
+<td>3</td>
+
+<td>QC Reflectivity (dBZ)</td>
+</tr>
+
+<tr>
+<td>ZT_INDEX</td>
+
+<td>4</td>
+
+<td>Total Reflectivity (dBZ)</td>
+</tr>
+
+<tr>
+<td>DR_INDEX</td>
+
+<td>5</td>
+
+<td>Differential reflectivity</td>
+</tr>
+
+<tr>
+<td>LR_INDEX</td>
+
+<td>6</td>
+
+<td>Another differential refl.</td>
+</tr>
+
+<tr>
+<td>ZD_INDEX</td>
+
+<td>7</td>
+
+<td>Reflectivity Depolarization Ratio&nbsp;
+<p>ZDR = 10log(ZH/ZV) (dB)</td>
+</tr>
+
+<tr>
+<td>DM_INDEX</td>
+
+<td>8</td>
+
+<td>Received power (dBm)</td>
+</tr>
+
+<tr>
+<td>RH_INDEX</td>
+
+<td>9</td>
+
+<td>Rho: Correlation coefficient</td>
+</tr>
+
+<tr>
+<td>PH_INDEX</td>
+
+<td>10</td>
+
+<td>Phi (MCTEX parameter)</td>
+</tr>
+
+<tr>
+<td>XZ_INDEX</td>
+
+<td>11</td>
+
+<td>X-band reflectivity</td>
+</tr>
+
+<tr>
+<td>CR_INDEX</td>
+
+<td>12</td>
+
+<td>Corrected DR reflectivity (differential).</td>
+</tr>
+
+<tr>
+<td>MZ_INDEX</td>
+
+<td>13</td>
+
+<td>DZ mask volume for HDF 1C-51 product.</td>
+</tr>
+
+<tr>
+<td>MR_INDEX</td>
+
+<td>14</td>
+
+<td>DR mask volume for HDF 1C-51 product.</td>
+</tr>
+
+<tr>
+<td>ZE_INDEX</td>
+
+<td>15</td>
+
+<td>Edited reflectivity.</td>
+</tr>
+
+<tr>
+<td>VE_INDEX</td>
+
+<td>16</td>
+
+<td>Edited velocity.</td>
+</tr>
+
+<tr>
+<td>KD_INDEX</td>
+
+<td>17</td>
+
+<td>KDP (unknown) for MCTEX data.</td>
+</tr>
+
+<tr>
+<td>TI_INDEX</td>
+
+<td>18</td>
+
+<td>TIME (unknown) for MCTEX data.</td>
+</tr>
+</table>
+
+<h4>
+The Volume structure</h4>
+The Volume structure represents the RADAR data for one, and only one, field
+type. Upon ingest, the data for each field type is separated and placed
+into separate volumes. This makes it convient to manipulate volumes based
+on their field type.
+<p>The organization of the Volume structure closely resembles the organization
+of the Radar structure. It, too, is compose of two parts:
+<ul>
+<li>
+Volume header.</li>
+
+<li>
+Array of pointers to <a href="RSL_sweep_struct.html">Sweep</a>s.</li>
+</ul>
+To access elements in the Volume header, you use the syntax:
+<pre>Volume *volume;
+volume->h.<i>member</i>;</pre>
+You can find a description of each volume header member later. The array
+of pointers to <a href="RSL_sweep_struct.html">Sweep</a>s contains either
+pointers to <a href="RSL_sweep_struct.html">Sweep</a>s of data or NULL.
+The number of possible <a href="RSL_sweep_struct.html">Sweep</a>s in the
+Volume is specified by <tt>volume->h.nsweeps</tt>. This number represents
+the length of the array of pointers to <a href="RSL_sweep_struct.html">Sweep</a>s
+and not the number of actual (non-NULL) sweeps in the volume.
+<p>There are two methods to accessing sweeps:
+<ul>
+<li>
+Use a loop index that ranges from 0 to <tt>volume->h.nsweeps-1</tt>.</li>
+
+<li>
+Use <a href="RSL_get_sweep.html">RSL_get_sweep</a> or other similiar RSL
+sweep retieval functions.</li>
+</ul>
+Here are two coding examples that demonstrate how to access the array of
+pointers to sweeps.
+<p>Example 1:
+<pre>Volume *volume;
+Sweep *sweep;
+int i;
+
+/* Assume a non-NULL volume at this point. */
+for (i=0; i&lt;volume->h.nsweeps; i++) {
+&nbsp;&nbsp; sweep = volume->sweep[i];
+&nbsp;&nbsp; if (sweep == NULL) continue; /* Skip NULL sweeps. */
+&nbsp;&nbsp; /* Do something with this sweep. */
+&nbsp;&nbsp; printf("Sweep %d elevation is %f\n", i, sweep->h.elev);
+}</pre>
+Example 2:
+<pre>Volume *volume;
+Sweep *sweep;
+float elev;
+
+/* No assumption about volume, it *can* be NULL! */
+/* That's because RSL_get_sweep checks it. */
+elev = 2.0;
+sweep = RSL_get_sweep(volume, elev);
+if (sweep != NULL)
+&nbsp;&nbsp; printf("Sweep %d elevation is %f\n", i, sweep->h.elev);</pre>
+Again, it is very important to check for NULL sweeps. By default volume->h.nsweeps
+is the length of the array of pointers to <a href="RSL_sweep_struct.html">Sweep</a>s.
+<h4>
+The Sweep structure</h4>
+The Sweep represents the data collected for one field type during one 360<sup>o</sup>
+revolution of the RADAR. Like the Radar and Volume structures, the Sweep
+organization is composed of two parts:
+<ul>
+<li>
+Sweep header.</li>
+
+<li>
+Array of pointers to <a href="RSL_ray_struct.html">Ray</a>s.</li>
+</ul>
+To access elements in the Sweep header, you use the syntax:
+<pre>Sweep *sweep;
+sweep->h.<i>member</i>;</pre>
+A description of each member of the Sweep header is presented later. The
+array of pointers to <a href="RSL_ray_struct.html">Ray</a>s contains either
+pointers to <a href="RSL_ray_struct.html">Ray</a>s of data or NULL. The
+number of possible <a href="RSL_ray_struct.html">Ray</a>s in the Sweep
+is specified by <tt>sweep->h.nrays</tt>. This number represents the length
+of the array of pointers to <a href="RSL_ray_struct.html">Ray</a>s and
+not the number of actual (non-NULL) rays in the Sweep.
+<p>There are two methods to accessing rays:
+<ul>
+<li>
+Use a loop index that ranges from 0 to <tt>sweep->h.nrays-1</tt>.</li>
+
+<li>
+Use <a href="RSL_get_ray.html">RSL_get_ray</a> or other similiar RSL ray
+retieval functions.</li>
+</ul>
+Here are two coding examples illustrating how to access the array of pointers
+to <a href="RSL_ray_struct.html">Ray</a>s.
+<p>Example 1:
+<pre>Sweep *sweep;
+Ray *ray;
+int i;
+
+/* Assume a non-NULL sweep at this point. */
+for (i=0; i&lt;sweep->h.nrays; i++) {
+&nbsp;&nbsp; ray = sweep->ray[i];
+&nbsp;&nbsp; if (ray == NULL) continue; /* Skip NULL rays. */
+&nbsp;&nbsp; /* Do something with this ray. */
+&nbsp;&nbsp; printf("Ray %d azimuth is %f\n", i, ray->h.azimuth);
+}</pre>
+Example 2:
+<pre>Volume *volume;
+Ray *ray;
+float elev, azimuth;
+
+/* No assumption about volume, it *can* be NULL! */
+/* That's because RSL_get_ray checks it. */
+elev = 2.0;
+azimuth = 30.2;
+ray = RSL_get_ray(volume, elev, azimuth);
+if (ray != NULL)
+&nbsp;&nbsp; printf("Ray %d elevation is %f, azimuth is %f\n", i, ray->h.elev, ray->h.azimuth);</pre>
+You never know when you'll encounter NULL rays, so, make sure you test
+for it. By default, sweep->h.nrays is the length of the array of pointers
+to <a href="RSL_ray_struct.html">Ray</a>s which may or may not be the number
+of non-NULL Rays present.
+<h4>
+The Ray structure</h4>
+A ray of RADAR measurements represents data collected from close to the
+RADAR to some maximum physical range. The <a href="RSL_ray_struct.html">Ray</a>,
+too, is composed of two parts:
+<ul>
+<li>
+Ray header.</li>
+
+<li>
+Array of field type measurements. These are not pointers. It is an array
+of values.</li>
+</ul>
+We're getting close to the data, now. The ray header contains the largest
+collection of members and describe all characteristics of the ray. To access
+elements in the Ray header, you use the syntax:
+<pre>Ray *ray;
+ray->h.<i>member</i>;</pre>
+A description of each member of the Ray header is described later. The
+array of field type measurements contains the data, finally. The data type
+for the data is <a href="RSL_range_struct.html">Range</a>. The <a href="RSL_range_struct.html">Range</a>
+data type must be converted to float by using the function that is in ray
+header: <tt>ray->h.f(r)</tt>, where <tt>r</tt> is of type <a href="RSL_range_struct.html">Range</a>.
+These conversion functions are in the headers for the volume and sweep.
+They are there only as a convenience to the application developer. The
+number of data values in the Rays is specified by <tt>ray->h.nbins</tt>.
+This number represents the length of the array of <a href="RSL_range_struct.html">Range</a>
+values. There is no abiguity here, the number of data values (<a href="RSL_range_struct.html">Range</a>
+values) exactly matches <tt>ray->h.nbins</tt>.
+<p>There are two methods to accessing the data:
+<ul>
+<li>
+Use a loop index that ranges from 0 to <tt>ray->h.nbins-1 </tt>calling
+the <tt>ray->h.f</tt> function.</li>
+
+<li>
+Use <a href="RSL_get_value.html">RSL_get_value</a> or other similiar RSL
+get value functions.</li>
+</ul>
+Here are two coding examples illustrating how to access the array of <a href="RSL_range_struct.html">Range</a>
+values..
+<p>Example 1:
+<pre>Ray *ray;
+int i;
+float x;
+
+/* Assume a non-NULL ray at this point. */
+for (i=0; i&lt;ray->h.nbins; i++) {
+&nbsp;&nbsp; x = ray->h.f(ray->range[i]);
+&nbsp;&nbsp; /* Do something with this floating point value 'x'. */
+&nbsp;&nbsp; printf("BIN %d value is %f\n", i, x);
+}</pre>
+Example 2:
+<pre>Volume *volume;
+float x;
+float elev, azimuth, range;
+
+/* No assumption about volume, it *can* be NULL! */
+/* That's because RSL_get_value checks it. */
+elev = 2.0;
+azimuth = 30.2;
+range = 87.3; /* KM */
+x = RSL_get_value(volume, elev, azimuth, range);</pre>
+
+<h2>
+No assumptions as to the validity of the data.</h2>
+The RSL does not modify the data in any way. It merely, loads the data
+into the Radar structure. For instance, during the MCTEX experiment, the
+azimuth values were incorrect for the first four tapes. They remain incorrect.
+It is up to you to write a conversion procedure that corrects the problem.
+<h2>
+Pitfalls when using RSL in an application.</h2>
+Here are some common mistakes made and things you should observe.
+<ol>
+<li>
+Not checking for NULL. It is very important to check for NULL pointers.
+In the RSL context, NULL is a perfectly valid ray, sweep or volume. Blindly
+assuming that a volume, sweep, or ray exists is asking for trouble. When
+using an RSL interface routine, a routine that is prefixed with <b>RSL_</b>,
+you don't have to worry too much about passing null pointers. RSL routines
+check their arguments.</li>
+
+<li>
+Not checking for NULL, when passing a volume, sweep, or ray pointer into
+a routine. Check for NULL immediately.</li>
+
+<li>
+Not using the value for <tt>radar->h.nvolumes</tt>, <tt>volume->h.nsweeps</tt>,
+<tt>sweep->h.nray</tt>.
+They represent the maximum index possible and not the actual number of
+non-NULL structures. Remember a NULL sweep, in RSL, is a valid sweep; you
+just can't do anything with it. If you want to know how many non-NULL volumes
+you have, you'll have to count them yourself. Do that by looping from 0
+to <tt>radar->h.nvolumes - 1</tt>.</li>
+
+<li>
+Not using the value for <tt>radar->h.nvolumes</tt>, <tt>volume->h.nsweeps</tt>,
+<tt>sweep->h.nrays</tt>,
+and <tt>ray->h.nbins</tt> for the current object. Never assume that the
+values are constant throughout the radar structure. They constantly change.
+For instance, the number of bins may decrease as the sweep elevation increases.</li>
+
+<li>
+Not converting the data in the <a href="RSL_radar_struct.html">Radar</a>,
+<a href="RSL_volume_struct.html">Volume</a>,
+<a href="RSL_sweep_struct.html">Sweep</a>,
+<a href="RSL_ray_struct.html">Ray</a>,
+(really the Ray) to floating point before comparing with anything, including
+comparing it with BADVAL, RFVAL, APFLAG, NOECHO. Do this conversion with
+the <tt>h.f(c)</tt>, where <tt>c</tt> is <tt>ray->range[i]</tt> and is
+of type <a href="RSL_range_struct.html">Range</a>. For example:</li>
+
+<br>&nbsp;
+<p>&nbsp;
+<p><tt>x = ray->h.f(ray->range[ibin]);</tt>
+<li>
+Not converting a floating point number to internal storage with <tt>h.invf(x)</tt>,
+where <tt>x</tt> is of type float, before filling the range array. For
+example:</li>
+
+<br>&nbsp;
+<p>&nbsp;
+<p><tt>ray->range[ibin] = ray->h.invf(x);</tt>
+<li>
+Forgetting to load a color table before calling an image generation function.
+If you don't load a color table, your images will be black.</li>
+
+<li>
+Not rebinning the velocity data before making velocity images. The default
+color table is setup to cover the range of -nyquist to +nyquist.</li>
+</ol>
+
+</body>
+</html>

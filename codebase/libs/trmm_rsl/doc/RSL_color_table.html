@@ -1,0 +1,77 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body>
+<a href="index.html"><img SRC="rsl.gif" height=100 width=100></a>
+<hr>
+<h1>
+RSL_get_color_table<br>
+RSL_set_color_table</h1>
+
+<h1>
+
+<hr></h1>
+
+<h3>
+Synopsis</h3>
+<b>#include "rsl.h"</b>
+<br><b>void RSL_get_color_table(int icolor, char buffer[256], int *ncolors)</b>
+<br><b>void RSL_set_color_table(int icolor, char buffer[256], int ncolors)</b>
+<h3>
+
+<hr>Description</h3>
+<b>RSL_get_color_table</b>: Given a color table index, one of <b>RSL_RED_TABLE</b>,
+<b>RSL_GREEN_TABLE</b> or <b>RSL_BLUE_TABLE</b>, return up to 256 color
+indexes each containing the color intensity for that color at each index.&nbsp;
+The number of colors in the table is indicated in <b>*ncolors</b>.
+<p>RSL_set_color_table: Given a color table index <b>icolor</b>, one of
+<b>RSL_RED_TABLE</b>, <b>RSL_GREEN_TABLE</b> or <b>RSL_BLUE_TABLE</b>,&nbsp;
+and a character buffer, at most 256 color indexes long, and the number
+of indexes in the character buffer, set the color table.&nbsp; Each color
+index in <b>buffer</b> contains the color intensity for that color.&nbsp;
+Range of color intensities is 0 to 255.
+<p>You must make three calls to both the get and set functions to change
+the entire color table entry for a particular index.&nbsp; For example,
+to change the 5<sup>th</sup> index of the color table to cyan (Red=0, Green=255,
+Blue=255), perform the following (provided a color table is already loaded):
+<p><tt>char r[256], g[256], b[256];</tt>
+<br><tt>RSL_get_color_table(RSL_RED_TABLE,&nbsp;&nbsp; r, &amp;ncolors);</tt>
+<br><tt>RSL_get_color_table(RSL_GREEN_TABLE, g, &amp;ncolors);</tt>
+<br><tt>RSL_get_color_table(RSL_BLUE_TABLE,&nbsp; b, &amp;ncolors);</tt><tt></tt>
+<p><tt>r[4] = (char)0;&nbsp;&nbsp;&nbsp; /* [4] is the 5-th index */</tt>
+<br><tt>g[4] = (char)255;</tt>
+<br><tt>b[4] = (char)255;</tt><tt></tt>
+<p><tt>RSL_set_color_table(RSL_RED_TABLE,&nbsp;&nbsp; r, ncolors);</tt>
+<br><tt>RSL_set_color_table(RSL_GREEN_TABLE, g, ncolors);</tt>
+<br><tt>RSL_set_color_table(RSL_BLUE_TABLE,&nbsp; b, ncolors);</tt>
+<br><tt></tt>&nbsp;
+<br><tt></tt>&nbsp;<tt></tt>
+<p>
+<hr>
+<h3>
+Return value</h3>
+None.&nbsp;
+<hr>
+<h3>
+See also</h3>
+<a href="RSL_rebin_velocity.html">RSL_rebin_velocity_ray</a>, <a href="RSL_rebin_velocity.html">RSL_rebin_velocity_sweep</a>,
+<a href="RSL_rebin_velocity.html">RSL_rebin_velocity_volume</a>,
+<br><a href="RSL_sweep_to.html">RSL_sweep_to_gif</a>, <a href="RSL_sweep_to.html">RSL_sweep_to_pict</a>,
+<a href="RSL_sweep_to.html">Vsweep_to_pgm</a>,
+<a href="RSL_sweep_to.html">Vsweep_to_ppm</a>,
+<br><a href="RSL_load_color_table.html">RSL_load_color_table</a>, <a href="RSL_load_color_table.html">RSL_load_green_table</a>,
+<a href="RSL_load_color_table.html">RSL_load_red_table</a>,
+<a href="RSL_load_color_table.html">RSL_load_blue_table</a>,
+<br><a href="RSL_load_color_table.html">RSL_load_refl_color_table</a>,
+<a href="RSL_load_color_table.html">RSL_load_sw_color_table</a>,
+<a href="RSL_load_color_table.html">RSL_load_vel_color_table</a>,
+<br><a href="RSL_volume_to.html">RSL_volume_to_gif</a>, <a href="RSL_volume_to.html">RSL_volume_to_pict</a>,
+<a href="RSL_volume_to.html">RSL_volume_to_pgm</a>,
+<a href="RSL_volume_to.html">RSL_volume_to_ppm</a>.&nbsp;
+<hr>
+<p>Author: <a href="john.merritt.html">John H. Merritt</a>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.01b6C [en] (X11; I; Linux 2.0.28 i686) [Netscape]">
+   <TITLE> RSL_rebin...</TITLE>
+</HEAD>
+<BODY>
+<A HREF="index.html"><IMG SRC="rsl.gif" ></A><A HREF="index.html">&nbsp;</A>
+<HR>
+<H1>
+RSL_rebin_...</H1>
+
+<HR>
+<H3>
+Synopsis</H3>
+<B>#include "rsl.h"</B>
+<BR><B>void RSL_rebin_ray(<A HREF="RSL_ray_struct.html">Ray</A> *r, int
+width);</B>
+<BR><B>void RSL_rebin_sweep(<A HREF="RSL_sweep_struct.html">Sweep</A> *s,
+int width);</B>
+<BR><B>void RSL_rebin_volume(<A HREF="RSL_volume_struct.html">Volume</A>
+*v, int width);</B>
+<H3>
+
+<HR>Description</H3>
+Rebin the data from -width to +width, centered at 0, to a positive value,
+such that -width corresponds to 1, and +width corresponds to the value
+2*width+1.
+
+<P>NOTE: This function modifies its argument: Ray, Sweep, or Volume. Use
+this function prior <A HREF="RSL_sweep_to_cart.html">RSL_sweep_to_cart</A>.
+The actual binning is done in RSL_rebin_ray.&nbsp;
+<HR>
+<H3>
+Return value</H3>
+None.&nbsp;
+<HR>
+<H3>
+See also</H3>
+<A HREF="RSL_sweep_to.html">RSL_sweep_to_gif</A>, <A HREF="RSL_sweep_to.html">RSL_sweep_to_pict</A>,
+<A HREF="RSL_sweep_to.html">RSL_sweep_to_pgm</A>, <A HREF="RSL_sweep_to.html">RSL_sweep_to_ppm</A>,
+<BR><A HREF="RSL_load_color_table.html">RSL_load_color_table</A>, <A HREF="RSL_load_color_table.html">RSL_load_green_table</A>,
+<A HREF="RSL_load_color_table.html">RSL_load_red_table</A>, <A HREF="RSL_load_color_table.html">RSL_load_blue_table</A>,
+<BR><A HREF="RSL_load_color_table.html">RSL_load_refl_color_table</A>,
+<A HREF="RSL_load_color_table.html">RSL_load_sw_color_table</A>, <A HREF="RSL_load_color_table.html">RSL_load_vel_color_table</A>,
+<BR><A HREF="RSL_volume_to.html">RSL_volume_to_gif</A>, <A HREF="RSL_volume_to.html">RSL_volume_to_pict</A>,
+<A HREF="RSL_volume_to.html">RSL_volume_to_pgm</A>, <A HREF="RSL_volume_to.html">RSL_volume_to_ppm</A>.&nbsp;
+<HR>
+
+<P>Author: <A HREF="david.wolff.html">David B. Wolff</A>
+</BODY>
+</HTML>

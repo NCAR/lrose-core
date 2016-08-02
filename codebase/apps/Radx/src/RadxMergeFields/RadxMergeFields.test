@@ -1,0 +1,871 @@
+/**********************************************************************
+ * TDRP params for RadxMergeFields
+ **********************************************************************/
+
+//======================================================================
+//
+// Merges fields from multiple CfRadial files into a single file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This application registers with procmap. This is the instance used 
+//   for registration.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in FILELIST mode, at 
+//   least) MUST contain a day-directory below the data file -- 
+//   ./data_file.ext will not work as a file path.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+// Only data less old than this will be used.
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// DATA LOCATIONS.
+//
+//======================================================================
+ 
+///////////// input_datasets //////////////////////////
+//
+// Index of directories containing the data files.
+// The indices are used by output_fields to indicate where each field is 
+//   located. The lowest index is used as the primary input. The geometry 
+//   of non-primary files will be converted to match the primary files. 
+//   The time offset will be used in searching for the files to merge in. 
+//   The offset is ignored for the primary field (index 1).
+//
+// Type: struct
+//   typedef struct {
+//      int index;
+//      string dir;
+//      int search_time_offset_secs;
+//      int search_time_margin_secs;
+//   }
+//
+// 1D array - variable length.
+//
+
+input_datasets = {
+  {
+    index = 1,
+    dir = "$(DATA_DIR)/cfradial/qc/sband/sur",
+    search_time_offset_secs = 0,
+    search_time_margin_secs = 60
+  }
+  ,
+  {
+    index = 2,
+    dir = "$(DATA_DIR)/cfradial/moments/sband/sur",
+    search_time_offset_secs = 0,
+    search_time_margin_secs = 60
+  }
+  ,
+  {
+    index = 3,
+    dir = "$(DATA_DIR)/cfradial/qc/kband/sur",
+    search_time_offset_secs = 0,
+    search_time_margin_secs = 60
+  }
+};
+
+//======================================================================
+//
+// SPECIFYING FIELDS TO COPY FROM EACH SOURCE.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Specs of fields to be copied from input to output.
+// input_index: indicates which input_dir to use.
+// input_field_name: name of field in input file.
+// output_field_name: name of field in output file.
+// encoding: output encoding for the field. If ASIS then the encoding is 
+//   not changed.
+// scaling: output scaling for the field. If SCALING_SPECIFIED, then the 
+//   scale and offset is used.
+//
+// Type: struct
+//   typedef struct {
+//      int input_index;
+//      string input_field_name;
+//      string output_field_name;
+//      output_encoding_t output_encoding;
+//        Options:
+//          ENCODING_ASIS
+//          ENCODING_FLOAT32
+//          ENCODING_INT32
+//          ENCODING_INT16
+//          ENCODING_INT08
+//      output_scaling_t output_scaling;
+//        Options:
+//          SCALING_DYNAMIC
+//          SCALING_SPECIFIED
+//      double output_scale;
+//      double output_offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    input_index = 1,
+    input_field_name = "DBZ_F",
+    output_field_name = "DBZ_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "DBZ_NO_ATMOS_ATTEN_F",
+    output_field_name = "DBZ_NO_ATMOS_ATTEN_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "VEL_F",
+    output_field_name = "VEL_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "VEL2_F",
+    output_field_name = "VEL2_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "VEL_HV_F",
+    output_field_name = "VEL_HV_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "WIDTH_F",
+    output_field_name = "WIDTH_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "ZDRM_F",
+    output_field_name = "ZDRM_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "ZDR_F",
+    output_field_name = "ZDR_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "LDRH_F",
+    output_field_name = "LDRH_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "LDRV_F",
+    output_field_name = "LDRV_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "RHOHV_F",
+    output_field_name = "RHOHV_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "PHIDP_F",
+    output_field_name = "PHIDP_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "KDP_F",
+    output_field_name = "KDP_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "PSOB_F",
+    output_field_name = "PSOB_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "NCP_F",
+    output_field_name = "NCP_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "SNRHC_F",
+    output_field_name = "SNRHC_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "SNRVC_F",
+    output_field_name = "SNRVC_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "SNRHX_F",
+    output_field_name = "SNRHX_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "SNRVX_F",
+    output_field_name = "SNRVX_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "DBMHC_F",
+    output_field_name = "DBMHC_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "DBMVC_F",
+    output_field_name = "DBMVC_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "DBMHX_F",
+    output_field_name = "DBMHX_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "DBMVX_F",
+    output_field_name = "DBMVX_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "NOISE_BIAS_DB_HC",
+    output_field_name = "NOISE_BIAS_DB_HC_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "NOISE_BIAS_DB_VC",
+    output_field_name = "NOISE_BIAS_DB_VC_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "PID",
+    output_field_name = "PID",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "TEMP_FOR_PID",
+    output_field_name = "TEMP_FOR_PID",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "RATE_ZH",
+    output_field_name = "RATE_ZH",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "RATE_Z_ZDR",
+    output_field_name = "RATE_Z_ZDR",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "RATE_KDP",
+    output_field_name = "RATE_KDP",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "RATE_KDP_ZDR",
+    output_field_name = "RATE_KDP_ZDR",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "RATE_HYBRID",
+    output_field_name = "RATE_HYBRID",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "AIQ",
+    output_field_name = "AIQ_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 1,
+    input_field_name = "NIQ",
+    output_field_name = "NIQ_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 2,
+    input_field_name = "CLUT",
+    output_field_name = "CLUT_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 2,
+    input_field_name = "CPA",
+    output_field_name = "CPA_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 2,
+    input_field_name = "CMD",
+    output_field_name = "CMD_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 2,
+    input_field_name = "CMD_FLAG",
+    output_field_name = "CMD_FLAG_S",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 3,
+    input_field_name = "DBZ_K",
+    output_field_name = "DBZ_K",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 3,
+    input_field_name = "DBZ_NO_ATMOS_ATTEN_K",
+    output_field_name = "DBZ_NO_ATMOS_ATTEN_K",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 3,
+    input_field_name = "VEL_K",
+    output_field_name = "VEL_K",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 3,
+    input_field_name = "WIDTH_K",
+    output_field_name = "WIDTH_K",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 3,
+    input_field_name = "LDRH_K",
+    output_field_name = "LDRH_K",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 3,
+    input_field_name = "SNRHC_K",
+    output_field_name = "SNRHC_K",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 3,
+    input_field_name = "SNRVX_K",
+    output_field_name = "SNRVX_K",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 3,
+    input_field_name = "DBMHC_K",
+    output_field_name = "DBMHC_K",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 3,
+    input_field_name = "DBMVX_K",
+    output_field_name = "DBMVX_K",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_index = 3,
+    input_field_name = "NOISE_BIAS_DB_HC_K",
+    output_field_name = "NOISE_BIAS_DB_HC_K",
+    output_encoding = ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+};
+
+//======================================================================
+//
+// OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS.
+//
+// Fixed angles are elevation in PPI mode and azimuth in RHI mode.
+//
+//======================================================================
+ 
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+// Only use sweeps within the specified fixed angle limits.
+// Type: boolean
+//
+
+set_fixed_angle_limits = FALSE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+// Type: double
+//
+
+lower_fixed_angle_limit = 0;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+// Type: double
+//
+
+upper_fixed_angle_limit = 90;
+
+///////////// set_sweep_num_limits ////////////////////
+//
+// Option to set sweep number limits.
+// Only read sweeps within the specified sweep number limits.
+// Type: boolean
+//
+
+set_sweep_num_limits = FALSE;
+
+///////////// lower_sweep_num /////////////////////////
+//
+// Lower sweep number limit.
+// Type: int
+//
+
+lower_sweep_num = 0;
+
+///////////// upper_sweep_num /////////////////////////
+//
+// Upper sweep number limit.
+// Type: int
+//
+
+upper_sweep_num = 0;
+
+//======================================================================
+//
+// SWEEP FILE AGGREGATION.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+// If false, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = TRUE;
+
+//======================================================================
+//
+// TOLERANCES ON TIME AND ANGLE FOR MERGED BEAMS.
+//
+// When matching beams between the primary and secondary volumes, we 
+//   search for the match within the tolerances specified below.
+//
+//======================================================================
+ 
+///////////// beam_time_tolerance_secs ////////////////
+//
+// Tolerance in time when merging beams (secs).
+// Beams must match in time, within this tolerance, to be considered the 
+//   same beam between the primary and secondary files.
+// Type: double
+//
+
+beam_time_tolerance_secs = 1;
+
+///////////// beam_azimuth_tolerance_deg //////////////
+//
+// Tolerance in azimuth when merging beams (deg).
+// Beams must match in azimuth, within this tolerance, to be considered 
+//   the same beam between the primary and secondary files.
+// Type: double
+//
+
+beam_azimuth_tolerance_deg = 0.1;
+
+///////////// beam_elevation_tolerance_deg ////////////
+//
+// Tolerance in elevation when merging beams (deg).
+// Beams must match in elevation, within this tolerance, to be 
+//   considered the same beam between the primary and secondary files.
+// Type: double
+//
+
+beam_elevation_tolerance_deg = 0.1;
+
+//======================================================================
+//
+// OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_UF
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+// If false, data will be byte-swapped as appropriate on output.
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+// Applies to netCDF and Dorade. UF does not support compression.
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+// Type: int
+//
+
+compression_level = 9;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+// Files will be written to this directory.
+// Type: string
+//
+
+output_dir = "$(DATA_DIR)/cfradial/qc/merged/sur";
+
+///////////// compute_output_path_using_start_time ////
+//
+// Compute the output file name using the end time of the volume or 
+//   sweep.
+// If false, the start time will be used instead.
+// Type: boolean
+//
+
+compute_output_path_using_start_time = TRUE;
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+// Path will be output_dir/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+

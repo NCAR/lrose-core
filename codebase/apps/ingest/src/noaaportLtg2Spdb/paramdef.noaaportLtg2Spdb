@@ -1,0 +1,199 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+///////////////////////////////////////////////////////////
+//
+// paramdef.NPLtg2Spdb
+//
+//
+
+commentdef {
+  p_header = "noaaportLtg2Spdb reads lightning data into an SPDB database.\n"
+	"Filenames - realtime or archive mode - must match the convention:\n\n"
+	"YYYYMMDD_hhmm.ltg, for example 20070215_1113.ltg\n\n"
+	"Or they will not be ingested. noaaportLtg2Spdb should be used\n"
+	"rather than the older NPLtg2Spdb, since that code could not\n"
+	"cope with files that grow in time like those delivered by\n"
+	"an LDM do.\n\nNiles Oien Feb 2007.";
+}         
+
+
+////////////////////////////////////////////////////////////////////////
+//
+// Debugging
+//
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = { false };
+} Debug;
+
+////////////////////////////////////////////////////////////////////////
+//
+// Operational information
+//
+
+paramdef string
+{
+  p_descr = "procmap instance";
+  p_help = "Be sure this is unique to this instance\n"
+	"of the program.";
+  p_default = { "Test" };
+} Instance;
+
+paramdef long
+{
+  p_descr = "processing delay in seconds";
+  p_help = "The number of seconds to wait before processing an input file.\n"
+	"This delay may allow activity on the file to finish before we start reading it,\n"
+	"realtime mode only.";
+  p_default = { 0 };
+} ProcessingDelay;
+
+paramdef long
+{
+  p_descr = "Delay between checking input directory for new files, seconds.";
+  p_help = "The number of seconds to wait before processing an input file.\n"
+	"Set fairly low since ltg updates are critical.";
+  p_default = { 5 };
+} strobeDelay;
+
+
+paramdef string
+{
+  p_descr = "Substring that input filenames must contain to be considered valid";
+  p_help = "Leave empty for this check to be ignored.";
+  p_default = { ".ltg" };
+} filenameSubstring;
+
+paramdef string
+{
+  p_descr = "Name for temporary file used to keep track of the input\n"
+	"directory's state.";
+  p_help = "Actual filename will have instance appended to it.";
+  p_default = { "/tmp/_noaaportLtg2Spdb" };
+} tempFile;
+
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_help = "Directory where NOAAPORT ltg files are, realtime mode only.";
+  p_default = { "." };
+} InputDir;
+
+
+paramdef long
+{
+  p_descr = "lightning data expire seconds";
+  p_help = "Number of seconds the lightning data is valid before it should be expired.";
+  p_default = { 60 };
+} ExpireSecs;
+
+paramdef int
+{
+  p_descr = "Maximum age for an input file to be processed, seconds.";
+  p_help = "Valid for REALTIME mode only.";
+  p_default = 300;
+} MaxRealtimeFileAge;
+
+paramdef string
+{
+  p_descr = "Destination SPDB URL";
+  p_help = "The name of the URL which will be used as the destination for the SPDB data.";
+  p_default = { "spdbp:://localhost::spdb/ltg" };
+} OutputUrl;
+
+paramdef enum runmode_t
+{
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode,\n"
+	"the analysis is performed for each dataset as it becomes available. In\n"
+	"archive mode, the file list is obtained from the command line.";
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+} Mode;
+
+
+commentdef {
+  p_header = "-------- Region over which to ingest data.";
+}
+
+paramdef float
+{
+  p_descr = "Minimum latitude for data to be ingested, decimal degrees.";
+  p_help = "Data south of this are not ingested. Default covers Mainland USA.";
+  p_default = 25.0;
+} MinLat;
+
+paramdef float
+{
+  p_descr = "Maximum latitude for data to be ingested, decimal degrees.";
+  p_help = "Data north of this are not ingested. Default covers Mainland USA.";
+  p_default = 50.0;
+} MaxLat;
+
+paramdef float
+{
+  p_descr = "Minimum longitude for data to be ingested, decimal degrees.";
+  p_help = "Data west of this are not ingested. Default covers Mainland USA.\n"
+            "Longitudes cover -180 to 180.";
+  p_default = -125.0;
+} MinLon;
+
+paramdef float
+{
+  p_descr = "Maximum longitude for data to be ingested, decimal degrees.";
+  p_help = "Data east of this are not ingested. Default covers Mainland USA.\n"
+            "Longitudes cover -180 to 180.";
+  p_default = -65.0;
+} MaxLon;
+
+paramdef int
+{
+  p_descr = "Maximum difference between the file name time and the\n"
+	"data time, seconds, for data point\n"
+	"to be considered for ingest. If set to a value less than\n"
+	"10, the units are assumed to be days, otherwise the units are\n"
+	"taken to be seconds.";
+  p_help = "File names must comply with the 20060802_1901.ltg naming\n"
+	"convention for this test to be applied. Note, however, that\n"
+	"sometimes the data files get stuck, by which I  mean that\n"
+	"data continues to be transmitted to a file with a name\n"
+	"pertaining to a certain time long after that time has expired.\n"
+	"Experience suggests that the input data are junk when this\n"
+	"happens.";
+  p_default = 1800;
+} MaxRealtimeFileTimeDiff;
+
+
+paramdef boolean
+{
+  p_descr = "Option to ingest the experimental type 0x97 ltg stream.";
+  p_help = "This is not reccomended as the format of this stream changes\n"
+	"very often and other Vaisala displays do not show these data,\n"
+	"leading to confusion.";
+  p_default = { false };
+} ingestExperimental;

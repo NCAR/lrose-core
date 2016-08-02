@@ -1,0 +1,240 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvFuzzyCombine
+ *
+ * This file contains the TDRP parameter definitions for MdvFuzzyCombine
+ */
+
+commentdef
+{
+  p_header = "MdvFuzzyCombine";
+  p_text = "This program reads in MDV data from a URL and then produces a fuzzy combination of input fields. Currently set for 2 dimensional input data only";
+};
+
+paramdef boolean
+{
+  p_descr = "debug";
+  p_help = "If TRUE, debugging is enabled";
+  p_default = FALSE;
+} debug;
+
+paramdef string
+{
+  p_descr = "instance";
+  p_help = "Instance name for PMU calls";
+  p_default = "default";
+} instance;
+
+paramdef string
+{
+  p_descr = "The input data";
+  p_help = "MDV URL";
+  p_default = "unknown";
+} inputDataUrl;
+
+paramdef string
+{
+  p_descr = "The optional input mask data";
+  p_help = "MDV URL, set to empty string for no mask data.";
+  p_default = "";
+} inputMaskUrl;
+
+paramdef string
+{
+  p_descr = "Optional input mask data field name";
+  p_help = "Ignored if inputMaskUrl is empty";
+  p_default = "";
+} inputMaskFieldName;
+
+paramdef boolean
+{
+  p_descr = "static mask data";
+  p_help = "TRUE if input mask data is static, i.e. read in one time and used for all subsequent times, FALSE if mask data is aligned with the actual input data, ignored if there is no input mask data. If staticMaskData expect to find a single data file in the specified mask URL.";
+  p_default = TRUE;
+} staticMaskData;
+
+paramdef string
+{
+  p_descr = "The output data";
+  p_help = "MDV URL";
+  p_default = "unknown";
+} outputDataUrl;
+
+paramdef boolean
+{
+  p_descr = "The input data type";
+  p_help = "if TRUE the input data is forecast data, if FALSE it is flat files";
+  p_default = TRUE;
+} isForecastData;
+
+paramdef boolean
+{
+  p_descr = "The input mask data type";
+  p_help = "if TRUE, and the inputMaskUrl is not empty, the input mask data is forecast data, if FALSE it is flat files. Note that you can have input forecast data with flat mask data, but not input flat data and forecast mask data.  If the input data is forecast and the mask is flat, the valid time of the forecast is the time used for the mask data";
+  p_default = FALSE;
+} isForecastMaskData;
+
+paramdef string
+{
+  p_descr = "field name for output";
+  p_default = "name";
+} outputFieldName;
+
+paramdef string
+{
+  p_descr = "field units for output";
+  p_default = "unit";
+} outputFieldUnits;
+
+typedef struct
+{  
+  string name;
+  double weight;
+  int fuzzy_index;
+} Input_t;
+
+paramdef struct Input_t
+{
+  p_descr = "Input";
+  p_help =
+    "name = field name\n"
+    "weight = weight to give in the fuzzy combination\n"
+    "fuzzy_index = index to fuzzy mapping that transforms the data before use, m
+ust be in the range 0 to 9";
+  p_default = {};
+} input[];
+
+paramdef int
+{
+  p_descr = "erode max";
+  p_help = "Number of gridpoints away from points without data to expand into areas of point with data, 0 for no eroding expansion.  Only used when a mask grid is used";
+  p_default = 0;
+} erodeMax;
+
+paramdef int
+{
+  p_descr = "smooth number of points";
+  p_help = "Number of gridpoints in x and y to smooth data prior to expanding";
+  p_default = 0;
+} smoothNpt;
+
+paramdef int
+{
+  p_descr = "dist fill max";
+  p_help = "Number of gridpoints away from points with data to expand to, 0 for no expansion.  Only used when a mask grid is used";
+  p_default = 0;
+} distFillMax;
+
+paramdef int
+{
+  p_descr = "dist fill scale";
+  p_help = "Resolution (Number of gridpoints) when expanding. Only used when a mask grid is used";
+  p_default = 1;
+} distFillScale;
+
+paramdef int
+{
+  p_descr = "Fuzzy mapping from distance to weight";
+  p_help = "Index to the fuzzy function used to taper, where distances are in terms of number of gridpoints";
+  p_default = 0;
+} fuzzy_dist_to_weight_index;  
+
+
+typedef struct
+{
+  double x;
+  double y;
+} Fuzzy_t;
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "Fuzzy function 0";
+  p_help = "mapping";
+  p_default = {};
+} fuzzy0[];
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "Fuzzy function 1";
+  p_help = "mapping";
+  p_default = {};
+} fuzzy1[];
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "Fuzzy function 2";
+  p_help = "mapping";
+  p_default = {};
+} fuzzy2[];
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "Fuzzy function 3";
+  p_help = "mapping";
+  p_default = {};
+} fuzzy3[];
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "Fuzzy function 4";
+  p_help = "mapping";
+  p_default = {};
+} fuzzy4[];
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "Fuzzy function 5";
+  p_help = "mapping";
+  p_default = {};
+} fuzzy5[];
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "Fuzzy function 6";
+  p_help = "mapping";
+  p_default = {};
+} fuzzy6[];
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "Fuzzy function 7";
+  p_help = "mapping";
+  p_default = {};
+} fuzzy7[];
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "Fuzzy function 8";
+  p_help = "mapping";
+  p_default = {};
+} fuzzy8[];
+
+paramdef struct Fuzzy_t
+{
+  p_descr = "Fuzzy function 9";
+  p_help = "mapping";
+  p_default = {};
+} fuzzy9[];
+

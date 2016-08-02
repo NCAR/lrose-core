@@ -1,0 +1,247 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SigmetUdp2Dsr
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2003
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SigmetUdp2Dsr reads Sigmet moments data from UDP and writes the contents into a DsRadar FMQ.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef int {
+  p_default = 30730;
+  p_descr = "Port number for UDP input.";
+} udp_port;
+
+commentdef {
+  p_header = "RADAR PARAMS";
+  p_text = "If any of the params are set in the input data files, the values in those params will be taken from the input data stream rather than from the parameter file."; 
+};
+
+typedef enum {
+  HORIZONTAL = 0,
+  VERTICAL = 1,
+  CIRCULAR = 2,
+  ELLIPTICAL = 3
+} polar_t;
+
+typedef struct {
+
+  int radar_id;
+  polar_t polarization;      // polarization type
+  double altitude;           // km
+  double latitude;           // degrees
+  double longitude;          // degrees
+  double horiz_beam_width;   // half-power beam width - degrees
+  double vert_beam_width;    // half-power beam width - degrees
+  double pulse_width;        // micro-secs
+  double radar_constant;     // dB
+  double xmit_peak_pwr;      // watts
+  double receiver_mds;       // dBm
+  double receiver_gain;      // dB
+  double antenna_gain;       // dB
+  double system_gain;        // dB
+  double noise_value;        // dBM
+  double min_dbz_at_1km;     // dBZ
+  
+} radar_params_t;
+
+paramdef struct radar_params_t {
+
+  p_descr = "Default radar params. If any of the params are set in the input data files, the values in those params will be taken from the input data stream rather than from the parameter file.";
+
+  p_help = "========== Radar params ==========\n"
+  "\t\n"
+  "polarization: polarization type\n"
+  "altitude: km\n"
+  "latitude: degrees\n"
+  "longitude: degrees\n"
+  "horiz_beam_width: half-power beam width - degrees\n"
+  "vert_beam_width: half-power beam width - degrees\n"
+  "pulse_width: micro-secs\n"
+  "radar_constant: dB\n"
+  "xmit_peak_pwr: watts\n"
+  "receiver_mds: dBm\n"
+  "receiver_gain: dB\n"
+  "antenna_gain: dB\n"
+  "system_gain: dB\n"
+  "noise_value: dBM - system noise\n"
+  "min_dbz_at_1km: dBZ - min detectable dBZ at 1km range\n"
+  "\t\n";
+  
+  p_default = { radar_id = 0,
+  		polarization = HORIZONTAL,
+                altitude = 1.742,
+                latitude = 39.93208,
+                longitude = -105.18175,
+                horiz_beam_width = 0.91,
+                vert_beam_width = 0.91,
+                pulse_width = 1.0,
+		radar_constant = 70.1652,
+		xmit_peak_pwr = 8000000,
+		receiver_mds = -113.0,
+		receiver_gain = 46.05,
+		antenna_gain = 45.2,
+		system_gain = 46.05,
+		noise_value = -110.0,
+		min_dbz_at_1km = -42.0
+  };
+  
+} radar;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Scan type id";
+  p_help = "Unique identifier for scan strategy";
+} scan_type_id;
+
+paramdef string {
+  p_default = "Surveillance";
+  p_descr = "Scan type name";
+  p_help = "Descriptive name for scan strategy";
+} scan_type_name;
+
+paramdef int  {
+  p_default = 64;
+  p_descr = "Number of IQ samples per beam.";
+  p_help = "Number of samples from which moments are computed.";
+} samples_per_beam;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check the task name.";
+  p_help = "If TRUE, only data packets with the specified task name will be processed. If FALSE, all task names will be accepted.";
+} check_task_name;
+
+paramdef string {
+  p_default = "VOL_SCAN";
+  p_descr = "Specified task name";
+  p_help = "See 'check_task_name'";
+} task_name;
+
+commentdef {
+  p_header = "TIME CORRECTION OPTION";
+};
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Correction to input data times.";
+  p_help = "This correction is added to the incoming data times, to give the output beam times. This can be used to (a) correct times when it is known that there is a time error or (b) convert local time to UTC.";
+} time_correction_secs;
+
+commentdef {
+  p_header = "OUTPUT DsRadar FMQ";
+};
+
+paramdef string {
+  p_default = "fmqp:://$(HOST)::fmq/dsRadar";
+  p_descr = "Output URL for DsRadar data via FMQ";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Wait per beam (milli-secs)";
+  p_help = "ARCHIVE and SIMULATE modes only.";
+} beam_wait_msecs;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to set the end of volume flag in the FMQ.";
+} set_end_of_vol_flag;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flag to indicate that elevation angles increase in the volume.";
+  p_help = "If the volume starts at the top, i.e. elevations decrease during the volume, set this to FALSE.";
+} volume_starts_at_bottom;
+
+paramdef double {
+  p_default = 1.5;
+  p_min = 0.1;
+  p_descr = "Change in elevation which triggers and end of volume.";
+  p_help = "If the elevation angle changes by this amount, and end of volume flag will be set.";
+} el_change_for_end_of_vol;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Min number of beams per volume.";
+  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.";
+} min_beams_per_vol;
+
+

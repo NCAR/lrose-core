@@ -1,0 +1,316 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions Dorade2Dsr
+//
+// Mike Dixon
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Feb 2002
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Dorade2Dsr reads Dorade radar beam-by-beam files and copies the contents into a DsRadar FMQ.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_DATA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, SIMULATE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.";
+} mode;
+
+commentdef {
+  p_header = "DORADE FILE DATA INPUT";
+};
+
+paramdef string {
+  p_default = "$(HOME)/data/raw/radar/dorade";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to unlink the input file after use.";
+  p_help = "If TRUE, the input file will be processed and then deleted.";
+} delete_input_file_after_use;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Time to wait between files in SIMULATE mode - (secs).";
+  p_help = "In SIMULATE mode the program cycles through the input files. This is the wait time between the files.";
+} simulate_wait_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to check elevation for error.";
+  p_help = "If true, and elevation error exceeds 'max_elev_error', the beam is discarded.";
+} check_elev;
+
+paramdef float {
+  p_descr = "Error in elevation (in degrees) for identifying unwanted beams.";
+  p_help = "Used for eliminating beams as the radar is moving around, for example when the radar is dropping down to begin a new volume scan.";
+  p_default = 0.5;
+} max_elev_error;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove the test pulse data.";
+  p_help = "If true, the test pulse data will be removed from the end of the beam. The test pulse data generally lies in the last few gates in the beam. If true, the number of gates will be reduced by 'ngates_test_pulse'.";
+} remove_test_pulse;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Number of gates to remove to get rid of test pulse.";
+  p_help = "See 'remove_test_pulse'.";
+} ngates_test_pulse;
+
+commentdef {
+  p_header = "RADAR PARAMS";
+  p_text = "If any of the params are set in the input data files, the values in those params will be taken from the input data stream rather than from the parameter file."; 
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute scan type from the file name";
+  p_help = "If TRUE, we search for a string in the file name, and derive the scan_type accordinly. If FALSE, we use the parameter scan_type_id.";
+} get_scan_id_type_from_file_name;
+
+typedef struct {
+  string scan_type_label;
+  int scan_type_id;
+} scan_type_lookup_t;
+
+paramdef struct scan_type_lookup_t {
+  p_default = {
+    { "SUR", 8 },
+    { "PPI", 1 },
+    { "RHI", 3 }
+  };
+  p_descr = "Lookup between scan labels and the scan type id."; 
+} scan_type_lookup[];
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Scan type id";
+  p_help = "Unique identifier for scan strategy";
+} scan_type_id;
+
+paramdef string {
+  p_default = "Default";
+  p_descr = "Scan type name";
+  p_help = "Descriptive name for scan strategy";
+} scan_type_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override input data stream with user-specified latitude, longitude and altitude";
+  p_help = "If TRUE, the radar location in the params will be used instead of the values in the input files.";
+} override_radar_location;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override input data stream with the current time in realtime mode.";
+  p_help = "If TRUE, the data will be timestamped with the current time. Useful in REALTIME mode for simulations.";
+} override_radar_time;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Radar latitude - deg";
+  p_help = "Only used if override_radar_location is true.";
+} radar_latitude;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Radar longitude - deg";
+  p_help = "Only used if override_radar_location is true.";
+} radar_longitude;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Radar altitude - km";
+  p_help = "Only used if override_radar_location is true.";
+} radar_altitude;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override gate_spacing and start_range in the input data.";
+  p_help = "If TRUE, the gate_spacing and start_range in the params will be used instead of the values in the input files.";
+} override_gate_geom;
+
+paramdef double {
+  p_default = 0.150;
+  p_descr = "Gate_spacing - km";
+  p_help = "Only used if override_gate_geom is true.";
+} gate_spacing;
+
+paramdef double {
+  p_default = 0.075;
+  p_descr = "start_range - km";
+  p_help = "Only used if override_gate_geom is true.";
+} start_range;
+
+paramdef double {
+  p_default = -108;
+  p_descr = "Receiver min detectable signal - dBm";
+} receiver_mds;
+
+commentdef {
+  p_header = "OUTPUT FIELDS";
+  p_text = "Only the following fields will included in the output. If the field is not in the input file, it will be left out.";
+};
+
+typedef struct {
+  string dorade_name;
+  string name;
+  string units;
+  double scale;
+  double bias;
+} output_fields_t;
+
+paramdef struct output_fields_t {
+  p_descr = "Output radar fields";
+  p_help = "List of fields to be output if available in the input data. If a field does not exist in the input data it will not be output either. The dorade_name can be either a single field name, or a comma-delimited list. If it is a list, the first name to match a field in the input data is used. If the data is output as OUTPUT_UI08, the specified scale and bias values will be used. If data is output as OUTPUT_UI16, and the input data is not 16-bit, the specified scale and bias will be used. If input and output data are both 16-bit, the scale and bias supplied by the Dorade data will be used. If OUTPUT_FL32, no scale and bias is needed.";
+  p_default = {
+    { "ZHH0", "DBZ", "dBZ", 0.5, -32.0 },
+    { "VE0", "VEL", "m/s", 0.5, -63.5 }
+  };
+} output_fields[];
+
+typedef enum {
+  OUTPUT_UI08, OUTPUT_UI16, OUTPUT_FL32
+} output_type_t;
+
+paramdef enum output_type_t {
+  p_default = OUTPUT_UI08;
+  p_descr = "Type of output data.";
+  p_help = "If OUTPUT_UI08, the specified scale and bias will be used. If OUTPUT_UI16, the Dorade scale and bias will be used.";
+} output_type;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use the Dorade data scale and bias if applicable.";
+  p_help = "If TRUE, then the incoming Dorade scale and bias values will be used if the input data type matches the output data type, i.e. if both are 8-bit or 16-bit values. Otherwise, the scale and bias values specified in 'output_fields' will be used.";
+} use_dorade_scale_and_bias;
+
+commentdef {
+  p_header = "OUTPUT Dsr FMQ";
+};
+
+paramdef string {
+  p_descr = "Output URL for DsRadar data via FMQ";
+  p_default = "fmqp:://$(HOST)::fmq/dsRadar";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer
+ will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages wh
+ich may be written to the buffer before overwrites occur. However, overwrites ma
+y occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_descr = "Wait per beam (milli-secs)";
+  p_default = 0;
+} beam_wait_msecs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+
+typedef enum {
+  CHANGE_IN_SWEEP_VOL, EVERY_FILE, END_OF_DATA
+} end_of_vol_flag_t;
+
+paramdef enum end_of_vol_flag_t {
+  p_default = CHANGE_IN_SWEEP_VOL;
+  p_descr = "Decision on when to set end of vol flag";
+  p_help = "If CHANGE_IN_VOL_NUM, this only occurs when the sweep file volume number changes. If EVERY_FILE, and end-of-volume flag is set after every file. The END_OF_DATA setting is used to set an end-of-vol flag only at the end of all of the data files - ARCHIVE mode only.";
+} end_of_vol_flag;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Decision as to if we should send end of volume flags or not.";
+  p_help = "Generally these should be sent, however, in some cases the end of volume decision is not or can not be made correctly and the end of volume should be determined by antenna motion.";
+} sendEOV;

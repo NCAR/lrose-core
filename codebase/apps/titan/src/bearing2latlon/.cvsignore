@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+bearing2latlon
+makefile
+makefile.am
+makefile.in

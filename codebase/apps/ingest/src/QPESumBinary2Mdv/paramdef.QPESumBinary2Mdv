@@ -1,0 +1,256 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for QPESumBinary2Mdv
+ *
+ * Dan Megenhardt, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * May 2012
+ * 
+ * QPESumBinary2Mdv was written to read QPESum binary data
+ * from the Taiwan CWB. So far this application has been tested
+ * on the 2D mosaic data, the extrapolation data, and the precip
+ * data. Some work will need to be done to convert the 3D mosaic
+ * data."
+ */
+
+commentdef {
+  p_header = 
+ "QPESumBinary2Mdv was written to read QPESum binary data "
+ "from the Taiwan CWB. So far this application has been tested "
+ "on the 2D mosaic data, the extrapolation data, and the precip "
+ "data. Some work will need to be done to convert the 3D mosaic "
+ "data.\n";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef enum debug_t
+{
+  p_options = { DEBUG_OFF,
+                DEBUG_WARNINGS,
+                DEBUG_NORM,
+                DEBUG_EXTRA };
+  p_default = { DEBUG_OFF };
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug_level;
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef char* 
+{
+  p_default = { "Test" };
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+/***********************************************************************
+ * Input/output parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT PARAMETERS";
+};
+
+typedef enum
+{
+  REALTIME,
+  FILE_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In FILE_LIST mode, the program operates on the input files "
+           "specified on the command line.\n"
+           "In REALTIME mode, the realtimeInput, InputDir is watched for "
+           "new incoming files.\n";
+  p_default = REALTIME;
+} trigger_mode;
+
+typedef struct {
+	string InputDir;
+	string IncludeSubString;
+	string ExcludeSubString;
+	boolean ProcessOldFiles;
+} realtimeInput_t;
+
+paramdef struct realtimeInput_t {
+  p_default = { "/d1/data/raw", "", "", FALSE };
+  p_descr = "If mode is REALTIME then use these parameters.";
+  p_help = "Directory to watch, substring in filenames to include,\n"
+	   "substring in filenames to exclude, and boolean \n"
+           "indicating if old files should be processed.";
+} realtimeInput;
+
+paramdef enum data_time_location_t
+{
+  p_options = { HEADER,
+                PRECIP_FILE_NAME };
+  p_default = { HEADER };
+  p_descr = "Location of the data's date and time.";
+  p_help = "The precip data has bad values in the header for the date "
+           "and time. When using PRECIP_FILE_NAME the date and time will "
+           "be pulled from the file name which is expected to be in the "
+           "form of CB_GC_PCP_1H_RAD.YYYYMMDD.HHMM.\n";
+} data_time_location;
+
+paramdef string 
+{
+  p_default = { "." };
+  p_descr = "Output url";
+} output_url;
+
+paramdef long
+{
+  p_descr = "file start time offset";
+  p_help = "The number of seconds to be subtracted from the Unisys data time "
+           "to get the MDV file start time.  "
+           "Use a negative value if the start time should be later than the "
+           "data time.";
+  p_default = { 300 };
+} start_time_offset;
+
+paramdef long
+{
+  p_descr = "file centroid time offset";
+  p_help = "The number of seconds to be added to the Unisys data time to get "
+           "the MDV file centroid time.  "
+           "Use a negative number if the file centroid time should precede "
+           "the Unisys data time.";
+  p_default = { 0 };
+} mid_time_offset;
+
+paramdef long
+{
+  p_descr = "file end time offset";
+  p_help = "The number of seconds to be added to the Unisys data time to get "
+           "the MDV file end time.  "
+           "Use a negative number if the file end time should precede the "
+           "Unisys data time.";
+  p_default = { 150 };
+} end_time_offset;
+
+paramdef long 
+{
+  p_min = { 60 };
+  p_default = { 300 };
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_input_data_age;
+
+paramdef long 
+{
+  p_min = { 0 };
+  p_max = { 300 };
+  p_default = { 10 };
+  p_descr = "Delay before processing incoming file (sec)";
+  p_help = "Delay between finding new file and processing it - realtime only (sec)";
+} processing_delay;
+
+paramdef boolean 
+{
+  p_descr = "Flag indicating if data_field_name_long and data_field_name "
+            "should be used.";
+  p_help =  "If TRUE, the data_field_name_long and data_field_name "
+            "will be used in the mdv field used in the mdv field "
+            "header. If FALSE, the names are retrieved from the "
+            "input header.";
+  p_default = false;
+} set_field_name;
+
+paramdef string
+{
+  p_descr = "field name for data -- long form";
+  p_help = "This value is put in the MDV field header.";
+  p_default = { "composite refectivity" };
+} data_field_name_long;
+
+paramdef string
+{
+  p_descr = "field name for data -- short form";
+  p_help = "This value is put in the MDV field header.";
+  p_default = { "crefl" };
+} data_field_name;
+
+paramdef boolean 
+{
+  p_descr = "Flag indicating if data_units should be used.";
+  p_help = "If TRUE, the data units will be used in the mdv field "
+           "header. If FALSE, the units are retrieved from the "
+           "input header.";
+  p_default = false;
+} set_data_units;
+
+paramdef string
+{
+  p_descr = "Data units to put in the MDV field header";
+  p_help = ".";
+  p_default = { "dBZ" };
+} data_units;
+
+paramdef boolean {
+  p_descr = "Flag indicating whether the scaling_info parameter will be used.";
+  p_help = "If TRUE, the scale and bias values in the scaling_info parameter "
+           "will be used to scale the output field. If FALSE, the output will "
+           "be set to floats.";
+  p_default = false;
+} use_scaling_info;
+
+typedef struct {
+  double scale;
+  double bias;
+} scaling_info_t;
+
+paramdef struct scaling_info_t {
+  p_descr = "Scaling information to be used for the output field.";
+  p_help = "This parameter gives a scale and bias to be used for the "
+           "output field.  This parameter is only used if use_scaling_info "
+           "is set to TRUE.";
+  p_default = { 0.5, -32.0 };
+} scaling_info;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating if data is big endian or little endian";
+  p_help  = "If true, the data is assumed to be big endian";
+  p_default = true;
+} is_bigend;

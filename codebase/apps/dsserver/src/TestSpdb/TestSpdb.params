@@ -1,0 +1,157 @@
+/**********************************************************************
+ * TDRP params for TestSpdb
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// no_threads //////////////////////////////
+//
+// Option to prevent server from using a thread per client.
+// For debugging purposes it it sometimes useful to suppress the use of 
+//   threads. Set no_threads to TRUE for this type of debugging.
+// Type: boolean
+//
+
+no_threads = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for procmap registration and auto restarting.
+// Type: string
+//
+
+instance = "primary";
+
+//======================================================================
+//
+// Source - where and how we get the data.
+//
+// The source data is in ASCII format in a simple file. Each line stores 
+//   data for a single time. The date and time is at the start of the 
+//   line. This may be either in UNIX_TIME or YR_MO_DAY_HR_MIN_SEC - see 
+//   date_time_format. The rest of the line forms the product - an ascii 
+//   string.
+//
+//======================================================================
+ 
+///////////// date_time_format ////////////////////////
+//
+// Format of the date/time field.
+// Each data line must start with valid time, either as unix_time or as 
+//   year month day hour min sec. This parameter specifies the format.
+//
+// Type: enum
+// Options:
+//   UNIX_TIME, YR_MO_DAY_HR_MIN_SEC
+//
+//
+
+date_time_format = YR_MO_DAY_HR_MIN_SEC;
+
+///////////// source_file_path ////////////////////////
+//
+// Text file path from which to read the product data.
+// This is a text file which holds product data line-by-line.
+// Type: string
+//
+
+source_file_path = "./test_data";
+
+///////////// product_label ///////////////////////////
+//
+// Product label string.
+// This label is stored in the product data base.
+// Type: string
+//
+
+product_label = "ASCII generic data";
+
+///////////// product_id //////////////////////////////
+//
+// Product ID.
+// This ID is used for identifying the product, specifying 
+//   transformation routines, etc.
+// Type: int
+//
+
+product_id = 50;
+
+//======================================================================
+//
+// Destination - where and how we put the data.
+//
+//======================================================================
+ 
+///////////// chunks_per_put //////////////////////////
+//
+// Number of chunks per put.
+// The chunks will be buffered up per put using this number.
+// Type: int
+//
+
+chunks_per_put = 10;
+
+///////////// destination_urls ////////////////////////
+//
+// Array of destination URLs.
+// The data may be put to multiple places.
+// Type: string
+// 1D array - variable length - 1 elements.
+//
+
+destination_urls = { "spdbp:://shear:10000:ascii",
+		     "spdbp:://shear:10000:ascii01",
+		     "spdbp:://shear:10000:ascii02",
+		     "spdbp:://shear:10000:ascii03"};
+
+// destination_urls = { "spdbp:://shear::ascii",
+// 		     "spdbp:://shear::ascii01",
+// 		     "spdbp:://shear::ascii02",
+// 		     "spdbp:://shear::ascii03"};
+
+// destination_urls = { "spdbp:://shear:10000:ascii03"};
+
+///////////// load_mode ///////////////////////////////
+//
+// Load mode.
+// If LOAD_ONCE, a chunk at a given time can only be stored once - a se 
+//   cond attempt causes and error. If LOAD_OVERWRITE, a new chunk at a 
+//   given time will overwrite and old one. If LOAD_ADD, new chunks will 
+//   be added to the list at a given time.
+//
+// Type: enum
+// Options:
+//   LOAD_ONCE, LOAD_OVERWRITE, LOAD_ADD
+//
+//
+
+load_mode = LOAD_OVERWRITE;
+load_mode = LOAD_ADD;
+
+///////////// product_valid_period ////////////////////
+//
+// Number of secs for which product is valid.
+// The expire time is computed by adding this to the valid time.
+// Type: int
+//
+
+product_valid_period = 300;
+

@@ -1,0 +1,21 @@
+
+This is a hacked version of gauge_strip (from the
+wsddm project) for the Taiwan project. Although the
+final executable is called metar_strip, the
+source files are named as they were for  gauge_strip.
+
+The only change is that precip rate and
+precip accum have been replaced by ceiling
+and visibility.
+
+This is something of a "quick fix" as we are near
+to shipping a version - in the long term, a whole
+new program will be written since gauge_strip needs to
+be updated to C++.
+
+Niles May 2000.
+
+-- Further munged into mos_strip - same thing but it
+can look into the future, ie. make forecasts.
+
+Niles March 2001

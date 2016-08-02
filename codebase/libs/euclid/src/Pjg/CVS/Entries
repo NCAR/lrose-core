@@ -1,0 +1,27 @@
+/.cvsignore/1.1/Fri Oct 23 21:19:26 2015//
+/Makefile/1.16/Thu Oct  7 23:50:03 2010//
+/Pjg.cc/1.13/Thu Mar  3 18:19:27 2016//
+/PjgAlbersMath.cc/1.11/Thu Mar  3 18:19:27 2016//
+/PjgAzimEquidistMath.cc/1.13/Thu Mar  3 18:19:27 2016//
+/PjgCalc.cc/1.16/Thu Mar  3 18:19:27 2016//
+/PjgFlatCalc.cc/1.12/Thu Mar  3 18:19:27 2016//
+/PjgGrib.cc/1.7/Thu Mar  3 18:19:27 2016//
+/PjgLambertAzimMath.cc/1.12/Thu Mar  3 18:19:27 2016//
+/PjgLambertConfMath.cc/1.12/Thu Mar  3 18:19:27 2016//
+/PjgLatlonCalc.cc/1.12/Thu Mar  3 18:19:27 2016//
+/PjgLatlonMath.cc/1.9/Thu Mar  3 18:19:27 2016//
+/PjgLc1Calc.cc/1.14/Thu Mar  3 18:19:27 2016//
+/PjgLc2Calc.cc/1.15/Thu Mar  3 18:19:27 2016//
+/PjgMath.cc/1.22/Thu Mar  3 18:19:27 2016//
+/PjgMercatorCalc.cc/1.4/Thu Mar  3 18:19:27 2016//
+/PjgMercatorMath.cc/1.11/Thu Mar  3 18:19:28 2016//
+/PjgObliqueStereoCalc.cc/1.7/Thu Mar  3 18:19:28 2016//
+/PjgObliqueStereoMath.cc/1.14/Thu Mar  3 18:19:28 2016//
+/PjgPolarRadarCalc.cc/1.14/Thu Mar  3 18:19:28 2016//
+/PjgPolarRadarMath.cc/1.6/Thu Mar  3 18:19:28 2016//
+/PjgPolarStereoCalc.cc/1.10/Thu Mar  3 18:19:28 2016//
+/PjgPolarStereoMath.cc/1.14/Thu Mar  3 18:19:28 2016//
+/PjgTransMercatorMath.cc/1.11/Thu Mar  3 18:19:28 2016//
+/PjgVertPerspMath.cc/1.11/Thu Mar  3 18:19:28 2016//
+/TEST_pjg_math.cc/1.7/Tue Mar 17 16:49:07 2009//
+D

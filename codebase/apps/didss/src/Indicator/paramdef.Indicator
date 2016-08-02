@@ -1,0 +1,225 @@
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;
+
+
+
+paramdef string {
+  p_default = "Test";
+  p_private = FALSE;
+  p_descr = "Instance to check in with.";
+  p_help = "The program check in to PMU with this.";
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {ARCHIVE};
+  p_descr = "Operation mode";
+  p_help = "Archive mode autoamtically invoked by -interval option.";
+} Mode;
+
+paramdef string {
+  p_default = "./";
+  p_private = FALSE;
+  p_descr = "DsSpdb output URL";
+  p_help = "SPDB data are written to this URL.";
+} outputURL;
+
+paramdef int {
+  p_default = 3600;
+  p_private = FALSE;
+  p_descr = "Exipry time for SPDB data";
+  p_help = "Units are seconds.";
+} expiryTime;
+
+paramdef string {
+  p_default = { "./truth1", "./truth2" };
+  p_private = FALSE;
+  p_descr = "Truth URLs";
+  p_help = "Must be a corresponding forecast URL for each one.";
+} TruthUrls[];
+
+paramdef string {
+  p_default = { "./forecast1", "./forecast2" };
+  p_private = FALSE;
+  p_descr = "Forecast URLs";
+  p_help = "Must be a corresponding truth URL for each one.";
+} ForecastUrls[];
+
+paramdef int {
+  p_default = {1800, 3600};
+  p_private = FALSE;
+  p_descr = "Forecast lead time for each forecast URL.";
+  p_help = "Units are seconds.";
+} forecastLeadTime[];
+
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;
+
+
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum time to look back, seconds.";
+  p_help = "When the indicator detects an input file in the (truth|forecast)\n"
+           "URL, it will examine the (forecast|truth) URL to get a matching\n"
+           "file. It will accept the first file that was written at/before\n"
+           "the data time of the (truth|forecast) file, provided that the\n"
+           "file in the (forecast|truth) URL does not predate the file in\n"
+           "the (truth|forecast) URL by more than LookBack seconds.\n"
+           "LookBack thus sets a limit on the maximum mismatch between the\n"
+           "truth and the forecast data times.";
+} LookBack;
+
+paramdef string {
+  p_default = "DBZ";
+  p_private = FALSE;
+  p_descr = "Field name for truth data.";
+  p_help = "Field name must exist in file.";
+} TruthFieldName;
+
+paramdef string {
+  p_default = "Forecast";
+  p_private = FALSE;
+  p_descr = "Field name for forecast data.";
+  p_help = "Field name must exist in file.";
+} ForecastFieldName;
+
+paramdef int {
+  p_default = "-1.0";
+  p_private = FALSE;
+  p_descr = "Lower level of truth data to composite.";
+  p_help = "Units of height, not plane number.";
+} CompositeMin;
+
+
+paramdef int {
+  p_default = "1000000.0";
+  p_private = FALSE;
+  p_descr = "Upper level of truth data to composite.";
+  p_help = "Units of height, not plane number.";
+} CompositeMax;
+
+
+paramdef struct Circles {
+  p_descr = "Specifications of circular regions.";
+  p_help = "Storm warnings can be computed for a series of circular regions.\n"
+           "The region is centered on the given lat and lon point, with the\n"
+           "radius as given in km. The percent coverage for an event is also\n"
+           "given per region.";
+  p_field_type = {string, float, float, float, float};
+  p_field_name = {regionName, lat, lon, radius, percent_covered};
+} Circles[];
+
+
+paramdef float {
+  p_default = "35.0";
+  p_private = FALSE;
+  p_descr = "Lower limit for truth data";
+  p_help = "A storm exists at x if LowerLimit <= x <= UpperLimit";
+} truthLowerLimit;
+
+paramdef float {
+  p_default = "1000000.0";
+  p_private = FALSE;
+  p_descr = "Upper limit for truth data";
+  p_help = "A storm exists at x if LowerLimit <= x <= UpperLimit";
+} truthUpperLimit;
+
+
+paramdef float {
+  p_default = "0.5";
+  p_private = FALSE;
+  p_descr = "Lower limit for forecast data";
+  p_help = "A storm exists at x if LowerLimit <= x <= UpperLimit";
+} forecastLowerLimit;
+
+paramdef float {
+  p_default = "1.0";
+  p_private = FALSE;
+  p_descr = "Upper limit for forecast data";
+  p_help = "A storm exists at x if LowerLimit <= x <= UpperLimit";
+} forecastUpperLimit;
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Percentages based on total grid points in the circle.";
+  p_help = "If false, percentages based on number of non missing/bad points in "
+           "the circle (old behavior).";
+} useAllPtsInCircle;
+
+paramdef int {
+  p_default = "400";
+  p_private = FALSE;
+  p_descr = "Number of grid points in X";
+  p_help = "A flat earth projection is assumed. Internal"
+           " computations are done on this grid.";
+} GridNx;
+
+paramdef int {
+  p_default = "400";
+  p_private = FALSE;
+  p_descr = "Number of grid points in Y";
+  p_help = "A flat earth projection is assumed. Internal"
+           " computations are done on this grid.";
+} GridNy;
+
+
+paramdef double {
+  p_default = "-200.0";
+  p_private = FALSE;
+  p_descr = "Grid minimum in X";
+  p_help = "A flat earth projection is assumed. Internal"
+           " computations are done on this grid.";
+} GridMinx;
+
+paramdef double {
+  p_default = "-200.0";
+  p_private = FALSE;
+  p_descr = "Grid minimum in Y";
+  p_help = "A flat earth projection is assumed. Internal"
+           " computations are done on this grid.";
+} GridMiny;
+
+paramdef double {
+  p_default = "1.0";
+  p_private = FALSE;
+  p_descr = "Grid spacing in X";
+  p_help = "A flat earth projection is assumed. Internal"
+           " computations are done on this grid.";
+} GridDx;
+
+paramdef double {
+  p_default = "1.0";
+  p_private = FALSE;
+  p_descr = "Grid spacing in Y";
+  p_help = "A flat earth projection is assumed. Internal"
+           " computations are done on this grid.";
+} GridDy;
+
+
+paramdef double {
+  p_default = "-106.12194";
+  p_private = FALSE;
+  p_descr = "Grid origin in X (longitude)";
+  p_help = "A flat earth projection is assumed. Internal"
+           " computations are done on this grid.";
+} GridOriginX;
+
+paramdef double {
+  p_default = "33.07583";
+  p_private = FALSE;
+  p_descr = "Grid origin in Y (longitude)";
+  p_help = "A flat earth projection is assumed. Internal"
+           " computations are done on this grid.";
+} GridOriginY;
+

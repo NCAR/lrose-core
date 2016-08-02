@@ -1,0 +1,643 @@
+/**********************************************************************
+ * TDRP params for RadxEvad
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxEvad reads in Doppler data from a polar radar file, computes 
+//   volumetric VAD (VVP) winds and writes them out to NetCDF.
+//
+// The implementation in Mdv2Vad is based on the paper 'An Improved 
+//   Version of the Extended Velocity-Azimuth Display Analysis of 
+//   Single-Doppler Radar Data' by Thomas Metejka and Ramesh C. 
+//   Srivastava, Journal of Atmospheric and Oceanic Technology, Vol 8, No 
+//   4, August 1991. The code is designed to match the terminology in the 
+//   paper as fas as is posible. Please refer to the paper for a detailed 
+//   explanation of the method.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// Computes enhanced VAD from polar radar data.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This application registers with procmap. This is the instance used 
+//   for registration.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+// Files will be searched for in this directory.
+// Type: string
+//
+
+input_dir = ".";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+// Only data less old than this will be used.
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+// If true, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = FALSE;
+
+///////////// aggregate_all_files_on_read /////////////
+//
+// Option to aggregate all files in the file list on read.
+// If true, all of the files specified with the '-f' arg will be 
+//   aggregated into a single volume as they are read in. This only 
+//   applies to FILELIST mode. Overrides 'aggregate_sweep_files_on_read'.
+// Type: boolean
+//
+
+aggregate_all_files_on_read = FALSE;
+
+///////////// remove_rays_with_antenna_transitions ////
+//
+// Option to remove rays taken while the antenna was in transition.
+// If true, rays with the transition flag set will not be used. The 
+//   transiton flag is set when the antenna is in transtion between one 
+//   sweep and the next.
+// Type: boolean
+//
+
+remove_rays_with_antenna_transitions = FALSE;
+
+///////////// transition_nrays_margin /////////////////
+//
+// Number of transition rays to include as a margin.
+// Sometimes the transition flag is turned on too early in a transition, 
+//   on not turned off quickly enough after a transition. If you set this 
+//   to a number greater than 0, that number of rays will be included at 
+//   each end of the transition, i.e. the transition will effectively be 
+//   shorter at each end by this number of rays.
+// Type: int
+//
+
+transition_nrays_margin = 0;
+
+///////////// trim_surveillance_sweeps_to_360deg //////
+//
+// Option to trip surveillance sweeps so that they only cover 360 
+//   degrees.
+// Some sweeps will have rays which cover more than a 360-degree 
+//   rotation. Often these include antenna transitions. If this is set to 
+//   true, rays are trimmed off either end of the sweep to limit the 
+//   coverage to 360 degrees. The median elevation angle is computed and 
+//   the end ray which deviates from the median in elevation is trimmed 
+//   first.
+// Type: boolean
+//
+
+trim_surveillance_sweeps_to_360deg = FALSE;
+
+//======================================================================
+//
+// OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS.
+//
+// Fixed angles are elevation in PPI mode and azimuth in RHI mode.
+//
+//======================================================================
+ 
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+// Only use sweeps within the specified fixed angle limits.
+// Type: boolean
+//
+
+set_fixed_angle_limits = FALSE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+// Type: double
+//
+
+lower_fixed_angle_limit = 0;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+// Type: double
+//
+
+upper_fixed_angle_limit = 90;
+
+//======================================================================
+//
+// OPTIONAL RANGE LIMITS.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+// Gates beyond this range are removed.
+// Type: double
+//
+
+max_range_km = 9999;
+
+///////////// remove_long_range_rays //////////////////
+//
+// Option to remove long range rays.
+// Applies to NEXRAD data. If true, data from the non-Doppler long-range 
+//   sweeps will be removed.
+// Type: boolean
+//
+
+remove_long_range_rays = TRUE;
+
+///////////// remove_short_range_rays /////////////////
+//
+// Option to remove short range rays.
+// Applies to NEXRAD data. If true, data from the Doppler short-range 
+//   sweeps will be removed.
+// Type: boolean
+//
+
+remove_short_range_rays = FALSE;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE RADAR NAME AND/OR LOCATION.
+//
+//======================================================================
+ 
+///////////// override_radar_name /////////////////////
+//
+// Option to override the radar name in input data.
+// Type: boolean
+//
+
+override_radar_name = FALSE;
+
+///////////// radar_name //////////////////////////////
+//
+// Specify radar name, to be used to override input data.
+// Type: string
+//
+
+radar_name = "NONE";
+
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_latitude_deg = -999;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_longitude_deg = -999;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+// See override_radar_location.
+// Type: double
+//
+
+radar_altitude_meters = -999;
+
+//======================================================================
+//
+// INPUT FIELD INFORMATION.
+//
+// Velocity field - required.
+//
+//======================================================================
+ 
+///////////// VEL_field_name //////////////////////////
+//
+// Field name for VEL in the input file.
+// Type: string
+//
+
+VEL_field_name = "VEL";
+
+//======================================================================
+//
+// INPUT DATA CENSORING.
+//
+// You have the option to censor gates in the input data based on the 
+//   value in an input field. Normally SNR or NCP is used for this 
+//   purpose.
+//
+//======================================================================
+ 
+///////////// censor_using_thresholds /////////////////
+//
+// Option to censor the output using set thresholds.
+// If TRUE, the thresholding fields will be examined to see if it is 
+//   within the desired range. Examples are SNR (Signal-to-noise) and NCP 
+//   (normalized coherent power). If the specified field at a gate falls 
+//   outside the specified range, all output fields will be set to missing 
+//   for that gate.
+// Type: boolean
+//
+
+censor_using_thresholds = FALSE;
+
+///////////// censor_field_name ///////////////////////
+//
+// Name of field for thresholding.
+// This is the DSR (input) field name for the thresholding field. If 
+//   this field is available, it is used for thresholding. If not, 
+//   thresholding will not be performed.
+// Type: string
+//
+
+censor_field_name = "SNR";
+
+///////////// censor_min_value ////////////////////////
+//
+// Minimum threshold - see 'censor_output_using_thresholds'.
+// The specified field at a gate must exceed this value for the gate to 
+//   be accepted.
+// Type: double
+//
+
+censor_min_value = -3;
+
+///////////// censor_max_value ////////////////////////
+//
+// Maximum threshold - see 'censor_output_using_thresholds'.
+// The specified field at a gate must be less than this value for the 
+//   gate to be accepted.
+// Type: double
+//
+
+censor_max_value = 70;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE NYQUIST velocity (m/s).
+//
+//======================================================================
+ 
+///////////// set_nyquist_velocity ////////////////////
+//
+// Option to specify the nyquist velocity.
+// If FALSE, the nyquist will be obtained from the RADAR chunk in the 
+//   MDV file. If TRUE, the nyquist value will be set from the parameter 
+//   file.
+// Type: boolean
+//
+
+set_nyquist_velocity = FALSE;
+
+///////////// nyquist_velocity ////////////////////////
+//
+// Nyquist velocity (m/s).
+// Must be supplied if not in MDV file. See 'set_nyquist_velocity'.
+// Type: double
+//
+
+nyquist_velocity = 25;
+
+//======================================================================
+//
+// VAD COMPUTATIONS.
+//
+//======================================================================
+ 
+///////////// min_elev ////////////////////////////////
+//
+// Minimum elevation angle for data in VAD - deg.
+// Type: double
+//
+
+min_elev = 1;
+
+///////////// max_elev ////////////////////////////////
+//
+// Maximum elevation angle for data in VAD - deg.
+// Type: double
+//
+
+max_elev = 45;
+
+///////////// min_range ///////////////////////////////
+//
+// Minimum range for computing VAD circles - km.
+// Type: double
+//
+
+min_range = 2;
+
+///////////// max_range ///////////////////////////////
+//
+// Maximum range for computing VAD circles - km.
+// Type: double
+//
+
+max_range = 30;
+
+///////////// delta_range /////////////////////////////
+//
+// Delta range for computing VAD circles - km.
+// Type: double
+//
+
+delta_range = 1;
+
+///////////// slice_delta_azimuth /////////////////////
+//
+// Azimuth interval for separating data into azimuth slices (deg).
+// Type: double
+//
+
+slice_delta_azimuth = 2;
+
+///////////// n_slices_for_vel_median /////////////////
+//
+// Number of slices for computing median of the velocity in a series of 
+//   slices.
+// This is used to condition the velocity when searching for folds.
+// Type: int
+//
+
+n_slices_for_vel_median = 5;
+
+///////////// min_vel_values_per_slice ////////////////
+//
+// Min number of valid velocity measurements per slice.
+// Velocity values are only included if the data at a gate meets the 
+//   censoring limits. Slices with fewer velocity values than this are not 
+//   included in the analysis.
+// Type: int
+//
+
+min_vel_values_per_slice = 3;
+
+///////////// max_missing_sector_size /////////////////
+//
+// Max size of missing sector for computing the VAD fit (deg).
+// The VAD computes wind vectors using series of rings at each elevation 
+//   angle. The rings are broken into azimuth slices - see 
+//   slice_delta_azimuth. The mean radial velocity is computed for each 
+//   slice. Some slices may have no data because the signal is too low - 
+//   see min_vel_values_per_slice. The VAD will not be reliable if large 
+//   sectors have no data within the censoring limits. This parameter 
+//   limits the size of any missing sectors. If the size of a missing 
+//   sector in a ring exceeds this parameters, the data from that ring 
+//   will not be used.
+// Type: double
+//
+
+max_missing_sector_size = 90;
+
+///////////// max_to_from_direction_error /////////////
+//
+// Max allowed_difference in to/from direction (deg).
+// The VAD computes wind vectors around the full circle. The max 
+//   negative speed value indicates wind blowing towards the radar and the 
+//   max positive speed value indicates wind blowing away from the radar. 
+//   Ideally the directtions of these two vectors are 180 degrees apart. 
+//   However, in reality there will be an error between these two ideal 
+//   directions. If the error exceeds this value, the wind vector will not 
+//   be considered valid.
+// Type: double
+//
+
+max_to_from_direction_error = 45;
+
+///////////// max_fit_rms_error ///////////////////////
+//
+// Max mean error of the model fit (m/s).
+// The VAD computes wind vectors around the full circle using a 3-term 
+//   Fourier model. The standard error of estimate is computed from the 
+//   root-mean-squared difference between the observations and the model. 
+//   If the RMS error is less than the specified number, the fit is 
+//   accepted and the wind estimate is considered valid.
+// Type: double
+//
+
+max_fit_rms_error = 3;
+
+///////////// w_at_top_level //////////////////////////
+//
+// w - vertical velocity - at top of VAD profile (m/s).
+// Using the variational method for finding w requires an estimate of 
+//   wtop - w at the top of the column.
+// Type: double
+//
+
+w_at_top_level = 0;
+
+//======================================================================
+//
+// REGULAR HEIGHT LEVELS FOR WIND PROFILE.
+//
+// Results will be interpolated onto this regular set of levels.
+//
+//======================================================================
+ 
+///////////// profile_min_height //////////////////////
+//
+// Minimum height for VAD profile - km.
+// Type: double
+//
+
+profile_min_height = 0.5;
+
+///////////// profile_max_height //////////////////////
+//
+// Maximum height for VAD profile - km.
+// Type: double
+//
+
+profile_max_height = 20;
+
+///////////// profile_height_interval /////////////////
+//
+// Height interval for VAD profile - km.
+// Type: double
+//
+
+profile_height_interval = 0.5;
+
+//======================================================================
+//
+// NETCDF OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_results_to_netcdf /////////////////
+//
+// Option to write results to NetCDF files.
+// Type: boolean
+//
+
+write_results_to_netcdf = TRUE;
+
+///////////// output_netcdf_dir ///////////////////////
+//
+// Output directory path.
+// Files will be written to this directory.
+// Type: string
+//
+
+output_netcdf_dir = "/tmp/vad/netcdf";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+// Path will be output_dir/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+
+//======================================================================
+//
+// SPDB OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_results_to_spdb ///////////////////
+//
+// Option to write results to SPDB data base.
+// Type: boolean
+//
+
+write_results_to_spdb = FALSE;
+
+///////////// output_spdb_url /////////////////////////
+//
+// Output URL.
+// Output SPDB data is written to this URL.
+// Type: string
+//
+
+output_spdb_url = "/tmp/vad/spdb";
+
+///////////// output_spdb_valid_period_secs ///////////
+//
+// Length of time over which the measurement is considered valid (secs).
+// This will be used to set the expire time in SPDB.
+// Type: int
+//
+
+output_spdb_valid_period_secs = 900;
+

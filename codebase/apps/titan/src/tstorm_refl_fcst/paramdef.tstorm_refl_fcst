@@ -1,0 +1,335 @@
+/*********************************************************
+ * parameter definitions for tstorm_refl_fcst
+ *
+ * Nancy Rehak, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 1998
+ */
+
+/***************************************************
+ * Operational parameters
+ */
+
+commentdef
+{
+  p_title = "OPERATIONAL PARAMETERS";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,
+  DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = DEBUG_OFF;
+} debug_level;
+
+paramdef long
+{
+  p_descr = "Malloc debug level";
+  p_help = "0 - none,\n"
+           "1 - corruption checking,\n"
+           "2 - records all malloc blocks and checks,\n"
+           "3 - printout of all mallocs etc.";
+  p_min = 0;
+  p_max = 3;
+  p_default = 0;
+} malloc_debug_level;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+typedef enum
+{
+  REALTIME,
+  ARCHIVE
+} mode_t;
+
+paramdef enum mode_t 
+{
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data;\n"
+           "archive mode runs on file list";
+  p_default = REALTIME;
+} mode;
+
+paramdef string 
+{
+  p_descr = "Input URL for storm data";
+  p_help = "The is the SPDB database directory for the storm data for which "
+           "we'll keep the storm shapes but update the vectors.";
+  p_default = "spdbp:://host::directory";
+} storm_data_url;
+
+paramdef string 
+{
+  p_descr = "Input URL for gridded data";
+  p_help = "The is the directory which contains the gridded data, in MDV "
+           "format, that will be extrapolated based on the storms and their "
+           "motions.";
+  p_default = "mdvp:://host::directory";
+} gridded_data_url;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use field name or number for "
+            "identifying the gridded field.";
+  p_default = true;
+} use_gridded_field_num;
+
+paramdef long
+{
+  p_descr = "Field number for gridded data in MDV files";
+  p_help = "Used only if use_gridded_field_num is set to true";
+  p_min = 0;
+  p_default = 0;
+} gridded_field_num;
+
+paramdef string
+{
+  p_descr = "Field name for gridded data in MDV files";
+  p_help = "Used only if use_gridded_field_num is set to false";
+  p_default = "DBZ";
+} gridded_field_name;
+
+paramdef long
+{
+  p_descr = "Maximum valid age in seconds for input data";
+  p_min = 0;
+  p_default = 3600;
+} max_valid_age;
+
+paramdef long
+{
+  p_descr = "Maximum data offset time in seconds";
+  p_help = "Maximum amount of time allowed between the base storm data time "
+           "and the gridded data time for the data to be used together.";
+  p_default = 150;
+} time_offset_max;
+
+paramdef long
+{
+  p_descr = "Sleep msecs between checks for new data";
+  p_min = 0;
+  p_default = 1000;
+} sleep_msecs;
+
+paramdef string 
+{
+  p_descr = "Output URL.";
+  p_default = "mdvp:://host::directory";
+} output_url;
+
+paramdef boolean
+{
+  p_help = "Flag indicating whether a forecast grid should be created if no "
+           "storms in the forecast are valid.  This flag was added because "
+           "we were having data outage problems with the system that were "
+           "adversely affecting our statistics.";
+  p_default = true;
+} output_empty_grids;
+
+typedef struct
+{
+  long begin_time_offset;
+  long end_time_offset;
+} time_offsets_t;
+
+paramdef struct time_offsets_t
+{
+  p_descr = "Number of seconds to add to the storm time to get the begin "
+            "and end times for the output grid. "
+            "The centroid time for the grid will be the storm time and the "
+            "expire time for the grid will be the same as the end time.";
+  p_default = { -150, 150 };
+} output_time_offsets;
+
+/***************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_title = "ALGORITHM PARAMETERS";
+}
+
+typedef enum
+{
+  GENERATE_TIME,
+  FORECAST_TIME
+} file_time_stamp_t;
+
+paramdef enum file_time_stamp_t
+{
+  p_descr = "File time stamp";
+  p_help = "If GENERATE_TIME, file names match generate data time.\n"
+           "If FORECAST_TIME, file names match forecast time.";
+  p_default = GENERATE_TIME;
+} file_time_stamp;
+
+paramdef long
+{
+  p_descr = "Forecast durations (secs)";
+  p_help = "Array of duration of precip forecast map.  If file_time_stamp is "
+           "GENERATE_TIME, only the first duration is used, the rest are "
+           "ignored.";
+  p_default = 1800;
+  p_min = 0;
+} forecast_durations[];
+
+paramdef boolean
+{
+  p_descr = "Option to round the forecast times";
+  p_help = "The interval used is given by the rounding_interval parameter.";
+  p_default = false;
+} round_forecast_times;
+
+paramdef long
+{
+  p_descr = "Rounding interval for forecast times (secs)";
+  p_help = "If round_forecast_times is TRUE, the forecast times are rounded "
+           "to this interval";
+  p_min = 10;
+  p_max = 86400;
+  p_default = 600;
+} rounding_interval;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set plane vlevel limits";
+  p_help = "If false, composite is done over all vertical levels.";
+} set_vlevel_limits;
+
+paramdef float {
+  p_default = 3;
+  p_descr = "Lower plane vlevel limit.";
+} lower_vlevel;
+
+paramdef float {
+  p_default = 6;
+  p_descr = "Upper plane vlevel limit.";
+} upper_vlevel;
+
+paramdef boolean
+{
+  p_descr = "Option to produce thresholded forecast";
+  p_help = "Thresholded forecast uses individual storm motion. Unthresholded "
+           "forecast uses area-weighted mean storm motion.";
+  p_default = true;
+} thresholded_forecast;
+
+paramdef boolean
+{
+  p_descr = "Valid forecasts only flag";
+  p_help = "If set, only valid forecasts will be mapped. If not, all "
+            "forecasts will be mapped.";
+  p_default = true;
+} valid_forecasts_only;
+
+paramdef boolean
+{
+  p_descr = "Flag to include decay trending in forecast";
+  p_help = "If set, the decay trend will be used to calculate storm size.";
+  p_default = true;
+} use_decay_trending;
+
+paramdef boolean
+{
+  p_descr = "Flag to include growth trending in forecast";
+  p_help = "If set, the growth trend will be used to calculate storm size.";
+  p_default = true;
+} use_growth_trending;
+
+paramdef boolean
+{
+  p_descr = "Flag to include intensity decay trending in forecast";
+  p_help = "If set, the decay trend will be used to trend the intensity "
+           "in storms smaller than max_intensity_trend_size.";
+  p_default = false;
+} use_decay_intensity_trending;
+
+paramdef boolean
+{
+  p_descr = "Flag to include intensity growth trending in forecast";
+  p_help = "If set, the growth trend will be used to trend the intensity "
+           "in storms smaller than max_intensity_trend_size.";
+  p_default = false;
+} use_growth_intensity_trending;
+
+paramdef double
+{
+  p_descr = "Maximum storm size in km**2 or km**3 for intensity trending.";
+  p_help = "Used only if use_decay_intensity_trending or "
+           "use_growth_intensity_trending is true.";
+  p_default = 1000;
+} max_intensity_trend_size;
+
+paramdef double
+{
+  p_descr = "Base value for intensity growth/decay";
+  p_help = "When growing or decaying the intensity of a grid point, "
+           "this value is subtracted from the original grid value, then the "
+           "growth/decay percentage is applied, then this value is added "
+           "back in. "
+           "This allows us to grow and decay intensities of fields that "
+           "aren't centered around a 0 value.";
+  p_default = 0.0;
+} intensity_base_value;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to negate the intensity change direction.";
+  p_help = "This is used for fields, like the satellite IR fields, that "
+           "decrease rather than increase.";
+  p_default = false;
+} negate_intensity_changes;
+
+/*************************************************************
+ * Polygon smoothing parameters
+ */
+
+commentdef
+{
+  p_title = "POLYGON SMOOTHING PARAMETERS";
+}
+
+paramdef boolean
+{
+  p_descr = "polygon smoothing flag";
+  p_help = "If TRUE, the polygons will be smoothed using the constrained "
+           "convex hull smoothing algorithm before being added to the output "
+           "file.";
+  p_default = false;
+} smooth_polygons;
+
+paramdef double
+{
+  p_descr = "polygon smoothing inner hull multiplier";
+  p_help = "The original polygon radial lengths are multiplied by this value "
+           "to get the inner polygon for the constrained convex hull "
+           "smoothing algorithm. This parameter is only used if "
+           "smooth_polygons is set to TRUE.";
+  p_min = 0.001;
+  p_default = 1.0;
+} smooth_inner_multiplier;
+
+paramdef double
+{
+  p_descr = "polygon smoothing outer hull multiplier";
+  p_help = "The original polygon radial lengths are multiplied by this value "
+           "to get the outer polygon for the constrained convex hull "
+           "smoothing algorithm. This parameter is only used if "
+           "smooth_polygons is set to TRUE.";
+  p_min = 0.001;
+  p_default = 1.0;
+} smooth_outer_multiplier;

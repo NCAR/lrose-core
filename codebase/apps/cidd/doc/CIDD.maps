@@ -1,0 +1,72 @@
+FORMAT FOR MAP FILES
+
+02/06/92 - Original by J Caron & F Hage.
+
+
+Maps are stored in ascii files; this document describes their format.
+
+These are the types of lines within the file:
+	1) comment lines, which have the character "#" in column 1
+	2) keyword lines, begining with a keyword
+	3) scaleable text lines, which have the character "&" in column 1
+
+
+1. Keyword lines:
+
+   	1.1. MAP_NAME <name> <desc>
+   This should be the first line of any map file. The name is restricted to
+64 characters, and must not have whitespace in it. The description is restricted
+to 64 chars.  A list of available map names (and desc) may be passed to client
+programs; typically it is displayed for the user to select from.
+
+   	1.2 TRANSFORM <tranformation matrix>
+    Optional line used by digitizing program.  
+   
+   	1.3 PROJECTION <type> <parameters>
+    Optional line used by digitizing program. <type> = PJG_XXXX; see PJG.h for
+description of the projection parameters.
+   
+   	1.4 ICONDEF <icon name> <npts>
+		<x> <y>
+		<x> <y>
+		<x> <y>
+		...
+    This defines an icon with name <icon name>. It consists of <npts> number
+of points, which immediately follow.  The <x> <y> are in units of pixels, 
+and the value "32767 32767" indicates a pen up.  Note this defines an
+icon, but does not draw it.
+
+	1.5 ICON <icon name> <lat> <lon> <text x> <text y> <text>
+
+    This indicates to draw the icon <icon name>, with origin at <lat> <lon>.
+If <text x> <text y> is not equal to "32767 32767", then also draw the
+text <text>, with the lower left corner of the text at <text x> <text y> pixels
+relative to the origin.
+   An ICON line can only refer to an <icon name> that is already defined by a
+ICONDEF in the same map file.
+   An ICON stays the same size as the user zooms.
+
+
+	1.6 POLYLINE <name> <npts>
+	    <lat> <lon>
+	    <lat> <lon>
+	    ...
+    This indicates an object called <name>, which is simply a polyline of
+<npts> segments, specified in world (lat, lon) coordinates. Penup =
+(-1000.0, -1000.0).
+
+
+2. Scaleable Text Lines: 
+    These are specified in world coordinates, and scale as the user zooms.
+    Note all are space-delineated tokens with the exception of the text itself:
+
+    LABEL <ll lat> <ll lon> <ur lat> <ur lon> <rot. angle> <attach loc> <text>
+
+	<ll lat> <ll lon> = lower left corner of the bounding rectangle
+	<ur lat> <ur lon> = upper right corner of the bounding rectangle
+	<rotation angle> = angle to rotate text in degrees: 
+	   0 = regular, 90 = vertical text goes up, 180 = upside down, 
+	   270 = vertical text goes down
+	<attach point> = lat, lon of the "attach point"; -1000, -1000 means none
+	<text>=  text to display
+

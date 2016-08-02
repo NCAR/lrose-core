@@ -1,0 +1,354 @@
+/**********************************************************************
+ * TDRP params for GroundEchoStats
+ **********************************************************************/
+
+//======================================================================
+//
+// GroundEchoStats compute stats from ground echo in nadir-pointing 
+//   airborne radar.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with the process mapper.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - how the data is read.
+// 	FMQ_INPUT: read moments from a file message queue./n/tTCP_INPUT: 
+//   read the moments data from a server, via a socket./n/tFILE_LIST: read 
+//   data from files specified on the command line.
+// 	FILE_REALTIME: watch an input directory, read each new file as it 
+//   arrives.
+//
+// Type: enum
+// Options:
+//     FMQ_INPUT
+//     TCP_INPUT
+//     FILE_LIST
+//     FILE_REALTIME
+//
+
+input_mode = FMQ_INPUT;
+
+///////////// fmq_url /////////////////////////////////
+//
+// FMQ url. For FMQ_INPUT only.
+// URL to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions. For local FMQ, this can be the file path. For a remote 
+//   FMQ, this will be a full URL: 'fmqp:://host::dir'.
+// Type: string
+//
+
+fmq_url = "/tmp/fmq/moments";
+
+///////////// seek_to_start_of_fmq ////////////////////
+//
+// Option to seek to the start of the input FMQ.
+// If FALSE, the program will seek to the end of the fmq and only read 
+//   in new data. If TRUE, it will start reading from the beginning of the 
+//   FMQ.
+// Type: boolean
+//
+
+seek_to_start_of_fmq = FALSE;
+
+///////////// input_tcp_host //////////////////////////
+//
+// Name of host for TCP server. For TCP_INPUT only.
+// Type: string
+//
+
+input_tcp_host = "localhost";
+
+///////////// input_tcp_port //////////////////////////
+//
+// Port for TCP server. For TCP_INPUT only.
+// Type: int
+//
+
+input_tcp_port = 12000;
+
+///////////// files_input_dir /////////////////////////
+//
+// Input dir for files. For FILE_REALTIME only.
+// Will watch this directory for new data.
+// Type: string
+//
+
+files_input_dir = "/tmp/files/moments";
+
+//======================================================================
+//
+// COMPUTING GROUND ECHO STATS.
+//
+//======================================================================
+ 
+///////////// nrays_for_stats /////////////////////////
+//
+// Number of rays required for computing statistics.
+// The stats are computed from this number of beams.
+// Type: double
+//
+
+nrays_for_stats = 10;
+
+///////////// min_dbz_for_stats ///////////////////////
+//
+// Minimum dbz for computing statistics.
+// If the max DBZ is less than this, the beam is discarded.
+// Type: double
+//
+
+min_dbz_for_stats = 10;
+
+///////////// min_range_for_ground ////////////////////
+//
+// Minimum range to ground (km).
+// Gates closer than this are not checked.
+// Type: double
+//
+
+min_range_for_ground = 0.5;
+
+///////////// dbz_field_name //////////////////////////
+//
+// Field name for reflectivity.
+// This is used for finding the max echo, which is interpreted as the 
+//   ground.
+// Type: string
+//
+
+dbz_field_name = "DBZVC";
+
+///////////// vel_field_name //////////////////////////
+//
+// Field name for radial velocity.
+// This is used for computing the mean velocity of the ground echo.
+// Type: string
+//
+
+vel_field_name = "VEL";
+
+///////////// tilt_correction /////////////////////////
+//
+// Correction to tilt measurement.
+// This value is added to the tilt in the data.
+// Type: double
+//
+
+tilt_correction = 0;
+
+///////////// rotation_correction /////////////////////
+//
+// Correction to rotation measurement.
+// This value is added to the rotation in the data.
+// Type: double
+//
+
+rotation_correction = 0;
+
+//======================================================================
+//
+// CHECKING LIMITS.
+//
+//======================================================================
+ 
+///////////// check_elevation /////////////////////////
+//
+// Option to check elevation angle is within limits.
+// If TRUE, the elevation angle (in earth-centric coords) will be 
+//   checked to ensure it is within the specified limits.
+// Type: boolean
+//
+
+check_elevation = TRUE;
+
+///////////// min_elevation ///////////////////////////
+//
+// Minimum limit for elevation angle in earth coords.
+// Type: double
+//
+
+min_elevation = -92;
+
+///////////// max_elevation ///////////////////////////
+//
+// Maximum limit for elevation angle in earth coords.
+// Type: double
+//
+
+max_elevation = -88;
+
+///////////// check_roll //////////////////////////////
+//
+// Option to check roll angle is within limits.
+// If TRUE, the roll angle will be checked to ensure it is within the 
+//   specified limits.
+// Type: boolean
+//
+
+check_roll = TRUE;
+
+///////////// max_abs_roll ////////////////////////////
+//
+// Maximum absolute limit for roll angle.
+// Type: double
+//
+
+max_abs_roll = 5;
+
+///////////// check_tilt //////////////////////////////
+//
+// Option to check tilt angle is within limits.
+// If TRUE, the tilt angle will be checked to ensure it is within the 
+//   specified limits. This helps detect when the tilt is at the stops.
+// Type: boolean
+//
+
+check_tilt = TRUE;
+
+///////////// max_abs_tilt ////////////////////////////
+//
+// Maximum absolute limit for tilt angle.
+// Type: double
+//
+
+max_abs_tilt = 3;
+
+///////////// check_drift /////////////////////////////
+//
+// Option to check drift angle is within limits.
+// If TRUE, the drift angle will be checked to ensure it is within the 
+//   specified limits.
+// Type: boolean
+//
+
+check_drift = FALSE;
+
+///////////// min_abs_drift ///////////////////////////
+//
+// Minimum absolute limit for drift angle.
+// Type: double
+//
+
+min_abs_drift = 0;
+
+///////////// max_abs_drift ///////////////////////////
+//
+// Maximum absolute limit for drift angle.
+// Type: double
+//
+
+max_abs_drift = 2;
+
+///////////// check_vert_velocity /////////////////////
+//
+// Option to check vert velocity is within limits.
+// If TRUE, the vertvelocity will be checked to ensure it is within the 
+//   specified limits.
+// Type: boolean
+//
+
+check_vert_velocity = TRUE;
+
+///////////// max_abs_vert_velocity ///////////////////
+//
+// Maximum absolute limit for vert_velocity angle.
+// Maximum absolute limit for vert_velocity angle.
+// Type: double
+//
+
+max_abs_vert_velocity = 2;
+
+///////////// check_sdev_vr_measured //////////////////
+//
+// Option to check the standard deviation of measured radial velocity.
+// If TRUE, the standard deviation of the measured radial velocity will 
+//   be checked to ensure it is below the threshold. This ensures the 
+//   plane is not in turbulence.
+// Type: boolean
+//
+
+check_sdev_vr_measured = FALSE;
+
+///////////// max_sdev_vr_measured ////////////////////
+//
+// Maximum absolute limit for vert_velocity angle.
+// Type: double
+//
+
+max_sdev_vr_measured = 0.25;
+
+//======================================================================
+//
+// CONTROLLING OUTPUT.
+//
+//======================================================================
+ 
+///////////// print_table_to_stdout ///////////////////
+//
+// Option to print detailed results as a table to stdout.
+// If TRUE, the stats are printed to stdout, as a space-delimited text 
+//   table, with one line per result. The fields printed are:
+// 	year
+// 	month
+// 	day
+// 	hour
+// 	min
+// 	sec
+// 	msecs
+// 	meanTime
+// 	meanRangeToGround
+// 	meanDbzOfGround
+// 	meanVrPlatform
+// 	meanVrMeasured
+// 	meanVrCorrected
+// 	tiltErrorDeg
+// 	pitch
+// 	-tilt
+// 	sdevVrMeasured.
+// Type: boolean
+//
+
+print_table_to_stdout = FALSE;
+
+///////////// n_results_for_median ////////////////////
+//
+// Number of results in computing median.
+// We compute the median value of the corrected velocity and tilt error, 
+//   and print those out. This is the number of results that are used to 
+//   compute the median.
+// Type: int
+//
+
+n_results_for_median = 31;
+

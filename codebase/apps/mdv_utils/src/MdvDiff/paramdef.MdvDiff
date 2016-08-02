@@ -1,0 +1,90 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for MdvDiff
+ *
+ */
+
+commentdef {
+  p_header = "MdvDiff";
+  p_text = "Compares data at two url's that are presumably the same data and check for differences in the grid values";
+}
+
+paramdef boolean
+{
+  p_help = "TRUE to show debugging";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_help = "True for obs data, false for forecast";
+} obs;
+
+paramdef string
+{
+  p_help = "new testing url";
+} test_url;
+
+paramdef string
+{
+  p_help = "old existing data url";
+} old_url;
+
+paramdef double
+{
+  p_help = "minimum difference to be considered non-zero, i.e. expected resolution of data values.  Set to 0.0 to have all differences shown. Differences less than this value are considered perfect matches";
+  p_default = 0.0;
+} min_diff;
+
+paramdef boolean
+{
+  p_help = "set TRUE to show all results, including perfect matches, FALSE to only show grids for which there were differences >= min_diff";
+  p_default = TRUE;
+} show_all;
+
+paramdef boolean
+{
+  p_help = "set TRUE to show details of non-grid related differences (metadata, field and master headeres, etc.)";
+  p_default = FALSE;
+} show_details;
+
+paramdef boolean
+{
+  p_help = "set TRUE to show every difference (every gridpoint for which there is a diff)";
+  p_default = FALSE;
+} show_all_data_diff;
+
+paramdef string
+{
+  p_help = "list of fields to compare. If empty, compare all fields from both URL's";
+  p_default = {};
+} compare_fields[];
+
+paramdef boolean
+{
+  p_help = "TRUE to compare metadata, FALSE to ingnore metadata differences";
+  p_default = TRUE;
+} compare_metadata;

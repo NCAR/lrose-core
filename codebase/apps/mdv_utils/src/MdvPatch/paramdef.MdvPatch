@@ -1,0 +1,111 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MdvPatch
+ *
+ * Yan Chen, RAL, NCAR 
+ *
+ * March 2008
+ * 
+ */
+
+commentdef {
+  p_header = "MdvPatch finds bad and missing data for MDV files, replaces them with the data interpolated from the surrounding data. For instance, if a bad or missing data is found at point (i, j), it will be replaced with an average value from the surrounding points (i+1,j),(i-1,j),(i,j+1),(i,j-1).";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  FIND, FIND_N_FIX
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FIND_N_FIX;
+  p_descr = "Operating mode";
+  p_help = "In FIND mode, the program only finds the bad and missing data and reports them in a log file. In FIND_N_FIX mode, it not only finds the bad and missing data, but also replaces them with the data interpolated from the surrounding data.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/GLOBAL";
+  p_descr = "URL directory for input data.";
+} input_url_dir;
+
+commentdef {
+  p_header = "ERROR CHECKING INFORMATION";
+}
+
+paramdef string {
+  p_default = "1985 01 01 00 00 00";
+  p_descr = "Start date time string.";
+  p_help = "Start date time for data requested. Format is YYYY MM DD HH MM SS";
+} start_date_time;
+
+paramdef string {
+  p_default = "1985 01 01 23 00 00";
+  p_descr = "End date time string.";
+  p_help = "End date time for data request. Format is YYYY MM DD HH MM SS";
+} end_date_time;
+
+paramdef string {
+  p_default = { };
+  p_descr = "Field name list.";
+  p_help = "If the list is empty, all fields will be checked.";
+} field_names[];
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/GLOBAL";
+  p_descr = "URL directory for output data.";
+} output_url_dir;
+
+paramdef string {
+  p_default = "mdv/bad_data";
+  p_descr = "Output directory for log files.";
+  p_help = "Outliers information is written to this directory. The name of the output log file is based on the time of the input files.";
+} output_log_dir;

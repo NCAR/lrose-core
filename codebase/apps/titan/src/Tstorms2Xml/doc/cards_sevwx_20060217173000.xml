@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<wxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML" version="2.1"
+	xsi:schemaLocation="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML/wxml.2.1.xsd">
+<head>
+	<product concise-name="point" operational-mode="experimental">
+		<system>cards</system>
+		<title>CARDS Mesocyclone Detection</title>
+                <description>B08FDP CARDS meso</description>
+		<category>analysis</category>
+		<creation-date refresh-frequency="PT10M">2006-02-17T17:35:00</creation-date>
+	</product>
+	<data-source>
+		<radar type="NEXRAD" name="Beijing" latitude="39.77" longitude="116.47" />
+		<radar type="NEXRAD" name="Tianjin" latitude="39.20" longitude="117.30" />
+                <domain>Outer</domain>
+	</data-source>
+	<product-source>
+		<more-information>
+			http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/info.html
+		</more-information>
+		<production-center>Bureau of Meteorology
+			<sub-center>Research Centre</sub-center>
+		</production-center>
+	</product-source>
+</head>
+<nowcast-data>
+	<time-layout time-coordinate="UTC">
+		<start-valid-time>2006-02-17T17:30:00</start-valid-time>
+		<end-valid-time>2006-02-17T17:30:00</end-valid-time>
+	</time-layout>
+	<event ID="00001">
+		<case>
+			<time>2006-02-17T17:30:00</time>
+			<location>
+				<moving-point type="mesocyclone">
+					<latitude>39.67</latitude>
+					<longitude>115.71</longitude>
+					<polar_motion>
+						<speed units="km h-1">32</speed>
+						<direction_from units="degrees true">102</direction_from>
+					</polar_motion>
+				</moving-point>
+			</location>
+			<nowcast-parameters>
+				<meso_type categorical-table="meso types">2</meso_type>
+				<meso_intensity categorical-table="meso intensities">3</meso_intensity>
+			</nowcast-parameters>
+		</case>
+	</event>
+	<categorical-definitions>
+		<categorical-table>
+			<categorical-key>meso types</categorical-key>
+			<value category="small mesocyclone">1</value>
+			<value category="large mesocyclone">2</value>
+		</categorical-table>
+		<categorical-table>
+			<categorical-key>meso intensities</categorical-key>
+			<value category="very mild">1</value>
+			<value category="mild">2</value>
+			<value category="moderate">3</value>
+			<value category="strong">4</value>
+			<value category="intense">5</value>
+		</categorical-table>
+	</categorical-definitions>
+</nowcast-data>
+</wxml>
+

@@ -1,0 +1,163 @@
+/*********************************************************
+ * parameter definitions for VerifyTracks
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 2005
+ */
+
+commentdef {
+  p_header = "Program name: VerifyTracks";
+  p_text = "Computes verification statistics for TITAN tracks and prints the results to stdout. Also updates verification values in the track files. You need to run VerifyTracks before Tracks2Ascii if you want access to the POD, FAR and CSI verification values in the track files.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./titan/storms";
+  p_descr = "Directory path for input data.";
+  p_help = "This is used if start and end times are specified on the command line. It is ignored if you specify a file list using -f on the command line.";
+} input_dir;
+
+commentdef {
+  p_header = "VERIFICATION OPTIONS";
+}
+
+typedef enum {
+  FORECAST_ELLIPSE, FORECAST_POLYGON
+} forecast_shape_t;
+
+paramdef enum forecast_shape_t {
+  p_default = FORECAST_POLYGON;
+  p_descr = "Shape to be used for making forecast.";
+  p_help = "POLYGON - use more complex polygon shape. ELLIPSE - use simpler ellipse shape fitted to the storm shape.";
+} forecast_shape;
+
+typedef enum {
+  VERIFY_ELLIPSE, VERIFY_POLYGON, VERIFY_RUNS, VERIFY_MDV
+} verify_shape_t;
+
+paramdef enum verify_shape_t {
+  p_default = VERIFY_POLYGON;
+  p_descr = "Shape to be used for verifying the forecast.";
+  p_help = "POLYGON - use more complex polygon shape. ELLIPSE - use simpler ellipse shape fitted to the storm shape. RUNS - the actual grid points for the storms. MDV - an MDV file containing verification field.";
+} verify_method;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Forecast lead time to be verified (secs).";
+  p_help = "Verification is performed for this lead time only.";
+} forecast_lead_time;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Forecast lead time margin (secs).";
+  p_help = "When searching for a radar scan to be used for verification, this is the search margin used. If no scan is found within this margin, verification is not performed for the scan.";
+} search_time_margin;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Minimum track history for verification (secs).";
+  p_help = "Track entries with less history than this will not be scored.";
+} forecast_min_history;
+
+typedef enum {
+  GROWTH_LINEAR, GROWTH_PARABOLIC, GROWTH_ZERO
+} growth_function_t;
+
+paramdef enum growth_function_t {
+  p_default = GROWTH_LINEAR;
+  p_descr = "Function to be used to compute growth.";
+  p_help = "LINEAR - storms grows or decays linearly in area/volume. PARABOLIC - storm grows in according to a parabolic function with time, reaching zero growth after 'time_to_zero_growth', followed by decay according to the same function. ZERO - no growth or decay.";
+} growth_function;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Time to zero growth (secs).";
+  p_help = "See 'growth_function'.";
+} time_to_zero_growth;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to include initiation.";
+  p_help = "If true, include the tracks which started between forecast issue time and valid time - i.e. include initiation.";
+} verify_before_forecast_time;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to continue to score forecast after track dies.";
+  p_help = "If true, include the tracks which die before the forecast valid time is reached.";
+} verify_after_track_dies;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to exclude movement error.";
+  p_help = "If true, place the forecast and verification centroid over each other and validate only on the shape differences.";
+} force_xy_fit;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Specify grid over which verification will be performed?";
+  p_help = "If true, you can set up a verification grid reflecting the needs of the study. For example, if you only care about a forecast accuracy of 5 km, you can specify a grid with 5 km resolution. If false, grid from MDV input files will be used.";
+} specify_verify_grid;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+  p_default = {100, 100, -247.5.0, -247.5.0, 5.0, 5.0};
+  p_descr = "Grid parameters for verification.";
+  p_help = "Projection is assumed to be same as for TITAN data. See 'specify_verify_grid.'";
+} verify_grid;
+
+paramdef string {
+  p_default = "./mdv/verify";
+  p_descr = "Directory path for MDV verification data.";
+  p_help = "Used if verify_method is VERIFY_MDV.";
+} truth_mdv_dir;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Time margin when searching for MDV file - secs.";
+  p_help = "The search is centered on the TITAN scan time.";
+} truth_mdv_time_margin;
+
+paramdef string {
+  p_default = "ValidStorms";
+  p_descr = "Field name for verification data.";
+} truth_mdv_field;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Threshold for verification data. If the data in the verification field exceeds this have we treat it as a 'hit', otherwise it is a 'miss'.";
+} truth_mdv_threshold;
+

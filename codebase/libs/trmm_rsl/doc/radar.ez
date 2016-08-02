@@ -1,0 +1,390 @@
+\begindata{text,1074348784}
+\textdsversion{12}
+\template{default}
+\define{typewriter
+menu:[Font~1,Typewriter~40]
+attr:[FontFace FixedFace Int Set]
+attr:[FontFamily AndyType Int 0]}
+\define{ttyleft
+menu:[,Tty_left]}
+\define{mylist
+menu:[List,Mylist]
+attr:[LeftMargin LeftMargin Cm 591862]
+attr:[RightMargin RightMargin Cm 0]
+attr:[Justification LeftAndRightJustified Point 0]}
+\majorheading{\center{Radar library documentation
+
+\smaller{\smaller{Version 0.27 (9/13/94)
+
+}}}}
+\bold{The documentation after this version is being migrated to HTML. 
+ Further additions to radar.ez and volume.ez are not expected.
+
+}
+This library is designed to provide an interface between multiple building 
+block libraries for processing radar data.  Functionality that requires 
+more than one library, \bold{Volume} *\bold{wsr88d_to_radar} for example, 
+is contained here; it uses routines from the libraries \bold{wsr88d} and 
+\bold{volume}.  Other more complicated algorithms, such as \bold{Carpi 
+*volume_to_carpi}  reside here as well.
+
+
+Eventually, the organization of this library will be such that it contains 
+the source (in object form) from each building block library which it 
+acesses.  That is, the \bold{lassen} library, the \bold{wsr88d} library, 
+the \bold{volume} library, etc., are all included in this \bold{radar} 
+library.  This makes it easier to specify the linking library as 
+\bold{-lradar} and the include statement \bold{#include "radar.h" }for 
+structure definintions.
+
+
+\heading{The Radar
+
+
+}The structure \bold{Radar} is our method to define the ideal or universal 
+radar representation in RAM while keeping the natural resolution of the 
+data unchanged.  More simply \bold{Radar} represents the super set of all 
+radar file formats.  The Radar structure is hierarchically defined. 
+ \bold{Radar} consists of an array of \bold{Volumes} which are 
+reflectivity, velocity, and spectrum width, etc.  Each \bold{Volume}, in 
+turn, is an array of \bold{Sweeps}.  Each \bold{Sweep} is an array of 
+\bold{Rays}.  Each \bold{Ray} is an array of \bold{Range} values (typically 
+\bold{Range} is defined to be \bold{char}).  Each of the structures, 
+\bold{Radar}, \bold{Volume}, \bold{Sweep}, and \bold{Ray} has a header 
+field containing information specific to its structure.  For example, the 
+\bold{Volume} header has the member \bold{nsweeps} to indicate the number 
+of sweeps in the \bold{Volume}.  Different library routines rely on 
+different header information, but, the most important fields are 
+\bold{nvolumes}, \bold{nsweeps}, \bold{nrays}, \bold{nbins}, which can be 
+found in \bold{Radar}, \bold{Volume}, \bold{Sweep} and \bold{Ray} 
+structures respectively.  They control the size of the Radar structure and 
+control all looping constructs for operations on a particular structure.
+
+
+For the most, routines manipulate \bold{Volume}, \bold{Sweep}, and 
+\bold{Ray} and one routine is defined for each.  Each function operates on 
+the structure for which it is defined and returns a pointer to a structure 
+of the same type.  Functions that manipulate \bold{Volume} do so by looping 
+on the array of \bold{Sweep} (0 .. nsweeps-1) calling the \bold{Sweep} 
+function and return a pointer to a \bold{Volume} structure..  The 
+\bold{Sweep} function loops on the array of \bold{Ray} (0 .. nrays-1) 
+calling the \bold{Ray} function and returns a pointer to a \bold{Sweep}. 
+ The \bold{Ray} function manipulates each \bold{Range} element (0..nbins-1) 
+and returns a pointer to a \bold{Ray}.  It is this approach that makes 
+coding the \bold{Volume} and \bold{Sweep} functions trivial.  Routines can 
+manipulate \bold{Radar}, too.  There are fewer of them simply because only 
+one radar is typically loaded into memory at once, nor have we defined any 
+functionality for \bold{Radar}.  You are not restricted to having only one 
+\bold{Radar} structure in memory at a time.  Here is an example to 
+illustrate a typical \bold{Volume} function.  This function allocates a new 
+volume pointer.  The function called in the loop, QC_sweep, is structured 
+identically to this function.
+
+
+Indexing the volumes in the \bold{Radar} is easy.  They are hard coded 
+symbols that refer to the field type.  The hard coding method is less 
+flexible than I like, but it will stay for now.  Each field type has a 
+special symbol known as the data mask and it is used to restrict the field 
+types requested when ingesting data from disk.  You will use the bitwise 
+or-ing operator, |, to select more than one field.  To access the velocity 
+volume you use the syntax: \typewriter{\bold{radar->v[VR_INDEX]}}.  When 
+asking for a particular field when reading a file (only wsr88d has this 
+capability) you use: \typewriter{\bold{radar = wsr88d_to_radar(infile, 
+DZMASK | VR_MASK)}} to get \bold{DZ} and \bold{VR} only, if they exist. 
+Here is a list of the fields and their associated index and  data masks.
+
+\begindata{bp,1074419936}
+\enddata{bp,1074419936}
+\view{bpv,1074419936,0,0,0}
+\underline{Name		Index and Data mask		Description}
+
+
+ DZ		DZ_INDEX, DZ_MASK		\mylist{Reflectivity (dBZ), may contain some 
+signal-processor level QC and/or filters. This field would contain Darwin's 
+CZ, or  WSR88D's standard reflectivity. In other words, unless  the field 
+is described otherwise, it should always go here. In essence, this is the 
+"cleanest" reflectivity field for a radar.
+
+}
+ VR		VR_INDEX, VR_MASK	\mylist{Radial Velocity (m/s).
+
+}
+ SW		SW_INDEX, SW_MASK	Spectral Width (m2/s2).
+
+
+ CZ		CZ_INDEX, CZ_MASK		QC Reflectivity (dBZ), contains post-processed QC'd 
+data.
+
+
+ ZT		ZT_INDEX, ZT_MASK		Total Reflectivity (dBZ).  May be uncommon, but 
+important
+
+
+ DR		DR_INDEX, DR_MASK	\mylist{Differential reflectivity.  DR and LR are 
+for dual-polarization radars only. Unitless or in dB.
+
+}
+ LR		LR_INDEX, LR_MASK		\mylist{Another form of differential ref. called 
+LDR, not sure of units.
+
+}
+
+
+\typewriter{\smaller{Volume *QC_volume(Volume *v, int radar_type)
+
+\{
+
+  Volume *qc_volume;
+
+  int i;
+
+
+  if (v == NULL) return NULL;
+
+  qc_volume = Vnew_volume(v->h.nsweeps);
+
+  qc_volume->h = v->h; /* Copy the whole header structure. */
+
+ \
+
+
+  for (i=0; i<v->h.nsweeps; i++)
+
+        qc_volume->sweep[i] = QC_sweep(v->sweep[i], radar_type);
+
+
+  return qc_volume;
+
+\}
+
+}}
+\begindata{bp,1074419840}
+\enddata{bp,1074419840}
+\view{bpv,1074419840,1,0,0}
+\heading{The structures}\typewriter{\flushleft{#include "radar.h";
+
+
+typedef struct \{
+
+  char *filename;
+
+  char *sitename;  /* KMLB for example, or Melbourne FL */
+
+  int month, day, year;
+
+  int hour, minute;
+
+  float sec; /* Second plus fractional part. */
+
+  int radar_type;  /* TBD. This is for Quality Control (qc.c) */
+
+  int nvolumes;
+
+\} Radar_header;
+
+
+typedef struct \{
+
+	Radar_header h;
+
+	Volume **v; /* Array 0..nvolumes-1.  Indexes are:
+
+	            *   0 = Reflectivity.  \
+
+
+	            *   1 = Velocity.
+
+	            *   2 = Spectrum width.
+
+	            *  etc. (as they become defined.)
+
+	            */
+
+\} Radar;
+
+}}
+\heading{Quick reference to functions }\smaller{(coded in 
+trmm:~merritt/proj/trmm/radar)}\heading{
+
+
+}\typewriter{Radar *new_radar(int nvolumes);
+
+void free_radar(Radar *r);
+
+void radar_load_date_time(Radar *radar);
+
+Volume *Vget_volume(Radar *r, int type_wanted);
+
+\flushleft{int wsr88d_load_sweep_into_volume(Wsr88d_sweep ws, Volume *v, 
+int nsweep, unsigned int vmask);
+
+Radar *wsr88d_to_radar(char *infile, unsigned int data_mask);
+
+Radar *read_radar(char *infile);
+
+int write_radar(Radar *radar, char *outfile);
+
+Radar *clear_radar(Radar *r);
+
+void radar_to_uf(Radar *r, char *outfile);
+
+Radar *uf_to_radar(char *infile);
+
+Radar *lassen_to_radar(char *infile);
+
+float get_nyquist_from_radar(Radar *radar);
+
+
+}}
+\heading{Future functions
+
+
+}\typewriter{Radar   *nsig_to_radar(char *infile, unsigned int data_mask);
+
+\begindata{bp,1074437576}
+\enddata{bp,1074437576}
+\view{bpv,1074437576,2,0,0}}\heading{
+}\heading{Function descriptions
+
+}\typewriter{Radar *wsr88d_to_radar(char *filename, unsigned int 
+data_mask);
+
+}\smaller{	Function: Reads a wsr88d (nexrad) file and returns a pointer to 
+the \bold{Radar} structure.  The radar structure is, essentially, an array 
+of Volumes.  These volumes represent the reflectivity, velocity and 
+spectrum width fields.  The \bold{data_mask} can be the bitwise OR-ing (the 
+| operation) of any or all of the following mask values: 
+\bold{\bold{DZ_MASK}, }\bold{VR_MASK} and \bold{SW_MASK}.  Those included 
+in the OR-ing operation are those volume fields which are loaded.
+
+
+}
+\ttyleft{\ttyleft{\typewriter{Radar *lassen_to_radar(char *filename);
+
+}}}\smaller{	Function: Similiar to wsr88d_to_radar but for lassen data.
+
+}
+\typewriter{void radar_to_uf(Radar *r, char *outfile);
+
+}\smaller{	Output the \bold{Radar} structure, pointed to by \bold{r}, to 
+disk.  The output filename is specified in \bold{outfile}.  The output UF 
+file incorporates the NON-UF conforming NCAR record structure. Each UF 
+record is surrounded by a 4 byte integer leading the UF buffer and a 4 byte 
+integer trailing the UF buffer.  The integer value represents the number of 
+bytes for the UF buffer.  This comes from the unformatted Fortran record 
+descriptors.
+
+}\typewriter{
+Radar *uf_to_radar(char *infile);
+
+}\smaller{	This is the inverse function for \bold{radar_to_uf}.  It reads a 
+UF file from disk and loads the \bold{Radar} structure.  Space for the 
+\bold{Radar} structure is obtained via malloc.  The space can be freed with 
+\bold{Vfree_radar}.  Using the system function \bold{free} will not free 
+the entire \bold{Radar} structure as pointer's need to be chased to free 
+the \bold{Volumes}, \bold{Sweeps}, and \bold{Ray }structures.
+
+}\typewriter{
+int write_radar(Radar *radar, char *filename);
+
+}\smaller{	Save the Radar structure to disk.  This is useful when it take 
+some effort or time to build the Radar structure from data; you can save 
+the Radar as an intermediate result of processing.  See also, read_radar. 
+ Returns the number of bytes written.
+
+}
+\typewriter{Radar *read_radar(char *filename);
+
+}\smaller{	Read the Radar structure from disk.  This is the inverse 
+function of write_radar.  Space for the \bold{Radar} structure is obtained 
+via calls to the volume routines: \bold{Vnew_volume}, \bold{Vnew_sweep}, 
+and \bold{Vnew_ray}, which obtain their space via the routine malloc.
+
+}
+\typewriter{Volume *Vget_volume(Radar *radar, int index);
+
+}\smaller{	Returns radar->v[index].  This function may seem rediculious, 
+but it was intended to have symbolic arguments and automatically determine 
+the volume index.  index is one of DZ_INDEX, VR_INDEX, SW_INDEX, CZ_INDEX, 
+ZT_INDEX, DR_INDEX, LR_INDEX.
+
+
+}\typewriter{Radar *new_radar(int nvolumes);
+
+}\smaller{	Allocate a new radar structure.  Space for \bold{nvolumes} 
+volume pointers is allocated.  The structure member, \bold{h.nvolumes} is 
+set to \bold{nvolumes}.
+
+}
+\typewriter{void free_radar(Radar *radar);
+
+}\smaller{	Frees the space allocated to the Radar structure radar.  It 
+frees all substructures, Volume, Sweep, Ray, Range, by calling 
+Vfree_volume, Vfree_sweep, Vfree_ray respectively.
+
+
+}\typewriter{void radar_load_data_time(Radar *radar);
+
+}\smaller{	Finds the first ray in the radar structure and sets the members 
+in the Radar structure, \bold{h}, with the date and time of that first ray.
+
+}\smaller{
+}\typewriter{float get_nyquist_from_radar(Radar *radar);
+
+}\smaller{	Returns the nyquist velocity from the velocity field in the 
+radar structure.  This function is present to faciliate the capability of 
+loading non-velocity fields with the nyquist velocity, prt and prf.  The 
+wsr88d processor does not provide those values in non-velocity fields.  If 
+no velocity field is present, 0.0 is returned.
+
+}\smaller{
+}
+\heading{Radar specific routines.
+
+}
+\typewriter{\flushleft{int wsr88d_load_sweep_into_volume(Wsr88d_sweep ws, 
+Volume *v, int nsweep, unsigned int vmask)
+
+}}\smaller{	Function: Take a \bold{Wsr88d_sweep ws} and load it into a 
+\bold{Volume} pointed to by \bold{v}.  Additional information for the 
+volume is needed to identify what field is being loaded: \bold{vmask}. 
+ \bold{vmask} can be only one of \bold{WSR88D_DZ}, \bold{WSR88D_VR}, or 
+\bold{WSR88D_SW}.  \bold{vmask} is passed, unaltered, to 
+\bold{wsr88d_ray_to_float}.   \bold{nsweep} is the current sweep number. 
+ It is intended that this procedure be called in a loop of reading 
+\bold{Wsr88d_sweeps} (or called after \bold{wsr88d_read_sweep}) where you 
+can keep track of the sweep number.  This function also loads all the 
+header information for the individual sweeps and 
+rays.}\typewriter{\flushleft{
+
+
+Radar *wsr88d_to_radar(char *infile, unsigned int data_mask)
+
+}}\smaller{	Function: Read a wsr88d file and fill the Radar structure. 
+ Basically, Radar is an array of Volume pointers.  For the wsr88d data 
+there are only 3 possible volumes that can be extracted from the file: 
+reflectivity, velocity, and  spectrum width.  data_mask is the bitwise 
+OR-ing of REFL_MASK, VEL_MASK, or SW_MASK indicating which volumes to 
+retrieve.  Each volume (field type) has a well known index into the array 
+of Volumes.  Index 0 is reflectivity, 1 is velocity, and 2 is spectrum 
+width.  This function calls wsr88d_load_volumes repeatedly for each sweep 
+read in via wsr88d_read_sweep.  The algorithm is:
+
+	1. Open the wsr88d file.
+
+	2. Read the file header.
+
+	3. Allocate space for each volume by looping on the bits set in data_mask.
+
+	4. Loop read a wsr88d sweep until EOF.
+
+		5. For each volume in data_mask.  I.e., for each bit set  (up to 3 for 
+wsr88d files).
+
+			6.  wsr88d_load_volume.
+
+		End 5.
+
+	End 4.
+
+}\enddata{text,1074348784}

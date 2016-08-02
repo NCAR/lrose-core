@@ -1,0 +1,97 @@
+<HTML>
+<HEAD>
+<TITLE>MdvServer User's Guide</TITLE>
+</HEAD>
+
+<BODY>
+
+<H1>MdvServer User's Guide</H1>
+
+This document describes how run the MdvServer process and how
+to set up clients to use the server.
+
+
+<H2>1. Command Line</H2>
+
+The MdvServer is started with the following command line:
+
+<P>
+<PRE>
+MdvServer <I>options</I>
+</PRE>
+
+<P>
+where the following options are valid:
+
+<P>
+<DL>
+
+<DT><KBD>-help</KBD>
+<DD>print the command usage to stdout.
+
+<P>
+<DT><KBD>-port <I>number</I></KBD>
+<DD>the port number to be used by the server.
+This option MUST be specified or the MdvServer will exit.
+
+<P>
+<DT><KBD>-qmax <I>seconds</I></KBD>
+<DD>the maximum quiescent time in seconds.
+The server will exit if no requests are received within this time period.
+If <KBD>-qmax</KBD> isn't specified on the command line, the server will
+run indefinitely.
+
+<P>
+<DT><KBD>-params <I>file</I></KBD>
+<DD>default parameter file to be used by this server.
+The server will use this parameter file unless there is a different
+parameter file specified in the URL or there is a
+<KBD>.MdvServer.default</KBD> parameter file in the data store directory.
+
+<P>
+<DT><KBD>-print_params</KBD>
+<DD>Print the default parameter file to stdout.
+
+</DL>
+
+The <KBD>-port</KBD>, <KBD>-qmax</KBD> and <KBD>-params</KBD> options
+are supported so that this server can be managed by the DIDSS
+(Data Ingest and Distributed Server System) server manager.
+
+<P>
+When running the MdvServer within the DIDSS, do NOT start the process
+by hand.
+Instead, let the server manager start the process.
+Any MdvServer process started by hand within the DIDSS will be ignored
+by the rest of the system and a redundant server will be started by
+the server manager.
+
+
+<H2>2. Client Set-up</H2>
+
+Setting a client up to use an MdvServer is as easy as using
+the appropriate RAP URL in the client.
+Generally, the URL will be specified in the client's parameter file.
+
+<P>
+To have the client go through the DIDSS data mapper and server manager
+to find the data, leave the host and port specifications blank in the
+URL.
+The client will then get the host name from the data mapper and then
+get the port number from the server manager.
+
+<P>
+To use a particular MdvServer (generally one that was started by hand),
+specify both the host and the port in the URL.
+
+
+<P>
+<ADDRESS>
+Author: Nancy Rehak<BR>
+RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000<BR>
+<A HREF="mailto:rehak@ucar.edu">rehak@ucar.edu</A> <BR>
+Last Modified on 7 December, 1998<BR>
+</ADDRESS>
+
+</BODY>
+</HTML>

@@ -1,0 +1,273 @@
+/*********************************************************
+ * parameter definitions for nex2mom
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * May 1997
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately. Use DEBUG_VERBOSE for all debug messages.";
+} debug;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance.";
+  p_help = "This is used by procmap utilities for registering the process with procmap.";
+} instance;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef enum input_device {
+  p_options = {IN_TAPE, IN_UDP};
+  p_default = {IN_UDP};
+  p_descr = "Input device type.";
+  p_help = "For IN_TAPE, set input_tape_name, input_tape wait and short_tape. For IN_UDP, set input_udp_port. For IN_SHMEM, set input_shmem_key.";
+} input_device;
+
+paramdef char* {
+  p_default = {"/dev/nrst0"};
+  p_descr = "Tape device name for input";
+} input_tape_name;
+
+paramdef long {
+  p_default = {30};
+  p_descr = "Tape input read delay (millisecs).";
+  p_help = "Wait between beam reads, to allow the user to simulate varying data rates.";
+} input_tape_wait;
+
+paramdef long {
+  p_default = {3280};
+  p_descr = "Input udp port number.";
+} input_udp_port;
+
+paramdef enum output_format {
+  p_options = {LL_FORMAT, DS_FORMAT, NATIVE_FORMAT};
+  p_default = {LL_FORMAT};
+  p_descr = "Output format type.";
+  p_help = "Output may be in Lincoln format (LL_FORMAT), DsRadar format (DS_FORMAT) or unchanged from input (NATIVE_FORMAT).";
+} output_format;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to output FMQ.";
+  p_help = "If set to TRUE, FMQ stream is output.";
+} write_fmq_output;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to output UDP.";
+  p_help = "If set to TRUE, UDP stream is output.";
+} write_udp_output;
+
+paramdef long {
+  p_default = {54321};
+  p_descr = "Output udp port number.";
+} output_udp_port;
+
+paramdef char* {
+  p_default = {"128.117.197.255"};
+  p_descr = "Broadcast address for UDP output.";
+} output_udp_address;
+
+paramdef char* {
+  p_default = {"output_fmq"};
+  p_descr = "Path for output FMQ";
+} output_fmq_path;
+
+paramdef long {
+  p_default = {2000000};
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} output_fmq_size;
+
+paramdef long {
+  p_default = {3600};
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to write an FMQ for archive purposes.";
+  p_help = "The archive FMQ is written in native RIDDS format. A separate program reads this FMQ and archives the data to tape.";
+} write_archive_fmq;
+
+paramdef char* {
+  p_default = {"archive_fmq"};
+  p_descr = "Path for archive FMQ";
+} archive_fmq_path;
+
+paramdef long {
+  p_default = {2000000};
+  p_descr = "Size of archive FMQ, in bytes.";
+  p_help = "This is the total size of the archive FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} archive_fmq_size;
+
+paramdef long {
+  p_default = {3600};
+  p_descr = "Number of slots in archive FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} archive_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Archive FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} archive_fmq_compress;
+
+paramdef char* {
+  p_default = {"ALENIA"};
+  p_descr = "Radar name.";
+} radar_name;
+
+paramdef char* {
+  p_default = {"Fossalon"};
+  p_descr = "Site name.";
+} site_name;
+
+paramdef struct ZR {
+  p_descr = "Radar location";
+  p_help = "Used if override_radar_location is TRUE. Lat and lon in degrees. Alt in km";
+  p_field_type = {double, double, double};
+  p_field_name = {latitude, longitude, altitude};
+} radar_location;
+
+paramdef double {
+  p_descr = "Elevation angle table";
+  p_help = "Array of expected elevation angles (deg).These are used to determine the tilt number for a beam.";
+} elev_table[];
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Time correction (secs).";
+  p_help = "Data time is adjusted by this number of seconds before output.";
+} time_correction;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Wallclock time override option.";
+  p_help = "If set, wallclock time will be used to override data time.";
+} use_wallclock_time;
+
+paramdef long {
+  p_default = {3};
+  p_descr = "Radar polarization code.";
+  p_help = "1 = hor, 2 = ver, 3 = circ, 4 = ellip. Should be 3; 1 for Jing compatibility.";
+} polarization_code;
+
+paramdef double {
+  p_default = {0.95};
+  p_min = {0.01};
+  p_max = {45.0};
+  p_descr = "Beam width";
+  p_help = "Radar half-power beam width (deg)";
+} beam_width;
+
+paramdef double {
+  p_default = {10.0};
+  p_min = {0.01};
+  p_max = {1000.0};
+  p_descr = "Wavelength";
+  p_help = "Radar wavelength (cm)";
+} wavelength;
+
+paramdef double {
+  p_default = {7.0};
+  p_descr = "Average transmitter power (kW)";
+} avg_xmit_pwr;
+
+paramdef double {
+  p_default = {-8.0};
+  p_descr = "Receiver noise.";
+  p_help = "Receiver noise in units of dBZ at a range of 100km.";
+} noise_dbz_at_100km;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to include dBZ in output stream.";
+  p_help = "dBZ, if available, will be first field in output data. If this option is set, and no dBZ data is available, missing data will be inserted.";
+} output_dbz;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to include Zdr in output stream.";
+  p_help = "zdr, if available, will follow dBZ in output data. If this option is set, and no zdr data is available, missing data will be inserted.";
+} output_zdr;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to include vel in output stream.";
+  p_help = "vel, if available, will follow Zdr in output data. If this option is set, and no vel data is available, missing data will be inserted.";
+} output_vel;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to include width in output stream.";
+  p_help = "vel, if available, will follow vel in output data. If this option is set, and no width data is available, missing data will be inserted.";
+} output_width;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to output valid data only.";
+  p_help = "The radar processor inserts a bit-flag to indicate that the data is invalid because the elevation angle has not stabilized at the target value. If valid_only is set the invalid data is not output.";
+} valid_only;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to rescale dBZ so that the scale and bias are not affected when the radar changes dBZ scale.";
+  p_help = "If TRUE, the dBZ scale and bias will be set to 0.4 and -30 respectively. This gives a range of -30 to 101.";
+} rescale_dbz;
+
+paramdef double {
+  p_default = {0.4};
+  p_descr = "dBZ scale if rescaling is used";
+  p_help = "If rescale_dbz is TRUE, the dBZ field will be rescaled using this sscale";
+} final_dbz_scale;
+
+paramdef double {
+  p_default = {-30.0};
+  p_descr = "dBZ bias if rescaling is used";
+  p_help = "If rescale_dbz is TRUE, the dBZ field will be rescaled using this bias";
+} final_dbz_bias;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Print summary option.";
+  p_help = "If TRUE summaries are printed at given interval.";
+} print_summary;
+
+paramdef long {
+  p_default = {90};
+  p_descr = "Interval for summary printouts.";
+  p_help = "See print_summary.";
+} summary_interval;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Print header option.";
+  p_help = "If TRUE headers are printed at given interval.";
+} print_header;
+
+paramdef long {
+  p_default = {360};
+  p_descr = "Interval for header printouts.";
+  p_help = "See print_header.";
+} header_interval;
+

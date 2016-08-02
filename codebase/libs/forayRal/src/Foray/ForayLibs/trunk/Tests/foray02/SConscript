@@ -1,0 +1,18 @@
+# -*- python -*-
+#
+#
+
+
+Import('env')
+
+sources  = ['main.cpp'];
+
+progNode  = env.Program('foray02',source = sources,
+                        CPPPATH=[env.installLocalInc,env.netcdfInc],
+                        LIBPATH=[env.installLocalLib,env.netcdfLib],
+                        LIBS=['rayfilefactory','ncradar','dorade','rayfile','forayutil','netcdf']);
+
+localInstallNode = env.Install(env.installLocalBin ,progNode);
+
+env.Default([progNode,localInstallNode])
+

@@ -1,0 +1,229 @@
+/**********************************************************
+ * paramdef.ThetaEAdvect
+ *
+ * This file contains the TDRP parameter definitions for
+ * ThetaEAdvect.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  INTERVAL
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+           "In INTERVAL mode, the program operates on archive data as "
+           "specified in the interval_trigger parameter.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "URL to use when using a LATEST_DATA trigger";
+  p_default = "mdvp:://localhost::./mdv/ruc";
+} latest_data_trigger;
+
+typedef struct
+{
+  string url;
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the URL to use to get the available data times.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "mdvp:://localhost::./mdv/ruc",
+                "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+  long interval;
+} interval_trigger_t;
+
+paramdef struct interval_trigger_t
+{
+  p_descr = "Trigger information used when using the INTERVAL trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.\n"
+           "interval gives the number of seconds between each trigger time.";
+  p_default = { "2001/1/1 00:00:00",
+                "2001/1/2 00:00:00",
+                3600 };
+} interval_trigger;
+
+typedef struct
+{
+  string url;
+  string field_name;
+  long field_num;
+} input_info_t;
+
+
+paramdef struct input_info_t
+{
+  p_descr = "Information about the input mixing ratio field";
+  p_help = "Uses field_name to identify field in MDV file unless "
+           "field_name is \"\" in which case it uses field_num to "
+           "identify the input field.\n"
+           "Note that this data is expected to be in g/kg.";
+  p_default = { "mdvp:://localhost::./mdv/ruc",
+                "mr", 0 };
+} mixing_ratio_field_info;
+
+paramdef struct input_info_t
+{
+  p_descr = "Information about the input temperature field";
+  p_help = "Uses field_name to identify field in MDV file unless "
+           "field_name is \"\" in which case it uses field_num to "
+           "identify the input field.\n"
+           "Note that this data is expected to be in Kelvin.";
+  p_default = { "mdvp:://localhost::./mdv/ruc",
+                "TMP", 0 };
+} temp_field_info;
+
+paramdef struct input_info_t
+{
+  p_descr = "Information about the input pressure field";
+  p_help = "Uses field_name to identify field in MDV file unless "
+           "field_name is \"\" in which case it uses field_num to "
+           "identify the input field.\n"
+           "Note that this data is expected to be in mb.";
+  p_default = { "mdvp:://localhost::./mdv/ruc",
+                "PRS", 0 };
+} pressure_field_info;
+
+paramdef struct input_info_t
+{
+  p_descr = "Information about the input U field";
+  p_help = "Uses field_name to identify field in MDV file unless "
+           "field_name is \"\" in which case it uses field_num to "
+           "identify the input field.\n"
+           "Note that this data is expected to be in m/s.";
+  p_default = { "mdvp:://localhost::./mdv/ruc",
+                "UGRD", 0 };
+} u_field_info;
+
+paramdef struct input_info_t
+{
+  p_descr = "Information about the input V field";
+  p_help = "Uses field_name to identify field in MDV file unless "
+           "field_name is \"\" in which case it uses field_num to "
+           "identify the input field.\n"
+           "Note that this data is expected to be in m/s.";
+  p_default = { "mdvp:://localhost::./mdv/ruc",
+                "VGRD", 0 };
+} v_field_info;
+
+typedef struct
+{
+  double lower_level;
+  double upper_level;
+} pressure_limits_t;
+
+paramdef struct pressure_limits_t
+{
+  p_descr = "The minimum and maximum pressure levels to process";
+  p_default = { 875.0, 675.0 };
+} pressure_limits;
+
+paramdef long
+{
+  p_descr = "Maximum input valid age in seconds";
+  p_help = "Once the algorithm is triggered, it will not use any input data "
+           "older than this value.";
+  p_default = 1800;
+} max_input_valid_secs;
+
+paramdef boolean
+{
+  p_descr = "Flag to read forecast directory structure mdv data";
+  p_default = false;
+} is_forecast_data;
+
+
+paramdef boolean 
+{
+  p_descr = "Flag to write data in forecast directory structure";
+  p_default = false;
+} write_as_forecast;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::./mdv/output";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};

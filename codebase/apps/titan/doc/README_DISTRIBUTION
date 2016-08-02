@@ -1,0 +1,49 @@
+RETRIEVING THE TITAN DISTRIBUTION
+=================================
+
+Mike Dixon
+RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+(303)-497-8440
+dixon@ncar.ucar.edu
+
+December 1994
+
+The distribution is available via anonymous ftp on
+thunder.rap.ucar.edu (128.117.192.14). The user must be licenced
+through UCAR to legally download the distribution. All ftp activity
+on thunder is logged.
+
+Use anonymous ftp, and your full username as a password.
+
+  cd pub/dixon
+  binary
+  get titan2.0.tar.Z
+
+Uncompress the tar file:
+
+  uncompress titan2.0.tar.Z
+
+Make a directory for the distribution. At RAP we name this directory
+'rap' for all of the RAP source, so if you name it rap it may make
+things easier for you.
+
+We will assume you have set an environment variable RAP_DIR to point
+to this directory.
+
+Move the tar file there, and extract with:
+
+  tar xvf titan2.0.tar
+
+You should then have the following subdirectories:
+
+  $RAP_DIR/doc
+  $RAP_DIR/make_bin
+  $RAP_DIR/make_include
+  $RAP_DIR/libraries
+  $RAP_DIR/projects
+
+Refer to README_INSTALL for further information.
+
+
+
+

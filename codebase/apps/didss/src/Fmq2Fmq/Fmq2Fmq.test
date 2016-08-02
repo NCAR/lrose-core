@@ -1,0 +1,152 @@
+/**********************************************************************
+ * TDRP params for Fmq2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// Fmq2Fmq program.
+//
+// Fmq2Fmq reads an input FMQ and copies the contents unchanged to an 
+//   output FMQ. It is useful for reading data from a remote queue and 
+//   copying it to a local queue. The clients can then read the local 
+//   queue rather than all access the remote queue.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input FMQ.
+// Type: string
+//
+
+input_url = "/tmp/fmq/test";
+
+///////////// msecs_sleep_blocking ////////////////////
+//
+// Number of millisecs to sleep while polling the input.
+// The reads are done in a polling-blocking mode. This is the number of 
+//   millisecs to sleep between polls.
+// Type: int
+//
+
+msecs_sleep_blocking = 1000;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_urls /////////////////////////////
+//
+// URLs for output FMQ.
+// Type: string
+// 1D array - variable length.
+//
+
+output_urls = { "fmqp:://localhost:0:/tmp/fmq/test1" };
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQs are written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+
+///////////// output_compression //////////////////////
+//
+// Output compression options.
+// The data may be optionally compressed for output. BZIP is generally 
+//   the slowest but most compact. ZLIB uses the gzip compression 
+//   algorithm, which is faster than BZIP, and for some data more compact 
+//   as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is 
+//   simple run-length encoding compression, which is the fastest and 
+//   least compact.
+//
+// Type: enum
+// Options:
+//     NO_COMPRESSION
+//     RLE_COMPRESSION
+//     LZO_COMPRESSION
+//     ZLIB_COMPRESSION
+//     BZIP_COMPRESSION
+//
+
+output_compression = NO_COMPRESSION;
+
+///////////// output_n_slots //////////////////////////
+//
+// Number of slots in output FMQ.
+// Type: int
+//
+
+output_n_slots = 1000;
+
+///////////// output_buf_size /////////////////////////
+//
+// Size of buffer in output FMQ.
+// Type: int
+//
+
+output_buf_size = 1000000;
+
+///////////// write_blocking //////////////////////////
+//
+// Option for blocking write on output.
+// If set, the output fmqs will activate blocking on write. This means 
+//   that if any of the output readers gets behind the entire program will 
+//   block untils that reader catches up. So be careful using this mode.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+///////////// max_cache_size //////////////////////////
+//
+// Max size of the write cache.
+// We read data until no more is available, caching it before performing 
+//   a write. This is the max number of messages in the write cache. If it 
+//   fills, it will be written before any further reads are performed.
+// Type: int
+//
+
+max_cache_size = 20;
+

@@ -1,0 +1,134 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MM5Simulate
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 1998
+ * 
+ * MM5Simulate writes MM5 output files to simulate the
+ * output file stream.
+ */
+
+commentdef {
+  p_header = "Program MM5Simulate.";
+  p_text = "This program simulates MM5 running in realtime. It cycles through a series of files actually produced by MM5, and adjusts the file name and the times in the file to simulate the situation in which the files had just been produced by MM5.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the analysis is performed for each volume scan as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+
+commentdef {
+  p_header = "SIMULATION DETAILS.";
+}
+
+paramdef int {
+  p_default = 21600;
+  p_descr = "Interval between simulated model runs - secs.";
+  p_help = "A simulated model run is triggered at this interval. In REALTIME mode, a time trigger always occurs on the hour, and at constant intervals thereafter. In ARCHIVE mode the trigger starts at start_time and at constant intervals thereafter.";
+} model_run_interval;
+
+paramdef int {
+  p_min = 0;
+  p_default = 1800;
+  p_descr = "Wallclock time taken for simulated model to produce one forecast step.";
+  p_help = "The program waits this amount of time before generating the output for each forecast period. This is intended to simulate model behavior.";
+} forecast_step_wallclock_duration;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "REALTIME mode only. Option for force one model run when "
+    "the program starts up.";
+  p_help = "Setting this option forces a single trigger in the past. "
+    "All subsequent trigger times will occur at times after program startup. "
+    "This option is useful for debugging so that you do not have to wait for the "
+    "first future trigger to occur before testing the program behavior.";
+} force_run_on_start;
+
+paramdef int {
+  p_min = 0;
+  p_default = 1800;
+  p_descr = "Time between model forecast steps (s).";
+  p_help = "The first forecast is time-stamped at trigger time. "
+    "Subsequent forecasts are spaced at this interval.";
+} forecast_interval;
+
+commentdef {
+  p_header = "INPUT DATA.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "List of input file paths.";
+  p_help = "The program cycles through these file paths to obtain "
+    "the simulation data.";
+} input_file_paths[];
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Output directory.";
+  p_help = "The simulated MM5 data is output to this directory.";
+} output_dir;
+
+
+
+
+

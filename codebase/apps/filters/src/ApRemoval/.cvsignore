@@ -1,0 +1,6 @@
+.deps
+ApRemoval
+__makefile.template
+makefile
+makefile.am
+makefile.in

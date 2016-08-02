@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# stephen dowdy, RAL, NCAR, Boulder, CO, USA
+# April 2015
+
+# show processes consuming > some amount of Virtual Memory
+
+vmem_thresh=${1:-200000}
+ps_fmt="pid:6,ppid:6,%mem:4,rss:8,size:8=SSZ,sz:8=PSZ,vsize:8,args:20"
+ps -A -o ${ps_fmt} | awk 'NR==1 {print $0;next} $7 > '${vmem_thresh}'{print $0}'
+
+exit 0
+
+#  from the ps(1) manpage
+​
+#  rss  RSS  resident set size, the non-swapped physical memory that a task has used (inkiloBytes).  (alias rssize, rsz).
+#  size SIZE approximate amount of swap space that would be required if the process were to dirty all writable pages and then be swapped out.  This number is very rough!
+#  sz   SZ   size in physical pages of the core image of the process.  This includes text, data, and stack space.  Device mappings are currently excluded; this is subject to change.  See vsz and rss.
+#  vsz  VSZ  virtual memory size of the process in KiB (1024-byte units).  Device mappings are currently excluded; this is subject to change.  (alias vsize).

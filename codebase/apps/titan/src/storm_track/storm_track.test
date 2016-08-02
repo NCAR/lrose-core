@@ -1,0 +1,269 @@
+/****************************************************
+ * TDRP params for storm_track
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA, DEBUG_VERBOSE.
+ */
+debug = DEBUG_EXTRA;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 2;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Tracking mode.
+ * In realtime and archive mode, tracking is performed for each
+ *   volume scan as it is made available by storm_ident. In retrack
+ *   mode, tracking is done on an existing storm file.
+ *
+ * Type: enum
+ * Default: ARCHIVE 
+ * Legal values: ARCHIVE, REALTIME, RE_TRACK.
+ */
+mode = ARCHIVE;
+
+/*
+ * Forecast mode.
+ * TREND - linear trend. PARABOLIC - parabolic trend on growth,
+ *   linear trend on decay. The parabola peaks at time parabolic_growth_period
+ *   from present. REGRESSION - uses regression equations for forecast
+ *   (experimental).
+ *
+ * Type: enum
+ * Default: TREND 
+ * Legal values: TREND, PARABOLIC, REGRESSION.
+ */
+forecast_type = TREND;
+
+/*
+ * Parabolic growth period (secs).
+ * Time at which parabolic growth curve becomes flat.
+ *
+ * Type: double
+ * Default: 1800 
+ * Min value: 0 
+ * Max value: 10800 
+ */
+parabolic_growth_period = 1800;
+
+/*
+ * Option to force storm growth to be zero.
+ * If this is set, the storm growth will be forced to zero. Storm
+ *   decay will be normal. Forecast movement will be normal.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+zero_growth = FALSE;
+
+/*
+ * Option to force storm decay to be zero.
+ * If this is set, the storm decay will be forced to zero. Storm growth
+ *   will be normal. Forecast movement will be normal.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+zero_decay = FALSE;
+
+/*
+ * Maximum allowable speed for tracks.
+ * This value is used to limit the search for a match in the tracking
+ *   algorithm.
+ *
+ * Type: double
+ * Default: 90 
+ * Min value: 5 
+ * Max value: 200 
+ */
+max_tracking_speed = 90;
+
+/*
+ * Matching parameter.
+ * The weight for distance moved in the matching algorithm.
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0 
+ * Max value: 10 
+ */
+weight_distance = 1;
+
+/*
+ * Matching parameter.
+ * The weight for delta_cube_root_volume in the matching algorithm.
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0 
+ * Max value: 10 
+ */
+weight_delta_cube_root_volume = 1;
+
+/*
+ * Max allowable time between scans (secs).
+ * Max delta time (secs) for valid tracking - if there is a larger
+ *   break than this in the data, all tracks are terminated and new
+ *   ones started.
+ *
+ * Type: double
+ * Default: 1200 
+ * Min value: 60 
+ * Max value: 86400 
+ */
+max_delta_time = 1200;
+
+/*
+ * Weights for making the trend forecast.
+ * A trend forecast is made using a weighted linear fit to the storm
+ *   history. These are the weights used. The first applies to the
+ *   most recent scan, and the last to the earliest scan used.
+ *
+ * Type: double
+ * Min value: 0 
+ * Max value: 1 
+ * Array elem size: 8 bytes
+ * Max number of elements: 10
+ */
+forecast_weights = {1, 0.9, 0.8, 0.7, 0.6, 0.5};
+
+/*
+ * Max allowable speed for valid forecast (km/hr).
+ * If the speed exceeds this value, the forecast is marked invalid.
+ *
+ * Type: double
+ * Default: 100 
+ * Min value: 5 
+ * Max value: 300 
+ */
+max_speed_for_valid_forecast = 80;
+
+/*
+ * Min history for valid forecast (secs).
+ * If the history is less than this value, the forecast is marked
+ *   invalid.
+ *
+ * Type: double
+ * Default: 900 
+ * Min value: 0 
+ * Max value: 7200 
+ */
+min_history_for_valid_forecast = 900;
+
+/*
+ * Option to scale forecasts by history.
+ * If this is set, forecasts are scaled by the ratio of history over
+ *   min_history_for_scaling.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+scale_forecasts_by_history = FALSE;
+
+/*
+ * History value for scaling forecasts (secs).
+ * If a storm has a history less than this value, the forecast values
+ *   are scaled by the ratio of history over history_for_scaling.
+ *   If the storm history exceeds this value, the scale factor is
+ *   1.0.
+ *
+ * Type: double
+ * Default: 1200 
+ * Min value: 0 
+ */
+history_for_scaling = 1200;
+
+/*
+ * Option to use storm runs for overlaps.
+ * If this is set, runs are used to compute the overlaps for identifying
+ *   mergers and splits. If not, the storm polygons are used.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+use_runs_for_overlaps = TRUE;
+
+/*
+ * Min fraction for valid overlap.
+ * When detetmining the overlap of a storm at successive times,
+ *   we consider the overlap as a fraction of the storm area at time1
+ *   and time2. This is the min overlap for a valid match.
+ *
+ * Type: double
+ * Default: 0.1 
+ * Min value: 0.01 
+ * Max value: 1 
+ */
+min_fraction_overlap = 0.1;
+
+/*
+ * Min sum fraction for valid overlap.
+ * When detetmining the overlap of a storm at successive times,
+ *   we consider the sum of the overlaps as a fraction of the storm
+ *   area at time1 and time2. This is the min overlap for a valid match.
+ *
+ * Type: double
+ * Default: 0.3 
+ * Min value: 0.01 
+ * Max value: 3 
+ */
+min_sum_fraction_overlap = 0.3;
+
+/*
+ * Option to perform spatial smoothing.
+ * If this is set, the motion forecasts are smoothed using an inverse-distance
+ *   weighting scheme. The max radius considered is given by the
+ *   parameter smoothing_radius.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+spatial_smoothing = FALSE;
+
+/*
+ * Radius for forecast smoothing.
+ * This is the maximum radius which the forecast algorithm will
+ *   use when searching for candidates for smoothing data.
+ *
+ * Type: double
+ * Default: 50 
+ * Min value: 0 
+ */
+smoothing_radius = 50;
+
+/*
+ * Shared mem key.
+ * This key is used for shared memory communication with storm_ident
+ *   and the track_server.
+ *
+ * Type: long
+ * Default: 44000 
+ * Min value: 10000 
+ */
+shmem_key = 44000;
+
+

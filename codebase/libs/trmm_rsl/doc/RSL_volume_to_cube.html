@@ -1,0 +1,36 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_volume_to_cube</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<a href=RSL_cube_struct.html>Cube</a> *RSL_volume_to_cube(<a href=RSL_volume_struct.html>Volume</a> *v, float dx, float dy, float dz, int nx, int ny, int nz, float grnd_r, int radar_x, int radar_y, int radar_z) 
+
+<h3>
+<hr>Description</h3>
+Convert polar coordinate Volume v into cube cartesean coordinates. This routine allocates space for the cube header and an array of pointers to carpi's. The routine <a href=RSL_volume_to_carpi.html>RSL_volume_to_carpi</a> is called for each <b>dz</b>. 
+
+<p><b>dx</b>, <b>dy</b>, <b>dz</b> specify the kilometer resolution of each cubic cell.<br>
+<b>nx</b>, <b>ny</b>, <b>nz</b> specify the cube dimensions.<br>
+<b>grnd_r</b> specifies the maximum ground range to load from the volume.<br>
+<b>radar_x</b>, <b>radar_y</b>, <b>radar_z</b> specify the location within the cube for the radar. Typically, <b>radar_z</b> equals 0 as there is no data below the radar. Specify dx/2 and dy/2 for radar_x and radar_y to center the radar within the cube. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. Otherwise, a NULL pointer is returned and errno is set. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_get_slice_from_cube.html>RSL_get_slice_from_cube</a>, <a href=RSL_volume_to_carpi.html>RSL_volume_to_carpi</a> 
+
+<p>
+<hr>Author: <a href=mike.kolander.html>Mike Kolander</a> 
+</body>

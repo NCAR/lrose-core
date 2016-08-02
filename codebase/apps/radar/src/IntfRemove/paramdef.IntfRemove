@@ -1,0 +1,228 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for IntfRemove
+//
+//  Mike Dixon, RAP, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  Oct 2007
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "IntfRemove reads DBZ and SNR data in an input DsRadar FMQ, identifies interference and removes the interference power from the power fields, and writes the cleaned up data out to a DsRadar queue.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_descr = "Input URL for dual-pol moments data via DsRadar FMQ";
+  p_default = "fmq/with_interference";
+} input_fmq_url;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the start of the fmq and read in data from the entire queue. If FALSE, it will only read new data as it is added to the FMQ.";
+} seek_to_start_of_input;
+
+commentdef {
+  p_header = "INPUT FIELD INFORMATION";
+  p_text = "Names of input fields in the Dsr queue.";
+}
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Dsr field name for DBZ.";
+  p_help = "Horizontally-polarized reflectivity factor.";
+} dsr_name_DBZ;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is SNR data available?";
+  p_help = "If not, SNR will be computed from DBZ, using noise_dbz_100km.";
+} SNR_available;
+
+paramdef string {
+  p_default = "SNR";
+  p_descr = "Dsr field name for SNR.";
+  p_help = "Signal-to-noise ratio (dB).";
+} dsr_name_SNR;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "The noise represented as dBZ at 100km range.";
+  p_help = "This is used for computing the signal/noise value from the DBZ field.";
+} noise_dbz_at_100km;
+
+commentdef {
+  p_header = "INTERFERENCE DETECTION";
+  p_text = "Computing a histogram for the SNR field allows us to identify interference from the apparently raised noise floor.";
+}
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Number of segments, in range, for computing the interference level.";
+  p_help = "We analyze the interference by splitting the beam gates into segments, and computing a histogram of SNR values for that segment. The reason for having segments is that as the antenna turns the level of interference will change because of how the beam pattern interacts with the source of interference. So the gates closer to the radar may have a different level of interference than the gates further from the radar.";
+} number_of_range_segments;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min value for snr histogram (dB).";
+} snr_hist_min;
+
+paramdef double {
+  p_default = 90.0;
+  p_descr = "Max value for snr histogram (dB).";
+} snr_hist_max;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "The resolution of the snr histogram (dB).";
+} snr_hist_delta;
+
+paramdef double {
+  p_default = 0.15;
+  p_descr = "Min value of mode to indicate interference.";
+  p_help = "We compute a density curve from the histogram. If interference is present, the mode of the density curve will indicate a peak at the interference snr level. Set this threshold appropriately to separate interference from other signals. The lower the value the larger the percentage of beams considered to have interference.";
+} mode_threshold;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Min density value for computing interference snr.";
+  p_help = "We compute interference snr by considering snr values on either side of the mode. We stop looking when the density value drops below this value.";
+} tail_threshold;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "SNR threshold for identifying interference.";
+  p_help = "A beam is identified as having interference if the interference SNR exceeds this value.";
+} interference_snr_threshold;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print out histogram.";
+} print_histogram;
+
+commentdef {
+  p_header = "INTERFERENCE REMOVAL";
+  p_text = "Removing interference once it has been found.";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Margin of power removed above the detected interference level (dB).";
+  p_help = "We remove somewhat more power that the interference detected, to eliminate the noisyness in the data left after removal.";
+} interference_margin;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+  p_text = "The cleaned up data will be output to a DsRadarFmq. All of the input fields will be written to the output. The original input DBZ and SNR field will be echoed as DBZ_ORIG and SNR_ORIG. If the SNR field was not available as an input, the derived SNR will be output.";
+}
+
+paramdef string {
+  p_descr = "Output URL for cleaned up data via DsRadar FMQ";
+  p_default = "fmq/interference_removed";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 50000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter output DBZ with median filter.";
+  p_help = "The filter is applied in range.";
+} apply_median_filter_to_output_DBZ;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for DBZ - gates.";
+  p_help = "See 'appply_median_filter_to_DBZ'";
+} DBZ_median_filter_len;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply NEXRADR spike filter to DBZ and SNR fields.";
+  p_help = "The NEXRAD spike filter filters single and double gates with significantly raised data relative to the surrounding gates.\n"
+    "   This routine filters the reflectivity data according to the\n"
+    "   NEXRAD specification DV1208621F, section 3.2.1.2.2, page 3-15.\n"
+    "  \n"
+    "   The algorithm is stated as follows:\n"
+    "  \n"
+    "   Clutter detection:\n"
+    "  \n"
+    "   The nth bin is declared to be a point clutter cell if its power value\n"
+    "   exceeds those of both its second nearest neighbors by a threshold\n"
+    "   value TCN. In other words:\n"
+    "  \n"
+    "      if   P(n) exceeds TCN * P(n-2)\n"
+    "      and  P(n) exceeds TCN * p(n+2)\n"
+    "  \n"
+    "    where\n"
+    "  \n"
+    "     TCN is the point clutter threshold factor, which is always\n"
+    "         greater than 1, and typically has a value of 8 (9 dB)\n"
+    "  \n"
+    "     P(n) if the poiwer sum value for the nth range cell\n"
+    "  \n"
+    "     n is the range gate number\n"
+    "  \n"
+    "   Clutter censoring:\n"
+    "  \n"
+    "   The formulas for censoring detected strong point clutter in an\n"
+    "   arbitrary array A via data substitution are as follows. If the nth\n"
+    "   range cell is an isolated clutter cell (i.e., it si a clutter cell but\n"
+    "   neither of its immediate neighboring cells is a clutter cell) then the \n"
+    "   replacement scheme is as follows:\n"
+    "  \n"
+    "     Replace A(n-1) with  A(n-2)\n"
+    "     Replace A(n)   with  0.5 * A(n-2) * A(n+2)\n"
+    "     Replace A(n+1) with  A(n+2)\n"
+    "  \n"
+    "   If the nth and (n+1)th range bins constitute an isolated clutter pair,\n"
+    "   the bin replacement scheme is as follows:\n"
+    "  \n"
+    "     Replace A(n-1) with  A(n-2)\n"
+    "     Replace A(n)   with  A(n+2)\n"
+    "     Replace A(n+1) with  A(n+3)\n"
+    "     Replace A(n+2) with  A(n+3)\n"
+    "  \n"
+    "   Note that runs of more than 2 successive clutter cells cannot occur\n"
+    "   because of the nature of the algorithm.\n";
+} apply_nexrad_spike_filter;
+

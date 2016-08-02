@@ -1,0 +1,105 @@
+////////////////////////////////////////////////////////
+// parameter definitions for Test2Edge
+///////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Test2Edge PARAMETER FILE";
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef boolean {
+  p_descr = "Info messaging option";
+  p_help = "If set to true, info messages will be printed";
+  p_default = {TRUE};
+} info;
+
+commentdef {
+  p_header = "SIMULATION PARAMETERS";
+}
+
+paramdef double {
+  p_descr = "Latitude of radar";
+  p_default = {0.0};
+} lat;
+
+paramdef double {
+  p_descr = "Longitude of radar";
+  p_default = {0.0};
+} lon;
+
+paramdef char* {
+  p_descr = "Site name of radar";
+  p_default = {"Test"};
+} site;
+
+paramdef char* {
+  p_descr = "Radar type";
+  p_default = {"Test"};
+} radar;
+
+paramdef char* {
+  p_descr = "Job name";
+  p_default = {"Test"};
+} job;
+
+paramdef long {
+  p_descr = "Number of gates to output";
+  p_default = {920};
+  p_max = {9999};
+} n_gates;
+
+paramdef long {
+  p_descr = "PRF";
+  p_default = {321};
+  p_max = {9999};
+} prf;
+
+paramdef long {
+  p_descr = "Gate spacing";
+  p_default = {250.0};
+  p_max = {99999};
+} gate_spacing;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef char* {
+  p_descr = "Broadcast address";
+  p_default = {"128.117.197.255"};
+} broadcast_address;
+
+paramdef char* {
+  p_descr = "Path for log file";
+  p_default = {"./log"};
+} log_file_path;
+
+typedef enum {
+  STATUS, BEAM_DATA
+} packet_type_t;
+
+paramdef enum packet_type_t {
+  p_header = "Output type";
+  p_default = {STATUS};
+} packet_type;
+
+paramdef long {
+  p_descr = "Udp port for output";
+  p_default = {6544};
+} port;
+
+paramdef long {
+  p_descr = "Interval in seconds between writing to udp";
+  p_default = {1};
+} interval;
+
+

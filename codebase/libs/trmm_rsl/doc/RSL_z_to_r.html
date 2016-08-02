@@ -1,0 +1,30 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_...z_to_r</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>float RSL_z_to_r(float dbz, float k, float a);</b><br>
+<b><a href=RSL_ray_struct.html>Ray</a> *RSL_ray_z_to_r(Volume *z_volume, float k, float a);<br>
+<a href=RSL_sweep_struct.html>Sweep</a> *RSL_sweep_z_to_r(Sweep *z_sweep, float k, float a);<br>
+<a href=RSL_volume_struct.html>Volume</a> *RSL_volume_z_to_r(Ray *z_ray, float k, float a);</b> 
+
+<h3>
+<hr>Description</h3>
+<b>RSL_volume_z_to_r</b> calls <b>RSL_sweep_z_to_r</b> for the number of sweeps. <b>RSL_sweep_z_to_r</b> calls <b>RSL_ray_z_to_r</b> for the number of rays. <b>RSL_ray_z_to_r</b> calls <b>RSL_z_to_r</b> for the number of bins in the ray. <b>RSL_z_to_r</b> computes the function <b>1/a*(dbz - 10*log10(k))</b>. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. Otherwise, a NULL pointer is returned and errno is set. 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

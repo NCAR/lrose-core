@@ -1,0 +1,18 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<pre>typedef struct {
+  char *type_str;  /* One of:'Reflectivity', 'Velocity' or 'Spectrum width' */
+  int nsweeps;
+        float calibr_const;        /* Calibration constant. */
+  float (*f)(Range x);       /* Data conversion function. f(x). */
+  Range (*invf)(float x);    /* Data conversion function. invf(x). */
+} Volume_header;
+</pre>
+
+</body>

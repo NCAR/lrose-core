@@ -1,0 +1,454 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:48 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+FMQ - File Message Queue
+========================
+
+Mike Dixon
+RAP, NCAR, P.O.Box 3000,
+Boulder, CO, 80307, USA
+April 1997
+
+=========================================================================
+
+Overview
+--------
+
+The FMQ module provides a simple file-based message queue facility,
+loosely based on the OWWS Message Buffer (MB) concepts.
+
+It differs from MB in that it uses two files for implementation,
+one status file and one buffer file. Also, it is strictly a
+sequential queue.
+
+FMQ provides a first-in, first-out message queue capability.
+
+Byte order
+----------
+
+All infrastructure is are stored in BE order. The byte order of the
+messages themselves must be handled by the client programs.
+
+==========================================================================
+
+=======
+ USAGE
+=======
+
+Interface
+---------
+
+  See fmq.h for details on function prototypes.
+
+Initialization - required:
+-------------------------
+
+  FMQ_init() - initialize the FMQ handle, which is analagous
+               to an object in C++.
+
+Set options - optional:
+----------------------
+
+  FMQ_set_heartbeat() - if desired, register a heartbeat function to be
+                        called during blocking behavior.
+
+  FMQ_set_compress() - set compression on. This causes writes to
+                       run-length encode the message before putting the
+                       message into the buffer.
+
+Open - required - use one of the following:
+------------------------------------------
+
+  FMQ_open_create()  - create, overwriting any existing files.
+                       Open in read/write mode.
+
+  FMQ_open_rdwr()    - if valid FMQ exists, open read/write.
+                       If not, create.
+
+  FMQ_open_rdonly()  - open read-only. If valid FMQ does not exist,
+                       return error.
+
+  FMQ_open_blocking()- open read-only. If no valid FMQ exists, block
+                       until one does. Call heartbeat function during
+                       blocking if set. Sleeps 1 second between attempts
+                       to open the file.
+
+Setting the read pointer - optional:
+-----------------------------------
+
+  FMQ_seek_end() - seek to end of existing data in buffer, ready to
+                   read in new messages.
+
+Reading - choose from the following:
+-----------------------------------
+
+  FMQ_read() - read in the next message. If none available,
+               returns with msg_read arg set to FALSE.
+
+  FMQ_read_type() - read in the next message of the specified type.
+                    If none available, returns with msg_read arg
+                    set to FALSE.
+
+  FMQ_read_blocking() - read in the next message, blocking until one
+                        is available. Calls heartbeat_func while
+                        waiting. User specifies sleep time between
+                        reads.
+
+  FMQ_read_type_blocking() - read in the next message of a given type,
+                             blocking until one is available. Calls
+                             heartbeat_func while waiting. User specifies
+                             sleep time between reads.
+
+Writing:
+-------
+
+  FMQ_write() - write a message.
+
+Close - required:
+----------------
+
+  FMQ_close() - close FMQ, free up memory associated with the reads and
+                writes.
+
+Free - required:
+---------------
+  
+  FMQ_free() - free up memory associated with the init call.
+
+Accessing the messages:
+-----------------------
+
+  Memory allocation for reads is handled by the library.
+
+  The following functions are used to access messages which have been
+  read. After a successful read these functions will provide valid
+  data.
+
+  void *FMQ_msg() - pointer to message
+
+  int FMQ_msg_len() - message length in bytes
+
+  int FMQ_msg_id() - message ID - automatically supplied during writes.
+
+  time_t FMQ_msg_time() - time at which message was written.
+
+  int FMQ_msg_type() - message type - user supplied on write
+
+  int FMQ_msg_subtype() - message subtype - user supplied on write.
+
+Printing - debugging:
+--------------------
+
+  FMQ_print_stat() - print buffer status
+
+  FMQ_print_slot_read() - print latest slot read
+
+  FMQ_print_slot_written() - print latest slot written
+
+  FMQ_print_debug() - debug printout of FMQ. Works on corrupted and
+                      invalid files.
+
+==========================================================================
+
+================
+ IMPLEMENTATION
+================
+
+Each FMQ is implemented as two files, a status file and a
+buffer file. This is done for efficiency reasons, to avoid
+seeking repeatedly between the header and buffer.
+
+See fmq.h for the full interface.
+
+
+Status file - 'fmq_path.stat'
+=============================
+
+Status file comprises a status struct followed by a table of
+slot structures which index the messages in the buffer.
+
+/*
+ * FMQ status struct
+ */
+
+typedef struct {
+
+  si32 magic_cookie;    /* magic cookie for file type */
+
+  si32 youngest_id;     /* message id of last message written */
+  si32 youngest_slot;   /* num of slot which contains the
+			 * youngest message in the queue */
+  si32 oldest_slot;     /* num of slot which contains the
+			   oldest message in the queue */
+
+  si32 nslots;          /* number of message slots */
+  si32 buf_size;        /* size of buffer */
+
+  si32 begin_insert;    /* offset to start of insert free region */
+  si32 end_insert;      /* offset to end of insert free region */
+  si32 begin_append;    /* offset to start of append free region */
+  si32 append_mode;     /* TRUE for append mode, FALSE for insert mode */
+
+  si32 time_written;    /* time at which the status struct was last
+			 * written to file */
+
+  si32 checksum;        /* check sum for checking reads */
+
+} fmq_stat_t;
+
+/*
+ * FMQ slot struct
+ */
+
+typedef struct {
+
+  si32 active;          /* active flag, 1 or 0 */
+  si32 id;              /* message id 0 to FMQ_MAX_ID */
+  si32 time;            /* Unix time at which the message is written */
+  si32 msg_len;         /* message len in bytes */
+  si32 stored_len;      /* message len + extra 12 bytes for magic-cookie
+			 * and slot num fields */
+  si32 offset;          /* message offset in buffer */
+  si32 type;            /* message type - user-defined */
+  si32 subtype;         /* message subtype - user-defined */
+  si32 compress;        /* compress mode - TRUE or FALSE */
+
+  si32 checksum;        /* check sum for checking reads */
+
+} fmq_slot_t;
+
+The id starts at 0, when the FMQ is created, and increments by 1 for
+each message written. When is reaches FMQ_MAX_ID, it folds back to 0.
+
+The type field may be used for selective reads. The subtype field is
+passed through - it is not used by the FMQ module. The user defines
+the types during the write.
+
+----------------------------------------------------------------------------
+active? | id | time | msg_len | stored_len | offset | type | subtype | cmp |
+----------------------------------------------------------------------------
+active? | id | time | msg_len | stored_len | offset | type | subtype | cmp |
+----------------------------------------------------------------------------
+active? | id | time | msg_len | stored_len | offset | type | subtype | cmp |
+----------------------------------------------------------------------------
+active? | id | time | msg_len | stored_len | offset | type | subtype | cmp |
+----------------------------------------------------------------------------
+active? | id | time | msg_len | stored_len | offset | type | subtype | cmp |
+----------------------------------------------------------------------------
+                                  .
+                                  .
+                                  .
+                                  .
+                                  .
+                                  .
+----------------------------------------------------------------------------
+active? | id | time | msg_len | stored_len | offset | type | subtype | cmp |
+----------------------------------------------------------------------------
+
+
+
+Buffer file - 'fmq_path.buf'
+============================
+
+
+The buffer file contains the messages themselves.
+
+A message stored in the buffer will have extra bytes added at
+the beginning and end:
+
+  si32            si32                            si32
+-------------------------------------------------------
+| magic cookie |  slot_num  |  --- message ---  |  id |
+-------------------------------------------------------
+                            <----- msg_len ----->
+<-------------------- stored_len --------------------->
+
+This allows diagnostics for buffer corruption.
+
+In the general case, there will be 4 regions in the file, a current
+message region at the start, followed by some free region into which
+messages may be inserted, followed by more current messages, followed
+by an append region in which messages may be appended.
+
+
+Write pointers
+==============
+
+In the following diagrams, the following abbreviations apply:
+
+  BI - stat.begin_insert
+  EI - stat.end_insert
+  BA - stat.begin_append
+
+Xs show bytes currently in use.
+
+Initial state: append_mode
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+BI
+EI
+BA
+
+Partially full: append_mode
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X| | | | | | | | | | | | | | | | | |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+BI                            BA
+EI
+
+Almost full: append_mode
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X| | |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+BI
+EI                                                          BA
+
+After freeing for first message after rollover: insert_mode
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| | | | | | | | | | | |X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X| | |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+BI                    EI                                  BA
+                                                          
+After storing first message after rollover: insert_mode
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|X|X|X|X| | | | | | | |X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X| | |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+         BI           EI                                  BA
+
+The following three types of situation are possible for the relative
+positions of oldest_slot and youngest_slot, using 10 slots
+for the examples.
+
+a) Oldest_slot at top, as in start-up, active area between oldest_slot
+   and youngest_slot.
+
+     active?   time    msg_len  offset   type  subtype
+    +-------+---------+------+--------+------+-------+
+  0 |  TRUE |         |      |        |      |       | <-- oldest_slot
+    +-------+---------+------+--------+------+-------+
+  1 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  2 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  3 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  4 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  5 |  TRUE |         |      |        |      |       | <-- youngest_slot
+    +-------+---------+------+--------+------+-------+
+  6 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  7 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  8 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  9 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+
+b) Oldest_slot above youngest_slot, not at top, active area bewteen the
+   two.
+
+     active?   time    msg_len  offset   type  subtype
+    +-------+---------+------+--------+------+-------+
+  0 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  1 |  TRUE |         |      |        |      |       | <-- oldest_slot
+    +-------+---------+------+--------+------+-------+
+  2 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  3 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  4 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  5 |  TRUE |         |      |        |      |       | <-- youngest_slot
+    +-------+---------+------+--------+------+-------+
+  6 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  7 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  8 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  9 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+
+c) Oldest_slot below youngest_slot, inactive area between the two.
+
+     active?   time    msg_len  offset   type  subtype
+    +-------+---------+------+--------+------+-------+
+  0 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  1 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  2 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  3 |  TRUE |         |      |        |      |       | <-- youngest_slot
+    +-------+---------+------+--------+------+-------+
+  4 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  5 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  6 | FALSE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  7 |  TRUE |         |      |        |      |       | <-- oldest_slot
+    +-------+---------+------+--------+------+-------+
+  8 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+  9 |  TRUE |         |      |        |      |       |
+    +-------+---------+------+--------+------+-------+
+
+Reading
+=======
+
+The FMQ_handle has 2 fields used for keeping track of reading position.
+These are 'last_id_read' and 'last_slot_read'.
+
+In the usual case, in which the reader is keeping up with the writer,
+the next slot to be read would follow the last_slot_read, with the
+caveat that at times its position will roll back to the top of the
+slot array. To determine if this is the case, the 'next_slot' position
+is examined. If the id for that slot is 1 greater that the previous slot
+read, the buffer has not overflowed, and that next slot is read.
+
+If the buffer has overflowed, the reader immediately moves to the
+latest slot written and continues reading from that position. The
+reasoning behind this strategy is that if the writer has caught up with 
+the reader once, it will do so again, and the best way to stay ahead
+for as long as possible is to move to the youngest_slot immediately.
+
+File locking
+============
+
+The FMQ can have mulltiple readers and multiple writers.
+
+(a) Multiple writers.
+
+As an example of this, multiple applications can write _latest_data_info
+files to a single directory. The _latest_data_info implementation is
+based on an FMQ. In this case, the writers open the FMQ files, read the
+status, lock the files, write to the files to update the queue,
+unlock the files and then close the files. 
+
+(b) Single or multiple readers.
+
+Readers do not rely on file locking. Rather, they rely on the short length
+of both the status and slot data structures. Since these are short, the
+file read actions are generally atomic, so that the entire status or slot
+struct is read in a single file access. This appears to work very
+reliably. Until Dec 2007, this was how the FMQ readers worked.
+
+To provide added reliability, a checksum was added to the end of the
+status and slot data structures. After the read, the checksum computed and
+checked against the stored value. If a difference is noted, the read will
+be repeated for up to 5 times.
+

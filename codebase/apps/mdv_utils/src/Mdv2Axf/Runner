@@ -1,0 +1,3 @@
+#!/bin/csh
+
+./Mdv2Axf -params test.params -archive 20000102030405 2002010203040506  

@@ -1,0 +1,83 @@
+/*********************************************************
+ * parameter definitions for wmi_ac_ingest
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * June 1996
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"/dev/nst0"};
+  p_descr = "Tape name";
+  p_help = "Name of tape device";
+} tape_name;
+
+paramdef char* {
+  p_default = {"131MP"};
+  p_descr = "Aircraft callsign - tail number";
+} callsign;
+
+paramdef char* {
+  p_default = {"acqtbl"};
+  p_descr = "Acquisition table file path";
+} acqtbl_file_path;
+
+paramdef char* {
+  p_default = {"cvars"};
+  p_descr = "Acquisition table file path";
+} cvars_file_path;
+
+paramdef char* {
+  p_default = {"fcoeff"};
+  p_descr = "Acquisition table file path";
+} fcoeff_file_path;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Archive directory path";
+  p_help = "Arcvive files are written to this directory";
+} archive_dir_path;
+
+paramdef long {
+  p_default = {1};
+  p_min = {1};
+  p_max = {3600};
+  p_descr = "Data store interval (secs)";
+  p_help = "Time between data store - this is used to keep the data file size reasonable.";
+} data_interval;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to store data using spdb.";
+  p_help = "Data will be stored in SPDB - symbolic products data base.";
+} use_spdb;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Data base directory";
+  p_help = "The path to the data base directory. AC posn data will be stored in subdirectories named after the aircraft callsign";
+} db_dir;
+
+paramdef long {
+  p_default = {120};
+  p_min = {1};
+  p_descr = "Valid period (secs)";
+  p_help = "Time period over which the position is valid.";
+} valid_period;
+

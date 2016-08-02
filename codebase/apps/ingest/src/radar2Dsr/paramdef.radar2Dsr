@@ -1,0 +1,258 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "radar2Dsr uses the rsl library to convert\n"
+	"many file formats to the Dsr format. The output\n"
+	"fields are always DBZ, VEL and SW. Niles Oien.";
+}
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use latest data info file in realtime.";
+  p_help = "Set to TRUE if it is workable to do so.";
+} ldataInfoAvailable;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to process latest file only on startup in realtime.";
+  p_help = "This is the default.";
+} latestFileOnly;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of seconds to sleep between detecting a gzipped\n"
+	"input file and attmpting to unzip it.";
+  p_help = "Intent is to allow the input file writing process\n"
+	"a chance to complete.";
+} sleepBeforeUnzip;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time offset for data, seconds. This is an offset that\n"
+  "is added to the input time to get the output time.";
+  p_help = "Useful if the data are timestamped in local time and\n"
+  "we want to go to UTC.";
+} time_offset;
+
+typedef enum {
+  INSIST_ON_DZ, INSIST_ON_CZ, PREFER_CZ, PREFER_DZ, USE_ZT
+} dbzChoice_t;
+
+paramdef enum dbzChoice_t
+{
+  p_default = PREFER_CZ;
+  p_descr = "Option as to which field to use for DBZ.\n"
+	"INSIST_ON_DZ - use the DZ field\n"
+	"INSIST_ON_CZ - use the corrected dbz, CZ, field\n"
+	"PREFER_CZ - try for CZ but if it is not there then\n"
+	"            use DZ\n"
+	"PREFER_DZ - try for DZ but resort to CZ if needed\n"
+	"USE_ZT - Use the ZT total reflectivity field. If selected\n"
+	"         the ZT field must be present.";
+
+  p_help = "Tradeoff between being robust enough to run on\n"
+	"all files and getting exactly what you want.";
+} dbzChoice;
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Info option";
+  p_help = "Print info messages";
+} info;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+      
+
+
+commentdef {
+  p_header = "LOGGING";
+}
+ 
+paramdef char* {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} msgLog_dir;
+
+
+paramdef boolean {
+  p_descr = "Option to send start,end of tilt,volume flags.";
+  p_help = "Typically these flags are sent, however sometimes the\n"
+	"input datastream is such that they are not correct.";
+  p_default = TRUE;
+} sendStartEndFlags;
+
+paramdef char* {
+  p_descr = "output fmq url";
+  p_help = "Path for FMQ output data.";
+  p_default = {"fmqp:://localhost::./fmq.dsRadar"};
+} output_fmq_url;
+ 
+paramdef long {
+  p_default = {2000000};
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} output_fmq_size;
+ 
+paramdef long {
+  p_default = {3600};
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_descr = "How many beams to process before sending radar header message.";
+  p_help = "Header messages are also sent at the end of tilts if\n"
+	"the radar parameters change.";
+  p_default = 60;
+} beamsPerMessage;
+ 
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use blocking mode in realtime.";
+  p_help = "By default FMQ writes are done in blocking mode in archive\n"
+           "and non-blocking in realtime, this forces blocked writes\n"
+	   "in realtime mode.";
+} realtimeBlockingFmq;
+
+commentdef {
+  p_header = "DELAY OPTIONS FOR ARCHIVE MODE";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of seconds to sleep between volumes.";
+  p_help = "May be useful to to this in archive mode.";
+} sleepBetweenVolumes;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of seconds to sleep between tilts.";
+  p_help = "May be useful to to this ion archive mode.";
+} sleepBetweenTilts;
+
+typedef struct {
+	boolean remapBeamGeometry;
+	double distFirstGateKm;
+	double gateSpacingKm;
+	int nGates;
+} remapBeams_t;
+
+paramdef struct remapBeams_t {
+	p_descr = "Option to remap beams onto a constant geometry";
+	p_help = "Dsr2Vol may expect this, invoke this if only some\n"
+	         "tilts are being written to the MDV file.";
+	p_default = { FALSE, 0.0, 1.0, 300 };
+} remapBeams;
+
+
+
+
+typedef struct {
+	boolean useCurrentTime;
+	int minFileAge;
+} useWallclockTime_t;
+
+paramdef struct useWallclockTime_t {
+	p_descr = "Option to use current time rather than data time\n"
+	"in file. May be useful for simulations. If useCurrentTime is\n"
+	"FALSE then the time specified in the file is always used.";
+	p_help = "Set useCurrentTime to TRUE to use current time.\n"
+	"If minFileAge is less than 0 then the current time will\n"
+	"be used if useCurrentTime is TRUE.\n\n"
+	"If minFileAge is positive then the file must be older than\n"
+	"minFileAge (in seconds) for the current time to be used. Files\n"
+	"newer than minFileAge will still use the time specified in the\n"
+	"file rather than the current time. The intent is to allow for\n"
+	"a param file to operate in simulation mode on old archival\n"
+	"data but operate in realtime mode on currently arriving data\n"
+	"without modification to the param file. The default setting\n"
+	"for minFileAge is one day (86400 seconds).";
+	p_default = { FALSE, 86400 };
+} useWallclockTime;
+
+typedef struct {
+        boolean delayPostBeam;
+        int msDelayPostBeam;
+} delayBeam_t;
+
+paramdef struct delayBeam_t {
+        p_default = {FALSE, 0};
+        p_descr = "Option to delay some number of milliseconds\n"
+        "after sending a beam.";
+        p_help = "May be handy in some circumstances.";
+} delayBeam;
+
+
+
+
+

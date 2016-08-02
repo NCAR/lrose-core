@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML"
+targetNamespace="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML"
+elementFormDefault="qualified">
+
+
+	<xsd:complexType name="headType">
+		<xsd:sequence>
+			<xsd:element name="product" type="productType" minOccurs="1" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>Holds meta information about the product.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="data-source" type="data-sourceType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="product-source" type="product-sourceType" minOccurs="1" maxOccurs="1"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="productType">
+		<xsd:all>
+            <xsd:element name="system" type="systemType" minOccurs="1" maxOccurs="1" />
+ 			<xsd:element name="title" type="xsd:string" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>Product title</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+ 			<xsd:element name="description" type="xsd:string" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>Product description, for convenience</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="field" type="fieldType" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>Specifies the general area within the environmental sciences that data contained in the WXML instance is from. Example values include "meteorological", "hydrological", "land surface".</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="category" type="categoryType" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>Defines the specific category that the product belongs to. Example values include "observation", "forecast", "analysis", and statistic".</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="creation-date" type="creation-dateType" minOccurs="1" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>The date and time that the product was prepared.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:all>
+		<xsd:attribute name="concise-name" type="concise-nameType" use="required">
+			<xsd:annotation>
+				<xsd:documentation>A name or code that describes this product.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="operational-mode" type="operational-modeType" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Defines the status of the product. Applications can review the content of this element to determine if they should further processing.	
+	Test Product: Indicates that this is an instance of an existing product that contains some change being evaluated by development team.    
+	Developmental Product: A new product that is not yet ready for public evaluation or use.
+				
+	Experimental Product: Product is available for testing and evaluation for a specified, limited time period for the explicit purpose of obtaining customer feedback.				
+	Official Product: Identifies an instance of an established product. This instance is part of the approved product suite available from the Bureau.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+    <xsd:complexType name="systemType" mixed="true">
+       <xsd:sequence>
+          <xsd:element name="sub-system" type="xsd:string" minOccurs="0" maxOccurs="1" />
+       </xsd:sequence>
+    </xsd:complexType>
+	<xsd:simpleType name="fieldType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="meteorological"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="categoryType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="forecast"/>
+			<xsd:enumeration value="warning"/>
+			<xsd:enumeration value="observation"/>
+            <xsd:enumeration value="analysis" />
+            <xsd:enumeration value="statistic" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="creation-dateType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:dateTime">
+				<xsd:attribute name="refresh-frequency" type="xsd:duration" use="required">
+					<xsd:annotation>
+						<xsd:documentation>Used by the production centre to help users know how often to return for updated data.
+						The data is updated on an as needed basis. The frequency will not guarantee that when updates are done that the data retrieved is new.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="period-name">
+					<xsd:annotation>
+						<xsd:documentation>Contains the name associated with this time period (ex. TODAY).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="data-sourceType">
+		<xsd:sequence>
+			<xsd:element name="radar"   type="radarType"   minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="network" type="networkType" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="domain" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="radarType">
+		<xsd:attribute name="type" type="xsd:string" use="required"/>
+		<xsd:attribute name="name" type="xsd:string" use="required"/>
+		<xsd:attribute name="latitude"  type="xsd:decimal" use="required"/>
+		<xsd:attribute name="longitude" type="xsd:decimal" use="required"/>
+		<xsd:attribute name="zr_a" type="xsd:decimal" use="optional"/>
+		<xsd:attribute name="zr_b" type="xsd:decimal" use="optional"/>
+	</xsd:complexType>
+	<xsd:complexType name="networkType">
+		<xsd:attribute name="type" type="networkTypeType" use="required"/>
+		<xsd:attribute name="name" type="xsd:string" use="required"/>
+	</xsd:complexType>
+	<xsd:simpleType name="networkTypeType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="radar"/>
+			<xsd:enumeration value="AWS"/>
+			<xsd:enumeration value="synop"/>
+			<xsd:enumeration value="rain gauge"/>
+			<xsd:enumeration value="lightning"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="product-sourceType">
+		<xsd:all>
+			 <xsd:element name="more-information" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="production-center" type="production-centerType" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Production Centre identifies which organisation creates the product.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="address" type="addressType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="copyright" type="infoType" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>Copyright message regarding the product.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="disclaimer" type="infoType" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>Disclaimer message regarding the product.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="credit" type="xsd:anyURI" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>The URL used to credit the source of the data.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="credit-logo" type="xsd:anyURI" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>The image link used with the credit URL to acknowledge the data source.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="feedback" type="xsd:anyURI" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>A URL to a web page used to provide the production centre comments on the product.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="production-centerType" mixed="true">
+		<xsd:sequence>
+			<xsd:element name="sub-center" type="xsd:string" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>The part of production centre that prepared the product.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="infoType" mixed="true">
+		<xsd:attribute name="ref" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>URL containing a copyright information regarding the product.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="addressType">
+		<xsd:sequence>
+			<xsd:element name="postal" type="xsd:string" minOccurs="0"/>
+			<xsd:element name="state" type="stateType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="stateType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Victoria"/>
+			<xsd:enumeration value="New South Wales"/>
+			<xsd:enumeration value="Queensland"/>
+			<xsd:enumeration value="Northern Territory"/>
+			<xsd:enumeration value="Western Australia"/>
+			<xsd:enumeration value="South Australia"/>
+			<xsd:enumeration value="Australian Capital Territory"/>
+			<xsd:enumeration value="Other"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="concise-nameType">
+		<xsd:restriction base="xsd:string">
+          <xsd:enumeration value="point" />
+          <xsd:enumeration value="line" />
+          <xsd:enumeration value="area" />
+          <xsd:enumeration value="track" />
+          <xsd:enumeration value="time-series" />
+          <xsd:enumeration value="glance" />
+          <xsd:enumeration value="tabular-digital" />
+          <xsd:enumeration value="digital-zone" />
+          <xsd:enumeration value="dwmlByDay" />
+	    </xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="operational-modeType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="official"/>
+			<xsd:enumeration value="developmental"/>
+			<xsd:enumeration value="experimental"/>
+			<xsd:enumeration value="test"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:attribute name="ref">
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:anyURI"/>
+		</xsd:simpleType>
+	</xsd:attribute>
+</xsd:schema>

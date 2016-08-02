@@ -1,0 +1,36 @@
+#! /bin/sh
+#
+#  - Create the links 'today' and 'yesterday' in the log dir(s)
+#  - Should be run shortly *after* 00 GMT from cron
+#
+
+Today=`date -u "+%Y%m%d"`
+Yesterday=`date -u "+%Y%m%d" --date "1 day ago"`
+Log_dirs="$LOG_DIR $DATA_DISTRIB_LOG_DIR $ERRORS_LOG_DIR $RESTART_LOG_DIR"
+echo "Today: $Today, Yesterday: $Yesterday"
+
+for dir in $Log_dirs; do
+    echo "dir: $dir"
+    if [ -d $dir ] ; then
+	cd $dir
+	if [ -h today ] ; then
+	    echo "today is a link"
+	    /bin/rm today
+	fi
+	if [ -d $Today ] ; then
+	    echo "make a link to $Today"
+	    ln -s $Today today
+	fi
+	if [ -h yesterday ] ; then
+	    echo "yesterday is a link"
+	    /bin/rm yesterday
+	fi
+	if [ -d $Yesterday ] ; then
+	    echo "make a link to $Yesterday"
+	    ln -s $Yesterday yesterday
+	fi
+    else
+	echo "dir not exist: $dir"
+    fi
+done
+

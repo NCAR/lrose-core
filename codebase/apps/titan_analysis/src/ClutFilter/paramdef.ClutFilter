@@ -1,0 +1,283 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions ClutFilter
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// March 2004
+
+commentdef {
+  p_header = "Program name: ClutFilter";
+  p_text = "ClutFilter simulates IQ data with clutter and tests a filter on removing the clutter.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "CREATING SPECTRA";
+}
+
+typedef enum {
+  MODE_SINGLE, MODE_MULTIPLE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = MODE_SINGLE;
+  p_descr = "Mode for determining moments characteristics.";
+  p_help = "MODE_SINGLE: use single_moments parameter. MODE_MULTIPLE: use multiple_moments parameter.";
+} mode;
+
+typedef enum {
+  MODELLED, RECONSTRUCTED
+} spectra_creation_method_t;
+
+paramdef enum spectra_creation_method_t {
+  p_default = MODELLED;
+  p_descr = "Method for creating spectra.";
+  p_help = "MODELLED: spectra are created using gaussian models based on the specified moments. RECONSTRUCTED: spectra are reconstructed from measured spectra.";
+} spectra_creation_method;
+
+commentdef {
+  p_header = "MOMENTS FOR MODELLING SPECTRA";
+}
+
+typedef struct {
+  double weather_dbm;
+  double weather_vel;
+  double weather_width;
+  double cwr_dbm;
+  double clutter_vel;
+  double clutter_width;
+} single_moments_t;
+
+paramdef struct single_moments_t {
+  p_default = {
+    weather_dbm = -33,
+    weather_vel = 10.0,
+    weather_width = 3.0,
+    cwr_dbm = 10,
+    clutter_vel = 0.0,
+    clutter_width = 0.25
+  };
+  p_desription = "The weather and clutter moments.";
+  p_help = "vel and width values are in m/s. cwr_dbm is clutter/weather power ratio, in dBM.";
+} single_moments;
+
+typedef struct {
+  double weather_dbm_min;
+  double weather_dbm_max;
+  double weather_dbm_delta;
+  double weather_vel_min;
+  double weather_vel_max;
+  double weather_vel_delta;
+  double weather_width_min;
+  double weather_width_max;
+  double weather_width_delta;
+  double cwr_dbm_min;
+  double cwr_dbm_max;
+  double cwr_dbm_delta;
+  double clutter_vel_min;
+  double clutter_vel_max;
+  double clutter_vel_delta;
+  double clutter_width_min;
+  double clutter_width_max;
+  double clutter_width_delta;
+} mult_moments_t;
+
+paramdef struct mult_moments_t {
+  p_default = {
+    weather_dbm_min = -50,
+    weather_dbm_max = -20,
+    weather_dbm_delta = 10,
+    weather_vel_min = -25.0,
+    weather_vel_max = 25.0,
+    weather_vel_delta = 1,
+    weather_width_min = 1.0,
+    weather_width_max = 6.0,
+    weather_width_delta = 1.0,
+    cwr_dbm_min = -30,
+    cwr_dbm_max = 40,
+    cwr_dbm_delta = 1,
+    clutter_vel_min = -0.5,
+    clutter_vel_max = 0.5,
+    clutter_vel_delta = 0.1,
+    clutter_width_min = 0.1,
+    clutter_width_max = 0.5,
+    clutter_width_delta = 0.1
+  };
+  p_desription = "Limits for the weather and clutter moments.";
+  p_help = "vel and width values are in m/s. cwr_dbm is clutter/weather power ratio, in dBM.";
+} mult_moments;
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Number of samples in spectrum.";
+} nsamples;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to simulate noise with the exponential function.";
+  p_help = "If FALSE a smooth gaussian is produced. If TRUE, the data is exponentially disctibuted about the the gaussian.";
+} use_exponential;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Mean of exponential distribution.";
+} exponential_lambda;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the phase to 0.";
+  p_help = "This has the effect of generating only real parts.";
+} force_zero_phase;
+
+typedef enum {
+  WINDOW_NONE, WINDOW_HANNING, WINDOW_BLACKMAN
+} window_t;
+
+paramdef enum window_t {
+  p_default = WINDOW_HANNING;
+  p_descr = "Window to apply to IQ data before computing spectrum.";
+} window;
+
+commentdef {
+  p_header = "FILES FOR RECONSTRUCTING SPECTRA";
+}
+
+paramdef string {
+  p_default = "weather_spectra.out";
+  p_descr = "Path to file containing measured weather spectra.";
+  p_help = "The weather spectra are used to reconstruct combined spectra.";
+} weather_spectra_input_path;
+
+paramdef string {
+  p_default = "clutter_spectra.out";
+  p_descr = "Path to file containing measured clutter spectra.";
+  p_help = "The clutter spectra are used to reconstruct combined spectra.";
+} clutter_spectra_input_path;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Index of specified spectrum in weather spectra file.";
+  p_descr = "For MODE_SINGLE only.";
+} weather_spectrum_index;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Index of specified spectrum in clutter spectra file.";
+  p_descr = "For MODE_SINGLE only.";
+} clutter_spectrum_index;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of spectra to be reconstructed.";
+  p_descr = "For MODE_MULTIPLE only.";
+} n_reconstructed;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Clutter-weather ratio for reconstructed spectra (dB).";
+  p_descr = "The power of the clutter is adjusted relative to the weather to achieve this ratio;";
+} reconstructed_cwr;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Max clutter absolute velocity for reconstructed spectra (m/s).";
+  p_help = "Spectra which do not meet this criterion will not be used.";
+} reconstructed_max_clutter_abs_vel;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Max clutter width for reconstructed spectra (m/s).";
+  p_help = "Spectra which do not meet this criterion will not be used.";
+} reconstructed_max_clutter_width;
+
+commentdef {
+  p_header = "RADAR DETAILS.";
+}
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "The wavelength of the radar (cm)";
+} wavelength;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "The PRT of the data (miscro-secs)";
+} prt;
+
+paramdef double {
+  p_default = 1.0e-6;
+  p_descr = "Receiver noise (watts)";
+} receiver_noise;
+
+commentdef {
+  p_header = "FILTER OPTIONS.";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Max clutter velocity for filter (m/s)";
+} max_abs_clutter_vel;
+
+paramdef double {
+  p_default = 1.5;
+  p_descr = "Width of initial notch (m/s)";
+  p_help = "This is the first guess for the notch. By iterating the algorithm may narrow the notch.";
+} initial_notch_width;
+
+paramdef double {
+  p_default = 50.0;
+  p_descr = "Max ratio of clutter power to weather power (dB)";
+  p_help = "If the ratio exceeds this, we will assume all of the power is from clutter.";
+} max_clutter_to_weather_ratio;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Noise power for filter (mW)";
+  p_help = "This is the noise in the spectral domain.";
+} spectral_noise_power;
+  
+commentdef {
+  p_header = "OUTPUT FILES.";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory for spactra files.";
+} output_dir;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Base name for output files.";
+  p_help = "Output files will start with this, and end with names which describe their specifics.";
+} output_file_base;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write spectra to files in SINGLE mode.";
+} write_spectra_files;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write results to files in MULTIPLE mode.";
+} write_results_file;
+

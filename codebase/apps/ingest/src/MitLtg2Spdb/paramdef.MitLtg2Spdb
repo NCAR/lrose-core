@@ -1,0 +1,126 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MitLtg2Spdb
+ *
+ * This file contains the TDRP parameter definitions for
+ * MitLtg2Spdb.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "MIT input hostname";
+  p_default = "129.55.56.2";
+} mit_hostname;
+
+paramdef long
+{
+  p_descr = "MIT input port";
+  p_min = 1;
+  p_default = "9301";
+} mit_port;
+
+paramdef long
+{
+  p_descr = "sleep seconds";
+  p_help = "Number of seconds to sleep between looking for new data "
+           "and between server connection attempts.";
+  p_min = 0;
+  p_default = 2;
+} sleep_seconds;
+
+paramdef long
+{
+  p_descr = "lightning buffer seconds";
+  p_help = "Number of seconds worth of lightning data to buffer together. "
+           "Once a strike is received whose valid time is greater than this "
+           "number of seconds later than the first strike in the current "
+           "ltg buffer, the current buffer will be written to the database "
+           "and the new strike will be put in a new ltg buffer. "
+           "The current ltg buffer will also be written to the database "
+           "if no new ltg data is received within this number of seconds "
+           "of the time the first ltg strike in the buffer was received.";
+  p_min = 0;
+  p_default = 1;
+} buffer_seconds;
+
+paramdef string
+{
+  p_descr = "Output SPDB database URL";
+  p_default = "spdbp:://localhost::spdb/ltg";
+} output_url;
+
+paramdef long
+{
+  p_descr = "Number of seconds before strike information expires.";
+  p_help = "This number is added to the strike time to get the "
+           "strike expire time.";
+  p_default = 300;
+} strike_expire_secs;
+

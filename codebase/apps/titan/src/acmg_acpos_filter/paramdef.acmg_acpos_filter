@@ -1,0 +1,40 @@
+/*********************************************************
+ * parameter definitions for precip_map
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 1993
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"."};
+  p_descr = "Output directory";
+  p_help = "Directory for output files";
+} output_dir;
+
+paramdef char* {
+  p_default = {""};
+  p_descr = "Output file extension";
+  p_help = "File name extension for ac posn data files, including '.'";
+} output_file_ext;
+
+paramdef char* {
+  p_default = {"LC"};
+  p_descr = "Aircraft call sign";
+} call_sign;

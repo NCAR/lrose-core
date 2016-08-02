@@ -1,0 +1,173 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions EdgeVol2Dsr
+//
+// Mike Dixon
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Nov 2010
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "EdgeVol2Dsr reads volume files in raw EDGE format, and reformats the contents into a DsRadar FMQ.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, SIMULATE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.";
+} mode;
+
+commentdef {
+  p_header = "FILE DATA INPUT";
+};
+
+paramdef string {
+  p_default = "$(HOME)/data/edge";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "NYQUIST VELOCITY";
+  p_text = "This section allows you to override the nyquist velocity computed from the PRF and wavelength.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the nyquist velocity.";
+  p_help = "The actual nyquist velocity is not available from the raw data. Therefore we need to compute it from the PRF and wavelength. However, the computed value may be incorrect if dual-prt operation was used. Therefore, you may wish to override the nyquist.";
+} override_nyquist_velocity;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Nyquist velocity (m/s)";
+  p_help = "See 'override_nyquist_velocity'";
+} nyquist_velocity;
+
+commentdef {
+  p_header = "TIME CORRECTION";
+  p_text = "This section allows you to correct the time, in case the realtime clock was incorrect, or the timezone was not UTC.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to adjust the time in the files.";
+  p_help = "See 'time_correction_secs'";
+} correct_radar_time;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time correction in seconds.";
+  p_help = "This is added to the time in the files, to correct as required.";
+} time_correction_secs;
+
+commentdef {
+  p_header = "OUTPUT FIELDS";
+  p_text = "Only the following fields will included in the output. If the field is not in the input file, it will be left out.";
+};
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+typedef struct {
+  string edge_name;
+  string dsr_name;
+  string units;
+  string transform;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    { "U", "DBZT", "dBZ", "dB" },
+    { "Z", "DBZ", "dBZ", "dB" },
+    { "V", "VEL", "m/s", "" },
+    { "W", "WIDTH", "m/s", "" },
+    { "D", "ZDR", "dB", "dB" },
+    { "RhoHv", "RHOHV", "", "" },
+    { "PhiDP", "PHIDP", "deg", "" }
+  };
+  p_descr = "Output field description";
+  p_help = "This allows you to set the fields you want to write out. You can translate the Edge field name to the desired output field name";
+} output_fields[];
+
+paramdef string {
+  p_descr = "Output URL for DsRadar data via FMQ";
+  p_default = "/tmp/fmq/edge";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 10000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer
+ will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages wh
+ich may be written to the buffer before overwrites occur. However, overwrites ma
+y occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_descr = "Wait per beam (milli-secs)";
+  p_default = 0;
+} beam_wait_msecs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+

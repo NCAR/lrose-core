@@ -1,0 +1,488 @@
+TITAN CORE ALGORITHM AND DISPLAY SOURCE CODE LINE COUNT
+-------------------------------------------------------
+
+dixon:         39283 99.2%
+betancourt:      300  0.8%
+
+Core applications:
+
+3846    Dsr2Vol         cpp=3846 (dixon)
+9370    Titan           cpp=9370 (dixon 9070, betancourt 300)
+2404    PrecipAccum     cpp=2404 (dixon)
+628     ClutterCompute  ansic=628 (dixon)
+13618   Rview           cpp=13618 (dixon)
+9717    TimeHist        cpp=9717 (dixon)
+
+TITAN SYSTEM SOURCE CODE LINE COUNT
+----------------------------------
+
+TOTAL lines of code:
+
+dixon:       290528  72.43 %
+hage:         39340   9.81 %
+rehak:        16292   4.06 %
+oien:         12650   3.15 %
+betancourt:   12541   3.13 %
+yee:          10850   2.70 %
+caron:         8832   2.20 %
+mccarthy:      5929   1.48 %
+wiener:        4161   1.04 %
+             ------
+Total:       401123
+             ------
+
+Applications summary - lines of code:
+-------------------------------------
+
+dixon:       234642
+hage:         27114
+rehak:        13807
+oien:         12367
+yee:          10850
+betancourt:    6264
+caron:          848
+             ------
+Total        305892
+             ------
+
+Library summary - lines of code:
+-------------------------------
+
+dixon:        55886
+hage:         12276
+caron:         7984
+betancourt:    6277
+mccarthy:      5929
+wiener:        4161
+rehak:         2485
+oien:           283
+             ------
+Total         95281
+             ------
+
+titan applications:
+-------------------
+
+dixon:       108353
+rehak:       5942
+oien:        4767
+betancourt:  300
+
+13618   Rview           cpp=13618 (dixon)
+9928    rview           ansic=9928 (dixon)
+9717    TimeHist        cpp=9717 (dixon)
+9370    Titan           cpp=9370 (dixon 9070, betancourt 300)
+7533    time_hist       ansic=7533 (dixon)
+6191    StormIdent      cpp=6191 (dixon)
+5038    storm_ident     ansic=5038 (dixon)
+4565    storm_track     ansic=4565 (dixon)
+3673    polar2gate      ansic=3673 (dixon)
+3472    precip_map      ansic=3472 (dixon)
+3422    polar_ingest    ansic=3422 (dixon)
+3360    track_server    ansic=3360 (dixon)
+2973    storm_file_v3_to_v5 ansic=2973 (dixon)
+2145    MDV_server      cpp=1736,ansic=409 (dixon)
+1943    uf2gate         ansic=1943 (rehak)
+1824    DobsonServer    ansic=1824 (dixon)
+1819    EsdAcIngest     cpp=1819 (dixon)
+1783    forecast_monitor ansic=1783 (dixon)
+1749    polar2mdv       ansic=1749 (dixon)
+1639    ufnexrad2gate   ansic=1639 (rehak)
+1503    rctable_generate ansic=1503 (dixon)
+1455    FilterStorms    cpp=1455 (rehak)
+1437    tstorm_refl_fcst cpp=1437 (dixon)
+1265    test2gate       ansic=1265 (dixon)
+1169    ac_tape_recover ansic=1169 (dixon)
+1149    ac_ingest       ansic=1149 (dixon)
+1119    StormInitClimatology cpp=1119 (oien)
+1026    StormInit2Field cpp=1026 (oien)
+1012    cart_slave      ansic=1012 (dixon)
+946     clutter_remove  ansic=946 (dixon)
+946     StormInitLocation cpp=946 (oien)
+905     TstormTemporalSmooth cpp=905 (rehak)
+898     Tstorms2Spdb    cpp=898 (dixon)
+893     StormInitBdry   cpp=893 (oien)
+817     tstorms2spdb    ansic=817 (dixon)
+798     titan_print     ansic=798 (dixon)
+783     StormInitFieldExtract cpp=783 (oien)
+628     ClutterCompute  ansic=628 (dixon)
+614     AcPosnAscii2Spdb cpp=614 (dixon)
+568     tprod_print     ansic=568 (dixon)
+558     Tstorms2Shapefile cpp=558 (betancourt)
+555     PrintTitanFiles cpp=555 (dixon)
+522     radmon_server   ansic=522 (dixon)
+514     ReadZebraMaps   cpp=514 (dixon)
+490     suncal          ansic=490 (dixon)
+483     GenStormIdentList cpp=483 (dixon)
+413     dobson2mdv      ansic=413 (dixon)
+408     bearing2latlon  ansic=408 (dixon)
+390     clutter_table_generate ansic=390 (dixon)
+365     PrintTitanServer cpp=365 (dixon)
+351     clutter_compute ansic=351 (dixon)
+
+titan_analysis applications:
+----------------------------
+
+dixon: 32303
+
+2716    verify_tracks   ansic=2716 (dixon)
+2561    TrackGridStats  cpp=2561 (dixon)
+2512    Tracks2Ascii    cpp=2512 (dixon)
+2235    tracks_to_ascii ansic=2235 (dixon)
+2207    verify_grid     ansic=2207 (dixon)
+2008    CaseStats       cpp=1602,ansic=406 (dixon)
+1863    StormModel      cpp=1125,ansic=738 (dixon)
+1495    track_grid_stats ansic=1495 (dixon)
+1453    PartialProps    cpp=1232,ansic=221 (dixon)
+1381    ascii_to_xgraph ansic=1381 (dixon)
+1242    TrackProps      cpp=1028,ansic=214 (dixon)
+1124    PrecipSeries    cpp=1124 (dixon)
+1064    Surfer2Mdv      cpp=1064 (dixon)
+1037    TrackMatch      cpp=772,ansic=265 (dixon)
+1035    TimeProps       cpp=667,ansic=368 (dixon)
+988     DistFit         cpp=599,ansic=389 (dixon)
+868     verify_day      ansic=868 (dixon)
+749     Mdv2Surfer      cpp=749 (dixon)
+713     mhr_analysis    ansic=713 (dixon)
+657     gen_test        ansic=657 (dixon)
+536     grid_forecast   ansic=536 (dixon)
+419     storms_to_ascii ansic=419 (dixon)
+412     track_print     ansic=412 (dixon)
+323     cart_convert    ansic=323 (dixon)
+310     vol_to_plane    ansic=310 (dixon)
+242     test_tserver    ansic=242 (dixon)
+111     rtiming         ansic=111 (dixon)
+
+procmap applications:
+---------------------
+
+dixon: 1419
+yee: 741
+garvey: 388
+
+2554    scripts         perl (yee 741, garvey 388)
+680     procmap         cpp=680 (dixon)
+472     print_procmap   cpp=472 (dixon)
+267     test_procmap    ansic=267 (dixon)
+
+servmap applications:
+---------------------
+
+caron: 848
+rehak: 889
+
+848     servmap         cpp=848 (caron)
+563     print_servmap   ansic=563(rehak)
+326     test_servmap    ansic=326 (rehak)
+
+tdrp applications:
+------------------
+
+dixon: 6972
+
+3996    tdrp_gen        ansic=3996 (dixon)
+1530    TdrpTest        cpp=1530 (dixon)
+1446    tdrp_test       ansic=1446 (dixon)
+
+symprod applications:
+---------------------
+
+dixon: 1249
+
+665     print_spdb      ansic=665 (dixon)
+477     load_spdb       ansic=477 (dixon)
+107     print_spdb_index ansic=107 (dixon)
+
+didss applications:
+-------------------
+
+dixon:   32624
+yee:      4658
+rehak:    2596
+oien:     5409
+
+3846    Dsr2Vol         cpp=3846 (dixon)
+3746    ridds2mom       cpp=3010,ansic=736 (dixon)
+3180    edge2dsr        cpp=3180 (yee)
+3158    Rapic2Dsr       cpp=3158 (dixon)
+2402    VerifyGrid      cpp=2402 (dixon)
+2140    Dsr2Mdv         cpp=1590,ansic=550 (dixon)
+1718    Validator       cpp=1714,csh=4 (oien)
+1698    Janitor         cpp=1683,csh=15 (oien)
+1529    wsim2mdv        cpp=1529 (rehak)
+1514    dva_cart        ansic=1514 (dixon)
+1511    rdacs2gate      ansic=1511 (dixon)
+1384    Dsr2MdvLookup   ansic=1384 (dixon)
+1345    Test2Dsr        cpp=1345 (dixon)
+1150    wmi_ac_ingest   ansic=1150 (dixon)
+990     InputWatcher    cpp=983,csh=7 (dixon)
+962     bprp2gate       ansic=962 (dixon)
+933     kavm2mdv        cpp=933 (rehak)
+911     LdataWatcher    cpp=857,csh=54 (dixon)
+898     wmi_ac_recover  ansic=898 (dixon)
+847     Scout           cpp=843,csh=4 (oien)
+837     Sigmet2Dsr      cpp=837 (oien)
+773     RadMon          cpp=773 (yee)
+761     ClutterTableGenerate cpp=761 (dixon)
+705     simulateEdge    cpp=705 (yee)
+678     GenPt2Spdb      cpp=678 (dixon)
+668     dva_ingest      ansic=668 (dixon)
+652     Fmq2MultMsgFmq  cpp=652 (dixon)
+651     dva_mklookup    ansic=651 (dixon)
+641     Fmq2Fmq         cpp=641 (dixon)
+638     FmqMon          cpp=638 (dixon)
+617     dsr2mmq         cpp=329,ansic=288 (dixon)
+590     MultMsgFmq2Fmq  cpp=590 (dixon)
+480     didss_compress  ansic=480 (dixon)
+307     acmg_acpos_filter ansic=307 (dixon)
+291     dva_mkgrid      ansic=291 (dixon)
+274     DsFmq2Tape      cpp=274 (dixon)
+256     map_atd2rap     cpp=256 (dixon)
+233     LdataWriter     cpp=233 (oien)
+225     read_bprp_tape  ansic=225 (dixon)
+186     print_polar2mdv_lookup ansic=186 (dixon)
+169     bprp_ac_ingest  ansic=169 (dixon)
+136     print_clutter_table ansic=136 (dixon)
+134     fmq_print       ansic=134  (dixon)
+134     edgeVol2Ascii   cpp=134 (rehak)
+111     copy_mh_tape    ansic=111  (dixon)
+99      LdataInformer   cpp=99 (oien)
+
+ingest applications:
+--------------------
+
+dixon:       18740
+betancourt:   3033
+
+9332    Dorade2Dsr      cpp=6659,ansic=2581 (dixon)
+6050    SigmetIQ2Dsr    cpp=4075,ansic=1975 (dixon)
+3033    nexrad2dsr      cpp=3033 (betancourt)
+2152    Uf2Dsr          cpp=2152 (dixon)
+2087    SigmetUdp2Dsr   cpp=2087 (dixon)
+1231    NidsRadial2Mdv  cpp=1231 (dixon)
+1191    Bprp2Dsr        cpp=1191 (dixon)
+1017    Sigmet2Dsr      cpp=1017 (dixon)
+851     WsiNidsIngest   cpp=851 (dixon)
+701     SatOrbit2AcPosn cpp=701 (dixon)
+270     PrintNids       cpp=270 (dixon)
+
+dsserver applications:
+----------------------
+
+dixon:      16084
+mccarthy:    1188
+hage:         269
+betancourt:   594
+rehak:       2143
+
+3076    DataMapper      cpp=3076 (dixon)
+2439    DsFileDist      cpp=2439 (dixon)
+1979    AcTrack2Symprod cpp=1979 (dixon)
+1453    DsMdvServer     cpp=1453 (dixon)
+1447    Tstorms2Symprod cpp=1447 (dixon)
+1411    DsSpdbServer    cpp=1411 (dixon)
+1197    SpdbQuery       cpp=1197 (dixon)
+1191    DsFCopyServer   cpp=1191 (dixon)
+1188    DsServerMgr     cpp=1188 (mccarthy)
+1169    XSpdbQuery      cpp=1072,ansic=97 (hage)
+1112    GenPt2Symprod   cpp=1112 (rehak)
+1031    GenPtField2Symprod cpp=1031 (rehak)
+714     DsTitanServer   cpp=714 (dixon)
+624     PrintDataMap    cpp=624 (dixon)
+594     DsFmqServer     cpp=594 (betancourt)
+553     SyncDataMap     cpp=553 (dixon)
+
+mdv applications:
+-----------------
+
+dixon:       13180
+cunning:      1016
+betancourt:   2137
+oien:         2191
+rehak:         501
+hage:          339
+
+2773    MdvMerge        cpp=2773 (dixon)
+1444    PrintMdv        cpp=1444 (dixon)
+1299    MdvConvert      cpp=1299 (dixon)
+1254    MdvMedian       cpp=1254 (dixon)
+1243    Mdv2Plain       cpp=1243 (dixon)
+1190    Mdv2Vil         cpp=1190 (betancourt)
+1016    MdvCombine      cpp=1016 (cunning)
+995     MdvTSmooth      cpp=995 (dixon)
+975     Mdv2TextHdr     cpp=975 (dixon)
+966     MdvTComp        cpp=966 (dixon)
+956     MdvComp         cpp=956 (dixon)
+947     ascii2mdv       cpp=947 (betancourt)
+944     MdvSmooth       cpp=944 (oien)
+928     mdv2plain       ansic=928 (dixon)
+637     UpdateMdvFieldNames cpp=637 (oien)
+613     UpdateMdvOrigin cpp=610,csh=3 (oien)
+501     Mdv2Ascii       cpp=501 (rehak)
+347     mdv2ascii       ansic=347 (dixon)
+339     print_mdv       ansic=339 (hage)
+224     WorldTerrain    cpp=219 (oien)
+
+spdb applications:
+------------------
+
+dixon: 918
+
+918     SpdbCollate     cpp=918 (dixon)
+
+filter apps:
+------------
+
+dixon:    234
+yee:     5451
+rehak:    969
+
+2830    ApRemoval       cpp=2830 (yee)
+2621    BrightBand      cpp=2075,ansic=546 (yee)
+1091    ClutterRemove   cpp=1091 (dixon)
+969     stratiform_filter cpp=969 (rehak)
+234     LogFilter       cpp=234 (dixon)
+
+CIDD apps:
+----------
+
+hage:   26506
+dixon:   1411
+
+25020   CIDD            cpp=23331,ansic=1493 (hage)
+1682    mdv_server      cpp=1682 (hage)
+568     MapGrid         cpp=568 (dixon)
+536     MapCircles      cpp=536 (dixon)
+307     view_colormap   ansic=307 (dixon)
+
+hydro apps:
+-----------
+
+dixon:   2404
+rehak:    767
+
+2404    PrecipAccum     cpp=2404 (dixon)
+388     BasinGenPt2Symprod cpp=388 (rehak)
+379     BasinPrecip     cpp=379 (rehak)
+
+Complete libraries:
+--------------------
+
+SLOC    Directory       SLOC-by-Language (Sorted)
+
+18993   rapformats      ansic=11759,cpp=7234 (multiple)
+16971   mdv             ansic=10807,cpp=5762,pascal=402 (hage, others)
+16616   euclid          ansic=9109,cpp=7507 (wiener, others)
+15591   Mdv             cpp=15591 (dixon)
+14227   toolsa          ansic=11411,cpp=2774,sh=42 (multiple)
+11004   Spdb            cpp=10493,ansic=511 (dixon)
+7068    symprod         ansic=6776,cpp=292 (dixon, rehak)
+5401    rapplot         ansic=4828,cpp=573 (dixon, hage)
+5120    didss           cpp=3918,ansic=1202 (dixon, mccarthy)
+4443    tdrp            ansic=4443 (dixon)
+4383    physics         cpp=2850,ansic=1533 (dixon, others)
+3172    rapmath         ansic=2854,cpp=318 (multiple)
+3043    Fmq             cpp=3043 (betancourt)
+2764    cidd            ansic=2764 (hage)
+2438    dsserver        cpp=2438 (dixon, mccarthy)
+2428    titan           ansic=2428 (dixon)
+
+rapformats library:
+-------------------
+
+1627    titan           ansic=1627 (dixon)
+1053    DsRadar         cpp=867,ansic=186 (betancourt)
+994     radar           ansic=994 (dixon)
+517     GenPt           cpp=517 (dixon)
+328     mdvt            ansic=328 (hage)
+312     gint            ansic=312 (hage)
+275     WinsRadar       cpp=275 (dixon)
+268     cedric          ansic=268 (hage)
+263     MultBuf         cpp=263 (dixon)
+242     nids            ansic=242 (hage)
+141     VerGrid         cpp=141 (dixon)
+93      ac_data         ansic=93 (dixon)
+83      ac_posn         ansic=83 (dixon)
+
+mdv library:
+------------
+9094    mdv             ansic=9094 (hage)
+
+euclid library:
+---------------
+
+4161    clump           ansic=4161 (wiener)
+
+toolsa library:
+---------------
+
+2455    sockutil        cpp=1551,ansic=897,sh=7 (caron)
+1968    fmq             ansic=1968 (dixon)
+1895    pjg             ansic=1888,sh=7 (caron)
+1852    umisc           ansic=1622,cpp=230 (dixon)
+1152    utim            cpp=743,ansic=402,sh=7 (caron)
+1022    mem             ansic=915,cpp=100,sh=7 (caron)
+851     file_io         ansic=557,cpp=294 (dixon)
+707     str             ansic=646,cpp=54,sh=7 (caron)
+637     pmu             ansic=483,cpp=154 (dixon)
+576     smu             ansic=569,sh=7 (caron)
+541     Log             cpp=541 (betancourt)
+395     ldata           ansic=395 (dixon)
+350     URL             cpp=350 (mccarthy)
+327     Path            cpp=327 (betancourt)
+325     misc            cpp=325 (rehak)
+219     port            ansic=219 (caron)
+
+symprod library:
+----------------
+
+3165    spdb            ansic=3165 (dixon)
+1703    symprod         ansic=1703 (rehak)
+
+rapplot library:
+----------------
+
+2200    gplot           ansic=2200 (dixon)
+2032    xutils          ansic=1916,cpp=116 (hage)
+
+
+didss library:
+--------------
+
+3866    DsInputPath     cpp=2664,ansic=1202 (mccarthy)
+797     LdataInfo       cpp=797 (dixon)
+614     DsMessage       ansic=317,cpp=297 (betancourt)
+580     DsURL           cpp=580 (betancourt)
+457     DsAccess        cpp=457 (rehak)
+283     DataFileNames   cpp=283 (oien)
+119     RapDataDir      cpp=119 (betancourt)
+
+physics library:
+----------------
+
+200     thermo.c        ansic=200 (dixon)
+98      vil             cpp=63,ansic=35 (dixon)
+
+rapmath library:
+----------------
+
+1795    umath           ansic=1795 (dixon)
+653     stats           ansic=653 (dixon)
+227     tree            ansic=227 (dixon)
+
+dsserver library:
+-----------------
+
+1733    DsServer        cpp=1733 (mccarthy)
+949     DsFileCopy      cpp=949 (dixon)
+674     DataMapper      cpp=674 (dixon)
+664     DsClient        cpp=664 (dixon)
+529     DsLdataInfo     cpp=529 (dixon)
+408     DsLocator       cpp=408 (dixon)
+209     DsSvrMgrSocket  cpp=209 (dixon)
+156     DestUrlArray    cpp=156 (dixon)
+
+
+
+
+

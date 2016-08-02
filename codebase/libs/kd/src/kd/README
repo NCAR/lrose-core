@@ -1,0 +1,129 @@
+Set KD_real in kd/datatype.h to float or double in order to utilize
+floats or doubles respectively.
+
+There are three test programs in this directory called test_kd_interp,
+test_kd and time_test_kd.
+
+You can build these after building the library by doing
+
+make test_kd_interp
+make test_kd
+make time_test_kd
+
+The test_kd_interp program illustrates how the kd library can be
+called using one function call:
+
+  kd_interp(xdata, ydata, ndata, data_val, xgrid, ygrid, xdim, ydim, grid_val);
+
+See kd_interp.cc for details on the function arguments. Memory
+allocation issues are circumvented using this call.
+
+
+The test_kd program contains examples on how to do nearest neighbor
+searching as well as range searching. It is useful when the underlying
+observation points do not change while the grid points
+requiring interpolation change as time goes on. 
+
+
+The following steps are involved:
+
+Nearest Neighbor
+
+1. Set up points array A. Define found and dist arrays.
+
+
+2. Create KD tree object kdt (you don't need to create KD naive -- it's a brute
+force algorithm for finding the nearest neighbor/range search)
+
+3. Call kdt.nnquery() using the query point querpoint. Note that
+num_neighbor has to be <= BUCKETSIZE. In test_kd.cc the output of
+kdt.nnquery() is returned in the arrays
+
+	found (stores the indices of nearest points)
+
+	dist  (stores the distances of the nearest points from the query point)
+
+4. Free memory
+
+
+Range Search
+
+1. Set up points array A. Define vector of integers for returning indices.
+
+2. Create KD tree object kdt (you don't need to create KD naive -- it's a brute
+force algorithm for finding the nearest neighbor/range search)
+
+3. Set up rectquery. It is an array of bounds for each dimension of
+the box,
+
+xlow, xhigh
+ylow, yhigh
+zlow, zhigh
+
+etc.
+
+4. Call kdt.rectquery() using rectquery. In test_rectquery() in
+test_kd.cc the output of kdt.rectquery() is stored in the vector ptsFound which contains
+the indices of the points that fall in the box determined by rectquery.
+
+5. Free memory
+
+
+
+
+Implementation information
+
+KD Trees, Nearest Neighbors and Range Searching
+
+The KD tree is a binary tree that can be constructed from a set of data 
+points. It is useful in optimizing both nearest neighbor searching
+and range searching.
+
+
+Building the KD Tree
+
+In order to build a KD tree, the underlying set of data points needs to be
+distributed among the tree leaves. Each leaf node is a bucket that
+will hold up to BUCKETSIZE points.
+
+The KD tree is built by calling KD_tree::BuildkdTree(). This is a
+recursive procedure with two arguments l, r. These arguments are left
+and right indices of the set of data points. If the number of data
+points is less than or equal to BUCKETSIZE points, a new kd node is
+created storing the lower and upper indices. If the number of data
+points is greater than BUCKETSIZE, BuildkdTree first finds the
+dimension where the maximum spread in values is occurring. It then
+partitions the points from l to r around the median value. The median
+value is then recorded in cutval and BuildkdTree() is called on (l, m)
+and (m+1, r).
+
+
+Nearest Neighbor Searching
+
+In order to search for the nearest neighbor using the KD tree, first
+start at the root node of the KD Tree and check where the query point
+lies with respect to the discriminating dimension. If it lies to the
+left of the discriminating dimension proceed to the low child. If it
+lies to the right of the discriminating dimension proceed to the high
+child. Once the procedure arrives at a leaf node, sort all the
+elements in the bucket according to distance. One may have to look at
+the adjacent leaf node for nearest neighbors depending on the number
+of neareast neighbors requested. Note that the user should choose the
+number of nearest neighbors to be less than BUCKETSIZE since the
+routine does not guarantee that more than BUCKETSIZE nodes will be
+examined. BUCKETSIZE is currently 50.
+
+
+
+Range Searching
+
+First a rectangular query consists first of x low, x high, y low, y
+high, z low, z high etc. Note that the rectangular query is not a
+pair of diagonal points!
+
+Break the rectangular query box into two pieces along the
+discriminating dimension at the median cut value. If both pieces are
+non-empty, search the left and right subtrees. (If a piece is empty,
+don't bother.) After arriving at a leaf node, check each point in the
+bucket to determine whether it's in the rectangular query or
+not. Recurse until reaching leaf nodes.

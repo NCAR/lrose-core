@@ -1,0 +1,85 @@
+########################################################################
+# parameters file for verify_day
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# October 1991
+#
+#########################################################################
+
+#
+# debugging
+#
+
+verify_day.debug: false
+verify_day.malloc_debug_level: 0
+
+#
+# mode may be 'runs' or 'ellipse', depending up which shape
+# data you wish to use
+#
+
+verify_day.mode: runs
+
+#
+# verify directory
+#
+
+verify_day.verify_dir: $(TITAN_HOME)/verify
+
+#
+# output file - this is a binary file, which may be
+# viewed with view_file
+#
+
+verify_day.output_file_path: $(TITAN_HOME)/output/verify_day.out
+verify_day.verify_file_ext: dob
+
+#
+# verification times - multiple times may be used
+#
+
+verify_day.n_forecast_times: 3
+verify_day.forecast_times: 0.0 5.0 10.0
+verify_day.forecast_lead_time_margin: 3.0
+
+#
+# if mode is ellipse, this ration increases/decreases the ellipse
+# radius for verification
+#
+
+verify_day.ellipse_radius_ratio: 1.0
+
+#
+# min track history (secs) for verification
+#
+
+verify_day.min_valid_history: 900
+
+#
+# field - all_storms or valid_storms
+#
+# for valid_storms, the small storms and noise are ignored
+#
+
+verify_day.verification_field: valid_storms
+
+#
+# set this if you wish to count multiple hits on one grid 
+#
+
+verify_day.count_multiple_hits: false
+
+#
+# verification grid parameters
+#
+
+verify_day.nx: 56
+verify_day.ny: 56
+
+verify_day.minx: -137.5
+verify_day.miny: -137.5
+
+verify_day.dx: 5.0
+verify_day.dy: 5.0
+

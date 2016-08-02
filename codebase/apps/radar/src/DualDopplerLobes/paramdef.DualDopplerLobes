@@ -1,0 +1,23 @@
+commentdef {
+  p_header = "Create a map of the dual doppler region for radar pairs.\n"
+	"The radar pairs are listed in the param file. The output map\n"
+	"files are suitable for display in CIDD.\nNiles Oien December 2007.";
+}
+
+typedef struct {
+	double latRadar1;
+	double lonRadar1;
+	double latRadar2;
+	double lonRadar2;
+	double minDiffAngleDegrees;
+	int nPointsPerLobe;
+	string outMapFile;
+} geometry_t;
+
+
+paramdef struct geometry_t {
+  p_default = { {-27.6692, 152.862, -27.7181, 153.24, 30.0, 50, "$(RAP_DIR)/projects/titan/cp2/projDir/display/maps/CP2MtStaplDualDoppler30.map" },
+	        {-27.6692, 152.862, -27.7181, 153.24, 45.0, 50, "$(RAP_DIR)/projects/titan/cp2/projDir/display/maps/CP2MtStaplDualDoppler45.map" } };
+  p_descr = "List of geometries of radar pairs to create map files for, and output map file names.";
+  p_help = "Set as appropriate.";
+} geometries[];

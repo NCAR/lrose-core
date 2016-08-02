@@ -1,0 +1,236 @@
+/**********************************************************************
+ * TDRP params for AcGeorefCompare
+ **********************************************************************/
+
+//======================================================================
+//
+// AcGeorefCompare reads multiple ac georef data sets from SPDB and 
+//   compares them. It is designed to compare the NCAR GV INS with the HCR 
+//   Gmigits unit.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// reg_with_procmap ////////////////////////
+//
+// Register with procmap.
+//
+//
+// Type: boolean
+//
+
+reg_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+// We specify a primary and secondary data set. The primary set is read 
+//   in first, and then data from the secondary data set is matched in 
+//   time to the entries in the primary.
+//
+//======================================================================
+ 
+///////////// primary_spdb_url ////////////////////////
+//
+// SPDB url for primary data set.
+//
+// Can take the form of a local directory path, or a full url of the 
+//   form:
+//
+// 	'spdbp:://hostname::dir_path'
+//
+// If the dir_path starts with '.' or '/', it specifies a relative or 
+//   absolute path respectively. If not, it specifies a path relative to 
+//   '$DATA_DIR'.
+//
+//
+// Type: string
+//
+
+primary_spdb_url = "spdbp:://eldora::/scr/eldora1/rsfdata/cset/hcr/qc/spdb/ac_georef/raf_1hz";
+
+///////////// secondary_spdb_url //////////////////////
+//
+// SPDB url for secondary data set.
+//
+// Can take the form of a local directory path, or a full url of the 
+//   form:
+//
+// 	'spdbp:://hostname::dir_path'
+//
+// If the dir_path starts with '.' or '/', it specifies a relative or 
+//   absolute path respecively. If not, it specifies a path relative to 
+//   '$DATA_DIR'.
+//
+//
+// Type: string
+//
+
+secondary_spdb_url = "spdbp:://eldora::/scr/eldora1/rsfdata/cset/hcr/qc/spdb/ac_georef/cfradial_10hz";
+
+//======================================================================
+//
+// DATA ANALYSIS.
+//
+// Data is written to stdout in ASCII column format.
+//
+//======================================================================
+ 
+///////////// primary_frequency_hz ////////////////////
+//
+// Frequency of primary data to be used in the analysis.
+//
+// If the data in the primary data set is more frequent than this, we 
+//   trim it down to this frequency.
+//
+//
+// Type: double
+//
+
+primary_frequency_hz = 1;
+
+///////////// time_block_secs /////////////////////////
+//
+// Length of data time blocks to be read in (secs).
+//
+// The data is read in blocks of this length, to control memory usage 
+//   for large data sets.
+//
+//
+// Type: int
+//
+
+time_block_secs = 600;
+
+///////////// max_time_diff_secs //////////////////////
+//
+// Maximum time difference for valid pair (secs).
+//
+// This is the max valid time difference between a primary observation 
+//   and secondary observation.
+//
+//
+// Type: double
+//
+
+max_time_diff_secs = 0.5;
+
+//======================================================================
+//
+// AIRCRAFT WEIGHT CALCULATIONS.
+//
+//======================================================================
+ 
+///////////// fuel_burn_rate_initial_climb ////////////
+//
+// Fuel burn rate in initial climb (lb/hr).
+//
+//
+// Type: double
+//
+
+fuel_burn_rate_initial_climb = 11500;
+
+///////////// mean_fuel_burn_rate_cruise //////////////
+//
+// Mean Fuel burn rate in cruise after the initial climb (lb/hr).
+//
+//
+// Type: double
+//
+
+mean_fuel_burn_rate_cruise = 3500;
+
+///////////// takeoff_weight_lbs //////////////////////
+//
+// Aircraft takeoff weight (lb).
+//
+//
+// Type: double
+//
+
+takeoff_weight_lbs = 88000;
+
+///////////// top_of_climb_altitude_ft ////////////////
+//
+// Target top of climb altitude (ft).
+//
+//
+// Type: double
+//
+
+top_of_climb_altitude_ft = 20000;
+
+//======================================================================
+//
+// OUTPUT DETAILS.
+//
+//======================================================================
+ 
+///////////// write_commented_header //////////////////
+//
+// If true, write a commented header at the start of the output.
+//
+//
+// Type: boolean
+//
+
+write_commented_header = TRUE;
+
+///////////// comment_character ///////////////////////
+//
+// Character at start of comment lines.
+//
+// Each comment line will be start with this character.
+//
+//
+// Type: string
+//
+
+comment_character = "#";
+
+///////////// column_delimiter ////////////////////////
+//
+// Delimiter between columns.
+//
+//
+// Type: string
+//
+
+column_delimiter = " ";
+

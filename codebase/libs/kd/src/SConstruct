@@ -1,0 +1,28 @@
+
+import os
+env = Environment(CPPPATH="include", LIBPATH=os.environ["RAL_LIB_DIR"], CCFLAGS=os.environ["RAL_CCFLAGS"])
+    
+env.Library("kd", [
+  "kd/fileoper.cc",
+  "kd/kd.cc",
+  "kd/metric.cc",
+  "kd/naive.cc",
+  "kd/pqueue.cc",
+  "kd/kd_interp.cc",
+  "kd/kd_query.cc",
+  "kd/tokenize.cc",
+  ]
+            )
+
+env.Install(env["LIBPATH"], "libkd.a")
+
+install_include = "%s/kd" % os.environ["RAL_INC_DIR"]
+env.Install(install_include, ["include/kd/kd.hh", "include/kd/datatype.hh", "include/kd/fileoper.hh","include/kd/kd_interp.hh", "include/kd/kd_query.hh","include/kd/metric.hh", "include/kd/naive.hh", "include/kd/tokenize.hh"])
+
+env.Alias("install", [env["LIBPATH"], install_include])
+env.Alias("install_include", install_include)
+
+
+
+
+

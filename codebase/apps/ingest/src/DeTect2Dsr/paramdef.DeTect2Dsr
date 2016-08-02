@@ -1,0 +1,405 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.DeTect2Dsr
+ *
+ * This file contains the TDRP parameter definitions for
+ * DeTect2Dsr.
+ */
+
+commentdef
+{
+  p_header = "DeTect2Dsr";
+  p_text = "This program reads a DeTect radar raw data file and writes the "
+           "beams to an FMQ where they can be read by Dsr2Vol and put into "
+           "MDV volumes.";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+  p_default = FALSE;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to write the start and end times to "
+            "stdout";
+  p_help = "If set, the program will write the times of the first and last "
+           "beam processed to stdout at the end of processing. "
+           "This can be used by scripts to get the data begin and end times "
+           "to use for other processing. "
+           "All other debug and error messages are written to stderr so that "
+           "these messages can be isolated for the scripts.";
+  p_default = FALSE;
+} write_times_to_stdout;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Instance";
+  p_help = "Used for process registration";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Input/output parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT PARAMETERS";
+};
+
+typedef enum
+{
+  FILE_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In FILE_LIST mode, the program operates on the input files "
+           "specified on the command line.\n";
+  p_default = FILE_LIST;
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Output fmq url";
+  p_default = {"fmqp:://localhost::fmq/dsRadar"};
+} output_fmq_url;
+ 
+paramdef long
+{
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+  p_default = 20000000;
+} output_fmq_size;
+ 
+paramdef long
+{
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages "
+           "which may be written to the buffer before overwrites occur. "
+           "However, overwrites may occur sooner if the size is not set "
+           "large enough.";
+  p_default = 360;
+} output_fmq_nslots;
+
+paramdef boolean
+{
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+  p_default = FALSE;
+} output_fmq_compress;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use a blocking write on the output "
+            "FMQ";
+  p_help = "You always want to use blocking write when working with archive "
+           "data. "
+           "I don't know if we'll want blocking write in realtime.";
+  p_default = TRUE;
+} use_blocking_write;
+
+paramdef long
+{
+  p_descr = "Frequency for including the radar parameters in the radar "
+            "messages.";
+  p_help = "The default value for this should be fine, but I've put this "
+           "here in case there are situations where this should be done more "
+           "or less frequently.";
+  p_minimum = 1;
+  p_default = 50;
+} output_radar_param_freq;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating to only process times in the given time list";
+  p_default = false;
+} use_time_list;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_t;
+
+paramdef struct time_t
+{
+  p_descr = "List of times to process from the input files";
+  p_help = "If use_time_list is set to TRUE, only times specified in this "
+           "list will be processed. "
+           "These times must be specified in chronological order.";
+  p_default = { { "2010 10 8 21 7 20", "2010 10 8 21 7 30" },
+                { "2010 10 8 21 7 40", "2010 10 8 21 7 50" } };
+} time_list[];
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to resample the beams on output";
+  p_default = false;
+} resample_beams;
+
+paramdef double
+{
+  p_descr = "Desired output beamwidth in degrees";
+  p_help = "This value should divide into the DeTect sector size evenly. "
+           "The sector size in the files I've seen is 90 degrees. "
+           "If this doesn't divide evenly into the sector size, the last "
+           "resampled beam in each sector will be constructed from the "
+           "remaining input beams, regardless of size.\n"
+           "Used only if resample_beams is set to true.";
+  p_min = 0.0;
+  p_default = 0.5;
+} resampled_beam_width;
+
+typedef enum
+{
+  RESAMPLE_MIN,
+  RESAMPLE_MAX,
+  RESAMPLE_MEAN
+} resample_type_t;
+
+paramdef enum resample_type_t
+{
+  p_descr = "Calculation to use for resampling the beams";
+  p_help = "Used only if resample_beams is set to true.";
+  p_default = RESAMPLE_MAX;
+} resample_type;
+
+
+/***********************************************************************
+ * Radar parameters
+ */
+
+commentdef
+{
+  p_header = "RADAR PARAMETERS";
+};
+
+paramdef long
+{
+  p_descr = "Radar identifier";
+  p_default = 1;
+} radar_id;
+
+paramdef double
+{
+  p_descr = "Radar altitude in km.";
+  p_default = 0.0;
+} radar_altitude;
+
+paramdef double
+{
+  p_descr = "Radar horizontal beam width in degrees";
+  p_default = 1.0;
+} horiz_beam_width;
+
+paramdef double
+{
+  p_descr = "Radar vertical beam width in degrees";
+  p_default = 1.0;
+} vert_beam_width;
+
+paramdef string
+{
+  p_descr = "Radar name";
+  p_default = "USDA bird radar";
+} radar_name;
+
+
+/***********************************************************************
+ * Count to power conversion table
+ */
+
+commentdef
+{
+  p_header = "COUNT TO POWER TABLE";
+};
+
+typedef struct
+{
+  int count;
+  double power;
+} count_to_power_t;
+
+paramdef struct count_to_power_t
+{
+  p_descr = "Table for converting count values to power.";
+  p_help = "This table is applied as a piecewise linear function. "
+           "Note that the code assumes this table is monotonically increasing. "
+           "Counts from 0 to the first specified value will receive the same "
+           "power as the first specified value. "
+           "Counts from the last specified value to 4096 will receive the same "
+           "power as the last specified value. "
+           "Counts below 0 and above 4096 will be ignored since these value "
+           "are not valid.";
+  p_default = { {  175, -110.0 },
+                {  183, -109.0 },
+                {  192, -108.0 },
+                {  200, -107.0 },
+                {  208, -106.0 },
+                {  217, -105.0 },
+                {  225, -104.0 },
+                {  233, -103.0 },
+                {  242, -102.0 },
+                {  250, -101.0 },
+                {  258, -100.0 },
+                {  267,  -99.0 },
+                {  275,  -98.0 },
+                {  283,  -97.0 },
+                {  292,  -96.0 },
+                {  300,  -95.0 },
+                {  368,  -94.0 },
+                {  436,  -93.0 },
+                {  504,  -92.0 },
+                {  572,  -91.0 },
+                {  640,  -90.0 },
+                {  708,  -89.0 },
+                {  776,  -88.0 },
+                {  844,  -87.0 },
+                {  912,  -86.0 },
+                {  980,  -85.0 },
+                { 1048,  -84.0 },
+                { 1116,  -83.0 },
+                { 1184,  -82.0 },
+                { 1252,  -81.0 },
+                { 1320,  -80.0 },
+                { 1388,  -79.0 },
+                { 1456,  -78.0 },
+                { 1524,  -77.0 },
+                { 1592,  -76.0 },
+                { 1660,  -75.0 },
+                { 1728,  -74.0 },
+                { 1796,  -73.0 },
+                { 1864,  -72.0 },
+                { 1932,  -71.0 },
+                { 2000,  -70.0 },
+                { 2067,  -69.0 },
+                { 2133,  -68.0 },
+                { 2200,  -67.0 },
+                { 2267,  -66.0 },
+                { 2333,  -65.0 },
+                { 2400,  -64.0 },
+                { 2467,  -63.0 },
+                { 2533,  -62.0 },
+                { 2600,  -61.0 },
+                { 2667,  -60.0 },
+                { 2733,  -59.0 },
+                { 2800,  -58.0 },
+                { 2867,  -57.0 },
+                { 2933,  -56.0 },
+                { 3000,  -55.0 },
+                { 3067,  -54.0 },
+                { 3133,  -53.0 },
+                { 3200,  -52.0 },
+                { 3267,  -51.0 },
+                { 3333,  -50.0 },
+                { 3400,  -49.0 },
+                { 3467,  -48.0 },
+                { 3533,  -47.0 },
+                { 3600,  -46.0 },
+                { 3667,  -45.0 },
+                { 3733,  -44.0 },
+                { 3800,  -43.0 },
+                { 3867,  -42.0 },
+                { 3933,  -41.0 },
+                { 4000,  -40.0 },
+                { 4050,  -39.0 },
+//                { 4100,  -38.0 },
+//                { 4100,  -37.0 },
+//                { 4100,  -36.0 },
+//                { 4100,  -35.0 },
+//                { 4100,  -34.0 },
+//                { 4100,  -33.0 },
+//                { 4100,  -32.0 },
+//                { 4100,  -31.0 },
+//                { 4100,  -30.0 } };
+                { 4096,  -30.0 } };
+} count_to_power_table[];
+
+/***********************************************************************
+ * Colorscale parameters
+ */
+
+commentdef
+{
+  p_header = "COLORSCALE PARAMETERS";
+  p_text = "This section contains parameters to allow you to automatically "
+           "generate colorscale files that might be useful in visualizing "
+           "the fields created by this program. "
+           "These are not necessary for the program to run, but can be "
+           "helpful for later viewing.";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to generate the count field colorscale.";
+  p_help = "The count field colorscale is a grayscale with the count values "
+           "evenly spread in the scale up to the maximum specified count "
+           "value, at which point all counts are assigned white.";
+  p_default = FALSE;
+} create_count_colorscale;
+
+paramdef string
+{
+  p_descr = "File path for count colorscale file.";
+  p_default = "./colorscales/count.colors";
+} count_colorscale_path;
+
+paramdef long
+{
+  p_descr = "Maximum spread value for the count colorscale.";
+  p_help = "This is the maximum data value below which the counts are "
+           "evenly spread within the grayscale. "
+           "This value and above will be represented by white in the "
+           "colorscale.";
+  p_min = 254;
+  p_max = 4096;
+  p_default = 3500;
+} count_colorscale_max_spread_value;

@@ -1,0 +1,105 @@
+#! /usr/bin/perl
+
+#
+# script to remove rcs keywords notice from source code files
+#
+
+#
+# usage rcs_keys_remove target_files
+#
+
+#
+# loop through all the args as filenames
+#
+
+ FILE:
+
+foreach $filename (@ARGV) {
+
+  $OK = 0;
+  
+  print(STDERR "Removing rcs keywords from $filename\n");
+
+  $bakfile = $filename . ".bak";
+  system ('/bin/mv', $filename, $bakfile);
+  
+  if (!open(SRCFILE, $bakfile)) {
+    print(STDERR "Cannot open source file $bakfile - continuing ... \n");
+    next FILE;
+  }
+
+  if (!open(STDOUT, ">$filename")) {
+    print(STDERR "Cannot open file $filename - continuing ... \n");
+    next FILE;
+  }
+  
+  $in_rcs_keys = 0;
+  $start_pattern = "/*-*-*-*-*-*-";
+  $end_pattern = "/**-*-*-*-*-*-";
+  
+  #
+  # loop through the lines in the file 
+  #
+
+  while ($line = <SRCFILE>) {
+
+    #
+    # if not in rcs_keys, look for start of rcs_keys
+    #
+
+    if (!$in_rcs_keys) {
+
+      if (index($line, $start_pattern) >= 0) {
+
+	#
+	# start of rcs_keys
+	#
+
+	$in_rcs_keys = 1;
+	$OK = 0;
+
+      } else {
+	
+	#
+	# not in rcs_keys, copy line out
+	#
+
+	print (STDOUT $line);
+
+      } # if (index($line, $start_pattern) >= 0)  
+
+    } else {
+
+      if (index($line, $end_pattern) >= 0) {
+
+	#
+	# end of rcs_keys
+	#
+
+	$in_rcs_keys = 0;
+	$OK = 1;
+
+      } # if (index($line, $end_pattern) >= 0) 
+
+    } # if (!$in_rcs_keys) 
+
+  } # while 
+
+  #
+  # remove bak file
+  #
+	
+  if ($OK) {
+
+    unlink ($bakfile);
+
+  } else {
+
+    unlink($filename);
+    system ('/bin/mv', $bakfile, $filename);
+    printf(stderr "ERROR in file $filename - keys not removed\n");
+    
+  }
+
+} # foreach
+

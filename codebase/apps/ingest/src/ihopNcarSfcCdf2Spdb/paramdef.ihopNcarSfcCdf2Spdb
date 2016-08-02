@@ -1,0 +1,242 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/****************************************************************
+ * parameter definitions for ihopNcarSfcCdf2Spdb
+ *  
+ * Kay Levesque
+ * July 2003
+ */
+
+/****************************************************************
+ * Debugging and process control.
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,		
+  DEBUG_VERBOSE	
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+           "appropriate level of detail.";
+  p_default = DEBUG_VERBOSE;
+} debug;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/*********************************************************
+ * Input and output data
+ */
+
+commentdef
+{
+  p_header = "INPUT AND OUTPUT DATA.";
+}
+
+paramdef long
+{
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+  p_min = 0;
+  p_default = 7200;
+} max_realtime_valid_age;
+
+paramdef string
+{
+  p_descr = "Output SPDB URL.";
+  p_help = "Output data is in spdb format.";
+  p_default = "spdbp:://localhost::./data/spdb";
+} output_spdb_url;
+
+paramdef long
+{
+  p_descr = "Number of seconds before the SPDB product expires";
+  p_default = 1200;
+} spdb_expire_secs;
+
+paramdef string
+{
+	p_descr = "Report base_time variable name";
+	p_help = "This is the report base_time variable name. It must match the name of "
+		 "the base_time variable in the netCDF file exactly. "
+		 "It is case-sensitive.";
+	p_default = "base_time";
+} observationTime;
+
+paramdef string
+{
+	p_descr = "Report offset time variable name";
+	p_help = "This is the offset from the base time for each data reading."
+	p_default = "time_offset";
+} timeOffset;
+
+typedef enum
+{
+	NO_MULTIPLIER,
+	MULTIPLIER,
+	KELVIN_TO_C
+} conversion_type_t;
+
+typedef struct
+{
+	string variable_name;
+	string missing_value_attr_name;
+	conversion_type_t convert_type;
+	double multiplier_value;
+} input_variable_t;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input latitude variable information.";
+	p_help = "\tvariable_name: This is the exact name of the "
+		 "latitude variable in the netCDF file and it "
+		 "is case-sensitive. Use \"ncdump\" to get variable "
+		 "names from the netCDF file. If this variable is not "
+		 "available in the netCDF file, set this to \"\"\n"
+		 "\tmissing_value_attr_name: This is the name of the "
+		 "attribute for this variable in the netCDF file that contains "
+		 "the missing data value. If the variable doesn't have an "
+		 "attribute of this type, set it to \"\"\n"
+		 "\tconvert_type: Used for converting the netCDF latitude "
+		 "value to the value needed for the station_report.\n"
+		 "\tmultiplier_value: value used if conversion type is "
+		 "MULTIPLIER.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} latitude;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input longitude variable information.";
+	p_help = "See latitude help information.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} longitude;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input altitude variable information.";
+	p_help = "See latitude help information.\n"
+		 "station_report uses meters.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} altitude;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input temperature variable information.";
+	p_help = "See latitude help information.\n"
+		 "station_report uses degrees celsius.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} temperature;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input dewpoint variable information.";
+	p_help = "See latitude help information.\n"
+		 "station_report uses degrees celsius.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} dewpoint;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input relative humidity variable information.";
+	p_help = "See latitude help information.\n"
+		 "station_report uses percent.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} relHumidity;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input wind speed variable information.";
+	p_help = "See latitude help information.\n"
+		 "station_report uses m/s.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} windSpeed;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input wind direction variable information.";
+	p_help = "See latitude help information.\n"
+		 "station_report uses deg.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} windDir;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input wind gust variable information.";
+	p_help = "See latitude help information.\n"
+		 "station_report uses m/s.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} windGust;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input pressure variable information.";
+	p_help = "See latitude help information.\n"
+		 "station_report barometric pressure (mb)";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} pressure;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input precipitation variable information.";
+	p_help = "See latitude help information.\n"
+		 "station_report uses mm.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} liquidAccum;
+
+paramdef struct input_variable_t
+{
+	p_descr = "Input visibility variable information.";
+	p_help = "See latitude help information.\n"
+		 "station_report uses km.";
+	p_default = {"", "", NO_MULTIPLIER, 0.0};
+
+} visibility;
+

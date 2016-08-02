@@ -1,0 +1,114 @@
+/**********************************************************************
+ * TDRP params for TsSim
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// mode ////////////////////////////////////
+//
+// Mode for running this app.
+// TsSim may be used in a variety of ways. The mode controls the 
+//   processing to be simulated.
+//
+// Type: enum
+// Options:
+//     MODE_TEST
+//     MODE_FFT
+//     MODE_SPRT
+//
+
+mode = MODE_SPRT;
+
+///////////// n_samples ///////////////////////////////
+//
+// The number of samples in each time series.
+// Type: int
+//
+
+n_samples = 64;
+
+///////////// wavelength //////////////////////////////
+//
+// The wavelength of the radar (cm).
+// Type: double
+//
+
+wavelength = 10;
+
+///////////// prt /////////////////////////////////////
+//
+// The PRT of the data (miscro-secs).
+// Type: double
+//
+
+prt = 1000;
+
+///////////// power ///////////////////////////////////
+//
+// Power in watts.
+// Type: double
+//
+
+power = 1;
+
+///////////// width ///////////////////////////////////
+//
+// Spectrum width (m/s).
+// Type: double
+//
+
+width = 0.25;
+
+///////////// use_exponential /////////////////////////
+//
+// Option to simulate noise with the exponential function.
+// If FALSE a smooth gaussian is produced. If TRUE, the data is 
+//   exponentially disctibuted about the the gaussian.
+// Type: boolean
+//
+
+use_exponential = TRUE;
+
+///////////// exponential_lambda //////////////////////
+//
+// Mean of exponential distribution.
+// Type: double
+//
+
+exponential_lambda = 1;
+
+///////////// receiver_noise //////////////////////////
+//
+// Receiver noise (watts).
+// Type: double
+//
+
+receiver_noise = 1e-08;
+
+///////////// force_zero_phase ////////////////////////
+//
+// Option to force the phase to 0.
+// This has the effect of generating only real parts.
+// Type: boolean
+//
+
+force_zero_phase = FALSE;
+

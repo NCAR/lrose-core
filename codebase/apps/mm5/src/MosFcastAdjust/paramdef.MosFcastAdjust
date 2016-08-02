@@ -1,0 +1,220 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MosFcastAdjust reads actual metars and adjusts the\n"
+		"pseudo-model metars accordingly. Niles Oien.";
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "spdbp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new metar data appear here."; 
+  p_default = {"spdbp:://localhost::spdb/Metars"};
+} TriggerUrl;
+
+paramdef boolean {
+  p_descr = "If set, use the list of stations specified by\n"
+            "the station_ids parameter.";
+  p_help = "This makes the program a lot more efficient."; 
+  p_default = FALSE;
+} UseStationIDs;
+
+paramdef char* {
+  p_descr = "Station ids";
+  p_help = "List of the station ids for which the MOS forecasts"
+           "should be made.";
+  p_default = "KCTP";
+} station_ids[];     
+ 
+paramdef string {
+  p_descr = "Model URL";
+  p_help = "Pseudo-metar model data are stored here and this\n"
+           "program will adjust them using the actual metars."; 
+  p_default = "spdbp:://localhost::spdb/ExtractedFromModel";
+} ModelUrl;
+  
+paramdef string {
+  p_descr = "Output URL";
+  p_help = "Forecast spdb files are written here."; 
+  p_default = "spdbp:://localhost::spdb/MosForecasts";
+} OutUrl;
+
+paramdef boolean {
+  p_descr = "Set to TRUE to save out correction factors/offsets\n"
+            "used to correct model pseudo-metars given an\n"
+            "actual metar.";
+  p_help = "Set to something unique.";
+  p_default = { FALSE };
+} SaveCorrections;
+
+paramdef string {
+  p_descr = "Output URL for correction factors/offsets.";
+  p_help = "Correction factors/offsets are written to this URL\n"
+           "using the METAR structure to store the information.\n"
+           "They are best thought of as Delta Metars, since\n"
+           "the structures contain not weather information per se\n"
+           "but the information used to adjust model weather information\n"
+           "to an actual METAR value.\n\nA field in these Delta Metars\n"
+           "may be an offset or a bias depending on the settings used\n"
+           "in this params file. Only relevant if SaveCorrections is TRUE."; 
+  p_default = "spdbp:://localhost::spdb/DeltaMetars";
+} OutDeltaUrl;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique.";
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;        
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Look back time, seconds.";
+  p_help = "Program will look back by this time from trigger time\n"
+	   "when looking for actual METAR data.";
+} LookBack;        
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Look ahead time, seconds.";
+  p_help = "Program will look ahead by this time from trigger time\n"
+	   "when looking for actual METAR data.";
+} LookAhead;        
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Trigger interval, seconds.";
+  p_help = "Program will trigger regularly at this interval.";
+} TriggerInterval;        
+
+paramdef int {
+  p_default = 36;
+  p_descr = "Maximum lead time, hours.";
+  p_help = "When a real METAR comes in, the program will look\n"
+	   "for pseudo METARS from the model data, starting at the time\n"
+	   "of the real metar and ending at the real metar plus this lead\n"
+           "time. This effectively sets the limit on the lead time\n"
+           "of the MOS forcasts.";
+} MaxLeadTime;
+
+paramdef int {
+  p_descr = "Time before data expire, seconds";
+  p_help = "Forecasts expire at the valid time + TimeBeforeExpire "; 
+  p_default = 1800;
+} TimeBeforeExpire;
+
+paramdef string {
+  p_default = "Waiting for data";
+  p_descr = "PMU registration string.";
+  p_help = "While waiting for data the program registers with this string.";
+} PMU_String;        
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug flag.";
+  p_help = "Set for more verbose output.";
+} Debug;        
+
+
+paramdef double {
+  p_descr = "Value to use for visibility if no clouds found, Km";
+  p_default = 3.6576;
+} ClearVisibility;
+
+paramdef double {
+  p_descr = "Value to use for ceiling if no clouds found, Km";
+  p_default = 9.999;
+} ClearCeiling;
+
+//////////////////////////////////////////////////
+//
+// Correction methods for the different fields.
+//
+
+typedef enum {
+  ADJUST_LINEAR, ADJUST_SIGMOID
+} adjust_t;
+
+
+paramdef enum adjust_t  {
+  p_default = {ADJUST_LINEAR};
+  p_descr = "Method to use when adjusting variables\n"
+            "ADJUST_LINEAR or ADJUST_SIGMOID.";
+  p_help = "Program will adjust using either a linear or sigmoid persistence.";
+} AdjustmentType;
+
+paramdef int {
+  p_default = 21600;
+  p_descr = "Persistence adjustment interval, seconds.";
+  p_help = "Program will adjust temp model forecasts within this many seconds of the METAR valid time.";
+} TempAdjustSec;
+
+paramdef int {
+  p_default = 21600;
+  p_descr = "Persistence adjustment interval, seconds.";
+  p_help = "Program will adjust humidity model forecasts within this many seconds of the METAR valid time.";
+} HumidityAdjustSec;
+
+paramdef int {
+  p_default = 21600;
+  p_descr = "Persistence adjustment interval, seconds.";
+  p_help = "Program will adjust wind speed model forecasts within this many seconds of the METAR valid time.";
+} WindSpeedAdjustSec;
+
+paramdef int {
+  p_default = 21600;
+  p_descr = "Persistence adjustment interval, seconds.";
+  p_help = "Program will adjust wind dir model forecasts within this many seconds of the METAR valid time.";
+} WindDirAdjustSec;
+
+paramdef int {
+  p_default = 21600;
+  p_descr = "Persistence adjustment interval, seconds.";
+  p_help = "Program will adjust pressure model forecasts within this many seconds of the METAR valid time.";
+} PressureAdjustSec;
+
+paramdef int {
+  p_default = 21600;
+  p_descr = "Persistence adjustment interval, seconds.";
+  p_help = "Program will adjust visibility model forecasts within this many seconds of the METAR valid time.";
+} VisibilityAdjustSec;
+
+paramdef int {
+  p_default = 21600;
+  p_descr = "Persistence adjustment interval, seconds.";
+  p_help = "Program will adjust ceiling model forecasts within this many seconds of the METAR valid time.";
+} CeilingAdjustSec;
+
+
+
+
+
+

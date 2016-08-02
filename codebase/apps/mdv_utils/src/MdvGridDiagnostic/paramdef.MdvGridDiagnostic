@@ -1,0 +1,136 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvGridDiagnostic is a small program written\n"
+	     "for Andrew Crook that reads MDV files and\n"
+	     "computes some statistics on a subgrid defined\n"
+	     "by grid points. Program is intended for post\n"
+	     "processing use only, it does not check in with\n"
+             "procmap or have a realtime mode. Only two dimensional\n"
+	     "fields are supported.\n\n"
+	     "The output file is an ASCII column file\n"
+	     "in the following format :\n\n"
+	     "Time since StartTime (see below) (seconds)\n"
+	     "Year, month, day, minute, hour and second of data\n"
+	     "The number of grid points counted (may be 0)\n"
+	     "The total of the grid points\n"
+	     "The Minimum, Mean and Maximum values for the\n"
+	     "points considered (may be set to BadValue, see below).\n"
+	     "and the 10th and 90th percentile.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off";
+  p_help = "Program reads MDV grids from this URL."; 
+  p_default = "mdvp:://localhost::mdv/trigger";
+} InUrl;
+
+paramdef string {
+  p_descr = "Output data file.";
+  p_help = "Output data are written here."; 
+  p_default = "./MdvGridDiagnostic.Out";
+} OutFile;
+
+paramdef string {
+  p_descr = "Field name";
+  p_help = "Statistics are calculated for this field."; 
+  p_default = "conv";
+} InFieldName;
+
+paramdef double {
+
+  p_descr = "Value to use for bad data";
+  p_help = "Bad data usually happens if all the data in the\n"
+	   "subgrid are bad or missing. In this case, the BadVal\n"
+           "will be printed out in place of the Min, Mean\n"
+           "and Max values."; 
+  p_default = -999.0;
+} BadValue;
+
+commentdef {
+
+  p_header = "Parameters that define the sub-grid";
+
+}
+
+paramdef int {
+  p_descr = "Minimum grid point in X for the subgrid.";
+  p_help = "The grid runs from 0 to NX-1 not 1 to NX."; 
+  p_default = "20";
+} MinX;
+
+paramdef int {
+  p_descr = "Minimum grid point in Y for the subgrid.";
+  p_help = "The grid runs from 0 to NY-1 not 1 to NY."; 
+  p_default = "20";
+} MinY;
+
+paramdef int {
+  p_descr = "Minimum grid point in Z for the subgrid.";
+  p_help = "The grid runs from 0 to NZ-1 not 1 to NZ."; 
+  p_default = "0";
+} MinZ;
+
+
+paramdef int {
+  p_descr = "Maximum grid point in X for the subgrid.";
+  p_help = "The grid runs from 0 to NX-1 not 1 to NX."; 
+  p_default = "40";
+} MaxX;
+
+paramdef int {
+  p_descr = "Maximum grid point in Y for the subgrid.";
+  p_help = "The grid runs from 0 to NY-1 not 1 to NY."; 
+  p_default = "40";
+} MaxY;
+
+paramdef int {
+  p_descr = "Maximum grid point in Z for the subgrid.";
+  p_help = "The grid runs from 0 to NZ-1 not 1 to NZ."; 
+  p_default = "0";
+} MaxZ;
+
+commentdef {
+
+  p_header = "Start/End time parameters.";
+
+}
+
+
+paramdef string {
+  p_descr = "Start time in YYYY MM DD hh mm ss";
+  p_help = "Times are inclusive."; 
+  p_default = "2001 06 25 23 30 00";
+} StartTime;
+
+paramdef string {
+  p_descr = "End time in YYYY MM DD hh mm ss";
+  p_help = "Times are inclusive."; 
+  p_default = "2001 06 26 03 45 00";
+} EndTime;
+
+
+

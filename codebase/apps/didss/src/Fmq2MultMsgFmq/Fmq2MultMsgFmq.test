@@ -1,0 +1,161 @@
+/**********************************************************************
+ * TDRP params for Fmq2MultMsgFmq
+ **********************************************************************/
+
+//======================================================================
+//
+// Fmq2MultMsgFmq program.
+//
+// Fmq2MultMsgFmq packs a number of input messages from an FMQ into a 
+//   single output message, which is then written to an output FMQ. The 
+//   reasons for doing this are (a) to improve compression by allowing the 
+//   compression algorithm to work on a larger buffer and (b) to reduce 
+//   the number of remote writes made across a network link.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input FMQ.
+// Type: string
+//
+
+input_url = "fmqp:://titan:10000:fmq.test";
+
+///////////// msecs_sleep_blocking ////////////////////
+//
+// Number of millisecs to sleep while polling the input.
+// The reads are done in a polling-blocking mode. This is the number of 
+//   millisecs to sleep between polls.
+// Type: int
+//
+
+msecs_sleep_blocking = 1000;
+
+//======================================================================
+//
+// PACKING.
+//
+//======================================================================
+ 
+///////////// pack_decision ///////////////////////////
+//
+// Decision option - for choosing how many messages to pack into a 
+//   single message.
+// If set to PACK_NMESSAGES, the parameter n_messages_packed will be 
+//   used to determine how many messages are packed together. If set to 
+//   PACK_NBYTES, the number of bytes will be summed, and when the sum 
+//   exceeds min_bytes_packed the messages up to that point will be packed 
+//   together. If set to PACK_EITHER, either condition will trigger output 
+//   packing.
+//
+// Type: enum
+// Options:
+//   PACK_NMESSAGES, PACK_NBYTES, PACK_EITHER
+//
+//
+
+pack_decision = PACK_NMESSAGES;
+pack_decision = PACK_NBYTES;
+pack_decision = PACK_EITHER;
+
+///////////// n_messages_packed ///////////////////////
+//
+// Number of messages packed into a single message.
+// See parameter 'pack_decision'.
+// Type: int
+//
+
+n_messages_packed = 20;
+
+///////////// min_bytes_packed ////////////////////////
+//
+// Min number of bytes packed into a single message.
+// See parameter 'pack_decision'.
+// Type: int
+//
+
+min_bytes_packed = 65536;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for output FMQ.
+// Type: string
+//
+
+output_url = "fmqp:://titan:10000:fmq_mult.test";
+
+///////////// output_compression //////////////////////
+//
+// Output compression options.
+// The data may be optionally compressed for output. BZIP is generally 
+//   the slowest but most compact. ZLIB uses the gzip compression 
+//   algorithm, which is faster than BZIP, and for some data more compact 
+//   as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is 
+//   simple run-length encoding compression, which is the fastest and 
+//   least compact.
+//
+// Type: enum
+// Options:
+//   NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION
+//
+//
+
+output_compression = ZLIB_COMPRESSION;
+
+///////////// output_n_slots //////////////////////////
+//
+// Number of slots in output FMQ.
+// Type: int
+//
+
+output_n_slots = 1000;
+
+///////////// output_buf_size /////////////////////////
+//
+// Size of buffer in output FMQ.
+// Type: int
+//
+
+output_buf_size = 1000000;
+

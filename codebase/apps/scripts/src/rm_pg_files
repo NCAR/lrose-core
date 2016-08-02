@@ -1,0 +1,2 @@
+nice find . '(' -name '*.ti' -o -name pchdir ')' \
+         -user $USER -print -exec \rm -r '{}' \;

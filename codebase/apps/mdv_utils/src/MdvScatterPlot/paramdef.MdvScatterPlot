@@ -1,0 +1,377 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvScatterPlot
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvScatterPlot.
+ */
+
+
+commentdef
+{
+  p_header = "MdvScatterPlot";
+  p_text = "This program reads two MDV fields and generates a scatter "
+           "plot of the data in the fields.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "If true, verbose debug messages will be printed.";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Trigger URL";
+  p_help = "This will generally be the URL of one of the input fields, "
+           "but doesn't have to be.";
+  p_default = "mdvp:://localhost::mdv/trigger";
+} trigger_url;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  READ_LAST,
+  READ_CLOSEST,
+  READ_FIRST_BEFORE,
+  READ_FIRST_AFTER,
+  READ_BEST_FORECAST,
+  READ_SPECIFIED_FORECAST
+} read_search_mode_t;
+
+typedef struct
+{
+  string url;
+  boolean use_field_name;
+  string field_name;
+  long field_num;
+  long max_input_secs;
+  boolean apply_min_thresh;
+  double min_thresh;
+  boolean apply_max_thresh;
+  double max_thresh;
+  boolean process_single_level;
+  long level_num;
+  string output_field_name;
+  read_search_mode_t read_search_mode;
+  int forecast_lead_secs;
+} input_field_t;
+
+paramdef struct input_field_t
+{
+  p_descr = "Information about the input fields for the scatter plot.";
+  p_help = "\turl - The URL for retrieving the field.\n"
+           "\tuse_field_name - Flag indicating whether to identify the "
+           "field based on its name or number in the MDV file.\n"
+           "\tfield_name - The name of the field in the MDV file. "
+           "Used only if use_field_name is set to true.\n"
+           "\tfield_num - The number of the field in the MDV file. "
+           "Field numbers start at 0. "
+           "Used only iif use_field_name is set to false.\n"
+           "\tmax_input_secs - The maximum number of seconds that this "
+           "input field is valid. "
+           "If there is no data available for this field within this number "
+           "of seconds of the trigger time, no scatter plot will be produced "
+           "for this time period.\n"
+           "\tapply_min_thresh - Flag indicating whethere to apply a minimum "
+           "threshold to this dataset before generating the scatter plot.\n"
+           "\tmin_thresh - Minimum threshold to apply to this dataset before "
+           "generating the scatter plot. "
+           "Used only if apply_min_thresh is set to true.\n"
+           "\tapply_max_thresh - Flag indicating whethere to apply a maximum "
+           "threshold to this dataset before generating the scatter plot.\n"
+           "\tmax_thresh - Maximum threshold to apply to this dataset before "
+           "generating the scatter plot. "
+           "Used only if apply_max_thresh is set to true.\n"
+           "\tprocess_single_level - Flag indicating whether to process only "
+           "a single level out of a 3D field.\n"
+           "\tlevel_num - Level number to process. "
+           "Used only if process_single_level is true. "
+           "Set to a negative number to use a maximum value composite.\n"
+           "\toutput_field_name - The name to use for this field in the "
+           "output file. "
+           "If set to \"\", the field_name from the MDV field header will "
+           "be used.\n"
+           "\tread_search_mode - Value indicating how to use the trigger time "
+           "to read in this field.\n"
+           "\tforecast_lead_secs - Desired forecast to read. "
+           "Used only if read_search_mode is set to READ_SPECIFIED_FORECAST.\n";
+  p_default = { { "mdvp:://localhost::mdv/field1",
+                  true,
+                  "field1",
+                  0,
+                  3600,
+                  false,
+                  0.0,
+                  false,
+                  0.0,
+                  false,
+                  0,
+                  "",
+                  READ_FIRST_BEFORE,
+                  0 },
+                { "mdvp:://localhost::mdv/field1",
+                  true,
+                  "field1",
+                  0,
+                  3600,
+                  false,
+                  0.0,
+                  false,
+                  0.0,
+                  false,
+                  0,
+                  "",
+                  READ_FIRST_BEFORE,
+                  0 } };
+} input_fields[2];
+
+paramdef boolean
+{
+  p_descr = "If use_hour_bounds is true we will only process data between the start_hour and end_hour";
+  p_default = false;
+} use_hour_bounds;
+
+paramdef int
+{
+  p_descr = "Start of interval of hours during the day in which data will be processed"; 
+  p_help = "Data will be processed if hour is in the interval [start_hour,end_hour)";
+  p_default = 0;
+} start_hour;
+
+paramdef int
+{
+  p_descr = "End of interval of hours during the day in which data will be processed";
+  p_help = "Data will be processed if hour is in the interval [start_hour,end_hour)";
+  p_default = 0;
+} end_hour;
+
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = "$(RAP_DATA_DIR)/plots";
+} output_dir;
+
+paramdef string
+{
+  p_descr = "Output file extension";
+  p_default = "plot";
+} output_ext;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  PLOT_ASCII_TABLE,
+  PLOT_NETCDF_FILE
+} plotter_type_t;
+
+paramdef enum plotter_type_t
+{
+  p_descr = "Type of plots to create";
+  p_help = "\tPLOT_ASCII_TABLE - Produces an ASCII table that can be read "
+           "into another program to create a scatter plot. "
+           "The ASCII table contains the following information: "
+           "lat, lon, date, time, field1 value, field2 value. "
+           "The format of the ASCII table is controlled by the "
+           "plot_ascii_table parameter.\n"
+           "\tNETCDF_FILE - Produces a simple netCDF file that can be read "
+           "into another program to create a scatter plot. "
+           "The netCDF file contains the following information: "
+           "lat, lon, date, time, field1 value, field2 value. "
+           "These values are stored in separate variables in the netCDF "
+           "file.\n";
+  p_default = PLOT_ASCII_TABLE;
+} plotter_type;
+
+typedef struct
+{
+  string delimiter;
+  boolean include_header;
+} plot_ascii_table_t;
+
+paramdef struct plot_ascii_table_t
+{
+  p_descr = "Parameters for plotting data in an ASCII table.";
+  p_help = "Used only if plotter_type is set to PLOT_ASCII_TABLE.\n"
+           "\tdelimiter - The delimiter to use between the fields in the "
+           "table. "
+           "The fields are output in this order:\n"
+           "\t\tlat<delim>lon<delim>date<delim>time<delim>field1<delim>field2\n"
+           "The date and time indicate the trigger time for the plot.\n"
+           "\tinclude_header - Flag indicating whether to include a header "
+           "in the file. "
+           "The header just indicates the field ordering.\n";
+  p_default = { " ", false };
+} plot_ascii_table;
+
+typedef enum
+{
+  PROJ_LATLON,
+  PROJ_FLAT,
+  PROJ_LAMBERT_CONFORMAL2
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} proj_info_t;
+
+paramdef struct proj_info_t
+{
+  p_descr = "Projection to use when reading the input fields";
+  p_help = "If proj_type is PROJ_LATLON, the following fields are used:\n"
+           "\tnx, ny, minx, miny, dx, dy\n\n"
+           "If proj_type is PROJ_FLAT, the following fields are used:\n"
+           "\tnx, ny, minx, miny, dx, dy, origin_lat, origin_lon, rotation\n\n"
+           "If proj_type is PROJ_LAMBERT_CONFORMAL2, the following fields "
+           "are used:\n"
+           "\tnx, ny, minx, miny, dx, dy, origin_lat, origin_lon, "
+           "lat1, lat2";
+} proj_info;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to accumulate the data into a single "
+            "output file";
+  p_help = "If true, the program will continue to write the data to a single "
+           "output file until all input files are processed.";
+  p_default = false;
+} accumulate_plots;
+
+paramdef string
+{
+  p_descr = "File path for accumulated output file.";
+  p_help = "Used only if accumulate_plots is set to true.";
+  p_default = "$(RAP_DATA_DIR)/ascii/scatter_plot.txt";
+} accumulation_file;

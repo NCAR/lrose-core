@@ -1,0 +1,307 @@
+/*********************************************************
+ * parameter definitions for wsim2mdv
+ *
+ * Nancy Rehak, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 1999
+ */
+
+commentdef
+{
+  p_header = "Reads WSI Radar Mosaic, converts into MDV.";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,
+  DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = DEBUG_OFF;
+} debug_level;
+
+paramdef string 
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+typedef enum
+{
+  REALTIME,
+  ARCHIVE
+} mode_t;
+
+paramdef enum mode_t 
+{
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; "
+           "archive mode runs on file list";
+  p_default = REALTIME;
+} mode;
+
+paramdef boolean
+{
+  p_descr = "flag indicating whether to use LDATA information when "
+            "looking for new files";
+  p_help = "If set, the program will use the latest_data_info file "
+           "in the input directory to indicate when new input files "
+           "have been received and what the filename is for the new "
+           "input file.  "
+           "Set this to TRUE when using wsi_ingest for WSI data ingest, "
+           "FALSE when getting WSI data over the LDM.";
+  p_default = FALSE;
+} use_ldata_info;
+
+paramdef string 
+{
+  p_descr = "Input file extension";
+  p_default = "MASTER";
+} input_file_ext;
+
+paramdef string 
+{
+  p_descr = "Input directory";
+  p_help = "Path of input directory - realtime mode only";
+  p_default = ".";
+} input_dir;
+
+paramdef string 
+{
+  p_descr = "Output URL";
+  p_default = { "mdvp:://localhost::./mdv/wsim" };
+} output_url;
+
+paramdef enum mdv_encoding_type_t
+{
+  p_options = { ENCODE_NATIVE,
+                ENCODE_INT8,
+                ENCODE_INT16,
+                ENCODE_INT32,
+                ENCODE_INT64,
+                ENCODE_FLOAT32,
+                ENCODE_FLOAT64,
+                ENCODE_PLANE_RLE8,
+                ENCODE_ROW_RLE8 };
+  p_default = { ENCODE_INT8 };
+  p_descr = "MDV output encoding type";
+  p_help = "Can output the MDV file in any of the supported formats.";
+} mdv_encoding_type;
+
+paramdef long
+{
+  p_descr = "file start time offset";
+  p_help = "The number of seconds to be added to the WSI data time "
+           "to get the MDV file start time.  "
+           "Use a negative value if the start time should precede "
+           "the data time.";
+  p_default = -150;
+} start_time_offset;
+
+paramdef long
+{
+  p_descr = "file centroid time offset";
+  p_help = "The number of seconds to be added to the WSI data time "
+           "to get the MDV file centroid time.";
+  p_default = 0;
+} mid_time_offset;
+
+paramdef long
+{
+  p_descr = "file end time offset";
+  p_help = "The number of seconds to be added to the WSI data time "
+           "to get the MDV file end time.";
+  p_default = 150;
+} end_time_offset;
+
+paramdef long 
+{
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+  p_min = 60;
+  p_default = 300;
+} max_input_data_age;
+
+paramdef long 
+{
+  p_descr = "Delay before processing incoming file (sec)";
+  p_help = "Delay between finding new file and processing it - "
+           "realtime only (sec)";
+  p_min = 0;
+  p_max = 300;
+  p_default = 10;
+} processing_delay;
+
+paramdef string
+{
+  p_descr = "field name for WSI data -- long form";
+  p_help = "This value is put in the MDV field header.";
+  p_default = "Reflectivity";
+} data_field_name_long;
+
+paramdef string
+{
+  p_descr = "field name for WSI data -- short form";
+  p_help = "This value is put in the MDV field header.";
+  p_default = "refl";
+} data_field_name;
+
+paramdef string
+{
+  p_descr = "data units";
+  p_help = "This value is put in the MDV field header.";
+  p_default = "dbz";
+} data_units;
+
+paramdef double 
+{
+  p_descr = "color -> data value lookup array";
+  p_help = "Array for translating WSI color value into a data value.  "
+           "There are 15 color values since value 0 is used to "
+           "indicate missing/bad data.";
+} color2data[15];
+
+paramdef double
+{
+  p_descr = "scale value used for converting between byte values and "
+            "data values";
+  p_help = "The byte value is calculated from the data value using "
+           "the following formula:\n"
+           "\tbyte = (value - data_bias) / data_scale.";
+  p_default = 0.5;
+} data_scale;
+
+paramdef double
+{
+  p_descr = "bias value used for converting between byte values and "
+            "data values";
+  p_help = "The byte value is calculated from the data value using "
+           "the following formula:\n"
+           "\tbyte = (value - data_bias) / data_scale.";
+  p_default = -30.0;
+} data_bias;
+
+paramdef boolean 
+{
+  p_descr = "Flag for resampling native grid";
+  p_descr = "If set, kavouras grid is resampled onto grid specified "
+            "by projection, x_grid and y_grid. "
+            "If not set, native grid is output.";
+  p_default = false;
+} resample_grid;
+
+typedef enum
+{
+  PROJ_FLAT,
+  PROJ_LATLON
+} proj_t;
+
+paramdef enum proj_t
+{
+  p_descr = "Output projection";
+  p_help = "Desired output projection.  "
+           "For PROJ_LATLON, the x_grid and y_grid parameters are "
+           "given in degrees; "
+           "for PROJ_FLAT, the x_grid and y_grid parameters are "
+           "given in km.  "
+           "This is only used if resample_grid is TRUE.";
+  p_default = PROJ_LATLON;
+} output_projection;
+
+typedef struct
+{
+  double lat;
+  double lon;
+} origin_t;
+
+paramdef struct origin_t
+{
+  p_descr = "Flat projection origin";
+  p_help = "This is only used if resample_grid is TRUE and "
+           "output_projection is PROJ_FLAT.";
+} flat_origin;
+
+typedef struct
+{
+  double min;
+  double delta;
+  long   n;
+} grid_t;
+
+paramdef struct grid_t 
+{
+  p_descr = "Resampled X grid params";
+  p_help = "For PROJ_LATLON, the grid parameters are given in degrees; "
+           "for PROJ_FLAT, the grid parameters are given in km.  "
+           "The X min value gives the min value of the lower left-hand "
+           "corner of the grid square "
+           "(not the middle of the square like MDV files give).";
+} x_grid;
+
+paramdef struct grid_t 
+{
+  p_descr = "Resampled Y grid params";
+  p_help = "For PROJ_LATLON, the grid parameters are given in degrees; "
+           "for PROJ_FLAT, the grid parameters are given in km.  "
+           "The Y min value gives the min value of the lower left-hand "
+           "corner of the grid square "
+           "(not the middle of the square like MDV files give).";
+} y_grid;
+
+paramdef double 
+{
+  p_descr = "Reflectivity threshold";
+  p_help = "No data below this threshold is considered when creating "
+           "output grid";
+  p_min = -50.0;
+  p_max = 90.0;
+  p_default = 0.0;
+} dbz_threshold;
+
+paramdef double 
+{
+  p_descr = "Min fraction coverage for resampled grid";
+  p_help = "The minimum fraction coverage for a given output grid area. "
+           "If the coverage is less than this, the output is set to zero.";
+  p_min = 0.0;
+  p_max = 100.0;
+  p_default = 0.0;
+} coverage_threshold;
+
+typedef enum
+{
+  MAX_FILTER,
+  MEAN_DBZ_FILTER,
+  MEAN_Z_FILTER
+} filter_type_t;
+
+paramdef enum filter_type_t 
+{
+  p_descr = "Filter type";
+  p_help = "The type of filter applied during resampling.  "
+           "This filtering will only be done if the output_projection "
+           "is PROJ_LATLON.  "
+           "For PROJ_FLAT projections, the data is resampled by using "
+           "the closest grid centroids.";
+  p_default = MAX_FILTER;
+} filter_type;
+
+
+

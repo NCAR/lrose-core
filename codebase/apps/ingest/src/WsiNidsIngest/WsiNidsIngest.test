@@ -1,0 +1,152 @@
+/**********************************************************************
+ * TDRP params for WsiNidsIngest
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: int
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// WSI DATA INPUT.
+//
+//======================================================================
+ 
+///////////// wsi_host ////////////////////////////////
+//
+// Name of WSI server host.
+// This program connects to the WSI server and reads the NIDS data from 
+//   a TCP/IP port.
+// Type: string
+//
+
+wsi_host = "none";
+
+///////////// wsi_port ////////////////////////////////
+//
+// NIDS stream port on wsi_host.
+// Type: int
+//
+
+wsi_port = 15000;
+
+///////////// read_stdin //////////////////////////////
+//
+// Option to read stdin instead of connecting to the wsi host.
+// This is a debugging option. It allows you to read from a file by 
+//   redirecting to stdin.
+// Type: boolean
+//
+
+read_stdin = TRUE;
+
+///////////// input_buffer_size ///////////////////////
+//
+// Size of input buffer.
+// The data is read in chunks of this size. If you make this too large, 
+//   (a) it may delay processing of a given radar and (b) the program may 
+//   not register sufficiently often with procmap.
+// Type: int
+//
+
+input_buffer_size = 1024;
+
+//======================================================================
+//
+// NIDS DATA FILE OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir_path /////////////////////////
+//
+// Name of top-level output directory.
+// The output files will be stored in directories beneath this top level 
+//   directory.
+// The file path is computed as follows:
+// 	 output_dir_path/radar_name/prodX.yyyymmdd/yyyymmdd.hhmm.nids
+// 	 prodX is the prod_name plus the tilt number
+// The prod_name is given in the product list.
+// The radar_name will be converted to upper case.
+// Type: string
+//
+
+output_dir_path = "./output";
+
+///////////// output_products /////////////////////////
+//
+// Array of output products.
+// 	 radar_name: case-insensitive, will be converted to lower case.
+// 	 message code: the NIDS message code - see NIDS documentation.
+// 	 prod_name: the product name.
+//
+// Type: struct
+//   typedef struct {
+//      string radar_name;
+//      int message_code;
+//      string prod_name;
+//   }
+//
+// 1D array - variable length - 22 elements.
+//
+
+output_products = {
+  { "dix", 19, "bref"},
+  { "okx", 19, "bref"},
+  { "enx", 19, "bref"},
+  { "dox", 19, "bref"},
+  { "lwx", 19, "bref"},
+  { "ccx", 19, "bref"},
+  { "box", 19, "bref"},
+  { "lot", 19, "bref"},
+  { "mkx", 19, "bref"},
+  { "ftg", 19, "bref"},
+  { "cle", 19, "bref"},
+  { "mpx", 19, "bref"},
+  { "mtx", 19, "bref"},
+  { "gvq", 19, "bref"},
+  { "pbz", 19, "bref"},
+  { "iln", 19, "bref"},
+  { "ind", 19, "bref"},
+  { "atx", 19, "bref"},
+  { "nda", 19, "bref"},
+  { "lvx", 19, "bref"},
+  { "fws", 19, "bref"},
+  { "pdt", 19, "bref"}
+};
+

@@ -1,0 +1,39 @@
+/*********************************************************
+ * parameter definitions for SeedTable2CaseTracks
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * March 2009
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SeedTable2CaseTracks reads a seed table file, captured from a web page, and reformats it into a case table.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Unknown";
+  p_descr = "Name of input file";
+} input_file_name;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Number of minutes analyzed before decision time.";
+} mins_before_decision;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Number of minutes analyzed after decision time.";
+} mins_after_decision;
+

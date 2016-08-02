@@ -1,0 +1,214 @@
+<HTML>
+<HEAD>
+<TITLE> CIDD Introduction and Overview </TITLE>
+</HEAD> 
+
+<BODY BGcolor=white> 
+<H3> CIDD Introduction and Overview</H3>
+
+<P>
+The display software, CIDD (Configurable, Interactive Data Display),
+is primarily intended as a display system for real-time meteorological data. It also
+provides capabilities for archival data display as well as a mode whereby
+it outputs imagery for Web page integration.  It runs on a  wide variety
+of Unix workstations using X-Windows graphics. Its principle
+function is to integrate and display, in real-time, meteorological
+information from disparate and distributed sources.  It combines visualizations of
+gridded data along with other products (data) displayed as symbols or text,
+overlaid with maps and other geographical symbols.  Graphics on the
+display are automatically updated as new data arrives, and movie loops
+shift forward in time as time passes.  The display's user interface
+is designed to be operated without extensive training or reference to
+detailed operators manuals. 
+<P>
+The architecture of the display and its data servers are flexible and
+modular, allowing for easy integration of new data and its configuration
+for a variety of locations and classes of users. Its client-server
+design allows a wide variety of distributed storage topologies and
+its http access modes allow for the tight integration with HTML based
+data visualization. The user interface can be configured to display
+just the minimum set of controls necessary to perform a task 
+or can be configured to allow access to all the controls over product combinations,
+colors, contour intervals, etc.
+This allows the same software to be used by both
+non-technical personnel with little or no training, as well as highly
+technical users who want to customize the imagery and explore the data
+in a variety of ways. CIDD's windows can be resized or closed on the
+screen, making it compatible with other tools the user may wish to run
+on the display workstation.
+
+<P>
+Gridded data can be visualized in a variety of ways; as color-filled
+rectangles or trapazoids, in the case of radial data, as color
+filled-contours and open contours. Wind fields may be displayed as wind
+barbs, with or without labels or scalable vectors. Data from grids of
+differing sources, resolutions or positions can be viewed simultaneously,
+being automatically registered correctly onto the same image.
+
+<P>
+The imagery can be animated to form movie loops of 
+products over time with the display automatically updating the
+animation loop as new data arrives. Non-gridded data such as pilot
+reports, meteorological station reports, or hazard areas, are 
+displayed over the gridded products as colored lines, text, or iconic
+symbols and can be displayed and updated during animation.
+
+<P>
+Users can select from a set of preset geographic domains or can
+arbitrarily zoom over any region of the display. As the user zooms in,
+additional detail in wind vectors, geographical overlays and symbolic products are
+revealed. This feature prevents the display from becoming crowded with
+too much graphics when viewing a regional area, yet allows the user to see
+all of the available information when viewing a limited area.
+
+<P>
+Users may arbitrarily select a multi way point route, using the mouse, for
+viewing vertical cross sections of the gridded data. The cross sections
+are constructed on demand and can be animated along with the main plan
+view imagery. Contours, and sets of wind vectors based on gridded data,
+can be overlaid on top of the cross sectional data grids.
+
+<P>
+CIDD uses a flexible client-server mechanism to retrieve its data for
+display.  Data are served to each user's workstation via TCP/IP network
+protocols as the user requests different products or shifts their temporal
+focus. Facilities for tunneling the data requests through http proxies
+and the Apache http server can be added to enable access to data through
+fire-walls. The client server architecture and protocols allows the
+display to operate over both high bandwidth and low bandwidth networks
+or PPP links.
+
+<P>
+CIDD's client-server data access mechanism is flexible and
+configurable. Data distribution topologies can be set up to allow users
+access to data that cannot be transmitted in their entirety down low
+bandwidth or transiently connected networks.  Data can be automatically
+pre-distributed to sites which have higher speed networks and whose
+users need rapid access to large data sets.
+
+<P>
+CIDD supports RAP's fault tolerant mechanisms in situatiuons where
+the display will be used continiously for long periods of time. CIDD
+produces a heartbeat which can be monitored for anomalies and restarted
+if necessary. CIDD has run for months at a time without restart in
+unattended settings, serving operations center personnel.
+
+
+<P>
+The Displays main features include:
+
+<UL>
+<LI> Easy to learn X based User interface - Supports 256 color and 16/24bit True-color Modes.
+<LI> The most commonly used features are controllable from the main window or keyboard.
+<LI> Integrates data from different sources and projections into one image.
+<LI> Automatically updates imagery with as new data arrives.
+<LI> Unlimited number of animated frames in loops.(Dependant on system memory available)
+<LI> Predefined or Arbitrary Zoom on plan view displays
+<LI> Arbitrary selection of cross sections via simple mouse actions.
+<LI> Animation Speed and end of loop delays are user adjustable.
+<LI> Displays up to 6 gridded fields simultaneously, layered over one another.
+<LI> Overlays Contours of gridded data with user selectable intervals and color.
+<LI> Overlays multiple  sets of wind barbs or scalable vectors.
+<LI> Users may select/deselect and change the color of geographic overlays. 
+<LI> Font sizes and line widths are adjustable for contours and symbolic products.
+<LI> Built in range rings and azimuth overlays with increasing detail on zooms.
+<LI> Gridded data can be easily dimmed on 8 bit displays to enhance and clarify complex overlaid products.
+<LI> Archival data can easily be accessed and displayed.
+<LI> Distributed data model allows users to run the display from their desktop.
+<LI> Config files, maps and colorscales may be stored and accessed on a HTTP server.
+</UL>
+
+
+<P>
+<H3> CIDD Can: </H3>
+
+<P>
+<UL>
+<LI> Display data arrays collected in either rectangular or spherical
+polar coordinates. Rectangular and polar data can be displayed
+simultaneously on a Modified Mercator, Labbert Conformal, or Local Area
+Cartesian projections. CIDD can display geographical maps, contours,
+wind vectors or barbs and well as other data depicted as lines, symbols,
+text and icons.
+
+<LI> Define and display vertical cross sections along arbitrary
+multi way-point routes.
+
+<LI> Be used to draw simple lines and polygons for output
+to other algorithms and displays. For example, CIDD can be used to draw
+an area boundary for severe turbulence, and then distribute this warning
+to other users in real-time.
+
+<LI> Run on UNIX X based workstations using 8 to 32 bit depths.
+
+<LI> Be use for Real-Time and Post Processing Modes of operation.
+
+<LI> Automatically gather data from distributed databases
+via client-server mechanisms. This facility allows the display to run
+on any desk top workstation.  All displays can share the same data sources
+and archives, preventing the duplication of data sets and large data
+transfers. 
+
+<LI> Allow users to interactively configure which data will appear on
+their display, what geographical area the display will cover, and over
+what time periods.
+
+<LI> Display arbitrary vertical cross sections selected by pointing and
+dragging.  Data field selection for horizontal and vertical views are
+independent.
+
+<LI> Can Zoom and Area Move its viewable domain, selected by clicking and dragging.
+
+<LI> Overlay multiple data grids onto one another selectable range
+transparency, as well as display  contour and wind vector overlays.
+
+<LI> Generate Movie frame sequences that span over 8 hours.  Movie sequences
+are not stored but are built "on the fly".  Data with differing time
+granularities are accommodated.
+
+<LI> Display both real time products and archived products.
+
+<LI> Can export lat-lon coordinates to external programs.  CIDD uses a
+shared memory area which allows external programs to read coordinates
+(Latitude, Longitude, Altitude and X,Y,Z km, and data time) from the
+display.  Current ancillary programs which make use of this interface
+include: time_hist; a storm cell analysis tool, pos_report; A position
+finder, for reporting relative distances and headings, snow_graph;
+which displays precip accumulation rates over time, gauge_strip; shows
+time histories of mesonet data closest to the click point, winds_select;
+a tool which plots a tabular vertical  profile of model data, metar_select;
+which displays a table of the metar data nearest the user selection,
+and cidd2skewt; which generates synthetic skewt's from model data.
+</UL>
+
+<P>
+<H3> CIDD Cannot: </H3>
+
+<P>
+<UL>
+<LI> Satify everyone.
+<LI> Run natively on Microsoft OS'es (Use VNC or Vmware)
+<LI> Display more than one plan view at the same time (One can always run multiple CIDDS)
+<LI> Display Profiler Data (Other programs do this)
+<LI> Display Sounding Data (Other programs do this)
+<LI> Display data not on a Mercator, Lambert tangential, or Radial
+     projection.
+</UL>
+
+<P>
+<H3> CIDD To Do's </H3>
+
+<P>
+<UL>
+<LI> Use a more powerful configuration mechanism to define exactly how each
+page of data appear.
+<LI> Provide a run-time editor panel for the above mechanism
+
+<LI> Add support for other common map projections.
+
+<LI> Support a table driven mechanism for generating 4-D HTML output
+</UL>
+
+
+</BODY>
+</HTML>

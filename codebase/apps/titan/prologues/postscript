@@ -1,0 +1,335 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 155 273 450 522
+%!
+%
+% ps_prologue file - sets up procedures etc for ps output
+%
+% what follows is program generated
+
+%%%%%%
+% FontHeight - gets the height of the current font, upper case and numbers only
+%
+/FontHeight {
+gsave
+newpath
+0 0 moveto
+(X) true charpath flattenpath
+pathbbox
+4 1 roll pop pop pop
+grestore
+} def
+
+%%%%%
+% DrawLine - expects: xmax ymax xmin ymin
+%
+/DrawLine {newpath moveto lineto stroke} def
+
+%%%%%%
+% DrawRect - expects: xmin ymin width height
+%
+/DrawRect {
+6 dict begin
+gsave newpath
+/rectheight exch def
+/rectwidth exch def
+/rectymin exch def
+/rectxmin exch def
+rectxmin rectwidth add /rectxmax exch def
+rectymin rectheight add /rectymax exch def
+rectxmin rectymin moveto
+rectxmax rectymin lineto
+rectxmax rectymax lineto
+rectxmin rectymax lineto
+rectxmin rectymin lineto
+end
+stroke grestore
+} def
+
+%%%%%%
+% FillRect - expects: xmin ymin width height graylevel
+%
+/FillRect {
+6 dict begin
+gsave newpath
+setgray
+/rectheight exch def
+/rectwidth exch def
+/rectymin exch def
+/rectxmin exch def
+rectxmin rectwidth add /rectxmax exch def
+rectymin rectheight add /rectymax exch def
+rectxmin rectymin moveto
+rectxmax rectymin lineto
+rectxmax rectymax lineto
+rectxmin rectymax lineto
+rectxmin rectymin lineto
+end
+fill grestore
+} def
+
+%%%%%%
+% SetClipRect - expects: xmin ymin width height
+%
+/SetClipRect {
+newpath
+6 dict begin
+/clipheight exch def
+/clipwidth exch def
+/clipymin exch def
+/clipxmin exch def
+clipxmin clipwidth add /clipxmax exch def
+clipymin clipheight add /clipymax exch def
+clipxmin clipymin moveto
+clipxmax clipymin lineto
+clipxmax clipymax lineto
+clipxmin clipymax lineto
+clipxmin clipymin lineto
+end
+clip newpath
+} def
+
+%%%%%%
+% DrawArc - expects: arcx, arcy, radiusx, radiusy, ang1, ang2, rot_ang
+%
+/DrawArc {
+gsave newpath
+7 dict begin
+/arc_rot exch def
+/arc_ang2 exch def
+/arc_ang1 exch def
+/arc_ry exch def
+/arc_rx exch def
+/arc_y exch def
+/arc_x exch def
+arc_x arc_y translate
+arc_rot rotate
+arc_ry arc_rx div 1.0 exch scale
+0 0 arc_rx arc_ang1 arc_ang2 arc
+end
+stroke grestore
+} def
+
+%%%%%%
+% FillArc - expects: arcx, arcy, radiusx, radiusy, ang1, ang2,
+%                    rot_ang, graylevel
+%
+/FillArc {
+gsave newpath
+7 dict begin
+setgray
+/arc_rot exch def
+/arc_ang2 exch def
+/arc_ang1 exch def
+/arc_ry exch def
+/arc_rx exch def
+/arc_y exch def
+/arc_x exch def
+arc_x arc_y translate
+arc_rot rotate
+arc_ry arc_rx div 1.0 exch scale
+0 0 arc_rx arc_ang1 arc_ang2 arc
+end
+fill grestore
+} def
+
+%%%%%
+% DrawStringCenterAbove - expects: x y (string)
+%
+/DrawStringCenterAbove {
+3 dict begin
+/text_str exch def
+/text_y exch def
+/text_x exch def
+text_x text_str stringwidth pop 2.0 div sub
+text_y moveto
+text_str show
+end
+} def
+
+%%%%%
+% DrawStringCenterCenter - expects: x y (string)
+%
+/DrawStringCenterCenter {
+exch FontHeight 0.5 mul sub exch
+DrawStringCenterAbove
+} def
+
+%%%%%
+% DrawStringCenterBelow - expects: x y (string)
+%
+/DrawStringCenterBelow {
+exch FontHeight sub exch
+DrawStringCenterAbove
+} def
+
+%%%%%
+% DrawStringLeftAbove - expects: x y (string)
+%
+/DrawStringLeftAbove {
+3 1 roll
+moveto
+show
+} def
+
+%%%%%
+% DrawStringLeftCenter - expects: x y (string)
+%
+/DrawStringLeftCenter {
+exch FontHeight 0.5 mul sub exch
+DrawStringLeftAbove
+} def
+
+%%%%%
+% DrawStringLeftBelow - expects: x y (string)
+%
+/DrawStringLeftBelow {
+exch FontHeight sub exch
+DrawStringLeftAbove
+} def
+
+%%%%%
+% DrawStringRightAbove - expects: x y (string)
+%
+/DrawStringRightAbove {
+3 dict begin
+/text_str exch def
+/text_y exch def
+/text_x exch def
+text_x text_str stringwidth pop sub
+text_y moveto
+text_str show
+end
+} def
+
+%%%%%
+% DrawStringRightCenter - expects: x y (string)
+%
+/DrawStringRightCenter {
+exch FontHeight 0.5 mul sub exch
+DrawStringRightAbove
+} def
+
+%%%%%
+% DrawStringRightBelow - expects: x y (string)
+%
+/DrawStringRightBelow {
+exch FontHeight sub exch
+DrawStringRightAbove
+} def
+
+%%%%%
+% ClearStringBox - expects (string)
+/ClearStringBox {
+gsave
+9 dict begin
+/text_str exch def
+currentpoint translate
+newpath 0 0 moveto
+text_str true charpath flattenpath pathbbox
+/path_ury exch def
+/path_urx exch def
+/path_lly exch def
+/path_llx exch def
+path_ury path_lly sub /path_height exch def
+path_urx path_llx sub /path_width exch def
+path_height 0.2 mul path_height add /image_height exch def
+path_height 0.2 mul path_width add /image_width exch def
+path_llx image_width path_width sub 0.5 mul sub
+path_lly image_height path_height sub 0.5 mul sub
+image_width image_height 1.0 FillRect
+end
+grestore
+} def
+
+%%%%%
+% DrawImstrCenterAbove - expects: x y (string)
+%
+/DrawImstrCenterAbove {
+3 dict begin
+/text_str exch def
+/text_y exch def
+/text_x exch def
+text_x text_str stringwidth pop 2.0 div sub
+text_y moveto
+text_str ClearStringBox
+text_str show
+end
+} def
+
+%%%%%
+% DrawImstrCenterCenter - expects: x y (string)
+%
+/DrawImstrCenterCenter {
+exch FontHeight 0.5 mul sub exch
+DrawImstrCenterAbove
+} def
+
+%%%%%
+% DrawImstrCenterBelow - expects: x y (string)
+%
+/DrawImstrCenterBelow {
+exch FontHeight sub exch
+DrawImstrCenterAbove
+} def
+
+%%%%%
+% DrawImstrLeftAbove - expects: x y (string)
+%
+/DrawImstrLeftAbove {
+3 dict begin
+/text_str exch def
+/text_y exch def
+/text_x exch def
+text_x text_y moveto
+text_str ClearStringBox
+text_str show
+end
+} def
+
+%%%%%
+% DrawImstrLeftCenter - expects: x y (string)
+%
+/DrawImstrLeftCenter {
+exch FontHeight 0.5 mul sub exch
+DrawImstrLeftAbove
+} def
+
+%%%%%
+% DrawImstrLeftBelow - expects: x y (string)
+%
+/DrawImstrLeftBelow {
+exch FontHeight sub exch
+DrawImstrLeftAbove
+} def
+
+%%%%%
+% DrawImstrRightAbove - expects: x y (string)
+%
+/DrawImstrRightAbove {
+3 dict begin
+/text_str exch def
+/text_y exch def
+/text_x exch def
+text_x text_str stringwidth pop sub
+text_y moveto
+text_str ClearStringBox
+text_str show
+end
+} def
+
+%%%%%
+% DrawImstrRightCenter - expects: x y (string)
+%
+/DrawImstrRightCenter {
+exch FontHeight 0.5 mul sub exch
+DrawImstrRightAbove
+} def
+
+%%%%%
+% DrawImstrRightBelow - expects: x y (string)
+%
+/DrawImstrRightBelow {
+exch FontHeight sub exch
+DrawImstrRightAbove
+} def
+

@@ -1,0 +1,203 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MdvOutlier
+ *
+ * Yan Chen, RAL, NCAR 
+ *
+ * Jan. 2008
+ * 
+ */
+
+commentdef {
+  p_header = "MdvOutlier performs gross error checking for MDV files. It searches in key fields for abnormalies that exceed some threshold deviation from the mean. If a threshold is exceeded, write out the offending data to a log file.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program watches for new data and checks for errors. In ARCHIVE mode, the program moves through an existing archive data and performs the gross error checking.";
+} mode;
+
+commentdef {
+  p_header = "LATEST DATA INFO HANDLING DETAILS";
+}
+
+paramdef int {
+  p_default = 10;
+  p_descr = "REALTIME mode only. Maximum age for files, in seconds";
+  p_help = "Default is 10 seconds.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "REALTIME mode only. Sleeping time to wait for data arriving, in seconds.";
+  p_help = "Default is 1 seconds.";
+} sleep_secs;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/NH_LL";
+  p_descr = "URL directory for input data.";
+} input_url_dir;
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/mdvstats/STDDEV";
+  p_descr = "URL directory for standard deviation data.";
+  p_help = "REALTIME only.";
+} std_dev_url_dir;
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/mdvstats/MEAN";
+  p_descr = "URL directory for mean data.";
+  p_help = "REALTIME only.";
+} mean_url_dir;
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/mdvstats/STDDEV/week1.mdv";
+  p_descr = "Path for standard deviation data.";
+  p_help = "ARCHIVE only.";
+} std_dev_path;
+
+paramdef string {
+  p_default = "mdvp:://dtra-c2-ppio::mdv/mdvstats/MEAN/week1.mdv";
+  p_descr = "Path for mean data.";
+  p_help = "ARCHIVE only.";
+} mean_path;
+
+commentdef {
+  p_header = "ERROR CHECKING INFORMATION";
+}
+
+/* TDRP can not have arrays in structures. To take care of multiple
+ * vertical levels for each field, the following is a feasible way.
+ */
+typedef struct {
+  string field_name;
+  double sigma_threshold;
+  double space_to_report_outlier;
+  int vertical_level;
+} field_params_t;
+
+paramdef struct field_params_t {
+  p_default = {
+    { "pressure2", 4.0, 2.0, 1  },
+    { "Temp",      4.0, 2.0, 7  },
+    { "W",         4.0, 2.0, 2  },
+    { "W",         4.0, 2.0, 14 },
+    { "W",         4.0, 2.0, 28 }
+  };
+  p_descr = "Parameters for fields interested.";
+  p_help = "\t field_name - Name of input field for error checking.\n"
+           "\t sigma_threshold - Standard deviation threshold for error "
+           "checking. If the value exceeds this threshold, it is considered "
+           "an outlier.\n"
+           "\t space_to_report_outlier - The grid spacing for both X "
+           "and Y directions. The units can be degree or km depending on the "
+           "x,y units indicated in the field header. The default is 2 deg/km. "
+           "If an outlier is found at location (x, y), it is reported into a "
+           "log file and the area within 2 degree/km of that location in both "
+           "direction will be skipped. The program will continue the check "
+           "beyond that 2 deg/km area.\n"
+           "\t vertical_level - Vertical levels to check errors, start from 1. "
+           "If the field is a 2d field, this will be ignored.\n"
+           "If more than one levels need to be checked for one field, add "
+           "the levels one by one for the same field.\n";
+} fields_interested[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use absolute input values to check outliers.";
+  p_help = "If statistics data is calculated by using absolute input values, then set this parameter to TRUE.";
+} use_absolute_values;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Find out maximum average hourly precipitation.";
+} find_max_precip;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of the first files to ignore outliers.";
+  p_help = "Do not report any outliers for these files. If the number is more than the input files that statistics data used, it will be considered 0.";
+} num_of_first_files_to_ignore;
+
+paramdef string {
+  p_default = "mdv/outlier";
+  p_descr = "Output directory for log files.";
+  p_help = "Outliers information is written to this directory. The name of the output log file is based on the time of the input files.";
+} output_log_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Write event list for Event Manager.";
+} write_event_list;
+
+paramdef string {
+  p_default = "mdv/outlier";
+  p_descr = "Directory of RAL format Event List file.";
+  p_help = "Works in conjunction with CIDD and Janitor.";
+} event_list_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write log for hourly precipitation values for each MDV file at the location of maximum average hourly precipitation.";
+  p_help = "If 'find_max_precip' is FALSE, this parameter is ignored.";
+} write_hrain_values;
+
+paramdef string {
+  p_default = "mdv/outlier";
+  p_descr = "Output directory for rain values.";
+} rain_log_dir;

@@ -1,0 +1,158 @@
+/**********************************************************************
+ * TDRP params for ScaleSep
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: ScaleSep.
+//
+// ScaleSep separates a radar image scene into different spatial scales, 
+//   by applying a filter in the 2D FFT frequency domain.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_url = "$(DATA_DIR)/mdv/radarCart/thills2";
+
+///////////// dbz_field_name //////////////////////////
+//
+// dBZ field name in input MDV files.
+// This is the field read as input. The analysis fields are computed 
+//   from this field.
+// Type: string
+//
+
+dbz_field_name = "DBZH";
+
+///////////// analysis_method /////////////////////////
+//
+// Analysis method for computing the 2D data set.
+// The method works on a 2D data field. We therefore need to compute a 
+//   2D field from the 3D input field. If the input field is already in 
+//   2D, use COMPUTE_COLUMN_MAX.
+//
+// Type: enum
+// Options:
+//     COMPUTE_COLUMN_MAX
+//     COMPUTE_VIL
+//
+
+analysis_method = COMPUTE_COLUMN_MAX;
+
+///////////// min_valid_height ////////////////////////
+//
+// Min height used in analysis (km).
+// Only data at or above this altitude is used.
+// Type: double
+//
+
+min_valid_height = 0;
+
+///////////// max_valid_height ////////////////////////
+//
+// Max height used in analysis (km).
+// Only data at or below this altitude is used.
+// Type: double
+//
+
+max_valid_height = 25;
+
+///////////// min_valid_dbz ///////////////////////////
+//
+// Minimum reflectivity threshold for this analysis (dBZ).
+// Reflectivity below this threshold is set to missing.
+// Type: double
+//
+
+min_valid_dbz = -10;
+
+//======================================================================
+//
+// SPATIAL FILTERING.
+//
+//======================================================================
+ 
+///////////// spatial_filter_wavelength_km ////////////
+//
+// Wavelength of spatial filter applied (km).
+// This filter is applied in the spectral FFT domain.
+// Type: double
+//
+
+spatial_filter_wavelength_km = 40;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// Output files are written to this URL.
+// Type: string
+//
+
+output_url = "$(DATA_DIR)/mdv/scaleSep/thills";
+

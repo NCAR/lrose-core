@@ -1,0 +1,751 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for Dsr2Rapic
+//
+//  Mike Dixon, RAP, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  July 2001
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Dsr2Rapic program";
+  p_text = "Dsr2Rapicreads an input FMQ containing radar data, and writes it to a file in MDV format. Grid remapping and spatial interpolation are optional.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_descr = "Input URL for DsRadar data via FMQ";
+  p_default = {"fmqp:://localhost::./fmq.dsRadar"};
+} input_fmq_url;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_input;
+
+typedef enum {
+  END_OF_VOL_FLAG, LAST_TILT_IN_VOL, AUTOMATIC
+} end_of_vol_decision_t;
+  
+paramdef enum end_of_vol_decision_t {
+  p_default = END_OF_VOL_FLAG;
+  p_descr = "Decision type for end-of-volume.";
+  p_help = "If END_OF_VOL_FLAG, the end-of-volume flag in the data will be used to trigger the end of volume. If LAST_TILT_IN_VOL, the end of the tilt number given by 'last_tilt_in_vol' will be used  to trigger the end-of-volume. If AUTOMATIC, this program will determine the end-of-volume condition by using the antenna-angle information.";
+} end_of_vol_decision;
+
+paramdef int {
+  p_descr = "The tilt number used to end the volume.";
+  p_help = "Only applies if 'end_of_vol_decision' is set to LAST_TILT_IN_VOL.";
+  p_default = 0;
+} last_tilt_in_vol;
+
+paramdef int {
+  p_descr = "The number of beams copied from the previous vol.";
+  p_help = "If non-zero, this number of beams is copied from the previous volume into the current one, at the start of the current volume. This is useful if the exact timing of the end-of-vol condition is in question, so that the data around the end-of-vol can be used in both volumes. If you set end_of_vol_decision to AUTOMATIC, it is recommended that you set this value to between 20 and 50, because the end-of-vol decision may be a few beams late.";
+  p_default = 0;
+} nbeams_overlap_per_vol;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "The minimum number of beams in a volume.";
+  p_help = "This filters out small unwanted bits of data between genuine volumes.";
+} min_beams_in_vol;
+
+paramdef int {
+  p_default = 20000;
+  p_descr = "The maximum number of beams in a volume.";
+  p_help = "This prevents memory from filling up if no end-of-volume is found.";
+} max_beams_in_vol;
+
+commentdef {
+  p_header = "COMPUTING THE ELEVATION HISTOGRAM";
+  p_text = "The program needs to determine the elevation angles used in the scan strategy. It does this by creating a histgram of elevation angles, and looking for peaks in this histogram.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use target elevation angles instead of actual.";
+  p_help = "If TRUE, the beam elevation will be set to the target elevation angle, and the actual elevation angle will be ignored.";
+} use_target_elev;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Resolution of elevation histogram (deg).";
+  p_help = "The elevation data is binned at this resolution. If the scan strategy has elevations very close together you may need to decrease this.";
+} elev_hist_resolution;
+
+paramdef int {
+  p_min = 1;
+  p_default = 3;
+  p_descr = "The width of the search in looking for peaks in the histogram.";
+  p_help = "When looking for peaks, the program searches by this number of bins on either side of the search bin. For example, if the elev_hist_resolution is 0.1 and the elev_hist_search_width is 3, the program will search 3 bins, or 0.3 degrees, on either side of the search bin. It looks for a peak with values equal to or below the peak in the adjacent bins and less than the peak in bins further out.";
+} elev_hist_search_width;
+
+paramdef double {
+  p_default = -10.0;
+  p_descr = "Histogram start value (deg).";
+  p_help = "The elev value for the lowest bin in the histogram.";
+} elev_hist_start;
+
+paramdef double {
+  p_default = 90.0;
+  p_descr = "Histogram end value (deg).";
+  p_help = "The elev value for the highest bin in the histogram.";
+} elev_hist_end;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check the number of beams in a tilt.";
+  p_help = "If TRUE, a tilt is only considered valid if the number of beams exceeds 'min_beams_in_tilt'.";
+} check_min_beams_in_tilt;
+
+paramdef int {
+  p_default = 180;
+  p_descr = "The min number of beams for a tilt to be valid.";
+  p_help = "See 'check_min_beams_in_tilt'.";
+} min_beams_in_tilt;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check the fraction of beams in a tilt.";
+  p_help = "If TRUE, a tilt is only considered valid if the number of beams in the tilt, expressed as a fraction of the max number of beams in any tilt, exceeds 'min_fraction_in_tilt'.";
+} check_min_fraction_in_tilt;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "The min fraction of max beams for a tilt to be valid.";
+  p_help = "See 'check_min_fraction_in_tilt'.";
+} min_fraction_in_tilt;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check the fraction of beams in all tilts.";
+  p_help = "If TRUE, the histogram is only considered valid if the sum of beams in all tilts, taken as a fraction of all valid beams, exceeds 'min_combined_fraction_in_all_tilts'. This is primarily used as a condition to trigger RHI mode.";
+} check_combined_fraction_in_all_tilts;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "The min fraction of sum of beams in all tilts as compared to all valid beams.";
+  p_help = "See 'check_combined_fraction_in_all_tilts'.";
+} min_combined_fraction_in_all_tilts;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the delta elevation instead of using the elevation histogram.";
+  p_help = "This is useful if you have RHI data as input but want to store the output as PPIs. Specify the delta elevation."; 
+} specify_elev_delta;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "The delta elevation to be used (deg).";
+  p_help = "See 'specify_elev_delta'.";
+} elev_delta;
+
+commentdef {
+  p_header = "NOISE FILTERING";
+  p_text = "You have the option of filtering out noise values based on a filter field value. If check_filter is true, the program filters out all gates with values between the min and max threshold. If the filter field is DBZ, the signal/noise value is computed using the reflectivity and the parameter noise_dbz_at_100km. For filter fields where the value needs to exceed a threshold, the filter_threshold_min should be set to that value, and the filter_threshold_max value should be set to exceed the max possible value. Alternatively, where the value needs to be below a threshold, the filter_threshold_max should be set to that value, and the filter_threshold_min value should be set below the min possible value. Additionally, isolated spikes of reflectivity with high signal/noise may be filtered out by requiring that a valid weather echo will have a radial dimension which exceeds a given number of gates - see 'filter_min_valid_run'.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check filter field values.";
+  p_help = "If TRUE, the filter field value will be computed from the value at the gate. If this is between the parameter 'filter_threshold_min' and filter_threshold_max, it will be conditionally accepted. See also filter_min_valid_run for additional filtering.";
+} check_filter;
+
+paramdef string {
+  p_descr = "Moment field name to use for filtering";
+  p_default = {"DBZ"};
+} filter_field_name;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Filter threshold min - for noise_removal.";
+  p_help = "See 'check_filter'.";
+} filter_threshold_min;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Filter threshold max - for noise_removal.";
+  p_help = "See 'check_filter'.";
+} filter_threshold_max;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Minimum valid run of reflectivity above the noise.";
+  p_help = "Only active if set to 2 or greater. A second check is made to remove noise spikes. Looking along the radial the number of contiguous gates (a 'run') with filter values above the threshold is computed. For the gates in this run to be accepted the length of the run must exceed filter_min_valid_run.";
+} filter_min_valid_run;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "The noise represented as dBZ at 100km range.";
+  p_help = "This is used for computing the signal/noise value from the Reflectivity.";
+} noise_dbz_at_100km;
+
+commentdef {
+  p_header = "FILLING IN MISSING BEAMS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to bridge over missing beams in azimuth.";
+  p_help = "If true, missing beams in azimuth will be filled in by interpolating from the adjacent two beams. Only a single missing beam will be filled in. If more than one is missing, they will not be filled in. Azimuth filling is done first, before elevation filling.";
+} bridge_missing_in_azimuth;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to bridge over missing beams in elevation.";
+  p_help = "If true, missing beams in elevation will be filled in by interpolating from the adjacent two beams. Only a single missing beam will be filled in. If more than one is missing, they will not be filled in. The elevation interpolation is done after the asimuth interpolation is complete.";
+} bridge_missing_in_elevation;
+
+commentdef {
+  p_header = "REMOVING TEST PULSE";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove the test pulse data.";
+  p_help = "If true, the test pulse data will be removed from the end of the beam. The test pulse data generally lies in the last few gates in the beam. If true, the number of gates will be reduced by 'ngates_test_pulse'.";
+} remove_test_pulse;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Number of gates to remove to get rid of test pulse.";
+  p_help = "See 'remove_test_pulse'.";
+} ngates_test_pulse;
+
+commentdef {
+  p_header = "RADAR PARAMETERS";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Target delta azimuth (deg).";
+  p_help = "The target spacing of the data beams in azimuth. NOTE: the lookup table is computed assuming that there is an exact number of beams per 45-degree sector. If delta_az does not satisfy this requirement, it will be adjusted upwards to the next suitable value.";
+} delta_az;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to angular azimuth values (deg).";
+  p_help = "This correction is applied to the azimuth angles before computing the azimuth position.";
+} az_correction;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override radar location.";
+  p_help = "If TRUE, the program will use location specified in the 'radar_location' parameter.";
+} override_radar_location;
+
+typedef struct {
+  double latitude;
+  double longitude;
+  double altitude;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 0.0, 0.0, 0.0 };
+  p_descr = "Radar location if override is set true.";
+  p_help = "The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in kilometers, not meters.";
+} radar_location;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override radar beam width.";
+  p_help = "If TRUE, the program will use beam width specified in the 'beam_width' parameter.";
+} override_beam_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Radar beam width if override is set true.";
+  p_help = "The beam width is only used if 'override_beam_width' is set true. Otherwise the information in the input data stream is used.";
+} beam_width;
+
+paramdef string {
+  p_descr = "General description of radar.";
+  p_help = "Used for data_set_info in MDV file.";
+  p_default = "not-set";
+} radar_description;
+
+commentdef {
+  p_header = "FILTER DATA BASED ON GEOMETRY or PRF";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter data based on gate spacing.";
+  p_help = "If TRUE, the program will use only beam data which matches the 'keep_gate_spacing' parameter.";
+} filter_gate_spacing;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Desired radar gate spacing (km).";
+  p_help = "The specified gate spacing is only used if 'filter_gate_spacing' is set true. Otherwise all gate spacings in the input data stream are used.";
+} keep_gate_spacing;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter data based on start range.";
+  p_help = "If TRUE, the program will use only beam data which matches the 'keep _start_range' parameter.";
+} filter_start_range;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Desired radar start range (km).";
+  p_help = "The specified start range is only used if 'filter_start_range' is set true. Otherwise all start ranges in the input data stream are used.";
+} keep_start_range;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter data based on PRF.";
+  p_help = "If TRUE, the program will use only beam data with PRFs between the given limits.";
+} filter_prf;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Minimum acceptable PRF (/s).";
+  p_help = "See 'filter_prf'.";
+} min_prf;
+
+paramdef double {
+  p_default = 2000.0;
+  p_descr = "Maximum acceptable PRF (/s).";
+  p_help = "See 'filter_prf'.";
+} max_prf;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter data based on elevation angle.";
+  p_help = "If TRUE, the program will use only beam data with elevations between the given limits.";
+} filter_elev;
+
+paramdef double {
+  p_default = -10.0;
+  p_descr = "Minimum valid elevation for beams (deg).";
+  p_help = "If the elevation is below this value, the beam is ignored.";
+} min_elev;
+
+paramdef double {
+  p_default = 90.0;
+  p_descr = "Maximum valid elevation for beams (deg).";
+  p_help = "If the elevation is above this value, the beam is ignored.";
+} max_elev;
+
+commentdef {
+  p_header = "INTERPOLATION";
+}
+
+paramdef int {	
+  p_default = 5;
+  p_min = 1;
+  p_max = 8;
+  p_descr = "Minimum number of valid data points for theinterpolation.";
+  p_help = "The program performs an 8-point linear interpolation. This is the number of valid data points, out of the possible 8, which must be present for interpolation to proceed. A high number will exclude marginal points. A low number will include marginal points.";
+} min_nvalid_for_interp;
+
+commentdef {
+  p_header = "OUTPUT FIELDS";
+}
+
+typedef enum {
+  NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION, GZIP_COMPRESSION
+} compression_t;
+  
+paramdef enum compression_t {
+  p_default = ZLIB_COMPRESSION;
+  p_descr = "Output compression options.";
+  p_help = "The data may be optionally compressed for output. BZIP is generally the slowest but most compact. ZLIB uses the gzip compression algorithm, which is faster than BZIP, and for some data more compact as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is simple run-length encoding compression, which is the fastest and least compact.";
+} output_compression;
+
+typedef enum {
+  ENCODING_INT8, ENCODING_INT16, ENCODING_FLOAT32
+} encoding_t;
+  
+typedef enum {
+  e_refl, e_vel, e_spectw, e_diffz, e_rawrefl, 
+  e_rainaccum, e_filtvel, e_vil, e_tops, 
+  e_terrainht, e_rf_rainrate, e_rf_rainaccum,
+  e_rf_fcstaccum, e_rf_probability, 
+  e_particle_id, e_qpe_rate,
+} rapic_type_t;
+  
+typedef struct {
+  string dsr_name;
+  string output_name;
+  string output_units;
+  rapic_type_t rapic_output_type;
+  encoding_t encoding;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    {"DBZ", "Refl", "dBZ", e_refl, ENCODING_INT8},
+    {"VEL", "Vel", "m/s", e_vel, ENCODING_INT8},
+    {"WIDTH", "SpWdth", "m/s", e_spectw, ENCODING_INT8},
+    {"PARTID", "PartID", "enum", e_particle_id, ENCODING_INT8}
+  };
+  p_descr = "Array of output fields.";
+  p_help = "The program will only output these fields. The dsr_name is the field name in the dsr data. If the output_name is an empty string, the output name will be set to the dsr_name. If output_name is non-empty, this will be used. Likewise for the units. Set the transform to dB, dBZ or none. Indicate the dBZ field by setting is_dbz to true. Set interp_db_as_power if you want to compute power from db before interpolating. Set is_vel for velocity field so that interpolation can take nyquist folding into account. If allow_interp is set to false, interpolation is not permitted on this field, and nearest-neighbor will be used instead. Set the output encoding type to select the resolution of the output data.";
+} output_fields[];
+
+paramdef string {
+  p_default = {
+    "No_Echo",
+    "Cld_Drop" ,
+    "Drizzle",	
+    "Lt_Rain",
+    "Mod_Rain",
+    "Hvy_Rain",
+    "Hail",
+    "Rain/Hail",
+    "Gr/Sm-Hail",
+    "Gr/Rain",
+    "Dry_Snow",
+    "Wet_Snow",
+    "Ice",
+    "Irreg_Ice",
+    "Slw",
+    "Insects",
+    "2nd_Trip",
+    "Clutter"
+    };
+  p_desc = "Particle ID type strings";
+  p_help = "These strings describe the Particle ID enumerators. These will be passed in the TYPESTRINGS: field of the Rapic fmt data. These strings must not contain any spaces.";
+} particle_id_strings[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output a field depicting radar coverage.";
+  p_help = "If true, and extra field, with the name 'Coverage', is included in the output. This is a simple flag field, with a 1 indicating that the radar covers that pixel, and a 0 indicating that is does not.";
+} output_coverage_field;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to set dBZ values if they are missing.";
+  p_help = "If true, missing dBZ values will be replaced by a low dbz value before interpolation takes place. If this is not done, non-missing dBZ values tend to be propagated into the missing areas, patricularly in the vertical dimension at long range where the vertical spacing between the beams is large. This leads to a ballooning of reflectivity from low heights.";
+} override_missing_dbz_for_interp;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override nyquist velocity in incoming data.";
+  p_help = "If true, the nyquist_velocity parameter is used to specify the nyquist. If false, the nyquist is computed from the incoming radar data stream. The nyquist is used for velocity interpolation, to ensure that folded values are treated correctlty.";
+} override_nyquist;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Specify nyquist velocity (m/s).";
+  p_help = "See 'override_nyquist'.";
+} nyquist_velocity;
+
+commentdef {
+  p_header = "OUTPUT FILES";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output files with Cartesian geometry.";
+  p_help = "If true, the parameters in the cart_files array are used. The grid origin is at the radar. nxy is the number of grid points in x and y. dxy is the grid resolution in x and y. Therefore the grid is a square in x,y. nz is the number of CAPPI heights. minz is the height of the lowest CAPPI and dz is the height between successive CAPPIs. If interpolate is true, an 8-point linear interpolation grid transformation is performed. If interpolate is false, a nearest-neighbor transformation is performed. The MDV files are stored at mdv_url. The max_range parameter (km) can be used to limit the useful data range. Input data beyond this range is ignored. Set to a negative value to disable it, in which case no limit is placed on range.";
+} output_cart_files;
+
+typedef struct {
+  int nxy;
+  double dxy;
+  int nz;
+  double minz;
+  double dz;
+  boolean interpolate;
+  string mdv_url;
+  double max_range;
+} cart_file_t;
+
+paramdef struct cart_file_t {
+  p_default = {
+    {
+      nxy = 400,
+      dxy = 1.0,
+      nz = 20,
+      minz = 0.5,
+      dz = 1.0,
+      interpolate = true,
+      mdv_url = "./data/mdv/radarCart",
+      max_range = -1
+    }
+  };
+  p_descr = "Details for files in cart geometry.";
+  p_help = "Only active if 'output_cart_files' is true.";
+} cart_files[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output files with PPI geometry.";
+  p_help = "If true, the parameters in the ppi_files array are used. The grid origin is at the radar. nxy is the number of grid points in x and y. dxy is the grid resolution in x and y. Therefore the grid is a square in x,y. min_elev is the lowest elevation angle to be stored, in degrees. Similarly for for max_elev. If interpolate is true, an 8-point linear interpolation grid transformation is performed. If interpolate is false, a nearest-neighbor transformation is performed. The MDV files are stored at mdv_url. All gates with heights below min_ht or above max_ht (in km) will be set to missing. The max_range parameter (km) can be used to limit the useful data range. Input data beyond this range is ignored. Set to a negative value to disable it, in which case no limit is placed on range.";
+} output_ppi_files;
+
+typedef struct {
+  int nxy;
+  double dxy;
+  double min_elev;
+  double max_elev;
+  boolean interpolate;
+  string mdv_url;
+  double min_ht;
+  double max_ht;
+  double max_range;
+} ppi_file_t;
+
+paramdef struct ppi_file_t {
+  p_default = {
+    {
+      nxy = 400,
+      dxy = 1.0,
+      min_elev = 0.0,
+      max_elev = 90.0,
+      interpolate = false,
+      mdv_url = "./data/mdv/radarPpi",
+      min_ht = 0.0,
+      max_ht = 50.0,
+      max_range = -1
+    }
+  };
+  p_descr = "Details for files in ppi geometry.";
+  p_help = "Only active if 'output_ppi_files' is true.";
+} ppi_files[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output files with Polar radar geometry.";
+  p_help = "If true, the parameters in the polar_files array are used. max_range is the maximum range to be stored, in km. min_elev is the lowest elevation angle to be stored, in degrees. Similarly for for max_elev. If interpolate is true, an 8-point linear interpolation grid transformation is performed. If interpolate is false, a nearest-neighbor transformation is performed. The MDV files are stored at mdv_url.";
+} output_polar_files;
+
+typedef struct {
+  double max_range;
+  double min_elev;
+  double max_elev;
+  string mdv_url;
+} polar_file_t;
+
+paramdef struct polar_file_t {
+  p_default = {
+    {
+      max_range = 300.0,
+      min_elev = 0.0,
+      max_elev = 90.0,
+      mdv_url = "./data/mdv/radarPolar"
+    }
+  };
+  p_descr = "Details for files in polar geometry.";
+  p_help = "Only active if 'output_polar_files' is true.";
+} polar_files[];
+
+commentdef {
+  p_header = "RHI MODE";
+  p_text = "If the program does not find any PPI data, it assumes that the data was taken in RHI mode. It performs a histogram analysis to decide which radials are active and stores out the data in the MDV files as RHIs.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to produce RHIs if available.";
+  p_help = "The program first attempts to deal with a volume as PPIs. If that does not work, and this flag is TRUE, it will attempt to treat the data as RHIs. This section deals with the RHI processing.\n\n"
+    "When creating RHI files, the elevation angles are stored in a regular grid while the azimuths are stored in the vlevels array. The actual RHI elevation angles are resampled onto the regular grid. The oversampling ration is the ratio of the number of elevation angles stored over the number of elevations measured. The higher the number the more accurate the elevation values. This step is necessary because the measured angles vary from one RHI to another, but all RHIs must be stored with the same elevation angles. Oversampling allows the program to interpolate the measured values onto the stored angles.\n\n"
+    "The interpolation flag governs whether the RHI data is interpolated when it is put onto the regular elevation grid. If false, nearest neighbor is used.\n";
+} output_rhi_files;
+
+typedef struct {
+  double oversampling_ratio;
+  boolean interp_in_elevation;
+  string mdv_url;
+} rhi_file_t;
+
+paramdef struct rhi_file_t {
+  p_default = {
+    {
+      oversampling_ratio = 4.0,
+      interp_in_elevation = false,
+      mdv_url = "./data/mdv/radarRhi"
+    }
+  };
+  p_descr = "Details for files in RHI geometry.";
+  p_help = "Only active if 'output_rhi_files' is true.";
+} rhi_files[];
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Resolution of azimuth histogram (deg).";
+  p_help = "For determining RHI azimuths. The azimuth data is binned at this resolution.";
+} rhi_az_hist_resolution;
+
+paramdef int {
+  p_min = 1;
+  p_default = 3;
+  p_descr = "The width of the search in looking for peaks in the azimuth histogram.";
+  p_help = "When looking for peaks in azimuth histogram, the program searches by this number of bins on either side of the search bin. For example, if the az_hist_resolution is 0.1 and the az_hist_search_width is 3, the program will search 3 bins, or 0.3 degrees, on either side of the search bin. It looks for a peak with values equal to or below the peak in the adjacent bins and less than the peak in bins further out.";
+} rhi_az_hist_search_width;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check the number of beams in an rhi.";
+  p_help = "If TRUE, an rhi is only considered valid if the number of beams exceeds 'min_beams_in_rhi'.";
+} check_min_beams_in_rhi;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "The min number of beams for an rhi to be valid.";
+  p_help = "See 'check_min_beams_in_rhi'.";
+} min_beams_in_rhi;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check the fraction of beams in an rhi.";
+  p_help = "If TRUE, an rhi is only considered valid if the number of beams in the rhi, expressed as a fraction of the max number of beams in any rhi, exceeds 'min_fraction_in_rhi'.";
+} check_min_fraction_in_rhi;
+
+paramdef double {
+  p_default = 0.3;
+  p_descr = "The min fraction of max beams for an rhi to be valid.";
+  p_help = "See 'check_min_fraction_in_rhi'.";
+} min_fraction_in_rhi;
+
+commentdef {
+  p_header = "OUTPUT FILE TIME-STAMP";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to automatically compute the volume mid time.";
+  p_help = "If TRUE, the mid_time is the mean of the start and end times of the data in the volume. If FALSE, the mid time is computed as the end time minus 'age_at_end_of_volume'.";
+} auto_mid_time;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Specified age (secs) of the data relative to the data time at the end of the volume.";
+  p_help = "Used if 'auto_mid_time' is FALSE.";
+} age_at_end_of_volume;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Maximum volume duration (secs).";
+  p_help = "If a volume exceeds this duration it is not saved. This takes care of cases in which the radar data stops in the middle of a volume for some reason. Then the early data in the volume will not match the late data.";
+} max_vol_duration;
+
+commentdef {
+  p_header = "OUTPUT DATA SET INFORMATION";
+}
+
+paramdef string {
+  p_default = "This MDV radar volume file was created by Dsr2Rapic.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "Radar data, RAP, NCAR.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+commentdef {
+  p_header = "AUTOMATIC END-OF-VOLUME DETECTION";
+  p_text = "These parameters are used if end_of_volume_decision is set to AUTOMATIC. This assumes a simple bottom-up or top-down scan strategy. No attempt will be made to search for RHIs, or other complicattions in the SCAN strategy.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set the end of vol flag based on change in elevation angle.";
+  p_help = "If true, the program will look for changes in elevation angle to compute the end of volume. Only this test, and the test for prf change, will be used to identify the end of volume condition.";
+} set_end_of_vol_from_elev_change;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flag to indicate that elevation angles increase in the volume.";
+  p_help = "If the volume starts at the top, i.e. elevations decrease during the volume, set this to FALSE.";
+} vol_starts_at_bottom;
+
+paramdef double {
+  p_default = 1.5;
+  p_min = 0.1;
+  p_descr = "Change in elevation which triggers and end of volume.";
+  p_help = "If the elevation angle changes by this amount, and end of volume flag will be set.";
+} elev_change_for_end_of_vol;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set the end-of-vol flag when the PRF changes.";
+} set_end_of_vol_on_prf_change;
+
+paramdef int {
+  p_default = 16;
+  p_descr = "Number of beams in history list.";
+  p_help = "This is the number of beams stored in the history list. The list is used for determining the status of the antenna. The antenna algorithm checks o see if either the elevation angle is stable (PPI mode) or the azimuth angle is stable (RHI mode). The el_accuracy and az_accuracy parameters are used to detect whether el or az are stable.";
+} nbeams_history;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Accuracy of antenna controller in elevation (deg).";
+  p_help = "Used to determine if antenna is stationary in elevation, i.e. is it in PPI mode? If the cumulative elevation change during the history period is less than this value, the antenna is assumed to be in PPI mode.";
+} el_accuracy;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Accuracy of antenna controller in azimuth (deg).";
+  p_help = "Used to determine if antenna is stationary in azimuth, i.e. is it in RHI mode? If the cumulative azimuth change during the history period is less than this value, the antenna is assumed to be in RHI mode.";
+} az_accuracy;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Min azimuth change for PPI (deg).";
+  p_help = "For a valid PPI, the azimuth must change by at least this amount during nbeams_history, while the elevation is not changing.";
+} min_az_change_ppi;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Min elevation change for RHI (deg).";
+  p_help = "For a valid RHI, the elevation must change by at least this amount during nbeams_history, while the azimuth is not changing.";
+} min_el_change_rhi;
+
+paramdef int {
+  p_default = 540;
+  p_descr = "Maximum azimuth change per tilt (deg).";
+  p_help = "If the tilt elevation has not changed by the time the azimuth has changed by this number of degrees, an end-of-volume condition is triggered. This is used to handle the single-elevation surveillance case in which the antenna scans in PPI at a single elevation angle."; 
+} max_az_change_per_tilt;
+
+paramdef int {
+  p_default = 180;
+  p_descr = "Min number of beams per PPI volume.";
+  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.";
+} min_beams_per_ppi_vol;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Min number of beams per RHI volume.";
+  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.";
+} min_beams_per_rhi_vol;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag for debugging auto end-of-vol detection.";
+  p_help = "If set, messages will be printed to stderr on how the auto-detection algorithm is making decisions.";
+} debug_auto_detection;
+

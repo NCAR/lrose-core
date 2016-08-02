@@ -1,0 +1,25 @@
+#!/bin/sh
+
+#
+# Script to cold start VDRAS
+#
+
+
+Date=`date -u +%Y%m%d`
+dateTime=`date -u +%Y%m%d_%H%M%S`
+#
+# Stop the running process
+#
+snuff adjoint_moist
+
+# Delete bad data files (can tell them from their size)
+# and move the existing log out of the way
+#
+find /transfer/algsys/vdras/adjoint/$Date -name \*.mdv -cmin -10 -size -150000c -exec /bin/rm -f {} \;
+/bin/mv -f $LOG_DIR/$Date/adjoint_moist.pentagonVDRAS.log $LOG_DIR/$Date/adjoint_moist.pentagonVDRAS.log.coldStart.$dateTime
+
+#
+# Restart.
+#
+start_adjoint_moist
+#

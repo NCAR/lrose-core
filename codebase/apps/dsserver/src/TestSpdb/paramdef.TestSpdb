@@ -1,0 +1,131 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for TestSpdb
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * March 1999
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress the use of threads. Set no_threads to TRUE for this type of debugging.";
+} no_threads;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+} instance;
+
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Source - where and how we get the data.";
+  p_text = "The source data is in ASCII format in a simple file. Each line stores data for a single time. The date and time is at the start of the line. This may be either in UNIX_TIME or YR_MO_DAY_HR_MIN_SEC - see date_time_format. The rest of the line forms the product - an ascii string.";
+};
+
+typedef enum {
+  UNIX_TIME, YR_MO_DAY_HR_MIN_SEC
+} date_time_format_t;
+
+paramdef enum date_time_format_t {
+  p_default = UNIX_TIME;
+  p_descr = "Format of the date/time field";
+  p_help = "Each data line must start with valid time, either as unix_time or as year month day hour min sec. This parameter specifies the format.";
+} date_time_format;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Text file path from which to read the product data";
+  p_help = "This is a text file which holds product data line-by-line.";
+} source_file_path;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Product label string";
+  p_help = "This label is stored in the product data base.";
+} product_label;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Product ID";
+  p_help = "This ID is used for identifying the product, specifying transformati
+on routines, etc.";
+} product_id;
+
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Destination - where and how we put the data.";
+};
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of chunks per put.";
+  p_help = "The chunks will be buffered up per put using this number.";
+} chunks_per_put;
+
+paramdef string {
+  p_default = {"spdbp:://localhost::test"};
+  p_descr = "Array of destination URLs.";
+  p_help = "The data may be put to multiple places.";
+} destination_urls[];
+
+typedef enum {
+  LOAD_ONCE, LOAD_OVERWRITE, LOAD_ADD
+} load_mode_t;
+
+paramdef enum load_mode_t
+{
+  p_default = LOAD_ADD;
+  p_descr = "Load mode";
+  p_help = "If LOAD_ONCE, a chunk at a given time can only be stored once - a se cond attempt causes and error. If LOAD_OVERWRITE, a new chunk at a given time will overwrite and old one. If LOAD_ADD, new chunks will be added to the list at a given time.";
+} load_mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Number of secs for which product is valid.";
+  p_help = "The expire time is computed by adding this to the valid time.";
+} product_valid_period;
+

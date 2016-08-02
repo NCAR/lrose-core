@@ -1,0 +1,119 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions ScaleSep
+//
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// August 2014
+
+commentdef {
+  p_header = "Program name: ScaleSep";
+  p_text = "ScaleSep separates a radar image scene into different spatial scales, by applying a filter in the 2D FFT frequency domain.";
+}
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "mdv/input";
+  p_descr = "URL for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "dBZ field name in input MDV files.";
+  p_help = "This is the field read as input. The analysis fields are computed from this field.";
+} dbz_field_name;
+
+typedef enum {
+  COMPUTE_COLUMN_MAX, COMPUTE_VIL
+} analysis_method_t;
+
+paramdef enum analysis_method_t {
+  p_default = COMPUTE_COLUMN_MAX;
+  p_descr = "Analysis method for computing the 2D data set";
+  p_help = "The method works on a 2D data field. We therefore need to compute a 2D field from the 3D input field. If the input field is already in 2D, use COMPUTE_COLUMN_MAX.";
+} analysis_method;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min height used in analysis (km).";	
+  p_help = "Only data at or above this altitude is used.";
+} min_valid_height;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Max height used in analysis (km).";	
+  p_help = "Only data at or below this altitude is used.";
+} max_valid_height;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Minimum reflectivity threshold for this analysis (dBZ).";
+  p_help = "Reflectivity below this threshold is set to missing.";
+} min_valid_dbz;
+
+commentdef {
+  p_header = "SPATIAL FILTERING";
+}
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Wavelength of spatial filter applied (km).";
+  p_help = "This filter is applied in the spectral FFT domain.";
+} spatial_filter_wavelength_km;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdv/scale_sep";
+  p_descr = "Output URL.";
+  p_help = "Output files are written to this URL.";
+} output_url;
+
+paramdef string {
+  p_default = "DBZ_FILT";
+  p_descr = "Name of filtered field in output MDV files.";
+  p_help = "The filtered field is the primary output field for this analysis.";
+} filtered_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write the intermediate fields for debugging.";
+  p_help = "If true, we add the input field, and the spectrum fields to the output file.";
+} write_debug_fields;
+

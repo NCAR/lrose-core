@@ -1,0 +1,261 @@
+/**********************************************************************
+ * TDRP params for RdasSim
+ **********************************************************************/
+
+//======================================================================
+//
+// RDAS Simulator.
+//
+// This program simulates RDAS radar data and serves the data out on a 
+//   socket.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_NORM;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "bprp";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mdv_path //////////////////////////
+//
+// Path for Input MDV file.
+// The file contains radar data which is sampled and served out to the 
+//   client.
+// Type: string
+//
+
+input_mdv_path = "./input/mdv/20010711/225715.mdv";
+
+///////////// dbz_field_name //////////////////////////
+//
+// Name of DBZ data field.
+// Type: string
+//
+
+dbz_field_name = "DBZ";
+
+//======================================================================
+//
+// SERVER DETAILS.
+//
+//======================================================================
+ 
+///////////// server_port /////////////////////////////
+//
+// Port for serving out radar data.
+// RdasSim listens on this port. When a connection from a client is 
+//   established, it receives commands from the client and sends beam data 
+//   to the client.
+// Type: int
+//
+
+server_port = 12000;
+
+//======================================================================
+//
+// CALIB PROPERTIES.
+//
+//======================================================================
+ 
+///////////// calib_slope /////////////////////////////
+//
+// Calibration slope (count/dB).
+// Type: double
+//
+
+calib_slope = 118;
+
+///////////// calib_offset_1km ////////////////////////
+//
+// Calibration offset at 1km range (count).
+// Type: double
+//
+
+calib_offset_1km = 4700;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// beam_wait_msecs /////////////////////////
+//
+// Wait per beam (milli-secs).
+// Type: int
+//
+
+beam_wait_msecs = 50;
+
+///////////// big_endian //////////////////////////////
+//
+// Output is in Big-Endian byte order.
+// If FALSE, order is Little-Endian.
+// Type: boolean
+//
+
+big_endian = TRUE;
+
+//======================================================================
+//
+// BPRP OPTIONS.
+//
+//======================================================================
+ 
+///////////// bprp_format /////////////////////////////
+//
+// If true, output is in old BPRP format.
+// Type: boolean
+//
+
+bprp_format = TRUE;
+
+///////////// bprp_viphi //////////////////////////////
+//
+// VIP HI calibration value for BPRP format (counts).
+// Type: int
+//
+
+bprp_viphi = 3971;
+
+///////////// bprp_viplo //////////////////////////////
+//
+// VIP LO calibration value for BPRP format (counts).
+// Type: int
+//
+
+bprp_viplo = 783;
+
+///////////// bprp_phi ////////////////////////////////
+//
+// Power HI calibration value for BPRP format (dBm).
+// Type: double
+//
+
+bprp_phi = -37;
+
+///////////// bprp_plo ////////////////////////////////
+//
+// Power LO calibration value for BPRP format (dBm).
+// Type: double
+//
+
+bprp_plo = -87;
+
+///////////// bprp_xmt ////////////////////////////////
+//
+// Transmitter power (dBm).
+// Type: double
+//
+
+bprp_xmt = 84;
+
+///////////// bprp_radar_constant /////////////////////
+//
+// Radar constant (dB).
+// Type: double
+//
+
+bprp_radar_constant = -154.91;
+
+///////////// bprp_mds ////////////////////////////////
+//
+// Min detectable signal (counts).
+// Type: int
+//
+
+bprp_mds = 53;
+
+///////////// bprp_mus ////////////////////////////////
+//
+// Min usable signal (counts).
+// Type: int
+//
+
+bprp_mus = 85;
+
+///////////// bprp_radar_id ///////////////////////////
+//
+// Radar ID for bprp mode.
+// Type: int
+//
+
+bprp_radar_id = 1;
+
+///////////// bprp_test_count /////////////////////////
+//
+// Test count loaded into all gates (counts).
+// Type: int
+//
+
+bprp_test_count = 3971;
+
+//======================================================================
+//
+// CALIBRATION OUTPUT.
+//
+//======================================================================
+ 
+///////////// pulse_gate_start ////////////////////////
+//
+// Start gate number for calibration pulse.
+// Type: int
+//
+
+pulse_gate_start = 100;
+
+///////////// pulse_gate_end //////////////////////////
+//
+// End gate number for calibration pulse.
+// Type: int
+//
+
+pulse_gate_end = 120;
+
+///////////// pulse_height_count //////////////////////
+//
+// Height of calibration pulse in counts.
+// Type: int
+//
+
+pulse_height_count = 2000;
+
+///////////// pulse_height_delta //////////////////////
+//
+// Change in ht per keystroke.
+// Type: int
+//
+
+pulse_height_delta = 100;
+

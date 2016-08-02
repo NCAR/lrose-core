@@ -1,0 +1,189 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "asdiVector2mdv is a program that ingests the SPDB vector\n"
+	"data written by asdi2Vector and writes a gridded field of aircraft\n"
+	"tracks. A two dimensional field is always output - for this\n"
+	"case, the output is altitude. Optionally a three dimensional\n"
+	"field can be output as well - in this case, the output is\n"
+	"simply a count of how many aircraft passed over the grid\n"
+	"point.\n\nNiles Oien July 2004.";
+}
+
+paramdef string {
+  p_default = "spdbp:://localhost::./spdb/asdiVectors";
+  p_descr = "Input SPDB url, of form spdbp:://host.domain:[port]:dir/dir ";
+  p_help = "Vector data are read from here.";
+} input_url;
+
+paramdef string {
+  p_default = "mdvp:://localhost::./mdv/asdiGrid";
+  p_descr = "Output MDV url, of form mdvp:://host.domain:[port]:dir/dir ";
+  p_help = "Gridded data are written here.";
+} output_url;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Time to look back by, seconds.";
+  p_help = "Determines temporal extent of grid.";
+} lookBack;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Output interval, seconds.";
+  p_help = "Data are output this often. Should be less than or\n"
+	"equal to lookBack time.";
+} outputInterval;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+  
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to output a three dimensional field.";
+  p_help = "Uses much more memory.";
+} output3D;
+
+
+typedef enum {
+  TIMESTAMP_START, TIMESTAMP_MIDDLE, TIMESTAMP_END
+} timestamp_t;
+
+paramdef enum timestamp_t {
+  p_descr = "How to timestamp the data.";
+  p_help = "Controls if data are timestamped wit the start,\n"
+  "middle or end of the time interval.";
+  p_default = TIMESTAMP_END;
+} timestamp;
+
+commentdef {
+  p_header = "OUTPUT GRID DEFINITION";
+}
+
+typedef enum {
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON
+} output_projection_t;
+
+paramdef enum output_projection_t {
+  p_default = OUTPUT_PROJ_FLAT;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT - (x,y) Cartesian data in km from a given origin.\n"
+           "LATLON - lat/lon grid with constant grid spacing.\n";
+           "LAMBERT - Lambert Conformal projection with constant grid spacing.\n";
+} output_projection;
+
+typedef struct {
+  double lat;
+  double lon;
+} output_origin_t;
+
+paramdef struct output_origin_t {
+  p_descr = "Origin of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT.";
+  p_default = {40.0, -104.0};
+} output_origin;
+
+typedef struct {
+  long nx;
+  long ny;
+  long nz;
+  double minx;
+  double miny;
+  double minz;
+  double dx;
+  double dy;
+  double dz;
+} grid_t;
+
+paramdef struct grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "The grid params for the output grid.";
+  p_default = {400, 400, 15, -199.5, -199.5, 0.5, 1.0, 1.0, 1.0};
+} output_grid;
+
+paramdef boolean {
+  p_descr = "Option to use Km for altitude.";
+  p_help = "If not set, Flight Level units are used..";
+  p_default = TRUE;
+} altsInKm;
+
+paramdef boolean {
+  p_descr = "Option to take 0 as the bad value in MDV.";
+  p_help = "Generally useful for display purposes.";
+  p_default = TRUE;
+} takeZeroAsBadValue;
+
+paramdef boolean {
+  p_descr = "Option to take the maximum altitude in the\n"
+	"2D grid at points for which two tracks cross.";
+  p_help = "This is usually true. If false, the\n"
+	"minimum altidue is taken.";
+  p_default = TRUE;
+} takeMaximumAlt;
+
+paramdef boolean {
+  p_descr = "Option to apply a test to the altitude, speed\n"
+	"and the distance between reports.";
+  p_help = "Default is to do this.";
+  p_default = TRUE;
+} applyQCtests;
+
+paramdef double {
+  p_descr = "Maximum allowable distance between two ASDI reports, Km.";
+  p_help = "Relevant only if applyQCtests is TRUE";
+  p_default = 300.0;
+} maxDist;
+
+paramdef double {
+  p_descr = "Maximum allowable altitude, Km.";
+  p_help = "Relevant only if applyQCtests is TRUE";
+  p_default = 15.0;
+} maxAlt;
+
+paramdef double {
+  p_descr = "Maximum allowable speed, Km/Hr.";
+  p_help = "Relevant only if applyQCtests is TRUE";
+  p_default = 1500.0;
+} maxSpeed;
+
+

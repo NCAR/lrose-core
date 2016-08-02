@@ -1,0 +1,134 @@
+/**********************************************************************
+ * TDRP params for GtsSockIngest
+ **********************************************************************/
+
+//======================================================================
+//
+// GtsSockIngest reads family of services data from a GTS socket and 
+//   writes the data to files at regular intervals.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// SERIAL DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_port //////////////////////////////
+//
+// Number of port to listen on.
+// This GTS server will connect to this port.
+// Type: int
+//
+
+input_port = 12000;
+
+//======================================================================
+//
+// DATA FILE OUTPUT.
+//
+//======================================================================
+ 
+///////////// end_of_message_check ////////////////////
+//
+// Option to check for end of message before closing an output file.
+// Some of the incoming data streams have special characters for 
+//   indicating the end of a message. The following EOM conditions are 
+//   used: (a) EOM_CHECK_NNNN: the 4 characters NNNN; (b) EOM_CHECK_CTRLC: 
+//   Ctrl-C; (c) EOM_CHECK_CTRLKC: Ctrl-K Ctrl-C; (d) EOM_CHECK_EQUALS: an 
+//   equals-sign followed by a line-feed.
+//
+// Type: enum
+// Options:
+//     EOM_CHECK_NONE
+//     EOM_CHECK_NNNN
+//     EOM_CHECK_CTRLC
+//     EOM_CHECK_CTRLKC
+//     EOM_CHECK_EQUALS
+//
+
+end_of_message_check = EOM_CHECK_CTRLC;
+
+///////////// output_interval /////////////////////////
+//
+// Interval at which output files are created (secs).
+// The program reads the incoming data and stores it in a temporary 
+//   file. At regular intervals, the file is renamed - see 
+//   output_dir_path.
+// Type: int
+//
+
+output_interval = 300;
+
+///////////// force_output_if_stalled /////////////////
+//
+// Flag for forcing the file output if the input stream in stalled.
+// If TRUE, on output file will be written at the appropriate time, even 
+//   if no data is coming in. If FALSE, the output file will only be 
+//   written when message data indicates that an appropriate 
+//   end-of-message condition has been met.
+// Type: boolean
+//
+
+force_output_if_stalled = TRUE;
+
+///////////// discard_zero_length_files ///////////////
+//
+// Flag for discarding 0-length files.
+// If TRUE, output files will be ignored if they are empty. If FALSE, 
+//   files will be output even if empty.
+// Type: boolean
+//
+
+discard_zero_length_files = FALSE;
+
+///////////// output_dir_path /////////////////////////
+//
+// Name of output directory.
+// The output files will be stored in this level directory.
+// The file path is computed as follows:
+// 	 output_dir_path/yyyymmdd/hhmmss.ext.
+// Type: string
+//
+
+output_dir_path = "./output";
+
+///////////// output_file_ext /////////////////////////
+//
+// Extension for output file.
+// See output_dir_path.
+// Type: string
+//
+
+output_file_ext = "gts";
+

@@ -1,0 +1,176 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for SurfaceAscii2Spdb
+ *
+ */
+
+commentdef {
+  p_header = "SurfaceAscii2Spdb reads surface weather observations, converts them to station_report_t format and writes them to an SPDB data base.";
+  p_text = 
+    "The input file should contain space-delimited ASCII.\n"
+    "Alternatively you can specify the delimiter character.\n"
+    "Comment lines start with '#'\n"
+    "There should be one line for each station for each time\n"
+    "If a value is unknown or missing, set to -9999\n"
+    "From column 18 and up you can leave them out if not available.\n"
+    "\n"
+    "The input fields should be as follows\n"
+    "\t00 year\n"
+    "\t01 month\n"
+    "\t02 day\n"
+    "\t03 hour\n"
+    "\t04 min\n"
+    "\t05 sec\n"
+    "\t06 station-id - integer - set to -9999 if missing\n"
+    "\t07 station-name - string - set to 'unknown' if missing\n"
+    "\t08 latitude (deg)\n"
+    "\t09 longitude (deg)\n"
+    "\t10 height (m MSL)\n"
+    "\t11 temp (C)\n"
+    "\t12 dewpoint (C)\n"
+    "\t13 RH (%)\n"
+    "\t14 pressure (hPa)\n"
+    "\t15 windspeed (m/s)\n"
+    "\t16 winddirn (degT)\n"
+    "\t17 windgust (m/s)\n"
+    "\t18 precip_accum (mm)\n"
+    "\t19 precip_rate (mm/hr)\n"
+    "\t20 visibility (m)\n"
+    "\t21 rvr (m)\n"
+    "\t22 ceiling (m)\n"
+    "\n";
+
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In this mode it is optional to watch for a latest_data_info file. In ARCHIVE mode, it processes all of the data files in the input directory between the start and end times set on the command line. In FILELIST mode, it processes all of the files in the list specified on the command line. In FILELIST mode paths must be fully qualified with respect to the date and time - so if each date has a separate subdirectory the date part of the path must be included.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./raw/aws";
+  p_descr = "Input directory";
+  p_help = "Directory where input data files can be found.";
+} input_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, only checks input_dir for subdirs of the form YYYYMMDD";
+  p_help = "Only in REALTIME mode with latest_data_info_avail FALSE.";
+} strict_subdir_check;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, check file name contains specified sub-string.";
+  p_help = "See file_match_string.";
+} file_name_check;
+
+paramdef string {
+  p_default = "txt";
+  p_descr = "Input filename match string";
+  p_help = "Files must contain this string to be processed";
+} file_match_string;
+
+paramdef string {
+  p_default = " ";
+  p_descr = "Delimiter for input data";
+  p_help = "Input data uses this between values.";
+} input_delimiter;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+typedef enum
+{
+  STATION_REPORT,
+  XML
+} output_report_type_t;
+
+paramdef enum output_report_type_t
+{
+  p_descr = "Type of station report to put in the output SPDB database";
+  p_default = STATION_REPORT;
+} output_report_type;
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/aws";
+  p_descr = "Output URL for decoded metars.";
+  p_help = "See the DIDSS docs for details on URL usage.";
+} output_url;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Expire time in seconds for each metar";
+  p_help = "This value will be added to the metar time to determine the expire time for the metar";
+} expire_seconds;
+

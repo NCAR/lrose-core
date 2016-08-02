@@ -1,0 +1,2163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
+	<TITLE>Component: IHL Algorithm Intermediate data</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.3  (Unix)">
+	<META NAME="CREATED" CONTENT="0;0">
+	<META NAME="CHANGEDBY" CONTENT="david albo">
+	<META NAME="CHANGED" CONTENT="20120127;13350100">
+	<META NAME="CHANGEDBY" CONTENT="david albo">
+	<META NAME="CHANGEDBY" CONTENT="david albo">
+	<META NAME="CHANGEDBY" CONTENT="david albo">
+	<STYLE TYPE="text/css">
+	<!--
+		PRE.cjk { font-family: "AR PL KaitiM GB", monospace }
+		PRE.ctl { font-family: "Lohit Hindi", monospace }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<H1 ALIGN=CENTER>Filter design</H1>
+<HR>
+<P ALIGN=LEFT><FONT SIZE=4>The FiltAlg design allows the user to put
+together combinations of  existing filters from a list, and feed
+outputs of one filter into any downstream filter.  This is all
+controlled by the pararmeter file. An example of the param file and
+additional explanation of what things mean is <a href="#example">here</a>.  Each filter has
+its own reference to the parameteres for that filter, found also in
+the same parameter file. The list of filters, meaning, and the
+parameters used by that filter is in the following table.</FONT></P>
+<TABLE WIDTH=922 BORDER=1 CELLPADDING=4 CELLSPACING=3>
+	<COL WIDTH=229>
+	<COL WIDTH=665>
+	<TR VALIGN=TOP>
+		<TH WIDTH=229>
+			<P><FONT SIZE=4>Filter</FONT></P>
+		</TH>
+		<TH WIDTH=665>
+			<P><FONT SIZE=4>Parameter reference </FONT>
+			</P>
+		</TH>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>ELLIP</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_2d</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>DILATE</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_2d</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>MEDIAN</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_2d_median</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>SDEV</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_2d</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>MEDIAN_NO_OVERLAP</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_2d_median</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>SDEV_NO_OVERLAP</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_2d</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>TEXTURE_X</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_2d</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>TEXTURE_Y</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_2d</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>REMAP</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>fuzzy0, fuzzy1, ...</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>REPLACE</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_replace</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>MAX</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>combine0, combine1, ...</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>AVERAGE</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>combine0, combine1, ...</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>PRODUCT</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>combine0, combine1, ...</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>FULL_MEAN</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_Scalar</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>FULL_SDEV</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_Scalar</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>FULL_MEDIAN</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_Scalar</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>VERT_AVERAGE</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_dummy</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>VERT_PRODUCT</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_dummy</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>WEIGHTED_SUM</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>combine0, combine1, ...</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>NORM_WEIGHTED_SUM</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>combine0, combine1, ...</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>MASK</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_mask</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>RESCALE</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_rescale</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>DB2LINEAR</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_dummy</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>LINEAR2DB</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_dummy</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>PASSTHROUGH</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>parm_dummy</FONT></P>
+		</TD>
+	</TR>
+	<TR VALIGN=TOP>
+		<TD WIDTH=229>
+			<P ALIGN=LEFT><FONT SIZE=4>APPFILTER</FONT></P>
+		</TD>
+		<TD WIDTH=665>
+			<P ALIGN=LEFT><FONT SIZE=4>The app filter is a special case of
+			filters not part of the FiltAlg library, written for a particular
+			app.</FONT></P>
+		</TD>
+	</TR>
+</TABLE>
+
+<P ALIGN=LEFT><BR><BR>
+</P>
+<a name="example">Example Parameter File</a>
+
+<style>
+
+    #columns {
+        width: 1200px;
+    }
+
+    #columns .column {
+        position: relative;
+        width: 46%;
+        padding: 1%;
+        border: solid 1px #000;
+    }
+
+    #columns .left {
+        float: left;
+    }
+
+    #columns .right {
+        float: right;
+    }
+
+</style>
+<div id="columns">
+    <div class="left column">
+      <P> <FONT SIZE=3> Example param file</FONT></P>
+      <PRE CLASS="western"><FONT SIZE=2>
+/**********************************************************************
+ * TDRP params for FiltAlgParams
+ **********************************************************************/
+
+//======================================================================
+//
+// FiltAlg.
+//
+// This program does generic and general algorithm data filtering.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// instance.
+// for PMU.
+// Type: string
+//
+
+instance = "texture";
+
+///////////// debug_mode //////////////////////////////
+//
+// debugging mode.
+// NONE=as quiet as possible, DEBUG = minimal debug output, 
+//   DEBUG_VERBOSE=more.
+//
+// Type: enum
+// Options:
+//     NONE
+//     DEBUG
+//     DEBUG_VERBOSE
+//
+
+debug_mode = DEBUG;
+
+///////////// debug_triggering ////////////////////////
+//
+// triggering debug.
+// set to TRUE to debug triggering.
+// Type: boolean
+//
+
+debug_triggering = FALSE;
+
+///////////// realtime ////////////////////////////////
+//
+// realtime.
+// Type: boolean
+//
+
+realtime = $(REALTIME);
+
+///////////// max_wait_minutes ////////////////////////
+//
+// max wait.
+// maximum wait time (minutes) for realtime=TRUE and multiple input 
+//   URLs. Not used in archive mode.
+// Type: double
+//
+
+max_wait_minutes = 1;
+
+///////////// read_tolerance_seconds //////////////////
+//
+// read_tolerance_seconds.
+// maximum allowed difference (seconds) between read request time and 
+//   data time.
+// Type: int
+//
+
+read_tolerance_seconds = 120;
+
+///////////// trigger_url /////////////////////////////
+//
+// trigger url.
+// URL to trigger off.
+// Type: string
+//
+
+trigger_url = "mdvp:://localhost::$(PROJECT)/mdv/pid";
+
+///////////// min_gate_index //////////////////////////
+//
+// min gate index.
+// sometimes the data is bad too close to radar. Don't include data this 
+//   close or closer in computations. Set to -1 for no effect.
+// Type: int
+//
+
+min_gate_index = -1;
+
+///////////// output_url //////////////////////////////
+//
+// output for Algorithm MDV (grids).
+// Type: string
+//
+
+output_url = "mdvp:://localhost::$(PROJECT)/mdv/texture";
+
+///////////// output_spdb /////////////////////////////
+//
+// output for Algorithm SPDB (1d data).
+// Type: string
+//
+
+output_spdb = "spdbp:://localhost::$(PROJECT)/spdb/texture";
+
+///////////// filter //////////////////////////////////
+//
+// Filters to apply.
+// field = name of input field to the filter
+// is_input_field = TRUE if field is an actual input FALSE if an 
+//   upstream filters output
+// write_output_field=TRUE to write output field to MDV file, FALSE to 
+//   keep it only as a passthrough to downstream filters
+// output_field = name of output field to the filter
+// filter = The filter to apply
+// filter_index = index into an array of params for that filter type 
+//   (below)
+// app_filter_name = name of filter when type = APPFILTER, empty if not.
+//
+// Type: struct
+//   typedef struct {
+//      string field;
+//      boolean is_input_field;
+//      boolean write_output_field;
+//      string output_field;
+//      filter_t filter;
+//        Options:
+//          ELLIP
+//          DILATE
+//          MEDIAN
+//          SDEV
+//          MEDIAN_NO_OVERLAP
+//          SDEV_NO_OVERLAP
+//          TEXTURE_X
+//          TEXTURE_Y
+//          REMAP
+//          REPLACE
+//          MAX
+//          AVERAGE
+//          PRODUCT
+//          FULL_MEAN
+//          FULL_SDEV
+//          FULL_MEDIAN
+//          VERT_AVERAGE
+//          VERT_MAX
+//          VERT_PRODUCT
+//          WEIGHTED_SUM
+//          NORM_WEIGHTED_SUM
+//          MASK
+//          RESCALE
+//          DB2LINEAR
+//          LINEAR2DB
+//          PASSTHROUGH
+//          APPFILTER
+//      int filter_index;
+//      string app_filter_name;
+//   }
+//
+// 1D array - variable length.
+//
+
+  filter = {
+  { "DBZ",                         TRUE,  TRUE,  "DBZ_P",            PASSTHROUGH, 0, ""},
+  { "ZDR",                         TRUE,  TRUE,  "ZDR_P",            PASSTHROUGH, 0, ""},
+  { "PHIDP",                       TRUE,  TRUE,  "PHIDP_P",          PASSTHROUGH, 0, ""},
+  { "KDP",                         TRUE,  TRUE,  "KDP_P",            PASSTHROUGH, 0, ""},
+  { "PID",                         TRUE,  TRUE,  "PID_P",            PASSTHROUGH, 0, ""},
+  { "DBZ",                         TRUE,  TRUE,  "MaskDBZ",          MASK,        0, ""},
+  { "MaskDBZ",                     FALSE, TRUE,  "DbLinear",         DB2LINEAR,   0, ""},
+  { "DbLinear",                    FALSE, TRUE,  "DbLinearMean",     ELLIP,       1, ""},
+  { "DbLinearMean",                FALSE, TRUE,  "MeanDBZ",          LINEAR2DB,   0, ""},
+  { "MaskDBZ",                     FALSE, TRUE,  "TDBZ",             TEXTURE_X,   1, ""},
+  { "MaskDBZ",                     FALSE, TRUE,  "sdevDBZ",          SDEV,        1, ""},
+  { "sdevDBZ",                     FALSE, TRUE,  "sdev15_sdevDBZ",   SDEV_NO_OVERLAP, 2, ""},
+  { "sdevDBZ",                     FALSE, TRUE,  "med15_sdevDBZ",    MEDIAN_NO_OVERLAP, 2, ""},
+  { "ZDR",                         TRUE,  TRUE,  "MaskZDR",          MASK,        0, ""},
+  { "MaskZDR",                     FALSE, TRUE,  "MeanZDR",          ELLIP,       1, ""},
+  { "MeanZDR",                     FALSE, TRUE,  "MeanZDR_corr",     RESCALE,     0, ""},
+  { "MaskZDR",                     FALSE, TRUE,  "sdevZDR",          SDEV,        1, ""},
+  { "KDP",                         TRUE,  TRUE,  "MaskKDP",          MASK,        0, ""},
+  { "MaskKDP",                     FALSE, TRUE,  "MeanKDP",          ELLIP,       1, ""},
+  { "MaskKDP",                     FALSE, TRUE,  "sdevKDP",          SDEV,        1, ""},
+  { "sdevDBZ",                     FALSE, TRUE,  "int_sdevDBZ",      REMAP,       0, ""},
+  { "TDBZ",                        FALSE, TRUE,  "int_TDBZ",         REMAP,       1, ""},
+  { "MeanDBZ",                     FALSE, TRUE,  "int_MeanDBZ",      REMAP,       2, ""},
+  { "DBZ",                         FALSE, TRUE,  "int_DBZ",          REMAP,       3, ""},
+  { "sdev15_sdevDBZ",              FALSE, TRUE,  "int_sdev15",       REMAP,       4, ""},
+  { "med15_sdevDBZ",               FALSE, TRUE,  "int_med15",        REMAP,       5, ""},
+  { "MeanZDR_corr",                FALSE, TRUE,  "int_MeanZDR_corr", REMAP,       6, ""},
+  { "sdevZDR",                     FALSE, TRUE,  "int_sdevZDR",      REMAP,       7, ""},
+  { "MeanKDP",                     FALSE, TRUE,  "int_MeanKDP",      REMAP,       8, ""},
+  { "sdevKDP",                     FALSE, TRUE,  "int_sdevKDP",      REMAP,       9, ""},
+  { "int_sdevDBZ",                 FALSE, TRUE,  "FRZDRZ",           AVERAGE,     0, ""},
+  { "int_MeanZDR_corr",            FALSE, TRUE,  "SLW",              AVERAGE,     1, ""},
+  { "SLW",                         FALSE, TRUE,  "IHL1",             REPLACE,     0, ""},
+  { "IHL1",                        FALSE, FALSE, "IHL2",             REPLACE,     1, ""},
+  { "IHL2",                        FALSE, FALSE, "IHL3",             REPLACE,     2, ""},
+  { "IHL3",                        FALSE, FALSE, "IHL4",             REPLACE,     3, ""},
+  { "IHL4",                        FALSE, FALSE, "IHL5",             REPLACE,     4, ""},
+  { "IHL5",                        FALSE, TRUE,  "IHL",              REPLACE,     5, ""}
+};
+
+///////////// input ///////////////////////////////////
+//
+// input fields.
+// The fields read in externally
+// name = name used in filtering as input
+// url = where the data is
+// field = field name within this data.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string url;
+//      string field;
+//   }
+//
+// 1D array - variable length.
+//
+
+input = {
+  { "DBZ",   "$(INPUT_DATA_URL)",                     "$(DBZ_FIELD)"},
+  { "ZDR",   "$(INPUT_DATA_URL)",                     "$(ZDR_FIELD)"},
+  { "PHIDP", "$(INPUT_DATA_URL)",                     "$(PHIDP_FIELD)"},
+  { "KDP",   "mdvp:://localhost::$(PROJECT)/mdv/pid", "KDP"},
+  { "PID",   "mdvp:://localhost::$(PROJECT)/mdv/pid", "PID"}
+};
+
+///////////// vlevel //////////////////////////////////
+//
+// vlevel range.
+// range of radar vertical levels to use from input data (degrees). If 
+//   either value < 0, then use all radar vertical levels in the input.
+// Type: double
+// 1D array - fixed length - 2 elements.
+//
+
+vlevel = { -1, -1 };
+
+///////////// vlevel_tolerance ////////////////////////
+//
+// vlevel tolerance.
+// maximum allowed difference (vlevel units within MDV) between inputs.
+// Type: double
+//
+
+vlevel_tolerance = 0.1;
+
+///////////// parm_2d /////////////////////////////////
+//
+// list of 2d filter params.
+// nr = number of radial points
+// ntheta = number of azimuthal points
+// filters that are 2d are:  ELLIP, DILATE SDEV SDEV_NO_OVERLAP 
+//   TEXTURE_X TEXTURE_Y.
+//
+// Type: struct
+//   typedef struct {
+//      int nr;
+//      int ntheta;
+//   }
+//
+// 1D array - variable length.
+//
+
+parm_2d = {
+  { 3, 3},
+  { 15, 5},
+  { 100, 90}
+};
+
+///////////// parm_2d_median //////////////////////////
+//
+// list of 2d median filter params.
+// nr = number of radial points
+// ntheta = number of azimuthal points
+// bin_min = minimum data bin value
+// bin_max = maximum data bin value
+// bin_delta = bin delta value resolution
+// filters that are use these params are:  MEDIAN  MEDIAN_NO_OVERLAP.
+//
+// Type: struct
+//   typedef struct {
+//      int nr;
+//      int ntheta;
+//      double bin_min;
+//      double bin_max;
+//      double bin_delta;
+//   }
+//
+// 1D array - variable length.
+//
+
+parm_2d_median = {
+  { 15, 5,  -50, 100, 0.2},
+  { 15, 5,  -20,  50, 0.2},
+  { 94, 360,-20,  50, 0.2}
+};
+
+///////////// parm_combine ////////////////////////////
+//
+// filters for combining.
+// For AVERAGE, PRODUCT, MAX, WEIGHTED_SUM, NORM_WEIGHTED_SUM
+// input_weight = main input weight, when WEIGHTED_SUM or 
+//   NORM_WEIGHTED_SUM
+// combine_index = index into combine arrays below.
+//
+// Type: struct
+//   typedef struct {
+//      double input_weight;
+//      int combine_index;
+//   }
+//
+// 1D array - variable length.
+//
+
+parm_combine = {
+ {1.0,0},
+ {2.0,1},
+ {1.0,2}
+};
+
+///////////// parm_replace ////////////////////////////
+//
+// parameters for the REPLACE filter.
+// set_initial_value = TRUE to set the initial value to a constant prior 
+//   to replacing values, FALSE to set the initial value to the main input 
+//   to the filter
+// initial_value = The value to fill the input with when 
+//   set_initial_value=TRUE, ignored when set_initial_value=FALSE
+// replacement_value = The value to set into the output data when 
+//   conditions are met
+// logical_command = string with named data and conditionals (for 
+//   example "A <= 30 & B < 5", where A and B are named data values found 
+//   upstream or as input)
+// combine_index = index into combine arrays below (this filter will 
+//   ignore weight).
+//
+// Type: struct
+//   typedef struct {
+//      boolean set_initial_value;
+//      double initial_value;
+//      double replacement_value;
+//      string logical_command;
+//      int combine_index;
+//   }
+//
+// 1D array - variable length.
+//
+
+parm_replace = {
+ {  TRUE,  0,  0.0, "SLW <= 0.45 && FRZDRZ <= 0.45", 2 },
+ {  FALSE, 0,  0.5, "SLW > 0.45 && SLW <= 0.55 && FRZDRZ > 0.45 && FRZDRZ < 0.7", 2 },
+ {  FALSE, 0,  1.0, "SLW > 0.55 ", 3 },
+ {  FALSE, 0,  0.7, "FRZDRZ > 0.70 ", 4},
+ {  FALSE, 0,  0.8, "SLW > 0.55 && FRZDRZ > 0.70 ", 2 },
+ {  FALSE, 0, -0.1, "MeanDBZ < -31", 5 }
+};
+
+
+///////////// parm_rescale ////////////////////////////
+//
+// filters for the RESCALE filter.
+// The remap value at each point is old_value*scale + offset.
+//
+// Type: struct
+//   typedef struct {
+//      double scale;
+//      double offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+parm_rescale = {
+   {1.0, 0.5}
+};
+
+
+
+///////////// parm_Scalar /////////////////////////////
+//
+// list of scalar filter params.
+// rLwr     = lower bound of radials to calculate scalar statistic over
+// rUpr     = upper bound of radials to calculate scalar statistic over
+// thetaLwr = lower bound of aziumuths to calculate scalar statistic 
+//   over
+// thetaUpr = upper bound of aziumuths to calculate scalar statistic 
+//   over
+// filters that are Scalr are:  FULL_MEAN, FULL_SDEV, FULL_MEDIAN.
+//
+// Type: struct
+//   typedef struct {
+//      int rLwr;
+//      int rUpr;
+//      int thetaLwr;
+//      int thetaUpr;
+//   }
+//
+// 1D array - variable length.
+//
+
+parm_Scalar = {
+  { 0, 15, 0, 360},
+  { 0, 100, 0, 360}
+};
+
+///////////// parm_dummy //////////////////////////////
+//
+// params for filters with no params.
+// dummy    = placeholder. 
+// filts with no parms: VERT_AVERAGE, VERT_MAX, VERT_PRODUCT
+//                      DB2LINEAR, LINEAR2DB, PASSTHROUGH.
+//
+// Type: struct
+//   typedef struct {
+//      int dummy;
+//   }
+//
+// 1D array - variable length.
+//
+
+parm_dummy = {
+  {0}
+};
+
+///////////// parm_mask ///////////////////////////////
+//
+// MASK filter params.
+// mask_name = name of mask field
+// mask_is_input = TRUE if this is an input to the program, FALSE if 
+//   derived within the program
+// mask_list_index = index to list of mask ranges below.
+//
+// Type: struct
+//   typedef struct {
+//      string mask_name;
+//      boolean mask_is_input;
+//      int mask_list_index;
+//   }
+//
+// 1D array - variable length.
+//
+
+parm_mask = {
+  {
+    mask_name = "PID",
+    mask_is_input = TRUE,
+    mask_list_index = 0
+  }
+};
+
+//======================================================================
+//
+// Fuzzy Function params.
+//
+//  Used internally for various filters, and for REMAP filter
+//  index 0 up to 11, each one has any number of :
+//    x = fuzzy x value
+//    y = fuzzy y value.
+//
+//======================================================================
+ 
+
+///////////// fuzzy0 //////////////////////////////////
+//
+// 0 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+// sdevDBZ
+fuzzy0 = {
+  {-32.0, 1.0},
+  {  1.0, 1.0},
+  {  2.5, 0.0},
+  { 20.0, 0.0}
+};
+
+
+///////////// fuzzy1 //////////////////////////////////
+//
+// 1 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+// TDBZ
+fuzzy1 = {
+  {-32.0, 1.0},
+  {  1.0, 1.0},
+  {  6.0, 0.0},
+  {124.0, 0.0}
+};
+
+
+///////////// fuzzy2 //////////////////////////////////
+//
+// 2 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+// MeanDBZ
+fuzzy2 = {
+  {-32.0, 0.0},
+  {-18.0, 0.0},
+  {-10.0, 1.0},
+  {  5.0, 1.0},
+  {  8.0, 0.0},
+  { 40.0, 0.0}
+};
+
+
+///////////// fuzzy3 //////////////////////////////////
+//
+// 3 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+// DBZ
+fuzzy3 = {
+  {-32.0, 0.0},
+  {-18.0, 0.0},
+  {-10.0, 1.0},
+  {  5.0, 1.0},
+  { 15.0, 0.0},
+  { 60.0, 0.0}
+};
+
+
+///////////// fuzzy4 //////////////////////////////////
+//
+// 4 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+// sdev15_sdevDBZ_3d
+fuzzy4 = {
+  {0.0, 1.0},
+  {1.5, 1.0},
+  {2.0, 0.0},
+  {4.0, 0.0}
+};
+
+
+///////////// fuzzy5 //////////////////////////////////
+//
+// 5 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+// med15_sdevDBZ_3d
+fuzzy5 = {
+  {0.0, 1.0},
+  {3.0, 1.0},
+  {4.5, 0.0},
+  {8.0, 0.0}
+};
+
+
+///////////// fuzzy6 //////////////////////////////////
+//
+// 6 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+// MeanZDR_corr
+fuzzy6 = {
+  {-3.0, 1.0},
+  { 0.1, 1.0},
+  { 0.2, 0.0},
+  { 5.0, 0.0}
+};
+
+
+///////////// fuzzy7 //////////////////////////////////
+//
+// 7 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+// sdevZDR
+fuzzy7 = {
+  {-3.0, 1.0},
+  { 0.1, 1.0},
+  { 0.3, 0.0},
+  { 2.0, 0.0}
+};
+
+
+///////////// fuzzy8 //////////////////////////////////
+//
+// 8 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+// MeanKDP
+fuzzy8 = {
+  {-11.0, 1.0},
+  {  0.0, 1.0},
+  {  0.1, 0.0},
+  {  3.0, 0.0}
+};
+
+
+///////////// fuzzy9 //////////////////////////////////
+//
+// 9 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+// sdevKDP
+fuzzy9 = {
+  {-11.0, 1.0},
+  {  0.1, 1.0},
+  {  0.2, 0.0},
+  {  6.0, 0.0}
+};
+
+///////////// fuzzy10 /////////////////////////////////
+//
+// 10 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+fuzzy10 = {
+};
+
+///////////// fuzzy11 /////////////////////////////////
+//
+// 11 fuzzy f.
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+fuzzy11 = {
+};
+
+
+//======================================================================
+//
+// Combine params.
+//
+//  for filters AVERAGE, PRODUCT, MAX, WEIGHTED_SUM, NORM_WEIGHTED_SUM,
+//     REPLACE
+//  index 0 up to 5, each one has any number of :
+//    name = data name
+//    is_input = TRUE if the input is an original input
+//    weight = weight for WEIGHTED_SUM and NORM_WEIGHTED_SUM.
+//
+//======================================================================
+ 
+///////////// combine0 ////////////////////////////////
+//
+// 0 combine params.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      boolean is_input;
+//      double weight;
+//   }
+//
+// 1D array - variable length.
+//
+
+combine0 = {
+ {"int_TDBZ",    FALSE,1.0},
+ {"int_MeanDBZ", FALSE,1.0},
+ {"int_sdev15",  FALSE,1.0},
+ {"int_med15",   FALSE,1.0}
+};
+
+///////////// combine1 ////////////////////////////////
+//
+// 1 combine params.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      boolean is_input;
+//      double weight;
+//   }
+//
+// 1D array - variable length.
+//
+
+combine1 = {
+ {"int_sdevZDR",      FALSE, 1.0},
+ {"int_MeanKDP",      FALSE, 3.0},
+ {"int_sdevKDP",      FALSE, 6.0}
+};
+
+///////////// combine2 ////////////////////////////////
+//
+// 2 combine params.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      boolean is_input;
+//      double weight;
+//   }
+//
+// 1D array - variable length.
+//
+
+combine2 = {
+ {"SLW", FALSE, 1.0},
+ {"FRZDRZ", FALSE, 1.0}
+};
+
+///////////// combine3 ////////////////////////////////
+//
+// 3 combine params.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      boolean is_input;
+//      double weight;
+//   }
+//
+// 1D array - variable length.
+//
+
+combine3 = {
+ {"SLW", FALSE, 1.0}
+};
+
+///////////// combine4 ////////////////////////////////
+//
+// 4 combine params.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      boolean is_input;
+//      double weight;
+//   }
+//
+// 1D array - variable length.
+//
+
+combine4 = {
+ {"FRZDRZ", FALSE, 1.0}
+};
+
+///////////// combine5 ////////////////////////////////
+//
+// 5 combine params.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      boolean is_input;
+//      double weight;
+//   }
+//
+// 1D array - variable length.
+//
+
+combine5 = {
+ {"MeanDBZ", FALSE, 1.0}
+};
+
+///////////// combine6 ////////////////////////////////
+//
+// 6 combine params.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      boolean is_input;
+//      double weight;
+//   }
+//
+// 1D array - variable length.
+//
+
+combine6 = {
+};
+
+
+///////////// mask_range0 /////////////////////////////
+//
+// 0 mask_range params.
+//
+// Type: struct
+//   typedef struct {
+//      double mask_min;
+//      double mask_max;
+//   }
+//
+// 1D array - variable length.
+//
+
+mask_range0 = {
+  { 1, 9},
+  { 11, 11},
+  { 15, 17}
+};
+
+///////////// mask_range1 /////////////////////////////
+//
+// 1 mask_range params.
+//
+// Type: struct
+//   typedef struct {
+//      double mask_min;
+//      double mask_max;
+//   }
+//
+// 1D array - variable length.
+//
+
+mask_range1 = {
+};
+
+///////////// mask_range2 /////////////////////////////
+//
+// 2 mask_range params.
+//
+// Type: struct
+//   typedef struct {
+//      double mask_min;
+//      double mask_max;
+//   }
+//
+// 1D array - variable length.
+//
+
+mask_range2 = {
+};
+
+/**********************************************************************
+ * TDRP params for Params
+ **********************************************************************/
+
+//======================================================================
+//
+// DataFilt.
+//
+// This program does any FiltAlg library filters, with no additional app 
+//   filters added.
+//
+//======================================================================
+ 
+
+      </PRE>
+    </div>
+    <div class="right column">
+      <P> <FONT SIZE=3> Comments</FONT></P>
+      <PRE CLASS="western"><FONT SIZE=2>
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The trigger URL is where data comes from.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Output goes to this URL.
+
+
+
+
+
+
+
+Output optionally goes to this URL. Depends on the filter.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The filters are applied in the order given below. Any combination of filters
+is allowed as long as the input is either an upstream output, or the input is
+an input to the app itself.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Consider this one line below:
+
+  { "MaskZDR",                     FALSE, TRUE,  "MeanZDR",          ELLIP,       1, ""},
+
+
+    "MaskZDR"  - The input data is named "MaskZDR". It is the output of the previous filter.
+    FALSE      - This data is not an app input, it is an upstream filter output.
+    TRUE       - This data will be written to the output_url.
+    "MeanZDR"  - This is the reference name for this data if it is used downstream, and the
+                 output field name when it is written to MDV.
+    ELLIP      - The filter to do is the elliptical (smoothing) filter.
+    1          - The index into the parm_2d array below (parm_2d goes with ELLIP)
+    ""         - This filter is not an APPFILTER, so this string is empty
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The inputs to the app are each descibed here. Each input has an internal
+name such as "DBZ", and a source URL, and an external MDV field name.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The parm_2d filtering parameters mentioned above. Three sets of parameters are defined,
+any number is allowed. The example above was for the 1'th parameters, namely a filter
+with box size 15 by 5. Each filter refers to an array of parameters through the index
+value.  The mapping from filter to parameters is described later.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The parameter for index refers to combine arrays below, such as combine0, combine1,...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The variables in the logical comparisons must be in the combine list refered to by the combine
+index (combine0, combine1,...)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The mask_list_index refers to the lists mask_range0, mask_range1,...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The fuzzy functions are refered to in various index references above,
+the parameters allow 0 up to 11 as the index.
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The combine lists are referenced in various combine index settings
+above.  Index values of 0 through 6 are supported.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Mask range index values are referenced above. Index values 0 through
+2 are supported.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+      </PRE>
+    </div>
+</div>
+
+
+</P>
+</BODY>
+</HTML>

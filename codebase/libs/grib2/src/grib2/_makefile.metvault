@@ -1,0 +1,94 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 23:12:37 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+###########################################################################
+#
+# Makefile for Grib2 library
+#
+# Gary Blackburn, RAP, NCAR, Boulder, Co, USA, 80307
+#
+# November 2004
+# 
+# Jason Craig
+# August 2006
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+# to use the JPEG2000 compression/decompression capability, libjasper.a
+# must be linked in conjuction with libgrib.a
+
+TARGET_FILE = ../libgrib2.a
+
+LOC_INCLUDES = -I../include -I/opt/jasper/include
+LOC_CFLAGS =
+
+MODULE_TYPE=library
+
+#
+# file lists
+#
+
+
+CPPC_SRCS = \
+	Grib2Record.cc \
+	GribSection.cc \
+	IdSec.cc \
+	IndicatorSec.cc \
+	LocalUseSec.cc \
+	GribProj.cc \
+	LatLonProj.cc \
+	PolarStereoProj.cc \
+        LambertConfProj.cc \
+	GausLatLonProj.cc \
+        GDS.cc \
+	PDS.cc \
+	ProdDefTemp.cc \
+        Template4.0.cc \
+        Template4.1.cc \
+        Template4.2.cc \
+        Template4.5.cc \
+        Template4.6.cc \
+        Template4.7.cc \
+        Template4.8.cc \
+        Template4.9.cc \
+        Template4.10.cc \
+        Template4.11.cc \
+        Template4.12.cc \
+	DataRepTemp.cc \
+        Template5.41.cc \
+        Template5.4000.cc \
+        Template5.0.cc \
+        Template5.2.cc \
+        Template5.3.cc \
+	DRS.cc \
+	BMS.cc \
+	DS.cc \
+	DataTemp.cc \
+        Template7.41.cc \
+        Template7.4000.cc \
+        Template7.0.cc \
+        Template7.2.cc \
+	ES.cc \
+	Grib2File.cc
+
+#
+# general targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+
+#
+# local targets
+#
+
+depend: depend_generic
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

@@ -1,0 +1,503 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+////////////////////////////////////////////////////////////////////////////////
+//
+// parameter definitions for application
+//
+// Terri Betancourt, RAP, NCAR, Boulder, CO, USA, 80307-3000
+// November 2001
+//
+// $Id: paramdef.nexrad2dsr,v 1.32 2016/03/07 01:25:08 dixon Exp $
+//
+////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option for build 5 data.";
+  p_help = "If set, build 5 level II nexrad data are expected."
+"\n"
+"HOW TO TELL IF A RADAR SWITCHED TO BUILD 5 FORMAT\n"
+"-------------------------------------------------\n"
+"\n"
+"At the time of writing some radar data are delivered\n"
+"in build 5 format and some in the previous format. Radars\n"
+"are in the process of switching to build 5, so it is important\n"
+"to be able to recognise when this switch has happened so that\n"
+"the line :\n"
+"\n"
+"build5 = TRUE;\n"
+"\n"
+"can be added to the nexrad2dsr param file.\n"
+"\n"
+"There are two ways to tell if a radar has switched to\n"
+"delivering build 5 data - by the ldm filename, and from\n"
+"the header contents in the first file in a volume\n"
+"delivered by the ldm.\n"
+"\n"
+"1/ FILENAME : \n"
+"\n"
+"  Build 5 data start with a filename with sequence\n"
+"  number 1, like :\n"
+"\n"
+"   KLOT/20040825/023325_1.BZIP2\n"
+"   KLOT/20040825/023325_2.BZIP2\n"
+"   KLOT/20040825/023325_3.BZIP2\n"
+"   KLOT/20040825/023325_4.BZIP2\n"
+"   KLOT/20040825/023325_5.BZIP2\n"
+"\n"
+"  While preivous data start with sequence number 0 :\n"
+"\n"
+"   KIND/20040825/023325_0.BZIP2\n"
+"   KIND/20040825/023325_1.BZIP2\n"
+"   KIND/20040825/023325_2.BZIP2\n"
+"   KIND/20040825/023325_3.BZIP2\n"
+"   KIND/20040825/023325_4.BZIP2\n"
+"   KIND/20040825/023325_5.BZIP2\n"
+"\n"
+"2/ HEADER :\n"
+"\n"
+" The header for build 5 will contain the string\n"
+" 'AR2V0001', and this can be checked by running the 'strings'\n"
+" command on the first file in a volume :\n"
+"\n"
+" The command : strings KLOT/20040825/023325_1.BZIP2 |& grep AR\n"
+"\n"
+" gives the result :\n"
+"\n"
+" AR2V0001.090\n"
+"\n"
+" Previous data contain the string 'ARCHIVE2' and this can\n"
+" again be checked with the 'strings' command on the\n"
+" first file in a volume :\n"
+"\n"
+" The command : strings KIND/20040825/023325_0.BZIP2\n"
+"\n"
+" gives the result :\n"
+"\n"
+" ARCHIVE2.127\n"
+"\n"
+" NOTE : There is ONE IMPORTANT EXECPTION to all this - if\n"
+" you are dealing with archived radar data, then build5 seems\n"
+" to need to be FALSE, no matter what the strings in the data\n"
+" file are set to.\n"
+"Niles Oien August 24 2004";
+
+
+
+} build5;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option for dealing with input for which there\n"
+  "is one input file per volume. Only relevant if build5 is true.\n"
+  "If these files are delivered via LDM they will typically have\n"
+  "the extension .raw";
+  p_help = "Typically this should be FALSE for realtime LDM\n"
+  "operations. Relevant only if delivery method is LDM.";
+} oneFilePerVolume;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Print summary";
+  p_help = "If TRUE, summary information will be printed";
+} print_summary;
+
+paramdef long {
+  p_min = 0;
+  p_default = {90};
+  p_descr = "Summary interval (in #beams) for printing information on "
+            "radar data written to the output radar queue";
+  p_help = "Used only if print_summary is set to TRUE";
+} summary_interval;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting";
+} instance;
+
+commentdef {
+  p_header = "CONSTANT RADAR CHARACTERISTICS";
+};
+
+paramdef char* {
+  p_default = {"NEXRAD-KFTG"};
+  p_descr = "Radar name";
+} radar_name;
+
+paramdef char* {
+  p_default = {"Denver"};
+  p_descr = "Site name";
+} site_name;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Radar ID";
+  p_help = "Project-specific ID for the radar";
+} radar_id;
+
+paramdef struct radar_location_t {
+  p_descr = "Radar location";
+  p_help = "Latitude and longitued in degrees, altitude in km.";
+  p_default = { 39.787, -104.546, 1.71 };
+  p_field_type = {float, float, float};
+  p_field_name = {latitude, longitude, altitude};
+} radar_location;
+
+paramdef int {
+  p_default = 64;
+  p_min = 1;
+  p_descr = "Samples per beam";
+  p_help = "Number of pulses used to compute data from a beam";
+} samples_per_beam;
+
+paramdef double {
+  p_default = -14.0;
+  p_descr = "Receiver noise in dBZ at a range of 100km.";
+  p_help = "Used in calculating signal-to-noise (SNR) output field.";
+} noise_dbz_at_100km;
+
+commentdef {
+  p_header = "RADAR DATA INPUT";
+};
+
+typedef enum {
+  LDM, TAPE, TCP_IP
+} input_stream_t;
+
+paramdef enum input_stream_t {
+  p_descr = "Type of radar input stream";
+  p_default = {LDM};
+} input_mechanism;
+
+paramdef boolean {   
+  p_default = FALSE;
+  p_descr = "Option to override actual data time with wall clock time.";
+  p_help = "Setting this option to TRUE provides a mechanism for simulating "
+           "a realtime data stream from archive data.";
+} use_wallclock_time;
+
+paramdef long {
+  p_default = 0;
+  p_descr = "Offset in seconds to add to actual data time.";
+  p_help = "Used for testing.";
+} offset_sec;
+
+commentdef {
+  p_header = "LDM INPUT PARAMETERS";
+};
+
+paramdef char* {
+  p_descr = "Directory location of LDM input";
+  p_help = "Used only if 'input_mechanism' is set to LDM";
+  p_default = {"$(DATA_DIR)/$(PROJECT)/ldm/radarSite"};
+} radar_input_dir;
+
+commentdef {
+  p_header = "SPECIFYING THE REALTIME INPUT FILENAME CONVENTION";
+  p_text = "The dated_dir_format and file_time_format parameters\n"
+  "specify the realtime file naming convention used for input files\n"
+  "(which at the time of writing are generated by the LDM). The\n"
+  "characters have the following significance :\n\n"
+  "C (or any other character not listed below) - literal character\n"
+  "  in the filename, no decoding should be attempted.\n"
+  "Y - Four digit year.\n"
+  "M - two digit month.\n"
+  "D - two digit day.\n"
+  "h - two digit hour.\n"
+  "m - two digit minute.\n"
+  "s - two digit second.\n"
+  "S - Sequence number, integer of unspecified length.\n\n"
+  "The following are examples of how to set these parameters.\n"
+  "Example filename              dated_dir_format       file_time_format\n"
+  "20031119/204118_12.BZIP2      YMD                   hms_S\n"
+  "2003111920/4118_12.BZIP2      YMDh                  ms_S\n"
+  "200311/19204118_12.BZIP2      YM                    Dhms_S\n"
+  "20031119_204118_12.BZIP2      Empty                 YMD_hms_S\n"
+  "20031119/KYSH_204118_12.BZIP2 YMD                   CCCC_hms_S\n\n"
+  "The intent is to cover all the possibilities that the LDM can\n"
+  "reasonably produce.\n\n"
+  "NOTE : Because the program seeks out the next filename in a\n"
+  "sequence according to a naming convention, any _latest_data_info\n"
+  "files are ignored.";
+};
+
+paramdef char* {
+  p_descr = "Format for dated subdirectories off of\n"
+  "radar_input_dir. Default is YMD which means\n"
+  "that the year, month and day will be in the directory name.\n"
+  "Valid characters are C,Y,M,D and h";
+  p_help = "Used only if 'input_mechanism' is set to LDM";
+  p_default = {"YMD"};
+} dated_dir_format;
+
+paramdef char* {
+  p_descr = "Format for the file names in the dated directories."
+  "Default is hms_S which means that the hour, minute\n"
+  "and seconds, followed by an underscore and then the sequence\n"
+  "number. Valid characters are C,Y,M,D,h,m,s and S.";
+  p_help = "Used only if 'input_mechanism' is set to LDM";
+  p_default = {"hms_S"};
+} file_time_format;
+
+typedef enum {
+  UNCOMPRESSED, BZIP2, ZLIB
+} ldm_compression_t;
+
+paramdef enum ldm_compression_t {
+  p_descr = "Type of LDM compression used on input stream";
+  p_default = {BZIP2};
+  p_help = "Requires that you have the utility 'nexradII_bz' in your "
+           "executable search path";
+} ldm_compression;
+
+paramdef char* {
+  p_descr = "Temporary directory for uncompressing input files";
+  p_default = "/tmp";
+  p_help = "Used only if 'input_mechanism' is set to LDM and "
+           "the input data files are compressed.";
+} tmp_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = {REALTIME};
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the 'radar_input_dir' is watched for new "
+           "incoming files.  In ARCHIVE mode input files are specified "
+           "using the -f or -start/-end command line options "
+           "for processing a specified list of input files. "
+           "Used only if 'input_mechanism' is set to LDM";
+} mode;
+
+paramdef int {
+   p_default = 5;
+   p-descr = "Number of seconds of input file quiescence before attempting "
+             "to read REALTIME input";
+   p_help = "The quiescence time allows an input file to be completely written "
+            "to disk before attempting to read as input data. "
+            "Used only if 'input_mechanism' is set to LDM.";
+ } file_quiescence_sec;
+
+paramdef int {
+   p_default = 0;
+   p-descr = "Minimum file size, bytes.";
+   p_help = "Used in conjunction with quiesence to\n"
+	"avoid grabbing a file prematurely.";
+ } min_file_size;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Maximum valid age (in min) of input data files.";
+  p_help = "Input files older than this will not be processed.\n"
+           "Used only if 'input_mechanism' is set to LDM. Note that\n"
+	   "The age of a file is computed by subtracting the time\n"
+	   "represented in the filaname from the current time, NOT\n"
+	   "by subracting the time the file was written to disk from\n"
+	   "the current time. The latter requires that a stat be done\n"
+	   "each file, which is not practical (the program cannot\n"
+	   "keep up in realtime if it has to do this in some cases).";
+} max_valid_age_min;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Maximum time (in min) to search for an input file.";
+  p_help = "If this is exceeded, we restart the serach.\n"
+           "Used only if 'input_mechanism' is set to LDM";
+} max_elapsed_search_time;
+
+commentdef {
+  p_header = "TCP/IP INPUT PARAMETERS";
+};
+
+paramdef char* {
+  p_descr = "Host name of machine providing TCP/IP input data.";
+  p_help = "Used only if 'input_mechanism' is set to TCP_IP";
+  p_default = {""};
+} hostname;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Port number for TCP/IP socketing.";
+  p_help = "Used only if 'input_mechanism' is set to TCP_IP";
+} port;
+
+commentdef {
+  p_header = "TAPE INPUT PARAMETERS";
+};
+paramdef string {
+  p_default = "/dev/nst0";
+  p_descr = "Tape device name for input.";
+  p_help = "Used only if 'input_mechanism' is set to TAPE." ;
+} input_tape_device;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Short tape option.";
+  p_help = "Set to FALSE if reading a standard NCDC Nexrad Level 2 archive tape.  Set to TRUE if reading a RAP generated Level 2 archive tape.  Used only if 'input_mechanism' is TAPE.";
+} short_tape;
+
+commentdef {
+  p_header = "RADAR DATA OUTPUT";
+};
+
+paramdef string {
+  p_descr = "Output URL for DsRadar data via FMQ";
+  p_default = "fmqp:://$(HOST)::$(PROJECT)/fmq/dsRadar";
+} output_fmq_url;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to output DsRadarFlags as separate fmq messages";
+  p_help = "Required for Dsr2Mdv and Jing Dealias";
+} separate_fmq_flags;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to turn off flags when filtering tilt";
+  p_help = "If we are combining the 1Km dbz data with the velocity data "
+           "on the lower tilts, usually the radar parameters and field "
+           "parameters are output anyway for the dbz data during the "
+           "ingest of the 1Km tilt. If set to false, this will turn off "
+           "those flags during that tilt.";
+} params_on_filtered_tilts;
+
+typedef enum {
+  DBZ, VEL, SPW, SNR
+} available_fields_t;
+
+paramdef enum available_fields_t {
+  p_descr = "Output radar fields";
+  p_help = "Data fields extracted or derived from the input radar stream\n"
+           "DBZ   =  Reflectivity factor in dBz\n"
+           "VEL   =  Doppler velocity in m/s\n"
+           "SPW   =  Spectral width in m/s\n"
+           "SNR   =  Signal to noise ratio in dB";
+  p_default = { DBZ, VEL };
+} output_fields[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Filter out 1km reflectivity only from output radar stream";
+} filter_1km_dbz;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Beam output delay (millisecs).";
+  p_help = "Pause after writing each radar beam to allow the user to simulate "
+           "varying data rates and to provide a more constant flow of "
+           "radar data.  In ARCHIVE mode a beam_wait of 30ms is suggested";
+} beam_wait;
+
+paramdef int {
+  p_default = 25000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. The default has been caclulate to accommodate a 16-tilt NEXRAD volume (vcp 11 -- the most dense NEXRAD scan strategy) with all four output fields.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 6000;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages wh
+ich may be written to the buffer before overwrites occur. However, overwrites ma
+y occur sooner if the size is not set large enough. The default has been calculated to accommodate a 16-tilt NEXRAD volume (vcp 11 -- the most dense NEXRAD scan strategy)";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+commentdef {
+  p_header = "DATA TRIMMING - OPTIONALLY ONLY SEND FIRST ROTATION";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to only send first antenna rotation.";
+  p_help = "Defaults to FALSE for backwards compatibility, but\n"
+	"should be set if you may be dealing with VCP 121 data.";
+} firstRotationOnly;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Azimuth tolerance, degrees.";
+  p_help = "Used to compare azimuths if firstRotationOnly is set.";
+} azTol;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Number of beams to allow after first rotation,\n"
+	"unless the geometry has changed.";
+  p_help = "Useful for getting a full volume by filling the gaps\n"
+	"left by the azimuth tolerance. The dealiaser JamesD cannot\n"
+        "cope with less than a full volume";
+} numBeamsPostRotation;
+
+
+typedef enum {
+  DECOMPRESS_NEXRADII_BZ, DECOMPRESS_NEXRAD_BZIP_DECOMPRESS
+} decompress_t;
+
+paramdef enum decompress_t {
+  p_descr = "Method to decompress input data files.";
+  p_help = "Default is to run nexradII_bz on the input data. This\n"
+	"app is checked in under apps/ingest/src/nexradII_bz and is\n"
+	"based on code external to RAL. The DECOMPRESS_NEXRAD_BZIP_DECOMPRESS\n"
+	"will run apps/ingest/src/NexradBzipDecompress which was\n"
+	"developed at RAL and as such is somewhat more maintained,\n"
+	"but only supports BZIP zipped data.\n"
+	"Applies only to LDM input data.";
+  p_default = { DECOMPRESS_NEXRADII_BZ };
+} decompress_mechanism;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override input tilt numbers.";
+  p_help = "Set to TRUE if it's important that tilt numbers are sequential.";
+} overrideInputTiltNumbers;
+
+
+paramdef double {
+  p_default = -1.0;
+  p_descr = "If this value is greater than 0, it is used\n"
+	"as the gate spacing in Km";
+  p_help = "Default value of -1.0 will take gate spacing from the\n"
+	"input data stream and this should almost always be used.\n"
+	"This was added to cope with a case in which data had been\n"
+	"incorrectly formatted to the nexrad format.";
+} specifiedGateSpacing;

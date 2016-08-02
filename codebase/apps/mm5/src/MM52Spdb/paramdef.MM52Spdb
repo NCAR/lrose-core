@@ -1,0 +1,194 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MM52Spdb
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 1998
+ * 
+ * MM52Spdb interpolates MM5 data to specified points and
+ * saves out the data to an SPDB database as a ComboPt.
+ */
+
+commentdef {
+  p_header = "MM52Spdb";
+  p_text = "MM52Spdb interpolates MM5 data to specified points and saves out the data to an SPDB database as a ComboPt buffer.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+  "In realtime mode, the analysis is performed for each volume scan "
+  "as it becomes available. In archive mode, the file list is obtained "
+  "from the command line.";
+} mode;
+
+commentdef {
+  p_header = "INPUT DATA.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Directory for input MM5 data - REALTIME mode.";
+  p_help = "The latest_data_info file in this directory is updated each time the model adds a forecast time step to the output file.";
+} realtime_input_dir;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be valid. "
+    "If the latest_data_info file is older than this, the program waits "
+    "for new data.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Output URL.";
+  p_help = "The interpolated point data is output to this URL in SPDB format.";
+} output_url;
+
+typedef enum {
+  U_3D, V_3D, W_3D, TEMP_3D,
+  HUMIDITY_3D, CLW_3D, RNW_3D,
+  ICE_3D, SNOW_3D, RAD_TEND_3D
+} output_field_3d_t;
+
+paramdef enum output_field_3d_t {
+  p_default = {  U_3D, V_3D, W_3D, TEMP_3D,
+		 HUMIDITY_3D, CLW_3D, RNW_3D,
+		 ICE_3D, SNOW_3D, RAD_TEND_3D };
+  p_descr = "3D Output fields.";
+  p_help = "In the output there will be one value for each of these fields for each height available at each point.";
+} output_fields_3d[];
+  
+typedef enum {
+  GROUND_T_2D, RAIN_CON_2D, RAIN_NON_2D,
+  TERRAIN_2D, CORIOLIS_2D, RES_TEMP_2D,
+  LAND_USE_2D, SNOWCOVR_2D, TSEASFC_2D,
+  PBL_HGT_2D, REGIME_2D, SHFLUX_2D,
+  LHFLUX_2D, UST_2D, SWDOWN_2D, LWDOWN_2D,
+  SOIL_T_1_2D, SOIL_T_2_2D, SOIL_T_3_2D, 
+  SOIL_T_4_2D, SOIL_T_5_2D, SOIL_T_6_2D
+} output_field_2d_t;
+
+paramdef enum output_field_2d_t {
+  p_default = { GROUND_T_2D, RAIN_CON_2D, RAIN_NON_2D,
+		TERRAIN_2D, CORIOLIS_2D, RES_TEMP_2D,
+		LAND_USE_2D, SNOWCOVR_2D, TSEASFC_2D,
+		PBL_HGT_2D, REGIME_2D, SHFLUX_2D,
+		LHFLUX_2D, UST_2D, SWDOWN_2D, LWDOWN_2D,
+		SOIL_T_1_2D, SOIL_T_2_2D, SOIL_T_3_2D, 
+		SOIL_T_4_2D, SOIL_T_5_2D, SOIL_T_6_2D };
+  p_descr = "2D Output fields.";
+  p_help = "In the output there will be one value for each of these fields at each  point.";
+} output_fields_2d[];
+  
+typedef struct {
+  string name;
+  double lat;
+  double lon;
+  double alt;
+} output_point_t;
+
+paramdef struct output_point_t {
+  p_descr = "Name and location of output points.";
+  p_help = "The model data will be interpolated to each of these locations.";
+  p_default = {
+    { RCTP,  25.08,  121.22,    33 },
+    { RCFG,  26.17,  119.93,    91 },
+    { RCSS,  25.07,  121.55,     6 },
+    { RCGM,  25.07,  121.23,    45 },
+    { RCNO,  23.27,  119.67,    45 },
+    { RCQC,  23.58,  119.62,    31 },
+    { RCBS,  24.43,  118.37,     9 },
+    { RCUK,  24.93,  121.30,   141 },
+    { RCKH,  22.58,  120.35,     9 },
+    { RCFN,  22.77,  121.08,    42 },
+    { RCNN,  22.95,  120.20,    19 },
+    { RCAY,  22.78,  120.27,    10 },
+    { RCKU,  23.47,  120.38,    25 },
+    { RCMJ,  22.47,  120.43,     8 },
+    { RCDC,  22.68,  120.47,    24 },
+    { RCLG,  24.18,  120.65,   112 },
+    { RCKW,  21.93,  120.83,    13 },
+    { RCPO,  24.82,  120.93,     8 },
+    { RCSQ,  22.70,  120.48,    29 },
+    { RCQS,  22.80,  121.18,    37 },
+    { RCLY,  22.03,  121.55,   325 },
+    { RCYU,  24.03,  121.62,    16 },
+    { RCMS,  24.75,  121.77,     9 },
+    { RCDI,  24.87,  121.23,   241 },
+    { RCMQ,  24.27,  120.62,     5 },
+    { RCFS,  22.42,  120.55,    20 },
+    { RCGI,  22.67,  121.46,    25 },
+    { RCMT,  26.23,  119.99,    50 },
+    { RCLM,  20.67,  116.72,     6 }
+  }
+} output_points[];
+
+paramdef string {
+  p_default = "MM5 output data interpolated to this point.";
+  p_descr = "Data set info.";
+  p_help = "This text is placed in the product info part of the output data buffer for documentation purposes.";
+} data_set_info;
+
+
+
+

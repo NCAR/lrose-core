@@ -1,0 +1,6 @@
+#!/bin/csh -f
+
+/bin/rm test.log
+/bin/rm -r $RAP_DATA_DIR/mdv/rita_test/*
+../../src/ctrec/ctrec -params rita/ctrec.new.99test -mode ARCHIVE \
+    -start "1999 07 02 00 00 00" -end "1999 07 02 23 59 59" -debug

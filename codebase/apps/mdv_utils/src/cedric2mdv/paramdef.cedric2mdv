@@ -1,0 +1,181 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions - cedric2mdv
+//
+// Mike Dixon
+// EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Sept 2012
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "cedric2mdv converts a CEDRIC file to MDV.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "REALTIME: watches input_dir, waits for a new input files to arrive. ARCHIVE: processes files in input_dir between the start and end times. FILELIST: processes the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "SIGN OF LATITUDE AND LONGITUDE";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to negate the value of latitude from the file.";
+  p_help = "Cedric only seems to support positive latitudes.";
+} negate_latitude;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to negate the value of longitude from the file.";
+  p_help = "Cedric only seems to support positive longitudes.";
+} negate_longitude;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME and ARCHIVE modes.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Specify file extension.";
+  p_help = "If empty, all extensions will be accepted.";
+} input_file_extension;
+
+commentdef {
+  p_header = "OUTPUT FIELD DETAILS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify which fields to write out.";
+  p_help = "If false, all fields in the input file will be written to the output file.";
+} specify_output_fields;
+
+typedef struct {
+  string cedric_name;
+  string output_name;
+  string units;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    {
+      cedric_name = "DBZ",
+      output_name = "DBZ",
+      units = "dBZ"
+    }
+    ,
+    {
+      cedric_name = "VEL",
+      output_name = "VEL",
+      units = "m/s"
+    }
+  };
+  p_descr = "Details of the output fields.";
+  p_help = "We search for the cedric_name. If the input file contains the requested name, the field is added to the output file.";
+} output_fields[];
+
+typedef enum {
+  ENCODING_INT8 = 1,
+  ENCODING_INT16 = 2,
+  ENCODING_FLOAT32 = 5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Set encoding type for all output fields.";
+} output_encoding;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory.";
+  p_help = "Output data is written to this dir.";
+} output_dir;
+
+paramdef string {
+  p_default = "Converted by cedric2mdv.";
+  p_descr = "Data set source details.";
+  p_help = "This short string is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+paramdef string {
+  p_default = "Unknown";
+  p_descr = "Data set info.";
+  p_help = "This long string is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+

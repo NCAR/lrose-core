@@ -1,0 +1,137 @@
+#!/bin/sh --
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 23:11:36 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# snuff: Kill processes by name, BSD or SysV.
+# Tres Hofmeister <tres@ncar.ucar.edu>
+# Usage: snuff [-l] [-s siglist] process[es]
+# CVS: $Id: snuff,v 1.2 2010/10/07 23:49:57 dave Exp $
+
+# Tested under: SunOS 4.1.3 and 5.4, IRIX 4.0.5, 5.3 and 6.2,
+# Debian Linux 1.1, Slackware Linux 3.0, HP-UX B.10.01, and AIX 4.1
+
+# Failed under: AIX 3.2 and OSF/1 V3.0 with getopts(1) problems.
+
+PATH=/bin:/usr/bin:/usr/ucb
+
+prog=`basename $0`
+usage="Usage: $prog [-l] [-s siglist] process[es]"
+
+# Default signal list.
+signals="TERM KILL"
+
+# Process command line.
+while getopts ls: opt
+do
+    case $opt in
+        s)  # Allow commas as signal list separator.
+            signals=`echo $OPTARG | sed 's/,/ /g'`
+            ;;
+        l)  # Loose match.
+	    loose=true
+	    ;;
+        \?) echo $usage >&2
+            exit 1
+            ;;
+        esac
+done
+shift `expr $OPTIND - 1`
+
+# Remaining arguments are process names.
+if [ $# -eq 0 ]; then
+    echo $usage >&2
+    exit 1
+fi
+
+# Verify the signal list.
+maxsig=`kill -l | wc -w`
+for sig in $signals
+do
+    if kill -l | egrep "(^| )|SIG$sig( |$)" > /dev/null 2>&1; then
+        : # Continue.
+    elif echo $sig | egrep '^[0-9]+$' > /dev/null 2>&1; then
+        if [ $sig -le $maxsig ]; then
+            : # Continue.
+        else
+            echo "$prog: signal out of range: $sig" >&2
+            exit 1
+        fi
+    else
+        echo "$prog: invalid signal: $sig" >&2
+        exit 1
+    fi
+done
+
+# Is this BSD or SysV?
+if ps -x >/dev/null 2>&1; then
+    BSD="true"
+fi
+
+# Loop over each pattern on the command line.
+for proc in "$@"
+do
+    # Quote any '/' characters in the pattern.
+    pat=`echo "$proc" | sed 's%/%\\\/%g'`
+
+    # Is this a loose match?
+    if [ ! "$loose" ]; then
+	pat="( |\/)$pat( |$)"
+    fi
+
+    # A process name is considered to start with either
+    # a space or '/', and end with either a space or newline.
+    if [ "$BSD" ]; then
+        pids=`ps axww | awk '/'"$pat"'/ && \
+            $0 !~ / awk |'$prog'/ {print $1}'`
+    else
+        pids=`ps -ef  | awk '/'"$pat"'/ && \
+            $0 !~ / awk |'$prog'/ {print $2}'`
+    fi
+
+    # Do any processes match this pattern?
+    if [ "$pids" ]; then
+        inst=`echo $pids | wc -w`
+        echo "Instances of \`$proc':" $inst
+
+        # Loop over each instance of this pattern.
+        for pid in $pids
+        do
+            echo " Killing $proc, PID $pid"
+
+            # Is this process killable by this UID?
+            error=`kill -0 $pid 2>&1`
+            if [ "$error" ]; then
+                echo " $prog: $error" >&2
+                # Next PID.
+                continue
+            fi
+
+            # Try each signal in the list.
+            for sig in $signals
+            do
+                kill -$sig $pid; sleep 1
+                if kill -0 $pid > /dev/null 2>&1; then
+                    echo "  SIG$sig failed" >&2
+            else
+                echo "  SIG$sig succeeded"
+                # Next PID.
+                continue 2
+                fi
+            done
+
+            if kill -0 $pid > /dev/null 2>&1; then
+                echo "Failed to kill $proc, PID $pid" >&2
+            fi
+        done
+    else
+        # No processes match this pattern.
+        echo "$proc: no such process" >&2
+    fi
+done
+
+exit 0

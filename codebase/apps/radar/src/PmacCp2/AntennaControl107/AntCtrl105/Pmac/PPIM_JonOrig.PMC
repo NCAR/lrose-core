@@ -1,0 +1,571 @@
+;added p51 and p52 centering 5/28/98 this only works for small changes
+;fixed left right detection problem 7/17/98
+&1a
+&2a
+&3a
+#include "spoldefm.h"
+close
+delete gather
+delete trace
+open prog 100
+clear
+linear
+
+running=1
+pig=0
+
+p99=0                             ;loop for each volume
+cmd"&2ab101r"                     ;kill and start prog101
+If (p99 < 10) wait                  ;wait for prog101 to start
+cmd "&1"
+elpntl=-1
+elpntr=-1
+elpnt=-1
+scan_type=1                      ;for PPI
+;Grab parameters from control table ,reset fixed angle pointer
+;volpnt contains the address of the source volume
+azr=p(volpnt+vazr)   ;az right
+azr=azr+p(volpnt+vazoff) ;include offset
+While (azr > 360) azr=azr-360
+azl=p(volpnt+vazl)   ;az left
+azl=azl+p(volpnt+vazoff) ;include offset
+While (azl > 360) azl=azl-360
+azv=p(volpnt+vrate)  ;az rate
+pfixang=p(volpnt+vtab)  ;fixed table angle source pointer
+; copy up to 36 angles from the fixed angle table
+; there needs to be a negative angle somewhere to end the list
+p200=p(pfixang+0)+p(volpnt+veloff)
+p201=p(pfixang+1)+p(volpnt+veloff)
+p202=p(pfixang+2)+p(volpnt+veloff)
+p203=p(pfixang+3)+p(volpnt+veloff)
+p204=p(pfixang+4)+p(volpnt+veloff)
+p205=p(pfixang+5)+p(volpnt+veloff)
+p206=p(pfixang+6)+p(volpnt+veloff)
+p207=p(pfixang+7)+p(volpnt+veloff)
+p208=p(pfixang+8)+p(volpnt+veloff)
+p209=p(pfixang+9)+p(volpnt+veloff)
+p210=p(pfixang+10)+p(volpnt+veloff)
+p211=p(pfixang+11)+p(volpnt+veloff)
+p212=p(pfixang+12)+p(volpnt+veloff)
+p213=p(pfixang+13)+p(volpnt+veloff)
+p214=p(pfixang+14)+p(volpnt+veloff)
+p215=p(pfixang+15)+p(volpnt+veloff)
+p216=p(pfixang+16)+p(volpnt+veloff)
+p217=p(pfixang+17)+p(volpnt+veloff)
+p218=p(pfixang+18)+p(volpnt+veloff)
+p219=p(pfixang+19)+p(volpnt+veloff)
+p220=p(pfixang+20)+p(volpnt+veloff)
+p221=p(pfixang+21)+p(volpnt+veloff)
+p222=p(pfixang+22)+p(volpnt+veloff)
+p223=p(pfixang+23)+p(volpnt+veloff)
+p224=p(pfixang+24)+p(volpnt+veloff)
+p225=p(pfixang+25)+p(volpnt+veloff)
+p226=p(pfixang+26)+p(volpnt+veloff)
+p227=p(pfixang+27)+p(volpnt+veloff)
+p228=p(pfixang+28)+p(volpnt+veloff)
+p229=p(pfixang+29)+p(volpnt+veloff)
+p230=p(pfixang+30)+p(volpnt+veloff)
+p231=p(pfixang+31)+p(volpnt+veloff)
+p232=p(pfixang+32)+p(volpnt+veloff)
+p233=p(pfixang+33)+p(volpnt+veloff)
+p234=p(pfixang+34)+p(volpnt+veloff)
+p235=p(pfixang+35)+p(volpnt+veloff)
+p236=p(pfixang+36)+p(volpnt+veloff)
+
+pfixang=fatab
+
+;danger if azl=azr don't let it happen
+If (abs(azl-azr) < .2)
+  azl=azl-.1
+  azr=azr+.1
+EndIf
+
+;get mispoint and quarterpoints of sweep   check this
+If ((azr-azl) > 0)
+  temp1=(azr-azl)/2                    ;width of sweep
+  azmid=(azl+temp1)%360.
+  azmidl=(azl+temp1/2)%360
+  azmidr=(azmid+temp1/2)%360
+Else
+  temp1=(azr-azl+360)/2
+  azmid=(azl+temp1)%360.
+  azmidl=(azl+temp1/2)%360
+  azmidr=(azmid+temp1/2)%360
+EndIf
+
+;compute az basic parameters
+azacmax=360.*(i117/i127)*1000000.;get max az acceleration from i variables
+azvmax=360.*(i116/i127)*1000     ;get az max velocity deg/sec
+azts0=i121/1000                  ;get ts0
+azts03=azts0*azts0*azts0         ;TS0^3
+azk=azacmax/azts0                ;get az K value
+
+If (azv > azvmax) azv=azvmax       ;limit azv to azvmax
+
+;compute elevation basic parameters
+elacmax=360.*(i217/i227)*1000000.;get max el acceleration from i variables
+elvmax=360.*(i216/i227)*1000     ;get el max velocity deg/sec
+elts0=i221/1000                  ;get ts0
+elts03=elts0*elts0*elts0         ;cube it
+elk=elacmax/elts0                ;get el K value
+
+;compute elevation parameters for step transitions
+eltam=elvmax/elacmax+elts0       ;el max perf TA to max velocity
+eltlm=eltam-2*elts0              ;max perf TL
+temp2=elts0*eltlm*eltlm          ;ts0tl^2
+elxmv=3*elts0*elts0*eltlm+temp2+2*elts03
+elxmv=(elk/2)*elxmv
+elxts=elk*elts03                 ;x for TS
+
+
+;compute az starting point offset, and startup TA, TS
+;this is always at maximum performance
+If ((azv/azacmax) > azts0)   ;for higher speeds
+  azits=azts0
+  azita=azv/azacmax+azts0
+  temp1=azv/azacmax-azts0     ;tl
+  temp2=azts0*temp1*temp1     ;ts0tl^2
+  azioff=3*azts0*azts0*temp1+temp2+2*azts03
+  azioff=(azk/2)*azioff
+Else ;forlowerspeeds
+  azits=sqrt(azv/azk)
+  azita=2*azits
+  azioff=azk*azits*azits*azits
+EndIf
+aziaz=azl-azioff           ;starting point for initial acceleration
+If (aziaz < 0) aziaz=aziaz+360
+
+;compute first step
+If (p(pfixang+1) > -1)				;fix this someday
+elstep=abs((p(pfixang+1)-p(pfixang))%-180)
+Else
+  elstep=0
+EndIf
+
+;compute elevation step time and make adjustments as necessary
+; to az and el TA and TS parameters
+
+call102
+
+
+;now finally do something
+FRAX(a)                   ;make az a feedrate axis
+
+;go to start point at max performance-assume large move
+F(azvmax)               ;max speed
+TS(azts0*1000)
+TA0
+m202=scan_type                  ;this is a ppi scan
+m206=1                           ;in a transition
+
+
+volcnt=volcnt+1                 ;inc volume count
+swpcnt=swpcnt+1                 ;inc sweep count
+fixed_ang=p(pfixang)+p52           ;initialize fixed_ang
+elpnt=p(pfixang)+p52               ;send el to starting point
+A(aziaz+p51)                        ;send az to starting point
+dwell 250
+
+done=999
+;while (1>2)                 ;this turns off the wait for position
+; while ((m140*m240)<1) wait ;wait for both in position and stopped
+
+While ((abs(elnow-(p(pfixang)+p52))%-180) > imhere) wait
+;m206=1    ;Kludge alert  this is because elpnt can reset transition when it gets there fixed?1/5/01
+While ((abs(aznow-(aziaz+p51))%-180) > imhere) wait
+
+While (abs(m166) > imstopped) wait
+While (abs(m266) > imstopped) wait
+
+
+; temp2=99
+; while (temp2>.1)
+;temp2=(abs(aznow-(aziaz+p51)))
+; if (temp2>180) temp2=360-temp2
+; endwhile
+;
+;temp2=99
+; while (temp2>.1)
+;temp2=abs(elnow-p(pfixang)+p52)
+; if (temp2>180) temp2=360-temp2
+; endwhile
+
+;endwhile
+
+done=-1
+
+m206=0                          ;and now it is not in a transition
+F(azv)
+TA(100+azta*1000) TS(azts*1000)
+
+
+;here follows the main back and forth loop
+;prog 101 deals with the EL steps
+;added p51 offset for sphere cals 5/27/98
+While (done < 0)
+  If (done < 0)
+    If (p(pfixang) > -1)
+      If (pfixang > fatab+.5)
+        elpntr=p(pfixang) +p52    ;send next fixed angle
+        ;TA1
+        TA(azta*1000) TS(azts*1000)
+        a(azl-aztoff+p51)       ;since first starting point=azl=azioff
+      EndIf
+      ;TA(azta*1000) TS(azts*1000)
+      TA1
+      ; a(azmidl+p51)
+      a(azmid+p51)
+      ;a(azmidr+p51)
+      pfixang=pfixang+1           ;pointer to next fixed angle
+      elstep=abs((fixed_ang-p(pfixang)-p52)%-180) ;next elstep
+      fixed_ang=p(pfixang)+p52        ;next fixed angle
+      call102                     ;recalculate TA and TS for new stepsize
+      
+    Else
+      TA(azita*1000) TS(azits*1000) ;end of scan at left end
+      a(azl-azioff+p51)       ;decellerate
+      a(azl-azioff+p51)           ;decellerate
+      done=1
+      dwell1
+    EndIf
+  EndIf
+  If (done < 0)
+    If (p(pfixang) > -1)
+      elpntl=p(pfixang)+p52             ;send next fixed angle
+      ;TA1
+      TA(azta*1000) TS(azts*1000)
+      a(azr+aztoff+p51)                 ;turnaround point
+      
+      ;TA(azta*1000) TS(azts*1000)
+      TA1
+      ; a(azmidr+p51)
+      a(azmid+p51)
+      ;a(azmidl+p51)
+      
+      pfixang=pfixang+1           ;pointer to next fixed angle
+      elstep=abs((fixed_ang-p(pfixang)-p52)%-180) ;next elstep
+      fixed_ang=p(pfixang) +p52       ;next fixed angle
+      call102                     ;recalculate TA and TS for new stepsize
+      
+      
+    Else
+      TA(azita*1000) TS(azits*1000)  ;end of scan at right end
+      a(azr+azioff+p51)        ;decellerate
+      a(azr+azioff+p51)        ;decellerate
+      done=1
+      dwell 1
+    EndIf
+  EndIf
+EndWhile
+m206=1                    ;in transition
+f(azvmax)
+elpntl=-1
+elpntr=-1
+elpnt=-1
+running=0
+close
+
+open prog101
+clear
+;loop forever and wait for messages from prog 100
+;messages are elpnt>0 send elevation to the angle in elpnt immediately
+;elpntl>0 send elevation to the angle in elpntl when commanded az >azr
+;elpntr>0 send elevation to the angle in elpntr when commanded az <azl
+;beware of timing lags
+;added p52 offset 5/27/98
+&2
+
+p99=0
+last_ang=(360/i227)*((m261/(i208*32))%i227)
+While (2 > 1)
+  p99=p99+1
+  TA15
+  TS1
+  b(last_ang)
+  ;aznow=(360/i127)*((m161/( i108*32))%i127)
+  ;elnow=(360/i227)*((m261/(i208*32))%i227)
+  If (elpnt !< 0)		;just point
+  ts(elts0*1000)
+  ta0
+  f(elvmax)
+  dwell1
+  m205=(elpnt)*182.0444   ;send fixed angle to host
+  m204=volcnt             ;and volume count
+  m203=swpcnt             ;send swpcnt to host
+  m206=1                  ;in transition
+  b(elpnt)
+  dwell 1
+  dwell 1
+  ;this must be done elsewhere
+  ;m206=0                 ;out of transition
+  last_ang=elpnt
+  elpnt=-1
+EndIf
+
+;>azr
+If (elpntl !< 0)
+  ; is aznow >azr+p51?
+  tap=azr+p51
+  If (((aznow-tap)%-180) > 0)    ;aznow to the right of tap
+    ts(elts*1000)
+    ta(elta*1000)
+    dwell1
+    m206=1                       ;transition flag on
+    m205=(elpntl)*182.0444       ;send fixed angle to host
+    If (pig = 0) swpcnt=swpcnt+1  ;inc sweep count when not at end of surv volume
+    m203=swpcnt                  ;send swpcnt to host
+    m204=volcnt                  ;and volume count
+    If (elpntl > 89 And scan_type = 8)  ;for surv's only
+      m202=4                          ;did we switch to vertical pointing?
+    Else ;surv'sonlygoclockwise
+      m202=scan_type                  ;scan type  surv or vert pointing
+    EndIf
+    b(elpntl)      ;go to next elevation
+    dwell1
+    m206=0         ;transition flag off
+    last_ang=elpntl
+    elpntl=-1
+    ;        p160=p160+1  ;for debug
+  EndIf
+EndIf
+;<azl
+If (elpntr !< 0)
+  ; is aznow <azr+p51?p141
+  tap=azl+p51
+  If (((aznow-tap)%-180) < 0)    ;aznow to the left of tap
+    ts(elts*1000)
+    ta(elta*1000)
+    dwell1
+    m206=1                    ;transition flag on
+    m205=(elpntr)*182.04444   ;send fixed angle to host
+    swpcnt=swpcnt+1           ;inc swpcnt
+    m203=swpcnt               ;send swpcnt to host
+    m204=volcnt               ;and volume count
+    b(elpntr)                 ;go to next elevation
+    dwell 1
+    m206=0                    ;transition flag off
+    last_ang=elpntr
+    elpntr=-1
+    
+  EndIf
+EndIf
+EndWhile
+close
+
+close
+open prog102
+clear
+
+;compute az turnaround time at maximum performance
+If (2*azv/azacmax > azts0)          ;is tl >0? for azts0
+  azta= 2*azv/azacmax+azts0
+  azts=azts0
+Else
+  azts=sqrt(2*azv*azts0/azacmax)
+  azta=2*azts
+EndIf
+;compute TL for turnaround
+If ((2*azv)/azacmax > azts0)
+  temp1=azta-2*azts
+Else
+  temp1=0
+EndIf
+temp2=azts*temp1*temp1
+temp2=temp2+2*azts*azts*azts
+aztoff=(azk/4)*(3*azts*azts*temp1+temp2)
+
+;compute elevation transition time at maximum performance
+If (abs(elstep) > 2*elxmv)      ;bigsteps
+  elta=eltam
+  elts=elts0
+  eltm=elta+(abs(elstep)/2-elxmv)/elvmax
+  elttt=eltm+elta
+Else
+  If (abs(elstep) > 2*elxts)    ;medium steps
+    elts=elts0
+    temp1=9*elts03*elts0
+    temp1=temp1-4*elts0*(2*elts03-(abs(elstep)/elk))
+    temp2=(-3*elts0*elts0+sqrt(temp1))/(2*elts0)
+    elta=2*elts+temp2
+    eltm=elta
+    elttt=2*elta
+  Else ;tinysteps
+    temp1=.333333*ln(abs(elstep)/(2*elk))
+    elts=exp(temp1)
+    elta=2*elts
+    eltm=elta
+    elttt=2*elta
+  EndIf
+EndIf
+eltamx=elta             ;save for surv scan
+eltsmx=elts             ;save for surv scan
+;adjust so elevation transition time = az turnaround time by
+;degrading the performance of which ever is faster.
+If (azta > elttt)         ;slow down elevation transitions
+  If (elttt > 2*elta)
+    eltm=azta-elta   ;for long transitions
+  Else
+    elta=azta/2        ;for short transitions
+  EndIf
+  
+  
+Else ;slowdownturnarounds
+  azta=elttt       ;force an azta by reducing azacmax by reducing ts0
+  ;compute a ts0 with k for a given ta and v
+  ;TS in this case will always be less then ta/2
+  
+  temp1=azta*azta-4*2*azv/azk
+  azts=(azta-sqrt(temp1))/2
+  ;and compute a new aztoff
+  temp1=azta-2*azts        ;tl
+  temp2=azts*temp1*temp1
+  temp2=temp2+2*azts*azts*azts
+  aztoff=(azk/4)*(3*azts*azts*temp1+temp2)
+EndIf
+close
+&1a
+&2a
+&3a
+close
+
+;surv scan
+open prog 103
+delete trace delete gather
+clear
+; startup prog101
+debug=3
+p99=0
+pig=0
+elpnt=-1
+elpntr=-1
+elpntl=-1
+cmd"&2ab101r"                      ;kill and start prog101
+debug=4
+If (p99 < 10) wait                   ;wait for prog101 to start
+cmd "&3"
+azv=p(volpnt+vrate)
+scan_type=8                        ;this is a surv scan
+m202=scan_type
+m206=1
+;right now in a transition
+;start az going
+i122=1.01*azv*(i127/360)/1000        ;counts/ms
+I121=300
+I120=1300
+debug=123
+cmd "#1j+"
+debug=456
+;spin forever
+pfixang=p(volpnt+vtab)  ;fixed table angle source pointer
+;copy the fixed angle table to allow modifications while running
+p200=p(pfixang+0)
+p201=p(pfixang+1)
+p202=p(pfixang+2)
+p203=p(pfixang+3)
+p204=p(pfixang+4)
+p205=p(pfixang+5)
+p206=p(pfixang+6)
+p207=p(pfixang+7)
+p208=p(pfixang+8)
+p209=p(pfixang+9)
+p210=p(pfixang+10)
+p211=p(pfixang+11)
+p212=p(pfixang+12)
+p213=p(pfixang+13)
+p214=p(pfixang+14)
+p215=p(pfixang+15)
+p216=p(pfixang+16)
+p217=p(pfixang+17)
+p218=p(pfixang+18)
+p219=p(pfixang+19)
+p220=p(pfixang+20)
+p221=p(pfixang+21)
+p222=p(pfixang+22)
+p223=p(pfixang+23)
+p224=p(pfixang+24)
+p225=p(pfixang+25)
+p226=p(pfixang+26)
+p227=p(pfixang+27)
+p228=p(pfixang+28)
+p229=p(pfixang+29)
+p230=p(pfixang+30)
+p231=p(pfixang+31)
+p232=p(pfixang+32)
+p233=p(pfixang+33)
+p234=p(pfixang+34)
+p235=p(pfixang+35)
+p236=p(pfixang+36)
+pfixang=fatab
+elta=.001                       ;fast as possible
+elts=.3
+swpcnt=swpcnt+1                 ;this is a new sweep
+volcnt=volcnt+1                 ;and a new volume
+elpnt=p(pfixang)                ;send el to first ang
+
+
+While (abs((elnow-p(pfixang))%-180) > imhere) wait  ;wait for it to get there Andstopped
+While (abs(m266) > imstopped) wait
+m206=0                           ;out of transition
+azr=aznow                       ;grab aznow for "full 360's"
+pfixang=pfixang+1               ;next angle
+
+done=-1
+
+;volume loop
+;while (done<0)
+;sweep loop
+
+While (p(pfixang) !< 0)
+  
+  While (((aznow-azr)%-180) !< 0) wait  ;wait while aznow is to the right of azr
+  ;then set up transition when crossing to the right
+  
+  elstep=abs((fixed_ang-p(pfixang))%-180) ;next elstep
+  call 102                         ;compute new TA and TS
+  elta=eltamx
+  elts=eltsmx                      ;all this is to bypass the turnaround opt.
+  elpntl=p(pfixang)                ;transition when it crosses azr
+  fixed_ang=p(pfixang)
+  
+  
+  While (elpntl !< 0) wait		;wait for the move
+  While (abs((elnow-p(pfixang))%-180) > imhere) wait  ;wait for it to get there
+  
+  azr=aznow                        ;grab aznow for "full 360's"
+  pfixang=pfixang+1                ;next angle
+EndWhile
+
+
+;this mess is to wait for the end of the last sweep
+While (((aznow-azr)%-180) !< 0) wait  ;wait while aznow is to the right of azr
+pig=1
+elpntl=p(pfixang-1)                  ;send same angle as before
+While (elpntl !< 0) wait               ;wait for transition to start
+
+
+
+
+
+m206=1                       ;in transition
+;cmd "#1j/"                   ;stop
+;a(aznow)
+;f(azvmax)
+;Dwell250                     ;changed 5/28/98
+elpntl=-1                    ;Bye
+elpntr=-1
+elpnt=-1
+running=0
+pig=0
+;endwhile
+close
+
+
+
+
+
+
+
+
+
+
+

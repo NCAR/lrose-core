@@ -1,0 +1,275 @@
+/*********************************************************
+ * parameter definitions for TrackGridStats
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * March 1998
+ */
+
+commentdef {
+  p_header = "Program name: TrackGridStats";
+  p_text = "TrackGridStats computes geographically-distributed statistics from titan storm and track files. Gridded output is in MDV format.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./titan/storms";
+  p_descr = "Input dir for storms files.";
+  p_help = "TITAN track *.sh5 files should appear in this directory.";
+} input_dir;
+
+paramdef string {
+  p_default = "th5";
+  p_descr = "File extension for input track files.";
+} input_file_ext;
+
+commentdef {
+  p_header = "COMPUTATIONAL PARAMETERS.";
+}
+
+typedef enum {
+  TITAN_TRACKS, MODEL_TRACKS
+} track_data_type_t;
+
+paramdef enum track_data_type_t {
+  p_default = TITAN_TRACKS;
+  p_descr = "Type of input track data.";
+  p_help = "Two track data types are permissable: (a) TITAN track files, (b) track files generated from the stochastic model StormModel.";
+} track_data_type;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of seasons for stats.";
+  p_help = "The number of seasons for computing the seasonal means, such as precip, if applicable.";
+} n_seasons;
+
+paramdef double {
+  p_default = 900.0;
+  p_descr = "Min track duration (secs)";
+  p_help = "The minimum duration for including a track in the analysis.";
+} min_duration;
+
+paramdef int {
+  p_default = 1;
+  p_min = 1;
+  p_descr = "The number of grid locations in x and y over which the data is smoothed during computation.";
+  p_help = "The stats are computed on the same grid projection as the track data. However, you may choose to smooth the data during the computations. A kernel size of 1 implies no smoothing. A kernel size of 3 implies smoothing over a 3x3 kernel. The kernel size must be a positive odd number.";
+} smoothing_kernel_size;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Radius used to compute counting statistics (km)";
+  p_help = "A number of statistics are computed as counts per unit area. These are: n_events, n_weighted, n_complex, n_start and n_mid. This is the radius over which the density is computed.";
+} radius_for_density_stats;
+
+typedef enum {
+  STORM_RUNS, STORM_ELLIPSES
+} spatial_representation_t;
+
+paramdef enum spatial_representation_t {
+  p_default = STORM_RUNS;
+  p_descr = "Spatial representation used for the storms.";
+  p_help = "The spatial extent of the storms may be described using either the original grid run locations, or the ellipse fitted to the storm shape. For MODEL_TRACKS only the ellipses are available.";
+} spatial_representation;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to estimate precip using the reflectivity histogram.";
+  p_help = "If true, the dbz histogram will be used to estimate the reflectivity at grid points, and the ZR relationship will be applied. If false, the precip flux computed by TITAN will be spread evenly over the storm area.";
+} compute_precip_from_dbz_histogram;
+
+paramdef double {
+  p_default = 200.0;
+  p_descr = "Z-R coefficient";
+  p_help = "The coefficient in the Z-R relationship";
+} z_r_coeff;
+
+paramdef double {
+  p_default = 1.6;
+  p_descr = "Z-R exponent";
+  p_help = "The exponent in the Z-R relationship";
+} z_r_exponent;
+
+paramdef double {
+  p_default = 55.0;
+  p_descr = "Hail dBZ threshold";
+  p_help = "The reflectivity threshold above which hail is assumed";
+} hail_dbz_threshold;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the storm ellipse shapes with circles of constant radius.";
+  p_help = "If set the same weight is given to all storms for those properties which are computed spatially. See circle_radius. NOTE: spatial_representation must be set to STORM_ELLIPSES for this to be effective. This option is useful for computing fields which should not be weighted by storm area - for example storm motion.";
+} override_ellipse;
+
+paramdef double {
+  p_default = 10.0;
+  p_min = 0.0;
+  p_descr = "Radius of circle for overriding the ellipses.";
+  p_help = "See override_ellipse.";
+} circle_radius;
+
+commentdef {
+  p_header = "MODEL PARAMETERS.";
+}
+
+paramdef double {
+  p_default = 360.0;
+  p_descr = "Nominal radar volume scan interval (secs).";
+  p_help = "Nominal interval between radar volume scans. This is used for adjusting time-dependent computations.";
+} scan_interval;
+
+typedef struct {
+  double origin_lat;
+  double origin_lon;
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} model_grid_t;
+
+paramdef struct model_grid_t {
+  p_descr = "Grid parameters for model data.";
+  p_help = "The grid params for computing the track stats from model data. Only applicable for MODEL_TRACKS.";
+  p_default = {
+    origin_lat = 39.78,
+    origin_lon = -104.546,
+    nx = 120,
+    ny = 120,
+    minx = -148.75,
+    miny = -148.75,
+    dx = 2.5,
+    dy = 2.5
+  };
+} model_grid;
+
+paramdef double {
+  p_default = 3.0;
+  p_min = 0.01;
+  p_descr = "Dbz histogram interval.";
+  p_help = "Reflectivity interval for histogram computations related to the reflectivity distribution. Used for MODEL_TRACKS only";
+} dbz_hist_interval;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "mdv/track_grid_stats";
+  p_descr = "URL for output MDV files.";
+  p_help = "Upper level directory for output grid stats files";
+} output_url;
+
+typedef enum {
+  START_TIME, MID_TIME, END_TIME
+} time_stamp_t;
+
+paramdef enum time_stamp_t
+{
+  p_default = END_TIME;
+  p_descr = "Time stamp used to name output file.";
+  p_help = "START_TIME: name with period start time. MID_TIME: name with period MID_TIME. END_TIME: name with period end time.";
+} output_time_stamp;
+
+paramdef string {
+  p_default = "This MDV file was created by TrackGridStats.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "Track grid statistics.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "TITAN storm tracks.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+typedef enum {
+  PROJ_NATIVE = -1,
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_FLAT = 8
+} output_projection_t;
+
+paramdef enum output_projection_t {
+  p_default = PROJ_NATIVE;
+  p_descr = "Projection for output grid.";
+  p_help = "If PROJ_NATIVE, the output grid is determined from the computational grid. If not, the computational grid is remapped to the output grid before the files are written.";
+} output_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} output_grid_params_t;
+
+paramdef struct output_grid_params_t {
+  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
+  p_descr = "Grid parameters for output file.";
+  p_help = "These params apply to all projection types, except NATIVE. The ";
+} output_grid;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Outputped grid rotation.";
+  p_help = "This applies only to PROJ_FLAT projections.";
+} output_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Outputped grid origin latitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.";
+} output_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Outputped grid origin longitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.";
+} output_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Outputped grid reference latitude 1.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} output_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Outputped grid reference latitude 2.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} output_lat2;
+

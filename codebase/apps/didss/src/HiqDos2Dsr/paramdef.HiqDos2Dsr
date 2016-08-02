@@ -1,0 +1,498 @@
+////////////////////////////////////////////////////////
+// parameter definitions for Hiq2Dsr
+///////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "Hiq2Dsr PARAMETER FILE";
+}
+
+commentdef
+{
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+  p_default = FALSE;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "Debug option for reading the HiQ messages";
+  p_help = "If set, verbose debug messages will be printed when any HiQ "
+           "data is read in. "
+           "These messages are very verbose so only use this option when "
+           "debugging a problem with the HiQ interface.";
+  p_default = FALSE;
+} debug_hiq;
+
+paramdef boolean
+{
+  p_descr = "Debug option for reading the HiQ messages";
+  p_help = "If set, summary debug messages will be printed when any HiQ "
+           "data is read in. "
+           "These messages include the elevation angle, azimuth angle "
+           "and time values from the received header.";
+  p_default = FALSE;
+} debug_hiq_summary;
+
+paramdef string
+{
+  p_descr = "Instance";
+  p_help = "Used for process registration";
+  p_default = "Test";
+} instance;
+
+commentdef
+{
+  p_header = "INPUT";
+}
+
+typedef enum
+{
+  RAP_ARCHIVE_FILE,
+  UDP
+} input_type_t;
+
+paramdef enum input_type_t
+{
+  p_descr = "Input type";
+  p_help = "Specifies where the HiQ data is coming from:\n"
+           "\tRAP_ARCHIVE_FILE - The HiQ data will be read from a list of "
+           "files created earlier by Hiq2Dsr. "
+           "These input files must be in the same format as the files "
+           "created by Hiq2Dsr when file archiving, either to a single "
+           "file or to multiple files, is turned on. "
+           "To specify the input files, either use the input_files "
+           "parameter below or use the -if command line option. "
+	   "Also, the input_msgs_per_sec indicates the number of input "
+           "messages to process per second. "
+	   "This is used to slow the file ingest down to be closer to "
+           "realtime. "
+           "For our setup in the UAE, the beam data is split into 3 "
+	   "messages per beam. "
+           "\tUDP - The HiQ data is coming over a UDP port. "
+           "For UDP input, the port parameter must be specified. "
+           "The test HiQ system used port number 21010 for UDP connections.";
+  p_default = UDP;
+} input_type;
+
+paramdef long
+{
+  p_descr = "UDP port for beam data packets";
+  p_help = "Used only if input_type is set to UDP";
+  p_default = 21010;
+} port;
+
+paramdef string
+{
+  p_descr = "List of input files to use when input_type is set to "
+            "RAP_ARCHIVE_FILE.";
+  p_help = "Used only if input_type is set to RAP_ARCHIVE_FILE and "
+           "overridden by the -if command line argument.";
+  p_default = { "file1", "file2" };
+} input_files[];
+
+paramdef long
+{
+  p_descr = "Number of messages processed from the input file per second";
+  p_help = "Used only if input_type is set to RAP_ARCHIVE_FILE.";
+  p_default = 60;
+} input_msgs_per_sec;
+
+commentdef
+{
+  p_header = "RADAR INFORMATION";
+}
+
+paramdef long
+{
+  p_descr = "Radar ID.";
+  p_help = "Project specified ID for the radar";
+  p_default = 0;
+} radar_id;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating where to get tilt number from";
+  p_help = "If set to true, the tilt number will be taken from the "
+           "HiQ beam header. "
+           "If set to false, the tilt number will be determined based "
+           "on the scan strategy given below.";
+  p_default = true;
+} get_tilt_num_from_header;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating where to get volume number from";
+  p_help = "If set to true, the volume number will be taken from the "
+           "HiQ beam header. "
+           "If set to false, the volume number will be determined based "
+           "on the scan strategy and end-of-volume information given below.";
+  p_default = true;
+} get_vol_num_from_header;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating where to get the beam time from";
+  p_help = "If set to true, the beam time will be taken from the "
+           "HiQ beam header. "
+           "If set to false, the beam time will be set to the current "
+           "system time on the host where Hiq2Dsr is running.";
+  p_default = true;
+} get_beam_time_from_header;
+
+paramdef double
+{
+  p_descr = "Scan strategy";
+  p_default = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
+} scan_strategy[];
+
+paramdef double
+{
+  p_descr = "Maximum allowable difference in target elevation from "
+            "scan strategy";
+  p_help = "This is used to prevent data from coming through that is "
+           "not associated witht the scan strategy we are expecting";
+  p_default = 0.5;
+} max_diff_from_scan;
+
+paramdef double
+{
+  p_descr = "When elevation angle drops by this much from the previous beam, "
+            "the current beam will not be written";
+  p_help = "This is used to prevent data from coming through as the antenna "
+           "drops down for a new volume";
+  p_default = 0.5;
+} max_legal_elev_drop;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use a median filter on the "
+            "elevation angles.";
+  p_default = false;
+} use_elev_median_filter;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use a median filter on the "
+            "azimuth angles.";
+  p_default = false;
+} use_az_median_filter;
+
+paramdef long
+{
+  p_descr = "Number of beams to look at before the current beam when "
+            "using the median filter.";
+  p_help = "Used only if use_elev_median_filter and/or "
+           "use_az_median_filter is true.";
+  p_min = 0;
+  p_default = 0;
+} median_filter_beams_before;
+
+paramdef long
+{
+  p_descr = "Number of beams to look at after the current beam when "
+            "using the median filter.";
+  p_help = "Used only if use_elev_median_filter and/or "
+           "use_az_median_filter is true.";
+  p_min = 0;
+  p_default = 0;
+} median_filter_beams_after;
+
+paramdef boolean
+{
+  p_descr = "Override latitude, longitude and altitude in header";
+  p_default = FALSE;
+} override_latlon;
+
+typedef struct
+{
+  double latitude;
+  double longitude;
+  double altitude;
+} radar_location_t;
+
+paramdef struct radar_location_t
+{
+  p_descr = "Radar location";
+  p_help = "Used if override_radar_location is TRUE. "
+           "Lat and lon in degrees. "
+           "Alt in km";
+} radar_location;
+
+typedef struct
+{
+  double scale;
+  double bias;
+} scaling_info_t;
+
+paramdef struct scaling_info_t
+{
+  p_descr = "Scale and bias for reflectivity data";
+  p_help = "The reflectivity fields are calculated as floats, and then "
+           "scaled using these values before they are output to the "
+           "dsRadar FMQ.";
+  p_default = {0.5, -32.0};
+} dbz_scaling_info;
+
+paramdef struct scaling_info_t
+{
+  p_descr = "Scale and bias for velocity data";
+  p_help = "The velocity field is calculated as a float, and then "
+           "scaled using these values before it is output to the "
+           "dsRadar FMQ.";
+  p_default = {0.5, -63.5};
+} vel_scaling_info;
+
+paramdef struct scaling_info_t
+{
+  p_descr = "Scale and bias for spectrum width data";
+  p_help = "The spectrum width field is calculated as a float, and then "
+           "scaled using these values before it is output to the "
+           "dsRadar FMQ.";
+  p_default = {0.5, -63.5};
+} sw_scaling_info;
+
+paramdef struct scaling_info_t
+{
+  p_descr = "Scale and bias for NCP data";
+  p_help = "The NCP field is calculated as a float, and then "
+           "scaled using these values before it is output to the "
+           "dsRadar FMQ.";
+  p_default = {0.004, 0.0};
+} ncp_scaling_info;
+
+paramdef struct scaling_info_t
+{
+  p_descr = "Scale and bias for power data";
+  p_help = "The power field is calculated as a float, and then "
+           "scaled using these values before it is output to the "
+           "dsRadar FMQ.";
+  p_default = {0.004, 0.0};
+} power_scaling_info;
+
+paramdef string
+{
+  p_descr = "Scan type name";
+  p_default = "Default";
+} scan_type_name;
+
+typedef enum
+{
+  EOV_TRIGGER_BY_ANGLE_DROP,
+  EOV_TRIGGER_BY_END_TILT,
+  EOV_TRIGGER_BY_START_TILT
+} eov_trigger_mode_t;
+
+paramdef enum eov_trigger_mode_t
+{
+  p_descr = "Type of end-of-volume trigger.";
+  p_help = "Determines when and end-of-volume will be triggered in the data. "
+           "\tEOV_TRIGGER_BY_ANGLE_DROP: An end-of-volume will be triggered "
+           "when a beam is received whose elevation angle is less than the "
+           "the maximum elevation received for that volume so far by an "
+           "amount greater than or "
+           "equal to the amount specified in the end_of_volume_trigger "
+           "parameter.\n"
+           "\tEOV_TRIGGER_BY_END_TILT: An end-of-volume will be triggered when "
+           "a beam is received whose elevation angle is not equal to the "
+           "end_of_volume_trigger angle after receiving one or more beams "
+           "whose elevation is equal to this angle.  "
+           "Note that all elevations are mapped to the nearest scan strategy "
+           "elevation before any comparisons are done.\n"
+           "\tEOV_TRIGGER_BY_START_TILT: An end-of-volume will be triggered "
+           "when a beam is received whose elevation angle is equal to the "
+           "end_of_volume_trigger angle after receiving one or more beams "
+           "whose elevation is not equal to this angle.  "
+           "Note that all elevations are mapped to the nearest scan strategy "
+           "elevation before any comparisons are done.";
+  p_default = EOV_TRIGGER_BY_ANGLE_DROP;
+} eov_trigger_mode;
+
+paramdef double
+{
+  p_descr = "Elevation angle used to trigger an end-of-volume.";
+  p_help = "See the comment for the eov_trigger_mode parameter to see how "
+           "this is used.";
+  p_default = 10.0;
+} end_of_volume_trigger;
+
+commentdef
+{
+  p_header = "OUTPUT";
+}
+
+paramdef string
+{
+  p_descr = "Output URL for DsRadar data via FMQ";
+  p_help = "The following fields are written to the output FMQ:\n"
+           "\t\"DBZ\" - reflectivity in dBZ\n"
+           "\t\"VEL\" - velocity in m/s\n"
+           "\t\"SPW\" - spectral width in m/s\n"
+           "\t\"COH DBZ\" - coherent reflectivity in dBZ\n"
+           "\t\"NCP\" - NCP without units\n"
+           "\t\"POWER\" - power in dB\n";
+  p_default = "fmqp:://localhost::./fmq.dsRadar";
+} output_fmq_url;
+
+paramdef long
+{
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. "
+           "Some of this buffer will be used for control bytes "
+           "(12 bytes per message).";
+  p_default = 2000000;
+} output_fmq_size;
+
+paramdef long
+{
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of "
+           "messages which may be written to the buffer before "
+           "overwrites occur. "
+           "However, overwrites may occur sooner if the size is not "
+           "set large enough.";
+  p_default = 3600;
+} output_fmq_nslots;
+
+paramdef boolean
+{
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+  p_default = FALSE;
+} output_fmq_compress;
+
+typedef enum
+{
+  OUTPUT_SIMPLE,
+  OUTPUT_SCAN_STRATEGY
+} output_type_t;
+
+paramdef enum output_type_t
+{
+  p_descr = "Type of output to produce";
+  p_help = "\tOUTPUT_SIMPLE - Output all beams as received (except for any "
+           "cleaning up that might be done like running the median filter "
+           "on the elevation angles) with just the addition of end of "
+           "volume flags. "
+           "No end of tilt flags are generated in this mode. "
+           "This mode can be used when the output is going either directly "
+           "to Dsr2Vol or through only simple filters before Dsr2Vol. "
+           "It cannot be used if ApRemoval is downstream from Hiq2Dsr.\n"
+           "\tOUTPUT_SCAN_STRATEGY - Output only beams the match the "
+           "included scan strategy. "
+           "This version of output is harder to tune and could remove beams "
+           "that should be kept. "
+           "However, this output is required if ApRemoval is run downstream "
+           "from this process since ApRemoval is very particular about its "
+           "input.\n";
+  p_default = OUTPUT_SCAN_STRATEGY;
+} output_type;
+
+commentdef
+{
+  p_header = "ARCHIVE";
+}
+
+paramdef boolean
+{
+  p_descr = "Use archive fmq";
+  p_default = FALSE;
+} archive_fmq;
+
+paramdef string
+{
+  p_descr = "Archive URL for raw Enterprise data via FMQ";
+  p_default = "fmqp:://localhost::./fmq.eecArchive";
+} archive_fmq_url;
+
+paramdef long
+{
+  p_descr = "Size of archive FMQ, in bytes.";
+  p_help = "This is the total size of the archive FMQ buffer. "
+           "Some of this buffer will be used for control bytes "
+           "(12 bytes per message).";
+  p_default = 2000000;
+} archive_fmq_size;
+
+paramdef long
+{
+  p_descr = "Number of slots in archive FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of "
+           "messages which may be written to the buffer before "
+           "overwrites occur. "
+           "However, overwrites may occur sooner if the size is not "
+           "set large enough.";
+  p_default = 3600;
+} archive_fmq_nslots;
+
+paramdef boolean
+{
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+  p_default = FALSE;
+} archive_fmq_compress;
+
+paramdef boolean
+{
+  p_descr = "If TRUE, an archive file will be created.";
+  p_default = FALSE;
+} archive_file;
+
+paramdef string
+{
+  p_descr = "Archive file path";
+  p_help = "If archive_file is set to TRUE, the raw HiQ messages will "
+           "be written to this file as they are received. "
+           "When a message is received, first the number of bytes in the "
+           "message will be written to the output file as an ui16 in the "
+           "native byte ordering. "
+           "Then the bytes of the message will be written to the file just "
+           "as they were received.";
+  p_default = "./hiq_data_file";
+} archive_file_path;
+
+paramdef boolean
+{
+  p_descr = "If TRUE, an archive directory will be created.";
+  p_help = "With this option, the raw HiQ data will be written out to "
+           "a set of files in the directory given in the "
+           "archive_mult_file_dir parameter in the same format as that "
+           "used for the archive_file option. "
+           "With this option, an hours worth of the raw HiQ messages will "
+           "be written to a file in the given directory. "
+           "The file naming is based on the time the message is read by "
+           "Hiq2Dsr and a new file will be created each hour. "
+           "The files will be named YYYYMMDD/HH0000.hiq where the "
+           "time in the file name is the starting time for that hour of "
+           "messages.";
+  p_default = FALSE;
+} archive_mult_file;
+
+paramdef string
+{
+  p_descr = "Directory for the output files when archive_mult_file is TRUE.";
+  p_default = "./hiq_data_dir";
+} archive_mult_file_dir;
+
+commentdef
+{
+  p_header = "DIAGNOSTICS";
+}
+
+paramdef boolean
+{
+  p_descr = "Print summary";
+  p_help = "If TRUE, summary information will be printed";
+  p_default = FALSE;
+} print_summary;
+
+paramdef long
+{
+  p_descr = "Print summary interval";
+  p_default = 360;
+} summary_interval;

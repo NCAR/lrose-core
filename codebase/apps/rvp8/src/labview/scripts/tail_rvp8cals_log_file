@@ -1,0 +1,8 @@
+#! /bin/csh
+
+set logfile=~/projDir/logs/run_rvp8cals.log
+
+tail -f $logfile
+
+
+

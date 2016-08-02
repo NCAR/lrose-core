@@ -1,0 +1,309 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for VertCompute
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Aug 2006
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "VertCompute analyses data from tsarchive time series files taken during vertical pointing scans.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  DSR_MOMENTS_INPUT, TS_FILE_INPUT, TS_FMQ_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = DSR_MOMENTS_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "DSR_MOMENTS_INPUT: read moments data in DSR format. TS_FMQ_INPUT: read time series from a file message queue and process the pulses as they come in. TS_FILE_INPUT: read time series from files specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For DSR_MOMENTS_INPUT and TS_FMQ_INPUT.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the start of the fmq and read in data from the entire queue. If FALSE, it will only read new data as it is added to the FMQ.";
+} seek_to_start_of_input;
+
+commentdef {
+  p_header = "COMPUTING MOMENTS FROM TIME SERIES";
+  p_text = "TS_FILE_INPUT and TS_FMQ_INPUT modes";
+};
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Number of pulse samples in a beam.";
+} n_samples;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to invert H/V flag in pulse data.";
+  p_help = "Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the data has the opposite sense, set this to true.";
+} invert_hv_flag;
+
+paramdef string {
+  p_default = "./spol_cal.xml";
+  p_descr = "Path for XML calibration file.";
+  p_help = "At a minimum, the calibration file should contain noiseDbm, receiverGainDbm, dbz0 and radarConstant values for each channel.";
+} cal_xml_file_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to adjust DBZ based on measured transmitter power.";
+  p_help = "If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed DBZ fields.";
+} adjust_dbz_for_measured_xmit_power;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to adjust ZDR based on measured transmitter power.";
+  p_help = "If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed ZDR fields.";
+} adjust_zdr_for_measured_xmit_power;
+
+typedef enum {
+
+  /// Dual pol, alternating transmission, copolar receiver only
+  /// (CP2 SBand)
+  DP_ALT_HV_CO_ONLY = 1, 
+  /// Dual pol, alternating transmission, co-polar and cross-polar
+  ///receivers (SPOL with Mitch Switch and receiver in 
+  /// switching mode, CHILL)
+  DP_ALT_HV_CO_CROSS = 2,
+  /// Dual pol, alternating transmission, fixed H and V receivers (SPOL
+  /// with Mitch Switch and receivers in fixed mode)
+  DP_ALT_HV_FIXED_HV = 3,
+  /// Dual pol, simultaneous transmission, fixed H and V receivers (NEXRAD
+  /// upgrade, SPOL with T and receivers in fixed mode)
+  DP_SIM_HV_FIXED_HV = 4,
+  /// Dual pol, simultaneous transmission, switching H and V receivers
+  /// (SPOL with T and receivers in switching mode)
+  DP_SIM_HV_SWITCHED_HV = 5
+
+} xmit_rcv_mode_t;
+
+paramdef enum xmit_rcv_mode_t {
+  p_default = DP_ALT_HV_CO_CROSS;
+  p_descr = "Transmit/Receive mode for radar";
+  p_help = "Mode for xmit and receive for polarization diversity\nDP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n";
+} xmit_rcv_mode;
+
+commentdef {
+  p_header = "READING MOMENTS FROM FMQ";
+  p_text = "DSR_MOMENTS_INPUT mode only.";
+};
+
+paramdef double {
+  p_default = 88.0;
+  p_descr = "Minimum elevation angle (deg).";
+  p_help = "Beams below this elevation angle will be ignored.";
+} min_elevation;
+
+typedef enum {
+
+  SNR,
+  SNRHC,
+  SNRHX,
+  SNRVC,
+  SNRVX,
+
+  DBM,
+  DBMHC,
+  DBMHX,
+  DBMVC,
+  DBMVX,
+
+  DBZ,
+  VEL,
+  WIDTH,
+
+  ZDRM,
+
+  LDRH,
+  LDRV,
+
+  PHIDP,
+  RHOHV
+
+} moments_id_t;
+
+typedef struct {
+
+  moments_id_t id;
+  string dsr_name;
+    
+} input_field_t;
+
+paramdef struct input_field_t {
+  p_default = {
+    { SNR, "SNR" },
+    { SNRHC, "SNRHC" },
+    { SNRHX, "SNRHX" },
+    { SNRVC, "SNRVC" },
+    { SNRVX, "SNRVX" },
+    { DBM, "DBM" },
+    { DBMHC, "DBMHC" },
+    { DBMHX, "DBMHX" },
+    { DBMVC, "DBMVC" },
+    { DBMVX, "DBMVX" },
+    { DBZ, "DBZ" },
+    { VEL, "VEL" },
+    { WIDTH, "WIDTH" },
+    { ZDRM, "ZDRM" },
+    { LDRH, "LDRH" },
+    { LDRV, "LDRV" },
+    { PHIDP, "PHIDP" },
+    { RHOHV, "RHOHV" }
+  };
+  p_descr = "List of input field from moments FMQ.";
+  p_help = "Only applies to DSR_MOMENTS_INPUT.";
+} input_fields[];
+
+commentdef {
+  p_header = "VERTICAL LAYERS";
+};
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Number of layers for analysis.";
+} n_layers;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Height of each layer (km).";
+} delta_height;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Start height of lowest layer (km).";
+} start_height;
+
+commentdef {
+  p_header = "ANALYSIS DETAILS";
+};
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Minimum SNR for analysis.";
+  p_help = "Gates with SNR below this will be ignored.";
+} min_snr;
+
+paramdef double {
+  p_default = 70.0;
+  p_descr = "Maximum SNR for analysis.";
+  p_help = "Gates with SNR above this will be ignored.";
+} max_snr;
+
+paramdef double {
+  p_default = -100.0;
+  p_descr = "Minimum VEL for analysis.";
+  p_help = "Gates with VEL below this will be ignored.";
+} min_vel;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Maximum VEL for analysis.";
+  p_help = "Gates with VEL above this will be ignored.";
+} max_vel;
+
+paramdef double {
+  p_default = 0.95;
+  p_descr = "Minimum RHOHV for analysis.";
+  p_help = "Gates with RHOHV below this will be ignored.";
+} min_rhohv; 
+
+paramdef double {
+  p_default = -20;
+  p_descr = "Max LDR for analysis.";
+  p_help = "Gates with LDR above this will be ignored.";
+} max_ldr;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Number of standard deviations for data QA purposes.";
+  p_help = "QA is applied to the ZDR data by ignoring values outside a certain range around the mean. This is the number of standard deviations within which data is accepted.";
+} zdr_n_sdev;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Min ht for computing stats (km).";
+  p_help = "A minimum ht is required to be clear of problems caused by differential recovery of the TR limiters.";
+} min_ht_for_stats;
+
+paramdef double {
+  p_default = 3.75;
+  p_descr = "Max ht for computing stats (km).";
+  p_help = "A max ht is sometimes required to be below bright band.";
+} max_ht_for_stats;
+
+commentdef {
+  p_header = "OUTPUT RESULTS";
+};
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output files.";
+  p_help = "The results will be written to sub-directories named from the data time.";
+} output_dir;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Number of revolutions for global stats.";
+  p_help = "A global stats file will be output each time the number of revolutions reaches this value.";
+} nrevs_for_global_stats;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out results to SPDB.";
+  p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
+} write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/vert";
+  p_descr = "URL for SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} spdb_output_url;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Radar name for tagging SPDB output data.";
+  p_help = "This is used to set the data_type in SPDB.";
+} radar_name;
+

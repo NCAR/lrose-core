@@ -1,0 +1,167 @@
+#!/usr/bin/perl --
+# scrub: Scrub directories, based on modification time.
+# Tres Hofmeister <tres@ncar.ucar.edu>
+# CVS: $Id: scrub,v 1.4 2015/08/21 22:35:45 dixon Exp $
+
+# The -d option causes directories to be removed as well as files.
+# The -n option causes scrub to not unlink files/directories, and
+#   automatically sets the -v option.
+# The -p option causes scrub to remove only files/directories matching the
+#   Perl regular expression [pattern].
+# The -v option causes file/directory names to be removed to be printed.
+# The -s option causes age-in-days to skip days with no files (fractional age-in-days will be rounded up).
+#   This is useful for maintaining archival data if no new data is being generated.
+#   Example: If age-in-days is 7, -s keeps files from the 7 most recent non-contiguous days for which files exist.
+# age-in-days is any valid Perl expression which results in a numeric
+#   value, e.g. "1/24" equals one hour.  Note: the granularity is quite
+#   fine, unlike find(1), which has a granularity of one day.
+
+use File::Find;
+use Getopt::Std qw( getopts );
+
+($prog = $0) =~ s%.*/%%;
+
+$usage = <<EOF;
+Usage: $prog [-dnvs] [-p pattern] age-in-days pathname ...
+  -d  Remove directories as well as files.
+  -n  Do not actually remove anything.
+  -v  Print file/directory names to be removed.
+  -s  Causes age-in-days to skip days with no files (fractional age-in-days will be rounded up).
+      This is useful for maintaining archival data if no new data is being generated.
+      Example: If age-in-days is 7, keep files from the 7 most recent non-contiguous days for which files exist.
+  -p  Remove only files/directories matching pattern.
+[age-in-days may be fractional, but will be rounded up if -s is specified; pattern is a Perl regular expression.]
+EOF
+
+&getopts('dnp:vs') || die $usage;
+@ARGV >= 2        || die $usage;
+
+# The -n option implies the -v option.
+$opt_v = 1 if $opt_n;
+
+# If -s, our 'wanted' subroutine will track the age of each file,
+# rather than simply deleting files older than age-in-days. This
+# hash associates each file name with its day (i.e. age).
+my %file_to_day = ();
+
+# Verify that the specified age is valid.
+($age = eval shift) =~ /^[.\d]+/ || die "$prog: bad age\n";
+
+# Round up age-in-days if arg '-s' was specified (e.g. 7.2 becomes 8)
+$age = round($age) if( $opt_s );
+
+# Quote any (unlikely, but...) "/" characters in the pattern.
+$opt_p =~ s|/|\\/|g if $opt_p;
+
+# Traverse the desired directories.
+&find(@ARGV);
+
+skipOrScrub() if $opt_s;
+
+# Remove old directories if so desired, simply failing if they're not
+# empty.  Do so in reverse order, so subdirectories will be removed
+# first.
+
+if ($opt_d)
+{
+    my(%mark);
+
+    # Exclude the top level directories from the list to be removed.
+    map($mark{$_}++, @ARGV);
+    @old_dirs = grep(!$mark{$_}, @old_dirs);
+
+    foreach $dir (reverse @old_dirs)
+    {
+      print "$dir\n" if $opt_v;
+      rmdir $dir || warn "rmdir: $dir: $!\n" unless $opt_n;
+    }
+}
+
+
+sub wanted {
+    (($dev, $ino, $mode, $nlink, $uid, $gid) = lstat($_))
+        || warn "stat: $name: $!\n";
+
+    my $fileAge = -M;
+
+    # If a pattern has been specified, check for it.
+    !/$opt_p/o && return if $opt_p;
+
+    ###################
+    # If we are skipping days with no files, we simply track the age of each file.
+    # The resulting has will be processed in the skipOrScrub subroutine.
+    if( $opt_s )
+    {
+      # Track this file/directory and its (rounded-up) age
+      $file_to_day{ $name } = round($fileAge);
+      return; # The skipOrScrub subroutine will handle these files
+    }
+
+    ###################
+    # If we are not skipping days with no files, simply evaluate the age of this file.
+    return unless $fileAge > $age;
+
+    # If the directory is old but contains files, it can't be removed.
+    # Save its name for possible removal later, when all files to be
+    # removed have been removed, and return.
+    -d _ && (push(@old_dirs, $name), return);
+
+    # Not a directory.
+    scrub( $_, $name );
+}
+
+# If we are skipping days with no files, loop through the file_to_day
+# hash and scrub files on days older than those skipped.
+sub skipOrScrub
+{
+  my $daysSkipped = 0;
+  my $lastDaySkipped = -1;
+  # Loop through the files in order of ascending day (age)
+  foreach $file ( sort orderHashByValue (keys(%file_to_day)) )
+  {
+     my $isDir = -d $file;
+
+     my $day = $file_to_day{$file};
+     if( !$isDir && $day != $lastDaySkipped )
+     {
+        $lastDaySkipped = $day;
+        $daysSkipped++;
+     }
+
+     # If we have skipped enough days, delete this file
+     if( $daysSkipped > $age )
+     {
+       if( $isDir )
+       {
+         # If the directory is old but contains files, it can't be removed.
+         # Save its name for possible removal later, when all files to be
+         # removed have been removed, and return.
+         push( @old_dirs, $file );
+       }
+       else
+       {
+         scrub( $file, $file );
+       }
+     }
+  }
+}
+
+sub scrub
+{
+  my $file = shift;
+  my $name = shift;
+
+  print "$name\n" if $opt_v;
+  unlink($file) || warn "unlink: $name: $!\n" unless $opt_n;
+}
+
+sub orderHashByValue
+{
+   $file_to_day{$a} <=> $file_to_day{$b};
+}
+
+sub round
+{
+  my $num = shift;
+  return (($num == int($num)) ? $num : int($num + 1));
+}

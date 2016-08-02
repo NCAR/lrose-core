@@ -1,0 +1,6 @@
+.deps
+SynopObsIngest
+__makefile.template
+makefile
+makefile.am
+makefile.in

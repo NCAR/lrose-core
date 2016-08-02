@@ -1,0 +1,8 @@
+#! /bin/csh
+
+set logfile=~/projDir/logs/run_selfcheck1.log
+
+tail -f $logfile
+
+
+

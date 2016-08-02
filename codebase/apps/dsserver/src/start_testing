@@ -1,0 +1,59 @@
+#! /bin/csh
+
+snuff TestDataMap
+
+TestDataMap -params TestDataMap.1 &
+sleep 5
+TestDataMap -params TestDataMap.2 &
+sleep 5
+TestDataMap -params TestDataMap.3 &
+sleep 5
+TestDataMap -params TestDataMap.4 &
+sleep 5
+TestDataMap -params TestDataMap.5 &
+sleep 5
+TestDataMap -params TestDataMap.6 &
+sleep 5
+TestDataMap -params TestDataMap.7 &
+sleep 5
+TestDataMap -params TestDataMap.8 &
+sleep 5
+TestDataMap -params TestDataMap.9 &
+sleep 5
+TestDataMap -params TestDataMap.1 &
+sleep 5
+TestDataMap -params TestDataMap.2 &
+sleep 5
+TestDataMap -params TestDataMap.3 &
+sleep 5
+TestDataMap -params TestDataMap.4 &
+sleep 5
+TestDataMap -params TestDataMap.5 &
+sleep 5
+TestDataMap -params TestDataMap.6 &
+sleep 5
+TestDataMap -params TestDataMap.7 &
+sleep 5
+TestDataMap -params TestDataMap.8 &
+sleep 5
+TestDataMap -params TestDataMap.9 &
+sleep 5
+TestDataMap -params TestDataMap.1 &
+sleep 5
+TestDataMap -params TestDataMap.2 &
+sleep 5
+TestDataMap -params TestDataMap.3 &
+sleep 5
+TestDataMap -params TestDataMap.4 &
+sleep 5
+TestDataMap -params TestDataMap.5 &
+sleep 5
+TestDataMap -params TestDataMap.6 &
+sleep 5
+TestDataMap -params TestDataMap.7 &
+sleep 5
+TestDataMap -params TestDataMap.8 &
+sleep 5
+TestDataMap -params TestDataMap.9 &
+sleep 5
+

@@ -1,0 +1,43 @@
+#!/bin/csh
+# 
+# make_cdrom: A script to simplify the making of CR-ROM's
+# 
+
+if( $#argv != 1 ) then
+     echo "Usage: make_cdrom directory_with_files"
+endif
+
+echo ""
+echo "##############################################################"
+echo "Creating UNIX/NT/WIN9X Compatible CD from directory $1"
+
+echo "Checking Size of directory $1"
+
+
+set result = `du -s $1  | awk '{print$1}'`
+
+if ($result > 660000) then
+	echo "Data Directories will not fit! Size = $result"
+	exit
+elseif ($result > 650000) then 
+	echo "WARNING Data Directories may not fit! Size = $result"
+else
+        echo "Directories Size:  $result"
+endif
+    
+
+echo "##############################################################"
+echo ""
+
+echo "Informational messages follow. If you have any long file names"
+echo "the software will create a lookup table (Rock Ridge Extensions)"
+echo "DO NOT BE ALARMED at these translation table messages"
+echo ""
+
+echo "The system will take a few seconds to begin writing - be patient"
+sleep 3
+
+echo "##############################################################"
+echo ""
+
+mkhybrid -r -j $1 | cdrecord -v fs=12m speed=4 -

@@ -1,0 +1,547 @@
+/**********************************************************************
+ * TDRP params for ridds2mom
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately. Use 
+//   DEBUG_VERBOSE for all debug messages.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_NORM;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// This is used by procmap utilities for registering the process with 
+//   procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: int
+//
+
+malloc_debug_level = 0;
+
+///////////// input_stream_format /////////////////////
+//
+// Input data stream format.
+// Input data stream may be expected in Nexrad format (alternating 
+//   ref/vel at the lower tilts), or constant format (both ref & vel at 
+//   every tilt).
+//
+// Type: enum
+// Options:
+//   NEXRAD_FORMAT, CONSTANT_FORMAT
+//
+//
+
+input_stream_format = NEXRAD_FORMAT;
+
+///////////// input_device ////////////////////////////
+//
+// Input device type.
+// For IN_TAPE, set input_tape_name, input_tape wait and short_tape. For 
+//   IN_UDP, set input_udp_port. For IN_SHMEM, set input_shmem_key. 
+//   IN_SHMEM is not supported yet.
+//
+// Type: enum
+// Options:
+//   IN_TAPE, IN_UDP, IN_SHMEM
+//
+//
+
+input_device = IN_UDP;
+
+///////////// input_tape_name /////////////////////////
+//
+// Tape device name for input. Applicable if input_device is IN_TAPE.
+// Type: string
+//
+
+input_tape_name = "/dev/nst0";
+
+///////////// input_tape_wait /////////////////////////
+//
+// Tape input read delay (millisecs).
+// Wait between beam reads, to allow the user to simulate varying data 
+//   rates. Applicable if input_device is IN_TAPE.
+// Type: int
+//
+
+input_tape_wait = 50;
+
+///////////// short_tape //////////////////////////////
+//
+// Short tape option.
+// Set to TRUE if reading a standard NCDC Nexrad Level 2 archive tape.  
+//   Set to FALSE if reading a RAP generated Level 2 archive tape.  
+//   Applicable if input_device is IN_TAPE.
+// Type: boolean
+//
+
+short_tape = FALSE;
+
+///////////// input_udp_port //////////////////////////
+//
+// Input udp port number. Applicable if input_device is IN_UDP.
+// Type: int
+//
+
+input_udp_port = 3280;
+
+///////////// input_shmem_key /////////////////////////
+//
+// Shared memory key for input queue. Applicable if input_device is 
+//   IN_SHMEM.
+// Type: int
+//
+
+input_shmem_key = 2750400;
+
+///////////// output_format ///////////////////////////
+//
+// Output format type.
+// Output may be in Lincoln format (LL_FORMAT), DsRadar format 
+//   (DS_FORMAT) or unchanged from input (RIDDS_FORMAT).
+//
+// Type: enum
+// Options:
+//   LL_FORMAT, DS_FORMAT, RIDDS_FORMAT
+//
+//
+
+output_format = DS_FORMAT;
+
+///////////// output_device ///////////////////////////
+//
+// Primary output device type.
+// There must be at least 1 output device, and you use this parameter to 
+//   set that primary device. If, for example, you set output_device to 
+//   OUT_FMQ, this has the effect of overriding write_fmq_output and 
+//   setting it to TRUE. In addition to the primary output device, your 
+//   can enable secondary outputs by setting any of write_fmq_output, 
+//   write_udp_output or write_shmem_output to TRUE. For OUT_UDP, set 
+//   output_udp_port and output_udp_address. For OUT_SHMEM, set 
+//   output_shmem_key. For OUT_FMQ, set output_fmq_url, output_fmq_size, 
+//   output_fmq_nslots and output_fmq_compress.
+//
+// Type: enum
+// Options:
+//   OUT_UDP, OUT_SHMEM, OUT_FMQ
+//
+//
+
+output_device = OUT_FMQ;
+
+///////////// write_fmq_output ////////////////////////
+//
+// Option to output FMQ in addition to chosen output_device.
+// If set to TRUE, FMQ is output in addition to the strean chosen by 
+//   output_device.
+// Type: boolean
+//
+
+write_fmq_output = TRUE;
+
+///////////// write_udp_output ////////////////////////
+//
+// Option to output UDP in addition to chosen output_device.
+// If set to TRUE, UDP is output in addition to the strean chosen by 
+//   output_device.
+// Type: boolean
+//
+
+write_udp_output = FALSE;
+
+///////////// write_shmem_output //////////////////////
+//
+// Option to output SHMEM in addition to chosen output_device.
+// If set to TRUE, SHMEM is output in addition to the strean chosen by 
+//   output_device.
+// Type: boolean
+//
+
+write_shmem_output = FALSE;
+
+///////////// output_udp_port /////////////////////////
+//
+// Output udp port number.
+// Type: int
+//
+
+output_udp_port = 54322;
+
+///////////// output_udp_address //////////////////////
+//
+// Broadcast address for UDP output.
+// You can use 'ifconfig -a' (as root) to check which network 
+//   connections you have.
+// Type: string
+//
+
+output_udp_address = "128.117.199.255";
+
+///////////// output_shmem_key ////////////////////////
+//
+// Shared memory key for output queue.
+// Type: int
+//
+
+output_shmem_key = 3750400;
+
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for DsRadar data via FMQ.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::fmq/fmq.dsRadar";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message.
+// Type: int
+//
+
+output_fmq_size = 5000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 7200;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = TRUE;
+
+///////////// output_ds_dbz ///////////////////////////
+//
+// Option to output DBZ (reflectivity) field for DS_FORMAT output.
+// Only applicable it output_format = DS_FORMAT.
+// Type: boolean
+//
+
+output_ds_dbz = TRUE;
+
+///////////// output_ds_vel ///////////////////////////
+//
+// Option to output VEL (radial velocity) field for DS_FORMAT output.
+// Only applicable it output_format = DS_FORMAT.
+// Type: boolean
+//
+
+output_ds_vel = TRUE;
+
+///////////// output_ds_spw ///////////////////////////
+//
+// Option to output SPW (spectral width) field for DS_FORMAT output.
+// Only applicable it output_format = DS_FORMAT.
+// Type: boolean
+//
+
+output_ds_spw = FALSE;
+
+///////////// output_ds_snr ///////////////////////////
+//
+// Option to output SNR (signal to noise) field for DS_FORMAT output.
+// Only applicable it output_format = DS_FORMAT.
+// Type: boolean
+//
+
+output_ds_snr = FALSE;
+
+///////////// vol_coverage_path ///////////////////////
+//
+// Path of volume coverage file.
+// This file contains the NEXRAD scan strategies. It is used to compute 
+//   the tilt numbers.
+// Type: string
+//
+
+vol_coverage_path = "./nexrad_vcp.conf";
+
+///////////// radar_id ////////////////////////////////
+//
+// Radar ID.
+// Project specified ID for the radar - for DS_FORMAT only.
+// Type: int
+//
+
+radar_id = 0;
+
+///////////// radar_name //////////////////////////////
+//
+// Radar name.
+// Type: string
+//
+
+radar_name = "NEXRAD";
+
+///////////// site_name ///////////////////////////////
+//
+// Site name.
+// Type: string
+//
+
+site_name = "KHDX-WSMR";
+
+///////////// radar_location //////////////////////////
+//
+// Radar location.
+// The NEXRAD data stream does not include radar position. Use this 
+//   parameter to set the Lat and lon in degrees, alt in km.
+//
+// Type: struct
+//   typedef struct {
+//      double latitude;
+//      double longitude;
+//      double altitude;
+//   }
+//
+//
+
+radar_location = { 33.0435, -106.072, 1.287 };
+
+///////////// time_correction /////////////////////////
+//
+// Time correction (secs).
+// Data time is adjusted by this number of seconds before output.
+// Type: int
+//
+
+time_correction = 0;
+
+///////////// use_wallclock_time //////////////////////
+//
+// Wallclock time override option.
+// If set, wallclock time will be used to override data time.
+// Type: boolean
+//
+
+use_wallclock_time = FALSE;
+
+///////////// samples_per_beam ////////////////////////
+//
+// Samples per beam.
+// Number of pulses used to compute data from a beam.
+// Minimum val: 1
+// Type: int
+//
+
+samples_per_beam = 64;
+
+///////////// polarization_code ///////////////////////
+//
+// Radar polarization code.
+// 1 = hor, 2 = ver, 3 = circ, 4 = ellip. Should be 3; 1 for Jing 
+//   compatibility.
+// Type: int
+//
+
+polarization_code = 3;
+
+///////////// beam_width //////////////////////////////
+//
+// Beam width.
+// Radar half-power beam width (deg).
+// Minimum val: 0.01
+// Maximum val: 45
+// Type: double
+//
+
+beam_width = 0.95;
+
+///////////// wavelength //////////////////////////////
+//
+// Wavelength.
+// Radar wavelength (cm).
+// Minimum val: 0.01
+// Maximum val: 1000
+// Type: double
+//
+
+wavelength = 10.38;
+
+///////////// avg_xmit_pwr ////////////////////////////
+//
+// Average transmitter power (kW).
+// For output_format = LL_FORMAT only.
+// Type: double
+//
+
+avg_xmit_pwr = 7;
+
+///////////// peak_xmit_pwr ///////////////////////////
+//
+// Peak transmitter power (kW).
+// For output_format = DS_FORMAT only.
+// Type: double
+//
+
+peak_xmit_pwr = 1000;
+
+///////////// receiver_mds ////////////////////////////
+//
+// Receiver MDS (dBM).
+// Receiver minimum detectable signal (dMD) - for DS_FORMAT only.
+// Type: double
+//
+
+receiver_mds = -113;
+
+///////////// noise_dbz_at_100km //////////////////////
+//
+// Receiver noise in dBZ.
+// Receiver noise in units of dBZ at a range of 100km.
+// Type: double
+//
+
+noise_dbz_at_100km = -8;
+
+///////////// receiver_gain ///////////////////////////
+//
+// Gain of the receiver (dB) - for DS_FORMAT only.
+// Type: double
+//
+
+receiver_gain = 0;
+
+///////////// antenna_gain ////////////////////////////
+//
+// Gain of the antenna (dB) - for DS_FORMAT only.
+// Type: double
+//
+
+antenna_gain = 45;
+
+///////////// system_gain /////////////////////////////
+//
+// Gain of the system (dB) - for DS_FORMAT only.
+// Type: double
+//
+
+system_gain = 0;
+
+///////////// print_summary ///////////////////////////
+//
+// Print summary option.
+// If TRUE summaries are printed at given interval.
+// Type: boolean
+//
+
+print_summary = TRUE;
+
+///////////// summary_interval ////////////////////////
+//
+// Interval for summary printouts.
+// See print_summary.
+// Type: int
+//
+
+summary_interval = 1;
+
+///////////// print_header ////////////////////////////
+//
+// Print header option.
+// If TRUE headers are printed at given interval.
+// Type: boolean
+//
+
+print_header = FALSE;
+
+///////////// header_interval /////////////////////////
+//
+// Interval for header printouts.
+// See print_header.
+// Type: int
+//
+
+header_interval = 360;
+
+///////////// write_archive_fmq ///////////////////////
+//
+// Option to write an FMQ for archive purposes.
+// The archive FMQ is written in native RIDDS format. A separate program 
+//   reads this FMQ and archives the data to tape.
+// Type: boolean
+//
+
+write_archive_fmq = FALSE;
+
+///////////// archive_fmq_url /////////////////////////
+//
+// Archive URL for DsRadar data via FMQ.
+// Type: string
+//
+
+archive_fmq_url = "fmqp:://localhost::./fmq.nexrad";
+
+///////////// archive_fmq_size ////////////////////////
+//
+// Size of archive FMQ, in bytes.
+// This is the total size of the archive FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message.
+// Type: int
+//
+
+archive_fmq_size = 2000000;
+
+///////////// archive_fmq_nslots //////////////////////
+//
+// Number of slots in archive FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+archive_fmq_nslots = 3600;
+
+///////////// archive_fmq_compress ////////////////////
+//
+// Archive FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+archive_fmq_compress = TRUE;
+
+///////////// print_max_min_byte //////////////////////
+//
+// Compute max and min byte value per beam.
+// If TRUE, max and min byte value will be computed for each beam.  
+//   Values will be printed with summary.
+// Type: boolean
+//
+
+print_max_min_byte = FALSE;
+

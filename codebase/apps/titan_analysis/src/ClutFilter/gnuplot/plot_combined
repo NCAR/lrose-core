@@ -1,0 +1,7 @@
+set title "Example of reconstructed spectrum"
+set xlabel "sample"
+set ylabel "Power (dB)" 
+set xrange [0:63]
+set yrange [1.e-10:10]
+set logscale y
+plot 'gmap_wx_truth.real' title 'Weather' with lines, 'gmap_clutter_truth.real' title 'Clutter' with lines, 'gmap_unfiltered.real' title 'Combined' with lines

@@ -1,0 +1,536 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for surface data interpolator
+ *
+ * SueDettling July 29, 2003
+ * 
+ */
+
+commentdef {
+  p_header = "surfInterp program";
+  p_text = "surfInterp performs interpolation on point data at non-uniform grid locations. It produces an MDV file containing the interpolation results.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME";
+} mode;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Interval for TIME_TRIGGER - secs.";
+  p_help = "For TIME_TRIGGER, this is the interval between trigger events. In REALTIME mode, a time trigger always occurs on the hour, and at constant intervals thereafter. In ARCHIVE mode the trigger starts at start_time and at constant intervals thereafter.";
+} time_trigger_interval;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use terrain data.";
+  p_help = "You need terrain data for ceiling computations.";
+} use_terrain_data;
+
+paramdef string {
+  p_default = "./terrain.mdv";
+  p_descr = "File of terrain data in LATLON projection.";
+  p_help = "Used to correct ceiling for height above sea.";
+} terrain_file;
+
+paramdef string {
+  p_default = "#0";
+  p_descr = "Terrain field name";
+  p_help = "To use a field number, specify # as first character";
+} terrain_field_name;
+
+paramdef string {
+  p_default = {"spdbp:://$(HOST)::spdb/surface"};
+  p_descr = "Input URLs";
+  p_help = "These are the URLs from which the station data are read.";
+} surface_data_urls[];
+
+paramdef string {
+  p_default = {"spdbp:://$(HOST)::spdb/surfaceCapeCin"};
+  p_descr = "Input URLs for surface GenPt data";
+} genpt_data_urls[];
+
+paramdef int {
+  p_default = 5400;
+  p_descr = "Data duration";
+  p_help = "This is how far back from the start time to search.";
+} duration;
+
+paramdef string {
+  p_descr = "URL of sounding database.";
+  p_default = {"spdbp:://$(HOST)::spdb/soundings"};
+} sounding_urls[];
+
+paramdef int {  
+  p_descr = "Time (in minutes) to search back for a sounding; "
+            "Default is 9 hours; max is 24 hours";
+  p_default = 540;
+} sounding_look_back;
+
+
+paramdef float {
+  p_default = 500.0;
+  p_descr = "Pressure to take temperature from in soundings";
+  p_help = "For lifted index";
+} PresLi;
+
+paramdef float {
+  p_default = 250;
+  p_descr = "Maximum distance of sounding from a surface report";
+  p_help = "For lifted index. Distance in kilometers.";
+} sounding_max_dist;
+
+
+commentdef {
+  p_header = "GRID";
+}
+
+typedef enum
+{
+  PROJ_LATLON,
+  PROJ_FLAT,
+  PROJ_LC
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  int nx;
+  int ny;
+  float dx;
+  float dy;
+  float minx;
+  float miny;
+  float origin_lat;
+  float origin_lon;
+  float lat1;
+  float lat2;
+} output_proj_t;
+
+paramdef struct output_proj_t
+{
+  p_descr = "Output projection";
+  p_default = { PROJ_FLAT,
+                134, 134,
+                3.0, 3.0,
+                -200, -200,
+                38.9753, -77.477,
+                0.0, 0.0 };
+} OutputProj;
+
+paramdef float {
+  p_default = 1600.0;
+  p_descr = "Altitude of origin";
+  p_help = "Defaults to New York (1600.0)";
+} altitude;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flat earth projection";
+  p_help = "If not use LatLon";
+} flat;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Allow terrain MDV file not to cover region";
+  p_help = "May be useful for an island.\n"
+           "THIS PARAMETER IS CURRENTLY NOT USED.\n";
+} AllowOutsideTerrain;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://$(HOST)::mdv/surfInterp";
+  p_descr = "Output URL.";
+  p_help = "The interpolated MDV data is written to this URL.";
+} output_url;
+
+paramdef string {
+  p_default = "SurfInterp";
+  p_descr = "Dataset name";
+} datasetName;
+
+paramdef string {
+  p_default = "Unknown";
+  p_descr = "Data Source";
+} dataSource;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Data info";
+} dataInfo;
+
+commentdef {
+  p_header = "FIELDS";
+}
+
+
+/*
+ * In the following list of output fields, you must make sure that when you
+ * add a new derived field that depends on another derived field, that the
+ * dependent derived field appears later in this list.  Otherwise, the needed
+ * derived field will be calculated AFTER the dependent derived field, which
+ * won't work.  So, for example, in the following list the FLIGHT_CAT field
+ * depends on the TERRAIN_RELATIVE_CEILING field, so it appears in the list
+ * after the TERRAIN_RELATIVE_CEILING field.
+ */
+
+typedef enum
+{
+  UWIND,
+  VWIND,
+  TEMP,
+  DEWPT,
+  LIFTED_INDEX,
+  REL_HUM,
+  WIND_GUST,
+  PRESSURE,
+  POTENTIAL_TEMP,
+  LIQUID_ACCUM,
+  PRECIP_RATE,
+  VISIBILITY,
+  RUNWAY_VIS_RANGE, 
+  SEALEVEL_RELATIVE_CEILING,
+  ALTITUDE,
+  DEWPT_DEPRESSION,
+  TERRAIN,
+  CONVERGENCE,
+  TERRAIN_RELATIVE_CEILING,
+  FLIGHT_CAT
+} interp_field_t;
+
+paramdef enum interp_field_t
+{
+  p_descr = "List of fields to include in the output file.";
+
+  p_default = { UWIND, VWIND, TEMP, DEWPT, PRESSURE, VISIBILITY,
+  RUNWAY_VIS_RANGE, SEALEVEL_RELATIVE_CEILING, CONVERGENCE};
+} outputFields[];
+
+typedef enum
+{
+  ENCODING_INT8,
+  ENCODING_INT16,
+  ENCODING_FLOAT32
+} encoding_type_t;
+
+typedef enum
+{
+  SCALING_NONE,
+  SCALING_ROUNDED,
+  SCALING_INTEGRAL,
+  SCALING_DYNAMIC,
+  SCALING_SPECIFIED
+} scaling_type_t;
+
+typedef struct
+{
+  encoding_type_t encoding_type;
+  boolean use_scaling_info;
+  scaling_type_t scaling_type;
+  double scale;
+  double bias;
+} output_encoding_t;
+
+paramdef struct output_encoding_t
+{
+  p_descr = "Output encoding for each outputField. "
+            "If nothing is specified, the default output encoding "
+            "(ENCODING_INT16 and SCALING_ROUNDED) will be used for every "
+            "output field. "
+            "If output encoding is specified, there must be 1 structure in "
+            "this array for every outputField specified. "
+            "If the array sizes don't match, the default output encoding "
+            "will be used for every field.";
+  p_help = "\tencoding_type - Type of encoding to use for the field data.\n"
+           "\tuse_scaling_info - Flag indicating whether to use the scaling "
+           "information from the structure. "
+           "If set to false, the default SCALING_ROUNDED will be used.\n"
+           "\tscaling_type - Type of scaling to use for the output field. "
+           "Used only if use_scaling_info is set to true.\n"
+           "\tscale - The scale value to use when scaling. "
+           "Used only if use_scaling_info is set to true and scaling_type "
+           "is set to SCALING_SPECIFIED.\n"
+           "\tbias - The bias value to use when scaling. "
+           "Used only if use_scaling_info is set to true and scaling_type "
+           "is set to SCALING_SPECIFIED.\n";
+  p_default = {};
+} outputFieldsEncoding[];
+
+typedef struct
+{
+  string genpt_field_name;
+  boolean check_missing;
+  double missing_value;
+  string output_field_name;
+  string output_field_units;
+  encoding_type_t encoding_type;
+  boolean use_scaling_info;
+  scaling_type_t scaling_type;
+  double scale;
+  double bias;
+} genpt_fields_t;
+
+paramdef struct genpt_fields_t
+{
+  p_descr = "Array of fields to generate from GenPt data";
+  p_help = "\tgenpt_field_name - Name of field as it appears in the GenPt "
+           "database.\n"
+           "\tcheck_missing - Flag indicating whether to check for missing "
+           "data values in the GenPt data.\n"
+           "\tmissing_value - The missing data value to use for this GenPt "
+           "field. "
+           "By default, the GenPt database uses -9999.0 for missing data; "
+           "however, some programs, like MetarCapeCin, don't use this value "
+           "for missing data. "
+           "MetarCapeCin uses -99999.0 for missing CIN values.\n"
+           "Used only if check_missing is set to true.\n"
+           "\toutput_field_name - Name of field as it should appear in the "
+           "output file.\n"
+           "\toutput_field_units - Name of field units to put in the output "
+           "file.\n"
+	   "\tencoding_type - Type of encoding to use for the field data.\n"
+           "\tuse_scaling_info - Flag indicating whether to use the scaling "
+           "information from the structure. "
+           "If set to false, the default SCALING_ROUNDED will be used.\n"
+           "\tscaling_type - Type of scaling to use for the output field. "
+           "Used only if use_scaling_info is set to true.\n"
+           "\tscale - The scale value to use when scaling. "
+           "Used only if use_scaling_info is set to true and scaling_type "
+           "is set to SCALING_SPECIFIED.\n"
+           "\tbias - The bias value to use when scaling. "
+           "Used only if use_scaling_info is set to true and scaling_type "
+           "is set to SCALING_SPECIFIED.\n";
+  p_default = { { "cape", false, -9999.0,
+                  "Cape", "none", ENCODING_INT8,
+                  false, SCALING_ROUNDED, 1.0, 0.0 },
+                { "cin", true, -99999.0,
+                  "Cin", "none", ENCODING_INT8,
+                  false, SCALING_ROUNDED, 1.0, 0.0 } };
+} genptFields[];
+
+commentdef {
+  p_header = "INTERPOLATION";
+}
+
+typedef enum {
+  INTERP_BARNES, INTERP_NEAREST
+} InterpMethod_t;
+
+paramdef enum InterpMethod_t {
+  p_default = INTERP_BARNES;
+  p_descr = "Interpolation option - choose the interpolation scheme";
+} InterpMethod;
+
+paramdef float {
+  p_default = -1.0;
+  p_descr = "Max difference between altitude and terrain for VFR to work";
+  p_help = "If negative, no check is made. Units are feet";
+} MaxAltError;
+
+paramdef float {
+  p_default = 1e-4;
+  p_descr = "Minimum sum of weights in Barnes interpolation for valid data";
+  p_help = "If not reached, bad value output - effectively sets radius of influence.";
+} MinWeight;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "WindowSize for optional VFR median filter";
+  p_help = "Actual tile is 2W +1 by 2W + 1";
+} WindowSize;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of passes for VFR median filter";
+  p_help = "Used to smooth out VFR image";
+} NumPasses;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Minimum number of stations";
+  p_help = "If fewer stations report, don't bother.";
+} MinStations;
+
+paramdef float {
+  p_default = 50.0;
+  p_descr = "Maximum distance for interpolation to be valid, Km.";
+  p_help = "Works in conjunction with minimum weight parameter.";
+} MaxInterpDist;
+
+paramdef float {
+  p_default = 0.0;
+  p_descr = "Scale radius for interpolations.";
+  p_help = "Defaults to half of MaxInterpDist if 0 or less";
+} Rscale;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to accept stations outside the grid.";
+  p_help = "Default is to only accept stations within the grid.";
+} UseOutsideRegion;
+
+commentdef {
+  p_header = "FLIGHT CATEGORY";
+}
+
+paramdef float {
+  p_default = -1.0;
+  p_descr = "Value to use if ceiling is missing - if negative, use bad value.";
+  p_help = "Default sets both ceiling and flight cat to missing if ceiling is bad";
+} BadCeilingValue;
+
+typedef struct
+{
+  float vis_thresh;
+  float ceil_thresh;
+} flt_cat_thresh_t;
+
+paramdef struct flt_cat_thresh_t
+{
+  p_descr = "Array of thresholds used for determining flight categories";
+  p_default = { { 0.0, 0.0 },
+                { 1.6, 500.0 },
+                { 5.0, 1500.0 } };
+} FltCatThresh[];
+
+paramdef float {
+  p_default = 30.0;
+  p_descr = "Maximum visibility from a station, Km";
+  p_help = "Values greater than this are set to missing.";
+} MaxVis;
+
+paramdef float {
+  p_default = 30.0;
+  p_descr = "Maximum cloud ceiling from a station, Km";
+  p_help = "Values greater than this are set to missing.";
+} MaxCeiling;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set to TRUE, ceiling values above ReplaceCeilingThreshold\n"
+            "are replaced with ReplaceCeilingValue. The reason is that in\n"
+            "some systems, a clear sky is reported as a ceiling of 10,000\n"
+            "feet - but the terrain may be near 10,000 feet which leads\n"
+            "to erroneous regions of bad flight cat.";
+  p_help = "No such processing occurrs if set to FALSE.";
+} ReplaceCeiling;
+
+paramdef float {
+  p_default = 9500.0;
+  p_descr = "Cloud ceiling threshold, ft.";
+  p_help = "If ReplaceCeiling is TRUE then values of ceiling at or above\n"
+           "this value are replaced with ReplaceCeilingValue.";
+} ReplaceCeilingThreshold;
+
+paramdef float {
+  p_default = 30000.0;
+  p_descr = "Cloud ceiling value, ft.";
+  p_help = "If ReplaceCeiling is TRUE then values of ceiling at or above\n"
+            "ReplaceCeilingThreshold are replaced with this value.";
+} ReplaceCeilingValue;
+
+commentdef {
+  p_header = "CONVERGENCE";
+}
+
+paramdef int {
+  p_default = 1;
+  p_min = 1;
+  p_descr = "Convergence is the sum of the derivatives of u and v with respect distance. 
+  convergenceDxDy is the distace in gridpoints from the point 
+  reference at which we will take values of u and v to form the difference
+  quotients.";
+  p_help = "By default the convergence is calculated using values of u and v at adjacent grid points ( convergenceDxDy = 1). Adjusting this parameter allows the convergence to be calculated over a larger spatial domain.";
+} convergenceDxDy;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to fall back onto another pressure if the\n"
+	"station pressure is missing in the calculation of lifted index.";
+  p_help = "The calculation of lifted index uses pressure data\n"
+	"from a surface station. If the\n"
+	"shared.pressure_station.stn_pres field in the station report\n"
+	"is not missing, then it is used. If it is missing and\n"
+	"tryOtherPressure is set to FALSE (default) then the lifted index\n"
+	"is not calculated, however if tryOtherPressure is set to TRUE and\n"
+	"the pres field in the station report is set to a\n"
+	"non-missing value then that value is used in the lifted index calc.";
+} tryOtherPressure;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set, station pressures are treated as having been\n"
+	"corrected to be at sea level, and a correction is applied\n"
+	"to get the actual station pressure, ie. to un-do the\n"
+	"the correction that was applied to get the sea level\n"
+	"station pressure.";
+  p_help = "If all your station pressures are near 1013, you\n"
+	"probably need this.";
+} adjustStationPressure;
+
+
+
+
+
+
+
+
+
+
+

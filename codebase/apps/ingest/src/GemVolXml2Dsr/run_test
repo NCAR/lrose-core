@@ -1,0 +1,3 @@
+#! /bin/csh
+
+GemVolXml2Dsr -params GemVolXml2Dsr.test -mode ARCHIVE -f input/*vol -verbose

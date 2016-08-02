@@ -1,0 +1,75 @@
+#! /usr/local/bin/perl
+
+#
+# Convert zeb map format to rap map format
+#
+
+printf(STDOUT "MAP_NAME UNKNOWN");
+
+while ($line = <>) {
+
+#
+# strip off any comments and leading whitespace, and
+# split into tokens
+#
+
+#  print $line;
+
+  $line =~ s/\s*!.*$//;
+  $line =~ s/^\s*//;
+  @tokens = split(/\s+/, $line);
+  $ntokens = $#tokens + 1;
+
+  if ($ntokens != 5) {
+    printf (STDOUT "BAD HEADER LINE, line %d\n", $.);
+    exit();
+  }
+
+  $ncoords = $tokens[0];
+
+  $npoints = int($ncoords / 2);
+
+  $coords_so_far = 0;
+
+#  printf (STDOUT "ncoords = %d\n", $ncoords);
+
+  @coords = ();
+
+#
+# loop through lines with coords
+#
+
+  while ($coords_so_far < $ncoords) {
+
+    $line = <>;
+    $line =~ s/\s*!.*$//;
+    $line =~ s/^\s*//;
+    @tokens = split(/\s+/, $line);
+    $ntokens = $#tokens + 1;
+
+#    print $line;
+#    printf (STDOUT "coords_so_far, ntokens = %d, %d\n",
+#	    $coords_so_far, $ntokens);
+
+    $coords_so_far += $ntokens;
+
+    push(@coords, @tokens);
+
+  }
+
+  printf (STDOUT "\n");
+  printf (STDOUT "POLYLINE UNKNOWN %d\n",$npoints + 1);
+
+  for ($i = 0; $i < $npoints; $i++)
+  {
+      $lat = $coords[$i * 2];
+      $lon = $coords[($i * 2) + 1];
+      printf (STDOUT "%f %f\n", $lat, $lon);
+
+  }
+    
+  printf (STDOUT "-1000.0 -1000.0\n");
+
+}
+
+

@@ -1,0 +1,54 @@
+
+
+InitClimate and UpdateClimate are two programs that operate 
+together to generate a clear sky climatology of maximum temperatures
+and minimum reflectances. The programs must be run on a year's worth
+of data in order to generate the complete climatology.
+
+The steps to use the programs are as follows.
+
+1/ Define the environment variable CLEAR_SKY_CLIMATOLOGY_DIR
+	to point to the directory where the climatology MDV files
+	will be written to. There will be one file for each month
+	and one for each hour => 288 files.
+
+2/ Find an MDV file of satellite data of the type that will be used
+	in the climatology, say 'START.mdv', and give the command
+
+	prompt>InitClimate START.mdv
+
+	288 files with initial values will be written under the
+	CLEAR_SKY_CLIMATOLOGY_DIR.
+
+3/ Run the UpdateClimate program, which will live in the background
+	watching for new data and process it when it comes along.
+	Generate a param file with the -print_params option and
+	edit it - the only thing I think will need to be changed
+	is the input directory. If MDV files are written like :
+
+	whatever/blah/YYYYMMDD/hhmmss.mdv
+
+	Then the input directory should be :
+
+	whatever/blah
+
+	Note that UpdateClimate, like InitClimate, needs the
+	variable CLEAR_SKY_CLIMATOLOGY_DIR set.
+
+FINAL COMMENTS
+
+	Fields in the MDV file are recognised by name, if the
+	short field name is 'temperature' then a brightness
+	temperature field is assumed, otherwise albedo is assumed.
+	--- This has been changed, I now work from the field codes.
+
+	Once initiated, everything should remain static - do not change
+	field order or size in the input MDV files.
+
+	Only run the InitClimate program if you want to erase the climatology
+	and start again. UpdateClimate can run pretty well any
+	time. It does not matter if it runs several times on the same data.
+
+
+Niles Oien April 1999.
+

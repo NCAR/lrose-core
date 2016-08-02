@@ -1,0 +1,24 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	chunk_spdb2symprod \
+	dist_spdb_data \
+	spdb_query \
+	spdb_server \
+	xspdb_query
+
+$(TARGETS): FORCE
+	$(MAKE) $(SUB_DIRS) TARGET=$@
+
+$(SUB_DIRS): FORCE
+	cd $@; $(MAKE) $(TARGET)
+
+FORCE:
+
+

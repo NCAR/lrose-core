@@ -1,0 +1,236 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SawsUm2Mdv
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// April 2007
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SawsUm2Mdv Parameter file";
+  p_text = "SawsUm2Mdv reads in UM model data in grib format, and converts to MDV.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "REALTIME: files are processed as they arrive in the input directory. ARCHIVE: files in the input directory with times between the start and end times are processed. FILELIST: the files specified on the command line are processed in the order specified.";
+} mode;
+
+commentdef {
+  p_header = "INPUT DATA";
+} 
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory.";
+  p_help = "Directory which contains GRIB files. REALTIME and ARCHIVE modes only.";
+} input_dir;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max valid age of input data files (secs)";
+  p_help = "REALTIME mode only. This the max valid age for an incoming file. Files older than this will be ignored.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is _latest_data_info fiel available in input_dir?";
+  p_help = "REALTIME mode only. Set to TRUE if _latest_data_info file is available, FALSE otherwise.";
+} latest_data_info_avail;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/um";
+  p_descr = "Url for output mdv files.";
+} output_url;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to create output path in forecast format.";
+  p_help = "If false, the output path is determined  using the valid time: topdir/yyyymmdd/hhmmss.mdv. If true, the output path is determined using the model initialization (generate) time and the forecast lead time in secs: yyyymmdd/g_hhmmss/f_ssssssss.mdv";
+} output_path_in_forecast_format;
+
+paramdef string {
+  p_default = "This MDV file was created by SawsUm2Mdv.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "UM model data.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "UM MDV output.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+paramdef int {
+  p_default = -180;
+  p_min = -360.0;
+  p_max = 0.0;
+  p_descr = "Longitude of W side of output grid. (deg)";
+  p_help = "The output grid should span 360 degrees in longitude. You can choose where to start the grid, so that your part of the world is not near an edge.";
+} output_min_longitude;
+
+typedef enum { 
+  PRES = 1,
+  PRMSL = 2,
+  HGT = 7,
+  TMP = 11,
+  WSPD = 32,
+  UGRD = 33,
+  VGRD = 34,
+  VVEL = 39,
+  RH = 52
+} grib_field_id_t;
+
+typedef enum { 
+  NO_CHANGE,
+  MPS_TO_KNOTS,
+  PASCALS_TO_MBAR,
+  KELVIN_TO_CELSIUS,
+  PERCENT_TO_FRACTION,
+  WSPD_FROM_U_AND_V
+} units_conversion_t;
+
+typedef enum {
+  INT8 = 1,
+  INT16 = 2,
+  FLOAT32 = 5
+} encoding_type_t;
+
+typedef struct {
+  string mdv_name;
+  string mdv_long_name;
+  string mdv_units;
+  grib_field_id_t grib_field_id;
+  units_conversion_t units_conversion;
+  encoding_type_t encoding;
+} out_field_t;
+
+paramdef struct out_field_t {
+
+  p_default = {
+    { "U", "U-wind", "knots", UGRD, MPS_TO_KNOTS, INT8},
+    { "V", "V-wind", "knots", VGRD, MPS_TO_KNOTS, INT8},
+    { "Temp", "Temperature", "C", TMP, KELVIN_TO_CELSIUS, INT8},
+    { "RH", "Relative Humidity", "%", RH, NO_CHANGE, INT8},
+    { "WSPD", "Wind Speed", "knots", WSPD, WSPD_FROM_U_AND_V, INT8}
+  };
+
+  p_descr = "List of output fields for MDV file.";
+  p_help = "Grib field list:\n"
+  "  PRES = 1: pressure (Pa)\n"
+  "  PRMSL = 2: pressure reduced to MSL (Pa)\n"
+  "  HGT = 7: geopotential height (m)\n"
+  "  TMP = 11: temperature (K)\n"
+  "  WSPD = 32: Wind speed derived from U and V (m/s)\n"
+  "  UGRD = 33: U wind (m/s)\n"
+  "  VGRD = 34: V wind (m/s)\n"
+  "  VVEL = 39: vertical velocity (m/s)\n"
+  "  RH = 52: relative humidity (%)\n"
+  "The WSPD field is derived from U and V, both of which must be present "
+  "if this is selected.\n";
+  "\n";
+
+} output_fields[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Output wind speed field, derived from U and V fields.";
+  p_help = "The wind speed field will be derived from the raw GRIB fields. For this to succeed, there must be an output_field named 'U', and one named 'V'. The wind speed will be computed from these two fields.";
+} output_wind_speed;
+
+typedef enum {
+  _MDV_COMPRESSION_NONE = 0,
+  _MDV_COMPRESSION_RLE = 1,
+  _MDV_COMPRESSION_ZLIB = 3,
+  _MDV_COMPRESSION_BZIP = 4,
+  _MDV_COMPRESSION_GZIP = 5
+} compression_t;
+
+paramdef enum compression_t {
+  p_default = _MDV_COMPRESSION_GZIP;
+  p_descr = "Compression type for output files";
+  p_help = "See <mdv/mdv_macros.h> for the C definitions to which these correspond.";
+} output_compression;
+
+typedef enum {
+  NATIVE_PRESSURE_LEVELS, FLIGHT_LEVELS, HEIGHT_LEVELS
+} output_level_type_t;
+
+paramdef enum output_level_type_t {
+  p_default = FLIGHT_LEVELS;
+  p_descr = "Option to choose vertical levels for output file.";
+  p_help = "If FLIGHT_LEVELS or HEIGHT_LEVELS, vertical levels will be interpolated accordingly. If NATIVE_PRESSURE_LEVELS, no interpolation is done and the data is output on the original pressure levels.";
+} output_level_type;
+
+paramdef int {
+  p_default = {10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500};
+  p_descr = "Array of output flight levels.";
+  p_help = "Only used if output_levels is FLIGHT_LEVELS. The flight levels in the output are taken from this array.";
+} flight_levels[];
+
+paramdef double {
+  p_default = {0.2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+  p_descr = "Array of output height levels (km).";
+  p_help = "Only used if output_levels is HEIGHT_LEVELS. The height levels in the output are taken from this array.";
+} height_levels[];
+

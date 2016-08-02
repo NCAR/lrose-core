@@ -1,0 +1,6 @@
+.deps
+combine_ltg_radar
+__makefile.template
+makefile
+makefile.am
+makefile.in

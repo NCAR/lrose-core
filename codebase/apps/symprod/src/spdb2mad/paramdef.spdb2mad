@@ -1,0 +1,36 @@
+/**********************************************************
+ * paramdef.spdb2mad
+ *
+ */
+
+/***********************************************************************
+ * Operational information
+ */
+
+paramdef string
+{
+  p_descr = "Path for spdb directory";
+  p_help = "";
+  p_default = { "." };
+} input_path;
+
+paramdef string
+{ 
+  p_descr = "Output file path";
+  p_help = "All data will be written to this file";
+  p_default = "./temp";
+} output_file_path;
+
+paramdef string
+{ 
+  p_descr = "Start time";
+  p_help = "Needs to be in this format:  HH:MM MM/DD/YYYY";
+  p_default = "00:00 01/01/1999";
+} start_time;
+
+paramdef string
+{
+  p_descr = "End time";
+  p_help = "Needs to be in this format: HH:MM MM/DD/YYYY";
+  p_default = "00:00 01/01/1999";
+} end_time;

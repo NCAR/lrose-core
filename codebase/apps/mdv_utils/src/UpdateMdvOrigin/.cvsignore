@@ -1,0 +1,6 @@
+.deps
+UpdateMdvOrigin
+__makefile.template
+makefile
+makefile.am
+makefile.in

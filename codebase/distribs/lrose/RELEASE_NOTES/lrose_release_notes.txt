@@ -1,0 +1,8 @@
+Release notes for lrose
+=======================
+
+2015/09/05
+----------
+
+Fixed bug in Radx which prevented proper access to measured RHIs in NcMdvServer.
+

@@ -1,0 +1,260 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for MdvLinearComb
+ *
+ */
+
+commentdef {
+  p_header = "MdvLinearComb allows user to create a linear combination of Mdv fields";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  TIME_INTERVAL, FILELIST, REALTIME, REALTIME_MULT_URL
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program triggers off of a latest data info file.\n"
+           "In REALTIME_MULT_URL mode, the program triggers off of a list of URLs all of which have to have data before "
+           "the program will trigger.\n"
+           "In FILELIST mode the program processed data between start and end times entered on the command line.\n"
+           "In FILELIST mode the file processes files entered on the command line";
+} mode;
+
+paramdef boolean {
+   p_descr = "Flag to set the Mdv read mode to READ_SPECIFIED_FORECAST ";
+   p_default = false;
+ } is_forecast_data;
+
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/"; 
+  p_help    = "Trigger url, latest data after trigger will be found for all field data files.";
+  
+} trigger_url;
+
+paramdef string {
+  p_default = { "mdvp:://localhost::mdv1", "mdvp:://localhost::mdv2" }; 
+  p_help    = "List of trigger urls used in REALTIME_MULT_URL mode. "
+              "The program will trigger when there is data available from all listed URLs.";
+  
+} mult_trigger_url[];
+
+paramdef int {
+  p_default = 300;
+  p_descr = "max valid realtime age of trigger data\n";
+
+}max_valid_realtime_age;
+
+commentdef {
+  p_header = "DATA INPUT.";
+ }
+
+
+typedef enum {
+  VERT_ACTION_NONE, VERT_ACTION_SET_LIMITS, VERT_ACTION_COMPOSITE
+} vert_action_t;
+
+typedef enum {
+  VLEVEL_PLANE_NUM, VLEVEL_DATA_UNITS
+} vlevel_type_t;
+
+
+typedef struct {
+  string url;
+  string field_name;
+  int field_number;
+  boolean use_field_name;
+  vert_action_t vert_action;
+  vlevel_type_t vlevel_type;
+  double vertical_min;
+  double vertical_max;
+  int search_margin;
+  double scale;
+  double offset;
+  int time_offset;
+} input_field_t;
+
+
+paramdef struct input_field_t {
+  p_help =
+    "url - location of truth or predictor data\n"
+    "field_name - name of field of interest at input url\n"
+    "field_number - number of field of interest at input\n"
+    "use_field_name- option to use field name instead of number.\n"
+    "                 If false, field_number_will be used.\n"
+    "vert_action - Set vertical limits on data being read. You can choose\n"
+    "              a composite( VERT_ACTION_COMPOSITE) or choose to read\n"
+    "              data between vertical limits( VERT_ACTION_SET_LIMITS)\n"
+    "               If not VERT_ACTION_NONE, choose VERT_ACTION_SET_LIMITS\n"
+    "              or VERT_ACTION_COMPOSITE.\n"
+    "vlevel_type - If choosing VERT_ACTION_SET_LIMITS, choose\n"
+    "              VLEVEL_PLANE_NUM to specify the boundind planes by\n"
+    "              number or choose VLEVEL_DATA_UNITS to specify\n"
+    "              the bounding planes in vertical units defined in\n"
+    "               the data file.\n"
+    "vertical_min - This is the minimum vertical level plane in units\n"
+    "                specified by vlevel_type.\n"
+    "vertical_max - This is the maximum vertical level plane in units\n"
+    "               specified by vlevel_type.\n"
+    "search_margin -defines time window around data search time.\n"
+    "scale, offset - multiple the field by the scale, and add the offset\n"
+    "               before summing them.\n"
+    "time_offset - offset (in secs) of the read time for this field\n"
+    "              relative to the trigger field.\n";
+
+  p_default = {
+    {"./","",0,FALSE,VERT_ACTION_NONE,VLEVEL_PLANE_NUM,0,0,0,1,0,0}, 
+    {"./","",0,FALSE,VERT_ACTION_NONE,VLEVEL_PLANE_NUM,0,0,0,1,0,0}
+  };
+
+  p_descr = "Specify field and any preprocessing.";
+
+} field_data[];
+	
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set to true to remap the data.";
+  p_help = "Defaults to false";
+} remap_grid;
+
+typedef enum {
+  PROJ_FLAT, PROJ_LATLON, PROJ_LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type for remapped grid";
+  p_default = PROJ_FLAT;
+  p_help = "Projections currently supported are PROJ_FLAT, PROJ_LATLON and PROJ_LAMBERT";
+} grid_projection;
+
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+  p_default = { 812, 485, -99.086,  31.515, .038239, .035933 };
+  p_descr = "Grid parameters for remapping in x,y.";
+  p_help = "These params apply to all projection types.";
+} grid_params;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin latitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT projections.";
+} origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin longitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT projections.";
+} origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} flat_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for PROJ_LAMBERT projection.";
+  p_help = "Applies only to PROJ_LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} lambert_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for PROJ_LAMBERT projection.";
+  p_help = "Applies only to PROJ_LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} lambert_lat2;
+
+paramdef boolean {
+   p_default = false;
+   p_descr = "Option of output the 0-based integer representing the field which has the max "
+             "value at each grid point of all input fields.";
+} output_field_of_max_val;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::$(PROJECT)/mdv";
+  p_descr = "Url of output mdv dataset";
+} output_url;
+
+paramdef string {
+  p_default = "LinearComb";
+  p_descr = "Name of output field";
+  p_help = "Name given to output field.";
+} output_field_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Units for output field";
+} output_field_units;
+
+paramdef boolean {
+   p_descr = "Option to write output in forecast directory structure";
+   p_default = false;
+} write_as_forecast;
+

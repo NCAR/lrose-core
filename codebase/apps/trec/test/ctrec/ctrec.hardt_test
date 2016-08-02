@@ -1,0 +1,847 @@
+/**********************************************************************
+<<<<<<< ctrec.hardt_test
+ * TDRP params for ../../src/ctrec/ctrec
+=======
+ * TDRP params for ctrec
+>>>>>>> 1.4
+ **********************************************************************/
+
+//======================================================================
+//
+// OPERATIONAL PARAMETERS.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Option to print debugging messages/post-analysis output.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for registration with the process mapper.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operational Mode.
+// Realtime mode waits for new data; archive mode processes files in a 
+//   given file list.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//
+
+mode = ARCHIVE;
+
+///////////// time_value //////////////////////////////
+//
+// Master header time field to use for time calculations.
+//
+// Type: enum
+// Options:
+//     TIME_BEGIN
+//     TIME_CENTROID
+//     TIME_END
+//
+
+//time_value = TIME_BEGIN;
+time_value = TIME_CENTROID;
+
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+// The ctrec algorithm performs the following steps:
+// 	read in the data
+// 	replace bad data values with thr_dbz
+// 	if (clutter_flg)
+// 		remove clutter (detrend if dtrnd_flg set)
+// 	if (floor_flg)
+// 		replace weak/missing data with noise
+// 	track echoes
+// 	if (thrvec_flg)
+// 		discard vectors based on local mean
+// 	discard vectors based on global mean
+// 	if (fillvec_flg)
+// 		fill in missing vectors using least-squares fit
+// 	fill in areas around each vector with closest vector value
+// 	perform temporal smoothing based on previous vectors
+// The parameters below are given in the order that things happen in the 
+//   program.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// Image timing parameters.
+//
+//======================================================================
+ 
+///////////// max_time_between_images /////////////////
+//
+// Maximum time (in seconds) allowed between images used to generate 
+//   vectors.
+// Two (consecutive) volume times are required to compute vectors.
+// Minimum val: 1
+// Type: long
+//
+
+max_time_between_images = 3600;
+
+///////////// min_time_between_images /////////////////
+//
+// Minimum time (in seconds) allowed between images used to generate 
+//   vectors.
+// Two (consecutive) volume times are required to compute vectors.
+// Minimum val: 1
+// Type: long
+//
+
+min_time_between_images = 300;
+
+//======================================================================
+//
+// Output grid parameters.
+//
+//======================================================================
+ 
+///////////// define_output_grid //////////////////////
+//
+// Define output grid flag.
+// If TRUE, the output_grid parameter will be used to define the output 
+//   grid.  If FALSE, the input grid will be used for the output grid.
+// Type: boolean
+//
+
+define_output_grid = TRUE;
+
+///////////// output_grid /////////////////////////////
+//
+// Output grid definition.
+// If define_output_grid is TRUE, this structure is used to define the 
+//   new output grid.  The grid_type field can be either FLAT or LATLON.  
+//   If grid_type is LATLON, the origin_lat and origin_lon fields are 
+//   ignored.
+//
+// Type: struct
+//   typedef struct {
+//      grid_type_t grid_type;
+//        Options:
+//          FLAT
+//          LATLON
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//      long nx;
+//      long ny;
+//      double origin_lat;
+//      double origin_lon;
+//   }
+//
+//
+
+output_grid = {
+    grid_type = LATLON,
+    minx = -79.5446,
+    miny = 36.9077,
+    dx = 0.036036,
+    dy = 0.036036,
+    nx = 115,
+    ny = 115,
+    origin_lat = 38.9753,
+    origin_lon = -77.477
+};
+
+//======================================================================
+//
+// Input file parameters.
+//
+//======================================================================
+ 
+///////////// analyze_alt /////////////////////////////
+//
+// Analyze altitude, in units used for vertical levels by the input 
+//   field.
+// This value must be given in units that match the units used in the 
+//   input files.  The plane in the data closest to this altitude with be 
+//   used in the analysis.
+// Type: double
+//
+
+analyze_alt = 0.112;
+
+///////////// field_name //////////////////////////////
+//
+// Field name to analyze. The user can specify a field number
+// rather than a name by using the pound sign, ie. setting the
+// name to #3 asks for field number three (fields start at 0).
+// Type: string
+//
+
+field_name = "DBZ";
+
+///////////// input_url ///////////////////////////////
+//
+// URL used for retrieving the input data.
+// For data on local disk, this can just be the directory containing the 
+//   input MDV data files.  For data retrieved from a server, it is the 
+//   URL for the server.  A server URL looks like the following:
+// 	mdvp:://host:port:directory_path
+// This URL specifies a DsMdvServer process running on the specified 
+//   host and using the specified port.  The data would reside on the 
+//   specified host under $RAP_DATA_DIR/directory_path.
+// Type: string
+//
+
+input_url = "mdvp:://localhost::./hardt_test_input";
+
+//======================================================================
+//
+// Output file parameters.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL used for writing the output data.
+// For data on local disk, this can just be the directory containing the 
+//   output MDV data files.  For data written via a server, it is the URL 
+//   for the server.  A server URL looks like the following:
+// 	mdvp:://host:port:directory_path
+// This URL specifies a DsMdvServer process running on the specified 
+//   host and using the specified port.  The data would reside on the 
+//   specified host under $RAP_DATA_DIR/directory_path.
+// Type: string
+//
+
+output_url = "./hardt_test_output";
+
+//======================================================================
+//
+// General algorithm parameters.
+//
+//======================================================================
+ 
+///////////// min_echo ////////////////////////////////
+//
+// Minimum data value to track.
+// This value is given in the same units as the underlying data.
+
+// Note that this value must be greater than or equal to thr_dbz.
+// Type: double
+//
+
+//min_echo = 20;
+min_echo = 0;
+
+///////////// max_echo ////////////////////////////////
+//
+// Maximum data value to track.
+// Type: double
+//
+
+max_echo = 1000;
+
+///////////// track_top_percentage ////////////////////
+//
+// Flag indicating whether to track the top_percentage percent of the 
+//   data.
+// If this flag is set, ctrec will track just the top given percentage 
+//   (defined in the top_percentage parameter below) of the data values in 
+//   each correlation box.  For example, if top_percentage is set to 0.4, 
+//   in each correlation box ctrec will sort the data values and find the 
+//   value at the 40% mark from the top of the data.  Then, any data value 
+//   below this value will be replaced with noise before calculating the 
+//   correlation coefficient.
+// Note that if top_percentage_increasing is set to false, the tracking 
+//   is reversed and the lowest 40% (or whatever) of the data in each box 
+//   will be tracked.
+// Type: boolean
+//
+
+//track_top_percentage = FALSE;
+track_top_percentage = TRUE;
+
+///////////// top_percentage //////////////////////////
+//
+// The percentage value to use if track_top_percentage is set to true.
+// This is a value between 0.0 and 0.1 representing the percentage of 
+//   data values to track.
+
+// See the description for the track_top_percentage parameter for 
+//   detailed information on how this parameter is used.
+// Minimum val: 0
+// Maximum val: 1
+// Type: double
+//
+
+top_percentage = 0.4;
+
+///////////// top_percentage_increasing ///////////////
+//
+// Flag indicating whether the data values are increasing or decreasing 
+//   when looking for the top percentage of the data.
+// For example, this flag would be true for reflectivity data, but false 
+//   for satellite data.
+// This flag is ignored if track_top_percentage is set to false.
+// Type: boolean
+//
+
+top_percentage_increasing = TRUE;
+
+///////////// max_speed_echo //////////////////////////
+//
+// User entered maximum expected echo speed (m/s) .
+// This should be set to a reasonable value for the data.  If it is set 
+//   very large not only will it slow down processing, it will also reduce 
+//   the area of the data where motion is calculated because we skip the 
+//   area around the data covered by this distance to make sure we can 
+//   look in all directions before calculating the correlations.
+// Minimum val: 0
+// Type: double
+//
+
+max_speed_echo = 30;
+
+//======================================================================
+//
+// Clutter removal parameters.
+//
+// Clutter removal is performed on the individual images before the 
+//   tracking algorithm is run.  The clutter is removed independently on 
+//   the two images.
+//
+//======================================================================
+ 
+///////////// clutter_flg /////////////////////////////
+//
+// Remove Clutter Flag.
+// If true, clutter in the original images is removed using  the 
+//   reflectivity variance method.
+// Type: boolean
+//
+
+clutter_flg = FALSE;
+
+///////////// dtrnd_flg ///////////////////////////////
+//
+// Detrend Flag.
+// If true, the reflectivity data will be detrended during the variance 
+//   calculation for clutter removal.  This flag is ignored if clutter_flg 
+//   is false.
+// Type: boolean
+//
+
+dtrnd_flg = TRUE;
+
+///////////// thr_sd //////////////////////////////////
+//
+// Variance threshold for clutter removal .
+// Minimum val: 0
+// Maximum val: 100
+// Type: double
+//
+
+thr_sd = 25;
+
+///////////// output_after_clutter_removal ////////////
+//
+// Output data grid after clutter removal flag.
+// If true and clutter_flg is also true, the data grid after clutter 
+//   removal has been performed will be added to the output file.
+// Type: boolean
+//
+
+output_after_clutter_removal = TRUE;
+
+//======================================================================
+//
+// Data filling parameters.
+//
+//======================================================================
+ 
+///////////// floor_flg ///////////////////////////////
+//
+// Floor data flag.
+// If true, weak/missing reflectivity data will be replaced with random 
+//   numbers.  This should always be set to true.
+// Type: boolean
+//
+
+floor_flg = TRUE;
+
+///////////// thr_dbz /////////////////////////////////
+//
+// Threshold dbz -- threshold for reflectivity filling/tracking.
+// If floor_flg is true, reflectivity values less than min_echo or 
+//   greater than max_echo will be filled with random values centered 
+//   around this value.
+
+// Note that this value must be less than or equal to min_echo.
+// Type: double
+//
+
+thr_dbz = -50;
+
+///////////// del_dbz /////////////////////////////////
+//
+// Delta dbz -- purtubation value for random numbers .
+// If floor_flg is true, reflectivity values less than min_echo will be 
+//   filled with random numbers between thr_dbz - del_dbz and thr_dbz + 
+//   del_dbz.
+// Type: double
+//
+
+del_dbz = 10;
+
+///////////// output_after_random_noise ///////////////
+//
+// Output data grid after adding random noise flag.
+// If true and floor_flg is also true, the data grid after data filling 
+//   with random noise has been performed will be added to the output 
+//   file.
+// Type: boolean
+//
+
+output_after_random_noise = TRUE;
+
+//======================================================================
+//
+// Correlation calculation parameters.
+//
+//======================================================================
+ 
+///////////// cbox_fract //////////////////////////////
+//
+// Correlation box fraction.
+// Maximum fraction (%) of bad data allowed in a correlation box.
+// Minimum val: 0
+// Maximum val: 100
+// Type: double
+//
+
+//cbox_fract = 85;
+cbox_fract = 100;
+
+///////////// cbox_size ///////////////////////////////
+//
+// Correlation box size.
+// The length of one side of the correlation box, in km.
+// Minimum val: 3
+// Maximum val: 1000
+// Type: double
+//
+
+cbox_size = 100;
+
+///////////// cbox_space //////////////////////////////
+//
+// Correlation box spacing.
+// Spacing between vectors in the final grid, in km.
+// Minimum val: 2
+// Maximum val: 1000
+// Type: double
+//
+
+cbox_space = 15;
+
+///////////// thr_cor /////////////////////////////////
+//
+// Correlation threshold.
+// Echo motion vectors that have (correlation coefficient*100) less than 
+//   this value will be discarded.
+// Minimum val: 0
+// Maximum val: 100
+// Type: double
+//
+
+thr_cor = 25;
+
+///////////// cormax_search_params ////////////////////
+//
+// Parameters describing the method for searching for the maximum 
+//   correlation value.
+// This parameter only matters if there are several motions for a box 
+//   that share the same maximum correlation.
+//
+// Type: struct
+//   typedef struct {
+//      search_start_t start;
+//        Options:
+//          UPPER_LEFT_CORNER
+//          UPPER_RIGHT_CORNER
+//          LOWER_LEFT_CORNER
+//          LOWER_RIGHT_CORNER
+//      search_dir_t direction;
+//        Options:
+//          ROW_FIRST_SEARCH
+//          COLUMN_FIRST_SEARCH
+//      search_result_t result;
+//        Options:
+//          TAKE_FIRST_FOUND
+//          TAKE_LAST_FOUND
+//          TAKE_MIDDLE_FOUND
+//   }
+//
+//
+
+cormax_search_params = {
+    start = LOWER_LEFT_CORNER,
+    direction = COLUMN_FIRST_SEARCH,
+    result = TAKE_FIRST_FOUND
+};
+
+///////////// output_correlation_locations ////////////
+//
+// Locations for outputting calculated correlation values.
+// X and Y values should be given in the correct units for the 
+//   underlying grid (deg for lat/lon grids; km for flat grids).
+//
+// Type: struct
+//   typedef struct {
+//      double x;
+//      double y;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_correlation_locations = {
+  {
+    x = -78.3618,
+    y = 40.377
+  }
+  ,
+  {
+    x = -78.3656,
+    y = 38.8433
+  }
+};
+
+///////////// output_correlation_grid /////////////////
+//
+// Output correlation grid flag.
+// If true, the correlation grid will be added to the output file.
+// Type: boolean
+//
+
+output_correlation_grid = TRUE;
+
+///////////// output_cormax_count_grid ////////////////
+//
+// Output max correlation count grid flag.
+// If true, a field will be added to the output file containing a count 
+//   of the number of positions where the maximum correlation coefficient 
+//   occurred in the search.  This was added to see if the direction of 
+//   the search for the maximum correlation coefficient is affecting the 
+//   final motion vectors.  For example, if we are searching for maximum 
+//   correlation beginning north of the current position and use the first 
+//   grid space to contain the maximum correlation coefficient to 
+//   determine the motion, will be a motion bias to the north if the 
+//   maximum correlation value appears multiple times in the search area.
+// Type: boolean
+//
+
+output_cormax_count_grid = FALSE;
+
+///////////// output_original_vectors /////////////////
+//
+// Output original vectors flag.
+// If true, the original U and V vectors (before all of the following 
+//   thresholding and filling) will be added to the output file.
+// Type: boolean
+//
+
+output_original_vectors = TRUE;
+
+//======================================================================
+//
+// Thresholding based on local mean parameters.
+//
+//======================================================================
+ 
+///////////// thrvec_flg //////////////////////////////
+//
+// Threshold Echo Motion Vectors Flag.
+// Flag indicating whether the motion vectors should be thresholded 
+//   based on a local mean.
+// Type: boolean
+//
+
+thrvec_flg = TRUE;
+
+///////////// rad_mean ////////////////////////////////
+//
+// Maximum radius used to find the local mean, in km.
+// Used only if thrvec_flg is true.There must be at least 5 valid 
+//   vectors around the current one within this radius in order for the 
+//   local mean to be computed.  If there are not enough valid vectors, 
+//   the current vector is discarded.  The current vector is NOT included 
+//   in the local mean calculation.
+// Note that this value must be greater than (1.5 * cbox_space) for 
+//   there to ever be enough vectors to calculate the local mean.
+// Minimum val: 0
+// Type: double
+//
+
+rad_mean = 70;
+
+///////////// thr_vec /////////////////////////////////
+//
+// Threshold used for discarding echo motion vectors .
+// If an echo motion vector differs from the local mean in either the U 
+//   or V direction by more than this value, it will be discarded.
+// Used only if thrvec_flg is true.
+// Minimum val: 0
+// Type: double
+//
+
+thr_vec = 8;
+
+///////////// output_local_mean_grids /////////////////
+//
+// Output local mean grid flag.
+// If true and thrvec_flg is true, the grids containing the calculated 
+//   local mean values used for threshholding the vectors are created and 
+//   added to the output file.  Note that there are separate grids for the 
+//   U and V components of the vectors.
+// Type: boolean
+//
+
+output_local_mean_grids = FALSE;
+
+///////////// output_local_mean_thresh_vectors ////////
+//
+// Output vectors after local mean thresholding flag.
+// If true and thrvec_flg is true, the U and V vectors after 
+//   thresholding based on the local mean will be added to the output 
+//   file.
+// Type: boolean
+//
+
+output_local_mean_thresh_vectors = TRUE;
+
+//======================================================================
+//
+// Thresholding based on global mean parameters.
+//
+//======================================================================
+ 
+///////////// thr_dif /////////////////////////////////
+//
+// Global mean threshold difference.
+// Echo motion vectors that differ from the global mean in either the U 
+//   or V component by more than this value will be discarded.
+// Global mean thresholding is always performed.
+// Minimum val: 0
+// Type: double
+//
+
+thr_dif = 75;
+
+///////////// output_global_mean_thresh_vectors ///////
+//
+// Output vectors after global mean thresholding flag.
+// If true, the U and V vectors after thresholding based on the global 
+//   mean will be added to the output file.
+// Type: boolean
+//
+
+output_global_mean_thresh_vectors = TRUE;
+
+//======================================================================
+//
+// Vector filling parameters.
+//
+// If requested, at the end of the tracking processing missing vectors 
+//   are filled using a least-squares fit to surrounding vectors.  The 
+//   least-squares fit is done using the smallest area around the vector 
+//   that includes at least min_vec_pts valid vectors and has vectors in 
+//   at least nquad_vec quadrants.  If these conditions are not met within 
+//   rad_vec km around the vector, the vector is left as missing.
+//
+//======================================================================
+ 
+///////////// fillvec_flg /////////////////////////////
+//
+// Fill Echo Motion Vectors Flag.
+// If true, motion vectors discarded above and missing motion vectors 
+//   will be filled in using the local mean if nquad_vec and min_vec_pts 
+//   are satisfied.
+// Type: boolean
+//
+
+fillvec_flg = TRUE;
+
+///////////// rad_vec /////////////////////////////////
+//
+// Radius for finding filling echo motion vectors, in km.
+// Used only if fillvec_flg is true.
+// Minimum val: 0
+// Type: double
+//
+
+rad_vec = 10;
+
+///////////// nquad_vec ///////////////////////////////
+//
+// Number of quadrants with data needed to fill echo motion vectors.
+// Used only if fillvec_flg is true.
+// Minimum val: 0
+// Maximum val: 4
+// Type: long
+//
+
+nquad_vec = 4;
+
+///////////// min_vec_pts /////////////////////////////
+//
+// Minimum number of points required for filling echo motion vectors .
+// Used only if fillvec_flg is true.
+// Minimum val: 0
+// Type: double
+//
+
+min_vec_pts = 10;
+
+//======================================================================
+//
+// Parameters for printing the global mean.
+//
+//======================================================================
+ 
+///////////// print_global_mean ///////////////////////
+//
+// Print global mean.
+// If set to TRUE, the global mean will be printed to stdout.
+// Type: boolean
+//
+
+print_global_mean = FALSE;
+
+//======================================================================
+//
+// Temporal smoothing parameters.
+//
+//======================================================================
+ 
+///////////// temporal_smoothing_type /////////////////
+//
+// Type of temporal smoothing to perform.
+// 	SMOOTH_NONE means that no temporal smoothing is performed.
+// 	SMOOTH_WITH_PREVIOUS_VECTOR means that the change in the values of 
+//   the U and V vector components are limited to temporal_u_percent and 
+//   temporal_v_percent of the previous U and V vector component values. 
+//   If there was no vector calculated for the current grid position in 
+//   the previous time period, the new vector is unchanged. For example, 
+//   assume both temporal_u_percent and temporal_v_percent are set to 0.1. 
+//   Then, at the end of processing ctrec will compare each current vector 
+//   with the final vector from the previous time step. If the U value for 
+//   the new vector is calculated to be 5 m/s and the U value of the final 
+//   vector at the same grid point for the prevous time period is 4 m/s, 
+//   then the U value for the new vector will be changed to 4.4 m/s (4 + 
+//   (4 * 0.1)). Since this method breaks down when the previous U or V 
+//   component is 0.0, the temporal_prev_u_min and temporal_prev_v_min 
+//   parameters are used to give minimum values for the previous vector 
+//   components, below which the smoothing is skipped (i.e. the current 
+//   vector values are not changed if the previous vector values are below 
+//   the given values).
+// 	SMOOTH_WITH_VECTOR_DIFFERENCE means that the difference between the 
+//   current and previous vector components is reduced by (1.0 - 
+//   temporal_u_percent) or (1.0 - temporal_v_percent). So, in the above 
+//   example, the calculated U difference is 1 m/s. This difference is 
+//   reduced to 0.1 percent of it's original value so the smoothed U value 
+//   becomes 4.1 m/s.
+//
+// Type: enum
+// Options:
+//     SMOOTH_NONE
+//     SMOOTH_WITH_PREVIOUS_VECTOR
+//     SMOOTH_WITH_VECTOR_DIFFERENCE
+//
+
+//temporal_smoothing_type = SMOOTH_WITH_PREVIOUS_VECTOR;
+temporal_smoothing_type = SMOOTH_WITH_VECTOR_DIFFERENCE;
+
+///////////// temporal_prev_grid_type /////////////////
+//
+// Type of grid to use as the previous grid in temporal smoothing.
+// 	PREV_GRID_SMOOTHED uses the temporally smoothed grid from the 
+//   previous time period.
+// 	PREV_GRID_UNSMOOTHED uses the originally calculated vectors (before 
+//   temporal smoothing) from the previous time period.
+// 	PREV_GRID_AVERAGE uses the average of the above two vectors from the 
+//   previous time period.
+//
+// Type: enum
+// Options:
+//     PREV_GRID_SMOOTHED
+//     PREV_GRID_UNSMOOTHED
+//     PREV_GRID_AVERAGE
+//
+
+//temporal_prev_grid_type = PREV_GRID_SMOOTHED;
+//temporal_prev_grid_type = PREV_GRID_UNSMOOTHED;
+temporal_prev_grid_type = PREV_GRID_AVERAGE;
+
+///////////// temporal_u_percent //////////////////////
+//
+// Temporal smoothing U change percentage.
+// See the temporal_smoothing_type parameter description for information 
+//   about how this parameter is used.
+// Minimum val: 0
+// Type: double
+//
+
+temporal_u_percent = 0.2;
+
+///////////// temporal_v_percent //////////////////////
+//
+// Temporal smoothing V change percentage.
+// See the temporal_smoothing_type parameter description for information 
+//   about how this parameter is used.
+// Minimum val: 0
+// Type: double
+//
+
+temporal_v_percent = 0.2;
+
+///////////// temporal_prev_u_min /////////////////////
+//
+// Temporal smoothing minimum previous U component value.
+// See the temporal_smoothing_type parameter description for information 
+//   about how this parameter is used.
+// Type: double
+//
+
+temporal_prev_u_min = 2;
+
+///////////// temporal_prev_v_min /////////////////////
+//
+// Temporal smoothing minimum previous V component value.
+// See the temporal_smoothing_type parameter description for information 
+//   about how this parameter is used.
+// Type: double
+//
+
+temporal_prev_v_min = 2;
+
+///////////// output_vectors_before_temporal_smoothing 
+//
+// Flag indicating whether the calculated vectors before temporal 
+//   smoothing should be included in the output file.
+// Type: boolean
+//
+
+output_vectors_before_temporal_smoothing = TRUE;
+

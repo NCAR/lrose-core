@@ -1,0 +1,219 @@
+/*********************************************************
+ * parameter definitions for ClutterMap
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * March 2004
+ * 
+ */
+
+commentdef {
+  p_text = "ClutterMap computes a clutter map from a series of MDV files. It considers the persistence of reflectivify, and if available uses velocity and width data to constrain the points considered. Outputs are the clutter flag, mean reflectivity, and if requested mean velocity and width for the clutter points.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+  p_text = "Modes and trigger mechanism.";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE, INTERVAL
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "In REALTIME mode, the analysis is performed as each trigger time arrives. See 'trigger_interval'. In ARCHIVE mode, the program loops through all trigger times between the the start time and the end time. In REALTIME and ARCHIVE mode, the program looks back from the trigger_time by the lookbak_duration to identify the files to be processed. In INTERVAL mode, the processing loop only runs once for the data between the start time and end time.";
+} mode;
+
+paramdef int {
+  p_default = 86400;
+  p_descr = "Interval for trigger - secs.";
+  p_help = "This is the interval between time trigger events. In REALTIME mode, a trigger always occurs on the hour, and at constant intervals thereafter. In ARCHIVE mode the trigger starts at start_time and at constant intervals thereafter.";
+} trigger_interval;
+
+paramdef int {
+  p_default = 86400;
+  p_descr = "Lookback duration (secs).";
+  p_help = "The program reads all data in this period and uses it to compute the statistics.";
+} lookback_duration;
+
+commentdef {
+  p_header = "INPUT DATA.";
+}
+
+paramdef string {
+  p_default = "mdv/radar/cart";
+  p_descr = "URL for input radar data.";
+  p_help = "Input data is in MDV format, and must contain a reflectivity field. The statistics are computed using the reflectivity data. The geometry of the input files must be constant.";
+} input_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Input data are intermediate results from ClutterMap.";
+  p_help = "Set to TRUE if you are using input files containing intermediate results which were previously computed by an instance of ClutterMap. This is a good way to limit the CPU load from ClutterMap. Set up one instance which computes intermediate results frequesntly, say once every 3 hours. This spreads the computational load. Then, run an instance of ClutterMap which uses these intermediate results as input to compute clutter for a longer period.";
+} input_intermediate_results;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Name of dBZ field in input MDV files.";
+} dbz_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is SNR data field available?";
+  p_help = "If TRUE, the SNR field will be used directly. If FALSE, SNR will be computed from DBZ using the parameter 'noise_dbz_at_1km'.";
+} use_snr_data;
+
+paramdef string {
+  p_default = "SNR";
+  p_descr = "Name of dBZ field in input MDV files.";
+} snr_field_name;
+
+paramdef double {
+  p_default = -25.0;
+  p_descr = "DBZ at 1 km range for SNR of 0.";
+  p_help = "Used for computing the SNR from DBZ, is SNR not available as a separate field.";
+} noise_dbz_at_1km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is velocity data available?";
+  p_help = "Set to true if velocity data is available in the MDV files and you want to use the velocity data in computing the clutter map.";
+} use_vel_data;
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "Name of vel field in input MDV files, if available.";
+} vel_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is spectrum width data available?";
+  p_help = "Set to true if spectrum width data is available in the MDV files and you want to use the width data in computing the clutter map.";
+} use_width_data;
+
+paramdef string {
+  p_default = "SPW";
+  p_descr = "Name of spectrum width field in input MDV files, if available.";
+} width_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to only consider a range of vertical levels.";
+  p_help = "If FALSE, all vert levels will be considered.";
+} set_vlevel_limits;
+
+paramdef double {
+  p_default = -1.0;
+  p_descr = "Min vertical level for clutter map (km or deg).";	
+  p_help = "Only data above this vlevel will be considered.";
+} min_v_level;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Max vertical level for clutter map (km or deg).";	
+  p_help = "Only data below this vlevel will be considered.";
+} max_v_level;
+
+commentdef {
+  p_header = "CLUTTER DETECTION.";
+}
+
+paramdef int {
+  p_default = 20;
+  p_min = 1;
+  p_descr = "Minimum number of data times for computing clutter.";
+  p_help = "If fewer data files are found, clutter is not computed.";
+} min_data_times;
+
+typedef enum {
+  DBZ_THRESHOLD, SNR_THRESHOLD
+} threshold_field_t;
+
+paramdef enum threshold_field_t {
+  p_default = SNR_THRESHOLD;
+  p_descr = "Thresholding field. SNR is recommended.";
+  p_help = "If DBZ, only grid cells with reflectivity above min_dbz will be included in the compuations. If SNR, min_snr will be used.";
+} threshold_field;
+
+paramdef double {
+  p_default = 6.0;
+  p_descr = "Low SNR threshold.";
+  p_help = "For threshold_field = SNR_THRESHOLD. Only points with SNR exceeding this threshold will be considered as candidates for clutter.";
+} min_snr;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Low DBZ threshold.";
+  p_help = "For threshold_field = DBZ_THRESHOLD. Only points with DBZ exceeding this threshold will be considered as candidates for clutter.";
+} min_dbz;
+
+paramdef double {
+  p_default = 0.9;
+  p_descr = "Min time fraction for clutter conditions to be met.";
+  p_help = "Clutter will be identified at a point only if the various conditions are met for at least this fraction of the time.";
+} min_clutter_time_fraction;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Max absolute velocity for clutter (m/s).";
+  p_help = "Set if use_vel_data is true.";
+} max_abs_vel;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Max spectrum width for clutter (m/s).";
+  p_help = "Set if use_width_data is true.";
+} max_width;
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/clutter_auto";
+  p_descr = "Output directory.";
+  p_help = "The clutter statistics are output to this directory in MDV format.";
+} output_url;
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output intermediate results instead of clutter data.";
+  p_help = "Set to TRUE if you want to output intermediate results for use by a different instance of ClutterMap. See 'input_intermediate_results'.";
+} output_intermediate_results;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_FLOAT32;
+  p_descr = "Set encoding type.";
+} output_encoding_type;
+
+

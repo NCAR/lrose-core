@@ -1,0 +1,45 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for RapMap2Chill
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Sept 2007
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "RapMap2Chill converts NCAR/RAP style maps to CHILL maps.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+typedef enum {
+  GTK_DISPLAY_MODE, VCHILL_MODE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = GTK_DISPLAY_MODE;
+  p_descr = "Mode";
+  p_help = "Convert to gtk_display, or vchill. Vchill not yet implemented.";
+} mode;
+
+paramdef double {
+  p_default = 39.9321;
+  p_descr = "Latitude of radar.";
+  p_help = "gtk_display maps are in km from the radar location.";
+} radar_latitude;
+
+paramdef double {
+  p_default = -105.182;
+  p_descr = "Longitude of radar.";
+  p_help = "gtk_display maps are in km from the radar location.";
+} radar_longitude;

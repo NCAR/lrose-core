@@ -1,0 +1,7 @@
+set title "POWER, GMAP using real spectra, CWR 10 dB"
+set xlabel "Power truth (dB)" 
+set ylabel "Power filtered (dB)"
+set xrange [-80:-20]
+set yrange [-80:-20]
+plot 'gmap_real_cwr_10.out' using 3:12 title ''
+

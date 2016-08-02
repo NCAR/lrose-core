@@ -1,0 +1,122 @@
+/*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+ ** Copyright UCAR (c) 1992 - 1997
+ ** University Corporation for Atmospheric Research(UCAR)
+ ** National Center for Atmospheric Research(NCAR)
+ ** Research Applications Program(RAP)
+ ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
+ ** All rights reserved. Licenced use only.
+ ** Do not copy or distribute without authorization
+ ** 1997/9/26 14:18:54
+ *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
+///////////////////////////////////////////////////////////////
+//
+// converter for little-endian mdv files.
+//
+// Paddy McCarthy, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// July 1999
+//
+///////////////////////////////////////////////////////////////
+
+#include <stdio.h>
+#include <stream.h>
+#include <signal.h>
+
+#include <os_config.h>
+#include <toolsa/port.h>
+
+#include "Args.hh"
+#include "Params.hh"
+
+#include <dataport/bigend.h>
+
+#include <mdv/MdvFile.hh>
+#include <mdv/MdvField.hh>
+#include <euclid/TypeGrid.hh>
+
+//
+// Prototypes for static functions.
+//
+
+static void tidy_and_exit (int sig);
+
+
+/*****************************************************************
+ * main() - main program.
+ */
+
+Args * _args = NULL;
+Params *_params = NULL;
+char * _progName = "mdv_le2be";
+char * _paramsPath = "unknown";
+
+int main(int argc, char **argv)
+{
+  // set signal handling
+  
+  PORTsignal(SIGINT, tidy_and_exit);
+  PORTsignal(SIGHUP, tidy_and_exit);
+  PORTsignal(SIGTERM, tidy_and_exit);
+  PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
+
+  _args = new Args(argc, argv, _progName);
+  if (!_args->OK || argc != 5) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with command line args" << endl;
+    tidy_and_exit(1);
+  }
+
+  _params = new Params();
+  if (_params->loadFromArgs(argc, argv,
+                            _args->override.list,
+                            &_paramsPath)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with TDRP parameters." << endl;
+    tidy_and_exit(1);
+  }
+
+  // Todo: Use stat().
+  FILE * fp = fopen(_params->inFile, "rb");
+  if (fp == NULL) {
+    cerr << "Could not open file: " << _params->inFile << endl;
+    tidy_and_exit(1);
+  }
+  fclose(fp);
+
+  MdvFile mdvFile;
+  TypeGrid<float> floatGrid(Grid::FLOAT_GRID);
+  MdvField protoField("Prototype Field", floatGrid);
+  string errString;
+
+  int status = mdvFile.readAllFields(_params->inFile, protoField, errString);
+  if (status < 0) {
+    cerr << "Could not read mdv file: " << _params->inFile << endl;
+    tidy_and_exit(1);
+  }
+
+  fp = fopen(_params->outFile, "wb");
+  if (fp == NULL) {
+    cerr << "Could not open output file: " << _params->outFile << endl;
+    tidy_and_exit(1);
+  }
+
+  status = mdvFile.write(fp, MDV_FLOAT32);
+  if (status < 0) {
+    cerr << "Could not write mdv file: " << _params->outFile << endl;
+    tidy_and_exit(1);
+  }
+  
+  tidy_and_exit(0);
+  return (0);
+}
+
+
+/*****************************************************************
+ * tidy_and_exit() - Clean up memory and exit from the program.
+ */
+
+static void tidy_and_exit(int sig)
+{
+  exit(sig);
+}
+

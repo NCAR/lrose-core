@@ -1,0 +1,113 @@
+6/26/92
+
+
+CIDD OPERATORS GUIDE =- RAPS 92 operations.
+-----------------------------------------------------------------------------------------------------------------
+
+The CIDD System has the following Componets: (For RAPS_92)
+
+Process        Host(s)                Normal Operation                      Function
+
+cidd        Brainiac,Grinch,Tempest   Started Each Day.                     Draws All Images
+                                      Can Be Restarted anytime.             Collects all Gridded data
+                                      Normally Started from the             from data servers.
+                                      Window Manager's pulldown menu.       Draws overlays that are
+                                                                            Selected by Prds
+
+prds        Brainic,Grinch,Tempest    Normally starts as part               Gathers Products from the
+                                      of the normal CIDD startup            Product Server, Provides a 
+                                      proceedure.                           User selection Mechanism.
+                                                                            Maintains and Controls static Maps.
+
+pdbs,pmonitor  Tempest                Starts each day from the              Collects all products generated
+                                      pulldown menu. Sends its output       from the tdwr system, aircraft tracks
+                                      to each running prds.                 storm tracks, and a whole slew of
+                                                                            experimental products and human 
+                                                                            generated products.
+
+data_servers:  Wherever The data is.  These can run continously.            Supply gridded data to Cidd,Zeb,TITAN
+
+cedric_server  Tempest,Grinch         They run as daemons, with             Supplies PAM surface, and TREC data.
+gint_server    Frost,Frost,Typhoon    no screen output                      Supplies 2D-DD, 3D-DD & 500m cart data
+dobson_server  Tornado                                                      Supplies 1000m cartesian data
+
+
+time_hist    Brainic,Grinch,Tempest   Started up from the pulldown          Used as needed 
+                                      menu in the window system background
+
+-----------------------------------------------------------------------------------------------------------------
+
+
+Daily Startup Procedures:    For all machines. (login as awdl)
+
+1. Make sure the Product Service system has been started on Tempest.
+    (log into tempest as awdl. Choose RAP Applications-> Start Product Service System from the background menu)
+    (Two windows should appear. One is diagnostic output from pdbs, the other is a monitor for the system )
+
+2. Choose RAP Applications-> Start CIDD from the background menu.
+
+3. If desired Choose RAP Applications-> Start TIME_HIST from the background menu.
+
+-----------------------------------------------------------------------------------------------------------------
+
+Daily Shutdown Procedures:    For all Machines.
+
+1. Choose the QUIT option on CIDD's Main Window Header Menu.
+ (Press the RIGHT mouse button while the cursor is on the border of the main CIDD window)
+
+2. Choose the EXIT option from the OpenWindows Root menu.
+ (Press the RIGHT mouse button while the cursor is in the background of the Screen)
+
+NOTE: IS it not necessary to shutdown the data servers. LEAVE THEM RUNNING!.
+
+-----------------------------------------------------------------------------------------------------------------
+
+
+TROUBLE SHOOTING:
+
+DISPLAY PROBLEMS:
+    No DATA: 1. Move the Altitude slider to 2km. Not all data covers the entire range.
+         2. The data servers might have died. Try to restart them. No harm will occur if one
+            tries to restart them "on top" of an existing one.
+         3. The data Source may have failed. Check the processes which generate the data.
+
+    No Products:
+         1. Check if any other displays are getting products. If so, Quit and restart CIDD.
+         2. The product server might have died. If so Restart it.
+
+    System Seems Locked up:        Try to change Altitudes. If you can't Kill and restart CIDD.
+
+
+DATA SERVERS:    All of them operate from the awdl accounts
+
+PAM Surface data. Uses cedric_server, running on tempest. cd to ~awdl/surf_data. enter: start_surf_server
+
+TREC data.        Uses cedric_server, running on grinch. cd ~awdl/trec_data. enter: start_trec_server
+
+2-D DD DATA   Uses gint_server, running on frost. enter: gint_server -f synt.out2 -p 65014  -d /home/jing/run/2d 
+
+3-D DD DATA   Uses gint_server, running on frost. enter: gint_server -f synt.out3 -p 65015  -d /home/jing/run/3d 
+
+500m Cart Data   Uses gint_server, running on typhoon. enter: gint_server -f gint.out -p 65012 -d /home/awdl 
+
+Note: When a server is already running and one tries to start it again, messages such as :
+Couldn't bind port 65012; error = 48
+Couldn't Begin Socket Operations
+
+Occur. This is normal. This means the server process already is attached to the port and serving data.
+If any other displays are recieving data from a particular server, then the server is not the problem.
+
+_______________________________________________________________________________________________________________
+
+Necessary Files:   ALL Configuration files exist under the cidd_startup directory in each awdl account.
+
+Process     File name            Function.
+----------------------------------------------------------------------------------------------------------------
+CIDD:      .cidd_defaults        Contains many configurable parameters. For experienced users only!
+            data.info            Determines what data sources to attach to and display.
+            wind.info            Determines what data source to attach to for wind vectors.
+            draw.colors          Determines which colors products and overlays will appear in.
+            *.colors             Color scales for the various data fields.
+
+PRDS:      prds.conf            Determines which overlays are on by default and their labels.
+           prds_maps            Contains Static Overlay data, including their display color

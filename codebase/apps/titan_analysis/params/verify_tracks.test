@@ -1,0 +1,103 @@
+########################################################################
+# parameters file for verify_tracks
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# October 1991
+#
+#########################################################################
+
+verify_tracks.debug: false
+verify_tracks.malloc_debug_level: 0
+
+#
+# forecast method - ellipse or polygon
+#
+
+verify_tracks.forecast_method: polygon
+
+#
+# verify method - ellipse, runs or polygon
+#
+
+verify_tracks.verify_method: runs
+
+#
+# forecast details - only 1 forecast lead time allowed
+#
+
+verify_tracks.forecast_lead_time: 30.0
+verify_tracks.forecast_lead_time_margin: 3.0
+
+#
+# min history for valid forecast
+#
+
+verify_tracks.forecast_min_history: 15.0
+
+#
+# scale the region larger or smaller
+#
+
+verify_tracks.forecast_scale_factor: 1.00
+
+#
+# zero_growth - if true, only storm movement is used for the
+# forecast, and growth/decay is neglected
+#
+
+verify_tracks.zero_growth: false
+
+#
+# use parabolic growth? (default: linear)
+#
+
+verify_tracks.parabolic_growth: false
+verify_tracks.forecast_growth_period: 15.0
+
+#
+# if verify_before_forecast_time is true, include the
+# tracks which started between forecast issue time and
+# valid time - i.e. include initiation
+#
+
+verify_tracks.verify_before_forecast_time: false
+
+#
+# if verify_after_track_dies is true, include the
+# tracks which die before the forecast valid time
+# is reached
+#
+
+verify_tracks.verify_after_track_dies: true
+
+#
+# force_xy_fit - if true, place the centroids over
+# each other and validate only on the shape differences
+#
+
+verify_tracks.force_xy_fit: false
+
+#
+# criterion can be point (the default) or area. If area, the
+# validation is made 'fuzzy' by spreading the forecast and
+# validation data out over multiple grids - not a good idea
+#
+
+verify_tracks.activity_criterion: point
+verify_tracks.activity_radius: 5.0
+verify_tracks.activity_fraction: 0.1
+
+#
+# validation grid params
+#
+
+verify_tracks.nx: 56
+verify_tracks.ny: 56
+
+verify_tracks.minx: -137.5
+verify_tracks.miny: -137.5
+
+verify_tracks.dx: 5.0
+verify_tracks.dy: 5.0
+

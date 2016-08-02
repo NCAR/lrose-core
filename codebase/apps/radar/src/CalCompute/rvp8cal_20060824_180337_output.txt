@@ -1,0 +1,154 @@
+Calibration file: rvp8cal_20060824_180337_example.txt
+==============================
+Channel: 0
+
+  shortLabel: ch
+  longLabel: co-polar horiz-receive ifd0
+  couplingLoss: 35.88
+  peakPower: 482626
+  radarConstant: -68.1627
+  siggen min power for computing noise: -120
+  siggen max power for computing noise: -100
+  siggen min power for computing gain: -60
+  siggen max power for computing gain: -20
+
+     siggen_dBm        ifd_dBm  waveguide_dBm      ifd-noise           gain     gain_error
+          0.000          1.272        -35.880          1.272         37.152          0.019
+        -10.000         -8.654        -45.880         -8.654         37.226         -0.055
+        -20.000        -18.790        -55.880        -18.790         37.090          0.081
+        -30.000        -28.751        -65.880        -28.751         37.129          0.042
+        -40.000        -38.677        -75.880        -38.678         37.202         -0.031
+        -50.000        -48.640        -85.880        -48.646         37.234         -0.063
+        -60.000        -58.620        -95.880        -58.681         37.199         -0.028
+        -70.000        -67.968       -105.880        -68.524         37.356         -0.185
+        -80.000        -74.904       -115.880        -78.808         37.072          0.099
+        -90.000        -76.941       -125.880        -89.768         36.112          1.059
+       -100.000        -77.173       -135.880       -115.477         20.403         16.768
+       -110.000        -77.192       -145.880       -120.000         25.880         11.291
+       -120.000        -77.156       -155.880       -101.077         54.803        -17.632
+
+  mean noise at IFD  : -77.1736
+  mean gain          : 37.1712
+  mean noise wv guide: -114.345
+  SNR0 dbz at 1km    : -46.1821
+
+  slope              : 0.969881
+  slope Y on X       : 0.952478
+  slope X on Y       : 1.01141
+  intercept          : -38.0914
+  correlation        : 0.981501
+==============================
+Channel: 1
+
+  shortLabel: xh
+  longLabel: cross-polar horiz-receive ifd1
+  couplingLoss: 35.88
+  peakPower: 465758
+  radarConstant: -68.3172
+  siggen min power for computing noise: -120
+  siggen max power for computing noise: -100
+  siggen min power for computing gain: -60
+  siggen max power for computing gain: -20
+
+     siggen_dBm        ifd_dBm  waveguide_dBm      ifd-noise           gain     gain_error
+          0.000          1.240        -35.880          1.240         37.120         -0.022
+        -10.000         -8.692        -45.880         -8.692         37.188         -0.090
+        -20.000        -18.831        -55.880        -18.831         37.049          0.049
+        -30.000        -28.788        -65.880        -28.788         37.092          0.006
+        -40.000        -38.713        -75.880        -38.714         37.166         -0.069
+        -50.000        -48.680        -85.880        -48.685         37.195         -0.097
+        -60.000        -58.841        -95.880        -58.896         36.984          0.114
+        -70.000        -68.557       -105.880        -69.101         36.779          0.319
+        -80.000        -75.573       -115.880        -79.465         36.415          0.683
+        -90.000        -77.643       -125.880        -90.945         34.935          2.163
+       -100.000        -77.852       -135.880       -120.000         15.880         21.218
+       -110.000        -77.880       -145.880       -120.000         25.880         11.218
+       -120.000        -77.821       -155.880        -99.452         56.428        -19.330
+
+  mean noise at IFD  : -77.8509
+  mean gain          : 37.0979
+  mean noise wv guide: -114.949
+  SNR0 dbz at 1km    : -46.6316
+
+  slope              : 0.957516
+  slope Y on X       : 0.935767
+  slope X on Y       : 1.01855
+  intercept          : -38.4049
+  correlation        : 0.976281
+==============================
+Channel: 2
+
+  shortLabel: cv
+  longLabel: co-polar vert-receive ifd0
+  couplingLoss: 35.43
+  peakPower: 465758
+  radarConstant: -68.3172
+  siggen min power for computing noise: -120
+  siggen max power for computing noise: -100
+  siggen min power for computing gain: -60
+  siggen max power for computing gain: -20
+
+     siggen_dBm        ifd_dBm  waveguide_dBm      ifd-noise           gain     gain_error
+          0.000          1.696        -35.430          1.696         37.126          0.362
+        -10.000         -8.198        -45.430         -8.198         37.232          0.256
+        -20.000        -18.098        -55.430        -18.098         37.332          0.156
+        -30.000        -28.042        -65.430        -28.042         37.388          0.100
+        -40.000        -37.955        -75.430        -37.955         37.475          0.013
+        -50.000        -47.900        -85.430        -47.905         37.525         -0.038
+        -60.000        -57.675        -95.430        -57.721         37.709         -0.221
+        -70.000        -67.109       -105.430        -67.533         37.897         -0.410
+        -80.000        -74.658       -115.430        -77.926         37.504         -0.017
+        -90.000        -77.175       -125.430        -89.692         35.738          1.750
+       -100.000        -77.437       -135.430       -120.000         15.430         22.058
+       -110.000        -77.417       -145.430       -104.595         40.835         -3.347
+       -120.000        -77.422       -155.430       -108.584         46.846         -9.359
+
+  mean noise at IFD  : -77.4253
+  mean gain          : 37.4876
+  mean noise wv guide: -114.913
+  SNR0 dbz at 1km    : -46.5957
+
+  slope              : 0.975925
+  slope Y on X       : 0.961407
+  slope X on Y       : 1.00868
+  intercept          : -38.0341
+  correlation        : 0.984758
+==============================
+Channel: 3
+
+  shortLabel: xv
+  longLabel: cross-polar vert-receive ifd1
+  couplingLoss: 35.43
+  peakPower: 482626
+  radarConstant: -68.1627
+  siggen min power for computing noise: -120
+  siggen max power for computing noise: -100
+  siggen min power for computing gain: -60
+  siggen max power for computing gain: -20
+
+     siggen_dBm        ifd_dBm  waveguide_dBm      ifd-noise           gain     gain_error
+          0.000          1.672        -35.430          1.672         37.102          0.320
+        -10.000         -8.229        -45.430         -8.229         37.201          0.221
+        -20.000        -18.131        -55.430        -18.131         37.299          0.123
+        -30.000        -28.073        -65.430        -28.073         37.357          0.066
+        -40.000        -37.987        -75.430        -37.987         37.443         -0.020
+        -50.000        -47.946        -85.430        -47.950         37.480         -0.057
+        -60.000        -57.859        -95.430        -57.900         37.530         -0.107
+        -70.000        -67.702       -105.430        -68.115         37.315          0.108
+        -80.000        -75.347       -115.430        -78.604         36.826          0.597
+        -90.000        -77.866       -125.430        -90.262         35.168          2.254
+       -100.000        -78.133       -135.430       -120.000         15.430         21.992
+       -110.000        -78.130       -145.430       -120.000         25.430         11.992
+       -120.000        -78.108       -155.430       -102.548         52.882        -15.460
+
+  mean noise at IFD  : -78.1237
+  mean gain          : 37.4225
+  mean noise wv guide: -115.546
+  SNR0 dbz at 1km    : -47.3834
+
+  slope              : 0.94753
+  slope Y on X       : 0.929256
+  slope X on Y       : 1.03276
+  intercept          : -38.8605
+  correlation        : 0.97964
+==============================

@@ -1,0 +1,10 @@
+# gray scale for nstart
+
+# Mike Dixon, Sept 1993
+
+#0.0	0.05	#111111
+0.05	0.10	#444444
+0.10	0.15	#777777
+0.15	0.20	#aaaaaa
+0.20	0.25	#cccccc
+0.25	0.50	#eeeeee

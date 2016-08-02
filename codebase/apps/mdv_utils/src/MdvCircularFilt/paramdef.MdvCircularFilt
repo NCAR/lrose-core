@@ -1,0 +1,270 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for MdvCircularFilt
+ *
+ */
+
+commentdef {
+  p_header = "MdvCircularFilt allows user to apply circular filter of user "
+             "statistic and user specified radius around each point of an Mdv field";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  TIME_INTERVAL, FILELIST, REALTIME, REALTIME_FCST_DATA
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program triggers off of a latest data info file. "
+           "REALTIME_FCST_DATA triggers off RAL forecast directory structure data. "
+           "In FILELIST mode the program processed data between start and end times " 
+           "entered on the command line." 
+           "In FILELIST mode the file processes files entered on the command line";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+ }
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/"; 
+  p_help    = "Data input";
+} data_url;
+
+paramdef string {
+  p_default = "dataField"; 
+  p_descr   = "Field name string of data in input file on which to perform filtering";
+} field_name;
+
+paramdef int {
+  p_default = 0; 
+  p_descr    = "Number of field in data input file on which to perform filtering";
+} field_number;
+
+paramdef boolean {
+   p_default = true;
+   p_descr = "Option to use field name instead of number. If false, field_number_will be used.\n";
+}use_field_name;
+
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Max valid realtime age of input data\n";
+}max_valid_realtime_age;
+
+typedef enum {
+  VERT_ACTION_NONE, VERT_ACTION_SET_LIMITS, VERT_ACTION_COMPOSITE
+} vert_action_t;
+
+paramdef enum vert_action_t {
+   p_default = VERT_ACTION_NONE;
+   p_descr = "Set vertical limits on data being read. You can choose\n"
+             "a composite( VERT_ACTION_COMPOSITE) or choose to read\n"
+             "data between vertical limits( VERT_ACTION_SET_LIMITS)\n"
+             "If not VERT_ACTION_NONE, choose VERT_ACTION_SET_LIMITS\n"
+             "or VERT_ACTION_COMPOSITE.\n";
+} vert_action;
+
+typedef enum {
+  VLEVEL_PLANE_NUM, VLEVEL_DATA_UNITS
+} vlevel_type_t;
+
+paramdef enum vlevel_type_t {
+  p_default = VLEVEL_DATA_UNITS;
+  p_descr = "If choosing VERT_ACTION_SET_LIMITS, or VERT_ACTION_COMPOSITE choose\n"
+            "VLEVEL_PLANE_NUM to specify the boundind planes by\n"
+            "number or choose VLEVEL_DATA_UNITS to specify\n"
+            "the bounding planes in vertical units defined in\n"
+            "the data file.\n";
+} vlevel_type;
+
+paramdef double {
+   p_default = 0;
+   p_descr = "Used if vertical action is not VERT_ACTION_NONE. "
+             "This is the minimum vertical level plane in units\n"
+             "specified by vlevel_type.\n";
+} vertical_min;
+
+paramdef double {
+   p_default = 0;
+   p_descr = "Used if vertical action is not VERT_ACTION_NONE. "
+             "This is the maximun vertical level plane in units\n"
+             "specified by vlevel_type.\n";
+} vertical_max;
+
+
+paramdef int {
+   p_default = 0;
+   p_descr = "This defines the time window around data search time. Only used in realtime mode.";
+} search_margin;
+
+paramdef boolean  {
+   p_default = false;
+   p_descr = "Apply max filter over circular region\n";
+}doMax;
+
+paramdef boolean  {
+   p_default = false;
+   p_descr = "Apply min filter over circular region\n";
+}doMin;
+
+paramdef boolean  {
+   p_default = false;
+   p_descr = "Apply average filter over circular region\n";
+}doAvg;
+
+paramdef boolean  {
+   p_default = false;
+   p_descr = "Apply standard deviation filter over circular region\n";
+}doStd;
+
+paramdef boolean {
+   p_default = false;
+   p_descr = "Apply percentile filter over circular region\n";
+}doPtile;
+
+paramdef float {
+   p_default = 50;
+   p_descr = "If doing a percentile filter, use this percentile of data in circular region\n";
+}ptile;
+
+paramdef boolean{
+   p_default = false;
+   p_descr = "Apply percentile filter over circular region\n";
+}doPercentCov;
+
+paramdef float {
+   p_default = 50;
+   p_descr = "If doing a percent coverage filter, use this threshhold to test data in circular region\n";
+} percent_cov_thresh;
+
+
+paramdef float {
+  p_default = 10;
+  p_descr = "radius of circular filter region in kilometers.";
+}radius; 
+
+	
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set to true to remap the data.";
+  p_help = "Defaults to false";
+} remap_grid;
+
+typedef enum {
+  PROJ_FLAT, PROJ_LATLON, PROJ_LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type for remapped grid";
+  p_default = PROJ_LATLON;
+  p_help = "Projections currently supported are PROJ_FLAT, PROJ_LATLON and PROJ_LAMBERT";
+} grid_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+p_default = { 812, 485, -99.086,  31.515, .038239, .035933 };
+p_descr = "Grid parameters for remapping in x,y.";
+p_help = "These params apply to all projection types.";
+}grid_params;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin latitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT projections.";
+} origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin longitude.";
+  p_help = "This applies only to PROJ_FLAT and PROJ_LAMBERT projections.";
+} origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} flat_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for PROJ_LAMBERT projection.";
+  p_help = "Applies only to PROJ_LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} lambert_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for PROJ_LAMBERT projection.";
+  p_help = "Applies only to PROJ_LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} lambert_lat2;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::$(PROJECT)/mdv";
+  p_descr = "Url of output mdv dataset";
+} output_url;
+

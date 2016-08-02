@@ -1,0 +1,121 @@
+/**********************************************************************
+ * TDRP params for SatOrbit2AcPosn
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: SatOrbit2AcPosn.
+//
+// SatOrbit2AcPosn reads and ascii file containing satellite location 
+//   data, and writes it to SPDB in ac_posn format.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// input_file_path /////////////////////////
+//
+// Path for input file.
+// This is an ASCII file. There is one line per time. The format is: 
+//   yyyy mm dd hh mm ss nadir_lon nadir_lat left_lon left_lat right_lon 
+//   right_lat. The left and right data may be missing, in which case only 
+//   the nadir is stored.
+// Type: string
+//
+
+input_file_path = "ascii/sat_posn";
+
+///////////// output_url //////////////////////////////
+//
+// Output SPDB URL.
+// Type: string
+//
+
+output_url = "spdb/sat_posn";
+
+///////////// nadir_label /////////////////////////////
+//
+// Label for nadir location.
+// This label is stored in the callsign field. The nadir is stored as 
+//   though it were a single aircraft.
+// Type: string
+//
+
+nadir_label = "NADIR";
+
+///////////// store_swath_positions ///////////////////
+//
+// Option to store swath edge locations.
+// If true, each edge is stored as a separate callsign. See 
+//   swath_left_label and swath_right_label below.
+// Type: boolean
+//
+
+store_swath_positions = TRUE;
+
+///////////// swath_left_label ////////////////////////
+//
+// Label for left edge of swath.
+// This label is stored in the callsign field.
+// Type: string
+//
+
+swath_left_label = "LEFT";
+
+///////////// swath_right_label ///////////////////////
+//
+// Label for right edge of swath.
+// This label is stored in the callsign field.
+// Type: string
+//
+
+swath_right_label = "RIGHT";
+
+///////////// apply_bounding_box //////////////////////
+//
+// Option to constrain data to within a bounding box.
+// If true, only times for which the nadir is within the bounding box 
+//   are stored.
+// Type: boolean
+//
+
+apply_bounding_box = FALSE;
+
+///////////// bounding_box ////////////////////////////
+//
+// Bounding box limits.
+// See 'apply_bounding_box.
+//
+// Type: struct
+//   typedef struct {
+//      double min_lat;
+//      double min_lon;
+//      double max_lat;
+//      double max_lon;
+//   }
+//
+//
+
+bounding_box = { 19, 34, 120, 136 };
+

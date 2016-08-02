@@ -1,0 +1,22 @@
+# -*- python -*-
+#
+#
+
+import os
+
+Import('env')
+
+sources  = ['Fault.cpp','RaycAngle.cpp','RaycTime.cpp','Buffer.cpp','Decoder.cpp','Encoder.cpp',
+            'FilePath.cpp','FortranBinary.cpp','KeyAccess.cpp']
+
+hFiles   = ['Fault.h','RaycAngle.h','RaycTime.h','Buffer.h','Decoder.h','Encoder.h',
+            'FilePath.h','FortranBinary.h','KeyAccess.h']
+
+#versionNode         = env.SvnInfo('forayinfo.h','#')
+libNode             = env.Library('forayutil'         ,source = sources);
+localInstallLibNode = env.Install(env.installLocalLib ,libNode);
+localInstallIncNode = env.Install(env.installLocalInc ,hFiles);
+
+env.Default([libNode,localInstallLibNode,localInstallIncNode])
+env.Install(env.installLib,libNode);
+env.Install(env.installInc,hFiles);

@@ -1,0 +1,4 @@
+#!/bin/csh
+
+./mdv_repeat_day -params  mdv_repeat_day.params
+

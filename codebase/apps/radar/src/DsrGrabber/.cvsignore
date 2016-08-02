@@ -1,0 +1,6 @@
+.deps
+DsrGrabber
+__makefile.template
+makefile
+makefile.am
+makefile.in

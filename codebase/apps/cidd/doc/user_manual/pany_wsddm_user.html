@@ -1,0 +1,598 @@
+<html>
+
+<head>
+
+<title>PANYNJ WSDDM User Manual</title>
+
+<meta http-equiv="Content-Type" content="text/html">
+
+</head>
+<img src="images/panynj.logo.472x23.gif">
+
+<!-- ******************************************************************** --><body bgcolor="#FFFFFF">
+<MAP NAME="Left_map"> 
+  <AREA Shape=rect coords= "9,180,200,258" href="#Route">
+  <AREA Shape=rect coords= "72,261,290,308" href="#Movie">
+  <AREA Shape=rect coords= "-2,1,306,323" href="#CIDD">
+</MAP>
+<MAP NAME="Right_map"> 
+  <AREA Shape=rect coords= "0,0,119,56" href="#Decoded">
+  <AREA Shape=rect coords= "0,57,119,224" href="#Winds/Temperature">
+  <AREA Shape=rect coords= "3,257,17,276" href="#Raw">
+  <AREA Shape=rect coords= "17,256,32,275" href="#TAFs">
+  <AREA Shape=rect coords= "48,257,62,276" href="#AIREPS">
+  <AREA Shape=rect coords= "63,257,81,278" href="#METAR">
+  <AREA Shape=rect coords= "0,225,119,278" href="#Icon">
+  <AREA Shape=rect coords= "0,279,119,322" href="#Functions">
+</MAP>
+<!-- ******************************************************************** -->
+ 
+
+
+
+
+ <center>
+    <h1> PANYNJ WSDDM User Manual</h1>
+    <h3> <i> *** Draft - Construction In Progress 4/14/02 *** </i> </h3>
+</center>
+<HR>
+<A NAME="Doc_Top"></a>
+<CENTER>
+  <H5> Click on images below or in table of contents to go to section of interest</H5>
+</CENTER>
+<center>
+<TABLE>
+<TR>
+      <TD ALIGN=CENTER> <IMG USEMAP="#Left_map" SRC="images/screen_left_sm_ch.jpg" width="310" height="323"> 
+      </TD>
+ <TD ALIGN=LEFT VALIGN=CENTER>
+  <center><h2> Table of Contents</h2></center>
+    <UL>
+    <B>
+    <LI><A HREF="#cidd_ops">1.WSDDM Users Guide</A></LI>
+      <OL>
+	<LI> <A HREF="#cidd_ops1">Basic Layout </A></LI>
+	<LI> <A HREF="#cidd_ops2">Menu Bar Buttons </A></LI>
+	<LI> <A HREF="#cidd_ops3">Margins</A></LI>
+	<LI> <A HREF="#cidd_ops4">Changing Height/Elevation</A></LI>
+	<LI> <A HREF="#cidd_ops5">Zooming and Panning </A></LI>
+	<LI> <A HREF="#cidd_ops6">Menus and Sub Panels </A></LI>
+	<LI> <A HREF="#Movie">Movie Control Panel </A></LI>
+      </OL>
+    <LI><A HREF="#purpose"> 2. Decoded Metar Display</A></LI>
+    <LI><A HREF="#hardware"> 3.PANYNJ Mesonet Display</A></LI>
+    <LI><A HREF="#startup"> 4.RADAR/Snow Trend Plot </A></LI>
+    <LI><A HREF="#trouble">8.CIDD Trouble Shooting and FAQ </A></LI>
+    </b></UL> 
+ </TD>
+    <TD ALIGN=CENTER> <IMG USEMAP="#Right_map" SRC="images/screen_right_sm_ch.jpg"> </TD>
+</TR>
+</TABLE>
+</center>
+<HR>
+<br>
+
+<!-- 1.1 -->
+<h2> <a name="cidd_ops"> CIDD Users Guide </a> <font size=2><a href="#Doc_Top">Back
+  to top</a></font></h2>
+
+<a name="cidd_ops1"></a>
+<h3>1.1 CIDD's Basic Layout <font size=2><a href="#Doc_Top">Back to top</a></font></h3>
+<P> CIDD consistes of two principle display panels; one of plan view and one for
+cross sectional data views. In addition a set of control sub panels are used to select products,
+add or change attributes of products in the images, control movie looping, etc.
+Many of the most frequently used operations such
+as selecting different products, heights or time of interest can be performed 
+with one keystoke or mouse click in the display window, or popup panels. Side by side comparisions
+of plan view or cross sectional data are accomplished by running multiple instances of CIDD.
+There is a CLone button/function available in the menu bar.
+<BR>
+
+  
+<p><a name="pic531_1"><img usemap="#imap531" src="images/pic531_1_e.jpg" ></a> 
+  <map name="imap531"> 
+    <area shape=rect coords="15,1,83,15" href="#pic531_01">
+    <area shape=rect coords="101,0,177,15" href="#pic531_02">
+    <area shape=rect coords="228,0,301,17" href="#pic531_03">
+    <area shape=rect coords="402,1,471,17" href="#pic531_04">
+    <area shape=rect coords="14,22,43,38" href="#pic531_05">
+    <area shape=rect coords="100,24,140,40" href="#pic531_06">
+    <area shape=rect coords="228,23,337,41" href="#pic531_07">
+    <area shape=rect coords="399,24,485,42" href="#pic531_08">
+    <area shape=rect coords="296,611,330,629" href="#pic531_09">
+    <area shape=rect coords="400,612,455,630" href="#pic531_10">
+    <area shape=rect coords="517,610,576,628" href="#pic531_11">
+  </map>
+</p>
+
+<h3>CIDD's Menu Bar<font size=2><a href="#Doc_Top">Back to top</a></font></h3>
+The main display window of CIDD has a menu bar area above the plan view
+graphics. This menu bar is configurable; 23 different functinoal buttons
+can be independantly ensbled or disabled and their labels chosen. (Via
+the Menu bar configuration section in the parameter file). Thus, the apperance and
+labels of the menu bar change from project to project. Menus for a typical
+end-user display are used in this document.
+<br>
+
+The menu bar buttons operate in two basic ways;
+
+<UL>
+<LI>1. The first type activates/ deactivates pop-up panels or menus(<a href="#pic51_1">Example </a>),  which provide for
+additional controls. In some cases, the menu will automatically de-select itself once a coice has been made.
+Otherwise, the button acts as a toggle for displaying the subpanel.<br>
+<LI>2. The second type is a feature initiator or toggle. They activate a function or toggle something on or off like movie looping.
+<br>
+</UL>
+<a href="#pic531_1">Figure 1.1</a> shows the CIDD main window in detail. Along 
+the top of the main window is a <a name="pic531_01"></a><a href="#pic531_1">menu bar</a> 
+<p>Directly below the menu bar is the time and flight level information bar. This 
+  bar shows:<br>
+ <UL>
+  <LI> Data time and frame sequence: the frame, date and time selected, <br>
+  <LI> Product flight level: flight level for the product displayed<br>
+  <LI> Current date and time: UTC </p>
+ </UL>
+
+<a name="cidd_ops3"></a>
+<p>The margins contain the following:<br>
+  <UL>
+   <LI>	Latitude scale: on the left side of the window
+   <LI>	Longitude scale: on the top of the window
+   <LI>	Main product info: displays the date and time of the product being displayed
+   <LI>	Model date and time for the forecast winds: The text in the upper left corner of the main window indicates the date and time of the main data field selected. If wind vectors are on, the date and time of the wind data is also shown. (Date and time of the forecast wind vectors being displayed.)
+   <LI>	Time scale: on the bottom of the screen
+-	Color scale: next to the flight level bar on the right side of the main window. The units of the data field are indicated at the top of the color scale.
+-	Height scale: on the right side of the screen. 
+ </UL>
+</p>
+
+<!--############################################################################### -->
+<a name="cidd_ops4"></a>
+<h4>Changing Height/Elevation <font size=2><a href="#Doc_Top">Back to top</a></font></h4>
+To change the elevation level, click the left mouse button in the
+height margin.  You can also step up and down in height
+by pressing the up or down arrow key on the keyboard
+<br> <i>Note: for this to work,
+the pointer must be within the main display window.</i>
+
+<!--############################################################################### -->
+<h4>Changing Time<font size="2"><a href="#Doc_Top">Back to top</a></font></h4>
+To change the time, click in the time scale bar. To return to real
+time (i.e., the time closest to the current time), click on the
+'Now' button in the main menu bar at the top.  Pressing the left or
+right arrow keys on the keyboard also moves the time by one frame
+<br><i>Note: for this to work,
+the pointer must be within the main display window.</i>
+
+<p><a name="pic533_1"><img src="images/pic533_1_e.jpg" ></a></p>
+
+<!--############################################################################### -->
+<a name="cidd_ops5"></a>
+<h4>Zooming and Panning<font size=2><a href="#Doc_Top">Back to top</a></font></h4>
+<p>The view menu allows you to adjust the zoom state to pre-defined domains. There are also buttons that allow you to save custom zoom states and return to the saved states.<br>
+  <br>
+  <b>Using Zoom</b>¡GUse the click and drag method for zooming (with the left-mouse button) to get a user-defined region. This user-defined region becomes the current zoom and will cause the 'Current' button to be selected. Unzoom by choosing one of the pre-defined domains.<br>
+  <br>
+  <b>Panning</b>¡GYou can pan or move the image with the middle mouse button: click on a point and drag it to the desired location, then release.<br>
+  <br>
+  <b>Saving zoom states</b>¡GTo save the current zoom, click on 'Save 1', 'Save 2', or 'Save 3'. To go back to the saved view, click on 'Goto 1', 'Goto 2', or 'Goto 3'.</p>
+
+<!--############################################################################### -->
+<yya name="cidd_ops6"></a>
+<h3> CIDD's Menus and Control Panels
+<h5><a name="Page"></a> Field/Page Menu<font size=2><a href="#Doc_Top">Back to top</a></font></h5>                                                                 
+<table width="75%" border="0">
+  <tr> 
+    <td width="15%"><img src="images/pic5361_1.jpg" width="119" height="367"></td>
+    <td width="85%" valign="top">
+    The 'Field or Page' menu (see left Fig.) is a pop-up menu for selecting
+    a desired data set page.  Select the desired page by clicking on the
+    appropriate button. Click on 'FIeld/Page' again in the menu bar to remove
+    the menu.  </td>
+  </tr>
+</table>
+
+<!--############################################################################### -->
+<h5><a name="View"></a> View <font size=2><a href="#Doc_Top">Back to top</a></font></h5>                                                                         
+<table width="75%" border="0">
+  <tr> 
+    <td width="15%" height="309" valign="top"><img src="images/pic5362_1.jpg" width="84" height="288"></td>
+    <td valign="top" align="left" width="85%" height="309">The 
+      view menu (see left Fig.) allows you to adjust the zoom state to pre-defined 
+      domains. Clicking on the View
+      button activates a pull-down menu of selectable items.
+      "Save1", "Save2", and "Save3" are the 
+      buttons that allow you to save custom zoom states. "Goto1", "Goto2", and 
+      "Goto3" are the buttons that allow you to return to the saved states. (See 
+      Section 5.3.4 for descriptions on "zooming and saving zoom states".)</td>                                                       
+  </tr>
+</table>
+
+<!--############################################################################### -->
+<h5><a name="Map"></a> Map Overlay Menu<font size="2"><a href="#Doc_Top">Back to Top</a></font></h5>                                                                         
+<table width="75%" border="0">
+  <tr> 
+   <td width="16%" valign="top"><img src="images/maps.jpg" width="115" height="337"></td>
+   <td width="84%" valign="top">
+The Maps... button activates a pull-down menu (see left Fig.) showing the available maps. Clicking on an item toggles it on/off. On startup, a default set of maps is turned on and the remaining maps are off.
+</td>                                                       
+  </tr>
+</table>
+
+<!--############################################################################### -->
+<h5><a name="Products"></a><a name="section5364"></a> Overlay Products Button<font size="2"><a href="#Doc_Top">Back to top</a></font></h5>                                                                         
+
+<table width="75%" border="0">
+  <tr> 
+   <td width="13%" valign="top"><img src="images/products.jpg" width="127" height="200"></td>
+    <td width="87%" valign="top">The Product...button activates a pull-down menu (see left Fig.) and toggles the overlay products on/off. Clicking once turns all the products on and clicking again turns all the products off. The available overlay products are: <br>
+	   </td>                                                       
+  </tr>
+</table>
+
+<!--############################################################################### -->
+<h5><a name="Winds"></a>Winds Button<font size="2"><a href="#Doc_Top">Back to top</a></font></h5>                                                                         
+</font>
+Toggling the Winds button turns 
+forecast model winds on and off (wind vector/barb overlays).<br>
+The density of wind barbs displayed is controlled via a startup aparameter.
+The default is to display between 10-20 wind barbs across the screen, even though there may be hundreds of
+wind grids cells across the screen.
+In addition, since winds is a 4-dimensional product, 
+when it is overlaid with a 3-dimensional product (surface fields, etc), the 
+date and time will be displayed on the left-top on CIDD and the height will 
+be labeled on the right side on CIDD to show the winds at different heights.
+<p><a name="pic5365_1"></a><img src="images/pic5365_1_e.jpg"></p>
+
+
+<!--############################################################################### -->
+<h3><a name="Movie"></a> Movie Control Panel<font size="2"><a href="#Doc_Top">Back 
+  to Top</a></font></h3>                                                                         
+<p><a name="pic5366_1"></a><img src="images/pic5366_1_e.jpg" usemap="#Map4" border="0"> 
+  <map name="Map4"> 
+    <area shape="rect" coords="18,14,55,30" href="#pic5366_1_01">
+    <area shape="rect" coords="60,13,98,30" href="#pic5366_1_02">
+    <area shape="rect" coords="103,13,188,29" href="#pic5366_1_03">
+    <area shape="rect" coords="197,13,278,29" href="#pic5366_1_04">
+    <area shape="rect" coords="284,12,361,29" href="#pic5366_1_05">
+    <area shape="rect" coords="363,13,413,30" href="#pic5366_1_06">
+    <area shape="rect" coords="522,14,622,30" href="#pic5366_1_07">
+    <area shape="rect" coords="519,39,598,58" href="#pic5366_1_08">
+    <area shape="rect" coords="418,67,474,83" href="#pic5366_1_09">
+    <area shape="rect" coords="519,66,603,84" href="#pic5366_1_10">
+    <area shape="rect" coords="7,277,102,294" href="#pic5366_1_11">
+    <area shape="rect" coords="103,281,148,298" href="#pic5366_1_12">
+    <area shape="rect" coords="305,276,375,294" href="#pic5366_1_13">
+    <area shape="rect" coords="533,277,638,294" href="#pic5366_1_14">
+    <area shape="rect" coords="234,310,376,327" href="#pic5366_1_15">
+    <area shape="rect" coords="498,311,639,327" href="#pic5366_1_16">
+  </map>
+</p>
+<p>The movie control panel has two main sections. The upper half of the panel contains a number of buttons, sliders and text entry areas. The lower half of the panel is a graphical display. Note that the display must render each movie frame, which takes a few seconds for each frame, so patience is required. After all frames have been rendered, the display will cycle rapidly through the frames with a delay at the end of the loop.</p>
+<p><img src="images/circle01.jpg"><a name="pic5366_1_01"></a><a href="#pic5366_1"><img src="images/stop_small.jpg" width="45" height="26"></a> 
+  : You can stop the movie by clicking this button. You can step through the movie 
+  by clicking<img src="images/stop_small.jpg" width="45" height="26">and then 
+  selecting the desired frame in the movie bar . You can also step through the 
+  frames by hitting the left arrow key (go back) or right arrow key (go forward) 
+  on the keyb<img src="images/moviebar_small.jpg" width="204" height="23">oard. 
+  For this to work, the pointer must be in the main MDS window.<br>
+  <br>
+  <img src="images/circle02.jpg"><a name="pic5366_1_02"></a><a href="#pic5366_1"><img src="images/start_small.jpg" width="48" height="26"></a>: 
+  Click on this button in the Movie Panel will start the movie.¡C<br>
+  <br>
+  <img src="images/circle03.jpg"><a name="pic5366_1_03"></a><a href="#pic5366_1"><img src="images/realtime_small.jpg" width="65" height="23"></a>: 
+  The display may be run in 'Realtime' or 'Archive' mode. In realtime mode, new 
+  data is added to the end of the movie loop as it arrives and the loop advancer 
+  as time passes. Realtime mode is the default behavior of a live system such 
+  as the AOAWS. To loop in realtime mode, you can either selec<img src="images/realtime_small.jpg" width="65" height="23"> 
+  then click on <img src="images/start_small.jpg" width="48" height="26"> in the 
+  Movie Panel or toggle the 'Loop' menu button on the main menu bar (see Section 
+  5.3.6.7). <br>
+  <br>
+  <img src="images/circle04.jpg"><a name="pic5366_1_04"></a><a href="#pic5366_1"><img src="images/archive_small.jpg" width="65" height="24"></a> 
+  : In archive mode, the movie loop remains static, does not move as time passes, 
+  and the display does not check for new data. Archive mode is used for viewing 
+  old data for analysis purposes. To set the display to archive mode, click on 
+  the <img src="images/archive_small.jpg" width="65" height="24"> button, before 
+  click on the <img src="images/start_small.jpg" width="48" height="26"> button, 
+  set the desired movie start time in the top text box that reads '<b>Movie Loop 
+  Starts at:</b>' The data entered is:<i>hour:minute month/day/year</i>. You can 
+  either use the format presented in the time text box, or you can just enter 
+  numbers separated by spaces.<i>(Remember to hit "Enter" when you are done.)</i> 
+  <br>
+  <br>
+  <img src="images/circle05.jpg"><a name="pic5366_1_05"></a><a href="#pic5366_1"><img src="images/frame_num.jpg"></a>¡GYou 
+  can change the number of movie frames in three ways:<br>
+  - Enter the number of frames at the relevant text entry point<img src="images/frame_num.jpg" > 
+  (<i>please note: for all text entries, you MUST hit &quot;Enter&quot; on the 
+  keyboard after entering text</i>);<br>
+  - Click on the up/down arrows next to the '<b>Number of Frames</b>'entry box; 
+  or<br>
+  <br>
+  - Drag either the start or finish solid triangles, at either end of the movie 
+  bar, to change its start or finish time.<br>
+  <br>
+   <img src="images/circle06.jpg"><a name="pic5366_1_06"></a><b><a href="#pic5366_1">Sweep Button</a></b>¡GUse 
+  the Sweep Button to enter sweep mode. In sweep mode the movie goes forwards 
+  and backwards in sequence, instead of just forwards.<br>
+  <br>
+   <img src="images/circle07.jpg"><a name="pic5366_1_07"></a><b><a href="#pic5366_1">Movie Loop Start 
+  Time</a></b>¡GSet the desired movie start time in the top text box that reads '<b>Movie 
+  Loop Starts at:</b>' The data entered is: <i>hour:minute month/day/year</i>. 
+  You can either use the format presented in the time text box, or you can just 
+  enter numbers separated by spaces. (<i>Remember to hit "Enter" when you are 
+  done</i>.) To return to realtime mode, click on the<img src="images/realtime_small.jpg" width="65" height="23"> 
+  button on the movie panel or the<img src="images/now_small.jpg" width="41" height="22"> 
+  button in the main menu (Fig. 5.3.6.6-1). <br>
+  <br>
+  <img src="images/circle08.jpg"><a name="pic5366_1_08"></a> <b><a href="#pic5366_1">Movie Frame Interval</a></b>¡GYou 
+  may change the movie frame interval. To do so, enter the number of minutes per 
+  frame at the "<b>Movie Frame Interval</b>" text box.<i> (Remember to hit "Enter" 
+  when you are done.)</i><br>
+  <br>
+   <img src="images/circle09.jpg"><a name="pic5366_1_09"></a><b><a href="#pic5366_1">Speed Slider Bar</a></b>¡GUse 
+  the 'Speed' slider bar in the Movie Control Panel to control the speed of the 
+  loop. Move the slider further to the right side to increase the speed.<br>
+  <br>
+   <img src="images/circle10.jpg"><a name="pic5366_1_10"></a><b><a href="#pic5366_1">Delay Slider Bar</a></b>¡GUse 
+  the 'Delay' slider bars in the Movie Control Panel to control the length of 
+  the end delay. Move the slider further to the right side indicating a longer 
+  delay.<br>
+  <br>
+   <img src="images/circle11.jpg"><a name="pic5366_1_11"></a><b><a href="#pic5366_1">Data Availability</a></b>¡GThe 
+  lower half of the panel is a graphical display which shows, from top to bottom, 
+  the "movie bar", a bar showing the current movie extent, the available data 
+  with lines for symbolic data and dots for gridded data, and a time scale. The 
+  denser the lines or dots indicate a larger data volume. <br>
+  <br>
+  <img src="images/circle12.jpg"><a name="pic5366_1_12"></a><b><a href="#pic5366_1">Time Axis</a></b>¡GThis 
+  shows time of the current movie loop and amount of data displayed.<br>
+  <br>
+  <img src="images/circle13.jpg"><a name="pic5366_1_13"></a><b><a href="#pic5366_1">Movie Bar</a></b>¡GDrag 
+  either the start or finish solid triangles, at either end of the movie bar, 
+  to change the start or finish time.<br>
+  <br>
+   <img src="images/circle14.jpg"><a name="pic5366_1_14"></a><b><a href="#pic5366_1">Text, Symbolic 
+  Data</a></b>¡GThis shows the current movie extent and the available data with lines 
+  for symbolic data, each line representing one record of data.<br>
+  <br>
+  <img src="images/circle15.jpg"><a name="pic5366_1_15"></a><b><a href="#pic5366_1">Change Start 
+  Time</a></b>¡GDrag the start solid triangles, at the left end of the movie bar, to 
+  change the start time. <br>
+  <br>
+  <img src="images/circle16.jpg"><b> <a name="pic5366_1_16"></a><a href="#pic5366_1">Change 
+  Finish Time</a></b>¡GDrag the finish solid triangles, at the right end of the 
+  movie bar, to change the finish time. 
+
+  <!-- 5.3.6.7 -->
+<h5><a name="Loop">5.3.6.7 Loop Button</a><font size=2><a href="#Doc_Top">Back to top</a></font></h5>                                  
+This<img src="images/loop_small.jpg" width="45" height="24"> 
+ button toggles the movie on/off. It has the same effect as using the<img src="images/start_small.jpg" width="48" height="26">or the<img src="images/stop_small.jpg" width="45" height="26">                                                                          
+button on the Movie Control Panel.                                                                         
+
+<!-- 5.3.6.8 -->
+<h5><a name="Past">5.3.6.8 Past Button</a><font size="2"><a href="#Doc_Top">Back to top</a></font></h5>
+<table width="75%" border="0">
+  <tr>
+    <td width="19%" valign="top" ><img src="images/pic5368_1.jpg" width="85" height="372" ></td>
+    <td width="81%" valign="top" >The"Past"button brings up a pop-up menu, which 
+      allows you to select a past time of interest, relative to<img src="images/now_small.jpg" width="41" height="22">button. 
+      For example, if you pick '-6 hrs' it will move the display time, and the 
+      end of the movie loop, to approximately 6 hours in the past. Doing so will 
+      put the display into 'Past' mode, and data in the past will be displayed. 
+      Selecting<img src="images/now_small.jpg" width="41" height="22">from the 
+      same menu will revert to Realtime mode. This is the same as selecting the<img src="images/now_small.jpg">button in the main menu bar (see <a href="#Now">Section 5.3.6.9</a>).</td>
+  </tr>
+</table>
+
+<!-- 5.3.6.9 -->
+<h5><a name="Now">5.3.6.9 Now Button</a><font size="2"><a href="#Doc_Top">Back to top</a></font></h5>                              
+Clicking this <img src="images/now_small.jpg" width="41" height="22">button will set the time mode to realtime and the selected time to the current time.It has the same effect as clicking on the <img src="images/realtime_small.jpg" width="65" height="23">
+button in the movie panel or clicking the "Now" button in the 'Forecast' menu as described in Section 5.3.6.10, or the<img src="images/now_small.jpg">button in the "Past" menu as described in Section 5.3.6.8.
+
+<!-- 5.3.6.10 -->
+<h5><a name="Forecast">5.3.6.10 Forecast Button</a><font size="2"><a href="#Doc_Top">Back to top</a></font></h5> 
+  <table width="75%" border="0">
+  <tr>
+    <td width="11%"><img src="images/forcast.jpg"></td>
+    <td width="89%" valign="top">The<img src="images/fcast_samll.jpg" width="55" height="27">button 
+      brings up a pop-up menu, which allows you to select a forecast time of interest, 
+      relative to the <img src="images/now_small.jpg" width="41" height="22"> 
+      button. For example, if you pick '+6 hrs' it will move the display time, 
+      and the end of the movie loop, to approximately 6 hours in the future. Doing 
+      so will put the display into 'Forecast' mode, and data in the future will 
+      be displayed. Selecting<img src="images/now_small.jpg" width="41" height="22"> from the same menu will revert to Realtime modes. This is the same as selecting the <img src="images/now_small.jpg">button in the main menu bar (see <a href="#Now">Section 5.3.6.9</a>).</td>
+  </tr>
+</table>
+                             
+<!-- 5.3.6.11 -->
+<h5><a name="Reload">5.3.6.11 Reload Button</a><font size="2"><a href="#Doc_Top">Back to top</a></font></h5>                              
+Clicking this<img src="images/reload_small.jpg" width="44" height="24"> button reloads the data and redraws the main window. Reloading is useful for refreshing the display if something seems wrong with the current data.
+
+<!-- 5.3.6.12 -->
+<h5><a name="Reset">5.3.6.12 Reset Button</a><font size="2"><a href="#Doc_Top">Back to top</a></font></h5>                              
+Clicking the<img src="images/reset_small.jpg" width="42" height="22"> button will 
+set the main window page, zoom and maps to the default state - i.e. the startup 
+state. A reset occurs automatically when the display has not been used for the 
+past 15 minutes. 
+
+<!-- 5.3.6.13 -->
+<h5><a name="Route">5.3.6.13 Route Button</a><font size="2"><a href="#Doc_Top">Back to top</a></font></h5>                              
+Please refer to <a href="#pic53613_1">Fig. 5.3.6.13-1</a>, <a href="#pic53613_2">Fig. 5.3.6.13-2</a> and <a href="#pic53613_3">Fig. 5.3.6.13-3</a> on following pages.<br>
+ <br>
+The<img src="images/route_small.jpg" width="42" height="24">button toggles the flight route vertical cross-section display on/off. You select the desired route by clicking and dragging, using the right mouse button. Multiple segments may be chosen. Release the button at each way point, and then click and drag to the next way point. If you make a mistake, click the left button to erase the previous segment. Double click on the end of the last segment to complete the selection. 
+<p></p>
+<p> The terrain along the route is depicted in solid brown, overlaying the data field. To change to a different field, right-click in the vertical section window and select the field from the menu that appears. The flight level scale appears in the left margin.</p>
+<p> <a href="#pic53613_1">Fig. 5.3.6.13-1</a> shows a user-selected route in plan view. The route is shown as a bold yellow line. The waypoints are labeled by the closest navigational fix (way point, VHF navaid or airport) within 20 nm of the selected point. If no navigational fix lies within a 20 nm radius, the point will be marked with a number indicating its position on the route. For example, the first point will be labeled "1", the third point "3", and so on. 
+</p>
+<p><a href="#pic53613_2">Figure 5.3.6.13-2</a> shows the corresponding vertical section. The selected field 
+  (in this case turbulence probability) is shown with the color scale legend on 
+  the right. As mentioned above, you may select a route by clicking and dragging 
+  in plan view. You may also select a route from a pre-defined list of routes. 
+  <br>
+  <br>
+  On Figure 5.3.5.13-2, you will see the button marked '<a name="pic53613_2_01"></a><a href="#pic53613_2">Routes ...</a>'. Clicking 
+  on this button will bring up a list of pre-defined routes. You may click on 
+  any of these to select it. The latest route you entered by clicking and dragging 
+  may be retrieved by using the 'Custom' button on that menu. <br>
+  <br>
+  The '<a name="pic53613_2_02"></a><a href="#pic53613_2">Label Waypoints</a>' is one of the check-boxes that toggle the waypoint labels 
+  on and off, in case they are obscuring data. If waypoint labels is on, the navigational 
+  fix lies within a 20 nm radius will be marked. Otherwise, they will not.<br>
+  <br>
+  The '<a name="pic53613_2_03"></a><a href="#pic53613_2">Show Winds Text</a>' is the other check-box that toggles the segment route 
+  with values on and off. See Figure 5.3.6.13-3 for an example with the route 
+  winds on. The mean wind for segments along the flight is shown plotted at the 
+  mid-point of the segment. <br>
+  <br>
+  The '<a name="pic53613_2_04"></a><a href="#pic53613_2">Average wind</a>' label located directly under the window title bar displays 
+  the average wind along the entire flight route. <br>
+  <br>
+  The '<a name="pic53613_2_05"></a><a href="#pic53613_2">Turbulence and/or icing warnings</a>' label located under 'Average wind' label, 
+  in red, warns if a route goes through an area of turbulence or icing, or both. 
+  Otherwise it is empty. (In the example, it shows "Mod Turb" indicating the route 
+  passes through an area with a moderate probability of turbulence.)<br>
+  <br>
+  The <a name="pic53613_2_06"></a><a href="#pic53613_2">selected flight level</a> is depicted by the dashed horizontal line.<br>
+  <br>
+  The <a name="pic53613_2_07"></a><a href="#pic53613_2">distance</a> along the route in nautical miles is shown along the bottom axis, 
+  with the starting point on the left. <br>
+  <br>
+  The <a name="pic53613_2_08"></a><a href="#pic53613_2">waypoints</a> are plotted as vertical dashed lines, with the waypoint name at 
+  the bottom. (The navigational fix lies within a 20 nm radius will be marked.) 
+  <br>
+  <br>
+ Use the '<a name="pic53613_2_09"></a><a href="#pic53613_2">Dismiss</a>' button to remove the vertical section from the screen. Toggling the<img src="images/route_small.jpg" width="42" height="24">button on the main menu may also be used for this purpose. 
+<p><a name="pic53613_1"><img src="images/pic53613_1_e.jpg" ></a></p>
+  
+<p><a name="pic53613_2"><img src="images/pic53613_2_e.jpg" usemap="#Map" border="0"></a><a name="pic53613_2"> 
+  <map name="Map"> 
+    <area shape="rect" coords="279,0,396,18" href="#pic53613_2_01">
+    <area shape="rect" coords="278,28,396,43" href="#pic53613_2_02">
+    <area shape="rect" coords="280,52,397,71" href="#pic53613_2_03">
+    <area shape="rect" coords="280,81,415,97" href="#pic53613_2_04">
+    <area shape="rect" coords="280,107,386,123" href="#pic53613_2_05">
+    <area shape="rect" coords="16,605,139,624" href="#pic53613_2_06">
+    <area shape="rect" coords="168,603,336,623" href="#pic53613_2_07">
+    <area shape="rect" coords="401,604,524,623" href="#pic53613_2_08">
+    <area shape="rect" coords="571,605,664,623" href="#pic53613_2_09">
+  </map>
+  </a></p> 
+<p><a name="pic5363_3"><img src="images/pic53613_3_e.jpg" ></a></p> 
+
+<!-- 5.3.6.14 -->
+<h5><a name="URL">5.3.6.14 URL Menu Button</a><font size="2"><a href="#Doc_Top">Back 
+  to Top</a></font></h5>                                  
+<p>This pop-up window<img src="images/url_small.jpg" width="44" height="25">allows you to select from a list of URLs. Netscape is started (if required) and is set to point to the requested URL. Iconify Netscape when done.</p>                                                                   
+<p>The following URLs are available:<br>
+<br>
+-	AOAWS WMDS - web-based MDS<br>
+<br>
+-	Winds/Temps aloft - tables of winds and temperature aloft forecasts for a selected set of airports.<br>
+<br>
+-	AOAWS MM5 - the MM5 model display.<br>
+<br>
+-	USA ADDS - the site for the USA National Weather Service Aviation Weather Center Aviation Digital Data Service (ADDS).
+ </p>                                                                    
+<!-- 5.3.6.15 -->
+<h5><a name="Report"></a>5.3.6.15 Report Button<font size="2"><a href="#Doc_Top">Back to top</a></font></h5>
+This is a toggle.  If you click on it to turn it on, and then place the cursor in the data area, the value of the data under the cursor will be shown as the cursor moves.  Toggle it again to turn it off. 
+
+<!-- 5.3.6.16 -->
+<h5><a name="Help"></a>5.3.6.16 Help Button<font size="2"><a href="#Doc_Top">Back to top</a></font></h5>                              
+This<img src="images/help_small.jpg" width="42" height="23">button starts Netscape (if required) and points to the MDS system 'Help' page. Iconify Netscape when done.
+
+<!-- ============================================================================================== -->
+<!-- Section 6 CIDD Companion Programs
+<!-- ============================================================================================== -->
+<h2><a name="cidd_ops">6. Tables and Graphs</a><font size="2"><a href="#Doc_Top">Back to top</a></font></h2> 
+
+<OL>
+  <LI> AsciiSelect - Displays Raw ASCII data nearest the click point - (METARS, TAFS, PIREPS, etc)
+    <h3><a name="TAFs"></a>5.8 TAFs Text Window<font size="2">
+    <a href="#Doc_Top">Back to top</a></font></h3>
+    Refer to <a href="#pic58_1">Figure 5.8-1</a>. 
+    o bring this window up, click on the<img src="images/tafs.jpg" width="57" height="55">icon.
+    The window will show the TAFs for the stations closest to the last
+    point clicked on the main display window. The TAFs are in time-reverse
+    order. To update the window, click on the airport of interest.
+    <p><a name="pic58_1"><img src="images/pic58_1_e.jpg"></a></p>
+
+  <LI> MetarSelect - Displays Decoded Metars nearest the click point
+
+    <h4><a name="Decoded"></a>5.4 Decoded METAR Text Window<font size="2">
+	<a href="#Doc_Top">Back to top</a></font>
+    </h4>
+
+    <p>Refer to <a href="#pic54_1">Figure 5.4-1</a>. The decoded METAR
+    text program (MetarSelect) displays metar data, sorted by distance
+    from the click point. If configured for real-time operation, the
+    program will display the latest data available. In archive mode,
+    the program will use information from CIDD to obtain the time of
+    interest and will gather data appropriate for that time.  </p>
+
+    <p> To update the window, select the desired METAR station by clicking in
+    the main display window close to the METAR station of interest. The METAR
+    text window will be updated with the latest reporting METAR information
+    for that station and nearby stations. The closest station will appear at
+    the top of the list. The data is in time-reverse order with the latest
+    observations at the top.  </p>
+
+    <p><a name="pic54_1"><img src="images/pic54_1_e.jpg" ></a></p>
+    <p>You can change the size of the font by holding down the control
+    key, putting the cursor in the window and then clicking the right
+    mouse button. A font menu will appear. Select the desired font. Select
+    the 'Default' option to use the original font.</p>
+
+  <LI> StationStripChart - Displays a time history of Surface Station Data.
+
+    <h3><a name="METAR"></a>5.10 METAR Time History Window<font size="2"><a href="#Doc_Top">Back to top</a></font></h3>             
+    <p>Refer to <a href="#pic510_1">Figure 5.10-1</a>
+    This program shows the time history for 
+    METAR stations. To change the field, right-click and select
+    the desired field in the pop-up menu that appears. The active
+    fields are: temperature, humidity, wind speed, pressure and wind
+    direction. Alternatively, you can select a station of interest in
+    the pop-up menu, which shows all the fields for that station.</p>
+    <p><a name="pic510_1"><img src="images/pic5_10_1_e.jpg" ></a></p>
+
+  <LI> pos_report - A position Reporting tool. Gives distance and azmith relative to pre-configured points.
+
+  <LI> snow_plot - Displays time histories and forcasts for Radar reflectivity and Surface station data precip rates
+
+  <LI> time-hist - Displays graphs of TITAN Storm characteristics.
+
+  <LI> mesonet_text_report - Displays Textual Surface station data in a simple form.
+
+  <LI> winds_aloft - Displays vertical column of  Winds, Temps etc above click point.
+
+    <h3><a name="Winds/Temperature"></a>5.5 Winds/Temperature Aloft
+    Window<font size="2"><a href="#Doc_Top">Back to Top</a></font></h3>
+    <p>Refer to <a href="#pic55_1">Figure 5.5-1</a>. The winds/temps aloft
+    window appears in the middle of the screen at the right hand side.</p>
+
+    <p>To update the window, click in the main window at the point of
+    interest. The text in the winds/temps aloft window will show a vertical
+    profile of the forecasted (MM5 model) wind speed, direction, temperature,
+    dew-point and relative humidity for the location at which you clicked. The
+    time on the panel is the forecast valid time. To change the forecast time,
+    select a different time on the time scale bar in the main window. The
+    location (Lat, Lon) of the vertical profile is also provided in the
+    widow. Also, the name of the closest navigational point within 50 nm is
+    printed below the lat/lon location. Data will not be displayed if you
+    click outside the MM5 data area.</p> <p>Occasionally you will see data
+    fields containing "xxxx" instead of a number. This indicates missing
+    data for that field and is usually caused by the fact that the relevant
+    flight level is below the terrain at the selected point.</p>
+
+</OL>
+
+
+<!-- ============================================================================================== -->
+<!-- Section 8  CIDD TROUBLE SHOOTING
+<!-- ============================================================================================== -->
+<h2><a name="trouble">7. TROUBLE SHOOTING </a><font size="2"><a href="#Doc_Top">Back 
+  to Top</a></font></h2>
+
+<P>
+NOT DONE.

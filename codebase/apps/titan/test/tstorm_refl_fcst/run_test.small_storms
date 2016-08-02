@@ -1,0 +1,11 @@
+#!/bin/csh -f
+
+/bin/rm -r data/small_storms/mdv/fcst
+
+DsMdvServer -port 60000 \
+    -params ./data/small_storms/mdv/static/_DsMdvServer.static &
+
+tstorm_refl_fcst -params tstorm_refl_fcst.small_storms \
+	-starttime "2002/07/22_00:00:00" -endtime "2002/07/23_00:00:00"
+
+snuff "DsMdvServer -port 60000"

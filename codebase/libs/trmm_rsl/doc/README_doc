@@ -1,0 +1,10 @@
+This directory contains all the HTML formatted documentation for version v0.28
+and above of the Radar Software Library (RSL -- pronounced rustle).
+
+The top level HTML file is: rsl_index.html.
+
+You can start 'Mosaic' by:  Mosaic rsl_index.html.
+
+Enjoy it.  Send suggestions for improvements to john.merritt@gsfc.nasa.gov.
+
+John

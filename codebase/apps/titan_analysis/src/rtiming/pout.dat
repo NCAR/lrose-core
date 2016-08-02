@@ -1,0 +1,969 @@
+<MIFFile 2.00> # ACE/gr (xmgr) v2.10
+<Units Uin>
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 5>
+     <Point  3.150 "  5.200 ">
+     <Point  3.150 "  2.800 ">
+     <Point  7.349 "  2.800 ">
+     <Point  7.349 "  5.200 ">
+     <Point  3.150 "  5.200 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  5.200 ">
+     <Point  3.150 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.569 "  5.200 ">
+     <Point  3.569 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.990 "  5.200 ">
+     <Point  3.990 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  4.410 "  5.200 ">
+     <Point  4.410 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  4.830 "  5.200 ">
+     <Point  4.830 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  5.249 "  5.200 ">
+     <Point  5.249 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  5.669 "  5.200 ">
+     <Point  5.669 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  6.090 "  5.200 ">
+     <Point  6.090 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  6.509 "  5.200 ">
+     <Point  6.509 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  6.929 "  5.200 ">
+     <Point  6.929 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  5.200 ">
+     <Point  7.349 "  5.160 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  2.800 ">
+     <Point  3.150 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.569 "  2.800 ">
+     <Point  3.569 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.990 "  2.800 ">
+     <Point  3.990 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  4.410 "  2.800 ">
+     <Point  4.410 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  4.830 "  2.800 ">
+     <Point  4.830 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  5.249 "  2.800 ">
+     <Point  5.249 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  5.669 "  2.800 ">
+     <Point  5.669 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  6.090 "  2.800 ">
+     <Point  6.090 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  6.509 "  2.800 ">
+     <Point  6.509 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  6.929 "  2.800 ">
+     <Point  6.929 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  2.800 ">
+     <Point  7.349 "  2.840 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  5.200 ">
+     <Point  3.150 "  5.120 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.990 "  5.200 ">
+     <Point  3.990 "  5.120 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  4.830 "  5.200 ">
+     <Point  4.830 "  5.120 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  5.669 "  5.200 ">
+     <Point  5.669 "  5.120 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  6.509 "  5.200 ">
+     <Point  6.509 "  5.120 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  5.200 ">
+     <Point  7.349 "  5.120 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  2.800 ">
+     <Point  3.150 "  2.880 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.990 "  2.800 ">
+     <Point  3.990 "  2.880 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  4.830 "  2.800 ">
+     <Point  4.830 "  2.880 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  5.669 "  2.800 ">
+     <Point  5.669 "  2.880 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  6.509 "  2.800 ">
+     <Point  6.509 "  2.880 ">
+  >
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 3.150000 5.376926>
+<Angle 0>
+<TLAlignment Center>
+<String `0.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 3.990000 5.376926>
+<Angle 0>
+<TLAlignment Center>
+<String `1.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 4.830000 5.376926>
+<Angle 0>
+<TLAlignment Center>
+<String `2.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 5.669000 5.376926>
+<Angle 0>
+<TLAlignment Center>
+<String `3.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 6.509000 5.376926>
+<Angle 0>
+<TLAlignment Center>
+<String `4.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 7.349000 5.376926>
+<Angle 0>
+<TLAlignment Center>
+<String `5.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 5.249000 5.578000>
+<Angle 0>
+<TLAlignment Center>
+<String `Time from start of volume (mins)'>
+>  # end of textline
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  2.800 ">
+     <Point  7.349 "  2.880 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  5.200 ">
+     <Point  3.190 "  5.200 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  4.901 ">
+     <Point  3.190 "  4.901 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  4.600 ">
+     <Point  3.190 "  4.600 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  4.300 ">
+     <Point  3.190 "  4.300 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  4.000 ">
+     <Point  3.190 "  4.000 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  3.700 ">
+     <Point  3.190 "  3.700 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  3.400 ">
+     <Point  3.190 "  3.400 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  3.100 ">
+     <Point  3.190 "  3.100 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  2.800 ">
+     <Point  3.190 "  2.800 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  5.200 ">
+     <Point  7.309 "  5.200 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  4.901 ">
+     <Point  7.309 "  4.901 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  4.600 ">
+     <Point  7.309 "  4.600 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  4.300 ">
+     <Point  7.309 "  4.300 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  4.000 ">
+     <Point  7.309 "  4.000 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  3.700 ">
+     <Point  7.309 "  3.700 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  3.400 ">
+     <Point  7.309 "  3.400 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  3.100 ">
+     <Point  7.309 "  3.100 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  2.800 ">
+     <Point  7.309 "  2.800 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  5.200 ">
+     <Point  3.230 "  5.200 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  4.600 ">
+     <Point  3.230 "  4.600 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  4.000 ">
+     <Point  3.230 "  4.000 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  3.400 ">
+     <Point  3.230 "  3.400 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  3.150 "  2.800 ">
+     <Point  3.230 "  2.800 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  5.200 ">
+     <Point  7.269 "  5.200 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  4.600 ">
+     <Point  7.269 "  4.600 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  4.000 ">
+     <Point  7.269 "  4.000 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  3.400 ">
+     <Point  7.269 "  3.400 ">
+  >
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 3.060000 5.250926>
+<Angle 0>
+<TLAlignment Right>
+<String `0.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 3.060000 4.650926>
+<Angle 0>
+<TLAlignment Right>
+<String `1.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 3.060000 4.050926>
+<Angle 0>
+<TLAlignment Right>
+<String `2.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 3.060000 3.450926>
+<Angle 0>
+<TLAlignment Right>
+<String `3.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 3.060000 2.850926>
+<Angle 0>
+<TLAlignment Right>
+<String `4.0'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 11>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 2.772000 4.000000>
+<Angle 90>
+<TLAlignment Center>
+<String `Mean age (mins)'>
+>  # end of textline
+<Font
+  <FFamily `Times'>
+<FSize 15>
+<FBold No>
+<FAngle `Regular'>
+> # end of font
+<TextLine
+<GroupID 1>
+<TLOrigin 5.249000 2.422000>
+<Angle 0>
+<TLAlignment Center>
+<String `rev nexrad av data age'>
+>  # end of textline
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 2>
+     <Point  7.349 "  2.800 ">
+     <Point  7.269 "  2.800 ">
+  >
+  <PolyLine
+     <GroupID 1>
+     <Pen 0>
+     <Fill 15>
+     <Separation 0>
+     <PenWidth  0.5 pt>
+     <HeadCap Round>
+     <TailCap Round>
+     <NumPoints 15>
+     <Point  3.150 "  4.314 ">
+     <Point  3.259 "  4.252 ">
+     <Point  3.469 "  4.114 ">
+     <Point  3.687 "  3.976 ">
+     <Point  3.906 "  3.844 ">
+     <Point  4.132 "  3.718 ">
+     <Point  4.351 "  3.604 ">
+     <Point  4.569 "  3.502 ">
+     <Point  4.838 "  3.364 ">
+     <Point  5.140 "  3.256 ">
+     <Point  5.451 "  3.220 ">
+     <Point  5.753 "  3.328 ">
+     <Point  6.073 "  3.736 ">
+     <Point  6.652 "  4.060 ">
+     <Point  7.215 "  4.390 ">
+  >
+<Group <ID 1>>

@@ -1,0 +1,33 @@
+#
+# SAMS locations at WSMR
+#
+# File prepared by Niles Oien, Jan 2000
+#
+# Format is :
+# ID number  Lat Lon Altitude Description
+#
+1	32.357	-106.38		4005	C_Stn
+2	32.663	-106.4		3953	Apache
+3	32.372	-106.488	4272	Post
+4	32.9	-106.42		3911	Northrup
+5	32.4	-106.5		5901	S_A_Pass
+6	33.5	-106.54		5356	Gap
+7	32.9	-106.13		4058	Ninnenger
+8	33.47	-106.58		4745	Zumwalt
+9	33.3	-106.53		8941	Salinas_Peak
+10	33.8	-106.3		8000	N_Oscura
+11	33.8	-106.683	4877	LBTS
+12	33.8	-106.59		4785	Zurf
+13	33.736	-106.432	5290	4Mile
+14	33.5	-106.21		4530	Oscura
+15	33.17	-106.49		4057	Jallen
+16	32.9	-106.33		3908	Ratscat
+17	32.787	-105.82		9169	Sacremento_Peak
+18	32.4	-106.15		4180	Oro_Grande
+19	33.626	-106.476	4917	Duquette
+21	33.16	-106.33		4031	ABC_1
+22	32.675	-106.483	4600	AshCanyon
+23	32.75	-106.517	4500	SanAndreas
+24	32.917	-106.6		4700	Hembrillo
+25	32.8	-106.8		3900	Space_Port
+30	32.357	-106.38		4005	Ramon

@@ -1,0 +1,24 @@
+# NAME height2.colors
+
+# awdl 	6/15/1993 15:20:31
+
+0000  250       gray99
+250   500	gray97
+500   600 	gray73
+600   700 	gray51
+700   800	gray41
+800   900 	gray31
+900   1000 	gray21
+1000  1200 	blue4
+1200  1400 	DarkOrchid4
+1400  1600 	HotPink4
+1600  1800 	maroon
+1800  2000 	sienna
+2000  2200	chocolate
+2200  2400 	goldenrod
+2400  2600 	yellow
+2600  2800	dark salmon
+2800  3000 	salmon
+3000  3200 	firebrick2
+3200  3400 	DeepPink1
+3400  5000 	white

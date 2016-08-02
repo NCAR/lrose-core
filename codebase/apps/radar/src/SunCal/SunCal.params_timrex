@@ -1,0 +1,588 @@
+/**********************************************************************
+ * TDRP params for SunCal
+ **********************************************************************/
+
+//======================================================================
+//
+// SunCal analyses data from tsarchive time series files taken during 
+//   sun scans.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "timrex";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or time series API.
+// If TS_FMQ_INPUT, the application will read the time series from a 
+//   file message queue and process the pulses as they come in. If 
+//   TS_FILE_INPUT, the application will process all the files specified 
+//   on the command line.
+//
+// Type: enum
+// Options:
+//     TS_FILE_INPUT
+//     TS_FMQ_INPUT
+//
+
+input_mode = TS_FILE_INPUT;
+
+///////////// input_fmq_name //////////////////////////
+//
+// FMQ name. For TS_FMQ_INPUT only.
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+// Type: string
+//
+
+input_fmq_name = "/tmp/fmq/ts";
+
+///////////// n_samples ///////////////////////////////
+//
+// Number of pulse samples in a beam.
+// Type: int
+//
+
+n_samples = 128;
+
+///////////// start_gate //////////////////////////////
+//
+// Start gate for analysis.
+// Type: int
+//
+
+start_gate = 50;
+
+///////////// n_gates /////////////////////////////////
+//
+// Number of gates for analysis.
+// Type: int
+//
+
+n_gates = 500;
+
+///////////// polarization_mode ///////////////////////
+//
+// Polarization mode.
+// H_ONLY: single pol, H channel. V_ONLY: single pol, V channel. HV_ALT: 
+//   dual pol fast alternating. HV_SIM: If set, debug messages will be 
+//   printed appropriately.
+//
+// Type: enum
+// Options:
+//     H_ONLY
+//     V_ONLY
+//     HV_ALT
+//     HV_SIM
+//
+
+polarization_mode = HV_ALT;
+
+///////////// invert_hv_flag //////////////////////////
+//
+// Option to invert H/V flag in pulse data.
+// Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the 
+//   data has the opposite sense, set this to true.
+// Type: boolean
+//
+
+invert_hv_flag = FALSE;
+
+///////////// scan_mode_rhi ///////////////////////////
+//
+// Scan mode is RHI instead of SECTOR.
+// Set to TRUE if the scan is in RHI mode and the RHI flag is not set in 
+//   the pulse headers.
+// Type: boolean
+//
+
+scan_mode_rhi = FALSE;
+
+//======================================================================
+//
+// VOLUME IDENTIFICATION OPTIONS.
+//
+//======================================================================
+ 
+///////////// analyze_individual_volumes //////////////
+//
+// Option to identify individual sun volumes for the analysis.
+// If false, all of the input data will be analyzed together. If true, 
+//   the program will identify individual sun scans for analysis by 
+//   monitoring the antenna elevation angle for a decrease which indicates 
+//   that the volume is restarting. You have the option of including more 
+//   than 1 volume in the analysis - see n_volumes_for_analysis.
+// Type: boolean
+//
+
+analyze_individual_volumes = TRUE;
+
+///////////// n_volumes_for_analysis //////////////////
+//
+// Number of consecutive volumes to be combined for each analysis. The 
+//   program will go through all of the data grouping the volumes 
+//   accordingly.
+// Applies if combine_all_volumes is false.
+// Type: int
+//
+
+n_volumes_for_analysis = 1;
+
+///////////// min_n_volumes_for_analysis //////////////
+//
+// Minimum number of consecutive volumes to be included in the analysis.
+// The program checks for the number of available volumes. If it exceeds 
+//   this number, the analysis is performed. If not, the data will be 
+//   ignored.
+// Type: int
+//
+
+min_n_volumes_for_analysis = 1;
+
+///////////// min_beams_per_volume ////////////////////
+//
+// Min number of beams per volume volume.
+// Type: int
+//
+
+min_beams_per_volume = 100;
+
+///////////// max_beams_per_volume ////////////////////
+//
+// Max number of beams per volume volume.
+// Type: int
+//
+
+max_beams_per_volume = 20000;
+
+///////////// check_for_elevation_change //////////////
+//
+// Option to identify end of volumes by elevation change.
+// If true, the antenna elevation will be checked. If it changes by a 
+//   significant amount, an end of volume is likely. See 
+//   'elev_change_for_end_of_volume'. If false, the volume number will be 
+//   checked for changes.
+// Type: boolean
+//
+
+check_for_elevation_change = FALSE;
+
+///////////// elev_change_for_end_of_volume ///////////
+//
+// Minimum delta elevation to indicate end of volume (deg).
+// At the end of a volume, the elevation angle will be reset to the 
+//   starting angle. When this happens the program can detect the end of 
+//   volume by the rapid change in elevation angle. This is the minimum 
+//   angular change to signal and end of volume.
+// Type: double
+//
+
+elev_change_for_end_of_volume = 2;
+
+///////////// volume_starts_at_bottom /////////////////
+//
+// Volume starts at lowest elevation angle and moves upwards.
+// If false, volume starts at top and moves downwards.
+// Type: boolean
+//
+
+volume_starts_at_bottom = TRUE;
+
+///////////// max_time_gap_within_volume //////////////
+//
+// Max time gap within a volume (secs).
+// If the time between pulses exceeds this value, the current analysis 
+//   will be terminated and a new analysis begun.
+// Type: int
+//
+
+max_time_gap_within_volume = 60;
+
+//======================================================================
+//
+// RADAR LOCATION.
+//
+//======================================================================
+ 
+///////////// radar_lat ///////////////////////////////
+//
+// Latiitude of radar location (deg).
+// North is positive, South is negative.
+// Type: double
+//
+
+radar_lat = 22.5267;
+
+///////////// radar_lon ///////////////////////////////
+//
+// Longitude of radar location (deg).
+// East is positive, West is negative.
+// Type: double
+//
+
+radar_lon = 120.433;
+
+///////////// radar_alt_km ////////////////////////////
+//
+// Altitude of radar (km).
+// Type: double
+//
+
+radar_alt_km = 0.042;
+
+//======================================================================
+//
+// GRID DETAILS.
+//
+//======================================================================
+ 
+///////////// grid_min_az /////////////////////////////
+//
+// Min azimiuth for the grid (deg).
+// Type: double
+//
+
+grid_min_az = -5;
+
+///////////// grid_max_az /////////////////////////////
+//
+// Max azimiuth for the grid (deg).
+// Type: double
+//
+
+grid_max_az = 5;
+
+///////////// grid_delta_az ///////////////////////////
+//
+// Resolution of regular grid in azimuth (deg).
+// Type: double
+//
+
+grid_delta_az = 0.1;
+
+///////////// grid_min_el /////////////////////////////
+//
+// Min elevation for the grid (deg).
+// Type: double
+//
+
+grid_min_el = -2;
+
+///////////// grid_max_el /////////////////////////////
+//
+// Max elevation for the grid (deg).
+// Type: double
+//
+
+grid_max_el = 2;
+
+///////////// grid_delta_el ///////////////////////////
+//
+// Resolution of regular grid in elevation (deg).
+// Type: double
+//
+
+grid_delta_el = 0.1;
+
+//======================================================================
+//
+// NOISE COMPUTATION.
+//
+//======================================================================
+ 
+///////////// max_solid_angle_for_noise_power /////////
+//
+// Max solid angle for power from the sun (deg).
+// The noise will be computed as the mean of power from beams outside 
+//   this solid angle.
+// Type: double
+//
+
+max_solid_angle_for_noise_power = 4;
+
+///////////// use_min_for_noise ///////////////////////
+//
+// Option to use min value in grid for noise.
+// If true, the minimum value in the grid will be use as the noise 
+//   value. If false, the noise value will be computed as the mean of all 
+//   values away from the sun. See noise_min_delta_angle_from_sun.
+// Type: boolean
+//
+
+use_min_for_noise = FALSE;
+
+///////////// specify_noise ///////////////////////////
+//
+// Option to specify the noise value.
+// If true, specified_noise_dbm will be used for the noise value.
+// Type: boolean
+//
+
+specify_noise = FALSE;
+
+///////////// specified_noise_dbm /////////////////////
+//
+// Noise value (dBm).
+// Will be used if 'specify_noise' is TRUE.
+// Type: double
+//
+
+specified_noise_dbm = -80;
+
+///////////// adjust_powers_for_noise /////////////////
+//
+// Option to subtract noise from powers.
+// If true, the noise power is subtracted from the received power.
+// Type: boolean
+//
+
+adjust_powers_for_noise = TRUE;
+
+//======================================================================
+//
+// INTERFERENCE REMOVAL FOR SUN CENTROID.
+//
+// Option to set a maximum sun power, so that we can filter out high 
+//   power values which affect the computation of the sun centroid.
+//
+//======================================================================
+ 
+///////////// set_max_sun_power ///////////////////////
+//
+// Option to set a maximum acceptable power value.
+// If true, powers above this value will be set to -120 dBm.
+// Type: boolean
+//
+
+set_max_sun_power = FALSE;
+
+///////////// max_valid_sun_power_dbm /////////////////
+//
+// Max valid sun power value (dBm).
+// See 'set_max_power'.
+// Type: double
+//
+
+max_valid_sun_power_dbm = -60;
+
+//======================================================================
+//
+// CROSS-POLAR POWER ANALYSIS.
+//
+//======================================================================
+ 
+///////////// sun_edge_below_peak_db //////////////////
+//
+// Power of sun edge relative to the peak (dB).
+// The sun position is computed using the power at each point. Only 
+//   powers within this margin of the peak power are used in the 
+//   computations.
+// Type: double
+//
+
+sun_edge_below_peak_db = 8;
+
+///////////// n_s1s2_ratios_computed //////////////////
+//
+// Number of ratios computed for S1S2.
+// Each ratio is computed for a different solid angle.
+// Type: int
+//
+
+n_s1s2_ratios_computed = 8;
+
+///////////// min_solid_angle_for_s1s2 ////////////////
+//
+// Min solid angle over which to compute S1S2 mean (deg).
+// This is the min angle for computing S1S2. The angle is centered on 
+//   the sun, and the mean ratio is computed over the entire angle. For 
+//   example, if set to 1.0, all points in the grid within 0.5 degrees of 
+//   the sun centroid will be used.
+// Type: double
+//
+
+min_solid_angle_for_s1s2 = 0.25;
+
+///////////// delta_solid_angle_for_s1s2 //////////////
+//
+// Delta solid angle over which to compute S1S2 mean (deg).
+// A number of ratios are computed for a range of solid angles. This is 
+//   the delta between each solid angle.
+// Type: double
+//
+
+delta_solid_angle_for_s1s2 = 0.25;
+
+///////////// npoints_power_ranking ///////////////////
+//
+// Number of grid points used to compute ratios using ranked powers.
+// In this method, the points in the grids are ranked, and a mean is 
+//   computed using the top npoints_power_ranking points, after dropping 
+//   the tops few points. See npoints_dropped_ranking.
+// Type: int
+//
+
+npoints_power_ranking = 10;
+
+//======================================================================
+//
+// COMPUTING CORRELATION OVER THE SUN DISK.
+//
+//======================================================================
+ 
+///////////// max_solid_angle_for_sun_correlation /////
+//
+// Solid angle for computing correlation over sun disk (deg).
+// The correlation will be computed for points within this angle.
+// Type: double
+//
+
+max_solid_angle_for_sun_correlation = 1;
+
+//======================================================================
+//
+// CONVOLUTION ANALYSIS for CROSS_CORRELATION.
+//
+// As a check on the cross-correlation between H and V, we compute a 
+//   convolved time series across the sun disk.
+//
+//======================================================================
+ 
+///////////// perform_convolution_analysis ////////////
+//
+// Option to compute convolved time series results.
+// The convolved time series is computed on a gate-by-gate basis, by 
+//   summing the I/Q data for pulses within a given solid angle of the 
+//   sun. The convolution reflects the fact that the power varies 
+//   according to the antenna pattern. Correlation quantities are computed 
+//   on the convolved time series.
+// Type: boolean
+//
+
+perform_convolution_analysis = TRUE;
+
+///////////// max_solid_angle_for_convolution /////////
+//
+// Max solid angle for computing convolution quantities (deg).
+// The convolved time series will be computed over this solid angle.
+// Type: double
+//
+
+max_solid_angle_for_convolution = 1;
+
+///////////// print_convolution_results ///////////////
+//
+// Option to print convolution results to stdout.
+// Type: boolean
+//
+
+print_convolution_results = FALSE;
+
+//======================================================================
+//
+// OUTPUT TEXT RESULTS.
+//
+//======================================================================
+ 
+///////////// write_text_files ////////////////////////
+//
+// Option to write out text files.
+// If false, the output fill be written to stdout.
+// Type: boolean
+//
+
+write_text_files = TRUE;
+
+///////////// text_output_dir /////////////////////////
+//
+// Dir for output text files.
+// The results will be written to sub-directories named from the cal 
+//   time.
+// Type: string
+//
+
+text_output_dir = "./output_timrex";
+
+///////////// append_to_global_results_file ///////////
+//
+// Option to append results to global file.
+// Type: boolean
+//
+
+append_to_global_results_file = TRUE;
+
+///////////// global_file_name ////////////////////////
+//
+// Name for global output file.
+// Type: string
+//
+
+global_file_name = "SunCal.global_results.timrex.txt";
+
+//======================================================================
+//
+// OUTPUT RESULTS TO MDV FILES.
+//
+//======================================================================
+ 
+///////////// write_mdv_files /////////////////////////
+//
+// Option to write out grids to MDV files.
+// Type: boolean
+//
+
+write_mdv_files = TRUE;
+
+///////////// mdv_output_dir //////////////////////////
+//
+// Dir for output MDV files.
+// Type: string
+//
+
+mdv_output_dir = "./mdv";
+

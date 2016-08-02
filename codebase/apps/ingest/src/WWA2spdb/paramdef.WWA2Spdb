@@ -1,0 +1,135 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+///////////////////////////////////////////////////////////
+//
+// paramdef.WWA2Spdb
+//
+//
+
+commentdef {
+  p_header = "WWA2Spdb reads lightning data into an SPDB database.\n";
+}         
+
+
+////////////////////////////////////////////////////////////////////////
+//
+// Debugging
+//
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = { false };
+} Debug;
+
+////////////////////////////////////////////////////////////////////////
+//
+// Operational information
+//
+
+paramdef string
+{
+  p_descr = "procmap instance";
+  p_default = { "Test" };
+} Instance;
+
+paramdef long
+{
+  p_descr = "processing delay in seconds";
+  p_help = "The number of seconds to wait before processing an input file.  This delay allows activity on the file to finish before we start reading it, realtime mode only.";
+  p_default = { 1 };
+} ProcessingDelay;
+
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_help = "Directory where WWA files are, realtime mode only.";
+  p_default = { "." };
+} InputDir;
+
+paramdef string
+{
+  p_descr = "Input File Extension";
+  p_help = "Real-time mode - Only ingest files with this extension, if set"; 
+  p_default = { "" };
+} InputExt;
+
+paramdef int
+{
+  p_descr = "Maximum age for an input file to be processed, seconds.";
+  p_help = "Valid for REALTIME mode only.";
+  p_default = 300;
+} MaxRealtimeFileAge;
+
+paramdef string
+{
+  p_descr = "Destination SPDB URL";
+  p_help = "The name of the URL which will be used as the destination for the SPDB data.";
+  p_default = { "spdbp:://localhost::spdb/wwa" };
+} OutputUrl;
+
+paramdef enum runmode_t
+{
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the analysis is performed for each dataset as it becomes available. In archive mode, the file list is obtained from the command line.";
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+} Mode;
+
+
+commentdef {
+  p_header = "-------- Region over which to ingest data. -------------------- ";
+}
+
+paramdef float
+{
+  p_descr = "Minimum latitude for data to be ingested, decimal degrees.";
+  p_help = "Data south of this are not ingested. Default covers Mainland USA.";
+  p_default = 25.0;
+} MinLat;
+
+paramdef float
+{
+  p_descr = "Maximum latitude for data to be ingested, decimal degrees.";
+  p_help = "Data north of this are not ingested. Default covers Mainland USA.";
+  p_default = 50.0;
+} MaxLat;
+
+paramdef float
+{
+  p_descr = "Minimum longitude for data to be ingested, decimal degrees.";
+  p_help = "Data west of this are not ingested. Default covers Mainland USA.\n"
+            "Longitudes cover -180 to 180.";
+  p_default = -125.0;
+} MinLon;
+
+paramdef float
+{
+  p_descr = "Maximum longitude for data to be ingested, decimal degrees.";
+  p_help = "Data east of this are not ingested. Default covers Mainland USA.\n"
+            "Longitudes cover -180 to 180.";
+  p_default = -65.0;
+} MaxLon;

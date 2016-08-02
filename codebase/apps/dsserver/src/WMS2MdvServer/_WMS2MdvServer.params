@@ -1,0 +1,344 @@
+/**********************************************************************
+ * TDRP params for WMS2MdvServer
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// no_threads //////////////////////////////
+//
+// Option to prevent server from using a thread per client.
+// For debugging purposes it it sometimes useful to suppress the use of 
+//   threads. Set no_threads to TRUE for this type of debugging.
+// Type: boolean
+//
+
+no_threads = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for procmap registration and auto restarting. If an empty 
+//   instance name is provided, the server automatically uses the port 
+//   number as its instance name.
+// Type: string
+//
+
+instance = "";
+
+//======================================================================
+//
+// Server details for support from ServerMgr.
+//
+//======================================================================
+ 
+///////////// port ////////////////////////////////////
+//
+// Port number.
+// The server listens on this port for client requests.
+// Type: int
+//
+
+port = 5440;
+
+///////////// qmax ////////////////////////////////////
+//
+// Max quiescent period (secs).
+// If the server does not receive requests for this time period, it will 
+//   die gracefully.
+// Type: int
+//
+
+qmax = 1800;
+
+///////////// max_clients /////////////////////////////
+//
+// Maximum number of clients.
+// This is the maximum number of threads the application will produce to 
+//   handle client requests.  If the maximum is reached, new clients will 
+//   receive a SERVICE_DENIED error message and will have to request the 
+//   data again.  If set to -1, no maximum is enforced.
+// Type: int
+//
+
+max_clients = -1;
+
+//======================================================================
+//
+// Security.
+//
+//======================================================================
+ 
+///////////// run_secure //////////////////////////////
+//
+// Option to run in secure mode.
+// If TRUE, the server will reject any URLs which specify an absolute 
+//   path, or a path with .. in it. This prevents the server from writing 
+//   any files which are not below DATA_DIR in the directory tree.
+// Type: boolean
+//
+
+run_secure = FALSE;
+
+//======================================================================
+//
+// Memory management for messages.
+//
+//======================================================================
+ 
+///////////// copy_message_memory /////////////////////
+//
+// Option to copy memory from the messages into the message objects.
+// Setting to FALSE will reduce the memory usage for the program.
+// Type: boolean
+//
+
+copy_message_memory = TRUE;
+
+///////////// vsection_nsamples ///////////////////////
+//
+// Number of samples in the vertical section.
+// Type: int
+//
+
+vsection_nsamples = 500;
+
+//======================================================================
+//
+// WMS URL support.
+//
+// Option to serve out data from a WMS source.
+//
+//======================================================================
+ 
+///////////// WMS_BASE ////////////////////////////////
+//
+// Base URL of  OGIS Web Map Server.
+// Type: string
+//
+
+WMS_BASE = "http://maps1.intergraph.com/wms/world/request.asp";
+
+///////////// WMS_WMTVER //////////////////////////////
+//
+// WMS WMTVER Message Part.
+// Type: string
+//
+
+WMS_WMTVER = "WMTVER=1.1.0";
+
+///////////// WMS_REQUEST /////////////////////////////
+//
+// WMS REQUEST Message Part.
+// Type: string
+//
+
+WMS_REQUEST = "REQUEST=map";
+
+///////////// WMS_LAYERS //////////////////////////////
+//
+// Base  LAYERS message part   - Requested field name will be appended 
+//   to this.
+// Type: string
+//
+
+//WMS_LAYERS = "LAYERS=Lakes";
+WMS_LAYERS = "LAYERS=GLOBEImage";
+
+//======================================================================
+//
+//  WMS BBOX - Derived from MdvX request WIDTH from 
+//   P->request_nx_pixels, HEIGHT from P->request_nx_pixels.
+//
+//======================================================================
+ 
+///////////// WMS_STYLES //////////////////////////////
+//
+// WMS STYLES Message Part.
+// Type: string
+//
+
+//WMS_STYLES = "STYLES=Default";
+WMS_STYLES = "FOO=Bar";
+
+///////////// WMS_SRS /////////////////////////////////
+//
+// WMS SRS Message Part - Complete.
+// Type: string
+//
+
+WMS_SRS = "SRS=EPSG:4326";
+
+///////////// WMS_FORMAT //////////////////////////////
+//
+// WMS FORMAT Message Part for static file.
+// Type: string
+//
+
+WMS_FORMAT = "FORMAT=png";
+
+///////////// WMS_TRANSPARENT /////////////////////////
+//
+// WMS TRANSPARENT Message Part.
+// Type: string
+//
+
+WMS_TRANSPARENT = "TRANSPARENT=TRUE";
+
+///////////// WMS_BGCOLOR /////////////////////////////
+//
+// WMS BGCOLOR Message Part.
+// Type: string
+//
+
+WMS_BGCOLOR = "BGCOLOR=0x000000";
+
+///////////// WMS_EXCEPTIONS //////////////////////////
+//
+// WMS EXCEPTIONS Message Part.
+// Type: string
+//
+
+WMS_EXCEPTIONS = "";
+
+///////////// WMS_VENDOR //////////////////////////////
+//
+// WMS VENDOR Message Part.
+// Type: string
+//
+
+WMS_VENDOR = "";
+
+//======================================================================
+//
+// Image Detail support.
+//
+//======================================================================
+ 
+///////////// request_nx_pixels ///////////////////////
+//
+// Number of X pixels to request.
+// Make this the width of the image on screen. - Note: modified to 
+//   produce square pixels.
+// Type: int
+//
+
+request_nx_pixels = 1024;
+
+///////////// request_ny_pixels ///////////////////////
+//
+// Number of Pixels in the Y dim to request.
+// Make this the height of the image on screen - Note: modified to 
+//   produce square pixels.
+// Type: int
+//
+
+request_ny_pixels = 1024;
+
+///////////// set_background_transparent //////////////
+//
+// Sets the Background to transparent. Any pixel which matches 
+//   transparent_color will be made transparent.
+//  Interacts with WMS_BGCOLOR setting.
+// Type: boolean
+//
+
+set_background_transparent = TRUE;
+
+///////////// transparent_color ///////////////////////
+//
+// Color to change to Transparent if set_background_transparent is TRUE.
+//  ORDER is: ABGR (Alpha bits ignored) - Red = 0x000000ff, Blue = 
+//   0x00ff0000.
+// Type: int
+//
+
+transparent_color = 0;
+
+///////////// default_alpha ///////////////////////////
+//
+// Alpha Channel assignment for images without alpha.
+// 1.0 is completely opaque, 0.0, completely transparent.
+// Type: double
+//
+
+default_alpha = 1;
+
+//======================================================================
+//
+// Image Conversion parameters.
+//
+//======================================================================
+ 
+///////////// field_units /////////////////////////////
+//
+// Image Units.
+// Type: string
+//
+
+field_units = "RGBA";
+
+///////////// in_projection ///////////////////////////
+//
+// Enumerated Projection ID.
+// Set this to the projection of the incoming image .
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_ARTCC
+//     PROJ_STEREOGRAPHIC
+//     PROJ_LAMBERT_CONF
+//     PROJ_MERCATOR
+//     PROJ_POLAR_STEREO
+//     PROJ_POLAR_ST_ELLIP
+//     PROJ_CYL_EQUIDIST
+//     PROJ_FLAT
+//     PROJ_POLAR_RADAR
+//
+
+in_projection = PROJ_LATLON;
+
+///////////// proj ////////////////////////////////////
+//
+// Projection Information.
+//  The fields in the structure are as follows:
+
+//   origin_lat: Projection Center - Latitude
+//   origin_lat: Projection Center - Longitude
+//   param1: 
+//   param2: 
+//   param3: 
+//   param4: .
+//
+// Type: struct
+//   typedef struct {
+//      double origin_lat;
+//      double origin_lon;
+//      double param1;
+//      double param2;
+//      double param3;
+//      double param4;
+//   }
+//
+//
+
+proj = { 0, 0, 0, 0, 0, 0 };
+

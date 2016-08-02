@@ -1,0 +1,338 @@
+//////////////////////////////////////////////////////////////////////
+// paramdef.Tdwrc2Dsr
+//
+// Gary Blackbur, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// April 2001
+//
+
+commentdef {
+  p_header = "Program name: Tdwr2Dsr";
+  p_text = "Tdwr2Dsr reads TDWR data from a udp socket and writes the data to a DsRadarQueue beam by beam.";
+}
+
+commentdef {
+  p_header = "PROCESS CONTROL AND DEBUGGING";
+}
+
+////////////////////////////////////////////////////////////////////////
+// Debugging
+///
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters helpful in debugging problems with the process.";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+////////////////////////////////////////////////////////////////////////
+// Process registration
+///
+
+commentdef
+{
+  p_header = "PROCESS REGISTRATION PARAMETERS";
+  p_text = "Parameters for registering process information.";
+};
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+////////////////////////////////////////////////////////////////////////
+// Operational parameters
+///
+
+commentdef
+{
+  p_header = "OPERATIONAL PARAMETERS";
+};
+
+////////////////////////////////////////////////////////////////////////
+// Process I/O.
+///
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef boolean {
+  p_descr = "If set to true, data is read from the tape device defined by tape_drive parameter.";
+  p_default = FALSE;
+} playback;
+
+paramdef string {
+  p_descr = "Tape device for data input.";
+  p_default = "/dev/nrst0";
+} tape_drive;
+
+paramdef long {
+  p_descr = "Udp port for beam data packets";
+  p_default = {10000};
+} port;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "fmq/Tdwr2Dsr";
+  p_descr = "Output URL for DsRadarQueue fmq.";
+  p_help = "The URL is of the form 'fmqp:://host::dir/name'. If the output is to the local host you can use just 'dir/name'.";
+} output_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to block on write when the radar queue fills up.";
+  p_help = "If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.";
+} write_blocking;
+
+typedef enum {
+  NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION
+} compression_t;
+  
+paramdef enum compression_t {
+  p_default = ZLIB_COMPRESSION;
+  p_descr = "Output compression options.";
+  p_help = "The data may be optionally compressed for output. BZIP is generally the slowest but most compact. ZLIB uses the gzip compression algorithm, which is faster than BZIP, and for some data more compact as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is simple run-length encoding compression, which is the fastest and least compact.";
+} output_compression;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Number of slots in output FMQ.";
+} output_n_slots;
+
+paramdef int {
+  p_default = 200000000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_buf_size;
+
+////////////////////////////////////////////////////////////////////////
+// TDWR data flags 
+///
+
+commentdef
+{
+  p_header = "TDWR DATA FLAGS";
+  p_text = "Clutter, point target / thresholding and dealias algorithm failure flags.";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Compressed dealias algorithm failure flag.";
+  p_help = "If true and flag is set, the program will set dealiased velocity values to zero.";
+} caf;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Point target flag.";
+  p_help = "If true and flag is set, the program will set width, both velocities and dbz to zero.";
+} ctf;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Compressed conditioned valid flag removes clutter and implements thresholding on velocity and SNR.";
+  p_help = "If true and flag is set, the program will set width and both velocities to zero.";
+} ccv;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Compressed valid flag removes for low prf scand.";
+  p_help = "If true and flag is set, the program will set dbz and snr to zero.";
+} cv;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Compressed valid flag removes clutter.";
+  p_help = "If true and flag is set, the program will set all parameters except SNR to zero.";
+} cvf;
+
+////////////////////////////////////////////////////////////////////////
+// TDWR radar output adjustment parameters
+///
+
+commentdef {
+  p_header = "TDWR RADAR OUTPUT ADJUSTMENT PARAMETERS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Eliminate the low prf scan from output volume.";
+  p_help = "If true the low prf scan is removed from the message queue.  Note that the tilt numbers, part of the TDWR header, will be missing the low prf scan number.  Current stratagies contain the first volume scan as low prf, when set to true thevolume starts at scan number 2.";
+} eliminate_low_prf;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add missing low prf fields and set to zero.";
+  p_help = "If true the program will add velocity and width fields to the output queue and set the values to zero.";
+} add_missing_low_prf_fields;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "TDWR outputs two gate spacings, make the spacing the same.";
+  p_help = "If true the program will change the low prf gate spacing from 300 meter to 150.  Values will be repeated for the higher resolution.";
+} adjust_low_prf_spacing;
+
+paramdef float {
+  p_default = 11.1;
+  p_descr = "Modify azimuth values to reflect true north.";
+  p_help = "TDWR data is oriented to magnetic north.  This adjustment modifies the output azimuths to true north.";
+} true_north_adj;
+
+////////////////////////////////////////////////////////////////////////
+// TDWR radar parameters
+///
+
+commentdef
+{
+  p_header = "TDWR RADAR PARAMETERS";
+  p_text = "Output header values, not available from the TDWR header.";
+};
+
+paramdef string {
+  p_default = "DENVER";
+  p_descr = "Site name.";
+} site_name;
+
+paramdef string {
+  p_default = "TDWR";
+  p_descr = "Radar name.";
+} radar_name;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of normal prf input fields.";
+} normal_prf_num_fields;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Number of low prf input fields.";
+} low_prf_num_fields;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Radar identifer / unique number.";
+} radar_id;
+
+paramdef float {
+  p_default = "65";
+  p_descr = "Radar Constant in db. Estimate";
+} radar_constant;
+
+paramdef float {
+  p_default = "39.72750";
+  p_descr = "Radar latitude deg.";
+} latitude;
+
+paramdef float {
+  p_default = "-104.52650";
+  p_descr = "Radar longitude deg.";
+} longitude;
+
+paramdef float {
+  p_default = "1.710";
+  p_descr = "Radar altitude km.";
+} altitude;
+
+paramdef float {
+  p_default = ".450";
+  p_descr = "Radar range to first gate in km.";
+} range_to_first_gate;
+
+paramdef float {
+  p_default = ".55";
+  p_descr = "Radar antenna beam width in degrees. ";
+} beam_width;
+
+paramdef float {
+  p_default = "1.1";
+  p_descr = "Radar pulse width width in microsecs. ";
+} pulse_width;
+
+paramdef float {
+  p_default = "5600";
+  p_descr = "Radar transmitter frequency in mhz. ";
+} freq_mhz;
+
+paramdef float {
+  p_default = ".250";
+  p_descr = "Radar Peak transmitted power in watts. ";
+} power_trans;
+
+// value is unknown
+paramdef float {
+  p_default = ".0";
+  p_descr = "In dBm. ";
+} receiver_mds;
+
+// value is unknown
+paramdef float {
+  p_default = ".0";
+  p_descr = "In db. ";
+} receiver_gain;
+
+paramdef float {
+  p_default = "50";
+  p_descr = "In db. ";
+} antenna_gain;
+
+paramdef float {
+  p_default = "45";
+  p_descr = "In db. ";
+} system_gain;
+
+paramdef float {
+  p_default = "80";
+  p_descr = "In m/s. ";
+} unambig_vel;
+
+paramdef float {
+  p_default = "460";
+  p_descr = "In km. ";
+} unambig_rng;
+
+paramdef float {
+  p_default = ".300";
+  p_descr = "In km. ";
+} low_prf_spacing;
+
+paramdef float {
+  p_default = ".150";
+  p_descr = "In km. ";
+} normal_prf_spacing;
+
+paramdef int {
+  p_default = "-4000";
+  p_descr = "Velocity bias (x 100) for converting 16 bit velocities to 8";
+} vel_bias;
+
+paramdef int {
+  p_default = "31";
+  p_descr = "Velocity scale (x 100) for converting 16 bit velocities to 8";
+} vel_scale;
+
+paramdef float {
+  p_default = "-1000";
+  p_descr = "Minimum dbz value. If dbz value is less than this, then all fields are set to missing.";
+} min_dbz;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Milliseconds to delay after sending a beam.";
+} msDelayPostBeam;

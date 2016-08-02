@@ -1,0 +1,287 @@
+#!/usr/bin/perl
+# push_files_rcp: Push input files from an input directory to another
+# directory using the rcp command 
+# or an alternative copy command specified on the command line.
+#
+# Usage:
+#   push_files_rcp <options>
+#
+# Options:
+#   -help                : Print usage
+#   -copy                : Specify the remote copy command (default = rcp)
+#   -delete              : Delete the input file after copying
+#   -input_dir <dir>     : Input directory (default = ".)
+#   -output_host <host>  : Output host (default = "localhost")
+#   -output_dir <dir>    : Output directory (default = ".")
+#   -prefix <prefix>     : Input file prefix (default = "")
+#   -suffix <suffix>     : Input file suffix (default = "")
+#   -file_perm <perm>    : Makes sure the file has the given permissions
+#                          on the destination host, for example you might
+#                          use -file_perm 0664.
+#   -interval <interval> : Data dir polling interval (default = 2)
+#   -instance <instance> : Procmap instance (default = "Test")
+#   -timeout <secs>      : Seconds before timeout rsh (default = 10)
+#   -debug               : Print debug messages
+#
+# N. Rehak  June 1997 NCAR/RAP
+#
+
+
+require 'stat.pl';
+
+use Getopt::Long;
+
+#
+# Get the required RAP libraries
+#
+
+use Env qw(RAP_LIB_DIR);
+use Env qw(RAP_SHARED_LIB_DIR);
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+use Toolsa;
+
+# Get the program basename.
+($prog = $0) =~ s|.*/||;
+
+# Unbuffer output.
+$| = 1;
+
+# Initialize command line arguments
+$opt_input_dir = ".";              # Local input data directory.
+$opt_output_host = "localhost";    # Remote output host
+$opt_output_dir = ".";             # Remote output data directory.
+$opt_prefix = "";                  # Prefix of files we want
+$opt_suffix = "";                  # Suffix of new files
+$opt_file_perm = "";               # Destination file permissions
+$opt_interval = 2;		   # Data directory polling interval.
+$opt_instance = "Test";            # Procmap instance
+$opt_debug = 0;                    # Debug mode
+$opt_copy = "rcp";                 # Remote copy command
+$opt_timeout = 10;                 # Number of seconds before timeout remote command
+
+# Save the usage to print to the user if there is a problem
+$usage =
+    "Usage: $prog [options]\n" .
+    "Options:\n" .
+    "   -help                : Print usage\n" .
+    "   -copy                : Specify the remote copy command (default = $opt_copy)\n" .
+    "   -delete              : Delete the input files after copying\n" .
+    "   -input_dir <dir>     : Local input dir (default = $opt_input_dir)\n" .
+    "   -output_host <host>  : Remote output host (default = $opt_output_host)\n" .
+    "   -output_dir <dir>    : Remote output dir (default = $opt_output_dir)\n" .
+    "   -prefix <prefix>     : Input file prefix (default = $opt_prefix)\n" .
+    "   -suffix <suffix>     : Input file suffix (default = $opt_suffix)\n" .
+    "   -file_perm <perm>    : Makes sure the file has the given permissions\n" .
+    "                          on the destination host, for example you might\n" .
+    "                          use -file_perm 664.\n" .
+    "   -interval <interval> : Data dir polling interval (default = $opt_interval\n" .
+    "   -instance <instance> : Procmap instance (default = $opt_instance)\n" .
+    "   -timeout <secs>      : Number of seconds before timeout rsh (default = $opt_timeout)\n" .
+    "   -debug               : Print debug messages\n";
+
+# Get the arguments from the command line
+
+$result = &GetOptions('help',
+		      'copy=s',
+		      'delete',
+		      'input_dir=s',
+		      'output_host=s',
+		      'output_dir=s',
+		      'prefix=s',
+		      'suffix=s',
+		      'file_perm=s',
+		      'interval=i',
+		      'instance=s',
+		      'timeout=i',
+		      'debug');
+
+if ($result == 0 ||
+    $opt_help)
+{
+    print $usage;
+    exit 0;
+}
+
+if ($opt_debug)
+{
+    print "Command Line Options:\n";
+    print "   help = $opt_help\n";
+    print "   copy = $opt_copy\n";
+    print "   delete = $opt_delete\n";
+    print "   input_dir = $opt_input_dir\n";
+    print "   output_host = $opt_output_host\n";
+    print "   output_dir = $opt_output_dir\n";
+    print "   prefix = $opt_prefix\n";
+    print "   suffix = $opt_suffix\n";
+    print "   file_perm = $opt_file_perm\n";
+    print "   interval = $opt_interval\n";
+    print "   instance = $opt_instance\n";
+    print "   timeout = $opt_timeout\n";
+    print "   debug = $opt_debug\n";
+    print "\n";
+}
+
+# Verify the local directory.
+die "$opt_input_dir: no such file or directory" unless -d $opt_input_dir;
+
+# Initialize PMU usage
+&Toolsa::PMU_auto_init($prog, $opt_instance, 60);
+
+# Set up signal handlers so we unregister from the process mapper
+# when we quit
+
+$SIG{INT} = \&tidy_and_exit;
+$SIG{KILL} = \&tidy_and_exit;
+$SIG{HUP} = \&tidy_and_exit;
+
+# Monitor the data directory for new files.
+while ()
+{
+    # Register with the process mapper
+    &Toolsa::PMU_auto_register("Waiting for data");
+
+    # Get the directory's modification time.
+    ($mtime = (stat($opt_input_dir))[$ST_MTIME]) ||
+	die "stat: $!";
+
+    if ($mtime > $old_mtime)
+    {
+	opendir(DIR, $opt_input_dir) ||
+	    die "Can't open directory $opt_input_dir";
+
+	# Skip the current and parent directory entries.
+	@files = grep(!/^\.\.?$/, readdir(DIR));
+	closedir(DIR);
+
+	# Exclude subdirectories.
+	@files = grep(!-d, @files);
+
+	# If the prefix is specified, pull out files without the prefix
+	if ($opt_prefix ne "")
+	{
+	    @files = grep(/^$opt_prefix/, @files);
+	}
+
+	# Also weed out based on the suffix
+	if ($opt_suffix ne "")
+	{
+	    @files = grep(/$opt_suffix$/, @files);
+	}
+
+	# Look for new files.  We'll always send what's lying around
+	# initially.
+	grep($mark{$_}++, @old_files);
+	@new_files = grep(!$mark{$_}, @files);
+
+	if ($opt_debug)
+	{
+	    $s = @new_files == 1 ? '' : 's';
+	    print join("\n  ", "New file$s:", @new_files), "\n"
+		if @new_files;
+	}
+
+	# Check that destination exists
+	if ($opt_copy eq "scp") {
+	    $rsh_cmd = "ssh";
+	}
+	elsif ($opt_copy eq "rcp") {
+	    $rsh_cmd = "rsh";
+	}
+	else {
+	    die "unknown copy command $opt_copy.\n";
+	}
+
+	if ($opt_debug)
+	{
+	    print "using $rsh_cmd shell.\n";
+	}
+
+	unless(@dir_stuff = qx/$rsh_cmd $opt_output_host "ls -a1 $opt_output_dir"/) {
+	    die "unable to find $opt_output_host:$opt_output_dir\n";
+	}
+
+	if ($opt_debug)
+	{
+	    print "the contents of $opt_output_host:$opt_output_dir are:\n @dir_stuff\n";
+	}
+
+	# Copy the files to the new directory
+	&copy_files(*new_files);
+
+	# Prepare for the next iteration of the loop.
+	$old_mtime = $mtime;
+	@old_files = @files;
+	undef %mark;
+	undef @new_files;
+    }
+    sleep($opt_interval);
+}
+
+
+# Copy the files to the new directory
+sub copy_files
+{
+    local(*files) = @_;
+
+    local($command);
+
+    foreach $filename (@files)
+    {
+	# Register with the process mapper
+	&Toolsa::PMU_auto_register("Copying $opt_input_dir/$filename to " .
+			   "$opt_output_host:$opt_output_dir/$filename");
+
+	$input_file = "$opt_input_dir/$filename";
+
+	if ($opt_debug)
+	{
+	    print "\n" .
+		"Copying: $input_file to " .
+		    "$opt_output_host:$opt_output_dir/$filename\n";
+	}
+	
+	if (length($opt_file_perm) > 0)
+	{
+	    # Change the file permissions
+
+	    $file_perm = oct($opt_file_perm);
+
+	    chmod($file_perm, $input_file);
+
+	    # Copy the input file to the remote location
+	    $command = "$opt_copy -p $input_file " .
+		"$opt_output_host:$opt_output_dir/.";
+
+	    ((&Toolsa::safe_system($command, $opt_timeout) >> 8) == 0) ||
+		warn "system: $command: error";
+	}
+	else
+	{
+	    # Copy the input file to the remote location
+	    $command = "$opt_copy $input_file " .
+		"$opt_output_host:$opt_output_dir/.";
+
+	    ((&Toolsa::safe_system($command, $opt_timeout) >> 8) == 0) ||
+		warn "system: $command: error";
+	}
+
+	if ($opt_delete)
+	{
+	    # Delete the input file
+	    $command = "rm $input_file";
+
+	    ((&Toolsa::safe_system($command, $opt_timeout) >> 8) == 0) ||
+		warn "system: $command: error";
+	}
+    } # end foreach - $filename
+}
+
+# Exit in a "tidy" fashion
+
+sub tidy_and_exit
+{
+    my $signame = shift;
+    &Toolsa::PMU_auto_unregister();
+    die "Exiting on signal SIG$signame";
+}

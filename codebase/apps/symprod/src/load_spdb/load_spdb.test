@@ -1,0 +1,129 @@
+/**********************************************************************
+ * TDRP params for load_spdb
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: long
+//
+
+malloc_debug_level = 0;
+
+///////////// data_base_dir ///////////////////////////
+//
+// Directory for data base.
+// Type: string
+//
+
+//data_base_dir = "spdb";
+data_base_dir = "62005@venus";
+
+///////////// product_file_path ///////////////////////
+//
+// Text file path from which to read the product data.
+// This is a text file which holds product data line-by-line.
+// Type: string
+//
+
+product_file_path = "none";
+
+///////////// product_label ///////////////////////////
+//
+// Product label string.
+// This label is stored in the product data base.
+// Type: string
+//
+
+product_label = "AC_POSN";
+
+///////////// product_id //////////////////////////////
+//
+// Product ID.
+// This ID is used for identifying the product, specifying 
+//   transformation routines, etc.
+// Type: long
+//
+
+product_id = 20001;
+
+///////////// load_mode ///////////////////////////////
+//
+// Load mode.
+// If LOAD_ONCE, a chunk at a given time can only be stored once - a 
+//   second attempt causes and error. If LOAD_OVERWRITE, a new chunk at a 
+//   given time will overwrite and old one. If LOAD_ADD, new chunks will 
+//   be added to the list at a given time.
+//
+// Type: enum
+// Options:
+//   LOAD_ONCE, LOAD_OVERWRITE, LOAD_ADD
+//
+//
+
+load_mode = LOAD_ONCE;
+load_mode = LOAD_OVERWRITE;
+
+///////////// string_len //////////////////////////////
+//
+// Max length of any string in the input file.
+// If an input string exceeds this length, it will be truncated.
+// Type: long
+//
+
+string_len = 12;
+
+///////////// data_format /////////////////////////////
+//
+// Format template - specifies the product format in the text file.
+// The template specifies the order and type of the fields in the input 
+//   file. Legal values are 'int', 'float' and 'string'. Strings must be 
+//   shorter than max_string_len. Multi-word strings must be separated by 
+//   underscores. The fields in the data line must be delimited by spaces 
+//   or tabs.
+// Type: string
+// 1D array - variable length - 1 elements.
+//
+
+data_format = { "float", "float", "float", "string" };
+
+///////////// date_time_format ////////////////////////
+//
+// Format of the date/time field.
+// Each data line must start with valid time, either as unix_time or as 
+//   year month day hour min sec. This parameter specifies the format.
+//
+// Type: enum
+// Options:
+//   UNIX_TIME, YR_MO_DAY_HR_MIN_SEC
+//
+//
+
+date_time_format = UNIX_TIME;
+
+///////////// product_lifetime ////////////////////////
+//
+// Number of secs for which product is valid.
+// The expire time is computed by adding this to the valid time.
+// Type: long
+//
+
+product_lifetime = 300;
+

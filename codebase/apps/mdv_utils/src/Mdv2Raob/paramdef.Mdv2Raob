@@ -1,0 +1,216 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Read MDV model data, write ASCII files of\n"
+	"soundings suitable for reading into RAOBs.\n"
+	"Assuming you are running this on MM5 MDV data, you\n"
+	"should ask for at least the following fields in your\n"
+	"MM5Ingest param file :\n\n"
+  	"   PRESSURE_FIELD\n"
+  	"   TC_FIELD\n"
+  	"   DEWPT_FIELD\n"
+  	"   WSPD_FIELD\n"
+  	"   WDIR_FIELD\n"
+  	"   Z_FIELD\n"
+  	"   T2C_FIELD\n"
+  	"   DEWPT2_FIELD\n"
+  	"   WSPD10_FIELD\n"
+  	"   WDIR10_FIELD\n"
+  	"   MSLP2_FIELD\n"
+  	"   TERRAIN_FIELD\n\n"
+	"Niles Oien March 2008.";
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output directory";
+  p_help = "Data are written here."; 
+  p_default = {"/some/directory/structure"};
+} OutDir;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+typedef struct {
+	double lat;
+	double lon;
+	string id;
+	int wmoNum;
+	int wbanNum;
+} samplePoint_t;
+
+paramdef struct samplePoint_t {
+  p_default = { {40, -90, "KDEN", 77777, 2300} };
+  p_private = FALSE;
+  p_descr = "List of points to output data for. The id string is\n"
+	"used in the output filename, probably best to avoid spaces\n"
+	"or other unusual characters.";
+  p_help = "Set as appropriate for your region.";
+} samplePoints[];
+
+paramdef double {
+  p_default = { 1000, 925, 850, 700, 500, 400, 300, 250 };
+  p_private = FALSE;
+  p_descr = "List of manditory pressure levels.";
+  p_help = "Default should be fine. Must be in order of decreasing pressure.";
+} mandatedLevels[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_private = FALSE;
+  p_descr = "Option to interpolate to manditory pressure levels.";
+  p_help = "If TRUE then model data will be interpolated onto the\n"
+	"specified manditory levels. If FALSE the manditory levels will\n"
+	"be left with missing data unless they co-incide with model output.";
+} mandatedInterpolate;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_private = FALSE;
+  p_descr = "Option to end lines windows (or DOS) style, that is,\n"
+	"if this is TRUE end lines with carriage return and linefeed\n"
+	"rather than just linefeed as is done on UNIX.";
+  p_help = "RAOBS usually runs on windows, so we want the files\n"
+	"to have windows style formatting when they are on the windows\n"
+	"box. The question is if this program should write the\n"
+	"windows format directly or if the files will be reformatted\n"
+	"on being sent to the windows box (as would be the case if\n"
+	"FTP is used in ASCII mode). Set this appropriate to your transfer\n"
+	"mechanism.";
+} windowsEndOfLine;
+
+
+typedef struct {
+	string pFieldName;
+	double pScale;
+	double pBias;
+	
+	string tFieldName;
+	double tScale;
+	double tBias;
+
+	string zFieldName;
+	double zScale;
+	double zBias;
+
+	string speedFieldName;
+	double speedScale;
+	double speedBias;
+
+	string dirFieldName;
+
+	string dewFieldName;
+	double dewScale;
+	double dewBias;
+
+	string sfcTfieldName;
+	double sfcTscale;
+	double sfcTbias;
+
+	string sfcDewFieldName;
+	double sfcDewScale;
+	double sfcDewBias;
+
+	string sfcSpeedFieldName;
+	double sfcSpeedScale;
+	double sfcSpeedBias;
+
+	string sfcDirFieldName;
+
+	string sfcPresFieldName;
+	double sfcPresScale;
+	double sfcPresBias;
+
+	string terrainFieldName;
+	double terrainScale;
+	double terrainBias;
+
+} inputFieldnameList_t;
+
+paramdef struct inputFieldnameList_t {
+  p_default = { "pressure", 1.0, 0.0, "Temp", 1.0, 0.0, "z", 1.0, 0.0, "Speed", 1.0, 0.0, "Wdir", "DewPt", 1.0, 0.0, "T2C", 1.0, 0.0, "DewPt2", 1.0, 0.0, "Speed10", 1.0, 0.0, "Wdir10", "pressure2", 1.0, 0.0, "terrain", 1.0, 0.0 };
+  p_private = FALSE;
+  p_descr = "List of input field names, scales, biases.";
+  p_help = "Default is OK for MM5. The point of the scale\n"
+	"and bias is to allow a change of units.";
+} inputFieldNameList;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_private = FALSE;
+  p_descr = "Option to treat surface pressure field as if it is mean\n"
+	"sea level pressure and adjust it back so that it is\n"
+	"station pressure.";
+  p_help = "Set to TRUE if your surface pressure is appropriate\n"
+	"for sea level.";
+} convertSfcPres;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "If you don't have a dewpoint field at the surface, but\n"
+	"do have temp and rh, then set the surface dew point field name to\n"
+	"be the RH field name and then set this to TRUE.";
+  p_help = "May have to do this with WRF data.";
+} sfcDewPtIsRH;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "If you don't have a 3D dewpoint field, but\n"
+	"do have temp and rh, then set the 3D dew point field name to\n"
+	"be the 3D RH field name and then set this to TRUE.";
+  p_help = "May have to do this in some cases.";
+} aloftDewPtIsRH;

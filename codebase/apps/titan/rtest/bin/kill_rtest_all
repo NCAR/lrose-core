@@ -1,0 +1,8 @@
+#! /bin/sh
+
+kill_rtest_display
+kill_rtest_tracking
+kill_rtest_servers
+kill_rtest_ingest
+
+#clean_ipcs -m -s

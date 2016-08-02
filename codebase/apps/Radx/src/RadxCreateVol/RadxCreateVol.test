@@ -1,0 +1,394 @@
+/**********************************************************************
+ * TDRP params for RadxCreateVol
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxCreateVol is an example application that creates a RadxVol from 
+//   scratch, and writes it out. This intention is that this code 
+//   documents the steps to take in creating a RadxVol object.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// RADAR PARAMETERS.
+//
+//======================================================================
+ 
+///////////// site_name ///////////////////////////////
+//
+// Name of radar site.
+// Stored in netCDF file.
+// Type: string
+//
+
+site_name = "SITE";
+
+///////////// radar_name //////////////////////////////
+//
+// Name of radar.
+// Type: string
+//
+
+radar_name = "NAME";
+
+///////////// radar_location //////////////////////////
+//
+// Radar location.
+// The radar_location, note that the altitude is in meters MSL.
+//
+// Type: struct
+//   typedef struct {
+//      double latitudeDeg;
+//      double longitudeDeg;
+//      double altitudeKm;
+//   }
+//
+//
+
+radar_location = { 0, 0, 0 };
+
+///////////// radar_wavelength_cm /////////////////////
+//
+// Radar wavelength, cm.
+// Type: double
+//
+
+radar_wavelength_cm = 2;
+
+///////////// horiz_beam_width_deg ////////////////////
+//
+// Radar beamwidth horizontal.
+// Type: double
+//
+
+horiz_beam_width_deg = 1;
+
+///////////// vert_beam_width_deg /////////////////////
+//
+// Radar beamwidth vertical.
+// Type: double
+//
+
+vert_beam_width_deg = 1;
+
+///////////// gates ///////////////////////////////////
+//
+// Gate specification (km).
+//
+// Type: struct
+//   typedef struct {
+//      int count;
+//      double start;
+//      double delta;
+//   }
+//
+//
+
+gates = { 1000, 0.075, 0.15 };
+
+///////////// azimuths ////////////////////////////////
+//
+// Azimuth specification (degrees).
+//
+// Type: struct
+//   typedef struct {
+//      int count;
+//      double start;
+//      double delta;
+//   }
+//
+//
+
+azimuths = { 360, 0, 1 };
+
+///////////// elevations //////////////////////////////
+//
+// Elevation specification (degrees).
+//
+// Type: struct
+//   typedef struct {
+//      int count;
+//      double start;
+//      double delta;
+//   }
+//
+//
+
+elevations = { 10, 0.5, 1 };
+
+//======================================================================
+//
+// OUTPUT FIELDS.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Array of output fields.
+// The program will only output these fields. long_name and 
+//   standard_name are netCDF conventions. Set the output encoding type to 
+//   select the resolution of the output data.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string long_name;
+//      string standard_name;
+//      string units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_FLOAT
+//          OUTPUT_SHORT
+//          OUTPUT_BYTE
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  { "BEAMB", "BEAMB", "BEAMB", "fraction", OUTPUT_FLOAT}
+};
+
+//======================================================================
+//
+// DATA SET INFORMATION.
+//
+// Will be stored in CfRadial files, and other formats to the extent 
+//   supported by the format.
+//
+//======================================================================
+ 
+///////////// title ///////////////////////////////////
+//
+// Title string for netCDF file.
+// Type: string
+//
+
+title = "";
+
+///////////// institution /////////////////////////////
+//
+// Institution string for netCDF file.
+// Type: string
+//
+
+institution = "EOL/NCAR";
+
+///////////// references //////////////////////////////
+//
+// References string for netCDF file.
+// Type: string
+//
+
+references = "";
+
+///////////// source //////////////////////////////////
+//
+// Source string for netCDF file.
+// Type: string
+//
+
+source = "";
+
+///////////// history /////////////////////////////////
+//
+// History string for netCDF file.
+// Type: string
+//
+
+history = "";
+
+///////////// comment /////////////////////////////////
+//
+// Comment string for netCDF file.
+// Type: string
+//
+
+comment = "";
+
+//======================================================================
+//
+// OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+// If false, data will be byte-swapped as appropriate on output.
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+// Applies to netCDF and Dorade. UF does not support compression.
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+//======================================================================
+//
+// OUTPUT OPTIONS FOR CfRadial FILES.
+//
+//======================================================================
+ 
+///////////// output_force_ngates_vary ////////////////
+//
+// Option to force the use of ragged arrays for CfRadial files.
+// Only applies to CfRadial. If true, forces the use of ragged arrays 
+//   even if the number of gates for all rays is constant.
+// Type: boolean
+//
+
+output_force_ngates_vary = FALSE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+// Files will be written to this directory.
+// Type: string
+//
+
+output_dir = "/tmp/RadxCreateVol/data";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+// Path will be output_dir/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+// Type: boolean
+//
+
+write_individual_sweeps = FALSE;
+
+//======================================================================
+//
+// REGISTERING LATEST DATA INFO.
+//
+//======================================================================
+ 
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+

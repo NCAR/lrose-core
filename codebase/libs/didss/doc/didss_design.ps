@@ -1,0 +1,6760 @@
+%!PS-Adobe-3.0
+%%BoundingBox: (atend)
+%%Pages: (atend)
+%%PageOrder: (atend)
+%%DocumentFonts: (atend)
+%%Creator: Frame 5.0
+%%DocumentData: Clean7Bit
+%%EndComments
+%%BeginProlog
+%
+% Frame ps_prolog 5.0, for use with Frame 5.0 products
+% This ps_prolog file is Copyright (c) 1986-1995 Frame Technology
+% Corporation.  All rights reserved.  This ps_prolog file may be
+% freely copied and distributed in conjunction with documents created
+% using FrameMaker, FrameMaker/SGML and FrameViewer as long as this 
+% copyright notice is preserved.
+%
+% FrameMaker users specify the proper paper size for each print job in the
+% "Print" dialog's "Printer Paper Size" "Width" and "Height~ fields.  If the
+% printer that the PS file is sent to does not support the requested paper
+% size, or if there is no paper tray of the proper size currently installed, 
+% then the job will not be printed.  The following flag, if set to true, will
+% cause the job to print on the default paper in such cases.
+/FMAllowPaperSizeMismatch            false def
+%
+% Frame products normally print colors as their true color on a color printer
+% or as shades of gray, based on luminance, on a black-and white printer. The
+% following flag, if set to true, forces all non-white colors to print as pure
+% black. This has no effect on bitmap images.
+/FMPrintAllColorsAsBlack             false def
+%
+% Frame products can either set their own line screens or use a printer's 
+% default settings. Three flags below control this separately for no 
+% separations, spot separations and process separations. If a flag
+% is true, then the default printer settings will not be changed. If it is
+% false, Frame products will use their own settings from a table based on
+% the printer's resolution.
+/FMUseDefaultNoSeparationScreen      true  def
+/FMUseDefaultSpotSeparationScreen    true  def
+/FMUseDefaultProcessSeparationScreen false def
+%
+% For any given PostScript printer resolution, Frame products have two sets of 
+% screen angles and frequencies for printing process separations, which are 
+% recomended by Adobe. The following variable chooses the higher frequencies
+% when set to true or the lower frequencies when set to false. This is only
+% effective if the appropriate FMUseDefault...SeparationScreen flag is false.
+/FMUseHighFrequencyScreens true def
+%
+% The following is a set of predefined optimal frequencies and angles for various
+% common dpi settings. This is taken from "Advances in Color Separation Using
+% PostScript Software Technology," from Adobe Systems (3/13/89 P.N. LPS 0043)
+% and corrolated with information which is in various PPD (4.0) files.
+%
+% The "dpiranges" figure is the minimum dots per inch device resolution which
+% can support this setting. The "low" and "high" values are controlled by the
+% setting of the FMUseHighFrequencyScreens flag above. The "TDot" flags control
+% the use of the "Yellow Triple Dot" feature whereby the frequency id divided by
+% three, but the dot function is "trippled" giving a block of 3x3 dots per cell.
+%
+% PatFreq is a compromise pattern frequency for ps Level 2 printers which is close
+% to the ideal WYSIWYG pattern frequency of 9 repetitions/inch but does not beat
+% (too badly) against the screen frequencies of any separations for that DPI.
+/dpiranges   [  2540    2400    1693     1270    1200     635      600      0      ] def
+/CMLowFreqs  [ 100.402  94.8683 89.2289 100.402  94.8683  66.9349  63.2456 47.4342 ] def
+/YLowFreqs   [  95.25   90.0    84.65    95.25   90.0     70.5556  66.6667 50.0    ] def
+/KLowFreqs   [  89.8026 84.8528 79.8088  89.8026 84.8528  74.8355  70.7107 53.033  ] def
+/CLowAngles  [  71.5651 71.5651 71.5651 71.5651  71.5651  71.5651  71.5651 71.5651 ] def
+/MLowAngles  [  18.4349 18.4349 18.4349 18.4349  18.4349  18.4349  18.4349 18.4349 ] def
+/YLowTDot    [  true    true    false    true    true     false    false   false   ] def
+/CMHighFreqs [ 133.87  126.491 133.843  108.503 102.523  100.402   94.8683 63.2456 ] def
+/YHighFreqs  [ 127.0   120.0   126.975  115.455 109.091   95.25    90.0    60.0    ] def
+/KHighFreqs  [ 119.737 113.137 119.713  128.289 121.218   89.8026  84.8528 63.6395 ] def
+/CHighAngles [  71.5651 71.5651 71.5651  70.0169 70.0169  71.5651  71.5651 71.5651 ] def
+/MHighAngles [  18.4349 18.4349 18.4349  19.9831 19.9831  18.4349  18.4349 18.4349 ] def
+/YHighTDot   [  false   false   true     false   false    true     true    false   ] def
+/PatFreq     [	10.5833 10.0     9.4055  10.5833 10.0	  10.5833  10.0	   9.375   ] def
+%
+% PostScript Level 2 printers contain an "Accurate Screens" feature which can
+% improve process separation rendering at the expense of compute time. This 
+% flag is ignored by PostScript Level 1 printers.
+/FMUseAcccurateScreens true def
+%
+% The following PostScript procedure defines the spot function that Frame
+% products will use for process separations. You may un-comment-out one of
+% the alternative functions below, or use your own.
+%
+% Dot function
+/FMSpotFunction {abs exch abs 2 copy add 1 gt 
+		{1 sub dup mul exch 1 sub dup mul add 1 sub }
+		{dup mul exch dup mul add 1 exch sub }ifelse } def
+%
+% Line function
+% /FMSpotFunction { pop } def
+%
+% Elipse function
+% /FMSpotFunction { dup 5 mul 8 div mul exch dup mul exch add 
+%		sqrt 1 exch sub } def
+%
+%
+/FMversion (5.0) def 
+/fMLevel1 /languagelevel where {pop languagelevel} {1} ifelse 2 lt def
+/FMPColor
+	fMLevel1 {
+		false
+		/colorimage where {pop pop true} if
+	} {
+		true
+	} ifelse
+def
+/FrameDict 400 dict def 
+systemdict /errordict known not {/errordict 10 dict def
+		errordict /rangecheck {stop} put} if
+% The readline in PS 23.0 doesn't recognize cr's as nl's on AppleTalk
+FrameDict /tmprangecheck errordict /rangecheck get put 
+errordict /rangecheck {FrameDict /bug true put} put 
+FrameDict /bug false put 
+mark 
+% Some PS machines read past the CR, so keep the following 3 lines together!
+currentfile 5 string readline
+00
+0000000000
+cleartomark 
+errordict /rangecheck FrameDict /tmprangecheck get put 
+FrameDict /bug get { 
+	/readline {
+		/gstring exch def
+		/gfile exch def
+		/gindex 0 def
+		{
+			gfile read pop 
+			dup 10 eq {exit} if 
+			dup 13 eq {exit} if 
+			gstring exch gindex exch put 
+			/gindex gindex 1 add def 
+		} loop
+		pop 
+		gstring 0 gindex getinterval true 
+		} bind def
+	} if
+/FMshowpage /showpage load def
+/FMquit /quit load def
+/FMFAILURE { 
+	dup = flush 
+	FMshowpage 
+	/Helvetica findfont 12 scalefont setfont
+	72 200 moveto show
+	72 220 moveto show
+	FMshowpage 
+	FMquit 
+	} def 
+/FMVERSION {
+	FMversion ne {
+		(Frame product version does not match ps_prolog!  Check installation;)
+		(also check ~/fminit and ./fminit for old versions) FMFAILURE
+		} if
+	} def 
+/FMBADEPSF { 
+	(Adobe's PostScript Language Reference Manual, 2nd Edition, section H.2.4)
+	(says your EPS file is not valid, as it calls X              )
+	dup dup (X) search pop exch pop exch pop length 
+	5 -1 roll 
+	putinterval 
+	FMFAILURE
+	} def
+/fmConcatProcs
+	{
+	/proc2 exch cvlit def/proc1 exch cvlit def/newproc proc1 length proc2 length add array def
+	newproc 0 proc1 putinterval newproc proc1 length proc2 putinterval newproc cvx
+}def
+FrameDict begin [
+	/ALDsave
+	/FMdicttop
+	/FMoptop
+	/FMpointsize
+	/FMsaveobject
+	/b
+	/bitmapsave
+	/blut
+	/bpside
+	/bs
+	/bstring
+	/bwidth
+	/c
+	/cf
+	/cs
+	/cynu
+	/depth
+	/edown
+	/fh
+	/fillvals
+	/fw
+	/fx
+	/fy
+	/g
+	/gfile
+	/gindex
+	/grnt
+	/gryt
+	/gstring
+	/height
+	/hh
+	/i
+	/im
+	/indx
+	/is
+	/k
+	/kk
+	/landscape
+	/lb
+	/len
+	/llx
+	/lly
+	/m
+	/magu
+	/manualfeed
+	/n
+	/offbits
+	/onbits
+	/organgle
+	/orgbangle
+	/orgbfreq
+	/orgbproc
+	/orgbxfer
+	/orgfreq
+	/orggangle
+	/orggfreq
+	/orggproc
+	/orggxfer
+	/orgmatrix
+	/orgproc
+	/orgrangle
+	/orgrfreq
+	/orgrproc
+	/orgrxfer
+	/orgxfer
+	/pagesave
+	/paperheight
+	/papersizedict
+	/paperwidth
+	/pos
+	/pwid
+	/r
+	/rad
+	/redt
+	/sl
+	/str
+	/tran
+	/u
+	/urx
+	/ury
+	/val
+	/width
+	/width
+	/ws
+	/ww
+	/x
+	/x1
+	/x2
+	/xindex
+	/xpoint
+	/xscale
+	/xx
+	/y
+	/y1
+	/y2
+	/yelu
+	/yindex
+	/ypoint
+	/yscale
+	/yy
+] { 0 def } forall
+/FmBD {bind def} bind def
+systemdict /pdfmark known {
+	/fMAcrobat true def
+	
+	/FmPD /pdfmark load def
+	
+	
+	/FmPT /show load def
+	
+	
+	currentdistillerparams /CoreDistVersion get 2000 ge {
+	
+		
+		/FmPD2 /pdfmark load def
+		
+		
+		
+		
+		
+		/FmPA { mark exch /Dest exch 5 3 roll 
+				/View [ /XYZ null 6 -2 roll FmDC exch pop null] /DEST FmPD 
+		}FmBD
+	} {
+		
+		/FmPD2 /cleartomark load def
+		/FmPA {pop pop pop}FmBD
+	} ifelse
+} {
+	
+	/fMAcrobat false def
+	/FmPD /cleartomark load def
+	/FmPD2 /cleartomark load def
+	/FmPT /pop load def
+	/FmPA {pop pop pop}FmBD
+} ifelse
+/FmDC {
+	transform fMDefaultMatrix itransform cvi exch cvi exch
+}FmBD
+/FmBx {
+	dup 3 index lt {3 1 roll exch} if 
+	1 index 4 index lt {4 -1 roll 3 1 roll exch 4 1 roll} if
+}FmBD
+/FMnone 0 def
+/FMcyan 1 def
+/FMmagenta 2 def
+/FMyellow 3 def
+/FMblack 4 def
+/FMcustom 5 def
+/fMNegative false def 
+/FrameSepIs FMnone def 
+/FrameSepBlack 0 def
+/FrameSepYellow 0 def
+/FrameSepMagenta 0 def
+/FrameSepCyan 0 def
+/FrameSepRed 1 def
+/FrameSepGreen 1 def
+/FrameSepBlue 1 def
+/FrameCurGray 1 def
+/FrameCurPat null def
+/FrameCurColors [ 0 0 0 1 0 0 0 ] def 
+/FrameColorEpsilon .001 def	
+/eqepsilon {		
+	sub dup 0 lt {neg} if
+	FrameColorEpsilon le
+} bind def
+/FrameCmpColorsCMYK { 
+	2 copy 0 get exch 0 get eqepsilon {
+		2 copy 1 get exch 1 get eqepsilon {
+			2 copy 2 get exch 2 get eqepsilon {
+				3 get exch 3 get eqepsilon
+			} {pop pop false} ifelse
+		}{pop pop false} ifelse
+	} {pop pop false} ifelse
+} bind def
+/FrameCmpColorsRGB { 
+	2 copy 4 get exch 0 get eqepsilon {
+		2 copy 5 get exch 1 get eqepsilon {
+			6 get exch 2 get eqepsilon
+		}{pop pop false} ifelse
+	} {pop pop false} ifelse
+} bind def
+/RGBtoCMYK { 
+	1 exch sub 
+	3 1 roll 
+	1 exch sub 
+	3 1 roll 
+	1 exch sub 
+	3 1 roll 
+	3 copy 
+	2 copy 
+	le { pop } { exch pop } ifelse 
+	2 copy 
+	le { pop } { exch pop } ifelse 
+	dup dup dup 
+	6 1 roll 
+	4 1 roll 
+	7 1 roll 
+	sub 
+	6 1 roll 
+	sub 
+	5 1 roll 
+	sub 
+	4 1 roll 
+} bind def
+/CMYKtoRGB { 
+	dup dup 4 -1 roll add 						  
+	5 1 roll 3 -1 roll add 						  
+	4 1 roll add 								  
+	1 exch sub dup 0 lt {pop 0} if 3 1 roll 	  
+	1 exch sub dup 0 lt {pop 0} if exch 	      
+	1 exch sub dup 0 lt {pop 0} if exch	  		  
+} bind def
+/FrameSepInit {
+	1.0 RealSetgray
+} bind def
+/FrameSetSepColor { 
+	/FrameSepBlue exch def
+	/FrameSepGreen exch def
+	/FrameSepRed exch def
+	/FrameSepBlack exch def
+	/FrameSepYellow exch def
+	/FrameSepMagenta exch def
+	/FrameSepCyan exch def
+	/FrameSepIs FMcustom def
+	setCurrentScreen	
+} bind def
+/FrameSetCyan {
+	/FrameSepBlue 1.0 def
+	/FrameSepGreen 1.0 def
+	/FrameSepRed 0.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 1.0 def
+	/FrameSepIs FMcyan def
+	setCurrentScreen	
+} bind def
+ 
+/FrameSetMagenta {
+	/FrameSepBlue 1.0 def
+	/FrameSepGreen 0.0 def
+	/FrameSepRed 1.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 1.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMmagenta def
+	setCurrentScreen
+} bind def
+ 
+/FrameSetYellow {
+	/FrameSepBlue 0.0 def
+	/FrameSepGreen 1.0 def
+	/FrameSepRed 1.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 1.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMyellow def
+	setCurrentScreen
+} bind def
+ 
+/FrameSetBlack {
+	/FrameSepBlue 0.0 def
+	/FrameSepGreen 0.0 def
+	/FrameSepRed 0.0 def
+	/FrameSepBlack 1.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMblack def
+	setCurrentScreen
+} bind def
+ 
+/FrameNoSep { 
+	/FrameSepIs FMnone def
+	setCurrentScreen
+} bind def
+/FrameSetSepColors { 
+	FrameDict begin
+	[ exch 1 add 1 roll ]
+	/FrameSepColors  
+	exch def end
+	} bind def
+/FrameColorInSepListCMYK { 
+	FrameSepColors {  
+       		exch dup 3 -1 roll 
+       		FrameCmpColorsCMYK 
+       		{ pop true exit } if
+    	} forall 
+	dup true ne {pop false} if
+	} bind def
+/FrameColorInSepListRGB { 
+	FrameSepColors {  
+       		exch dup 3 -1 roll 
+       		FrameCmpColorsRGB 
+       		{ pop true exit } if
+    	} forall 
+	dup true ne {pop false} if
+	} bind def
+/RealSetgray /setgray load def
+/RealSetrgbcolor /setrgbcolor load def
+/RealSethsbcolor /sethsbcolor load def
+end 
+/setgray { 
+	FrameDict begin
+	FrameSepIs FMnone eq
+		{ RealSetgray } 
+		{ 
+		FrameSepIs FMblack eq 
+			{ RealSetgray } 
+			{ FrameSepIs FMcustom eq 
+			  FrameSepRed 0 eq and
+			  FrameSepGreen 0 eq and
+			  FrameSepBlue 0 eq and {
+			  	RealSetgray
+			  } {
+				1 RealSetgray pop 
+			  } ifelse
+			} ifelse
+		} ifelse
+	end
+} bind def
+/setrgbcolor { 
+	FrameDict begin
+	FrameSepIs FMnone eq
+	{  RealSetrgbcolor }
+	{
+		3 copy [ 4 1 roll ] 
+		FrameColorInSepListRGB
+		{
+				FrameSepBlue eq exch 
+			 	FrameSepGreen eq and exch 
+			 	FrameSepRed eq and
+			 	{ 0 } { 1 } ifelse
+		}
+		{
+			FMPColor {
+				RealSetrgbcolor
+				currentcmykcolor
+			} {
+				RGBtoCMYK
+			} ifelse
+			FrameSepIs FMblack eq
+			{1.0 exch sub 4 1 roll pop pop pop} {
+			FrameSepIs FMyellow eq
+			{pop 1.0 exch sub 3 1 roll pop pop} {
+			FrameSepIs FMmagenta eq
+			{pop pop 1.0 exch sub exch pop } {
+			FrameSepIs FMcyan eq
+			{pop pop pop 1.0 exch sub } 
+			{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+		} ifelse
+		RealSetgray
+	} 
+	ifelse
+	end
+} bind def
+/sethsbcolor {
+	FrameDict begin
+	FrameSepIs FMnone eq 
+	{ RealSethsbcolor } 
+	{
+		RealSethsbcolor 
+		currentrgbcolor  
+		setrgbcolor 
+	} 
+	ifelse
+	end
+} bind def
+FrameDict begin
+/setcmykcolor where {
+	pop /RealSetcmykcolor /setcmykcolor load def
+} {
+	/RealSetcmykcolor {
+		4 1 roll
+		3 { 3 index add 0 max 1 min 1 exch sub 3 1 roll} repeat 
+		RealSetrgbcolor pop
+	} bind def
+} ifelse
+userdict /setcmykcolor { 
+		FrameDict begin
+		FrameSepIs FMnone eq
+		{ RealSetcmykcolor } 
+		{
+			4 copy [ 5 1 roll ]
+			FrameColorInSepListCMYK
+			{
+				FrameSepBlack eq exch 
+				FrameSepYellow eq and exch 
+				FrameSepMagenta eq and exch 
+				FrameSepCyan eq and 
+				{ 0 } { 1 } ifelse
+			}
+			{
+				FrameSepIs FMblack eq
+				{1.0 exch sub 4 1 roll pop pop pop} {
+				FrameSepIs FMyellow eq
+				{pop 1.0 exch sub 3 1 roll pop pop} {
+				FrameSepIs FMmagenta eq
+				{pop pop 1.0 exch sub exch pop } {
+				FrameSepIs FMcyan eq
+				{pop pop pop 1.0 exch sub } 
+				{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+			} ifelse
+			RealSetgray
+		}
+		ifelse
+		end
+	} bind put
+fMLevel1 { 
+	
+	
+	
+	/patScreenDict 7 dict dup begin
+		<0f1e3c78f0e1c387> [ 45  { pop } {exch pop} 		.5   2 sqrt] FmBD
+		<0f87c3e1f0783c1e> [ 135 { pop } {exch pop}			.5   2 sqrt] FmBD
+		<cccccccccccccccc> [ 0   { pop } dup				.5   2	   ] FmBD
+		<ffff0000ffff0000> [ 90  { pop } dup				.5   2	   ] FmBD
+		<8142241818244281> [ 45  { 2 copy lt {exch} if pop}	dup .75  2 sqrt] FmBD
+		<03060c183060c081> [ 45  { pop } {exch pop}			.875 2 sqrt] FmBD
+		<8040201008040201> [ 135 { pop } {exch pop}			.875 2 sqrt] FmBD
+	end def
+} { 
+	
+	/patProcDict 5 dict dup begin
+		<0f1e3c78f0e1c387> { 3 setlinewidth -1 -1 moveto 9 9 lineto stroke 
+											4 -4 moveto 12 4 lineto stroke
+											-4 4 moveto 4 12 lineto stroke} bind def
+		<0f87c3e1f0783c1e> { 3 setlinewidth -1 9 moveto 9 -1 lineto stroke 
+											-4 4 moveto 4 -4 lineto stroke
+											4 12 moveto 12 4 lineto stroke} bind def
+		<8142241818244281> { 1 setlinewidth -1 9 moveto 9 -1 lineto stroke
+											-1 -1 moveto 9 9 lineto stroke } bind def
+		<03060c183060c081> { 1 setlinewidth -1 -1 moveto 9 9 lineto stroke 
+											4 -4 moveto 12 4 lineto stroke
+											-4 4 moveto 4 12 lineto stroke} bind def
+		<8040201008040201> { 1 setlinewidth -1 9 moveto 9 -1 lineto stroke 
+											-4 4 moveto 4 -4 lineto stroke
+											4 12 moveto 12 4 lineto stroke} bind def
+	end def
+	/patDict 15 dict dup begin
+		/PatternType 1 def		
+		/PaintType 2 def		
+		/TilingType 3 def		
+		/BBox [ 0 0 8 8 ] def 	
+		/XStep 8 def			
+		/YStep 8 def			
+		/PaintProc {
+			begin
+			patProcDict bstring known {
+				patProcDict bstring get exec
+			} {
+				8 8 true [1 0 0 -1 0 8] bstring imagemask
+			} ifelse
+			end
+		} bind def
+	end def
+} ifelse
+/combineColor {
+    FrameSepIs FMnone eq
+	{
+		graymode fMLevel1 or not {
+			
+			[/Pattern [/DeviceCMYK]] setcolorspace
+			FrameCurColors 0 4 getinterval aload pop FrameCurPat setcolor
+		} {
+			FrameCurColors 3 get 1.0 ge {
+				FrameCurGray RealSetgray
+			} {
+				fMAcrobat not FMPColor graymode and and {
+					0 1 3 { 
+						FrameCurColors exch get
+						1 FrameCurGray sub mul
+					} for
+					RealSetcmykcolor
+				} {
+					4 1 6 {
+						FrameCurColors exch get
+						graymode {
+							1 exch sub 1 FrameCurGray sub mul 1 exch sub
+						} {
+							1.0 lt {FrameCurGray} {1} ifelse
+						} ifelse
+					} for
+					RealSetrgbcolor
+				} ifelse
+			} ifelse
+		} ifelse
+	} { 
+		FrameCurColors 0 4 getinterval aload
+		FrameColorInSepListCMYK {
+			FrameSepBlack eq exch 
+			FrameSepYellow eq and exch 
+			FrameSepMagenta eq and exch 
+			FrameSepCyan eq and
+			FrameSepIs FMcustom eq and
+			{ FrameCurGray } { 1 } ifelse
+		} {
+			FrameSepIs FMblack eq
+			{FrameCurGray 1.0 exch sub mul 1.0 exch sub 4 1 roll pop pop pop} {
+			FrameSepIs FMyellow eq
+			{pop FrameCurGray 1.0 exch sub mul 1.0 exch sub 3 1 roll pop pop} {
+			FrameSepIs FMmagenta eq
+			{pop pop FrameCurGray 1.0 exch sub mul 1.0 exch sub exch pop } {
+			FrameSepIs FMcyan eq
+			{pop pop pop FrameCurGray 1.0 exch sub mul 1.0 exch sub } 
+			{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+		} ifelse
+		graymode fMLevel1 or not {
+			
+			[/Pattern [/DeviceGray]] setcolorspace
+			FrameCurPat setcolor
+		} { 
+			graymode not fMLevel1 and {
+				
+				dup 1 lt {pop FrameCurGray} if
+			} if
+			RealSetgray
+		} ifelse
+	} ifelse
+} bind def
+/savematrix {
+	orgmatrix currentmatrix pop
+	} bind def
+/restorematrix {
+	orgmatrix setmatrix
+	} bind def
+/fMDefaultMatrix matrix defaultmatrix def
+/fMatrix2 matrix def
+/dpi    72 0 fMDefaultMatrix dtransform
+    dup mul exch   dup mul add   sqrt def
+	
+/freq dpi dup 72 div round dup 0 eq {pop 1} if 8 mul div def
+/sangle 1 0 fMDefaultMatrix dtransform exch atan def
+	sangle fMatrix2 rotate 
+	fMDefaultMatrix fMatrix2 concatmatrix 
+	dup 0 get /sflipx exch def
+	    3 get /sflipy exch def
+/screenIndex {
+	0 1 dpiranges length 1 sub { dup dpiranges exch get 1 sub dpi le {exit} {pop} ifelse } for
+} bind def
+/getCyanScreen {
+	FMUseHighFrequencyScreens { CHighAngles CMHighFreqs} {CLowAngles CMLowFreqs} ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get /FMSpotFunction load
+} bind def
+/getMagentaScreen {
+	FMUseHighFrequencyScreens { MHighAngles CMHighFreqs } {MLowAngles CMLowFreqs} ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get /FMSpotFunction load
+} bind def
+/getYellowScreen {
+	FMUseHighFrequencyScreens { YHighTDot YHighFreqs} { YLowTDot YLowFreqs } ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get { 3 div
+			{2 { 1 add 2 div 3 mul dup floor sub 2 mul 1 sub exch} repeat
+			FMSpotFunction } } {/FMSpotFunction load } ifelse
+			0.0 exch
+} bind def
+/getBlackScreen  {
+	FMUseHighFrequencyScreens { KHighFreqs } { KLowFreqs } ifelse
+		screenIndex get 45.0 /FMSpotFunction load 
+} bind def
+/getSpotScreen {
+	getBlackScreen
+} bind def
+/getCompositeScreen {
+	getBlackScreen
+} bind def
+/FMSetScreen 
+	fMLevel1 { /setscreen load 
+	}{ {
+		8 dict begin
+		/HalftoneType 1 def
+		/SpotFunction exch def
+		/Angle exch def
+		/Frequency exch def
+		/AccurateScreens FMUseAcccurateScreens def
+		currentdict end sethalftone
+	} bind } ifelse
+def
+/setDefaultScreen {
+	FMPColor {
+		orgrxfer cvx orggxfer cvx orgbxfer cvx orgxfer cvx setcolortransfer
+	}
+	{
+		orgxfer cvx settransfer
+	} ifelse
+	orgfreq organgle orgproc cvx setscreen
+} bind def
+/setCurrentScreen {
+	FrameSepIs FMnone eq {
+		FMUseDefaultNoSeparationScreen {
+			setDefaultScreen
+		} {
+			getCompositeScreen FMSetScreen
+		} ifelse
+	} {
+		FrameSepIs FMcustom eq {
+			FMUseDefaultSpotSeparationScreen {
+				setDefaultScreen
+			} {
+				getSpotScreen FMSetScreen
+			} ifelse
+		} {
+			FMUseDefaultProcessSeparationScreen {
+				setDefaultScreen
+			} {
+				FrameSepIs FMcyan eq {
+					getCyanScreen FMSetScreen
+				} {
+					FrameSepIs FMmagenta eq {
+						getMagentaScreen FMSetScreen
+					} {
+						FrameSepIs FMyellow eq {
+							getYellowScreen FMSetScreen
+						} {
+							getBlackScreen FMSetScreen
+						} ifelse
+					} ifelse
+				} ifelse
+			} ifelse
+		} ifelse
+	} ifelse 
+} bind def
+end
+	
+/FMDOCUMENT { 
+	array /FMfonts exch def 
+	/#copies exch def
+	FrameDict begin
+	0 ne /manualfeed exch def
+	/paperheight exch def
+	/paperwidth exch def
+	0 ne /fMNegative exch def 
+	0 ne /edown exch def 
+	/yscale exch def
+	/xscale exch def
+	fMLevel1 {
+		manualfeed {setmanualfeed} if
+		/FMdicttop countdictstack 1 add def 
+		/FMoptop count def 
+		setpapername 
+		manualfeed {true} {papersize} ifelse 
+		{manualpapersize} {false} ifelse 
+		{desperatepapersize} {false} ifelse 
+		{papersizefailure} if
+		count -1 FMoptop {pop pop} for
+		countdictstack -1 FMdicttop {pop end} for 
+		}
+		{2 dict
+		 dup /PageSize [paperwidth paperheight] put
+		 manualfeed {dup /ManualFeed manualfeed put} if
+		 {setpagedevice} stopped {papersizefailure} if
+		}
+	ifelse 
+	
+	FMPColor {
+		currentcolorscreen
+			cvlit /orgproc exch def
+				  /organgle exch def 
+				  /orgfreq exch def
+			cvlit /orgbproc exch def
+				  /orgbangle exch def 
+				  /orgbfreq exch def
+			cvlit /orggproc exch def
+				  /orggangle exch def 
+				  /orggfreq exch def
+			cvlit /orgrproc exch def
+				  /orgrangle exch def 
+				  /orgrfreq exch def
+			currentcolortransfer 
+			fMNegative {
+				1 1 4 { 
+					pop { 1 exch sub } fmConcatProcs 4 1 roll
+				} for
+				4 copy
+				setcolortransfer
+			} if
+			cvlit /orgxfer exch def
+			cvlit /orgbxfer exch def
+			cvlit /orggxfer exch def
+			cvlit /orgrxfer exch def
+	} {
+		currentscreen 
+			cvlit /orgproc exch def
+				  /organgle exch def 
+				  /orgfreq exch def
+				  
+		currenttransfer 
+		fMNegative {
+			{ 1 exch sub } fmConcatProcs
+			dup settransfer
+		} if 
+		cvlit /orgxfer exch def
+	} ifelse
+	end 
+} def 
+/FMBEGINPAGE { 
+	FrameDict begin 
+	/pagesave save def
+	3.86 setmiterlimit
+	/landscape exch 0 ne def
+	landscape { 
+		90 rotate 0 exch dup /pwid exch def neg translate pop 
+	}{
+		pop /pwid exch def
+	} ifelse
+	edown { [-1 0 0 1 pwid 0] concat } if
+	0 0 moveto paperwidth 0 lineto paperwidth paperheight lineto 
+	0 paperheight lineto 0 0 lineto 1 setgray fill
+	xscale yscale scale
+	/orgmatrix matrix def
+	gsave 
+} def 
+/FMENDPAGE {
+	grestore 
+	pagesave restore
+	end 
+	showpage
+	} def 
+/FMFONTDEFINE { 
+	FrameDict begin
+	findfont 
+	ReEncode 
+	1 index exch 
+	definefont 
+	FMfonts 3 1 roll 
+	put
+	end 
+	} def 
+/FMFILLS {
+	FrameDict begin dup
+	array /fillvals exch def
+	dict /patCache exch def
+	end 
+	} def 
+/FMFILL {
+	FrameDict begin
+	 fillvals 3 1 roll put
+	end 
+	} def 
+/FMNORMALIZEGRAPHICS { 
+	newpath
+	1 setlinewidth
+	0 setlinecap
+	0 0 0 sethsbcolor
+	0 setgray 
+	} bind def
+/FMBEGINEPSF { 
+	end 
+	/FMEPSF save def 
+	/showpage {} def 
+% See Adobe's "PostScript Language Reference Manual, 2nd Edition", page 714.
+% "...the following operators MUST NOT be used in an EPS file:" (emphasis ours)
+	/banddevice {(banddevice) FMBADEPSF} def
+	/clear {(clear) FMBADEPSF} def
+	/cleardictstack {(cleardictstack) FMBADEPSF} def 
+	/copypage {(copypage) FMBADEPSF} def
+	/erasepage {(erasepage) FMBADEPSF} def
+	/exitserver {(exitserver) FMBADEPSF} def
+	/framedevice {(framedevice) FMBADEPSF} def
+	/grestoreall {(grestoreall) FMBADEPSF} def
+	/initclip {(initclip) FMBADEPSF} def
+	/initgraphics {(initgraphics) FMBADEPSF} def
+	/quit {(quit) FMBADEPSF} def
+	/renderbands {(renderbands) FMBADEPSF} def
+	/setglobal {(setglobal) FMBADEPSF} def
+	/setpagedevice {(setpagedevice) FMBADEPSF} def
+	/setshared {(setshared) FMBADEPSF} def
+	/startjob {(startjob) FMBADEPSF} def
+	/lettertray {(lettertray) FMBADEPSF} def
+	/letter {(letter) FMBADEPSF} def
+	/lettersmall {(lettersmall) FMBADEPSF} def
+	/11x17tray {(11x17tray) FMBADEPSF} def
+	/11x17 {(11x17) FMBADEPSF} def
+	/ledgertray {(ledgertray) FMBADEPSF} def
+	/ledger {(ledger) FMBADEPSF} def
+	/legaltray {(legaltray) FMBADEPSF} def
+	/legal {(legal) FMBADEPSF} def
+	/statementtray {(statementtray) FMBADEPSF} def
+	/statement {(statement) FMBADEPSF} def
+	/executivetray {(executivetray) FMBADEPSF} def
+	/executive {(executive) FMBADEPSF} def
+	/a3tray {(a3tray) FMBADEPSF} def
+	/a3 {(a3) FMBADEPSF} def
+	/a4tray {(a4tray) FMBADEPSF} def
+	/a4 {(a4) FMBADEPSF} def
+	/a4small {(a4small) FMBADEPSF} def
+	/b4tray {(b4tray) FMBADEPSF} def
+	/b4 {(b4) FMBADEPSF} def
+	/b5tray {(b5tray) FMBADEPSF} def
+	/b5 {(b5) FMBADEPSF} def
+	FMNORMALIZEGRAPHICS 
+	[/fy /fx /fh /fw /ury /urx /lly /llx] {exch def} forall 
+	fx fw 2 div add fy fh 2 div add  translate
+	rotate
+	fw 2 div neg fh 2 div neg translate
+	fw urx llx sub div fh ury lly sub div scale 
+	llx neg lly neg translate 
+	/FMdicttop countdictstack 1 add def 
+	/FMoptop count def 
+	} bind def
+/FMENDEPSF {
+	count -1 FMoptop {pop pop} for 
+	countdictstack -1 FMdicttop {pop end} for 
+	FMEPSF restore
+	FrameDict begin 
+	} bind def
+FrameDict begin 
+/setmanualfeed {
+%%BeginFeature *ManualFeed True
+	 statusdict /manualfeed true put
+%%EndFeature
+	} bind def
+/max {2 copy lt {exch} if pop} bind def
+/min {2 copy gt {exch} if pop} bind def
+/inch {72 mul} def
+/pagedimen { 
+	paperheight sub abs 16 lt exch 
+	paperwidth sub abs 16 lt and
+	{/papername exch def} {pop} ifelse
+	} bind def
+/setpapername { 
+	/papersizedict 14 dict def 
+	papersizedict begin
+	/papername /unknown def 
+		/Letter 8.5 inch 11.0 inch pagedimen
+		/LetterSmall 7.68 inch 10.16 inch pagedimen
+		/Tabloid 11.0 inch 17.0 inch pagedimen
+		/Ledger 17.0 inch 11.0 inch pagedimen
+		/Legal 8.5 inch 14.0 inch pagedimen
+		/Statement 5.5 inch 8.5 inch pagedimen
+		/Executive 7.5 inch 10.0 inch pagedimen
+		/A3 11.69 inch 16.5 inch pagedimen
+		/A4 8.26 inch 11.69 inch pagedimen
+		/A4Small 7.47 inch 10.85 inch pagedimen
+		/B4 10.125 inch 14.33 inch pagedimen
+		/B5 7.16 inch 10.125 inch pagedimen
+	end
+	} bind def
+/papersize {
+	papersizedict begin
+		/Letter {lettertray letter} def
+		/LetterSmall {lettertray lettersmall} def
+		/Tabloid {11x17tray 11x17} def
+		/Ledger {ledgertray ledger} def
+		/Legal {legaltray legal} def
+		/Statement {statementtray statement} def
+		/Executive {executivetray executive} def
+		/A3 {a3tray a3} def
+		/A4 {a4tray a4} def
+		/A4Small {a4tray a4small} def
+		/B4 {b4tray b4} def
+		/B5 {b5tray b5} def
+		/unknown {unknown} def
+	papersizedict dup papername known {papername} {/unknown} ifelse get
+	end
+	statusdict begin stopped end 
+	} bind def
+/manualpapersize {
+	papersizedict begin
+		/Letter {letter} def
+		/LetterSmall {lettersmall} def
+		/Tabloid {11x17} def
+		/Ledger {ledger} def
+		/Legal {legal} def
+		/Statement {statement} def
+		/Executive {executive} def
+		/A3 {a3} def
+		/A4 {a4} def
+		/A4Small {a4small} def
+		/B4 {b4} def
+		/B5 {b5} def
+		/unknown {unknown} def
+	papersizedict dup papername known {papername} {/unknown} ifelse get
+	end
+	stopped 
+	} bind def
+/desperatepapersize {
+	statusdict /setpageparams known
+		{
+		paperwidth paperheight 0 1 
+		statusdict begin
+		{setpageparams} stopped 
+		end
+		} {true} ifelse 
+	} bind def
+/papersizefailure {
+	FMAllowPaperSizeMismatch not
+		{
+(The requested paper size is not available in any currently-installed tray)
+(Edit the PS file to "FMAllowPaperSizeMismatch true" to use default tray)
+		 FMFAILURE } if
+	} def
+/DiacriticEncoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl
+/numbersign /dollar /percent /ampersand /quotesingle /parenleft
+/parenright /asterisk /plus /comma /hyphen /period /slash /zero /one
+/two /three /four /five /six /seven /eight /nine /colon /semicolon
+/less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K
+/L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash
+/bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h
+/i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar
+/braceright /asciitilde /.notdef /Adieresis /Aring /Ccedilla /Eacute
+/Ntilde /Odieresis /Udieresis /aacute /agrave /acircumflex /adieresis
+/atilde /aring /ccedilla /eacute /egrave /ecircumflex /edieresis
+/iacute /igrave /icircumflex /idieresis /ntilde /oacute /ograve
+/ocircumflex /odieresis /otilde /uacute /ugrave /ucircumflex
+/udieresis /dagger /.notdef /cent /sterling /section /bullet
+/paragraph /germandbls /registered /copyright /trademark /acute
+/dieresis /.notdef /AE /Oslash /.notdef /.notdef /.notdef /.notdef
+/yen /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/ordfeminine /ordmasculine /.notdef /ae /oslash /questiondown
+/exclamdown /logicalnot /.notdef /florin /.notdef /.notdef
+/guillemotleft /guillemotright /ellipsis /.notdef /Agrave /Atilde
+/Otilde /OE /oe /endash /emdash /quotedblleft /quotedblright
+/quoteleft /quoteright /.notdef /.notdef /ydieresis /Ydieresis
+/fraction /currency /guilsinglleft /guilsinglright /fi /fl /daggerdbl
+/periodcentered /quotesinglbase /quotedblbase /perthousand
+/Acircumflex /Ecircumflex /Aacute /Edieresis /Egrave /Iacute
+/Icircumflex /Idieresis /Igrave /Oacute /Ocircumflex /.notdef /Ograve
+/Uacute /Ucircumflex /Ugrave /dotlessi /circumflex /tilde /macron
+/breve /dotaccent /ring /cedilla /hungarumlaut /ogonek /caron
+] def
+/ReEncode { 
+	dup 
+	length 
+	dict begin 
+	{
+	1 index /FID ne 
+		{def} 
+		{pop pop} ifelse 
+	} forall 
+	0 eq {/Encoding DiacriticEncoding def} if 
+	currentdict 
+	end 
+	} bind def
+FMPColor 
+	
+	{
+	/BEGINBITMAPCOLOR { 
+		BITMAPCOLOR} def
+	/BEGINBITMAPCOLORc { 
+		BITMAPCOLORc} def
+	/BEGINBITMAPTRUECOLOR { 
+		BITMAPTRUECOLOR } def
+	/BEGINBITMAPTRUECOLORc { 
+		BITMAPTRUECOLORc } def
+	/BEGINBITMAPCMYK { 
+		BITMAPCMYK } def
+	/BEGINBITMAPCMYKc { 
+		BITMAPCMYKc } def
+	}
+	
+	{
+	/BEGINBITMAPCOLOR { 
+		BITMAPGRAY} def
+	/BEGINBITMAPCOLORc { 
+		BITMAPGRAYc} def
+	/BEGINBITMAPTRUECOLOR { 
+		BITMAPTRUEGRAY } def
+	/BEGINBITMAPTRUECOLORc { 
+		BITMAPTRUEGRAYc } def
+	/BEGINBITMAPCMYK { 
+		BITMAPCMYKGRAY } def
+	/BEGINBITMAPCMYKc { 
+		BITMAPCMYKGRAYc } def
+	}
+ifelse
+/K { 
+	FMPrintAllColorsAsBlack {
+		dup 1 eq 2 index 1 eq and 3 index 1 eq and not
+			{7 {pop} repeat 0 0 0 1 0 0 0} if
+	} if 
+	FrameCurColors astore 
+	pop combineColor
+} bind def
+/graymode true def
+fMLevel1 {
+	/fmGetFlip {
+		fMatrix2 exch get mul 0 lt { -1 } { 1 } ifelse
+	} FmBD
+} if
+/setPatternMode {
+	fMLevel1 {
+		2 index patScreenDict exch known {
+			pop pop
+			patScreenDict exch get aload pop 
+			freq 								
+			mul									
+			5 2 roll							
+			fMatrix2 currentmatrix 1 get 0 ne {
+				3 -1 roll 90 add 3 1 roll 		
+				sflipx 1 fmGetFlip sflipy 2 fmGetFlip neg mul
+			} {  								
+				sflipx 0 fmGetFlip sflipy 3 fmGetFlip mul 
+			} ifelse
+			0 lt {exch pop} {pop} ifelse 		
+			fMNegative { 
+				{neg} fmConcatProcs 			
+			} if
+			bind
+			
+			
+			
+			systemdict /setscreen get exec		
+			/FrameCurGray exch def
+		} {
+			/bwidth  exch def
+			/bpside  exch def
+			/bstring exch def
+			/onbits 0 def  /offbits 0 def
+			freq sangle landscape {90 add} if 
+				{/ypoint exch def
+				 /xpoint exch def
+				 /xindex xpoint 1 add 2 div bpside mul cvi def
+				 /yindex ypoint 1 add 2 div bpside mul cvi def
+				 bstring yindex bwidth mul xindex 8 idiv add get
+				 1 7 xindex 8 mod sub bitshift and 0 ne fMNegative {not} if
+				 {/onbits  onbits  1 add def 1}
+				 {/offbits offbits 1 add def 0}
+				 ifelse
+				}
+				setscreen
+			offbits offbits onbits add div fMNegative {1.0 exch sub} if
+			/FrameCurGray exch def
+		} ifelse
+	} { 
+		pop pop
+		dup patCache exch known {
+			patCache exch get
+		} { 
+			dup
+			patDict /bstring 3 -1 roll put
+			patDict 
+			9 PatFreq screenIndex get div dup matrix scale
+			makepattern
+			dup 
+			patCache 4 -1 roll 3 -1 roll put
+		} ifelse
+		/FrameCurGray 0 def
+		/FrameCurPat exch def
+	} ifelse
+	/graymode false def
+	combineColor
+} bind def
+/setGrayScaleMode {
+	graymode not {
+		/graymode true def
+		fMLevel1 {
+			setCurrentScreen
+		} if
+	} if
+	/FrameCurGray exch def
+	combineColor
+} bind def
+/normalize {
+	transform round exch round exch itransform
+	} bind def
+/dnormalize {
+	dtransform round exch round exch idtransform
+	} bind def
+/lnormalize { 
+	0 dtransform exch cvi 2 idiv 2 mul 1 add exch idtransform pop
+	} bind def
+/H { 
+	lnormalize setlinewidth
+	} bind def
+/Z {
+	setlinecap
+	} bind def
+	
+/PFill {
+	graymode fMLevel1 or not {
+		gsave 1 setgray eofill grestore
+	} if
+} bind def
+/PStroke {
+	graymode fMLevel1 or not {
+		gsave 1 setgray stroke grestore
+	} if
+	stroke
+} bind def
+/X { 
+	fillvals exch get
+	dup type /stringtype eq
+	{8 1 setPatternMode} 
+	{setGrayScaleMode}
+	ifelse
+	} bind def
+/V { 
+	PFill gsave eofill grestore
+	} bind def
+/Vclip {
+	clip
+	} bind def
+/Vstrk {
+	currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/N { 
+	PStroke
+	} bind def
+/Nclip {
+	strokepath clip newpath
+	} bind def
+/Nstrk {
+	currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/M {newpath moveto} bind def
+/E {lineto} bind def
+/D {curveto} bind def
+/O {closepath} bind def
+/L { 
+ 	/n exch def
+	newpath
+	normalize
+	moveto 
+	2 1 n {pop normalize lineto} for
+	} bind def
+/Y { 
+	L 
+	closepath
+	} bind def
+/R { 
+	/y2 exch def
+	/x2 exch def
+	/y1 exch def
+	/x1 exch def
+	x1 y1
+	x2 y1
+	x2 y2
+	x1 y2
+	4 Y 
+	} bind def
+/rarc 
+	{rad 
+	 arcto
+	} bind def
+/RR { 
+	/rad exch def
+	normalize
+	/y2 exch def
+	/x2 exch def
+	normalize
+	/y1 exch def
+	/x1 exch def
+	mark
+	newpath
+	{
+	x1 y1 rad add moveto
+	x1 y2 x2 y2 rarc
+	x2 y2 x2 y1 rarc
+	x2 y1 x1 y1 rarc
+	x1 y1 x1 y2 rarc
+	closepath
+	} stopped {x1 y1 x2 y2 R} if 
+	cleartomark
+	} bind def
+/RRR { 
+	/rad exch def
+	normalize /y4 exch def /x4 exch def
+	normalize /y3 exch def /x3 exch def
+	normalize /y2 exch def /x2 exch def
+	normalize /y1 exch def /x1 exch def
+	newpath
+	normalize moveto 
+	mark
+	{
+	x2 y2 x3 y3 rarc
+	x3 y3 x4 y4 rarc
+	x4 y4 x1 y1 rarc
+	x1 y1 x2 y2 rarc
+	closepath
+	} stopped
+	 {x1 y1 x2 y2 x3 y3 x4 y4 newpath moveto lineto lineto lineto closepath} if
+	cleartomark
+	} bind def
+/C { 
+	grestore
+	gsave
+	R 
+	clip
+	setCurrentScreen
+} bind def
+/CP { 
+	grestore
+	gsave
+	Y 
+	clip
+	setCurrentScreen
+} bind def
+/F { 
+	FMfonts exch get
+	FMpointsize scalefont
+	setfont
+	} bind def
+/Q { 
+	/FMpointsize exch def
+	F 
+	} bind def
+/T { 
+	moveto show
+	} bind def
+/RF { 
+	rotate
+	0 ne {-1 1 scale} if
+	} bind def
+/TF { 
+	gsave
+	moveto 
+	RF
+	show
+	grestore
+	} bind def
+/P { 
+	moveto
+	0 32 3 2 roll widthshow
+	} bind def
+/PF { 
+	gsave
+	moveto 
+	RF
+	0 32 3 2 roll widthshow
+	grestore
+	} bind def
+/S { 
+	moveto
+	0 exch ashow
+	} bind def
+/SF { 
+	gsave
+	moveto
+	RF
+	0 exch ashow
+	grestore
+	} bind def
+/B { 
+	moveto
+	0 32 4 2 roll 0 exch awidthshow
+	} bind def
+/BF { 
+	gsave
+	moveto
+	RF
+	0 32 4 2 roll 0 exch awidthshow
+	grestore
+	} bind def
+/G { 
+	gsave
+	newpath
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	PFill fill
+	grestore
+	} bind def
+/Gstrk {
+	savematrix
+    newpath
+    2 index 2 div add exch 3 index 2 div sub exch 
+    normalize 2 index 2 div sub exch 3 index 2 div add exch 
+    translate
+    scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    restorematrix
+    currentlinewidth exch setlinewidth PStroke setlinewidth
+    } bind def
+/Gclip { 
+	newpath
+	savematrix
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	clip newpath
+	restorematrix
+	} bind def
+/GG { 
+	gsave
+	newpath
+	normalize translate 0.0 0.0 moveto 
+	rotate 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath
+	PFill
+	fill
+	grestore
+	} bind def
+/GGclip { 
+	savematrix
+	newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath
+	clip newpath
+	restorematrix
+	} bind def
+/GGstrk { 
+	savematrix
+    newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath 
+	restorematrix
+    currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/A { 
+	gsave
+	savematrix
+	newpath
+	2 index 2 div add exch 3 index 2 div sub exch 
+	normalize 2 index 2 div sub exch 3 index 2 div add exch 
+	translate 
+	scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	restorematrix
+	PStroke
+	grestore
+	} bind def
+/Aclip {
+	newpath
+	savematrix
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	strokepath clip newpath
+	restorematrix
+} bind def
+/Astrk {
+	Gstrk
+} bind def
+/AA { 
+	gsave
+	savematrix
+	newpath
+	
+	3 index 2 div add exch 4 index 2 div sub exch 
+	
+	normalize 3 index 2 div sub exch 4 index 2 div add exch
+	translate 
+	rotate 
+	scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	restorematrix
+	PStroke
+	grestore
+	} bind def
+/AAclip {
+	savematrix
+	newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath
+	strokepath clip newpath
+	restorematrix
+} bind def
+/AAstrk {
+	GGstrk
+} bind def
+/BEGINPRINTCODE { 
+	/FMdicttop countdictstack 1 add def 
+	/FMoptop count 7 sub def 
+	/FMsaveobject save def
+	userdict begin 
+	/showpage {} def 
+	FMNORMALIZEGRAPHICS 
+	3 index neg 3 index neg translate
+	} bind def
+/ENDPRINTCODE {
+	count -1 FMoptop {pop pop} for 
+	countdictstack -1 FMdicttop {pop end} for 
+	FMsaveobject restore 
+	} bind def
+/gn { 
+	0 
+	{	46 mul 
+		cf read pop 
+		32 sub 
+		dup 46 lt {exit} if 
+		46 sub add 
+		} loop
+	add 
+	} bind def
+/cfs { 
+	/str sl string def 
+	0 1 sl 1 sub {str exch val put} for 
+	str def 
+	} bind def
+/ic [ 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0223
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0223
+	0
+	{0 hx} {1 hx} {2 hx} {3 hx} {4 hx} {5 hx} {6 hx} {7 hx} {8 hx} {9 hx}
+	{10 hx} {11 hx} {12 hx} {13 hx} {14 hx} {15 hx} {16 hx} {17 hx} {18 hx}
+	{19 hx} {gn hx} {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12}
+	{13} {14} {15} {16} {17} {18} {19} {gn} {0 wh} {1 wh} {2 wh} {3 wh}
+	{4 wh} {5 wh} {6 wh} {7 wh} {8 wh} {9 wh} {10 wh} {11 wh} {12 wh}
+	{13 wh} {14 wh} {gn wh} {0 bl} {1 bl} {2 bl} {3 bl} {4 bl} {5 bl} {6 bl}
+	{7 bl} {8 bl} {9 bl} {10 bl} {11 bl} {12 bl} {13 bl} {14 bl} {gn bl}
+	{0 fl} {1 fl} {2 fl} {3 fl} {4 fl} {5 fl} {6 fl} {7 fl} {8 fl} {9 fl}
+	{10 fl} {11 fl} {12 fl} {13 fl} {14 fl} {gn fl}
+	] def
+/ms { 
+	/sl exch def 
+	/val 255 def 
+	/ws cfs 
+	/im cfs 
+	/val 0 def 
+	/bs cfs 
+	/cs cfs 
+	} bind def
+400 ms 
+/ip { 
+	is 
+	0 
+	cf cs readline pop 
+	{	ic exch get exec 
+		add 
+		} forall 
+	pop 
+	
+	} bind def
+/rip { 
+	   
+	  
+	  bis ris copy pop 
+      is
+      0
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop 
+	  ris gis copy pop 
+	  dup is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  gis bis copy pop 
+	  dup add is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+      pop 
+      
+      } bind def
+/rip4 { 
+	   
+	  
+	  kis cis copy pop 
+      is
+      0
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop 
+	  cis mis copy pop 
+	  dup is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  mis yis copy pop 
+	  dup dup add is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  yis kis copy pop 
+	  3 mul is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+      pop 
+      
+      } bind def
+/wh { 
+	/len exch def 
+	/pos exch def 
+	ws 0 len getinterval im pos len getinterval copy pop
+	pos len 
+	} bind def
+/bl { 
+	/len exch def 
+	/pos exch def 
+	bs 0 len getinterval im pos len getinterval copy pop
+	pos len 
+	} bind def
+/s1 1 string def
+/fl { 
+	/len exch def 
+	/pos exch def 
+	/val cf s1 readhexstring pop 0 get def
+	pos 1 pos len add 1 sub {im exch val put} for
+	pos len 
+	} bind def
+/hx { 
+	3 copy getinterval 
+	cf exch readhexstring pop pop 
+	} bind def
+/wbytes { 
+      dup dup
+      8 gt { pop 8 idiv mul }
+      { 8 eq {pop} {1 eq {7 add 8 idiv} {3 add 4 idiv} ifelse} ifelse } ifelse
+	} bind def
+/BEGINBITMAPBWc { 
+	1 {} COMMONBITMAPc
+	} bind def
+/BEGINBITMAPGRAYc { 
+	8 {} COMMONBITMAPc
+	} bind def
+/BEGINBITMAP2BITc { 
+	2 {} COMMONBITMAPc
+	} bind def
+/COMMONBITMAPc { 
+		 
+	/cvtProc exch def
+	/depth exch def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+	cvtProc                
+	/is im 0 lb getinterval def 
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height depth [width 0 0 height neg 0 height] 
+	{ip} image 
+	bitmapsave restore 
+	grestore
+	} bind def
+/BEGINBITMAPBW { 
+	1 {} COMMONBITMAP
+	} bind def
+/BEGINBITMAPGRAY { 
+	8 {} COMMONBITMAP
+	} bind def
+/BEGINBITMAP2BIT { 
+	2 {} COMMONBITMAP
+	} bind def
+/COMMONBITMAP { 
+	/cvtProc exch def
+	/depth exch def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/bitmapsave save def 
+	cvtProc              
+	/is width depth wbytes string def
+	/cf currentfile def 
+	width height depth [width 0 0 height neg 0 height] 
+	{cf is readhexstring pop} image
+	bitmapsave restore 
+	grestore
+	} bind def
+/ngrayt 256 array def
+/nredt 256 array def
+/nbluet 256 array def
+/ngreent 256 array def
+fMLevel1 {
+/colorsetup {
+	currentcolortransfer
+	/gryt exch def
+	/blut exch def
+	/grnt exch def
+	/redt exch def
+	0 1 255 {
+		/indx exch def
+		/cynu 1 red indx get 255 div sub def
+		/magu 1 green indx get 255 div sub def
+		/yelu 1 blue indx get 255 div sub def
+		/kk cynu magu min yelu min def
+		/u kk currentundercolorremoval exec def
+%		/u 0 def
+		nredt indx 1 0 cynu u sub max sub redt exec put
+		ngreent indx 1 0 magu u sub max sub grnt exec put
+		nbluet indx 1 0 yelu u sub max sub blut exec put
+		ngrayt indx 1 kk currentblackgeneration exec sub gryt exec put
+	} for
+	{255 mul cvi nredt exch get}
+	{255 mul cvi ngreent exch get}
+	{255 mul cvi nbluet exch get}
+	{255 mul cvi ngrayt exch get}
+	setcolortransfer
+	{pop 0} setundercolorremoval
+	{} setblackgeneration
+	} bind def
+}
+{
+/colorSetup2 {
+	[ /Indexed /DeviceRGB 255 
+		{dup red exch get 255 div 
+		 exch dup green exch get 255 div 
+		 exch blue exch get 255 div}
+	] setcolorspace
+} bind def
+} ifelse
+/fakecolorsetup {
+	/tran 256 string def
+	0 1 255 {/indx exch def 
+		tran indx
+		red indx get 77 mul
+		green indx get 151 mul
+		blue indx get 28 mul
+		add add 256 idiv put} for
+	currenttransfer
+	{255 mul cvi tran exch get 255.0 div}
+	exch fmConcatProcs settransfer
+} bind def
+/BITMAPCOLOR { 
+	/depth 8 def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/bitmapsave save def
+	fMLevel1 {	
+		colorsetup
+		/is width depth wbytes string def
+		/cf currentfile def 
+		width height depth [width 0 0 height neg 0 height] 
+		{cf is readhexstring pop} {is} {is} true 3 colorimage 
+	} {
+		colorSetup2
+		/is width depth wbytes string def
+		/cf currentfile def 
+		7 dict dup begin
+			/ImageType 1 def
+			/Width width def
+			/Height height def
+			/ImageMatrix [width 0 0 height neg 0 height] def
+			/DataSource {cf is readhexstring pop} bind def
+			/BitsPerComponent depth def
+			/Decode [0 255] def
+		end image	
+	} ifelse
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPCOLORc { 
+	/depth 8 def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+	fMLevel1 {	
+		colorsetup
+		/is im 0 lb getinterval def 
+		ws 0 lb getinterval is copy pop 
+		/cf currentfile def 
+		width height depth [width 0 0 height neg 0 height] 
+		{ip} {is} {is} true 3 colorimage
+	} {
+		colorSetup2
+		/is im 0 lb getinterval def 
+		ws 0 lb getinterval is copy pop 
+		/cf currentfile def 
+		7 dict dup begin
+			/ImageType 1 def
+			/Width width def
+			/Height height def
+			/ImageMatrix [width 0 0 height neg 0 height] def
+			/DataSource {ip} bind def
+			/BitsPerComponent depth def
+			/Decode [0 255] def
+		end image	
+	} ifelse
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPTRUECOLORc { 
+	/depth 24 def
+        gsave
+ 	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/ris im 0 width getinterval def	
+	/gis im width width getinterval def	
+	/bis im width 2 mul width getinterval def 
+        
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height 8 [width 0 0 height neg 0 height] 
+	{width rip pop ris} {gis} {bis} true 3 colorimage
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPCMYKc { 
+	/depth 32 def
+        gsave
+ 	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/cis im 0 width getinterval def	
+	/mis im width width getinterval def	
+	/yis im width 2 mul width getinterval def 
+	/kis im width 3 mul width getinterval def 
+        
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height 8 [width 0 0 height neg 0 height] 
+	{width rip4 pop cis} {mis} {yis} {kis} true 4 colorimage
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPTRUECOLOR { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /gis width string def
+        /bis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop } 
+        { cf gis readhexstring pop } 
+        { cf bis readhexstring pop } 
+        true 3 colorimage 
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYK { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /mis width string def
+        /yis width string def
+        /kis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop } 
+        { cf mis readhexstring pop } 
+        { cf yis readhexstring pop } 
+        { cf kis readhexstring pop } 
+        true 4 colorimage 
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPTRUEGRAYc { 
+	/depth 24 def
+        gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+        /bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/ris im 0 width getinterval def	
+	/gis im width width getinterval def	
+	/bis im width 2 mul width getinterval def 
+        ws 0 lb getinterval is copy pop 
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        {width rip pop ris gis bis width gray} image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYKGRAYc { 
+	/depth 32 def
+        gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+        /bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/cis im 0 width getinterval def	
+	/mis im width width getinterval def	
+	/yis im width 2 mul width getinterval def 
+	/kis im width 3 mul width getinterval def 
+        ws 0 lb getinterval is copy pop 
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        {width rip pop cis mis yis kis width cgray} image
+        bitmapsave restore 
+        grestore
+        } bind def
+/cgray { 
+        /ww exch def
+        /k exch def
+        /y exch def
+        /m exch def
+        /c exch def
+        0 1 ww 1 sub { /i exch def c i get m i get y i get k i get CMYKtoRGB
+				.144 mul 3 1 roll .587 mul 3 1 roll .299 mul add add
+				c i 3 -1 roll floor cvi put } for
+        c
+ 		} bind def
+/gray { 
+        /ww exch def
+        /b exch def
+        /g exch def
+        /r exch def
+        0 1 ww 1 sub { /i exch def r i get .299 mul g i get .587 mul
+			b i get .114 mul add add r i 3 -1 roll floor cvi put } for
+        r
+        } bind def
+/BITMAPTRUEGRAY { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /gis width string def
+        /bis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop 
+          cf gis readhexstring pop 
+          cf bis readhexstring pop width gray}  image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYKGRAY { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /yis width string def
+        /mis width string def
+        /kis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop 
+          cf mis readhexstring pop 
+          cf yis readhexstring pop 
+          cf kis readhexstring pop width cgray}  image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPGRAY { 
+	8 {fakecolorsetup} COMMONBITMAP
+	} bind def
+/BITMAPGRAYc { 
+	8 {fakecolorsetup} COMMONBITMAPc
+	} bind def
+/ENDBITMAP {
+	} bind def
+end 
+	/ALDmatrix matrix def ALDmatrix currentmatrix pop
+/StartALD {
+	/ALDsave save def
+	 savematrix
+	 ALDmatrix setmatrix
+	} bind def
+/InALD {
+	 restorematrix
+	} bind def
+/DoneALD {
+	 ALDsave restore
+	} bind def
+/I { setdash } bind def
+/J { [] 0 setdash } bind def
+%%EndProlog
+%%BeginSetup
+(5.0) FMVERSION
+1 1 0 0 612 792 0 1 9 FMDOCUMENT
+0 0 /Times-Bold FMFONTDEFINE
+1 0 /Times-Roman FMFONTDEFINE
+2 0 /Courier-Bold FMFONTDEFINE
+3 0 /Courier FMFONTDEFINE
+4 0 /Times-Italic FMFONTDEFINE
+32 FMFILLS
+0 0 FMFILL
+1 0.1 FMFILL
+2 0.3 FMFILL
+3 0.5 FMFILL
+4 0.7 FMFILL
+5 0.9 FMFILL
+6 0.97 FMFILL
+7 1 FMFILL
+8 <0f1e3c78f0e1c387> FMFILL
+9 <0f87c3e1f0783c1e> FMFILL
+10 <cccccccccccccccc> FMFILL
+11 <ffff0000ffff0000> FMFILL
+12 <8142241818244281> FMFILL
+13 <03060c183060c081> FMFILL
+14 <8040201008040201> FMFILL
+16 1 FMFILL
+17 0.9 FMFILL
+18 0.7 FMFILL
+19 0.5 FMFILL
+20 0.3 FMFILL
+21 0.1 FMFILL
+22 0.03 FMFILL
+23 0 FMFILL
+24 <f0e1c3870f1e3c78> FMFILL
+25 <f0783c1e0f87c3e1> FMFILL
+26 <3333333333333333> FMFILL
+27 <0000ffff0000ffff> FMFILL
+28 <7ebddbe7e7dbbd7e> FMFILL
+29 <fcf9f3e7cf9f3f7e> FMFILL
+30 <7fbfdfeff7fbfdfe> FMFILL
+%%EndSetup
+%%Page: "0" 1
+%%BeginPaperSize: Letter
+%%EndPaperSize
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+108 36 540 47.95 R
+V
+48 54 540 54 2 L
+V
+0.25 H
+2 Z
+0 X
+N
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+0 18 Q
+0 X
+(Resear) 201.56 668 T
+(ch A) 254.21 668 T
+(pplications Pr) 289.26 668 T
+(ogram) 396.45 668 T
+(National Center f) 162.09 628 T
+(or Atmospheric r) 295.61 628 T
+(esear) 428.26 628 T
+(ch) 467.91 628 T
+(RAP / NCAR) 272.51 588 T
+(DIDSS) 297.49 508 T
+(Data Ingest and Distrib) 159.62 468 T
+(uted Ser) 339.77 468 T
+(v) 404.08 468 T
+(er System) 412.9 468 T
+(High-le) 257.97 388 T
+(v) 314.7 388 T
+(el design) 323.52 388 T
+0 14 Q
+(Mik) 288.87 273.67 T
+(e Dixon) 313.63 273.67 T
+(May 19, 1999) 284.14 242.67 T
+1 10 Q
+(File /home/dixon/rap/libs/didss/doc/didss_design.mif) 327.2 98.33 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "0" 1
+%%Page: "1" 2
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(1) 535.5 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+0 14 Q
+0 X
+(1.  Ov) 108 710.67 T
+(er) 143.25 710.67 T
+(view) 155.54 710.67 T
+(.) 181.78 710.67 T
+1 12 Q
+(This document describes the design of the Data Ingest and Distrib) 108 683 T
+(uted Serv) 424.38 683 T
+(er system) 469.86 683 T
+-0.43 (\050DIDSS\051 for data ingest and handling. DIDSS will be used by a number of projects at RAP) 108 669 P
+(for data management and access.) 108 655 T
+0 F
+(1.1. System components.) 108 623 T
+1 F
+(The system is made up of the follo) 108 597 T
+(wing components:) 274.02 597 T
+(\245) 126 577 T
+(the) 144 577 T
+0 F
+( data stor) 158.66 577 T
+(e) 207.11 577 T
+1 F
+(, which comprises data sets stored on disk at locations relati) 212.44 577 T
+(v) 499.1 577 T
+(e to a) 504.92 577 T
+(well-kno) 144 563 T
+(wn point in the \336le system, in much the same w) 186.36 563 T
+(ay as W) 415.24 563 T
+(eb serv) 452.93 563 T
+(er data is) 487.07 563 T
+(or) 144 549 T
+(g) 153.78 549 T
+(anized;) 159.72 549 T
+(\245) 126 529 T
+0 F
+(clients) 144 529 T
+1 F
+( which either need to put data to the store or get data from the store;) 176.66 529 T
+(\245) 126 509 T
+0 F
+(ser) 144 509 T
+(v) 159.2 509 T
+(ers) 165.08 509 T
+1 F
+( which pro) 180.41 509 T
+(vide clients access to the store;) 231.55 509 T
+(\245) 126 489 T
+-0.15 (a) 144 489 P
+0 F
+-0.15 (ser) 152.18 489 P
+-0.15 (v) 167.38 489 P
+-0.15 (er manager) 173.26 489 P
+1 F
+-0.15 (which starts serv) 234.93 489 P
+-0.15 (ers in response to client requests, and pro) 315.1 489 P
+-0.15 (vides) 511.82 489 P
+(information to clients on ho) 144 475 T
+(w to connect to the serv) 277.03 475 T
+(ers;) 391.16 475 T
+(\245) 126 455 T
+(a) 144 455 T
+0 F
+(data mapper) 152.33 455 T
+1 F
+( which k) 217.99 455 T
+(eeps a list of a) 259.2 455 T
+(v) 327.61 455 T
+(ailable data in the store;) 333.31 455 T
+(\245) 126 435 T
+(a) 144 435 T
+0 F
+(scout) 152.33 435 T
+1 F
+( which searches through the store to k) 178.99 435 T
+(eep the data mapper up to date;) 360.5 435 T
+(\245) 126 415 T
+(a) 144 415 T
+0 F
+(janitor) 152.33 415 T
+1 F
+( which cleans up the store, if required, compressing or remo) 187.66 415 T
+(ving \336les to) 475.42 415 T
+(k) 144 401 T
+(eep disk space a) 149.88 401 T
+(v) 227.28 401 T
+(ailable for ne) 232.98 401 T
+(w data;) 295.99 401 T
+(\245) 126 381 T
+(a) 144 381 T
+0 F
+(system monitor) 152.33 381 T
+1 F
+( which presents diagnostic system status information to the user) 231.31 381 T
+(.) 536.96 381 T
+-0.06 (The use of serv) 108 355 P
+-0.06 (ers allo) 181.27 355 P
+-0.06 (ws \0501\051 distrib) 215.9 355 P
+-0.06 (uted access to data and \0502\051 distrib) 279.53 355 P
+-0.06 (uted intelligence, by) 439.54 355 P
+(hiding from the client unnecessary details about the data set.) 108 341 T
+(Communication within the system is done either via the \336le system or TCP/IP sock) 108 315 T
+(ets.) 507.55 315 T
+(The \324hidden\325 components which glue the system together are the function calls which the) 108 301 T
+(v) 108 287 T
+(arious components mak) 113.7 287 T
+(e to communicate with each other) 227.57 287 T
+(.) 389.21 287 T
+-0.29 (A data set is referenced by a Uniform Record Locator \050URL\051 similar to those used for http) 108 261 P
+(and ftp access on the W) 108 247 T
+(eb) 221.34 247 T
+(.) 232.19 247 T
+0 F
+(1.2. Shar) 108 215 T
+(ed data r) 153.46 215 T
+(egion.) 199.24 215 T
+1 F
+(A) 108 189 T
+0 F
+(shar) 119.66 189 T
+(ed data r) 142.12 189 T
+(egion) 187.9 189 T
+1 F
+( \050SDR\051 is an) 215.23 189 T
+(y netw) 274.72 189 T
+(ork) 306.92 189 T
+(ed re) 322.8 189 T
+(gion with suf) 346.27 189 T
+(\336cient bandwidth for ef) 409.31 189 T
+(\336-) 521.99 189 T
+(cient communication between distrib) 108 175 T
+(uted serv) 285.41 175 T
+(ers. Generally this means a f) 328.88 175 T
+(ast LAN, \050at) 465.4 175 T
+(least 10 mbit/s\051, although slo) 108 161 T
+(wer links may be included in the SDR if the performance) 246.71 161 T
+(across those links is satisf) 108 147 T
+(actory for the needs of the project.) 231.88 147 T
+(The system may be contained on a single host or spread across multiple hosts.) 108 121 T
+-0.02 (In a single host system, the SDR encompasses only that single host. In such cases all data) 108 95 P
+(sets are local.) 108 81 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "1" 2
+%%Page: "2" 3
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(2) 535.5 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+1 12 Q
+0 X
+(In multiple host systems, the SDR includes all hosts. A cop) 108 712 T
+(y of the serv) 392.56 712 T
+(er manager) 452.03 712 T
+(, data) 505.19 712 T
+(mapper) 108 698 T
+(, scout and janitor runs on each host. Data sets and their serv) 143.51 698 T
+(ers are distrib) 433.94 698 T
+(uted) 499.02 698 T
+-0.22 (across the SDR. All data mappers within the system are synchronized - when a mapper on) 108 684 P
+(a gi) 108 670 T
+(v) 125.36 670 T
+(en host recei) 131.18 670 T
+(v) 191.53 670 T
+(es updated information about a data set it communicates that informa-) 197.35 670 T
+(tion to the other mappers in the SDR.) 108 656 T
+(Figure 1 sho) 108 630 T
+(ws the components for a single-host system. Each of these components is) 167.7 630 T
+(described in detail, along with their interactions, later in the document.) 108 238 T
+0 F
+(1.3. Byte-ordering) 108 206 T
+(.) 200.81 206 T
+1 F
+(All data in system is represented in big-endian \050XDR\051 byte order) 108 180 T
+(. This applies to data in) 418.62 180 T
+(the store and to messages passed.) 108 166 T
+0 14 Q
+(2.  Unif) 108 125.17 T
+(orm Record Locators - URLs.) 151.6 125.17 T
+1 12 Q
+(Required data services are speci\336ed using a URL-style address.) 108 97.5 T
+(The URL syntax is:) 108 71.5 T
+108 63 540 720 C
+108 255.74 540 626 C
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0.5 H
+0 Z
+0 X
+0 0 0 1 0 0 0 K
+90 450 37.86 13.93 226.64 446.39 A
+1 10 Q
+(serv) 214.5 442.3 T
+(er) 231.01 442.3 T
+90 450 37.86 13.93 403.89 387.89 A
+(client get\050\051) 382.09 383.8 T
+90 450 37.86 13.93 339.09 530.55 A
+(data mapper) 314.52 526.46 T
+117.83 269.33 531.83 296.33 R
+7 X
+V
+1 12 Q
+0 X
+(Figure 1. Components in a single-host system.) 213.5 288.33 T
+309.09 465.91 373.38 493.77 R
+N
+1 10 Q
+(data store) 321.93 474.64 T
+90 450 37.86 13.93 225.18 508.48 A
+(serv) 194.57 504.39 T
+(er manager) 211.08 504.39 T
+90 450 37.86 13.93 439.29 505.09 A
+(scout) 428.73 501 T
+90 450 37.86 13.93 438.89 450.22 A
+(janitor) 425.84 446.12 T
+90 450 37.86 13.93 338.52 584.34 A
+(system monitor) 307.54 580.25 T
+389.38 551.07 461.52 575.54 R
+N
+(Output to user) 396.84 559.89 T
+1 9 Q
+(URL) 167.96 494.38 T
+(URL w/Port) 210.98 359.67 T
+(URL) 262.83 433.42 T
+(URL) 168 520.58 T
+212.38 551.82 284.52 576.29 R
+N
+1 10 Q
+(Data ref. list) 223.59 560.64 T
+90 450 37.86 13.93 262.14 386.52 A
+(client put\050\051) 240.06 382.43 T
+J
+336.5 562.56 334.5 562.56 336.5 570.03 338.51 562.56 4 Y
+N
+336.5 562.56 334.5 562.56 336.5 570.03 338.51 562.56 4 Y
+V
+J
+336.5 544.12 336.5 562.31 2 L
+J
+336.5 544.12 336.5 547.87 2 L
+2 Z
+N
+[12.325 10.682] 12.325 I
+336.5 547.87 336.5 558.56 2 L
+N
+J
+336.5 558.56 336.5 562.31 2 L
+N
+J
+291.72 585.29 291.72 587.29 299.2 585.29 291.72 583.28 4 Y
+0 Z
+N
+291.72 585.29 291.72 587.29 299.2 585.29 291.72 583.28 4 Y
+V
+J
+250.79 576.54 250.79 585.29 291.47 585.29 3 L
+J
+250.79 576.54 250.79 580.29 2 L
+2 Z
+N
+[1.442 1.249] 1.442 I
+250.79 580.29 250.79 581.54 2 L
+N
+J
+250.79 581.54 250.79 585.29 254.54 585.29 3 L
+N
+[7.214 6.252] 7.214 I
+254.54 585.29 287.72 585.29 2 L
+N
+J
+287.72 585.29 291.47 585.29 2 L
+N
+J
+420.16 581.85 422.17 581.85 420.16 574.38 418.16 581.85 4 Y
+0 Z
+N
+420.16 581.85 422.17 581.85 420.16 574.38 418.16 581.85 4 Y
+V
+J
+377.04 585.91 420.16 585.91 420.16 582.1 3 L
+J
+377.04 585.91 380.79 585.91 2 L
+2 Z
+N
+[7.745 6.712] 7.745 I
+380.79 585.91 416.41 585.91 2 L
+N
+J
+416.41 585.91 420.16 585.91 420.16 582.1 3 L
+N
+J
+437.75 482.55 435.75 482.55 437.75 490.03 439.76 482.55 4 Y
+0 Z
+N
+437.75 482.55 435.75 482.55 437.75 490.03 439.76 482.55 4 Y
+V
+J
+374 476.62 437.75 476.62 437.75 482.3 3 L
+J
+374 476.62 377.75 476.62 2 L
+2 Z
+N
+[6.75 5.85] 6.75 I
+377.75 476.62 434 476.62 2 L
+N
+J
+434 476.62 437.75 476.62 437.75 482.3 3 L
+N
+J
+348.38 457.8 346.7 457.8 348.38 464.07 350.05 457.8 4 Y
+1 H
+0 Z
+N
+348.38 457.8 346.7 457.8 348.38 464.07 350.05 457.8 4 Y
+V
+J
+400.25 449.75 348.38 449.75 348.38 457.3 3 L
+J
+400.25 449.75 399.75 449.75 2 L
+2 Z
+N
+[0.96 4.799] 0.96 I
+399.75 449.75 348.88 449.75 2 L
+N
+J
+348.88 449.75 348.38 449.75 348.38 450.25 3 L
+N
+[0.596 2.98] 0.596 I
+348.38 450.25 348.38 456.8 2 L
+N
+J
+348.38 456.8 348.38 457.3 2 L
+N
+J
+348.38 510.06 346.37 510.06 348.38 517.53 350.38 510.06 4 Y
+0.5 H
+0 Z
+N
+348.38 510.06 346.37 510.06 348.38 517.53 350.38 510.06 4 Y
+V
+J
+400.88 504.12 348.38 504.12 348.38 509.81 3 L
+J
+400.88 504.12 397.13 504.12 2 L
+2 Z
+N
+[6.959 6.031] 6.959 I
+397.13 504.12 352.13 504.12 2 L
+N
+J
+352.13 504.12 348.38 504.12 348.38 509.81 3 L
+N
+J
+272.82 445.37 272.82 443.7 266.56 445.37 272.82 447.05 4 Y
+1 H
+0 Z
+N
+272.82 445.37 272.82 443.7 266.56 445.37 272.82 447.05 4 Y
+V
+357.06 387.87 357.06 389.55 363.32 387.87 357.06 386.2 4 Y
+N
+357.06 387.87 357.06 389.55 363.32 387.87 357.06 386.2 4 Y
+V
+273.32 445.37 343.38 445.37 343.38 387.87 356.56 387.87 4 L
+N
+253.38 464.19 255.05 464.19 253.38 457.93 251.7 464.19 4 Y
+N
+253.38 464.19 255.05 464.19 253.38 457.93 251.7 464.19 4 Y
+V
+300.81 474.75 300.81 476.43 307.07 474.75 300.81 473.07 4 Y
+N
+300.81 474.75 300.81 476.43 307.07 474.75 300.81 473.07 4 Y
+V
+253.38 464.69 253.38 474.75 300.31 474.75 3 L
+N
+J
+293.68 531.62 293.68 533.63 301.16 531.62 293.68 529.62 4 Y
+0.5 H
+N
+293.68 531.62 293.68 533.63 301.16 531.62 293.68 529.62 4 Y
+V
+J
+282.75 397.87 282.75 531.62 293.43 531.62 3 L
+J
+282.75 397.87 282.75 401.62 2 L
+2 Z
+N
+[7.146 6.193] 7.146 I
+282.75 401.62 282.75 527.87 2 L
+N
+J
+282.75 527.87 282.75 531.62 286.5 531.62 3 L
+N
+[3.672 3.182] 3.672 I
+286.5 531.62 289.68 531.62 2 L
+N
+J
+289.68 531.62 293.43 531.62 2 L
+N
+J
+139 337.87 523.38 602.25 R
+4 H
+0 Z
+4 X
+N
+J
+385.57 531 385.57 528.99 378.09 531 385.57 533 4 Y
+0.5 H
+0 X
+N
+385.57 531 385.57 528.99 378.09 531 385.57 533 4 Y
+V
+J
+449.95 389.12 449.95 387.12 442.47 389.12 449.95 391.13 4 Y
+N
+449.95 389.12 449.95 387.12 442.47 389.12 449.95 391.13 4 Y
+V
+J
+385.82 531 488.38 531 488.38 389.12 450.2 389.12 4 L
+J
+385.82 531 389.57 531 2 L
+2 Z
+N
+[7.878 6.827] 7.878 I
+389.57 531 484.63 531 2 L
+N
+J
+484.63 531 488.38 531 488.38 527.25 3 L
+N
+[7.606 6.592] 7.606 I
+488.38 527.25 488.38 392.88 2 L
+N
+J
+488.38 392.88 488.38 389.12 484.63 389.12 3 L
+N
+[6.67 5.781] 6.67 I
+484.63 389.12 453.95 389.12 2 L
+N
+J
+453.95 389.12 450.2 389.12 2 L
+N
+J
+244 425.93 242.32 425.93 244 432.19 245.68 425.93 4 Y
+1 H
+0 Z
+N
+244 425.93 242.32 425.93 244 432.19 245.68 425.93 4 Y
+V
+244 425.43 244 398.5 2 L
+2 Z
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+1 9 Q
+(URL w/Port) 352.31 357.83 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+(Data) 347.13 393.5 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+(URL) 224.63 415.37 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+(Spa) 188.38 477.25 T
+(wns) 201.74 477.25 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+181.81 514.12 181.81 516.13 189.29 514.12 181.81 512.12 4 Y
+0.5 H
+0 Z
+N
+181.81 514.12 181.81 516.13 189.29 514.12 181.81 512.12 4 Y
+V
+J
+401.5 366.3 399.5 366.3 401.5 373.78 403.51 366.3 4 Y
+N
+401.5 366.3 399.5 366.3 401.5 373.78 403.51 366.3 4 Y
+V
+J
+181.56 514.12 153.38 514.12 153.38 349.12 401.5 349.12 401.5 366.05 5 L
+J
+181.56 514.12 177.81 514.12 2 L
+2 Z
+N
+[7.566 6.558] 7.566 I
+177.81 514.12 157.13 514.12 2 L
+N
+J
+157.13 514.12 153.38 514.12 153.38 510.37 3 L
+N
+[7.36 6.378] 7.36 I
+153.38 510.37 153.38 352.88 2 L
+N
+J
+153.38 352.88 153.38 349.12 157.13 349.12 3 L
+N
+[7.381 6.397] 7.381 I
+157.13 349.12 397.75 349.12 2 L
+N
+J
+397.75 349.12 401.5 349.12 401.5 352.87 3 L
+N
+[10.883 9.432] 10.883 I
+401.5 352.87 401.5 362.3 2 L
+N
+J
+401.5 362.3 401.5 366.05 2 L
+N
+J
+259.63 363.8 257.62 363.8 259.63 371.28 261.63 363.8 4 Y
+0 Z
+N
+259.63 363.8 257.62 363.8 259.63 371.28 261.63 363.8 4 Y
+V
+J
+178.68 506.62 178.68 508.63 186.16 506.62 178.68 504.62 4 Y
+N
+178.68 506.62 178.68 508.63 186.16 506.62 178.68 504.62 4 Y
+V
+J
+259.63 363.55 259.63 353.5 159.63 353.5 159.63 506.62 178.43 506.62 5 L
+J
+259.63 363.55 259.63 359.8 2 L
+2 Z
+N
+[2.951 2.557] 2.951 I
+259.63 359.8 259.63 357.25 2 L
+N
+J
+259.63 357.25 259.63 353.5 255.88 353.5 3 L
+N
+[7.666 6.644] 7.666 I
+255.88 353.5 163.38 353.5 2 L
+N
+J
+163.38 353.5 159.63 353.5 159.63 357.25 3 L
+N
+[7.455 6.461] 7.455 I
+159.63 357.25 159.63 502.87 2 L
+N
+J
+159.63 502.87 159.63 506.62 163.38 506.62 3 L
+N
+[13.046 11.307] 13.046 I
+163.38 506.62 174.68 506.62 2 L
+N
+J
+174.68 506.62 178.43 506.62 2 L
+N
+J
+(Data set info) 351.5 507.87 T
+(URL w/Host) 446.5 379.75 T
+(URL) 390.13 537.19 T
+(Data) 247 414.87 T
+(Data) 232.92 469.17 T
+(Data) 286.75 480.12 T
+(Data set info) 386.5 480.37 T
+J
+(Cleans up) 358.38 454.75 T
+(List) 342.57 560.29 T
+J
+225.21 467.23 226.89 467.23 225.21 460.97 223.53 467.23 4 Y
+1 H
+0 Z
+N
+225.21 467.23 226.89 467.23 225.21 460.97 223.53 467.23 4 Y
+V
+J
+225.21 493.42 225.21 467.73 2 L
+J
+225.21 493.42 225.21 492.92 2 L
+2 Z
+N
+[0.851 4.256] 0.851 I
+225.21 492.92 225.21 468.23 2 L
+N
+J
+225.21 468.23 225.21 467.73 2 L
+N
+(Latest) 255.84 528.83 T
+(data) 262.84 520.46 T
+(info) 263.33 510.83 T
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+174.31 321.93 174.31 323.61 180.57 321.93 174.31 320.25 4 Y
+0 Z
+N
+174.31 321.93 174.31 323.61 180.57 321.93 174.31 320.25 4 Y
+V
+135 321.93 173.81 321.93 2 L
+2 Z
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+1 12 Q
+(Data) 190.83 317.83 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+311.23 321.93 311.23 323.93 318.7 321.93 311.23 319.93 4 Y
+0.5 H
+0 Z
+N
+311.23 321.93 311.23 323.93 318.7 321.93 311.23 319.93 4 Y
+V
+J
+276.33 321.93 310.98 321.93 2 L
+J
+276.33 321.93 280.08 321.93 2 L
+2 Z
+N
+[9.93 8.606] 9.93 I
+280.08 321.93 307.22 321.93 2 L
+N
+J
+307.22 321.93 310.98 321.93 2 L
+N
+(Message) 323.83 317.83 T
+J
+476.81 321.93 476.81 323.61 483.07 321.93 476.81 320.25 4 Y
+1 H
+0 Z
+N
+476.81 321.93 476.81 323.61 483.07 321.93 476.81 320.25 4 Y
+V
+J
+433.33 321.93 476.31 321.93 2 L
+J
+433.33 321.93 433.83 321.93 2 L
+2 Z
+N
+[1.024 5.119] 1.024 I
+433.83 321.93 475.81 321.93 2 L
+N
+J
+475.81 321.93 476.31 321.93 2 L
+N
+(Action) 489.17 317.83 T
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+108 63 540 720 C
+0 0 612 792 C
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "2" 3
+%%Page: "3" 4
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(3) 535.5 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+2 10 Q
+0 X
+( protocol:translator:params//host:port:file?args) 126 713.33 T
+1 12 Q
+(The) 108 690 T
+2 10 Q
+(protocol) 129.66 690 T
+1 12 Q
+( is required. The) 177.66 690 T
+2 10 Q
+(translator) 259.31 690 T
+3 F
+(,) 319.31 690 T
+2 F
+(params) 331.31 690 T
+3 F
+(,) 367.31 690 T
+2 F
+(host) 379.31 690 T
+3 F
+(,) 403.31 690 T
+2 F
+(port, file) 415.31 690 T
+1 12 Q
+(and) 481.31 690 T
+2 10 Q
+(?args) 501.64 690 T
+1 12 Q
+(are optional. All delimiters e) 108 676 T
+(xcept the) 245.47 676 T
+2 10 Q
+(?) 292.13 676 T
+1 12 Q
+( are required.) 298.13 676 T
+(The optional) 108 650 T
+2 10 Q
+(translator) 172 650 T
+1 12 Q
+(, if present, de\336nes the program to be used to translate the data) 231.52 650 T
+(into the desired protocol and form.) 108 636 T
+(The optional) 108 610 T
+2 10 Q
+(params) 172 610 T
+1 12 Q
+(, if present, de\336nes the param \336le to be used by the serv) 208 610 T
+(er or the) 475.1 610 T
+-0 (translator) 108 596 P
+-0 (. The parameter \336le must e) 152.66 596 P
+-0 (xist in the root directory for the data type. The param-) 281.1 596 P
+-0.13 (eter \336le name on disk is computed by concatenating the serv) 108 582 P
+-0.13 (er name and the param name,) 396.49 582 P
+(separated by a period, with the entire name pre\336x) 108 568 T
+(ed with an underscore \050see e) 345.43 568 T
+(xample) 481.54 568 T
+(belo) 108 554 T
+(w\051.) 128.36 554 T
+(If the) 108 528 T
+2 10 Q
+(host) 136.66 528 T
+1 12 Q
+( is missing, the data mapper must be contacted to determine the host name. If) 160.66 528 T
+-0.09 (the) 108 514 P
+2 10 Q
+-0.18 (host) 125.57 514 P
+1 12 Q
+-0.09 ( is local, the service may in some implementations be pro) 149.57 514 P
+-0.09 (vided by reading to and) 424.13 514 P
+(writing from the disk directly) 108 500 T
+(.) 248.54 500 T
+-0.44 (If the) 108 474 P
+2 10 Q
+-0.89 (port) 135.77 474 P
+1 12 Q
+-0.44 ( is missing, the serv) 159.77 474 P
+-0.44 (er manager must be contacted to determine the port number) 252.82 474 P
+-0.44 (.) 534.44 474 P
+(If the) 108 460 T
+2 10 Q
+(port) 136.66 460 T
+1 12 Q
+( is present, contact with the serv) 160.66 460 T
+(er is made via this speci\336ed port.) 314.78 460 T
+-0.41 (The) 108 434 P
+2 10 Q
+-0.81 (?args) 129.25 434 P
+1 12 Q
+-0.41 ( is an open-ended string for passing e) 159.25 434 P
+-0.41 (xtra information to the serv) 335.2 434 P
+-0.41 (er API. It is not) 464.7 434 P
+(used frequently) 108 420 T
+(.) 181.54 420 T
+(URL e) 108 394 T
+(xamples are:) 140.15 394 T
+(\245) 126 374 T
+(V) 144 374 T
+(isible satellite MD) 151.94 374 T
+(V data on vir) 240.13 374 T
+(g) 302.9 374 T
+(a, port to be determined from the serv) 308.84 374 T
+(er man-) 489.96 374 T
+(ager:) 144 360 T
+3 10 Q
+(mdvp:://virga::sat/vis) 147 334 T
+1 12 Q
+(\245) 126 314 T
+-0.08 (IR satellite MD) 144 314 P
+-0.08 (V data - host to be determined from the data mapper) 218.02 314 P
+-0.08 (, port from the) 468 314 P
+(serv) 144 300 T
+(er manager:) 163.81 300 T
+3 10 Q
+(mdvp:://::sat/ir) 151.2 274 T
+1 12 Q
+(\245) 126 254 T
+(V) 144 254 T
+(isible satellite MD) 151.94 254 T
+(V data from vir) 240.13 254 T
+(g) 314.23 254 T
+(a using serv) 320.17 254 T
+(er on port 11000:) 377.32 254 T
+3 10 Q
+(mdvp:://virga:11000:sat/vis) 151.2 228 T
+1 12 Q
+(\245) 126 208 T
+(Colide boundaries SPDB data on babinet, port from the serv) 144 208 T
+(er manager:) 433.13 208 T
+3 10 Q
+( spdbp:://babinet::boundaries/colide) 144 185.33 T
+1 12 Q
+(\245) 126 166 T
+(TIT) 144 166 T
+(AN tz30 SPDB data, on vil, port from the serv) 161.54 166 T
+(er manager) 384.35 166 T
+(, using the) 437.51 166 T
+(T) 144 152 T
+(itan2Symprod translation process e) 150.91 152 T
+(x) 319.72 152 T
+(ecutable with this name running under the) 325.54 152 T
+(\322) 144 138 T
+4 F
+($RAP_D) 149.33 138 T
+(A) 191.57 138 T
+(T) 198.46 138 T
+(A_DIR/spdb/T) 204.53 138 T
+(itan2Sympr) 273.2 138 T
+(od.mult_for) 328 138 T
+(ecasts\323) 383.89 138 T
+1 F
+( parameter \336le:) 419.89 138 T
+3 10 Q
+( spdbp:Titan2Symprod:mult_forecasts//vil::titan/tz30) 144 115.33 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "3" 4
+%%Page: "4" 5
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(4) 535.5 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+0 14 Q
+0 X
+(3.  The data stor) 108 710.67 T
+(e.) 205.36 710.67 T
+1 12 Q
+(The data store is made up of \336les stored on disk.) 108 683 T
+0 F
+(3.1. Data types.) 108 651 T
+1 F
+(An) 108 625 T
+(y number of data types may be included in the system. The follo) 122.48 625 T
+(wing data types ha) 431.15 625 T
+(v) 520.56 625 T
+(e) 526.38 625 T
+(already been identi\336ed:) 108 611 T
+(\245) 126 591 T
+(mdv - gridded data in MD) 144 591 T
+(V format;) 269.17 591 T
+(\245) 126 571 T
+(spdb - symbolic product data in SPDB format;) 144 571 T
+(\245) 126 551 T
+(titan - storm track data in TIT) 144 551 T
+(AN format;) 285.53 551 T
+(\245) 126 531 T
+(grib - gridded data in grib format;) 144 531 T
+(\245) 126 511 T
+(cedric - gridded data in Cedric format.) 144 511 T
+(Other \336le types may be added as required.) 108 485 T
+0 F
+(3.2. Dir) 108 453 T
+(ectory structur) 146.11 453 T
+(e.) 222.86 453 T
+1 F
+(The top of the data directory tree is de\336ned by the en) 108 427 T
+(vironment v) 361.8 427 T
+(ariable) 419.83 427 T
+3 10 Q
+($RAP_DATA_DIR) 455.48 427 T
+1 12 Q
+(.) 533.48 427 T
+-0.12 (The v) 108 401 P
+-0.12 (arious main data types are stored in subdirectories of) 135.24 401 P
+3 10 Q
+-0.25 ($RAP_DATA_DIR) 390.41 401 P
+1 12 Q
+-0.12 (. F) 468.41 401 P
+-0.12 (or e) 480.77 401 P
+-0.12 (xample,) 498.8 401 P
+(you could e) 108 387 T
+(xpect to see the follo) 163.81 387 T
+(wing subdirectories:) 263.5 387 T
+3 10 Q
+($RAP_DATA_DIR/mdv) 126 367 T
+1 12 Q
+( - all mdv data) 228 367 T
+3 10 Q
+($RAP_DATA_DIR/spdb) 126 349 T
+1 12 Q
+( - all spdb data) 234 349 T
+3 10 Q
+($RAP_DATA_DIR/titan) 126 331 T
+1 12 Q
+( - all titan data) 240 331 T
+3 10 Q
+($RAP_DATA_DIR/grib) 126 313 T
+1 12 Q
+( - all grib data) 234 313 T
+(etc.) 108 289 T
+(The v) 108 263 T
+(arious data sets w) 135.36 263 T
+(ould be stored in subdirectories of these main directories. F) 220.22 263 T
+(or) 504.67 263 T
+(e) 108 249 T
+(xample:) 113.15 249 T
+3 10 Q
+($RAP_DATA_DIR/mdv/sat/vis) 126 229 T
+1 12 Q
+(- visible satellite data) 282 229 T
+3 10 Q
+($RAP_DATA_DIR/mdv/radarCart) 126 211 T
+1 12 Q
+( - Cartesian radar data) 288 211 T
+3 10 Q
+($RAP_DATA_DIR/spdb/boundaries) 126 193 T
+1 12 Q
+( - colide-deri) 300 193 T
+(v) 361.68 193 T
+(ed boundaries) 367.5 193 T
+3 10 Q
+($RAP_DATA_DIR/spdb/ltg) 126 175 T
+1 12 Q
+( - lightning) 258 175 T
+3 10 Q
+($RAP_DATA_DIR/spdb/surface/metar) 126 157 T
+1 12 Q
+( - MET) 318 157 T
+(ARs) 352.21 157 T
+3 10 Q
+($RAP_DATA_DIR/titan/tz30) 126 139 T
+1 12 Q
+( - TIT) 270 139 T
+(AN 30dBZ storm data) 297.54 139 T
+0 F
+(3.3. Data dir) 108 109 T
+(ectory and \336le names.) 171.78 109 T
+1 F
+-0.15 (The names of all special non-data \336les, such as parameter \336les, should start with an under-) 108 83 P
+(score. This will safe) 108 69 T
+(guard them from compression or remo) 204.47 69 T
+(v) 389.26 69 T
+(al by the janitor) 394.96 69 T
+(.) 469.96 69 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "4" 5
+%%Page: "5" 6
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(5) 535.5 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+1 12 Q
+0 X
+(The directories and \336les within a data store may be named using an) 108 712 T
+(y con) 431.1 712 T
+(v) 456.95 712 T
+(ention. Ho) 462.77 712 T
+(w-) 513.13 712 T
+(e) 108 698 T
+(v) 113.03 698 T
+(er) 118.85 698 T
+(, in order to mak) 127.69 698 T
+(e optimum used of generic serv) 207.23 698 T
+(er and data library functions, the fol-) 358.02 698 T
+(lo) 108 684 T
+(wing con) 117.04 684 T
+(v) 160.88 684 T
+(entions should be observ) 166.7 684 T
+(ed where possible.) 285.52 684 T
+0 F
+(3.3.1  One set of \336les per day) 126 652 T
+(.) 271.49 652 T
+1 F
+(In this case all of the \336les reside in the data set directory) 126 626 T
+(. The \336les should be named:) 395.17 626 T
+4 F
+(yyyymmdd.e) 144 602 T
+(xt,) 202.73 602 T
+1 F
+(where) 126 582 T
+4 F
+(yyyy) 158.32 582 T
+1 F
+( is the year) 179.63 582 T
+(,) 231.47 582 T
+4 F
+(mm) 237.47 582 T
+1 F
+( the month,) 254.8 582 T
+4 F
+(dd) 312.13 582 T
+1 F
+( is the day) 324.13 582 T
+(, and) 372.35 582 T
+4 F
+(e) 398.68 582 T
+(xt) 403.76 582 T
+1 F
+( is the appropriate e) 412.43 582 T
+(xten-) 506.89 582 T
+(sion.) 126 570 T
+-0 (F) 126 552 P
+-0 (or e) 132.49 552 P
+-0 (xample, SPDB \336les are stored in this manner using) 150.63 552 P
+4 F
+-0 (yyyymmdd.indx) 398.58 552 P
+1 F
+-0 ( for the inde) 472.88 552 P
+-0 (x) 531.01 552 P
+(\336les and) 126 540 T
+4 F
+(yyyymmdd.data) 169.33 540 T
+1 F
+( for the data \336les.) 244.31 540 T
+0 F
+(3.3.2  Multiple \336les per day) 126 510 T
+(.) 264.17 510 T
+1 F
+(In this case the \336les for a particular day reside in a subdirectory) 126 484 T
+(, which should be) 429.82 484 T
+(named:) 126 472 T
+4 F
+(yyyymmdd/) 144 448 T
+1 F
+(W) 126 428 T
+(ithin that directory) 136.85 428 T
+(, the \336les should be named:) 225.4 428 T
+4 F
+(hhmmss.e) 144 404 T
+(xt) 190.75 404 T
+1 F
+(where) 126 384 T
+4 F
+(hh) 158.32 384 T
+1 F
+( is the hour) 170.32 384 T
+(,) 223.5 384 T
+4 F
+(mm) 229.5 384 T
+1 F
+( the minute and) 246.83 384 T
+4 F
+(ss) 324.16 384 T
+1 F
+( the second.) 333.49 384 T
+(F) 126 366 T
+(or e) 132.49 366 T
+(xample, radar MD) 150.64 366 T
+(V \336les are normally stored in this manner) 238.46 366 T
+(. The \336le:) 437.45 366 T
+(mdv/radarCart/19980623/152321.mdv) 144 342 T
+(is a cartesian radar v) 126 322 T
+(olume \336le for 15:23:21 UCT on 23 June 1998.) 224.39 322 T
+0 F
+(3.3.3  Multiple \336les per day) 126 292 T
+(, with multiple f) 264.35 292 T
+(or) 345.38 292 T
+(ecast times.) 356.5 292 T
+1 F
+-0.02 (Some data sets, such as model data, contain forecasts at multiple lead times created at) 126 266 P
+(multiple generate times.) 126 254 T
+(In this case the \336les generated on a particular day reside in a subdirectory) 126 236 T
+(, which) 477.47 236 T
+(should be named:) 126 224 T
+4 F
+(yyyymmdd/) 144 200 T
+1 F
+-0.43 (W) 126 180 P
+-0.43 (ithin that directory) 136.85 180 P
+-0.43 (, there is a subdirectory for each generate time. The subdirectories) 224.53 180 P
+(should be named:) 126 168 T
+4 F
+(g_hhmmss/) 144 144 T
+1 F
+(where the \324) 126 124 T
+4 F
+(g) 179.98 124 T
+1 F
+(\325 indicates that this is a generate time subdirectory) 185.98 124 T
+(.) 426.49 124 T
+(W) 126 106 T
+(ithin that directory) 136.85 106 T
+(, the \336les should be named:) 225.4 106 T
+4 F
+(f_ssssssss.e) 144 82 T
+(xt) 198.77 82 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "5" 6
+%%Page: "6" 7
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(6) 535.5 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+1 12 Q
+0 X
+-0.22 (where the \324) 126 712 P
+4 F
+-0.22 (f) 179.54 712 P
+1 F
+-0.22 (\325 indicates that this is a forecast time \336le. The 8-digit numerical name indi-) 183.54 712 P
+(cates the forecast lead time in seconds, which is v) 126 700 T
+(alid for lead times of up to 3 years.) 364.32 700 T
+(F) 126 682 T
+(or e) 132.49 682 T
+(xample, the \336le:) 150.64 682 T
+(mdv/mm5/19980725/g_150000/f_00007200.mdv) 144 658 T
+-0.47 (is a 2-hour \0507200 seconds\051 MM5 model forecast generated using data at 15:00:00 UCT) 126 638 P
+(on 25 July 1998.) 126 626 T
+0 F
+(3.3.4  Compr) 126 596 T
+(essed \336les.) 192.44 596 T
+1 F
+-0.04 (The janitor will compress \336les to sa) 126 570 P
+-0.04 (v) 296.84 570 P
+-0.04 (e disk space. Therefore, an) 302.66 570 P
+-0.04 (y of the data \336les may) 430.93 570 P
+(be compressed using gzip, which will add the \324.gz\325 e) 126 558 T
+(xtension to the name.) 378.11 558 T
+0 14 Q
+(4.  Clients.) 108 519.17 T
+1 12 Q
+(A client is an) 108 491.5 T
+(y program which requires service from DIDSS. The primary operations are) 171.48 491.5 T
+(\0501\051 putting data to the data store and \0502\051 getting data from the data store. The details of) 108 477.5 T
+-0.46 (these functions are go) 108 463.5 P
+-0.46 (v) 211.41 463.5 P
+-0.46 (erned by the data type. Ne) 217.23 463.5 P
+-0.46 (v) 340.58 463.5 P
+-0.46 (ertheless a number of details apply to all) 346.4 463.5 P
+(such operations, re) 108 449.5 T
+(g) 198.13 449.5 T
+(ardless of data type.) 204.07 449.5 T
+0 F
+(4.1. The put function.) 108 417.5 T
+1 F
+(A client controls the put function using the URL. The follo) 108 391.5 T
+(wing sequence is follo) 390.68 391.5 T
+(wed:) 498.04 391.5 T
+(\245) 126 371.5 T
+0 F
+-0.38 (host) 144 371.5 P
+1 F
+-0.38 (: if the host is not speci\336ed, the client contacts the local data mapper to resolv) 165.34 371.5 P
+-0.38 (e) 532.05 371.5 P
+(the host name. In most cases the host is kno) 144 357.5 T
+(wn, since most components of the) 353.69 357.5 T
+(system put the data to a pre-determined location;) 144 343.5 T
+(\245) 126 323.5 T
+0 F
+(port) 144 323.5 T
+1 F
+(: if the port is not speci\336ed, the client contacts the serv) 166 323.5 T
+(er manager at the spec-) 427.79 323.5 T
+-0.42 (i\336ed host to resolv) 144 309.5 P
+-0.42 (e the port number) 231.58 309.5 P
+-0.42 (. The manager starts the rele) 314.65 309.5 P
+-0.42 (v) 448.24 309.5 P
+-0.42 (ant serv) 453.94 309.5 P
+-0.42 (er if it not) 491 309.5 P
+(already running. It adds the port to the URL and returns the resolv) 144 295.5 T
+(ed URL to the) 461.44 295.5 T
+(client;) 144 281.5 T
+(\245) 126 261.5 T
+0 F
+(ser) 144 261.5 T
+(v) 159.2 261.5 T
+(er) 165.08 261.5 T
+1 F
+(: the serv) 175.74 261.5 T
+(er is contacted and the put message is passed to the serv) 219.55 261.5 T
+(er for) 487.66 261.5 T
+(action.) 144 247.5 T
+(If the host is local, the put implementation may choose to write directly to disk instead of) 108 221.5 T
+(contacting the serv) 108 207.5 T
+(er) 198.47 207.5 T
+(.) 207.13 207.5 T
+(In real-time mode, the routine which writes the data to disk also contacts the data mapper) 108 181.5 T
+(and sends it the latest data information. If the serv) 108 167.5 T
+(er writes to disk, its write routine con-) 347.78 167.5 T
+(tacts the mapper) 108 153.5 T
+(. If the client performs a local write, this routine contacts the mapper) 185.99 153.5 T
+(.) 514.6 153.5 T
+(Figure 2 sho) 108 127.5 T
+(ws the communication during a put using a serv) 167.7 127.5 T
+(er) 397.5 127.5 T
+(.) 406.16 127.5 T
+(Figure 3 sho) 108 101.5 T
+(ws the communication during a put which writes directly to disk.) 167.7 101.5 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "6" 7
+%%Page: "7" 8
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(7) 535.5 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+108 63 540 720 C
+108 355.41 540 720 C
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+121.67 601.17 526.67 707.83 R
+4 H
+0 Z
+4 X
+0 0 0 1 0 0 0 K
+N
+121.67 458.16 526.67 591.5 R
+N
+0.5 H
+0 X
+90 450 37.86 15.4 288.31 507.83 A
+1 10 Q
+(serv) 276.17 503.55 T
+(er) 292.68 503.55 T
+90 450 37.86 15.4 446.59 672.8 A
+(data mapper) 422.02 668.53 T
+116.17 370.67 530.17 416.83 R
+7 X
+V
+1 12 Q
+0 X
+(Figure 2. Communications during a put\050\051 using a serv) 188.6 408.83 T
+(er) 446.07 408.83 T
+(.) 454.73 408.83 T
+152.43 490.71 216.71 521.52 R
+N
+1 10 Q
+(data store) 165.27 500.61 T
+90 450 37.86 15.4 286.85 567.22 A
+(serv) 256.24 562.94 T
+(er manager) 272.75 562.94 T
+1 9 Q
+(URL) 329.62 574.58 T
+(URL w/Port) 320.98 657.51 T
+(URL) 335.5 513.61 T
+90 450 37.86 15.4 176.64 651.01 A
+1 10 Q
+(client put\050\051) 154.56 646.73 T
+1 9 Q
+(URL) 388.79 681.12 T
+(Spa) 250.04 542.18 T
+(wns) 263.41 542.18 T
+(URL w/Host) 320.55 678.59 T
+(Data) 336.75 495.59 T
+J
+286.88 530.01 288.55 530.01 286.88 523.75 285.2 530.01 4 Y
+1 H
+N
+286.88 530.01 288.55 530.01 286.88 523.75 285.2 530.01 4 Y
+V
+J
+286.88 552 286.88 530.51 2 L
+J
+286.88 552 286.88 551.5 2 L
+2 Z
+N
+[0.891 4.454] 0.891 I
+286.88 551.5 286.88 531.01 2 L
+N
+J
+286.88 531.01 286.88 530.51 2 L
+N
+(Latest data info) 341.01 477.57 T
+J
+173.47 442.43 173.47 444.11 179.74 442.43 173.47 440.75 4 Y
+0 Z
+N
+173.47 442.43 173.47 444.11 179.74 442.43 173.47 440.75 4 Y
+V
+134.17 442.43 172.97 442.43 2 L
+2 Z
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+1 12 Q
+(Data) 190 438.33 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+310.39 442.43 310.39 444.43 317.87 442.43 310.39 440.43 4 Y
+0.5 H
+0 Z
+N
+310.39 442.43 310.39 444.43 317.87 442.43 310.39 440.43 4 Y
+V
+J
+275.5 442.43 310.14 442.43 2 L
+J
+275.5 442.43 279.25 442.43 2 L
+2 Z
+N
+[9.929 8.605] 9.929 I
+279.25 442.43 306.39 442.43 2 L
+N
+J
+306.39 442.43 310.14 442.43 2 L
+N
+(Message) 323 438.33 T
+J
+475.98 442.43 475.98 444.11 482.24 442.43 475.98 440.75 4 Y
+1 H
+0 Z
+N
+475.98 442.43 475.98 444.11 482.24 442.43 475.98 440.75 4 Y
+V
+J
+432.5 442.43 475.48 442.43 2 L
+J
+432.5 442.43 433 442.43 2 L
+2 Z
+N
+[1.024 5.119] 1.024 I
+433 442.43 474.97 442.43 2 L
+N
+J
+474.97 442.43 475.48 442.43 2 L
+N
+(Action) 488.33 438.33 T
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+215.33 606.38 310.93 689.33 R
+0.5 H
+0 Z
+N
+(\245) 220.33 674.61 T
+(resolv) 238.33 674.61 T
+(e host;) 267.48 674.61 T
+(\245) 220.33 654.61 T
+(resolv) 238.33 654.61 T
+(e port) 267.48 654.61 T
+(\245) 220.33 634.61 T
+(put data) 238.33 634.61 T
+90 450 37.86 15.4 445.42 505.43 A
+1 10 Q
+(data mapper) 420.85 501.15 T
+J
+322.61 672.93 322.61 670.92 315.13 672.93 322.61 674.93 4 Y
+N
+322.61 672.93 322.61 670.92 315.13 672.93 322.61 674.93 4 Y
+V
+J
+399.89 672.93 399.89 674.93 407.37 672.93 399.89 670.92 4 Y
+N
+399.89 672.93 399.89 674.93 407.37 672.93 399.89 670.92 4 Y
+V
+J
+322.86 672.93 399.64 672.93 2 L
+J
+322.86 672.93 326.61 672.93 2 L
+2 Z
+N
+[8.314 7.205] 8.314 I
+326.61 672.93 395.89 672.93 2 L
+N
+J
+395.89 672.93 399.64 672.93 2 L
+N
+J
+322.25 651.73 322.25 649.72 314.77 651.73 322.25 653.73 4 Y
+0 Z
+N
+322.25 651.73 322.25 649.72 314.77 651.73 322.25 653.73 4 Y
+V
+J
+330.03 567.07 330.03 565.07 322.55 567.07 330.03 569.08 4 Y
+N
+330.03 567.07 330.03 565.07 322.55 567.07 330.03 569.08 4 Y
+V
+J
+322.5 651.73 394.17 651.73 394.17 567.07 330.28 567.07 4 L
+J
+322.5 651.73 326.25 651.73 2 L
+2 Z
+N
+[7.7 6.673] 7.7 I
+326.25 651.73 390.42 651.73 2 L
+N
+J
+390.42 651.73 394.17 651.73 394.17 647.98 3 L
+N
+[7.564 6.556] 7.564 I
+394.17 647.98 394.17 570.83 2 L
+N
+J
+394.17 570.83 394.17 567.07 390.42 567.07 3 L
+N
+[6.767 5.864] 6.767 I
+390.42 567.07 334.03 567.07 2 L
+N
+J
+334.03 567.07 330.28 567.07 2 L
+N
+J
+332.36 507.03 332.36 505.35 326.1 507.03 332.36 508.7 4 Y
+1 H
+0 Z
+N
+332.36 507.03 332.36 505.35 326.1 507.03 332.36 508.7 4 Y
+V
+319.17 630.53 368.33 630.53 368.33 507.03 332.86 507.03 4 L
+2 Z
+N
+223.19 507.95 223.19 506.27 216.93 507.95 223.19 509.63 4 Y
+0 Z
+N
+223.19 507.95 223.19 506.27 216.93 507.95 223.19 509.63 4 Y
+V
+250 507.95 223.69 507.95 2 L
+2 Z
+N
+J
+447.5 481.32 445.82 481.32 447.5 487.58 449.18 481.32 4 Y
+0 Z
+N
+447.5 481.32 445.82 481.32 447.5 487.58 449.18 481.32 4 Y
+V
+J
+287.5 492.28 287.5 472 447.5 472 447.5 480.82 4 L
+J
+287.5 492.28 287.5 488.78 2 L
+2 Z
+N
+[13.28 13.28] 13.28 I
+287.5 488.78 287.5 475.5 2 L
+N
+J
+287.5 475.5 287.5 472 291 472 3 L
+N
+[7.286 7.286] 7.286 I
+291 472 444 472 2 L
+N
+J
+444 472 447.5 472 447.5 475.5 3 L
+N
+[1.822 1.822] 1.822 I
+447.5 475.5 447.5 477.32 2 L
+N
+J
+447.5 477.32 447.5 480.82 2 L
+N
+J
+445.83 648.15 444.16 648.15 445.83 654.41 447.51 648.15 4 Y
+0 Z
+N
+445.83 648.15 444.16 648.15 445.83 654.41 447.51 648.15 4 Y
+V
+J
+445.83 521.77 445.83 647.65 2 L
+J
+445.83 521.77 445.83 525.27 2 L
+2 Z
+N
+[6.993 6.993] 6.993 I
+445.83 525.27 445.83 644.14 2 L
+N
+J
+445.83 644.14 445.83 647.65 2 L
+N
+1 9 Q
+(Latest data info) 450.68 633.7 T
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+(Data) 225.59 515.31 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+1 12 Q
+(Local host) 130 695.33 T
+(Data host) 130.95 577.83 T
+J
+108 63 540 720 C
+0 0 612 792 C
+108 63 540 720 C
+108 86.65 540 355.41 C
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+121.67 184.9 526.67 319.07 R
+4 H
+0 Z
+4 X
+0 0 0 1 0 0 0 K
+N
+0.5 H
+0 X
+90 450 37.86 15.4 446.59 284.04 A
+1 10 Q
+(data mapper) 422.02 279.76 T
+117.83 110.24 531.83 138.07 R
+7 X
+V
+1 12 Q
+0 X
+(Figure 3. Communications during a put\050\051 which writes directly to disk.) 154.84 130.07 T
+411.59 197.78 475.88 228.59 R
+N
+1 10 Q
+(data store) 424.44 207.68 T
+90 450 37.86 15.4 168.07 263.68 A
+(client put\050\051) 145.99 259.4 T
+1 9 Q
+(URL) 387.36 289.5 T
+169.31 162 169.31 163.68 175.57 162 169.31 160.33 4 Y
+1 H
+N
+169.31 162 169.31 163.68 175.57 162 169.31 160.33 4 Y
+V
+130 162 168.81 162 2 L
+2 Z
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+1 12 Q
+(Data) 185.83 157.91 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+306.22 162 306.22 164.01 313.7 162 306.22 160 4 Y
+0.5 H
+0 Z
+N
+306.22 162 306.22 164.01 313.7 162 306.22 160 4 Y
+V
+J
+271.33 162 305.97 162 2 L
+J
+271.33 162 275.08 162 2 L
+2 Z
+N
+[9.929 8.605] 9.929 I
+275.08 162 302.22 162 2 L
+N
+J
+302.22 162 305.97 162 2 L
+N
+(Message) 318.83 157.91 T
+J
+J
+206.76 219.05 320.93 302 R
+0 Z
+N
+(\245) 211.76 287.28 T
+(resolv) 229.76 287.28 T
+(e host;) 258.91 287.28 T
+(\245) 211.76 267.28 T
+(put data) 229.76 267.28 T
+(\245) 211.76 247.28 T
+(update latest info) 229.76 247.28 T
+J
+332.73 284.17 332.73 282.16 325.25 284.17 332.73 286.17 4 Y
+N
+332.73 284.17 332.73 282.16 325.25 284.17 332.73 286.17 4 Y
+V
+J
+399.89 284.17 399.89 286.17 407.37 284.17 399.89 282.16 4 Y
+N
+399.89 284.17 399.89 286.17 407.37 284.17 399.89 282.16 4 Y
+V
+J
+332.98 284.17 399.64 284.17 2 L
+J
+332.98 284.17 336.73 284.17 2 L
+2 Z
+N
+[7.099 6.153] 7.099 I
+336.73 284.17 395.89 284.17 2 L
+N
+J
+395.89 284.17 399.64 284.17 2 L
+N
+1 9 Q
+(Latest data info) 384.01 251.61 T
+J
+(Data) 381.42 219.05 T
+1 12 Q
+(Local host) 130 306.57 T
+J
+404.31 210.74 404.31 212.42 410.57 210.74 404.31 209.06 4 Y
+1 H
+0 Z
+N
+404.31 210.74 404.31 212.42 410.57 210.74 404.31 209.06 4 Y
+V
+322.86 268.24 377.26 268.24 377.26 210.74 403.81 210.74 4 L
+2 Z
+N
+J
+445.83 258.38 444.16 258.38 445.83 264.64 447.51 258.38 4 Y
+0 Z
+N
+445.83 258.38 444.16 258.38 445.83 264.64 447.51 258.38 4 Y
+V
+J
+330.83 246.57 445.83 246.57 445.83 257.88 3 L
+J
+330.83 246.57 334.33 246.57 2 L
+2 Z
+N
+[7.2 7.2] 7.2 I
+334.33 246.57 442.33 246.57 2 L
+N
+J
+442.33 246.57 445.83 246.57 445.83 250.07 3 L
+N
+[4.307 4.307] 4.307 I
+445.83 250.07 445.83 254.38 2 L
+N
+J
+445.83 254.38 445.83 257.88 2 L
+N
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+1 9 Q
+(URL w/Host) 324.98 290.58 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 C
+0 0 612 792 C
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "7" 8
+%%Page: "8" 9
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(8) 535.5 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+0 12 Q
+0 X
+(4.2. The get function.) 108 712 T
+1 F
+(The get function in) 108 686 T
+(v) 199.18 686 T
+(olv) 204.94 686 T
+(es similar steps:) 220.09 686 T
+(\245) 126 666 T
+0 F
+-0.38 (host) 144 666 P
+1 F
+-0.38 (: if the host is not speci\336ed, the client contacts the local data mapper to resolv) 165.34 666 P
+-0.38 (e) 532.05 666 P
+(the host name. The URL is passed to the data mapper which \336lls in the host and) 144 652 T
+(returns the resolv) 144 638 T
+(ed URL;) 227.14 638 T
+(\245) 126 618 T
+0 F
+(port) 144 618 T
+1 F
+(: if the port is not speci\336ed, the client contacts the serv) 166 618 T
+(er manager at the spec-) 427.79 618 T
+-0.42 (i\336ed host to resolv) 144 604 P
+-0.42 (e the port number) 231.58 604 P
+-0.42 (. The manager starts the rele) 314.65 604 P
+-0.42 (v) 448.24 604 P
+-0.42 (ant serv) 453.94 604 P
+-0.42 (er if it not) 491 604 P
+(already running. It adds the port to the URL and returns the resolv) 144 590 T
+(ed URL to the) 461.44 590 T
+(client;) 144 576 T
+(\245) 126 556 T
+0 F
+(ser) 144 556 T
+(v) 159.2 556 T
+(er) 165.08 556 T
+1 F
+(: the serv) 175.74 556 T
+(er is contacted, and the get message is passed to the serv) 219.55 556 T
+(er for) 489.98 556 T
+(action. The serv) 144 542 T
+(er carries out the request and returns the data to the client.) 220.8 542 T
+(If the host is local, the get implementation may choose to read directly from disk instead) 108 516 T
+(of contacting the serv) 108 502 T
+(er) 211.46 502 T
+(.) 220.13 502 T
+(Figure 4 sho) 108 476 T
+(ws the communication during a get using a serv) 167.7 476 T
+(er) 396.83 476 T
+(. Figure 5 sho) 405.49 476 T
+(ws the com-) 471.19 476 T
+(munication during a get which reads directly from disk.) 108 462 T
+108 63 540 720 C
+108 118.07 540 458 C
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+121.67 339.88 526.67 445.83 R
+4 H
+0 Z
+4 X
+0 0 0 1 0 0 0 K
+N
+121.67 215.5 526.67 324.5 R
+N
+0.5 H
+0 X
+90 450 37.86 15.4 288.31 245.83 A
+1 10 Q
+(serv) 276.17 241.55 T
+(er) 292.68 241.55 T
+90 450 37.86 15.4 446.59 410.8 A
+(data mapper) 422.02 406.52 T
+116.17 136.67 530.17 154.84 R
+7 X
+V
+1 12 Q
+0 X
+(Figure 4. Communications during a get\050\051 using a serv) 188.93 146.84 T
+(er) 445.73 146.84 T
+(.) 454.4 146.84 T
+152.43 228.71 216.71 259.52 R
+N
+1 10 Q
+(data store) 165.27 238.61 T
+90 450 37.86 15.4 286.85 303.07 A
+(serv) 256.24 298.8 T
+(er manager) 272.75 298.8 T
+1 9 Q
+(URL) 331.05 309.01 T
+(URL w/Port) 318.83 396.22 T
+(URL) 335.5 251.61 T
+90 450 37.86 15.4 176.64 389.01 A
+1 10 Q
+(client get\050\051) 154.84 384.73 T
+1 9 Q
+(URL) 388.79 419.12 T
+(Spa) 250.04 280.18 T
+(wns) 263.41 280.18 T
+(URL w/Host) 319.84 416.59 T
+(Data) 319.42 374.92 T
+J
+286.88 268.01 288.55 268.01 286.88 261.75 285.2 268.01 4 Y
+1 H
+N
+286.88 268.01 288.55 268.01 286.88 261.75 285.2 268.01 4 Y
+V
+J
+286.88 287.43 286.88 268.51 2 L
+J
+286.88 287.43 286.88 286.93 2 L
+2 Z
+N
+[1.054 5.269] 1.054 I
+286.88 286.93 286.88 269.01 2 L
+N
+J
+286.88 269.01 286.88 268.51 2 L
+N
+J
+172.81 189.1 172.81 190.78 179.07 189.1 172.81 187.42 4 Y
+0 Z
+N
+172.81 189.1 172.81 190.78 179.07 189.1 172.81 187.42 4 Y
+V
+133.5 189.1 172.31 189.1 2 L
+2 Z
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+1 12 Q
+(Data) 189.33 185 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+309.72 189.1 309.72 191.1 317.2 189.1 309.72 187.09 4 Y
+0.5 H
+0 Z
+N
+309.72 189.1 309.72 191.1 317.2 189.1 309.72 187.09 4 Y
+V
+J
+274.83 189.1 309.47 189.1 2 L
+J
+274.83 189.1 278.58 189.1 2 L
+2 Z
+N
+[9.929 8.605] 9.929 I
+278.58 189.1 305.72 189.1 2 L
+N
+J
+305.72 189.1 309.47 189.1 2 L
+N
+(Message) 322.33 185 T
+J
+475.31 189.1 475.31 190.78 481.57 189.1 475.31 187.42 4 Y
+1 H
+0 Z
+N
+475.31 189.1 475.31 190.78 481.57 189.1 475.31 187.42 4 Y
+V
+J
+431.83 189.1 474.81 189.1 2 L
+J
+431.83 189.1 432.33 189.1 2 L
+2 Z
+N
+[1.024 5.119] 1.024 I
+432.33 189.1 474.31 189.1 2 L
+N
+J
+474.31 189.1 474.81 189.1 2 L
+N
+(Action) 487.67 185 T
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+215.33 344.38 313.79 427.33 R
+0.5 H
+0 Z
+N
+(\245) 220.33 412.61 T
+(resolv) 238.33 412.61 T
+(e host;) 267.48 412.61 T
+(\245) 220.33 392.61 T
+(resolv) 238.33 392.61 T
+(e port) 267.48 392.61 T
+(\245) 220.33 372.61 T
+(get data) 238.33 372.61 T
+J
+322.61 410.93 322.61 408.92 315.13 410.93 322.61 412.93 4 Y
+N
+322.61 410.93 322.61 408.92 315.13 410.93 322.61 412.93 4 Y
+V
+J
+399.89 410.93 399.89 412.93 407.37 410.93 399.89 408.92 4 Y
+N
+399.89 410.93 399.89 412.93 407.37 410.93 399.89 408.92 4 Y
+V
+J
+322.86 410.93 399.64 410.93 2 L
+J
+322.86 410.93 326.61 410.93 2 L
+2 Z
+N
+[8.314 7.205] 8.314 I
+326.61 410.93 395.89 410.93 2 L
+N
+J
+395.89 410.93 399.64 410.93 2 L
+N
+J
+324.4 389.73 324.4 387.73 316.92 389.73 324.4 391.73 4 Y
+0 Z
+N
+324.4 389.73 324.4 387.73 316.92 389.73 324.4 391.73 4 Y
+V
+J
+331.96 303.64 331.96 301.64 324.49 303.64 331.96 305.65 4 Y
+N
+331.96 303.64 331.96 301.64 324.49 303.64 331.96 305.65 4 Y
+V
+J
+324.65 389.73 394.17 389.73 394.17 303.64 332.21 303.64 4 L
+J
+324.65 389.73 328.4 389.73 2 L
+2 Z
+N
+[7.443 6.45] 7.443 I
+328.4 389.73 390.42 389.73 2 L
+N
+J
+390.42 389.73 394.17 389.73 394.17 385.98 3 L
+N
+[7.704 6.677] 7.704 I
+394.17 385.98 394.17 307.39 2 L
+N
+J
+394.17 307.39 394.17 303.64 390.42 303.64 3 L
+N
+[8.42 7.298] 8.42 I
+390.42 303.64 335.97 303.64 2 L
+N
+J
+335.97 303.64 332.21 303.64 2 L
+N
+J
+327.36 368.53 327.36 366.85 321.1 368.53 327.36 370.21 4 Y
+1 H
+0 Z
+N
+327.36 368.53 327.36 366.85 321.1 368.53 327.36 370.21 4 Y
+V
+332.36 245.03 332.36 243.35 326.1 245.03 332.36 246.7 4 Y
+N
+332.36 245.03 332.36 243.35 326.1 245.03 332.36 246.7 4 Y
+V
+327.86 368.53 368.33 368.53 368.33 245.03 332.86 245.03 4 L
+N
+241.81 245.95 241.81 247.63 248.07 245.95 241.81 244.27 4 Y
+N
+241.81 245.95 241.81 247.63 248.07 245.95 241.81 244.27 4 Y
+V
+241.31 245.95 215 245.95 2 L
+2 Z
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+1 9 Q
+(Data) 225.59 253.31 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+1 12 Q
+(Local host) 130 433.33 T
+(Data host) 131.67 310.83 T
+J
+108 63 540 720 C
+0 0 612 792 C
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "8" 9
+%%Page: "9" 10
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(9) 535.5 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+0 12 Q
+0 X
+(4.3. Rules f) 108 461.41 T
+(or r) 164.36 461.41 T
+(esolving host and port.) 183.8 461.41 T
+1 F
+(F) 108 435.41 T
+(or URL) 114.49 435.41 T
+(\325) 150.38 435.41 T
+(s with an unspeci\336ed hostname, the the data mapper is contacted to obtain the) 153.72 435.41 T
+-0.05 (hostname. F) 108 421.41 P
+-0.05 (or URL) 166.44 421.41 P
+-0.05 (\325) 202.29 421.41 P
+-0.05 (s with an unspeci\336ed port number) 205.62 421.41 P
+-0.05 (, the serv) 367.89 421.41 P
+-0.05 (er manager is contacted to) 411.27 421.41 P
+(obtain the correct port.) 108 407.41 T
+(Both the hostname and port in the URL may contain special k) 108 381.41 T
+(e) 404.86 381.41 T
+(y v) 410 381.41 T
+(alues which determine) 424.7 381.41 T
+(whether or not serv) 108 367.41 T
+(er communications is required.) 200.8 367.41 T
+0 F
+(4.3.1  Special beha) 126 335.41 T
+(vior f) 220.04 335.41 T
+(or URL hostName.) 247.4 335.41 T
+1 F
+(\245) 126 309.41 T
+(if hostname = \322localhost\323,) 144 309.41 T
+4 F
+(server_contact) 273.08 309.41 T
+1 F
+( = f) 344.4 309.41 T
+(alse.) 361.04 309.41 T
+0 F
+(4.3.2  Special beha) 126 277.41 T
+(vior f) 220.04 277.41 T
+(or URL port.) 247.4 277.41 T
+1 F
+(\245) 126 251.41 T
+(if a non-zero port is speci\336ed,) 144 251.41 T
+4 F
+(server_contact) 290.3 251.41 T
+1 F
+( = true, use the user) 361.62 251.41 T
+(-speci\336ed port;) 455.46 251.41 T
+(\245) 126 231.41 T
+(if a port of zero is speci\336ed,) 144 231.41 T
+4 F
+(server_contact) 281.3 231.41 T
+1 F
+( = true, use the port returned from the) 352.62 231.41 T
+(serv) 144 217.41 T
+(er manager;) 163.81 217.41 T
+(\245) 126 197.41 T
+(if the port is left unspeci\336ed,) 144 197.41 T
+4 F
+(server_contact) 284.99 197.41 T
+1 F
+( is determined based on dataset loca-) 356.3 197.41 T
+(tion. If the dataset resides on the local host,) 144 183.41 T
+4 F
+(server_contact) 354.97 183.41 T
+1 F
+( = f) 426.29 183.41 T
+(alse, otherwise) 442.93 183.41 T
+4 F
+(server_contact) 144 169.41 T
+1 F
+( = true.) 215.32 169.41 T
+0 F
+(4.4. Caching the host and port inf) 108 137.41 T
+(ormation.) 279.05 137.41 T
+1 F
+(Contacting the data mapper and serv) 108 111.41 T
+(er manager e) 283.45 111.41 T
+(v) 345.12 111.41 T
+(ery time for host and port information) 350.94 111.41 T
+-0.01 (may incur unacceptable o) 108 97.41 P
+-0.01 (v) 230.74 97.41 P
+-0.01 (erhead in certain situations. In such cases, the put and get func-) 236.56 97.41 P
+(tions may be implemented to cache the host and port information, so that after the initial) 108 83.41 T
+-0.06 (call all remaining calls contact the serv) 108 69.41 P
+-0.06 (er directly) 294.74 69.41 P
+-0.06 (. If the call using the cached information) 342.88 69.41 P
+108 63 540 720 C
+108 487.41 540 720 C
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0.5 H
+0 Z
+0 X
+0 0 0 1 0 0 0 K
+90 450 37.86 15.4 446.59 672.8 A
+1 10 Q
+(data mapper) 422.02 668.53 T
+117.83 499 531.83 526.83 R
+7 X
+V
+1 12 Q
+0 X
+(Figure 5. Communications during a get\050\051 which reads directly from disk.) 150.18 518.83 T
+411.59 586.54 475.88 617.35 R
+N
+1 10 Q
+(data store) 424.44 596.44 T
+90 450 37.86 15.4 168.07 650.3 A
+(client get\050\051) 146.27 646.02 T
+1 9 Q
+(URL) 385.22 680.41 T
+(URL w/Host) 319.84 678.59 T
+169.31 550.76 169.31 552.44 175.57 550.76 169.31 549.09 4 Y
+1 H
+N
+169.31 550.76 169.31 552.44 175.57 550.76 169.31 549.09 4 Y
+V
+130 550.76 168.81 550.76 2 L
+2 Z
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+1 12 Q
+(Data) 185.83 546.67 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+306.22 550.76 306.22 552.77 313.7 550.76 306.22 548.76 4 Y
+0.5 H
+0 Z
+N
+306.22 550.76 306.22 552.77 313.7 550.76 306.22 548.76 4 Y
+V
+J
+271.33 550.76 305.97 550.76 2 L
+J
+271.33 550.76 275.08 550.76 2 L
+2 Z
+N
+[9.929 8.605] 9.929 I
+275.08 550.76 302.22 550.76 2 L
+N
+J
+302.22 550.76 305.97 550.76 2 L
+N
+(Message) 318.83 546.67 T
+J
+J
+206.76 619 310.93 688.62 R
+0 Z
+N
+(\245) 211.76 673.89 T
+(resolv) 229.76 673.89 T
+(e host;) 258.91 673.89 T
+(\245) 211.76 653.89 T
+(get data) 229.76 653.89 T
+J
+322.61 672.93 322.61 670.92 315.13 672.93 322.61 674.93 4 Y
+N
+322.61 672.93 322.61 670.92 315.13 672.93 322.61 674.93 4 Y
+V
+J
+399.89 672.93 399.89 674.93 407.37 672.93 399.89 670.92 4 Y
+N
+399.89 672.93 399.89 674.93 407.37 672.93 399.89 670.92 4 Y
+V
+J
+322.86 672.93 399.64 672.93 2 L
+J
+322.86 672.93 326.61 672.93 2 L
+2 Z
+N
+[8.314 7.205] 8.314 I
+326.61 672.93 395.89 672.93 2 L
+N
+J
+395.89 672.93 399.64 672.93 2 L
+N
+J
+1 9 Q
+(Data) 316.75 642.48 T
+121.67 573.67 526.67 707.83 R
+4 H
+0 Z
+4 X
+N
+1 12 Q
+0 X
+(Local host) 130 695.33 T
+J
+322.48 657 322.48 655.32 316.22 657 322.48 658.68 4 Y
+1 H
+N
+322.48 657 322.48 655.32 316.22 657 322.48 658.68 4 Y
+V
+322.98 657 373.89 657 373.89 599.5 412.5 599.5 4 L
+2 Z
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 C
+0 0 612 792 C
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "9" 10
+%%Page: "10" 11
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(10) 531 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+1 12 Q
+0 X
+(f) 108 712 T
+(ails to obtain service the serv) 111.88 712 T
+(er manager is contacted to restore the service and pro) 251.34 712 T
+(vide) 506.75 712 T
+(updated port information.) 108 698 T
+0 F
+(4.5. Implementation.) 108 666 T
+1 F
+-0 (When the data host is local, it may mak) 108 640 P
+-0 (e sense to read from and write to the disk directly) 297.51 640 P
+-0 (.) 534 640 P
+(The implementation of the put and get functions hides these details from the client. In) 108 626 T
+-0.42 (such cases, after the host has been resolv) 108 612 P
+-0.42 (ed, no serv) 300.8 612 P
+-0.42 (er manager or serv) 352.1 612 P
+-0.42 (er communication is) 440.28 612 P
+(necessary) 108 598 T
+(, since the reads and writes w) 153.86 598 T
+(ork directly on the \336le system.) 294.71 598 T
+(F) 108 572 T
+(or deb) 114.49 572 T
+(ugging purposes it may be useful to force serv) 144.58 572 T
+(er access during a put or a get. The) 366.36 572 T
+(follo) 108 558 T
+(wing rule is follo) 130.37 558 T
+(wed: if the host name resolv) 212.4 558 T
+(es to \324localhost\325 the routines may) 347.87 558 T
+(optionally access the disk directly) 108 544 T
+(. If the host name resolv) 269.87 544 T
+(es to an) 385.67 544 T
+(ything else, such as the) 422.15 544 T
+(actual host name, the routines must mak) 108 530 T
+(e their requests via a serv) 300.86 530 T
+(er) 422.32 530 T
+(.) 430.98 530 T
+0 F
+(4.6. Puts and gets in a multiple host system.) 108 498 T
+1 F
+-0.03 (Figure 6 sho) 108 472 P
+-0.03 (ws an e) 167.64 472 P
+-0.03 (xample of the data and message \337o) 203.4 472 P
+-0.03 (w during puts and gets in a system) 371.56 472 P
+(with multiple hosts.) 108 458 T
+0 14 Q
+(5.  Ser) 108 417.17 T
+(v) 145.58 417.17 T
+(ers.) 152.44 417.17 T
+1 12 Q
+-0.3 (Serv) 108 389.5 P
+-0.3 (ers respond to client requests for putting data to the store and getting it from the store.) 129.82 389.5 P
+(There are tw) 108 375.5 T
+(o classes of serv) 168.52 375.5 T
+(er \050a\051 non-translating serv) 246.65 375.5 T
+(ers which serv) 370.76 375.5 T
+(e out the data in) 439.9 375.5 T
+(nati) 108 361.5 T
+(v) 125.7 361.5 T
+(e mode and \050b\051 translating serv) 131.52 361.5 T
+(ers which translate the data before serving it out.) 280.31 361.5 T
+-0.09 (Serv) 108 347.5 P
+-0.09 (er requests may require the computation of deri) 129.82 347.5 P
+-0.09 (v) 356.51 347.5 P
+-0.09 (ed \336elds before serving the data out -) 362.33 347.5 P
+(for e) 108 333.5 T
+(xample, a v) 130.14 333.5 T
+(ertical cross-section in gridded data.) 185.62 333.5 T
+0 F
+(5.1. Deciding which parameters to use.) 108 301.5 T
+(5.1.1  No parameter \336le speci\336ed at start-up.) 126 269.5 T
+1 F
+-0.25 (A serv) 126 243.5 P
+-0.25 (er may be started without specifying a parameter \336le, in which case it initializes) 157.23 243.5 P
+(using def) 126 231.5 T
+(ault parameters.) 170.21 231.5 T
+(If such a serv) 126 213.5 T
+(er is servicing a request and \336nds a parameter \336le in the data set direc-) 190.13 213.5 T
+(tory) 126 201.5 T
+(, it reads in the parameter \336le to o) 144.55 201.5 T
+(v) 306.01 201.5 T
+(erride the def) 311.83 201.5 T
+(ault parameters prior to servicing) 375.68 201.5 T
+-0.14 (the request. The parameter \336le name is determined by concatenating the serv) 126 189.5 P
+-0.14 (er e) 492.86 189.5 P
+-0.14 (x) 510.19 189.5 P
+-0.14 (ecut-) 516.01 189.5 P
+(able name and \324params\325, separated by a period and preceded by an underscore.) 126 177.5 T
+0 F
+(5.1.2  P) 126 147.5 T
+(arameter \336le speci\336ed at start-up.) 163.21 147.5 T
+1 F
+(If the URL which initiates the start-up of a serv) 126 121.5 T
+(er includes a parameter \336le name, this) 353.45 121.5 T
+-0.26 (\336le is read to set the state after the serv) 126 109.5 P
+-0.26 (er starts. The parameter \336le name is determined) 310.45 109.5 P
+(by concatenating the serv) 126 97.5 T
+(er e) 248.12 97.5 T
+(x) 265.6 97.5 T
+(ecutable name and the parameter name, separated by a) 271.42 97.5 T
+(period and preceded by an underscore. This \336le is located in the root directory for the) 126 85.5 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "10" 11
+%%Page: "11" 12
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(11) 531 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+1 12 Q
+0 X
+(data type. In such a case, the serv) 126 305.91 T
+(er al) 286.1 305.91 T
+(w) 306.97 305.91 T
+(ays runs with the start-up parameters and) 315.52 305.91 T
+(ignores an) 126 293.91 T
+(y parameter \336les found in the data set directories.) 175.48 293.91 T
+0 F
+(5.1.3  Example of parameter \336les and their locations.) 126 263.91 T
+1 F
+(Consider the follo) 126 237.91 T
+(wing directory structure:) 212.36 237.91 T
+(mdv/_MdvServ) 144 213.91 T
+(er) 219.16 213.91 T
+(.demo) 227.82 213.91 T
+(mdv/sat/vis/_MdvServ) 144 199.91 T
+(er) 253.16 199.91 T
+(.params) 261.83 199.91 T
+(The \324params\325 parameter \336le w) 126 179.91 T
+(ould be used to o) 271.16 179.91 T
+(v) 352.98 179.91 T
+(erride the parameters for an) 358.8 179.91 T
+-0.37 (MdvServ) 126 167.91 P
+-0.37 (er which w) 170.48 167.91 P
+-0.37 (as started without a parameter \336le. The full path for this \336le w) 222.94 167.91 P
+-0.37 (ould) 516.03 167.91 P
+(be) 126 155.91 T
+4 F
+($RAP_D) 140.33 155.91 T
+(A) 182.57 155.91 T
+(T) 189.46 155.91 T
+(A_DIR/mdv/sat/vis/_MdvServer) 195.53 155.91 T
+(.par) 346.84 155.91 T
+(ams) 366.32 155.91 T
+1 F
+(.) 385.66 155.91 T
+(The \324demo\325 parameter \336le w) 126 137.91 T
+(ould be used at start-up for an MdvServ) 263.17 137.91 T
+(er to satisfy a) 453.96 137.91 T
+(request for the follo) 126 125.91 T
+(wing URL:) 220.68 125.91 T
+(mdvp::demo//::radarCart) 144 101.91 T
+(The full path for this \336le w) 126 81.91 T
+(ould be) 255.2 81.91 T
+4 F
+($RAP_D) 293.87 81.91 T
+(A) 336.11 81.91 T
+(T) 343 81.91 T
+(A_DIR/mdv/_MdvServer) 349.07 81.91 T
+(.demo) 466.37 81.91 T
+1 F
+(.) 495.36 81.91 T
+108 63 540 720 C
+108 313.91 540 720 C
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0.5 H
+0 Z
+0 X
+0 0 0 1 0 0 0 K
+90 450 37.86 13.93 355.56 609.39 A
+1 10 Q
+(client get\050\051) 333.76 605.3 T
+90 450 37.86 13.93 356.59 660.39 A
+(data mapper) 332.02 656.3 T
+117.83 322.5 531.83 349.5 R
+7 X
+V
+1 12 Q
+0 X
+(Figure 6. put\050\051 and get\050\051 messages and data \337o) 122.67 341.5 T
+(w across hosts in a multi-host system.) 345.33 341.5 T
+(Host A) 149 682.45 T
+1 9 Q
+(URL w/Port) 208.95 616.17 T
+90 450 37.86 13.93 256.31 639.68 A
+1 10 Q
+(client put\050\051) 234.23 635.59 T
+139 572.71 523.38 696.25 R
+4 H
+4 X
+N
+1 9 Q
+0 X
+(URL w/Port) 270.52 615.99 T
+(Data) 420.46 440.83 T
+(URL w/Host) 396.5 616.25 T
+(URL) 392.63 642.86 T
+0.5 H
+90 450 37.86 13.93 359.92 528.43 A
+1 10 Q
+(data mapper) 335.35 524.34 T
+90 450 37.86 13.93 279.14 426.77 A
+(serv) 267 422.67 T
+(er) 283.51 422.67 T
+385.76 453.79 450.05 481.64 R
+N
+(data store) 398.6 462.51 T
+1 12 Q
+(Host B) 148.41 540.01 T
+90 450 37.86 13.93 276.85 488.02 A
+1 10 Q
+(serv) 246.24 483.93 T
+(er manager) 262.75 483.93 T
+1 9 Q
+(URL) 235.46 505.58 T
+(URL) 318.83 405.12 T
+139 389.91 523.38 557.62 R
+4 H
+4 X
+N
+0 X
+(Spa) 244.21 455.96 T
+(wns) 257.58 455.96 T
+(Data) 347.92 432.04 T
+(Data) 402.58 593 T
+(Synchronization) 402.93 670.24 T
+(Synchronization) 410.1 535.33 T
+J
+(URL) 299.21 503.91 T
+(URL) 216.02 431.9 T
+(Data) 216.74 416.19 T
+J
+279 447.69 280.68 447.69 279 441.43 277.32 447.69 4 Y
+1 H
+N
+279 447.69 280.68 447.69 279 441.43 277.32 447.69 4 Y
+V
+J
+279 474.5 279 448.19 2 L
+J
+279 474.5 279 474 2 L
+2 Z
+N
+[0.873 4.363] 0.873 I
+279 474 279 448.69 2 L
+N
+J
+279 448.69 279 448.19 2 L
+N
+(Latest) 344.25 503.37 T
+(data) 351.25 495 T
+(info) 351.75 485.37 T
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+J
+403.44 661.17 403.44 659.16 395.96 661.17 403.44 663.17 4 Y
+0.5 H
+0 Z
+N
+403.44 661.17 403.44 659.16 395.96 661.17 403.44 663.17 4 Y
+V
+J
+406.78 529.5 406.78 527.5 399.3 529.5 406.78 531.5 4 Y
+N
+406.78 529.5 406.78 527.5 399.3 529.5 406.78 531.5 4 Y
+V
+J
+403.69 661.17 496.67 661.17 496.67 529.5 407.03 529.5 4 L
+J
+403.69 661.17 407.44 661.17 2 L
+2 Z
+N
+[7.084 6.139] 7.084 I
+407.44 661.17 492.92 661.17 2 L
+N
+J
+492.92 661.17 496.67 661.17 496.67 657.42 3 L
+N
+[7.859 6.811] 7.859 I
+496.67 657.42 496.67 533.25 2 L
+N
+J
+496.67 533.25 496.67 529.5 492.92 529.5 3 L
+N
+[8.053 6.979] 8.053 I
+492.92 529.5 410.78 529.5 2 L
+N
+J
+410.78 529.5 407.03 529.5 2 L
+N
+J
+404.03 609.5 404.03 607.5 396.55 609.5 404.03 611.5 4 Y
+0 Z
+N
+404.03 609.5 404.03 607.5 396.55 609.5 404.03 611.5 4 Y
+V
+J
+398.44 654.5 398.44 652.5 390.97 654.5 398.44 656.5 4 Y
+N
+398.44 654.5 398.44 652.5 390.97 654.5 398.44 656.5 4 Y
+V
+J
+404.28 609.5 449.17 609.5 449.17 654.5 398.69 654.5 4 L
+J
+404.28 609.5 408.03 609.5 2 L
+2 Z
+N
+[8.129 7.045] 8.129 I
+408.03 609.5 445.42 609.5 2 L
+N
+J
+445.42 609.5 449.17 609.5 449.17 613.25 3 L
+N
+[8.152 7.065] 8.152 I
+449.17 613.25 449.17 650.75 2 L
+N
+J
+449.17 650.75 449.17 654.5 445.42 654.5 3 L
+N
+[6.645 5.759] 6.645 I
+445.42 654.5 402.45 654.5 2 L
+N
+J
+402.45 654.5 398.69 654.5 2 L
+N
+J
+308.22 610.33 308.22 612.34 315.7 610.33 308.22 608.33 4 Y
+0 Z
+N
+308.22 610.33 308.22 612.34 315.7 610.33 308.22 608.33 4 Y
+V
+J
+294.17 508.77 296.17 508.77 294.17 501.3 292.16 508.77 4 Y
+N
+294.17 508.77 296.17 508.77 294.17 501.3 292.16 508.77 4 Y
+V
+J
+307.97 610.33 294.17 610.33 294.17 509.02 3 L
+J
+307.97 610.33 304.22 610.33 2 L
+2 Z
+N
+[7.277 6.307] 7.277 I
+304.22 610.33 297.92 610.33 2 L
+N
+J
+297.92 610.33 294.17 610.33 294.17 606.58 3 L
+N
+[7.774 6.738] 7.774 I
+294.17 606.58 294.17 512.78 2 L
+N
+J
+294.17 512.78 294.17 509.02 2 L
+N
+J
+257.5 617.72 255.5 617.72 257.5 625.2 259.5 617.72 4 Y
+0 Z
+N
+257.5 617.72 255.5 617.72 257.5 625.2 259.5 617.72 4 Y
+V
+J
+257.5 507.94 259.5 507.94 257.5 500.46 255.5 507.94 4 Y
+N
+257.5 507.94 259.5 507.94 257.5 500.46 255.5 507.94 4 Y
+V
+J
+257.5 617.47 257.5 508.19 2 L
+J
+257.5 617.47 257.5 613.72 2 L
+2 Z
+N
+[7.305 6.331] 7.305 I
+257.5 613.72 257.5 511.94 2 L
+N
+J
+257.5 511.94 257.5 508.19 2 L
+N
+J
+338.33 508.56 336.33 508.56 338.33 516.03 340.34 508.56 4 Y
+0 Z
+N
+338.33 508.56 336.33 508.56 338.33 516.03 340.34 508.56 4 Y
+V
+J
+305 437.83 338.33 437.83 338.33 508.31 3 L
+J
+305 437.83 308.75 437.83 2 L
+2 Z
+N
+[9.451 8.191] 9.451 I
+308.75 437.83 334.58 437.83 2 L
+N
+J
+334.58 437.83 338.33 437.83 338.33 441.58 3 L
+N
+[7.557 6.549] 7.557 I
+338.33 441.58 338.33 504.56 2 L
+N
+J
+338.33 504.56 338.33 508.31 2 L
+N
+J
+233.47 425.33 233.47 427.01 239.74 425.33 233.47 423.65 4 Y
+1 H
+0 Z
+N
+233.47 425.33 233.47 427.01 239.74 425.33 233.47 423.65 4 Y
+V
+218.33 638.67 202.5 638.67 202.5 425.33 232.97 425.33 4 L
+2 Z
+N
+324.86 427.83 324.86 426.15 318.6 427.83 324.86 429.51 4 Y
+0 Z
+N
+324.86 427.83 324.86 426.15 318.6 427.83 324.86 429.51 4 Y
+V
+413.33 445.47 411.66 445.47 413.33 451.73 415.01 445.47 4 Y
+N
+413.33 445.47 411.66 445.47 413.33 451.73 415.01 445.47 4 Y
+V
+325.36 427.83 413.33 427.83 413.33 444.97 3 L
+N
+395.59 602 395.59 600.32 389.33 602 395.59 603.68 4 Y
+N
+395.59 602 395.59 600.32 389.33 602 395.59 603.68 4 Y
+V
+313.19 417 313.19 415.32 306.93 417 313.19 418.68 4 Y
+N
+313.19 417 313.19 415.32 306.93 417 313.19 418.68 4 Y
+V
+396.09 602 480.83 602 480.83 417 313.69 417 4 L
+N
+170.47 368.02 170.47 369.7 176.74 368.02 170.47 366.35 4 Y
+N
+170.47 368.02 170.47 369.7 176.74 368.02 170.47 366.35 4 Y
+V
+131.17 368.02 169.97 368.02 2 L
+2 Z
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+1 12 Q
+(Data) 187 363.93 T
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+307.39 368.02 307.39 370.03 314.87 368.02 307.39 366.02 4 Y
+0.5 H
+0 Z
+N
+307.39 368.02 307.39 370.03 314.87 368.02 307.39 366.02 4 Y
+V
+J
+272.5 368.02 307.14 368.02 2 L
+J
+272.5 368.02 276.25 368.02 2 L
+2 Z
+N
+[9.929 8.605] 9.929 I
+276.25 368.02 303.39 368.02 2 L
+N
+J
+303.39 368.02 307.14 368.02 2 L
+N
+(Message) 320 363.93 T
+J
+472.98 368.02 472.98 369.7 479.24 368.02 472.98 366.35 4 Y
+1 H
+0 Z
+N
+472.98 368.02 472.98 369.7 479.24 368.02 472.98 366.35 4 Y
+V
+J
+429.5 368.02 472.48 368.02 2 L
+J
+429.5 368.02 430 368.02 2 L
+2 Z
+N
+[1.024 5.119] 1.024 I
+430 368.02 471.98 368.02 2 L
+N
+J
+471.98 368.02 472.48 368.02 2 L
+N
+(Action) 485.33 363.93 T
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+J
+255.71 662.59 257.72 662.59 255.71 655.11 253.71 662.59 4 Y
+0.5 H
+0 Z
+N
+255.71 662.59 257.72 662.59 255.71 655.11 253.71 662.59 4 Y
+V
+J
+315.13 667.71 315.13 669.72 322.61 667.71 315.13 665.71 4 Y
+N
+315.13 667.71 315.13 669.72 322.61 667.71 315.13 665.71 4 Y
+V
+J
+255.71 662.84 255.71 667.71 314.88 667.71 3 L
+J
+255.71 662.84 255.71 667.71 259.46 667.71 3 L
+2 Z
+N
+[7.989 6.924] 7.989 I
+259.46 667.71 311.13 667.71 2 L
+N
+J
+311.13 667.71 314.88 667.71 2 L
+N
+J
+1 9 Q
+(URL w/Host) 262.36 656.82 T
+(URL) 300.63 673.43 T
+108 63 540 720 C
+0 0 612 792 C
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "11" 12
+%%Page: "12" 13
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(12) 531 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+0 12 Q
+0 X
+(5.2. Handling a client r) 108 712 T
+(equest.) 225.13 712 T
+1 F
+(On recei) 108 686 T
+(ving a client request a serv) 148.68 686 T
+(er decodes the URL to determine the directory for the) 276.8 686 T
+(required data set.) 108 672 T
+(If the serv) 108 646 T
+(er w) 156.47 646 T
+(as started without a param \336le, and a param \336le for that serv) 177.34 646 T
+(er e) 465.43 646 T
+(xists in the) 482.9 646 T
+(data set directory) 108 632 T
+(, it reads in the param \336le to o) 189.86 632 T
+(v) 333.34 632 T
+(erride the def) 339.16 632 T
+(ault parameters prior to ser-) 403.01 632 T
+(vicing the request.) 108 618 T
+(The serv) 108 592 T
+(er responds to the request by either writing to the speci\336ed data set directory) 149.47 592 T
+(, or) 515.63 592 T
+(reading from the directory) 108 578 T
+(, processing the data and passing it back to the client.) 233.52 578 T
+0 F
+(5.3. Requir) 108 546 T
+(ements f) 164.78 546 T
+(or interacting with the ser) 207.47 546 T
+(v) 340.66 546 T
+(er manager) 346.54 546 T
+(.) 404.32 546 T
+1 F
+(In most cases the serv) 108 520 T
+(er is started and managed by the serv) 213.13 520 T
+(er manager) 390.58 520 T
+(. Therefore e) 443.56 520 T
+(v) 504.89 520 T
+(ery) 510.71 520 T
+(serv) 108 506 T
+(er must pro) 127.81 506 T
+(vide a set of minimum capabilities.) 182.29 506 T
+-0.04 (When the serv) 108 480 P
+-0.04 (er manager starts a serv) 177.06 480 P
+-0.04 (er it must specify the port number for listening, and) 290.04 480 P
+(qmax, the maximum quiescent time, which is the maximum time, in seconds, which the) 108 466 T
+(serv) 108 452 T
+(er w) 127.81 452 T
+(aits between connections before e) 148.68 452 T
+(xiting.) 310.45 452 T
+(Therefore the command line handling must allo) 108 426 T
+(w for the follo) 336.34 426 T
+(wing:) 405.02 426 T
+(\245) 126 406 T
+0 F
+(-port) 144 406 T
+1 F
+(to specify port number;) 172.99 406 T
+(\245) 126 386 T
+0 F
+(-qmax) 144 386 T
+1 F
+(to specify the maximum quiescent time in seconds.) 179.66 386 T
+(\245) 126 366 T
+0 F
+(-params) 144 366 T
+1 F
+( for specifying a parameter \336le name.) 186.66 366 T
+(If the port is not speci\336ed, a def) 108 340 T
+(ault port must be used.) 260.52 340 T
+(If -qmax is speci\336ed on the command line, the serv) 108 314 T
+(er must e) 353.78 314 T
+(xit gracefully \050with return) 397.6 314 T
+(code 0\051 if no client requests ha) 108 300 T
+(v) 255.06 300 T
+(e been made o) 260.88 300 T
+(v) 329.68 300 T
+(er the past qmax seconds. The serv) 335.5 300 T
+(er) 502.94 300 T
+(manager reaps the child \050using the w) 108 286 T
+(ait3 function\051 and gi) 284.51 286 T
+(v) 381.86 286 T
+(en a 0 return code it does not) 387.68 286 T
+-0.03 (restart the serv) 108 272 P
+-0.03 (er until the ne) 178.41 272 P
+-0.03 (xt request arri) 244.47 272 P
+-0.03 (v) 310.77 272 P
+-0.03 (es for that service. This allo) 316.59 272 P
+-0.03 (ws the manager to) 449.46 272 P
+(k) 108 258 T
+(eep control of the number of running serv) 113.88 258 T
+(ers.) 313.99 258 T
+(The serv) 108 232 T
+(er manager starts all serv) 149.47 232 T
+(ers using the -qmax command line ar) 269.26 232 T
+(gument. The v) 447.01 232 T
+(alue) 516.37 232 T
+(of qmax is speci\336ed when the serv) 108 218 T
+(er manager is started.) 273.79 218 T
+(If -params is not speci\336ed, the serv) 108 192 T
+(er is initialized using the def) 276.12 192 T
+(ault parameters.) 412.32 192 T
+0 F
+(5.4. Ser) 108 160 T
+(v) 146.21 160 T
+(er executable names.) 152.09 160 T
+1 F
+-0.41 (Since the serv) 108 134 P
+-0.41 (er manager must start the particular serv) 174.32 134 P
+-0.41 (er required for a requested service, a) 364.95 134 P
+(logical naming con) 108 120 T
+(v) 199.51 120 T
+(ention is essential. Serv) 205.33 120 T
+(er names are chosen to match the data types.) 318.48 120 T
+(F) 108 106 T
+(or e) 114.49 106 T
+(xample, MdvServ) 132.64 106 T
+(er for MD) 218.45 106 T
+(V data, SpdbServ) 266.62 106 T
+(er for SPDB data and T) 350.76 106 T
+(itanServ) 463.32 106 T
+(er for) 503.14 106 T
+(TIT) 108 92 T
+(AN data.) 125.54 92 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "12" 13
+%%Page: "13" 14
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(13) 531 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+0 12 Q
+0 X
+(5.5. Ser) 108 712 T
+(v) 146.21 712 T
+(er Pr) 152.09 712 T
+(otocols.) 178.19 712 T
+1 F
+(Data is serv) 108 686 T
+(ed out using protocols which are speci\336c to the data type. The protocol need) 164.47 686 T
+(only be understood by the serv) 108 672 T
+(er and its clients.) 255.47 672 T
+-0.09 (The serv) 108 646 P
+-0.09 (er protocols names are deri) 149.38 646 P
+-0.09 (v) 278.7 646 P
+-0.09 (ed from the data types, with \324p\325 appended. Therefore) 284.52 646 P
+(using the types abo) 108 632 T
+(v) 200.15 632 T
+(e we ha) 205.97 632 T
+(v) 242.38 632 T
+(e:) 248.2 632 T
+(\245) 126 612 T
+(mdvp: MD) 144 612 T
+(V data serv) 196.52 612 T
+(er protocol) 250.99 612 T
+(\245) 126 592 T
+(spdbp: SPDB data serv) 144 592 T
+(er protocol) 254.82 592 T
+(\245) 126 572 T
+(titanp: TIT) 144 572 T
+(AN data serv) 195.22 572 T
+(er protocol) 258.35 572 T
+(Data is serv) 108 546 T
+(ed out using a speci\336c protocol. F) 164.47 546 T
+(or e) 326.62 546 T
+(xample, MD) 344.76 546 T
+(V data, which is gridded, is) 404.94 546 T
+(serv) 108 532 T
+(ed out using the mdvp protocol. Other gridded data types, such as grib, may be trans-) 127.81 532 T
+(formed into MD) 108 518 T
+(V format and serv) 186.18 518 T
+(ed out using the mdvp protocol. In the latter case, a) 272.98 518 T
+(translating serv) 108 504 T
+(er is used to transform the data format.) 181.48 504 T
+0 14 Q
+(6.  Ser) 108 463.17 T
+(v) 145.58 463.17 T
+(er manager) 152.44 463.17 T
+(.) 219.85 463.17 T
+1 12 Q
+(The serv) 108 435.5 T
+(er manager is responsible for starting serv) 149.47 435.5 T
+(ers as required, and pro) 350.58 435.5 T
+(viding serv) 462.7 435.5 T
+(er) 516.18 435.5 T
+(port information to clients.) 108 421.5 T
+0 F
+(6.1. Handling r) 108 389.5 T
+(equests f) 185.14 389.5 T
+(or ser) 229.16 389.5 T
+(vice.) 258.7 389.5 T
+1 F
+(When the serv) 108 363.5 T
+(er manager recei) 177.13 363.5 T
+(v) 256.79 363.5 T
+(es a request for service, it does the follo) 262.61 363.5 T
+(wing:) 453.26 363.5 T
+(\245) 126 343.5 T
+(decodes the \336rst portion of the URL;) 144 343.5 T
+(\245) 126 323.5 T
+(decides which serv) 144 323.5 T
+(er is appropriate to handle the request;) 235.13 323.5 T
+(\245) 126 303.5 T
+-0.3 (checks its serv) 144 303.5 P
+-0.3 (er list - if the appropriate serv) 213.21 303.5 P
+-0.3 (er is not running, it starts it on an a) 353.88 303.5 P
+-0.3 (v) 518.3 303.5 P
+-0.3 (ail-) 524 303.5 P
+(able port and adds the serv) 144 289.5 T
+(er information to its serv) 272.12 289.5 T
+(er list. The desired port and) 390.6 289.5 T
+(qmax information is communicated to the serv) 144 275.5 T
+(er at start-up via the command line;) 367.8 275.5 T
+(\245) 126 255.5 T
+(\336lls out the URL with the port number and returns the resolv) 144 255.5 T
+(ed URL to the client.) 435.47 255.5 T
+0 F
+(6.2. Con\336guration.) 108 223.5 T
+1 F
+(The serv) 108 197.5 T
+(er manager reads a parameter \336le which contains a table relating serv) 149.47 197.5 T
+(er e) 481.52 197.5 T
+(x) 499 197.5 T
+(ecut-) 504.82 197.5 T
+-0.16 (able names to information in the URLs. It uses this table to determine which e) 108 183.5 P
+-0.16 (x) 480.52 183.5 P
+-0.16 (ecutable is) 486.34 183.5 P
+(rele) 108 169.5 T
+(v) 125.69 169.5 T
+(ant for each requested service.) 131.39 169.5 T
+0 F
+(6.3. Handling r) 108 137.5 T
+(equests f) 185.14 137.5 T
+(or the complete ser) 229.16 137.5 T
+(v) 326.68 137.5 T
+(er list.) 332.56 137.5 T
+1 F
+(Some clients \050such as the system monitor\051 may require the entire serv) 108 111.5 T
+(er list. If the serv) 442.1 111.5 T
+(er) 523.57 111.5 T
+(manager recei) 108 97.5 T
+(v) 175.33 97.5 T
+(es such a request, it places the entire list in a message and writes the) 181.15 97.5 T
+(message out to the client.) 108 83.5 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "13" 14
+%%Page: "14" 15
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(14) 531 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+0 12 Q
+0 X
+(6.4. Maintaining the ser) 108 712 T
+(v) 229.55 712 T
+(er list.) 235.43 712 T
+1 F
+(The serv) 108 686 T
+(ers are programmed to e) 149.47 686 T
+(xit gracefully \050return code 0\051 if the) 265.92 686 T
+(y are quiescent) 432.36 686 T
+(\050recei) 108 672 T
+(v) 135.01 672 T
+(e no connections\051 for a certain period \050qmax seconds\051. The serv) 140.83 672 T
+(er manager) 446.23 672 T
+(, as the) 499.39 672 T
+(parent process, must reap the children if the) 108 658 T
+(y die. If the return code is 0, the serv) 317.77 658 T
+(er) 493.88 658 T
+(manager simply remo) 108 644 T
+(v) 212.47 644 T
+(es the serv) 218.29 644 T
+(er from the list. If the error code is not 0, the manager) 268.76 644 T
+-0.28 (logs that information. If a particular serv) 108 630 P
+-0.28 (er dies continually with errors the serv) 301.12 630 P
+-0.28 (er manager) 483.91 630 P
+(may elect not to restart it and den) 108 616 T
+(y client access to that service by returning an error code) 268.13 616 T
+(to an) 108 602 T
+(y client which requests the service.) 131.48 602 T
+0 14 Q
+(7.  Data mapper) 108 561.17 T
+(.) 203.03 561.17 T
+1 12 Q
+(The data mapper recei) 108 533.5 T
+(v) 214.66 533.5 T
+(es, stores and serv) 220.48 533.5 T
+(es out information on data sets within a shared) 307.61 533.5 T
+(data re) 108 519.5 T
+(gion. It listens for clients on a well-kno) 140.14 519.5 T
+(wn port.) 328.49 519.5 T
+0 F
+(7.1. Data set list.) 108 487.5 T
+1 F
+(The data mapper maintains a list of the follo) 108 461.5 T
+(wing information for each data set:) 320.34 461.5 T
+2 10 Q
+(host) 126 441.5 T
+1 12 Q
+(: host on which the data resides.) 150 441.5 T
+2 10 Q
+(data_type) 126 423.5 T
+1 12 Q
+(: major data type, e.g. mdv) 180 423.5 T
+(.) 307.87 423.5 T
+2 10 Q
+(dir) 126 405.5 T
+1 12 Q
+(: subdirectory of data store, relati) 144 405.5 T
+(v) 303 405.5 T
+(e to) 308.82 405.5 T
+3 10 Q
+($RAP_DATA_DIR.) 329.48 405.5 T
+2 F
+(latest_time) 126 387.5 T
+1 12 Q
+(: the time of the latest data put to the store. This is not necessarily the) 192 387.5 T
+(most recent data in the store, because in playback mode the latest data may precede) 126 375.5 T
+(data already on disk.) 126 363.5 T
+2 10 Q
+(start_time) 126 345.5 T
+1 12 Q
+(: start time of data in the store.) 186 345.5 T
+2 10 Q
+(end_time) 126 327.5 T
+1 12 Q
+(: end time of data in the store.) 174 327.5 T
+0 F
+(7.2. Data mapper clients.) 108 297.5 T
+1 F
+(The data mapper handles messages from a number of dif) 108 271.5 T
+(ferent clients.) 379.97 271.5 T
+0 F
+(7.2.1  Registration of data set inf) 126 239.5 T
+(ormation.) 291.68 239.5 T
+1 F
+(\245) 126 213.5 T
+-0.03 (in real-time mode, the put functions contact the data mapper to con) 144 213.5 P
+-0.03 (v) 465.15 213.5 P
+-0.03 (e) 470.97 213.5 P
+-0.03 (y the time of) 476.12 213.5 P
+(latest data put to the store;) 144 199.5 T
+(\245) 126 179.5 T
+(the scout determines the start and end times for each data set, and con) 144 179.5 T
+(v) 478.12 179.5 T
+(e) 483.94 179.5 T
+(ys this) 489.08 179.5 T
+(information to the data mapper) 144 165.5 T
+(.) 291.98 165.5 T
+0 F
+(7.2.2  Requests f) 126 133.5 T
+(or data set inf) 208.69 133.5 T
+(ormation.) 279.38 133.5 T
+1 F
+(\245) 126 107.5 T
+(if a get function recei) 144 107.5 T
+(v) 246.34 107.5 T
+(es a URL which does not include the host name, it passes) 252.16 107.5 T
+(the URL to the data mapper for resolution of the host. The mapper \336lls out the) 144 93.5 T
+(URL with the host name and returns it to the client. If the data set is distrib) 144 79.5 T
+(uted) 503.4 79.5 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "14" 15
+%%Page: "15" 16
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(15) 531 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+1 12 Q
+0 X
+(across hosts, an array of resolv) 144 712 T
+(ed URLs is returned in priority order - the mapper) 291.78 712 T
+-0.15 (puts the URL most lik) 144 698 P
+-0.15 (ely to satisfy the request at the top of the list, and so on. The) 249.96 698 P
+(clients can then try the URLs in order) 144 684 T
+(.) 324.31 684 T
+(\245) 126 664 T
+(system monitor processes contact the data mapper to obtain the entire acti) 144 664 T
+(v) 497.98 664 T
+(e data) 503.8 664 T
+(set list. The acti) 144 650 T
+(v) 219.7 650 T
+(e list is compared to an e) 225.52 650 T
+(xpected list and the comparison results) 344.65 650 T
+(are displayed to the user) 144 636 T
+(.) 259.98 636 T
+0 F
+(7.3. Synchr) 108 604 T
+(onizing data mappers within a shar) 165.46 604 T
+(ed data r) 346.26 604 T
+(egion.) 392.04 604 T
+1 F
+(The data set lists for all data mappers within an SDR are identical. This is achie) 108 578 T
+(v) 489.65 578 T
+(ed in the) 495.47 578 T
+-0.14 (follo) 108 564 P
+-0.14 (wing w) 130.37 564 P
+-0.14 (ay) 165.77 564 P
+-0.14 (. Each data mapper routinely scans a \336le, in $RAP_D) 176.32 564 P
+-0.14 (A) 430.87 564 P
+-0.14 (T) 438.2 564 P
+-0.14 (A_DIR, which lists) 444.42 564 P
+(the hosts in the SDR. When a re) 108 550 T
+(gistration message is recei) 261.8 550 T
+(v) 387.82 550 T
+(ed, this indicates that the data) 393.64 550 T
+(store has changed in some w) 108 536 T
+(ay) 245.52 536 T
+(. The data mapper forw) 256.07 536 T
+(ards this message to all the other) 368.24 536 T
+(mappers in the SDR. It also recei) 108 522 T
+(v) 266.68 522 T
+(es forw) 272.5 522 T
+(arded messages from the other mappers. This) 308.03 522 T
+(k) 108 508 T
+(eeps the data set lists on all hosts synchronized.) 113.88 508 T
+0 F
+(7.4. Implementation.) 108 476 T
+1 F
+-0.07 (The data mapper stores the data set list in a \336le in $RAP_D) 108 450 P
+-0.07 (A) 391.37 450 P
+-0.07 (T) 398.7 450 P
+-0.07 (A_DIR. This allo) 404.92 450 P
+-0.07 (ws certain) 488.15 450 P
+(functions, such as the client get\050\051, to access the data set list directly via a \336le read instead) 108 436 T
+(of via a sock) 108 422 T
+(et call. This impro) 168.86 422 T
+(v) 256.68 422 T
+(es ef) 262.5 422 T
+(\336cienc) 284.52 422 T
+(y and simplicity) 316.33 422 T
+(.) 392.89 422 T
+0 14 Q
+(8.  The janitor) 108 381.17 T
+(.) 192.15 381.17 T
+1 12 Q
+(The janitor is responsible for maintaining free space on the disks. It achie) 108 353.5 T
+(v) 459.97 353.5 T
+(es this by per-) 465.79 353.5 T
+(forming the follo) 108 339.5 T
+(wing functions:) 189.7 339.5 T
+(\245) 126 319.5 T
+(data compression;) 144 319.5 T
+(\245) 126 299.5 T
+(data scrubbing.) 144 299.5 T
+(The janitor routinely tra) 108 273.5 T
+(v) 222.74 273.5 T
+(erses the data tree, compressing \336les which ha) 228.56 273.5 T
+(v) 450.28 273.5 T
+(e not been) 456.1 273.5 T
+(recently used and remo) 108 259.5 T
+(ving old \336les as required. The actions of the janitor depend upon:) 219.46 259.5 T
+(\245) 126 239.5 T
+-0.08 (the time since a \336le w) 144 239.5 P
+-0.08 (as last accessed - a \336le which has not been used for a certain) 248.49 239.5 P
+(period may be compressed;) 144 225.5 T
+(\245) 126 205.5 T
+-0.15 (the time since a \336le w) 144 205.5 P
+-0.15 (as last modi\336ed - a \336le which is older than a certain age may) 248.13 205.5 P
+(be remo) 144 191.5 T
+(v) 182.81 191.5 T
+(ed;) 188.63 191.5 T
+(\245) 126 171.5 T
+(an e) 144 171.5 T
+(v) 163.36 171.5 T
+(ent list - e) 169.18 171.5 T
+(v) 216.54 171.5 T
+(ent lists protect the data for gi) 222.36 171.5 T
+(v) 365.38 171.5 T
+(en e) 371.2 171.5 T
+(v) 390.55 171.5 T
+(ents, so that all other data is) 396.37 171.5 T
+-0.2 (scrubbed before data from the e) 144 157.5 P
+-0.2 (v) 295 157.5 P
+-0.2 (ents. An e) 300.82 157.5 P
+-0.2 (v) 348.45 157.5 P
+-0.2 (ent is a time period of interest for anal-) 354.27 157.5 P
+(ysis, so the data should be sa) 144 143.5 T
+(v) 282.08 143.5 T
+(ed if possible. Ev) 287.9 143.5 T
+(ent lists are created and installed) 371.05 143.5 T
+(manually by users;) 144 129.5 T
+(\245) 126 109.5 T
+(the free space on the disk - as a disk \336lls, the \336le scrubbing age may optionally be) 144 109.5 T
+(reduced in an ef) 144 95.5 T
+(fort to k) 220.67 95.5 T
+(eep a certain minimum free space on the disk. The) 259.21 95.5 T
+-0.23 (maximum allo) 144 81.5 P
+-0.23 (w) 213.14 81.5 P
+-0.23 (able age before deletion is calculated by linear interpolation based) 221.69 81.5 P
+-0.05 (on the percentage of disk usage. Be) 144 67.5 P
+-0.05 (yond that the disk is allo) 313.81 67.5 P
+-0.05 (wed to \336ll, since there) 430.93 67.5 P
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "15" 16
+%%Page: "16" 17
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(16) 531 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+1 12 Q
+0 X
+(is no point in remo) 144 712 T
+(ving v) 234.49 712 T
+(ery recent \336les which are lik) 264.65 712 T
+(ely to be required by the) 400.82 712 T
+(system.) 144 698 T
+(The janitor ignores all \336les with names be) 108 672 T
+(ginning with an underscore. Therefore, the) 309.47 672 T
+-0.23 (names of all special \336les such as parameter \336les and access control \336les should be) 108 658 P
+-0.23 (gin with) 497.8 658 P
+(\324_\325.) 108 644 T
+(These beha) 108 618 T
+(vior of the janitor is con\336gurable via a master \324_) 162.07 618 T
+4 F
+(janitor) 394.37 618 T
+1 F
+(\325 parameter \336le, to be) 427.04 618 T
+-0.09 (found at the top of the data tree, and on secondary) 108 604 P
+4 F
+-0.09 (_janitor) 350.35 604 P
+1 F
+-0.09 ( \336les at other points in the tree.) 389.02 604 P
+-0.4 (The janitor mo) 108 590 P
+-0.4 (v) 178.35 590 P
+-0.4 (es recursi) 184.17 590 P
+-0.4 (v) 229.11 590 P
+-0.4 (ely through the tree. When it \336nds a) 234.93 590 P
+4 F
+-0.4 (_janitor) 407.37 590 P
+1 F
+-0.4 ( \336le at a gi) 446.05 590 P
+-0.4 (v) 494.8 590 P
+-0.4 (en le) 500.62 590 P
+-0.4 (v) 522.92 590 P
+-0.4 (el) 528.74 590 P
+(this is used to o) 108 576 T
+(v) 182.5 576 T
+(erride the current parameters from that le) 188.32 576 T
+(v) 385.28 576 T
+(el do) 391.1 576 T
+(wnw) 414.47 576 T
+(ards. When it mo) 437.68 576 T
+(v) 520.15 576 T
+(es) 525.97 576 T
+(up to a pre) 108 562 T
+(vious le) 158.69 562 T
+(v) 196.06 562 T
+(el the o) 201.88 562 T
+(v) 237.02 562 T
+(errides are lost and the pre) 242.84 562 T
+(vious parameter settings apply) 369.5 562 T
+(.) 515.04 562 T
+0 14 Q
+(9.  The scout.) 108 521.17 T
+1 12 Q
+(The scout has the responsibility of supplying the data mapper with details of the data sets) 108 493.5 T
+(in the store. The data store may be modi\336ed in the follo) 108 479.5 T
+(wing w) 374.34 479.5 T
+(ays:) 409.88 479.5 T
+(\245) 126 459.5 T
+(a client writes to disk via a put function, which may in turn use a serv) 144 459.5 T
+(er) 477.78 459.5 T
+(. In either) 486.44 459.5 T
+(case the data mapper is informed directly by the put function or serv) 144 445.5 T
+(er) 471.76 445.5 T
+(, therefore) 480.6 445.5 T
+(the actions of the scout are secondary;) 144 431.5 T
+(\245) 126 411.5 T
+(data is added to the disk in some other w) 144 411.5 T
+(ay) 339.53 411.5 T
+(, for e) 350.08 411.5 T
+(xample when a user copies \336les) 378.22 411.5 T
+(from some other location;) 144 397.5 T
+(\245) 126 377.5 T
+(the janitor remo) 144 377.5 T
+(v) 220.48 377.5 T
+(es data through scrubbing;) 226.3 377.5 T
+(\245) 126 357.5 T
+(a user deletes \336les.) 144 357.5 T
+(The scout mo) 108 331.5 T
+(v) 173.15 331.5 T
+(es through the data tree, locating the data sets and computing the start and) 178.97 331.5 T
+-0.15 (end time limits for the data sets. It then communicates this information to the data mapper) 108 317.5 P
+-0.15 (.) 537 317.5 P
+0 14 Q
+(10.  System monitor) 108 276.67 T
+(.) 225.59 276.67 T
+1 12 Q
+(The system monitor pro) 108 249 T
+(vides a mechanism for summarizing the status of the system and) 222.82 249 T
+(presenting that summary to the user in a clear manner) 108 235 T
+(.) 364.96 235 T
+-0.18 (The monitor reads a static \336le which contains information about system con\336guration and) 108 209 P
+-0.17 (an e) 108 195 P
+-0.17 (xpected data set list. It also periodically contacts the data mapper to obtain the current) 127.31 195 P
+(data set list. It compares this list with the e) 108 181 T
+(xpected list and identi\336es an) 312.48 181 T
+(y discrepancies) 448.96 181 T
+(such as late or missing data.) 108 167 T
+(The data set list and discrepancies are displayed to the user) 108 141 T
+(.) 390.61 141 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "16" 17
+%%Page: "17" 18
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(17) 531 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+0 14 Q
+0 X
+(11.  Pr) 108 710.67 T
+(o) 147.02 710.67 T
+(viding r) 153.88 710.67 T
+(edundancy) 200.69 710.67 T
+(.) 265.07 710.67 T
+1 12 Q
+-0.24 (F) 108 683 P
+-0.24 (or some projects, high reliability is required. In such cases some or all of the system may) 114.49 683 P
+(be duplicated to pro) 108 669 T
+(vide redundanc) 203.47 669 T
+(y) 276.94 669 T
+(. A distrib) 282.16 669 T
+(uted system is an e) 330.25 669 T
+(xcellent w) 420.73 669 T
+(ay to pro) 470.27 669 T
+(vide) 512.75 669 T
+(redundanc) 108 655 T
+(y) 157.8 655 T
+(.) 163.02 655 T
+0 F
+(11.1. Redundant data mappers.) 108 623 T
+1 F
+(The data mappers in a standard distrib) 108 597 T
+(uted system are already redundant since their data) 291.06 597 T
+(lists are copies of each other) 108 583 T
+(.) 243.64 583 T
+0 F
+(11.2. Redundant data str) 108 551 T
+(eam.) 234.79 551 T
+1 F
+(Running redundant data streams requires that the follo) 108 525 T
+(wing needs be handled:) 368.66 525 T
+(\245) 126 505 T
+(splitting a stream into tw) 144 505 T
+(o;) 263.22 505 T
+(\245) 126 485 T
+(joining tw) 144 485 T
+(o streams;) 192.89 485 T
+(\245) 126 465 T
+(allo) 144 465 T
+(wing a client to pick the best store for a gi) 161.7 465 T
+(v) 363.37 465 T
+(en data set.) 369.19 465 T
+(Figure 7 sho) 108 439 T
+(ws an e) 167.7 439 T
+(xample of a system in which part of the data \337o) 203.51 439 T
+(w is duplicated in) 431.84 439 T
+(redundant streams.) 108 425 T
+(Splitting a stream is simple - a put\050\051 function puts the data to tw) 108 399 T
+(o locations as depicted at) 414.2 399 T
+(point A in the \336gure.) 108 385 T
+(Joining tw) 108 359 T
+(o streams requires an arbitration process. Consider the tw) 158.22 359 T
+(o puts at D and E in) 433.72 359 T
+-0.28 (the \336gure. Each put\050\051 acts alone, and the serv) 108 345 P
+-0.28 (er must decide whether to store the data from) 322.21 345 P
+(the second put\050\051 o) 108 331 T
+(v) 194.14 331 T
+(er the \336rst or to ignore the second put\050\051 request.) 199.96 331 T
+(A client must decide where to get the data. It contacts the data mapper and recei) 108 305 T
+(v) 491.6 305 T
+(es an) 497.42 305 T
+(array of URLs, one for each data store location, B and C. It tries the \336rst URL, and if that) 108 291 T
+(f) 108 277 T
+(ails it tries the second one.) 111.88 277 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "17" 18
+%%Page: "18" 19
+612 792 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+108 740.81 540 756 R
+7 X
+0 0 0 1 0 0 0 K
+V
+1 9 Q
+0 X
+(DIDSS design) 298.12 750 T
+48 54 540 54 2 L
+7 X
+V
+0.25 H
+2 Z
+0 X
+N
+108 36 540 47.95 R
+7 X
+V
+0 X
+(RAP) 108 41.95 T
+(, NCAR.) 124.51 41.95 T
+(May 19, 1999) 299.1 41.95 T
+(18) 531 41.95 T
+72 774.5 72 18.5 2 L
+7 X
+V
+1 H
+4 X
+N
+78 774.5 78 18.5 2 L
+7 X
+V
+2 X
+N
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+108 63 540 720 R
+7 X
+V
+108 63 540 720 C
+108 269.95 540 720 C
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+3 H
+0 Z
+4 X
+0 0 0 1 0 0 0 K
+90 450 202.36 186.99 322.79 518.23 A
+115.33 283.81 529.33 310.81 R
+7 X
+V
+1 12 Q
+0 X
+(Figure 7. Example of redundant data streams.) 213.02 302.81 T
+(SDR - shared data re) 371.07 660.55 T
+(gion) 470.86 660.55 T
+0.5 H
+90 450 37.86 12.28 269.33 408.71 A
+(serv) 254.76 404.77 T
+(er) 274.58 404.77 T
+90 450 37.86 12.28 455.62 480.03 A
+(client) 442.29 476.09 T
+237.9 655.36 302.19 679.93 R
+N
+(DataStore) 246.05 662.72 T
+90 450 37.86 12.28 216.9 451.3 A
+(put\050\051) 205.24 447.36 T
+90 450 37.86 12.28 216.9 536.23 A
+(put\050\051) 205.24 532.29 T
+90 450 37.86 12.28 268.48 623.04 A
+(put\050\051) 256.81 619.1 T
+238.76 355.98 303.05 380.55 R
+N
+(DataStore) 246.91 363.35 T
+184.76 481.48 249.05 506.05 R
+N
+(DataStore) 192.91 488.85 T
+184.76 566.4 249.05 590.97 R
+N
+(DataStore) 192.91 573.77 T
+90 450 41.71 12.28 428.29 554.53 A
+(DataMap) 405.96 550.59 T
+216.91 557.46 218.91 557.46 216.91 549.98 214.9 557.46 4 Y
+N
+216.91 557.46 218.91 557.46 216.91 549.98 214.9 557.46 4 Y
+V
+216.91 566.02 216.91 557.71 2 L
+2 Z
+N
+216.91 514.62 218.91 514.62 216.91 507.14 214.9 514.62 4 Y
+0 Z
+N
+216.91 514.62 218.91 514.62 216.91 507.14 214.9 514.62 4 Y
+V
+216.91 523.81 216.91 514.87 2 L
+2 Z
+N
+216.91 471.78 218.91 471.78 216.91 464.3 214.9 471.78 4 Y
+0 Z
+N
+216.91 471.78 218.91 471.78 216.91 464.3 214.9 471.78 4 Y
+V
+216.91 481.6 216.91 472.03 2 L
+2 Z
+N
+0 Z
+90 450 37.86 12.28 316.33 451.3 A
+(put\050\051) 304.67 447.36 T
+90 450 37.86 12.28 316.33 536.23 A
+(put\050\051) 304.67 532.29 T
+284.19 481.48 348.48 506.05 R
+N
+(DataStore) 292.34 488.85 T
+284.19 566.4 348.48 590.97 R
+N
+(DataStore) 292.34 573.77 T
+316.33 557.46 318.34 557.46 316.33 549.98 314.33 557.46 4 Y
+N
+316.33 557.46 318.34 557.46 316.33 549.98 314.33 557.46 4 Y
+V
+316.33 566.02 316.33 557.71 2 L
+2 Z
+N
+316.33 514.62 318.34 514.62 316.33 507.14 314.33 514.62 4 Y
+0 Z
+N
+316.33 514.62 318.34 514.62 316.33 507.14 314.33 514.62 4 Y
+V
+316.33 523.81 316.33 514.87 2 L
+2 Z
+N
+316.33 471.78 318.34 471.78 316.33 464.3 314.33 471.78 4 Y
+0 Z
+N
+316.33 471.78 318.34 471.78 316.33 464.3 314.33 471.78 4 Y
+V
+316.33 481.6 316.33 472.03 2 L
+2 Z
+N
+267.62 644.52 269.62 644.52 267.62 637.05 265.62 644.52 4 Y
+0 Z
+N
+267.62 644.52 269.62 644.52 267.62 637.05 265.62 644.52 4 Y
+V
+267.62 654.98 267.62 644.77 2 L
+2 Z
+N
+223.53 596.59 224.77 595.02 217.66 591.95 222.28 598.16 4 Y
+0 Z
+N
+223.53 596.59 224.77 595.02 217.66 591.95 222.28 598.16 4 Y
+V
+244.76 613.4 223.72 596.74 2 L
+2 Z
+N
+307.41 596.57 308.65 598.15 313.29 591.95 306.17 594.99 4 Y
+0 Z
+N
+307.41 596.57 308.65 598.15 313.29 591.95 306.17 594.99 4 Y
+V
+287.62 612.14 307.22 596.72 2 L
+2 Z
+N
+240.65 423.49 241.78 425.15 246.82 419.27 239.52 421.84 4 Y
+0 Z
+N
+240.65 423.49 241.78 425.15 246.82 419.27 239.52 421.84 4 Y
+V
+219.05 438.26 240.44 423.63 2 L
+2 Z
+N
+289.36 425.08 290.56 423.48 283.39 420.57 288.15 426.68 4 Y
+0 Z
+N
+289.36 425.08 290.56 423.48 283.39 420.57 288.15 426.68 4 Y
+V
+307.62 438.89 289.55 425.23 2 L
+2 Z
+N
+269.05 388.74 271.05 388.74 269.05 381.27 267.05 388.74 4 Y
+0 Z
+N
+269.05 388.74 271.05 388.74 269.05 381.27 267.05 388.74 4 Y
+V
+269.05 396.68 269.05 388.99 2 L
+2 Z
+N
+0 Z
+90 450 37.86 12.28 408.05 435.05 A
+(serv) 393.48 431.11 T
+(er) 413.29 431.11 T
+390.48 454.89 392.48 454.89 390.48 447.41 388.47 454.89 4 Y
+N
+390.48 454.89 392.48 454.89 390.48 447.41 388.47 454.89 4 Y
+V
+348.33 494.33 390.48 494.33 390.48 455.14 3 L
+2 Z
+N
+455.35 435.11 455.35 433.11 447.87 435.11 455.35 437.11 4 Y
+0 Z
+N
+455.35 435.11 455.35 433.11 447.87 435.11 455.35 437.11 4 Y
+V
+464.05 458.8 462.05 458.8 464.05 466.27 466.05 458.8 4 Y
+N
+464.05 458.8 462.05 458.8 464.05 466.27 466.05 458.8 4 Y
+V
+455.6 435.11 464.05 435.11 464.05 458.55 3 L
+N
+152.63 362 152.63 364 160.11 362 152.63 359.99 4 Y
+N
+152.63 362 152.63 364 160.11 362 152.63 359.99 4 Y
+V
+117.5 362 152.38 362 2 L
+2 Z
+N
+(Data) 168.21 360.57 T
+J
+152.77 343.28 152.77 345.29 160.25 343.28 152.77 341.28 4 Y
+0 Z
+N
+152.77 343.28 152.77 345.29 160.25 343.28 152.77 341.28 4 Y
+V
+J
+117.64 343.28 152.52 343.28 2 L
+J
+117.64 343.28 121.39 343.28 2 L
+2 Z
+N
+[10.017 8.681] 10.017 I
+121.39 343.28 148.77 343.28 2 L
+N
+J
+148.77 343.28 152.52 343.28 2 L
+N
+(Message) 168.36 341.86 T
+(A) 263.33 599.21 T
+(B) 235.12 468.62 T
+(C) 286.91 467.99 T
+(D) 242.14 431.43 T
+(E) 280.36 429.76 T
+J
+388.23 562.83 388.23 564.84 395.7 562.83 388.23 560.83 4 Y
+0 Z
+N
+388.23 562.83 388.23 564.84 395.7 562.83 388.23 560.83 4 Y
+V
+J
+245 542.83 245 562.83 387.98 562.83 3 L
+J
+245 542.83 245 546.58 2 L
+2 Z
+N
+[14.423 12.5] 14.423 I
+245 546.58 245 559.08 2 L
+N
+J
+245 559.08 245 562.83 248.75 562.83 3 L
+N
+[7.668 6.646] 7.668 I
+248.75 562.83 384.22 562.83 2 L
+N
+J
+384.22 562.83 387.98 562.83 2 L
+N
+J
+378.23 558.67 378.23 560.67 385.7 558.67 378.23 556.66 4 Y
+0 Z
+N
+378.23 558.67 378.23 560.67 385.7 558.67 378.23 556.66 4 Y
+V
+J
+255 451.17 263.33 451.17 263.33 558.67 377.98 558.67 4 L
+J
+255 451.17 258.75 451.17 2 L
+2 Z
+N
+[0.961 0.833] 0.961 I
+258.75 451.17 259.58 451.17 2 L
+N
+J
+259.58 451.17 263.33 451.17 263.33 454.92 3 L
+N
+[7.177 6.22] 7.177 I
+263.33 454.92 263.33 554.91 2 L
+N
+J
+263.33 554.91 263.33 558.67 267.08 558.67 3 L
+N
+[7.69 6.664] 7.69 I
+267.08 558.67 374.22 558.67 2 L
+N
+J
+374.22 558.67 377.98 558.67 2 L
+N
+J
+395.83 539.39 393.83 539.39 395.83 546.87 397.84 539.39 4 Y
+0 Z
+N
+395.83 539.39 393.83 539.39 395.83 546.87 397.84 539.39 4 Y
+V
+J
+355 537 395.83 537 395.83 539.14 3 L
+J
+355 537 358.75 537 2 L
+2 Z
+N
+[7.246 6.28] 7.246 I
+358.75 537 392.08 537 2 L
+N
+J
+392.08 537 395.83 537 395.83 539.14 3 L
+N
+J
+405 534.39 403 534.39 405 541.87 407 534.39 4 Y
+0 Z
+N
+405 534.39 403 534.39 405 541.87 407 534.39 4 Y
+V
+J
+344.17 460.33 405 460.33 405 534.14 3 L
+J
+344.17 460.33 347.92 460.33 2 L
+2 Z
+N
+[8.247 7.148] 8.247 I
+347.92 460.33 401.25 460.33 2 L
+N
+J
+401.25 460.33 405 460.33 405 464.08 3 L
+N
+[7.957 6.896] 7.957 I
+405 464.08 405 530.39 2 L
+N
+J
+405 530.39 405 534.14 2 L
+N
+J
+441.67 534.39 439.66 534.39 441.67 541.87 443.67 534.39 4 Y
+0 Z
+N
+441.67 534.39 439.66 534.39 441.67 541.87 443.67 534.39 4 Y
+V
+J
+441.67 498.78 443.67 498.78 441.67 491.3 439.66 498.78 4 Y
+N
+441.67 498.78 443.67 498.78 441.67 491.3 439.66 498.78 4 Y
+V
+J
+441.67 534.14 441.67 499.03 2 L
+J
+441.67 534.14 441.67 530.39 2 L
+2 Z
+N
+[10.102 8.755] 10.102 I
+441.67 530.39 441.67 502.78 2 L
+N
+J
+441.67 502.78 441.67 499.03 2 L
+N
+J
+108 63 540 720 C
+0 0 612 792 C
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "18" 19
+%%Trailer
+%%BoundingBox: 0 0 612 792
+%%PageOrder: Ascend
+%%Pages: 19
+%%DocumentFonts: Times-Bold
+%%+ Times-Roman
+%%+ Courier-Bold
+%%+ Courier
+%%+ Times-Italic
+%%EOF

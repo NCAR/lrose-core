@@ -1,0 +1,996 @@
+#! /usr/bin/perl
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2012 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2012/8/30 18:47:4 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+#  
+# Function: Script to prepend copyright notice to source code files. Tries
+#           to determine the type of file so can use the correct comment
+#           character to enclose the copyright in. The character strings
+#           used above and below the copyright notice are used by the
+#           copyright_remove script to remove the copyright notice from source
+#           code files so DO NOT CHANGE the special character strings.
+#
+# Usage:    copyright_prepend target_files
+#
+#
+#============================================================================
+#
+# Externals
+#
+
+use Getopt::Std qw( getopts );
+
+#
+# Globals
+#
+$Exit_success=0;
+$Exit_failure=-1;
+$C_start_comment_char="\/\*";
+$C_end_comment_char="\*\/";
+$Cplus_start_comment_char="\/\/";
+$Cplus_end_comment_char="";
+$java_start_comment_char="\/\/";
+$java_end_comment_char="";
+$sql_start_comment_char="-- ";
+$sql_end_comment_char="";
+$F90_start_comment_char="\!";
+$F90_end_comment_char="";
+$Fortran_start_comment_char="C   ";
+$Fortran_end_comment_char="";
+$Script_start_comment_char="\#";
+$Script_end_comment_char="";
+$Matlab_start_comment_char="%";
+$Matlab_end_comment_char="";
+$Html_start_comment_char="\<\!--";
+$Html_end_comment_char="--\>";
+$Man_start_comment_char="\.\\";
+$Man_end_comment_char="";
+$Ncl_start_comment_char="\;";
+$Ncl_end_comment_char="";
+
+$keystring_chars="*=";
+
+($prog = $0) =~ s%.*/%%;                   # Program name
+
+# Set command line defaults
+
+$Debug=0;                                  # Flag for debug
+$Debug_level=0;                            # Flag for debug level
+$Cleanup=1;                                # Flag for cleanup temp files
+$Test=0;                                   # Flag for test mode
+$Backward_compat=1;                        # Flag for backward compatibility mode
+$Check_for_copyright=1;                    # Flag for check copyrights
+$Do_force=0;                               # Flag for force mode
+$Use_std_copyright=1;                      # Flag for standard or alternate copyright
+
+# Parse input parameters
+
+&getopts('a:bcdfhjk:lmnopqstvx');
+
+if ($opt_h) {
+    print STDERR "Usage: $prog [-dhbcflmnopstvx] [-a <file>] [-k <chars>] target-files\n";
+    print STDERR "Purpose: Go through the list of target-files and add a\n";
+    print STDERR "   UCAR copyright statement as a comment to the top of each file.\n";
+    print STDERR "   Also adds the flag search lines to the top and bottom of the copyright text\n";
+    print STDERR "   By default, tries to determine the filetype based on the filename\n";
+    print STDERR "   extension or the output of the \'file\' command:\n";
+    print STDERR "     .c, .h, .css, files              use the C comment character: $C_start_comment_char, $C_end_comment_char\n";
+    print STDERR "     .cc, .hh, .cdl, .php files       use the C\+\+ comment character: $Cplus_start_comment_char\n";
+    print STDERR "     .java, .groovy                   use the Java comment character: $java_start_comment_char\n";
+    print STDERR "     .f, .F, .incl files              use the FORTRAN comment character: $Fortran_start_comment_char\n";
+    print STDERR "     .f90, .F90, .inc files           use the F90 comment character: $F90_start_comment_char\n";
+    print STDERR "     .m files                         use the Matlab comment character: $Matlab_start_comment_char\n";
+    print STDERR "     .l files                         use the man comment character: $Man_start_comment_char\n";
+    print STDERR "     .sh, .csh, .pl, .py, .pm, .mif   use the script comment character: $Script_start_comment_char\n";
+    print STDERR "     .ncl, .pro                       use the script comment character: $Ncl_start_comment_char\n";
+    print STDERR "     .html, .htm, .xml, .xsd, .wsdl   use the HTML comment character: $Html_start_comment_char, $Html_end_comment_char\n";
+    print STDERR "     .sql                             use the SQL comment character: $sql_start_comment_char\n";
+    print STDERR "Options:\n";
+    print STDERR "\t-a <file>:\tUse alternate copyright text from <file>\n";
+    print STDERR "\t-b:\tDo not force backward compatibility.\n";
+    print STDERR "\t-k <chars>: Use this character sequence for the copyright keystring instead of *=\n";
+    print STDERR "\t            This sequence will be repeated before and after the copyright notice,\n";
+    print STDERR "\t            e.g.    =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\n";
+    print STDERR "\t\tWill not prepend a copyright if cannot\n";
+    print STDERR "\t\tdetermine which comment character to use.\n";
+    print STDERR "\t\tDefault is the prior behavior of this script\n";
+    print STDERR "\t\twhich forces use of a C-style comment\n";
+    print STDERR "\t\tcharacter if cannot determine the file type.\n";
+    print STDERR "\t-c:\tForce use of the C comment character: $C_start_comment_char for all target-files\n";
+    print STDERR "\t-d:\tPrint debug messages\n";
+    print STDERR "\t-f:\tForce use of the F90 comment character: $F90_start_comment_char for all target-files\n";
+    print STDERR "\t-h:\tPrint this usage message\n";
+    print STDERR "\t-j:\tForce use of the Java comment character: $java_start_comment_char for all target-files\n";
+    print STDERR "\t-l:\tForce use of the HTML comment character: $Html_start_comment_char for all target-files\n";
+    print STDERR "\t-m:\tForce use of the Matlab comment character: $Matlab_start_comment_char for all target-files\n";
+    print STDERR "\t-n:\tDo not cleanup the backup tmp files\n";
+    print STDERR "\t-o:\tForce use of the old FORTRAN comment character: $Fortran_start_comment_char for all target-files\n";
+    print STDERR "\t-p:\tForce use of the C\+\+ comment character: $Cplus_start_comment_char for all target-files\n";
+    print STDERR "\t-q:\tForce use of the SQL comment character: $sql_start_comment_char for all target-files\n";
+    print STDERR "\t-s:\tForce use of the script comment character: $Script_start_comment_char for all target-files\n";
+    print STDERR "\t-t:\t(Test mode) do not actually modify the files\n";
+    print STDERR "\t-v:\tPrint verbose debug messages\n";
+    print STDERR "\t-x:\tDo not check each target-file for existing copyright.\n" ;
+    print STDERR "\t\tDefault is to check for an existing copyright\n";
+    print STDERR "\t\tand not prepend a new one if one already exists.\n";
+    exit $Exit_failure;
+}
+
+if ($opt_a) {
+    $Non_std_copyright_file=$opt_a;
+    $Use_std_copyright=0;
+}
+
+if ($opt_b) {
+    $Backward_compat=0;
+}
+
+if ($opt_c) {
+    $Do_force=1;
+    $Force_start_char=$C_start_comment_char;
+    $Force_end_char=$C_end_comment_char;
+}
+
+if ($opt_d) {
+    $Debug = 1;
+    $Debug_level =1;
+}
+
+if ($opt_f) {
+    $Do_force=1;
+    $Force_start_char=$F90_start_comment_char;
+    $Force_end_char=$F90_end_comment_char;
+}
+
+if ($opt_j) {
+    $Do_force=1;
+    $Force_start_char=$java_start_comment_char;
+    $Force_end_char=$java_end_comment_char;
+}
+
+if ($opt_l) {
+    $Do_force=1;
+    $Force_start_char=$Html_start_comment_char;
+    $Force_end_char=$Html_end_comment_char;
+    $is_script=1;
+}
+
+if ($opt_k) {
+    $keystring_chars = $opt_k;
+}
+
+if ($opt_m) {
+    $Do_force=1;
+    $Force_start_char=$Matlab_start_comment_char;
+    $Force_end_char=$Matlab_end_comment_char;
+}
+
+if ($opt_n) {
+    $Cleanup=0;
+}
+
+if ($opt_o) {
+    $Do_force=1;
+    $Force_start_char=$Fortran_start_comment_char;
+    $Force_end_char=$Fortran_end_comment_char;
+}
+
+if ($opt_p) {
+    $Do_force=1;
+    $Force_start_char=$Cplus_start_comment_char;
+    $Force_end_char=$Cplus_end_comment_char;
+}
+
+if ($opt_q) {
+    $Do_force=1;
+    $Force_start_char=$sql_start_comment_char;
+    $Force_end_char=$sql_end_comment_char;
+}
+
+if ($opt_s) {
+    $Do_force=1;
+    $Force_start_char=$Script_start_comment_char;
+    $Force_end_char=$Script_end_comment_char;
+    $is_script=1;
+}
+
+if ($opt_t) {
+    $Test=1;
+}
+
+if ($opt_v) {
+    $Debug=1;
+    $Debug_level=2;
+}
+
+if ($opt_x) {
+    $Check_for_copyright=0;
+}
+
+@ARGV >= 1    || die "Usage: $prog [-dhbcfjlmnopqstvx] [-a <file>] target-files\n";
+
+#
+# ----------------------- Initialization -----------------------
+#
+# get time so can use it to timestamp the copyright
+#
+
+($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) =
+    localtime(time);
+
+$mon = $mon+1;
+$year = $year+1900;
+$Copyright_timestring=sprintf("%04d/%02d/%02d %02d:%02d:%02d", $year, $mon, $mday, $hour, $min, $sec);
+$Copyright_year=$year;
+
+#
+# Does the file command exist?
+#
+
+$check_file=`which file`;
+if (!$check_file) {
+    print(STDERR "ERROR: Cannot find the file command\n");
+    if ($Backward_compat) {
+	print(STDERR "\tWill use the $C_start_comment_char for all files\n");
+    }
+}
+
+#
+# If a non-standard copyright, does the input file exist?
+#
+
+if (!$Use_std_copyright) {
+    if (!-f $Non_std_copyright_file) {
+	print(STDERR "ERROR: The non-standard copyright text file to read does not exist: $Non_std_copyright_file\n");
+	exit($Exit_failure);
+    }
+}
+
+# Get the copyright text
+
+($is_ok, $Nlines_copyright_text)=getCopyrightText($Use_std_copyright, $Non_std_copyright_file, 
+						  $Copyright_timestring, $Copyright_year, 
+						  *Copyright_text_arr, $Debug_level);
+if (!$is_ok) {
+    exit($Exit_failure);
+}
+  
+# -------------------------- Main ---------------------------
+#
+# loop through all the args as filenames
+#
+
+ FILE:
+
+foreach $filename (@ARGV) {
+
+  # Skip the filename if it is not a file
+
+  if (!-f $filename) {
+      print(STDERR "Skipping $filename - not a file\n");
+      next FILE;
+  }
+
+  # Skip the filename if it is a CVS file
+
+  if ($filename =~ /CVS/) {
+      print(STDERR "Skipping $filename - is a CVS file\n");
+      next FILE;
+  }
+
+  # Skip the filename if it is a binary file
+
+  if (-B $filename) {
+      print(STDERR "Skipping $filename - is a binary file\n");
+      next FILE;
+  }
+
+  # Print info
+
+  print(STDERR "Prepending copyright to $filename\n");
+
+  # Try to determine the type of file so know which comment character
+  # to use. Look for a filename extension or some specific name
+  # (i.e., Makefile). Use the file command if we still cannot determine
+  # the type of file.
+
+  ($is_ok, $is_script, $do_copyright, $recommend_start_char, $recommend_end_char)=&get_comment_char($filename, $Debug_level, $check_file);
+  if ($Do_force) {
+      $start_comment_char=$Force_start_char;
+      $end_comment_char=$Force_end_char;
+      if (!$is_ok) {
+	  print(STDERR "WARNING forcing comment style on unknown filetype: $filename\n");
+      }
+      if (!$do_copyright) {
+	  print(STDERR "WARNING forcing copyright on binary file: $filename\n");
+      }
+  } else {
+      if ((!$is_ok) && (!$Backward_compat)) {
+	  print(STDERR "Skipping $filename - cannot determine filetype\n");
+	  next FILE;
+      }
+      if (!$do_copyright) {
+	  print(STDERR "Skipping $filename - binary file\n");
+	  next FILE;
+      }
+      if($is_ok) {
+	  $start_comment_char = $recommend_start_char;
+	  $end_comment_char = $recommend_end_char;
+      } else {
+	  print(STDERR "Caution forcing C comment style on unknown filetype: $filename\n");
+	  $start_comment_char=$C_start_comment_char;
+	  $end_comment_char=$C_end_comment_char;
+      }
+  }
+
+
+  # If specified, check for a copyright on the file
+
+  if ($Check_for_copyright) {
+      ($is_ok, $is_copyright)=&check_copyright_exist($filename, $Debug_level);
+      if (!$is_ok) {
+	  next FILE;
+      }
+      if ($is_copyright) {
+	  print(STDERR "Skipping $filename - already has a copyright!\n");
+	  next FILE;
+      }
+  }
+
+  # Debug
+
+  if ($Debug) {
+      print(STDERR "\twill use comment char: $start_comment_char  $end_comment_char\n");
+  }
+
+  # If in test mode, do not continue
+
+  if ($Test) {
+      next FILE;
+  }
+
+  # Copy the input file to a backup name
+  
+  $backup_file="$filename.bak-$prog";
+  system("/bin/cp $filename $backup_file");
+
+  # Set the output filename
+
+  $outfile="$filename.modified-$prog";
+  
+  # If this IS a script file, need to put the copyright below the 
+  # script definition at the top of the file
+
+  if ($is_script) {
+      ($is_ok, $did_copyright)=&put_copyright_below_scriptdefn($backup_file, $outfile, $start_comment_char, $end_comment_char, $Nlines_copyright_text, *Copyright_text_arr, $Debug_level);
+      if (!$is_ok) {
+	  next FILE;
+      }
+      if (!$did_copyright) {
+	  unlink($outfile);
+      }
+  }
+
+  # If this is NOT a script file, or if we failed to write the copyright
+  # below the script definition (perhaps because we could not find it),
+  # write the copyright at the top then cat the file contents to the output file.
+
+   if ((!$is_script) || (($is_script) && (!$did_copyright))) {
+
+       if (!open(OUTFILE, ">$outfile")) {
+	   print(STDERR "Cannot open file $outfile - continuing ... \n");
+	   next FILE;
+       }
+
+       $is_ok=&print_copyright(OUTFILE, $start_comment_char, $end_comment_char, $Nlines_copyright_text,
+			       *Copyright_text_arr, $Debug_level);
+       if (!$is_ok) {
+	  print(STDERR "ERROR: Could not prepend copyright to $filename!\n");
+      }
+
+      # Close the file
+      
+      close(OUTFILE);
+
+      # Append the input file to the copyright in the output file
+
+      system("cat $filename >> $outfile");
+  }
+
+  # Copy the output file to the input filename
+  # Need to do a copy, not a move to preserve file permissions
+
+  system("/bin/cp $outfile $filename");
+
+  # Delete the backup files
+
+  if ($Cleanup) {
+      unlink($backup_file);
+      unlink($outfile);
+  }
+
+} #endforeach
+  
+# Done
+
+exit $Exit_success;
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: getCopyrightText
+#
+# Usage: ($return_val, $narr)=getCopyrightText($use_std_text, $alt_file, 
+#                                              $timestring, $year,
+#                                              *arr, $debug)
+#
+# Function: Put the copyright text into the output array
+#
+# Input:  $use_std_text    flag to use standard copyright text or not
+#         $alt_file        if use_std_text is false, the file to read the text from
+#         $timestring      timestring to print into copyright
+#         $year            year to print into copyright, ignored if using alt_file
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#         $narr            size of arr
+#         *arr             array of copyright text lines
+#
+#
+sub getCopyrightText {
+  local ($use_std_text, $alt_file, $timestring, $year, *arr, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname, $narr);
+  local($line, $found_errors, $i);
+
+  # Set defaults
+
+  $return_val=0;
+  $narr=0;
+  $subname="getCopyrightText";
+  
+  if ($debug > 1) {
+      print(STDERR "$subname: Input...\n");
+      print(STDERR "\tuse_std_text: $use_std_text, alt_file: $alt_file\n");
+      print(STDERR "\ttimestring: $timestring, year: $year\n");
+  }
+
+  # Print chars
+
+  $found_errors=0;
+  
+  # Set array of text lines
+  # Print search text at top
+
+  $narr=0;
+  $arr[$narr] = '';
+  for ($count = 0; $count < 36; $count++) {
+      $arr[$narr] = $arr[$narr] . $keystring_chars;
+  }
+  $arr[$narr] = $arr[$narr] . "*";
+  $narr++;
+
+  # Print copyright text
+
+  if ($use_std_text) {
+
+      $arr[$narr++]="** Copyright UCAR (c) 1990 - $year                                        ";
+
+      $arr[$narr++]="** University Corporation for Atmospheric Research (UCAR)                ";
+      $arr[$narr++]="** National Center for Atmospheric Research (NCAR)                       ";
+      $arr[$narr++]="** Boulder, Colorado, USA                                                ";
+      $arr[$narr++]="** BSD licence applies - redistribution and use in source and binary     ";
+      $arr[$narr++]="** forms, with or without modification, are permitted provided that      ";
+      $arr[$narr++]="** the following conditions are met:                                     ";
+
+      $arr[$narr++]="** 1) If the software is modified to produce derivative works,           ";
+      $arr[$narr++]="** such modified software should be clearly marked, so as not            ";
+      $arr[$narr++]="** to confuse it with the version available from UCAR.                   ";
+
+      $arr[$narr++]="** 2) Redistributions of source code must retain the above copyright     ";
+      $arr[$narr++]="** notice, this list of conditions and the following disclaimer.         ";
+
+      $arr[$narr++]="** 3) Redistributions in binary form must reproduce the above copyright  ";
+      $arr[$narr++]="** notice, this list of conditions and the following disclaimer in the   ";
+      $arr[$narr++]="** documentation and/or other materials provided with the distribution.  ";
+
+      $arr[$narr++]="** 4) Neither the name of UCAR nor the names of its contributors,        ";
+      $arr[$narr++]="** if any, may be used to endorse or promote products derived from       ";
+      $arr[$narr++]="** this software without specific prior written permission.              ";
+
+      $arr[$narr++]='** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS ';
+      $arr[$narr++]="** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED     ";
+      $arr[$narr++]="** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.   ";
+
+  } else {
+      if (!open(INFILE, "< $alt_file")) {
+	   print(STDERR "Cannot open file $altfile\n");
+	   $found_errors=1;
+	   $narr=0;
+       }
+      while ($line = <INFILE>) {
+	  chop($line);
+	  $arr[$narr]=$line;
+	  $narr++;
+      }
+      close(INFILE);
+  } #end else (use_std_text)
+
+  # Add end text
+
+  $arr[$narr] = '';
+  for ($count = 0; $count < 36; $count++) {
+      $arr[$narr] = $arr[$narr] . $keystring_chars;
+  }
+  $arr[$narr] = $arr[$narr] . "*";
+
+  # Debug
+
+  if ($debug > 1) {
+      print(STDERR "$subname: narr: $narr\n");
+      for ($i=0; $i<=$narr; $i++) {
+	  print(STDERR "\ti: $i, arr: $arr[$i]\n");
+      }
+  }
+
+  # Done
+  
+  if ($found_errors) {
+      $return_val=0;
+  } else {
+      $return_val=1;
+  }
+
+  return($return_val, $narr);
+}
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: print_copyright
+#
+# Usage: $return_val=&print_copyright($filehandle, $start_cchar,
+#                                     $end_cchar, $ntextarr,
+#                                     *text_arr, $debug)
+#
+# Function: Print the copyright to the output $filehandle using
+#           the input start and end comment characters.
+#
+# Input:  $filehandle      file handle for output file to print to,
+#                              must be already opened for writing
+#         $start_cchar     comment character to start a comment
+#         $end_cchar       comment character to end a comment
+#         $ntextarr        size of *text_arr
+#         *text_arr        array of copyright text lines
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#
+#
+sub print_copyright {
+  local ($filehandle, $start_cchar, $end_cchar, $ntextarr, *text_arr, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($sc, $ec, $is_ok, $found_errors, $i, $counter, *arr);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="print_copyright";
+
+  # Debug
+
+  if ($debug > 1) {
+      print(STDERR "$subname: Input...\n");
+      print(STDERR "\tstart_cchar: $start_cchar, end_cchar: $end_cchar, ntextarr: $ntextarr\n");
+  }
+
+  # Print chars
+
+  $sc=$start_cchar;
+  $ec=$end_cchar;
+  $found_errors=0;
+  
+  # Loop through text array and print lines
+
+  for ($i=0; $i<=$ntextarr; $i++) {
+      $is_ok=print (OUTFILE "$start_cchar $text_arr[$i] $end_cchar\n");
+      if (!$is_ok) {
+	  $found_errors=1;
+      }
+  }
+
+  # Done
+  
+  if ($found_errors) {
+      $return_val=0;
+  } else {
+      $return_val=1;
+  }
+
+  return($return_val);
+}
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: get_comment_char
+#
+# Usage: ($return_val, $is_script, $do_prepend, $start_cchar, $end_cchar)
+#                     =&get_comment_char($filename, $debug)
+#
+# Function: Try to determine the comment characters to use for the
+#           input $filename. Uses the globally defined comment chars
+#           from the top of the file.
+#
+# Input:  $filename        filename to determine the comment chars for
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#         $is_script       1 if $filename is a script, 0 if not
+#         $do_prepend      1 to do prepend of copyright, 0 to skip
+#         $start_cchar     comment character to start a comment
+#         $end_cchar       comment character to end a comment
+#
+#
+sub get_comment_char {
+  local ($filename, $debug, $check_file) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($start_cchar, $end_cchar, $do_prepend, $is_script);
+  local($last_dot, $fname_len, $ext);
+  local($dbg2);
+
+  # Set defaults
+
+  $return_val=0;
+  $do_prepend=0;
+  $is_script=0;
+  $subname="get_comment_char";
+
+  # Debugging
+
+  if ($debug == 2) {
+      $dbg2=1;
+  } else {
+      $dbg2=0;
+  }
+
+  # Set return defaults for the comment characters
+
+  $start_cchar=$C_start_comment_char;
+  $end_cchar=$C_end_comment_char;
+
+  # Get the filename extension if we can
+
+  $last_dot = rindex($filename, ".");
+  $fname_len = length($filename);
+
+  if (($last_dot <= 0) || ($last_dot >= $fname_len)) {
+      $ext="UNKNOWN";
+  } else {
+      $ext=substr($filename, $last_dot);
+  }
+
+  if ($dbg2) {
+      print(STDERR "\t$subname: $filename has extension: $ext\n");
+  }
+
+  # Look for a match with the filename extension
+
+  $return_val = 1;
+  $do_prepend = 1;
+
+  if (($ext eq ".c") || ($ext eq ".h")) {
+      $start_cchar=$C_start_comment_char;
+      $end_cchar=$C_end_comment_char;
+  } elsif ($ext eq ".css") {
+      $start_cchar=$C_start_comment_char;
+      $end_cchar=$C_end_comment_char;
+  } elsif ($ext eq ".php") {
+      $start_cchar=$Cplus_start_comment_char;
+      $end_cchar=$Cplus_end_comment_char;
+      $is_script=1;
+  } elsif (($ext eq ".cc") || ($ext eq ".hh") || ($ext eq ".cpp") || ($ext eq ".cdl")) {
+      $start_cchar=$Cplus_start_comment_char;
+      $end_cchar=$Cplus_end_comment_char;
+  } elsif (($ext eq ".f90") || ($ext eq ".F90") || ($ext eq ".inc")) {
+      $start_cchar=$F90_start_comment_char;
+      $end_cchar=$F90_end_comment_char;
+  } elsif (($ext eq ".f") || ($ext eq ".F") || ($ext eq ".incl")) {
+      $start_cchar=$Fortran_start_comment_char;
+      $end_cchar=$Fortran_end_comment_char;
+  } elsif ($ext eq ".m") {
+      $start_cchar=$Matlab_start_comment_char;
+      $end_cchar=$Matlab_end_comment_char;
+  } elsif (($filename =~ /akefile/) || 
+	   ($ext eq ".sh") || ($ext eq ".csh") || ($ext eq ".py") || 
+	   ($ext eq ".pl") || ($ext eq ".pm") || ($ext eq ".mif") ||
+           ($ext eq ".config")) {
+      $start_cchar=$Script_start_comment_char;
+      $end_cchar=$Script_end_comment_char;
+      $is_script=1;
+  } elsif (($ext eq ".html") || ($ext eq ".htm") || ($ext eq ".xml") || 
+	   ($ext eq ".xsd") || ($ext eq ".wsdl") || ($ext eq ".fml") ||
+           ($ext eq ".xjb")) {
+      $start_cchar=$Html_start_comment_char;
+      $end_cchar=$Html_end_comment_char;
+      $is_script=1;
+  } elsif ($ext eq ".l") {
+      $start_cchar=$Man_start_comment_char;
+      $end_cchar=$Man_end_comment_char;
+  } elsif (($ext eq ".ncl") || ($ext eq ".pro")) {
+      $start_cchar=$Ncl_start_comment_char;
+      $end_cchar=$Ncl_end_comment_char;
+  } elsif (($ext eq ".java") || ($ext eq ".groovy")) {
+      $start_cchar=$java_start_comment_char;
+      $end_cchar=$java_end_comment_char;
+  } elsif ($ext eq ".sql") {
+      $start_cchar=$sql_start_comment_char;
+      $end_cchar=$sql_end_comment_char;
+  } elsif (($ext eq ".jpg") || ($ext eq ".png")  || ($ext eq ".gif") ||
+	   ($ext eq ".zip") || ($ext eq ".tar")  || ($ext eq ".gz")  ||
+	   ($ext eq ".doc") || ($ext eq ".docx") || ($ext eq ".ppt") ||
+	   ($ext eq ".o")   || ($ext eq ".a")    || ($ext eq ".jar") ||
+	   ($ext eq ".grb") || ($ext eq ".grb2") || ($ext eq ".nc")  ||
+	   ($ext eq ".ps")  || ($ext eq ".so")   || ($ext eq ".pdf")) {
+      $do_prepend=0;
+  } else {
+
+      if($check_file) {
+	  # Okay, we will try to figure out the type of file using the
+	  # file command
+	  $filetype=`file $filename`;
+	  
+	  if ($filetype =~ /C\+\+ program/) {
+	      $start_cchar=$C_start_comment_char;
+	      $end_cchar=$C_end_comment_char;
+	  } elsif ($filetype =~ /C program/) {
+	      $start_cchar=$C_start_comment_char;
+	      $end_cchar=$C_end_comment_char;
+	  } elsif ($filetype =~ /script/) {
+	      $start_cchar=$Script_start_comment_char;
+	      $end_cchar=$Script_end_comment_char;
+	      $is_script=1;
+	  } elsif (($filetype =~ /fortran/) || ($filetype =~ /FORTRAN/)) {
+	      $start_cchar=$Fortran_start_comment_char;
+	      $end_cchar=$Fortran_end_comment_char;
+	  } elsif ($filetype =~ /HTML/) {
+	      $start_cchar=$Html_start_comment_char;
+	      $end_cchar=$Html_end_comment_char;
+	  } elsif (($filetype =~ /executable/) || ($filetype =~ /data/)) {
+	      $do_prepend=0;
+	  } else {
+	      $return_val = 0;
+	  }
+
+      } else {
+	  $return_val = 0;
+      }
+  }
+
+  # Debug
+
+  if ($dbg2) {
+      print(STDERR "\t$subname: $filename\n");
+      print(STDERR "\t\tstart_comment_char: $start_cchar, end_comment_char: $end_cchar, is_script: $is_script, do_prepend: $do_prepend\n");
+  }
+
+  # Done
+
+  return($return_val, $is_script, $do_prepend, $start_cchar, $end_cchar);
+}
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: put_copyright_below_scriptdefn
+#
+# Usage: $return_val
+#       =&put_copyright_below_scriptdefn($source_file, $out_file,
+#                                 $start_cchar, $end_cchar, 
+#                                 $ntextarr, *text_arr, $debug)
+#
+# Function: Put the copyright below the script definition at the top
+#           of the file.
+#
+# Input:  $source_file     input file to read
+#         $out_file        output file to create
+#         $start_cchar     comment character to start a comment
+#         $end_cchar       comment character to end a comment
+#         $ntextarr        size of *text_arr
+#         *text_arr        array of copyright text lines
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#         $did_copyright   1 if found the script definition and put
+#                               the copyright on
+#
+#
+sub put_copyright_below_scriptdefn {
+  local ($source_file, $out_file, $start_cchar, $end_cchar, $ntextarr, *text_arr, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($is_ok, $did_copyright, $found, $line);
+  local($dbg2);
+
+  # Set defaults
+
+  $return_val=0;
+  $did_copyright=0;
+  $subname="put_copyright_below_scriptdefn";
+
+  if ($debug == 2) {
+      $dbg2=1;
+  } else {
+      $dbg2=0;
+  }
+
+  # Open the input file so we can read it line by line looking for
+  # script definition
+
+  if (!open(SRCFILE, $source_file)) {
+      print(STDERR "Cannot open source file $source_file - continuing ... \n");
+      return($return_val, $did_copyright);
+  }
+
+  # Open the output file
+
+  if (!open(OUTFILE, ">$out_file")) {
+      print(STDERR "Cannot open file $out_file - continuing ... \n");
+      return($return_val, $did_copyright);
+   }
+
+   $found=0;
+   while ($line = <SRCFILE>) {
+
+       # Look for the script definition at the top of the file
+
+       if (($found == 0) && 
+	   (($line =~ /^\#\!/) || ($line =~ /^\<\?php/) || 
+	    ($line =~ /^\<\?xml/) || ($line =~ /\<\!DOCTYPE/))) {
+	   $found=1;
+	   print(OUTFILE $line);
+	   $is_ok=&print_copyright(OUTFILE, $start_cchar, $end_cchar, $ntextarr, 
+				   *text_arr, $debug);
+	   next;
+       }
+
+       # Print all lines in the file to the output file
+
+       print(OUTFILE $line);
+   }
+
+  # Close the files
+
+  close(OUTFILE);
+  close(SRCFILE);
+
+  # Debug
+
+  if ($dbg2) {
+      print(STDERR "$subname: source_file $source_file, outfile: $out_file, found: $found\n");
+  }
+  
+  # Done
+
+  $did_copyright=$found;
+  $return_val=1;
+
+  return($return_val, $did_copyright);
+}
+
+
+#--------------------------------------------------------------------------
+#
+# Subroutine: check_copyright_exist
+#
+# Usage: ($return_val, $found_copyright) =
+#             &check_copyright_exist($file, $debug)
+#
+# Function: Open the $filename and see if a Copyright exists on the file
+#
+# Input:  $file            file to check
+#         $debug           flag for debug info
+#
+# Output: $return_val      1 on success, 0 on error
+#         $found_copyright 1 if a copyright in the file, 0 if not
+#
+#
+sub check_copyright_exist {
+  local ($file, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($line, $orig_line, $found_copyright);
+  local($dbg2, $dbg3);
+
+  # Set defaults
+
+  $return_val=0;
+  $found_copyright=0;
+  $subname="check_copyright_exist";
+
+  # Debugging
+
+  $dbg2=0;
+  $dbg3=0;
+  if ($debug == 2) {
+      $dbg2=1;
+  } elsif ($debug == 3) {
+      $dbg2=1;
+      $dbg3=1;
+  }
+
+  # Open the file
+
+  if (!open(CHKFILE, $file)) {
+      print(STDERR "Cannot open file $file...\n");
+      return($return_val, $found_copyright);
+  }
+
+  # Look for a copyright
+
+  while ($line = <CHKFILE>) {
+
+      # Convert the line to upper case so can find matches
+
+      $orig_line=$line;
+      $line =~ tr/[a-z]/[A-Z]/;     
+
+      if ($dbg3) {
+	  print(STDERR "line: $line");
+      }
+
+      # Look for Copyright, need to be careful NOT to find ucopyright() call 
+      # or the include copyright.h line
+
+      if ($line =~ /COPYRIGHT/) {
+	  if (($line =~ /UCOPYRIGHT/) || ($line =~ /COPYRIGHT\.H\>/) ||
+	      ($line =~ /PRINTS THE RAP COPYRIGHT MESSAGE/) ||
+	      ($line =~ /COPYRIGHT\_PREPEND/) || ($line =~ /COPYRIGHT\_REMOVE/) ||
+	      ($line =~ /COPYRIGHT1\_PREPEND/) || ($line =~ /COPYRIGHT1\_REMOVE/) ||
+	      (($line =~ /FPRINTF/) && ($line =~ /NOW\.YEAR/)) ||
+	      ($line =~ /STDERR/) || ($line =~ /RAP\_COPYRIGHT\_DIR/) ||
+	      ($line =~ /INSTALL\_COPYRIGHT/) ||
+	      ($line =~ /NON\-ERROR MESSAGES \(SUCH AS COPYRIGHT INFO/) ||
+	      (($line =~ /COPYRIGHT\_NOTICE\.TXT/) || ($line =~ /COPYRIGHT\:/) && ($file =~ /rap\_make/)))
+	      {
+	      if ($debug) {
+		  print(STDERR "\t$file -- Skipping non-copyright copyright string: $orig_line");
+	      }
+	  } else {
+	      $found_copyright=1;
+	      print(STDERR "\t$file -- Found a copyright in the file: $orig_line");
+	  }
+      }
+  }
+  
+  # Close the file
+
+  close(CHKFILE);
+
+  # Debug
+
+  if ($dbg2) {
+      print(STDERR "\t$subname: file: $file, found copyright: $found_copyright\n");
+  }
+
+  # Done
+
+  $return_val=1;
+  return($return_val, $found_copyright);
+}
+
+#------------------------------------ EOF ------------------------------------
+

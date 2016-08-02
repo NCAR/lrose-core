@@ -1,0 +1,12 @@
+/.cvsignore/1.1/Fri Oct 23 21:35:06 2015//
+/Makefile/1.8/Fri Mar  4 03:10:20 2016//
+/acmg_acpos_filter.c/1.6/Fri Mar  4 02:04:38 2016//
+/acmg_acpos_filter.h/1.5/Fri Mar  4 01:28:15 2016//
+/acmg_acpos_filter.params/1.1/Tue Dec  5 16:13:53 1995//
+/acmg_acpos_filter_tdrp.c/1.2/Fri Mar  4 02:04:38 2016//
+/acmg_acpos_filter_tdrp.h/1.1/Sun Apr 29 00:19:21 2012//
+/paramdef.acmg_acpos_filter/1.2/Mon Feb 19 17:19:11 1996//
+/parse_args.c/1.4/Fri Mar  4 01:28:15 2016//
+/process_file.c/1.4/Fri Mar  4 01:28:15 2016//
+/tidy_and_exit.c/1.2/Fri Mar  4 01:28:15 2016//
+D

@@ -1,0 +1,383 @@
+/**********************************************************************
+ * TDRP params for Bprp2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: Bprp2Dsr.
+//
+// Bprp2Dsr reads bprp data over a socket and writes the data to a 
+//   DsRadarQueue beam by beam.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL AND DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "rdas";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_host //////////////////////////////
+//
+// Input data host.
+// TCP/IP name/address of host for input data.
+// Type: string
+//
+
+input_host = "localhost";
+
+///////////// input_port //////////////////////////////
+//
+// Input data port.
+// TCP/IP port number for input data.
+// Type: int
+//
+
+input_port = 12000;
+
+///////////// pacer ///////////////////////////////////
+//
+// Set options for PACER radar.
+// If this is set, processing is done as for the PACER radar data 
+//   system.
+// Type: boolean
+//
+
+pacer = FALSE;
+
+///////////// check_radar_id //////////////////////////
+//
+// Option to check radar ID.
+// If this is set, only beams with the correct radar id are included in 
+//   the output data stream.
+// Type: boolean
+//
+
+check_radar_id = FALSE;
+
+///////////// time_mode ///////////////////////////////
+//
+// Time computation mode.
+// If AS_IS, time is accepted as is. Otherwise, it is assumed local and 
+//   changed to UCT.
+//
+// Type: enum
+// Options:
+//     LOCAL_TO_UCT
+//     AS_IS
+//
+
+time_mode = AS_IS;
+
+///////////// time_correction /////////////////////////
+//
+// Time correction (secs).
+// Data time is adjusted by this number of seconds before output.
+// Type: int
+//
+
+time_correction = 0;
+
+///////////// target_radar_id /////////////////////////
+//
+// Target radar ID.
+// The radar ID to be used for filtering the input data.
+// Type: int
+//
+
+target_radar_id = 0;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL for DsRadarQueue fmq.
+// The URL is of the form 'fmqp:://host::dir/name'. If the output is to 
+//   the local host you can use just 'dir/name'.
+// Type: string
+//
+
+output_url = "fmq/rdas_test";
+
+///////////// write_blocking //////////////////////////
+//
+// Option to block on write when the radar queue fills up.
+// If false, the program writes data to the output queue without regard 
+//   to whether the reader is keeping up. This mode should usually be used 
+//   in realtime, to avoid holding things up if a client becomes slow. If 
+//   true, the program will not overwrite data in the queue which has not 
+//   been read by the reader. This is recommended for ARCHIVE and FILELIST 
+//   mode. In this mode there should be only one reader. If you need to 
+//   service more than one reader, use Fmq2Fmq in write blocking mode with 
+//   multiple output urls to multiplex the queue.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+///////////// output_compression //////////////////////
+//
+// Output compression options.
+// The data may be optionally compressed for output. BZIP is generally 
+//   the slowest but most compact. ZLIB uses the gzip compression 
+//   algorithm, which is faster than BZIP, and for some data more compact 
+//   as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is 
+//   simple run-length encoding compression, which is the fastest and 
+//   least compact.
+//
+// Type: enum
+// Options:
+//     NO_COMPRESSION
+//     RLE_COMPRESSION
+//     ZLIB_COMPRESSION
+//
+
+output_compression = ZLIB_COMPRESSION;
+
+///////////// output_n_slots //////////////////////////
+//
+// Number of slots in output FMQ.
+// Type: int
+//
+
+output_n_slots = 10000;
+
+///////////// output_buf_size /////////////////////////
+//
+// Size of buffer in output FMQ.
+// Type: int
+//
+
+output_buf_size = 10000000;
+
+///////////// dbz_as_float32 //////////////////////////
+//
+// Option to write dbz data out as 32-bit floats.
+// If false, the dbz output is as 8-bit ints.
+// Type: boolean
+//
+
+dbz_as_float32 = TRUE;
+
+//======================================================================
+//
+// RADAR PARAMETERS.
+//
+//======================================================================
+ 
+///////////// site_name ///////////////////////////////
+//
+// Name of radar site.
+// Type: string
+//
+
+site_name = "Bethlehem";
+
+///////////// scan_type ///////////////////////////////
+//
+// Scan strategy type.
+// Indicates which scan strategy is in use.
+// Type: int
+//
+
+scan_type = 0;
+
+///////////// scan_name ///////////////////////////////
+//
+// Scan strategy name.
+// Descriptive name for scan strategy.
+// Type: string
+//
+
+scan_name = "Surveillance";
+
+///////////// radar_altitude //////////////////////////
+//
+// Radar altitude.
+// Radar altitude (km MSL).
+// Type: double
+//
+
+radar_altitude = 1.57;
+
+///////////// radar_latitude //////////////////////////
+//
+// Radar latitude.
+// Radar latitude (deg.decimal).
+// Type: double
+//
+
+radar_latitude = 39.787;
+
+///////////// radar_longitude /////////////////////////
+//
+// Radar longitude.
+// Radar longitude (deg.decimal).
+// Type: double
+//
+
+radar_longitude = -104.546;
+
+///////////// samples_per_beam ////////////////////////
+//
+// Samples per beam.
+// Number of pulse samples used to compute data from a beam. 
+//   Documentation purposes only.
+// Type: int
+//
+
+samples_per_beam = 32;
+
+///////////// atmos_attenuation ///////////////////////
+//
+// Atmospheric attenuation.
+// Atmospheric attenuation correction (dB/km). S-band: 0.012, C-band: 
+//   0.014, X-band: 0.024.
+// Type: double
+//
+
+atmos_attenuation = 0.014;
+
+///////////// beam_width //////////////////////////////
+//
+// Beam width.
+// Radar half-power beam width (deg). Documentation purposes only.
+// Type: double
+//
+
+beam_width = 1;
+
+///////////// pulse_width /////////////////////////////
+//
+// Pulse width.
+// Radar pulse width (microsecs). Documentation purposes only.
+// Type: double
+//
+
+pulse_width = 4;
+
+///////////// prf /////////////////////////////////////
+//
+// PRF.
+// Radar pulse repitition frequency (pulses per sec).
+// Type: double
+//
+
+prf = 250;
+
+///////////// wavelength //////////////////////////////
+//
+// Wavelength.
+// Radar wavelength (cm).
+// Type: double
+//
+
+wavelength = 5;
+
+///////////// radar_constant //////////////////////////
+//
+// Radar constant.
+// Value of radar constant for Met type radar.
+// Type: double
+//
+
+radar_constant = -154.91;
+
+///////////// polarization_code ///////////////////////
+//
+// Radar polarization code.
+// 1 = hor, 2 = ver, 3 = circ, 4 = ellip. Should be 3; 1 for Jing 
+//   compatibility. Documentation purposes only.
+// Type: int
+//
+
+polarization_code = 3;
+
+///////////// peak_xmit_pwr ///////////////////////////
+//
+// Peak transmitter power (kW).
+// Documentation purposes only.
+// Type: double
+//
+
+peak_xmit_pwr = 250;
+
+///////////// receiver_mds ////////////////////////////
+//
+// Receiver MDS (dBM).
+// Receiver minimum detectable signal (dMD) - for DS_FORMAT only. 
+//   Documentation purposes only.
+// Type: double
+//
+
+receiver_mds = -113;
+
+///////////// receiver_gain ///////////////////////////
+//
+// Gain of the receiver (dB) - for DS_FORMAT only.
+// Documentation purposes only.
+// Type: double
+//
+
+receiver_gain = 0;
+
+///////////// antenna_gain ////////////////////////////
+//
+// Gain of the antenna (dB) - for DS_FORMAT only.
+// Documentation purposes only.
+// Type: double
+//
+
+antenna_gain = 45;
+
+///////////// system_gain /////////////////////////////
+//
+// Gain of the system (dB) - for DS_FORMAT only.
+// Documentation purposes only.
+// Type: double
+//
+
+system_gain = 0;
+
+///////////// unambig_velocity ////////////////////////
+//
+// Unambiguous velocity - m/s.
+// Documentation purposes only.
+// Type: double
+//
+
+unambig_velocity = -1;
+

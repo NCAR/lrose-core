@@ -1,0 +1,6 @@
+.deps
+BasinPrecipSpdb2Xml
+__makefile.template
+makefile
+makefile.am
+makefile.in

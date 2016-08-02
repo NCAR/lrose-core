@@ -1,0 +1,679 @@
+/**********************************************************************
+ * TDRP params for InputWatcher
+ **********************************************************************/
+
+//======================================================================
+//
+// InputWatcher program.
+//
+// InputWatcher watches for new data arriving in a directory. It 
+//   optionally registers the latest time with the DataMapper, optionally 
+//   copies the file to a file named with the modify time, and optionally 
+//   runs a script.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+//
+// This directory is watched for new files. NOTE: if the directory does 
+//   not start with a . or /, it will be relative to $DATA_DIR or 
+//   $RAP_DATA_DIR.
+//
+//
+// Type: string
+//
+
+input_dir = "$(HOME)/cvs/libs/toolsa";
+
+///////////// wait_between_checks /////////////////////
+//
+// Sleep time between checking directory for input - secs.
+//
+// If a directory is large and files do not arrive frequently, set this 
+//   to a higher value to reduce the CPU load from checking the directory.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+wait_between_checks = 2;
+
+///////////// file_quiescence /////////////////////////
+//
+// File quiescence when checking for files - secs.
+//
+// This allows you to make sure that a file coming from a remote machine 
+//   is complete before reading it.
+//
+//
+// Type: int
+//
+
+file_quiescence = 5;
+
+///////////// max_valid_age ///////////////////////////
+//
+// Maximum valid age for files, seconds.
+//
+// Default is 900 secs (15 minutes).
+//
+//
+// Type: int
+//
+
+max_valid_age = 900;
+
+///////////// latest_data_info_avail //////////////////
+//
+// Is _latest_data_info file available?.
+//
+// If TRUE, will watch the latest_data_info file. If FALSE, will scan 
+//   the input directory for new files.
+//
+//
+// Type: boolean
+//
+
+latest_data_info_avail = FALSE;
+
+///////////// latest_file_only ////////////////////////
+//
+// Option to only use the latest file.
+//
+// If TRUE, processes only the latest file on startup. If FALSE, 
+//   processes all files within the max_valid_age. This only applies to 
+//   startup, when a number of files could be available for processing.
+//
+//
+// Type: boolean
+//
+
+latest_file_only = FALSE;
+
+///////////// skip_to_latest_file /////////////////////
+//
+// Option to skip past files that have been queued.
+//
+// If TRUE, processes only the latest file available when the queued 
+//   list is queried. This allows the process to skip intermediate files 
+//   and catch up if it is falling behind. Normally this would be FALSE to 
+//   prevent missing data, but there are circumstance in which it is 
+//   preferable to miss data and catch up.
+//
+//
+// Type: boolean
+//
+
+skip_to_latest_file = FALSE;
+
+///////////// search_recursively //////////////////////
+//
+// Option to recurse to subdirectories while looking for new files.
+//
+// If TRUE, all subdirectories with ages less than max_dir_age will be 
+//   searched. This may take considerable CPU, so be careful in its use.
+//
+//
+// Type: boolean
+//
+
+search_recursively = TRUE;
+
+///////////// max_dir_age /////////////////////////////
+//
+// Maximum age of directory for recursive search.
+//
+// Only applies search_recursively is TRUE. If set to -1, no age test is 
+//   used and all directories will be scanned.
+//
+//
+// Type: int
+//
+
+max_dir_age = 900;
+
+///////////// max_recursion_depth /////////////////////
+//
+// Maximum depth for recursive directory scan.
+//
+// Only applies search_recursively is TRUE. This is the max depth, below 
+//   input_dir, to which the recursive directory search will be carried 
+//   out. A depth of 0 will search the top-level directory only. A depth 
+//   of 1 will search the level below the top directory, etc.
+//
+//
+// Type: int
+//
+
+max_recursion_depth = 5;
+
+///////////// follow_links ////////////////////////////
+//
+// Follow directory and file links.
+//
+// If FALSE, we will not consider files or directories that are symbolic 
+//   links.
+//
+//
+// Type: boolean
+//
+
+follow_links = FALSE;
+
+///////////// use_inotify /////////////////////////////
+//
+// Option to use inotify in realtime mode without latest_data_info.
+//
+// If TRUE, uses inotify instead of scanning the directory for new 
+//   files. This is more efficient.
+//
+//
+// Type: boolean
+//
+
+use_inotify = TRUE;
+
+///////////// search_ext //////////////////////////////
+//
+// File name extension.
+//
+// If set, only files with this extension will be processed.
+//
+//
+// Type: string
+//
+
+search_ext = "";
+
+///////////// search_substr ///////////////////////////
+//
+// File name sub-string.
+//
+// If set, only files with names containing this sub-string will be 
+//   processed.
+//
+//
+// Type: string
+//
+
+search_substr = "";
+
+///////////// save_latest_read_time ///////////////////
+//
+// Option to save latest time for each read.
+//
+// If TRUE, the latest read info will be saved out in a file to preserve 
+//   state in case the application dies. On restart, the latest read info 
+//   will be read in to re-initialize the application, so that data 
+//   already read will not be read again.
+//
+//
+// Type: boolean
+//
+
+save_latest_read_time = FALSE;
+
+//======================================================================
+//
+// CALL SCRIPT WHEN NEW DATA ARRIVES.
+//
+//======================================================================
+ 
+///////////// script_style ////////////////////////////
+//
+// Type of script to call.
+//
+// 	SCRIPT_WITH_ORDERED_ARGS - Call a script with an ordered list of 
+//   arguments.
+// 	SCRIPT_WITH_COMMAND_LINE_OPTIONS - Precedes each argument with a 
+//   '-arg' style command line argument, so that order is not longer 
+//   important, and extra args can be added without causing problems for 
+//   client scripts.
+// 	SCRIPT_WITH_COMMAND_LINE_OPTIONS_DOUBLE_DASH - Same as 
+//   SCRIPT_WITH_COMMAND_LINE_OPTIONS except that the the args are 
+//   preceded by a double-dash rather than a single dash for use with 
+//   languages like Python.
+//
+//
+// Type: enum
+// Options:
+//     SCRIPT_WITH_ORDERED_ARGS
+//     SCRIPT_WITH_COMMAND_LINE_OPTIONS
+//     SCRIPT_WITH_COMMAND_LINE_OPTIONS_DOUBLE_DASH
+//
+
+script_style = SCRIPT_WITH_COMMAND_LINE_OPTIONS;
+
+///////////// call_data_arrived_script ////////////////
+//
+// Option to spawn a script when a new file is detected.
+//
+// If TRUE, the script 'data_arrived_script' will be called. The 
+//   arguments will depend on the script_style parameter.
+//
+// For SCRIPT_WITH_ORDERED_ARGS, the args are in the following order:
+//   input_file_path, file_modify_time.
+//
+// For SCRIPT_WITH_COMMAND_LINE_OPTIONS, the following command line args 
+//   will be included, in no particular order:
+//   -input_file_path
+//   -file_modify_time
+// and each arg will be followed by its respective value.
+//
+//
+// For SCRIPT_WITH_COMMAND_LINE_OPTIONS_DOUBLE_DASH, the following 
+//   command line args will be included, in no particular order:
+//   --input_file_path
+//   --file_modify_time
+// and each arg will be followed by its respective value.
+//
+//
+// Type: boolean
+//
+
+call_data_arrived_script = FALSE;
+
+///////////// data_arrived_script /////////////////////
+//
+// Name of script to call if call_script is true.
+//
+// The script will be called with the args specified in the 
+//   'call_data_arrived_script parameter'.
+//
+//
+// Type: string
+//
+
+data_arrived_script = "test_script.pl";
+
+///////////// include_arrived_script_args /////////////
+//
+// Option include arguments to the data_arrived_script.
+//
+//
+// Type: boolean
+//
+
+include_arrived_script_args = FALSE;
+
+///////////// arrived_script_args /////////////////////
+//
+// Array of strings that will make up the list of arguments to be called 
+//   with script.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+arrived_script_args = {
+};
+
+///////////// run_script_in_background ////////////////
+//
+// Option to run script in background.
+//
+// If TRUE, the script will be run in the background. Therefore, the 
+//   system call will return immediately. If FALSE, InputWatcher will 
+//   register with procmap while waiting for the script to complete.
+//
+//
+// Type: boolean
+//
+
+run_script_in_background = FALSE;
+
+///////////// terminate_script_if_hung ////////////////
+//
+// Option to terminate script if it hangs.
+//
+// If TRUE, the script will be killed if it does not return within 
+//   'script_max_run_secs'.
+//
+//
+// Type: boolean
+//
+
+terminate_script_if_hung = TRUE;
+
+///////////// script_max_run_secs /////////////////////
+//
+// Max time allowed for script - secs.
+//
+// If 'terminate_script_if_hung' is TRUE, the script will be killed if 
+//   it does not complete withing this number of secs.
+//
+//
+// Type: int
+//
+
+script_max_run_secs = 3600;
+
+///////////// procmap_register_interval ///////////////
+//
+// Register interval for procmap - secs.
+//
+// If the script takes longer than 60 secs to complete, you will need to 
+//   set this to a higher value to avoid the process being killed and 
+//   restarted by the auto_restarter.
+//
+//
+// Type: int
+//
+
+procmap_register_interval = 60;
+
+//======================================================================
+//
+// CALL SCRIPT WHEN DATA IS LATE.
+//
+//======================================================================
+ 
+///////////// call_data_late_script ///////////////////
+//
+// Option to spawn a script when data is late.
+//
+// If TRUE, the script 'data_late_script' will be called when data has 
+//   not arrived within the last 'data_late_secs'. The call to the script 
+//   will be repeated every 'data_late_secs' until data arrives.
+// The arguments will depend on the script_style parameter.
+//
+// For SCRIPT_WITH_ORDERED_ARGS, the args are in the following order:
+//   input_dir, data_late_secs, unix_time.
+//
+// For SCRIPT_WITH_COMMAND_LINE_OPTIONS, the following command line args 
+//   will be included, in no particular order:
+//   -input_dir
+//   -data_late_secs
+//   -unix_time
+// and each arg will be followed by its respective value.
+//
+//
+// Type: boolean
+//
+
+call_data_late_script = FALSE;
+
+///////////// data_late_script ////////////////////////
+//
+// Name of script to call if call_data_late_script is true.
+//
+// The script will be called with the args specified in the 
+//   'call_data_late_script' parameter.
+//
+//
+// Type: string
+//
+
+data_late_script = "test_script";
+
+///////////// include_late_script_args ////////////////
+//
+// Option include arguments to the data_late_script.
+//
+//
+// Type: boolean
+//
+
+include_late_script_args = FALSE;
+
+///////////// late_script_args ////////////////////////
+//
+// Array of strings that will make up the list of arguments to be called 
+//   with data late script.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+late_script_args = {
+};
+
+///////////// data_late_secs //////////////////////////
+//
+// Max data interval before it is considered late - secs.
+//
+// If data has not arrived within this interval, and 
+//   call_data_late_script is true, the data late script is called.
+//
+//
+// Type: int
+//
+
+data_late_secs = 3600;
+
+//======================================================================
+//
+// COPY THE FILE, OPTIONALLY TO TIME-STAMPED FILE.
+//
+//======================================================================
+ 
+///////////// copy_to_time_stamped_file ///////////////
+//
+// Option to copy to a file with name based on the time.
+//
+// If TRUE, the file will be copied to a file, in the directory 
+//   'output_dir', with the path based on the file modify time. The path 
+//   will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'.
+//
+//
+// Type: boolean
+//
+
+copy_to_time_stamped_file = FALSE;
+
+///////////// copy_using_original_name ////////////////
+//
+// Option to make a copy of the file using its original name.
+//
+// If TRUE, the file will be copied to a directory 
+//   'copy_dir/yyyymmdd/original_file_name', i.e. preserving the original 
+//   file name. 'copy_to_time_stamped_file' takes precedence, and 
+//   overrides this option.
+//
+//
+// Type: boolean
+//
+
+copy_using_original_name = FALSE;
+
+///////////// without_date_directory //////////////////
+//
+// Option to remove yyyymmdd directory when copy_using_original_name is 
+//   set to true.
+//
+// If TRUE, the file will be copied to a directory 
+//   'copy_dir/original_file_name'.
+//
+//
+// Type: boolean
+//
+
+without_date_directory = FALSE;
+
+///////////// copy_dir ////////////////////////////////
+//
+// Output directory for file copies.
+//
+//
+// Type: string
+//
+
+copy_dir = "./output";
+
+///////////// copy_ext ////////////////////////////////
+//
+// File extension of file copy.
+//
+// If empty, no extension will be added.
+//
+//
+// Type: string
+//
+
+copy_ext = "copy";
+
+///////////// add_day_to_filename /////////////////////
+//
+// Option to add the day into the file name.
+//
+// If TRUE, he path will be: 
+//   'copy_dir/yyyymmdd/yyyymmdd_hhmmss.copy_ext'.
+//
+//
+// Type: boolean
+//
+
+add_day_to_filename = FALSE;
+
+///////////// remove_after_copy ///////////////////////
+//
+// Option to remove the file after the copy is complete.
+//
+// It is not wise to use this if you are also calling a script which 
+//   uses the file, since it could be removed before the script reads it.
+//
+//
+// Type: boolean
+//
+
+remove_after_copy = FALSE;
+
+///////////// uncompress_after_copy ///////////////////
+//
+// Uncompress a compressed file after the copy, if required.
+//
+//
+// Type: boolean
+//
+
+uncompress_after_copy = FALSE;
+
+//======================================================================
+//
+// WRITE LATEST_DATA_INFO FILE.
+//
+//======================================================================
+ 
+///////////// write_latest_data_info_file /////////////
+//
+// Option to write _latest_data_info file when new data arrives.
+//
+// If TRUE, when a new data arrives, a _latest_data_info file will be 
+//   written into the directory. This will be automatically set to FALSE 
+//   if latest_data_info_avail is TRUE.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info_file = TRUE;
+
+///////////// data_type ///////////////////////////////
+//
+// Set the data type.
+//
+// If not set, the DIDSS system will attempt to determine the data type 
+//   from the file path.
+//
+//
+// Type: string
+//
+
+data_type = "";
+
+///////////// write_latest_data_info_to_proxy_dir /////
+//
+// Option to write _latest_data_info file to a proxy directory.
+//
+// Normally the _latest_data_info is written to the data directory. 
+//   However, it is possible that the input directory is write-protected. 
+//   In such cases, you need to write the _latest_data_info to a proxy 
+//   directory. The _latest_data_info files will point to the data 
+//   directory.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info_to_proxy_dir = FALSE;
+
+///////////// latest_data_info_proxy_dir //////////////
+//
+// Proxy directory for _latest_data_info.
+//
+// See 'write_latest_data_info_to_proxy_dir'.
+//
+//
+// Type: string
+//
+
+latest_data_info_proxy_dir = "./proxy";
+
+//======================================================================
+//
+// REGISTER WITH DATA_MAPPER.
+//
+//======================================================================
+ 
+///////////// register_with_datamapper ////////////////
+//
+// Option to register the data set with the DataMapper.
+//
+// If TRUE, when a new data arrives, that info will be used to register 
+//   with the DataMapper on the local machine. Not needed if 
+//   write_latest_data_info_file is set to TRUE because when the 
+//   latest_data_info is written the DataMapper will be notified. Uses the 
+//   data_type, if set.
+//
+//
+// Type: boolean
+//
+
+register_with_datamapper = FALSE;
+

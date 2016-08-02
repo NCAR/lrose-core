@@ -1,0 +1,213 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for Metreport2Spdb
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// June 2014
+
+commentdef {
+  p_header = "Program name: MetreportSpdb";
+  p_text = "Metreport2Spdb reads 'MET REPORT' and SPECIAL bulletins from text files and stores it in an SPDB data base in ASCII format.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "OPERATIONAL MODE.";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "REALTIME mode - waits for new data. ARCHIVE mode - finds files between start and end times. FILELIST mode - uses file list from -f on command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "raw/aftn";
+  p_descr = "Name of input data directory.";
+  p_help = "ASCII input files are stored in this directory.";
+} input_dir;
+
+paramdef string {
+  p_default = "2008 01 01 00 00 00";
+  p_descr = "Start time.";
+  p_help = "The start time for ARCHIVE MODE. The format is "
+           "'YYYY MM DD HH MM SS.' This parameter can be "
+           "over-ridden by the -start command line option.";
+} start_time;
+
+paramdef string {
+  p_default = "2008 01 01 01 00 00";
+  p_descr = "End time.";
+  p_help = "The end time for ARCHIVE MODE. The format is "
+           "'YYYY MM DD HH MM SS.' This parameter can be "
+           "over-ridden by the -start command line option.";
+} end_time;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Max age of input data";
+  p_help = "For REALTIME only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, only checks input_dir for subdirs of the form YYYYMMDD";
+  p_help = "Only in REALTIME mode with latest_data_info_avail FALSE.";
+} strict_subdir_check;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, check file name contains specified sub-string.";
+  p_help = "See file_match_string.";
+} file_name_check;
+
+paramdef string {
+  p_default = "amdar";
+  p_descr = "Input filename match string";
+  p_help = "Files must contain this string to be processed";
+} file_match_string;
+
+commentdef {
+  p_header = "STATION LOCATIONS.";
+}
+
+paramdef char* {
+  p_default = {"./station_location.txt"};
+  p_descr = "Path to station location file.";
+  p_help = "Used to determine the location of station identifiers. The station location file should contain a station identification followed by the latitude and longitude for each station.";
+} station_location_path;
+
+commentdef {
+  p_header = "FILTERING STATIONS BASED ON NAME.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the acceptedStations list (below)";
+  p_help = "Only accept stations in this list.";
+} use_accepted_stations_list;
+
+paramdef string {
+  p_default = {
+    "RCTP", "RCFG", "RCSS", "RCGM", "RCNO", "RCQC", "RCBS"
+  };
+  p_descr = "List of accepted station IDs";
+  p_help = "If a station is not on this list, it is not stored.";
+} accepted_stations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to use the rejectedStations list (below)";
+  p_help = "Reject stations in this list.";
+} use_rejected_stations_list;
+
+paramdef string {
+  p_default = {
+    "RCFN", "RCAY", "RCQS", "RCFS","RCMT"
+  };
+  p_descr = "List of rejected station IDs";
+  p_help = "If a station is not on this list, it is not stored.";
+} rejected_stations[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include header with the MET REPORT.";
+  p_help = "Sometimes there is a header, starting with FT, at the start of a TAF block. If store_header is true, the header is added to the start of the TAF message before storing it.";
+} store_header;
+
+paramdef string {
+  p_descr = "Output SPDB URL.";
+  p_help = "";
+  p_default = "spdb/metreport";
+} output_url;
+
+paramdef int {
+  p_descr = "Data expire seconds - ASCII data";
+  p_help = "Number of seconds the data is valid before it should be expired.";
+  p_default = 10800;
+} expire_secs;
+
+paramdef int {
+  p_default = 21600;
+  p_min = 1;
+  p_descr = "Max valid age of AMDAR bulletins in realtime mode (secs)";
+  p_help = "This is the maximum age of individual AMDAR bulletins in the file.";
+} max_bulletin_valid_age;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Sleep interval in seconds.";
+  h_help = "Sleep between processing input files. Used in ARCHIVE mode.";
+} sleep_interval;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of lines to skip between the SOH and the WMO header.";
+  h_help = "Sometimes there are interceding message block identifier lines that have to be skipped.";
+} num_block_lines;
+
+paramdef string {
+  p_default = "This is data from Metreport2Spdb.";
+  p_descr = "Data set info.";
+  p_help = "This text is placed in the product info part of the output data buffer for documentation purposes.";
+} data_set_info;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Expire time in seconds for the  messages.";
+  p_help = "This value will be added to the issus time to determine the expire time for the bulletin";
+} expire_seconds;
+

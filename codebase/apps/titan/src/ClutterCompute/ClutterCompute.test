@@ -1,0 +1,299 @@
+/**********************************************************************
+ * TDRP params for ClutterCompute
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: ClutterCompute.
+//
+// ClutterCompute computes the median values from a series of MDV files. 
+//   The result is stored in an MDV file, the time stamp on the file being 
+//   the mean of the start and end time of the input data. The usage is 
+//   'ClutterCompute -params params_file'.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. When a new 
+//   file arrives, it computes the median of the files from the latest 
+//   time and back by the parameter 'past_secs'. In ARCHIVE mode, it moves 
+//   through the data between the start and end times set on the command 
+//   line. In FILELIST mode, it moves through the list of file names 
+//   specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+// This is used in REALTIME and ARCHIVE modes only. If it does not start 
+//   with . or /, it is relative to $DATA_DIR or $RAP_DATA_DIR. In 
+//   FILELIST mode, the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "mdv/input";
+
+///////////// realtime_past_period ////////////////////
+//
+// REALTIME mode only. Files from this period in the past will be used 
+//   for computing the median.
+// Median period in realtime - secs.
+// Type: int
+//
+
+realtime_past_period = 1800;
+
+//======================================================================
+//
+// COMPUTING THE MEDIAN.
+//
+//======================================================================
+ 
+///////////// npoints_per_pass ////////////////////////
+//
+// The program makes a number of passes through the data file, 
+//   processing this number of points each pass. Set this to reflect the 
+//   amount of available memory.
+// Number of points to process at each pass.
+// Type: int
+//
+
+npoints_per_pass = 100000;
+
+///////////// field_names /////////////////////////////
+//
+// List of field names for which the median is to be computed.
+// Type: string
+// 1D array - variable length.
+//
+
+field_names = { "Refl" };
+
+///////////// set_vlevel_limits ///////////////////////
+//
+// Option to set plane vlevel limits.
+// If true, the data will be cropped in the vertical before computing 
+//   the median.
+// Type: boolean
+//
+
+set_vlevel_limits = FALSE;
+
+///////////// lower_vlevel ////////////////////////////
+//
+// Lower plane vlevel limit.
+// Type: float
+//
+
+lower_vlevel = 0;
+
+///////////// upper_vlevel ////////////////////////////
+//
+// Upper plane vlevel limit.
+// Type: float
+//
+
+upper_vlevel = 0;
+
+///////////// composite ///////////////////////////////
+//
+// Option for creating composite.
+// If true, the composite will be computed before computing the median.
+// Type: boolean
+//
+
+composite = FALSE;
+
+///////////// remap_xy ////////////////////////////////
+//
+// Option to remap grid in x,y.
+// If true, set the remap parameters below.
+// Type: boolean
+//
+
+remap_xy = FALSE;
+
+///////////// remap_projection ////////////////////////
+//
+// Projection for remapping in x,y.
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_FLAT
+//
+
+remap_projection = PROJ_FLAT;
+
+///////////// remap_grid //////////////////////////////
+//
+// Grid parameters for remapping in x,y.
+// These params apply to all projection types.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+remap_grid = { 1, 1, 0, 0, 1, 1 };
+
+///////////// remap_rotation //////////////////////////
+//
+// Remapped grid rotation.
+// This applies only to PROJ_FLAT projections.
+// Type: double
+//
+
+remap_rotation = 0;
+
+///////////// remap_origin_lat ////////////////////////
+//
+// Remapped grid origin latitude.
+// This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_origin_lat = 0;
+
+///////////// remap_origin_lon ////////////////////////
+//
+// Remapped grid origin longitude.
+// This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_origin_lon = 0;
+
+///////////// remap_lat1 //////////////////////////////
+//
+// Remapped grid reference latitude 1.
+// This applies only to PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_lat1 = 0;
+
+///////////// remap_lat2 //////////////////////////////
+//
+// Remapped grid reference latitude 2.
+// This applies only to PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_lat2 = 0;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_to_path ///////////////////////////
+//
+// Option to write the median file to the specified output_path.
+// If true, the output file is written to the specified path. See 
+//   'output_path_url'.
+// Type: boolean
+//
+
+write_to_path = TRUE;
+
+///////////// output_path /////////////////////////////
+//
+// Output path.
+// The exact path to which the output file is written. See 
+//   'write_to_path'. If it does not start with . or /, it is relative to 
+//   $DATA_DIR or $RAP_DATA_DIR. .
+// Type: string
+//
+
+output_path = "mdv/median/clutter.mdv";
+
+///////////// write_to_dir ////////////////////////////
+//
+// Option to write the median file to the output directory.
+// If true, the output file is written to the data directory. The file 
+//   name is based on the time of the last data used in the computation. 
+//   See 'output_dir'.
+// Type: boolean
+//
+
+write_to_dir = TRUE;
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+// Output data is written to this directory. See 'write_to_dir'. If it 
+//   does not start with . or /, it is relative to $DATA_DIR or 
+//   $RAP_DATA_DIR. .
+// Type: string
+//
+
+output_dir = "mdv/median";
+
+///////////// output_encoding_type ////////////////////
+//
+// Set encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding_type = ENCODING_INT8;
+

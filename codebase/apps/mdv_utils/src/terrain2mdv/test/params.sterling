@@ -1,0 +1,16 @@
+
+proj = FLAT;
+
+output_type = MDV;
+
+lon =  -78.0660;
+lat =   38.5360;
+
+xmin = -400;
+xmax =  400;
+ymin = -340;
+ymax =  400;
+
+scale = 10.0;
+outfname = "sterling.mdv";
+output_dir = ".";

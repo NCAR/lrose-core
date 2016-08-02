@@ -1,0 +1,226 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvVertProfile
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvVertProfile
+ */
+
+commentdef
+{
+  p_header = "MdvVertProfile";
+  p_text = "This program pulls vertical profiles for specifield points and "
+           "fields out of an MDV file and puts them in a file of the "
+           "specified format.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tLATEST_DATA - The program watches the latest data file for "
+           "the input_url and triggers whenever a new file is received.\n"
+           "\tTIME_LIST - The program is triggered for each of the files in "
+           "the input_url whose data time is between the times specified "
+           "in the time_list parameter.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_t;
+
+paramdef struct time_list_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list;
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef int
+{
+  p_descr = "Maximum data age in seconds";
+  p_help = "Data older than this will not be processed in LATEST_DATA mode";
+  p_default = 3600;
+} max_valid_secs;
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = "./output";
+} output_dir;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use field names or numbers when "
+            "identifying the fields in the MDV file.";
+  p_default = true;
+} use_mdv_field_names;
+
+typedef struct
+{
+  string mdv_field_name;
+  string mdv_field_num;
+  string output_field_name;
+  double output_missing_value;
+} field_info_t;
+
+paramdef struct field_info_t
+{
+  p_descr = "Information about the fields to process";
+  p_help = "\tmdv_field_name - The field name as it appears in the MDV file. "
+           "Used only if use_mdv_field_names is true.\n"
+           "\tmdv_field_num - The index of the field in the MDV file. "
+           "Used only if use_mdv_field_names is false.\n"
+           "\toutput_field_name - Name of field in the output file. "
+           "For ASCII output, this name should not include any spaces since "
+           "spaces could confuse downstream processes that want to read this "
+           "data.\n"
+           "\toutput_missing_value - The value to use to flag missing data "
+           "in the output.\n";
+  p_default = { { "CAPE", 0, "CAPE", -999.0 },
+                { "CIN" , 1, "CIN", -999.0 } };
+} field_info[];
+
+paramdef string
+{
+  p_descr = "Name to use for the height profile in the output file";
+  p_help = "The height profile is extracted from the vlevel header of one "
+           "of the input fields.";
+  p_default = "ht";
+} height_field_name;
+
+typedef struct
+{
+  double lat;
+  double lon;
+} data_point_t;
+
+paramdef struct data_point_t
+{
+  p_descr = "List of locations for vertical profiles";
+  p_default = { { 30.0, -140.0 } };
+} data_points[];
+
+typedef enum
+{
+  ASCII_OUTPUT
+} output_type_t;
+
+paramdef enum output_type_t
+{
+  p_descr = "Type of output file";
+  p_help = "\tASCII_OUTPUT - Output will be written to ASCII files. "
+           "See ascii_output_params for parameters controlling this output.\n";
+  p_default = ASCII_OUTPUT;
+} output_type;
+
+typedef struct
+{
+  string format;
+  string delimiter;
+} ascii_output_params_t;
+
+paramdef struct ascii_output_params_t
+{
+  p_descr = "Parameters controlling the output to ASCII output files.";
+  p_help = "\tformat - Format string used for outputting data values.\n"
+           "\tdelimiter - Delimiter string inserted between each output "
+           "value.\n";
+  p_default = { "%9.2f", " " };
+} ascii_output_params;

@@ -1,0 +1,128 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "The idea of LdmDynamic2Static is that you can point\n"
+             "it at an LDM output directory where LDM output files\n"
+             "named InputDir/YYYYMMDD/YYYYMMDDHH.METAR are written\n"
+             "(these files may be growing in time, ie. dynamic).\n"
+             "The program will periodically write output files\n"
+             "to OutDir/metar.YYYYMMDDHHmm and the output files\n"
+             "do not grow (static), making them suitable\n"
+             "for ingest into an SPDB database. Typical uses would be\n"
+             "for METAR and upper air sounding data.\n\nNiles Oien March 2002";
+}
+
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Output directory";
+  p_help = "Output metar.YYYYMMDDHHmm files get written here.";
+} OutDir;
+
+paramdef string {
+  p_default = "metar";
+  p_descr = "Output file precursor.";
+  p_help = "By default, output files are named metar.YYYYMMDDHHmm but\n"
+           "it may be appropriate to set this to upp to wite files\n"
+           "named upp.YYYYMMDDHHmm for upper air sounding.";
+} OutPrecursor;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write output files to day directory";
+  p_help = "If true, the output path will contain a YYYYMMDD day subdirectory.";
+} OutHasDayDir;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write latest_data_info files to output directory";
+  p_help = "If set, latest_data_info file is written to output dir each time a new output file is written. The time in the ldata file refers to the time used to name the output file.";
+} WriteLdataFile;
+
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory";
+  p_help = "Input YYYYMMDD/YYYYMMDDHH{mm}.METAR files are here.";
+} InDir;
+
+
+paramdef string {
+  p_default = "METAR";
+  p_descr = "Input file extension.";
+  p_help = "By default, input files are named\n"
+           "YYYYMMDD/YYYYMMDDHH{mm}.METAR - this parameter controls the\n"
+           "extension. Set to UPP to ingest upper-air files named\n"
+           "YYYYMMDD/YYYYMMDDHH{mm}.UPP";
+} InExt;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Indicated whether the YYYYMMDD day dir exists in the input file path";
+  p_help = "See InDir and InExt above. Normally we expect the files to be in a YYYYMMDD subdirectory. If this is not the case, set InDayDir to FALSE.";
+} InHasDayDir;
+
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "PMU Instance";
+  p_help = "Use if more than one running (unlikely).";
+} Instance;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Delay between checks";
+  p_help = "In seconds.";
+} Delay;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set, debugging messages are printed.";
+} Debug;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set, verbose debugging messages are printed.";
+} Verbose;
+
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Maximum gap in metar files";
+  p_help = "In Hours.";
+} MaxGap;
+
+
+paramdef int {
+  p_default = 250;
+  p_descr = "Maximum number of passes with no data before quitting.";
+  p_help = "When this is reached the program re-initializes search.";
+} MaxFails;
+

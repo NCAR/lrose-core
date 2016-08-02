@@ -1,0 +1,129 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for AcTrack2Polygon
+ *
+ */
+
+commentdef {
+  p_header = "AcTrack2Polygon reads the ac_posn_wmod_t or ac_posn_t spdb points making up a flight track and creates the convex hull containing them. The convex hull is output as a GenPoly object.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program triggers off of new radar data volumes. In ARCHIVE mode, it processes all tracks for each radar volume between start and end times set on the command line. ";
+} mode;
+
+
+paramdef string {
+  p_default = "mdvp:://$(INGEST_HOST)::$(PROJECT)/mdv/radar/cart";
+  p_descr = "Url of dataset used to trigger processing of new flight tracks";
+} trigger_url;
+
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "NONE";
+  p_descr = "Tail number or call sign of aircraft.";
+} tailnum;
+
+paramdef string {
+  p_default = "spdbp: ://localhost::$(PROJECT)/spdb/ac_posn";
+  p_descr = "Input url";
+  p_help = "Location of spdb aircraft track points";
+} ac_posn_url;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Lookback time (secs) for aircraft position points used to create flight track.";
+  p_help = "We gather aircraft position points in the interval [trigger time - lookback, trigger time]";
+} lookback;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Maximum age(secs) of dataset that will trigger processing.";
+} max_valid_realtime_age;
+
+
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "spdbp:://localhost::$(PROJECT)/spdb/AcTrackPolygon";
+  p_descr = "Output url";
+  p_help = "Location of polygon output";
+} output_url;
+
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Expire time in seconds GenPoly objects";
+  p_help = "This value will be added to the GenPoly time to determine the expire time for the object";
+} expire_seconds;
+
+commentdef {
+  p_header = "PROCESSING";
+}  
+
+paramdef float{
+ p_default = 20;
+ p_descr = "Percent by which the convex hull will be expanded or contracted";
+ p_help =  "If expansion_factor is positive, polygon will be expanded. If expansion_factor is negative, then polygon wilbe contracted. If expansion_factor is zero, no expansion or contraction will take place.";
+} expansion_factor;
+

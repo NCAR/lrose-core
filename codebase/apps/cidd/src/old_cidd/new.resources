@@ -1,0 +1,59 @@
+#
+# HELP TEXT LINKS
+cidd.loop_button_help :         cidd:loop_button
+cidd.view_button_help :         cidd:view_button
+cidd.field_button_help :        cidd:field_button
+cidd.movie_button_help :        cidd:movie_button
+cidd.overlay_button_help :      cidd:overlay_button
+cidd.warnings_button_help :     cidd:warnings_button
+cidd.draw_button_help :         cidd:draw_button
+cidd.vert_button_help :         cidd:vert_button
+cidd.config_button_help :       cidd:config_button
+cidd.canvas_help :              cidd:canvas
+cidd.frame_message_help :       cidd:frame_message
+cidd.speed_slider_help :        cidd:speed_slider
+#
+#
+cidd.no_data_message:          RADAR is DOWN
+#
+# Set this to the amount grids are rotated clockwise to true north.
+# Overlays will rotate counterclockwise. - In Degrees
+cidd.north_angle:        0.0
+#
+# Sets the default line width for product rendering
+cidd.product_line_width:  2
+#
+# Set the scale factor and label for Range rings and Distance scales.
+cidd.units_per_km:          0.5395932
+cidd.scale_units_label:  nm
+#
+# Set times to the nearest value divisible by the number of seconds
+cidd.temporal_rounding:      300
+#
+# Uncomment the followine line to set up and turn on a default contour field
+# Uses the contour levels and the Field Label string in data.info
+# cidd.contour_field_label:      SURF_T
+#
+#
+# Image Dump resources
+#
+cidd.horiz_image_dir:      /tmp
+cidd.horiz_image_fname:    cidd1.xwd
+cidd.horiz_image_command:  imconv cidd1.xwd cidd1.gif
+cidd.vert_image_dir:      /tmp
+cidd.vert_image_fname:    cidd2.xwd
+cidd.vert_image_command:  imconv cidd2.xwd cidd2.gif
+#
+# GUI RELATED STUFF
+#
+cidd.horiz_frame_label:       * National Center for Atmospheric Research * (303)497-8413
+cidd.overlay_bt_label:        Overlays
+cidd.product_bt_label:        Warnings
+cidd.horiz_default_x_pos:    10
+cidd.horiz_default_y_pos:    10
+#
+# Commands to run to spawn a product selector and exporter
+#
+cidd.prds_command:         prds  -k40500 -b50000 -a/tmp/prod.temp -o/tmp/prod.out -c/rap/config/cidd/prds.conf.ord
+cidd.exprt_command:        exprt -k51400 -a/tmp/prod.temp
+

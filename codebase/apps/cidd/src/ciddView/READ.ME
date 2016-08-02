@@ -1,0 +1,52 @@
+
+                            ciddView Technical Support
+
+This is some technical support for the ciddView AJAX setup that allows the web display
+of images that CIDD dumps. The code is checked in under apps/cidd/src/ciddView
+in our CVS repository.
+
+To get it going, do the following on a machine that has a web server running 
+with PHP available :
+
+ [1] Check out the code and get CIDD to dump *.jpg images into the subdirectory "images"
+     (this directory is usually a link). This typically involves running CIDD like :
+
+     CIDD -u -p CIDD.real.dump -i real
+
+   Or :
+
+     CIDD -u -p CIDD.cti.dump -i cti -h -1,1.5,4,6.5,9,11,14,16,19,21,24 
+
+   For 3D fields. The latter is usually cron-driven with "cidd.run_once_and_exit: 1"
+   in the param file. Other typical CIDD param file entries might be :
+
+   cidd.html_mode: 1
+   cidd.image_dir: ./images
+   cidd.image_ext: jpg
+   cidd.add_valid_time_to_filename: 0
+   cidd.add_gen_time_to_filename: 0
+   cidd.add_height_to_filename: 0    (Should be 1 for the 3D case)
+   cidd.image_convert_script: ls
+   cidd.series_convert_script: ls
+   cidd.print_script: ls
+
+
+ [2] Once CIDD is dumping images, edit the ciddView.php file and change the
+     names of the fields, zoom states, heights etc. - there are comments in
+     there that will tell you what to do. You may also have to edit make_prod.php
+     as well, if you are presenting 3D data.
+
+ [3] Link ciddView.php to index.html and point a browser at this directory.
+     It should be OK after a couple of debugging runs. The browser needs
+	 to have javaScript enabled and be reasonably recent.
+
+Please do be careful about making changes to the code without a running system to
+test if things are working after the changes you make! The distributed processing nature of
+this system means that breaking it can lead to some difficult debugging - especially
+if the browser is IE, which does not have as well developed debugging tools as
+other browsers at the time of writing.
+
+Niles Oien January 2006.
+
+
+

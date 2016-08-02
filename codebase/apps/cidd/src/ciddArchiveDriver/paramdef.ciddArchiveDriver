@@ -1,0 +1,79 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "The idea of ciddArchiveDriver is that you give it\n"
+	"an MDV url, a start and end time, some parameters for CIDD\n"
+	"and it will produce a file that can be used to\n"
+	"run CIDD with for the specified data. This can be useful\n"
+	"when using CIDD to produce images for a movie or an AJAX\n"
+	"based web page.\n\nNiles Oien March 2006.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Input data are read from here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output file name, complete path.";
+  p_help = "You might have to chmod 777 on this but it will\n"
+	"be in the right format to drive CIDD."; 
+  p_default = {"/Some/Directory/Structure/ciddDriver"};
+} Outfile;
+
+paramdef string {
+  p_descr = "CIDD command line arguments.";
+  p_help = "The -t argument will be appended."; 
+  p_default = {" -p CIDD.params -u"};
+} ciddParams;
+
+paramdef string {
+  p_descr = "Start time in YYYY/MM/DD_hh:mm:ss format.";
+  p_help = "UTC assumed."; 
+  p_default = {"1941/12/07_09:30:00"};
+} startTime;
+
+paramdef string {
+  p_descr = "End time in YYYY/MM/DD_hh:mm:ss format.";
+  p_help = "UTC assumed."; 
+  p_default = {"2001/09/11_09:30:00"};
+} endTime;
+
+
+typedef struct {
+        boolean includeStartEndStrings;
+        string startString;
+        string endString;
+} startEndStrings_t;
+
+paramdef struct startEndStrings_t {
+  p_descr = "Option to write lines to the output script before\n"
+  "and after the image dumping.";
+  p_help = "Default is not to do this but it can allow for cleanup."; 
+  p_default = { FALSE,  "/bin/rm -rf *.jpg *.gif; echo Image dump starts", "convert -loop 0 -delay 50 *.jpg ./movie.gif; echo Done with image dump"  };
+} startEndStrings;

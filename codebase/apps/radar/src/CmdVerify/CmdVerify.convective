@@ -1,0 +1,402 @@
+/**********************************************************************
+ * TDRP params for CmdVerify
+ **********************************************************************/
+
+//======================================================================
+//
+// Reads CMD data from CfRadial files, containing (a) weather only, (b) 
+//   clutter only, (c) merged. Verifies the performance of CMD against the 
+//   known truthiness. Also writes data out to ASCII file in column 
+//   format, for analysis by other apps.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In ARCHIVE mode, it moves through the data between the start and end 
+//   times set on the command line. In FILELIST mode, it moves through the 
+//   list of file names specified on the command line. Paths (in FILELIST 
+//   mode, at least) MUST contain a day-directory below the data file -- 
+//   ./data_file.ext will not work as a file path.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory path.
+// Applies to ARCHIVE mode only.
+// Type: string
+//
+
+input_dir = "$(HOME)/data/CmdVerify/cfradial/merged";
+
+///////////// start_time //////////////////////////////
+//
+// Start time for reading data.
+// Applies to ARCHIVE mode only.
+// Type: string
+//
+
+start_time = "2014 09 29 22 00 00";
+
+///////////// end_time ////////////////////////////////
+//
+// Start time for reading data.
+// Applies to ARCHIVE mode only.
+// Type: string
+//
+
+end_time = "2014 09 29 23 00 00";
+
+//======================================================================
+//
+// READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+// Gates beyond this range are removed.
+// Type: double
+//
+
+max_range_km = 9999;
+
+///////////// set_ngates_constant /////////////////////
+//
+// Option to force the number of gates to be constant.
+// If TRUE, the number of gates on all rays will be set to the maximum, 
+//   and gates added to shorter rays will be filled with missing values.
+// Type: boolean
+//
+
+set_ngates_constant = FALSE;
+
+//======================================================================
+//
+// OPTION TO SPECIFY OUTPUT FIELD NAMES.
+//
+//======================================================================
+ 
+///////////// set_output_fields ///////////////////////
+//
+// Set the field names for output.
+// If false, all fields will be used.
+// Type: boolean
+//
+
+set_output_fields = TRUE;
+
+///////////// output_field_names //////////////////////
+//
+// Names of output fields to be written.
+// Type: string
+// 1D array - variable length.
+//
+
+output_field_names = {
+ "DBZ_WX",
+ "VEL_WX",
+ "WIDTH_WX",
+ "CLUT_WX",
+ "ZDR_WX",
+ "RHOHV_WX",
+ "PHIDP_WX",
+ "SNRHC_WX",
+ "SNRVC_WX",
+ "DBMHC_WX",
+ "DBMVC_WX",
+ "NCP_WX",
+ "CPA_WX",
+ "TDBZ_WX",
+ "SPIN_WX",
+ "ZDR_SDEV_WX",
+ "PHIDP_SDEV_WX",
+ "PHIDP_SDEV_4KDP_WX",
+ "PHIDP_SDEV_NEW_WX",
+ "CMD_WX",
+ "CMD_FLAG_WX",
+ "DBZ_CLUT",
+ "VEL_CLUT",
+ "WIDTH_CLUT",
+ "CLUT_CLUT",
+ "ZDR_CLUT",
+ "RHOHV_CLUT",
+ "PHIDP_CLUT",
+ "SNRHC_CLUT",
+ "SNRVC_CLUT",
+ "DBMHC_CLUT",
+ "DBMVC_CLUT",
+ "NCP_CLUT",
+ "CPA_CLUT",
+ "TDBZ_CLUT",
+ "SPIN_CLUT",
+ "ZDR_SDEV_CLUT",
+ "PHIDP_SDEV_CLUT",
+ "PHIDP_SDEV_4KDP_CLUT",
+ "PHIDP_SDEV_NEW_CLUT",
+ "CMD_CLUT",
+ "CMD_FLAG_CLUT",
+ "DBZ_COMB",
+ "DBZ_F_COMB",
+ "VEL_COMB",
+ "VEL_F_COMB",
+ "WIDTH_COMB",
+ "WIDTH_F_COMB",
+ "CLUT_COMB",
+ "ZDR_COMB",
+ "ZDR_F_COMB",
+ "RHOHV_COMB",
+ "RHOHV_F_COMB",
+ "PHIDP_COMB",
+ "PHIDP_F_COMB",
+ "SNRHC_COMB",
+ "SNRHC_F_COMB",
+ "SNRVC_COMB",
+ "SNRVC_F_COMB",
+ "DBMHC_COMB",
+ "DBMHC_F_COMB",
+ "DBMVC_COMB",
+ "DBMVC_F_COMB",
+ "NCP_COMB",
+ "NCP_F_COMB",
+ "CPA_COMB",
+ "TDBZ_COMB",
+ "SPIN_COMB",
+ "ZDR_SDEV_COMB",
+ "PHIDP_SDEV_COMB",
+ "PHIDP_SDEV_4KDP_COMB",
+ "PHIDP_SDEV_NEW_COMB",
+ "CMD_COMB",
+ "CMD_FLAG_COMB",
+ "TDBZ_INT_COMB",
+ "SPIN_INT_COMB",
+ "CPA_INT_COMB",
+ "ZDR_SDEV_INT_COMB",
+ "PHIDP_SDEV_INT_COMB",
+ "CSR"
+};
+
+//======================================================================
+//
+// CENSORING.
+//
+// You have the option of censoring the data based in input fields - 
+//   i.e. omitting the data at gates which meet certain criteria.
+//
+//======================================================================
+ 
+///////////// apply_censoring /////////////////////////
+//
+// Apply censoring based on field values and thresholds.
+// If TRUE, censoring will be performed. See 'censoring_fields' for 
+//   details on how the censoring is applied.
+// Type: boolean
+//
+
+apply_censoring = TRUE;
+
+///////////// censoring_fields ////////////////////////
+//
+// Fields to be used for censoring.
+// Specify the fields to be used to determine whether a gate should be 
+//   censored. The name refers to the input data field names. Valid field 
+//   values lie in the range from min_valid_value to max_valid_value 
+//   inclusive. If the value of a field at a gate lies within this range, 
+//   it is considered valid. Each specified field is examined at each 
+//   gate, and is flagged as valid if its value lies in the valid range. 
+//   These field flags are then combined as follows: first, all of the 
+//   LOGICAL_OR flags are combined, yielding a single combined_or flag 
+//   which is true if any of the LOGICAL_OR fields is true. The 
+//   combined_or flag is then combined with all of the LOGICAL_AND fields, 
+//   yielding a true value only if the combined_or flag and the 
+//   LOGICAL_AND fields are all true. If this final flag is true, then the 
+//   data at the gate is regarded as valid and is retained. If the final 
+//   flag is false, the data at the gate is censored, and all of the 
+//   fields at the gate are set to missing.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      double min_valid_value;
+//      double max_valid_value;
+//      logical_t combination_method;
+//        Options:
+//          LOGICAL_AND
+//          LOGICAL_OR
+//   }
+//
+// 1D array - variable length.
+//
+
+censoring_fields = {
+  {
+    name = "CMD_WX",
+    min_valid_value = 0,
+    max_valid_value = 0.35,
+    combination_method = LOGICAL_AND
+  }
+  ,
+  {
+    name = "CMD_CLUT",
+    min_valid_value = 0.65,
+    max_valid_value = 1,
+    combination_method = LOGICAL_AND
+  }
+};
+
+//======================================================================
+//
+// SPECIFYING FIELDS TO BE COMBINED.
+//
+//======================================================================
+ 
+///////////// add_combined_fields /////////////////////
+//
+// Option to combine some fields to produce derived fields.
+// We can combine pairs of fields using simple algorithms. This created 
+//   derived fields. The fields to be combined must already have been 
+//   specified as 'output_fields' above.
+// Type: boolean
+//
+
+add_combined_fields = TRUE;
+
+///////////// combined_fields /////////////////////////
+//
+// Specs of fields to be combined.
+// field_name_1 and field_name_2 must be in the output_field_names list, 
+//   or in the input file if all fields are used. If 'require_both' is 
+//   TRUE, both fields needs to be non-missing to produce an output field. 
+//   MEAN: arimthmetic mean. UNBIASED_MEAN: first remove any consistent 
+//   bias between field1 and field2, by adjusting field2 to field 1. Then 
+//   compute the arithmetic mean. This reduces noise in the fields without 
+//   changing the value of field1. GEOM_MEAN: geometric mean. MAX: maximum 
+//   of the two fields. MIN: minimum of the two fields. SUM: field1 + 
+//   field2. DIFF: field1 - field2.
+//
+// Type: struct
+//   typedef struct {
+//      string field_name_1;
+//      string field_name_2;
+//      string combined_name;
+//      string long_name;
+//      combine_method_t combine_method;
+//        Options:
+//          COMBINE_MEAN
+//          COMBINE_UNBIASED_MEAN
+//          COMBINE_GEOM_MEAN
+//          COMBINE_MAX
+//          COMBINE_MIN
+//          COMBINE_SUM
+//          COMBINE_DIFF
+//      boolean require_both;
+//   }
+//
+// 1D array - variable length.
+//
+
+combined_fields = {
+  {
+    field_name_1 = "CSR",
+    field_name_2 = "CLUT_COMB",
+    combined_name = "CSR_MINUS_CLUT",
+    long_name = "CSR_minus_filtered_clutter",
+    combine_method = COMBINE_DIFF,
+    require_both = TRUE
+  }
+};
+
+//======================================================================
+//
+// WRITING OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_table_to_stdout ///////////////////
+//
+// Write comma-delimited file to standard out.
+// Type: boolean
+//
+
+write_table_to_stdout = TRUE;
+
+///////////// delimiter_string ////////////////////////
+//
+// String to use to delimit values in table.
+// Type: string
+//
+
+delimiter_string = ",";
+
+///////////// comment_start_string ////////////////////
+//
+// String to use at start of comments - i.e. label line.
+// Type: string
+//
+
+comment_start_string = "";
+
+///////////// missing_data_string /////////////////////
+//
+// String to use for missing data values.
+// This string will be used to represent missing data in the output.
+// Type: string
+//
+
+missing_data_string = "NaN";
+
+///////////// add_col_num_to_col_labels ///////////////
+//
+// Option to add the column number to the column labels.
+// The column number, in parens, will be added to the label. For 
+//   example, DBZ_WX will become DBZ_WX(11) if this is column index 11. 
+//   Indices are 0-based.
+// Type: boolean
+//
+
+add_col_num_to_col_labels = FALSE;
+

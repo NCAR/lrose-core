@@ -1,0 +1,149 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.CfRadial2DeTect
+ *
+ * This file contains the TDRP parameter definitions for
+ * CfRadial2DeTect.
+ */
+
+commentdef
+{
+  p_header = "CfRadial2DeTect";
+  p_text = "This program reads a DeTect radar raw data file and writes the "
+           "beams to an FMQ where they can be read by Dsr2Vol and put into "
+           "MDV volumes.";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+  p_default = FALSE;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Instance";
+  p_help = "Used for process registration";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Input/output parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT PARAMETERS";
+};
+
+typedef enum
+{
+  FILE_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In FILE_LIST mode, the program operates on the input files "
+           "specified on the command line.\n";
+  p_default = FILE_LIST;
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "The name of the field to process";
+  p_default = "count";
+} field_name;
+
+paramdef string
+{
+  p_descr = "Output file path";
+  p_default = "data/output/output_file";
+} output_file_path;
+
+
+/***********************************************************************
+ * DeTect file parameters
+ */
+
+commentdef
+{
+  p_header = "DETECT FILE PARAMETERS";
+  p_text = "These are values that must be set in the DeTect file but aren't "
+           "included in the CfRadial file.";
+};
+
+paramdef boolean
+{
+  p_descr = "Pulse filtering flag";
+  p_help = "This is found in the image options record of the DeTect file.";
+  p_default = false;
+} pulse_filtering;
+
+paramdef long
+{
+  p_descr = "The pulse period in usecs";
+  p_help = "This is found in the bandwidth related inputs record of the "
+           "DeTect file.";
+  p_default = 333;
+} pulse_period;
+
+paramdef double
+{
+  p_descr = "NMI value";
+  p_help = "This is found in the bandwidth related inputs and radar bandwith "
+           "mode records of the DeTect file.";
+  p_default = 7410.0;
+} nmi;
+
+paramdef long
+{
+  p_descr = "Nominal throughput value";
+  p_help = "This is found in the radar bandwith mode record of the "
+           "DeTect file.";
+  p_default = 8900892;
+} nominal_throughput;

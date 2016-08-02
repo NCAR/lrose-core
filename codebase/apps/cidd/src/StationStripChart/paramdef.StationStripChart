@@ -1,0 +1,521 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions StationStripChart
+//
+// F Hage, M Dixon, RAP, NCAR,
+// July 2000
+//
+
+commentdef {
+  p_header = "Program name: StationStripChart";
+  p_text = "StationStripChart displays a time-history of Surface Station/METAR data.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+
+typedef enum {
+  METRIC, ENGLISH
+} units_t;
+
+paramdef enum units_t
+{
+  p_default = METRIC;
+  p_descr = "Units to use for Display";
+} units;
+
+
+paramdef string {
+  p_default = "Generic";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, SLAVE
+} mode_t;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use Local times, rather than UTC for all times";
+} use_localtime;
+
+paramdef float {
+  p_default = "-104.0";
+  p_descr = "Starting Focus longitude for Distance sorting.";
+} focus_lon;
+
+paramdef float {
+  p_default = "40.0";
+  p_descr = "Starting Focus latitude for Distance sorting.";
+} focus_lat;
+
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, StationStripChart retrieves data every update_interval\n"
+   "and renders that data, moving forward in time as time passes.\n"
+   "In ARCHIVE mode, the program starts up and remains at the archive_time.\n"
+   "In SLAVE mode, the program FOLLOWS CIDD shared memory commands .\n"
+	   ;
+} mode;
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} archive_time_t;
+
+paramdef struct archive_time_t {
+  p_default = {2000, 09, 05, 12, 00, 00};
+  p_descr = "The display time for ARCHIVE mode";
+  p_help = "See mode";
+} archive_time;
+
+paramdef int {
+  p_default = 61500;
+  p_descr = "The shared memory key for the CIDD coordinate struct.";
+  p_help = "When the user clicks in the CIDD main window, \n"
+	   "the coordinate struct is updated with the click lat long.\n"
+	   "The time value is used to drive StationStripChart in REALTIME mode.";
+} cidd_shmem_key;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Interval at which to request new data (minutes)";
+  p_help = "This program will schedule updates on the even interval";
+} update_interval_min;
+
+paramdef int {
+p_descr = "Seconds after the Update Interval to inititate data retrieval";
+p_descr = "Set this to schedule updates just after they are available.";
+p_default = 0;
+p_min = 0;
+p_max = 59;
+} seconds_delay;
+
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "spdb/metar";
+  p_descr = "URL for input SPDB data.";
+  p_help = "METAR data is stored in SPDB format at this URL.";
+} input_url;
+
+commentdef {
+  p_header = "STATION DETAILS";
+}
+paramdef int {
+  p_default = 10;
+  p_descr = "Max number of stations to display.";
+} max_display_stations;
+
+
+commentdef {
+  p_header = "DISPLAY DETAILS";
+}
+
+paramdef string {
+  p_default = "Surface Station Time History";
+  p_descr = "Label for window border";
+  p_help = "This label will normally appear in the top border of the display window.";
+} window_label;
+paramdef int {
+  p_default = 300;
+  p_descr = "The startup height for the window.";
+} window_height;
+
+paramdef int {
+  p_default = 435;
+  p_descr = "The startup width for the window.";
+} window_width;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Width of bottom margin (pixels).";
+} bottom_margin;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "The width of the lines used for the plot traces.";
+} trace_line_width;
+
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Width of right margin (pixels).";
+} right_margin;
+
+paramdef int {
+  p_min = 0;
+  p_default = 86400;
+  p_descr = "The initial period for the plot - secs.";
+  p_help = "This is the initial time period for the plot in seconds. \n"
+           " The scale of the plot (pixels/sec) =  window_width/plot_period_secs."
+           " If the window is resized, the plot period will change, keeping the"
+           " pixels/sec scale constant. - If keep_period_fixed is TRUE the "
+           " plot period stays fixed and the pixels/sec varies.";
+} plot_period_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Do not expand the time range on window resize when true";
+} keep_period_fixed;
+
+paramdef float {
+  p_default = "1.0";
+  p_descr = "Scale Spare1 values by this amount";
+} spare1_scale;
+
+paramdef float {
+  p_default = "0.0";
+  p_descr = "Bias Spare1 values by this amount - After scaling";
+} spare1_bias;
+
+paramdef float {
+  p_default = "1.0";
+  p_descr = "Scale Spare2 values by this amount";
+} spare2_scale;
+
+paramdef float {
+  p_default = "0.0";
+  p_descr = "Bias Spare2 values by this amount - After scaling";
+} spare2_bias;
+
+typedef enum {
+  RATE = 0 , ACCUMULATION, CEILING, VISIBILITY, FLIGHT_CAT, TEMPERATURE, HUMIDITY,
+  WIND_SPEED, WIND_DIRN, PRESSURE, ACCUMULATION2, SPARE1, SPARE2, FZ_PRECIP, DEWPT,
+  PRECIP_TYPE
+} field_name_t;
+
+typedef struct {
+  field_name_t field;
+  string label_str;
+} display_variables_t;
+
+paramdef struct display_variables_t {
+  p_descr = "List of Variables to Display";
+  p_help = "Choose from the field_name_t list above. The program will"
+		   " generate a menu with the fields listed";
+
+  p_default = {
+				{ RATE,       "Precip Rate" },
+				{ ACCUMULATION, "Precip Accum" },
+				{ CEILING,      "Ceiling" },
+				{ VISIBILITY,   "Visibility" },
+				{ FLIGHT_CAT, "Flt Cat" },
+				{ TEMPERATURE, "Temperature" },
+				{ HUMIDITY, "Humidity" },
+				{ DEWPT, "Dew Point" },
+				{ WIND_SPEED, "Wind Speed" },
+				{ WIND_DIRN, "Wind Direction" },
+				{ PRESSURE, "Barometer" },
+				{ ACCUMULATION2, "12 Hr Accum" },
+				{ SPARE1, "Probe Frequency" },
+				{ SPARE2, "Icing Rate" },
+				{ FZ_PRECIP, "Freezing Precip" },
+				{ PRECIP_TYPE, "Precip Type" }
+			   };
+} display_variable[];
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Which Menu Button to activate on startup.";
+} starting_menu_selection;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of the foreground in the display.";
+} foreground_color;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Color of the background in the display.";
+} background_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color for the NOW line on the display.";
+} now_color;
+
+paramdef string {
+  p_default = "6x13";
+  p_descr = "Name of font for the text on the display.";
+} font_name;
+
+paramdef float {
+  p_default = "20.0";
+  p_descr = "Minimum range for ceiling plot.";
+} min_ceiling_range;
+
+paramdef float {
+  p_default = "5.0";
+  p_descr = "Minimum Precip Rate scale range mm/hr";
+  p_descr = "Set this larger to hide false positives";
+} min_prate_range;
+
+commentdef {
+  p_header = "Frozen Precip  CATEGORY ";
+  p_help = "Plotting of the frozen precip category.";
+};
+
+paramdef string {
+  p_default = "dark green";
+  p_descr = "Color for No Frozen Precip.";
+} no_fzra_color;
+
+paramdef string {
+  p_default = "burlywood";
+  p_descr = "Color for Frozen FOG.";
+} fzfg_color;
+
+paramdef string {
+  p_default = "peru";
+  p_descr = "Color for FROST";
+} frost_color;
+
+paramdef string {
+  p_default = "LightSkyBlue";
+  p_descr = "Color for -FZDZ";
+} lt_fzdz_color;
+
+paramdef string {
+  p_default = "Royal Blue";
+  p_descr = "Color for FZDZ";
+} fzdz_color;
+
+paramdef string {
+  p_default = "Dark Blue";
+  p_descr = "Color for +FZDZ";
+} hv_fzdz_color;
+
+paramdef string {
+  p_default = "gold";
+  p_descr = "Color for -FZRA";
+} lt_fzra_color;
+
+paramdef string {
+  p_default = "plum";
+  p_descr = "Color for FZRA";
+} fzra_color;
+
+paramdef string {
+  p_default = "magenta";
+  p_descr = "Color for +FZRA";
+} hv_fzra_color;
+
+commentdef {
+  p_header = "RAIN and SNOW TYPES ";
+};
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color for TS";
+} ts_color;
+
+paramdef string {
+  p_default = "DarkOliveGreen";
+  p_descr = "Color for DZ";
+} dz_color;
+
+paramdef string {
+  p_default = "Grey";
+  p_descr = "Color for FG";
+} fg_color;
+
+paramdef string {
+  p_default = "DimGrey";
+  p_descr = "Color for HZ";
+} hz_color;
+
+paramdef string {
+  p_default = "RosyBrown";
+  p_descr = "Color for UP";
+} up_color;
+
+paramdef string {
+  p_default = "DarkGreen";
+  p_descr = "Color for -RA";
+} lt_ra_color;
+
+paramdef string {
+  p_default = "LimeGreen";
+  p_descr = "Color for RA";
+} ra_color;
+
+paramdef string {
+  p_default = "GreenYellow";
+  p_descr = "Color for +RA";
+} hv_ra_color;
+
+
+paramdef string {
+  p_default = "skyblue1";
+  p_descr = "Color for -SN";
+} lt_sn_color;
+
+paramdef string {
+  p_default = "deepskyblue1";
+  p_descr = "Color for SN";
+} sn_color;
+
+paramdef string {
+  p_default = "royalblue";
+  p_descr = "Color for +SN";
+} hv_sn_color;
+
+paramdef string {
+  p_default = "blue";
+  p_descr = "Color for PE";
+} pe_color;
+
+commentdef {
+  p_header = "FLIGHT CATEGORY AND SKY OBSCURATION";
+  p_help = "Plotting parameters for flight category and sky obscuration.";
+};
+
+typedef enum {
+  VFR, MVFR, IFR
+} flight_category_label_t;
+
+typedef struct {
+  flight_category_label_t label;
+  string label_str;
+  string color;
+  float ceiling_threshold;
+  float visibility_threshold;
+} flight_category_t;
+
+paramdef struct flight_category_t {
+  p_default = {
+    { VFR, "VFR", "seagreen", 1500.0, 5.0 },
+    { MVFR, "MVFR", "blue", 500.0, 1.6 },
+    { IFR, "IFR", "orange", 0.0, 0.0 }
+  };
+  p_descr = "Array of flight category parameters.";
+  p_help = "The flight category at a station will be computed using the aeiling (ft) and visibility (km) thresholds. If both values exceed the threshold, the flight category will be equal to or greater that the specified category.";
+} flight_category[];
+
+paramdef int {
+  p_default = 10;
+  p_descr = "The width of the lines used for flight category.";
+} flight_category_line_width;
+
+commentdef {
+  p_header = "HTML OUTPUT FOR INDIVIDUAL FIELDS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to generate html output.";
+  p_help = "If true, images suitable for html pages are generated for each station and each field. See stations[] and xxxx_html_image.";
+} output_html;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = " - For HTML Mode. Option to run unmapped (off screen).";
+  p_help = "If false, the program should run hidden.";
+} show_window;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = " - For HTML Mode. Option to output ldata info";
+  p_help = "Use the Ldata FMQ, as the images come out fast.";
+} write_ldata_info;
+
+paramdef string {
+  p_default = "/tmp";
+  p_descr = "Where image files will be left.";
+  p_help = "This directory should be scrubbed by some mechanism.";
+} html_output_dir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Html mode file name prefix string - strftime(3) format";
+  p_help = "Often: %Y%m%d%H%M";
+} filename_prefix;
+
+paramdef string {
+  p_default = "png";
+  p_descr = "Image Output type. Imlib Library supported formats" ;
+  p_help = "Legal image types are png,tiff,jpg,pgm,ppm,eim";
+} image_output_type;
+
+paramdef string {
+  p_default = "ls -l";
+  p_descr = "Conversion script to post process the ouput images"
+            "Note: StationStripChart calls this script and passes the name of the"
+            "output image as the first argument"; 
+  p_help = "  Images are output in the chosen format. The script often "
+    "copies the image onto a web server and then removes the local copy.";
+} html_image_post_process_script;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Timeout (secs) for post processing script to prevent hanging.";
+  p_descr = "Time allowed for post processing before giving up.";
+}post_process_timeout ;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef struct {
+  string menu_name;
+  string name;
+  string color;
+  field_name_t fz_precip_field;
+} station_t;
+
+paramdef struct station_t {
+  p_default = {
+    {"Denver", "KDEN", "green", SPARE2 }
+  }
+  p_descr = "Information for each station to be displayed.";
+  p_help = "The name must be a 4 character ID of the Surface station "
+  "Set fz_precip_field to a data field which, when set, indicate that
+  freezing precip indicator bits are valid in the data for this station"
+  "This is used to prevent false negative indications.";
+} stations[];

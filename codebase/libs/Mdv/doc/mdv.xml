@@ -1,0 +1,206 @@
+<!-- *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* -->
+<!-- ** Copyright UCAR (c) 1992 - 2010 -->
+<!-- ** University Corporation for Atmospheric Research(UCAR) -->
+<!-- ** National Center for Atmospheric Research(NCAR) -->
+<!-- ** Research Applications Laboratory(RAL) -->
+<!-- ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA -->
+<!-- ** 2010/10/7 23:12:32 -->
+<!-- *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* -->
+<!-- Proposal for MDV metadata in XML -->
+<!-- ================================ -->
+
+<mdv>
+
+  <!-- master header -->
+
+  <valid_time>2006-07-14T21:30:05</valid_time>             <!-- time at which data is valid, or was observed -->
+                                                           <!-- valid_time = time_centroid in old MDV -->
+
+  <gen_time>2006-07-14T21:30:05</gen_time>                 <!-- generate time for forecast -->
+  <forecast_lead_secs>3600</forecast_lead_secs>            <!-- lead time for forecasts (secs) -->
+
+  <write_time>2006-07-14T21:30:05</write_time>             <!-- time file is written -->
+
+  <data_set_name>For information</data_set_name>    
+  <data_set_source>For information</data_set_source>    
+  <data_set_info>For information</data_set_info>    
+
+  <!-- location of sensor (radar, satellite etc.) if applicable -->
+  <sensor_lon>0.0</sensor_lon>
+  <sensor_lat>0.0</sensor_lat>
+  <sensor_alt>0.0</sensor_alt>
+
+  <!-- fields -->
+
+  <!-- Field example - reflectivity -->
+
+  <field>
+
+    <name>DBZ</name>
+    <long_name>Radar reflectivity</long_name>
+    <units>dBZ</units>
+
+    <data_collection_type>measured</data_collection_type>    <!-- measured, extrapolated, forecast,
+                                                                  image, mixed, graphic -->
+
+    <!-- data_type: int8, int16, float32 -->
+
+    <data_type>int8</data_type>
+    <data_scale>0.5</data_scale>   <!-- for int8 and int16 -->
+    <data_bias>-32</data_bias>     <!-- for int8 and int16 -->
+
+    <missing_data_value>0</missing_data_value> <!-- missing val before applying scale and bias -->
+
+    <min_value>-21.5</min_value>           <!-- min value in this field data -->
+    <max_value>43.5</max_value>            <!-- max value in this field data -->
+    <min_value_file>-32.0</min_value_file> <!-- min value in file, before clipping -->
+    <max_value_file>55.0</max_value_file>  <!-- max value in file, before clipping -->
+
+    <!-- compression_type: none, gzip -->
+
+    <compression_type>gzip</compression_type> <!-- entire field buffer either compressed or not -->
+
+    <is_3d>true</is_3d> <!-- is this a 3D data set? -->
+    <is_clipped_xy>true</is_clipped_xy> <!-- data data been clipped in xy relative to file? -->
+    <zoom_overlap>true</zoom_overlap> <!-- overlap between requested zoom and data in file? -->
+
+    <data_nbytes>121324</data_nbytes>   <!-- length of binary data in bytes -->
+    <data_offset>321990</data_offset>   <!-- offset of binary data from start of data file -->
+    
+    <!-- xy_grid -->
+
+    <xy_grid>
+      <nx>400</nx>
+      <ny>400</ny>
+      <minx>-199.5</minx>
+      <miny>-199.5</miny>
+      <deltax>0.75</deltax>
+      <deltay>0.75</deltay>
+    </xy_grid>
+
+    <!-- xy_projection -->
+
+    <!-- Supported types are-->
+    <!--   latlon - Simple Cylindrical or Platte Carree -->
+    <!--   lambert_conformal_conic -->
+    <!--   polar_stererographic -->
+    <!--   oblique_stererographic -->
+    <!--   radar_flat - Oblique Lambert Azimuthal (Cartesian radar) -->
+    <!--   radar_ppi - km(X) x km(Y) x deg(el) (Cartesian PPIs) -->
+    <!--   radar_polar - km(range) x deg(az) x deg(el) -->
+
+    <xy_projection type="lambert_conformal_conic">
+      <origin_lat>25.0</origin_lat> <!-- not used for latlon -->
+      <origin_lon>-100.0</origin_lon> <!-- not used for latlon -->
+      <lat1>15.0</lat1> <!-- lambert conformal -->
+      <lat2>45.0</lat2> <!-- lambert conformal -->
+      <tangent_lon>0.0</tangent_lon> <!-- polar and oblique stereographic -->
+      <tangent_lat>0.0</tangent_lat> <!-- oblique_stereographic -->
+    </xy_projection>
+
+    <!-- vlevel_types:
+  
+     km_msl - the default
+     sigma_p, sigma_z, eta, flight_level, pressure_level,
+     radar_elev (ppis),
+     surface (2D), satellite (2D), earth_image (2D), composite - max at any ht (2D),
+     cross_section (2D),
+     variable (mixed types between vlevels)
+  
+     If vlevel_type is variable, the type for each vlevel is assumed to be
+     km_msl unless the type attribute is included.
+  
+    -->
+
+    <!-- vertical levels -->
+  
+    <vlevels type="km_msl">
+      <vlevel>2.0</vlevel>
+      <vlevel>3.0</vlevel>
+      <vlevel>4.0</vlevel>
+      <vlevel>5.0</vlevel>
+      <vlevel type="km_msl">6.0</vlevel>  <!-- example of specifying type individually -->
+      <vlevel>7.0</vlevel>
+      <vlevel>8.0</vlevel>
+      <vlevel>9.0</vlevel>
+      <vlevel>10.0</vlevel>
+    </vlevels>
+
+  </field>
+
+
+  <!-- Field example - temperature -->
+
+  <field>
+
+    <name>Temp</name>
+    <long_name>Dry-bulb temperature</long_name>
+    <units>C</units>
+
+    <data_collection_type>forecast</data_collection_type>
+
+    <!-- data_type: int8, int16, float32 -->
+
+    <data_type>float32</data_type>
+    <missing_data_value>-999</missing_data_value>
+
+    <min_value>-75.1</min_value>           <!-- min value in this field data -->
+    <max_value>35.0</max_value>            <!-- max value in this field data -->
+    <min_value_file>-79.2</min_value_file> <!-- min value in file, before clipping -->
+    <max_value_file>38.3</max_value_file>  <!-- max value in file, before clipping -->
+
+    <!-- compression_type: none, gzip -->
+
+    <compression_type>gzip</compression_type> <!-- entire field buffer either compressed or not -->
+
+    <is_3d>true</is_3d> <!-- is this a 3D data set? -->
+    <is_clipped_xy>false</is_clipped_xy> <!-- data data been clipped in xy relative to file? -->
+    <zoom_overlap>true</zoom_overlap> <!-- overlap between requested zoom and data in file? -->
+
+    <data_nbytes>3205769</data_nbytes>   <!-- length of binary data in bytes -->
+    <data_offset>6843521</data_offset>   <!-- offset of binary data from start of data file -->
+
+    <!-- grid -->
+    
+    <xy_grid>
+      <nx>100</nx>
+      <ny>100</ny>
+      <minx>-99.5</minx>
+      <miny>25</miny>
+      <deltax>0.05</deltax>
+      <deltay>0.05</deltay>
+    </xy_grid>
+    
+    <!-- projection -->
+
+    <xy_projection type="latlon">
+      <origin_lon>-100.0</origin_lon>
+    </xy_projection>
+
+    <!-- vertical levels -->
+
+    <vlevels type="pressure">
+      <vlevel>1000</vlevel>
+      <vlevel>850</vlevel>
+      <vlevel>700</vlevel>
+      <vlevel>500</vlevel>
+      <vlevel>300</vlevel>
+      <vlevel>200</vlevel>
+      <vlevel>150</vlevel>
+      <vlevel type="sigma_p">0.99</vlevel>
+    </vlevels>
+
+  </field>
+
+  <!-- chunks -->
+
+  <!-- Chunks are arbitrary binary objects included in the file.
+       Any applications using them must know all about them a priori. -->
+
+  <chunk type="dsradar_params">
+    <info>Information text</info>    
+    <chunk_nbytes>3205769</chunk_nbytes>   <!-- length of binary chunk in bytes -->
+    <chunk_offset>6843521</chunk_offset>   <!-- offset of binary chunk from start of data file -->
+  </chunk>
+
+</mdv>

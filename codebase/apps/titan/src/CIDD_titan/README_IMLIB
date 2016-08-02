@@ -1,0 +1,13 @@
+#########################################################
+
+Use of Imlib for image dumps
+
+#########################################################
+
+By default, Imlib is not used, and only xwd files will be dumped.
+
+To compile with Imlib support, use:
+
+  make all_imlib (debug version)
+  make opt_imlib (optimized version)
+

@@ -1,0 +1,167 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MosFcastRaw
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 2001
+ * 
+ */
+
+commentdef {
+  p_header = "MosFcastRaw reads SPDB MM5 data that have been\n"
+    "extracted at single points from a grid, and it\n"
+    "produces an SPDB database in a METAR station\n"
+    "format that has been corrected using regression\n"
+    "co-efficients.\n\n"
+    "Niles Oien";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} Debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} Instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+  "Archive mode automatically invoked by -interval option.";
+} Mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_descr = "URL for input data\n";
+  p_help = "For now, set this to the input directory. Remote operation will be added later."; 
+  p_default = "$(RAP_DATA_DIR)/spdb/mm5";
+} InUrl;
+ 
+paramdef int {
+  p_default = 3600;
+  p_descr = "Max valid age for input data (secs).";
+  p_help = "REALTIME mode only";
+} MaxValidAge;        
+
+paramdef int {
+  p_default = 64800;
+  p_descr = "Max lead time (secs) for which forecasts are used";
+  p_help = "PLAYBACK mode only";
+} MaxLeadSecs;   
+
+commentdef {
+  p_header = "APPLYING THE REGRESSION.";
+}
+
+paramdef string {
+  p_default = {"spdbp:://localhost::spdb/mos_calib"};
+  p_descr = "Regression url"; 
+  p_help = "Url for regression data";
+} RegressionUrl; 
+
+paramdef int {
+  p_default = 7;
+  p_descr = "Look back time in days for regression data.";
+  p_help = "When in realtime mode, the program will look back this many "
+           "days from the current time to find regression information.";  
+} RegressionLookBack;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Model delta lead time in hours.";
+  p_help = "Number of hours between forecasts for a given generate time";
+} ModelDeltaT;     
+
+paramdef double {
+  p_descr = "Value to use for visibility if no clouds found, Km";
+  p_default = 9.999;
+} ClearVisibility;
+
+paramdef double {
+  p_descr = "Value to use for ceiling if no clouds found, Km";
+  p_default = 3.6576;
+} ClearCeiling;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Check forecast values";
+  p_help = "If set to TRUE, the calculated forecast values will be "
+           "checked prior to writing them out.  If they do not make "
+           "sense, they will be modified.  For example, if a value of "
+           "101 is calculated for relative humidity, this will be changed "
+           "to 100";
+} CheckForecast;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_descr = "Output URL, typically of the form\n"
+	    "spdbp:://host.domain:[port]:dir/dir";
+  p_help = "Derived satellite fields are written here."; 
+  p_default = {"spdbp:://localhost::spdb/mos_raw"};
+} OutUrl;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Longevity, seconds.";
+  p_help = "Output SPDB data will expire after this time.";
+} Longevity ;
+
+paramdef string {
+  p_descr = "Output directory for debug data";
+  p_help = "Output directory for csv ascii files containing data from the "
+           "variables used in the regression calculations\n"
+		   "Use empty string for no csv debug output.";
+  p_default = {""};
+} debug_output_dir;
+

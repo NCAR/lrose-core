@@ -1,0 +1,863 @@
+/**********************************************************************
+ * TDRP params for SigAirMet2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: SigAirMet2Spdb.
+//
+// SigAirMet2Spdb reads SIGMET and AIRMET data from text files and 
+//   stores in SPDB in ASCII and/or decoded format.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// print_decode_problems_to_stderr /////////
+//
+// Option to print decoding problems to stderr.
+// Turn this on if you want to log these problems in detail or if you 
+//   want to run SigAirMet2Spdb.pl to generate statistics.
+// Type: boolean
+//
+
+print_decode_problems_to_stderr = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// OPERATIONAL MODE.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operational mode.
+// REALTIME mode - waits for new data. ARCHIVE mode - finds files 
+//   between start and end times. FILELIST mode - uses file list from -f 
+//   on command line.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir_path //////////////////////////
+//
+// Name of input data directory.
+// ASCII input files are stored in this directory.
+// Type: string
+//
+
+input_dir_path = "$(DATA_DIR)/raw/gts";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For REALTIME only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+///////////// decode_sigmets //////////////////////////
+//
+// Decode SIGMETs.
+// Turn this on to decode SIGMETs from the input_dir_path. Turn off to 
+//   not decode SIGMETs; they will also not be saved to the output URL(s).
+// Type: boolean
+//
+
+decode_sigmets = TRUE;
+
+///////////// decode_airmets //////////////////////////
+//
+// Decode AIRMETs.
+// Turn this on to decode AIRMETs from the input_dir_path. Turn off to 
+//   not decode AIRMETs; they will also not be saved to the output URL(s).
+// Type: boolean
+//
+
+decode_airmets = TRUE;
+
+///////////// st_location_path ////////////////////////
+//
+// Path to station location file.
+// Used to determine the location of station identifiers. The station 
+//   location file should contain a station identification followed by the 
+//   latitude and longitude for each station.
+// Type: string
+//
+
+st_location_path = "./station_location.txt";
+
+///////////// fir_location_path ///////////////////////
+//
+// Path to FIR location file.
+// Used to determine the location of FIRs. The FIR file should contain 
+//   the FIR/UIR/CTA name. Lat,lon are not yet supported for FIRs.
+// Type: string
+//
+
+fir_location_path = "./fir_list.txt";
+
+///////////// us_states_location_path /////////////////
+//
+// Path to US states abbreviations file.
+// Used to determine the US States abbreviations. The file should 
+//   contain the state name a comma and then the 2-letter abbreviation.
+// Type: string
+//
+
+us_states_location_path = "./us_states.txt";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// store_ascii_format //////////////////////
+//
+// Option to store in ascii format in SPDB.
+// If TRUE, ascii data is stored using the ascii_url.
+// Type: boolean
+//
+
+store_ascii_format = FALSE;
+
+///////////// ascii_output_url ////////////////////////
+//
+// Output SPDB URL for ascii data.
+// Used if 'store_ascii_format' is TRUE.
+// Type: string
+//
+
+ascii_output_url = "/d2/dixon/rap/apps/ingest/src/SigAirMet2Spdb/output/spdb/ascii_sigmet";
+
+///////////// store_ascii_header //////////////////////
+//
+// Option to include header with the SIGMET.
+// Sometimes there is a header at the start of a SIG/AIRMET block. If 
+//   store_header is true, the header is added to the start of the 
+//   SIG/AIRMET message before storing it.
+// Type: boolean
+//
+
+store_ascii_header = TRUE;
+
+///////////// ascii_expire_secs ///////////////////////
+//
+// Data expire seconds - ASCII data.
+// Number of seconds the data is valid before it should be expired.
+// Type: int
+//
+
+ascii_expire_secs = 10800;
+
+///////////// store_decoded_format ////////////////////
+//
+// Option to store in decoded format in SPDB.
+// If TRUE, decoded data is stored using the decoded_url.
+// Type: boolean
+//
+
+store_decoded_format = TRUE;
+
+///////////// decoded_output_url //////////////////////
+//
+// Output SPDB URL for decoded data.
+// Used if 'store_decoded_format' is TRUE.
+// Type: string
+//
+
+decoded_output_url = "/d2/dixon/rap/apps/ingest/src/SigAirMet2Spdb/output/spdb/sigmet";
+
+///////////// cancel_input_url ////////////////////////
+//
+// Input URL for cancelling.
+// To cancel a sigmet we read in from this URL, set the cancel flag, and 
+//   then overwrite to decoded_output_url. This is done because the 
+//   output_url may sometimes be a distribution URL, and we do not want to 
+//   read from those.
+// Type: string
+//
+
+cancel_input_url = "/d2/dixon/rap/apps/ingest/src/SigAirMet2Spdb/output/spdb/sigmet";
+
+//======================================================================
+//
+// DECODING SPECIFICS.
+//
+//======================================================================
+ 
+///////////// modify_fir_boundary /////////////////////
+//
+// Option to try to generate polyons as modifications from FIR boundary.
+// Only valid when cannot generate a polygon from the SIG/AIRMET but 
+//   SIG/AIRMET text does refer to an FIR. If TRUE, and the SIG/AIRMET 
+//   text contains modifications to the FIR, will attempt to generate a 
+//   polygon as a subset of the FIR. If FALSE, will return the FIR 
+//   boundary with no subsetting.
+// Type: boolean
+//
+
+modify_fir_boundary = TRUE;
+
+///////////// bogus_stations //////////////////////////
+//
+// List of bogus stations.
+// Only used in station decoding.
+// Type: string
+// 1D array - variable length.
+//
+
+bogus_stations = {
+ "ABV",
+ "AND",
+ "AREA",
+ "AT",
+ "BLO",
+ "BLW",
+ "BOT",
+ "BOUNDED",
+ "BTN",
+ "BUT",
+ "BY",
+ "CHG",
+ "CTA",
+ "DUE",
+ "FROM",
+ "GND",
+ "ICING",
+ "INTSF",
+ "KMH",
+ "KTS",
+ "LIN",
+ "LINE",
+ "METEO-SAT",
+ "MOV",
+ "OBS",
+ "OBS/FCST",
+ "OF",
+ "ON",
+ "OR",
+ "OVER",
+ "SAN",
+ "SLW",
+ "STNR",
+ "THE",
+ "TO",
+ "TOP",
+ "TOPS",
+ "UNTIL",
+ "UTC",
+ "VALID",
+ "WHOLE",
+ "WKN",
+ "WTN"
+};
+
+///////////// wx_translator ///////////////////////////
+//
+// Translation of message wx text into official text.
+// Some messages contain non-standard weather text. For example, the 
+//   message may contain the text MDT TURB instead of MOD TURB. This array 
+//   allows for the translation of message text into standard text. This 
+//   list should include all the standard wx types as well as non-standard 
+//   ones.
+//
+// Type: struct
+//   typedef struct {
+//      string message_text;
+//      string standard_text;
+//   }
+//
+// 1D array - variable length.
+//
+
+wx_translator = {
+  {
+    message_text = "TROPICAL STORM",
+    standard_text = "TC"
+  }
+  ,
+  {
+    message_text = "TROPICAL CYCLONE",
+    standard_text = "TC"
+  }
+  ,
+  {
+    message_text = "TYPHOON",
+    standard_text = "TC"
+  }
+  ,
+  {
+    message_text = "HURRICANE",
+    standard_text = "TC"
+  }
+  ,
+  {
+    message_text = "TC",
+    standard_text = "TC"
+  }
+  ,
+  {
+    message_text = "VOLCANIC",
+    standard_text = "VA"
+  }
+  ,
+  {
+    message_text = "VOLCANIC ASH",
+    standard_text = "VA"
+  }
+  ,
+  {
+    message_text = "VA",
+    standard_text = "VA"
+  }
+  ,
+  {
+    message_text = "ERUPTION",
+    standard_text = "VA"
+  }
+  ,
+  {
+    message_text = "OBSC TS HVYGR",
+    standard_text = "OBSC TS HVYGR"
+  }
+  ,
+  {
+    message_text = "EMBD TS HVYGR",
+    standard_text = "EMBD TS HVYGR"
+  }
+  ,
+  {
+    message_text = "FRQ TS HVYGR",
+    standard_text = "FRQ TS HVYGR"
+  }
+  ,
+  {
+    message_text = "SQL TS HVYGR",
+    standard_text = "SQL TS HVYGR"
+  }
+  ,
+  {
+    message_text = "ISOL TS GR",
+    standard_text = "ISOL TS GR"
+  }
+  ,
+  {
+    message_text = "OCNL TS GR",
+    standard_text = "OCNL TS GR"
+  }
+  ,
+  {
+    message_text = "TSGR",
+    standard_text = "TS GR"
+  }
+  ,
+  {
+    message_text = "ISOL TS",
+    standard_text = "ISOL TS"
+  }
+  ,
+  {
+    message_text = "OCNL TS",
+    standard_text = "OCNL TS"
+  }
+  ,
+  {
+    message_text = "OBSC TS",
+    standard_text = "OBSC TS"
+  }
+  ,
+  {
+    message_text = "EMBD TS",
+    standard_text = "EMBD TS"
+  }
+  ,
+  {
+    message_text = "EMBD TS/CB",
+    standard_text = "EMBD TS"
+  }
+  ,
+  {
+    message_text = "ISOL EMBD TS",
+    standard_text = "TS"
+  }
+  ,
+  {
+    message_text = "ISOL EMBD CB",
+    standard_text = "ISOL TS"
+  }
+  ,
+  {
+    message_text = "FRQ TS",
+    standard_text = "FRQ TS"
+  }
+  ,
+  {
+    message_text = "FRQ TSRA",
+    standard_text = "FRQ TS"
+  }
+  ,
+  {
+    message_text = "SQL TS",
+    standard_text = "SQL TS"
+  }
+  ,
+  {
+    message_text = "LN TS",
+    standard_text = "LN TS"
+  }
+  ,
+  {
+    message_text = "LN DVLPG TS",
+    standard_text = "LN TS"
+  }
+  ,
+  {
+    message_text = "TS",
+    standard_text = "TS"
+  }
+  ,
+  {
+    message_text = "EMBD CB",
+    standard_text = "EMBD TS"
+  }
+  ,
+  {
+    message_text = "EMBD CB/TS",
+    standard_text = "EMBD TS"
+  }
+  ,
+  {
+    message_text = "ISOL CB",
+    standard_text = "ISOL TS"
+  }
+  ,
+  {
+    message_text = "ISOL CB/TS",
+    standard_text = "ISOL TS"
+  }
+  ,
+  {
+    message_text = "ISOL/OCNL CB",
+    standard_text = "ISOL TS"
+  }
+  ,
+  {
+    message_text = "OCNL CB",
+    standard_text = "OCNL TS"
+  }
+  ,
+  {
+    message_text = "FRQ CB",
+    standard_text = "FRQ TS"
+  }
+  ,
+  {
+    message_text = "FRONTAL CB",
+    standard_text = "TS"
+  }
+  ,
+  {
+    message_text = "LN CB",
+    standard_text = "LN TS"
+  }
+  ,
+  {
+    message_text = "LN TS",
+    standard_text = "LN TS"
+  }
+  ,
+  {
+    message_text = "CB/TS",
+    standard_text = "TS"
+  }
+  ,
+  {
+    message_text = "SEV ICE(FZRA)",
+    standard_text = "SEV ICE(FZRA)"
+  }
+  ,
+  {
+    message_text = "FZRA",
+    standard_text = "SEV ICE(FZRA)"
+  }
+  ,
+  {
+    message_text = "SEV ICE",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "SEV ICG",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "SEV ICING",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "SEV/MOD ICE",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "MOD-SEV ICE",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "MDT-SEV ICE",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "MOD/SEV ICE",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "MDT/SEV ICE",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "MOD-SEV ICING",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "MDT-SEV ICING",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "MOD/SEV ICING",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "MDT/SEV ICING",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "SEV MXD ICGICIP",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "SEV MXD ICGIC",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "SEV MXD/CLR ICGICIP",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "SEV MXD ICG/TURB",
+    standard_text = "SEV ICE"
+  }
+  ,
+  {
+    message_text = "MDT ICE",
+    standard_text = "MOD ICE"
+  }
+  ,
+  {
+    message_text = "MOD ICE",
+    standard_text = "MOD ICE"
+  }
+  ,
+  {
+    message_text = "SEV TURB",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "SEV TRB",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "SEVERE TURB",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "SEVERE TURBULENCE",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "MODERATE TO SEVERE TURBULENCE",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "MOD-SEV TURB",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "MDT-SEV TURB",
+    standard_text = "MOD TURB"
+  }
+  ,
+  {
+    message_text = "MOD/SEV TURB",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "MDT/SEV TURB",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "SEV/MOD TURB",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "SEV-MOD TURB",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "SEV/MDT TURB",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "SEV-MDT TURB",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "MODERATE TURBULENCE",
+    standard_text = "MOD TURB"
+  }
+  ,
+  {
+    message_text = "MOD TURB",
+    standard_text = "MOD TURB"
+  }
+  ,
+  {
+    message_text = "MDT TURB",
+    standard_text = "MOD TURB"
+  }
+  ,
+  {
+    message_text = "TURB MOD",
+    standard_text = "MOD TURB"
+  }
+  ,
+  {
+    message_text = "SEV CAT",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "MOD-SEV CAT",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "MDT-SEV CAT",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "MOD CAT",
+    standard_text = "MOD TURB"
+  }
+  ,
+  {
+    message_text = "MDT CAT",
+    standard_text = "MOD TURB"
+  }
+  ,
+  {
+    message_text = "MDT-SEV MECH/LLJ",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "MDT-SEV MECH",
+    standard_text = "SEV TURB"
+  }
+  ,
+  {
+    message_text = "SEV MTW",
+    standard_text = "SEV MTW"
+  }
+  ,
+  {
+    message_text = "MOD MTW",
+    standard_text = "MOD MTW"
+  }
+  ,
+  {
+    message_text = "MDT/SEV MTW",
+    standard_text = "SEV MTW"
+  }
+  ,
+  {
+    message_text = "HVY DS",
+    standard_text = "HVY DS"
+  }
+  ,
+  {
+    message_text = "HVY SS",
+    standard_text = "HVY SS"
+  }
+  ,
+  {
+    message_text = "SFC WSPD",
+    standard_text = "SFC WSPD"
+  }
+  ,
+  {
+    message_text = "SFC VIS",
+    standard_text = "SFC VIS"
+  }
+  ,
+  {
+    message_text = "BKN CLD",
+    standard_text = "BKN CLD"
+  }
+  ,
+  {
+    message_text = "OVC CLD",
+    standard_text = "OVC CLD"
+  }
+  ,
+  {
+    message_text = "MT OBSC",
+    standard_text = "MT OBSC"
+  }
+  ,
+  {
+    message_text = "GR",
+    standard_text = "GR"
+  }
+  ,
+  {
+    message_text = "SA",
+    standard_text = "SA"
+  }
+};
+
+//======================================================================
+//
+// QUALITY CONTROL.
+//
+//======================================================================
+ 
+///////////// max_distance_to_closest_station /////////
+//
+// Maximum distance to a station (km).
+// When searching for a station closest to a point, the station will 
+//   only be accepted if the distance to the station is less than this 
+//   value.
+// Type: double
+//
+
+max_distance_to_closest_station = 7500;
+
+///////////// check_polygon_size_and_shape ////////////
+//
+// Option to check polygon for reasonable size and shape.
+// If TRUE, test the vertices to make sure they are reasonable. There 
+//   are 2 tests: (a) max_valid_polygon_distance: the maximum distance 
+//   between adjacent vertices; (b) min_valid_angle: minimum angle 
+//   enclosed between adjacent sides of the polygon.
+// Type: boolean
+//
+
+check_polygon_size_and_shape = TRUE;
+
+///////////// max_valid_polygon_distance //////////////
+//
+// Maximum polygon side distance (km).
+// If the length of two adjacent sides in a polygon exceeds this value, 
+//   the vertex between the two sides is discarded. Only applies if 
+//   check_polygon_size_and_shape is true.
+// Type: double
+//
+
+max_valid_polygon_distance = 3500;
+
+///////////// min_valid_polygon_angle /////////////////
+//
+// Minumum angle between polygon sides (deg).
+// If the angle between two adjacent sides in a polygon is less than 
+//   this value, the vertex between the two sides is discarded. Only 
+//   applies if check_polygon_size_and_shape is true.
+// Type: double
+//
+
+min_valid_polygon_angle = 10;
+
+///////////// sigmet_max_duration /////////////////////
+//
+// Maximum SIGMET duration - secs.
+// The maximum duration of a SIGMET. If the duration exceeds this value, 
+//   the start and expire times are set to the issue time. That way the 
+//   SIGMET will have no effect, but will still be in the data base.
+// Type: int
+//
+
+sigmet_max_duration = 28800;
+
+///////////// airmet_max_duration /////////////////////
+//
+// Maximum AIRMET duration - secs.
+// The maximum duration of an AIRMET. If the duration exceeds this 
+//   value, the start and expire times are set to the issue time. That way 
+//   the AIRMET will have no effect, but will still be in the data base.
+// Type: int
+//
+
+airmet_max_duration = 28800;
+

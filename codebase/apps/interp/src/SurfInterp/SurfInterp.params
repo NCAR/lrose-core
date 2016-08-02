@@ -1,0 +1,560 @@
+/**********************************************************************
+ * TDRP params for SurfInterp
+ **********************************************************************/
+
+//======================================================================
+//
+// surfInterp program.
+//
+// surfInterp performs interpolation on point data at non-uniform grid 
+//   locations. It produces an MDV file containing the interpolation 
+//   results.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "interp_metar100";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, ARCHIVE and REALTIME.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// time_trigger_interval ///////////////////
+//
+// Interval for TIME_TRIGGER - secs.
+// For TIME_TRIGGER, this is the interval between trigger events. In 
+//   REALTIME mode, a time trigger always occurs on the hour, and at 
+//   constant intervals thereafter. In ARCHIVE mode the trigger starts at 
+//   start_time and at constant intervals thereafter.
+// Minimum val: 0
+// Type: int
+//
+
+time_trigger_interval = 900;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// terrain_file ////////////////////////////
+//
+// File of terrain data in LATLON projection.
+// Used to correct ceiling for height above sea.
+// Type: string
+//
+
+terrain_file = "./terrain.mdv";
+
+///////////// surface_data_urls ///////////////////////
+//
+// Input URLs.
+// These are the URLs from which the station data are read.
+// Type: string
+// 1D array - variable length.
+//
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/APRSWXNET", 
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/APG",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/AWS",
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/AWX",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/DCNet",
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/DDMET",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/GADOT",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/GoMOOS",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/HADS",
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/IADOT",
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/IEM",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/INDOT",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/KSDOT",
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/KYTC-RWIS",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/MDDOT",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/MEDOT",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/MesoWest"
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/MNDOT",
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/MOComAgNet",
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/MQT-Meso",
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/RAWS",
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/NEDOR",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/NDDOT",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/NHDOT",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/NJWxNet",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/NonFedAWOS",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/NOS-NWLON",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/NOS-PORTS",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/OHDOT",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/OK-Meso",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/RAWS",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/WIDOT",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/VADOT",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/VTDOT",
+//		      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/WIDOT",
+//                      "spdbp:://$(INGEST5_HOST)::$(PROJECT)/spdb/madis/WXforYou"
+
+surface_data_urls = { "spdbp:://$(INGEST2_HOST)::$(PROJECT)/spdb/surface"
+};
+
+///////////// cape_cin_data_urls //////////////////////
+//
+// Input URLs for surface cape cin data.
+// Type: string
+// 1D array - variable length.
+//
+
+cape_cin_data_urls = {  };
+
+///////////// duration ////////////////////////////////
+//
+// Data duration.
+// This is how far back from the start time to search.
+// Type: int
+//
+
+//duration = 500;
+duration = 3600;
+
+///////////// sounding_urls ///////////////////////////
+//
+// URL of sounding database.
+// Type: string
+// 1D array - variable length.
+//
+
+sounding_urls = { "spdbp:://$(INGEST2_HOST)::$(PROJECT)/spdb/Sndg/ruc",
+	          "spdbp:://$(INGEST2_HOST)::$(PROJECT)/spdb/Sndg/sonde"};
+
+///////////// sounding_look_back //////////////////////
+//
+// Time (in minutes) to search back for a sounding; Default is 9 hours; 
+//   max is 24 hours.
+// Type: int
+//
+
+// sounding_look_back = 60;
+sounding_look_back = 240;
+
+///////////// PresLi //////////////////////////////////
+//
+// Pressure to take temperature from in soundings.
+// For lifted index.
+// Type: float
+//
+
+PresLi = 500;
+
+///////////// sounding_max_dist ///////////////////////
+//
+// Maximum distance of sounding from a surface report.
+// For lifted index. Distance in kilometers.
+// Type: float
+//
+
+sounding_max_dist = 500;
+
+//======================================================================
+//
+// GRID.
+//
+//======================================================================
+ 
+///////////// nx //////////////////////////////////////
+//
+// Grid size in X.
+// Number of X points.
+// Type: int
+//
+
+nx = $(COSPA_NX);
+
+///////////// ny //////////////////////////////////////
+//
+// Grid size in Y.
+// Number of Y points.
+// Type: int
+//
+
+ny = $(COSPA_NY);
+
+///////////// dx //////////////////////////////////////
+//
+// Grid spacing in X.
+// Grid spacing in x, units determined by projection.
+// Type: float
+//
+
+dx = $(COSPA_DX);
+
+///////////// dy //////////////////////////////////////
+//
+// Grid spacing in Y.
+// Grid spacing in y, units determined by projection.
+// Type: float
+//
+
+dy = $(COSPA_DY);
+
+///////////// lat_origin //////////////////////////////
+//
+// If LAT_LON projection, Latitude of SW corner. If flat earth, Latitude 
+//   of center.
+// Defaults to New York radar.
+// Type: float
+//
+
+lat_origin = $(COSPA_LAT);
+
+///////////// lon_origin //////////////////////////////
+//
+// If LAT_LON projection, Longitude of SW corner. If flat earth, 
+//   Longitude of center.
+// Defaults to New York radar.
+// Type: float
+//
+
+lon_origin = $(COSPA_LON);
+
+///////////// altitude ////////////////////////////////
+//
+// Altitude of origin.
+// Defaults to New York (1600.0).
+// Type: float
+//
+
+altitude = 250;
+
+///////////// flat ////////////////////////////////////
+//
+// Flat earth projection.
+// If not use LatLon.
+// Type: boolean
+//
+
+flat = FALSE;
+
+///////////// AllowOutsideTerrain /////////////////////
+//
+// Allow terrain MDV file not to cover region.
+// May be useful for an island.
+// Type: int
+//
+
+AllowOutsideTerrain = 0;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// The interpolated MDV data is written to this URL.
+// Type: string
+//
+
+output_url = "mdvp:://localhost::$(PROJECT)/mdv/SurfInterpProfileTest3";
+
+///////////// datasetName /////////////////////////////
+//
+// Dataset name.
+// Type: string
+//
+
+datasetName = "Metar SurfInterp file";
+
+///////////// dataSource //////////////////////////////
+//
+// Data Source.
+// Type: string
+//
+
+dataSource = "SurfInterp";
+
+///////////// dataInfo ////////////////////////////////
+//
+// Data info.
+// Type: string
+//
+
+dataInfo = "none";
+
+//======================================================================
+//
+// FIELDS.
+//
+//======================================================================
+ 
+///////////// outputFields ////////////////////////////
+//
+// List of fields to include in the output file.
+//
+// Type: enum
+// Options:
+//     UWIND
+//     VWIND
+//     TEMP
+//     DEWPT
+//     LIFTED_INDEX
+//     REL_HUM
+//     WIND_GUST
+//     PRESSURE
+//     POTENTIAL_TEMP
+//     LIQUID_ACCUM
+//     PRECIP_RATE
+//     VISIBILITY
+//     RUNWAY_VIS_RANGE
+//     SEALEVEL_RELATIVE_CEILING
+//     ALTITUDE
+//     DEWPT_DEPRESSION
+//     TERRAIN
+//     CONVERGENCE
+//     TERRAIN_RELATIVE_CEILING
+//     FLIGHT_CAT
+//     CAPE
+//     CIN
+// 1D array - variable length.
+//
+
+outputFields = { UWIND, VWIND, LIFTED_INDEX, REL_HUM, CONVERGENCE };
+
+//======================================================================
+//
+// INTERPOLATION.
+//
+//======================================================================
+ 
+///////////// InterpMethod ////////////////////////////
+//
+// Interpolation option - choose the interpolation scheme.
+//
+// Type: enum
+// Options:
+//     INTERP_BARNES
+//     INTERP_NEAREST
+//
+
+InterpMethod = INTERP_BARNES;
+
+///////////// MaxAltError /////////////////////////////
+//
+// Max difference between altitude and terrain for VFR to work.
+// If negative, no check is made. Units are feet.
+// Type: float
+//
+
+MaxAltError = -1;
+
+///////////// MinWeight ///////////////////////////////
+//
+// Minimum sum of weights in Barnes interpolation for valid data.
+// If not reached, bad value output - effectively sets radius of 
+//   influence.
+// Type: float
+//
+
+MinWeight = 1e-04;
+
+///////////// WindowSize //////////////////////////////
+//
+// WindowSize for optional VFR median filter.
+// Actual tile is 2W +1 by 2W + 1.
+// Type: int
+//
+
+WindowSize = 0;
+
+///////////// NumPasses ///////////////////////////////
+//
+// Number of passes for VFR median filter.
+// Used to smooth out VFR image.
+// Type: int
+//
+
+NumPasses = 0;
+
+///////////// MinStations /////////////////////////////
+//
+// Minimum number of stations.
+// If fewer stations report, don't bother.
+// Type: int
+//
+
+MinStations = 0;
+
+///////////// MaxInterpDist ///////////////////////////
+//
+// Maximum distance for interpolation to be valid, Km.
+// Works in conjunction with minimum weight parameter.
+// Type: float
+//
+
+MaxInterpDist = 100;
+
+///////////// Rscale //////////////////////////////////
+//
+// Scale radius for interpolations.
+// Defaults to half of MaxInterpDist if 0 or less.
+// Type: float
+//
+
+Rscale = 0;
+
+///////////// UseOutsideRegion ////////////////////////
+//
+// Set to TRUE to accept stations outside the grid.
+// Default is to only accept stations within the grid.
+// Type: boolean
+//
+
+UseOutsideRegion = TRUE;
+
+//======================================================================
+//
+// FLIGHT CATEGORY.
+//
+//======================================================================
+ 
+///////////// BadCeilingValue /////////////////////////
+//
+// Value to use if ceiling is missing - if negative, use bad value.
+// Default sets both ceiling and flight cat to missing if ceiling is bad.
+// Type: float
+//
+
+BadCeilingValue = -1;
+
+///////////// VisThresh ///////////////////////////////
+//
+// Thresholds for visibility in flight category, Km.
+// Must be is ascending order. See comments for CeilThresh.
+// Type: float
+// 1D array - variable length.
+//
+
+VisThresh = { 0, 1.6, 5 };
+
+///////////// CeilThresh //////////////////////////////
+//
+// Thresholds for ceiling in flight category, ft.
+// Must be is ascending order. Every time a ceiling
+// and vis criteria is satisfied, 10 is added to the numerical
+// value of the flight category (which is initialised with
+// the value 10.0). Thus, the maximum numerical value for
+// flight category is 10.0 + NumThresholds*10.0.
+
+// The number of thresholds in ceiling and visibilitymust be the same.
+// Type: float
+// 1D array - variable length.
+//
+
+CeilThresh = { 0, 500, 1500 };
+
+///////////// MaxVis //////////////////////////////////
+//
+// Maximum visibility from a station, Km.
+// Values greater than this are set to missing.
+// Type: float
+//
+
+MaxVis = 30;
+
+///////////// MaxCeiling //////////////////////////////
+//
+// Maximum cloud ceiling from a station, Km.
+// Values greater than this are set to missing.
+// Type: float
+//
+
+MaxCeiling = 30;
+
+///////////// ReplaceCeiling //////////////////////////
+//
+// If set to TRUE, ceiling values above ReplaceCeilingThreshold
+// are replaced with ReplaceCeilingValue. The reason is that in
+// some systems, a clear sky is reported as a ceiling of 10,000
+// feet - but the terrain may be near 10,000 feet which leads
+// to erroneous regions of bad flight cat.
+// No such processing occurrs if set to FALSE.
+// Type: boolean
+//
+
+ReplaceCeiling = FALSE;
+
+///////////// ReplaceCeilingThreshold /////////////////
+//
+// Cloud ceiling threshold, ft.
+// If ReplaceCeiling is TRUE then values of ceiling at or above
+// this value are replaced with ReplaceCeilingValue.
+// Type: float
+//
+
+ReplaceCeilingThreshold = 9500;
+
+///////////// ReplaceCeilingValue /////////////////////
+//
+// Cloud ceiling value, ft.
+// If ReplaceCeiling is TRUE then values of ceiling at or above
+// ReplaceCeilingThreshold are replaced with this value.
+// Type: float
+//
+
+ReplaceCeilingValue = 30000;
+
+//======================================================================
+//
+// CONVERGENCE.
+//
+//======================================================================
+ 
+///////////// convergenceDxDy /////////////////////////
+//
+// Convergence is the sum of the derivatives of u and v with respect 
+//   distance.   convergenceDxDy is the distace in gridpoints from the 
+//   point   reference at which we will take values of u and v to form the 
+//   difference  quotients.
+// By default the convergence is calculated using values of u and v at 
+//   adjacent grid points ( convergenceDxDy = 1). Adjusting this parameter 
+//   allows the convergence to be calculated over a larger spatial domain.
+// Minimum val: 1
+// Type: int
+//
+
+convergenceDxDy = 2;
+

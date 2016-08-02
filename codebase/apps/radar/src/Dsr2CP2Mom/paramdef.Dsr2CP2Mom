@@ -1,0 +1,130 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for Dsr2CP2Mom
+//
+//  Mike Dixon, RAP, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  Oct 2007
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Dsr2CP2Mom program";
+  p_text = "Dsr2CP2Momreads an input FMQ containing radar data, and writes out UDP data in CP2 moments format.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_descr = "Input URL for S-band data via FMQ";
+  p_default = "fmq/Iq2Dsr_s";
+} sband_fmq_url;
+
+paramdef string {
+  p_descr = "Input URL for X-band data via FMQ";
+  p_default = "fmq/Iq2Dsr_x";
+} xband_fmq_url;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_input;
+
+commentdef {
+  p_header = "FIELD INFORMATION";
+  p_text = "Translate fields from DSR input to UDP output.";
+}
+
+typedef enum {
+  PROD_S_DBMHC,	///< S-band dBm horizontal co-planar
+  PROD_S_DBMVC,	///< S-band dBm vertical co-planar
+  PROD_S_DBZ,   ///< S-band dBz 
+  PROD_S_SNR,   ///< S-band SNR
+  PROD_S_VEL,	///< S-band velocity
+  PROD_S_WIDTH,	///< S-band spectral width
+  PROD_S_RHOHV,	///< S-band rhohv
+  PROD_S_PHIDP,	///< S-band phidp
+  PROD_S_ZDR,	///< S-band zdr
+  PROD_X_DBMHC,	///< X-band dBm horizontal co-planar
+  PROD_X_DBMVX,	///< X-band dBm vertical cross-planar
+  PROD_X_DBZ ,	///< X-band dBz
+  PROD_X_SNR,	///< X-band SNR
+  PROD_X_VEL,	///< X-band velocity
+  PROD_X_WIDTH,	///< X-band spectral width
+  PROD_X_LDR	///< X-band LDR
+} cp2_field_id_t;
+
+typedef struct {
+  cp2_field_id_t field_id;
+  string dsr_name;
+  double missing_val;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    {PROD_S_DBMHC, "DBZ", -120},
+    {PROD_S_DBMVC, "DBZ", -120},
+    {PROD_S_DBZ, "DBZ", -40},
+    {PROD_S_SNR, "DBZ", -30},
+    {PROD_S_VEL, "VEL", -30},
+    {PROD_S_WIDTH, "DBZ", -1},
+    {PROD_S_RHOHV, "DBZ", -1},
+    {PROD_S_PHIDP, "DBZ", -400},
+    {PROD_S_ZDR, "DBZ", -100}
+  };
+  p_descr = "Array of output fields for S band.";
+  p_help = "Associate each desired S-band output field with the DSR field name.";
+} sband_output_fields[];
+
+paramdef struct output_field_t {
+  p_default = {
+    {PROD_X_DBMHC, "DBMHC", -120},
+    {PROD_X_DBMVX, "DBMVX", -120},
+    {PROD_X_DBZ , "DBZ", -40},
+    {PROD_X_SNR, "SNR", -30},
+    {PROD_X_VEL, "VEL", -30},
+    {PROD_X_WIDTH, "WIDTH", -1},
+    {PROD_X_LDR, "LDRH", 30}
+  };
+  p_descr = "Array of X-band output fields.";
+  p_help = "Associate each desired X-band output field with the DSR field name.";
+} xband_output_fields[];
+
+commentdef {
+  p_header = "OUTPUT UDP DATA";
+}
+
+paramdef string {
+  p_descr = "Address for UDP broadcast.";
+  p_help = "UDP packets are broadcast on this address.";
+  p_default = "192.168.1";
+} udp_network;
+
+paramdef int {
+  p_default = 3200;
+  p_descr = "Port for UDP broadcast.";
+} udp_port;
+

@@ -1,0 +1,112 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for MdvMergeClosest
+ *
+ */
+
+commentdef {
+  p_header = "MdvMergeClosest";
+  p_text = "Data from more than one source is read in, and at each point in the grid, the source whose origin is closest to the point that has recent enough data is used. Many assumptions exist:\n1. The inputs must all be the same grid\n2. The grids must be two dimensional\n3. The inputs must all have the merge fields\n4. The data cannot be forecast data\nUsage is\nMdvMergeCloset -params <parmfile>\nor\nMdvMergeClosest -params <parmfile> -interval yyyymmddhhmmss yyyymmddhhmmss";
+}
+
+paramdef boolean
+{
+  p_help = "Debugging";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_help = "Verbose debugging";
+  p_default = false;
+} debug_verbose;
+
+paramdef string
+{
+  p_help = "Process instance";
+  p_default = "default";
+} instance;
+
+paramdef int
+{
+  p_help = "Process registration interval seconds";
+  p_default = 60;
+} register_seconds;
+
+typedef struct
+{
+  string url;
+  double origin_latitude;
+  double origin_longitude;
+} input_t;
+
+
+paramdef struct input_t
+{
+  p_descr = "inputs";
+  p_help = "Inputs that get merged.  Each is a MDV source URL, with a specific latitude/longitude origin";
+  p_default = {};
+} input[];
+
+
+paramdef string
+{
+  p_descr = "The names of the fields to merge";
+  p_default = {};
+} fields[];
+
+paramdef int {
+  p_default = 300;
+  p_min = 1;
+  p_descr = "Triggering Interval - seconds.";
+  p_help = "The interval between trigger events. Time triggers are synchronized to the hour, and occur at constant intervals thereafter.";
+} time_trigger_interval;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time trigger offset - seconds.";
+  p_help = "Time triggers occur on the hour and at constant intervals thereafter until the next hour. This parameters allows you to schedule the trigger to be offset from the anchored time by the specified number of secs. For example, if you set time_trigger_interval to 600 (10 mins) and time_trigger_offset to 420 (7 minutes), the trigger will occur at 7, 17, 27, 37, 47 and 57 mins after the hour.";
+} time_trigger_offset;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Max time diff for searching for files relative to the trigger time - secs.";
+  p_help = "When matching files up with the trigger time, the difference between the trigger time and file time must be less than this margin.";
+} time_trigger_margin;
+
+paramdef double
+{
+  p_descr = "timeout";
+  p_help = "data older than this compared to trigger time is not used. Units=seconds";
+  p_default = 300;
+} timeout_seconds;
+
+paramdef string
+{
+  p_descr = "output url";
+  p_default = "mdvp:://localhost::out";
+} output_url;
+

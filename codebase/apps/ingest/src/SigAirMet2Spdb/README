@@ -1,0 +1,75 @@
+Title:	Running the SIGMET/AIRMET decoder
+Date:	08-JUL-2003
+================================================================================
+The SIGMET/AIRMET decoder has been run on 2 different input data streams to
+date.
+
+1) LDM data from the /weather/ddp cross-mount on a RAP-located host in the
+   Oceanic Weather project.
+
+2) GTS data from the CAA serial data feed in the Taiwan project
+
+
+
+LDM
+---
+If you use the LDM data feed, which does not have a _latest_data_info
+mechanism, the SIGMETS are read from hourly SIGMET files and the
+decoder is run in "archive" mode to read an input data file and
+exit. See the code example below for the start script used to run the
+decoder. This script is run hourly from cron.
+
+
+GTS
+---
+If you use a data feed with the _latest_data_info mechanism available,
+you can run the decoder under the auto restarter and have it poll for
+data.
+
+
+Station list files
+------------------
+Station list files and FIR boundary files for use by the decoder can 
+be found in CVS under:
+
+   projects/aoaws/rte/sigairmet/params/fir_list.txt and station_location.txt
+
+
+
+Example start script to run SigAirMet2Spdb on the LDM data feed
+---------------------------------------------------------------
+#! /bin/csh
+#
+# This script should NOT be run under the proc_list and the auto_restart
+# it needs to be run under cron on approximately an hourly basis.
+# The reason for this is that the LDM data does NOT have _latest_data_info
+# files. This script needs to run once and exit.
+
+set Now=`date -u`
+set DataDir=/weather/ddp
+set Date=`date -u --date "1 hour ago" '+%Y%m%d'`
+set File=`date -u --date "1 hour ago" '+%Y%m%d%H'`
+set FileName="${DataDir}/${Date}/${File}.SIGMETS"
+
+set PrevDate=`date -u --date "2 hours ago" '+%Y%m%d'`
+set PrevFile=`date -u --date "2 hours ago" '+%Y%m%d%H'`
+set PrevFileName="${DataDir}/${PrevDate}/${PrevFile}.SIGMETS"
+
+set OutLog="LogFilter -d $ERRORS_LOG_DIR -p SigAirMet2Spdb -i gomex"
+
+# Kill the ingest if it is still running from the previous hour. 
+# Since we are running this from cron, may not know if it is hung
+
+running "SigAirMet2Spdb -params $OCND_INGEST_HOME/params/SigAirMet2Spdb.gomex -d  -f $PrevFileName"
+if ($status == 0) then
+    snuff "SigAirMet2Spdb -params $OCND_INGEST_HOME/params/SigAirMet2Spdb.gomex -d -f $PrevFileName"
+endif
+
+# Run the ingest
+
+if (-e $FileName) then
+    SigAirMet2Spdb -params $OCND_INGEST_HOME/params/SigAirMet2Spdb.gomex -d -f $
+FileName |& $OutLog
+else
+    echo "${Now}: File does not exist: $FileName" |& $OutLog
+endif

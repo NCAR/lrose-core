@@ -1,0 +1,319 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for NetCDF2Spdb
+ *
+ * Mike Dixon, EOL, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * May 2014
+ */
+
+commentdef {
+  p_header = "NetCDF2Spdb reads met data in netCDF, interprets it and writes it to SPDB";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "\tREALTIME: files are read and processed as they arrive in the input_dir. \n\tARCHIVE: files between the start and end times are read in and processed. \n\tFILELIST: files listed on the command line are read in and processed.";
+} mode;
+
+paramdef string {
+  p_default = "./raw/acdata";
+  p_descr = "Input directory";
+  p_help = "Directory where input data files can be found.";
+} input_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Process the latest available file only.";
+  p_help = "REALTIME mode only, and if latest_data_info_avail is FALSE.";
+} latest_file_only;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, only checks input_dir for subdirs of the form YYYYMMDD";
+  p_help = "Only in REALTIME mode with latest_data_info_avail FALSE.";
+} strict_dir_scan;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input filename match sub-string";
+  p_help = "If not empty, file names must contain this string to be processed";
+} file_name_substr;
+
+commentdef {
+  p_header = "NETCDF fields details";
+}
+
+paramdef string {
+  p_default = "time";
+  p_descr = "Name of time variable";
+  p_help = "If possible, get the units from the attribute.";
+} time_var_name;
+
+paramdef string {
+  p_default = "latitude";
+  p_descr = "Name of latitude variable.";
+  p_help = "Set to empty string if not available. Assumes units are deg N.";
+} latitude_var_name;
+
+paramdef string {
+  p_default = "longitude";
+  p_descr = "Name of longitude variable";
+  p_help = "Set to empty string if not available. Assumes units are deg E.";
+} longitude_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of altitude variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} altitude_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of temperature variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} pressure_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of temperature variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} temp_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of dewpt variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} dewpt_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of relative himidity variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} rh_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of mixing ratio variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} mixing_ratio_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of liquid water content variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} liquid_water_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of wind direction variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} wind_dirn_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of wind speed variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} wind_speed_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of wind gust speed variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} wind_gust_var_name;
+
+commentdef {
+  p_header = "AIRCRAFT data fields";
+}
+
+paramdef string {
+  p_default = "N2UW";
+  p_descr = "Aircraft callsign";
+} aircraft_callsign;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of true airspeed variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} true_airspeed_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of ground speed variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} ground_speed_var_name;
+
+commentdef {
+  p_header = "SURFACE data fields";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of observation station";
+} station_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of precip rate variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} precip_rate_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of precip accumulation variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} precip_accum_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of visibility variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} visibility_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of ceiling variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} ceiling_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of runway visual range variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} rvr_var_name;
+
+commentdef {
+  p_header = "LIGHTNING data fields";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of ltg amplitude variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} ltg_amplitude_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of ltg ellipse angle variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} ltg_ellipse_angle_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of semi-major axis variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} ltg_semi_major_axis_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of eccentricity axis variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} ltg_eccentricity_var_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of ltg chisq variable";
+  p_help = "Set to empty string if not available. If possible, get the units from the attribute.";
+} ltg_chisq_var_name;
+
+commentdef {
+  p_header = "OUTPUT FORMAT STRUCTURE";
+  p_text = "Specify the type of storage structure to be used in SPDB.";
+}
+
+typedef enum {
+  SURFACE,
+  SOUNDING,
+  LIGHTNING,
+  AIRCRAFT,
+  GEN_PT
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = AIRCRAFT;
+  p_descr = "Output data format structure.";
+  p_help = "Only AIRCRAFT supported so far.";
+} output_format;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "/tmp/spdb/ac_posn";
+  p_descr = "Output SPDB URL.";
+  p_help = "This is the path to the output data directory. You can use full URL sytnax and optionally put the data to a remote machine.";
+} output_url;
+
+paramdef int {
+  p_default = 120;
+  p_min = 1;
+  p_descr = "Valid period (secs)";
+  p_help = "Time period over which the data is considered valid.";
+} valid_period_secs;
+

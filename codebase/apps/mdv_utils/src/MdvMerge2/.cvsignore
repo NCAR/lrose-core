@@ -1,0 +1,6 @@
+.deps
+MdvMerge2
+__makefile.template
+makefile
+makefile.am
+makefile.in

@@ -1,0 +1,92 @@
+/****************************************************
+ * TDRP params for cindex_test
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 2;
+
+/*
+ * Process instance.
+ * The instance of this process, used for reistration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Operating mode.
+ * If REALTIME, index time is based on current time. If ARCHIVE,
+ *   index time starts at the given start_time, and increments from
+ *   there.
+ *
+ * Type: enum
+ * Default: REALTIME 
+ * Legal values: REALTIME, ARCHIVE.
+ */
+mode = REALTIME;
+
+/*
+ * Update interval (secs).
+ *
+ * Type: long
+ * Default: 60 
+ * Min value: 1 
+ */
+update_interval = 2;
+
+/*
+ * Data directory.
+ * Directory to which index file will be written.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+data_dir = "data_dir";
+
+/*
+ * Extension for data files.
+ * In this test there are no data files, but we need the extension
+ *   for filling the index.
+ *
+ * Type: string
+ * Default: "test" 
+ */
+file_extension = "test";
+
+/*
+ * Start time.
+ * In ARCHIVE mode the time starts at this time and increments.
+ *
+ * Type: struct
+ */
+start_time = {
+  0, /* year:long */
+  0, /* month:long */
+  0, /* day:long */
+  0, /* hour:long */
+  0, /* min:long */
+  0  /* sec:long */
+};
+
+

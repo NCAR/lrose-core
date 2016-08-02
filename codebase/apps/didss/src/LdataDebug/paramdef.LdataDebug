@@ -1,0 +1,36 @@
+/*********************************************************
+ * parameter definitions for LdataDebug
+ *
+ */
+
+commentdef
+{
+  p_header = "LdataDebug program";
+  p_text = "LdataDebug watches a latest data info file using the DsLdataInfo "
+           "class.  "
+           "Whenever the latest data info file changes (as indicated by this "
+           "object), a message is printed to stderr with the new data time.";
+}
+
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "test";
+} instance;
+
+commentdef
+{
+  p_header = "Input Data parameters";
+} 
+
+paramdef string
+{
+  p_descr = "Ldata info file URL";
+  p_default = {"mdvp:://localhost::mdv/data"};
+} input_url;

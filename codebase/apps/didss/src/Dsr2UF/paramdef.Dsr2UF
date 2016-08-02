@@ -1,0 +1,145 @@
+/**********************************************************
+ * paramdef for Dsr2UF
+ *
+ * Mike Dixon
+ *
+ * May 1998
+ */
+
+commentdef {
+  p_header = "Dsr2UF reads radar beam-by-beam data from a DSR-format FMQ and saves the data out in Universal Format files.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_descr = "Input URL for DsRadar data via FMQ";
+  p_default = "fmqp:://localhost::./fmq.dsRadar";
+} input_fmq_url;
+
+commentdef {
+  p_header = "RADAR PROCESSING OPTIONS";
+}
+
+paramdef boolean {
+  p_descr = "Option to override Dsr radar location.";
+  p_help = "If TRUE, the UF output will use location information specified in 'radar_location'.";
+  p_default = FALSE;
+} override_radar_location;
+ 
+paramdef struct radar_location_t {
+  p_descr = ".";
+  p_help = "The radar_location need only be set if 'override_radar_location' is TRUE.";
+  p_field_type = { double, double, double };
+  p_field_name = { latitude, longitude, altitude };
+} radar_location;
+
+typedef enum {
+  END_OF_VOL_FLAG, LAST_TILT_IN_VOL
+} end_of_vol_decision_t;
+
+paramdef enum end_of_vol_decision_t {
+  p_default = END_OF_VOL_FLAG;
+  p_descr = "Decision type for end-of-volume.";
+  p_help = "If END_OF_VOL_FLAG, the end-of-volume flag in the data will be used to trigger the end of volume. If LAST_TILT_IN_VOL, the end of the tilt number given by 'last_tilt_in_vol' will be used  to trigger the end-of-volume.";
+} end_of_vol_decision;
+
+paramdef long {
+  p_descr = "The tilt number used to end the volume.";
+  p_help = "Only applies if 'end_of_vol_decision' is set to LAST_TILT_IN_VOL.";
+  p_default = 0;
+} last_tilt_in_vol;
+	
+paramdef boolean {
+  p_descr = "Option to remove out beams in which the antenna is in transition.";
+  p_help = "When the antenna is changing from one volume scan to the next, the antenna is sometimes in a transtion state. If this is set, the transition beams are not included in the output files.";
+  p_default = TRUE;
+} remove_antenna_transitions;
+ 
+commentdef {
+  p_header = "DATA CENSORING OPTIONS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to censor fields based on SNR values.";
+  p_help = "If TRUE, all fields at a gate will be set to missing if the SNR at that gate is less than the snr_threshold";
+} censor_on_snr;
+ 
+paramdef double {
+  p_default = 0;
+  p_descr = "SNR threshold for censoring (dB).";
+  p_help = "See censor_on_snr.";
+} snr_threshold;
+	
+paramdef string {
+  p_default = "SNR";
+  p_descr = "Name of SNR field in input FMQ";
+  p_help = "This is used for censoring. If the field does not exist, censoring will not be performed.";
+} input_snr_field_name;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+typedef struct {
+  string dsr_name;
+  string uf_name;
+  int scale;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    {"DBZ", "DZ", 100 },
+    {"VEL", "VR", 100 }
+  };
+  p_descr = "Array of output field names.";
+  p_help = "The program will only output these fields.\n\nThe 'dsr_name' is the field name in the dsr data.\nThe 'uf_name' is the name in the output file. UF names are limited to 2 characters. Only the first 2 characters of the UF name will be used.\n\nThe UF field headers are set differently for velocity fields. Velocity fields should be set to start with the character V. For example, the nyquist velocity shares a spot with the radar constant. So nyquist is included with velocity fields, while the radar constant is included with non-velocity fields.\n\nThe 'scale' value is used to compute the integer output values for each field. UF files are stored as signed 2-byte integers. The real values of the field are scaled by this value.\n\nThe equation used for calculating the stored values is:\n\n\tscaled-integer = real-value * scale.\n\nThe equation used for interpreting the stored values is:\n\n\treal-value = scaled-integer / scale.\n\nIf 'scale' is set to a negative number, the scale is computed dynamically from the data in the field record.";
+} output_fields[];
+
+paramdef string {
+  p_descr = "Dir of output UF files.";
+  p_help = "This directory must exist.";
+  p_default = "./output";
+} output_uf_dir;
+
+paramdef string {
+  p_default = "Radar_";
+  p_descr = "Prefix to the file name.";
+} output_file_prefix;
+
+paramdef string {
+  p_default = "uf";
+  p_descr = "Extension to the file name.";
+} output_file_ext;
+
+paramdef boolean {
+ p_default = FALSE;
+ p_descr = "Option to output data in little-endian byte ordering.";
+ p_help = "If FALSE, data will be output in big-endian byte ordering - also known as network-byte-order.";
+} output_little_endian;
+
+paramdef boolean {
+ p_default = FALSE;
+ p_descr = "Option to skip beams in which all data is missing.";
+ p_help = "If TRUE, the application will not write beams in which all of the data are missing.";
+} skip_all_missing;
+

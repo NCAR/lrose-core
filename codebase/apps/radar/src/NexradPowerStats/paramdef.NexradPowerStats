@@ -1,0 +1,54 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for NexradPowerStats
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// June 2011
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "NexradPowerStats analyses NEXRAD power files.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "ANALYSIS";
+};
+
+paramdef int {
+  p_default = "90";
+  p_descr = "Max time diff for computing power diff (secs).";
+  p_help = "The H and V powers must be sensed within this time period for the difference to be considered valid.";
+} max_time_diff_for_power_diff;
+
+commentdef {
+  p_header = "OUTPUT RESULTS";
+};
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output files.";
+  p_help = "The results will be written to sub-directories named from the cal time.";
+} output_dir;
+

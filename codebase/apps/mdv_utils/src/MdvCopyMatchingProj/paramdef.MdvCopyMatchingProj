@@ -1,0 +1,168 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvCopyMatchingProj
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvCopyMatchingProj
+ */
+
+commentdef
+{
+  p_header = "MdvCopyMatchingProj";
+  p_text = "This program looks at the data in the input URL and copies any "
+           "files matching the given projection to the output URL.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tIn LATEST_DATA mode, the program will process new files as they "
+           "appear in the input_url.\n"
+           "\tIn TIME_LIST mode, the program will process all of the files "
+           "valid at times between the start and end time specified on the "
+           "command line.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "The input URL.";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef int
+{
+  p_descr = "Maximum age of a file, in seconds, for it to be processed in "
+            "real-time.";
+  p_help = "Only used if trigger_mode is set to LATEST_DATA.";
+  p_default = 300;
+} max_valid_secs;
+
+paramdef string
+{
+  p_descr = "Field name";
+  p_help = "The name of the field to look for in the input file. "
+           "If this field exists in the file and has the given projection, "
+           "the file will be written to the output URL.";
+  p_default = "DBZ_F";
+} field_name;
+
+paramdef boolean
+{
+  p_descr = "If set to true, only the indicated field will be included "
+            "in the output file.";
+  p_default = false;
+} only_write_specified_field;
+
+typedef enum
+{
+  PROJ_POLAR_RADAR
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  int nx;
+  int ny;
+  double dx;
+  double dy;
+  double minx;
+  double miny;
+  double origin_lat;
+  double origin_lon;
+} proj_t;
+
+paramdef struct proj_t
+{
+  p_descr = "The required projection for the data";
+  p_default = { PROJ_POLAR_RADAR,
+                996, 480,
+                0.15, 0.75,
+                0.15, 0.0,
+                22.526699, 120.433502 };
+} proj;
+
+paramdef string
+{
+  p_descr = "The output URL.";
+  p_default = "mdvp:://localhost::mdv/output";
+} output_url;

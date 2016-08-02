@@ -1,0 +1,6 @@
+.deps
+CalCompute
+__makefile.template
+makefile
+makefile.am
+makefile.in

@@ -1,0 +1,394 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions TsRefract2Dsr
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// April 2006
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsRefract2Dsr reads time-series data in Sigmet TsArchive format, computes the basic moments and refractivity quantities, and writes the results into a DsRadar FMQ.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, SIMULATE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.";
+} mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to check for dual polarization alternating mode.";
+  p_help = "If true, a check will be made on the H/V flag in the time series data, to see if alternating mode is in operation. If so, the moments will be computed accordingly.";
+} check_for_dual_pol_alternating_mode;
+
+commentdef {
+  p_header = "TIME-SERIES FILE DATA INPUT";
+};
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "RADAR PARAMS";
+  p_text = "If any of the params are set in the input data files, the values in those params will be taken from the input data stream rather than from the parameter file."; 
+};
+
+typedef struct {
+
+  double altitude;           // km
+  double latitude;           // degrees
+  double longitude;          // degrees
+  double horiz_beam_width;   // half-power beam width - degrees
+  double vert_beam_width;    // half-power beam width - degrees
+  double radar_constant;     // dB
+  double xmit_peak_pwr;      // watts
+  double receiver_mds;       // dBm
+  double receiver_gain;      // dB
+  double antenna_gain;       // dB
+  double system_gain;        // dB
+  
+} radar_params_t;
+
+paramdef struct radar_params_t {
+
+  p_descr = "Default radar params. If any of the params are set in the input data files, the values in those params will be taken from the input data stream rather than from the parameter file.";
+
+  p_help = "========== Radar params ==========\n"
+  "\t\n"
+  "altitude: km\n"
+  "latitude: degrees\n"
+  "longitude: degrees\n"
+  "horiz_beam_width: half-power beam width - degrees\n"
+  "vert_beam_width: half-power beam width - degrees\n"
+  "radar_constant: dB\n"
+  "xmit_peak_pwr: watts\n"
+  "receiver_mds: dBm\n"
+  "receiver_gain: dB\n"
+  "antenna_gain: dB\n"
+  "system_gain: dB\n"
+  "\t\n";
+  
+  p_default = { altitude = 1.742,
+                latitude = 39.93208,
+                longitude = -105.18175,
+                horiz_beam_width = 0.91,
+                vert_beam_width = 0.91,
+		radar_constant = 70.1652,
+		xmit_peak_pwr = 8000000,
+		receiver_mds = -113.0,
+		receiver_gain = 46.05,
+		antenna_gain = 45.2,
+		system_gain = 46.05
+  };
+  
+} radar;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Scan type id";
+  p_help = "Unique identifier for scan strategy";
+} scan_type_id;
+
+paramdef string {
+  p_default = "Default";
+  p_descr = "Scan type name";
+  p_help = "Descriptive name for scan strategy";
+} scan_type_name;
+
+paramdef double {
+  p_default = 0.012;
+  p_descr = "Atmospheric attenuation (dB/km).";
+  p_help = "Reflectivity is corrected for this.";
+} atmos_attenuation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to DBZ calibration.";
+  p_help = "DBZ values are corrected by this amount. Used in cases in which the reflectivity calibration values provided in the time series appears to be in error.";
+} dbz_calib_correction;
+
+commentdef {
+  p_header = "MOMENTS COMPUTATIONS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to index the beams to azimuth.";
+  p_help = "If true, moments are computed for IQ series centered around azimuths at a specified spacing.";
+} index_beams_in_azimuth;
+
+paramdef double {
+  p_default = 1.0;
+  p_min = 0.001;
+  p_max = 360.0;
+  p_descr = "Resolution in azimuth for beam indexing.";
+  p_help = "See index_beams_in_azimuth. This is the azimuth resolution for computing the location at which to compute the moments. The azimuths always start at 0.0 and increase at this resolution.";
+} azimuth_resolution;
+
+typedef enum {
+  ALG_PP, ALG_FFT
+} algorithm_t;
+
+paramdef enum algorithm_t {
+  p_default = ALG_FFT;
+  p_descr = "Algorithm to use for computing moments.";
+  p_help = "ALG_PP: pulse-pair. ALG_FFT: spectral processing.";
+} moments_algorithm;
+
+typedef enum {
+  WINDOW_HANNING, WINDOW_BLACKMAN, WINDOW_NONE
+} fft_window_t;
+
+paramdef enum fft_window_t {
+  p_default = WINDOW_HANNING;
+  p_descr = "Window to use for spectral processing.";
+  p_help = "HANNING or BLACKMAN.";
+} fft_window;
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Number of samples (pulses) for computing moments.";
+} n_samples;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Signal-to-noise value for thresholding (dB).";
+  p_help = "This is the signal-to-noise ratio used to thresholding based on the noise.";
+} signal_to_noise_ratio_threshold;
+
+paramdef double {
+  p_default = -57.8;
+  p_descr = "Correction factor for dbm (dB).";
+  p_help = "This is applied after computing dbm from I/Q.";
+} dbm_correction;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to change sign on AIQ field.";
+  p_help = "Set this to true to change the sign of the computed AIQ field.";
+} change_aiq_sign;
+
+commentdef {
+  p_header = "OUTPUT FIELDS";
+  p_text = "Only the following fields will included in the output. If the field is not in the input file, it will be left out.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output SNR in dB.";
+} output_snr;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output power in dBm.";
+} output_power_dbm;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output DBZ.";
+} output_dbz;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output radial VEL (m/s).";
+} output_velocity;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output spectral width (m/s).";
+} output_width;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output AIQ field - for refractivity.";
+  p_help = "AIQ is the mean absolute phase.";
+} output_aiq;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output NIQ fields - for refractivity.";
+  p_help = "NIQ is the mean power.";
+} output_niq;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output average I field - for refractivity.";
+} output_mean_i;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output average Q field - for refractivity.";
+} output_mean_q;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output AIQ field - for refractivity.";
+  p_help = "AIQ is the mean absolute phase.";
+} output_aiq_vpol;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output NIQ fields - for refractivity.";
+  p_help = "NIQ is the mean power.";
+} output_niq_vpol;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output average I field - for refractivity.";
+} output_mean_i_vpol;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output average Q field - for refractivity.";
+} output_mean_q_vpol;
+
+commentdef {
+  p_header = "OUTPUT DsRadar FMQ";
+};
+
+paramdef string {
+  p_default = "fmqp:://localhost::fmq/refract";
+  p_descr = "Output URL for DsRadar data via FMQ";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 50000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+
+paramdef int {
+  p_default = 25;
+  p_descr = "Wait per beam (milli-secs)";
+  p_help = "ARCHIVE and SIMULATE modes only.";
+} beam_wait_msecs;
+
+commentdef {
+  p_header = "SWEEP INFORMATION";
+  p_text = "Option to read volume and tilt numbers from sweep information stored in SPDB. The program will wait until it has sweep information for the current beam before writing it out. The sweep information is written at the end of the sweep.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read sweep info from SPDB.";
+} read_sweep_info_from_spdb;
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/sweepinfo/viraq";
+  p_descr = "URL for sweep information";
+} sweep_url;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Time margin for searching for relevant sweep info - secs.";
+  p_help = "This is the time margin, on either side of the beam time, to search for sweep information. It should be at least as long as the maximum sweep duratation.";
+} sweep_search_margin;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Wait time for sweep info before giving up - secs.";
+  p_help = "If no relevant sweep information is found after waiting this number of secs, the program guesses at the volume and tilt numbers.";
+} sweep_info_wait_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Turn on strict time checking for sweep info.";
+  p_help = "If strict mode is on, then beams between sweeps will be marked with a tilt number of -1. In non-strict mode, the beams between sweeps will be assigned to the following sweep.";
+} strict_sweep_times;
+
+commentdef {
+  p_header = "END OF VOLUME FLAG";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to set the end of vol flag based on change in elevation angle.";
+  p_help = "If true, the program will look for changes in antenna angle to compute the end of volume.";
+} set_end_of_vol_from_elev_change;
+
+paramdef double {
+  p_default = 1.5;
+  p_min = 0.1;
+  p_descr = "Change in elevation which triggers and end of volume.";
+  p_help = "If the elevation angle changes by this amount, and end of volume flag will be set.";
+} elev_change_for_end_of_vol;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flag to indicate that elevation angles increase in the volume.";
+  p_help = "If the volume starts at the top, i.e. elevations decrease during the volume, set this to FALSE.";
+} vol_starts_at_bottom;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Min number of beams per volume.";
+  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume. Only used for set_end_of_vol_from_elev_angle.";
+} min_beams_per_vol;
+
+
+

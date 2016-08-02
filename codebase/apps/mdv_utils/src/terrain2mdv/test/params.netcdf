@@ -1,0 +1,12 @@
+
+proj = LATLON;
+
+output_type = NETCDF;
+
+map_south = 32.43;
+map_north = 32.53;
+map_west = -107.6;
+map_east = -107.38;
+
+outfname = "test.cdf";
+output_dir = ".";

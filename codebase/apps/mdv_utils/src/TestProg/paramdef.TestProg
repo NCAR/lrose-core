@@ -1,0 +1,77 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+paramdef string {
+  p_descr = "Input URL";
+  p_help = "Set to the URL for the input MDV files";
+  p_default = "./";
+} InMdvURL;
+
+paramdef string {
+  p_descr = "Output netCDF directory";
+  p_help = "Set to the name of the output netCDF directory";
+  p_default = "./";
+} OutDir;
+
+paramdef string {
+  p_descr = "Base NetCDF filename, with or without .nc extension";
+  p_help = "Output NetCDF files will have the date/time pre-pended";
+  p_default = "RapData";
+} NetCDF_FileName;
+
+paramdef string {
+  p_descr = "Instance to check into procmap with";
+  p_help = "Set as appropriate";
+  p_default = "primary";
+} Instance;
+
+paramdef boolean {
+  p_descr = "Set to TRUE to convert all fields in MDV file";
+  p_help = "If FALSE then only fields in FieldNames are converted";
+  p_default = TRUE;
+} DoAllFields;
+
+paramdef string {
+  p_descr = "Names of desired fields in MDV file";
+  p_help = "Only used if DoAllFields is FALSE";
+  p_default = { "Pressure", "Temperature" };
+} FieldNames[];
+
+
+paramdef int {
+  p_descr = "Maximum age for file to be considered valid";
+  p_help = "In realtime mode only";
+  p_default = 3600;
+} RealtimeMaxAge;
+
+paramdef boolean {
+  p_descr = "Set to TRUE to run once and exit";
+  p_help = "Set to TRUE in Realtime only";
+  p_default = FALSE;
+} Once;
+
+
+
+
+

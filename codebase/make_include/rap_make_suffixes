@@ -1,0 +1,78 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+.SUFFIXES: .c .cc .cpp .cxx .f .f90 .f95 .F .F90 .l .y .o .ln .java .class
+
+.c.o:
+	$(_CC) $(CFLAGS) $(DBUG_OPT_FLAGS) -c $(INCLUDES) $<
+
+.c.ln:
+	$(LINT) $(LINTFLAGS) -c $(INCLUDES) $< 2>&1 | $(LINTFILTER)
+
+.f.o:
+	$(_FC) $(FFLAGS) $(DBUG_OPT_FLAGS) -c $(INCLUDES) $<
+
+.F.o:
+	$(_FC) $(FFLAGS) $(DBUG_OPT_FLAGS) -c $(INCLUDES) $<
+
+.f90.o:
+	$(_F90C) $(F90FLAGS) $(DBUG_OPT_FLAGS) -c $(INCLUDES) $<
+
+.F90.o:
+	$(_F90C) $(F90FLAGS) $(DBUG_OPT_FLAGS) -c $(INCLUDES) $<
+
+.f95.o:
+	$(_F95C) $(F95FLAGS) $(DBUG_OPT_FLAGS) -c $(INCLUDES) $<
+
+.cc.o:
+	$(_CPPC) $(CPPC_CFLAGS) $(DBUG_OPT_FLAGS) -c $(CPPC_INCLUDES) $<
+
+.cpp.o:
+	$(_CPPC) $(CPPC_CFLAGS) $(DBUG_OPT_FLAGS) -c $(CPPC_INCLUDES) $<
+
+.cxx.o:
+	$(_CPPC) $(CPPC_CFLAGS) $(DBUG_OPT_FLAGS) -c $(CPPC_INCLUDES) $<
+
+.cc.ln:
+	$(LINT) $(LINTFLAGS) -c $(INCLUDES) $< 2>&1 | $(LINTFILTER)
+
+.l.o:
+	$(LEX.l) $< > $*.c
+	$(_CC) $(CFLAGS) $(INCLUDES) -c -o $@ $*.c
+
+.l.cc:
+	$(_LEX) $(LEXFLAGS) -o$@ $<
+
+.y.o:
+	$(YACC.y) $(YFLAGS) $<
+	$(_CC) $(CFLAGS) $(INCLUDES) -c -o $@ y.tab.c
+
+.y.cc:
+	$(_YACC) $(YACCFLAGS) -o $(YACC_TEMPNAME).cc $<
+	$(MV) $(YACC_TEMPNAME).hh $(YACC_INC_DEST)/$(@:.cc=.$(YACC_SUFFIX)) 
+	$(MV) $(YACC_TEMPNAME).cc ./$@
+	$(RM) $(YACC_TEMPNAME).output
+
+#.java.class:
+#	$(JAVAC) $(JAVA_FLAGS) -classpath $(JAVA_CLASSPATH) $<
+#
+
+.java.class:
+	$(JAVAC) $(JAVA_FLAGS) $<
+
+# note: see dix_make_macros for definition of EDIT_RPCGEN
+
+%.h: %.x
+	rpcgen -h -o $@ $<
+	rpcgen -c -o `basename $@ .h`.c $<
+	$(EDIT_RPCGEN) $@ `basename $@ .h`.c
+	$(RAP_MAKE_BIN_DIR)/fix_xdr.pl < $@ > $@.new 
+	mv $@.new $@
+	$(RAP_MAKE_BIN_DIR)/install_header.pl $@ $(TARGET_FILE)	
+
+

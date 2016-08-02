@@ -1,0 +1,105 @@
+#!/bin/sh --
+# make_jar: creates a compound jar file from java class files and the contents
+# of other jar files
+# Arnaud Dumont <dumont@ncar.ucar.edu>
+#
+# Usage: make_jar [-h] javaRoot outputFileDir input1 [input2] [input3]...
+#        where:  javaRoot       the top of the java packages directory
+#                outputFileDir  the directory in which to look for input files
+#                                 and to place the jar file of the same name
+#                input1..n      the java class files, resources, or other jar
+#                                 files to include in this jar
+#
+# Tested under: Debian Linux potato
+
+PATH=/bin:/usr/bin:/usr/ucb
+
+prog=`basename $0`
+usage="Usage: $prog [-h] javaRoot outputFileDir input1 [input2] [input3]..."
+jar=jar
+
+# Process command line.
+while getopts ls: opt
+do
+    case $opt in
+        h)  # Show help info
+            echo $usage >&2
+            exit 0;
+            ;;
+        \?) echo $usage >&2
+            exit 1
+            ;;
+        esac
+done
+shift `expr $OPTIND - 1`
+
+# If there are no args, exit
+if [ $# -eq 0 ]; then
+    echo $usage >&2
+    exit 1
+fi
+
+# Loop over each file name provided as an argument
+for file in "$@"
+do
+    # The first file name is the path to the root of the java package tree
+    if [ ! "$javaRoot" ]; then
+        if ! test -d $file; then
+            echo "Invalid javaRoot directory:$file"
+            echo $usage
+            exit 0
+        fi
+        javaRoot=$file
+        echo "Changing directory to java root:$javaRoot"
+        cd $javaRoot
+        continue;
+    # The second file name is the directory whose jar to create
+    elif [ ! "$jarFile" ]; then
+        if ! test -d $file; then
+            echo "Invalid output directory:$file"
+            echo $usage
+            exit 0
+        fi
+        currDir=$file
+        jarFile="$file/"`echo $file | awk -F / '{OFS="";print $NF,".jar"}'`
+        echo "Creating jar file: $jarFile..."        
+        continue
+    fi
+
+    # Strip off any leading/trailing slashes
+    file=`echo $file | \
+        awk '{if($0 ~ /^\//) {print substr($0,2)} else {print $0}}'`
+    file=`echo $file | \
+        awk '{if($0 ~ /\/$/) {print substr($0,0,length($0))} else {print $0}}'`
+    # Ignore any bogus references to "./" inserted by make and expanded by sh
+    if test -z $file || test $file -ef $currDir; then
+        continue
+    fi
+
+    # If this filename is a common file, include it in the archive
+    if test -f $file; then
+        fileList="$fileList $file"
+    # If this filename is a directory containing an archive
+    elif test -d $file; then
+        # get the archive name (the directory name plus ".jar")
+        archive=`echo $file | awk -F / '{OFS="";print $0,"/",$NF,".jar"}'`
+        if test -f $archive; then
+            # and include the archives files in the new archive
+            echo "Including archive: $archive"
+            jarFiles=`$jar tvf $archive 2>&1 | \
+              awk '/[\._a-zA-Z0-9]+$/ && $0 !~ /MANIFEST/ {ORS=" ";print $NF}'`
+            fileList="$fileList $jarFiles"
+        else
+            echo "Archive: $archive does not exist!"
+        fi
+    # If this filename is neither a common file or directory, ignore it
+    else
+        continue
+    fi
+done
+
+# make the jar file
+$jar cvf $jarFile $fileList
+
+exit 0
+

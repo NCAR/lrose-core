@@ -1,0 +1,256 @@
+/**********************************************************
+ * paramdef.ShearForLeadingEdge
+ *
+ * This file contains the TDRP parameter definitions for
+ * ShearForLeadingEdge.
+ */
+
+
+commentdef
+{
+  p_header = "ShearForLeadingEdge";
+  p_text = "This program estimates the vertical shear component for "
+           "points along the leading edge of a storm using the algorithm "
+           "created by Stan Trier.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "URL for triggering in latest data mode";
+  p_default = "mdvp:://localhost::mdv/derived_ruc";
+} latest_data_trigger;
+
+typedef struct
+{
+  string url;
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "mdvp:://localhost::mdv/derived_ruc",
+                 "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Leading edge database URL";
+  p_default = "spdbp:://localhost::spdb/leading_edge";
+} leading_edge_url;
+
+typedef struct
+{
+  string url;
+  string field_name;
+  int field_num;
+} input_field_t;
+
+paramdef struct input_field_t
+{
+  p_descr = "Information describing the U wind component field";
+  p_help = "\turl - URL for MDV file containing the field.\n"
+           "\tfield_name - Exact name of field in the MDV file. "
+           "If set to \"\", field_num is used instead.\n"
+           "\tfield_num - Number of field (0-based) in the MDV file.\n"
+           "Note that the projections for the U, V and CAPE fields in "
+           "the input files must match exactly.\n";
+  p_default = { "mdvp:://localhost::mdv/ruc", "UGRD", 3 };
+} u_field_info;
+
+paramdef struct input_field_t
+{
+  p_descr = "Information describing the V wind component field";
+  p_help = "\turl - URL for MDV file containing the field.\n"
+           "\tfield_name - Exact name of field in the MDV file. "
+           "If set to \"\", field_num is used instead.\n"
+           "\tfield_num - Number of field (0-based) in the MDV file.\n"
+           "Note that the projections for the U, V and CAPE fields in "
+           "the input files must match exactly.\n";
+  p_default = { "mdvp:://localhost::mdv/ruc", "VGRD", 4 };
+} v_field_info;
+
+paramdef struct input_field_t
+{
+  p_descr = "Information describing the CAPE field";
+  p_help = "\turl - URL for MDV file containing the field.\n"
+           "\tfield_name - Exact name of field in the MDV file. "
+           "If set to \"\", field_num is used instead.\n"
+           "\tfield_num - Number of field (0-based) in the MDV file.\n"
+           "Note that the projections for the U, V and CAPE fields in "
+           "the input files must match exactly.\n";
+  p_default = { "mdvp:://localhost::mdv/ruc", "CAPE", 0 };
+} cape_field_info;
+
+typedef struct
+{
+  boolean use_level_nums;
+  int min_level_num;
+  int max_level_num;
+  double min_level_value;
+  double max_level_value;
+} level_limits_t;
+
+paramdef struct level_limits_t
+{
+  p_descr = "Level limits for the incoming RUC data fields";
+  p_help = "\tuse_level_nums - If true, min_level_num and max_level_num "
+           "are used. "
+           "If false, min_level_value and max_level_value are used.\n"
+           "\tmin_level_num - Minimum level number (0-based) to use from "
+           "the RUC input datasets.\n"
+           "\tmax_level_num - Maximum level number (0-based) to use from "
+           "the RUC input datasets.\n"
+           "\tmin_level_value - Height of lowest level of data to use from "
+           "the RUC input datasets. "
+           "This value must be specifed in the units used in the MDV files.\n"
+           "\tmax_level_value - Height of highest level of data to use from "
+           "the RUC input datasets. "
+           "This value must be specifed in the units used in the MDV files.\n";
+  p_default = { false, 0, 10, 1000.0, 600.0 };
+} input_level_limits;
+
+paramdef long
+{
+  p_descr = "Maximum input valid age in seconds";
+  p_help = "Once the algorithm is triggered, it will not use any input data "
+           "older than this value.";
+  p_default = 1800;
+} max_input_valid_secs;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "spdbp:://localhost::spdb/leading_edge_shear";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef double
+{
+  p_descr = "Maximum edge-normal distance from leading-edge point for "
+            "RUC data to be used in calculation";
+  p_help = "Value given in km.";
+  p_default = 100.0;
+} max_edge_normal_distance;
+
+paramdef double
+{
+  p_descr = "Maximum edge-parallel distance from leading-edge point for "
+            "RUC data to be used in calculation";
+  p_help = "Value given in km.";
+  p_default = 50.0;
+} max_edge_parallel_distance;
+
+typedef struct
+{
+  boolean use_num_levels;
+  int num_levels;
+  double level_depth;
+} level_depth_t;
+
+paramdef struct level_depth_t
+{
+  p_descr = "Depth of vertical shear layer";
+  p_help = "\tuse_num_levels - If true, num_levels is used. "
+           "If false, level_depth is used.\n"
+           "\tnum_levels - Absolute number of levels to use for vertical "
+           "shear depth.\n"
+           "\tlevel_depth - Level depth specified in the units used for "
+           "the vertical levels in the underlying MDV files.\n";
+  p_default = { true, 9, 200.0 };
+} vertical_shear_depth;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to print warning message when CAPE "
+            "value is missing.";
+  p_default = false;
+} print_missing_value_message;

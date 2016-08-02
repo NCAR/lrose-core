@@ -1,0 +1,180 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvFlat2Fcst
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvFlat2Fcst
+ */
+
+commentdef
+{
+  p_header = "MdvFlat2Fcst";
+  p_text = "This program takes fields from multiple flat MDV URLs and "
+           "combines them into a single forecast directory structure.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  REALTIME,
+  ARCHIVE
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tREALTIME - The program watches the latest data files for all "
+           "of the input URLs specified in the input_fcsts parameter and "
+           "triggers whenever a new file is received on any of the URLs.\n"
+           "\tARCHIVE - The program is triggered for each of the files in "
+           "each of the input URLs specified in the input_fcsts parameter "
+           "whose data time is between the times specified in the time_list "
+           "parameter.\n"
+           "When the program is triggered, it reads the input dataset that "
+           "triggered operations and adds that dataset to the output forecast "
+           "directory.";
+  p_default = "REALTIME";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_t;
+
+paramdef struct time_list_t
+{
+  p_descr = "Trigger information used when using the ARCHIVE trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list;
+
+typedef struct
+{
+  string url;
+  string field_names;
+  int fcst_lead_secs;
+  boolean fcst_stored_by_gen_time;
+} input_fcst_t;
+
+paramdef struct input_fcst_t
+{
+  p_descr = "List of forecasts to include in the output forecast directory";
+  p_help = "\turl - Url for the input files.\n"
+           "\tfield_names - String of input field names to include in the "
+           "output file. "
+           "If a field name has a space in it, replace the space with a "
+           "^ character. "
+           "The field names must be delimited by spaces. "
+           "There must be the same number of names in this list as in the "
+           "fcst_field_names parameter.\n"
+           "\tfcst_lead_secs - The number of seconds of forecast lead time "
+           "that these files represent in the forecast directory.\n"
+           "\tfcst_stored_by_gen_time - Flag indicating whether the input "
+           "forecast is stored by gen time or by forecast valid time.\n";
+  p_default = { { "mdvp:://localhost::mdv/analysis",
+                  "field1 field2 field3",
+                  0, true },
+                { "mdvp:://localhost::mdv/1hour",
+                  "field1 field2 field3",
+                  3600, true },
+                { "mdvp:://localhost::mdv/2hour",
+                  "field1 field2 field3",
+                  7200, true } };
+} input_fcsts[];
+
+paramdef string
+{
+  p_descr = "The names to use for the output forecast fields.";
+  p_help = "The input field names are changed to these names on output "
+           "so that the naming in the forecast fields is internally "
+           "consistent.";
+  p_default = { "fcst1", "fcst2", "fcst3" };
+} fcst_field_names[];
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/output";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};

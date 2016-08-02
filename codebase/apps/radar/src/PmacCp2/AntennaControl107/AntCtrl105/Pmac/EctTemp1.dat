@@ -1,0 +1,19 @@
+Encoder Table Definitions.
+  Executed - Tue Feb 19 16:05:48 2008
+
+ Entry    Address     Y-Word     Conversion Method  
+----------------------------------------------------
+   1      Y:$000720   $00C000    1/T extension of encoder 1 ($C000)
+   2      Y:$000721   $00C004    1/T extension of encoder 2 ($C004)
+   3      Y:$000722   $35FFD0    Filtered parallel pos of $FFD0 (1st Acc14-J7)
+          Y:$000723   $00FFFF     Bits enabled mask
+          Y:$000724   $000100     Maximum change in cts/cycle
+   4      Y:$000725   $35FFD3    Filtered parallel pos of location Y:$FFD3
+          Y:$000726   $00FFFF     Bits enabled mask
+          Y:$000727   $000100     Maximum change in cts/cycle
+   5      Y:$000728   $00C010    1/T extension of encoder 5 ($C010)
+   6      Y:$000729   $00C014    1/T extension of encoder 6 ($C014)
+   7      Y:$00072A   $00C018    1/T extension of encoder 7 ($C018)
+   8      Y:$00072B   $00C01C    1/T extension of encoder 8 ($C01C)
+   9      Y:$00072C   $400723    Timebase from converted location $0723
+          Y:$00072D   $000295     Timebase scale factor

@@ -1,0 +1,99 @@
+#!/bin/csh
+# 
+# Name: make_unix_cdrom
+#
+# Function: A simple script to simplify the making of CR-ROM's
+#
+# Author: F. Hage 1998
+#
+# Usage: make_unix_cdrom dir-with-files
+#
+#        Note: The directory you pass in to this script will
+#              not be written to the CD, the contents of that
+#              directory will be.
+#
+# Dependencies: (1) You must be on a machine with a CDROM-writer
+#                   on it and it must be in the /etc/fstab
+#               (1) You must be able to write to the current directory
+#               (2) You must edit this script to set the hostname and
+#                   device as follows:
+#
+#   a) Change CDRW_HOST to new host computer name in line 'set
+#   CDRW_HOST="mars"'. 
+#   
+#   b) Change CDRW_DEVICE to settings appropriate for new host computer 
+#   in line 'set CDRW_DEVICE="dev=1,6,0"'. Look at file /proc/scsi/scsi for
+#   the information. /proc/scsi/scsi on mars looks like 
+#
+#Attached devices: 
+#Host: scsi0 Channel: 00 Id: 00 Lun: 00
+#  Vendor: SEAGATE  Model: ST118202LW       Rev: 0004
+#  Type:   Direct-Access                    ANSI SCSI revision: 02
+#Host: scsi0 Channel: 00 Id: 01 Lun: 00
+#  Vendor: SEAGATE  Model: ST118202LW       Rev: 0004
+#  Type:   Direct-Access                    ANSI SCSI revision: 02
+#Host: scsi1 Channel: 00 Id: 05 Lun: 00
+#  Vendor: NEC      Model: CD-ROM DRIVE:466 Rev: 1.06
+#  Type:   CD-ROM                           ANSI SCSI revision: 02
+#Host: scsi1 Channel: 00 Id: 06 Lun: 00
+#  Vendor: YAMAHA   Model: CRW4416S         Rev: 1.0g
+#  Type:   CD-ROM                           ANSI SCSI revision: 02
+#
+#For "dev=1,6,0", the 1 come from the scsi host. In this example, the
+#host is scsi 1. The 6 is for the scsi Id. The 0 is for either channel
+#or lun.
+#
+#====================================================================== 
+#
+# Devices specific to mars
+set CDRW_HOST="mars"
+set CDRW_DEVICE="dev=1,6,0"
+set CDROM_DEVICE="/dev/sr0"
+
+set host=`hostname`
+
+if($host != $CDRW_HOST) then
+   echo "This script works only on $CDRW_HOST"
+     echo "CDRW_DEVICE:  $CDRW_DEVICE"
+     echo "CDROM_DEVICE:  $CDROM_DEVICE"
+    exit
+endif
+
+if( $#argv != 1 ) then
+     echo "Usage: make_unix_cdrom: directory_with_files"
+endif
+
+echo ""
+echo "##############################################################"
+echo "Creating a UNIX Compatible CD from directory $1"
+
+echo "Checking Size of directory $1"
+
+
+set result = `du -s $1  | awk '{print$1}'`
+
+if ($result > 660000) then
+	echo "Data Directories will not fit! Size = $result"
+	exit
+elseif ($result > 650000) then 
+	echo "WARNING Data Directories may not fit! Size = $result"
+else
+        echo "Directories Size:  $result"
+endif
+    
+
+echo "##############################################################"
+echo ""
+
+echo "Informational messages follow. If you have any long file names"
+echo "the software will create a lookup table (Rock Ridge Extensions)"
+echo "DO NOT BE ALARMED at these translation table messages"
+echo ""
+
+echo "The system will take a few seconds to begin writing - be patient"
+sleep 3
+
+echo "##############################################################"
+echo ""
+
+/usr/bin/mkisofs -r $1 | /usr/bin/cdrecord -v $CDRW_DEVICE fs=12m speed=4 -

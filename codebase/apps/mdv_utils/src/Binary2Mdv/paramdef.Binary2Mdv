@@ -1,0 +1,205 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Binary2Mdv
+ *
+ * Dan Megenhardt, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 2004
+ */
+
+paramdef enum debug_t
+{
+  p_options = { DEBUG_OFF,
+                DEBUG_WARNINGS,
+                DEBUG_NORM,
+                DEBUG_EXTRA };
+  p_default = { DEBUG_OFF };
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug_level;
+
+paramdef char* 
+{
+  p_default = { "Test" };
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum mode_t 
+{
+  p_options = { REALTIME,
+                ARCHIVE };
+  p_default = { REALTIME };
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; archive mode runs on file list";
+} run_mode;
+
+paramdef char* 
+{
+  p_descr = "Input file substring";
+  p_default = { "p37cr" };
+} input_file_substring;
+
+paramdef string 
+{
+  p_default = { "." };
+  p_descr = "Input directory";
+  p_help = "Path of input directory - realtime mode only";
+} input_dir;
+
+paramdef string 
+{
+  p_default = { "." };
+  p_descr = "Output url";
+} output_url;
+
+paramdef long
+{
+  p_descr = "file start time offset";
+  p_help = "The number of seconds to be subtracted from the Unisys data time "
+           "to get the MDV file start time.  "
+           "Use a negative value if the start time should be later than the "
+           "data time.";
+  p_default = { 300 };
+} start_time_offset;
+
+paramdef long
+{
+  p_descr = "file centroid time offset";
+  p_help = "The number of seconds to be added to the Unisys data time to get "
+           "the MDV file centroid time.  "
+           "Use a negative number if the file centroid time should precede "
+           "the Unisys data time.";
+  p_default = { 0 };
+} mid_time_offset;
+
+paramdef long
+{
+  p_descr = "file end time offset";
+  p_help = "The number of seconds to be added to the Unisys data time to get "
+           "the MDV file end time.  "
+           "Use a negative number if the file end time should precede the "
+           "Unisys data time.";
+  p_default = { 150 };
+} end_time_offset;
+
+paramdef long 
+{
+  p_min = { 60 };
+  p_default = { 300 };
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_input_data_age;
+
+paramdef long 
+{
+  p_min = { 0 };
+  p_max = { 300 };
+  p_default = { 10 };
+  p_descr = "Delay before processing incoming file (sec)";
+  p_help = "Delay between finding new file and processing it - realtime only (sec)";
+} processing_delay;
+
+paramdef string
+{
+  p_descr = "field name for data -- long form";
+  p_help = "This value is put in the MDV field header.";
+  p_default = { "Refectivity" };
+} data_field_name_long;
+
+paramdef string
+{
+  p_descr = "field name for data -- short form";
+  p_help = "This value is put in the MDV field header.";
+  p_default = { "refl" };
+} data_field_name;
+
+paramdef string
+{
+  p_descr = "data units";
+  p_help = "This value is put in the MDV field header.";
+  p_default = { "dBZ" };
+} data_units;
+
+
+paramdef double
+{
+  p_descr = "Bad data value.";
+  p_help = "Data with this value (BEFORE applying scale and bias) not valid.";
+  p_default = { -99.0 };
+} bad_data_value;
+
+paramdef double
+{
+  p_descr = "Missing data value.";
+  p_help = "Data with this value (BEFORE applying scale and bias) not measured.";
+  p_default = { -98.0 };
+} missing_data_value;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating if data is big endian or little endian";
+  p_help  = "If true, the data is assumed to be big endian";
+  p_default = TRUE;
+} is_bigend;
+
+
+typedef enum
+{
+ PROJ_TYPE_LAT_LON,
+ PROJ_TYPE_FLAT
+}proj_type_t;
+
+typedef struct
+{
+ proj_type_t proj_type;
+ double minx;
+ double miny;
+ double minz;
+ double dx;
+ double dy;
+ double dz;
+ long   nx;
+ long   ny;
+ long   nz;
+ double origin_lat;
+ double origin_lon;
+ double rotation;
+} proj_info_t;
+
+paramdef struct proj_info_t
+{
+  p_descr = "Projection information for data coming in";
+  p_default = { PROJ_TYPE_LAT_LON,-124.995, 32.005, 0.5, .01, .01, 0.5, 1501, 1201, 21, 0.0, 0.0, 0.0  }; 
+} input_proj;
+
+paramdef double
+{
+  p_descr = "Vlevels";
+  p_help = "Vertical levels found in data";
+  p_default = {0.5, 1.0, 1.5, 2.0, 2.5, 3.0};
+} Vlevels[];
+
+

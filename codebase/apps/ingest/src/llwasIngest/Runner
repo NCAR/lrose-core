@@ -1,0 +1,7 @@
+#!/bin/csh
+
+\rm -rf Out
+
+./llwasIngest Locations.dat llwas-000627.txt ./Out
+
+#

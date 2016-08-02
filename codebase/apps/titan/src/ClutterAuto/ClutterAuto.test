@@ -1,0 +1,202 @@
+/**********************************************************************
+ * TDRP params for ClutterAuto
+ **********************************************************************/
+
+//======================================================================
+//
+// ClutterAuto computes the auto-correlation for points in a series of 
+//   MDV files. The auto-correlation, standard deviation and mean data are 
+//   written out to MDV files. Points with high correlation are regarded 
+//   as having a high likelihood of representing clutter. The output files 
+//   are used by ClutterRemove.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+// Modes and trigger mechanism.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each data volume as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// trigger_interval ////////////////////////
+//
+// Interval for trigger - secs.
+// For trigger, this is the interval between trigger events. In REALTIME 
+//   mode, a trigger always occurs on the hour, and at constant intervals 
+//   thereafter. In ARCHIVE mode the trigger starts at start_time and at 
+//   constant intervals thereafter.
+// Type: int
+//
+
+trigger_interval = 86400;
+
+///////////// lookback_duration ///////////////////////
+//
+// Lookback duration (secs).
+// The program reads all data in this period and uses it to compute the 
+//   statistics.
+// Type: int
+//
+
+lookback_duration = 86400;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input radar data.
+// Input data is in MDV format, and must contain a reflectivity field. 
+//   The statistics are computed using the reflectivity data. The geometry 
+//   of the input files must be constant.
+// Type: string
+//
+
+input_url = "mdv/radar/cart";
+
+///////////// dbz_field_name //////////////////////////
+//
+// Name of dBZ field in input MDV files.
+// Type: string
+//
+
+dbz_field_name = "DBZ";
+
+//======================================================================
+//
+// STATISTICS GENERATION.
+//
+//======================================================================
+ 
+///////////// min_ht //////////////////////////////////
+//
+// Min height for stats computations (km).
+// Only data above this height will be used.
+// Type: float
+//
+
+min_ht = -1;
+
+///////////// max_ht //////////////////////////////////
+//
+// Max height for stats computations (km).
+// Only data below this height will be used.
+// Type: float
+//
+
+max_ht = 30;
+
+///////////// min_dbz /////////////////////////////////
+//
+// Low DBZ threshold.
+// Only data exceeding this threshold will be included in the 
+//   computations.
+// Type: float
+//
+
+min_dbz = 10;
+
+//======================================================================
+//
+// FILE LABEL DETAILS.
+//
+//======================================================================
+ 
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "Clutter statistics.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_source = "Computed by ClutterAuto.";
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output directory.
+// The clutter statistics are output to this directory in MDV format.
+// Type: string
+//
+
+output_url = "mdvp:://localhost::mdv/clutter_auto";
+
+///////////// output_encoding_type ////////////////////
+//
+// Set encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_ASIS
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding_type = ENCODING_INT8;
+

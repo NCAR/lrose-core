@@ -1,0 +1,281 @@
+/**********************************************************************
+ * TDRP params for NWSsoundingIngest
+ **********************************************************************/
+
+//======================================================================
+//
+// NWSsoundingIngest is a program that reads WMO format
+// upper air sounding data and writes them to an SPDB
+// database. Niles Oien February 2002.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// InDir ///////////////////////////////////
+//
+// Input directory - top level. Set to the
+// the directory in which the input files appear.Used in realtime mode 
+//   only.
+// Directory path for input data files.
+// Type: string
+//
+
+InDir = "./raw/NWSsoundings";
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+// If string is NULL, all extensions are valid.
+// Type: string
+//
+
+fileExtension = "";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 7200;
+
+//======================================================================
+//
+// LOCATION INFORMATION.
+//
+//======================================================================
+ 
+///////////// siteLocations ///////////////////////////
+//
+// Given an input sounding ID, this table
+// is used to locate the station in lat, lon and alt.
+// See http://www.met.fsu.edu/Classes/Common/00zua.gif and
+// http://www.ofcm.gov/fmh3/text/append-c.html.
+//
+// Type: struct
+//   typedef struct {
+//      int soundingSiteId;
+//      double lat;
+//      double lon;
+//      double alt;
+//   }
+//
+// 1D array - variable length.
+//
+
+siteLocations = {
+  { 61967, -7.3, 72.4, 3},
+  { 61902, -7.96667, -14.4, 79},
+  { 70273, 61.15, -149.983, 50},
+  { 70398, 55.0333, -131.567, 37},
+  { 70026, 71.3, -156.783, 12},
+  { 70219, 60.7833, -161.8, 36},
+  { 70316, 55.2, -162.717, 30},
+  { 70261, 64.8167, -147.867, 135},
+  { 70326, 58.6833, -156.65, 15},
+  { 70350, 57.75, -152.483, 4},
+  { 70133, 66.8667, -162.633, 5},
+  { 70231, 62.9667, -155.617, 103},
+  { 70200, 64.5, -165.433, 5},
+  { 70308, 57.15, -170.217, 10},
+  { 70414, 52.7167, -174.1, 31},
+  { 70361, 59.5167, -139.667, 12},
+  { 72659, 45.45, -98.4167, 397},
+  { 72518, 42.75, -73.8, 86},
+  { 72365, 35.0333, -106.617, 1615},
+  { 72634, 44.9167, -84.7167, 1465},
+  { 72363, 35.2333, -101.7, 1094},
+  { 72215, 33.3667, -84.5667, 246},
+  { 72230, 33.1667, -86.7667, 178},
+  { 72764, 46.7667, -100.75, 505},
+  { 72681, 43.5667, -116.217, 871},
+  { 72250, 25.9, -97.4333, 7},
+  { 72528, 42.9333, -78.7333, 218},
+  { 72712, 46.8667, -68.0167, 191},
+  { 72208, 32.9, -80.0333, 15},
+  { 72426, 39.4167, -83.8167, 323},
+  { 72251, 27.7667, -97.5, 14},
+  { 72261, 29.3667, -100.917, 314},
+  { 72469, 39.7667, -104.867, 1611},
+  { 72387, 36.6167, -116.017, 1007},
+  { 72632, 42.7, -83.4667, 329},
+  { 72451, 37.7667, -99.9667, 790},
+  { 72381, 34.9, -117.917, 724},
+  { 72221, 30.4833, -86.5167, 20},
+  { 72582, 40.8667, -115.733, 1607},
+  { 72364, 31.8667, -106.7, 1257},
+  { 72376, 35.2333, -111.817, 2180},
+  { 72257, 31.1, -97.3333, 270},
+  { 72273, 31.5667, -110.35, 1439},
+  { 72249, 32.1333, -97.05, 198},
+  { 72768, 48.2167, -106.617, 696},
+  { 72476, 39.1167, -108.533, 1475},
+  { 72776, 47.45, -111.383, 1132},
+  { 72645, 44.4833, -88.1333, 214},
+  { 72317, 36.0833, -79.95, 277},
+  { 72747, 48.5667, -93.3833, 361},
+  { 72235, 32.3167, -90.0833, 91},
+  { 72206, 30.4833, -81.7, 11},
+  { 72201, 24.55, -81.75, 2},
+  { 72240, 30.1167, -93.2167, 5},
+  { 72340, 34.8333, -92.2667, 172},
+  { 72597, 42.3833, -122.883, 397},
+  { 72202, 24.75, -80.3833, 5},
+  { 72265, 31.95, -102.183, 873},
+  { 72649, 44.85, -93.9, 288},
+  { 72305, 34.7833, -76.8833, 11},
+  { 72327, 36.25, -86.5667, 180},
+  { 72233, 30.3333, -89.8333, 10},
+  { 72501, 40.8667, -72.8667, 20},
+  { 72357, 35.2333, -97.45, 357},
+  { 72562, 41.1333, -100.683, 847},
+  { 72493, 37.75, -122.217, 6},
+  { 72558, 41.3167, -96.3667, 350},
+  { 72520, 40.5333, -80.2333, 360},
+  { 72391, 34.1167, -119.117, 14},
+  { 72797, 47.7833, -124.55, 56},
+  { 72662, 44.05, -103.067, 966},
+  { 72489, 39.5667, -119.8, 1516},
+  { 72672, 43.0667, -108.483, 1700},
+  { 72318, 37.2, -80.4167, 648},
+  { 72694, 44.9167, -123.017, 61},
+  { 72572, 40.7833, -111.95, 1288},
+  { 72293, 32.8333, -117.117, 134},
+  { 72291, 33.2333, -119.467, 14},
+  { 72248, 32.45, -93.8333, 85},
+  { 72785, 47.6333, -117.533, 720},
+  { 72440, 37.2333, -93.4, 390},
+  { 72214, 30.3833, -84.35, 18},
+  { 72210, 27.7, -82.4, 13},
+  { 72456, 39.0667, -95.6333, 270},
+  { 72274, 32.1167, -110.933, 787},
+  { 72393, 34.7333, -120.55, 100},
+  { 72402, 37.9333, -75.4833, 13},
+  { 72403, 38.9833, -77.4667, 85},
+  { 74002, 39.4667, -76.0667, 5},
+  { 74794, 28.4833, -80.55, 5},
+  { 74560, 40.15, -89.3333, 178},
+  { 74494, 41.6667, -69.9667, 16},
+  { 74003, 40.0167, -112.533, 1325},
+  { 74389, 43.9, -70.25, 125},
+  { 74455, 41.6167, -90.5833, 229},
+  { 74001, 34.6, -86.6333, 175},
+  { 74606, 34.65, -120.567, 112},
+  { 74690, 32.2167, -106.217, 1224},
+  { 74004, 32.55, -113.483, 145},
+  { 78367, 19.9, -75.2167, 56},
+  { 78806, 8.98333, -79.55, 69},
+  { 78526, 18.4333, -66, 3},
+  { 91334, 7.45, 151.833, 3},
+  { 91212, 13.4833, 144.8, 78},
+  { 91285, 19.7167, -155.067, 10},
+  { 91408, 7.33333, 134.483, 30},
+  { 91366, 8.73333, 167.733, 8},
+  { 91165, 21.9833, -159.35, 32},
+  { 91376, 7.08333, 171.383, 3},
+  { 91765, -14.3333, -170.717, 5},
+  { 91348, 6.96667, 158.217, 39},
+  { 91245, 19.2833, 166.65, 5},
+  { 91413, 9.48333, 138.083, 14}
+};
+
+///////////// processIfNotLocated /////////////////////
+//
+// Option to write data for stations whos ID number
+// does not appear in the siteLocations table above.
+// Default is to simply skip these stations; setting this option
+// causes them to be written out with silly lat,lon and alt
+// values.
+// Used primarily for debugging.
+// Type: boolean
+//
+
+processIfNotLocated = FALSE;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// OutUrl //////////////////////////////////
+//
+// URL for output SPDB data.
+// Type: string
+//
+
+OutUrl = "spdbp:://localhost::/home/oien/rap/apps/ingest/src/NWSsoundingIngest/Out";
+
+///////////// expiry //////////////////////////////////
+//
+// How long data are valid, seconds.
+// Type: int
+//
+
+expiry = 1800;
+
+///////////// soundingMergeEpsilon ////////////////////
+//
+// Vertical distance between sounding points for them to be
+// considered distinct points, meters.
+// The WMO input encoding scheme is such that different parts of the
+// sounding are in different input messages. The merging of these
+// messages into one coherrent sounding requires that a decision
+// be made as to if two points in two different messages are
+// at the same height.
+
+// If the heights differ by less than soundingMergeEpsilon
+// vertical meters, then they are taken to be at the same
+// height and merged. If not, they are taken to be at different
+// heights and interleaved.
+
+// Values of less than 0.5 for
+// epsilon are problematic and are not allowed (points are
+// (never merged if epsilon is 0.0, even if they are identical).
+// Minimum val: 0.5
+// Maximum val: 500
+// Type: double
+//
+
+soundingMergeEpsilon = 1;
+

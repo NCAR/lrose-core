@@ -1,0 +1,17 @@
+#!/bin/csh
+
+\rm -f *.tif
+\rm -f *.png
+\rm -f *.jpg
+\rm -f *.gif
+\rm -f *.mdv
+
+\rm -f Image2Mdv.*_row_*_col_*
+
+\rm -rf 2*
+\rm -f _la*
+find . -name \*~ -exec \rm -f {} \;
+\rm -f Runner
+
+#
+

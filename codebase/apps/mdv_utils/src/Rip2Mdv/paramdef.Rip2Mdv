@@ -1,0 +1,143 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Rip2Mdv
+ *
+ * This file contains the TDRP parameter definitions for Rip2Mdv.
+ */
+
+
+commentdef
+{
+  p_header = "Rip2Mdv";
+  p_text = "This program converts WRF RIP data files to MDV format.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  FILE_LIST,
+  INPUT_DIR
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tFILE_LIST - Process the list of files specified on the "
+           "command line with the -f option.\n"
+           "\tINPUT_DIR - Process files as they appear in the specified "
+           "input directory. "
+           "The input directory parameter are specified in "
+           "input_dir_trigger below.\n";
+  p_default = FILE_LIST;
+} trigger_mode;
+
+typedef struct
+{
+  string dir;
+  string file_substring;
+  boolean process_old_files;
+} input_dir_trigger_t;
+
+paramdef struct input_dir_trigger_t
+{
+  p_descr = "Parameters describing the input directory trigger";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR.";
+  p_default = { "$(RAP_DATA_DIR)/raw/rip", "wrf", false };
+} input_dir_trigger;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef boolean
+{
+  p_descr = "Use specified gen_time";
+  p_help = "Set to true to use the gen_time below instead of the gen_time in model file.";
+  p_default = false;
+} use_gen_time;
+
+paramdef string
+{
+  p_descr = "Model cycle time";
+  p_help = "This time is put in the master header to define the gen_time (YYYYMMDDHH)";  
+  p_default = "2005061717";
+} gen_time;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/mm5";
+} output_url;

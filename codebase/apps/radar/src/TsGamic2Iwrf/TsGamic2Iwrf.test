@@ -1,0 +1,418 @@
+/**********************************************************************
+ * TDRP params for TsGamic2Iwrf
+ **********************************************************************/
+
+//======================================================================
+//
+// TsGamic2Iwrf reads pulse IQ data in GAMIC format and converts to IWRF 
+//   format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+//
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file to process. 
+//   In ARCHIVE mode, it moves through the list of file names specified on 
+//   the command line.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// input_dir ///////////////////////////////
+//
+// Directory for IQ data files.
+//
+//
+// Type: string
+//
+
+input_dir = "$(HOME)/data/frech/IQ";
+
+//======================================================================
+//
+// SET RADAR INFO.
+//
+//======================================================================
+ 
+///////////// radar_name //////////////////////////////
+//
+// Name of radar.
+//
+//
+// Type: string
+//
+
+radar_name = "Hohnpeissenberg";
+
+///////////// site_name ///////////////////////////////
+//
+// Name of radar site.
+//
+//
+// Type: string
+//
+
+site_name = "Hohnpeissenberg";
+
+///////////// radar_latitude //////////////////////////
+//
+// Latitude of radar.
+//
+//
+// Type: double
+//
+
+radar_latitude = 47.8015;
+
+///////////// radar_longitude /////////////////////////
+//
+// Longitude of radar.
+//
+//
+// Type: double
+//
+
+radar_longitude = 11.0093;
+
+///////////// radar_altitude_m ////////////////////////
+//
+// Altitude of radar dish (m).
+//
+//
+// Type: double
+//
+
+radar_altitude_m = 1006.2;
+
+///////////// antenna_gain_db /////////////////////////
+//
+// Gain of antenna (dB).
+//
+//
+// Type: double
+//
+
+antenna_gain_db = 45.9;
+
+///////////// xmit_power_dbm_h ////////////////////////
+//
+// Nominal transmit power, H channel (dBm).
+//
+//
+// Type: double
+//
+
+xmit_power_dbm_h = 85;
+
+///////////// xmit_power_dbm_v ////////////////////////
+//
+// Nominal transmit power, V channel (dBm).
+//
+//
+// Type: double
+//
+
+xmit_power_dbm_v = 85;
+
+///////////// xmit_rcv_mode ///////////////////////////
+//
+// Transmit-receive mode for radar.
+//
+//   SINGLE_POL: Single polarization (NEXRAD)
+//
+//   DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar 
+//   receiver only (CP2 SBand)
+//
+//   DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar 
+//   and cross-polar receivers (SPOL with Mitch Switch and receiver in 
+//   switching mode, CHILL)
+//
+//   DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and 
+//   V receivers (SPOL with Mitch Switch and receivers in fixed mode)
+//
+//   DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H 
+//   and V receivers (NEXRAD upgrade, SPOL with T and receivers in fixed 
+//   mode)
+//
+//   DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, 
+//   switching H and V receivers (SPOL with T and receivers in switching 
+//   mode)
+//
+//   DP_H_ONLY_FIXED_HV: Dual pol, H transmission, fixed H and V 
+//   receivers (CP2 X band)
+//
+//   DP_V_ONLY_FIXED_HV: Dual pol, V transmission, fixed H and V 
+//   receivers (CP2 X band)
+//
+//   DP_ALT_HHVV_FIXED_HV: Dual pol, alternating transmission, pulsing 
+//   HHVV sequence, fixed receiver chain (HCR).
+//
+//
+// Type: enum
+// Options:
+//     XMIT_RCV_UNKNOWN
+//     SINGLE_POL
+//     DP_ALT_HV_CO_ONLY
+//     DP_ALT_HV_CO_CROSS
+//     DP_ALT_HV_FIXED_HV
+//     DP_SIM_HV_FIXED_HV
+//     DP_SIM_HV_SWITCHED_HV
+//     DP_H_ONLY_FIXED_HV
+//     DP_V_ONLY_FIXED_HV
+//     DP_ALT_HHVV_FIXED_HV
+//
+
+xmit_rcv_mode = DP_SIM_HV_FIXED_HV;
+
+///////////// scan_mode ///////////////////////////////
+//
+// Scan mode for radar.
+//
+// Set to the relevant scan mode
+//
+// SCAN_MODE_SECTOR: sector scan mode
+//
+// SCAN_MODE_COPLANE: co-plane dual doppler mode
+//
+// SCAN_MODE_RHI: range height vertical scanning mode
+//
+// SCAN_MODE_VERTICAL_POINTING: vertical pointing for calibration
+//
+// SCAN_MODE_IDLE: between scans
+//
+// SCAN_MODE_AZ_SUR_360: 360-degree azimuth mode - surveillance
+//
+// SCAN_MODE_EL_SUR_360: 360-degree elevation mode - eg Eldora
+//
+// SCAN_MODE_SUNSCAN: scanning the sun for calibrations
+//
+// SCAN_MODE_POINTING: fixed pointing
+//
+// SCAN_MODE_FOLLOW_VEHICLE: follow target vehicle
+//
+// SCAN_MODE_EL_SURV: elevation surveillance (ELDORA)
+//
+// SCAN_MODE_MANPPI: Manual PPI mode (elevation does
+//
+// SCAN_MODE_MANRHI: Manual RHI mode (azimuth does
+//
+// SCAN_MODE_SUNSCAN_RHI: sunscan in RHI mode.
+//
+//
+// Type: enum
+// Options:
+//     SCAN_MODE_UNKNOWN
+//     SCAN_MODE_SECTOR
+//     SCAN_MODE_COPLANE
+//     SCAN_MODE_RHI
+//     SCAN_MODE_VERTICAL_POINTING
+//     SCAN_MODE_IDLE
+//     SCAN_MODE_AZ_SUR_360
+//     SCAN_MODE_EL_SUR_360
+//     SCAN_MODE_SUNSCAN
+//     SCAN_MODE_POINTING
+//     SCAN_MODE_FOLLOW_VEHICLE
+//     SCAN_MODE_EL_SURV
+//     SCAN_MODE_MANPPI
+//     SCAN_MODE_MANRHI
+//     SCAN_MODE_SUNSCAN_RHI
+//
+
+scan_mode = SCAN_MODE_SUNSCAN;
+
+//======================================================================
+//
+// PULSE WIDTH DECODING.
+//
+//======================================================================
+ 
+///////////// pulse_width_lookup //////////////////////
+//
+// Lookup table for pulse widths.
+//
+// The data only contains the pulse width index. This lookup table 
+//   allows you to decode the pulse width from the index.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int index;
+//      double pulse_width_us;
+//   }
+//
+// 1D array - variable length.
+//
+
+pulse_width_lookup = {
+  {
+    index = 0,
+    pulse_width_us = 0.4
+  }
+  ,
+  {
+    index = 1,
+    pulse_width_us = 0.8
+  }
+};
+
+//======================================================================
+//
+// SCALING FOR NOMINAL RECEIVER GAIN.
+//
+// The raw I/Q data should be scaled to provide powers in the correct 
+//   range.
+//
+//======================================================================
+ 
+///////////// rx_gain_nominal_db_h ////////////////////
+//
+// Nominal receiver gain in H channel (dB).
+//
+// The IQ data will be scaled based on this nominal gain.
+//
+//
+// Type: double
+//
+
+rx_gain_nominal_db_h = 107;
+
+///////////// rx_gain_nominal_db_v ////////////////////
+//
+// Nominal receiver gain in V channel (dB).
+//
+// The IQ data will be scaled based on this nominal gain.
+//
+//
+// Type: double
+//
+
+rx_gain_nominal_db_v = 107;
+
+//======================================================================
+//
+// OUTPUT FILES.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files are written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "$(HOME)/data/frech/IWRF";
+
+///////////// add_scan_mode_to_file_name //////////////
+//
+// Option to add a string indicating the scan mode to the file name.
+//
+//
+// Type: boolean
+//
+
+add_scan_mode_to_file_name = TRUE;
+
+///////////// output_format ///////////////////////////
+//
+// Format of the output files.
+//
+// IWRF: stream of binary structs and IQ data following the IWRF 
+//   (CSU-CHILL/NCAR Integrated Weather Radar Facility) format. TSACHIVE: 
+//   Sigmet time series archive format.
+//
+//
+// Type: enum
+// Options:
+//     FORMAT_IWRF
+//     FORMAT_TSARCHIVE
+//
+
+output_format = FORMAT_IWRF;
+
+///////////// output_packing //////////////////////////
+//
+// Packing of the IQ data in the output files.
+//
+// ASIS: as it was read. FL32: 32-bit floating point. SCALED_SI16: 
+//   scaled signed 16-bit integers. DBM_PHASE_SI16: signed 16-bit integers 
+//   representing power in dBM and phase in deg. SIGMET_SI16: Sigmet 
+//   16-bit floating point packing as in the RVP8.
+//
+//
+// Type: enum
+// Options:
+//     PACKING_ASIS
+//     PACKING_FL32
+//     PACKING_SCALED_SI16
+//     PACKING_DBM_PHASE_SI16
+//     PACKING_SIGMET_FL16
+//
+
+output_packing = PACKING_FL32;
+

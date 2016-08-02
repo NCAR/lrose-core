@@ -1,0 +1,8 @@
+/*
+ * params for storm_file_v3_to_v5
+ */
+
+debug = DEBUG_OFF;
+malloc_debug_level = 2;
+print_file = FALSE;
+add_proj_runs = FALSE;

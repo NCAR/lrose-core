@@ -1,0 +1,25 @@
+
+import os
+
+buildOptions = Options('buildOpts.py')
+buildOptions.Add(PathOption('NCDIR','Root directory where netcdf library was installed.','/opt/local'))
+
+env = Environment(options=buildOptions, CCFLAGS='-g', LDFLAGS='-g', LINKFLAGS='-g')
+
+progNode = env.Program('go',source=['main.cpp'],
+                       CPPPATH=[os.path.join('${NCDIR}','include')],
+                       LIBPATH=[os.path.join('${NCDIR}','lib')],
+                       LIBS=['netcdf']);
+
+print "NCDIR is ",env['NCDIR']
+print "NCDIR include is ",os.path.join(env['NCDIR'],'include')
+env.installLoc = os.path.join("${NCDIR}",'sandbox')
+
+print "NCDIR sandbox is ",env.installLoc
+
+env.Default([progNode])
+
+Help(buildOptions.GenerateHelpText(env))
+
+
+

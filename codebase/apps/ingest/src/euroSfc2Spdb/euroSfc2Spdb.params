@@ -1,0 +1,113 @@
+/**********************************************************************
+ * TDRP params for ./euroSfc2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// Small program to convert european surfacedata from netCDF to SPDB for 
+//   Tammy Weckwerthe. Niles Oien.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, ARCHIVE and REALTIME.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Instance.
+// Process instance for registration with process mapper.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// Input data.
+//
+//======================================================================
+ 
+///////////// inputPath ///////////////////////////////
+//
+// File path of surface input data.
+// This is the directory in which input files arein realtime mode.
+// Type: string
+//
+
+inputPath = "./latest.data";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Maximum age for files, realtime mode, seconds.
+// Default is 15 minutes. .
+// Type: long
+//
+
+max_realtime_valid_age = 900;
+
+//======================================================================
+//
+// Output SPDB Data.
+//
+//======================================================================
+ 
+///////////// outputUrl ///////////////////////////////
+//
+// Output DsSpdb destination.
+// METAR format SPDB data will be written to this destination.
+// Type: string
+//
+
+outputUrl = "./euroSfcData";
+
+//======================================================================
+//
+// Program parameters.
+//
+//======================================================================
+ 
+///////////// expireDelta /////////////////////////////
+//
+// Expire time delta, seconds.
+// Expiry time is validity time plus expire delta.
+// Type: long
+//
+
+expireDelta = 1800;
+
+///////////// boundingBox /////////////////////////////
+//
+// Limits on lat, lon.
+// May prevent output from becoming too verbose.
+//
+// Type: struct
+//   typedef struct {
+//      double minLat;
+//      double minLon;
+//      double maxLat;
+//      double maxLon;
+//   }
+//
+//
+
+boundingBox = { 46, 5, 51, 10 };
+

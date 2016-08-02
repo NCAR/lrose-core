@@ -1,0 +1,244 @@
+#! /usr/bin/perl
+
+#
+# script to check the usage of the parameters used by the
+# uparams functions in libdixutil.a
+#
+
+sub print_usage {
+
+  printf(STDERR "Usage : $prog app_name params_file_path\n");
+  printf(STDERR "Must be run from source dir\n");
+
+}
+
+sub check_src {
+
+  local($func_str) = @_;
+
+  open(SRC_FILE_LIST, "ls *.*c |");
+  
+  while ($src_file = <SRC_FILE_LIST>) {
+    
+    chop $src_file;
+    
+    if (!open(SRC_FILE, $src_file)) {
+      printf(STDERR "Cannot open src file %s\n", $src_file);
+      exit (-1);
+    }
+    
+    $line_no = 0;
+    
+    while ($line = <SRC_FILE>) {
+      
+      $line_no++;
+      chop ($line);
+      
+#
+# find lines which call param reading functions, and concat the 
+# call  into a single line
+#
+      
+      if ($line =~ /$func_str/) {
+	
+	$call = $line;
+	
+	while ((!($line =~ /\;/)) && (!eof(SRC_FILE))) {
+	  
+	  $line = <SRC_FILE>;
+	  $line_no++;
+	  chop ($line);
+	  $call = $call . $line;
+	  
+	}
+	
+#
+# find the parameter name
+#
+	
+	$start = index($call, "\"") + 1;
+	$param_name = substr($call, $start);
+	$len = index($param_name, "\"");
+	$param_name = substr($param_name, 0, $len);
+	
+	$param_read[$n_read] = $param_name;
+	$param_read_default{$param_name} = true;
+	$param_read_flag{$param_name} = true;
+	$param_read_src_file{$param_name} = $src_file;
+	$param_read_line_no{$param_name} = $line_no;
+	$n_read++;
+	
+      }
+      
+    } # while ($line = <SRC_FILE>) #
+      
+    close ($src_file);
+    
+  } # while ($src_file = <SRC_FILE_LIST>) #
+    
+  close(SRC_FILE_LIST);
+
+}
+
+#
+# check usage
+#
+
+($prog = $0) =~ s%.*/%%;
+ 
+if (@ARGV < 2) {
+  &print_usage();
+  exit(-1);
+}
+
+$app_name = shift(@ARGV);
+$params_file_path = shift(@ARGV);
+
+printf(STDOUT "Running %s\n\n", $prog);
+printf(STDOUT "params file path: %s\n\n", $params_file_path);
+
+#
+# get the list of params in the params file
+#
+
+if (open (PARAMS, $params_file_path) == 0) {
+  printf ("Cannot open $params_file_path\n");
+  &print_usage();
+  exit(-1);
+}
+
+$line_no = 0;
+$n_set = 0;
+
+while ($line = <PARAMS>) {
+  
+  $line_no++;
+
+  #
+  # get rid of comments 
+  #
+  
+  if ($line =~ /^#/) {
+    goto end_of_loop;
+  }
+
+  #
+  # get rid of lines which do not conform to the params spec
+  #
+
+  if (!($line =~ /^$app_name\..*\:.*/)) {
+    goto end_of_loop;
+  }
+
+  $start = index($line, ".") + 1;
+  $end = index($line, ":");
+  $param_name = substr($line, $start, $end - $start);
+  $param_set[$n_set] = $param_name;
+  $param_set_line_no{$param_name} = $line_no;
+  $param_set_flag{$param_name} = true;
+  $param_set_obsolete{$param_name} = true;
+  $n_set++;
+
+ end_of_loop:
+
+} # while #
+
+close (PARAMS);
+
+#
+# get list from source files
+#
+
+$n_read = 0;
+
+&check_src(uGetParam);
+&check_src(xGetRes);
+&check_src(setup_color_gc);
+&check_src(setup_color_and_dim_gc);
+&check_src(load_psgc_linestyle);
+&check_src(setup_gc_from_param);
+&check_src(load_tf_option);
+&check_src(load_dual_option);
+&check_src(load_triple_option);
+&check_src(load_quad_option);
+
+#
+# check for obsolete parameters, i.e. those in the parameter file but
+# not used in the source
+#
+
+for ($i = 0; $i < $n_set; $i++) {
+
+  $param_name = $param_set[$i];
+
+  if ($param_read_flag{$param_name} eq true) {
+    $param_set_obsolete{$param_name} = false;
+  }
+  
+}
+
+#
+# check for default parameters, i.e. those in the source code but not
+# in the parameter file
+#
+
+for ($i = 0; $i < $n_read; $i++) {
+
+  $param_name = $param_read[$i];
+
+  if ($param_set_flag{$param_name} eq true) {
+    $param_read_default{$param_name} = false;
+  }
+  
+}
+
+printf(STDOUT "Parameters in file\n");
+printf(STDOUT "==================\n\n");
+
+for ($i = 0; $i < $n_set; $i++) {
+  printf(STDOUT "Line %4d: %s\n",
+	 $param_set_line_no{$param_set[$i]},
+	 $param_set[$i]);
+}
+
+printf(STDOUT "\n");
+printf(STDOUT "Obsolete parameters - not used in source code\n");
+printf(STDOUT "=============================================\n\n");
+
+for ($i = 0; $i < $n_set; $i++) {
+  if ($param_set_obsolete{$param_set[$i]} eq true) {
+    printf(STDOUT "Line %4d: %s\n",
+	   $param_set_line_no{$param_set[$i]},
+	   $param_set[$i]);
+  }
+}
+
+printf(STDOUT "\n");
+printf(STDOUT "Params read\n");
+printf(STDOUT "===========\n");
+
+for ($i = 0; $i < $n_read; $i++) {
+  printf(STDOUT "File %30s, line %4d: %s\n",
+	 $param_read_src_file{$param_read[$i]},
+	 $param_read_line_no{$param_read[$i]},
+	 $param_read[$i]);
+}
+
+printf(STDOUT "\n");
+printf(STDOUT "Default parameters - not set in params file\n");
+printf(STDOUT "===========================================\n\n");
+
+for ($i = 0; $i < $n_read; $i++) {
+  if ($param_read_default{$param_read[$i]} eq true) {
+    if (!($param_read[$i] =~ /ERROR/) && !($param_read[$i] eq "")) {
+      printf(STDOUT "File %30s, line %4d: %s\n",
+	     $param_read_src_file{$param_read[$i]},
+	     $param_read_line_no{$param_read[$i]},
+	     $param_read[$i]);
+    }
+  }
+}
+
+exit (0);
+
+

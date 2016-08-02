@@ -1,0 +1,7 @@
+#!/bin/csh
+#
+#
+#
+./UpdateMdvOrigin   -starttime "1975/01/01_00:00:00" \
+		    -endtime   "2002/05/13_23:55:00" \
+		    -params test.params

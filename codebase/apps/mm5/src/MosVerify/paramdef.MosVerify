@@ -1,0 +1,129 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*
+ *
+ * Parameter definitions for MosVerify application
+ *
+ * $Id: paramdef.MosVerify,v 1.5 2016/03/07 01:33:51 dixon Exp $
+ *
+ */
+
+commentdef {
+  p_header = "MosVerify PARAMETER FILE";
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+paramdef string {
+  p_descr = "Process instance";
+  p_descr = "This is used by the process mapper, procmap";
+  p_default = {"nowcast"};
+} instance;
+
+paramdef boolean {
+  p_descr = "Info messaging option";
+  p_default = {TRUE};
+} info;
+
+paramdef boolean {
+  p_descr = "Debug messaging option";
+  p_default = {FALSE};
+} debug;
+
+commentdef {
+  p_header = "LOGS.";
+}
+
+paramdef string {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} log_dir;
+
+commentdef {
+  p_header = "INPUT.";
+}
+
+paramdef char* {
+  p_descr = "Url for truth data";
+  p_default = "spdbp:://localhost::spdb/metar";
+} truth_url;
+
+paramdef char* {
+  p_descr = "Url for forcast data";
+  p_default = "spdbp:://localhost::spdb/mos_raw";
+} forecast_url;
+
+paramdef char* {
+  p_descr = "Url for model data";
+  p_default = "spdbp:://localhost::spdb/mm5";
+} model_url;
+
+paramdef long {
+  p_descr = "Look back time in days";
+  p_help = "If the start time is not specified on the command line "
+           "look back this amount from the end time.  If the end time "
+           "is not specified on the command line, the current time "
+           "will be used for the end time";
+  p_default = {42};
+} look_back;
+
+commentdef {
+  p_header = "PROCESSING PARAMETERS.";
+}
+
+paramdef char* {
+  p_descr = "Station ids";
+  p_help = "List the station ids for which the verification data "
+           "should be calculated.  A seperate set of verification "
+           "parameters will be calculated for each station id listed";
+  p_default = "KCTP";
+} station_ids[];
+ 
+paramdef int {
+  p_descr = "Forecast times";
+  p_help = "If use_forecast_times is set to TRUE, look for these "
+           "lead times in the forecast database"; 
+  p_default = {0};
+} forecast_times[];
+
+paramdef long {
+  p_descr = "Time tolerance for data blending in seconds";
+  p_help = "A metar data point must be within this time tolerance "
+           "to be considered a match for a given model data point";
+  p_default = {120};
+} time_tolerance;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef char* {
+  p_descr = "Output directory for ascii data files";
+  p_help = "Ascii files with the paired data will be written "
+           "to this directory";
+  p_default = {"./"};
+} variable_output_dir;
+

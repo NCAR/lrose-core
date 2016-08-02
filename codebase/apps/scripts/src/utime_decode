@@ -1,0 +1,46 @@
+#! /usr/bin/perl
+
+#
+# script to decode unix time
+#
+# Usage :
+#   utime_decode utime
+#
+#
+# check usage
+#
+
+($prog = $0) =~ s%.*/%%;
+
+$usage = "Usage : $prog unix_time";
+ 
+if (@ARGV != 1) {
+
+  print("$usage\n");
+  exit(-1);
+
+}
+
+$utime = shift(@ARGV);
+
+#
+# get localtime
+#
+
+($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) =
+  localtime($utime);
+
+printf ("local : %4d/%.2d/%.2d %.2d:%.2d:%.2d\n",
+	$year + 1900, $mon + 1, $mday, $hour, $min, $sec);
+
+#
+# get gmttime
+#
+
+($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) =
+  gmtime($utime);
+
+printf ("gmt   : %4d/%.2d/%.2d %.2d:%.2d:%.2d\n",
+	$year + 1900, $mon + 1, $mday, $hour, $min, $sec);
+
+exit(0);

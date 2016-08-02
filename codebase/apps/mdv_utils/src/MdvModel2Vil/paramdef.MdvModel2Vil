@@ -1,0 +1,272 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvModel2Vil
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvModel2Vil.
+ */
+
+
+commentdef
+{
+  p_header = "MdvModel2Vil";
+  p_text = "This program calculates VIL based on the given model fields.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  LATEST_NONFCST_DATA,
+  TIME_LIST,
+  TIME_LIST_NONFCST_DATA
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program processes each new file as "
+           "it appears in the input_url.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n";
+  p_default = TIME_LIST;
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST or TIME_LIST_NOFCSTDATA trigger";
+  p_help = "url specifies the triggering url.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_help = "This program assumes that the input URL points to a forecast "
+           "directory structure. "
+           "It won't work if it points to a flat directory structure.";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef long
+{
+  p_descr = "Maximum valid age for input files in seconds";
+  p_default = 3600;
+} max_valid_age;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to get the pressure data from a pressure "
+            "field included in the MDV file or from the vlevel header for the "
+            "rnw field.";
+  p_help = "If true, the pressure values come from the press_field_name "
+           "field in the MDV file. "
+           "If false, the pressure values come from the rnw field vlevel "
+           "header.";
+  p_default = true;
+} get_pressure_from_field;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the RWP field is supplied in the "
+            "input file.";
+  p_help = "If true, digital VIL is calculated from the supplied RWP field. "
+           "If false, RWP and digital VIL are calculated from the supplied "
+           "rnw, snow, press, temp and hgt fields.";
+  p_default = false;
+} rwp_field_supplied;
+
+typedef struct
+{
+  string rnw_field_name;
+  string snow_field_name;
+  string press_field_name;
+  string temp_field_name;
+  string hgt_field_name;
+  string rwp_field_name;
+} input_fields_t;
+
+paramdef struct input_fields_t
+{
+  p_descr = "The names of the input fields as they appear in the MDV file.";
+  p_help = "\trnw_field_name is the name of the rain water field in kg/kg. "
+           "Used only if vil_field_supplied is false.\n"
+           "\tsnow_field_name is the name of the snow water field in kg/kg. "
+           "Used only if vil_field_supplied is false.\n"
+           "\tpress_field_name is the name of the pressure field in mb."
+           "Used only if vil_field_supplied is false and "
+           "get_pressure_from_field is true.\n"
+           "\ttemp_field_name is the name of the temperature field in K.\n"
+           "Used only if vil_field_supplied is false.\n"
+           "\thgt_field_name is the name of the height field in m.\n"
+           "Used only if vil_field_supplied is false.\n"
+           "\trwp_field_name is the name of the supplied VIL field in g/m**2. "
+           "Used only if vil_field_supplied is true.\n";
+  p_default = { "RWMR", "SNMR", "Pressure", "TMP", "HGT", "RWP" };
+} input_fields;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the heights of the Z levels are "
+            "in increasing or decreasing order";
+  p_help = "For the HRRR data, the heights are in decreasing order";
+  p_default = true;
+} height_increasing;
+
+paramdef string
+{
+ p_descr = "Output field name";
+ p_default = "digitalVIL";
+}output_field_name;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/output";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef double
+{
+  p_descr = "HRRR  VIL lower threshold";
+  p_default = 0.;
+} low_thresh;
+
+paramdef double
+{
+  p_descr = "HRRR  VIL high threshold";
+  p_default = 0.5;
+} high_thresh;
+
+
+paramdef double
+{
+  p_default = 2.0;
+} a0;
+
+paramdef double
+{
+  p_default = 1.0;
+} a1;
+
+paramdef double
+{
+  p_default = 1.0;
+} b0;
+
+paramdef double
+{
+  p_default = 1.0;
+} b1;
+
+paramdef double
+{
+  p_default = 1.0;
+} b2;
+
+paramdef double
+{
+  p_default = 1.0;
+} cc;
+
+paramdef double
+{
+  p_default = 1.0;
+} ee;
+

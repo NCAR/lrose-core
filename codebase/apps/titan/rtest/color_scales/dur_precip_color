@@ -1,0 +1,24 @@
+# colorscale for precip
+
+# Mike Dixon, April 1991
+	
+0	1	DarkSlateBlue
+1 	2 	NavyBlue
+2	3 	Blue
+3 	4	MediumBlue
+4	5 	SkyBlue
+5	10 	DarkGreen
+10	15	ForestGreen
+15	20	YellowGreen
+20	25	Gold
+25	30 	Yellow
+30	35	Coral
+35	40	Orange
+40	45	MediumVioletRed
+45	50	OrangeRed
+50	100	Red
+100	200	Gray
+
+
+
+

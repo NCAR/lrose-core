@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!--   **********************************************************************   
+                                                                           
+       time_layout.xsd - XML Schema for Nowcast Markup Language   
+
+       John L. Schattel          MDL                		4 August 2004  
+               
+       Sandy Dance						Feb 2006
+       Elena Dozortseva						Apr 2006
+       
+      *************************************************************************   -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:include schemaLocation="definitions.xsd"/>
+	<xsd:complexType name="time-layoutElementType">
+		<xsd:sequence>
+			<xsd:element name="layout-key" type="layout-keyType" minOccurs="0" maxOccurs="1"/>
+			<xsd:sequence minOccurs="1" maxOccurs="unbounded">
+				<xsd:element name="start-valid-time" type="start-valid-timeType" minOccurs="1" maxOccurs="unbounded"/>
+				<xsd:element name="end-valid-time" type="xsd:dateTime" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+		</xsd:sequence>
+		<xsd:attribute name="time-coordinate" type="time-coordinateType" use="required"/>
+		<xsd:attribute name="summarization" type="summarizationType" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:simpleType name="time-coordinateType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="UTC"/>
+			<xsd:enumeration value="EST"/>
+			<xsd:enumeration value="EDT"/>
+			<xsd:enumeration value="local"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="start-valid-timeType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:dateTime">
+				<xsd:attribute name="period-name" type="xsd:string"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:simpleType name="layout-keyType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="k-p\d+[s|m|h|d|M|y]-n\d+-\d+"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="time-layoutAttributeType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="k-p\d+[s|m|h|d|M|y]-n\d+-\d+"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+</xsd:schema>

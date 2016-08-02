@@ -1,0 +1,512 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = "./ascii_header.txt";
+  p_descr = "The CTI data file has an ASCII section embedded in it.\n"
+	"During processing this ascii section is written to this temporary\n"
+	"file (which is overwritten each time a new CTI file is processed).";
+  p_help = "ASCII section contains information on LIDAR setup.";
+} temp_file;
+
+paramdef string {
+  p_default = "# VELOCITY, ASCOPE, VAD, UVW, BACK PROP RAW DATA PARAMETERS SECTION";
+  p_descr = "The ASCII section of the CTI file has several sections in\n"
+	"it. The YEAR, MONTH, DAY and SAMPLE_FREQUENCY are read from the\n"
+	"start of the file, but other parameters such as the RAW_DATA_OFFSET_METERS,\n"
+	"RANGE_GATES and GATES_TO_MERGE appear several times in different\n"
+	"sections of the file. The tag_line parameter allows the user to\n"
+	"determines which section to read these parameters from.";
+  p_help = "You can use the less command to view the ASCII section of a CTI\n"
+	"lidar file - it is towards the front of the file.";
+} tag_line;
+
+
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_DATA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} msgLog_dir;
+
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Info option";
+  p_help = "Print info messages";
+} info;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+
+paramdef char* {
+  p_descr = "output fmq url";
+  p_help = "Path for FMQ output data.";
+  p_default = {"fmqp:://localhost::./fmq.dsLidar"};
+} output_fmq_url;
+ 
+paramdef long {
+  p_default = {2000000};
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} output_fmq_size;
+ 
+paramdef long {
+  p_default = {3600};
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+
+commentdef {
+  p_header = "LIDAR PARAMETERS";
+}
+
+
+typedef struct {
+	int lidarNumber;
+	string Name;
+	double lat;
+	double lon;
+	double alt;
+} lidarID_t;
+
+paramdef struct lidarID_t {   
+  p_descr = "Description of this lidar.";
+  p_help = "lat/lon info is not in the input files.";
+  p_default = {42, "TestLidar",  42.0, -95.0, 1.02 };
+} lidarID;
+
+paramdef boolean {
+  p_descr = "Option to try to read the lidar location from a file.\n"
+            "If set, the location set in the lidarID struct (lat, lon\n"
+            "and altitude) is overridden by reading the location\n"
+            "from an ASCII file that has a record of the lidars movements.";
+  p_help = "Format of the file is as follows : \n"
+           "YYYY-MM-DD hh:mm:ss timeZone lat lon alt altUnits, ie.\n"
+           "2003-09-24 09:47:00  MDT  40.1234 -113.115 1350 Meters\n"
+           "2003-10-03 12:00:00  MDT  41.345  -114.234 1250 Meters\n"
+           "If the data time is less than the first time, then the\n"
+           "first lat/lon are used. If the time is after the last entry\n"
+           "then the last entry is used. If the data time is between two\n"
+           "entry times, then the entry at the time that preceedes\n"
+           "the data time is used.\n\n"
+           "At the time of writing, the timeZone and the altUnits\n"
+           "strings are ignored. The time is adjusted to UTC by\n"
+           "adding the time_offset parameter to it, and the altitude is\n"
+           "assumed to be in meters.";
+           p_default = FALSE;
+} readLocationFromFile;
+
+paramdef string {
+  p_descr = "File from which to read lidar location if\n"
+  "readLocationFromFile is TRUE.";
+  p_help = "See comments for readLocationFromFile parameter above.";
+  p_default = "/some/file/name.dat";
+} locationFile;
+
+commentdef {
+  p_header = "FIELD PARAMETERS";
+}
+
+
+paramdef double {
+  p_default = 990;
+  p_descr = "Maximum absolute value for data values.";
+  p_help = "Data values outside this range are marked as bad.\n"
+	"The default should be fine since -999 seems to be\n"
+	"what is used to delineate bad values in the input file.";
+} MaxAbsDataVal;
+
+
+typedef struct {
+	int windtracerCode;
+	string outputFieldName;
+	string units;
+} field_t;
+
+paramdef struct field_t {    
+  p_default = {
+		{30, "VEL",  "m/s"  },
+		{31, "SNR",  "none" },
+		{33, "SW",   "m"    },
+		{85, "FVEL", "m/s"  },
+		{86, "FSNR", "none" }
+  };
+  p_private = FALSE;
+  p_descr = "Fields are recognized by their Windtracer codes and given\n"
+	"an output field name. These codes MUST be specified in the\n"
+	"order in which they occur in the input file (ie. the codes\n"
+	"must be in ascending order) or the output fields will be labelled\n"
+	"incorrectly.";
+  p_help = "The defaults are very probably fine. The options are :\n\n"
+	" VEL  (Windtracer code 30) - velocity\n"
+	" SNR  (Windtracer code 31) - signal-to-noise, analagous to dBz\n"
+	" SW   (Windtracer code 33) - spectral width\n"
+	" FVEL (Windtracer code 85) - median filtered velocity\n"
+	" FSNR (Windtracer code 86) - filtered signal-to-noise.\n\n"
+	"There are other options which I have documented";
+} fields[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set, the time is added to the output.";
+  p_help = "This may be desired for use with VLAS.";
+} addTimeField;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set, threshold each beam according to one field.";
+  p_help = "This may be useful if there is a quality control field\n"
+	"like CFAR - if CFAR is 2.0 the other fields are good.";
+} thresholdOnField;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "The field number, starting at 0, as ordered in the\n"
+	"list above, on which we are to threshold.";
+  p_help = "Only relevant if thresholdOnField is TRUE.";
+} thresholdFieldNum;
+
+paramdef double {
+  p_default = 1.5;
+  p_descr = "The minimum threshold.";
+  p_help = "Only relevant if thresholdOnField is TRUE.";
+} threshMin;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "The maximum threshold.";
+  p_help = "Only relevant if thresholdOnField is TRUE.";
+} threshMax;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "If set, send an end of volume at the end of each input\n"
+	"data file. This also causes a start_of_volume to be sent at\n"
+	"the start of each data file.";
+  p_help = "This may be useful if there is a one to one relationship\n"
+	"in that there is one file per volume. AT THE TIME OF WRITING THIS\n"
+	"SHOULD DEFINITELY BE TRUE - later development may change that.";
+} oneFilePerVolume;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set, send an end of volume followed by a start of volume\n"
+  "if the azimuth direction changes.";
+  p_help = "This is useful if the lidar is scanning back and forth\n"
+  "at one elevation.";
+} endVolumeOnAzReversal;
+
+paramdef int {
+  p_descr = "How many beams to process before sending radar header message.";
+  p_help = "The default should be OK.\n";
+  p_default = 60;
+} beamsPerMessage;
+ 
+paramdef int {
+  p_descr = "After sending the radar header message, delay for this\n"
+	"many seconds.";
+  p_help = "The intent is to allows Dsr2Vol some catchup time.\n";
+  p_default = 2;
+} delaySecs;
+
+paramdef int {
+  p_descr = "After finishing a file, delay for this\n"
+	"many seconds.";
+  p_help = "The intent is to allows Dsr2Vol some catchup time.\n";
+  p_default = 2;
+} fileDelaySecs;
+
+paramdef double {
+  p_descr = "Nominal horizontal beam width, degrees.";
+  p_help = "The default should be OK.\n";
+  p_default = 1.0;
+} horizBeamWidth;
+ 
+
+paramdef double {
+  p_descr = "Nominal vertical beam width, degrees.";
+  p_help = "The default should be OK.\n";
+  p_default = 0.1;
+} vertBeamWidth;
+ 
+paramdef long {
+  p_default = {0};
+  p_descr = "Time offset, seconds.";
+  p_help = "The Lidar data are typically referenced according to\n"
+	"local time, while UTC is desired for output. This parameter\n"
+	"is added to the input time to obtain the output time.";
+} time_offset;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use the current time. If this option is\n"
+  "selected, the time_offset (above) is not added. All the beams are sent\n"
+  "timestamped with the run-time of this program.";
+  p_help = "This is intended for use in archive mode to simulate\n"
+  "realtime operations.";
+} useRealTime;
+
+paramdef double {
+  p_default = {0};
+  p_descr = "Azimuth offset, degrees.";
+  p_help = "An offset added to the azimuth to correct misalignment.";
+} azimuth_offset;
+
+paramdef double {
+  p_default = {0};
+  p_descr = "Elevation offset, degrees";
+  p_help = "An offset added to the elevation angle to correct for\n"
+	"misalignment.";
+} elevation_offset;
+
+
+paramdef double {
+  p_default = {3.0};
+  p_descr = "Maximum change in azimuth from one beam to the next\n"
+	"for a beam to be sent.";
+  p_help = "The intent is to avoid sending beams that are collected\n"
+	"when the lidar is in fact not scanning but rather is racing to\n"
+	"the next point in its scan pattern - the instrument is not\n"
+	"shut down at these times.";
+} maxDelAz;
+
+paramdef double {
+  p_default = {100.0};
+  p_descr = "The final elevation of the scan, degrees.";
+  p_help = "After 5 sequential beams at this elevation are encountered,\n"
+	"the program assumes that it is on the last scan.\n\n"
+	"If the program is on its last scan, then once the elevation\n"
+	"deviates from this elevation the file is closed.\n\n"
+	"The intent is to stop reading when the last scan is finished\n"
+	"and close the file, thereby avoiding reading the trailing data\n"
+	"which are probably junk, collected as the scanner moved into\n"
+	"position for the next scan. If this is set to a non-existant\n"
+	"scan like 100 degrees, then the program will read to the end\n"
+	"of the file.";
+} lastElevation;
+
+paramdef double {
+  p_default = {0.5};
+  p_descr = "First elevation to accept in a scan, degrees.\n"
+  "Relevant only if firstElevationSpecified is TRUE.";
+  p_help = "The intent is similar to that of the lastElevation\n"
+  "parameter - while lastElevation avoid trailing junk, firstElevation\n"
+  "avoids leading junk in the file. While lastElevation can be made\n"
+  "irrelevant by setting it to a nonexistant scan, firstElevation\n"
+  "cannot - therefore, the firstElevationSpecified parameter is used\n"
+  "to indicate that this parameter is relevant.";
+} firstElevation;
+
+paramdef double {
+  p_default = {0.1};
+  p_descr = "Elevation tolerance, degrees.";
+  p_help = "Used to evaluate if the elevation is close enough\n"
+  "to firstElevation or lastElevation.";
+} elevationTolerance;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "See description for firstElevation parameter above.";
+  p_help = "This parameter determines if firstElevation is used.";
+} firstElevationSpecified;
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "If firstAzimuthSpecified (below) is set to TRUE, then\n"
+            "the scanner must reach this azimuth before any beams\n"
+            "are sent to the FMQ. If a firstElevation is also\n"
+            "specified then this amounts to specifying a start\n"
+            "position - data collected before this position is reached\n"
+            "are discarded. The azimuth must match that specified\n"
+            "to within firstAzimuthTolerance (set below) to be\n"
+            "considered a match.";
+  p_help = "Relevant only if firstAzimuthSpecified is TRUE.";
+} firstAzimuth;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "See description for firstAzimuth parameter above.";
+  p_help = "Relevant only if firstAzimuthSpecified is TRUE.";
+} firstAzimuthTolerance;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "See description for firstAzimuth parameter above.";
+  p_help = "This parameter determines if firstAzimuth and\n"
+           "firstAzimuthTolerance are used.";
+} firstAzimuthSpecified;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to take the time from the filename rather than\n"
+	"reading it from the file itself. Added for realtime\n"
+	"simulations. The time_offset is still added to the time that\n"
+	"is obtained. The filename format is taken to be\n"
+	"YYYYMMDD_hhmmss_blah, ie.  20020722_231017_base.prd";
+  p_help = "Set for realtime simulations.";
+} timeFromFilename;
+
+paramdef int {
+  p_default = {4};
+  p_descr = "a run of non-missing values in a beam must be at\n"
+  "least this long to be accepted. The intent is to avoid short\n"
+  "runs of non-missing data embedded in missing data as these are\n"
+  "usually erroneous.";
+  p_help = "Avoid making this too big or good values will be rejected.";
+} minRunLen;
+
+commentdef {
+  p_header = "Options to test the velocity data for maximum shear.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to do a shear test on the velocity data.";
+  p_help = "If this is set, points in each beam that would cause\n"
+  "a shear that exceeds maxShear are marked as bad. Points near to the lidar\n"
+  "are trusted over those further away.";
+} doShearTest;
+
+paramdef double {
+  p_default = 0.025;
+  p_descr = "Maximum allowable shear, meters per second per meters.";
+  p_help = "Only relevant if doShearTest is TRUE.";
+} maxShear;
+
+paramdef int {
+  p_default = 0.0;
+  p_descr = "Field number for velocity in the fields[] list above.\n"
+  "First field is number 0.";
+  p_help = "Only relevant if doShearTest is TRUE.";
+} velFieldNum;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to only read scans that are ascending in azimuth.";
+  p_help = "May be helpful if scans double back on themselves.";
+} azAscendingOnly;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to only read scans that are descending in azimuth.";
+  p_help = "May be helpful if scans double back on themselves.";
+} azDescendingOnly;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to round off elevation angles.";
+  p_help = "May be helpful to turn elevations like 1.5001\n"
+  "into elevations like 1.5";
+} roundElevations;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "How much to round off elevation angles.";
+  p_help = "Relevant only if roundElevations is TRUE";
+} elevationRounding;
+
+paramdef double {
+  p_default = -90.0;
+  p_descr = "Minimum elevation to process, degrees.";
+  p_help = "Always applied but default has no effect.";
+} minElevation;
+
+paramdef double {
+  p_default = 90.0;
+  p_descr = "Maximum elevation to process, degrees.";
+  p_help = "Always applied but default has no effect.";
+} maxElevation;
+
+paramdef double {
+  p_default = -90.0;
+  p_descr = "Minimum azimuth to process, degrees.";
+  p_help = "Always applied but default has no effect.";
+} minAzimuth;
+
+paramdef double {
+  p_default = 400.0;
+  p_descr = "Maximum azimuth to process, degrees.";
+  p_help = "Always applied but default has no effect.";
+} maxAzimuth;
+
+
+
+
+
+

@@ -1,0 +1,453 @@
+/*********************************************************
+ * parameter definitions for StormIdent
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 1998
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef int {
+  p_default = 0;
+  p_min = 0;
+  p_max = 3;
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In realtime mode, storm_ident waits for a new input file. In archive mode, it moves through the files between the times set by the user.";
+} mode;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max missing data gap (secs)";
+  p_help = "In realtime mode, if auto_restart is false, storm_ident looks back from latest data time for the first gap exceeding max_missing_data_gap. Files since this gap are processed.";
+} max_missing_data_gap;
+
+commentdef {
+  p_header = "TRACKING OPTIONS.";
+  p_text = "Options for using and/or starting storm tracking.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to run tracking automatically.";
+  p_help = "If this is set, StormIdent will communicate with the storm tracking program, so that the tracking is performed after each scan.";
+} perform_tracking;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to start storm_track automatically";
+  p_help = "If this is set, storm_track will be started from within storm_ident.";
+} start_storm_track;
+
+paramdef string {
+  p_default = "&";
+  p_descr = "Command line for starting storm_track";
+  p_help = "The storm tracking program MUST be started in the BACKGROUND. Therefore make sure you include an '&' at the end of the command line.";
+} storm_track_command_line;
+
+paramdef int {
+  p_default = 44000;
+  p_descr = "Shared mem key.";
+  p_help = "This key is used for shared memory communication with storm_track.";
+} shmem_key;
+
+commentdef {
+  p_header = "DATA DIRECTORIES.";
+}
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Radar data directory - input";
+  p_help = "The input MDV files are stored in this directory. In REALTIME mode the program watches the latest_data_info file in this directory and processes a new scan each time the info file updates.";
+} rdata_dir;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef float {
+  p_default = 1.0;
+  p_min = 0.0;
+  p_descr = "Factor to convert velocity field units to m/s.";
+  p_help = "This is included in case the velocity is not in m/s units.";
+} vel_to_m_per_sec_scale;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Storms data directory - output";
+  p_help = "The storm files are placed in this directory.";
+} storm_data_dir;
+
+commentdef {
+  p_header = "DATA FIELDS IN INPUT FILES.";
+}
+
+paramdef int {
+  p_default = 0;
+  p_min = 0;
+  p_descr = "dBZ field number";
+  p_help = "Field number for dBZ data in radar volumes.";
+} dbz_field;
+
+paramdef int {
+  p_default = 1;
+  p_min = 0;
+  p_descr = "Velocity field number";
+  p_help = "Field number for velocity data in radar volumes.";
+} vel_field;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag to indicate if velocity data is available";
+  p_help = "If this is set, velocity data is available in the radar volumes. Velocity-based computations will be carried out. If not, velocity-based computations will be omitted.";
+} vel_available;
+
+commentdef {
+  p_header = "STORM IDENTIFICATION PARAMETERS.";
+}
+
+paramdef float {
+  p_default = 35.0;
+  p_descr = "Lower dBZ threshold for storm identification (dBZ).";
+  p_help = "Storms are defined as regions with reflectivity values in excess of this value.";
+} low_dbz_threshold;
+
+paramdef float {
+  p_default = 80.0;
+  p_descr = "Upper dBZ threshold (dBZ).";
+  p_help = "If a storm contains reflectivity in excess of this value, it will not be processed.";
+} high_dbz_threshold;
+
+paramdef int {
+  p_default = 1;
+  p_min = 1;
+  p_descr = "Min overlap between storm fragments.";
+  p_help = "A storm is made up of a series of adjacent 'runs' of data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.";
+} min_grid_overlap;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to perform identification using dual thresholds.";
+  p_help = "If set, the identification is performed in multiple stages. First, an outer storm envelope is computed, using the low_dbz_threshold. This is the default method which has always been used in TITAN. Then, using the dual_threshold parameters, a search is performed for storms within the envelope exceeding the dbz_threshold. If there is only one region at the higher reflectivity, the entire outer envelope is used. If there are two or more regions which meet or exceed the required characteristics, these regions are grown back out to the original envelop, but stop growing where they meet between the higher-reflectivity areas. The final storms are computed by breaking the original storm into regions based upon these secondary areas.";
+} use_dual_threshold;
+
+typedef struct {
+  float dbz_threshold;
+  float min_fraction_all_parts;
+  float min_fraction_each_part;
+  float min_area_each_part;
+} dual_threshold_t;
+
+paramdef struct dual_threshold_t {
+  p_default = {45.0, 0.5, 0.05, 20.0};
+  p_descr = "Parameters for dual threshold identification.";
+  p_help = "See 'use_dual_threshold'. dbz_threshold: threshold for this stage. A number of regions may be identified at the higher threshold. min_frction_all_parts: we sum the sizes of the parts at the higher threshold, and the sum divided by the original size of the envelope must exceed this fraction. If it does not the original envelope is used. min_fraction_each_part: for any part to be valid its size as a fraction of all of the parts must exceed this value. min_area_each_part: for any part to be valid its area must exceed this value. If it does not the part is ignored. If only 1 part is valid, the entire envelope is used.";
+} dual_threshold;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create dual threshold files for debugging.";
+  p_help = "If this is set, dual threshold files will be stored in dual_threshold_dir.";
+} create_dual_threshold_files;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Dual_threshold data directory.";
+  p_help = "If create_dual_threshold_files is TRUE, the dual_threshold debugging files are stored in this directory.";
+} dual_threshold_dir;
+
+paramdef float {
+  p_default = 0.0;
+  p_min = 0.0;
+  p_max = 25.0;
+  p_descr = "Storm base threshold (km).";
+  p_help = "Storms identification is only performed using CAPPIs at or above this threshold. Reflectivity values in CAPPIs below the base are ignored.";
+} base_threshold;
+
+paramdef float {
+  p_default = 30.0;
+  p_min = 0.0;
+  p_max = 30.0;
+  p_descr = "Storm top threshold (km).";
+  p_help = "Storms identification is only performed using CAPPIs at or below this threshold. Reflectivity values in CAPPIs above the top are ignored.";
+} top_threshold;
+
+paramdef float {
+  p_default = 30.0;
+  p_min = 0.0;
+  p_descr = "Minimum storm size (km2 or km3 depending on input grid type).";
+  p_help = "Storms must exceed this size to be considered valie.  If the data is 2D (i.e. nz == 1), the units are km2; if the data is 3D, units are km3.";
+} min_storm_size;
+
+paramdef float {
+  p_default = 1000000000.0;
+  p_min = 1.0;
+  p_descr = "Maximum storm size (km2 or km3 depending on input grid type).";
+  p_help = "Storms must not exceed this size to be considered valid.  If the data is 2D (i.e. nz == 1), the units are km2; if the data is 3D, the units are km3.";
+} max_storm_size;
+
+commentdef {
+  p_header = "OPTIONS TO CHECK SECOND TRIP.";
+}
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check for storm range limits.";
+  p_help = "If the storm is at the limit of radar range, a flag is set.";
+} check_range_limits;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check for second trip characteristics.";
+  p_help = "If set, the storm orientation and shape are checked for second trip characteristics. An elongated, low storm with a major axis lined up with the radar indicates a likely second-trip echo. For a storm to be considered second-trip, all 3 of the following tests must be passwd: (a) the horizontal aspect ratio exceeds the given parameter; (b) the vertical aspect ratio exceeds the given parameter; (c) the horizontal orientation lies close to the line from the radra. If the storm is thought to be second-trip, the second-trip flag is set.";
+} check_second_trip;
+
+paramdef float {
+  p_default = 4.0;
+  p_min = 1.0;
+  p_max = 20.0;
+  p_descr = "Second trip detection vertical aspect threshold.";
+  p_help = "If the vertical aspect ratio exceeds this value, the storm may be flagged as second-trip.";
+} sectrip_vert_aspect;
+
+paramdef float {
+  p_default = 4.0;
+  p_min = 1.0;
+  p_max = 20.0;
+  p_descr = "Second trip detection horizontal aspect threshold.";
+  p_help = "If the horizontal aspect ratio (based on the ellipse) exceeds this value, the storm may be flagged as second-trip.";
+} sectrip_horiz_aspect;
+
+paramdef float {
+  p_default = 10.0;
+  p_min = 1.0;
+  p_max = 90.0;
+  p_descr = "Allowable second trip orientation error.";
+  p_help = "For a storm to be flagged as second-trip, the orientation must be aligned with the storm azimuth from the radar, within this allowable error.";
+} sectrip_orientation_error;
+
+commentdef {
+  p_header = "PRECIP RATE AND MASS PARAMETERS.";
+}
+
+paramdef float {
+  p_default = {55.0};
+  p_min = {40.0};
+  p_max = {70.0};
+  p_descr = "Hail reflectivity threshold";
+  p_help = "The threshold between rain and hail (dBZ)";
+} hail_dbz_threshold;
+
+typedef struct {
+  float coeff;
+  float expon;
+} zr_t;
+
+paramdef struct zr_t {
+  p_descr = "Z-R parameters";
+  p_help = "Parameters in Z-R relationship.";
+  p_default = {200.0, 1.6};
+} ZR;
+
+paramdef struct zr_t {
+  p_descr = "Z-M parameters";
+  p_help = "Parameters in Z-M relationship.";
+  p_default = {20465.0, 1.75};
+} ZM;
+
+paramdef float {
+  p_default = 3.0;
+  p_min = 0.01;
+  p_descr = "Dbz histogram interval.";
+  p_help = "Reflectivity interval for histogram computations related to the reflectivity distribution.";
+} dbz_hist_interval;
+
+commentdef {
+  p_header = "OPTIONS TO STORE STORM RUNS IN OUTPUT FILE.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to store runs in storm file";
+  p_help = "If set, the raw storm runs are stored in the storm file. A run is a contiguous block of reflectivity in the X direction for a given Y and Z. This is a useful way of storing storm grid locations reasonably efficiently. If the runs are stored, the exact 3D storm shape can be recreated from the storm file.";
+} store_storm_runs;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to store projected area runs in storm file";
+  p_help = "If set, the raw storm projected area runs are stored in the storm file. A run is a contiguous block of reflectivity in the X direction for a given Y. If these runs are stored, the exact 2D projected area storm shape can be recreated from the storm file.";
+} store_proj_runs;
+
+commentdef {
+  p_header = "OPTION TO CREATE VERIFICATION FILES.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create verification files.";
+  p_help = "If this is set, verification files will be stored in verify_dir. The verification files allow forecast verification against the regions which were actually used by the program to compute the storms. There are 2 fields: field 0 is the ALL_STORMS_FIELD - all storms above threshold are stored even if they do not meet other criteria such as minimum storm volume. Field 1 is the VALID_STORMS_FIELD, which only include the valid storms included in the storm file.";
+} create_verification_files;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Verify data directory.";
+  p_help = "If create_verification_files is TRUE, the verification files are stored in this directory.";
+} verify_dir;
+
+commentdef {
+  p_header = "OPTION TO CHECK STORM MORPHOLOGY.";
+  p_text = "The storm morphology check allows you to erode minor connections between storms when these connections really have no phyical significance.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check morphology";
+  p_help = "If this is set, morphology will be used for storm definition. A check is performed on storm morphology to reduce apparent mergers. The technique is as follows: 1. Compute euclidean distance (ed) of each point from edge of storm clump 2. Compute reflectivity excess above threshold, and divide by morphology_refl_divisor (in dbz/km). 3. Add ed to refl excess, to get interest map 4. Threshold interest map using morphology_erosion_threshold (in km). 5. Erode points which do not exceed the threshold, and which are not adjacent to a point which exceeds the threshold.";
+} check_morphology;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create morphology files for debugging.";
+  p_help = "If this is set, morphology files will be stored in morphology_dir.";
+} create_morphology_files;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Morphology data directory.";
+  p_help = "If create_morphology_files is TRUE, the morphology files are stored in this directory.";
+} morphology_dir;
+
+paramdef float {
+  p_default = 5.0;
+  p_min = 0.0;
+  p_max = 100.0;
+  p_descr = "Erosion threshold for morphology check (km).";
+  p_help = "Threshold to which morphology erosion is performed.";
+} morphology_erosion_threshold;
+
+paramdef float {
+  p_default = 10.0;
+  p_min = 0.1;
+  p_max = 100.0;
+  p_descr = "Reflectivity divisor for morphology check (dbz/km).";
+  p_help = "The morphology value for a point (km) is obtained by adding the euclidean distance to storm edge (km) to the reflectivity excess (above threshold) divided by this value (dbz/km).";
+} morphology_refl_divisor;
+
+commentdef {
+  p_header = "OPTION TO CHECK STORM TOPS.";
+  p_text = "The storm tops check allows you to remove areas with low tops prior to performing the storm identification. In this manner you can ignore regions of stratiform rain.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check tops";
+  p_help = "If this is active, areas with radar tops below min_radar_tops will be removed from the data prior to storm identification. The tops_edge_margin parameter allows you to account for tilted storms, leaving a  margin around the area to be removed.";
+} check_tops;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create tops files for debugging.";
+  p_help = "If this is set, tops files will be stored in tops_dir.";
+} create_tops_files;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Radar tops data directory.";
+  p_help = "If create_tops_files is TRUE, the tops files are stored in this directory.";
+} tops_dir;
+
+paramdef float {
+  p_default = 4.5;
+  p_min = 0.0;
+  p_max = 25.0;
+  p_descr = "Minimum radar tops (km).";
+  p_help = "Minimum radar tops for valid radar data - see check_tops.";
+} min_radar_tops;
+
+paramdef float {
+  p_default = 1.5;
+  p_min = 0.0;
+  p_max = 10.0;
+  p_descr = "Margin placed around tops when computing min_tops field (km).";
+  p_help = "This takes into account the fact that some storms may be tilted. Grid points within this margin are left intact.";
+} tops_edge_margin;
+
+commentdef {
+  p_header = "AUTO-RESTART OPTION.";
+  p_text = "This allows you to automatically restart the program at a given time of day (GMT). This keeps the output files simple - there is one series of files per day. If storm tracking is running it is also restarted.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Auto-restart option";
+  p_help = "If set, the program restarts at restart_time (GMT). The data from the previous 'restart_overlap_period' is copied into the new file, so that tracks at restart time will have some history. Use of this option ensures that the storm and track files will not grow forever.";
+} auto_restart;
+
+typedef struct {
+  int hour;
+  int min;
+} restart_time_t;
+
+paramdef struct restart_time_t {
+  p_descr = "The time in the day (UCT/GMT) at which restart occurs.";
+  p_help = "The program will check for the passing of this time. Once data beyond this time is found, restart will occur.\n";
+} restart_time;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 0;
+  p_descr = "The period copied to the new file on restart (secs).";
+  p_help = "On restart, the program copies some of the previous file, to provide history for storm_track. This is the duration of the copied data.";
+} restart_overlap_period;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Cleanup on restart option";
+  p_help = "If set, the program will delete old storm files on restart. This allows the program to keep the disk usage low.";
+} remove_old_files_on_restart;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag to force restart at first opportunity.";
+  p_help = "Normally the restart time will be set so that at least one day elapses before the restart. This flag forces the restart at the first opportunity. This option is normally only used for debugging.";
+} restart_no_delay;
+
+
+
+

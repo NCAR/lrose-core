@@ -1,0 +1,22 @@
+########################################################################
+# parameters file for clutter_compute
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# April 1991
+#
+#########################################################################
+
+#
+# debugging
+#
+
+clutter_compute.debug: false
+clutter_compute.malloc_debug_level: 0
+
+#
+# directories and file paths
+#
+
+clutter_compute.clutter_dir: $(TITAN_HOME)/clutter
+clutter_compute.clutter_file_path: $(TITAN_HOME)/clutter/median

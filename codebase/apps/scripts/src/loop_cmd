@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+# loop_cmd: Run a command every x seconds.
+#
+# Usage:
+#   loop_cmd <options>
+#
+# Options:
+#   -help              : Print usage
+#   -command <command> : Command to run (REQUIRED)
+#   -interval <secs>   : Interval between running command (default = 2)
+#   -debug             : Print debug messages
+#
+# N. Rehak  Feb 1997 NCAR/RAP
+#
+
+
+use Getopt::Long;
+
+# Get the program basename.
+($prog = $0) =~ s|.*/||;
+
+# Unbuffer output.
+$| = 1;
+
+# Initialize command line arguments
+$opt_command = "";
+$opt_interval = 2;
+
+# Save the usage to print to the user if there is a problem
+$usage =
+    "Usage: $prog [options]\n" .
+    "   -help              : Print usage\n" .
+    "   -command <command> : Command to execute (REQUIRED)\n" .
+    "   -interval <secs>   : Seconds between command execution (default = $opt_interval)\n" .
+    "   -debug             : Print debug messages\n";
+
+# Get the arguments from the command line
+$result = &GetOptions('help',
+		      'command=s',
+		      'interval=i',
+		      'debug');
+
+if ($result == 0 ||
+    $opt_help)
+{
+    print $usage;
+    exit 0;
+}
+
+# Execute the given command every $opt_interval seconds
+while ()
+{
+    if ($opt_debug)
+    {
+	print "Executing $opt_command\n";
+    }
+
+    ((system("$opt_command") >> 8) == 0) ||
+	warn "system: $opt_command: error";
+
+    sleep($opt_interval);
+}

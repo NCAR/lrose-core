@@ -1,0 +1,132 @@
+#!/usr/bin/perl --
+# pullmcg: Pull Kavouras radar mosaic data files from an NFS partition.
+# Tres Hofmeister <tres@ncar.ucar.edu>	Tue Oct 25 17:00:00 MDT 1994
+
+require 'stat.pl';
+
+use Getopt::Long;
+
+# Get the program basename.
+($prog = $0) =~ s|.*/||;
+
+# Unbuffer output.
+$| = 1;
+
+$dir = "/kavouras/mcg";		# Data directory.
+$interval = 2;			# Data directory polling interval.
+
+%months = (
+    JAN,  1,
+    FEB,  2,
+    MAR,  3,
+    APR,  4,
+    MAY,  5,
+    JUN,  6,
+    JUL,  7,
+    AUG,  8,
+    SEP,  9,
+    OCT, 10,
+    NOV, 11,
+    DEC, 12
+);
+    
+# Initialize the command line arguments
+$opt_output_dir = ".";
+$opt_debug = 0;
+
+# Save the usage to print to the user if there is a problem
+$usage =
+    "Usage: $prog [options]\n" .
+    "Options:\n" .
+    "   -help               : Print usage\n" .
+    "   -output_dir <dir>   : Output dir (default = $opt_output_dir)\n" .
+    "   -debug              : Print debug messages\n";
+
+# Get the arguments from the command line
+$result = &GetOptions('help',
+		      'output_dir=s',
+		      'debug');
+
+if ($result == 0 ||
+    $opt_help) {
+    print $usage;
+    exit 0;
+}
+
+# Make sure the output directory exists
+mkdir($opt_output_dir, 0755) ||
+    die "mkdir: $opt_output_dir: $!" unless -d $opt_output_dir;
+
+
+# Monitor the data directory for new files.
+while () {
+    # Get the directory's modification time.
+    ($mtime = (stat($dir))[$ST_MTIME]) || die "stat: $!";
+
+    if ($mtime > $old_mtime) {
+	opendir(DIR, $dir) || die "Can't open directory $dir";
+
+	# Skip the current and parent directory entries.
+	@files = grep(!/^\.\.?$/, readdir(DIR));
+	closedir(DIR);
+
+	# Exclude subdirectories.
+	@files = grep(!-d, @files);
+
+	# Look for new files.  We'll always send what's
+	# lying around initially.
+	grep($mark{$_}++, @old_files);
+	@new_files = grep(!$mark{$_}, @files);
+
+	if ($opt_debug) {
+	    $s = @new_files == 1 ? '' : 's';
+	    print join("\n  ", "New file$s:", @new_files), "\n"
+		if @new_files;
+	}
+
+	# Copy the files to a local directory, renaming them.
+	&retrieve(*new_files);
+
+	# Prepare for the next iteration of the loop.
+	$old_mtime = $mtime;
+	@old_files = @files;
+	undef %mark;
+	undef @new_files;
+    }
+    sleep($interval);
+}
+
+
+# Pull the list of files to the local directory.
+sub retrieve {
+    local(*files) = @_;
+
+    foreach $file (@files) {
+	$file = $dir . '/' . $file;
+	open(FILE, $file) || die "open: $file: $!";
+
+	# Pull the date from the first 12 bytes of the ASCII file header.
+	# Example date format: 25OCT94 2005
+	read(FILE, $_, 12, 0);
+	($day, $month, $year, $hour, $minute) = /^(..)(...)(..) (..)(..)/;
+
+	# Convert the alphabetic month to a numeric month.
+	$month = $months{$month};
+
+	# Convert the two digit year to a four digit year.
+	$year += ($year < 70) ? 2000 : 1900;
+
+	# Build the local directory name.
+	$ldir = $year . $month . $day;
+	$output_dir = $opt_output_dir . '/' . $ldir;
+
+	close(FILE) || warn "close: $tmp: $!";
+	mkdir($output_dir, 0755) ||
+	    die "mkdir: $output_dir: $!" unless -d $output_dir;
+
+	# Build the local file name.
+	$rename = $output_dir . '/' . $hour . $minute . '00' . '.mcg';
+	system("/bin/cp $file $rename");
+    }
+}
+

@@ -1,0 +1,217 @@
+/*
+ * ufnexrad_to_socket.paramdef
+ *
+ * This file contains the TDRP parameter definitions for
+ * ufnexrad_to_socket.
+ */
+
+paramdef struct file_info
+{
+  p_descr = "file information";
+  p_help = "Information about the input files used by ufnexrad_to_socket.";
+
+  p_field_name = { file_id_string,
+                   field_name,
+                   field_factor,
+                   field_scale,
+                   field_bias,
+                   primary_flag };
+
+  p_field_type = { string,
+                   string,
+                   long,
+                   long,
+                   long,
+                   boolean };
+} file_info[];
+
+
+paramdef struct tilt_table
+{
+  p_descr = "tilt table";
+  p_help = "Table of tilt information including target elevation.";
+
+  p_field_name = { target_elevation,
+                   primary_tilt,
+                   secondary_tilt };
+
+  p_field_type = { double,
+                   long,
+                   long };
+} tilt_table[];
+
+
+paramdef struct radar_params
+{
+  p_descr = "radar parameters";
+  p_help = "Default radar parameters.";
+
+  p_field_name = { radar_id,
+                   samples_per_beam,
+                   pulse_width,           /* nano-secs */
+                   wavelength };          /* cm */
+
+  p_field_type = { long,
+                   long,
+                   double,
+                   double };
+
+  p_default = { 0,
+                64,
+                1666.67,
+                10.0 };
+} radar_params;
+
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "TRUE if running in debug mode; FALSE otherwise.";
+  p_default = { false };
+} debug;
+
+
+paramdef long
+{
+  p_descr = "malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+  p_default = { 0 };
+  p_min = { 0 };
+  p_max = { 3 };
+} malloc_debug_level;
+
+paramdef boolean
+{
+  p_descr = "field order flag";
+  p_help = "TRUE if each field is transmitted in order; FALSE if the field values are interspersed.";
+  p_default = { false };
+} data_field_by_field;
+
+
+paramdef boolean
+{
+  p_descr = "set time to current flag";
+  p_help = "TRUE if data time is set to the current time; FALSE if the data time is sent unchanged.";
+  p_default = { false };
+} set_time_to_current;
+
+
+paramdef enum scan_mode
+{
+  p_descr = "scan mode";
+  p_help = "SCAN_SECTOR_MODE, SCAN_RHI_MODE or SCAN_SURVEILLANCE_MODE";
+  p_options = { SCAN_SECTOR_MODE, SCAN_RHI_MODE, SCAN_SURVEILLANCE_MODE };
+  p_default = { SCAN_SURVEILLANCE_MODE };
+} scan_mode;
+
+
+paramdef long
+{
+  p_descr = "summary interval";
+  p_help = "Interval between printing summary information.";
+  p_default = { 360 };
+} summary_interval;
+
+
+paramdef boolean
+{
+  p_descr = "print summary flag";
+  p_help = "Print summary information while running?";
+  p_default = { false };
+} summary_print;
+
+
+paramdef long
+{
+  p_descr = "header interval";
+  p_help = "Interval between printing header information.";
+  p_default = { 360 };
+} header_interval;
+
+
+paramdef boolean
+{
+  p_descr = "print header flag";
+  p_help = "Print header information while running?";
+  p_default = { false };
+} header_print;
+
+
+paramdef long
+{
+  p_descr = "output port";
+  p_help = "Port used for sending radar information to clients.";
+  p_default = { 60000 };
+} output_port;
+
+
+paramdef boolean
+{
+  p_descr = "check gate spacing flag";
+  p_help = "Check gate spacing while running?";
+  p_default = { false };
+} check_gate_spacing;
+
+
+paramdef long
+{
+  p_descr = "target gate spacing";
+  p_help = "Target gate spacing in meters.";
+  p_default = { 250 };
+} target_gate_spacing;
+
+
+paramdef long
+{
+  p_descr = "target start range";
+  p_help = "Output start range in meters, usually half of gate spacing.";
+  p_default = { 125 };
+} target_start_range;
+
+
+paramdef long
+{
+  p_descr = "device read wait";
+  p_help = "Delay between beam reads in micro-seconds.";
+  p_default = { 0 };
+} device_read_wait;
+
+
+paramdef long
+{
+  p_descr = "num output gates";
+  p_help = "Number of gates to output for each beam.";
+  p_default = { 920 };
+} ngates_out;
+
+
+paramdef long
+{
+  p_descr = "num gates dropped";
+  p_help = "Number of start gates to be dropped.";
+  p_default = { 0 };
+} ngates_dropped;
+
+
+paramdef long
+{
+  p_descr = "time correction";
+  p_help = "Seconds added to the data time before transmission.";
+  p_default = { 0 };
+} time_correction;
+
+
+paramdef string
+{
+  p_descr = "input file path";
+  p_help = "Input file directory path specification.";
+  p_default = { "." };
+} input_file_path;
+
+
+paramdef string
+{
+  p_descr = "input file specifier";
+  p_help = "Regular expression, like that used in the ls command, specifying the input files of interest.";
+  p_default = { "*" };
+} input_file_spec;

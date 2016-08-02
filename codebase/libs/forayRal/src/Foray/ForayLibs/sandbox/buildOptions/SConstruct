@@ -1,0 +1,16 @@
+
+
+buildOptions = Options('buildOpts.py')
+buildOptions.Add('GOVALUE','CPP #define value',8)
+
+env      = Environment(options=buildOptions, CCFLAGS='-g', LDFLAGS='-g', LINKFLAGS='-g',
+                       CPPDEFINES={'GOVALUE':'${GOVALUE}'})
+
+progNode = env.Program('go',source=['main.cpp'])
+
+env.Default([progNode])
+
+Help(buildOptions.GenerateHelpText(env))
+
+
+

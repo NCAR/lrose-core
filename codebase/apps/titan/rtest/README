@@ -1,0 +1,94 @@
+RUNNING REAL-TIME TITAN TEST - RTEST
+====================================
+
+1. Enviromnent.
+---------------
+
+The environment variable RTEST_HOME must be set to the rtest
+top-level directory.
+
+Usually:
+
+  setenv RTEST_HOME $TITAN_HOME/rtest
+
+The directory $RTEST_HOME/bin must be in the path.
+
+TITAN binaries must be installed and in the path.
+
+2. Create the lookup tables.
+----------------------------
+
+Run create_rc_table.rtest. This stores the tables in
+the tables directory.
+
+3. Start the test.
+------------------
+
+Run start_rtest_all
+
+4. Check display.
+-----------------
+
+After a few nimutes, the display should show radar data and 
+storm track data.
+
+5. Kill the test.
+-----------------
+
+Run kill_rtest_all.
+
+6. Clean up the data and tables.
+--------------------------------
+
+Run delete_rtest_data and delete_rtest_tables.
+
+DATA FLOW
+=========
+
+1. Test data creation.
+----------------------
+The program test2gate resamples radar data from a Cartesian
+volume file stored in dobson format. The resampled data is
+formatted into gate data format and made available on a
+socket.
+
+2. Ingest.
+----------
+polar_ingest ingests the data and places it in a shared memory
+buffer. polar2mdv reads the buffers, performs the Cartesian 
+transformation and stores the data in MDV files in the
+cdata directory.
+
+3. Storm tracking.
+------------------
+storm_ident identifies the storms in the MDV files and stores
+the results in storms files in the storms directory. storm_ident
+communicates with storm_tarck via shared memory, coordinating
+the two programs. storm_track tracks the identified storms and
+stores the results in track files in the storms directory.
+
+4. Precip products.
+-------------------
+precip_map is run to procuce a forecast and accumulation product.
+These are stored in MDV files in the precip_fcast and precip_accum
+directories.
+
+5. Reflectivity forecast.
+-------------------------
+precip_map is run to procuce a reflectivity forecast product.
+This is stored in MDV files in the refl_fcast directories.
+
+6. Forecast monitor.
+--------------------
+forecast_monitor is run to monitor the accuracy of the forecasts.
+The results are stored in the fmon directory.
+
+7. Data servers.
+----------------
+The dobson_server is used to serve out the MDV file data. The track
+server serves out storm and track data.
+
+8. Displays.
+------------
+rview and time_hist read data from the servers.
+

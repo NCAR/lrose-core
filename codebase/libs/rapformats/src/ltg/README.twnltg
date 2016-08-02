@@ -1,0 +1,24 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:51 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+		Taiwan Lightning Data Format
+		------------------------------
+
+CAA gets lightning data from CWB Forecasting Center
+
+The lightning data files are named lmmddhh.mm, where hhmm is the
+Greenwich Mean Time (GMT) in which the file was uplinked.  Each file
+consists of a variable number of records or empty lines, with one record
+for each lightning stroke which has occurred during that interval.  Each
+record consists of a series of asc text:
+
+	- 11 bytes Time 		(Hour:Min:Sec.Msec)
+	- 6 bytes  Latitude		(Degrees)
+	- 6 bytes  Longitude		(Degrees)
+

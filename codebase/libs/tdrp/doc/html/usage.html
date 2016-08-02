@@ -1,0 +1,49 @@
+<html>
+
+<head>
+<title>TDRP usage</title>
+</head>
+
+<body>
+
+<h3>TDRP usage</h3>
+
+The TDRP usage is printed out for the user if the <a
+href="command_line.html">command line option</a> '-tdrp_usage' is
+invoked.<p>
+
+However, it is also conventional for the programmer to provide
+a complete usage for the program via the '-h' command line arg.
+In this case, the program should print out its specific usage,
+and then follow up with the TDRP usage.<p>
+
+The following code shows an example of a function which does this:<p>
+
+<pre>
+static void usage(char *prog_name, FILE *out)
+{
+  fprintf(out, "%s%s%s%s",
+	  "Usage: ", prog_name, " [options as below]\n",
+	  "   [ -h] produce this list.\n"
+	  "   [ -debug ] print debug messages\n"
+	  ..........);
+  TDRP_usage(out);
+}
+</pre>
+
+The following code fragment demonstrates how it may be invoked:
+
+<pre>
+  for (i =  1; i < argc; i++) {
+    if (!strcmp(argv[i], "-h")) {
+      usage(prog_name, stdout);
+      exit(0);
+    } else if .....
+
+    }
+  } /* i */
+</pre>
+
+</body>
+</html>
+

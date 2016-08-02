@@ -1,0 +1,394 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for DsFileDist
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 1999
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SETTING UP PARAMETER FILES FOR DsFileDist";
+  p_text =
+    "The main parameter file specifies the global behavior of DsFileDist. The program may be started with the -params option to specify a global parameter file, or there may be a '_DsFileDist' file in $RAP_DATA_DIR (or $DATA_DIR).\n"
+    " \n"
+    "Local parameter files in the directory tree may override the global parameters - see 'LOCAL DISTRIBUTION PARAMETERS'.\n\n";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+  p_text = "ONLY set these in the global file. DO NOT set them in the local parameter files down in the data directory tree.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Program instance for process registration.";
+  p_help = "This program registers with procmap. This is the instance used for registration.";
+} instance;
+
+paramdef int {
+  p_default = 128;
+  p_descr = "File disrtibution is handled by child processes. This is the max number of child processes allowed to be active at a time.";
+  p_help = "If the child count reaches this number, no new children will be created until an existing child exits. This prevents the number of children from becoming excessive should children hang.";
+} max_n_threads;
+
+paramdef int {
+  p_default = 4096;
+  p_descr = "Maximum number of files in file queue.";
+  p_help = "This app watches for new data files and adds them to a queue, waiting to be written to the target hosts. The files are written as fast as reasonable, and normally the queue does not grow large. However, if something prevents the files from being written, the queue will grow in size. If the queue reaches the limit specified by this parameter, file entries will be discarded and a warning will be printed.";
+} max_file_queue_size;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "No threads option. Forces single-threaded operation - no children are created.";
+  p_help = "For debugging purposes. Note that the program will handle only a single data directory in single-threaded operation.";
+} no_threads;
+
+paramdef int {
+  p_default = -1;
+  p_descr = "Set the timeout for server connections, in milliseconds.";
+  p_help = "If set to -1, the server connections open in blocking mode. This is the default and is recommended to internet operations. If you have a local network and wish to speed up timeout for hosts which are not up, you can set this to a positive number. 10000 (10 secs) is suggested.";
+} server_open_timeout_msecs;
+
+commentdef {
+  p_header = "DIRECTORY SEARCH PARAMETERS";
+  p_text = "ONLY set these in the global file. DO NOT set them in the local parameter files down in the data directory tree.";
+};
+
+paramdef string {
+  p_default = "";
+  p_descr = "Top-level directory.";
+  p_help = "DsFileDist searches recursively below source_top_dir for 'active' directories from which files are be distributed. If the specified directory starts with . or /, it is interpreted as an absolule path. If not, top_dir is computed relative to RAP_DATA_DIR.";
+} source_top_dir;
+
+paramdef string {
+  p_default = "/tmp";
+  p_descr = "Directory for temporary files.";
+  p_help = "DsFileDist uses temporary files to pass information from the child threads back to the main thread.";
+} tmp_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to periodically check for new active directories.";
+  p_help = "If TRUE, the program will periodically check for new active directories or directories which have been removed. See 'find_mode' for the definition of an active directory.\nTo force a new directory search, send the process a SIGHUP signal.\nSee 'new_directory_delay' for how often the check is performed. ";
+} check_for_new_directories;
+
+paramdef int {
+  p_default = 300;
+  p_min = 1;
+  p_descr = "Delay between checking for active directories using params (secs).";
+  p_help = "The program will sleep for this length of time between checking for new or removed _DsFileDist files.\nSee 'check_for_new_directories'.";
+} new_directory_delay;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to periodically check for new latest_data_info files.";
+  p_help = "Only applies to directories for which find_mode = FIND_LATEST_DATA_INFO. See 'find_mode' below. If TRUE, the program will periodically check for new _latest_data_info files to activate a directory. This applies to new data sets which appear AFTER DsFileDist has been started. To force a new search, send the process a SIGHUP signal.\nSee 'new_latest_data_info_delay' for how often the check is performed. ";
+} check_for_new_latest_data_info;
+
+paramdef int {
+  p_default = 60;
+  p_min = 1;
+  p_descr = "Delay between checking for new latest_data_info (secs).";
+  p_help = "The program will sleep for this length of time between checking for new _latest_data_info files.";
+} new_latest_data_info_delay;
+
+paramdef double {
+  p_default = 1.0;
+  p_min = 0.1;
+  p_descr = "Delay while checking a directory for new data (secs).";
+  p_help = "Only for latest_data_info_avail = false. The program will sleep for this length of time between checking a directory for new data.";
+} new_data_delay;
+
+paramdef int {
+  p_default = 8;
+  p_min = 1;
+  p_descr = "Max number of simultaneous active file transfers to each host.";
+  p_help = "The program will only allow this number of puts to be active to a single host at any time. This prevents the network from becoming overloaded by many simultaneous file transfers.";
+} max_simultaneous_per_host;
+
+paramdef int {
+  p_default = 2;
+  p_min = 1;
+  p_descr = "Number of tries to transfer a file.";
+  p_help = "Sometimes the transfer to a remote host will fail, possibly because of network problems. If max_n_tries_for_transfer is greater than 1, the application will retry to transfer the file. When the number of tries is exceeded, it will give up.";
+} max_n_tries_per_transfer;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Max age for an entry on the queue (secs).";
+  p_help = "When a file is found, an entry is added to the queue for distribution. If an entry exists on the queue for longer than this, it will be aged off. Normally this only happens if a destination host is down.";
+} max_age_on_queue;
+
+
+
+commentdef {
+  p_header = "WRITING DS MESSAGES DIRECTLY TO DISK.";
+  p_text = "This is done if the host in the desination url is set to 'localfile'. If this option is selected, then DsFileDist will write its output DsMessages to files on disk rather than communicating them to servers. These files can then be transmitted via a channel (such as an LDM or a serial line) to another host, where the program DsFile2Server may be used to read the files and send them to the approriate server.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to execute a script after a file is written due to the URL host being set to 'localfile'";
+  p_help = "If TRUE, the script named by the parameter 'post_file_write_script' is executed after a file is written. This may be used to put that file into an LDM queue.";
+} do_post_file_write_script;
+
+paramdef string {
+  p_default = "PostFileWriteScript";
+  p_descr = "Script to execute after writing a file if do_post_file_write_script is TRUE.";
+  p_help = "The name of the file that was just written is the first argument to the script.";
+} post_file_write_script;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "If the URL host is set to 'localfile' then the following host name will be substituted in the DsMsg URL.";
+  p_help = "Usually should be localhost.";
+} local_file_host;
+
+paramdef string {
+  p_default = "DsMsg";
+  p_descr = "Directory for message files.";
+  p_help = "If the URL host is set to 'localfile' then the input files will be packaged as DsMessages and written to this directory. If the path does not start with '.' or '/', it will be relative to RAP_DATA_DIR or DATA_DIR.";
+} local_file_dir;
+
+commentdef {
+  p_header = "LOCAL DISTRIBUTION PARAMETERS";
+  p_text =
+    "Only set these parameters in the local _DsFileDist files in the data directory tree. To avoid confusing behavior, it is good practice not to override the DEBUGGING or DIRECTORY SEARCH parameters.\n"
+    " \n"
+    "DsFileDist searches recursively down from the top dir, looking for _DsFileDist parameter files or _latest_data_info files - see 'find_mode' for a more detailed explanation. When a _DsFileDist file is found, it overrides the gobal parameters.\n"
+    " \n"
+    "If 'process' in the local params is FALSE, DsFileDist does not distribute files from that directory or any below it. This is useful for marking areas as off-limits so that they are not included in the search.\n";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Processing flag - controls whether we process this directory or not.";
+  p_help = "If FALSE, stop looking for _DsFileDist param files and do not process this directory. If TRUE, process using the param information at this level.";
+} process;
+
+typedef enum {
+  FIND_DSFILEDIST_PARAMS,
+  FIND_LATEST_DATA_INFO
+} find_mode_t;
+
+paramdef enum find_mode_t {
+  p_default = FIND_DSFILEDIST_PARAMS;
+  p_descr = "Mode for finding directories to be distributed.";
+  p_help =
+  " \n"
+  "FIND_DSFILEDIST_PARAMS: DsFileDist searches recursively from source_top_dir for '_DsFileDist' param files. If a '_DsFileDist' file is found, the directory is marked as active and files are distributed using the information in the _DsFileDist param file. Once a _DsFileDist file is found, the search does not continue below that directory, unless the find_mode is switched to FIND_LATEST_DATA_INFO. The parameters in the '_DsFileDist' file override those in the main parameters, and the combined parameters are used to control the file distribution. It is good practice to only include parameters in the LOCAL section, so that parameters such as debug and instance are not overridden.\n"
+  " \n"
+  "If 'process' in the local params is FALSE, DsFileDist does not distribute files from that directory.\n"
+  " \n"
+  "FIND_LATEST_DATA_INFO: if this is set in a '_DsFileDist' file, then we search recursively below that directory for '_latest_data_info' files insead of _DsFileDist param files. If a _latest_data_info file is found, the directory is marked as active, and the search does not continue below that level. The information in the _latest_data_info file, PLUS parameters set in the _DsFileDist file which set FIND_LATEST_DATA_INFO mode, are used to control distribution. The directory part of the URL is determined by stripping RAP_DATA_DIR (or DATA_DIR) from the active directory path.\n"
+  " \n"
+  "See dest_url_template and dest_url_list for more on the directory settings in the url.\n";
+} find_mode;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional extension for _DsFileDist param files.";
+  p_help = "Normally DsFileDist scans the directory tree for files named _DsFileDist. However, if this string has a non-zero length, it is appended to _DsFileDist as an extension, and only those files with the extension will be considered. For example, if the extension is set to 'special', then only param files named '_dsFileDist.special' will be considered.";
+} _dsFileDist_ext;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Indicates that _latest_data_info is available for reading.";
+  p_help = "Only applies to FIND_DSFILEDIST_PARAMS mode. If TRUE, we use the _latest_data_info files for notification that a file has arrived. Otherwise we scan the directory recursively for new files, and a latest_data_info file is created by this program to keep track of distribution times.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of files to be transferred (secs).";
+  p_help = "When checking for new files to distribute, files older than this will be ignored. See also 'max_age_at_copy_time'.";
+} max_valid_age;
+
+paramdef int {
+  p_default = 5;
+  p_min = 1;
+  p_descr = "Quiesence on a file before it is assumed to be complete (secs).";
+  p_help = "Only applicable when latest_data_info_avail = false. The program will wait for a file to stop growing before deciding that it has been completely written to disk.";
+} file_quiescence_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to only copy files with a given extension.";
+  p_help = "If TRUE, only files with extensions which match the parameter 'data_file_ext' will be copied.";
+} check_file_ext;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Specified data file extension before distribution.";
+  p_help = "See 'check_file_ext'.";
+} data_file_ext;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to allow redistribution of DsFileDist files.";
+  p_help = "If TRUE, allows files which have already been distributed by DsFileDist to be forwarded on. If FALSE, does not allow the redistribution of files which have already been distributed once. This is useful to prevent infinte loops in distribution of files between redundant hosts.";
+} allow_redistribution;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to force copy. Uses single TCP/IP message.";
+  p_help = "If TRUE, a single put message will be sent from the client to the server. The file will always be written, even if it already exists. If FALSE, the client will request the server to tell it whether to send the file. This request is made via an 'enquire' message. The server will tell the client whether to send the file. It will decline the copy request if the file already exists, and if the age of the file is less than the 'overwrite-age' parameter. This mode is intended for use with redundant data sources in which the file may be sent from more than one client.";
+} force_copy;
+
+paramdef int {
+  p_default = -1;
+  p_descr = "Overwrite age for existing file on target machine (secs).";
+  p_help = "If force_copy is true, the copy will be forced even if file exists on target machine. If force_copy is false, the file age on target machine will be checked. If the age exceeds 'overwrite_age', the file will be copied over existing file. If overwrite_age is -1, the file will never be overwritten.";
+} overwrite_age;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Max allowable age of files when copying starts (secs).";
+  p_help = "Before the program starts to copy a file, it will check the file age. If the age exceeds this maximum, the file will not be copied. See also 'max_valid_age'. The problem is that sometimes the network connection is bad or goes down, and the copying gets behind. When that happens, it may be that the program will try to copy files which are old. This parameter allows you to prevent old files from being copied. Set to -1 to disable checking, i.e., to force copying irrespective of the file age.";
+} max_age_at_copy_time;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to remove the file after copying.";
+  p_help = "Normally the file is not removed after copying. Setting this to TRUE will cause the file to be removed after a successful copy. This will only apply for a single URL destination. If you have more than 1 destination this parameter will be ignored and an error message will be generated.";
+} remove_after_copy;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write the latest data file to the input dir.";
+  p_help = "This is useful for keeping the data mapper up to date for external data sets which do not have a _latest_data_info file. This will only apply if 'latest_data_info_avail' is false.";
+} write_ldata_to_input_dir;
+
+typedef enum {
+  COMPRESSION_NONE = 0,
+  COMPRESSION_RLE = 1,
+  COMPRESSION_LZO = 2,
+  COMPRESSION_ZLIB = 3,
+  COMPRESSION_BZIP = 4,
+  COMPRESSION_GZIP = 5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_NONE;
+  p_descr = "Compression type for transfer.";
+  p_help = "RLE - simple run-length encoding, fastest. LZO - fast, not very compact, better than RLE. ZLIB - same as gzip, but without headers. Not as fast as LZO, better than RLE. More compact than RLE and LZO. BZIP - slow, very compact. GZIP - recommended.";
+} compression_type;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Use host list in the file to create the destination urls.";
+  p_help = "The host list file contains a list of destination hosts. Each entry in this list is merged with the url_template to create a list of destination urls.";
+} use_dest_host_list_file;
+
+paramdef string {
+  p_default = {
+    "fcopyp:://targethost1::",
+    "fcopyp:://targethost2:5445:",
+    "fcopyp:://targethost3::my_dir"
+  };
+  p_descr = "Specified URL list for destination hosts.";
+  p_help =
+    " \n"
+    "This is only used if parameter 'use_dest_host_list_file' is FALSE.\n"
+    " \n"
+    "URL format: fcopyp:://targethost:port:dir\n"
+    " \n"
+    "The files will be distributed to this list of hosts.\n"
+    " \n"
+    "If the directory part is empty, the target directory will be the same as the source directory, relative to RAP_DATA_DIR or DATA_DIR.\n"
+    " \n"
+    "If the directory part is set, the target directory will be as specified, relative to RAP_DATA_DIR or DATA_DIR, unless the dir starts with /, in which case it is taken as the absolute path.\n"
+    " \n"
+    "For FIND_LATEST_DATA_INFO mode: if the directory part is empty, the target directory will be the same as the source directory, relative to $DATA_DIR. If the directory part is set, the target directory will be $DATA_DIR + specified-dir + source-dir-relative-to-_DsFileDist-file.\n"
+    " \n"
+    "DsFileDist will NOT distribute files to either 'localhost' or the IP address of the local host, unless you specify the target directory. This behavior prevents an infinite loop caused by recursively writing data to a directory, then distributing it to itself. If you want to copy files to a different directory, MAKE SURE you have set a different directory, to prevent the infinit loop problem.\n"
+    " \n";
+} dest_url_list[];
+
+paramdef string {
+  p_default = "dest_host_list";
+  p_descr = "Path for destination host list file";
+  p_help = "Only used if parameter 'use_dest_host_list_file' is TRUE.";
+} dest_host_list_file_path;
+
+paramdef string {
+  p_default = "fcopyp:://::";
+  p_descr = "URL template for all destination URLs.";
+  p_help =
+    " \n"
+    "Only used if parameter 'use_dest_host_list_file' is TRUE.\n"
+    " \n"
+    "The host names from dest_host_list file are inserted into this template to create an array of URLs.\n"
+    " \n"
+    "See dest_url_list for rules on setting the target directory.\n"
+    " \n"
+    "Example:\n"
+    " \n"
+    "Suppose the template is:\n"
+    "\tfcopyp:://::my_dir\n"
+    "And the dest_host_list is:\n"
+    "\tluna\n"
+    "\tearth\n"
+    "\tmercury\n"
+    "Then the actual url list would be\n"
+    "\tfcopyp:://luna::my_dir\n"
+    "\tfcopyp:://earth::my_dir\n"
+    "\tfcopyp:://mercury::my_dir\n"
+    " \n";
+} dest_url_template;
+
+paramdef int {
+  p_default = 128;
+  p_descr = "Minimum expected transfer speed (kBytes/sec).";
+  p_help = "This should be set to the minimum speed expected on any of the lines to be used. The expected transfer time is set using this speed. If the transfer takes more than 10 times the expected time, the transfer is killed.";
+} minimum_expected_transfer_speed;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use file size to alter the order for sending files.";
+  p_help = "If FALSE, files are sent in the order in which they appear on the disk. If TRUE, this order is modified by the relative size of the files to be sent. See 'max_reorder_delay_fraction'.";
+} reorder_by_file_size;
+
+paramdef float {
+  p_default = 0.4;
+  p_min = 0.0;
+  p_max = 1.0;
+  p_descr = "The cumulative delay fraction used to make reorder decisions.";
+  p_help = "If reorder_by_file_size is TRUE, small files may be inserted into the put list ahead of larger files. This parameter controls how that decision is made. When we insert a file in the queue, we note its size, 'file_size'. Once it is in the queue, we keep track of how many bytes are inserted ahead of it, 'nbytes_inserted'. We compute the delay_fraction as nybytes_inserted divided by file_size. We only allow a file to be inserted ahead of another file if the delay fraction does not exceed this parameter, reorder_delay_fraction. The bytes inserted cause a delay for the files behind. Using this scheme, the fractional delay per file will always be less than the fraction specified.";
+} max_reorder_delay_fraction;
+

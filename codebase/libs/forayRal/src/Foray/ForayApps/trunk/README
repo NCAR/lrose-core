@@ -1,0 +1,65 @@
+ForayApps
+
+Author: Dennis Flanigan, dennisf@ucar.edu.
+
+Foray Apps are set of example applications that use
+the Foray libraries.
+
+
+SCons is required to build:
+	http://www.scons.org
+
+Foray is dependent on the netCDF library from unidata:
+	http://www.unidata.ucar.edu/software/netcdf
+
+
+
+Build Options:
+The ForayLibs build scripts accepts three options: ncdir,foraydir and prefix.
+ncdir specifies the root directory path where the netcdf library was
+installed.  foraydir specifies the root location where foray libraries
+will be installed. prefix defines the root location where foray apps will
+be installed  The command:
+
+     scons -h
+
+will print out the default and current values of the options.
+
+These options can be set from the command line.  This example
+sets ncdir to /usr/local
+  
+     scons ncdir=/usr/local
+
+
+Options can also be set in file named buildOpts.py.  This options files is 
+a python script.  Setting ncdir in buildOpts.py would look like this:
+
+     ncdir='/usr/local'
+
+
+If the buildOpts.py file does not exist, the build scripts will create
+one containing the options that override the defaults values.  
+
+Install Target:
+--------------
+Use the install target to install the foray libraries in the root library
+specified by the prefix option:
+
+     scons install prefix=/usr/local/foray
+
+This will install foray applications in
+
+     /usr/local/foray/bin
+
+
+
+
+
+
+
+
+
+
+
+
+

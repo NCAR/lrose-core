@@ -1,0 +1,124 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for SpdbXmlPut
+//
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Nov 2015
+//
+
+commentdef {
+  p_header = "Program name: SpdbXmlPut";
+  p_text = "SpdbXmlPut writes XML chunks to SPDB. It is intended to be used from the command line, or more commonly via a script. It can also take a comma or space delimited file, read it in, interpret it and write the results to SPDB in XML.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+typedef enum {
+  COMMAND_LINE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FILELIST;
+  p_descr = "Run mode";
+  p_help = "In FILELIST mode, move through the list of specified files, processing them one at a time. The data in the files is processed a line at a time, and the the time for each entry is read from the line contents. In COMMAND_LINE mode, the XML is specified on the command line, along with the valid and expire times.";
+} mode;
+
+commentdef {
+  p_header = "FILELIST MODE.";
+  p_text = "The input file, if specified, should be delimited using a constant character, normally comma or space. The first line should contain labels for each of the colums. The labels will be used to create the xml tags.\n\nSome special labels will be interpreted for date/time. These are: \n\n  'yyyymmddhhmmss' - single date and time column.\n\n 'year', 'month', 'day', 'hour', 'min', 'sec': individual date/time columns.";
+}
+
+paramdef string {
+  p_default = "#";
+  p_descr = "Character with which to start a comment line.";
+  p_help = "Comment lines are ignored except for the first line, which should contain the headings for each column.";
+} comment_character;
+
+paramdef string {
+  p_default = ",";
+  p_descr = "ASCII column delimiter in input file.";
+  p_help = "Normally comma or space delimiter.";
+} column_delimiter;
+
+commentdef {
+  p_header = "COMMAND_LINE MODE.";
+  p_text = "The valid time, expire time and XML contents are read from the command line. You can specify the entire xml string, or specify individual pairs of tags and values.";
+}
+
+paramdef string {
+  p_default = "SpdbXmlPut";
+  p_descr = "Outer tag for XML.";
+  p_help = "This will delimit the entire XML entry. It is only used if individual tags/vals are specified.";
+} outer_xml_tag;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "spdb/xml";
+  p_descr = "Output URL.";
+  p_help = "Data will be put to the SPDB data base at this URL.";
+} output_url;
+
+paramdef string {
+  p_default = "0";
+  p_descr = "Datatype for SPDB.";
+  p_help = "If numeric, it is used directly. If non-numeric the first 4 bytes are hashed into a number.";
+} datatype;
+
+paramdef string {
+  p_default = "0";
+  p_descr = "Datatype2 for SPDB.";
+  p_help = "If numeric, it is used directly. If non-numeric the first 4 bytes are hashed into a number.";
+} datatype2;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "data expire seconds";
+  p_help = "Number of seconds the data is valid before it should be expired.";
+} expire_secs;
+
+paramdef int {
+  p_default = 55;
+  p_descr = "SPDB product ID";
+  p_help = "Identifies the type of data in the data base. For generic XML data, this is 55.";
+} spdb_id;
+
+paramdef string {
+  p_default = "XML data";
+  p_descr = "SPDB product label.";
+  p_help = "Identifies the type of data in the data base. For generic XML data, this is 'XML data'.";
+} spdb_label;

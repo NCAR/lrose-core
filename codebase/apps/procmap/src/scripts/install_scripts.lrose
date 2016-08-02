@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# install selected scripts in the bin dir
+# First arg is the target dir
+
+bin_dir=$1
+
+mkdir -p $bin_dir
+
+/bin/cp -f \
+    auto_restart \
+    auto_restart_stats \
+    DataMapper_list_check \
+    procmap_auto_restart \
+    procmap_list_kill \
+    procmap_list_check \
+    procmap_list_start \
+    start_inst \
+    $bin_dir
+

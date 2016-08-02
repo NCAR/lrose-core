@@ -1,0 +1,110 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+##########################################################################
+#
+# Makefile targets for C, C++ and FORTRAN program binaries
+#
+# Mike Dixon
+#
+# RAP,NCAR,Boulder,Colorado,80307,USA
+# 
+# Nov 1998
+#
+###########################################################################
+
+install_bin: install_bin_path
+
+install_bin_path: all
+	if $(TEST) -d $(RAP_BIN_DIR); then :; else \
+		$(MKDIR) $(RAP_BIN_DIR); fi ; \
+	if $(TEST) -f $(INSTALL_BIN_PATH) ;\
+	then \
+	 	$(MV) $(RAP_BIN_DIR)/$(TARGET_FILE) $(RAP_BIN_DIR)/$(TARGET_FILE).bak ;\
+		$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH) ;\
+		$(RM) $(RAP_BIN_DIR)/$(TARGET_FILE).bak ;\
+	else \
+		$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH); \
+	fi
+	if $(TEST) "$(DO_SRC_README)" = "" ; then :; else \
+	        echo "$(TARGET_FILE) -- source: `$(PWD)`" >> $(RAP_BIN_DIR)/README.src_dir_info ;\
+	fi
+
+install: install_bin
+
+install_shared_bin:
+	$(MAKE) RAP_BIN_DIR=$(RAP_SHARED_BIN_DIR) install_bin
+	strip $(RAP_SHARED_BIN_DIR)/$(TARGET_FILE)
+
+install_shared: install_shared_bin
+
+install_cgi:
+	$(MAKE) RAP_BIN_DIR=$(RAP_CGI_BIN_DIR) install_bin
+
+copy_bin:
+	if $(TEST) -d $(RAP_BIN_DIR); then :; else \
+		$(MKDIR) $(RAP_BIN_DIR); fi ; \
+	if $(TEST) -f $(TARGET_FILE) ; then \
+		if $(TEST) -f $(RAP_BIN_DIR)/$(TARGET_FILE) ;\
+		then \
+			$(MV) $(RAP_BIN_DIR)/$(TARGET_FILE) $(RAP_BIN_DIR)/$(TARGET_FILE).bak ;\
+			$(CP) $(TARGET_FILE) $(RAP_BIN_DIR) ;\
+			$(RM) $(RAP_BIN_DIR)/$(TARGET_FILE).bak ;\
+		else \
+			$(CP) $(TARGET_FILE) $(RAP_BIN_DIR); \
+		fi ;\
+	else \
+		echo "ERROR: $(TARGET_FILE) does not exist" ;\
+	fi
+
+clean_bin:
+	$(RM) $(TARGET_FILE)
+
+strip:
+	strip $(TARGET_FILE)
+
+install_copyright:
+	if $(TEST) -f copyright_notice.txt ; then \
+		if $(TEST) -d $(RAP_COPYRIGHT_DIR); then :; else \
+			$(MKDIR) $(RAP_COPYRIGHT_DIR); fi ;\
+		$(CP) copyright_notice.txt $(RAP_COPYRIGHT_DIR)/$(TARGET_FILE)_copyright_notice.txt ;\
+	fi
+
+install_pgi_bin: install_pgi_bin_path
+
+install_pgi_bin_path: pgi
+	if $(TEST) -d $(RAP_PGI_BIN_DIR); then :; else \
+		$(MKDIR) $(RAP_PGI_BIN_DIR); fi ; \
+	if $(TEST) -f $(INSTALL_PGI_BIN_PATH) ;\
+	then \
+	 	$(MV) $(RAP_PGI_BIN_DIR)/$(TARGET_FILE) $(RAP_PGI_BIN_DIR)/$(TARGET_FILE).bak ;\
+		$(CP) $(TARGET_FILE) $(INSTALL_PGI_BIN_PATH) ;\
+		$(RM) $(RAP_PGI_BIN_DIR)/$(TARGET_FILE).bak ;\
+	else \
+		$(CP) $(TARGET_FILE) $(INSTALL_PGI_BIN_PATH); \
+	fi
+	if $(TEST) "$(DO_SRC_README)" = "" ; then :; else \
+	        echo "$(TARGET_FILE) -- source: `$(PWD)`" >> $(RAP_PGI_BIN_DIR)/README.src_dir_info ;\
+	fi
+
+install_intel_bin: install_intel_bin_path
+
+install_intel_bin_path: intel
+	if $(TEST) -d $(RAP_INTEL_BIN_DIR); then :; else \
+		$(MKDIR) $(RAP_INTEL_BIN_DIR); fi ; \
+	if $(TEST) -f $(INSTALL_INTEL_BIN_PATH) ;\
+	then \
+	 	$(MV) $(RAP_INTEL_BIN_DIR)/$(TARGET_FILE) $(RAP_INTEL_BIN_DIR)/$(TARGET_FILE).bak ;\
+		$(CP) $(TARGET_FILE) $(INSTALL_INTEL_BIN_PATH) ;\
+		$(RM) $(RAP_INTEL_BIN_DIR)/$(TARGET_FILE).bak ;\
+	else \
+		$(CP) $(TARGET_FILE) $(INSTALL_INTEL_BIN_PATH); \
+	fi
+	if $(TEST) "$(DO_SRC_README)" = "" ; then :; else \
+	        echo "$(TARGET_FILE) -- source: `$(PWD)`" >> $(RAP_INTEL_BIN_DIR)/README.src_dir_info ;\
+	fi

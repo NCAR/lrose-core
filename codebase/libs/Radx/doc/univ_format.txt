@@ -1,0 +1,172 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:35 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+This document has been modified/extracted from the original Journal
+article on Universal Format.  Editorial modifications are noted in
+[square brackets].    RAR 10/2000
+
+
+The original report can be found in:
+
+	Barnes, Stanley L, 1980: Report on a meeting to establish a
+	common Doppler radar data exchange format.
+	The Bulletin of the American Meteorological Society, Vol 61, 
+	    No. 11, pp1401-1404. Nov 1980
+
+
+                  Universal Format Radar Tape Structure
+		  =====================================
+                  
+
+Universal format tapes conform to the following five specification:
+
+ 1. 9 track tapes, 1600 or 6250 cpi density. [Now extended to other media]
+ 2. 16-bit words, signed integers, 2's complement.
+           [Note that words are "big-endian" (most significant byte at end of word)]
+ 3. Physical records, length <= 4095 words.  [Record lengths now < 65536 bytes.]
+ 4. File marks between volume scans (volumes).
+ 5. ASCII words are left justified, blank filled.
+
+
+MANDATORY HEADER BLOCK
+
+  Word
+    1   UF (ASCII)
+    2   Record length (16-bit words)
+    3   Position of first word of nonmandatory header block.  (If no
+         nonmandatory header block exists, this points to the first
+         existing header block following the mandatory.  In this way,
+         word (3) always gives 1 + the length of the mandatory header.
+    4   Position of first word of local use header block.  (If no local
+          use headers exist, this points to the start of the data
+          header block.)
+    5   Position of first word of data header block
+    6   Physical record number relative to beginning of file
+    7   Volume scan number relative to beginning of tape
+    8   Ray number within volume scan
+    9   Physical record number within the ray (one for the first
+         physical record of each ray)
+
+   10   Sweep number within this volume scan
+11-14   Radar name (8ASCII characters, includes processor ID.)
+15-18   Site name (8 ASCII characters)
+   19   Degrees of latitude (North is positive, South is negative)
+   20   Minutes of latitude
+   21   Seconds (x64) of latitude
+   22   Degrees of longitude (East is positive, West is negative)
+   23   Minutes of longitude
+   24   Seconds (x64) of longitude (Note:  minutes and seconds have same
+         sign as degrees.)
+   25   Height of antenna above sea level (meters)
+   26   Year (of data)  (last 2 digits)
+   27   Month
+   28   Day
+   29   Hour
+   30   Minute
+   31   Second
+   32   Time zone (2 ASCII -- UT, CS, MS, etc.)
+   33   Azimuth (degrees x 64) to midpoint of sample
+   34   Elevation (degrees x 64)
+   35   Sweep mode:  0 - Calibration
+                     1 - PPI (Constant elevation)
+                     2 - Coplane
+                     3 - RHI (Constant azimuth)
+                     4 - Vertical
+                     5 - Target (stationary)
+                     6 - Manual
+                     7 - Idle (out of control
+   36   Fixed angle (degrees x 64) (e.g., elevation of PPI; azimuth
+          of RHI; coplane angle)
+   37   Sweep rate (degrees/seconds x 64)
+   38   Generation date of common format - Year
+   39   Month
+   40   Day
+41-44   Tape generator facility name (8 character ASCII)
+   45   Deleted of missing data flag (Suggest 100000 octal)
+
+
+OPTIONAL HEADER BLOCK
+
+  Word
+  1-4   Project name (8 ASCII)
+    5   Baseline azimuth (degrees x 64)
+    6   Baseline elevation (degrees x 64)
+    7   Hour (start of current volume scan)
+    8   Minute (start of current volume scan)
+    9   Second (start of current volume scan)
+10-13   Field tape name (8 ASCII)
+   14   Flag (= 0 if number of range gates, R min, and spacing are the
+          same for all data within this volume scan; = 1 if these are
+          the same only within each sweep; = 2 if these are the same
+          only within each ray).
+
+
+LOCAL USE HEADER BLOCK
+
+  Any use, any contents
+
+
+DATA HEADER
+
+  Word
+    1   Total number of fields this ray
+    2   Total number of records this ray
+    3   Total number of fields this record
+    4   1st field name (2 ASCII): e.g., VE - velocity (m/s)
+                                        SW - spectral width (m/s)
+                                        DM - reflected power dB(mW)
+                                        DZ - dB(Z)
+                                        etc.
+    5   Position of 1st word of 1st field header
+    6   2nd field name
+    7   Position of 1st word of 2nd field header
+   etc.
+
+
+FIELD HEADER
+
+  Word
+    1   Position of first data word
+    2   Scale factor (meteorological units = tape value divided by
+         scale factor)
+    3   Range to first gate (km)
+    4   Adjustment to center of first gate (m)
+    5   Sample Volume spacing (m)
+    6   Number of sample volumes
+    7   Sample volume depth (m)
+    8   Horizontal beam width (degrees x 64)
+    9   Vertical beam width (degrees x 64)
+   10   Receiver bandwidth (MHz)
+   11   Polarization transmitted (0 = horizontal; 1 =vertical;
+         2 = circular; >2 = elliptical)
+   12   Wavelength (cm x 64)
+   13   Number of samples used in field estimate
+   14   Threshold field (e.g., DM) (2 ASCII)
+   15   Threshold value
+   16   Scale
+   17   Edit code (2 ASCII)
+   18   Pulse repetition time (microseconds)
+   19   Bits per sample volume (16 for exchanged tape)
+ 20-?   Words for individual fields, as follows
+
+  for VF, VE, VR, VT, VP:
+  word
+   20   Nyquist velocity (scaled)
+   21   FL (2 ASCII) if flagged in least significant bit with
+         NCAR bad velocity flag (1 = good, 0 = bad)
+
+  for DM:
+  word
+   20   Radar constant = RC, such that dB(Z) = [ (RC + DATA/SCALE] +
+          20log(range in km)
+   21   Noise power (dB(mW) x scale)
+   22   Receiver gain (dB x scale)
+   23   Peak power (dB(mW) x scale)
+   24   Antenna gain (dB x scale)
+   25   Pulse duration (microseconds x 64)

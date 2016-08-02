@@ -1,0 +1,73 @@
+BUGS:
+
+
+I started looking a bit closer at some of the edge/cross stuff.
+
+Right now the only fields that we are handling for edge data is the
+U&V fields.
+
+We also need to do something to handle the ph, phb, & geo_hgt  fields
+correctly.
+
+There are two ways to do this.  Either we can de-stager these
+fields so that they are on the cross grid.  This is pretty simple.  Take
+a look at WRFData::_destagerUWind() to see an example.
+
+
+Alternatively, we need to move their
+
+case Params::HGT_FIELD:
+          _interp3dField(inData, "geo_hgt", inData.geo_hgt, mdvx,
+                         planeOffset, nPointsPlane,
+                         fhdr->missing_data_value, mGrid);
+          break;
+
+section from
+_loadCrossOutputFields()
+
+to
+_loadEdgeOutputFields()
+
+
+And we should probably give their field name in the params a trailing
+_EDGE to identify them as edge fields.
+
+From a brief look, I'm not sure what the difference in handling is
+between the _loadCrossOutputField() and _loadEdgeOutputFields().
+So it might be more a matter of organization than a real difference
+in the way things work.
+
+
+I also should look at Wrf2Mdv.cc around lines 81-92.  It does a check
+that edge fields are not requested in the output unless output
+projection is native.  Is this necessary for the vertical edge fields
+also?
+
+It also probably best to for now, load the vertical edge fields, 
+destager them into a seperate variable, and then offer that variable
+for output.  If someone wants the original vertical edge fields
+they will have to request them and make sure they are being outputed
+correctly.
+
+
+CLEANUP:
+
+
+
+6) Don't print warnings for a field being missing unless it was requested.
+
+
+7) Check that if someone requests a field that is not available, it
+   should just fill with MISSING_DATA instead of exiting.
+	(see #11)
+
+
+11) If field is missing, error message is printed for each point in the
+    grid. It should give you this error only once.
+    eg. ERROR - Wrf2Mdv:WRFData::interp3dField
+        ITFADEF array not loaded yet, operation invalid.
+ 
+
+13) It might be nice to change the nLon, nLat, nEta stuff to nX, nY, nZ or 
+something equivalent, because we are not really talking about lat, lon, & eta
+necessarily.  But this is probably more work than it is worth.

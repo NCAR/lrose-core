@@ -1,0 +1,47 @@
+spdb_server apps
+================
+
+The spdb_server apps include executables for serving out SPDB data 
+in different ways.  Currently, the following executables exist:
+
+spdb_server:
+	The spdb_server is a generic server for serving out SPDB
+	data.  When SPDB_PUT_DATA, SPDB_PUT_DATA_ADD or
+	SPDB_PUT_DATA_OVER requests are received, the recieved
+	data is stored in an SPDB database without any type
+	of transformation.  When SDPB_GET_DATA, SPDB_GET_DATA_CLOSEST,
+	SPDB_GET_DATA_INTERVAL and SPDB_GET_DATA_VALID requests
+	are received, the indicated data is returned to the client,
+	again without any type of transformation.  Data is assumed
+	to be received and is served out in big-endian format.  This
+	server has no knowledge of the structure of the data.
+
+spdb_server_client:
+	This is a menu driven test program for testing SPDB servers
+	and databases.  It uses the get and put routines in the 
+	symprod library (described in <symprod/spdb_client.h>) to
+	store and retrieve data from any valid SPDB destination
+	(currently port@host or database directory).  It currently
+	knows about station report and TREC history forecast data,
+	but other specific data types can be added as needed for
+	testing.
+
+spdb_server_poll:
+	This is another menu driven test program for testing SPDB
+	servers, but this one uses the SPDB poll routines (again
+	described in <symprod/spdb_client.h>) to retrieve data.
+
+dist_spdb_data:
+	This process distributes data to other distribution processes,
+	to SPDB servers or to SPDB databases.  Basically, this process
+	listens on a socket for SPDB_PUT_DATA, SPDB_PUT_DATA_ADD and
+	SPDB_PUT_DATA_OVER requests.  When a request is received, the
+	data is sent on to all indicated destinations in the received
+	format.
+
+bdry_spdb2symprod:
+ltg_spdb2symprod:
+	These processes serve out data from the indicated type of SPDB
+	database in SYMPROD format so that it can be displayed on the
+	RAP displays through the product selector.
+

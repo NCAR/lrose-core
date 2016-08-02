@@ -1,0 +1,538 @@
+/**********************************************************************
+ * TDRP params for ./SoundingChart
+ **********************************************************************/
+
+//======================================================================
+//
+// SoundingChart is a program that works
+// with CIDD to plot sounding data.
+// Niles Oien and Frank Hage February 2004.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// Window Attributes.
+//
+//======================================================================
+ 
+///////////// window_height ///////////////////////////
+//
+// Default Window Height.
+// Type: int
+//
+
+window_height = 500;
+
+///////////// window_width ////////////////////////////
+//
+// Default Window Width.
+// Type: int
+//
+
+window_width = 500;
+
+///////////// foreground_color ////////////////////////
+//
+// Foreground Color - Used for Axes, labels.
+// Type: string
+//
+
+foreground_color = "White";
+
+///////////// reference_color /////////////////////////
+//
+// Reference Line Color.
+// Type: string
+//
+
+reference_color = "Orange";
+
+///////////// background_color ////////////////////////
+//
+// Background Color.
+// Type: string
+//
+
+background_color = "Black";
+
+///////////// font_name ///////////////////////////////
+//
+// Name of font for the text on the display.
+// Type: string
+//
+
+font_name = "6x13";
+
+//======================================================================
+//
+// USER INTERFACE.
+//
+//======================================================================
+ 
+///////////// use_cidd_time ///////////////////////////
+//
+// Use Cidd time.
+// Use times from Cidd to retrieve data.
+// Type: boolean
+//
+
+use_cidd_time = FALSE;
+
+///////////// mouse_button ////////////////////////////
+//
+// mouse button recognized.
+// 0 = any, 1 = left button, 2 = middle, 3 = right button.
+// Type: int
+//
+
+mouse_button = 0;
+
+///////////// sleep_msecs /////////////////////////////
+//
+// sleep milli-seconds.
+// Number of milli-seconds to sleep between checks for mouse clicks.
+// Minimum val: 20
+// Type: int
+//
+
+sleep_msecs = 250;
+
+///////////// auto_click_interval /////////////////////
+//
+// Automatic click interval - secs.
+// Number of seconds between automatic clicks.  If the user hasn't 
+//   clicked anywhere after this number of seconds, we will simulate a 
+//   user click in the same place as before and will update the 
+//   information.  If <= 0, no automatic updates of the display are done.
+// Type: int
+//
+
+auto_click_interval = 60;
+
+///////////// startup_location ////////////////////////
+//
+// startup click location.
+// Lat/lon position to display if the user hasn't clicked on a location.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+startup_location = { 0, 0 };
+
+///////////// click_point_url /////////////////////////
+//
+// SPDB URL to Click point reference markers.
+// This Url is used to ourput click points for plotting on CIDD.
+// Type: string
+//
+
+click_point_url = "";
+
+///////////// click_point_label ///////////////////////
+//
+// Label to use for SPDB data base and invalidating CIDD data.
+// Type: string
+//
+
+click_point_label = "Click Point";
+
+//======================================================================
+//
+// Plot Parameters .
+//
+//======================================================================
+ 
+///////////// left_margin /////////////////////////////
+//
+// Size of Left Margin in Pixels.
+// Type: int
+//
+
+left_margin = 20;
+
+///////////// right_margin ////////////////////////////
+//
+// Size of Right Margin in Pixels.
+// Type: int
+//
+
+right_margin = 40;
+
+///////////// top_margin //////////////////////////////
+//
+// Size of Top Margin in Pixels.
+// Type: int
+//
+
+top_margin = 20;
+
+///////////// bottom_margin ///////////////////////////
+//
+// Size of Bottom Margin in Pixels.
+// Type: int
+//
+
+bottom_margin = 30;
+
+///////////// min_height_km ///////////////////////////
+//
+// Min Height - Kilometers .
+// Type: double
+//
+
+min_height_km = 0;
+
+///////////// max_height_km ///////////////////////////
+//
+// Max Height - Kilometers .
+// Type: double
+//
+
+max_height_km = 10;
+
+///////////// lookBack ////////////////////////////////
+//
+// Time to look back, hours.
+// Temporal window is defined by this and lookAhead.
+// Type: int
+//
+
+lookBack = 0;
+
+///////////// lookAhead ///////////////////////////////
+//
+// Time to look ahead, hours.
+// Temporal window is defined by this and lookBack.
+// Type: int
+//
+
+lookAhead = 0;
+
+//======================================================================
+//
+// DATA TO DISPLAY.
+//
+//======================================================================
+ 
+///////////// coord_shmem_key /////////////////////////
+//
+// Shared memory status key.
+// Id for the shared memory status segment used for communicating with 
+//   the display.
+// Type: int
+//
+
+coord_shmem_key = 61500;
+
+///////////// no_wait_for_shmem ///////////////////////
+//
+// Flag to not wait for display shared memory.
+// If set, this program will not wait for shared memory segment from the 
+//   display to be set ready.
+// Type: boolean
+//
+
+no_wait_for_shmem = FALSE;
+
+///////////// max_data_age ////////////////////////////
+//
+// Don't collect new data until last request was this old (secs).
+// Type: int
+//
+
+max_data_age = 10;
+
+///////////// StationLocatorURL ///////////////////////
+//
+// URL for Locating Station ID's by Lat Lon .
+// Sounding Locations are looked up in this data base.
+// Type: string
+//
+
+StationLocatorURL = "$(PROJ_DIR)/display/maps/world_stations.dat";
+
+///////////// useStationLocator ///////////////////////
+//
+// Type: boolean
+//
+
+useStationLocator = FALSE;
+
+///////////// station_id //////////////////////////////
+//
+// If not using the StationLocator, request this station.
+// Set to 0 to gather any/all soundings from the url.
+// Type: int
+//
+
+// CP2
+station_id = 1395806275;
+
+///////////// max_station_dist_km /////////////////////
+//
+// Maximum distance to a valid station.
+// Locater will not return station further than this from the interest 
+//   point.
+// Type: double
+//
+
+max_station_dist_km = 30000;
+
+///////////// cscale_dir //////////////////////////////
+//
+// Comma delimited list of URL's to color scales.
+// Directory containing Color scale files.
+// Type: string
+//
+
+cscale_dir = ".,$(PROJ_DIR)/display/color_scales";
+
+//======================================================================
+//
+// URLs for Sounding  Data .
+//
+//======================================================================
+ 
+///////////// doSoundings /////////////////////////////
+//
+// If set, actual soundings are collected and displayed.
+// Type: boolean
+//
+
+doSoundings = TRUE;
+
+///////////// output_ref_points ///////////////////////
+//
+// If set, SPDB GenPt reference points are output.
+// Type: boolean
+//
+
+output_ref_points = FALSE;
+
+///////////// sound_winds_on //////////////////////////
+//
+// Toggle to Set Sounding winds to ON at startup.
+// Type: boolean
+//
+
+sound_winds_on = TRUE;
+
+///////////// plot_3d_border //////////////////////////
+//
+// Toggle to Set Plotting 3d  to ON at startup.
+// Type: boolean
+//
+
+plot_3d_border = FALSE;
+
+///////////// sound_lines_on //////////////////////////
+//
+// Toggle to Set Sounding Line plots to ON at startup.
+// Type: boolean
+//
+
+sound_lines_on = FALSE;
+
+///////////// sound_color_on //////////////////////////
+//
+// Toggle to Set Sounding Color Cells to ON at startup.
+// Type: boolean
+//
+
+sound_color_on = TRUE;
+
+///////////// sound_winds_color ///////////////////////
+//
+// Color to render the Sounding Wind Barbs in.
+// Type: string
+//
+
+sound_winds_color = "White";
+
+///////////// sounding_width_minutes //////////////////
+//
+// Sounding will be rendered this many minutes wide.
+// Type: double
+//
+
+sounding_width_minutes = 5;
+
+///////////// vscale_type /////////////////////////////
+//
+// Average & Plot data on this vertical scale.
+//
+// Type: enum
+// Options:
+//     VSCALE_MB
+//     VSCALE_KM
+//
+
+vscale_type = VSCALE_KM;
+
+///////////// sounding_interval_km ////////////////////
+//
+// Sounding values will be averaged into vertical bins of this size when 
+//   vscale_type =  VSCALE_KM.
+// Type: double
+//
+
+sounding_interval_km = 0.5;
+
+///////////// sounding_interval_mbar //////////////////
+//
+// Sounding values will be averaged into vertical bins of this sizewhen 
+//   vscale_type =  VSCALE_MB.
+// Type: double
+//
+
+sounding_interval_mbar = 10;
+
+///////////// soundingSrc /////////////////////////////
+//
+// Spdb Sounding or Sounding Plus data URL and field to display.
+// TEMP - Temperature
+// PRES - Pressure mb
+// RH - Rel Humid %
+// DEWPT - Dew point C
+// W_WIND - Vertical Winds m/s
+// W_SPD - Wind Speed m/s
+// W_DIR - Wind Direction degrees
+// ASCEN_R - Asention Rate m/s
+// SPARE1 - Spare value
+// SPARE2 - Second SpareSPARE3 - 3rd Spare.
+//
+// Type: struct
+//   typedef struct {
+//      string label;
+//      string url;
+//      sounding_fld_t field;
+//        Options:
+//          TEMP
+//          RH
+//          DEWPT
+//          W_WIND
+//          W_SPD
+//          W_DIR
+//          ASCEN_R
+//          PRESS
+//          SPARE1
+//          SPARE2
+//          SPARE3
+//      string cscale;
+//      string units;
+//   }
+//
+// 1D array - variable length.
+//
+
+soundingSrc = {
+  { "Divergence", "spdbp:://pgen:0:spdb/vad/cp2", SPARE1, "diverg.colors", "Dvg"},
+  { "Wind SPD", "spdbp:://pgen:0:spdb/vad/cp2", W_SPD, "wind_jet.colors", "m/s"},
+  { "Wind SPD - Brisbane", "spdbp:://pgen:0:spdb/soundings/brisbane", W_SPD, "wind_jet.colors", "m/s"}
+};
+
+//======================================================================
+//
+// Gridded Data Params.
+//
+//======================================================================
+ 
+///////////// grid_winds_on ///////////////////////////
+//
+// Toggle to Set Grid winds to ON at startup.
+// Type: boolean
+//
+
+grid_winds_on = TRUE;
+
+///////////// grid_lines_on ///////////////////////////
+//
+// Toggle to Set Grid Line Plots to ON at startup.
+// Type: boolean
+//
+
+grid_lines_on = TRUE;
+
+///////////// grid_color_on ///////////////////////////
+//
+// Toggle to Set Grid Color Cells to ON at startup.
+// Type: boolean
+//
+
+grid_color_on = TRUE;
+
+///////////// grid_winds_color ////////////////////////
+//
+// Color to render the Grid Wind Barbs in.
+// Type: string
+//
+
+grid_winds_color = "White";
+
+///////////// doMdv ///////////////////////////////////
+//
+// If set, MDV soundings are collected and displayed.
+// Type: boolean
+//
+
+doMdv = FALSE;
+
+///////////// GridSrc /////////////////////////////////
+//
+// List of Gridded/MDV data fields to display.
+// label = Menu Label 
+// url = MDV URL to data 
+// fieldname = Short Field name in Mdv File
+// u_fname = Short Field name of E-W Wind componet
+// v_fname = Short Field name of N-S Wind componet
+// cscale = Name of Colorscale to use for drawing.
+//
+// Type: struct
+//   typedef struct {
+//      string label;
+//      string url;
+//      string fieldname;
+//      string u_fname;
+//      string v_fname;
+//      string cscale;
+//      string units;
+//   }
+//
+// 1D array - variable length.
+//
+
+GridSrc = {
+  { "Temperature", "mdvp:://gauss.rap::/d3/data/IHOP/mdv/ruc10km/pressure/f00", "TMP", "UGRD", "VGRD", "temp.colors", "C"},
+  { "RH", "mdvp:://host::dir/dir", "RH", "UGRD", "VGRD", "humid.colors", "%"}
+};
+

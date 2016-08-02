@@ -1,0 +1,135 @@
+/*********************************************************
+ * parameter definitions for track_grid_stats
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 1993
+ */
+
+paramdef enum debug {
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Track grid statistics"};
+  p_descr = "Note for stats file";
+  p_help = "Note to go in track stats grid file";
+} note;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option to compute the max precip depth for a given duration";
+  p_help = "If this is set, the max precip depth for a given duration will bw computed and stored in the  given field. If not the field will be left with zero entries";
+} compute_dur_max_precip;
+
+paramdef long {
+  p_default = {1800};
+  p_min = {300};
+  p_max = {86400};
+  p_descr = "Duration for max precip duration comps - secs";
+  p_help = "The duration in seconds for which the maximum precip depth is computed.";
+} dur_for_max_precip;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Track grid stats directory";
+  p_help = "Upper level directory for output grid stats files";
+} grid_stats_dir;
+
+paramdef char* {
+  p_default = {"mdv"};
+  p_descr = "Output file extension";
+  p_help = "File name extension for output cartesian files";
+} output_file_ext;
+
+paramdef long {
+  p_default = {1};
+  p_descr = "Number of seasons for stats";
+  p_help = "The number of seasons for computing the seasonal means, such as precip.";
+} n_seasons;
+
+paramdef double {
+  p_default = {360.0};
+  p_min = {0.0};
+  p_max = {1800.0};
+  p_descr = "Radar vol scan interval (secs)";
+  p_help = "Interval between radar volume scans (secs)";
+} scan_interval;
+
+paramdef double {
+  p_default = {900.0};
+  p_min = {0.0};
+  p_max = {10000.0};
+  p_descr = "Min track duration (secs)";
+  p_help = "The minimum duration for including a track in the analysis (secs)";
+} min_duration;
+
+paramdef double {
+  p_default = {39.87823};
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_descr = "Grid latitude";
+  p_help = "Latitude of grid origin";
+} grid_lat;
+
+paramdef double {
+  p_default = {-104.75900};
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_descr = "Grid longitude";
+  p_help = "Longitude of grid origin";
+} grid_lon;
+
+paramdef struct grid {
+  p_descr = "Grid parameters";
+  p_help = "The grid params for the track stats.";
+  p_field_type = {long, long, double, double, double, double};
+  p_field_name = {nx, ny, minx, miny, dx, dy};
+} grid;
+
+paramdef double {
+  p_default = {200.0};
+  p_min = {1.0};
+  p_max = {2000.0};
+  p_descr = "Z-R coefficient";
+  p_help = "The coefficient in the Z-R relationship";
+} z_r_coeff;
+
+paramdef double {
+  p_default = {1.6};
+  p_min = {0.1};
+  p_max = {10.0};
+  p_descr = "Z-R exponent";
+  p_help = "The exponent in the Z-R relationship";
+} z_r_exponent;
+
+paramdef double {
+  p_default = {55.0};
+  p_min = {40.0};
+  p_max = {80.0};
+  p_descr = "Hail dBZ threshold";
+  p_help = "The reflectivity threshold above which hail is assumed";
+} hail_dbz_threshold;
+
+
+
+
+
+
+
+
+
+
+
+

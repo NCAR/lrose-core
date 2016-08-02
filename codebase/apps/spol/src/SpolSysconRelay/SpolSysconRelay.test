@@ -1,0 +1,162 @@
+/**********************************************************************
+ * TDRP params for SpolSysconRelay
+ **********************************************************************/
+
+//======================================================================
+//
+// SpolSysconRelay reads status packets from the Syscon server, and 
+//   relays relevant information to SPOL processes.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// SYSCON DETAILS.
+//
+//======================================================================
+ 
+///////////// syscon_server_host //////////////////////
+//
+// Host name on which SysCon server is running.
+// Type: string
+//
+
+syscon_server_host = "localhost";
+
+///////////// syscon_ops_info_port ////////////////////
+//
+// TCP/IP port from which ops_info packets are available.
+// Type: int
+//
+
+syscon_ops_info_port = 2513;
+
+///////////// syscon_rsm_info_port ////////////////////
+//
+// TCP/IP port from which RSM packets are available.
+// Type: int
+//
+
+syscon_rsm_info_port = 2515;
+
+//======================================================================
+//
+// WRITING SYSCON INFO TO SHARED MEMORY.
+//
+// SysCon information is written to shared memory, to be used by client 
+//   applications, such as TsTcp2Fmq, which need to merge this information 
+//   with time series data.
+//
+//======================================================================
+ 
+///////////// syscon_info_shmem_key ///////////////////
+//
+// Shared memory key for syscon information.
+// This key will be used for the shared memory. (key+1) will be used for 
+//   the semaphore.
+// Type: int
+//
+
+syscon_info_shmem_key = 55555;
+
+//======================================================================
+//
+// CORRECT THE SWEEP NUMBER.
+//
+//======================================================================
+ 
+///////////// override_sweep_number ///////////////////
+//
+// Option to override sweep number in data.
+// Some radars set the sweep number to always increase, without 
+//   resetting to 0 when a new volume starts. If this parameter is TRUE, 
+//   the sweep number will be corrected so that it is zero at the start of 
+//   each volume.
+// Type: boolean
+//
+
+override_sweep_number = FALSE;
+
+//======================================================================
+//
+// REGISTERING WITH DATA MAPPER.
+//
+//======================================================================
+ 
+///////////// register_with_data_mapper ///////////////
+//
+// Option to register writes to shmem with the DataMapper.
+// If true, the app will register with the DataMapper each time the 
+//   shared memory is updated.
+// Type: boolean
+//
+
+register_with_data_mapper = TRUE;
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the shared 
+//   memory is updated. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+
+//======================================================================
+//
+// MONITOR MODE.
+//
+//======================================================================
+ 
+///////////// monitor_mode ////////////////////////////
+//
+// Option to monitor the shared memory from a different instance.
+// If true, this application will monitor the shared memory written by a 
+//   different instance of this application, and print out debugging 
+//   information.
+// Type: boolean
+//
+
+monitor_mode = FALSE;
+

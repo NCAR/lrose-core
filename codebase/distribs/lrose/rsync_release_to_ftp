@@ -1,0 +1,62 @@
+#! /bin/bash
+
+#--------------------------------------------------------------------
+#
+# rsync source lrose release to ftp site
+#
+# Mike Dixon, RAP, NCAR, Boulder, CO, USA
+# Oct 2014
+#
+#--------------------------------------------------------------------
+
+# set the path
+
+export PATH=.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin
+
+# set package name
+
+package=lrose
+release_dir=$WORK/releases
+
+#######################################################
+# get run time
+
+year=`date +'%Y'`
+month=`date +'%m'`
+day=`date +'%d'`
+hour=`date +'%H'`
+min=`date +'%M'`
+sec=`date +'%S'`
+
+#--------------------------------------------------------------------
+
+echo
+echo "*********************************************************************"
+echo
+echo "  Rsync ${package} source release to ftp site"
+echo
+echo "  NCAR, Boulder, CO, USA"
+echo
+echo "  $year/$month/$day $hour:$min:$sec"
+echo
+echo "*********************************************************************"
+echo
+
+echo "Rsync the src release ...."
+
+cd $release_dir
+#cmd="rsync -av -e ssh --delete $package kali.rap.ucar.edu:/ftp/root/pub/titan"
+cmd="rsync -av $package kali.rap.ucar.edu:/ftp/root/pub/titan"
+echo $cmd
+$cmd
+
+#--------------------------------------------------------------------
+# done
+
+echo
+echo "  **************************************************"
+echo "  *** Done with rsync ***"
+echo "  **************************************************"
+echo
+
+exit 0

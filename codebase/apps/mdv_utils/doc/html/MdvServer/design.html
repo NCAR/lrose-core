@@ -1,0 +1,149 @@
+<HTML>
+<HEAD>
+<TITLE>MdvServer Design Document</TITLE>
+</HEAD>
+
+<BODY>
+
+<H1>MdvServer Design Document</H1>
+
+This document describes the high level design of the MdvServer process.
+The MdvServer serves MDV data to requesting clients using the
+MDV protocol.
+
+
+<H2>1. Requests</H2>
+
+The MdvServer receives requests over a socket.
+The request includes a RAP URL that describes the location of the data set
+and any special parameter files to be used to satisfy the request.
+
+<P>
+The data set directory is the subdirectory of the 
+<KBD>$RAP_DATA_DIR/mdv</KBD> directory that was specified in the URL.
+
+<P>
+If a parameter file is specified in the URL or if a
+<KBD>.MdvServer.default</KBD> parameter file exists in the data directory,
+the MdvServer uses this parameter file when fulfilling the request.
+If both exists, the parameter file specified in the URL is used.
+
+<P>
+The server responds to the request by either writing to the specifed
+data set directory, or by reading from the directory, processing the
+data and passing it back to the client.
+
+<H3>1.1 Put Requests</H3>
+
+There is only one type of put request supported by the MdvServer.
+For this type of request, the client must put together all of the
+MDV information for the new file and send this information to the
+MdvServer.
+The server will then create a new file containing this information.
+If this file already exists, the server decides whether to override
+the existing file based on a flag in the put request.
+
+
+<H3>1.2 Data Time Requests</H3>
+
+The MdvServer allows the client to request a list of available data
+times so the client can decide which data is most appropriate before
+making a request.
+The client specifies a time range of interest to reduce the size of the
+returned list.
+
+
+<H3>1.3 Get Requests</H3>
+
+The MdvServer supports several types of get requests for retrieving
+non-forecast data:
+
+<UL>
+<LI>Get closest data to the given time.
+<LI>Get first data before the given time.
+<LI>Get first data after the given time.
+<LI>Get the latest data.
+<LI>Get the latest data after the given time.
+</UL>
+
+<P>
+The get closest, get first before and get first after requests are usually
+used by clients in archive mode while the get latest and get latest after
+requests are usually used in realtime mode.
+
+<P>
+To request forecast data, the client must first request the list of
+available data times.
+Using this list, the client must then request the data explicitly
+by specifying the generation time and the forecast time desired.
+
+<P>
+The client may request all of the data fields in the file be returned
+or may specify a single field to be returned.
+This field may be specified either by field name or by field number.
+The field number is the 0-based position of the field in the MDV file.
+
+<P>
+The client may request the entire data volume for the field(s),
+may specify a single plane of the data to be returned,
+or may indicate that no data be returned.
+In the last case, only the MDV header information is returned
+to the client.
+
+<P>
+All of the get requests include information that allow the client to
+request the following operations to be performed on the data before
+the data is returned:
+
+<UL>
+<LI>Horizontal cropping of the data.
+<LI>Vertical cropping of the data.
+<LI>Data compositing.
+<LI>Vertical cross-sectioning of the data.
+</UL>
+
+<P>
+The client may request any or all of these operations
+(of course, combining data compositing and vertical cross-sections
+in a single request will result in very little data being returned!).
+The operations are then applied in the order listed above.
+
+
+<H2>2. Running Within the DIDSS System</H2>
+
+The MdvServer fits into the DIDSS (Data Ingest and Distributed Server
+System) as shown in the following diagram:
+
+<P>
+<IMG SRC=didss.gif>
+
+<P>
+In DIDSS, the server manager spawns the MdvServer process at the
+first request for MDV services.
+The MdvServer then waits for client requests over the port assigned
+to it by the server manager.
+When the server receives a data get request, it retrieves the
+requested data from the data store and returns that data to the client.
+When the server receives a data put request, it writes that data to
+the data store, tells the client whether the put was successful and
+updates the latest data information in the local data mapper.
+
+
+<H2>3. Running Independently</H2>
+
+The MdvServer can also be run independently of the DIDSS system.
+To operate this way, the user must start the MdvServer process by
+hand and the clients must explicitly specify the port number in
+the request URL (so the server manager will be bypassed).
+
+
+<P>
+<ADDRESS>
+Author: Nancy Rehak<BR>
+RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000<BR>
+<A HREF="mailto:rehak@ucar.edu">rehak@ucar.edu</A> <BR>
+Last Modified on 7 December, 1998<BR>
+</ADDRESS>
+
+</BODY>
+</HTML>

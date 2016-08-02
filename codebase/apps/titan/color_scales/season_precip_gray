@@ -1,0 +1,10 @@
+# gray scale for precip
+
+# Mike Dixon, Sept 1993
+
+0	30	#111111
+30	60	#444444
+60	90	#777777
+90	120	#aaaaaa
+120	150	#cccccc
+150	200	#eeeeee

@@ -1,0 +1,306 @@
+/****************************************************
+ * TDRP params for verify_grid
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Operation mode.
+ * Modes are 1) cont - contingency table analysis, with text output,
+ *   2) stats analysis, with text and xgraph output, 3) regression
+ *   - data pairs for plotting with ascii_to_xgraph, output to stdout.
+ *
+ * Type: enum
+ * Default: STATS 
+ * Legal values: CONT, STATS, REGRESSION.
+ */
+mode = STATS;
+
+/*
+ * Truth data directory.
+ * Directory for dobson cartesian radar data files - truth.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+truth_data_dir = "none";
+
+/*
+ * Truth label.
+ * Label for truth data.
+ *
+ * Type: string
+ * Default: "Truth" 
+ */
+truth_label = "Truth";
+
+/*
+ * Detection label.
+ * Label for detection data.
+ *
+ * Type: string
+ * Default: "Detection" 
+ */
+detect_label = "Detection";
+
+/*
+ * Truth field number.
+ * Field number of truth data in cartesian grid (0-based).
+ *
+ * Type: long
+ * Default: 0 
+ */
+truth_field = 0;
+
+/*
+ * Detection field number.
+ * Field number of detection data in cartesian grid (0-based).
+ *
+ * Type: long
+ * Default: 0 
+ */
+detect_field = 0;
+
+/*
+ * Option to output scan-by-scan cont. data to named dir.
+ * If set, the contingency table data computed for each scan will
+ *   be output to a file in the named directory. The file name will
+ *   comprise the date and the specified file extension.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+output_scan_cont = FALSE;
+
+/*
+ * Dir path for scan-by-scan contingency data.
+ *
+ * Type: string
+ * Default: "null" 
+ */
+scan_cont_dir = "null";
+
+/*
+ * Extension for scan-by-scan contingency data.
+ *
+ * Type: string
+ * Default: "cont" 
+ */
+scan_cont_ext = "cont";
+
+/*
+ * Time lag (secs).
+ * Time lag between truth and detection (secs).
+ *
+ * Type: long
+ * Default: 0 
+ */
+time_lag = 0;
+
+/*
+ * Time margin (secs).
+ * Margin around actual file time used when determining time match.
+ *
+ * Type: long
+ * Default: 180 
+ */
+time_margin = 180;
+
+/*
+ * Option to use a relaxed algorithm to compute the contingencies.
+ * If set, a relaxed algorithm is used. This means that surrounding
+ *   points are used in determining the contingency values. The
+ *   contingency_search_margin governs the search limits. See
+ *   the code for details.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+relaxed_contingency = TRUE;
+
+/*
+ * Search margin (grid units).
+ * Number of adjacent grids searched for contingency match.
+ *
+ * Type: long
+ * Default: 0 
+ */
+relaxed_margin = 0;
+
+/*
+ * Option to check range from radar.
+ * If set, the range from the radar is checked. Only points at less
+ *   than the maximum range are used.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_range = FALSE;
+
+/*
+ * Max range (km).
+ * Max. range (km) for analysis - data beyond this is ignored.
+ *
+ * Type: double
+ * Default: 150 
+ * Min value: 10 
+ * Max value: 1000 
+ */
+max_range = 150;
+
+/*
+ * Min regression data value.
+ * Only points with data above this value are included in the regresion
+ *   analysis.
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: -1000 
+ * Max value: 1000 
+ */
+min_regression_val = 1;
+
+/*
+ * Lower value for truth level.
+ * Only include truth data above this value in the contingecy table
+ *   analysis.
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -1000 
+ * Max value: 1000 
+ */
+truth_level_lower = 0;
+
+/*
+ * Upper value for truth level.
+ * Only include truth data below this value in the contingecy table
+ *   analysis.
+ *
+ * Type: double
+ * Default: 100 
+ * Min value: -1000 
+ * Max value: 1000 
+ */
+truth_level_upper = 100;
+
+/*
+ * Lower value for detection level.
+ * Only include detection data above this value in the contingecy
+ *   table analysis.
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -1000 
+ * Max value: 1000 
+ */
+detect_level_lower = 0;
+
+/*
+ * Upper value for detection level.
+ * Only include detection data below this value in the contingecy
+ *   table analysis.
+ *
+ * Type: double
+ * Default: 100 
+ * Min value: -1000 
+ * Max value: 1000 
+ */
+detect_level_upper = 100;
+
+/*
+ * Histogram parameters.
+ * The params for the histogram mode.
+ *
+ * Type: struct
+ */
+hist = {
+  0, /* n_intervals:long */
+  0, /* low_limit:double */
+  0  /* interval_size:double */
+};
+
+/*
+ * Option to use the native grid for the data.
+ * If set, the native data grid is used for evaluation. Otherwise
+ *   the grid specified in the param file is used.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+use_native_grid = TRUE;
+
+/*
+ * Grid parameters.
+ * The grid params for the regression mode.
+ *
+ * Type: struct
+ */
+grid = {
+  0, /* nx:long */
+  0, /* ny:long */
+  0, /* minx:double */
+  0, /* miny:double */
+  0, /* dx:double */
+  0  /* dy:double */
+};
+
+/*
+ * Option to output intermediate grids to an MDV file.
+ * If set, the intermediate grids are output in an MDV file. The
+ *   intermediate grids are the truth and detection grids mapped
+ *   onto the specified contingency grid and set to 1 if the input
+ *   grid is between the specified limits, 0 otherwise. The intermediate
+ *   grids will only be output if this is set and use_native_grid
+ *   and relaxed_contingency are both FALSE and you are in CONT mode.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+output_intermediate_grids = FALSE;
+
+/*
+ * Intermediate grid output directory.
+ * The directory to be used for intermediate grids. Only used if
+ *   output_intermediate_grids is TRUE. The files in this directory
+ *   are named YYYYMMDD/hhmmss.mdv using the centroid time of the
+ *   truth file as the time used in naming the file.
+ *
+ * Type: string
+ * Default: "." 
+ */
+intermediate_dir = ".";
+
+/*
+ * Projection type for intermediate grid file.
+ * Projection type to put in intermediate grid file so it can be
+ *   displayed. See output_intermediate_grids parameter.
+ *
+ * Type: enum
+ * Default: PROJ_FLAT 
+ * Legal values: PROJ_FLAT, PROJ_LATLON.
+ */
+projection = PROJ_FLAT;
+
+

@@ -1,0 +1,147 @@
+/**********************************************************
+ * paramdef.edgeVol2Socket
+ *
+ * This file contains the TDRP parameter definitions for
+ * edgeVol2Socket.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether extra radar information should be"
+            "written to stdout";
+  p_default = false;
+} print_radar_info;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output.";
+};
+
+typedef struct
+{
+  string directory;
+  string ext;
+} input_info_t;
+
+paramdef struct input_info_t
+{
+  p_descr = "Input file information";
+  p_help = "All files in the given directory with the given extension will "
+           "be processed.";
+  p_default = { "./vol_data", "vol" };
+} input_info;
+
+typedef enum
+{
+  UDP,
+  TCPIP_SINGLE,
+  TCPIP_MULTI
+} output_socket_type_t;
+
+paramdef enum output_socket_type_t
+{
+  p_descr = "Type of output socket to use";
+  p_help = "UDP - Output will appear on the UDP single host socket specified "
+           "by the udp_socket parameter.  NOT YET IMPLEMENTED.\n"
+           "TCPIP_SINGLE - Output will appear on a single TCP/IP socket "
+           "specified by the tcpip_single_port parameter.\n"
+           "TCPIP_MULTI - Output will appear on multiple TCP/IP sockets "
+           "(status packets on socket 6600, "
+           "corrected reflectivity packets on socket 6601, "
+           "uncorrected reflectivity packets on socket 6602, "
+           "velocity packets on socket 6603, and "
+           "spectrum width packets on socket 6605).";
+  p_default = TCPIP_SINGLE;
+} output_socket_type;
+
+paramdef long
+{
+  p_descr = "Output socket used for UDP output";
+  p_default = "6544";
+} udp_port;
+
+paramdef long
+{
+  p_descr = "Output socket used for TCP/IP output to a single socket";
+  p_default = "6605";
+} tcpip_single_port;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef long
+{
+  p_descr = "Number of beams per second to transmit";
+  p_default = 20;
+} beams_per_sec;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to simulate realtime with the data";
+  p_help = "If FALSE, the beams will be time stamped based on the volume "
+           "time in the current volume file. "
+           "Since EDGE volume files just have a single time stamp for the "
+           "entire volume, the first beam sent out will be time stamped "
+           "with the volume time. "
+           "The remaining beams in the volume will be time stamped with "
+           "the volume time plus the number of seconds that have elapsed "
+           "since the first beam was sent out.\n";
+           "If TRUE, the beams will be time stamped with the current "
+           "system time when sent out.";
+  p_default = FALSE;
+} simulate_realtime;
+
+paramdef double
+{
+  p_descr = "Azimuth correction value";
+  p_help = "This value is added to the original azimuth value for each "
+           "beam before writing the beam to the socket.";
+  p_default = 0.0;
+} az_correction;

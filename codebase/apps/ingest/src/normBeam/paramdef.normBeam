@@ -1,0 +1,170 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "normBeam reads an FMQ of REAL lidar data and then\n"
+	"does the normalization suggested by ITT on the data and\n"
+	"writes the result off to another FMQ. The field to do the\n"
+	"normalization on is identified by the fieldName parameter.\n"
+	"If there is no field by that name then no normalization\n"
+	"is done.\n\n"
+	"Data are converted to float and that is how they are sent out\n"
+	"(ie. no scaled bytes or ints in the FMQ).\n"
+	"Niles Oien December 2006.";
+}
+
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORMAL, DEBUG_NORMALIZATION, DEBUG_DATA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed, possibly with\n"
+	"some degree of appropriateness.";
+} debug;
+
+
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with the process mapper";
+} instance;
+
+paramdef string {
+  p_descr = "URL for DsRadar data via FMQ";
+  p_default = "fmqp:://localhost::./fmq.dsLidar";
+} fmq_url;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If FALSE, the program will seek to the end of the fmq\n"
+	"and only read in new data. If TRUE, it will start reading\n"
+	"from the beginning of the FMQ.";
+} seek_to_start_of_input;
+
+
+paramdef char* {
+  p_descr = "output fmq url";
+  p_help = "Path for FMQ output data.";
+  p_default = {"fmqp:://localhost::./fmq.dsLidarNorm"};
+} output_fmq_url;
+
+
+paramdef boolean {
+  p_descr = "Option to do blocking FMQ writes";
+  p_help = "This will always be done in ARCHIVE mode.";
+  p_default = TRUE;
+} blockingFmqWrites;
+ 
+
+paramdef long {
+  p_default = {10000000};
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this\n"
+	"buffer will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+ 
+paramdef long {
+  p_default = {300};
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number \n"
+	"of messages which may be written to the buffer before\n"
+	"overwrites occur. However, overwrites ma y occur sooner\n"
+	"if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef string {
+  p_default = "Backscatter";
+  p_descr = "Field name to normalize.";
+  p_help = "Set as appropriate.";
+} fieldName;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Start range to normalize over, Km.";
+  p_help = "Set as appropriate.";
+} startRange;
+
+paramdef double {
+  p_default = 1.5;
+  p_descr = "End range to normalize over, Km.";
+  p_help = "Set as appropriate.";
+} endRange;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Percentage of sorted beam values to take in computing average.";
+  p_help = "Set as appropriate.";
+} percentToTake;
+
+paramdef double {
+  p_default = 34.28;
+  p_descr = "Value to add after removing the mean.";
+  p_help = "Set as appropriate.";
+} displayOffset;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to overwrite the beam data time with the current time.";
+  p_help = "May be good for a simulation.";
+} useRealTime;
+
+typedef struct {
+        double minVal;
+        double maxVal;
+ } dataWindow_t;
+
+ paramdef struct dataWindow_t {
+  p_default = { 15.0, 100.0 };
+  p_descr = "Range of acceptable values for computing mean\n"
+	"to use in normalizing the beam.";
+  p_help = "Values outside this range are not considered.";
+} dataWindow;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Determines if we allow missing values (those outside the\n"
+	"data window above) in the output beam.";
+  p_help = "Default is to allow this. Missing values are replaced\n"
+	"by interpolation if they are not allowed in the output.";
+} allowMissing;
+
+paramdef double {
+  p_default = 75;
+  p_descr = "Minimum percentage of points in the normalization range\n"
+	"that have non-missing values required to proceed with the normalization.";
+  p_help = "If this criterion is not met, the output beam is set to missing.";
+} minPercentGood;

@@ -1,0 +1,85 @@
+/********************************************************
+ * run-time parameters for kav2dobson
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * December 1994
+ *		
+ * See src/kav2dobson/paramdef.kav2dobson for
+ * parameter details
+ */
+
+/*
+ * debugging
+ */
+
+debug = DEBUG_NORM;	
+malloc_debug_level = 2;
+
+/*
+ * mode may be REALTIME or ARCHIVE
+ */
+
+mode = ARCHIVE;
+
+/*
+ * input
+ */
+
+input_dir = "$(TITAN_HOME)/cdata";
+input_file_ext = "mcg";
+
+/*
+ * output
+ */
+
+output_dir = ".";
+output_host = "local";
+output_file_ext = "dob";
+output_type = DOBSON;
+output_data_origin = BOTLEFT;
+fortran_output = false;
+local_tmp_dir = "/tmp";
+
+/*
+ * max age of input data in realtime mode (secs)
+ */
+
+max_input_data_age = 1200;
+
+/*
+ * processing may be deliberatley delayed (secs)
+ */
+
+processing_delay = 20;
+
+/*
+ * the transformation from vip to dbz
+ */
+
+vip2dbz = {-25.0, 24.0, 36.0, 44.0, 48.0, 54.0, 60.0};
+
+/*
+ * resampling grid
+ */
+
+resample_grid = true;
+
+lon_grid = {-129.125, 0.25, 265};
+lat_grid = {14.1, 0.20, 250};
+
+/*
+ * For resampling, a max or mean filter may be applied.
+ * Options are 'max_filter' and 'mean_filter'.
+ */
+
+filter_type = max_filter;
+
+/*
+ * The data may be thresholded before creating output grid.
+ * The coverage threshold only applies to resampled grids.
+ */
+
+dbz_threshold = 10.0;
+coverage_threshold = 0.5;
+

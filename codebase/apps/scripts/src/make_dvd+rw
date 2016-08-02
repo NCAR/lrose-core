@@ -1,0 +1,1295 @@
+#!/usr/bin/perl
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2002 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Program(RAP) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2002/9/24 21:38:7 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+#
+# Purpose: Script to write data to a DVD+RW or DVD+R disk.
+# 
+# Usage: Run this script with the -h option.
+#
+# Status: In maintenance
+#
+# For more information: http://fy.chalmers.se/~appro/linux/DVD+RW/
+#
+# Author: Deirdre Garvey NCAR/RAP/SDG    25-MAR-2002
+#
+#====================================================================
+#
+# --------------------------- Externals ------------------------
+# The sys_wait_h is required to get the correct return codes from the system() calls.
+
+require 5.002;
+use POSIX 'sys_wait_h'; 
+use Getopt::Long;
+use Env;
+use Cwd;
+Env::import();
+
+# --------------------------- Defaults ------------------------
+# ... Set program defaults ...
+#
+# $Prog is the program name
+# $Exit_failure is the error exit value from this script
+# $Exit_success is the success exit value from this script
+# $Cdrecord_error_exit is the value returned from 'cdrecord' if an error is detected
+# $Debian_version_file is the file to check for the Debian Linux version
+# $Min_debian_version is the minimum Debian Linux version supported
+# @Needed_exes is the list of needed exes for this script to run
+# $Tmp_dir is the temporary directory used for intermediate files
+
+($Prog = $0) =~ s%.*/%%;
+$Exit_failure=1;
+$Exit_success=0;
+$Debian_version_file="/etc/debian_version";
+$Min_debian_version=3.0;
+$Cdrecord_error_exit=255;
+@Needed_exes_withcdrecord=('cdrecord');
+@Needed_exes=('dvd+rw-format', 'growisofs', 'mkisofs');
+$Tmp_dir="/tmp";
+
+# Get current environment if set
+# $Dvd_scsi_device_env must be a SCSI device
+# $Dvd_device_env must be the name of the dvd device itself
+# $Dvd_mount_point_env must be the mount location
+# $Dvd_media_env must be one of: dvd+r, dvd+rw
+# $Skip_cdrecord_check_env must be one of: true, false
+# $Skip_mount_check_env must be one of: true, false
+# $Skip_file_check_env must be one of: true, false
+# $Mount_sleep_secs_env must be: a number of sleep secs or <0 for no sleep
+
+$Dvd_scsi_device_env = $ENV{'DVD_SCSI_DEVICE'};
+$Dvd_device_env = $ENV{'DVD_DEVICE'};
+$Dvd_mount_point_env = $ENV{'DVD_MOUNT_POINT'};
+$Dvd_media_env = $ENV{'DVD_MEDIA'};
+$Skip_cdrecord_check_env = $ENV{'DVD_SKIP_CDRECORD_CHECK'};
+$Skip_mount_check_env = $ENV{'DVD_SKIP_MOUNT_CHECK'};
+$Skip_file_check_env = $ENV{'DVD_SKIP_FILE_CHECK'};
+$Mount_sleep_secs_env = $ENV{'DVD_MOUNT_SLEEP_SECS'};
+
+# ... Set command line defaults ...
+#
+# $Debug is the debug flag
+# $Test is the test mode flag
+# $Format is the flag to format the DVD disk
+# $Reformat is the flag to format a used DVD disk (+RW only)
+# $Follow_symlinks is the flag to follow symbolic links
+# $Joliet is the flag to write Joliet format disk (Windows-compatible)
+# $Blank is the flag to blank the DVD+RW disk
+# $WriteOver is the flag to force the -Z option for DVD+RW and
+#      not use the -M (merge) option.
+# $Skip_cdrecord_check is the flag to skip the 'cdrecord' check on the DVD drive
+#                    before starting. This option should only be used with extreme care.
+# $Skip_mount_check is the flag to skip the 'mount' check on the DVD drive before
+#                    starting. This mount check is only valid if the disk has
+#                    been formatted before, i.e., a brand-new unformatted disk 
+#                    cannot be mounted.
+# $Skip_file_check is the flag to skip the check on the files written to the DVD
+#                    disk at the end. The file check is only valid if the disk
+#                    is being reformatted for new files but has been previously
+#                    formatted before this write session.
+# $Dvd_scsi_device is the information returned from '# cdrecord -scanbus'
+#                    for the DVD+RW device
+# $Dvd_device is the actual name of the DVD device, required for growisofs
+# $Dvd_mount_point is the mount point for the DVD device and must exist in
+#                    the /etc/fstab for this host, required to list the contents
+#                    of the disk.
+# $Mount_sleep_secs is the seconds to sleep before mounting the device.
+#                    This is needed on sarge for additional DVD drives doing RW.
+
+$Debug=0;
+$Test=0;
+$Format=0;
+$Reformat=0;
+$Follow_symlinks=0;
+$Joliet=0;
+$Blank=0;
+$WriteOver=0;
+$Mount_sleep_secs=5;
+
+($is_ok, $true_false, $lc_str)=&getEnvVarString($Skip_cdrecord_check_env, $Debug);
+if ($is_ok) {
+    $Skip_cdrecord_check=$true_false;
+} else {
+    $Skip_cdrecord_check=0;
+}
+
+($is_ok, $true_false, $lc_str)=&getEnvVarString($Skip_mount_check_env, $Debug);
+if ($is_ok) {
+    $Skip_mount_check=$true_false;
+} else {
+    $Skip_mount_check=0;
+}
+
+($is_ok, $true_false, $lc_str)=&getEnvVarString($Skip_file_check_env, $Debug);
+if ($is_ok) {
+    $Skip_file_check=$true_false;
+} else {
+    $Skip_file_check=0;
+}
+
+if ($Dvd_scsi_device_env ne "") {
+    $Dvd_scsi_device=$Dvd_scsi_device_env;
+} else {
+    $Dvd_scsi_device="2,0,0";
+}
+
+if ($Dvd_device_env ne "") {
+    $Dvd_device=$Dvd_device_env;
+} else {
+    $Dvd_device="/dev/dvd";
+}
+
+if ($Dvd_mount_point_env ne "") {
+    $Dvd_mount_point=$Dvd_mount_point_env;
+} else {
+    $Dvd_mount_point="/dvd";
+}
+
+($is_ok, $true_false, $lc_str)=&getEnvVarString($Dvd_media_env, $Debug);
+if (($is_ok) && ($lc_str eq "dvd+rw")) {
+    $Dvd_rw=1;
+} elsif (($is_ok) && ($lc_str eq "dvd+r")) {
+    $Dvd_rw=0;
+} else {
+    $Dvd_rw=1;
+}
+
+if ($Mount_sleep_secs_env ne "") {
+    $Mount_sleep_secs=$Mount_sleep_secs_env;
+}
+
+$usage=
+    "Usage: $Prog -i dir|-b [-f|r|n] [-hjlotvw] [-d dev] [-m mdev] [-s sdev]\n" .
+    "Purpose: To write the files in the specified input directory to a DVD+RW or DVD+R disk.\n" .
+    "         The default is to do a DVD+RW disk.\n" .
+    "         The -b option can be used to blank (more secure than reformat) a DVD+RW disk.\n" .
+    "         If you are using a new DVD+RW disk with growisofs version 5.10 or older, you \n" .
+    "            must set the --format flag to format the disk because the default is --noformat.\n" .
+    "            Note that if you set --format or --reformat and you have files on the \n" .
+    "            DVD+RW disk they will be ERASED!\n" .
+    "         If you are using a DVD+R disk, use the --onetime flag to override\n" .
+    "            the format flags since DVD+R disks should not be formatted before writing.\n" .
+    "         If you are using an HP-400 drive, you may need growisofs version 5.10 or newer\n" .
+    "\n" .
+    "Example (for DVD+RW): $Prog --format --indir /tmp/dummy \n" .
+    "Example (for DVD+R) : $Prog --onetime --indir /tmp/dummy \n" .
+    "\n" .
+    "Environment variables available:\n" .
+    "   DVD_MEDIA        : Set to either: DVD+R or DVD+RW\n" .
+    "                      You can skip the --format or --onetime flags if you use this environment variable\n" .
+    "   DVD_DEVICE       : See --dev below\n" .
+    "   DVD_MOUNT_POINT  : See --mount below\n" .
+    "   DVD_SCSI_DEVICE  : See --scsi below\n" .
+    "   DVD_SKIP_CDRECORD_CHECK : Set to TRUE or FALSE. Skips the cdrecord check on the DVD drive.\n" .
+    "                             This test is no longer used if you are running Linux 3.0 or higher.\n" .
+    "   DVD_SKIP_MOUNT_CHECK    : Set to TRUE or FALSE. Skips the mount check on the DVD\n" .
+    "   DVD_SKIP_FILE_CHECK     : Set to TRUE or FALSE. Skips the file check after the DVD write\n" .
+    "\n" .
+    "Options:\n" .
+    "   --blank         : Blank the disk. Note that this may require growisofs version 5.10 or newer\n" .
+    "   --dev <dev>     : Specify the actual device name for the DVD drive\n" .
+    "                     This can be set using the environment variable: DVD_DEVICE\n" .
+    "                     Default is: $Dvd_device\n" .
+    "   --format        : Flag to format the DVD+RW disk before writing to it.\n" .
+    "                     This option must be used with a brand-new disk.\n" .
+    "                     --reformat is suggested for a used disk.\n" .
+    "                     Default is not to format the disk.\n" .
+    "   --help          : Print this usage statement\n" .
+    "   --indir <dir>   : (Required unless --blank) Input directory of files to write to the disk.\n" .
+    "                     Note that the <dir> itself will not be written to the disk\n" .
+    "                     but all files and subdirectories in the <dir> will be written\n" .
+    "                     to the disk.\n" .
+    "   --joliet        : Flag to write Joliet (Windows-compatible) files in addition to\n" .
+    "                     Rock Ridge (Linux-compatible) files.\n" .
+    "                     Default is to write Rock Ridge only\n" .
+    "   --links         : Flag to follow symbolic links when writing files to the DVD.\n" .
+    "                     Default is not to follow symbolic links.\n" .
+    "   --mount <mdev>  : Specify the mount point for the DVD drive. This must exist in the\n" .
+    "                     /etc/fstab for this host and must match the --dev device.\n" .
+    "                     This can be set using the environment variable: DVD_MOUNT_POINT\n" .
+    "                     Default is: $Dvd_mount_point\n" .
+    "   --noformat      : Flag to not format the disk before writing to it. This assumes\n" .
+    "                     the DVD+RW disk has already been formatted and you are adding\n" .
+    "                     files to the DVD+RW disk (merge option), or that you are writing\n" .
+    "                     a DVD+R disk\n" .
+    "                     This is the default.\n" .
+    "   --onetime       : Flag to indicate this is a DVD+R disk.\n" .
+    "                     Default is a DVD+RW disk (rewriteable)\n" .
+    "   --reformat      : Flag to reformat a used disk. Do not use this option with a\n" .
+    "                     brand-new disk, use --format instead.\n" .
+    "                     ******** Formatting a disk erases all data on it **********\n" .
+    "                     Note that this is not recommended, use --writeover or --blank instead.\n" .
+    "                     Default is not to reformat the disk.\n" .
+    "   --scsi <sdev>   : (Obsolete) Specify the SCSI device name for the DVD drive as listed\n" .
+    "                     under the 'cdrecord -scanbus' command. Note that in Debian sarge\n" .
+    "                     you may need to use the 'cdrecord dev=ATAPI -scanbus' command to see\n" .
+    "                     IDE drives. If you need to use an IDE drive, prepend 'ATAPI:'\n" .
+    "                     (no quotes) ahead of the device name, e.g., 'ATAPI:1,0,0'.\n" .
+    "                     This can be set using the environment variable: DVD_SCSI_DEVICE\n" .
+    "                     Default is: $Dvd_scsi_device\n" .
+    "   --test          : Test mode. Do not actually format or write to the disk.\n" .
+    "                     Instead, tests the drive and echos the format and write commands.\n".
+    "   --verbose       : Print debugging information to STDERR\n" .
+    "   --writeover     : Flag to overwrite the files on a used DVD+RW disk without\n " .
+    "                     reformatting or blanking. This assumes the DVD+RW disk has already\n"  .
+    "                     been formatted and you want to overwrite the files on it.\n" .
+    "   --xtrasleep <secs>: Sleep seconds before trying to mount a DVD device. This has been\n" .
+    "                     needed under sarge for additional DVD drives with DVD+RW disks.\n" .
+    "                     Set to <0 to disable sleep\n" .
+    "                     Default is: $Mount_sleep_secs\n" ;
+
+
+#------------------------- Parse command line ----------------------------
+
+$result=&GetOptions("blank",
+		    "dev=s",
+		    "format",
+		    "help",
+		    "indir=s",
+		    "joliet",
+		    "killchecks",
+		    "links",
+		    "mount=s",
+		    "noformat",
+		    "onetime",
+		    "reformat",
+		    "scsi=s",
+		    "test",
+		    "verbose",
+		    "writeover",
+		    "xtrasleep=s");
+
+if ( $result == 0 || $opt_help ) {
+    print $usage;
+    exit ($Exit_success);
+}
+
+if ($opt_verbose) {
+    $Debug=1;
+    print(STDERR "Input...\n");
+    print(STDERR "\tblank: $opt_blank\n");
+    print(STDERR "\tdev: $opt_dev\n");
+    print(STDERR "\tformat: $opt_format\n");
+    print(STDERR "\tindir: $opt_indir\n");
+    print(STDERR "\tjoliet: $opt_joliet\n");
+    print(STDERR "\tlinks: $opt_links\n");
+    print(STDERR "\tmount: $opt_mount\n");
+    print(STDERR "\tnoformat: $opt_noformat\n");
+    print(STDERR "\tonetime: $opt_onetime\n");
+    print(STDERR "\treformat: $opt_reformat\n");
+    print(STDERR "\tscsi: $opt_scsi\n");
+    print(STDERR "\ttest: $opt_test\n");
+    print(STDERR "\twriteover: $opt_writeover\n");
+    print(STDERR "\txtrasleep: $opt_xtrasleep\n");
+}
+
+$Errors=0;
+
+if ($opt_blank) {
+    $Blank=1;
+}
+
+if ((($opt_format) && ($opt_noformat)) ||
+    (($opt_format) && ($opt_reformat)) ||
+    (($opt_reformat) && ($opt_noformat)) ||
+    (($opt_format) && ($opt_writeover)) ||
+    (($opt_reformat) && ($opt_writeover)) ||
+    (($opt_noformat) && ($opt_writeover))) {
+    print(STDERR "***** ERROR: $Prog: Conflicting format/noformat/reformat options!\n");
+    $Errors=1;
+}
+
+if ($opt_dev) {
+    $Dvd_device=$opt_dev;
+}
+
+if ($opt_format) {
+    $Format=1;
+    $Skip_mount_check=1;
+    $Skip_file_check=1;
+}
+
+if ($opt_indir) {
+    $Input_dir=$opt_indir;
+}
+elsif ((!$opt_indir) && (!$opt_blank)) {
+    print(STDERR "***** ERROR: $Prog: You must specify an input directory\n");
+    $Errors=1;
+}
+
+if ($opt_joliet) {
+    $Joliet=1;
+}
+
+if ($opt_killchecks) {
+    $Skip_cdrecord_check=1;
+    $Skip_file_check=1;
+    $Skip_mount_check=1;
+}
+
+if ($opt_links) {
+    $Follow_symlinks=1;
+}
+
+if ($opt_mount) {
+    $Dvd_mount_point=$opt_mount;
+} 
+
+if ($opt_noformat) {
+    $Format=0;
+    $Skip_file_check=1;
+}
+
+if (($opt_onetime) || ($Dvd_rw == 0)) {
+    $Dvd_rw=0;
+    $Skip_mount_check=1;
+    $Format=0;
+    $Skip_file_check=1;
+}
+
+if ($opt_reformat) {
+    $Format=1;
+    $Reformat=1;
+}
+
+if ($opt_scsi) {
+    $Dvd_scsi_device=$opt_scsi;
+}
+
+if ($opt_test) {
+    $Test=1;
+    $Skip_file_check=1;
+}
+
+if ($opt_writeover) {
+    $WriteOver=1;
+}
+
+if ($opt_xtrasleep) {
+    $Mount_sleep_secs=$opt_xtrasleep;
+}
+
+if ($Errors) {
+    exit($Exit_failure);
+}
+
+print(STDERR "$Prog will run using...\n");
+print(STDERR "\tInput_dir: $Input_dir\n");
+print(STDERR "\tDVD device: $Dvd_device\n");
+print(STDERR "\tDVD mount point: $Dvd_mount_point\n");
+print(STDERR "\tDVD SCSI device: $Dvd_scsi_device\n");
+print(STDERR "\tDo follow symbolic links: $Follow_symlinks\n");
+print(STDERR "\tDo format the disk: $Format\n");
+print(STDERR "\tDo reformat the disk: $Reformat\n");
+print(STDERR "\tDo write over: $WriteOver\n");
+print(STDERR "\tDo joliet mode: $Joliet\n");
+print(STDERR "\tDo blank the disk: $Blank\n");
+print(STDERR "\tDo DVD+RW (1=DVD+RW, 0=DVD+R): $Dvd_rw\n");
+print(STDERR "\tTest mode: $Test\n");
+print(STDERR "\tSkip cdrecord check: $Skip_cdrecord_check\n");
+print(STDERR "\tSkip mount check: $Skip_mount_check\n");
+print(STDERR "\tSkip file check: $Skip_file_check\n");
+print(STDERR "\tMount sleep secs: $Mount_sleep_secs\n");
+
+# ----------------------------- Error checking -------------------
+#
+# Are the needed exes in the path?
+
+$Errors=0;
+foreach $exe (@Needed_exes) {
+    $found=`which $exe`;
+    if (!$found) {
+	print(STDERR "***** ERROR: $Prog: Cannot find needed executable in path: $exe\n");
+	$Errors=1;
+    }
+}
+
+# Does the input directory exist?
+
+if ((!-d $Input_dir) && (!$Blank)) {
+    print(STDERR "***** ERROR: $Prog: The input directory $Input_dir does not exist\n");
+    $Errors=1;
+}
+
+# What version of Debian are we running?
+
+($is_ok, $debian_version)=&getDebianVersion();
+if ((!$is_ok) || ($debian_version < $Min_debian_version)) {
+    print(STDERR "WARNING: $Prog: You are using Debian Linux version: $debian_version\n");
+    print(STDERR "\twhich is less than the expected minimum: $Min_debian_version.\n");
+    print(STDERR "\tYour results may be unpredictable\n");
+}
+
+if ($Errors) {
+    exit($Exit_failure);
+}
+
+# ----------------------------- Device checking -------------------
+# Overview:
+#    Step 1: Check if the device exists in the filesystem
+#    Step 2: Check whether we can mount the device
+#    Step 3: Check whether there is a disk in the drive
+#
+# ... Step 1: check if the device exists. ...
+
+print(STDERR "----- $Prog: Checking if $Dvd_device exists...\n");
+
+$found=`ls $Dvd_device`;
+if (!$found) {
+    print(STDERR "***** ERROR: $Prog: The device does not exist $Dvd_device\n");
+    exit($Exit_failure);
+} else {
+    print(STDERR "----- $Prog: Okay, passed the: ls $Dvd_device test\n");
+}
+
+# ... Step 2: check if we can mount the device . ...
+
+if (!$Skip_mount_check) {
+    print(STDERR "----- $Prog: Checking if can mount the $Dvd_mount_point ...\n");
+
+    $is_ok=&remountDvd($Dvd_mount_point, $Mount_sleep_secs, $Debug);
+    if (!$is_ok) {
+	print(STDERR "***** ERROR: $Prog: Cannot mount the DVD drive at $Dvd_mount_point\n");
+	print(STDERR "      or no disk in the $Dvd_mount_point drive\n");
+	exit($Exit_failure);
+    } else {
+	print(STDERR "----- $Prog: Okay, passed the mount $Dvd_mount_point test\n");
+    }
+}
+
+# ... Step 3: check whether there is a disk in the drive . ...
+
+($is_ok, $is_blank)=&isDiskInDrive($Dvd_mount_point, $Debug);
+if (!$is_ok) {
+    exit($Exit_failure);
+}
+$is_ok=&unmountDvd($Dvd_mount_point, $Debug);
+
+# For a DVD+R only, is the disk in the drive blank?
+
+if (($Dvd_rw == 0) && (!$is_blank)) {
+    print(STDERR "***** ERROR: $Prog: Disk in drive is not blank, cannot reburn a DVD+R\n");
+    exit($Exit_failure);
+}
+
+# ----------------------------- Driver checking -------------------
+# Overview:
+#  Step 1: What version of growisofs do we have? Behavior changes
+#          with version 5.10 or greater.
+#  Step 2: What version of mkisofs do we have? Behavior changes
+#          with version 2.0 or greater? Need minimum 1.14?
+
+($is_ok, $growisofs_version, $growisofs_major_ver, $growisofs_minor_ver)=&getToolVersion("growisofs", $Debug);
+if (($growisofs_major_ver >= 5) && ($growisofs_minor_ver >= 10)) {
+    $have_new_growisofs=1;
+} else {
+    $have_new_growisofs=0;
+}
+
+if ($Debug) {
+    print(STDERR "----- $Prog: You are using growisofs version: $growisofs_version  have_new_growisofs: $have_new_growisofs\n");
+}
+
+($is_ok, $mkisofs_version)=&getToolVersion("mkisofs", $Debug);
+if ($Debug) {
+    print(STDERR "----- $Prog: You are using mkisofs version: $mkisofs_version\n");
+}
+
+# ---------------------------------- Main -------------------------
+# Overview: 
+#   Step 1: Blank the disk, then exit
+#   Step 2: Format the disk
+#   Step 3: Write data to the disk
+#   Step 4: Test if successful write
+#
+
+#...Step 1: Blank the disk ...
+#    growisofs -Z /dev/scdN=/dev/zero
+
+if ($Blank) {
+    $cmd="growisofs -Z $Dvd_device=/dev/zero";
+    $is_ok=system($cmd);
+    $blank_disk=WEXITSTATUS($?);
+
+    if ($Debug) {
+	print(STDERR "----- $Prog: $blank_disk returned from: $cmd\n");
+    }
+
+    if (!$Test) {
+	if ($blank_disk != 0) {
+	    print(STDERR "***** ERROR: $Prog: Failure to blank $Dvd_device\n");
+	    exit($Exit_failure);
+	} else {
+	    print(STDERR "----- $Prog, Okay, blanked $Dvd_device.\n");
+	    exit($Exit_success);
+	}
+    } else {
+	exit ($Exit_success);
+    }
+}
+
+#... Step 2: Format the disk ...
+#    dvd+rw-format returns 0 on success and non-zero on error
+#
+#    This has changed with growisofs version 5.1 and higher and is no longer
+#    required with DVD+RW for new disks.
+
+if ($Format) {
+    if (($have_new_growisofs) && (!$Reformat)) {
+	print(STDERR "----- $Prog: Skipping the format step because you are using new growisofs\n");
+    } else {
+	if ($Reformat)  {
+	    $force_flag="-force";
+	} else {
+	    $force_flag="";
+	}
+
+	print(STDERR "----- $Prog: Formatting the $Dvd_device disk...\n");
+
+	$cmd="dvd+rw-format $force_flag $Dvd_device";
+
+	if ($Test) {
+	    $cmd="echo " . $cmd;
+	}
+	$is_ok=system($cmd);
+	$format_drive=WEXITSTATUS($?);
+
+	if ($Debug) {
+	    print(STDERR "----- $Prog: $format_drive returned from: $cmd\n");
+	}
+
+	if (!$Test) {
+	    if ($format_drive != 0) {
+		print(STDERR "***** ERROR: $Prog: failure in formatting the $Dvd_device disk\n");
+		exit($Exit_failure);
+	    } else {
+		print(STDERR "----- $Prog, Okay, formatted the $Dvd_device disk.\n");
+	    }
+	}
+    }
+}
+
+#... Step 3: Write data to the disk ...
+#
+# From Jeff Stolte:
+#   Use the "growisofs" command to burn the DVD.  An initial session
+#   can be made with this command:
+#      "growisofs -r -Z /dev/dvd /some/files"
+#
+#   Another session can be added with this command:
+#      "growisofs -r -M /dev/dvd /other/files"
+#
+# If we are formatting the disk, we are doing an initial session.
+#    growisofs returns 0 on success and non-zero on error
+
+print(STDERR "----- $Prog: Writing files from $Input_dir to $Dvd_device...\n");
+
+if ($Follow_symlinks) {
+    $symlinks_flag="-follow-links";
+} else {
+    $symlinks_flag="";
+}
+
+if ($Joliet) {
+    $joliet_flag="-joliet";
+} else {
+    $joliet_flag="";
+}
+
+if ($Dvd_rw) {
+    $merge_flag="-M";
+} else {
+    $merge_flag="";
+}
+
+if (($Format) || (!$Dvd_rw)) {
+    $cmd="growisofs $symlinks_flag $joliet_flag -r -Z $Dvd_device $Input_dir";
+} elsif ($WriteOver) {
+    $cmd="growisofs $symlinks_flag $joliet_flag -r -Z $Dvd_device $Input_dir";
+} else {
+    $cmd="growisofs $symlinks_flag $joliet_flag -r $merge_flag $Dvd_device $Input_dir";
+}
+
+if ($Test) {
+    $cmd="echo " . $cmd;
+}
+$is_ok=system($cmd);
+$write_files=WEXITSTATUS($?);
+
+if ($Debug) {
+    print(STDERR "----- $Prog: $write_files returned from: $cmd\n");
+}
+
+if (!$Test) {
+    if ($write_files != 0) {
+	print(STDERR "***** ERROR: $Prog: Failure in writing files to $Dvd_device\n");
+	exit($Exit_failure);
+    } else {
+	print(STDERR "----- $Prog, Okay, wrote files to $Dvd_device.\n");
+    }
+}
+
+# Step 4: Test if successful write
+# For now, only works for initial writes.
+#
+# Need to mount or remount the dvd drive in order to check on it
+
+if (!$Skip_file_check) {
+    $is_ok=&remountDvd($Dvd_mount_point, $Mount_sleep_secs, $Debug);
+    if (!$is_ok) {
+	exit($Exit_failure);
+    }
+
+    # Now check whether the files were written successfully
+
+    $is_ok=&checkFiles($Dvd_mount_point, $Input_dir, $Tmp_dir, $Follow_symlinks, $Debug);
+    &unmountDvd($Dvd_mount_point, $Debug);
+    if (!$is_ok) {
+	exit($Exit_failure);
+    }
+} else {
+    if ($Debug) {
+	print(STDERR "----- $Prog: Skipping the file write check\n");
+    }
+}
+
+# Done
+
+exit($Exit_success);
+
+# ================================= SUBROUTINES =================================
+#
+# Subroutine remountDvd
+#
+# Usage: $return_val = &remountDvd($dvd_drive, $sleep_secs, $debug)
+# 
+# Input: $dvd_drive        the mount point for the dvd drive
+#        $sleep_secs       sleep seconds before do mount, <0 for no sleep
+#        $debug            flag (1=on, 0=off)
+#
+# Output: Returns 1 on success, 0 on error
+#
+# Function: Checks if the $dvd_drive is mounted? If not, try to mount it, 
+#           if yes try to unmount then remount it
+#
+#
+
+sub remountDvd
+{
+  local ($dvd_drive, $sleep_secs, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($check_mounted, $unmount, $mount);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="remountDvd";
+
+  # Debugging
+
+  if ($debug) {
+      print(STDERR "----- $Prog: Check if the $dvd_drive disk is mounted\n");
+  }
+
+  # Note: 
+  #    grep returns 0 if the string was a match and 1 if the string was not matched.
+  #    mount returns 0 on success and non-zero on error
+  #    umount returns 0 on success and non-zero on error
+  #
+  # Is the disk mounted?
+
+  $cmd="df | grep $dvd_drive";
+  $is_ok=system($cmd);
+  $check_mounted=WEXITSTATUS($?);
+
+  if ($debug) {
+      print(STDERR "----- $Prog: $check_mounted returned from: $cmd\n");
+  }
+
+  if ($check_mounted == 0) {
+      if ($debug) {
+	  print(STDERR "----- $Prog: the DVD drive: $dvd_drive is already mounted. Will try to remount it\n");
+      }
+
+      $cmd="umount $dvd_drive";
+      $is_ok=system($cmd);
+      $unmount=WEXITSTATUS($?);
+
+      if ($debug) {
+	  print(STDERR "----- $Prog: $unmount returned from: $cmd\n");
+      }
+    
+      if ($unmount !=0 ) {
+	  print(STDERR "----- ERROR: Cannot unmount the DVD drive: $dvd_drive.\n");
+	  return($return_val);
+      }
+  }
+
+  # Do sleep before try doing a mount
+
+  if ($sleep_secs > 0) {
+      if ($debug) {
+	  print(STDERR "----- $Prog: Sleeping $sleep_secs secs before mount DVD drive\n");
+      }
+      sleep($sleep_secs);
+  }
+ 
+  if ($debug) {
+      print(STDERR "----- $Prog: Mounting the DVD drive: $dvd_drive\n");
+  }
+    
+  $cmd="mount $dvd_drive";
+  $is_ok=system($cmd);
+  $mount=WEXITSTATUS($?);
+
+  if ($debug) {
+      print(STDERR "----- $Prog: $mount returned from: $cmd\n");
+  }
+
+  if ($mount != 0) {
+      print(STDERR "----- ERROR: Cannot mount the DVD drive: $dvd_drive\n");
+      return($return_val);
+  }
+
+  # Done
+
+  $return_val=1;
+  return($return_val);
+}
+
+
+#------------------------------------------------------------------------------
+#
+# Subroutine isDiskInDrive
+#
+# Usage: ($return_val, $is_blank) = &isDiskInDrive($dvd_drive, $debug)
+# 
+# Input: $dvd_drive        the mount point for the dvd drive
+#        $debug            flag (1=on, 0=off)
+#
+# Output: $return_val      Returns 1 on success, 0 on error
+#         $is_blank        flag (1=is blank, 0 is not blank)
+#
+# Function: Checks the return values from mounting the $dvd_drive.
+#
+#
+
+sub isDiskInDrive
+{
+  local ($dvd_drive, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname, $is_blank);
+  local($cmd, $mount, $mount_return_str);
+
+  # Set defaults
+
+  $return_val=0;
+  $is_blank=0;
+  $subname="isDiskInDrive";
+
+  # Debugging
+
+  if ($debug) {
+      print(STDERR "----- $Prog: Check if there is a disk in the $dvd_drive\n");
+  }
+
+  # Note: 
+  #    grep returns 0 if the string was a match and 1 if the string was not matched.
+  #
+  # Is there NO disk in the drive?
+
+  $cmd="mount $dvd_drive 2>&1 | grep \"No medium found\"";
+  $is_ok=system($cmd);
+  $mount=WEXITSTATUS($?);
+
+  if ($mount == 0) {
+      print(STDERR "----- ERROR: No disk in the drive: $dvd_drive\n");
+      return($return_val, $is_blank);
+  }
+
+  # Is there a BLANK disk in the drive?
+
+  if ($debug) {
+      print(STDERR "----- $Prog: Mounting the DVD drive: $dvd_drive\n");
+  }
+    
+  $cmd="mount $dvd_drive 2>&1 | grep \"wrong fs type\"";
+  $is_ok=system($cmd);
+  $mount=WEXITSTATUS($?);
+
+  if ($mount == 0) {
+      $is_blank=1;
+      print(STDERR "----- $Prog: Blank disk in the drive: $dvd_drive\n");
+  }
+
+  $return_val=1;
+
+  # Done
+
+  return($return_val, $is_blank);
+}
+
+
+#------------------------------------------------------------------------------
+#
+# Subroutine unmountDvd
+#
+# Usage: $return_val = &unmountDvd($dvd_drive, $debug)
+# 
+# Input: $dvd_drive        the mount point for the dvd drive
+#        $debug            flag (1=on, 0=off)
+#
+# Output: Returns 1 on success, 0 on error
+#
+# Function: Checks if the $dvd_drive is unmounted? If not, try to unmount it, 
+#
+#
+
+sub unmountDvd
+{
+  local ($dvd_drive, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($check_mounted, $unmount, $mount);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="unmountDvd";
+
+  # Debugging
+
+  if ($debug) {
+      print(STDERR "----- $Prog: Check if the $dvd_drive disk is unmounted\n");
+  }
+
+  # Note: 
+  #    grep returns 0 if the string was a match and 1 if the string was not matched.
+  #    mount returns 0 on success and non-zero on error
+  #    umount returns 0 on success and non-zero on error
+  #
+  # Is the disk mounted?
+
+  $cmd="df | grep $dvd_drive";
+  $is_ok=system($cmd);
+  $check_mounted=WEXITSTATUS($?);
+
+  if ($debug) {
+      print(STDERR "----- $Prog: $check_mounted returned from: $cmd\n");
+  }
+
+  if ($check_mounted == 1) {
+      if ($debug) {
+	  print(STDERR "----- $Prog: the disk $dvd_drive is not mounted.\n");
+      }
+      $return_val=1;
+      return($return_val);
+  }
+
+  $cmd="umount $dvd_drive";
+  $is_ok=system($cmd);
+  $unmount=WEXITSTATUS($?);
+
+  if ($debug) {
+      print(STDERR "----- $Prog: $unmount returned from: $cmd\n");
+  }
+    
+  if ($unmount !=0 ) {
+      print(STDERR "----- ERROR: Cannot unmount the $dvd_drive.\n");
+      return($return_val);
+  }
+
+  # Done
+
+  $return_val=1;
+  return($return_val);
+}
+
+
+#------------------------------------------------------------------------------
+#
+# Subroutine checkFiles
+#
+# Usage: $return_val = &checkFiles($dvd_drive, $in_dir, $tmp_dir, $follow_links, $debug)
+# 
+# Input: $dvd_drive        the mount point for the dvd drive
+#        $in_dir           input directory
+#        $tmp_dir          temporary directory for intermediate files
+#        $follow_links     flag to follow symbolic links (1=on, 0=off)
+#        $debug            flag (1=on, 0=off)
+#
+# Output: Returns 1 on success, 0 on error
+#
+# Function: Check whether the files were written successfully by doing a checksum
+#           on the files in the input directory and the dvd disk.
+#
+#
+
+sub checkFiles
+{
+  local ($dvd_drive, $in_dir, $tmp_dir, $follow_links, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($now, $tmp_indir_file, $tmp_dvd_file, $is_ok, $cmd);
+  local($indir_size, $dvd_size, $symlinks_flag);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="checkFiles";
+
+  if ($follow_links) {
+      $symlinks_flag="-follow";
+  } else {
+      $symlinks_flag="";
+  }
+
+  print(STDERR "----- $Prog: Checking if files were written successfully by doing cksum on input files and dvd ...\n");
+
+  # Now check whether the files were written successfully by doing a cksum
+  # on the files in the input directory and on the dvd disk. cksum only works
+  # on files, not directories so we will only compare files.
+  
+  $now=time;
+  $tmp_indir_file="${tmp_dir}/${Prog}.indir.${now}";
+  $tmp_dvd_file="${tmp_dir}/${Prog}.dvd.${now}";
+
+  $cmd="find $in_dir $symlinks_flag -type f -exec cksum {} \\; > $tmp_indir_file";
+  $is_ok=system($cmd);
+  $is_ok=WEXITSTATUS($?);
+
+  $cmd="find $dvd_drive $symlinks_flag -type f -exec cksum {} \\; > $tmp_dvd_file";
+  $is_ok=system($cmd);
+  $is_ok=WEXITSTATUS($?);
+
+  # Use awk to retrieve the desired number rather than spend processing time
+  # opening and closing the temporary files. cksum returns a CRC checksum
+  # and a byte count on each file, it is easier to sum the byte counts
+
+  $indir_size=`awk '{total +=\$2} END {print total}' $tmp_indir_file`;
+  $dvd_size=`awk '{total +=\$2} END {print total}' $tmp_dvd_file`;
+  chop($indir_size);
+  chop($dvd_size);
+
+  if ($indir_size != $dvd_size) {
+      print(STDERR "***** ERROR: $Prog: The file byte counts of the input directory ($indir_size)\n");
+      print(STDERR "      and DVD disk ($dvd_size) do not agree!\n");
+      print(STDERR "      There may have been an an error in writing to the DVD!\n");
+      $return_val=0;
+  } else {
+      if ($debug) {
+	  print(STDERR "----- File byte counts match: $in_dir and $dvd_drive\n");
+      }
+      $return_val=1;
+  }
+
+  # Delete temp files
+
+  unlink $tmp_indir_file;
+  unlink $tmp_dvd_file;
+    
+  # Done
+
+  return($return_val);
+}
+
+
+#------------------------------------------------------------------------------
+#
+# Subroutine getEnvVarString
+#
+# Usage: ($return_val, $tf, $lc_string) = &getEnvVarString($env_var, $debug)
+# 
+# Input: $env_var          environment variable to check
+#        $debug            flag (1=on, 0=off)
+#
+# Output: $return_val      1 if $env_var set, 0 if not
+#         $tf              1 if $env_var is true, 0 if false
+#         $lc_string       $env_var in all lower case if set
+#
+# Function: Test the $env_var for true/false string and set the
+#           return $tf value. If not true/false, but a string,
+#           return it in all lower case for easier testing.
+#
+
+sub getEnvVarString
+{
+  local ($env_var, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($tf, $lc_string);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="getEnvVarString";
+
+  $tf=0;
+  $lc_string="";
+
+  # Is the env var set?
+
+  if ($env_var eq "") {
+      return($return_val, $tf, $lc_string);
+  }
+
+  # It is set, convert any strings to lower case
+
+  $return_val=1;
+  $lc_string=$env_var;
+  $lc_string =~ tr/[A-Z]/[a-z]/;
+
+  # Test the string value
+
+  if ($lc_string eq "true") {
+      $tf=1;
+  }
+
+  # Done
+
+  return($return_val, $tf, $lc_string);
+}
+
+
+#------------------------------------------------------------------------------
+#
+# Subroutine getToolVersion
+#
+# Usage: ($return_val, $ver, $major_ver, $minor_ver) 
+#                = &getToolVersion($tool, $debug)
+# 
+# Input: $tool             name of tool to check
+#        $debug            flag (1=on, 0=off)
+#
+# Output: $return_val      1 on success, 0 if not
+#         $ver             version of $tool, set to -1 on failure
+#         $major_ver       first part of $ver before the .
+#         $minor_ver       second part of $ver after the .
+#
+# Function: Run $tool --version to retrieve the version number.
+#           Returns the 2nd item in the return string as the version number.
+#
+
+sub getToolVersion
+{
+  local ($tool, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($ver, $major_ver, $minor_ver, $version_str, @arr, $word);
+  local($found, $counter, $found_idx);
+
+  # Set defaults
+
+  $return_val=0;
+  $ver=-1;
+  $major_ver=-1;
+  $minor_ver=-1;
+  $subname="getToolVersion";
+
+  # get version
+
+  $version_str=`$tool --version`;
+  @arr=split('\s+', $version_str);
+
+  # look for the word version and take the next string
+  # as the version number
+
+  $counter=0;
+  $found_idx=0;
+  $found=0;
+  foreach $word (@arr) {
+      $word=lc($word);
+      if ((!$found) && ($word =~ /version/)) {
+	  $found=1;
+	  $found_idx=$counter;
+      }
+      $counter++;
+  }
+
+  # If not found, is this the old style with the tool name then
+  # the version number as the return?
+
+  if (!$found) {
+      if (($arr[0] =~ /$tool/) && ($arr[1] >= 0.0)) {
+	  $found=1;
+	  $found_idx=0;
+      }
+  }
+
+  if ((!$found) || ($found_idx+1 >= $counter)) {
+      return ($return_val, $ver, $major_ver, $minor_ver);
+  }
+
+  $ver=$arr[$found_idx+1];
+  
+  # pull off a trailing , if there is one
+  
+  if ($ver =~ /\,/) {
+      @arr=split('\,', $ver);
+      $ver=$arr[0];
+  }
+
+  # split the version at the .
+  # need to do this because of growisofs versioning which has 5.17 as
+  # newer than 5.2
+
+  if ($ver =~ /\./) {
+      @arr=split('\.', $ver);
+      $major_ver=$arr[0];
+      $minor_ver=$arr[1];
+  }
+
+  if ($ver >= 0.0) {
+      $return_val=1;
+  } else {
+      $ver=-1;
+  }
+  return ($return_val, $ver, $major_ver, $minor_ver);
+}
+
+#------------------------------------------------------------------------------
+#
+# Subroutine getDebianVersion
+#
+# Usage: ($return_val, $ver) = &getDebianVersion($debug)
+# 
+# Input:  $debug            flag (1=on, 0=off)
+#
+# Output: $return_val      1 on success, 0 if not
+#         $ver             version of $tool, set to -1 on failure
+#
+# Function: Cat the /etc/debian_version file and look for the value in it.
+#           Return the value as the $ver.
+#
+
+sub getDebianVersion
+{
+  local () = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($ver);
+
+  # Set defaults
+
+  $return_val=0;
+  $ver=-1;
+  $subname="getDebianVersion";
+
+  # Does the version file exist
+
+  if (!-e $Debian_version_file) {
+      print(STDERR "WARNING: $Prog: The Debian version file does not exist: $Debian_version_file\n");
+      return($return_val, $ver);
+  }
+
+  # get version
+
+  $ver=`cat $Debian_version_file`;
+  chop($ver);
+  
+  if ($Debug) {
+      print(STDERR "$Prog: You are using Debian Linux Version: $ver\n");
+  }
+
+  $return_val=1;
+  return($return_val, $ver);
+}
+
+
+#------------------------------------------------------------------------------
+#
+# This function is here for historical purposes. It is no longer used after 9-JUL-2004
+# due to failures with HP400i drives and DVD+RW disks.
+#
+# Subroutine runCdrecordCheck
+#
+# Usage: $return_val = &runCdrecordCheck($debug)
+# 
+# Input:  $debug            flag (1=on, 0=off)
+#
+# Output: $return_val      1 on success, 0 if not
+#
+# Function: Run cdrecord in dummy mode and return true if the device is a
+#           CD/DVD device and there is a disk in the drive
+#
+
+sub runCdRecordCheck
+{
+  local () = @_;
+
+  local($return_val);
+  $return_val=0;
+
+  # Return if not checking cdrecord
+
+  if ($Skip_cdrecord_check) {
+      $return_val=1;
+      return($return_val);
+  }
+
+  # Check that cdrecord is in the path
+
+  foreach $exe (@Needed_exes_withcdrecord) {
+      $found=`which $exe`;
+      if (!$found) {
+	  print(STDERR "***** ERROR: $Prog: Cannot find needed executable in path: $exe\n");
+	  return($return_val);
+      }
+  }
+
+# cdrecord:
+# Returns 255 if an error condition. E.g., not a CD/DVD device or no disk in the
+# drive. 
+# Returns !255 if a CD/DVD drive with a disk in it.
+#
+# May need to write the output of the cdrecord command to a file and parse
+# it if want a specific error message.
+
+
+  print(STDERR "----- $Prog: Checking if the dvd scsi device: $Dvd_scsi_device is valid...\n");
+  print(STDERR "-----        and if there is a disk in the drive. This check uses 'cdrecord'\n");
+  print(STDERR "-----        in dummy mode; you may see a number of WARNINGS. These can be\n");
+  print(STDERR "-----        ignored. This check can take up to 15 secs.\n");
+
+  $cmd="cdrecord -v dev=${Dvd_scsi_device} -dummy /tmp";
+  $is_ok=system($cmd);
+  $check_drive=WEXITSTATUS($?);
+
+  if ($Debug) {
+      print(STDERR "----- $Prog: $check_drive returned from: $cmd\n");
+  }
+
+  if ($check_drive == $Cdrecord_error_exit) {
+      print(STDERR "***** ERROR: $Prog: either scsi device: $Dvd_scsi_device\n");
+      print(STDERR "      is not a CD or DVD r/w device or there is no disk in the drive\n");
+      return($return_val);
+  } else {
+      print(STDERR "----- $Prog: Okay, passed the cdrecord test. The specified device is\n");
+      print(STDERR "      a CD or DVD r/w device and and there is a disk in the drive.\n");
+  }
+  
+  $return_val=1;
+  return($return_val);
+}
+
+#------------------------------------------- EOF -------------------------------------

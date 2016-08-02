@@ -1,0 +1,637 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Grib2Mdv
+ *
+ */
+
+commentdef {
+  p_header = "Grib2Mdv PARAMETER FILE";
+  p_text = "Grib2Mdv creates MDV data from GRIB model data files. A number of different model output is supported.";
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed.";
+} debug;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Always swaps grids from N-S to S-N";
+  p_help = "Some NCEP data has corrupt headers and can't be used to determine grid order";
+} always_swap_ns;
+
+paramdef char* {
+  p_default = {"ruc"};
+  p_descr = "GRIB Type";
+  p_help = "Type of GRIB file to convert.";
+} type;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Instance";
+  p_help = "Process instance for registration with process mapper.";
+} instance;
+
+paramdef enum mode_t {
+  p_options = {REALTIME, REALTIME_DIR, FILELIST, NEWFILES};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "\tREALTIME - In REALTIME mode, files are processed as they "
+           "are received, as indicated by the latest_data_info file in "
+           "the input directory. "
+           "In REALTIME mode, the LDATA_FMQ_ACTIVE environment "
+           "variable must be set to \"true\" if the raw RUC files might "
+           "be received more quickly than Grib2Mdv can process them."
+           "\tREALTIME_DIR - In REALTIME_DIR mode, files are processed "
+           "as they are written to the input directory. "
+           "In this case new files are recognized by creating a directory "
+           "listing so there is no need for a latest_data_info file in "
+           "the input directory to trigger processing. "
+           "The input_substring parameter is used to indicate which files "
+           "in the input directory should be processed when running in "
+           "REALTIME_DIR mode.\n"
+           "\tFILELIST - In FILELIST mode, the files listed on the "
+           "command line using "
+           "the -f command line option are processed and then Grib2Mdv "
+           "exits. "
+           "FILELIST mode is automatically invoked by -f option on the "
+           "command line and if the FILELIST mode is specified, the -f "
+           "option is required on the command line.\n"
+           "\tNEWFILES - In NEWFILES mode, new files are detected in the "
+           "input directory by their appearance and file size.  This mode "
+           "is intended to be used with rsync.  It is similar to REALTIME_DIR.\n";
+} mode;
+
+paramdef string {
+  p_default = "f00.ruc20b";
+  p_descr = "Substring contained in the filenames of all files to be "
+            "processed from the input directory when running in "
+            "REALTIME_DIR or NEWFILES mode.";
+} input_substring;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Flag to indicate that the input files are from the old "
+    "RUC2 40km data";
+  p_help = "If set, the program will recognize the water vapor mixing "
+    "ratio (WVMR) field. In the old GRIB files WVMR's field code is "
+    "185, which conflicts with the GRIB standard. The field code 185 "
+    "is supposed to represent Turbulence SIGMET/AIRMET. Note that "
+    "humidity mixing ratio supercedes WVMR in the latest RUC output.";
+} runOnOldRuc40File;
+
+commentdef {
+  p_header = "INPUT DATA PARAMETERS";
+} 
+
+paramdef char* {
+  p_default = {"./"};
+  p_descr = "Input directory";
+  p_help = "Directory which contains input RUC 2 files. "
+           "Used only if files are not specified on the command line. ";
+} input_dir;
+
+paramdef long {             
+  p_min = {0};
+  p_default = {10800};
+  p_descr = "Max age (in seconds) of input data";
+  p_help = "Used only if files are not specified on the command line";
+} max_input_data_age;
+
+
+typedef enum {
+  GRIB_TYPE_RUC,
+  GRIB_TYPE_AVN,
+  GRIB_TYPE_ETA,
+  GRIB_TYPE_WAFS,
+  GRIB_TYPE_AFWA,
+  GRIB_TYPE_DTRA
+} grib_type_t;
+
+paramdef enum grib_type_t {
+  p_default = { GRIB_TYPE_RUC };
+  p_descr = "Type of input GRIB file";
+  p_help = "";
+} input_grib_type;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Flag to direct processing of pre-existing files. ";
+  p_help = "If set, the program will treat any pre-existing files "
+    "in the input directory as newly arrived files. ";
+} process_old_files;
+
+
+commentdef {
+  p_header = "MDV OUTPUT PARAMETERS";
+}
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Write mdv files in a forecast directory structure";
+  p_help = "If this is true, mdv files will be written in the "
+           "rap forecast directory structure.  Note that if "
+           "write_non_forecast is also set to true, two mdv "
+           "files will be written";
+} write_forecast;
+
+paramdef char* {
+  p_default = {"mdvp:://localhost::./mdv"};
+  p_descr = "Url for mdv files in forecast structure";
+  p_help = "";
+} forecast_mdv_url;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Write mdv files in a non-forecast directory structure";
+  p_help = "If this is true, mdv files will be written in the "
+           "regular (non-forecast) rap directory structure.  Note "
+           "that if write_forecast is also set to true, two mdv "
+           "files will be written.  Note also that this option allows "
+           "for overwriting files, since the forecast time will be "        
+           "used as the data time in this case.  This is a temporary "
+           "option to allow for easier display of the data";
+} write_non_forecast;
+
+paramdef char* {
+  p_default = {"mdvp:://localhost::./mdv"};
+  p_descr = "Url for mdv files in non-forecast structure";
+  p_help = "";
+} non_forecast_mdv_url;
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Set encoding type.";
+} encoding_type;
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4, 
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_RLE;
+  p_descr = "Set compression type.";
+} compression_type;
+
+typedef enum { 
+  TIMESTAMP_GEN_TIME, TIMESTAMP_FCAST_TIME
+} timestamp_t;
+
+paramdef enum timestamp_t {
+  p_default = {TIMESTAMP_FCAST_TIME};
+  p_descr = "This parameter allows user to timestamp non-forecast mdv files based "
+	"on the model's run time or the forecast time.";
+  p_help = "The choices are TIMESTAMP_GEN_TIME and TIMESTAMP_FCAST_TIME";
+} non_forecast_timestamp;
+
+paramdef string {
+  p_default = "This MDV file was created by RUC 2.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "RUC 2 model output.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "RUC 2 output.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+typedef enum { 
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON, OUTPUT_PROJ_LAMBERT_CONF, OUTPUT_PROJ_NATIVE 
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = {OUTPUT_PROJ_FLAT};
+  p_descr = "Projection type for the output mdv files."
+            "If mdv_proj_type is set to OUTPUT_PROJ_NATIVE, then output_origin, "
+            "output_rotation, output_parallel, and output_grid do not need to be set" ;
+  p_help = "";
+} mdv_proj_type;
+
+typedef struct {
+  double lat;
+  double lon;
+} output_origin_t;
+
+paramdef struct output_origin_t {
+  p_descr = "Origin of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT_CONF only.";
+  p_default = {40.0, -104.0};
+} output_origin;
+
+paramdef float {
+  p_descr = "rotation of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT only.";
+  p_default = {0.0};
+} output_rotation;
+
+typedef struct {
+  double lat1;
+  double lat2;
+} output_parallel_t;
+
+paramdef struct output_parallel_t {
+  p_descr = "Standard parallels of output projection.";
+  p_help = "Used with OUTPUT_PROJ_LAMBERT_CONF only.";
+  p_default = {25.0, 25.0};
+} output_parallel;
+
+typedef struct {
+  int nx;
+  int ny;
+  int nz;
+  double minx;
+  double miny;
+  double minz;
+  double dx;
+  double dy;
+  double dz;
+} output_grid_t;
+
+paramdef struct output_grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "The grid params for the output grid.  Note that the units "
+           "of minz and dz will depend on the type of output levels selected."
+           "  If natural levels are selected, the units will in level numbers, "
+           "and the value of dz will be overridden.  Note also that if the "
+           "output grid is lat/lon, the units of minx, miny, dx and dy are "
+           "in degrees; otherwise they are in km";
+  p_default = {151, 113, 40, -3000.0, -3000.0, 0.0, 40.0, 40.0, 1.0};
+} output_grid;
+
+
+typedef enum { 
+  UNKNOWN, PRESSURE=1, PRES=1, PRMSL=2, PRESSURE_TENDENCY=3, GEOPOTENTIAL_HEIGHT=7, HGT=7,
+  CLOUD_HEIGHT=8, TOZNE=10,
+  TEMPERATURE=11, TMP=11, POTENTIAL_TEMPERATURE=13, POT=13, EQUIVALENT_POTENTIAL_TEMP=14,
+  DEW_POINT_TEMPERATURE=17, DEW_POINT_DEPRESSION=18, VISIBILITY=20,
+  PLI=24, GPA=27,
+  WDIR=31, WIND_DIRECTION_FROM=31, WIND=32, WIND_SPEED=32,
+  U_WIND=33, UGRD=33, V_WIND=34, VGRD=34,
+  VERTICAL_VELOCITY=39, VVEL=39, DZDT=40, ABSV=41, SPECIFIC_HUMIDITY=51, SPFH=51,
+  RELATIVE_HUMIDITY=52, RH=52, HUMIDITY_MIXING_RATIO=53, PRECIPITABLE_WATER=54, PWAT=54,
+  CICE=58, PRECIPITATION_RATE=59, TOTAL_PRECIPITATION=61, LARGE_SCALE_PRECIPITATION=62,
+  CONVECTIVE_PRECIPITATION=63, WATER_EQIV_ACCUM_SNOW_DEPTH=65, WEASD=65, SNOW_DEPTH=66,
+  TCDC=71, LOW_CLOUD_COVER=73, MED_CLOUD_COVER=74, HIGH_CLOUD_COVER=75, CWAT=76,
+  BEST_LIFTED_INDEX=77, LAND=81, ALBEDO=84, SOIL_TEMPERATURE=85, TSOIL=85,
+  SOIL_MOISTURE_CONTENT=86,
+  ICEC=91, SNOW_MELT=99, SHORTWAVE_RAD_AT_SURFACE=111, LONGWAVE_RAD_AT_SURFACE=112, 
+  SHORTWAVE_RAD_AT_TOP=113, LONGWAVE_RAD_AT_TOP=114, LATENT_HEAT_FLUX=121,
+  SENSIBLE_HEAT_FLUX=122, SHTFL=122, MEAN_SEA_LEVEL_PRESS_SAR=128,
+  PBL_REGIME=128,
+  MEAN_SEA_LEVEL_PRESS_MAPS=129,
+  SURFACE_LIFTED_INDEX=131, LFTX=131, PRESS=131,
+  FOUR_LFTX=132, HORZ_MOISTURE_CONVERGENCE=135,
+  VWSH=136, PBLHGT=137, CATEGORICAL_RAIN=140, 
+  CATEGORICAL_FREEZING_RAIN=141, CATEGORICAL_ICE_PELLETS=142, CATEGORICAL_SNOW=143, 
+  VOL_SOIL_MOISTURE_CONTENT=144, SOILW=144, POTENTIAL_VORTICITY=149, CLOUD_WATER_MIXING_RATIO=153, 
+  CLWMR=153, O3MR=154, CONVECTIVE_INHIBITION=156, CIN=156, CONVEC_AVIAL_POT_ENERGY=157, CAPE=157,
+  TURBULENT_KINETIC_ENERGY=158, SOILL=160,
+  RAIN_WATER_MIXING_RATIO=170, SNOW_MIXING_RATIO=171,
+  MOMENTUM_FLUX=172, NLAT=176, ELON=177, ICE_MIXING_RATIO=178, GRAUPEL_MIXING_RATIO=179,
+  WATER_VAPOR_MIXING_RATIO=185, TURB_SIGMET_AIRMET=185, ICING_SIGMET_AIRMET=186, LIGHTNING=187,
+  RATE_WATER_CANOPY2GROUND=188, VIRTUAL_POTENTIAL_TEMP=189, STORM_RELATIVE_HELICITY=190,
+  PSTAR=191, PRSPRT=192, PBLREG=193, FRIVEL=194,
+  U_STORM_MOTION=196, V_STORM_MOTION=197, NUM_CONCEN_ICE_PARTICLES=198,
+  DIRECT_EVAPORATION_BARE_SOIL=199, MAPSCL=199, UUE=203, VVE=204, UVE=205, DOWN_SHORTWAVE_RAD_FLUX=204, 
+  DOWN_LONGWAVE_RAD_FLUX=205, UP_SHORTWAVE_RAD_FLUX=211, UP_LONGWAVE_RAD_FLUX=212, 
+  PBL_HEIGHT=221, HPBL=221, FIVE_WAVH=222, PLANT_CANOPY_SURFACE_WATER=223, SOIL_TYPE=224,
+  VEGETATION_TYPE=225, VGTYP=225, TB=226,
+  SNOW_PHASE_CHANGE_HEAT_FLUX=229, FIVE_WAVA=230,
+  LAT=230, LON=231,
+  MFLUX=231, TERHGT=233, TER_HT=233, BASEFLOW_GRDWATER_RUNOFF=234,
+  STORM_SURFACE_RUNOFF=235, 
+  SNOW_TEMPERATURE=239,
+  TOTACP=240, LNDUSE=241, PCPTYPE=244,
+  DRAG_COEFFICIENT=253, GUST_WIND_SPEED=255
+} param_id_t;
+
+typedef enum { 
+  GROUND_OR_WATER_SURFACE=1, SFC=1, CLOUD_BASE_LEVEL=2, CBL=2, CLOUD_TOP_LEVEL=3, CTL=3,
+  LEVEL_OF_0_DEGREE_ISOTHERM=4, MAXIMUM_WIND_LEVEL=6, TROPOPAUSE=7,
+  ISOBARIC=100, MEAN_SEA_LEVEL=102, ALTITUDE_ABOVE_MSL=103, SPECF_HEIGHT_ABOVE_GROUND=105, 
+  HTGY=106, SIGMA_LEVEL=107,
+  HYBRID=109, DEPTH_BELOW_SURFACE=111, LAYER_BETWEEN_TWO_DEPTHS_BELOW_SURFACE=112,
+  LAYER_BETWEEN_TWO_LEVELS_AT_SPECIFIED_PRESSURES=116, ENTIRE_ATMOSPHERE=200,
+  HIGHEST_TROPO_FREEZE_LEVEL=204, CONVECTIVE_CLOUD_TOP_LEVEL=243,
+  CONVECTIVE_TOTAL_CLOUD_COVER=244,
+  MAXIMUM_EPOT_LEVEL=246, EQUILIBRIUM_LEVEL=247  
+} level_id_t;
+
+typedef enum { 
+  NO_CHANGE = 0,
+  MPS_TO_KNOTS = 1,
+  M_TO_KM = 2,
+  M_TO_100FT = 3,
+  PASCALS_TO_MBAR = 4,
+  KELVIN_TO_CELSIUS = 5,
+  KGPKG_TO_GPKG = 6,
+  PERCENT_TO_FRACTION = 7
+} out_units_t;
+
+typedef struct {
+  param_id_t param_id;
+  level_id_t level_id;
+  out_units_t out_units;
+} out_field_t;
+
+paramdef struct out_field_t {
+  p_descr = "List of output fields, which are descibed by the field parameter, vertical level "
+  "type and output units. This list is only needed if output_all_fields is set to FALSE.\n"
+  " The list of GRIB parameters are:\n"
+  "PRESSURE=1                        PRESSURE_TENDENCY=3\n"
+  "GEOPOTENTIAL_HEIGHT=7             CLOUD_HEIGHT=8\n"
+  "TEMPERATURE=11                    POTENTIAL_TEMPERATURE=13\n"
+  "EQUIVALENT_POTENTIAL_TEMP=14      DEW_POINT_TEMPERATURE=17\n"        
+  "DEW_POINT_DEPRESSION=18           VISIBILITY=20 \n"
+  "WDIR=31                           WIND=32\n" 
+  "U_WIND=33                         V_WIND=34\n" 
+  "VERTICAL_VELOCITY=39              SPECIFIC_HUMIDITY=51\n"             
+  "RELATIVE_HUMIDITY=52              HUMIDITY_MIXING_RATIO=53\n"         
+  "PRECIPITABLE_WATER=54             PRECIPITATION_RATE=59\n" 
+  "TOTAL_PRECIPITATION=61            LARGE_SCALE_PRECIPITATION=62\n"
+  "CONVECTIVE_PRECIPITATION=63       WATER_EQIV_ACCUM_SNOW_DEPTH=65\n"
+  "SNOW_DEPTH=66                     LOW_CLOUD_COVER=73\n"
+  "MED_CLOUD_COVER=74                HIGH_CLOUD_COVER=75 \n"            
+  "BEST_LIFTED_INDEX=77              ALBEDO=84\n"                        
+  "SOIL_TEMPERATURE=85               TSOIL=85\n" 
+  "SOIL_MOISTURE_CONTENT=86\n" 
+  "SNOW_MELT=99                      SHORTWAVE_RAD_AT_SURFACE=111\n"    
+  "LONGWAVE_RAD_AT_SURFACE=112       SHORTWAVE_RAD_AT_TOP=113\n"        
+  "LONGWAVE_RAD_AT_TOP=114           LATENT_HEAT_FLUX=121\n"  
+  "SENSIBLE_HEAT_FLUX=122            MEAN_SEA_LEVEL_PRESS_SAR=128\n"    
+  "MEAN_SEA_LEVEL_PRESS_MAPS=129     SURFACE_LIFTED_INDEX=131\n"          
+  "PRESS=131\n"          
+  "HORZ_MOISTURE_CONVERGENCE=135     PBLHGT=137\n" 
+  "CATEGORICAL_RAIN=140\n" 
+  "CATEGORICAL_FREEZING_RAIN=141     CATEGORICAL_ICE_PELLETS=142\n"     
+  "CATEGORICAL_SNOW=143              VOL_SOIL_MOISTURE_CONTENT=144\n"    
+  "SOILW=144\n"    
+  "POTENTIAL_VORTICITY=149           CLOUD_WATER_MIXING_RATIO=153\n"  
+  "CONVECTIVE_INHIBITION=156         CONVEC_AVIAL_POT_ENERGY=157\n"      
+  "SOILL=160\n"      
+  "TURBULENT_KINETIC_ENERGY=158      RAIN_WATER_MIXING_RATIO=170\n"      
+  "SNOW_MIXING_RATIO=171             MOMENTUM_FLUX=172\n" 
+  "NLAT=176                          ELON=177\n" 
+  "ICE_MIXING_RATIO=178              GRAUPEL_MIXING_RATIO=179\n"        
+  "TURB_SIGMET_AIRMET=185            ICING_SIGMET_AIRMET=186\n"
+  "LIGHTNING=187                     RATE_WATER_CANOPY2GROUND=188\n" 
+  "VIRTUAL_POTENTIAL_TEMP=189        STORM_RELATIVE_HELICITY=190\n"
+  "PSTAR=191                         PRSPRT=192\n"
+  "PBLREG=193                        FRIVEL=194\n"
+  "U_STORM_MOTION=196                V_STORM_MOTION=197\n"               
+  "NUM_CONCEN_ICE_PARTICLES=198      DIRECT_EVAPORATION_BARE_SOIL=199\n"  
+  "MAPSCL=199\n"  
+  "DOWN_SHORTWAVE_RAD_FLUX=204       DOWN_LONGWAVE_RAD_FLUX=205\n"      
+  "UP_SHORTWAVE_RAD_FLUX=211         UP_LONGWAVE_RAD_FLUX=212\n"         
+  "PBL_HEIGHT=221                    PLANT_CANOPY_SURFACE_WATER=223\n"  
+  "SOIL_TYPE=224                     VEGETATION_TYPE=225\n"             
+  "VGTYP=225                         TB=226\n"
+  "SNOW_PHASE_CHANGE_HEAT_FLUX=229   BASEFLOW_GRDWATER_RUNOFF=234\n"
+  "STORM_SURFACE_RUNOFF=235          SNOW_TEMPERATURE=239\n"
+  "DRAG_COEFFICIENT=253              GUST_WIND_SPEED=255\n"
+  "WATER_VAPOR_MIXING_RATIO=185\n\n\n"
+  "The list of available vertical levels are:\n"
+  "GROUND_OR_WATER_SURFACE=1      CLOUD_BASE_LEVEL=2\n"
+  "CLOUD_TOP_LEVEL=3              LEVEL_OF_0_DEGREE_ISOTHERM=4\n" 
+  "MAXIMUM_WIND_LEVEL=6           TROPOPAUSE=7\n"
+  "ISOBARIC=100                   MEAN_SEA_LEVEL=102\n"
+  "SPECF_HEIGHT_ABOVE_GROUND=105  HYBRID=109\n"
+  "DEPTH_BELOW_SURFACE=111\n"        
+  "LAYER_BETWEEN_TWO_DEPTHS_BELOW_SURFACE=112\n"
+  "LAYER_BETWEEN_TWO_LEVELS_AT_SPECIFIED_PRESSURES=116\n"
+  "ENTIRE_ATMOSPHERE=200          HIGHEST_TROPO_FREEZE_LEVEL=204\n"                        
+  "CONVECTIVE_CLOUD_TOP_LEVEL=243 MAXIMUM_EPOT_LEVEL=246\n"
+  "EQUILIBRIUM_LEVEL=247\n\n\n"
+  "The list of unit conversions are:\n"
+  "NO_CHANGE            -- no change to units\n"
+  "MPS_TO_KNOTS         -- convert m/s to knots\n"
+  "M_TO_KM              -- convert meters to kilometers\n"
+  "M_TO_100FT           -- convert meters to 100's of feet, fligh levels\n"
+  "PASCALS_TO_MBAR      -- convert pascals to millibars\n"
+  "KELVIN_TO_CELSIUS    -- convert degrees kelvin to to degrees celsius\n"
+  "KGPKG_TO_GPKG        -- convert kilogram per kilogram to gram\n"
+  "                        per kilogram\n"
+  "PERCENT_TO_FRACTION  -- convert percentage to fraction, values\n"
+  "                        between 0 and 1\n\n\n"; 
+  p_help = "The integers following each GRIB field and vertical type are the actual values used "
+  "in the GRIB files. They are present to provide a reference for the GRIB and RUC documentation. "
+  "For a more detailed description of the GRIB fields and types of vertical "
+  "levels see the listings at http://maps.fsl.noaa.gov/ruc2gribtable.html. For a description"
+  " of the GRIB file format see the documentation at http://www.wmo.ch/web/www/reports/Guide-binary-2.html\n\n"
+  "The expected fields and their associated vertical levels in the hybrid RUC GRIB file are:\n"
+  "PRESSURE			HYBRID\n"
+  "GEOPOTENTIAL_HEIGHT		HYBRID\n"
+  "VIRTUAL_POTENTIAL_TEMP	HYBRID\n"
+  "HUMIDITY_MIXING_RATIO	HYBRID\n"
+  "U_WIND			HYBRID\n"
+  "V_WIND			HYBRID\n"
+  "VERTICAL_VELOCITY		HYBRID\n"
+  "CLOUD_WATER_MIXING_RATIO	HYBRID\n"
+  "RAIN_WATER_MIXING_RATIO	HYBRID\n"
+  "ICE_MIXING_RATIO		HYBRID\n"
+  "SNOW_MIXING_RATIO		HYBRID\n"
+  "GRAUPEL_MIXING_RATIO		HYBRID\n"
+  "NUM_CONCEN_ICE_PARTICLES	HYBRID\n"
+  "TURBULENT_KINETIC_ENERGY	HYBRID\n"
+  "MEAN_SEA_LEVEL_PRESS_MAPS	MEAN_SEA_LEVEL\n"
+  "SOIL_TEMPERATURE		GROUND_OR_WATER_SURFACE\n"
+  "SENSIBLE_HEAT_FLUX		GROUND_OR_WATER_SURFACE\n"
+  "LATENT_HEAT_FLUX		GROUND_OR_WATER_SURFACE\n"
+  "LONGWAVE_RAD_AT_SURFACE	GROUND_OR_WATER_SURFACE\n"
+  "PRECIPITATION_RATE		GROUND_OR_WATER_SURFACE\n"
+  "LARGE_SCALE_PRECIPITATION	GROUND_OR_WATER_SURFACE\n"
+  "CONVECTIVE_PRECIPITATION	GROUND_OR_WATER_SURFACE\n"
+  "PRECIPITABLE_WATER		ENTIRE_ATMOSPHERE\n"
+  "PRESSURE			TROPOPAUSE\n"
+  "POTENTIAL_TEMPERATURE	TROPOPAUSE\n"
+  "U_WIND			TROPOPAUSE\n"
+  "V_WIND			TROPOPAUSE\n"
+  "CONVEC_AVIAL_POT_ENERGY	GROUND_OR_WATER_SURFACE\n"
+  "CONVECTIVE_INHIBITION	GROUND_OR_WATER_SURFACE\n"
+  "SOIL_TYPE			GROUND_OR_WATER_SURFACE\n"
+  "VEGETATION_TYPE		GROUND_OR_WATER_SURFACE\n"
+  "ICING_SIGMET_AIRMET		GROUND_OR_WATER_SURFACE\n"
+  "LIGHTNING			GROUND_OR_WATER_SURFACE\n"
+  "SHORTWAVE_RAD_AT_SURFACE	GROUND_OR_WATER_SURFACE\n"
+  "WATER_EQIV_ACCUM_SNOW_DEPTH	GROUND_OR_WATER_SURFACE\n"
+  "SNOW_DEPTH			GROUND_OR_WATER_SURFACE\n"
+  "STORM_SURFACE_RUNOFF		GROUND_OR_WATER_SURFACE\n"
+  "PLANT_CANOPY_SURFACE_WATER	GROUND_OR_WATER_SURFACE\n"
+  "HUMIDITY_MIXING_RATIO	GROUND_OR_WATER_SURFACE\n\n"
+  "The expected fields and their associated vertical levels in the pressure RUC GRIB file are:\n"
+  "GEOPOTENTIAL_HEIGHT		ISOBARIC\n"
+  "TEMPERATURE			ISOBARIC\n"
+  "RELATIVE_HUMIDITY		ISOBARIC\n"
+  "U_WIND			ISOBARIC\n"
+  "V_WIND			ISOBARIC\n"
+  "VERTICAL_VELOCITY		ISOBARIC\n"
+  "MEAN_SEA_LEVEL_PRESS_MAPS	MEAN_SEA_LEVEL\n"
+  "PRESSURE			GROUND_OR_WATER_SURFACE\n"
+  "PRESSURE_TENDENCY		GROUND_OR_WATER_SURFACE\n"
+  "EQUIVALENT_POTENTIAL_TEMP	GROUND_OR_WATER_SURFACE\n"
+  "CONVEC_AVIAL_POT_ENERGY	GROUND_OR_WATER_SURFACE\n"
+  "CONVECTIVE_INHIBITION	GROUND_OR_WATER_SURFACE\n"
+  "SURFACE_LIFTED_INDEX		GROUND_OR_WATER_SURFACE\n"
+  "BEST_LIFTED_INDEX		GROUND_OR_WATER_SURFACE\n"
+  "LARGE_SCALE_PRECIPITATION	GROUND_OR_WATER_SURFACE\n"
+  "CONVECTIVE_PRECIPITATION	GROUND_OR_WATER_SURFACE\n"
+  "CATEGORICAL_RAIN		GROUND_OR_WATER_SURFACE\n"
+  "CATEGORICAL_FREEZING_RAIN	GROUND_OR_WATER_SURFACE\n"
+  "CATEGORICAL_ICE_PELLETS	GROUND_OR_WATER_SURFACE\n"
+  "CATEGORICAL_SNOW		GROUND_OR_WATER_SURFACE\n"
+  "WATER_EQIV_ACCUM_SNOW_DEPTH	GROUND_OR_WATER_SURFACE\n"
+  "STORM_RELATIVE_HELICITY	GROUND_OR_WATER_SURFACE\n"
+  "PRESSURE			LEVEL_OF_0_DEGREE_ISOTHERM\n"
+  "GEOPOTENTIAL_HEIGHT		LEVEL_OF_0_DEGREE_ISOTHERM\n"
+  "RELATIVE_HUMIDITY		LEVEL_OF_0_DEGREE_ISOTHERM\n"
+  "PRESSURE			TROPOPAUSE\n"
+  "POTENTIAL_TEMPERATURE	TROPOPAUSE\n"
+  "U_WIND			TROPOPAUSE\n"
+  "V_WIND			TROPOPAUSE\n"
+  "PRESSURE			MAXIMUM_WIND_LEVEL\n"
+  "U_WIND			MAXIMUM_WIND_LEVEL\n"
+  "V_WIND			MAXIMUM_WIND_LEVEL\n"
+  "PRECIPITATION_RATE		GROUND_OR_WATER_SURFACE\n"
+  "DIRECT_EVAPORATION_BARE_SOIL	GROUND_OR_WATER_SURFACE\n"
+  "STORM_SURFACE_RUNOFF		GROUND_OR_WATER_SURFACE\n"
+  "PRESSURE			GROUND_OR_WATER_SURFACE\n"
+  "GEOPOTENTIAL_HEIGHT		GROUND_OR_WATER_SURFACE\n"
+  "PRESSURE			HIGHEST_TROPO_FREEZE_LEVEL\n"
+  "GEOPOTENTIAL_HEIGHT		HIGHEST_TROPO_FREEZE_LEVEL\n"
+  "RELATIVE_HUMIDITY		HIGHEST_TROPO_FREEZE_LEVEL\n"
+  "SNOW_DEPTH			GROUND_OR_WATER_SURFACE\n"
+  "PRECIPITABLE_WATER		ENTIRE_ATMOSPHERE\n"
+  "U_STORM_MOTION		GROUND_OR_WATER_SURFACE\n"
+  "V_STORM_MOTION		GROUND_OR_WATER_SURFACE\n"
+  "PBL_HEIGHT			GROUND_OR_WATER_SURFACE\n"
+  "CLOUD_HEIGHT			CLOUD_BASE_LEVEL\n"
+  "CLOUD_HEIGHT			CLOUD_TOP_LEVEL\n"
+  "VISIBILITY			GROUND_OR_WATER_SURFACE\n"
+  "GEOPOTENTIAL_HEIGHT		CONVECTIVE_CLOUD_TOP_LEVEL\n\n"
+  "The expected fields and their associated vertical levels in the surface RUC GRIB file are:\n"
+  "MEAN_SEA_LEVEL_PRESS_MAPS	MEAN_SEA_LEVEL\n"
+  "MEAN_SEA_LEVEL_PRESS_SAR	MEAN_SEA_LEVEL\n"
+  "PRESSURE_TENDENCY		GROUND_OR_WATER_SURFACE\n"
+  "EQUIVALENT_POTENTIAL_TEMP	GROUND_OR_WATER_SURFACE\n"
+  "CONVEC_AVIAL_POT_ENERGY	GROUND_OR_WATER_SURFACE\n"
+  "CONVECTIVE_INHIBITION	GROUND_OR_WATER_SURFACE\n"
+  "SURFACE_LIFTED_INDEX		GROUND_OR_WATER_SURFACE\n"
+  "BEST_LIFTED_INDEX		GROUND_OR_WATER_SURFACE\n"
+  "LARGE_SCALE_PRECIPITATION	GROUND_OR_WATER_SURFACE\n"
+  "CONVECTIVE_PRECIPITATION	GROUND_OR_WATER_SURFACE\n"
+  "CATEGORICAL_RAIN		GROUND_OR_WATER_SURFACE\n"
+  "CATEGORICAL_FREEZING_RAIN	GROUND_OR_WATER_SURFACE\n"
+  "CATEGORICAL_ICE_PELLETS	GROUND_OR_WATER_SURFACE\n"
+  "CATEGORICAL_SNOW		GROUND_OR_WATER_SURFACE\n"
+  "WATER_EQIV_ACCUM_SNOW_DEPTH	GROUND_OR_WATER_SURFACE\n"
+  "STORM_RELATIVE_HELICITY	GROUND_OR_WATER_SURFACE\n";
+} output_fields[];
+
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Flag to override the requested field list and output all fields. ";
+  p_help = "If set, the program will treat all fields "
+    "as if they were in the output_fields[] list.  "
+    "Any level will be accepted and the units will not change. ";
+} output_all_fields;
+
+
+typedef struct {
+  int code;
+  string name;
+  string description;
+  string units;
+} code_name_map_t;
+
+
+paramdef struct code_name_map_t {
+  p_descr = "AFWA ensemble mapping from code to field name.";
+} afwa_code_name_map[];
+
+paramdef struct code_name_map_t {
+  p_descr = "NCEP ensemble mapping from code to field name.";
+} ncep_code_name_map[];
+
+
+
+typedef struct {
+	boolean override;
+
+	double dx;
+	double dy;
+	double dz;
+
+	double minx;
+	double miny;
+	double minz;
+
+	double rotation;
+
+	double projParam0;
+	double projParam1;
+
+} overrideGeom_t;
+
+paramdef struct overrideGeom_t {
+  p_default = {FALSE, 1,1,1,-100,-100,0,0,0,0};
+  p_descr = "Values for projection that will be written directly into "
+	"the output MDV file if the first boolean is TRUE.";
+  p_help = "Only do this if there is some issue with the input geometry.";
+} overrideGeom;
+
+paramdef enum overrideGeomProj_t {
+  p_options = {PROJ_LAMBERT_CONF, PROJ_LATLON, PROJ_POLAR_STEREO,
+	 PROJ_OBLIQUE_STEREO, PROJ_FLAT};
+  p_default = {PROJ_LAMBERT_CONF};
+  p_descr = "Projection type to use if the geometry is being overridden.";
+  p_help = "Only relevant if the boolean in the overrideGeom is "
+	"set to TRUE";
+} overrideGeomProj;

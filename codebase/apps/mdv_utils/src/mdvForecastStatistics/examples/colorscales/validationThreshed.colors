@@ -1,0 +1,8 @@
+# Colors for thresholded fields output by mdvForecastStatistics
+# Niles Oien October 2006
+
+-0.5 0.5 black ! Ignored
+0.5  1.5 cyan  ! NoStorm
+1.5  2.5 white ! Storm
+
+#

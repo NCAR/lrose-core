@@ -1,0 +1,368 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "This application reads super resolution nexrad\n"
+	"radar data and writes the beam data to an FMQ.\n"
+	"Super resolution data became available in 2008 with\n"
+	"NOAAs Radar Operations Center (ROC) release of build 10\n"
+	"software. At this point, this application replaced\n"
+	"the earlier nexrad2dsr application.\n\n"
+	"The radar data consists of reflectivity (DBZ),\n"
+	"radial velocity (VEL) and spectral width (SW) fields.\n"
+	"At the time of writing the nexrads are being fitted\n"
+	"with dual polarmetric abilities. Once this is complete\n"
+	"the dual pol data fields - ZDR, PHI and RHO - will also\n"
+	"be available. This application should cope with these\n"
+	"fields as they become available.\n\n"
+	"This application can either read from a socket or read\n"
+	"from input files. Input files are typically delivered\n"
+	"via LDM, however, as they arrive the files are NOT\n"
+	"suitable for reading by this program. The application\n"
+	"apps/ingest/src/superResNexradLdmUnzip\n"
+	"should be used to initially read the input files from\n"
+	"LDM and write files that this application can read. The\n"
+	"superResNexradLdmUnzip can optionally write to a scoket\n"
+	"as well, and users who are interested in the highest tilt\n"
+	"may want to elect using a socket since it means that\n"
+	"they will not have to wait for the highest tilt before\n"
+	"an end of volume can be triggered. But in general file based\n"
+	"input is the norm.\n\n"
+	"Niles Oien February 2008";
+}
+
+typedef enum {
+  DEBUG_NONE, DEBUG_HEADERS, DEBUG_NORM, DEBUG_DATA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_NONE;
+  p_descr = "How much printing to do while running.";
+  p_help = "Set as appropriate.";
+} debug;
+
+typedef enum {
+  READ_ARCHIVE_FILES, READ_REALTIME_FILES, READ_SOCKET
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = READ_ARCHIVE_FILES;
+  p_descr = "Where to read data from.";
+  p_help = "Set as appropriate.";
+} mode;
+
+
+typedef struct {
+	int realtimeMaxAgeSec;
+	string realtimeDir;
+	string realtimeFilenameSubString;
+	boolean realtimeGzipInput;
+} realtimeInput_t;
+
+
+paramdef struct realtimeInput_t {
+  p_default = { 60, "/Some/Directory/structure", "Substring", FALSE };
+  p_descr = "If mode is READ_REALTIME_FILES then use these parameters.";
+  p_help = "Maximum file age (seconds), dir to watch, substring in filenames\n"
+	"and boolean indicating if input files should be gzipped when\n"
+	"done with them (they compress very effectively).";
+} realtimeInput;
+
+typedef struct {
+	string socketHostName;
+	int socketPortNum;
+} socketInput_t;
+
+paramdef struct socketInput_t {
+  p_default = { "tcpipHostName", 5050 };
+  p_descr = "If mode is READ_SOCKET then use these parameters.";
+  p_help = "Host name and port number to connect to.";
+} socketInput;
+
+paramdef string {
+  p_default = "AR";
+  p_descr = "String to look for that signifies start of volume";
+  p_help = "Default should be OK for new data. Use the strings\n"
+	"command if it is not.";
+} archiveString;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to byte swap the input data.";
+  p_help = "This should be TRUE on a PC.";
+} byteSwap;
+
+typedef struct {
+	double firstGateRangeKm;
+	double lastGateRangeKm;
+	double gateSpacingKm;
+	double azIncDeg;
+} resample_t;
+
+paramdef struct resample_t {
+  p_default = {2.125, 300.125, 0.25, 0.5 };
+  p_descr = "Beam geometry to resample to.";
+  p_help = "All beams are resampled to this geometry. This is needed\n"
+	"for the super res data.";
+} resample;
+
+typedef enum {
+  ELEVATION_ASIS, ELEVATION_ROUNDED, ELEVATION_LOOKUP
+} elev_t;
+
+paramdef enum elev_t {
+  p_default = ELEVATION_ASIS;
+  p_descr = "Determines how elevation angles are handled.";
+  p_help = "ELEVATION_ASIS (default) Just use the elevation as reported\n"
+	"ELEVATION_ROUNDED Round the elevation as reported - see\n"
+	"                  the roundElevDelta parameter.\n"
+	"ELEVATION_LOOKUP This allows a lookup table to be used to\n"
+	"   translate the elevation as read by mapping ranges of\n"
+	"   elevation angle to a single elevation. The lookup table\n"
+	"   depends on the VCP number and is stored in a file. The\n"
+	"   name of the file incorporates the VCP number (see the\n"
+	"   vcpElevFilename parameter). The format of this file is\n"
+	"   repaeated ASCI lines of the form\n\n"
+	"   minElevation    maxElevation    elevation to use\n\n"
+	"   Consider the following example lines :\n\n"
+	"   0.0     1.0    0.5\n"
+	"   1.0     2.0    1.45\n"
+	"   2.0     3.0    2.4\n\n"
+	"   This would have the result of using elevation 0.5 if\n"
+	"   the elevation was in the range 0.0 to 1.0 degrees,\n"
+	"   using 1.45 degrees for the range 1.0 to 2.0 and using\n"
+	"   2.4 for the range 2.0 to 3.0\n\n"
+	"   Elevations that do not lie within the specified ranges\n"
+	"   will be passed on as is in this mode.";    
+
+} elevAction;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "If elevAction is ELEVATION_ROUNDED then elevations will\n"
+	"be rounded to integer multiples of this value.";
+  p_help = "Set as appropriate.";
+} roundElevDelta;
+
+paramdef string {
+  p_default = "/some/dir/vcp_%03d.elev";
+  p_descr = "If elevAction is ELEVATION_LOOKUP then the filename\n"
+	"to read the lookup table from will be construed using this\n"
+	"string and the VCP number.";
+  p_help = "Set as appropriate.";
+} vcpElevFilename;
+
+paramdef string {
+  p_default = "/some/dir/vcp_%03d.elSelect";
+  p_descr = "Controls which field(s) to extract from which\n"
+	"elevation. This is done by reading a file for each VCP.\n"
+	"The filename is construed from this string and the VCP\n"
+	"number.";
+  p_help = "The format of this ASCII file is probably best illustrated\n"
+	"by example. For the entries :\n\n"
+	"DBZ[1] VEL[2] SW[2]\n"
+	"DBZ[5] VEL[6] SW[6]\n"
+	"DBZ[9] VEL[9] SW[9]\n\n"
+	" in the first output tilt, the DBZ field will be\n"
+	"taken from input elevation 1, VEL\n"
+	"and SW from input elevation 2. The next line\n"
+	"determines that the second output tilt will be\n"
+	"construed using the DBZ field from input elevation 5\n"
+	"and VEL and SW from input elevation 6. The third line\n"
+	"determines that the third output tilt will be construed\n"
+	"using the DBZ, VEL and SW from input elevation 9. The first\n"
+	"input tilt is number 1 (not 0)";
+} vcpElevSelectFilename;
+
+typedef struct {
+	boolean wantDBZ;
+	boolean wantVEL;
+	boolean wantSW;
+	boolean wantZDR;
+	boolean wantPHI;
+	boolean wantRHO;
+} fieldList_t;
+
+paramdef struct fieldList_t {
+  p_default = {TRUE, TRUE, FALSE, FALSE, FALSE, FALSE };
+  p_descr = "List of fields that we want to output.";
+  p_help = "Set as appropriate. Output field names will be set\n"
+	"to DBZ, VEL, SW, ZDR, PHI and RHO respectively.";
+} fieldList;
+
+typedef struct {
+	long fmqSizeBytes;
+	long fmqNumSlots;
+	boolean fmqCompress;
+	string fmqUrl;
+	string fmqMsgLogDir;
+	boolean fmqBlockingWrites;
+	int fmqBeamsPerRadarParams;
+	int delayAfterSendingParamsSecs;
+} output_t;
+
+paramdef struct output_t {
+  p_default = { 25000000, 6000, FALSE, "fmqp:://localhost::fmq/dsRadar", "/Some/Dir/", FALSE, 30, 0 };
+  p_descr = "Specifications for the FMQ that we are to write to.";
+  p_help = "Set as appropriate, try to avoid overwrites. The delay is not done if\n"
+	"the input mode is READ_SOCKET.";
+} outputFmq;
+
+typedef struct {
+	double lat;
+	double lon;
+	double altKm;
+	long   radarID;
+	string radarName;
+	string siteName;
+	double horizBeamWidth;
+	double vertBeamWidth;
+} radarDesc_t;
+
+paramdef struct radarDesc_t {
+  p_default = {40, -110, 1.648, 42, "NEXRAD", "Denver", 1.0, 1.0 };
+  p_descr = "Specifications for the radar.";
+  p_help = "Set as appropriate.";
+} radarDesc;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to take lat, lon alt from input data\n"
+	"rather than the radarDesc entry in the param file.";
+  p_help = "Generally OK to set this to true and trust the\n"
+	"incoming datastream to get the location right.\n"
+	"It is set to FALSE by default for compatibility purposes.";
+} locationFromInput;
+
+
+paramdef int {   
+  p_default = 4;
+  p_descr = "Number of bytes in message 31 is reported as being\n"
+	"this many bytes more than it actually is, ie.\n"
+	"actualNumBytes = headerNumBytes - message31SizeError\n"
+	"for message type 31.";
+  p_help = "At the time of writing the error is 4 bytes. I think the\n"
+	"error is likely to remain, however, it is a parameter so that\n"
+	"if it is ever fixed then we can account for that without a\n"
+	"recompile.";
+} message31SizeError;
+
+typedef enum {
+  TIME_BEAM, TIME_FILENAME, TIME_WALLCLOCK
+} timeAction_t;
+
+paramdef enum timeAction_t {
+  p_default = TIME_FILENAME;
+  p_descr = "How to set the time for a beam.";
+  p_help = "TIME_BEAM - take the time from the first beam. This may be\n"
+	"confusing, given that beams can be composites of different fields\n"
+	"that come from different rotations.\n\n"
+	"TIME_FILENAME - take the time from the input filneame. Assumes\n"
+	"a 20080208_202933.nexDat naming convention.\n\n"
+	"TIME_WALLCLOCK - Use current time.";
+} timeAction;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time offset to add, seconds, regardless of what timeAction\n"
+	"is set to.";
+  p_help = "Typically will be 0.";
+} timeOffsetSecs;
+
+typedef struct {
+	int delayPostTiltSecs;
+	int delayPostVolSecs;
+} delay_t;
+
+paramdef struct delay_t {
+	p_default = {0,0};
+	p_descr = "Number of seconds to delay after sending a tilt\n"
+	"and sending a volume.";
+	p_help = "May well both be 0. These dealys are not done if the\n"
+	"input mode is READ_SOCKET.";
+} delay;
+
+
+typedef struct {
+	boolean delayPostBeam;
+	int msDelayPostBeam;
+} delayBeam_t;
+
+paramdef struct delayBeam_t {
+	p_default = {FALSE, 0};
+	p_descr = "Option to delay some number of milliseconds\n"
+	"after sending a beam.";
+	p_help = "May be handy in some circumstances.";
+} delayBeam;
+
+paramdef boolean {
+	p_default = TRUE;
+	p_descr = "Option to require at least some non-missing data\n"
+	"for all fields in all beams.";
+	p_help = "It is strongly suggested that this be set TRUE.\n"
+	"The advantage of setting it to false is that if a beam\n"
+	"has data in one field and not in another - say, it has\n"
+	"velocity data but the reflectivity data are all missing - then\n"
+	"the non-missing data are passed on for the field for\n"
+	"which they are available. The problem is that the all\n"
+	"missing data for the other field are also passed on. This\n"
+	"can cause problems for downstream processes - Titan,\n"
+	"for instance.";
+} requireAllFieldsInBeam;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Offset to add, degrees, in azimuths.";
+  p_help = "Typically will be 0.";
+} azOffset;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Report when all fields in a beam are set to the\n"
+	"the missing value for the whole beam.";
+  p_help = "Independant of other debugging.";
+} reportAllMissing;
+
+typedef struct {
+    double minAz;
+    double maxAz;
+} excludeAz_t;
+
+paramdef struct excludeAz_t {
+  p_default = { };
+  p_descr = "Unusual option to exclude ranges of azimuth.\n"
+             "Azimuths range from 0 to 360 degrees inclusive.";
+  p_help = "Default is not to do this. It is really a debugging measure\n"
+          "for a specific case, but it may be handy in some debugging\n";
+	"to cut down the volume of data sent. Setting this to \n"
+        "{350, 361}, {0, 10} will stop azimuths from 350 degrees\n"
+        "to 10 degrees from being sent.";
+} excludeAzRanges[];

@@ -1,0 +1,52 @@
+#! /usr/bin/perl
+
+#
+# script to check library dependencies
+#
+# The script reads data from stdin. You must first run grep
+# as follows:
+#
+#  Go to libs/xxx/src
+#  grep include */*h */*c */*/*h | check_lib_depends
+#
+
+sub print_usage {
+
+  printf(STDERR "Usage : grep include */*h */*c */*/*h | check_lib_depends\n");
+  printf(STDERR "Must be run from libs/xxx/src dir\n");
+
+}
+
+#
+# check usage
+#
+
+($prog = $0) =~ s%.*/%%;
+ 
+if (@ARGV > 1) {
+  &print_usage();
+  exit(-1);
+}
+
+# look through stdin
+
+while (<STDIN>) {
+
+    next unless /^(.*)#include/;
+    next unless ($match) = m|<(\w+)/|;
+    push(@list, $match) unless $seen{$match}++;
+
+}
+
+$dir = system("pwd");
+$dir =~ m|(.*)|;
+#$lib = ( $dir =~ m|(.*)$| );
+print "$dir\n";
+print "$lib\n";
+
+
+print "Lib pwd() depends on: @list\n";
+
+exit (0);
+
+

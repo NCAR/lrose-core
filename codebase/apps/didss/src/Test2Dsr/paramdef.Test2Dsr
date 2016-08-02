@@ -1,0 +1,238 @@
+/**********************************************************
+ * paramdef for Test2Dsr
+ *
+ * Mike Dixon
+ *
+ * May 1998
+ */
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_descr = "output fmq path";
+  p_help = "Path for FMQ output data.";
+  p_default = "none";
+} output_fmq_path;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef boolean {
+  p_descr = "Option to output veloocity field";
+  p_help = "If FALSE, only dBZ is output. If TRUE, velocity is also output.";
+  p_default =  true ;
+} output_vel_field;
+
+paramdef boolean {
+  p_descr = "Option to output geometry fields";
+  p_help = "If TRUE, elevation, azimuth and range fields are also output.";
+  p_default =  false ;
+} output_geom_fields;
+
+typedef struct {
+
+  int radar_id;
+  double altitude;         /* km */
+  double latitude;         /* degrees */
+  double longitude;        /* degrees */
+  int num_gates;
+  double gate_spacing;     /* km */
+  double start_range;      /* km */
+  double beam_width;       /* degrees */
+  int samples_per_beam;    /* number of samples used in
+			    * computing beam fields */
+  double pulse_width;      /* nano-secs */
+  double prf;              /* /s */
+  double wavelength;       /* cm */
+  double radar_constant;   /* dB */
+  double xmit_peak_pwr;    /* watts */
+  double receiver_mds;     /* dBm */
+  double receiver_gain;    /* dB */
+  double antenna_gain;     /* dB */
+  double system_gain;      /* dB */
+  double unambig_velocity; /* m/s */
+  double unambig_range;    /* km */
+
+} radar_params_t;
+
+paramdef struct radar_params_t {
+
+  p_descr = "radar parameters";
+  p_help = "Default radar parameters.";
+
+  p_default = { radar_id = 0,
+                altitude = 1.6,
+                latitude = 39.87823,
+                longitude = -104.75900,
+                num_gates = 65,
+                gate_spacing = 900.0,
+                start_range = 700.0,
+                beam_width = 5.0,
+		samples_per_beam = 32,
+                pulse_width = 6000.0,
+                prf = 1000.0,
+                wavelength = 5.0,
+		radar_constant = 63.0,
+		xmit_peak_pwr = 1000000.0,
+		receiver_mds = 113.0,
+		receiver_gain = 1.0,
+		antenna_gain = 1.0,
+		system_gain = 1.0,
+		unambig_velocity = 25.0,
+		unambig_range = 150.0
+  };
+
+} radar_params;
+
+paramdef boolean {
+  p_descr = "Use scan table";
+  p_help = "If set, use scan azimuth table. If not, construct table from elevation angles, start azimuth and delta azimuth.";
+  p_default =  false ;
+} use_scan_table;
+
+
+paramdef string {
+  p_descr = "scan table path";
+  p_default =  "./tass_scan_table" ;
+} scan_table_path;
+
+paramdef string {
+  p_descr = "Name of scan strategy";
+  p_default =  "Test scan type 1" ;
+} scan_strategy_name;
+
+paramdef int {
+  p_descr = "ID of scan strategy";
+  p_default = 1;
+} scan_strategy_id;
+
+
+paramdef double {
+  p_descr = "Noise dBZ level at 100 km range";
+  p_help = "Used to compute noise reflectivity at all ranges.";
+  p_default = 0.0;
+} noise_dbz_at_100km;
+
+paramdef double {
+  p_descr = "Elevation angle list";
+  p_help = "If use_scan_table is false, these elevation angles are used to construct the scan table.";
+  p_default = 1.0;
+} elev_angles[];
+
+paramdef int {
+  p_descr = "Number of aziimuths";
+  p_help = "If use_scan_table is false, this is used to construct the scan table.";
+  p_default = 360;
+} nazimuths;
+
+paramdef double {
+  p_descr = "Start azimuth angle";
+  p_help = "If use_scan_table is false, this is used to construct the scan table.";
+  p_default = 0.0;
+} start_azimuth;
+
+paramdef double {
+  p_descr = "Delta azimuth angle";
+  p_help = "If use_scan_table is false, this is used to construct the scan table.";
+  p_default = 1.0;
+} delta_azimuth;
+
+paramdef string {
+  p_descr = "Radar sample file path";
+  p_help = "Path for file from which radar data are sampled";
+  p_default =  "null" ;
+} radar_sample_file_path;
+
+paramdef int {
+  p_descr = "Sample dbz field num";
+  p_default =  0 ;
+} sample_dbz_field;
+
+paramdef int {
+  p_descr = "Sample vel field num";
+  p_default =  0 ;
+} sample_vel_field;
+
+paramdef double {
+  p_descr = "Sampling range scale factor";
+  p_help = "The range is multiplied by this factor before searching for the data in the simulation file.";
+  p_default = 1.0;
+} range_scale;
+
+paramdef boolean {
+  p_descr = "Override velocity with origin movement.";
+  p_help = "If TRUE, the velocity field will be set using the motion of the sampling origin.";
+  p_default =  false ;
+} override_vel;
+
+paramdef struct sampling_origin_t {
+
+  p_descr = "Radar data sampling origin";
+  p_help = "Origin from which the dobson radar data are sampled.";
+
+  p_field_name = { start_x,   /* km, rel to grid */
+                   start_y,   /* km, rel to grid */
+                   speed,     /* km/hr */
+                   dirn,      /* deg T */
+                   max_dist }; /* km */
+
+  p_field_type = { double,                /* start_x */
+                   double,                /* start_y */
+                   double,                /* speed */
+                   double,                /* dirn */
+                   double };              /* max_dist */
+	
+  p_default = { 0.0,                /* start_x */
+		0.0,                /* start_y */
+		0.0,                /* speed */
+		0.0,                /* dirn */
+		200.0 };            /* max_dist */
+
+} sampling_origin;
+
+paramdef int {
+  p_descr = "Wait per beam (milli-secs)";
+  p_default =  10 ;
+} beam_wait_msecs;
+
+
+paramdef int {
+  p_descr = "Wait per vol (secs)";
+  p_default =  1 ;
+} vol_wait_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+

@@ -1,0 +1,80 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:36 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+###################################################################
+#
+# Radx library for Radial RADAR and LIDAR data
+#
+# Mike Dixon, NCAR, Boulder, CO, 80305, USA
+#
+# July 2010
+#
+####################################################################
+
+Radx is a library designed to handle radial radar and lidar data,
+in the following formats:
+
+  CfRadial
+  Dorade
+  UF
+
+Dependencies
+------------
+
+Radx is dependent on the following libraries:
+
+  udunits2 (Unidata)
+  netcdf4 (Unidata)
+  hdf5 (NASA)
+
+You may download these directly from the web, or from the TITAN distribution site:
+
+  ftp.rap.ucar.edu/pub/titan/distribution
+
+See
+
+  ./doc/building_netcdf.howto.txt
+
+for details on how to build these libraries.
+
+Building
+--------
+
+The Radx library may be built using 'configure'.
+
+If your libraries are in a non-standard place, you will need to set the
+CXXFLAGS environment variable.
+
+For example:
+
+  setenv CXXFLAGS "-I/usr/local/netcdf4/include -I/usr/include/udunits2"
+
+Then run configure:
+
+  ./configure --prefix=/usr/local
+
+or set --prefix to point to your installation area.
+
+Then
+
+  make install
+
+Documentation
+-------------
+
+See
+
+  http://www.ral.ucar.edu/projects/titan/docs/radial_formats/
+
+for full documentation.
+
+See also:
+
+  ./doc/CfRadialDoc.pdf for details of CfRadial format
+  ./doc/DoradeDoc.pdf for details of Dorade format
+  ./doc/univ_format.txt for details of UF format

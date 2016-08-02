@@ -1,0 +1,174 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.SpdbCollector
+ *
+ * This file contains the TDRP parameter definitions for
+ * SpdbCollector.
+ */
+
+commentdef
+{
+  p_header = "SpdbCollector";
+  p_text = "This process collects data from an SPDB database into bundles "
+           "and outputs the bundles to a new SPDB database. "
+           "The SPDB data is bundled up based on time intervals. "
+           "So, for example, if you are collecting the data once an hour, "
+           "then all of the chunks from the input database that occur within "
+           "the collection hour are collected together and written to the "
+           "output database as an array of chunks.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  INTERVAL_REALTIME,
+  INTERVAL_ARCHIVE
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tINTERVAL_REALTIME - The program will wake up every "
+           "trigger_interval seconds and will collect all of the input "
+           "SPDB data from that interval into a single array and write "
+           "this bundle of data to the output database.\n"
+           "\tINTERVAL_ARCHIVE - The program triggers at the start_time "
+           "and then every trigger_interval seconds thereafter until "
+           "the end_time is reached.\n";
+  p_default = "INTERVAL_REALTIME";
+} trigger_mode;
+
+paramdef int
+{
+  p_descr = "Trigger interval in seconds";
+  p_default = 300;
+} trigger_interval;
+
+paramdef int
+{
+  p_descr = "Trigger start time in seconds";
+  p_help = "Number of seconds after the hour for the first trigger. "
+           "Used only in INTERVAL_REALTIME mode.";
+  p_default = 0;
+} trigger_start_time;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} interval_archive_t;
+
+paramdef struct interval_archive_t
+{
+  p_descr = "Start and end time for INTERVAL_ARCHIVE mode";
+  p_default = { "2005 1 1 0 0 0", "2006 1 1 0 0 0" };
+} interval_archive;
+
+paramdef string
+{
+  p_descr = "Input URL.";
+  p_help = "URL for the input SPDB database.";
+  p_default = "spdbp:://localhost::spdb/sounding";
+} input_url;
+
+paramdef string
+{
+  p_descr = "Output URL.";
+  p_help = "URL for the output SPDB database.";
+  p_default = "spdbp:://localhost::spdb/sounding_collected";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef int
+{
+  p_descr = "Chunk header time offset, in seconds.";
+  p_help = "This number of seconds will be SUBTRACTED from the trigger "
+           "time to get the chunk header time for each chunk written "
+           "to the output database.";
+  p_default = 150;
+} chunk_hdr_time_offset;
+
+paramdef boolean
+{
+  p_descr = "Flag for numbering the output chunks consecutively in the "
+            "data_type field.";
+  p_help = "This was added because it was needed for the Sounding input "
+           "into the VDRAS/VLAS programs. "
+           "Numbering starts at 1.";
+  p_default = false;
+} number_chunks;

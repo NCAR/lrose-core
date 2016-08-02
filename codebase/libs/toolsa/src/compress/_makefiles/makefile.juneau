@@ -1,0 +1,96 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 23:12:46 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+###########################################################################
+#
+# Makefile for compression module
+#
+# Mike Dixon, RAP, NCAR, Boulder, Co, USA, 80307
+#
+# July 1999
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+LOC_INCLUDES = -I../include
+#LOC_CFLAGS = -ansi
+LOC_CFLAGS = -DEXCLUDE_LZO
+
+TARGET_FILE = ../libtoolsa.a
+
+#
+# file lists
+#
+
+SRCS = \
+	bzip_compress.c \
+	bziplib.c \
+	gzip_compress.c \
+	rle_compress.c \
+	ta_compress.c \
+	zlib_compress.c \
+	zlib.c \
+	zlib_adler32.c \
+	zlib_crc32.c \
+	zlib_deflate.c \
+	zlib_gzio.c \
+	zlib_infblock.c \
+	zlib_infcodes.c \
+	zlib_inffast.c \
+	zlib_inflate.c \
+	zlib_inftrees.c \
+	zlib_infutil.c \
+	zlib_trees.c \
+	zlib_zutil.c
+
+#
+# general targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+
+#
+# local targets
+#
+
+test: test_p
+
+test_p:
+	$(MAKE) DBUG_OPT_FLAGS="$(DEBUG_FLAG)" test_bzip
+	$(MAKE) DBUG_OPT_FLAGS="$(DEBUG_FLAG)" test_gzip
+	$(MAKE) DBUG_OPT_FLAGS="$(DEBUG_FLAG)" test_lzo
+	$(MAKE) DBUG_OPT_FLAGS="$(DEBUG_FLAG)" test_rle
+	$(MAKE) DBUG_OPT_FLAGS="$(DEBUG_FLAG)" test_zlib
+
+test_bzip: test_bzip.o
+	$(CC) $(DBUG_OPT_FLAGS) test_bzip.o \
+	$(LDFLAGS) -o test_bzip ../libtoolsa.a -ldataport -lm
+
+test_gzip: test_gzip.o
+	$(CC) $(DBUG_OPT_FLAGS) test_gzip.o \
+	$(LDFLAGS) -o test_gzip ../libtoolsa.a -ldataport -lm
+
+test_lzo: test_lzo.o
+	$(CC) $(DBUG_OPT_FLAGS) test_lzo.o \
+	$(LDFLAGS) -o test_lzo ../libtoolsa.a -ldataport -lm
+
+test_rle: test_rle.o
+	$(CC) $(DBUG_OPT_FLAGS) test_rle.o \
+	$(LDFLAGS) -o test_rle ../libtoolsa.a -ldataport -lm
+
+test_zlib: test_zlib.o
+	$(CC) $(DBUG_OPT_FLAGS) test_zlib.o \
+	$(LDFLAGS) -o test_zlib ../libtoolsa.a -ldataport -lm
+
+clean_test:
+	$(RM) test_bzip test_gzip test_lzo test_rle test_zlib
+
+depend: depend_generic
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

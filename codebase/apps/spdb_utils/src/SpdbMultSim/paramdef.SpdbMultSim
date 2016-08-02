@@ -1,0 +1,67 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/********************************************************
+ * Parameter definitions for SpdbMultSim
+ *
+ *******************************************************/
+commentdef {
+  p_header = "SpdbMultSim PARAM FILE";
+  p_text = "Parameter files for SpdbMultSim.  This program reads a set of spdb databases between a specified range of times, then outputs to a second set of spdb databases, simulating realtime.  The order of outputs is the same as that given by the times in the databases, i.e. the oldest remaining data amongst all databases is always the next output.";
+};
+
+typedef struct
+{
+   string in_url;
+   string out_url;
+} element_t;
+
+paramdef struct element_t
+{
+   p_header = "list of inputs/output url pairs."; 
+   p_help = "each string is an spdb url.  Data is read from the first url and written to the second url\n";
+   p_default = {{"spdb_in0", "spdb_out0"},
+                {"spdb_in1", "spdb_out1"}};
+} element[];
+
+paramdef double
+{
+   p_header = "speedup";
+   p_help = "percentage to speed up from realtime rate (1.0 =realtime, 2.0=twice realtime, etc.)\n";
+   p_min = 0.1;
+   p_default = 1.0;
+} speedup;
+
+paramdef double
+{ 
+   p_header = "time0";
+   p_help = "minimum year/month/day/hour/min/sec";
+   p_default = {2001, 7, 8, 22, 0, 0};
+} time0[6];
+
+paramdef double
+{ 
+   p_header = "time1";
+   p_help = "maximum year/month/day/hour/min/sec";
+   p_default = {2001, 7, 8, 23, 0, 0};
+} time1[6];

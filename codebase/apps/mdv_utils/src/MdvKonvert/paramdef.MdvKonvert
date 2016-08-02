@@ -1,0 +1,357 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvKonvert duplicates the functionality of the\n"
+	"earlier MdvConvert and MdvResample applications, while\n"
+	"relying on newer libraries and triggering mechanisms.\n"
+	"Niles Oien March 2006.";
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Derived satellite fields are written here."; 
+  p_default = {"mdvp:://localhost::mdv/grad"};
+} OutUrl;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, ARCHIVE_FORECAST, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option. Use\n"
+           "ARCHIVE_FORECAST to process MDV forecast data in archive mode.";
+} Mode;
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Should be TRUE if input MDV data are forecast data.";
+  p_help = "Defaults to FALSE. Should certainly be true if\n"
+           "Mode is set to ARCHIVE_FORECAST.";
+} writeAsForecast;   
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "If FALSE, all input fields are processed.";
+  p_help = "Defaults to FALSE";
+} useInputFieldNames;   
+
+paramdef string {
+  p_default = { "VisField", "IRField" };
+  p_private = FALSE;
+  p_descr = "Input field names to process.";
+  p_help = "Relevant iff useInputFileldNames is TRUE";
+} InFieldNames[];   
+
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Option to apply vlevel plane (plane number,\n"
+              "not height!!) limits.";
+  p_help = "Defaults to FALSE";
+} applyVlevelPlaneLimits;   
+
+paramdef int {
+  p_default = 0;
+  p_private = FALSE;
+  p_descr = "First plane. Planes start at 0.";
+  p_help = "Relevant iff applyVlevelPlaneLimits is TRUE";
+} minVlevelPlane;   
+
+paramdef int {
+  p_default = 1;
+  p_private = FALSE;
+  p_descr = "Last plane. Planes start at 0.";
+  p_help = "Relevant iff applyVlevelPlaneLimits is TRUE";
+} maxVlevelPlane;   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Option to apply vlevel height (height,\n"
+              "not plane number!!) limits.";
+  p_help = "Defaults to FALSE";
+} applyVlevelHeightLimits;   
+
+paramdef float {
+  p_default = 0.5;
+  p_private = FALSE;
+  p_descr = "Lower height.";
+  p_help = "Relevant iff applyVlevelHeightLimits is TRUE";
+} minVlevelHeight;   
+
+paramdef float {
+  p_default = 1;
+  p_private = FALSE;
+  p_descr = "Maximum height.";
+  p_help = "Relevant iff applyVlevelHeightLimits is TRUE";
+} maxVlevelHeight;   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Option to composite vertically, taking maximum value..";
+  p_help = "Defaults to FALSE";
+} composite;   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Option to composite.";
+  p_help = "Defaults to FALSE";
+} applyHorizLimits;   
+
+typedef struct {
+  float min_lat;
+  float min_lon;
+  float max_lat;
+  float max_lon;
+} horiz_limits_t;
+
+paramdef struct horiz_limits_t {
+  p_default = {-90.0, -180.0, 90.0, 180.0};
+  p_descr = "Set horizontal limits.";
+} horiz_limits;
+
+paramdef enum encoding_type {
+  p_options = {ENCODING_MDV_ASIS, ENCODING_MDV_INT8,
+               ENCODING_MDV_INT16, ENCODING_MDV_FLOAT32};
+  p_default = {ENCODING_MDV_ASIS};
+  p_descr = "output MDV encoding type.";
+  p_help = "Default is to leave it alone.";
+} encodingType;
+    
+paramdef enum compression_type {
+  p_options = {COMPRESSION_ASIS, 
+               COMPRESSION_NONE,
+               COMPRESSION_RLE,
+               COMPRESSION_LZO,
+               COMPRESSION_ZLIB,
+               COMPRESSION_BZIP,
+               COMPRESSION_GZIP };
+  p_default = {COMPRESSION_ASIS};
+  p_descr = "Output MDV compression type.";
+  p_help = "Default is to leave it alone.";
+} compressionType;
+    
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Option to change scaling type.";
+  p_help = "Defaults to FALSE";
+} changeScalingType;   
+
+paramdef enum scaling_type {
+  p_options = {SCALING_ROUNDED,
+               SCALING_INTEGRAL,
+               SCALING_DYNAMIC,
+               SCALING_SPECIFIED };
+  p_default = {SCALING_ROUNDED};
+  p_descr = "Output MDV scaling type.";
+  p_help = "Relevant iff changeScalingType is TRUE.";
+} scalingType;
+
+paramdef double {
+  p_default = 1.0;
+  p_private = FALSE;
+  p_descr = "Specified scale.";
+  p_help = "Relevant iff changeScalingType is TRUE and\n"
+	"scaling type is SCALING_SPECIFIED";
+} scale;   
+
+paramdef double {
+  p_default = 0.0;
+  p_private = FALSE;
+  p_descr = "Specified bias.";
+  p_help = "Relevant iff changeScalingType is TRUE and\n"
+	"scaling type is SCALING_SPECIFIED";
+} bias;   
+
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Option to override vlevel header heights.";
+  p_help = "Defaults to FALSE. Input number of levels must be\n"
+	"equal to the number specified in the vlevels array below.";
+} overrideVlevels;   
+
+paramdef double {
+  p_default = { 0.0, 1.0 };
+  p_private = FALSE;
+  p_descr = "Specified vlevel heights.";
+  p_help = "Relevant iff overrideVlevels is TRUE. Number of heghts must\n"
+	"match those in input file. Units of vlevels (Km, degrees)\n"
+        "are unchanged.";
+} vlevels[];   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Option to copy chunks from the input to the output.";
+  p_help = "Defaults is not to do this - somewhat arbitrarily.";
+} addChunks;   
+
+/////////// Grid parameters.
+
+commentdef {
+  p_header = " ------------ GRID PARAMETERS --------\n"
+  		"These specify the grid on which the\n"
+                "computations will be performed.\n"
+		"These are used only if RemapGrid is set\n"
+		"to TRUE. If RemapGrid is FALSE then it is assumed\n"
+		"that the fields are already on the same grid.";
+
+}
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to TRUE to remap the data - useful if visible is at\n"
+	    "four times the resolution of the IR channels.";
+  p_help = "Defaults to FALSE";
+} RemapGrid;   
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} grid_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} grid_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} grid_lat2;
+
+typedef enum {
+  FLAT, LATLON, LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT, LATLON and LAMBERT";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in X";
+  p_min = {1};
+  p_default = { 100 };
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in Y";
+  p_min = {1};
+  p_default = {100};
+} grid_ny;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in X";
+  p_default = {1.0};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in Y";
+  p_default = {1.0};
+} grid_dy;
+
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_miny;
+
+
+commentdef {
+  p_header = "------ End of grid parameters. ";
+}
+
+
+
+

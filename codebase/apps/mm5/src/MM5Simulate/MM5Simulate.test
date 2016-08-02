@@ -1,0 +1,186 @@
+/**********************************************************************
+ * TDRP params for MM5Simulate
+ **********************************************************************/
+
+//======================================================================
+//
+// Program MM5Simulate.
+//
+// This program simulates MM5 running in realtime. It cycles through a 
+//   series of files actually produced by MM5, and adjusts the file name 
+//   and the times in the file to simulate the situation in which the 
+//   files had just been produced by MM5.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//   ARCHIVE, REALTIME
+//
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// SIMULATION DETAILS.
+//
+//======================================================================
+ 
+///////////// model_run_interval //////////////////////
+//
+// Interval between simulated model runs - secs.
+// A simulated model run is triggered at this interval. In REALTIME 
+//   mode, a time trigger always occurs on the hour, and at constant 
+//   intervals thereafter. In ARCHIVE mode the trigger starts at 
+//   start_time and at constant intervals thereafter.
+// Type: int
+//
+	
+model_run_interval = 21600;
+
+///////////// forecast_step_wallclock_duration ////////
+//
+// Wallclock time taken for simulated model to produce one forecast 
+//   step.
+// The program waits this amount of time before generating the output 
+//   for each forecast period. This is intended to simulate model 
+//   behavior.
+// Minimum val: 0
+// Type: int
+//
+
+forecast_step_wallclock_duration = 1800;
+forecast_step_wallclock_duration = 1;
+
+///////////// force_run_on_start //////////////////////
+//
+// REALTIME mode only. Option for force one model run when the program 
+//   starts up.
+// Setting this option forces a single trigger in the past. All 
+//   subsequent trigger times will occur at times after program startup. 
+//   This option is useful for debugging so that you do not have to wait 
+//   for the first future trigger to occur before testing the program 
+//   behavior.
+// Type: boolean
+//
+
+force_run_on_start = TRUE;
+
+///////////// forecast_interval ///////////////////////
+//
+// Time between model forecast steps (s).
+// The first forecast is time-stamped at trigger time. Subsequent 
+//   forecasts are spaced at this interval.
+// Minimum val: 0
+// Type: int
+//
+
+forecast_interval = 3600;
+forecast_interval = 7200;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_file_paths ////////////////////////
+//
+// List of input file paths.
+// The program cycles through these file paths to obtain the simulation 
+//   data.
+// Type: string
+// 1D array - variable length.
+//
+
+// input_file_paths = {
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm0302.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm0403.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm0503.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm0604.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm0705.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm0806.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm0900.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm1000.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm1101.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm1202.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm1303.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm1403.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm1504.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm1605.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm1706.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm1800.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm1900.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm2001.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm2102.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm2203.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm2303.mm5",
+//   "$(RAP_DATA_DIR)/raw/mm5/d3.1999091312.tm2404.mm5"
+// };
+
+input_file_paths = {
+  "/home/dixon/rap/apps/aoaws/src/MM5Simulate/data/v3.d3.1999120612.tm0600.mm5",
+  "/home/dixon/rap/apps/aoaws/src/MM5Simulate/data/v3.d3.1999120612.tm0600.mm5",
+  "/home/dixon/rap/apps/aoaws/src/MM5Simulate/data/v3.d3.1999120612.tm0600.mm5",
+  "/home/dixon/rap/apps/aoaws/src/MM5Simulate/data/v3.d3.1999120612.tm0600.mm5"
+};
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+// The simulated MM5 data is output to this directory.
+// Type: string
+//
+
+output_dir = "output";
+

@@ -1,0 +1,59 @@
+/*********************************************************
+ * parameter definitions for km2mdv
+ *
+ * Nancy Rehak, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * January 1997
+ */
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_options = { DEBUG_OFF,
+                DEBUG_WARNINGS,
+                DEBUG_NORM,
+                DEBUG_EXTRA };
+  p_default = { DEBUG_OFF };
+} debug_level;
+
+paramdef long
+{
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+  p_min = { 0 };
+  p_max = { 3 };
+  p_default = { 0 };
+} malloc_debug_level;
+
+paramdef string 
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = { "Test" };
+} instance;
+
+paramdef string
+{
+  p_descr = "IP addres of WSI data feed";
+  p_default = { "129.55.56.8" };
+} wsi_ip_address;
+
+paramdef long
+{
+  p_descr = "port number for WSI data feed";
+  p_default = { 8000 };
+} wsi_port;
+
+paramdef struct output_data_t
+{
+  p_descr = "array of WSI file types to output to files";
+  p_field_name = { product_type,
+                   product_coverage,
+                   output_dir,
+                   output_ext };
+  p_field_type = { string,             /* product_type */
+                   string,             /* product_coverage */
+                   string,             /* output_dir */
+                   string };           /* output_ext */
+} output_data[];

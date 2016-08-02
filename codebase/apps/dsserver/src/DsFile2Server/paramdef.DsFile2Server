@@ -1,0 +1,105 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for DsFile2Server
+ *
+ * Niles Oien, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * October 2004
+ *
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_text = "DsFile2Server opens files that contain Ds messages, reads\n"
+           "the messages, and sends them on their way. Said files were\n"
+	   "typically written either by DsFileDist by setting the host to\n"
+	   "'localfile', or by DsSpdbServer. Normally files watched for and read\n"
+           "in realtime  but the -f option can be\n"
+           "used to specify input file(s) for debugging.\n"
+           "\n\nNiles Oien September 2004";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Program instance for process registration.";
+  p_help = "This program registers with procmap. This is\n"
+	"the instance registered.";
+} instance;
+
+paramdef string {
+  p_default = "./";
+  p_descr = "The input directory in which DsMsg files appear.";
+  p_help = "These files are read and the messages sent to the\n"
+	"appropriate server via a socket.";
+} input_directory;
+
+paramdef boolean {
+  p_descr = "Option to Trigger off _ldatainfo files/queues.";
+  p_default = FALSE;
+} use_ldatainfo;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Maximum age of file to process, seconds.";
+  p_help = "Default is 15 minutes.";
+} max_realtime_age;
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef boolean {
+  p_descr = "Option to Trigger off _ldatainfo files/queues.";
+  p_default = TRUE;
+} write_status_file;
+
+paramdef string {
+  p_default = "DsFile2Server.status";
+  p_descr = "IO Statistics and status info file";
+  p_help = "File is re-written every minute if write_status_file is TRUE.";
+} IO_status_file;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME.\n\n"
+           "In REALTIME mode, the analysis is performed as new data\n"
+           "arrives. In ARCHIVE mode, the file list is obtained from\n"
+           "the command line with the -f option. Specifying -f automatically\n"
+           "invokes archive mode.";
+} mode;
+

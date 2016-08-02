@@ -1,0 +1,254 @@
+/**********************************************************************
+ * TDRP params for VerifyTracks
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: VerifyTracks.
+//
+// Computes verification statistics for TITAN tracks and prints the 
+//   results to stdout. Also updates verification values in the track 
+//   files. You need to run VerifyTracks before Tracks2Ascii if you want 
+//   access to the POD, FAR and CSI verification values in the track 
+//   files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory path for input data.
+// This is used if start and end times are specified on the command 
+//   line. It is ignored if you specify a file list using -f on the 
+//   command line.
+// Type: string
+//
+
+input_dir = "$(DATA_DIR)/titan/storms";
+
+//======================================================================
+//
+// VERIFICATION OPTIONS.
+//
+//======================================================================
+ 
+///////////// forecast_shape //////////////////////////
+//
+// Shape to be used for making forecast.
+// POLYGON - use more complex polygon shape. ELLIPSE - use simpler 
+//   ellipse shape fitted to the storm shape.
+//
+// Type: enum
+// Options:
+//     FORECAST_ELLIPSE
+//     FORECAST_POLYGON
+//
+
+forecast_shape = FORECAST_POLYGON;
+
+///////////// verify_method ///////////////////////////
+//
+// Shape to be used for verifying the forecast.
+// POLYGON - use more complex polygon shape. ELLIPSE - use simpler 
+//   ellipse shape fitted to the storm shape. RUNS - the actual grid 
+//   points for the storms. MDV - an MDV file containing verification 
+//   field.
+//
+// Type: enum
+// Options:
+//     VERIFY_ELLIPSE
+//     VERIFY_POLYGON
+//     VERIFY_RUNS
+//     VERIFY_MDV
+//
+
+verify_method = VERIFY_POLYGON;
+// verify_method = VERIFY_MDV;
+
+///////////// forecast_lead_time //////////////////////
+//
+// Forecast lead time to be verified (secs).
+// Verification is performed for this lead time only.
+// Type: int
+//
+
+forecast_lead_time = 1800;
+
+///////////// search_time_margin //////////////////////
+//
+// Forecast lead time margin (secs).
+// When searching for a radar scan to be used for verification, this is 
+//   the search margin used. If no scan is found within this margin, 
+//   verification is not performed for the scan.
+// Type: int
+//
+
+search_time_margin = 300;
+
+///////////// forecast_min_history ////////////////////
+//
+// Minimum track history for verification (secs).
+// Track entries with less history than this will not be scored.
+// Type: int
+//
+
+forecast_min_history = 0;
+
+///////////// growth_function /////////////////////////
+//
+// Function to be used to compute growth.
+// LINEAR - storms grows or decays linearly in area/volume. PARABOLIC - 
+//   storm grows in according to a parabolic function with time, reaching 
+//   zero growth after 'time_to_zero_growth', followed by decay according 
+//   to the same function. ZERO - no growth or decay.
+//
+// Type: enum
+// Options:
+//     GROWTH_LINEAR
+//     GROWTH_PARABOLIC
+//     GROWTH_ZERO
+//
+
+growth_function = GROWTH_LINEAR;
+
+///////////// time_to_zero_growth /////////////////////
+//
+// Time to zero growth (secs).
+// See 'growth_function'.
+// Type: int
+//
+
+time_to_zero_growth = 900;
+
+///////////// verify_before_forecast_time /////////////
+//
+// Option to include initiation.
+// If true, include the tracks which started between forecast issue time 
+//   and valid time - i.e. include initiation.
+// Type: boolean
+//
+
+verify_before_forecast_time = FALSE;
+
+///////////// verify_after_track_dies /////////////////
+//
+// Option to continue to score forecast after track dies.
+// If true, include the tracks which die before the forecast valid time 
+//   is reached.
+// Type: boolean
+//
+
+verify_after_track_dies = TRUE;
+
+///////////// force_xy_fit ////////////////////////////
+//
+// Option to exclude movement error.
+// If true, place the forecast and verification centroid over each other 
+//   and validate only on the shape differences.
+// Type: boolean
+//
+
+force_xy_fit = FALSE;
+
+///////////// specify_verify_grid /////////////////////
+//
+// Specify grid over which verification will be performed?.
+// If true, you can set up a verification grid reflecting the needs of 
+//   the study. For example, if you only care about a forecast accuracy of 
+//   5 km, you can specify a grid with 5 km resolution. If false, grid 
+//   from MDV input files will be used.
+// Type: boolean
+//
+
+specify_verify_grid = FALSE;
+
+///////////// verify_grid /////////////////////////////
+//
+// Grid parameters for verification.
+// Projection is assumed to be same as for TITAN data. See 
+//   'specify_verify_grid.'.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+verify_grid = { 56, 56, -137.5, -137.5, 5, 5 };
+
+///////////// truth_mdv_dir ///////////////////////////
+//
+// Directory path for MDV verification data.
+// Used if verify_method is VERIFY_MDV.
+// Type: string
+//
+
+truth_mdv_dir = "$(DATA_DIR)/mdv/verify";
+
+///////////// truth_mdv_time_margin ///////////////////
+//
+// Time margin when searching for MDV file - secs.
+// The search is centered on the TITAN scan time.
+// Type: int
+//
+
+truth_mdv_time_margin = 300;
+
+///////////// truth_mdv_field /////////////////////////
+//
+// Field name for verification data.
+// Type: string
+//
+
+truth_mdv_field = "ValidStorms";
+
+///////////// truth_mdv_threshold /////////////////////
+//
+// Threshold for verification data. If the data in the verification 
+//   field exceeds this have we treat it as a 'hit', otherwise it is a 
+//   'miss'.
+// Type: double
+//
+
+truth_mdv_threshold = 0.5;
+

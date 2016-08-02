@@ -1,0 +1,265 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for GemVolXml2Dsr
+//
+// Mike Dixon
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2006
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "GemVolXml2Dsr reads in volume scan files in Gematronik XML format and reformats the contents into a DsRadar FMQ.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, SIMULATE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.";
+} mode;
+
+paramdef int {
+  p_descr = "Sleep between files in simulate mode (secs)";
+  p_default = 180;
+} simulate_sleep_secs;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default = "$(HOME)/data/gematronik/vol";
+  p_descr = "Dir for input volume scan files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_descr = "Sleep between scan of input directory (secs)";
+  p_help = "REALTIME mode only. Only applies if use_ldata_info_file is FALSE. This is the interval at which the input directory is scanned for new data.";
+  p_default = 2;
+} dir_scan_interval_secs;
+
+paramdef int {
+  p_descr = "File quiescence for input data (secs)";
+  p_help = "REALTIME mode only. Only applies if use_ldata_info_file is FALSE. This is the number of seconds for which the size of an input file must not change before it is considered completely written to disk.";
+  p_default = 2;
+} input_file_quiescence_secs;
+
+
+paramdef int {
+  p_descr = "File time offset - for correcting file timestamps to UTC";
+  p_help = "REALTIME mode only.  Add this number of seconds to the file name time to get to UTC";
+  p_default = 0;
+} input_file_time_offset_secs;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+typedef struct {
+  string input_field_name;
+  string output_field_name;
+  string output_units;
+  boolean required;
+} field_t;
+  
+paramdef struct field_t {
+  p_default = {
+    { "dBZ", "DBZ", "dBZ", true },
+    { "V", "VEL", "m/s", false },
+    { "W", "SPW", "m/s", false }
+  };
+  p_descr = "List of fields to be included in output.";
+  p_help = "List of fields expected in input data files. The 'input_field_name' must match the name in the incoming data file name. For example the file name '2014103114000400Vel.vol' indicates that the input_field_name is 'Vel', while a name of '2014103114000400V.vol' indicates that the input_field_name is 'V'. You also set the field name and units in the output DsRadar queue. If this field MUST be present, set 'required' to TRUE. In that case a set of files will not be processed until that field is available.";
+} fields[];  
+
+commentdef {
+  p_header = "RADAR PARAMETERS";
+  p_text = "These parameters are not available in the input data file.";
+};
+
+typedef enum {
+  POLAR_HORIZONTAL = 0,
+  POLAR_VERTICAL = 1,
+  POLAR_CIRCULAR = 2,
+  POLAR_ELLIPTICAL = 3,
+  POLAR_DUAL = 4
+} polar_mode_t;
+
+paramdef enum polar_mode_t {
+  p_default = POLAR_HORIZONTAL;
+  p_descr = "Polarization mode.";
+} polarization_mode;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Short pulse width (micro-secs)";
+} short_pulse_width_us;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Long pulse width (micro-secs)";
+} long_pulse_width_us;
+
+paramdef double {
+  p_default = 45.0;
+  p_descr = "Receiver gain value (dB)";
+} receiver_gain;
+
+paramdef double {
+  p_default = 44.0;
+  p_descr = "Antenna gain value (dB)";
+} antenna_gain;
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "System gain value (dB)";
+} system_gain;
+
+commentdef {
+  p_header = "RADAR LOCATION";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override input data stream with user-specified latitude, longitude and altitude.";
+  p_help = "If TRUE, these values will be used instead of the values in the input files.";
+} override_radar_location;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Radar altitude (km).";
+  p_help = "ALWAYS used. No altitude available in data.";
+} radar_altitude;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Radar latitude (deg).";
+  p_help = "Used if override_radar_location is TRUE.";
+} radar_latitude;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Radar longitude (deg).";
+  p_help = "Used if override_radar_location is TRUE.";
+} radar_longitude;
+
+commentdef {
+  p_header = "SCAN INFORMATION";
+  p_text = "May be used by downstream processes. Can normally safely use the defaults.";
+};
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Scan type id";
+  p_help = "Unique identifier for scan strategy";
+} scan_type_id;
+
+paramdef string {
+  p_default = "Surveillance";
+  p_descr = "Scan type name";
+  p_help = "Descriptive name for scan strategy";
+} scan_type_name;
+
+commentdef {
+  p_header = "OUTPUT FILE MESSAGE QUEUE - FMQ";
+};
+
+paramdef string {
+  p_descr = "Output URL for DsRadar data via FMQ";
+  p_default = "fmqp:://localhost::fmq/gematronik";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 10000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer
+ will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 4800;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages wh
+ich may be written to the buffer before overwrites occur. However, overwrites ma
+y occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_descr = "Wait per beam (milli-secs)";
+  p_default = 0;
+} beam_wait_msecs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+

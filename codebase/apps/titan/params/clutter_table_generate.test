@@ -1,0 +1,34 @@
+########################################################################
+# parameters file for clutter_table_generate
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# April 1991
+#
+#########################################################################
+
+#
+# debugging
+#
+
+clutter_table_generate.debug: false
+clutter_table_generate.malloc_debug_level: 0
+
+#
+# file paths
+#
+
+clutter_table_generate.clutter_file_path: $(TITAN_HOME)/clutter/median
+clutter_table_generate.rc_table_path: $(TITAN_HOME)/tables/rc_table.test
+clutter_table_generate.clutter_table_path: $(TITAN_HOME)/tables/clutter_table.test
+
+#
+# clutter computation params. When the clutter table is applied,
+# a location is determined to have clutter if the reflectivity
+# there does not exceed the dbz_threshold by the dbz_margin
+#
+
+clutter_table_generate.dbz_margin: 5.0
+clutter_table_generate.dbz_threshold: 10.0
+clutter_table_generate.dbz_field: 0
+

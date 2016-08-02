@@ -1,0 +1,192 @@
+/**********************************************************************
+ * TDRP params for Dsr2CP2Mom
+ **********************************************************************/
+
+//======================================================================
+//
+// Dsr2CP2Mom program.
+//
+// Dsr2CP2Momreads an input FMQ containing radar data, and writes out 
+//   UDP data in CP2 moments format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// sband_fmq_url ///////////////////////////
+//
+// Input URL for S-band data via FMQ.
+// Type: string
+//
+
+sband_fmq_url = "$(DATA_DIR)/fmq/Iq2DsrOps_s";
+
+///////////// xband_fmq_url ///////////////////////////
+//
+// Input URL for X-band data via FMQ.
+// Type: string
+//
+
+xband_fmq_url = "$(DATA_DIR)/fmq/Iq2DsrOps_x";
+
+///////////// seek_to_end_of_input ////////////////////
+//
+// Option to seek to the end of the input FMQ.
+// If TRUE, the program will seek to the end of the fmq and only read in 
+//   new data. If FALSE, it will start reading from the beginning of the 
+//   FMQ.
+// Type: boolean
+//
+
+seek_to_end_of_input = TRUE;
+
+//======================================================================
+//
+// FIELD INFORMATION.
+//
+// Translate fields from DSR input to UDP output.
+//
+//======================================================================
+ 
+///////////// sband_output_fields /////////////////////
+//
+// Array of output fields for S band.
+// Associate each desired S-band output field with the DSR field name.
+//
+// Type: struct
+//   typedef struct {
+//      cp2_field_id_t field_id;
+//        Options:
+//          PROD_S_DBMHC
+//          PROD_S_DBMVC
+//          PROD_S_DBZ
+//          PROD_S_SNR
+//          PROD_S_VEL
+//          PROD_S_WIDTH
+//          PROD_S_RHOHV
+//          PROD_S_PHIDP
+//          PROD_S_ZDR
+//          PROD_X_DBMHC
+//          PROD_X_DBMVX
+//          PROD_X_DBZ
+//          PROD_X_SNR
+//          PROD_X_VEL
+//          PROD_X_WIDTH
+//          PROD_X_LDR
+//      string dsr_name;
+//      double missing_val;
+//   }
+//
+// 1D array - variable length.
+//
+
+sband_output_fields = {
+  { PROD_S_DBMHC, "DBMHC", -120},
+  { PROD_S_DBMVC, "DBMVC", -120},
+  { PROD_S_DBZ, "DBZ", -40},
+  { PROD_S_SNR, "SNR", -30},
+  { PROD_S_VEL, "VEL", -30},
+  { PROD_S_WIDTH, "WIDTH", -1},
+  { PROD_S_RHOHV, "RHOHV", -1},
+  { PROD_S_PHIDP, "PHIDP", -400},
+  { PROD_S_ZDR, "ZDR", -100}
+};
+
+///////////// xband_output_fields /////////////////////
+//
+// Array of X-band output fields.
+// Associate each desired X-band output field with the DSR field name.
+//
+// Type: struct
+//   typedef struct {
+//      cp2_field_id_t field_id;
+//        Options:
+//          PROD_S_DBMHC
+//          PROD_S_DBMVC
+//          PROD_S_DBZ
+//          PROD_S_SNR
+//          PROD_S_VEL
+//          PROD_S_WIDTH
+//          PROD_S_RHOHV
+//          PROD_S_PHIDP
+//          PROD_S_ZDR
+//          PROD_X_DBMHC
+//          PROD_X_DBMVX
+//          PROD_X_DBZ
+//          PROD_X_SNR
+//          PROD_X_VEL
+//          PROD_X_WIDTH
+//          PROD_X_LDR
+//      string dsr_name;
+//      double missing_val;
+//   }
+//
+// 1D array - variable length.
+//
+
+xband_output_fields = {
+  { PROD_X_DBMHC, "DBMHC", -120},
+  { PROD_X_DBMVX, "DBMVX", -120},
+  { PROD_X_DBZ, "DBZ", -40},
+  { PROD_X_SNR, "SNR", -30},
+  { PROD_X_VEL, "VEL", -30},
+  { PROD_X_WIDTH, "WIDTH", -1},
+  { PROD_X_LDR, "LDRH", 30}
+};
+
+//======================================================================
+//
+// OUTPUT UDP DATA.
+//
+//======================================================================
+ 
+///////////// udp_network /////////////////////////////
+//
+// Address for UDP broadcast.
+// UDP packets are broadcast on this address.
+// Type: string
+//
+
+udp_network = "192.168.1";
+
+///////////// udp_port ////////////////////////////////
+//
+// Port for UDP broadcast.
+// Type: int
+//
+
+udp_port = 3200;
+

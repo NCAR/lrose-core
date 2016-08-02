@@ -1,0 +1,149 @@
+/*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+ ** Copyright UCAR (c) 2000
+ ** University Corporation for Atmospheric Research(UCAR)
+ ** National Center for Atmospheric Research(NCAR)
+ ** Research Applications Program(RAP)
+ ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
+ ** All rights reserved. Licenced use only.
+ ** Do not copy or distribute without authorization
+ *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
+/****************************************************************
+ * parameter definitions for UpdateStormSpeeds
+ *  
+ * Nancy Rehak
+ * February 2003
+ */
+
+commentdef
+{
+  p_text = "This program is used to nudge the speeds of storms "
+           "in a given TITAN SPDB database by a given factor.  "
+           "For example, this program could be used to increase "
+           "all of the storm speeds in a database by 10%.";
+}
+
+/****************************************************************
+ * Debugging and process control.
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,		
+  DEBUG_VERBOSE	
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+           "appropriate level of detail.";
+  p_default = DEBUG_OFF;
+} debug;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/*********************************************************
+ * Input and output data
+ */
+
+commentdef
+{
+  p_header = "INPUT AND OUTPUT DATA.";
+}
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "input_url.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_help = "URL of the input TITAN SPDB database.";
+  p_default = "spdbp:://localhost::spdb/input_storms";
+} input_url;
+
+paramdef long
+{
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+  p_min = 0;
+  p_default = 7200;
+} max_realtime_valid_age;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "spdbp:://localhost::spdb/output_storms";
+} output_url;
+
+
+/*********************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS.";
+}
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to process all storms or just the "
+            "storms that have valid forecasts.";
+  p_help = "If set to TRUE, only storms with valid forecasts will be "
+           "processed. "
+           "If set to FALSE, all storms will be processed and the "
+           "forecast valid flag will be preserved from the input.";
+  p_default = false;
+} valid_forecasts_only;
+
+paramdef double
+{
+  p_descr = "Adjustment factor for the speed values.";
+  p_help = "For each storm in the input database, the speed value will "
+           "be multiplied by this value and that will be the speed in the "
+           "output database.";
+  p_default = 1.1;
+} speed_multiplier;

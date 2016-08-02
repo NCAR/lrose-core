@@ -1,0 +1,193 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.TrmmLisHdf2Spdb
+ *
+ * This file contains the TDRP parameter definitions for
+ * TrmmLisHdf2Spdb
+ */
+
+commentdef
+{
+  p_header = "TrmmLisHdf2Spdb";
+  p_text = "This program converts TRMM LIS HDF4 files into SPDB format.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process Input.
+ */
+
+commentdef
+{
+  p_header = "PROCESS INPUT PARAMETERS";
+  p_text = "Parameters describing the input locations and timing.";
+};
+
+typedef enum
+{
+  FILE_LIST,
+  INPUT_DIR,
+  INPUT_DIR_RECURSE,
+  LATEST_DATA
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tIn FILE_LIST mode, the program operates on the files specified "
+           "on the command line.\n"
+           "\tIn INPUT_DIR mode, the program will process new files as they "
+           "appear in the input_dir directory.\n"
+           "\tIn INPUT_DIR_RECURSE mode, the program will process new files "
+           "as they appear in the input_dir directory or in any "
+           "subdirectory.\n"
+           "\tIn LATEST_DATA mode, the program will process new files as they "
+           "appear in the _latest_data_info file in the input_dir directory.\n";
+  p_default = "FILE_LIST";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_default = "$(RAP_DATA_DIR)/raw/TRMM/LIS";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Input filename substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will only process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} input_substring;
+
+paramdef string
+{
+  p_descr = "Input filename exclude substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will not process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} exclude_substring;
+
+paramdef long
+{
+  p_descr = "Maximum number of seconds input files are valid.";
+  p_help = "Used only if trigger_mode is set to LATEST_DATA.";
+  p_default = 600;
+} max_valid_secs;
+
+
+/***********************************************************************
+ * Process Output.
+ */
+
+commentdef
+{
+  p_header = "PROCESS OUTPUT PARAMETERS";
+  p_text = "Parameters describing the output types and locations.";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to output flashes from the LIS files.";
+  p_help = "Flashes are put into LTG SPDB files.";
+  p_default = true;
+} output_flashes;
+
+typedef struct
+{
+  string url;
+  long expire_secs;
+} output_info_t;
+
+paramdef struct output_info_t
+{
+  p_descr = "Flash output Information";
+  p_help = "Used only if output_flashes is set to TRUE.\n"
+           "\turl - URL for the output LTG SPDB database.\n"
+           "\texpire_secs - Flash expire time in the SPDB database "
+           "in seconds.\n";
+  p_default = { "spdbp:://localhost::spdb/TRMM/LIS/flashes", 600 };
+} flashes_output_info;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to output groups from the LIS files.";
+  p_help = "Groups are put into LTG_GROUP SPDB files.";
+  p_default = false;
+} output_groups;
+
+paramdef struct output_info_t
+{
+  p_descr = "Group output Information";
+  p_help = "Used only if output_groups is set to TRUE.\n"
+           "\turl - URL for the output LTG_GROUP SPDB database.\n"
+           "\texpire_secs - Group expire time in the SPDB database "
+           "in seconds.\n";
+  p_default = { "spdbp:://localhost::spdb/TRMM/LIS/groups", 600 };
+} groups_output_info;

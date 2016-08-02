@@ -1,0 +1,171 @@
+<html>
+<head>
+<title>TDRP - Table-Driven Runtime Parameters</title>
+</head>
+
+<BODY BGCOLOR="white">
+
+<H1>TDRP - Table-Driven Runtime Parameters</H1>
+<P>
+<HR>
+<P>
+
+<!-- -->
+<!-- ----------------- Top of page --------------   -->
+<!-- -->
+
+<A NAME="top"></A>
+
+<H2>Summary</H2><A NAME="summary">
+<P>
+<UL>
+<LI>Name: libtdrp, tdrp_gen
+<LI>Status: mature, used in multiple Level 3 projects
+<LI>Programming language: C/C++
+<LI>Maintainer(s): <A HREF="mailto:dixon@ucar.edu">Mike Dixon</A>
+<LI>Part of /rap nightly build: Yes
+<LI>License: 
+<LI>Dependencies:
+<LI>Location in CVS: libs/tdrp, apps/tdrp
+</UL>
+
+<P>
+<HR>
+<P>
+<h2>TDRP - Table-Driven Runtime Parameters</h2>
+
+TDRP consists of a small stand-alone C library and a code generation
+program which helps both the <b>user</b> and the <b>programmer</b>
+deal effectively with any parameters needed for a program to run.<p>
+
+TDRP is written in ANSI-C, and only an ANSI-C compiler is required to
+build the system which consists of the library <i>libtdrp</i> and the program
+<i>tdrp_gen</i>. Both C and C++ are supported explicilty.<p>
+
+<hr>
+
+The <b>user</b> interacts with a TDRP-based program in two ways:<p>
+
+<ul>
+<li><a href="command_line.html">The command line</a>:</li><p>
+
+Command line arguments allow the user to print default parameter
+files and check which parameters are set.<p>
+
+In addition, if the programmer codes in this manner, non-TDRP command
+line arguments can have the effect of <a
+href="override.html">overriding</a> parameters in the parameter
+file.<p>
+
+<li><a href="parameter_file.html">The parameter file</a>:</li><p>
+
+The parameter file contains the parameter values which the program
+will use. Editing this file allows the user to change any of the
+public parameters to control program execution.<p>
+
+</ul>
+
+<hr>
+
+The <b>programmer</b> goes through the following steps in setting up
+a TDRP-based program:<p>
+
+<ul>
+<li>Create the <a href = "paramdef.html">paramdef</a> file:</li><p>
+
+This file defines the parameters to be used by the client program, as
+well as comments which may be used to annotate the default parameter
+files printed out by the user.<p>
+
+<li>Run <a href = "tdrp_gen.html">tdrp_gen</a> to generate the TDRP
+code for the program:</li><p>
+
+<i>tdrp_gen</i> generates two files, one header and one code file, which
+provide the program with a specific interface to TDRP supporting
+just the parameters defined in the paramdef file.<p>
+
+It is relatively straight-forward to set up a <a
+href="Makefiles.html">Makefile</a> to automatically invoke
+<i>tdrp_gen</i> if the paramdef file changes.<p>
+
+<li>Create an <a href="override.html">override list</a> from the
+command line args.</li><p>
+
+If the programmer wishes to override any of the parameters in the
+run-time parameter file, the override mechanism provides a simple way to
+do this.<p>
+
+<li><a href="load_params.html">Load the parameters</a>.</li><p>
+
+The programmer adds the the function calls to load the parameters
+from the parameter file.<p>
+
+<li>Provide the <a href="usage.html">TDRP usage</a> to the
+user.</li><p>
+
+TDRP provides a function for printing out the TDRP-specific command
+line options.<p>
+</ul>
+
+<hr>
+
+Three <b>applications programming interfaces</b> are provided:<p>
+<ul>
+
+<li><a href="api_c.html">C API</a>.</li><p>
+
+<li><a href="api_c++.html">C++ API</a>.</li><p>
+
+<li><a href="api_c.old.html">Old C API</a> - included for backward
+compatibillity.</li><p>
+
+</ul>
+
+<hr>
+
+More <b>advanced programming topics</b> include:
+
+<ul>
+<li><a href="changing_params.html">Changing</a>
+TDRP parameters from within a program:</li><p>
+
+In some programs, especially those with GUIs, the programmer may wish
+to respond to user input by changing parameters on the fly.<p>
+
+<li><a href="saving_params.html">Saving</a>
+out alternative TDRP parameter sets to a file:</li><p>
+
+If the previous option is used, TDRP provides a mechanism for saving
+the amended parameters to a file for later use. This allows a user to
+create multiple start-up states based on different parameter
+configurations.<p>
+
+<li>Creating <a href="mult_modules.html">multiple TDRP modules</a> for
+a single C program.</li><p>
+
+<li>Creating <a href="mult_classes.html">multiple TDRP classes</a> for
+a single C++ program.</li><p>
+
+</ul>
+
+<hr>
+
+<b> Additional topics:</b><p>
+<ul>
+<li><a href="advantages.html">Advantages of this approach</a>.</li><p>
+<li><a href="how_it_works.html">How it works</a>.</li><p>
+<li><a href="example_c.html">C code example</a>.</li><p>
+<li><a href="example_c++.html">C++ code example</a>.</li><p>
+<li><a href="history.html">A brief history.</a></li><p>
+</ul>
+
+<hr>
+
+Author:
+<cite>Mike Dixon</cite><br>
+RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000<br>
+September 1998
+
+</body>
+</html>
+

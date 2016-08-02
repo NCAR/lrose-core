@@ -1,0 +1,6 @@
+set title "POWER, unfiltered real spectra, CWR 20 dB"
+set xlabel "Power truth (dB)" 
+set ylabel "Power unfiltered (dB)"
+set xrange [-80:-20]
+set yrange [-80:-20]
+plot 'ssef_real_cwr_20.out' using 3:9 title ''

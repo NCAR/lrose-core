@@ -1,0 +1,117 @@
+#!/usr/bin/perl
+
+use Getopt::Std qw( getopts );
+use Getopt::Long;
+use File::stat;
+
+use Env;
+Env::import();
+use Env qw(RAP_LIB_DIR);
+use Env qw(RAP_SHARED_LIB_DIR);
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+use Toolsa;   
+ 
+$timeout      = 10;
+$controlDir   = $ENV{CONTROL_DIR};
+$hostenv_file = "$controlDir/params/host_env.inField";
+
+$usage =
+    "Usage: $prog [options]\n" .
+    "Options:\n" .
+    "   -h                   : Print usage\n" .
+    "   -latest              : print latest data time.\n" .
+    "   -lreg                : print latest registration time.\n" .
+    "   -all                 : print latest, dates and size.\n" .
+    "   -dates               : print data set date limits.\n";
+ 
+ 
+#
+# Get the arguments from the command line
+#
+ 
+$result = &GetOptions('h',
+                      'latest',
+                      'lreg',
+                      'all',
+                      'dates');        
+
+if ($result == 0 ||
+    $opt_h)
+{
+    print $usage;
+    exit 0;
+} 
+
+$ext = ' -latest' if $opt_latest;
+$ext = "$ext".' -lreg' if $opt_lreg;
+$ext = "$ext".' -all' if $opt_all;
+$ext = "$ext".' -dates' if $opt_dates;
+
+getHostList();
+
+doSomethingOnEachHost();
+ 
+################################################################################
+#
+# Determine unique list of hosts to be processed
+#
+sub getHostList
+{
+   unless (open(HOSTFILE, $hostenv_file)) {
+       print(STDERR "ERROR: Cannot open the file $hostenv_file\n");
+       exit -1;
+   }
+ 
+   #
+   # Read the host file to see which machines to query
+   #
+   while (<HOSTFILE>) {
+ 
+       #
+       # Skip comment lines
+       #
+       next if ( m/^\s*#/ );
+ 
+       #
+       # Build up a list of all hostnames
+       #
+       chop;
+       if ( m/\s*setenv\s*\w+\s*(.+)/ ) {
+           $host = $1;
+           if ( $host =~ m/(\$\w+)/ ) {
+              #
+              # Skip environment variable references
+              #
+              next;
+           }
+           else {
+              #
+              # Add this host name to our list
+              #
+              push( @hosts, $host );
+           }
+       }
+ 
+       # Get the unique host name list                             
+ 
+       # Get the unique host name list
+       %seen = ();
+       foreach $item (@hosts) {
+          $seen{$item}++;
+       }
+       @hostList = keys %seen;
+   }
+}
+ 
+################################################################################
+sub doSomethingOnEachHost {
+ 
+   foreach $host( @hostList ) {
+ 
+      $doSomething = "PrintDataMap $ext";
+      $cmd = "ssh -x $host -n $doSomething";
+      $out = Toolsa::safe_system( $cmd, $timeout );
+	print "$out\n";
+   }
+}                                                     

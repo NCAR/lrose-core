@@ -1,0 +1,329 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvThresh thresholds MDV data. Data which fail the\n"
+             "threshold test are set to missing. Data which pass\n"
+             "the threshold may be set to a constant value if desired,\n"
+             "effecively creating a boolean pass/fail field.\n\n"
+             "Niles Oien\n\n"
+             "If OneValueMin/Max are set to FALSE, a URL specifying\n"
+             "a 2D field can be used to create a gridded threshold comparison.\n\n";
+}
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+
+paramdef int {
+  p_default = 0;
+  p_private = FALSE;
+  p_descr = "Seconds to sleep after triggering on an input file";
+  p_help = "REALTIME mode only.";
+} SleepAfterTrigger;
+
+paramdef string {
+  p_descr = "URL of the input field";
+  p_help = "If set to \"\", will use TriggerUrl"; 
+  p_default = "";
+} InUrl;
+
+paramdef string {
+  p_default = { "VisField", "IRField" };
+  p_private = FALSE;
+  p_descr = "Input field names to process - or use '#2' to indicate field\n"
+            "two (fields start at 0 in this case).";
+  p_help = "Must have matching entry in TakeMaximum array (below) for\n"
+           "each field name entered.";
+} InFieldName[];   
+
+paramdef string {
+  p_descr = "URL of the field used for thresholding the data";
+  p_help = "If set to \"\", will use TriggerUrl"; 
+  p_default = "";
+} ThreshUrl;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of threshold field to use from the input file - "
+            "or use '#2' to indicate field two "
+            "(fields start at 0 in this case).";
+  p_help = "If set to \"\", will use each input field as its own threshold "
+           "field.";
+} ThreshFieldName;
+
+paramdef long {
+  p_descr = "Number of seconds the ThreshUrl is valid.";
+  p_default = 600;
+} ThreshValidSecs;
+
+paramdef boolean {
+  p_descr = "Use single value minimum thresh or use grid";
+  p_help = "True to use MinThresh.  If false, set minThreshField to a 2D field"; 
+  p_default = TRUE;
+} OneValueMin;
+
+paramdef double {
+  p_descr = "Minimum threshold - data must be equal to or\n"
+            "greater than this to pass.";
+  p_help = "Set to hugely negative value to have no effect."; 
+  p_default = -5000.0;
+} MinThresh;
+
+paramdef string {
+  p_descr = "URL of the 2D field used to set minimum threshold";
+  p_help = "Must be a 2D field on the same grid as the threshold field"; 
+  p_default = "";
+} MinThreshUrl;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of minimum threshold field to use from the input file - "
+            "or use '#2' to indicate field two "
+            "(fields start at 0 in this case).";
+  p_help = "Must be a 2D field on the same grid as the threshold field";
+} MinThreshFieldName;
+
+paramdef boolean {
+  p_descr = "Use single value maximum thresh or use grid";
+  p_help = "True to use MaxThresh.  If false, set maxThreshField to a 2D field"; 
+  p_default = TRUE;
+} OneValueMax;
+
+paramdef double {
+  p_descr = "Maximum threshold - data must be equal to or\n"
+            "less than this to pass.";
+  p_help = "Set to hugely positive value to have no effect."; 
+  p_default = 5000.0;
+} MaxThresh;
+
+paramdef string {
+  p_descr = "URL of the 2D field used to set maximum threshold";
+  p_help = "Must be a 2D field on the same grid as the threshold field"; 
+  p_default = "";
+} MaxThreshUrl;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of maximum threshold field to use from the input file - "
+            "or use '#2' to indicate field two "
+            "(fields start at 0 in this case).";
+  p_help = "Must be a 2D field on the same grid as the threshold field";
+} MaxThreshFieldName;
+
+paramdef boolean {
+  p_descr = "Flag indicating whether to threshold out grid points where data "
+            "is missing in the threshhold field.";
+  p_default = false;
+} ThreshMissing;
+
+paramdef boolean {
+  p_descr = "Set this to replace values that pass the thresholding\n"
+            "with a contsant value specified by PassValue";
+  p_help = "If FALSE the data values that pass are sent to the output."; 
+  p_default = FALSE;
+} ReplacePassValues;
+
+paramdef double {
+  p_descr = "Value to use for data points that pass the threshold test.";
+  p_help =  "Has effect only if ReplacePassValues is TRUE";
+  p_default = 1.0;
+} PassValue;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Derived satellite fields are written here."; 
+  p_default = {"mdvp:://localhost::mdv/thresh"};
+} OutUrl;
+
+paramdef string {
+  p_default = { "VisField", "IRField" };
+  p_private = FALSE;
+  p_descr = "Output field names to process.";
+  p_help = "Must be one output name for each input field.";
+} OutFieldName[];   
+
+paramdef string {
+  p_default = { "albedo", "DegC" };
+  p_private = FALSE;
+  p_descr = "Output units for each field.";
+  p_help = "Must be output units for each input field.";
+} Units[];   
+
+typedef enum
+{
+  ENCODING_INT8,
+  ENCODING_INT16,
+  ENCODING_FLOAT32
+} encoding_type_t;
+
+paramdef enum encoding_type_t
+{
+  p_descr = "Output encoding type";
+  p_default = ENCODING_INT8;
+} output_encoding_type;
+
+/////////// Grid parameters.
+
+commentdef {
+  p_header = " ------------ GRID PARAMETERS --------\n"
+  		"These specify the grid on which the\n"
+                "computations will be performed.\n"
+		"These are used only if RemapGrid is set\n"
+		"to TRUE. If RemapGrid is FALSE then it is assumed\n"
+		"that the fields are already on the same grid.";
+
+}
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to TRUE to remap the data - useful if visible is at\n"
+	    "four times the resolution of the IR channels.";
+  p_help = "Defaults to FALSE";
+} RemapGrid;   
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} grid_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} grid_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} grid_lat2;
+
+typedef enum {
+  FLAT, LATLON, LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT, LATLON and LAMBERT";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in X";
+  p_min = {1};
+  p_default = { 100 };
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in Y";
+  p_min = {1};
+  p_default = {100};
+} grid_ny;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in X";
+  p_default = {1.0};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in Y";
+  p_default = {1.0};
+} grid_dy;
+
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_miny;
+
+
+commentdef {
+  p_header = "------ End of grid parameters. ";
+}
+
+
+
+

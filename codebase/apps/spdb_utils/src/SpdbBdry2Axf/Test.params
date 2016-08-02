@@ -1,0 +1,63 @@
+/**********************************************************************
+ * TDRP params for SpdbBdry2Axf
+ **********************************************************************/
+
+///////////// InURL ///////////////////////////////////
+//
+// Input URL.
+// Set to the URL for the input spdb files.
+// Type: string
+//
+
+InURL = "./";
+
+///////////// OutDir //////////////////////////////////
+//
+// Output axf directory.
+// Set to the name of the output axf directory.
+// Type: string
+//
+
+OutDir = "./Output";
+
+///////////// Instance ////////////////////////////////
+//
+// Instance to check into procmap with.
+// Set as appropriate.
+// Type: string
+//
+
+Instance = "test";
+
+///////////// time_trigger_interval ///////////////////
+//
+// Time between strobes, seconds.
+// In realtime mode only.
+// Type: long
+//
+
+time_trigger_interval = 10;
+
+///////////// LatestFileName //////////////////////////
+//
+// Each output file is copied to this file
+// when it is written.
+// For Olympics 2000, this should probably be something like :
+// ncaifs:/aifs/dev/wwrp/products/anc/loopfiles/ANC_BDRY_latest
+// Files in this dir are then named : 
+// ANC_BDRY_latest_1.axf to ANC_BDRY_latest_N.axf
+// Where N is specified by NumLatestFiles.
+// Type: string
+//
+
+LatestFileName = "ANC_BDRY_latest";
+
+///////////// NumLatestFiles //////////////////////////
+//
+// Number of latest files to store.
+// Set to cover an hour or so.
+// Type: int
+//
+
+NumLatestFiles = 6;
+

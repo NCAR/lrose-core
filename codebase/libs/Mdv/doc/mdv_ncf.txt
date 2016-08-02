@@ -1,0 +1,283 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:32 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+MDV/NCF conversions
+-------------------
+
+Mike Dixon, August 2008
+
+Introduction
+------------
+
+In response to the requirement to translate between MDV-format files and
+NetCDF CF files, components were added to the libs/Mdv library, and the
+libs/NcfMdv library was added. A number of applications were added and
+existing applications upgraded.
+
+This document gives an overview of the setup for handling the conversion
+of MDV to/from NetCDF CF.
+
+Nomenclature
+------------
+
+NetCDF is very flexible and allows a wide variety of data to be
+represented.
+
+This document specifically deals with NetCDF files which conform to the
+CF conventions:
+
+  http://cf-pcmdi.llnl.gov/
+
+We refer to this format as NCF.
+
+Libraries
+---------
+
+  libs/Mdv    - updated
+  libs/NcfMdv - added for MDV/NCF support
+
+Applications
+------------
+
+  apps/mdv_utils/src/PrintMdv   : added -format option to convert
+                                  to/from NCF
+                                  -save option allows writing to file
+
+  apps/mdv_utils/src/MdvConvert : added conversion to/from NCF
+  apps/mdv_utils/src/Mdv2NetCDF : convert from MDV to NCF
+  apps/mdv_utils/src/NetCDF2Mdv : convert from NCF to MDV
+
+  apps/dsserver/src/DsMdvServer : added support for reading/writing NCF
+                                  files into the Mdvx class _ncfBuf
+
+  apps/dsserver/src/NcMdvServer : server for translating between
+                                  MDV and NCF
+
+Performing translations
+-----------------------
+
+The MDV/NCF/MDV translation service is provided by the NcMdvServer. This
+server does not write or read files (other than temporary files). The
+DsMdvx class has methods which contact this server when a translation 
+is required.
+
+So, all applications built on the DsMdvx class can make use of this
+translation service. These include:
+
+  DsMdvServer
+  PrintMdv
+  MdvConvert
+
+The DsMdvServer/NcMdvServer combination provides on-the-fly translations
+between NCF and MDV in both directions, for volumes and vertical sections.
+Time-height profiles are not yet supported in NCF format.
+
+There are 2 stand-alone applications for translation:
+
+  Mdv2NetCDF
+  NetCDF2Mdv
+
+These do not use the server, but are instead built directly using the
+NcfMdvx class (see below).
+
+Dependencies
+------------
+
+It was decided that libs/Mdv should remain independent of the Unidata
+netcdf library. This is important because with netcdf4, applications must
+link in the hdf5 library, the Unidata netcdf library (for version 4) and
+the Unidata udunits2 library.
+
+The dependencies are:
+
+  libs/Mdv
+  apps/mdv_utils/src/PrintMdv
+  apps/mdv_utils/src/MdvConvert
+  apps/dsserver/src/DsMdvServer
+
+depend on RAL libraries:
+
+  dataport, toolsa, euclid, rapformats, didss, dsserver
+
+  libs/NcfMdv
+  apps/mdv_utils/src/Mdv2NetCDF
+  apps/mdv_utils/src/NetCDF2Mdv
+
+depend on RAL libraries:
+
+  dataport, toolsa, euclid, rapformats, didss, dsserver
+
+and external libraries:
+
+  netcdf (Unidata)
+  udunits2 (Unidata)
+  hdf5 (NASA)
+
+C++ class hierarchy
+-------------------
+
+Five classes implement the handling for NCF in MDV:
+
+  libs/Mdv:
+
+    Mdvx 
+    DsMdvx (derives from Mdvx)
+
+  libs/NcfMdv
+
+    NcfMdvx (derives from DsMdvx)
+    Mdv2NcfTrans
+    Ncf2MdvTrans
+
+class Mdvx (libs/Mdv)
+---------------------
+
+Mdvx can recognize, via the .nc file extension, when a file
+is in NCF format. It can read such files into a MemBuf, and determine
+the date/time of the data set from the file name. It can also guess
+whether this is a forecast data set or not, by looking at the file
+name.
+
+Mdvx has the following public methods for setting and getting the
+formats:
+
+  void setReadFormat(mdv_format_t read_format); (Mdvx_read.hh)
+  void setWriteFormat(mdv_format_t format); (Mdvx_write.hh)
+
+and these public methods to get the read, write and current formats:
+
+  mdv_format_t getCurrentFormat() const;
+  mdv_format_t getReadFormat() const;
+  mdv_format_t getWriteFormat() const;
+
+Mdvx has the following protected data members for representing NCF
+data sets:
+
+  mdv_format_t _currentFormat; // how data is stored in mdvx object
+  mdv_format_t _readFormat;    // requested format on read
+  mdv_format_t _writeFormat;   // requested format on write
+
+It is important to note that Mdvx (and DsMdvx) cannot interpret the
+NCF data, only hold it as a binary buffer.
+
+  mutable MemBuf _ncfBuf;
+
+When reading a file, Mdvx can determine the date/time of the data set
+from the file name. It can also guess whether this is a forecast data
+set or not, by looking at the file name. The following protected members
+are used to hold the time information:
+
+  time_t _ncfValidTime;
+  time_t _ncfGenTime;
+  time_t _ncfForecastTime;
+  int _ncfForecastDelta;
+  bool _ncfIsForecast;
+  int _ncfEpoch;
+  string _ncfFileSuffix;
+
+class DsMdvx (libs/Mdv)
+-----------------------
+
+DsMdvx derives from Mdvx.
+
+DsMdvx has the following methods to allow it to convert data
+formats from MDV to NCF and back:
+
+  virtual int convertMdv2Ncf(const string &url);
+  virtual int convertNcf2Mdv(const string &url);
+  virtual int constrainNcf(const string &url);
+
+DsMdvx cannot perform the conversion itself. Instead DsMdvx contacts the
+NcMdvServer, which provides the translation service.
+
+All NCF projections are supported, except for 'Rotated Pole'.
+
+When converting from NCF to MDV, no parameters are required.
+
+When converting from MDV to NCF, DsMdvx accepts parameters for
+how the translation should be performed. The default translation
+preserves the Mdv field name, units and data packing (byte, short
+or float), and applies HDF5 compression level 9, for the smallest
+file sizes.
+
+The following methods provide control over the translation
+from MDV to NCF.
+
+  // global attributes
+
+  void setMdv2NcfAttr(const string &institution,
+                      const string &references,
+                      const string &comment);
+                      
+  // set compression and level
+                                              
+  void setMdv2NcfCompression(bool compress,
+                             int compressionLevel);
+  
+  // set the output format of the netCDF file
+  //    NCF_FORMAT_CLASSIC
+  //    NCF_FORMAT_OFFSET64BITS
+  //    NCF_FORMAT_NETCFD4_CLASSIC 
+  //    NCF_FORMAT_NETCDF4    
+ 
+  void setMdv2NcfFormat(nc_file_format_t fileFormat);
+
+  // set output parameters - what should be included in NCF
+  
+  void setMdv2NcfOutput(bool outputLatlonArrays,
+                        bool outputMdvAttr,
+                        bool outputMdvChunks);
+  
+  // field-by-field translation
+  // If none specified, default is to use the MDV names and 
+  // data packing (byte, short, float)
+  
+  void addMdv2NcfTrans(string mdvFieldName,
+                       string ncfFieldName,
+                       string ncfStandardName,
+                       string ncfLongName,
+                       string ncfUnits,
+                       bool doLinearTransform,
+                       double linearMult,
+                       double linearOffset,
+                       ncf_pack_t packing);
+  
+class NcfMdvx (libs/NcfMdv)
+---------------------------
+
+NcfMdvx derives from Mdvx.
+
+It overrides the following methods:
+
+  virtual int convertMdv2Ncf(const string &url);
+  virtual int convertNcf2Mdv(const string &url);
+  virtual int constrainNcf(const string &url);
+
+Ncf2Mdvx uses the Mdv2NcfTrans and Ncf2MdvTrans classes to
+perform the actual translation work.
+
+NcMdvServer, Mdv2NetCDF and NetCDF2Mdv are all built using NcfMdvx.
+
+class Mdv2NcfTrans (libs/NcfMdv)
+--------------------------------
+
+Given a DsMdvx object, translate into NCF file:
+
+  int translate(const DsMdvx &mdv, const string &ncFilePath);
+
+class Ncf2MdvfTrans (libs/NcfMdv)
+--------------------------------
+
+Given an NCF file, translate into DsMdvx object:
+
+  int translate(const string &ncFilePath, Mdvx &mdv);
+
+
+
+
+

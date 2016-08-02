@@ -1,0 +1,370 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions - Plain2Mdv
+//
+// Mike Dixon
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Sept 2005
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Plain2Mdv converts a plain binary array file to MDV. The data in the file is one or more fields in an ordered binary array. The data ordering is ZYX, with Z varying slowest and Z fastest. By default the first input row (y = 0) is at the south edge of the data. There is an option to accept the (y = 0) row at the north edge.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE mode, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Specify file extension.";
+  p_help = "If empty, all extensions will be accepted.";
+} input_file_extension;
+
+typedef enum {
+  RAP_STANDARD, YYMMDDHH
+} filename_time_t;
+
+paramdef enum filename_time_t {
+  p_default = RAP_STANDARD;
+  p_descr = "Method for determining the data time from the file name.";
+  p_help = "This is used if no latest_data_info file is available.\n"
+  "  RAP_STANDARD: will use the DataFileNames class to determing time\n"
+  "    Supported conventions are:\n"
+  "     yyyymmdd/g_hhmmss/f_llllllll.ext\n"
+  "     yyyymmdd/hhmmss.ext\n"
+  "     *yyyymmdd?hhmmss*\n"
+  "     *yyyymmddhhmmss*\n"
+  "     *yyyymmddhhmm*\n"
+  "     *yyyymmddhh.tmhhmm (mm5 forecast)\n"
+  "     *yyyymmddhh*\n"
+  "     *yyyyjjjhh*\n"
+  "     *yyyymmdd?hhmm*\n"
+  "     *yyyymmdd?hh*\n"
+  "     *yyyymmdd*\n"
+  "     *yyjjj*\n"
+  "  YYMMDDHH: two-digit year, followed by month, day, hour\n";
+} filename_time;
+
+paramdef int {
+  p_default = 1;
+  p_min = 1;
+  p_descr = "Number of fields in the input data.";
+  p_help = "This number must match the size of the fields array later in this file.";
+} n_fields;
+
+typedef enum {
+  SOUTH_ROW_FIRST,
+  NORTH_ROW_FIRST
+} row_ordering_t;
+
+paramdef enum row_ordering_t {
+  p_default = SOUTH_ROW_FIRST;
+  p_descr = "Ordering of rows in the input data.";
+  p_help = "If the first row in the input data is in the North, set to NORTH_ROW_FIRST.";
+} input_row_ordering;
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Input encoding type.";
+} input_encoding;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to swap bytes on incoming data.";
+  p_help = "Only applies to INT16 and FLOAT32 data. If true, the bytes on each data element will be swapped before interpretation.";
+} byte_swap_input_data;
+
+commentdef {
+  p_header = "GRID DETAILS";
+};
+
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_POLAR_STEREO = 5,
+  PROJ_FLAT = 8,
+  PROJ_POLAR_RADAR = 9
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_LATLON;
+  p_descr = "Projection type for grid.";
+} grid_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  int nz;
+} grid_size_t;
+
+paramdef struct grid_size_t {
+  p_default = {200, 200, 1};
+  p_descr = "Number of grid points in each dimension";
+} grid_size;
+
+typedef struct {
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_geom_t;
+
+paramdef struct grid_geom_t {
+  p_default = {0.0, 0.0, 1.0, 1.0};
+  p_descr = "Grid geometry in x,y.";
+  p_help = " For LATLON projections, minx and miny are the lon/lat of the CENTER of the South-West grid cell. For all other projections, minx and miny are the (x,y) coordinates in km of the CENTER of the SW grid cell relative to the projection origin. dx and dy are the spacing of the grid cells in x and y. For LATLON projections, dx is in degrees longitude and dy in degrees latitude. For all other projections dx and dy are in km. ";
+} grid_geom;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Grid origin latitude.";
+  p_help = "For latlon grids, set this to the mid latitude of the grid.";
+} grid_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Grid origin longitude.";
+  p_help = "For latlon grids, set this to the mid longitude of the grid.";
+} grid_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Grid rotation relative to TRUE North.";
+  p_help = "This applies to PROJ_FLAT projections only.";
+} flat_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Lambert reference latitude 1.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} lambert_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Lambert reference latitude 2.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} lambert_lat2;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Tangent longitude.";
+  p_help = "This applies only to PROJ_POLAR_STEREO projections.";
+} polar_stereo_tangent_lon;
+
+commentdef {
+  p_header = "VERTICAL LEVELS";
+};
+
+typedef enum {
+  VERT_TYPE_UNKNOWN =      0,
+  VERT_TYPE_SURFACE =      1,
+  VERT_TYPE_SIGMA_P =      2,
+  VERT_TYPE_PRESSURE =     3,
+  VERT_TYPE_Z =            4,
+  VERT_TYPE_SIGMA_Z =      5,
+  VERT_TYPE_ETA =          6,
+  VERT_TYPE_THETA =        7,
+  VERT_TYPE_MIXED =        8,
+  VERT_TYPE_ELEV =         9,
+  VERT_TYPE_COMPOSITE =   10,
+  VERT_SATELLITE_IMAGE =  12,
+  VERT_FLIGHT_LEVEL =     15,
+  VERT_EARTH_IMAGE =      16
+} vlevel_type_t;
+
+paramdef enum vlevel_type_t {
+  p_default = VERT_TYPE_Z;
+  p_descr = "Vertical level type.";
+  p_help =
+  "Supported types\n"
+  "  VERT_TYPE_UNKNOWN\n"
+  "  VERT_TYPE_SURFACE - Earth surface field\n"
+  "  VERT_TYPE_SIGMA_P - Sigma pressure levels\n"
+  "  VERT_TYPE_PRESSURE - Pressure levels, units = mb\n"
+  "  VERT_TYPE_Z - Constant altitude, units = Km MSL\n"
+  "  VERT_TYPE_SIGMA_Z - Model sigma Z levels\n"
+  "  VERT_TYPE_ETA - Model eta levels\n"
+  "  VERT_TYPE_THETA - Isentropic surface, units = Kelvin\n"
+  "  VERT_TYPE_MIXED - Any hybrid grid\n"
+  "  VERT_TYPE_ELEV - Elevation angles - radar\n"
+  "  VERT_TYPE_COMPOSITE - A Composite of a set of planes\n"
+  "  VERT_SATELLITE_IMAGE - Satelite Image\n"
+  "  VERT_FLIGHT_LEVEL - ICAO flight level (100's of ft)\n"
+  "  VERT_EARTH_IMAGE - Image, conformal to the surface of the earth \n";
+} vlevel_type;
+
+paramdef double {
+  p_default = { 0.0 };
+  p_descr = "Array of vertical levels.";
+  p_help = "Number must be equal to nz. See 'grid_size'.";
+} vlevels[];
+
+commentdef {
+  p_header = "FIELD DETAILS";
+};
+
+typedef struct {
+  string name;
+  string name_long;
+  string units;
+  string transform;
+  double scale;
+  double bias;
+  double missing_val;
+  double min_val;
+  double max_val;
+} field_t;
+
+paramdef struct field_t {
+  p_default = {
+    {
+      name = "VEL",
+      name_long = "Radial velocity",
+      units = "m/s",
+      transform = "",
+      scale = 1.0,
+      bias = 0.0,
+      missing_val = -99,
+      min_val = -1.0e99,
+      max_val = 1.0e99
+    }
+  };
+  p_descr = "Details of input fields. Size of this array must match n_fields.";
+  p_help = "'scale' and 'bias' are applied to input data to convert to floats, in the case of INT8 and INT16 input data. 'missing_val' is used if a specific value in the input data is reserved for missing or bad data. Although this is a floating point value, it can be used for all encoding types. For INT8 and INT16 data, this is the value of the byte or short data BEFORE scale and bias is applied. min_val and max_val allow you to only include data within these limits. Data outside these limits is set to missing.";
+} fields[];
+
+commentdef {
+  p_header = "OUTPUT FILE INFO";
+};
+
+paramdef string {
+  p_default = "Unknown";
+  p_descr = "Data set name.";
+  p_help = "This short string is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "Converted by Plain2Mdv.";
+  p_descr = "Data set source details.";
+  p_help = "This short string is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+paramdef string {
+  p_default = "Unknown";
+  p_descr = "Data set info.";
+  p_help = "This long string is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string {
+  p_descr = "Output URL for MDV data";
+  p_default = "mdvp:://localhost::./output";
+} output_url;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "output encoding type.";
+} output_encoding;
+
+typedef enum {
+  COMPRESSION_NONE =  0,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4, 
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_GZIP;
+  p_descr = "Set compression type.";
+} output_compression;
+
+
+

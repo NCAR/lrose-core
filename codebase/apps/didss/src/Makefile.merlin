@@ -1,0 +1,32 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	DsFmq2Tape \
+	Dsr2Mdv \
+	Janitor \
+	RadMon \
+	Scout \
+	VerifyGrid \
+	didss_compress \
+	didss_print \
+	edge2dsr \
+	fmq2tape \
+	fmq_print \
+	gen_polar2mdv_lookup \
+	kavltg2spdb \
+	ridds2mom \
+	simulateEdge
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+
+
+
+
+
+

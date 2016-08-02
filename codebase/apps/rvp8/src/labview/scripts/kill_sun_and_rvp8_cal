@@ -1,0 +1,4 @@
+#! /bin/csh
+
+snuff run_sun_and_rvp8_cal
+snuff start_TsTcpSmartSave.ops

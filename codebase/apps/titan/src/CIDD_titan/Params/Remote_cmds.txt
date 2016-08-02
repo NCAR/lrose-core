@@ -1,0 +1,107 @@
+## Example Command file for CIdd's Remote UI capability
+## Currently Supported Commands:
+##
+## SET_ALTITUDE Value   // Sets the altitude
+## SET_REQUEST_TIME Time     // Data request Time - either "now" or integer unix_time
+##                           // seconds since 1970
+## PICK_LATEST_MODEL_RUN     // Requests  data from the latest model runs
+## PICK_MODEL_RUN  Time      // Requests data from Model run at the specific time (integer unix time)
+## SET_REFERENCE_LINES  ON | OFF // Turns on/off the route and height reference lines.
+## #                    // Comment
+## #
+## SELECT_ROUTE Name             // Sets a Predefined route by name
+## SELECT_ROUTE_NUM Number       // Sets a Predefined route by number
+## SET_ROUTE Lat Lon Lat lon ... // Sets a route by lat,lon point list
+##
+## SELECT_V_PAGE Name            // Selects the Page/data to display by name
+## SELECT_V_PAGE_NUM Number      // Selects the Page/data to display by number
+## 
+## SET_V_IMAGE_SIZE  X Y         // Sets the size of the output image
+## SET_V_IMAGE_NAME Name         // Sets the output file name
+## DUMP_V_IMAGE                  // Output a Cross Section Image
+##
+## SELECT_DOMAIN_NAME name       // Sets a Predefined zoom by label
+## SELECT_DOMAIN_NUM Number      // Sets a Predefined zoom by index number
+## SET_DOMAIN MIN_X MIN_Y MAX_X MAXY // Sets zoom by bounding box
+##
+## SET_H_IMAGE_HEIGHT Height     // Sets the height of the output image - Width set by aspect ratio
+## SELECT_H_PAGE Name            // Selects the Page/data to display by name
+## SELECT_H_PAGE_NUM Number      // Selects the Page/data to display by number
+##
+## SET_H_IMAGE_NAME Name         // Sets the output file name
+## GEN_H_IMAGE_NAME              // Automatically Generates an Image name
+## DUMP_H_IMAGE                  // Output a Plan View Image
+##
+## SET_SYMPRODS_OFF_ALL          // Turns off All Symbolic Products
+## SET_SYMPRODS_ON Name          // Turns On a specific Symbolic Product by name
+##
+## SET_MAPS_OFF_ALL              // Turns off All Map Overlays
+## SET_MAPS_ON Name              // Turns On a specific Map Overlay by name
+##
+## SET_WINDS_OFF_ALL             // Turns off All Wind Fields
+## SET_WINDS_ON Name             // Turns On a specific Wind Field by name
+##
+## NEW_MDV_AVAIL Name            // Indicates Mdv data with Menu label matching Name needs reloaded.
+## NEW_SPDB_AVAIL Name           // Indicates Spdb data with Menu label matching Name needs reloaded.
+## RELOAD_DATA                   // Force all data to be reloaded.
+## #
+
+#########################################################################
+# 
+SET_ALTITUDE 230
+#SET_REQUEST_TIME now
+#
+#
+SET_REFERENCE_LINES ON
+SELECT_DOMAIN_NUM  4
+SELECT_H_PAGE Humidity
+SET_H_IMAGE_SIZE  800 800
+SET_H_IMAGE_NAME XSECT_H_IM_01
+DUMP_H_IMAGE
+
+SELECT_DOMAIN_NAME DOMAIN2
+SELECT_H_PAGE_NUM 1
+SET_H_IMAGE_NAME XSECT_H_IM_02
+DUMP_H_IMAGE
+#
+SET_REFERENCE_LINES OFF
+SELECT_H_PAGE_NUM 7
+SET_SYMPRODS_OFF_ALL
+SET_MAPS_OFF_ALL
+SET_WINDS_OFF_ALL
+SET_H_IMAGE_NAME XSECT_H_IM_03
+DUMP_H_IMAGE
+#
+#
+SELECT_DOMAIN_NUM  4
+SET_SYMPRODS_ON METARS-plot
+SET_WINDS_ON MM5
+SET_MAPS_ON Taiwan
+SET_H_IMAGE_NAME XSECT_H_IM_04
+DUMP_H_IMAGE
+#
+GEN_H_IMAGE_NAME
+DUMP_H_IMAGE
+#
+SET_REFERENCE_LINES ON
+SET_ALTITUDE 180
+SELECT_H_PAGE Wind_Speed
+GEN_H_IMAGE_NAME
+DUMP_H_IMAGE
+#
+SET_V_IMAGE_SIZE  400 800
+#SELECT_ROUTE A-1
+#SELECT_ROUTE G-581
+SELECT_ROUTE M-750
+SELECT_V_PAGE 4_Wind_Speed
+#SELECT_V_PAGE 7_Humidity
+SET_V_IMAGE_NAME XSECT_V_IM_1
+DUMP_V_IMAGE
+#
+SELECT_ROUTE B-591
+SET_V_IMAGE_NAME XSECT_V_IM_2
+DUMP_V_IMAGE
+#
+SELECT_V_PAGE 7_Humidity
+SET_V_IMAGE_NAME XSECT_V_IM_3
+DUMP_V_IMAGE

@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+edge2dsr
+makefile
+makefile.am
+makefile.in

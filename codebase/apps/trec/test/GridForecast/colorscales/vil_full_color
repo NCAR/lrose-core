@@ -1,0 +1,21 @@
+# NAME vil.colors
+
+# bforman 	1/17/1996 17:00:36
+
+-19 	.005 	black
+.005    1       grey25
+1       2       dim gray
+2       3       gray
+3       4       dark orchid
+4       5       slate blue
+5       6       medium blue
+6       7       deep sky blue
+7 	10 	medium turquoise
+10 	15 	dark green
+15 	20 	lime green
+20 	25 	chartreuse
+25 	30 	red
+30 	35 	orange
+35 	40 	gold1
+40 	45 	yellow
+45 	90 	light blue

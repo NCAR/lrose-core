@@ -1,0 +1,846 @@
+<html>
+<head>
+<title>Validator</title>
+</head>
+
+<body>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" >
+
+<H1> Validator </H1>     
+
+<P>
+The Validator is a program that generates statistics
+about a forecasting method.
+</P>
+<P>
+Its inputs are MDV files of forecasts, and
+MDV files of what actually happened (truth
+data). These files are then thresholded
+to detect storms (a storm is detected if
+the value, x, at a grid point is such that
+lower_limit <= x <= upper_limit).
+</P>
+
+<P>
+Statistics are generated and placed
+in output files.
+</P>
+
+<P>
+The validator can output intermediate MDV
+files that show how it performed.
+These files show how each grid point was detected
+and used in the statistics.
+</P>
+
+<P>
+It can also operate on a set of regions delineated
+by a set of map files. In this
+case multiple sets of statistics are generated
+(but no intermediate MDV output is available in
+this case).
+</P>
+
+<P>
+A small MatLab script for plotting the statistics
+is checked into the CVS repository under the
+Validator/plot directory at the time of writing.
+</P>
+
+<P>
+The Validator is run as follows :
+</P>
+
+<P>
+Validator -start "YYYY MM DD hh mm ss" -end "YYYY MM DD hh mm ss" 
+-params X.params
+</P>
+
+<P> 
+Note that these times are <B> truth </B> times, not
+forecast times.
+</P>
+
+<P>
+If the Validator is run by cron (which is recommended for a field site)
+then the <B> -yesterday </B> option can be used instead 
+of the <B> -start </B> and <B> -end </B> options, viz.
+</P>
+
+<P>
+Validator -yesterday -params X.params
+</P>
+
+<P>
+Which will run the Validator on yesterday's data, <B> in the UTC </B>
+timing convention.
+</P>
+
+<P> Niles Oien August 1999. </P>
+
+<HR>
+<H1> Parameters. </H1> 
+
+
+<P> <B> TruthDir </B> </P>
+
+<P>
+Directory (actually URL now) for truth data.
+This is the top directory under which
+the MDV truth data is.
+</P>
+
+
+<HR>
+
+<P> <B> ForecastDir </B> </P>
+
+<P>
+Directory (actually URL now) for forecast data.
+This is the top directory under which
+the MDV forecast data is.
+</P>
+
+<HR>
+
+<P> <B> OutDir </B> </P>
+
+<P>
+Directory (actually URL now) in which to write MDV 
+files of contingency tables.
+These intermediate files serve as a diagnostic
+by showing how the Validator treated each grid point.
+</P>
+
+<P>
+Typically these files will be generated during the setup
+of the Validator to see how it is performing - or
+if the files are always produced, they will be scrubbed
+fairly regularly. It is not intended that they be retained.
+<P>
+
+<P>
+The files are time tagged by forecastTime + leadTime - which
+is approximately the truth time. If the truth time were used, and
+two forecasts were validated using the same truth, then the
+output file would be overwritten. Tagging in this way ensures that
+there will be an output file for each forecast file validated.
+</P>
+
+<HR>
+
+<P> <B> StatsDir  </B> </P>
+
+Directory in which to write statistical output.
+These ASCII files are named Valid_YYYYMMDD_hhmmss_NAME.dat and are
+MatLab loadable. The final summary is named
+Valid_YYYYMMDD_hhmmss_NAME.final - in both cases the
+time in the filename is the data time. For analyses of the whole
+grid, NAME is set to Grid, otherwise for map files the
+NAME is set to the name found in the map file.
+</P>
+<P>
+The format of this file
+is as follows :
+
+</P>
+
+<P align=center>
+ <Table align=center border>
+
+  <TR>
+   <TH>  Column </TH>
+   <TH>  Value  </TH>
+  </TR>
+  
+  <TR>
+   <TD> 1 </TD>
+   <TD> Year </TD>
+  </TR>
+  
+  <TR>
+   <TD> 2 </TD>
+   <TD> Month </TD>
+  </TR>
+  
+  <TR>
+   <TD> 3 </TD>
+   <TD> Day  </TD>
+  </TR>
+  
+  <TR>
+   <TD> 4 </TD>
+   <TD> Hour </TD>
+  </TR>
+  
+  <TR>
+   <TD> 5 </TD>
+   <TD> Minute </TD>
+  </TR>
+  
+  <TR>
+   <TD> 6 </TD>
+   <TD> Second  </TD>
+  </TR>
+  
+  <TR>
+   <TD> 7 </TD>
+   <TD> Time from start to end of interval, seconds </TD>
+  </TR>
+  
+  <TR>
+   <TD> 8 </TD>
+   <TD> Population - the number of forecast files in the interval  </TD>
+  </TR>
+   
+  <TR>
+   <TD> 9 </TD>
+   <TD> Number of non-events  </TD>
+  </TR>
+  
+  <TR>
+   <TD> 10 </TD>
+   <TD> Number of failures  </TD>
+  </TR>
+  
+  <TR>
+   <TD> 11 </TD>
+   <TD> Number of false alarms  </TD>
+  </TR>
+
+  <TR>
+   <TD> 12 </TD>
+   <TD> Number of successes  </TD>
+  </TR>
+
+  <TR>
+   <TD> 13 </TD>
+   <TD> Probability of Detection, POD  </TD>
+  </TR>
+
+  <TR>
+   <TD> 14 </TD>
+   <TD> False Alarm Rate, FAR  </TD>
+  </TR>
+
+  <TR>
+   <TD> 15 </TD>
+   <TD> Critical Success Index, CSI </TD>
+  </TR>
+
+  <TR>
+   <TD> 16 </TD>
+   <TD> Heidke Skill Score, HSS  </TD>
+  </TR>
+
+  <TR>
+   <TD> 17 </TD>
+   <TD> POD_NO  </TD>
+  </TR>
+
+  <TR>
+   <TD> 18 </TD>
+   <TD> Bias  </TD>
+  </TR>
+
+ </Table>
+</P>
+
+<P>
+The MatLab script PlotValid, which is checked into the
+CVS repository in the subdirectory Validator/plot, can be
+used to plot one of these files.
+</P>
+
+<HR>
+<P> <B> FieldNumbersMustMatch </B> </P>
+
+<P>
+Both forecast and truth fields are identified by field name,
+using parameters ForecastFieldName and TruthFieldName. The
+user may also specify the field numbers they expect these fields
+to have using ForecastFieldNum and TruthFieldNum. Past experience
+has shown that erroneous post-processing can result in MDV
+files in the input directories which have fields with the
+correct name but at a different field number. These fields are invalid
+and should be ignored.
+</P>
+
+<P>
+If FieldNumbersMustMatch is TRUE, then the field numbers in the
+input MDV files must match the ones specified by the user. If they
+do not, the program exits. A warning is printed in this case regardless
+of the value of FieldNumbersMustMatch.
+</P>
+
+<P>
+FieldNumbersMustMatch should probably be FALSE in the field, since
+this allows the field numbers to change if another interest field is
+added to cronus. For post-processing purposes it should be TRUE.
+</P>
+
+<HR>
+
+<P> <B> ForecastFieldNum </B> </P>
+
+<P>
+Forecast field number. See FieldNumbersMustMatch
+</P>
+
+<HR>
+
+<P> <B> ForecastFieldName </B> </P>
+
+<P>
+Name of the forecast field. See FieldNumbersMustMatch
+
+</P>
+
+<HR>
+
+<P> <B> TruthFieldNum </B> </P> 
+
+<P>
+Truth field number. See FieldNumbersMustMatch
+</P>
+
+<HR>
+
+<P> <B> TruthFieldName </B> </P>
+
+<P>
+Name of the truth field. See FieldNumbersMustMatch
+</P>
+
+<HR>
+
+<P> <B> Instance </B> </P>
+
+<P>
+Procmap instance. Used for process identification.
+</P>
+
+<HR>
+
+<P> <B> Slop </B> </P>
+
+<P>
+Allowable time error between a forecast and truth file, seconds.
+If no truth file is found, the forecast file
+will be skipped.
+</P>
+
+<HR>
+
+
+<P> <B> ForecastLead </B> </P>
+
+<P>
+Forecast lead time, seconds.
+</P>
+
+<HR>
+
+<P> <B> OutputInterval </B> </P>
+
+<P>
+Statistical interval time, seconds.
+Statistics are output to file for every interval
+of this duration. Intervals without any forecasts
+in them are skipped.
+</P>
+
+<HR>
+
+<P> <B> Debug </B> </P>
+
+<P>
+Debug flag.
+If set to non-zero, more verbose output is printed on standard error.
+</P>
+
+<HR>
+
+
+<H1> Grid Parameters </H1>
+
+<P>
+The grid parameters specify the grid onto which both the
+truth and forcast data will be remapped prior to performing
+the validation. The grid must be specified - if it is
+to be the same as the geometry of the data on disk, then
+the print_mdv utility can be used to obtain the values
+for the grid parameters.
+</P>
+
+ 
+<P> <B> grid_origin_lat </B> </P>
+
+<P>
+Latitude of grid origin.
+</P>
+
+<HR>
+
+<P> <B> grid_origin_lon </B> </P>
+<P>
+Longitude of grid origin.
+</P>
+
+<HR>
+
+<P> <B> grid_rotation </B> </P>
+<P>
+Rotation (in degrees) of grid from true north.
+</P>
+
+<HR>
+
+<P> <B> grid_projection </B> </P>
+
+<P>
+Projection type of grid.
+Projections currently supported are FLAT and LATLON.
+</P>
+
+<HR>
+
+<P> <B> grid_nx </B> </P>
+
+<P>
+Number of cells in the grid in X.
+</P>
+
+<HR>
+
+<P> <B> grid_ny </B> </P>
+<P>
+Number of cells in the grid in Y.
+</P>
+
+<HR>
+
+<P> <B> grid_nz </B> </P>
+<P>
+Number of vertical levels in the output grid.
+</P>
+
+<HR>
+
+<P> <B> grid_dx </B> </P>
+<P>
+Size of the cells in the output grid in X.
+</P>
+
+<HR>
+
+<P> <B> grid_dy </B> </P>
+<P>
+Size of the cells in the output grid in Y.
+</P>
+
+<HR>
+
+<P> <B> grid_dz </B> </P>
+<P>
+Change in altitude between vertical levels of the output grid.
+</P>
+
+<HR>
+
+<P> <B> grid_minx </B> </P>
+<P>
+X at grid's lower left corner.
+Units for this parameter will depend upon the output grid_projection.
+</P>
+
+<HR>
+
+<P> <B> grid_miny </B> </P>
+<P>
+Y at grid's lower left corner.
+Units for this parameter will depend upon the output grid_projection.
+</P>
+
+<HR>
+
+
+<HR>
+
+<P> <B> composite_min </B> </P>
+<P>
+The lower level (in units of height, not plane
+number) that is to be composited in the truth field.
+</P>
+
+
+<HR>
+
+<P> <B> composite_max </B> </P>
+<P>
+The upper level (in units of height, not plane
+number) that is to be composited in the truth field.
+</P>
+
+<HR>
+
+<P> <B> composite_truth </B> </P>
+<P>
+If composite_truth is TRUE then the truth field is composited.
+Limits are set by composite_min and composite_max.
+</P>
+
+<H1> End of grid parameters. </H1>
+
+<HR>
+ 
+<P> <B> truth_lower_limit </B> </P>
+<P>
+Lower limit threshold on truth data.
+A storm will be detected if data >= truth_lower_limit and data <= 
+  truth_upper_limit.
+</P>
+
+<HR>
+
+<P> <B> truth_upper_limit </B> </P>
+<P>
+Upper limit threshold on truth data.
+A storm will be detected if data >= truth_lower_limit and data <= 
+  truth_upper_limit.
+</P>
+
+<HR>
+
+<P> <B> forecast_lower_limit </B> </P>
+
+<P>
+Lower limit threshold on forecast data.
+A storm will be detected if data >= forecast_lower_limit and data <= 
+  forecast_upper_limit.
+</P>
+
+<HR>
+
+<P> <B> forecast_upper_limit </B> </P>
+<P>
+Upper limit threshold on forecast data.
+A storm will be detected if data >= forecast_lower_limit and data <= 
+  forecast_upper_limit.
+<P>
+
+<HR>
+
+
+<P> <B> ForecastRelax </B> </P>
+<P>
+This sets the relaxation window size for the forecast field.
+The window is always an odd number squared - 1x1 (no relaxation),
+3x3, 5x5. The user specifies N, and the window is 2*N+1 x 2*N+1.
+Specify 0 for no relaxation, 1 for a 3x3 window and so on.
+</P>
+
+<HR>
+
+<P> <B> ForecastNumRelax </B> </P>
+<P>
+There are three possibilities for storm detection with the forcast field.
+ <UL>
+  <LI> The window is enitrely full of grid points that match the storm
+       critera as set by the thresholds. In this case, a storm is
+       detected.
+  <LI> The window is not completely filled, but it does have at
+       least <B> ForecastNumRelax </B> storm grid points. In this
+       case a storm is detected in realxed mode.
+  <LI> The window has fewer than <B> ForecastNumRelax </B> 
+       storm grid points. In this case no storm is detected.
+ </UL>
+Note that if ForecastNumRelax is set 0 then a storm will always be detected
+(highly erroneous). If it is set to a value higher than the number of
+points in the window, then the storm must completely fill the
+window to be detected (ie. no relaxed mode detections).
+</P>
+
+<P>
+Typically this is set to 1. Storms detected in relaxed mode are treated
+the same as storms detected by filling the window unless the
+extended contingency option is used (See the ExtendedContingency
+option).
+</P>
+
+<HR>
+
+<P> <B> TruthRelax </B> </P>
+<P>
+Similar to ForecastRelax but for the truth field.
+</P>
+
+<HR>
+
+<P> <B> TruthNumRelax </B> </P>
+<P>
+Similar to ForecastNumRelax but for the truth field.
+</P>
+
+<HR>
+
+<P> <B> ExtendedContingency </B> </P>
+<P>
+By default the following contingency table is used.
+</P>
+
+<P align=Center>
+ <Table align=Center border>
+
+  <TR> 
+   <TH> Truth  </TH>
+   <TH> No storm forecast </TH> 
+   <TH> Storm forecast </TH>
+  </TR>
+
+  <TR> 
+   <TD> No storm eventuated  </TD>
+   <TH> Non-Event </TH> 
+   <TH> False alarm </TH>
+  </TR>
+
+
+
+  <TR> 
+   <TD> Storm eventuated </TD>
+   <TH> Failure </TH> 
+   <TH> Success </TH>
+  </TR>
+
+ </Table>
+</P>
+
+<P>
+Storms detected in the relaxed region are treated simply as storms
+for the default contingency table. This increases the success rate but failures and
+false alarms are also increased.
+</P>
+
+
+<P>
+The extended contingency table is used if ExtendedContingency is TRUE.
+It is as follows.
+</P>
+
+<P align=Center>
+ <Table align=Center border>
+
+  <TR> 
+   <TH> Truth  </TH>
+   <TH> No storm forecast </TH> 
+   <TH> Storm forecast in relaxed mode </TH> 
+   <TH> Storm forecast </TH>
+  </TR>
+
+  <TR> 
+   <TD> No storm eventuated  </TD>
+   <TH> Non-Event </TH> 
+   <TH> Non-Event </TH> 
+   <TH> False alarm </TH>
+  </TR>
+
+  <TR> 
+   <TD> Storm eventuated in relaxed mode  </TD>
+   <TH> Non-Event </TH> 
+   <TH> Success </TH> 
+   <TH> Success </TH>
+  </TR>
+
+  <TR> 
+   <TD> Storm eventuated </TD>
+   <TH> Failure </TH> 
+   <TH> Success </TH> 
+   <TH> Success </TH>
+  </TR>
+
+ </Table>
+</P>
+
+<P>
+A distinction is made between storms detected and storms detected in relaxed mode
+for the extended contingency table. In this case
+the relaxed region increases the success rate without incurring a penalty
+in false alarms or failures. This may not be considered fair.
+</P>
+
+<HR>
+
+<P> <B> NotRelaxedIfTrue </B> </P>
+
+<P>
+By default, if a grid point is in a storm it may still not
+be detected as such if a relaxed grid is used, since the entire
+window must contain storm pixels for the grid point to be
+considered a storm. In this case it is likely (but not necessarily true)
+that the grid point will be detected in relaxed mode.
+</P>
+
+<P>
+If NotRelaxedIfTrue is set, then if a grid point is in a storm,
+then it is detected as such, rather than being detected in relaxed mode
+(or a non-event).
+</P>
+
+<HR>
+
+<P> <B> CountMissing </B> </P>
+<P>
+Set to count missing data as being a non-event.
+Do this for consistency with the old VerifyGrid program - it
+may also be physically valid in the case of radar data.
+</P>
+
+<HR>
+
+<P> <B> IntermediateGrids </B> </P>
+<P>
+If set, output intermediate MDV files.
+Intermediate MDV files contain storm detected truth, storm 
+detected forecast and resulting contingency table and
+are useful for debugging.
+</P>
+
+<HR>
+
+<P> <B> TruthComposite </B> </P>
+<P>
+If set, composite the truth field into 2D data.
+The alternative is to compare a full 3D forecast to a full 3D truth.
+<P>
+
+<HR>
+
+<P> <B> TruthCompositeMaxZ </B> </P>
+<P>
+Upper limit on compositing, if TruthComposite is TRUE.
+<P>
+
+<HR>
+
+
+<P> <B> RegionSpecified </B> </P>
+<P>
+If set, specify a map file of the region of interest.
+Default is not to do this. This allows ONE region map
+to be processed - and intermediate output MDV files
+can be written. Multiple regions should be processed
+with the MapList parameter (which does not allow for
+MDV output). Only works for FLAT projection.
+</P>
+<P>
+This is NOT recommened - it is something of a kludge
+that was perpetrated for a demo at Sterling. Regional
+analyses are best done with the MapMode and MapList
+parameters.
+</P>
+
+<HR>
+
+<P> <B> RegionMapFile </B> </P>
+<P>
+Map file name for region.
+Should be a polyline of lat,lon points.
+See comments for RegionSpecified.
+</P>
+
+<HR>
+
+<P> <B> MaxRealtimeValidAge </B> </P>
+<P>
+Max age (in minutes) of input data.
+For realtime only - max age of input data for it to be valid.
+</P>
+
+<HR>
+
+<P> <B> ClumpTruth </B> </P>
+<P>
+Set this to remove small clumps from the truth field.
+This is often advantageous if the forecast method
+is attempting to forecast large storms only, but there
+are many small local storms in the truth field that
+are counting against the forecast method.
+</P>
+
+<P>
+If this is set, then each storm in the truth field must
+be at least <B> MinTruthClumpPixels </B> grid points large,
+or it is ignored.
+</P>
+
+<HR>
+
+
+<P> <B> MinTruthClumpPixels </B> </P>
+<P>
+How small can a clump be before removal, in grid points. 
+See comments for ClumpTruth.
+</P>
+
+<HR>
+
+<P> <B> TemporalRelax </B> </P>
+<P>
+If set, composite all the truth files in the time window 
+allowed by the slop parameter. If not, use only the closest
+file in the window.
+</P>
+
+<HR>
+
+<P> <B> MapMode </B> </P>
+<P>
+If set, do a regional analysis using a set of map files (specified
+with the MapList parameter). If not, do the analysis over the whole
+grid.
+</P>
+
+<HR>
+
+<P> <B> MapList </B> </P>
+<P>
+List of map files.
+Only used if MapMode is true. Map files must be
+a connected polyline and have #VerifyMap as
+the first line.
+<P>
+
+<P> 
+An example map file may be as follows.
+</P>
+
+#VerifyMap <BR>
+# <BR>
+# Map of US County Prince_Georges for use with Validator <BR>
+# <BR>
+POLYLINE Prince_Georges 72 <BR>
+38.5318 -76.6749 <BR>
+38.534  -76.6799 <BR>
+38.5554 -76.7361 <BR>
+38.5922 -76.7486 <BR>          
+</P>
+<P>
+38.5505 -76.6745 <BR>
+38.5318 -76.6749 <BR>
+-1000   -1000    <BR>
+</P>
+
+<P>
+The last point is expected to be a pen-up instruction - the second to
+last point is expected to be the same as the first point. The
+comment #VerifyMap at the start of the file is required for
+use with the Validator.
+</P>
+
+<HR>
+
+<P> Niles Oien August 1999 </P>  
+
+<P> Updated January 2000 </P>
+
+

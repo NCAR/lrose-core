@@ -1,0 +1,187 @@
+/**********************************************************
+ * paramdef.VerticalAverage
+ *
+ * This file contains the TDRP parameter definitions for
+ * VerticalAverage.
+ */
+
+
+commentdef
+{
+  p_header = "VerticalAverage";
+  p_text = "This program calculates the average data values of all "
+           "grid pionts in each vertical column of the data.  "
+           "The input grid is 3-dimensional while the output grid "
+           "is 2-dimensional.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "URL for input files";
+  p_default = "mdvp:://localhost::./mdv/derived_ruc";
+} input_url;
+
+paramdef boolean
+{
+  p_descr = "Flag to set the Mdv read mode to READ_SPECIFIED_FORECAST ";
+  p_default = false;
+} is_forecast_data;
+
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use the field_name or the field_num "
+            "field in the input_fields array to identify the input fields.";
+  p_default = true;
+} use_field_name;
+
+typedef struct
+{
+  string field_name;
+  long field_num;
+} input_info_t;
+
+paramdef struct input_info_t
+{
+  p_descr = "Information about the fields to be averaged";
+  p_help = "If use_field_name is true, uses the field_name field to "
+           "identify the input fields.  "
+           "Otherwise, uses field_num to identify the input fields.";
+  p_default = { {"RH", 0} };
+} input_fields[];
+
+typedef struct
+{
+  double lower_level;
+  double upper_level;
+} pressure_limits_t;
+
+paramdef struct pressure_limits_t
+{
+  p_descr = "The minimum and maximum pressure levels to process";
+  p_default = { 1000.0, 700.0 };
+} pressure_limits;
+
+paramdef long
+{
+  p_descr = "Maximum input valid age in seconds";
+  p_help = "Once the algorithm is triggered, it will not use any input data "
+           "older than this value.";
+  p_default = 1800;
+} max_input_valid_secs;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::./mdv/output";
+} output_url;
+
+paramdef boolean 
+{
+  p_descr = "Option to write output in forecast directory structure";
+  p_default = false;
+} write_as_forecast;
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to include missing/bad data in "
+            "the averages.";
+  p_help = "If this flag is true, the missing_avg_value parameter will "
+           "be used as the data value in the average calculations for any "
+           "missing or bad data value in the input field.";
+  p_default = false;
+} include_missing_in_avg;
+
+paramdef double
+{
+  p_descr = "Value to use in place of missing/bad data in the input field.";
+  p_help = "Only used if include_missing_in_avg is set to TRUE.";
+  p_default = 0.0;
+} missing_avg_value;

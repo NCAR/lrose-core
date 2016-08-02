@@ -1,0 +1,6 @@
+.deps
+Qmap2Cidd
+__makefile.template
+makefile
+makefile.am
+makefile.in

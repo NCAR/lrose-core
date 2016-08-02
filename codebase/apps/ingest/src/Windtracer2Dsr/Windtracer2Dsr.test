@@ -1,0 +1,308 @@
+/**********************************************************************
+ * TDRP params for Windtracer2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// InDir ///////////////////////////////////
+//
+// Input directory.
+// Directory path for input data files.
+// Type: string
+//
+
+InDir = "./";
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+// If string is NULL, all extensions are valid.
+// Type: string
+//
+
+fileExtension = "";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 7200;
+
+///////////// temp_file ///////////////////////////////
+//
+// The CTI data file has an ASCII section embedded in it.
+// During processing this ascii section is written to this temporary
+// file (which is overwritten each time a new CTI file is processed).
+// ASCII section contains information on LIDAR setup.
+// Type: string
+//
+
+temp_file = "./ascii_header.txt";
+
+///////////// tag_line ////////////////////////////////
+//
+// The ASCII section of the CTI file has several sections in
+// it. The YEAR, MONTH, DAY and SAMPLE_FREQUENCY are read from the
+// start of the file, but other parameters such as the 
+//   RAW_DATA_OFFSET_METERS,
+// RANGE_GATES and GATES_TO_MERGE appear several times in different
+// sections of the file. The tag_line parameter allows the user to
+// determines which section to read these parameters from.
+// You can use the less command to view the ASCII section of a CTI
+// lidar file - it is towards the front of the file.
+// Type: string
+//
+
+tag_line = "# VELOCITY, ASCOPE, VAD, UVW, BACK PROP RAW DATA PARAMETERS SECTION";
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_DATA
+//
+
+debug = DEBUG_NORM;
+
+///////////// msgLog_dir //////////////////////////////
+//
+// Directory for log file output.
+// Type: string
+//
+
+msgLog_dir = "";
+
+///////////// info ////////////////////////////////////
+//
+// Info option.
+// Print info messages.
+// Type: boolean
+//
+
+info = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// output_fmq_url //////////////////////////
+//
+// output fmq url.
+// Path for FMQ output data.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::./fmq/fmq.dsRadar";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message.
+// Type: long
+//
+
+output_fmq_size = 2000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: long
+//
+
+output_fmq_nslots = 3600;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+//======================================================================
+//
+// LIDAR PARAMETERS.
+//
+//======================================================================
+ 
+///////////// lidarID /////////////////////////////////
+//
+// Description of this lidar.
+// lat/lon info is not in the input files.
+//
+// Type: struct
+//   typedef struct {
+//      int lidarNumber;
+//      string Name;
+//      double lat;
+//      double lon;
+//      double alt;
+//   }
+//
+//
+
+lidarID = { 42, "TestLidar", 42, -95, 1.02 };
+
+//======================================================================
+//
+// FIELD PARAMETERS.
+//
+//======================================================================
+ 
+///////////// MaxAbsDataVal ///////////////////////////
+//
+// Maximum absolute value for data values.
+// Data values outside this range are marked as bad.
+// The default should be fine since -999 seems to be
+// what is used to delineate bad values in the input file.
+// Type: double
+//
+
+MaxAbsDataVal = 990;
+
+///////////// fields //////////////////////////////////
+//
+// Scaling parameters for data on a field-by-field basis.
+// Fields are recognized by their Windtracer codes and given
+// an output field name. These codes MUST be specified in the
+// order in which they occur in the input file (ie. the codes
+// must be in ascending order) or the output fields will be labelled
+// incorrectly.
+// The defaults are very probably fine. The options are :
+
+//  VEL  (Windtracer code 30) - velocity
+//  SNR  (Windtracer code 31) - signal-to-noise, analagous to dBz
+//  SW   (Windtracer code 33) - spectral width
+//  FVEL (Windtracer code 85) - median filtered velocity
+//  FSNR (Windtracer code 86) - filtered signal-to-noise.
+
+// There are other options which I have documented.
+//
+// Type: struct
+//   typedef struct {
+//      int windtracerCode;
+//      string outputFieldName;
+//      string units;
+//      double scale;
+//      double bias;
+//   }
+//
+// 1D array - variable length.
+//
+
+fields = {
+  { 30, "VEL", "m/s",   0.15, -19},
+  { 31, "SNR", "none",  0.15, -19},
+  { 32, "CFAR", "none", 0.15, -19},
+  { 33, "SW",   "m",    0.15, -19},
+  { 85, "FVEL", "m/s",  0.15, -19},
+  { 86, "FSNR", "none", 0.15, -19}
+};
+
+///////////// oneFilePerVolume ////////////////////////
+//
+// If set, send an end of volume at the end of each input
+// data file. This also causes a start_of_volume to be sent at
+// the start of each data file.
+// This may be useful if there is a one to one relationship
+// in that there is one file per volume.
+// Type: boolean
+//
+
+oneFilePerVolume = TRUE;
+
+///////////// beamsPerMessage /////////////////////////
+//
+// How many beams to process before sending radar header message.
+// The default should be OK.
+// Type: int
+//
+
+beamsPerMessage = 60;
+
+///////////// horizBeamWidth //////////////////////////
+//
+// Nominal horizontal beam width, degrees.
+// The default should be OK.
+// Type: double
+//
+
+horizBeamWidth = 1;
+
+///////////// vertBeamWidth ///////////////////////////
+//
+// Nominal vertical beam width, degrees.
+// The default should be OK.
+// Type: double
+//
+
+vertBeamWidth = 0.1;
+
+///////////// time_offset /////////////////////////////
+//
+// Time offset, seconds.
+// The Lidar data are typically referenced according to
+// local time, while UTC is desired for output. This parameter
+// is added to the input time to obtain the output time.
+// Type: long
+//
+
+time_offset = 0;
+
+///////////// timeFromFilename ////////////////////////
+//
+// Option to take the time from the filename rather than
+// reading it from the file itself. Added for realtime
+// simulations. The time_offset is still added to the time that
+// is obtained. The filename format is taken to be
+// YYYYMMDD_hhmmss_blah, ie.  20020722_231017_base.prd.
+// Set for realtime simulations.
+// Type: boolean
+//
+
+timeFromFilename = FALSE;
+

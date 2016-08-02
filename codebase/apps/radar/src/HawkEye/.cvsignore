@@ -1,0 +1,9 @@
+.deps
+HawkEye
+Makefile
+Makefile.qmake
+__makefile.template
+makefile
+makefile.am
+makefile.in
+moc_*

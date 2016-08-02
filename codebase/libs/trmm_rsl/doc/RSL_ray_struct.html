@@ -1,0 +1,18 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<pre>typedef struct {
+  <a href=RSL_ray_header_struct.html>Ray_header</a> h;
+  <a href=RSL_range_struct.html>Range</a> *range; /* range[0..nbins-1] */
+                /* For wsr88d file:
+                 * 0..460 for reflectivity, 0..920 for velocity and 
+                 * spectrum width. You must allocate this space.
+                 */
+} Ray; </pre>
+
+</body>

@@ -1,0 +1,136 @@
+/**********************************************************************
+ * TDRP params for Rdas2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: Rdas2Dsr.
+//
+// Rdas2Dsr reads radar data from the RDAS relay server over a socket 
+//   and writes the data to a DsRadarQueue beam by beam.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL AND DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// relay_host //////////////////////////////
+//
+// RDAS relay server host.
+// Rdas data is read from the RDAS relay server.
+// Type: string
+//
+
+relay_host = "localhost";
+
+///////////// relay_port //////////////////////////////
+//
+// Port for RDAS relay server.
+// Rdas data is read from the RDAS relay server.
+// Type: int
+//
+
+relay_port = 11000;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL for DSR radar data FMQ.
+// This program outputs beam-by-beam data to a file message queue (FMQ). 
+//   This is the URL for that queue. It is of the form 
+//   'fmqp:://host::dir/name'. If the output is to the local host you can 
+//   use just 'dir/name'.
+// Type: string
+//
+
+output_url = "fmq/rdas";
+
+///////////// write_blocking //////////////////////////
+//
+// Option to block on write when the radar queue fills up.
+// If false, the program writes data to the output queue without regard 
+//   to whether the reader is keeping up. If the FMQ fills without being 
+//   read it will overflow and overwrite data which has not been read. 
+//   This is the normal mode for REALTIME operations. If true, the program 
+//   will not overwrite data in the queue which has not been read by the 
+//   reader. In this mode there should be only one reader. If you need to 
+//   service more than one reader, use Fmq2Fmq in write blocking mode with 
+//   multiple output urls to multiplex the queue.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+///////////// output_compression //////////////////////
+//
+// Option to compress output infor FMQ.
+// If compression is on, this increases the amount of data you can store 
+//   in the output FMQ before overflow. However, this causes increased CPU 
+//   load.
+// Type: boolean
+//
+
+output_compression = FALSE;
+
+///////////// output_n_slots //////////////////////////
+//
+// Number of slots in output FMQ.
+// Type: int
+//
+
+output_n_slots = 10000;
+
+///////////// output_buf_size /////////////////////////
+//
+// Size of buffer in output FMQ.
+// Type: int
+//
+
+output_buf_size = 10000000;
+
+///////////// override_time ///////////////////////////
+//
+// Option to override data time with current time.
+// If true, the data will be time-stamped with the current time set on 
+//   the host computer.
+// Type: boolean
+//
+
+override_time = FALSE;

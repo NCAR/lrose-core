@@ -1,0 +1,118 @@
+<html>
+<head>
+<title> WorldTerrain </title>
+</head>
+ 
+<body>
+            
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" >
+ 
+<H2> Extracting USGS Terrain data at RAP </H2>
+ 
+<P>
+<B> Niles Oien, <A HREF="mailto:oien@ucar.edu"> oien@ucar.edu </A>  October 2001 </B>       
+<P>
+
+<P>
+The WorldTerrain program is used to process the USGS Digital Elevation
+Model (DEM) data files into ASCII or MDV files (MDV can then be converted
+into netCDF). It is probably best explained by the following script that
+runs the program.
+</P>
+
+#!/bin/csh <BR>
+# <BR>
+# This is a script to run the WorldTerrain program to extract two <BR>
+# MDV files covering Afghanistan from the USGS elevation <BR>
+# dataset. It is well documented so I can point <BR>
+# other people at it. If you want to extract terrain data, <BR>
+# copy this file to another name and edit the <BR>
+# commands that run WorldTerrain at the bottom of this <BR>
+# file. <BR>
+# <BR>
+# One file is at the maximum resolution of the <BR>
+# USGS dataset (0.00833333333333 degrees in latitude <BR>
+# and longitude) and the other covers a wider area <BR>
+# at a lower resolution. <BR>
+# <BR>
+# For the WorldTerrain program to run, all the USGS <BR>
+# Digital Elevation Model (DEM) files must be in one <BR>
+# directory. This is something of a hassle since a <BR>
+# lot of disk space is needed (Just under 1.9 GB).  <BR>
+# At the time of writing this is too much for one CD. <BR>
+# The DEM files are unpacked on <BR>
+# <BR>
+# aoaws@venus:/d1/terrain <BR>
+# <BR>
+# And the software (including a copy of this script) is in : <BR>
+# <BR>
+# aoaws@venus:/d1/terrain/prog <BR>
+# <BR>
+# <BR>
+# Myself, Deirdre Garvey, Frank Hage and Mike Dixon <BR>
+# know the password for aoaws@venus. <BR>
+# <BR>
+# The WorldTerrain  program is checked in as : <BR>
+# <BR>
+# apps/mdv_utils/src/WorldTerrain  <BR>
+# <BR>
+# The program is not efficient. For each grid point,  <BR>
+# it opens a DEM file, reads an elevation value, and  <BR>
+# then closes the DEM file again. The upshot is that <BR>
+# a given DEM file will probably be read several times. <BR>
+# <BR>
+# Also the program produces only lat/lon projection MDV files. <BR>
+# <BR>
+# For these reasons, it is best to run the program only <BR>
+# to initially extract the terrain data. Remapping the <BR>
+# data onto other grid projections is probably best done by <BR>
+# running MdvResample on the output of WorldTerrain. <BR>
+# <BR>
+# WorldTerrain also produces ascii data in the files <BR>
+# ascii.dat, ascii.lat and ascii.lon. The file ascii.dat <BR>
+# is a two dimensional ASCII file that has the whole grid <BR>
+# in it, ascii.lon and ascii.lat are one dimensional and <BR>
+# have the longitudes and latitudes used for the grid in them. <BR>
+# <BR>
+# The program just uses the nearest appropriate DEM point,  <BR>
+# there is no internal interpolation. <BR>
+# <BR>
+# --------------------------------------------------------- <BR>
+# <BR>
+# To run the program, the usage is : <BR>
+# <BR>
+# <B> WorldTerrain DEM_DIR ll_lat ll_lon Nx Ny Dx Dy Outfilename </B> <BR>
+# <BR>
+# Where : <BR>
+# <BR>
+# <B> DEM_DIR </B> is the directory where the USGS DEM files are, <BR>
+# <B> ll_lat </B> is the lower left latitude, <BR>
+# <B> ll_lon </B> is the lower left longitude, <BR>
+# <B> Nx  </B> is the number of points to extract in the longitude direction, <BR>
+# <B> Ny </B> is the number of points to extract in the latitude direction, <BR>
+# <B> Dx </B> is the increment in longitude, in degrees, <BR>
+# <B> Dy </B> is the increment in latitude, in degrees, and <BR>
+# <B> Outfilename </B> is the MDV filename, with extension. <BR>
+# <BR>
+# <BR>
+# First the small coverage, high resolution file : <BR>
+# <BR>
+<B> WorldTerrain ../ 25.0 60.0 1801 1801 0.00833333333333 0.00833333333333  Afghan_HiRes.mdv </B> <BR>
+# <BR>
+# That should cover 25N to 40N and 60E to 75E (you have to do some <BR>
+# minor math to get the coverage you want). <BR>
+# <BR>
+# <BR>
+# Then the wider coverage, lower resolution file : <BR>
+# <BR>
+<B> WorldTerrain ../ 15.0 45.0 901 601 0.05 0.05 Afghan_WideArea.mdv </B> <BR>
+# <BR>
+# That should cover 15N to 45N and 45E to 90E <BR>
+# <BR>
+# Niles Oien October 2001. <BR>
+# <BR>
+</P>
+
+</font>
+</body>
+</html>       

@@ -1,0 +1,162 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Mdv2ZebraNetCDF
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * October 2011
+ */
+
+commentdef {
+  p_header = "Mdv2ZebraNetCDF reads MDV Cartesian grid files and converts them into NetCDF format for displaying in Zebra.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Interval for registering with procmap (secs)";
+  p_help = "Sometime this app will spend a long time writing the netCDF file, since compression can be quite time-consuming. Setting this to longer than 60 secs (say 180) gives the app more time to complete its work. The auto-restarter will restart any app which has not registered for twice the length of the register interval.";
+} procmap_register_interval;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Input directory";
+  p_help = "Path of input directory";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "REALTIME: - waits for new data. ARCHIVE: uses start and end times. FILELIST: processes specified file list";
+} mode;
+  
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data";
+  p_help = "REALTIME mode only. Max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Use _latest_data_info files to decide when new data has arrived.";
+  p_help = "REALTIME mode only. If false, the directory input_dir is scanned for new files.";
+} latest_data_info_avail;
+
+commentdef {
+  p_header = "FIELD LIST";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify field names to be included.";
+  p_help = "If false, all fields will be included.";
+} set_field_names;
+
+typedef struct {
+  string input_name;
+  string output_name;
+} field_t;
+
+paramdef struct field_t {
+  p_default = {
+    { "DBZ", "DBZ" },
+    { "VEL", "VEL" },
+    { "WIDTH", "WIDTH" }
+  };
+  p_descr = "Names of fields to be included in converted file";
+  p_help =
+    "\tinput_name: name of field in input file\n"
+    "\touput_name: name of field in output file\n";
+} fields[];
+
+commentdef {
+  p_header = "REMAP TO LATLON?";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to remap xy projection to latlon.";
+  p_help = "If true, the method to automatically convert MDV Cartesian data to latlon is used for the converstion.";
+} remap_xy_to_latlon;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "/tmp/output";
+  p_descr = "Directory for output data";
+  p_help = "The NetCDF files will be written to this directory.";
+} output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to create a day dir for Zebra data.";
+  p_help = "A subdirectory named yyyymmdd will be created for the files.";
+} write_to_day_dir;
+
+paramdef string {
+  p_default = "spol";
+  p_descr = "Label to be used in file name";
+} data_set_label;
+
+paramdef string {
+  p_default = "DYNAMO";
+  p_descr = "NetCDF global attribute";
+} data_set_name;
+
+paramdef string {
+  p_default = "SPOL-WHARF";
+  p_descr = "NetCDF global attribute";
+} data_set_source;
+

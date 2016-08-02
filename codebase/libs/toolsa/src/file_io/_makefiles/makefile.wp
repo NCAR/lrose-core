@@ -1,0 +1,50 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2003 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Program(RAP) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2003/5/6 11:44:47 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+###########################################################################
+#
+# Makefile for file utilities module for wind profiler
+#
+# C S Morse, RAL, NCAR, Boulder, Co, USA, 80307
+#
+# Aug 2012
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+LOC_INCLUDES = -I../include
+LOC_CFLAGS =
+
+TARGET_FILE = ../libtoolsa.a
+
+#
+# file lists
+#
+
+HDRS = $(RAP_INC_DIR)/toolsa/file_io.h
+
+C_SRCS = \
+	file_io.c \
+	makedir.c
+
+CPPC_SRCS = \
+
+#
+# general targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+
+#
+# local targets
+#
+
+depend: depend_generic
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

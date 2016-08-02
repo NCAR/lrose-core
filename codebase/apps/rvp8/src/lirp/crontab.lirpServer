@@ -1,0 +1,8 @@
+#############################################
+# use bash to run commands, no matter what /etc/passwd says
+SHELL=/bin/bash
+# start up lirp server if it is not running
+# do once per minute
+#
+*/1 * * * * /home/operator/rap/bin/start_lirp_server 1> /dev/null 2> /dev/null
+

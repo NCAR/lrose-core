@@ -1,0 +1,271 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/****************************************************************
+ * parameter definitions for TstormTemporalSmooth
+ *  
+ * Nancy Rehak
+ * April 2003
+ */
+
+commentdef
+{
+  p_text = "This program is used perform simple temporal smoothing "
+           "on a TITAN SPDB database.\n"
+           "When new data appears on input_url, the storms are read in "
+           "and then written out to output_url with the speed and direction "
+           "values constrained as described in the algorithm parameters. "
+           "constraint_url indicates the database to use for determining "
+           "the acceptable range of values of speed and direction for the "
+           "output storms. "
+           "If no constraint vector is found for an input storm, the storm "
+           "is written to the output database unchanged. "
+           "By default, the input_url database is also used as the "
+           "constraint_url database because this is most likely what is "
+           "wanted.\n"
+           "The output vectors are constrained by determining the appropriate "
+           "constraint vector and then calculating a range of acceptable "
+           "output values by applying the speed_delta_max and "
+           "direction_delta_max parameters to that constraint vector. "
+           "If the input vector speed or direction falls outside of the "
+           "constraint range, then the speed or direction value is "
+           "changed to the closest value within the range.\n"
+           "The constraint vector can be calculated in several different "
+           "ways, as described in the comment for the "
+           "constraint_vector_calc_type parameter.";
+}
+
+/****************************************************************
+ * Debugging and process control.
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,		
+  DEBUG_VERBOSE	
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+           "appropriate level of detail.";
+  p_default = DEBUG_OFF;
+} debug;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/*********************************************************
+ * Input and output data
+ */
+
+commentdef
+{
+  p_header = "INPUT AND OUTPUT DATA.";
+}
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "Input URL";
+  p_help = "URL of the input TITAN SPDB database.";
+  p_default = "spdbp:://localhost::spdb/storms";
+} input_url;
+
+paramdef long
+{
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+  p_min = 0;
+  p_default = 7200;
+} max_realtime_valid_age;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "spdbp:://localhost::spdb/storms/temporal_smoothed";
+} output_url;
+
+
+/*********************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS.";
+}
+
+paramdef double
+{
+  p_descr = "Speed change maximum in km/hr";
+  p_help = "If the speed of the storm changes more than this amount "
+           "between two time periods, the change will be reduced to "
+           "this amount.";
+  p_min = 0.0;
+  p_default = 999.0;
+} speed_delta_max;
+
+paramdef double
+{
+  p_descr = "Direction change maximum in degrees";
+  p_help = "If the direction of the storm changes more than this amount "
+           "between two time periods, the change will be reduced to "
+           "this amount.";
+  p_min = 0.0;
+  p_max = 180.0;
+  p_default = 180.0;
+} direction_delta_max;
+
+paramdef string
+{
+  p_descr = "URL of constraint vector database";
+  p_help = "The vectors in this database will be the ones used for "
+           "constraining the speed and direction of the output vectors. "
+           "If set to \"\", the input_url database will be used.";
+  p_default = "";
+} constraint_url;
+
+typedef enum
+{
+  USE_CURRENT_STORM_TIME_FOR_CONSTRAINTS,
+  USE_PREVIOUS_STORM_TIME_FOR_CONSTRAINTS
+} constraint_time_type_t;
+
+paramdef enum constraint_time_type_t
+{
+  p_descr = "Flag indicating what time to use when requesting data "
+            "from the constraint database.";
+  p_default = USE_PREVIOUS_STORM_TIME_FOR_CONSTRAINTS;
+} constraint_time_type;
+
+paramdef long
+{
+  p_descr = "Maximum allowable time offset between the requested "
+            "constraint data time and the actual constraint data time.";
+  p_help = "This is the time_offset value used when requesting the "
+           "data from the constraint SPDB database.";
+  p_default = 0;
+} constraint_offset_max;
+
+typedef enum
+{
+  CONSTRAINT_VECTOR_FROM_SAME_SIMPLE_ID,
+  CONSTRAINT_VECTOR_WEIGHTED_AVG_AT_CURR_LOCATION,
+  CONSTRAINT_VECTOR_WEIGHTED_AVG_AT_PREV_LOCATION
+} constraint_vector_calc_type_t;
+
+paramdef enum constraint_vector_calc_type_t
+{
+  p_descr = "Method to use for calculating the constraint vector for "
+            "each output storm.";
+  p_help = "\tCONSTRAINT_VECTOR_FROM_SAME_SIMPLE_ID - The constraint "
+           "vector will be the vector for the storm in the constraint "
+           "database with the same simple id as the output storm. "
+           "This choice probably only makes sense if constraint_url is "
+           "the same as input_url.\n"
+           "\tCONSTRAINT_VECTOR_WEIGHTED_AVG_AT_CURR_LOCATION - The "
+           "constraint vector is the weighted average of the vectors "
+           "in the constraint database based on the current location "
+           "of the output storm. "
+           "The weighted_average_radius parameter defines the range used "
+           "for calculating the weighted average. "
+           "The weighted average is calculated assuming that the storm "
+           "vectors are located at the storm centroids.\n"
+           "\tCONSTRAINT_VECTOR_WEIGHTED_AVG_AT_PREV_LOCATION - The "
+           "constraint vector is the weighted average of the vectors "
+           "in the constraint database based on the previous location "
+           "of the output storm. "
+           "The previous location of the storm is calculated by applying "
+           "the storms current speed and direction into the past. "
+           "The weighted_average_radius parameter defines the range used "
+           "for calculating the weighted average. "
+           "The weighted average is calculated assuming that the storm "
+           "vectors are located at the storm centroids.\n";
+  p_default = CONSTRAINT_VECTOR_FROM_SAME_SIMPLE_ID;
+} constraint_vector_calc_type;
+
+paramdef double
+{
+  p_descr = "Radius (in km) of area of influence used in calculating weighted "
+            "average vectors.";
+  p_help = "Used only if constraint_vector_calc_type is set to "
+           "CONSTRAINT_VECTOR_WEIGHTED_AVG_AT_CURR_LOCATION or "
+           "CONSTRAINT_VECTOR_WEIGHTED_AVG_AT_PREV_LOCATION.";
+  p_default = 100.0;
+} weighted_average_radius;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use valid storms only from the "
+            "constraint database.";
+  p_help = "If true, only storms marked as valid in the constraint "
+           "database will be used. "
+           "If false, all storms in the constraint database will be used.";
+  p_default = FALSE;
+} valid_constraint_storms_only;

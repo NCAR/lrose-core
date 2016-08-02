@@ -1,0 +1,153 @@
+/*********************************************************
+ * parameter definitions for PrecipSeries
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * March 1999
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef int {
+  p_default = 0;
+  p_min = 0;
+  p_max = 3;
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA DIRECTORIES.";
+}
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Radar data directory - input";
+  p_help = "The input MDV files are stored in this directory. In REALTIME mode the program watches the latest_data_info file in this directory and processes a new scan each time the info file updates.";
+} input_rdata_dir;
+
+commentdef {
+  p_header = "DATA FIELDS IN INPUT FILES.";
+}
+
+paramdef int {
+  p_default = 0;
+  p_min = 0;
+  p_descr = "dBZ field number";
+  p_help = "Field number for dBZ data in radar volumes.";
+} dbz_field;
+
+commentdef {
+  p_header = "PRECIP ESTIMATION.";
+}
+
+paramdef float {
+  p_default = -1.0;
+  p_descr = "Min altitude CAPPI used in composite (km).";	
+  p_help = "All precip estimates are computed from composite reflectivity, "
+    "i.e. the max reflectivity over a given point between two height limits. "
+    "This is the altitude of lower CAPPI for the composite. "
+    "If you want to use reflectivity at a single height only, set this "
+    "equal to composite_max_altitude.";
+} composite_min_altitude;
+
+paramdef float {
+  p_default = 25.0;
+  p_descr = "Max altitude CAPPI used in composite (km).";	
+  p_help = "All precip estimates are computed from composite reflectivity, "
+    "i.e. the max reflectivity over a given point between two height limits. "
+    "This is the altitude of upper CAPPI for the composite. "
+    "If you want to use reflectivity at a single height only, set this "
+    "equal to composite_min_altitude.";
+} composite_max_altitude;
+
+paramdef float {
+  p_default = 10.0;
+  p_min = -40.0;
+  p_max = 90.0;
+  p_descr = "Low reflectivity threshold (dBZ).";
+  p_help = "Reflectivity below this threshold is ignored in "
+    "making the computations. This prevents clear air returns from "
+    "creating areas of low precipitation.";
+} low_dbz_threshold;
+
+paramdef float {
+  p_default = 53.0;
+  p_min = 40.0;
+  p_max = 90.0;
+  p_descr = "Hail reflectivity threshold (dBZ).";
+  p_help = "The reflectivity threshold between rain and hail. "
+    "dBZ values above this threshold are truncated to the threshold prior "
+    "to the computation of precipitation rate.";
+} hail_dbz_threshold;
+
+typedef struct {
+  float coeff;
+  float expon;
+} zr_t;
+
+paramdef struct zr_t {
+  p_default = {200.0, 1.6};
+  p_descr = "ZR function parameters.";
+  p_help = "These are used if the ZR function is considered constant "
+  "and is not obtained from the data base.";
+} zr;
+
+commentdef {
+  p_header = "DATA SAMPLING.";
+}
+
+typedef struct {
+  double lat;
+  double lon;
+  string name;
+} location_t;
+
+paramdef struct location_t {
+  p_default = {{0.0, 0.0, "location"}};
+  p_descr = "The program will sample precip data at each of these points.";
+  P_help = "At each point a time series of precip will be computed.";
+} locations[];
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Max time between radar volumes (secs).";
+  p_help = "If the time between volumes exceeds this value, it is assumed that the data is missing.";
+} max_time_between_volumes;
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Precip text file directory - output";
+  p_help = "The text precip output files are written to this directory.";
+} output_precip_dir;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Time between output values (secs).";
+  p_help = "The depth is interpolated to this delta-t before writing out.";
+} output_delta_t;
+

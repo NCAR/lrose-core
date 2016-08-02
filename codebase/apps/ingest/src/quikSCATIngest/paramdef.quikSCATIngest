@@ -1,0 +1,181 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.quikSCATIngest
+ *
+ * This file contains the TDRP parameter definitions for
+ * quikSCATIngest.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  REALTIME,
+  ARCHIVE
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In REALTIME mode, the program watches for new files in the "
+           "specified input_dir and processes each file as it appears.\n"
+           "In ARCHIVE mode, the program processes the files specified "
+           "on the command line with the -f option.\n";
+  p_default = REALTIME;
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Input directory.";
+  p_help = "Used only in REALTIME mode.";
+  p_default = "$(RAP_DATA_DIR)/ascii";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Input file substring";
+  p_help = "Substring that identifies files to process in the input_dir. "
+           "Used only in REALTIME mode.";
+  p_default = "asc";
+} input_substring;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to process old files in the input "
+            "directory.";
+  p_help = "Used only in REALTIME mode.";
+  p_default = FALSE;
+} process_old_files;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  SPDB_GEN_PT_FORMAT,
+  MDV_FORMAT
+} output_format_t;
+
+paramdef enum output_format_t
+{
+  p_descr = "Format to use for output";
+  p_help = "\tSPDB_GEN_PT_FORMAT\n"
+           "\tMDV_FORMAT\n";
+  p_default = MDV_FORMAT;
+} output_format;
+
+typedef enum {
+
+  PROJ_LATLON,
+  PROJ_FLAT
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  long nx;
+  long ny;
+  double dx;
+  double dy;
+  double minx;
+  double miny;
+  double rotation;
+  double origin_lat;
+  double origin_lon;
+} xy_grid_t;
+
+paramdef struct xy_grid_t
+{
+  p_descr = "Take for example, a minx of -100 with 250 x values at increments of .25.";
+  p_descr = "250 times .25 is 62.5  So -100 plus 62.5 is -37.5.";
+  p_descr = "That makes the longitude range go from -100 to -37.5.";
+-100 is like 260 and -37.5 is like 322.5
+//  p_default = {PROJ_LATLON, 250, 280, 0.25, 0.25, -100.0, -15.0, 0, 10.02, -65.03};
+  p_default = {PROJ_LATLON, 250, 280, 0.25, 0.25, 0.0, -15.0, 0, 10.02, -65.03};
+} xy_grid;
+
+paramdef long
+{
+  p_descr = "Number of seconds each observation is valid";
+  p_default = 3600;
+} output_expire_secs;
+

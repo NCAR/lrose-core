@@ -1,0 +1,190 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Assist in creating diagrams for sysView.\n\n"
+	"The idea here is that you give this program a\n"
+	"process list file, and a host name, and it will\n"
+	"generate a sysView diagram for that host that\n"
+	"contains all the processes listed in the process list\n"
+	"file.\n\n"
+	"Optionally, the program will contact the DataMapper\n"
+	"on that host to get a list of datasets, and it will add\n"
+	"those to the sysView diagram. You give it a time range\n"
+	"to consider to try to calculate the late and very late\n"
+	"times (if the calculation fails, a default is used).\n\n"
+	"The resulting diagrams do not have any flow arrows\n"
+	"or annotation in them. If this is a problem then it\n"
+	"may be that some human interaction with sysView is\n"
+	"required to re-arrange things and draw the flow lines.\n\n"
+	"Niles Oien January 2007.";
+}
+
+typedef struct {
+  int xInc;
+  int yInc;
+  int nx;
+} layout_t;
+
+paramdef struct layout_t {
+  p_default = { 150, 75, 5 };
+  p_descr = "Layout information for the output diagram.";
+  p_help = "X and Y increments, in pixels, and the number\n"
+	"of items to be written on a line.";
+} layout;
+
+paramdef string {
+  p_descr = "Output sysView diagram to write.";
+  p_help = ".diagram is typically used as an extension."; 
+  p_default = {"host.diagram"};
+} diagramFile;
+ 
+paramdef string {
+  p_descr = "Host name to use.";
+  p_help = "Default is generally OK."; 
+  p_default = {"localhost"};
+} hostname;
+ 
+paramdef string {
+  p_descr = "Input list of processes.";
+  p_help = "First entry on a line is process name, next entry is\n"
+	"process instance."; 
+  p_default = {"$(CONTROL_LOCAL_DIR)/runtime/PROCESS_LIST"};
+} processList;
+
+typedef struct {
+  string oldString;
+  string newString;
+} sub_t;
+
+paramdef struct sub_t {
+  p_descr = "List of questionmark-based substitutions to make\n"
+	"in instance strings.";
+  p_help = "For example, in the process list, the entry :\n\n"
+	"Dsr2Vol ?radar5?cartPPIfullVol start_radar_ingest snuff_inst localhost\n\n"
+	"would be replaced by : \n\n"
+	"Dsr2Vol KFTGcartPPIfullVol start_radar_ingest snuff_inst localhost\n\n"
+	"if the substitution for radar5 was set to KFTG. Some systems\n"
+	"at UCAR use this methodology. If they do the settings are in\n"
+	"$CONTROL_DIR/params/radar_env.lookup";
+  p_default = {
+      { "radar1", "KFWS" },
+      { "radar2", "KEWX" },
+      { "radar3", "KFDR" },
+      { "radar4", "KSHV" },
+      { "radar5", "KSJT" },
+      { "radar6", "KDYX" },
+      { "radar7", "KTLX" },
+      { "radar8", "KGRK" },
+      { "radar9", "KAMA" },
+      { "radar10", "KLBB" },
+      { "radar11", "KMAF" },
+      { "radar12", "KHGX" },
+      { "radar13", "KDFX" },
+      { "radar14", "KINX" }
+   };
+} subList[];
+
+paramdef boolean {
+  p_descr = "Option to attempt to add the datasets to the diagram\n"
+	"by interfacing with the DataMapper.";
+  p_help = "Late times will be estimated from data."; 
+  p_default = FALSE;
+} doData;
+
+paramdef int {
+  p_descr = "Minimum number of data times that need to be found\n"
+	"for the program to try to estimate the late time\n"
+	"for that dataset.";
+  p_help = "If not enough points are found the default will be used."; 
+  p_min = 2;
+  p_default = 10;
+} minDataTimes;
+
+paramdef long {
+  p_descr = "Amount of time to look back over in order to\n"
+	"get data time to calculate the mean time between\n"
+	"data, seconds.";
+  p_help = "Default is one day. Relevant only if doData is TRUE."; 
+  p_default = 86400;
+} lookbackTime;
+
+paramdef string {
+  p_descr = "Time to look back from in order to\n"
+	"get data time to calculate the mean time between\n"
+	"data, in YYYY MM DD hh mm ss format.";
+  p_help = "Relevant only if doData is TRUE."; 
+  p_default = "2007 01 16 23 59 59";
+} endTime;
+
+paramdef double {
+  p_descr = "For each dataset, the mean time interval\n"
+	"between data will be calculated, and then the late\n"
+	"time in sysView will be calculated by multiplying\n"
+	"that mean interval by this factor.";
+  p_help = "Relevant only if doData is TRUE."; 
+  p_default = 3.0;
+} mean2lateTimeFactor;
+
+paramdef long {
+  p_descr = "Default late time to use, seconds, if\n"
+	"data type is not recognised or data interval\n"
+	"cannot be calculated.";
+  p_help = "Relevant only if doData is TRUE."; 
+  p_default = 1800;
+} defaultLateTime;
+
+paramdef boolean {
+  p_descr = "Option to always use the default"
+	"late time, ie. do not attempt to calculate a\n"
+	"late time from considering data intervals.";
+  p_help = "Relevant only if doData is TRUE."; 
+  p_default = FALSE;
+} forceDefaultLateTime;
+
+paramdef double {
+  p_descr = "Factor relating very late time to late time, ie\n"
+	"veryLateTime = factor * lateTime";
+  p_help = "Relevant only if doData is TRUE."; 
+  p_default = 3.0;
+} veryLateFactor;
+
+
+paramdef boolean {
+  p_descr = "Option to add unrecognised types to\n"
+	"the sysView diagram. MDV and SPDB are the\n"
+	"recognized types.";
+  p_help = "Relevant only if doData is TRUE."; 
+  p_default = TRUE;
+} addUnknownTypes;
+
+
+
+
+
+
+
+
+
+

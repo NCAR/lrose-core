@@ -1,0 +1,329 @@
+/*********************************************************
+ * parameter definitions for RadxClutMon
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Dec 2015
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Performs clutter analysis";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "READING CLUTTER MAP DATA";
+  p_text = "The clutter map is a CfRadial file created using the RadxPersistenceClutter app.";
+}
+
+paramdef string {
+  p_default = "./cfradial/clutmap";
+  p_descr = "Input directory for clutter map files.";
+  p_help = "The clutter map files are created using the RadxPersistenceClutter app.";
+} clutter_map_input_dir;
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} datetime_t;
+
+paramdef struct datetime_t {
+  p_default = { 2015, 07, 07, 05, 00, 00 };
+  p_descr = "Time of clutter map file";
+  p_help = "We will retrieve the file closest to this time.";
+} clutter_map_search_time;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Time margin when searching for clutter map file (secs)";
+  p_help =  "We will search by this margin on either side of clutmap_file_time.";
+} clutter_map_search_margin_secs;
+
+paramdef string {
+  p_default = "DBMVC";
+  p_descr = "Field name for clutter power.";
+  p_help = "We generally use a power field in dBm, that has not been noise corrected.";
+} clutter_power_field_name;
+
+paramdef string {
+  p_default = "NormFreqCount";
+  p_descr = "Field name for fraction of time clutter is identified at each gate.";
+  p_help = "This is a normalized value between 0 and 1, with 1 indicating clutter is detected 100% ot the time.";
+} clutter_time_fraction_field_name;
+
+commentdef {
+  p_header = "READING THE MOMENTS DATA";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, we wait for a new input file.  "
+           "It is assumed that latest_data_info will be availble in realtime mode. "
+           "In ARCHIVE mode, we move through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, we move through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef string {
+  p_default = "./cfradial/moments";
+  p_descr = "Input directory for moments files.";
+  p_help = "These are the files we are analyzing for changes in the clutter field.";
+} moments_input_dir;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} search_ext;
+
+paramdef string {
+  p_default = "DBZHC";
+  p_descr = "Field name for reflectivity.";
+  p_help = "This field is required";
+} dbz_field_name;
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "Field name for Doppler velocity.";
+  p_help = "If not available, leave empty";
+} vel_field_name;
+
+paramdef string {
+  p_default = "CPA";
+  p_descr = "Field name for Clutter Phase Alignment (CPA).";
+  p_help = "If not available, leave empty";
+} cpa_field_name;
+
+paramdef string {
+  p_default = "DBMHC";
+  p_descr = "Field name for power in H co-polar channel.";
+  p_help = "If not available, leave empty";
+} dbmhc_field_name;
+
+paramdef string {
+  p_default = "DBMVC";
+  p_descr = "Field name for power in V co-polar channel.";
+  p_help = "If not available, leave empty";
+} dbmvc_field_name;
+
+paramdef string {
+  p_default = "DBMHX";
+  p_descr = "Field name for power in H cross-polar channel.";
+  p_help = "If not available, leave empty";
+} dbmhx_field_name;
+
+paramdef string {
+  p_default = "DBMVX";
+  p_descr = "Field name for power in V cross-polar channel.";
+  p_help = "If not available, leave empty";
+} dbmvx_field_name;
+
+commentdef {
+  p_header = "OPTIONAL FIXED ANGLE LIMITS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only use sweeps within the specified fixed angle limits.";
+} set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Lower fixed angle limit - degrees.";
+} lower_fixed_angle_limit;
+
+paramdef double {
+  p_default = 0.75;
+  p_descr = "Upper fixed angle limit - degrees.";
+} upper_fixed_angle_limit;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply strict checking for angle or sweep number limits on read.";
+  p_help = "If true, an error will occur if the fixed angle limits or sweep num limits are outside the bounds of the data. If false, a read is guaranteed to return at least 1 sweep - if no sweep lies within the angle limits set, the nearest sweep will be returned.";
+} apply_strict_angle_limits;
+
+commentdef {
+  p_header = "READ OPTIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove rays taken while the antenna was in transition.";
+  p_help = "If true, rays with the transition flag set will not be used. The transiton flag is set when the antenna is in transtion between one sweep and the next.";
+} remove_rays_with_antenna_transitions;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
+  p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
+} trim_surveillance_sweeps_to_360deg;
+
+commentdef {
+  p_header = "OPTION TO CORRECT ANTENNA ANGLES";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply an offset to the azimuth values.";
+  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.";
+} apply_azimuth_offset;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Azimuth offset (degrees).";
+  p_help = "See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.";
+} azimuth_offset;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply an offset to the elevation values.";
+  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.";
+} apply_elevation_offset;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Elevation offset (degrees).";
+  p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
+} elevation_offset;
+
+commentdef {
+  p_header = "CLUTTER ANALYSIS";
+  p_text = "We use 'strong' clutter to montitor the clutter power change over time, and 'weak' clutter to detect the presence of weather echoes in the clutter field.";
+}
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Specified minimum range for clutter (km).";
+  p_help = "Gates closer than this range are ignored.";
+} clutter_min_range_km;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Specified maximim range (km).";
+  p_help = "Gates beyond this range are ignored.";
+} clutter_max_range_km;
+
+paramdef double {
+  p_default = 0.90;
+  p_descr = "Minimum fraction of time clutter detected at a gate.";
+  p_help = "In the clutter map, we only use gates where the time fraction exceeds this value. This means we are only using gates where clutter predominates when weather is not present.";
+} clutter_min_time_fraction;
+
+paramdef double {
+  p_default = -50.0;
+  p_descr = "Minimum power for strong clutter (dBm).";
+  p_help = "We identify strong clutter in the clutter map, and then use that to monitor the clutter power over time in the moments data.";
+} strong_clutter_min_power_dbm;
+
+paramdef double {
+  p_default = -40.0;
+  p_descr = "Maximum power for strong clutter (dBm).";
+  p_help = "We need to ensure that we do not include gates where the receiver is saturated. So set this to a value 5 dB or more below saturation.";
+} strong_clutter_max_power_dbm;
+
+paramdef double {
+  p_default = -80.0;
+  p_descr = "Minimum power for weak clutter (dBm).";
+  p_help = "We use weak clutter gates to monitor for the presence of weather in the clutter region.";
+} weak_clutter_min_power_dbm;
+
+paramdef double {
+  p_default = -70.0;
+  p_descr = "Maximum power for weak clutter (dBm).";
+  p_help = "Set these values so that we have good SNR, but that the powers are low enough to ensure that we can detect the presence of weather.";
+} weak_clutter_max_power_dbm;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Power increase to indicate weather contamination (dB).";
+  p_help = "If weather exists in the clutter area, it will raise the power in the weak gates before the strong gates. This is the increase in power (above the background clutter value) used to indicate that weather is contaminating a gate.";
+} power_margin_for_wx_contamination;
+
+paramdef double {
+  p_default = 0.15;
+  p_descr = "This is the fraction of weak gates with weather to indicate weather contamination.";
+  p_help = "If more than this fraction of weak gates has as power increase in excess of 'weak_power_margin_for_wx_contamination', the weather contamination flag will be set.";
+} min_fraction_for_wx_contamination;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Tolerance for matching rays in azimuth (deg).";
+  p_help = "We need to match up rays between the clutter map and moments files.";
+} ray_azimuth_tolerance_deg;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Tolerance for matching rays in elevation (deg).";
+  p_help = "We need to match up rays between the clutter map and moments files.";
+} ray_elevation_tolerance_deg;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Maximum absolute velocity in clutter (m/s).";
+  p_help = "In choosing clutter values, we only use gates at which the velocity is below this value.";
+} clutter_max_abs_vel;
+
+paramdef double {
+  p_default = 0.9;
+  p_descr = "Minimum clutter phase alignment in clutter.";
+  p_help = "In choosing clutter values, we only use gates at which the CPA exceeds this value. CPA, if available, is a strong indicator of clutter.";
+} clutter_min_cpa;
+
+commentdef {
+  p_header = "WRITE RESULTS";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out analysis results to SPDB.";
+  p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
+} write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/clutter_analysis";
+  p_descr = "URL for writing results to SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} spdb_output_url;
+

@@ -1,0 +1,40 @@
+AWS data format readme file...
+
+The data name of BMB's Auto Weather Stations is AWSyyndd.hhh. Here yy is year; n is month, 1 to 9 are for Jan to Sep, A, B, C are for Oct., Nov., Dec., severally; dd is day.
+
+Every file is the same time for all AWSs and each row in the file is a aws data. The data format for every row is:
+
+yyyy  ---->  year
+mm    ---->  month
+dd    ---->  day
+hh    ---->  hour
+mm    ---->  minute
+nnn   ---->  station number
+xx    ---->  mean wind speed in two minutes (10m/s)
+xx    ---->  mean wind direction in two minutes (0 is north and clockwise for increasing)
+xx    ---->  mean wind speed in ten minutes (10m/s)
+xx    ---->  mean wind direction in ten minutes (0 is north and clockwise for increasing)
+xx    ---->  extreme wind speed in 1 hour (10m/s)
+xx    ---->  direction of extreme wind speed (0 is north and clockwise for increasing)
+xx    ---->  appear time of extreme wind speed
+xx    ---->  maximal wind speed in 1 hour (10m/s)
+xx    ---->  direction of maximal wind speed (0 is north and clockwise for increasing)
+xx    ---->  appear time of maximal wind speed
+xx    ---->  rainfall in 1 hour (10mm)
+xx    ---->  rainfall in 1 day (10mm)
+xx    ---->  rainfall in 10 minutes (10mm)
+xx    ---->  rain starting time for the rainfall in 10 minutes
+xx    ---->  mean temperature in 1 hour (10C)
+xx    ---->  maximal temperature in 1 hour (10C)
+xx    ---->  appear time of the maximal temperature in 1 hour
+xx    ---->  minimal temperature in 1 hour (10C)
+xx    ---->  appear time of the minimal temperature in 1 hour
+
+if more, for
+xx    ---->  relative humidity (RH, %)
+xx    ---->  pressure (10mb)
+
+if further more, for else variables
+
+Notes: 1. If the station number is 901 or 902, the data is for else instrument and is void.
+       2. Maybe some data is bad.

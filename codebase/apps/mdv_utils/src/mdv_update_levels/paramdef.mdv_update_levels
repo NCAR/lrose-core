@@ -1,0 +1,95 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for mdv_update_levels
+ *
+ * Jaimi Yee, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * February 1999
+ */
+
+paramdef boolean
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = { FALSE };
+} debug;
+
+paramdef long
+{
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+  p_min = { 0 };
+  p_max = { 3 };
+  p_default = { 0 };
+} malloc_debug_level;
+
+paramdef enum data_type_t
+{
+  p_descr = "Type of data in input file";
+  p_help = "Uncompressed type of data in input file.";
+  p_options = { DATA_INT8,
+                DATA_INT16,
+                DATA_FLOAT32 };
+  p_default = { DATA_INT8 };
+} data_type;
+
+paramdef enum output_type_t
+{
+  p_descr = "Type to use for writing data to output file";
+  p_options = { OUTPUT_INT8,
+                OUTPUT_INT16,
+                OUTPUT_FLOAT32,
+                OUTPUT_PLANE_RLE8 };
+  p_default = { OUTPUT_PLANE_RLE8 };
+} output_type;
+
+paramdef long
+{
+  p_descr = "Number of vertical levels in the output file";
+  p_help = "";
+  p_default = {1};
+} num_output_levels;
+
+paramdef char* 
+{
+  p_descr = "file extension";
+  p_help = "";
+  p_default = {"mdv"};
+} file_ext;
+
+paramdef char*
+{
+  p_descr = "input directory path";
+  p_help = "";
+  p_default = {"./input"};
+} input_dir;
+
+paramdef char*
+{
+  p_descr = "output directory path";
+  p_help = "";
+  p_default = { "./output" };
+} output_dir;
+

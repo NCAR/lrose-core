@@ -1,0 +1,92 @@
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// ** Copyright UCAR (c) 1990 - 2016                                         
+// ** University Corporation for Atmospheric Research (UCAR)                 
+// ** National Center for Atmospheric Research (NCAR)                        
+// ** Boulder, Colorado, USA                                                 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from UCAR.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of UCAR nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+/////////////////////////////////////////////////////////////
+// ReadStates.hh
+//
+// ReadStates object
+//
+// Deirdre Garvey RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// July 2003
+//
+///////////////////////////////////////////////////////////////
+//
+// ReadStates finds state abbreviations
+//
+///////////////////////////////////////////////////////////////
+
+#ifndef ReadStates_HH
+#define ReadStates_HH
+
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class ReadStates
+{
+ 
+public:
+
+  //////////////////////////////////////////
+  /// This class, info, defines two public variables. 
+  /// These variables are for 
+  /// storing the data which was read from input data file into 
+  /// the system main memory. 
+
+  class Info{
+  public:
+    string iname, iabbr;
+  };
+
+  ReadStates();    // Constructor
+  ~ReadStates();   // Destructor
+
+  // read in the data file - this must be called before using
+  // other functions
+
+  int ReadData(const char *FilePath);
+  
+  // Print the station data to standard output
+
+  void PrintAll();
+  
+  // Given abbreviation, does it exist
+  // Returns true on success, false on failure.
+
+  bool IsStateAbbr(const string &abbr);
+
+private:
+
+  int ReadDataHttp(const char *url);
+  void Tokenize(const string &str,
+		const string &spacer,
+		vector<string> &toks);
+
+  vector<Info> v1;
+  vector<Info>::iterator infoi;
+
+};
+
+#endif

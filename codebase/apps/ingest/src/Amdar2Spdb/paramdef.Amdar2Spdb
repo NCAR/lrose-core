@@ -1,0 +1,249 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Amdar2Spdb
+ *
+ * Gary Cunning, RAL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * October 2012
+ * 
+ * Amdar2Spdb converts AMDAR data in AIREP, FM-42, and 
+ * FM-94 (BUFR) formats into SPDB data.
+ */
+
+commentdef {
+  p_header = "Amdar2Spdb";
+  p_text = "Amdar2Spdb decodes AMDAR messages in text and BUFR format and writes the observations to an SPDB file.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF = 0, DEBUG_NORM = 1, DEBUG_VERBOSE = 2, DEBUG_EXTRA = 3
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print decoding problems to stderr.";
+  p_help = "Turn this on if you want to log these problems in detail.";
+} print_decode_problems_to_stderr;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In this mode it is optional to watch for a latest_data_info file. In ARCHIVE mode, it processes all of the data files in the input directory between the start and end times set on the command line. In FILELIST mode, it processes all of the files in the list specified on the command line. In FILELIST mode paths must be fully qualified with respect to the date and time - so if each date has a separate subdirectory the date part of the path must be included.";
+} mode;
+
+paramdef string {
+  p_default = "2008 01 01 00 00 00";
+  p_descr = "Start time.";
+  p_help = "The start time for ARCHIVE MODE. The format is "
+           "'YYYY MM DD HH MM SS.' This parameter can be "
+           "over-ridden by the -start command line option.";
+} start_time;
+
+paramdef string {
+  p_default = "2008 01 01 01 00 00";
+  p_descr = "End time.";
+  p_help = "The end time for ARCHIVE MODE. The format is "
+           "'YYYY MM DD HH MM SS.' This parameter can be "
+           "over-ridden by the -start command line option.";
+} end_time;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "/d1/cunning/aoaws/raw/gts";
+  p_descr = "Input directory";
+  p_help = "Directory where input data files can be found.";
+} input_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of data input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, only checks input_dir for subdirs of the form YYYYMMDD";
+  p_help = "Only in REALTIME mode with latest_data_info_avail FALSE.";
+} strict_subdir_check;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When set, check file name contains specified sub-string.";
+  p_help = "See file_match_string.";
+} file_name_check;
+
+paramdef string {
+  p_default = "amdar";
+  p_descr = "Input filename match string";
+  p_help = "Files must contain this string to be processed";
+} file_match_string;
+
+paramdef int {
+  p_default = 21600;
+  p_min = 1;
+  p_descr = "Max valid age of AMDAR bulletins in realtime mode (secs)";
+  p_help = "This is the maximum age of individual AMDAR bulletins in the file.";
+} max_bulletin_valid_age;
+
+
+commentdef {
+  p_header = "INPUT FORMATTING.";
+}
+
+typedef enum {
+  FM42 = 0, 
+  FM94 = 1
+} input_format_t;
+
+paramdef enum input_format_t {
+  p_default = {FM42, FM94};
+  p_descr = "An array of the input formats to decode and convert to SPDB.";
+  p_help = "FM42 is the ASCII representation of an AMDAR message. FM94 is the BUFR "
+    "representation of an AMDAR message. A user may wish to convert mulitple formats "
+    "AMDAR messages in a circuit. A circuit may contain both FM42 and FM94, and a "
+    "user can choose either or both types.";
+} input_formats[];
+
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Sleep interval in seconds.";
+  h_help = "Sleep between processing input files. Used in ARCHIVE mode.";
+} sleep_interval;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of lines to skip between the SOH and the WMO header.";
+  h_help = "Sometimes there are interceding message block identifier lines that have to be skipped.";
+} num_block_lines;
+
+paramdef char* {
+  p_default = '\001';
+  p_desc = "Start of header character.";
+  p_help = "Use caret if the charater is a control character.";
+} start_of_header;
+
+paramdef char* {
+  p_default = '\003';
+  p_desc = "End of header character.";
+  p_help = "Use caret if the charater is a control character.";
+} end_of_header;
+
+paramdef string {
+  p_default = "/home/aoaws/projDir/bin/decbufr";
+  p_descr = "Full path to the Opera BUFR decodeer decbufr";
+  p_help = "The application should be installed in $PROJ_DIR/bin";
+} decbufr_path;
+
+paramdef string {
+  p_default = "$(PROJ_DIR)/airep/params/tables";
+  p_descr = "Directory containing table files for Opera BUFR decoding";
+  p_help = "The user must know which table files are needed for decoding.";
+} table_dir;
+
+commentdef {
+  p_header = "ASCII OUTPUT.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to store in ascii format.";
+  p_help = "If TRUE, ascii data is stored using the ascii_output_url.";
+} store_ascii_format;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include WMO header with the bulletin.";
+  p_help = "If store_header is true, the WMO header is added to the start of the bulletin before storing it.";
+} store_wmo_header;
+
+paramdef string {
+  p_descr = "Output SPDB URL for ascii data.";
+  p_help = "Used if 'store_ascii_format' is TRUE.";
+  p_default = {"spdbp:://localhost::spdb/ascii_amdar"};
+} ascii_output_urls[];
+
+paramdef string {
+  p_default = "This is data from Amdar2Spdb.";
+  p_descr = "Data set info.";
+  p_help = "This text is placed in the product info part of the output data buffer for documentation purposes.";
+} data_set_info;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Expire time in seconds for the AMDAR messages.";
+  p_help = "This value will be added to the issus time to determine the expire time for the bulletin";
+} expire_seconds;
+
+commentdef {
+  p_header = "XML OUTPUT.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to store in decoded format in XML.";
+  p_help = "If TRUE, decoded data is stored using the xml_output_url.";
+} store_xml_format;
+
+paramdef string {
+  p_descr = "Output SPDB URL for XML format.";
+  p_help = "Used if 'store_xml_format' is TRUE.";
+  p_default = {"spdbp:://localhost::spdb/xml_amdar"};
+} xml_output_urls[];
+

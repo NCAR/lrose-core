@@ -1,0 +1,473 @@
+#! /usr/bin/perl
+#
+# script to check datasets listed in the data set list file
+#
+# Returns 0 on success
+#         1 on error
+#
+# Prints number of late data sets to STDOUT.
+#
+# Mike Dixon, Nov 2002
+#
+############################################################################
+
+#
+# Make hostname() available
+#
+
+use Sys::Hostname;
+
+# ------------------------ START OF MAIN ---------------------------
+# main routine
+#
+
+use Getopt::Long;
+
+#
+# Initialize command line arguments
+#
+
+$opt_data_list = "";
+($prog = $0) =~ s%.*/%%;
+
+$usage =
+    "Usage : $prog [options]\n" .
+    "  -help, -h     : Print usage\n" .
+    "  -debug        : Print debug messages\n" .
+    "  -data_list ?  : Data set list file - required.\n" .
+    "  -host ?       : Specify host if not local.\n" .
+    "  -justlog      : Log each data late, very late, missing to STDOUT\n" .
+    "                  Ignores -percent, -silent, -vlate\n" .
+    "  -ok           : Print info on datasets which are OK\n" .
+    "  -percent      : Include a line indicating the success percentage\n" .
+    "  -silent       : Be silent except for nlate, only print n late data sets.\n" .
+    "                  If not silent, late data set info also goes to STDOUT\n" .
+    "  -verbose      : Print verbose debug messages\n" .
+    "  -vlate        : Use very late times, instead of late times\n" .
+    "Returns 0 on success, 1 on error\n";
+
+$options_result = &GetOptions('h', 'help',
+			      'debug',
+			      'ok',
+			      'silent',
+			      'percent',
+			      'data_list=s',
+			      'justlog',
+			      'host=s',
+			      'verbose',
+			      'vlate');
+
+if ($options_result == 0 || $opt_help || $opt_h) {
+    print $usage;
+    exit 1;
+}
+
+$debug = 0;
+$debugStr = "";
+if ($opt_debug) {
+    $debug = 1;
+    $debugStr = "-debug";
+}
+
+$verbose = 0;
+if ($opt_verbose) {
+    $verbose = 1;
+    $debug = 1;
+}
+
+$ok = 0;
+if ($opt_ok) {
+    $ok = 1;
+}
+
+$silent = 0;
+if ($opt_silent) {
+    $silent = 1;
+}
+
+$use_vlate = 0;
+if ($opt_vlate) {
+    $use_vlate = 1;
+}
+
+$percent = 0;
+if ($opt_percent) {
+    $percent = 1;
+}
+
+$justlog=0;
+if ($opt_justlog) {
+    $justlog=1;
+    $use_vlate=0;
+    $percent=0;
+}
+
+if ($opt_data_list) {
+    $data_list_file=$opt_data_list;
+} else {
+    print(STDERR "Must specify data_list\n");
+    exit 1;
+}
+
+$host_is_local = 1;
+$host = "localhost";
+if ($opt_host) {
+    $host_is_local = 0;
+    $host = $opt_host;
+}
+
+if (!-e $data_list_file) {
+    print(STDERR "Cannot find data_list file: $data_list_file\n");
+    exit 1;
+}
+
+# read data list file to get get dirs and late_secs arrays
+
+($ret_val, $nexpected) =
+    &read_data_list_file($data_list_file,
+			 *data_list_dir_array, *late_secs_array, *vlate_secs_array);
+
+if ($ret_val) {
+    print(STDERR
+	  "ERROR - cannot read data_list file: $data_list_file\n");
+    exit 1;
+}
+
+if ($nexpected <= 0) {
+    print STDOUT "  0 data set(s) have problems\n";
+    exit 0;
+}
+
+# get current data info from PrintDataMap
+
+($ret_val, $navailable) =
+    &read_PrintDataMap(*available_dir_array, *available_age_array);
+
+if ($ret_val) {
+    print(STDERR
+	  "ERROR - cannot read PrintDataMap\n");
+    exit 1;
+}
+
+# debug print
+
+if ($debug) {
+    print(STDERR "======================================================\n");
+    print(STDERR "Expected number of data sets: $nexpected\n");
+    foreach $i (0..($nexpected - 1)) {
+	print(STDERR
+	      "  Expecting dir: $data_list_dir_array[$i], " . 
+	      "late_secs: $late_secs_array[$i], " . 
+	      "vlate_secs: $vlate_secs_array[$i]\n");
+    }
+}
+if ($debug) {
+    print(STDERR "======================================================\n");
+    print(STDERR "Number of available data sets: $navailable\n");
+    foreach $i (0..($navailable - 1)) {
+	print(STDERR
+	      "  Available dir: $available_dir_array[$i], " . 
+	      "age_secs: $available_age_array[$i]\n");
+    }
+    print(STDERR "======================================================\n");
+}
+
+# now check for data which is late or missing
+
+$nproblems = 0;
+$nok = 0;
+foreach $i (0..($nexpected - 1)) {
+
+    $found = 0;
+    $late = 0;
+    $vlate = 0;
+    
+    foreach $j (0..($navailable - 1)) {
+	if ($available_dir_array[$j] eq $data_list_dir_array[$i]) {
+	    $found = 1;
+	    if ($use_vlate) {
+		if ($available_age_array[$j] > $vlate_secs_array[$i]) {
+		    $late = 1;
+		}
+	    } else {
+		if ($available_age_array[$j] > $late_secs_array[$i]) {
+		    $late = 1;
+		}
+	    }
+	    if ($justlog) {
+		# use_vlate is forced off so have already checked the late_secs_array
+		if ($available_age_array[$j] > $vlate_secs_array[$i]) {
+		    $vlate = 1;
+		}
+	    }
+	    break;
+	}
+    }
+
+    if ($found) {
+	if ($late) {
+	    $problem_dirs[$nproblems] = $data_list_dir_array[$i];
+	    $problem_types[$nproblems] = late;
+	    $nproblems++;
+	} else {
+	    $ok_dirs[$nok] = $data_list_dir_array[$i];
+	    $nok++;
+        }
+	if ($vlate) {
+	    $problem_dirs[$nproblems] = $data_list_dir_array[$i];
+	    $problem_types[$nproblems] = vlate;
+	    $nproblems++;
+	}
+    } else {
+	$problem_dirs[$nproblems] = $data_list_dir_array[$i];
+	$problem_types[$nproblems] = missing;
+	$nproblems++;
+    }
+
+} # i
+
+# print the number of late and missing processes
+
+if ($justlog) {
+    $date=`date -u "+%m/%d/%y %H:%M:%S UTC [utime: %s]"`;
+    chop($date);
+    foreach $i (0..($nproblems - 1)) {
+	print STDOUT "$date $problem_dirs[$i] -- $problem_types[$i]\n";
+    }
+} else {
+    print STDOUT "  $nproblems data set(s) have problems\n";
+    if ($ok) {
+        print STDOUT "  $nok data set(s) are OK\n";
+    }
+    if (!$silent) {
+        if ($ok) {
+            foreach $i (0..($nok - 1)) {
+                print STDOUT "    $ok_dirs[$i] OK\n";
+            }
+        }
+	foreach $i (0..($nproblems - 1)) {
+	    print STDOUT "    $problem_dirs[$i] $problem_types[$i]\n";
+	}
+    }
+    if ($percent) {
+	$ngood = $nexpected - $nproblems;
+	$percent_good = ($ngood / $nexpected) * 100.0;
+	printf STDOUT "  Success rate: %.2f%%\n", $percent_good, "\n";
+    }
+}
+
+exit 0;
+
+#---------------------------------------------------------------------
+# Subroutine: read_PrintDataMap()
+#
+# Usage:      ($return_val, $num_data_sets)=
+#                  read_PrintDataMap(*dir_array, *age_array)
+#
+# Output:     Returns (in $return_val), 0 if okay, -1 on error.
+#             Returns (in $num_data_sets), the number of available data sets.
+#             Returns the array of directories in dir_array.
+#             Returns the array of data ages in age_array.
+#
+
+sub read_PrintDataMap {
+
+    local (*dir_array, *age_array) = @_;
+    local $datatype, $dir, $hostname, $ipaddr, $latest_time;
+    local $forecast_lead_time, $last_reg_time;
+    local $return_val;
+
+    # Initialize
+    
+    $return_val = -1;
+    $num_data_sets = 0;
+    
+    # Open PrintDataMap as a file handle
+
+    $cmdStr = "PrintDataMap -plain $debugStr | ";
+    if (!$host_is_local) {
+        $cmdStr = "PrintDataMap -plain -host $host $debugStr | ";
+    }
+    if ($debug) {
+        print STDERR "Running cmd: $cmdStr\n";
+    }
+
+    if (open(DATAMAP, $cmdStr) == 0) {
+        print(STDERR "ERROR getting PrintDataMap list\n");
+        print(STDERR "  Cannot contact DataMapper on $host\n");
+        return($return_val, $num_data_sets);
+    }
+
+# the first entry in the list is the number of data sets
+# If zero length and error occurred
+    
+    $first_line = <DATAMAP>;
+    $length_first = length($first_line);
+    
+    if ($length_first == 0) {
+	print(STDERR "ERROR - no DataMapper running on $host\n");
+	return($return_val, $num_data_sets);
+    }
+
+    $now = time();
+    while ($line = <DATAMAP>) {
+	
+	# parse the line
+	
+	($datatype, $dir, $hostname, $ipaddr, $latest_time,
+	 $forecast_lead_time, $last_reg_time) = split(/\s+/, $line);
+
+	# only use entries which have been registered
+
+        if ($last_reg_time > 0) {
+
+            if ($verbose) {
+                print STDERR "========== Data set ============\n";
+                print STDERR "  datatype: $datatype\n";
+                print STDERR "  dir: $dir\n";
+                print STDERR "  hostname: $hostname\n";
+                print STDERR "  ipaddr: $ipaddr\n";
+                print STDERR "  latest_time: $latest_time\n";
+                print STDERR "  forecast_lead_time: $forecast_lead_time\n";
+                print STDERR "  last_reg_time: $last_reg_time\n";
+            }
+            
+            $dir_array[$num_data_sets] = $dir;
+            $age_array[$num_data_sets] = $now - $last_reg_time;
+            $num_data_sets++;
+        }
+	
+    } # while
+    
+# Close the DATAMAP
+    
+    close(DATAMAP);
+    $return_val = 0;
+    return($return_val, $num_data_sets);
+}
+
+#---------------------------------------------------------------------
+# Subroutine: read_data_list_file()
+#
+# Usage:      ($return_val, $num_data_sets)=
+#                  read_data_list_file($data_list_fname,
+#                  *dir_array, *late_secs_array)
+#
+# Input:      The data_file_list to read.
+#
+# Output:     Returns (in $return_val), 0 if okay, -1 on error.
+#             Returns (in $num_data_sets), the total number of data sets.
+#             Returns the array of directories in dir_array.
+#             Returns the array of late secs values in late_secs_array.
+#             Returns the array of very latesecs values in vlate_secs_array.
+#
+
+sub read_data_list_file{
+
+    local ($data_list_fname, *dir_array, *late_secs_array, *vlate_secs_array) = @_;
+    local $return_val, $sub_name;
+    local $dir, $late_secs, $vlate_secs;
+    
+    # Initialize
+    
+    $sub_name="read_data_list_file";
+    $return_val = -1;
+    $num_data_sets = 0;
+
+    # Open the data_list file
+
+    if ($verbose) {
+	print STDERR "======================================================\n";
+	print STDERR "Parsing data list file: $data_list_fname\n";
+    }
+    
+    unless (open(EXPECTED, "$data_list_fname")) {
+	print (STDERR "ERROR: $sub_name\n");
+	print (STDERR "  Cannot open expected data set list file $data_list_fname\n");
+	return($return_val, $num_data_sets);
+    } # endunless - open expected data set list file
+
+    # loop through the expected entries, ignoring
+    # comments and blank lines
+ 
+    while ($line = <EXPECTED>) {
+
+	if ($verbose) {
+	    print STDERR "Input line: $line";
+	}
+
+	# Read the entry line, skip if not what we want
+	
+	$use_line=&check_data_file_line($line);
+
+	if ($use_line == 1) {
+	    
+	    if ($verbose) {
+		print STDERR "  Input line is valid\n";
+	    }
+
+	    ($dir, $late_secs, $vlate_secs) = split(/\s+/, $line);
+	    
+	    if (length($dir) != 0 &&
+		length($late_secs) != 0 &&
+		length($vlate_secs) != 0) {
+
+		$dir_array[$num_data_sets] = $dir;
+		$late_secs_array[$num_data_sets] = $late_secs;
+		$vlate_secs_array[$num_data_sets] = $vlate_secs;
+		$num_data_sets++;
+		if ($verbose) {
+		    print (STDERR
+			   "Successful parse, dir, late_secs, vlate_secs: " .
+			   " $dir, $late_secs, $vlate_secs\n");
+		}
+
+	    }
+
+	} else {
+	    
+	    if ($verbose) {
+		print STDERR "  Input line rejected\n";
+	    }
+
+	}
+
+    } # while
+    
+    close(EXPECTED);
+    $return_val = 0;
+
+    return($return_val, $num_data_sets);
+}
+
+#---------------------------------------------------------------------
+# Subroutine: check_data_file_line
+#
+# Function:   Check a line from a data_list file to see whether to
+#             parse it or skip it.
+# Input:      An entry line from a data_list
+# Output:     Returns 1 if a line to parse, 0 if a line to skip.
+# 
+# Overview:   Reads the input line and tests whether it contains text to
+#             parse. Returns 0 if a blank line or a comment.
+#
+
+sub check_data_file_line {
+
+    local ($entry_line) = @_;
+
+    # Skip lines with leading comment characters or blank lines
+
+    if ($entry_line =~ /^#/) {
+	 return(0);
+     }
+
+    if ($entry_line !~ /\S/) {
+	return(0);
+    }
+    
+    return(1);
+}
+
+
+

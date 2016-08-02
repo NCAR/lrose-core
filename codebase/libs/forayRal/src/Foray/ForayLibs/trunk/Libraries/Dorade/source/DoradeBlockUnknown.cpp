@@ -1,0 +1,87 @@
+//
+//
+//
+//
+
+#include <stdio.h>
+
+#include "DoradeBlockUnknown.h"
+using namespace std;
+using namespace ForayUtility;
+
+
+//////////////////////////////////////////////////////////////////////
+//
+//
+//
+//////////////////////////////////////////////////////////////////////
+DoradeBlockUnknown::DoradeBlockUnknown(){
+
+
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+//
+//
+//////////////////////////////////////////////////////////////////////
+DoradeBlockUnknown::~DoradeBlockUnknown(){
+
+
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+//
+//
+//////////////////////////////////////////////////////////////////////
+bool DoradeBlockUnknown::decode(Buffer &buffer) throw(Fault){
+
+    try{
+	stringValues_["id"]          = buffer.get_string_from_char(0,4);
+	integerValues_["block_size"] = buffer.get_four_byte_integer(4);
+
+	// Keep a copy of this buffer around for the encode function.
+	blockData_ = buffer;
+    }catch(Fault re){
+	re.add_msg("DoradeBlockUnknown::decode:: caught Fault \n");
+	throw re;
+    }catch(...){
+	throw Fault("DoradeBlockUnknown::decode: caught exception \n");
+    }
+
+
+    return true;
+
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+//
+//
+//////////////////////////////////////////////////////////////////////
+void DoradeBlockUnknown::encode(Buffer &buffer) throw(Fault){
+
+    // not coded yet
+
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+//
+//
+//////////////////////////////////////////////////////////////////////
+string DoradeBlockUnknown::listEntry(){
+
+    char charEntry[4096];
+
+    sprintf(charEntry,
+	    "%4s %5d (Unknown) \n\n",
+	    stringValues_["id"].c_str(),
+	    integerValues_["block_size"]);
+
+    string entry(charEntry);
+
+    return entry;
+}
+

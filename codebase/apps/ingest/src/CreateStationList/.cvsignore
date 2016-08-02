@@ -1,0 +1,6 @@
+.deps
+CreateStationList
+__makefile.template
+makefile
+makefile.am
+makefile.in

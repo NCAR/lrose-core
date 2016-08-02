@@ -1,0 +1,10 @@
+#! /bin/sh
+
+snuff "forecast_monitor -params forecast_monitor.rtest"
+
+
+
+
+
+
+

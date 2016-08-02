@@ -1,0 +1,29 @@
+# NAME fuzzy_pos.colors
+
+# fhage         6/9/1993 12:2:13
+
+-100    0.0     gray25
+0.00    0.05    blue4
+0.05    0.10    medium blue
+0.10    0.15    slate blue
+0.15    0.20    cornflower blue
+0.20    0.25    medium turquoise
+0.25    0.30    dark green
+0.30    0.35    dark olive green
+0.35    0.40    SpringGreen4
+0.40    0.45    SpringGreen3
+0.45    0.50    lime green
+0.50    0.55    chartreuse
+0.55    0.60    DarkOliveGreen1
+0.60    0.65    DarkOrange3
+0.65    0.70    goldenrod
+0.70    0.75    gold1
+0.75    0.80    yellow
+0.80    0.85    light goldenrod
+0.85    0.90    dark salmon
+0.90    0.95    salmon
+0.95    1.00    PaleVioletRed3
+1.00    2.00    firebrick
+2.00    5.00    red
+5.00    10.0    DeepPink1
+10.0    100     gray

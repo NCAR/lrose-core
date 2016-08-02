@@ -1,0 +1,490 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "This program has a somewhat tortured history.\n\n"
+	"The purpose of mdvForecastStatistics is to generate\n"
+	"statistics about how susscessful our forecasting is.\n"
+	"The input is, fundamentally, two parts - a set of\n"
+	"forecast MDV grids (ie. what we said would happen)\n"
+	"and a set of set of truth MDV grids (ie. what actually\n"
+	"happened). Typically the forecast field will be an\n"
+	"interest field or probablility field, depending on the\n"
+	"nature of the forecast, and the truth field will be\n"
+	"some objective measurement such as a radar grid. Both\n"
+	"fields are then thresholded into, essentially, binary\n"
+	"storm/no storm grids, and statistics are generated based\n"
+	"on these binary fields. The user also has the option of\n"
+	"saving out grids that what happened where, ie. where the\n"
+	"program decided that the forecast was correct, and where it\n"
+	"was not.\n\n"
+	"The program has gone through several iterations. Initially,\n"
+	"the program VerifyGrid was ussed for this work. VerifyGrid was\n"
+	"based on the earlier mdv library (as opposed to Mdv).\n"
+	"When a significant bug was found in verifyGrid the decision\n"
+	"was made to develop a new program, Validator, that was based\n"
+	"on Mdv (the bug in verifyGrid was also fixed).\n\n"
+	"Unfortunately, the Mdv library was still evolving as Validator\n"
+	"was developed, with the result that Validator did not take full\n"
+	"advantage of the Mdv library. Further, at the time that\n"
+	"Validator was being developed, there appeared to be strong\n"
+	"interest in validating on a county-by-county basis, and this\n"
+	"was coded into the Validator (the program can read map files\n"
+	"and validate accordingly). This interest largely evaporated.\n\n"
+	"As a result, when interest in running with multiple threshold\n"
+	"values developed, the decision was made to develop this program\n"
+	"rather than modify the Validator.\n\n"
+	"The MdvVerify program was also written around this time, but\n"
+	"its focus is somewhat different as I understand it, and it\n"
+	"does not allow multiple thresholds.\n\nNiles Oien October 2006";
+}
+
+commentdef {
+  p_header = "The program runs in archive mode only. Realtime mode\n"
+	"does not make much sense, since the program triggers when\n"
+	"a new forecast is ready for validating and the truth will\n"
+	"not have eventuated at that time. The time specified on the\n"
+	"command line are, thus, forecast times not truth times.\n\n"
+	"Pseudo-realtime operations can be orchestrated with cron.";
+}
+
+commentdef {
+  p_header = "The program is checked into CVS as\n"
+	"apps/mdv_utils/src/mdvForecastStatistics and examples of\n"
+	"running it, setting up CIDD to display the results etc. are\n"
+	"checked in as apps/mdv_utils/src/mdvForecastStatistics/examples";
+}
+
+typedef struct {
+	string name;
+	double truth_min;
+	double truth_max;
+	double forecast_min;
+	double forecast_max;
+	int truth_relax;
+	int forecast_relax;
+} threshold_t;
+
+paramdef struct threshold_t {
+	p_descr = "Array of truth, forecast thresholds (thresholds are\n"
+	"exclusive)and relaxation values. The name is used in the output\n"
+	"file name, so no spaces.";
+	p_help = "Leave the relaxation values set at 0 unless you have\n"
+	"a good understaning of relaxation (relaxation windows are 2N+1)";
+	p_default = {
+		{"light_storms", 30.0, 1000.0, 0.7, 1000.0, 0, 0},
+		{"moderate_storms", 35.0, 1000.0, 0.8, 1000.0, 0, 0},
+		{"severe_storms", 40.0, 1000.0, 0.9, 1000.0, 0, 0}
+	};
+} thresholds[];
+
+
+commentdef {
+  p_header = "The specification of the truth and forecast inputs follows.\n\n"
+	"Some things to note :\n\n"
+	" * CLUMPING is the process of removing small clumps\n"
+	" from an input dataset. For instance, if the truth dataset is\n"
+	" a radar grid and the radar occasionally erroneously has a small\n"
+	" number of geographically isolated grid points set to a high\n"
+	" dbZ value, the user may want to require that each grid point\n"
+	" be connected to (ie adjacent to) a minimum number of other\n"
+	" grid points.\n\n"
+	" * A MAP FILE can be used to set some regions of the input\n"
+	" data to missing data values prior to proceeding with\n"
+	" the statistics, thereby effectively excluding them from\n"
+	" the calculation. The format of the map file is as follows :\n\n"
+	"  OUTSIDE 30 <-- 30 lat/lon points follow. specifying a polygon.\n"
+	"  40.1  -100.3   Data must be outside of this polygon to\n"
+	"  40.2  -100.4   be considered valid, ie. all data inside\n"
+	"  40.3  -100.5   this polygon will be set to missing. The\n"
+	"  40.4  -100.6   polygon need not be closed in the file since\n"
+	"  40.5  -100.7   closure is assumed.\n"
+	"    .       .\n"
+	"    .       .\n"
+	"    .       .\n"
+	"    .       .\n"
+        "  40.0  -100.2  <----- last of the 30 points.\n"
+	"  INSIDE 25 <---- Start of the next polygon - similar\n"
+	"  30.0  -90.0     to the above but here data must be\n"
+	"  30.1  -90.1     inside the polygon to be valid, ie.\n"
+	"  30.2  -90.2     data ouside the polygon are marked missing.\n"
+	"    .       .\n"
+	"    .       .\n"
+	"    .       .\n"
+	"    .       .\n"
+	"  29.9  -89.9 <---- Last of the 25 points.\n\n"
+	"The operations are done in the following order : first,\n"
+	"clumps are removed, then, any relaxation criteria are\n"
+	"applied, finally any map mask is applied.";
+}
+
+
+
+typedef enum {
+  PROJ_FLAT, PROJ_LATLON, PROJ_LAMBERT
+} projection_t;
+
+typedef enum {
+  VERT_ACTION_NONE, VERT_ACTION_SET_LIMITS, VERT_ACTION_COMPOSITE
+} vertAction_t;
+
+
+typedef struct {
+	string url;
+	string fieldName;
+	boolean useMapFile;
+	string mapFilename;
+	boolean doClumping;
+	int minClumpsize;
+	vertAction_t vertAction;
+	boolean vlevelsSpecified;
+	double verticalMin;
+	double verticalMax;
+	boolean doGridRemap;
+	projection_t projType;
+	int nx;
+	int ny;
+	double dx;
+	double dy;
+	double trueLambertLat1;
+	double trueLambertLat2;
+	double flatRotation;
+	double originLat;
+	double originLon;
+	double minX;
+	double minY;
+} input_t;
+
+
+
+
+paramdef struct input_t {
+	p_descr = "Input specifications for truth, forecast fields.";
+	p_help = "Fields have the following significance :\n"
+	" url - mdvp URL from which to read data.\n"
+	" fieldName - field to read.\n"
+	" useMapFile - option to use a map file.\n"
+	" mapFilename - name of map file, if one is being used.\n"
+	" doClumping - option to remove small clumps.\n"
+	" minClumpsize - minimum number of connected points in a clump\n"
+	"                required to avoid removal if we're doing\n"
+	"                clumping.\n"
+	" vertAction - action to take re vertical levels.\n"
+	"                 VERT_ACTION_NONE means take no action,\n"
+	"                 VERT_ACTION_SET_LIMITS means set limits\n"
+	"                 in the vertical according to the vlevelsSpecified,\n"
+	"                 verticalMin and verticalMax parameters, ie.\n"
+	"                 truncate in the vertical. VERT_ACTION_COMPOSITE\n"
+	"                 means do a maximum value composite between the\n"
+	"                 verticalMin and verticalMax levels.\n"
+	" vlevelsSpecified - relevant only if vertAction is not NONE.\n"
+	"                 If TRUE, the parameters verticalMin and\n"
+	"                 verticalMax are taken to be doubles specifying\n"
+	"                 the min and max levels. If this\n"
+	"                 is FALSE the values are taken as integers\n"
+	"                 specifying the min and max plane numbers.\n"
+	" verticalMin - see comments for vlevelsSpecified.\n"
+	" verticalMax - see comments for vlevelsSpecified.\n"
+	" doGridRemap - option to remap grid.\n"
+	" projType - Remapped projection type.  PROJ_FLAT,\n"
+	"            PROJ_LATLON, or PROJ_LAMBERT\n"
+	" nx - points in X in remapped grid.\n"
+	" ny - points in Y in remapped grid.\n"
+	" dx - remapped grid X spacing.\n"
+	" dy - remapped grid Y spacing.\n"
+	" trueLambertLat1 - relevant for remapping to Lambert.\n"
+	" trueLambertLat2 - relevant for remapping to Lambert.\n"
+	" flatRotation - relevant only for flat earth remapping.\n"
+	" originLat - latitude of remapped origin.\n"
+	" originLon - longitude of remapped origin.\n"
+	" minX - lower left X offset for remapped grid.\n"
+	" minY - lower left Y offset for remapped grid.\n";
+
+	p_default = {
+		{
+			url = "mdvp:://localhost::mdv/truthDir",
+			fieldName = "dbZ",
+			useMapFile = FALSE,
+			mapFilename = "notRelevantHere.validationMap",
+			doClumping = FALSE,
+			minClumpsize = 75,
+			vertAction = VERT_ACTION_NONE,
+			vlevelsSpecified = TRUE,
+			verticalMin = 1.5,	
+			verticalMax = 10.0,
+			doGridRemap = FALSE,
+			projType = PROJ_FLAT,
+			nx = 400,
+			ny = 400,
+			dx = 0.5,
+			dy = 0.5,
+			trueLambertLat1 = 35.0,
+			trueLambertLat2 = 40.0,
+			flatRotation = 0.0,
+			originLat = 40.0,
+			originLon = -100.0,
+			minX = -99.75,
+			minY = -99.75
+		},
+		{
+			url = "mdvp:://localhost::mdv/forecastDir",
+			fieldName = "interestField",
+			useMapFile = FALSE,
+			mapFilename = "notRelevantHere.validationMap",
+			doClumping = FALSE,
+			minClumpsize = 75,
+			vertAction = VERT_ACTION_COMPOSITE,
+			vlevelsSpecified = TRUE,
+			verticalMin = 1.5,	
+			verticalMax = 10.0,
+			doGridRemap = FALSE,
+			projType = PROJ_FLAT,
+			nx = 400,
+			ny = 400,
+			dx = 0.5,
+			dy = 0.5,
+			trueLambertLat1 = 35.0,
+			trueLambertLat2 = 40.0,
+			flatRotation = 0.0,
+			originLat = 40.0,
+			originLon = -100.0,
+			minX = -99.75,
+			minY = -99.75
+		}
+	};
+} inputs[2];
+
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Output URL to which intermediate grids will be written.";
+  p_help = "If string is empty, no intermediate grids are written.\n"
+	"The values that are written are : \n"
+	" //\n"
+	"  // Possible outcomes for thresholding operation.\n"
+	"  //\n"
+	"  const static int thresholdedIgnore = 0;\n"
+	"  const static int thresholdedNoStorm = 1;\n"
+	"  const static int thresholdedStorm = 2;\n"
+	"\n"
+	"  //\n"
+	"  // Possible outcomes of validation.\n"
+	"  //\n"
+	"  const static int validatedIgnore = 0;\n"
+	"  const static int validatedNonEvent = 1;\n"
+	"  const static int validatedFalseAlarm = 2;\n"
+	"  const static int validatedMiss = 3;\n"
+	"  const static int validatedHit = 4;";
+} intermediateUrl;
+
+paramdef string {
+  p_default = "/Some/Output/Directory";
+  p_descr = "Output directory in which ASCII statistics files will be written.";
+  p_help = "Set as appropriate. If empty, no ASCII ouput is generated. This\n"
+	"maynot work if forecast mode is invoked.";
+} outDir;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Output interval for statistics files.";
+  p_help = "Relevant only if ASCII output is generated.";
+} outputInterval;
+
+typedef enum {
+  BAD_TRUTH_VALUE_IS_STORM, BAD_TRUTH_VALUE_IS_NOT_STORM, BAD_TRUTH_VALUE_IS_IGNORED
+} bad_truth_value_t;
+
+paramdef enum bad_truth_value_t {
+  p_default = BAD_TRUTH_VALUE_IS_NOT_STORM;
+  p_descr = "Determines what to do with bad or missing truth data.";
+  p_help = "BAD_TRUTH_VALUE_IS_STORM - treat the grid point as\n"
+	" having passed the threshold test, ie. it is a storm.\n"
+	"BAD_TRUTH_VALUE_IS_NOT_STORM - treat the grid point as\n"
+	" having failed the threshold test, ie. it is not a storm.\n"
+	"BAD_TRUTH_VALUE_IS_IGNORED - ignore the point, do not include\n"
+	" it in the calculations. This means that whatever forecast\n"
+	" value is at the grid point location is also ignored.";
+} badTruthValueAction;
+
+typedef enum {
+  BAD_FORECAST_VALUE_IS_STORM, BAD_FORECAST_VALUE_IS_NOT_STORM, BAD_FORECAST_VALUE_IS_IGNORED
+} bad_forecast_value_t;
+
+paramdef enum bad_forecast_value_t {
+  p_default = BAD_FORECAST_VALUE_IS_IGNORED;
+  p_descr = "Determines what to do with bad or missing forecast data.";
+  p_help = "BAD_FORECAST_VALUE_IS_STORM - treat the grid point as\n"
+	" having passed the threshold test, ie. it is a storm.\n"
+	"BAD_FORECAST_VALUE_IS_NOT_STORM - treat the grid point as\n"
+	" having failed the threshold test, ie. it is not a storm.\n"
+	"BAD_FORECAST_VALUE_IS_IGNORED - ignore the point, do not include\n"
+	" it in the calculations. This means that whatever truth\n"
+	" value is at the grid point location is also ignored.";
+} badForecastValueAction;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Maximum time difference between truth and forecast, seconds.";
+  p_help = "Set as appropriate.";
+} temporalTolerance;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Determines if the input forecast data are in forecast\n"
+	"mode (filename has generate and lead time) or not.";
+  p_help = "If this is set then intermediate grids written out\n"
+	"will also be in forecast mode.";
+} forecastMode;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Forecast lead time, seconds.";
+  p_help = "Ignored if forecastMode is TRUE (the lead time is\n"
+	"taken from the forecast data in that case).";
+} forecastLeadtime;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compare two model runs by setting the truth\n"
+	"to one model run and the forecast to another.";
+  p_help = "By default, mdvForecastStatistics will read forecast times\n"
+	"and then read the truth data at the time nearest\n"
+	"to the valid time of the forecast. It is assumed that the\n"
+	"truth data are actual measurements (ie. radar data) stored in MDV\n"
+	"non-forecast mode.\n\n"
+	"But if model2Model is set to TRUE, then is is assumed that both\n"
+	"the forecast and truth data are model data stored in MDV forecast\n"
+	"mode. If a forecast at a certain gen and valid time exists, then\n"
+	"it is assumed that truth data at this gen and valid time exists,\n"
+	"and this is what is read for truth data.\n\n"
+	"Setting model2Model to TRUE causes forecastMode to be set to TRUE\n"
+	"internally.";
+} model2Model;
+
+
+commentdef {
+  p_header = "The following options were added so that a false origin\n"
+	     "can be added to the read for the truth or forecast fields\n"
+	     "(or both). Ideally these options would be part of the remapping\n"
+	     "options presented earlier, however, for historical reasons that\n"
+	     "did not eventuate and the options are now separate.\n\n"
+	     "The options are :\n"
+	     " falseOrigin - set to TRUE to set a false origin for\n"
+	     "   this field. FALSE means the other parameters in this\n"
+	     "   structure are ignored.\n"
+	     " latLon - if this is TRUE then x is taken as the longitude\n"
+	     "   and y is taken as the latitude, both in decimal degrees.\n"
+	     "   If this is FALSE then x and y are taken to be the distance\n"
+	     "   in Km between the two origins, ie. x is the false easting\n"
+	     "   and y is the false northing.\n"
+	     " x,y - as discussed above.\n\n"
+	     "These options only take effect if the grid is being remapped,\n"
+	     "ie if doRemap is TRUE.";
+}
+
+typedef struct {
+	boolean falseOrigin;
+	boolean latLon;
+	double x;
+	double y;
+} falseOrigin_t;
+
+paramdef struct falseOrigin_t {
+	p_descr = "Option to set a false origin for the truth field.";
+	p_help = "Default is not to do this and that should be fine for most\n"
+	"cases.";
+	p_default = {FALSE, FALSE, 0, 0};
+} truthFalseOrigin;
+
+paramdef struct falseOrigin_t {
+	p_descr = "Option to set a false origin for the forecast field.";
+	p_help = "Default is not to do this and that should be fine for most\n"
+	"cases.";
+	p_default = {FALSE, FALSE, 0, 0};
+} fcstFalseOrigin;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use only specified forecast lead times.";
+  p_help = "Ignored if forecastMode is FALSE (the lead time is\n"
+	"specified in that case). If set to TRUE, forecast lead times\n"
+	"that are not in the specifiedForecastLeadtimes array\n"
+	"are skipped.";
+} useSpecifiedForecastLeadtimes;
+
+paramdef int {
+  p_default = { 1800, 3600, 5400, 7200 };
+  p_descr = "Forecast lead times, seconds.";
+  p_help = "Ignored if forecastMode is FALSE (the lead time is\n"
+	"specified in that case).";
+} specifiedForecastLeadtimes[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use only specified generation times.";
+  p_help = "Ignored if forecastMode is FALSE (it has no meaining\n"
+	"in that case). If set to TRUE, generate times\n"
+	"that are consistent with the specifiedGentimes parameter\n"
+	"are skipped.";
+} useSpecifiedGentimes;
+
+typedef struct {
+        int interval;
+	int offset;
+} specifyGenTimes_t;
+
+paramdef struct specifyGenTimes_t {
+  p_default = { 900, 0 };
+  p_descr = "Specification of gen times if useSpecifiedGentimes\n"
+	"is TRUE. Units are seconds.";
+  p_help = "Ignored if forecastMode is FALSE (it has no meaning\n"
+	"in that case). Specification is as follows - if\n"
+	"you have gen times every 5 minutes, and want only to\n"
+	"process every 15 minutes, and your gen times are on the hour\n"
+	"then you would set the interval to 900 (15 minutes) and\n"
+	" the offset to 0, so that the gen times marked by a star\n"
+	"below would be processed :\n"
+	"17:00:00 *\n"
+	"17:05:00\n"
+	"17:10:00\n"
+	"17:15:00 *\n"
+	"If your gen times were not on the hour but were offset by 2 minutes\n"
+	"then you would set the offset to 120 (two minutes) so that the\n"
+	"gen times marked by a star\n"
+	"below would be processed :\n"
+	"17:02:00 *\n"
+	"17:07:00\n"
+	"17:12:00\n"
+	"17:17:00 *\n";
+} specifiedGenTimes;

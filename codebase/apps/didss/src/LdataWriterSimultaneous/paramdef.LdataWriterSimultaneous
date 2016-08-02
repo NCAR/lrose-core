@@ -1,0 +1,63 @@
+/*********************************************************
+ * parameter definitions
+ *
+ * Niles Oien, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 2004
+ * 
+ */
+
+commentdef {
+  p_header = "Monitor a directory in which several files may appear\n"
+			"simultaneously in realtime.\n"
+             "Write _latest_data_info files for each input file.\n\n"
+	     "Niles Oien.";
+}
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Directory to watch and write _ldata to";
+  p_help = "Set as appropriate.";
+} dir;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Maximum age of files to care about, seconds.";
+  p_help = "Files older than this are disregarded.";
+} maxAge;
+
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Delay between checking directory, seconds.";
+  p_help = "Directory is checked at this frequency.";
+} checkDelay;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Delay after writing _ldata info, seconds.";
+  p_help = "May give readers a chance to keep up.";
+} ldataDelay;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Minimum file size, bytes.";
+  p_help = "Default should have no effect.";
+} minSize;
+
+
+
+

@@ -1,0 +1,13 @@
+# -*- python -*-
+#
+#
+
+env = Environment(CCFLAGS='-g', LDFLAGS='-g', LINKFLAGS='-g')
+
+sources  = ['main.cpp'];
+
+progNode  = env.Program('typeSizes',source = sources)
+
+env.Default([progNode])
+
+

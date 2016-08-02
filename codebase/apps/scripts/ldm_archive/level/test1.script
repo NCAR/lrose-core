@@ -1,0 +1,13 @@
+#!/bin/csh -x
+#
+echo "Starting"
+
+echo "test: TEST" >> ~rapdmg/archive_scripts/test.out
+
+~rapdmg/archive_scripts/test2.script
+
+set time2 = `date`
+echo "End time: " $time2
+
+  exit
+

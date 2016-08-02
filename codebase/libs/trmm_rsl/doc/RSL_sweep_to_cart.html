@@ -1,0 +1,31 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_sweep_to_cart</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>unsigned char *RSL_sweep_to_cart(<a href=RSL_sweep_struct.html>Sweep</a> *s, int xdim, int ydim, float range); </b>
+
+<h3>
+<hr>Description</h3>
+Given a Sweep pointer, <b>s</b>, return a character image of size <b>xdim</b> by <b>ydim</b> representing the mapping of polar to cartesean with the radar at the center of the image. The radial range, <b>range</b>, is mapped to the edge of the image. The space for the returned images is obtained via malloc. It is assumed that range is in units of gate size.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion a valid pointer to unsigned char is returned, otherwise NULL.
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_sweep_to.html>RSL_sweep_to_gif</a>, <a href=RSL_sweep_to.html>RSL_sweep_to_pict</a>, <a href=RSL_sweep_to.html>RSL_sweep_to_pgm</a>, <a href=RSL_sweep_to.html>RSL_sweep_to_ppm</a>
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

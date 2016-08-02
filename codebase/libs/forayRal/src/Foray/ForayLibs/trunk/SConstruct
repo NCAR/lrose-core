@@ -1,0 +1,37 @@
+import os,sys
+
+buildOptions = Options('buildOpts.py')
+buildOptions.Add(PathOption('ncdir' ,'Root directory where netcdf library was installed.'  ,'/opt/local'      ,PathOption.PathIsDir))
+buildOptions.Add(PathOption('prefix','Root directory where foray library will be installed','/opt/local/foray',PathOption.PathAccept))
+
+#env = Environment(options=buildOptions,CCFLAGS='-g', LDFLAGS='-g', LINKFLAGS='-g',tools=['default','svninfo'])
+env = Environment(options=buildOptions,CCFLAGS='-g', LDFLAGS='-g', LINKFLAGS='-g',tools=['default'])
+Export('env')
+
+if not os.path.exists('buildOpts.py'):
+    buildOptions.Save('buildOpts.py',env)
+
+
+Help(buildOptions.GenerateHelpText(env))
+
+env.installLocalLib = '#/lib'
+env.installLocalInc = '#/include'
+env.installLocalBin = '#bin'
+
+env.netcdfLib  = os.path.join(env['ncdir'],'lib')
+env.netcdfInc  = os.path.join(env['ncdir'],'include')
+
+env.installLib = os.path.join(env['prefix'],'lib')
+env.installInc = os.path.join(env['prefix'],'include')
+
+env.Alias('install',(env.installLib,env.installInc))
+
+SConscript(['Libraries/SConscript'])
+SConscript(['Tests/SConscript'])
+
+
+
+
+
+
+

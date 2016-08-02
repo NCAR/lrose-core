@@ -1,0 +1,207 @@
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// ** Copyright UCAR (c) 1990 - 2016                                         
+// ** University Corporation for Atmospheric Research (UCAR)                 
+// ** National Center for Atmospheric Research (NCAR)                        
+// ** Boulder, Colorado, USA                                                 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from UCAR.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of UCAR nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+///////////////////////////////////////////////////////////////
+// LayerStats.cc
+//
+// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Aug 2006
+//
+///////////////////////////////////////////////////////////////
+
+#include "LayerStats.hh"
+#include <toolsa/DateTime.hh>
+#include <iomanip>
+#include <cmath>
+using namespace std;
+
+// Constructor
+
+LayerStats::LayerStats(const Params &params, double min_ht, double max_ht) :
+        _params(params),
+        _minHt(min_ht),
+        _maxHt(max_ht)
+  
+{
+  _meanHt = (_minHt + _maxHt) / 2.0;
+
+  _globalNValid = 0;
+  _globalSum.zeroOut();
+  _globalSum2.zeroOut();
+
+}
+
+// destructor
+
+LayerStats::~LayerStats()
+
+{
+
+}
+
+// clear data
+
+void LayerStats::clearData()
+
+{
+  _nValid = 0;
+ _momentData.clear();
+}
+
+// add a zdr value
+
+void LayerStats::addData(const MomentData &data)
+
+{
+
+  _momentData.push_back(data);
+
+};
+  
+// print
+
+void LayerStats::print(ostream &out)
+
+{
+
+  out << "============ LayerStats ==============" << endl;
+  out << "  minHt: " << _minHt << endl;
+  out << "  maxHt: " << _maxHt << endl;
+  out << "  nData: " << _momentData.size() << endl;
+  out << "  nValid: " << _nValid << endl;
+  out << endl;
+
+}
+
+// compute stats
+
+void LayerStats::computeStats()
+
+{
+
+  MomentData example;
+
+  // mark data as invalid if it does not meet criteria
+
+  for (int ii = 0; ii < (int) _momentData.size(); ii++) {
+    double ldr = (_momentData[ii].ldrh + _momentData[ii].ldrv) / 2.0;
+    if (_momentData[ii].snr < _params.min_snr ||
+        _momentData[ii].snr > _params.max_snr ||
+        _momentData[ii].vel < _params.min_vel ||
+        _momentData[ii].vel > _params.max_vel ||
+        _momentData[ii].rhohv < _params.min_rhohv ||
+        ldr > _params.max_ldr) {
+      _momentData[ii].valid = false;
+    }
+  }
+
+  // compute mean and sdev of zdr data
+  
+  _computeZdrmMeanSdev(_meanZdr, _sdevZdr);
+  
+  // set invalid if zdr is outlier
+
+  double minZdrm = _meanZdr - _sdevZdr * _params.zdr_n_sdev;
+  double maxZdrm = _meanZdr + _sdevZdr * _params.zdr_n_sdev;
+  for (int ii = 0; ii < (int) _momentData.size(); ii++) {
+    if (_momentData[ii].zdrm < minZdrm ||
+        _momentData[ii].zdrm > maxZdrm) {
+      _momentData[ii].valid = false;
+    }
+  }
+
+  // zero out sums
+
+  _sum.zeroOut();
+  _sum2.zeroOut();
+
+  // accumulate
+
+  _nValid = 0;
+  for (int ii = 0; ii < (int) _momentData.size(); ii++) {
+    if (_momentData[ii].valid) {
+      _sum.add(_momentData[ii]);
+      _sum2.addSquared(_momentData[ii]);
+      _nValid++;
+    }
+  }
+
+  _globalNValid += _nValid;
+  _globalSum.add(_sum);
+  _globalSum2.add(_sum2);
+
+  // compute mean and sdev
+
+  MomentData::computeMeanSdev(_nValid, _sum, _sum2, _mean, _sdev);
+
+};
+
+// compute global stats
+
+void LayerStats::computeGlobalStats()
+
+{
+  MomentData::computeMeanSdev(_globalNValid,
+                              _globalSum, _globalSum2,
+                              _globalMean, _globalSdev);
+}
+
+// compute mean and sdev of zdrm
+  
+void LayerStats::_computeZdrmMeanSdev(double &mean, double &sdev)
+  
+{
+
+  mean = MomentData::missingVal;
+  sdev = MomentData::missingVal;
+  
+  double sum = 0;
+  double sum2 = 0;
+  double dn = 0;
+  
+  for (int ii = 0; ii < (int) _momentData.size(); ii++) {
+    const MomentData &data = _momentData[ii];
+    if (data.valid) {
+      double val = data.zdrm;
+      sum += val;
+      sum2 += val * val;
+      dn++;
+    }
+  } // ii
+
+  if (dn > 0) {
+    mean = sum / dn;
+  }
+  
+  if (dn > 2) {
+    double var = (sum2 - (sum * sum) / dn) / (dn - 1.0);
+    if (var >= 0.0) {
+      sdev = sqrt(var);
+    } else {
+      sdev = 0.0;
+    }
+  }
+
+};
+  

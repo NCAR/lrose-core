@@ -1,0 +1,44 @@
+/.cvsignore/1.1/Fri Oct 23 21:31:17 2015//
+/Makefile/1.45/Mon Sep 30 16:18:30 2013//
+/Makefile.etg/1.5/Thu Oct  7 23:50:06 2010//
+/Makefile.juneau_verif/1.2/Thu Oct  7 23:50:06 2010//
+/Makefile.nima/1.2/Thu Oct  7 23:50:06 2010//
+D/Data////
+D/Log////
+D/Path////
+D/URL////
+D/_makefiles////
+D/ansi////
+D/ascii_files////
+D/attributes////
+D/compress////
+D/db_access////
+D/dlm////
+D/err////
+D/exception////
+D/file_io////
+D/fmq////
+D/font////
+D/http////
+D/include////
+D/ldata////
+D/mb////
+D/mem////
+D/misc////
+D/pjg////
+D/pmu////
+D/port////
+D/reutil////
+D/smu////
+D/sockutil////
+D/sok2////
+D/str////
+D/tcp////
+D/templates////
+D/threads////
+D/ttape////
+D/tty////
+D/umisc////
+D/utim////
+D/xdru////
+D/xml////

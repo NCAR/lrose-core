@@ -1,0 +1,16 @@
+
+proj = FLAT;
+
+output_type = MDV;
+
+lon = -106.0700;
+lat =   33.0400;
+
+xmin = -250;
+xmax =  250;
+ymin = -250;
+ymax =  250;
+
+scale = 20.0;
+outfname = "wsmr.mdv";
+output_dir = ".";

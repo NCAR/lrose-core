@@ -1,0 +1,72 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body>
+<a href="index.html"><img SRC="rsl.gif" ></a>
+<hr>
+<h1>
+RSL color table routines</h1>
+
+<hr>
+<h3>
+Synopsis</h3>
+<b>#include "rsl.h"</b>
+<br><b>void RSL_load_color_table(char *infile, char buffer[256], int *ncolors);</b>
+<br><b>void RSL_load_green_table(char *infile);</b>
+<br><b>void RSL_load_blue_table(char *infile);</b>
+<br><b>void RSL_load_red_table(char *infile);</b>
+<br><b>void RSL_load_refl_color_table();</b>
+<br><b>void RSL_load_sw_color_table();</b>
+<br><b>void RSL_load_vel_color_table();</b>
+<br><b>void RSL_load_zdr_color_table();</b>
+<br><b>void RSL_load_rainfall_color_table();</b>
+<br><b>void RSL_load_height_color_table();</b>
+<h3>
+
+<hr>Description</h3>
+These are the color table routines. The color table is use when making
+images and is merely 256 bytes in size representing red, green and blue
+color indexes. The routines <b>RSL_load_refl_color_table</b>, <b>RSL_load_sw_color_table,
+RSL_load_vel_color_table</b>,and <b>RSL_load_zdr_color_table</b> each call
+the three routines <b>RSL_load_red_table</b>, <b>RSL_load_green_table</b>,
+and <b>RSL_load_blue_table</b> with a hard coded (defined during software
+installation) color input file. Under normal usage, you only have to call
+these routines once prior to any image generation function calls.
+<p>The routines <b>RSL_load_rainfall_color_table</b> and <b>RSL_load_height_color_table</b>
+use the default files defined during installation. These routines exist
+to simplify the interface when generating height or rainfall images.
+<p>The default input file names are defined in volume.h. When you don't
+want to use the default color tables for reflectivity, spectrum width,
+or velocity, and have your own color tables, you can use <b>RSL_load_red_table</b>,
+<b>RSL_load_green_table</b>,
+and <b>RSL_load_blue_table</b> directly. Be sure to call all three routines.
+The most general of the routines, and one you should not normally use,
+is <b>RSL_load_color_table</b>. It manages a static global color table
+array and it is how the color table is remembered throughout your application.
+<p>The organization of the input color table files is binary. They contain,
+at most, 256 bytes with no delimeters and represent the color ramp from
+index 0 to 255.&nbsp;
+<hr>
+<h3>
+Return value</h3>
+None.&nbsp;
+<hr>
+<h3>
+See also</h3>
+<a href="RSL_sweep_to.html">RSL_sweep_to_gif</a>, <a href="RSL_sweep_to.html">RSL_sweep_to_pict</a>,
+<a href="RSL_sweep_to.html">RSL_sweep_to_pgm</a>,
+<a href="RSL_sweep_to.html">RSL_sweep_to_ppm</a>,
+<br><a href="RSL_bscan.html">RSL_bscan_ray</a>, <a href="RSL_bscan.html">RSL_bscan_sweep</a>,
+<a href="RSL_bscan.html">RSL_bscan_volume</a>,
+<br><a href="RSL_volume_to.html">RSL_volume_to_gif</a>, <a href="RSL_volume_to.html">RSL_volume_to_pict</a>,
+<a href="RSL_volume_to.html">RSL_volume_to_pgm</a>,
+<a href="RSL_volume_to.html">RSL_volume_to_ppm</a>,
+<br><a href="RSL_color_table.html">RSL_get_color_table</a>, <a href="RSL_color_table.html">RSL_set_color_table</a>.
+<br>
+<hr>
+<p>Author: <a href="john.merritt.html">John H. Merritt</a>
+</body>
+</html>

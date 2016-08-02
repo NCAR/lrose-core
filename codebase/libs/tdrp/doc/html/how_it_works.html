@@ -1,0 +1,42 @@
+<html>
+
+<head>
+<title>How TDRP works</title>
+</head>
+
+<body>
+
+<h3>How TDRP works</h3>
+
+There are two main components of the system in memory:
+
+<ul>
+<li>
+The parameter table.
+</li><p>
+<li>
+The parameter structure (C) or object (C++) in user space.
+</li><p>
+</ul>
+
+The table is a static array in the _tdrp.c module for C, or a private
+array in the Params class in C++. The <code>init()</code> function
+loads up the table with the default values. The <code>read()</code>
+function then takes values from the parameter file and writes over the
+defaults.<p>
+
+Stored in the table are offsets from some reference address in memory
+to the address of the parameter in user space.  At the end of the
+<code>read()</code> function the values in the table are copied across
+from the table into user space, using the offset to compute the
+user-space address.<p>
+
+From then on the program deals with the parameters in user space.
+If changes are made to parameter values this is done in user space.<p>
+
+Prior to a print of the parameters, the values are copied back from
+user space to the table via the <code>sync()</code> function.<p>
+
+</body>
+</html>
+

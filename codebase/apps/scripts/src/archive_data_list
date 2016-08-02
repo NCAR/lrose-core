@@ -1,0 +1,56 @@
+# ==============================================================================================================================================
+# TAR FILE NAME				LOCAL ARCHIVE DIR		FILE_TYPE	DATA PATH (relative to $RAP_DATA_DIR)	MSS PATH
+# ==============================================================================================================================================
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/colide/regions		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/colide/tracked		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/detect_120		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/detect_60		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/detect_growth		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/detect_large_storms	/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/extrap			/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/ng60_growth		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/ng60_merged		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/ng60_updv_bdry		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/ng60_updv_ncwf		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/ng60_updv_ruc		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/ng120_growth		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/ng120_merged		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/ng120_updv_bdry	/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/ng120_updv_ncwf	/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/ng120_updv_ruc		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/upd_vec_120		/NCWF/thorn/spdb
+extrap-growth_spdb_data.tar		/d1/data/rcwf/archive_files	date		rcwf/spdb/storms/upd_vec_60		/NCWF/thorn/spdb
+
+ciws-vil_ltg_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/CIWS_vil			/NCWF/thorn/mdv
+ciws-vil_ltg_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/ltg				/NCWF/thorn/mdv
+wsi_2km_refl_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/wsi_refl			/NCWF/thorn/mdv
+
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/colide/image			/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/colide/reg_orient		/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/filtered_growth_interest_final	/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/filtered_likelihood		/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/front_likelihood		/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/growth_interest		/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/growth_interest_final		/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/interest_detect		/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/interest_detect_2km		/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/mask				/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/mit_filt_2km			/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/mit_filt_2km_thin		/NCWF/thorn/mdv
+extrap-growth_mdv_data.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/strat_filt			/NCWF/thorn/mdv
+
+ruc_new40_hybrid_03fcst_mdv.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/ruc/hybrid/f03			/NCWF/thorn/ruc/mdv
+ruc_new40_pressure_00anal_mdv.tar	/d1/data/rcwf/archive_files	time		rcwf/mdv/ruc/pressure/f00		/NCWF/thorn/ruc/mdv
+ruc_new40_derived_hybrid_03fcst_mdv.tar	/d1/data/rcwf/archive_files	time		rcwf/mdv/ruc/derived/hybrid/f03		/NCWF/thorn/ruc/mdv
+satellite_g08_4km_mdv.tar		/d1/data/rcwf/archive_files	time		rcwf/mdv/satellite/low_res/orig		/NCWF/thorn/sat/mdv
+
+satellite_g08_4km_raw.tar		/d1/data/rcwf/archive_files	time		rcwf/raw/satellite/low-res		/NCWF/thorn/sat/raw
+satellite_g08_1km_raw.tar		/d1/data/rcwf/archive_files	time		rcwf/raw/satellite/high-res		/NCWF/thorn/sat/raw
+#ruc_new40_hybrid_03fcst_raw.tar	/d1/data/rcwf/archive_files	time		rcwf/raw/ruc/hybrid/f03			/NCWF/ruc/raw
+#ruc_new40_pressure_00anal_raw.tar	/d1/data/rcwf/archive_files	time		rcwf/raw/ruc/pressure/f00		/NCWF/ruc/raw
+
+ncwf_verify.tar				/d1/data/rcwf/archive_files	time		rcwf/mdv/verify/truth			/NCWF/thorn/verify
+ncwf_verify.tar				/d1/data/rcwf/archive_files	time		rcwf/mdv/verify/extrap_fcst_1hr		/NCWF/thorn/verify
+ncwf_verify.tar				/d1/data/rcwf/archive_files	time		rcwf/mdv/verify/extrap_fcst_2hr		/NCWF/thorn/verify
+ncwf_verify.tar				/d1/data/rcwf/archive_files	time		rcwf/mdv/verify/growth_fcst_1hr		/NCWF/thorn/verify
+ncwf_verify.tar				/d1/data/rcwf/archive_files	time		rcwf/mdv/verify/growth_fcst_2hr		/NCWF/thorn/verify

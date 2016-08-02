@@ -1,0 +1,78 @@
+/****************************************************
+ * TDRP params for smooth_mdv
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Smoothing method.
+ * The method used to smooth the grid.
+ *
+ * Type: enum
+ * Default: MEAN 
+ * Legal values: MEAN, MEDIAN.
+ */
+method = MEAN;
+
+/*
+ * Smoothing kernel size.
+ * Size of smoothing kernel - must be odd number.
+ *
+ * Type: long
+ * Default: 3 
+ * Min value: 3 
+ * Max value: 99 
+ */
+kernel_size = 3;
+
+/*
+ * Smoothed fields.
+ * Fields to be smoothed.
+ *
+ * Type: long
+ * Min value: 0 
+ * Array elem size: 4 bytes
+ * Array has no max number of elements
+ */
+smoothed_fields = {0};
+
+/*
+ * Input file path.
+ * Path of file to be smoothed.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+input_file_path = "/home/dixon/titan/cdata/19900710/030314.dob";
+
+/*
+ * Output file path.
+ * Path of smoothed file.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+output_file_path = "/home/dixon/titan/cdata/19900710/030314.dob";
+
+

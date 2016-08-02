@@ -1,0 +1,99 @@
+#! /bin/csh
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070209/200* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070208/200?????_18* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070208/200?????_19* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070206/200* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070205/200* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070124/200?????_1[7-8]* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070124/200?????_19* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070119/200* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070110/200* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070104/200?????_1* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070104/200?????_2* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070103/200?????_1* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20070103/200?????_2* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20061207/200* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20061019/200* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20061009/200* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060901/200* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060831/200* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060824/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060824/200?????_1* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060823/200?????_1* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060823/200?????_2* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060822/200?????_0* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060821/200?????_ -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060819/200?????_ -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060818/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060818/200?????_2* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060817/200?????_0* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060816/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060816/200?????_1* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060815/200* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060814/200* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060812/200* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060811/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060811/200?????_1* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060811/200?????_2* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060810/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060810/200?????_1* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060810/200?????_2* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060807/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060807/200?????_1* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060806/200* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060805/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060805/200?????_1* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060805/200?????_2* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060804/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060804/200?????_1* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060803/200?????_1* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060802/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060802/200?????_1* -debug
+
+gunzip ~/data/raw/tsarchive/sunscan/*/*gz
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060731/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060731/200?????_1* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060730/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060730/200?????_1* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060729/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060729/200?????_1* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060728/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060728/200?????_1* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060727/200?????_0* -debug
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060727/200?????_1* -debug
+
+SunCal -params SunCal.test -f ~/data/raw/tsarchive/sunscan/20060726/200* -debug
+

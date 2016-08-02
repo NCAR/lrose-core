@@ -1,0 +1,69 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_volume</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href=RSL_volume_struct.html>Volume</a> *RSL_get_volume(<a href=RSL_radar_struct.html><a href=RSL_radar_struct.html>Radar</a></a> *r, int type_wanted);</b>
+
+<h3>
+<hr>Description</h3>
+<b>RSL_get_volume</b> extracts the desired volume from the <b>Radar</b> *<b>r</b>. <b>type_wanted</b> can be one of: DZ_INDEX, VR_INDEX, SW_INDEX, CZ_INDEX, ZT_INDEX, DR_INDEX or LR_INDEX. Only the pointer is copied for the returned value. If you want to optain a seperate copy of the volume, from the Radar *r, for modification purposes, then use <a href=RSL_copy.html>RSL_copy_volume</a>. The different indexes are described as follows:
+
+<pre> DZ	Reflectivity (dBZ), may contain some	DZ_INDEX
+ 	signal-processor level QC and/or
+ 	filters. This field would contain
+ 	Darwin's CZ, or WSR88D's standard
+ 	reflectivity. In other words, unless
+ 	the field is described otherwise, it
+ 	should always go here. In essence, this
+ 	is the &quot;cleanest&quot; reflectivity field
+ 	for a radar.
+
+ VR 	Radial Velocity (m/s)		VR_INDEX
+
+ SW 	Spectral Width (m2/s2) 		SW_INDEX
+
+ CZ 	QC Reflectivity (dBZ), contains
+	post-processed QC'd data 		CZ_INDEX
+
+ ZT 	Total Reflectivity (dBZ) 		ZT_INDEX
+ 	May be uncommon, but important
+
+ DR	Differential reflectivity 		DR_INDEX
+ 	DR and LR are for dual-polarization
+ 	radars only. Unitless or in dB.
+
+ LR 	Another form of differential ref	LR_INDEX
+ 	called LDR, not sure of units 
+
+</pre>This function is a one line C function. Observe the following:
+
+<pre>Radar *radar;
+Volume *v;
+/* The following two lines are identical. */
+v = Vget_volume(radar, DZ_INDEX);
+v = radar-&gt;v[DZ_INDEX];
+</pre>
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the Volume structure is returned; only the pointer is copyied.
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_get_sweep.html>RSL_get_sweep</a>, <a href=RSL_get_ray.html>RSL_get_ray</a><br>
+<a href=RSL_copy.html>RSL_copy_volume</a>, <a href=RSL_copy.html>RSL_copy_sweep</a>, <a href=RSL_copy.html>RSL_copy_ray</a><br>
+<a href=RSL_free.html>RSL_free_volume</a>, <a href=RSL_free.html>RSL_free_sweep</a>, <a href=RSL_free.html>RSL_free_ray</a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

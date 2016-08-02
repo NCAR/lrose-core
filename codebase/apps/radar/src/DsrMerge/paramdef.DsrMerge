@@ -1,0 +1,191 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions DsrMerge
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Feb 2010
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DsrMerge reads moments data from 2 Dsr file message queues, which contain data from 2 channels of the same radar system, in which there are differences. For example, there may be 2 transmitters operating at different frequencies, each of which has a separate moments data set. DsrMerge merges these two data streams, and produces a single combined data stream. In doing so, some fields are copied unchanged into the output queue. Other fields may be combined using the mean of the two incoming fields.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "FMQ INPUT - file message queues";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/moments1";
+  p_descr = "Name for first input FMQ.";
+} input_fmq_name_chan1;
+
+paramdef string {
+  p_default = "/tmp/fmq/moments2";
+  p_descr = "Name for second input FMQ.";
+} input_fmq_name_chan2;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to start reading at beginning of input FMQs.";
+  p_help = "Normally, we start reading at the end of the queues. For debugging, however, it is sometimes helpful to start at the beginning of the queues.";
+} start_reading_at_fmq_start;
+
+commentdef {
+  p_header = "OPTION TO REQUIRE DATA FROM BOTH CHANNELS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to require data from both channels.";
+  p_help = "If TRUE, a beam will only be written when data is available from both channels. If FALSE, a beam will be written even when data is only availabl from one of the two channels.";
+} require_both_channels;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to allow set of merge field from only one channel.";
+  p_help = "If FALSE, then the merged fields are only set if both channels are available. If TRUE, when only a single channel is available, the merged fields will be set from the single available channel.";
+} allow_merge_from_single_channel;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print which channel is being used.";
+  p_help = "If TRUE, prints to stderr: 'M' if merged from both, '1' if from channel 1 only, '2' if from channel 2 only.";
+} print_active_channel;
+
+commentdef {
+  p_header = "CONSTRAINTS FOR MATCHING BEAMS BETWEEN CHANNELS";
+};
+
+paramdef double {
+  p_default = 0.001;
+  p_descr = "The maximum difference in time between beams in the 2 channels - secs.";
+  p_help = "If the difference in the times in the two channels is less than this number, the two beams are considered candidates for merging.";
+} max_beam_time_difference;
+
+paramdef double {
+  p_default = 0.005;
+  p_descr = "The maximum difference in azimuth between beams in the 2 channels - degrees.";
+  p_help = "If the difference in the azimuths in the two channels is less than this number, the two beams are considered candidates for merging.";
+} max_beam_azimuth_difference;
+
+paramdef double {
+  p_default = 0.005;
+  p_descr = "The maximum difference in elevation between beams in the 2 channels - degrees.";
+  p_help = "If the difference in the elevations in the two channels is less than this number, the two beams are considered candidates for merging.";
+} max_beam_elevation_difference;
+
+commentdef {
+  p_header = "FIELD LIST - which fields to copy";
+};
+
+typedef struct {
+  string input_name;
+  boolean output_from_queue_1;
+  boolean output_from_queue_2;
+  boolean output_mean;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    { "DBZ", true, true, true },
+    { "VEL", true, true, false }
+  };
+  p_descr = "Specify which derived fields are to be included in the output.";
+  p_help = "Only the selected fields will be written to the output queue. The output field names will be computed from the input filed name, with a suffix as specified.";
+} output_fields[];
+
+paramdef string {
+  p_default = "_chan1";
+  p_descr = "Suffix for computing names of fields copied from queue 1.";
+  p_descr = "Output field name will be input field name, plus this suffix.";
+} field_name_suffix_1;
+
+paramdef string {
+  p_default = "_chan2";
+  p_descr = "Suffix for computing names fields copied from queue 2.";
+  p_descr = "Output field name will be input field name, plus this suffix.";
+} field_name_suffix_2;
+
+paramdef string {
+  p_default = "_mean";
+  p_descr = "Suffix for computing names of mean fields.";
+  p_descr = "Output field name will be input field name, plus this suffix.";
+} field_name_suffix_mean;
+
+commentdef {
+  p_header = "FMQ OUTPUT for merged data";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/moments_combined";
+  p_descr = "Name for output FMQ.";
+} output_fmq_name;
+
+paramdef int {
+  p_default = 50000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+commentdef {
+  p_header = "RADAR NAME";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify a radar name.";
+  p_help = "If TRUE, the specified name will be used. If FALSE, the name from radar 1 will be used.";
+} override_radar_name;
+
+paramdef string {
+  p_default = "MERGED";
+  p_descr = "Radar name.";
+  p_descr = "See override_radar_name.";
+} radar_name;
+

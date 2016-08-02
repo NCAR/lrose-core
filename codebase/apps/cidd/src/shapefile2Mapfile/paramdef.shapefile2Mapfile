@@ -1,0 +1,106 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "shapefile2Mapfile is a small program that reads\n"
+	"shapefiles that use the State Plane Coordinate System (SPCS)\n"
+	"and writes map files that CIDD can use.\n\n"
+	"The SPCS is something of a muddle - it never really took\n"
+	"off, but is very popular with local government agencies\n"
+	"like City of Boulder, DOT etc. Most of its popularity\n"
+	"stems from the fact that its boundaries are long political\n"
+	"lines (ie. the edge of Boulder county).\n\n"
+	"The SPCS X,Y points have different meanings depending\n"
+	"on which SPCS zone is being used. The defaults in\n"
+	"this param file are for the Colorado North zone,\n"
+	"which is zone number 501.\n\n"
+	"Parameters for other zones can be found at :\n"
+	"  http://www.ngs.noaa.gov/PUBS_LIB/ManualNOSNGS5.pdf\n"
+	"      ------- Look in appendix A, and\n"
+	"  http://gpsinformation.net/mapinfow.prj\n\n"
+	"The program writes its output to a map file\n"
+	"of the same name as the input shape file.\n\n"
+	"At the time of writing only Lambert Conformal\n"
+	"SPCS systems are supported - no Mercator.\n\n"
+	"The city of Boulder has shapefiles available at :\n"
+	"http://www.co.boulder.co.us/gis/downloads/dl_shapefiles.htm\n\n"
+	"Niles Oien August 2006.";
+
+}
+
+paramdef string {
+  p_descr = "Input directory to read shape files from.";
+  p_help = "Both the .shp and .sbx files must be here."; 
+  p_default = {"/Some/input/directory"};
+} inDir;
+ 
+paramdef string {
+  p_descr = "Output directory.";
+  p_help = "Map files are written here. Directory will be\n"
+	"created if it does not exist."; 
+  p_default = {"/Some/output/directory"};
+} outDir;
+
+paramdef string {
+  p_descr = "General descriptor for these files.";
+  p_help = "Will be pre-pended to output map file names."; 
+  p_default = {"Boulder_"};
+} generalDescriptor;
+
+paramdef string {
+  p_descr = "List of map file names to process.";
+  p_help = "No extensions."; 
+  p_default = {"lakes", "rivers", "roads" };
+} mapFiles[];
+
+typedef struct {
+        double originLat;
+        double originLon;
+	double trueLat1;
+	double trueLat2;
+	double originEastingMeters;
+	double originNorthingMeters;
+} SPCS_parameters_t;
+
+paramdef struct SPCS_parameters_t {
+	p_descr = "Parameters of SPCS Zone.";
+	p_help = "Default is for Colorado North Zone (0501)";
+	p_default = { 39.33333333333, -105.5, 39.7166666667, 40.7833333333,
+		914401.8289, 304800.6096 };
+} SPCS_parameters;
+
+paramdef double {
+  p_descr = "Offset to add in X, meters.";
+  p_help = "Idea is to overcome NAD differences to allow these\n"
+	"maps to align with existing maps."; 
+  p_default = 0;
+} xOffset;
+
+paramdef double {
+  p_descr = "Offset to add in Y, meters.";
+  p_help = "Idea is to overcome NAD differences to allow these\n"
+	"maps to align with existing maps."; 
+  p_default = 0;
+} yOffset;
+

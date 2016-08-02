@@ -1,0 +1,213 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_routes: Parameter definitions for 
+// Predefined route wind, etc support
+
+commentdef {
+  p_header = "Route Winds Parameters";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_help = "Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output";
+} debug; 
+
+paramdef int {
+  p_default = 13;
+  p_descr = " Maximum height in Pixels of labels";
+} font_height;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Default state of the add_waypoints_labels";
+  p_help = "0 = off, 1 = on";
+} add_waypoints_labels;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Default state of the add_wind_text labels";
+  p_help = "0 = off, 1 = on";
+} add_wind_text;
+
+typedef enum {
+  REGULAR_INTERVALS, EQUAL_DIVISIONS
+} label_style_t; 
+
+paramdef enum label_style_t
+{
+    p_default = REGULAR_INTERVALS;
+    p_help = "Set to REGULAR_INTERVALS or EQUAL_DIVISIONS";
+} label_style;
+
+paramdef double {
+    p_default = 55.6;
+    p_help =  "Used if label_style is set to REGULAR_INTERVALS";
+    p_descr = "Distance in km between winds labels";
+} label_interval;
+
+paramdef int {
+  p_default = 10;
+  p_min = 2;
+  p_max = 100;
+  p_descr = "number of route wind labels to plot along the route.";
+  p_help = "Typically this should be set between 5 and 20";
+} num_route_labels; 
+
+paramdef int {
+  p_default = 3;
+  p_min = 1;
+  p_max = 20;
+  p_descr = "Width in pixels of the route winds track";
+} route_track_line_width;
+
+paramdef string {
+  p_default = "mdvp::zoom_mds//neptune::mdv/mm5&U"; 
+  p_descr = "U Wind Componet";
+  p_help = " URL's take the form  mdvp::[paramfile]//host.dom::dir/dir&fieldname\n";
+} u_url;
+
+paramdef string {
+  p_default = "mdvp::zoom_mds//neptune::mdv/mm5&V"; 
+  p_descr = "v Wind Componet";
+} v_url;
+
+paramdef string {
+  p_default = "mdvp::d3_d4//neptune::mdv/mm5&Turb";
+  p_descr = "Turbulence Index";
+} turb_url;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Value at which the turbulence is considered Low";
+} turb_low_thresh;
+
+paramdef double {
+  p_default = 0.50;
+  p_descr = "Value at which the turbulence is considered Moderate";
+} turb_mod_thresh;
+
+paramdef double {
+  p_default = 0.75;
+  p_descr = "Value at which the turbulence is considered High";
+} turb_hi_thresh;
+
+paramdef string {
+  p_default = "mdvp::d3_d4//neptune::mdv/mm5&Icing";
+  p_descr = "Icing Index";
+} icing_url;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Value at which the icing is considered Light";
+} icing_low_thresh;
+
+paramdef double {
+  p_default = 0.50;
+  p_descr = "Value at which the icing is considered Moderate";
+} icing_mod_thresh;
+
+paramdef double {
+  p_default = 0.75;
+  p_descr = "Value at which the icing is considered Heavy";
+} icing_hi_thresh;
+
+paramdef string {
+  p_default = {
+  "A-1 8 "
+  "BULAN 27.0917 124.0000 "
+  "OSTAR 26.3317 123.0000 "
+  "SHARK 25.8333 122.3583 "
+  "ANNNA 25.5717 122.0217 "
+  "APU 25.1767 121.5233 "
+  "HLG 24.6400 120.7833 "
+  "MKG 23.5583 119.6283 "
+  "ELATO 22.3333 117.5000 ",
+
+  "M-750 12 "
+  "MOLKA 26.6583 124.0000 "
+  "MORSU 25.9100 123.0000 "
+  "LEKOS 25.5100 122.4717 "
+  "ROBIN 25.4200 122.2083 "
+  "NOKAS 25.1317 121.9917 "
+  "SANAS 24.8967 121.6917 "
+  "PILOX 24.4150 121.0250 "
+  "ANLOT 23.9417 120.5233 "
+  "TOROX 23.3533 119.9083 "
+  "RENOT 22.5683 118.5117 "
+  "DADON 22.2767 118.0033 "
+  "ENVAR 21.9917 117.5000 ",
+
+  "G-581 7 "
+  "IGURU 23.9500 124.0000 "
+  "TULTO 23.3233 123.0000 "
+  "HCN 21.9283 120.8433 "
+  "PARPA 22.0150 120.1683 "
+  "CYRUS 22.2167 118.5317 "
+  "DADON 22.2767 118.0033 "
+  "ELATO 22.3333 117.5000 ",
+
+  "B-591 9 "
+  "APU 25.1767 121.5233 "
+  "SANAS 24.8967 121.6917 "
+  "TINHO 24.3533 122.0283 "
+  "TITUS 23.8283 121.8517 "
+  "TACLE 22.9933 121.5867 "
+  "GID 22.6733 121.4867 "
+  "TUNNY 22.3600 121.2150 "
+  "HCN 21.9283 120.8433 "
+  "DOREX 21.0000 120.7833 ",
+
+  "R-583 5 "
+  "BORDO 26.0167 124.0000 "
+  "KIKIT 25.8817 123.5917 "
+  "PABSO 25.6517 122.8750 "
+  "LEKOS 25.5100 122.4717 "
+  "APU 25.1767 121.5233 ",
+
+  "G-86 3 "
+  "HCN 21.9283 120.8433 "
+  "ANDRE 21.7783 120.1683 "
+  "KAPLI 21.1667 117.5000 ",
+
+  "B-576 3 "
+  "SALMI 28.3150 124.0000 "
+  "BERBA 27.0783 123.0000 "
+  "APU 25.1767 121.5233 "
+  };
+   p_descr = " Route path strings - Format of each string is"
+      "ROUTE_LABEL NPOINTS  ID_String Lat Lon ID_String LAT Lon ...\n";
+   p_help = "ROUTE_LABEL will be used in the menu, \n"
+      "NPoints = Number of way points in route \n"
+      "  Followed by NPoint triplets of the following:\n"
+      "ID_string -> usually a Airport or VOR \n"
+      "Lat Lon :  decimal degrees\n";
+      "\n";
+      "Note: Make sure white space separates the fields!\n";
+} route_paths[];

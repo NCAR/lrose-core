@@ -1,0 +1,8 @@
+#
+# NEXRAD NIDS data. Request only the radars we need. I think this
+# does get us several fields that we *don't* write to disk - N1S and
+# N2S, for instance - but it is still a *much* smaller request
+# than requesting all radars.
+#
+request	NNEXRAD	"AKQ|CCX|DOX|LWX"	134.194.66.142
+#

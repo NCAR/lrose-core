@@ -1,0 +1,125 @@
+/*********************************************************
+ * parameter definitions for CaseStats
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 1997
+ */
+
+commentdef {
+  p_header = "Computes statistics for the analysis of weather modification efforts. Uses the re-randomization technique to compute the probability that the effect was by chance. Requires randomized pools of seed/no-seed cases. Must run PartialProps first to compute the properties of the partial tracks for each case. The app reads in the partial properties files, computes the statistics and writes to output files in ASCII.";
+}
+
+paramdef enum debug_t
+{
+  p_options = {DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE};
+  p_default = DEBUG_OFF;	
+  p_descr = "Debug option";	
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "File path for seed/no-seed cases.";
+  p_help = "This file indicates the time and track numbers for each seeded case. In addition the environmental conditions, such as cloud base and CAPE are input from this file.";
+} case_file_path;
+
+paramdef string {
+  p_default = "null";
+  p_descr = "Directory for properties files.";
+  p_help = "This directory holds the files produced by PartialProps.";
+} props_files_dir;
+
+paramdef string {
+  p_descr = "Global property list.";
+  p_help = "The is the list of global properties used in the analysis. Global properties apply to the entire case, for example mean_volume.";
+} global_props[];
+
+paramdef string {
+  p_descr = "Time series property list.";
+  p_help = "The is the list of time series properties used in the analysis. Time series properties are instanteous values, for example the volume at a given time.";
+} tseries_props[];
+
+paramdef int {
+  p_descr = "Time series delta time list (secs).";
+  p_help = "The is the list of time series delta time values used in the analysis. Delta_times are relative to decision time. Each of the tseries properties will be computed at each of these times.";
+} tseries_dtimes[];
+
+paramdef struct condition {
+  p_descr = "Conditions on variables for analysis.";
+  p_help = "If you wish you may impose conditions on the analysis by using this parameter array. For global props, just insert the prop_name and the max and min vals (e.g. precip_flux_max). Only cases in which the global val falls with the range will be included. For time_series props, designate the prop_name as prop_name@time, where time is the number of seconds from decision time in the time series (e.g. precip_flux@300 for precip_flux 5 mins after decision time).";
+  p_field_type = {string, double, double};
+  p_field_name = {prop_name, min_val, max_val};
+} conditions[];
+
+paramdef enum stat_type_t
+{
+  p_options = {ARITH_MEAN, GEOM_MEAN, FIRST_QUARTILE, SECOND_QUARTILE, THIRD_QUARTILE};
+  p_default = ARITH_MEAN;	
+  p_descr = "Statistic type for analysis.";	
+  p_help = "One of the following stats may be utilized in any single analysis: arithmetic mean, geometric mean (better for log-normal data), first quartile, second quartile and third quartile.";
+} stat_type;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to set the interpolated value to missing if the storm did not exist at the interp time.";
+  p_help = "If false, 0 will be used instead of missing data.";
+} set_missing_val_in_interp;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Allow interpolation to a value when the data does not straddle the time to which you are interpolating.";
+  p_help = "This applies to interpolating the storm properties onto a regular time interval. If false, the interpolated value will only be computed if there is data both before and after the interpolation time. If true, and data is not available on both sides of the interp time, the interpolated value will be set to the nearest neighbor data value if the time difference is less than max_time_error_for_one_ended_interp.";
+} allow_one_ended_interp;
+
+paramdef int {
+  p_default = 180;
+  p_descr = "Max time slop to one ended interpolation.";
+  p_help = "The is max time difference between the requested time and the observed time, for one-ended interpolation.";
+} max_time_error_for_one_ended_interp;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to perform re-randomization.";
+  p_help = "If set, the re-randomization technique will be used to compute the significance of any changes between the seed and no-seed data. The results will be included in the printout.";
+} use_rerandomization;
+
+paramdef int {
+  p_default = 1000;
+  p_min = 10;
+  p_descr = "Number of re-randomization sequences.";
+  p_help = "If rerandomization is used, this is the number of re-randomized sequences which are used in the analysis.";
+} n_rerand;
+
+paramdef int {
+  p_default = 200;
+  p_min = 10;
+  p_descr = "Number of entries in randomized list.";
+  p_help = "Each time a random list is created, it will be n_random_list long. The entries in the list will be used from the start of the list, one per case. If there are more cases than n_random_list an error will be reported.";
+} n_random_list;
+
+paramdef int {
+  p_default = 7;
+  p_descr = "Maximum seed-no_seed split.";
+  p_help = "This is the max allowable split between the seed and no-seed pools in the re-randomization. If the split in a list exceeds this value, a new list will be generated.";
+} max_split;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write interpolated time-series files.";
+  p_help = "If set, interpolated time-series files are written to props_files_dir. The file names are interp.nnn, where nnn is the case number.";
+} write_interp_files;
+
+
+
+
+
+
+
+

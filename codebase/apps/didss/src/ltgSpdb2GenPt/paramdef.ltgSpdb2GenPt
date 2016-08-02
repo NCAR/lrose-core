@@ -1,0 +1,129 @@
+/*
+ *
+ * Parameter definitions for ltgSpdb2GenPt application        
+ *
+ *
+ */
+
+commentdef {
+  p_header = "Reads lightning data from SPDB data base in normal struct format, converts it into Generic Point format.";
+}
+
+paramdef string {
+  p_descr = "Process instance";
+  p_help = "This is used by the process mapper, procmap";
+  p_default = "test";
+} instance;
+
+paramdef boolean {
+  p_descr = "Info messaging option";
+  p_help  = "This defaults to TRUE if debug is turned on";
+  p_default = FALSE;
+} info;
+
+paramdef boolean {
+  p_descr = "Debug messaging option.";
+  p_help  = "More extensive messages than info messages";
+  p_default = FALSE;
+} debug;
+
+typedef enum {
+  REALTIME, 
+  ARCHIVE
+} run_mode_t;
+
+paramdef enum run_mode_t {
+  p_default = REALTIME;
+  p_descr = "Run mode";
+  p_help =  "REALTIME\n"
+	    "ARCHIVE\n";
+} runMode;
+
+typedef enum {
+  EXACT,
+  CLOSEST,
+  INTERVAL,
+  VALID, 
+  LATEST,
+  BEFORE, 
+  AFTER 
+} data_mode_t;
+
+paramdef enum data_mode_t {
+  p_default = INTERVAL;
+  p_descr = "Data retrieval mode\n"
+            "runMode: ARCHIVE";
+  p_help = "EXACT:    get data at request time only\n"
+           "CLOSEST:  get data closest to request time within timeMargin\n"
+           "INTERVAL: get data in specific interval\n"
+	   "VALID:    get data valid at request time\n"
+	   "LATEST:   get the latest data within timeMargin\n"
+	   "BEFORE:   get the first data before request time within timeMargin\n"
+	   "AFTER:    get the first data after the request time within timeMargin\n";
+} dataMode;
+
+paramdef string {
+  p_descr = "runMode: ARCHIVE\n"
+	    "dataModes: EXACT, CLOSEST, BEFORE, AFTER, VALID\n";
+  p_help =  "format: 'YYYY/MM/DD HH:MM:SS'.\n"
+            "requesTime defaults to now\n"
+	    "requesTime should be given in UTC";
+} requestTime;
+
+paramdef string {
+  p_descr = "runMode: ARCHIVE\n"
+            "dataModes: INTERVAL only";
+  p_help =  "format: 'YYYY/MM/DD HH:MM:SS'. start_time defaults to now - 1 day\n"
+	    "startTime should be given in UTC";
+} startTime;
+
+paramdef string {
+  p_descr = "runMode: ARCHIVE\n"
+	    "dataModes: INTERVAL only";
+  p_help =  "format: 'YYYY/MM/DD HH:MM:SS'\n" 
+            "endTime defaults to now"
+	    "endTime should be given in UTC";
+} endTime;
+
+paramdef int {
+  p_default = 1440;
+  p_descr = "runMode: ARCHIVE\n"
+	    "dataMode:  CLOSEST, LATEST, BEFORE, AFTER";
+  p_help =  "time margin in minutes.";
+} timeMargin;
+
+paramdef int {
+  p_default = 900; 
+  p_descr = "# of seconds to add to strike time to create valid time in"
+            " Spdb output file. Default is 15 minutes.";	
+}ltg_valid_time;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Data type associated with ltg data to be retreived.";
+  p_help =  "A value of zero retrieves all data types within relevant"
+            " time period.";
+} ltgType; 
+  
+paramdef string {
+  p_descr = "input url";
+  p_help =  "URL format: spdbp:://host:port:directory (port optional) or directory";
+  p_default = "";
+} inputUrl;
+
+paramdef string {
+  p_descr = "ouput url";
+  p_help =  "URL format: spdbp:://host:port:directory (port optional) or directory";
+  p_default = "";
+} outputUrl;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "runMode: REALTIME\n"
+            "Sleep time (seconds) between requests for data.";
+} sleepTime;
+
+
+
+
+

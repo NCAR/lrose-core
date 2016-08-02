@@ -1,0 +1,22 @@
+# colorscale for zdr field
+
+# Mike Dixon, April 1991
+
+-4	-3     DarkSlateBlue
+-3 	-2 	NavyBlue
+-2	-1 	Blue
+-1 	0	MediumBlue
+0 	1 	SkyBlue
+1 	2 	DarkGreen
+2	3	ForestGreen
+3 	4	YellowGreen
+4	5	Gray
+5  	6 	Wheat
+6  	7 	Gold
+7  	8 	Yellow
+8	9	Coral
+9	10	Orange
+10	11	MediumVioletRed
+11	12	OrangeRed
+12	20	Red
+

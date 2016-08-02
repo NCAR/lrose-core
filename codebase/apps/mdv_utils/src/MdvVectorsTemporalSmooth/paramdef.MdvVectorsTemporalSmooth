@@ -1,0 +1,215 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvVectorsTemporalSmooth
+ *
+ * This file contains the TDRP parameter definitions for
+ * MdvVectorsTemporalSmooth.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+	   "In FILE_LIST mode, the files listed on the command line using "
+           "the -f command line option are processed and then MdvVectorsTemporalSmooth "
+           "exits. ";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the URL to use to get the available data times.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "Input URL.";
+  p_default = "mdvp:://localhost::mdv/input";
+} input_url;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to use field names or field numbers "
+            "to identify the input fields.";
+  p_help = "If set to true, field names are used. "
+           "Otherwise, field numbers are used.";
+  p_default = true;
+} use_field_names;
+
+typedef struct
+{
+  string field_name;
+  int field_num;
+} field_info_t;
+
+paramdef struct field_info_t
+{
+  p_descr = "Information identifying the input U field.";
+  p_help = "The U data is expected to be in m/s";
+  p_default = { "U", 0 };
+} u_field;
+
+paramdef struct field_info_t
+{
+  p_descr = "Information identifying the input V field.";
+  p_help = "The V data is expected to be in m/s";
+  p_default = { "V", 1 };
+} v_field;
+
+paramdef string
+{
+  p_descr = "Output URL.";
+  p_default = "mdvp:://localhost::mdv/output";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef long
+{
+  p_descr = "Maximum allowable time offset between the current vector grid "
+            "and the previous vector grid.";
+  p_help = "If the previous vector grid is older than this, the current "
+           "vectors will not be smoothed.";
+  p_min = 0;
+  p_default = 300;
+} max_grid_offset;
+
+paramdef double
+{
+  p_descr = "Speed change maximum in km/hr.";
+  p_help = "If the speed of the vector changes more than this amount between "
+           "two time periods, the change will be reduced to this amount.";
+  p_min = 0.0;
+  p_default = 10.0;
+} speed_delta_max;
+
+paramdef double
+{
+  p_descr = "Direction change maximum in degrees.";
+  p_help = "If the direction of the vector changes more than this amount "
+           "between two time periods, the change will be reduced to this "
+           "amount.";
+  p_min = 0.0;
+  p_max = 180.0;
+  p_default = 30.0;
+} direction_delta_max;
+
+paramdef double
+{
+  p_descr = "Minimum output speed in km/hr.";
+  p_help = "If the smoothed speed for any grid square is less than this "
+           "amount, the speed and direction will be changed to 0.";
+  p_min = 0.0;
+  p_default = 1.0;
+} min_output_speed;
+
+paramdef double
+{
+  p_descr = "Minimum recovery speed in km/hr.";
+  p_help = "If the previous speed for this grid location was 0 and the "
+           "current speed is less than this amount, the output speed and "
+           "direction will be changed to 0. "
+           "This is used to try to keep vectors from flickering in and "
+           "out at the min_output_speed cutoff. "
+           "This value must be greater than the min_output_speed value.";
+  p_min = 0.0;
+  p_default = 2.0;
+} min_recovery_speed;

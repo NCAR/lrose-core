@@ -1,0 +1,56 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2003 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Program(RAP) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2003/5/6 11:52:42 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+###########################################################################
+#
+# Makefile for sockutil module
+#
+# Mike Dixon, RAP, NCAR, Boulder, Co, USA, 80307
+#
+# Nov 1994
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+LOC_INCLUDES = -I../include
+LOC_CFLAGS =
+
+TARGET_FILE = ../libtoolsa.a
+
+#
+# file lists
+#
+
+#DEBUG_CFLAGS = -DDEBUG
+
+HDRS = $(RAP_INC_DIR)/toolsa/sockutil.h
+SRCS = sock_util.c sku_named.c
+
+CPPC_SRCS = \
+	GetHost.cc \
+	IpCache.cc \
+	SockUtil.cc \
+	ServerSocket.cc \
+	Socket.cc \
+	ThreadSocket.cc \
+	incremental.cc
+
+#
+# general targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+
+#
+# local targets
+#
+
+depend: depend_generic
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

@@ -1,0 +1,46 @@
+########################################################################
+# parameters file for nexrad_generate
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# October 1991
+#
+#########################################################################
+
+nexrad_generate.debug: false
+nexrad_generate.malloc_debug_level: 0
+
+nexrad_generate.mode: realtime
+
+nexrad_generate.tmp_dir: /tmp
+nexrad_generate.source_dir: $(TITAN_HOME)/cdata
+nexrad_generate.comp_dir: $(TITAN_HOME)/nexrad_comp
+nexrad_generate.layer_dir: $(TITAN_HOME)/nexrad_layer
+nexrad_generate.dobson_file_ext: dob
+
+nexrad_generate.comp_host: $(HOST)
+nexrad_generate.layer_host: $(HOST)
+
+nexrad_generate.source_dbz_field: 0
+nexrad_generate.scan_period: 360
+nexrad_generate.dbz_tops: 18.0
+
+nexrad_generate.comp_nx: 150.0
+nexrad_generate.comp_ny: 150.0
+nexrad_generate.comp_minx: -149.0
+nexrad_generate.comp_miny: -149.0
+nexrad_generate.comp_dx: 2.0
+nexrad_generate.comp_dy: 2.0
+
+nexrad_generate.n_layers: 3
+nexrad_generate.layer_limits: 0.0 24000.0 33000.0 60000.0
+
+nexrad_generate.layer_nx: 75.0
+nexrad_generate.layer_ny: 75.0
+nexrad_generate.layer_minx: -148.0
+nexrad_generate.layer_miny: -148.0
+nexrad_generate.layer_dx: 4.0
+nexrad_generate.layer_dy: 4.0
+
+
+

@@ -1,0 +1,103 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for RadarCal
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// March 2007
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "RadarCal analyses radar calibration data.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "CAL CIRCUIT PARAMETERS";
+};
+
+paramdef double {
+  p_default = 20.5;
+  p_descr = "Gain through the H circuit, dBm.";
+} circuit_gain_h;
+
+paramdef double {
+  p_default = 20.1;
+  p_descr = "Gain through the V circuit, dBm.";
+} circuit_gain_v;
+
+paramdef double {
+  p_default = -36.92;
+  p_descr = "Coupling factor H pipe, dBm.";
+} coupling_factor_h;
+
+paramdef double {
+  p_default = -37.00;
+  p_descr = "Coupling factor H pipe, dBm.";
+} coupling_factor_v;
+
+commentdef {
+  p_header = "ANALYSIS PARAMETERS";
+};
+
+paramdef double {
+  p_default = -80;
+  p_descr = "dBm value at low end of linear region.";
+} linear_region_min_dbm;
+
+paramdef double {
+  p_default = -20;
+  p_descr = "dBm value at upper end of linear region.";
+} linear_region_max_dbm;
+
+paramdef double {
+  p_default = -110;
+  p_descr = "dBm value at upper end of noise region.";
+} noise_region_max_dbm;
+
+commentdef {
+  p_header = "OUTPUT RESULTS";
+};
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output files.";
+  p_help = "The results will be written to sub-directories named from the cal time.";
+} output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to append results to global file.";
+} append_to_global_results_file;
+
+paramdef string {
+  p_default = "RadarCal.global_results.txt";
+  p_descr = "Name for global output file.";
+} global_file_name;
+

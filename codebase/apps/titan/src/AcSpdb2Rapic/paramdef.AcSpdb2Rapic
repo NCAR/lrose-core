@@ -1,0 +1,113 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for AcSpdb2Rapic
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * October 2008
+ */
+
+commentdef {
+  p_header = "AcSpdb2Rapic reads aircraft data from SPDB, and reformats it for use in RAPIC. RAPIC is a radar display tool from the Australian Bureau of Meteorologyxb";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the application wakes up periodically, reads the SPDB data base, and writes out reformatted files. In ARCHIVE mode, the application traverses a time period specified by the user on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./spdb/ac_posn";
+  p_descr = "The SPDB data is stored here.";
+} ac_posn_spdb_url;
+
+typedef enum {
+  ALTITUDE_KM, ALTITUDE_METERS, ALTITUDE_FEET
+} altitude_units_t;
+
+paramdef enum altitude_units_t {
+  p_default = ALTITUDE_KM;
+  p_descr = "Units of the altitude data in the SPDB data base";
+} altitude_units;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "./raw/ac_posn_rapic";
+  p_descr = "The output ASCII data is stored here.";
+  p_descr = "The files are stored in subdirectories, based on the aircraft callsign.";
+} output_dir;
+
+paramdef string {
+  p_default = "trk";
+  p_descr = "Extension of the output files.";
+} output_file_ext;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Interval at which the data is written to the daily files (secs)";
+} daily_file_output_interval;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Interval at which the data is written to the latest file (secs)";
+} latest_file_output_interval;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Length of latest file, in secs";
+} latest_file_len_secs;
+

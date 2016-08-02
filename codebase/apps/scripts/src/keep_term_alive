@@ -1,0 +1,9 @@
+#!/bin/csh
+# Keep terminal alive by peforming a date once a minute
+# Some terminals will log you out if no action is taken for a while.
+# This prevents that from happening.
+
+while 1
+	date
+	sleep 60
+end

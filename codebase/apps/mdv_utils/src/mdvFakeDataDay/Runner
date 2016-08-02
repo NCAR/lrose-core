@@ -1,0 +1,12 @@
+#!/bin/csh
+
+
+/bin/rm -rf mdv
+
+./mdvFakeDataDay /d2/oien/playa/data/20100601/231242.mdv ./mdv 180 0
+./mdvFakeDataDay /d2/oien/playa/data/20100601/231836.mdv ./mdv 180 30
+./mdvFakeDataDay /d2/oien/playa/data/20100601/035209.mdv ./mdv 180 60
+./mdvFakeDataDay /d2/oien/playa/data/20100601/035804.mdv ./mdv 180 90
+./mdvFakeDataDay /d2/oien/playa/data/20100601/040326.mdv ./mdv 180 120
+./mdvFakeDataDay /d2/oien/playa/data/20100601/040921.mdv ./mdv 180 150
+

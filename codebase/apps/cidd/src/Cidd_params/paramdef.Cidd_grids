@@ -1,0 +1,59 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_grids Parameter definitions for Grided Fields
+
+typedef enum {
+  RECT = 1, FCONT = 2, RADIAL = 3 
+} render_t;
+
+commentdef {
+  p_header = "Grid Parameters";
+  p_text = "Testing";
+};
+
+typedef struct {
+  char* id;
+  char* url;
+  char* label;
+  char* units;
+  char* field_name;
+  char* colorscale_name;
+
+  render_t ren_type;
+  double on_thresh; // km across the screen;
+  double off_thresh;// km across the screen;
+  double lo_clip;   // Don't display data below this value
+  double hi_clip;   // Don't display data above this value
+  double tm_allow;  // Allowance in minutes for time validity checks
+  double tm_offset; // Offset temporal requests by this ammount in minutes
+} grid_t;
+
+paramdef struct grid_t {
+  p_default = {{"Not Defined", "Not Defined", "Not Defined",
+	       "Not Defined", "Not Defined", "Not Defined",  RECT, 
+		0.0, 36000.0, -1.0e36, 1.0e36, 0.0, 0.0 }};
+  p_descr = "Grid parameters";
+  p_help = "ID URL Label Units Field_name color_scale";
+} grid_arr[];

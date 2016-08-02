@@ -1,0 +1,17 @@
+#
+cidd.coord_key: 61500
+#
+pos_report.num_origins: 3
+
+pos_report.origin0_label: DEN
+pos_report.origin0_lat: 40.0
+pos_report.origin0_lon: -104.0
+#
+pos_report.origin1_label: PUX
+pos_report.origin1_lat: 41.0
+pos_report.origin1_lon: -105.0
+#
+pos_report.origin2_label: CYS
+pos_report.origin2_lat: 39.0
+pos_report.origin2_lon: -103.0
+#

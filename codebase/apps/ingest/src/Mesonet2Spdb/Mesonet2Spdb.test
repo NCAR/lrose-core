@@ -1,0 +1,379 @@
+/**********************************************************************
+ * TDRP params for Mesonet2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// Mesonet2Spdb reads mesonet surface observations in ASCII format, 
+//   converts them and writes them to an SPDB data base. The intended data 
+//   format is modeled after that used by the Oklahoma mesonet. For 
+//   details on the mesonet.org format, see 
+//   http://www.mesonet.org/wiki/Public:MDF_Format. Extensions to this are 
+//   supported as documented by this parameter file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In this 
+//   mode it is optional to watch for a latest_data_info file. In ARCHIVE 
+//   mode, it processes all of the data files in the input directory 
+//   between the start and end times set on the command line. In FILELIST 
+//   mode, it processes all of the files in the list specified on the 
+//   command line. In FILELIST mode paths must be fully qualified with 
+//   respect to the date and time - so if each date has a separate 
+//   subdirectory the date part of the path must be included.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA FILE INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Directory where input data files can be found.
+// Type: string
+//
+
+input_dir = "./raw/aws";
+
+///////////// latest_data_info_avail //////////////////
+//
+// Set to true if there is a latest_data_info file available in the 
+//   input directory.
+// REALTIME mode only.
+// Type: boolean
+//
+
+latest_data_info_avail = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// strict_subdir_check /////////////////////
+//
+// When set, only checks input_dir for subdirs of the form YYYYMMDD.
+// Only in REALTIME mode with latest_data_info_avail FALSE.
+// Type: boolean
+//
+
+strict_subdir_check = FALSE;
+
+///////////// file_name_check /////////////////////////
+//
+// When set, check file name contains specified sub-string.
+// See file_match_string.
+// Type: boolean
+//
+
+file_name_check = FALSE;
+
+///////////// file_match_string ///////////////////////
+//
+// Input filename match string.
+// Files must contain this string to be processed.
+// Type: string
+//
+
+file_match_string = "";
+
+//======================================================================
+//
+// DATA FORMAT.
+//
+// The input data is in an ASCII file based on the mesonet.org format. 
+//   See http://www.mesonet.org/wiki/Public:MDF_Format. The file is 
+//   space-delimited and is organized by rows and columns. A single 
+//   observation is stored per row. The fields are stored by columns, one 
+//   column per field. If a row begins with '#' it is ignored as a 
+//   comment. A row containing a '!' will be ignored as a version number 
+//   line. A row containing 7 integers will be interpreted as the base 
+//   time line: 'nfields base_year base_month base_day base_hour base_min 
+//   base_sec'. This will be followed by a line containing a series of 
+//   field labels, which will be used to interpret the data in each 
+//   column.
+//
+//======================================================================
+ 
+///////////// field_defs //////////////////////////////
+//
+// List of field definitions, associating the labels in the file with 
+//   the field types. There can be more definitions than fields in the 
+//   file - so you can use a master list even if some of the fields are 
+//   absent in the files. Either SECS_SINCE_BASE_TIME or 
+//   YEAR,MONTH,DAY,HOUR,MIN,SEC must appear, otherwise we do not know the 
+//   observation time. Obs time is computed as the base time plus 
+//   SECS_SINCE_BASE_TIME, if this is specified. Otherwise the 
+//   YYYY,MM,DD,HH,MM,DD data it used to compute the time. If the 
+//   LATITUDE,LONGITUDE,ELEVATION_M is not included in the data file, the 
+//   station position information must be made available from a separate 
+//   file - see station_location_file_path.
+//
+// Type: struct
+//   typedef struct {
+//      string label;
+//      field_type_t ftype;
+//        Options:
+//          STATION_ID
+//          STATION_NUM
+//          SECS_SINCE_BASE_TIME
+//          YEAR
+//          MONTH
+//          DAY
+//          HOUR
+//          MIN
+//          SEC
+//          LATITUDE
+//          LONGITUDE
+//          ELEVATION_M
+//          TEMP_C
+//          MIN_TEMP_C
+//          MAX_TEMP_C
+//          DEWPOINT_C
+//          RH_PERCENT
+//          WIND_DIRN_DEGT
+//          WIND_SPEED_MPS
+//          WIND_GUST_MPS
+//          VISIBILITY_KM
+//          EXTINCTION_PER_KM
+//          VERT_VIS_KM
+//          CEILING_KM
+//          RVR_KM
+//          PRESSURE_MB
+//          MSL_PRESSURE_MB
+//          MSL_PRESSURE_IN_HG
+//          PRESS_TEND_MB
+//          PRECIP_LIQUID_MM
+//          PRECIP_RATE_MMPH
+//          SNOW_DEPTH_MM
+//          FIELD_UNKNOWN
+//   }
+//
+// 1D array - variable length.
+//
+
+field_defs = {
+  { "STID", STATION_ID},
+  { "STNM", STATION_NUM},
+  { "TIME", SECS_SINCE_BASE_TIME},
+  { "YEAR", YEAR},
+  { "MONTH", MONTH},
+  { "DAY", DAY},
+  { "HOUR", HOUR},
+  { "MIN", MIN},
+  { "SEC", SEC},
+  { "LATITUDE", LATITUDE},
+  { "LONGITUDE", LONGITUDE},
+  { "ELEVATION_M", ELEVATION_M},
+  { "TAIR", TEMP_C},
+  { "MIN_TEMP_C", MIN_TEMP_C},
+  { "MAX_TEMP_C", MAX_TEMP_C},
+  { "DEWPOINT_C", DEWPOINT_C},
+  { "RELH", RH_PERCENT},
+  { "WDIR", WIND_DIRN_DEGT},
+  { "WVEC", WIND_SPEED_MPS},
+  { "WMAX", WIND_GUST_MPS},
+  { "VISIBILITY_KM", VISIBILITY_KM},
+  { "EXTINCTION_PER_KM", EXTINCTION_PER_KM},
+  { "VERT_VIS_KM", VERT_VIS_KM},
+  { "CEILING_KM", CEILING_KM},
+  { "RVR_KM", RVR_KM},
+  { "PRES", PRESSURE_MB},
+  { "MSL_PRESSURE_MB", MSL_PRESSURE_MB},
+  { "MSL_PRESSURE_IN_HG", MSL_PRESSURE_IN_HG},
+  { "PRESS_TEND_MB", PRESS_TEND_MB},
+  { "RAIN", PRECIP_LIQUID_MM},
+  { "PRECIP_RATE_MMPH", PRECIP_RATE_MMPH},
+  { "SNOW_DEPTH_MM", SNOW_DEPTH_MM}
+};
+
+//======================================================================
+//
+// STATION LOCATION FILE.
+//
+//======================================================================
+ 
+///////////// use_station_location_file ///////////////
+//
+// Set to TRUE to obtain the lat/lon form a station location file.
+// If FALSE, the LATITUDE,LONGITUDE,ELEVATION_M must be set in the data.
+// Type: boolean
+//
+
+use_station_location_file = TRUE;
+
+///////////// station_location_file_path //////////////
+//
+// Path to station location file.
+// If the do not contain lat/lon information, we must determine this 
+//   from a separate file. The station location file should contain a four 
+//   letter station identification followed by the latitude and longitude 
+//   for each station to be processed, and the elevation in meters. 
+//   Stations not in this file will be ignored.
+// Type: string
+//
+
+station_location_file_path = "./station_loc.txt";
+
+//======================================================================
+//
+// STATION FILTERING.
+//
+//======================================================================
+ 
+///////////// use_accepted_stations_list //////////////
+//
+// Set to TRUE to use the acceptedStations list (below).
+// Only accept stations in this list.
+// Type: boolean
+//
+
+use_accepted_stations_list = FALSE;
+
+///////////// accepted_stations ///////////////////////
+//
+// List of accepted station IDs.
+// If a station is not on this list, it is not stored.
+// Type: string
+// 1D array - variable length.
+//
+
+accepted_stations = { "KDEN", "KTLX" };
+
+///////////// use_rejected_stations_list //////////////
+//
+// Set to TRUE to use the rejectedStations list (below).
+// Reject stations in this list.
+// Type: boolean
+//
+
+use_rejected_stations_list = FALSE;
+
+///////////// rejected_stations ///////////////////////
+//
+// List of rejected station IDs.
+// If a station is not on this list, it is not stored.
+// Type: string
+// 1D array - variable length.
+//
+
+rejected_stations = { "KDEN", "KTLX" };
+
+///////////// check_bounding_box //////////////////////
+//
+// Set to TRUE to check that observations are within a bounding box.
+// Type: boolean
+//
+
+check_bounding_box = FALSE;
+
+///////////// bounding_box ////////////////////////////
+//
+// Bounding box to check if checkBoundingBox is TRUE.
+// Only observations which fall inside this box will be stored.
+//
+// Type: struct
+//   typedef struct {
+//      double min_lat;
+//      double max_lat;
+//      double min_lon;
+//      double max_lon;
+//   }
+//
+//
+
+bounding_box = { -90, 90, -180, 180 };
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL for decoded station data.
+// Type: string
+//
+
+output_url = "spdbp:://localhost::./spdb/mesonet";
+
+///////////// expire_seconds //////////////////////////
+//
+// Expire time in seconds for each observation.
+// This value will be added to the observation time to determine the 
+//   expire time.
+// Type: int
+//
+
+expire_seconds = 3600;
+
+///////////// output_format ///////////////////////////
+//
+// Format for data in SPDB.
+// (a) STATION_REPORT - C-style struct. (b) WX_XML: XML.
+//
+// Type: enum
+// Options:
+//     STATION_REPORT
+//     XML
+//
+
+output_format = XML;
+

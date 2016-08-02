@@ -1,0 +1,181 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "frenchRadar2Dsr reads ASCII files from Joel\n"
+	"Van Baelen and writes the data to Dsr. Only the dbz\n"
+	"field is present.";
+}
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use latest data info file in realtime.";
+  p_help = "Set to TRUE if it is workable to do so.";
+} ldataInfoAvailable;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to process latest file only on startup in realtime.";
+  p_help = "This is the default.";
+} latestFileOnly;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of seconds to sleep between detecting a gzipped\n"
+	"input file and attmpting to unzip it.";
+  p_help = "Intent is to allow the input file writing process\n"
+	"a chance to complete.";
+} sleepBeforeUnzip;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time offset for data, seconds. This is an offset that\n"
+  "is added to the input time to get the output time.";
+  p_help = "Useful if the data are timestamped in local time and\n"
+  "we want to go to UTC.";
+} time_offset;
+
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Info option";
+  p_help = "Print info messages";
+} info;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+      
+
+
+commentdef {
+  p_header = "LOGGING";
+}
+ 
+paramdef char* {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} msgLog_dir;
+
+
+paramdef char* {
+  p_descr = "output fmq url";
+  p_help = "Path for FMQ output data.";
+  p_default = {"fmqp:://localhost::./fmq.dsRadar"};
+} output_fmq_url;
+ 
+paramdef long {
+  p_default = {20000000};
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} output_fmq_size;
+ 
+paramdef long {
+  p_default = {300};
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_descr = "How many beams to process before sending radar header message.";
+  p_help = "Header messages are also sent at the end of tilts if\n"
+	"the radar parameters change.";
+  p_default = 60;
+} beamsPerMessage;
+ 
+typedef struct {
+	double latDeg;
+	double lonDeg;
+	double altKm;
+	int radarID;
+	string radarName;
+	double elevationDeg;
+	double gateSpacingKm;
+	double gateStartKm;
+	double beamWidth;
+} radarDef_t;
+
+paramdef struct radarDef_t {
+  p_descr = "Defintions for the radar - mostly location";
+  p_help = "Set as appropriate";
+  p_default = { 48.4793, 7.47472, 0.36, 1, "frenchRadar", 5.0, 0.05787, 0.028935, 2.0 };
+} radarDef;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Number of gates to send.";
+  p_help = "Default should be fine.";
+} nGatesToSend;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Number of seconds to sleep after sending a volume.";
+  p_help = "May be able to set this to 0.";
+} sleepPostVolume;
+

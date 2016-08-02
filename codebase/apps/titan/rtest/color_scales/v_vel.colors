@@ -1,0 +1,21 @@
+# NAME v_vel.colors
+
+# fhage 	6/9/1993 12:19:36
+
+-2.4 	-2.1 	DeepPink1
+-2.1 	-1.8 	maroon
+-1.8 	-1.5 	dark orchid
+-1.5 	-1.2 	blue
+-1.2 	-.9 	royal blue
+-.9 	-.6 	deep sky blue
+-.6 	-.3 	medium spring green
+-.3 	-.1 	forest green
+-.1 	.1	 	gray
+.1 		.3 		tan2
+.3 		.6 		gold1
+.6 		.9 		yellow
+.9 		1.2	 	salmon1
+1.2 	1.5 	tomato
+1.5 	1.8 	brown1
+1.8 	2.1 	red
+2.1 	2.4 	firebrick

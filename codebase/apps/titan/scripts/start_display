@@ -1,0 +1,18 @@
+#! /bin/csh
+
+#
+# kill if running
+#
+
+kill_display
+
+#
+# start data servers
+#
+
+rview -params $TITAN_HOME/params/rview.test &
+
+
+
+
+

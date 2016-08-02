@@ -1,0 +1,699 @@
+/**********************************************************************
+ * TDRP params for ./StationStripChart
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: StationStripChart.
+//
+// StationStripChart displays a time-history of Surface Station/METAR 
+//   data.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// units ///////////////////////////////////
+//
+// Units to use for Display.
+//
+// Type: enum
+// Options:
+//     METRIC
+//     ENGLISH
+//
+
+units = METRIC;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Generic";
+
+///////////// use_localtime ///////////////////////////
+//
+// Use Local times, rather than UTC for all times.
+// Type: boolean
+//
+
+use_localtime = FALSE;
+
+///////////// focus_lon ///////////////////////////////
+//
+// Starting Focus longitude for Distance sorting.
+// Type: float
+//
+
+focus_lon = -104;
+
+///////////// focus_lat ///////////////////////////////
+//
+// Starting Focus latitude for Distance sorting.
+// Type: float
+//
+
+focus_lat = 40;
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, StationStripChart retrieves data every 
+//   update_interval
+// and renders that data, moving forward in time as time passes.
+// In FOLLOW_CIDD mode, StationStripChart watches the
+// CIDD coordinate shared memory segment, and follows the time and click 
+//   point.
+// REALTIME_FOLLOW_CIDD Now Does Exactly the Same thing Aas FOLLOW_CIDD 
+//   mode.
+// In ARCHIVE mode, the program starts up and remains at the 
+//   archive_time.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FOLLOW_CIDD
+//     REALTIME_FOLLOW_CIDD
+//
+
+mode = REALTIME;
+
+///////////// archive_time ////////////////////////////
+//
+// The display time for ARCHIVE mode.
+// See mode.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+archive_time = { 2006, 4, 6, 12, 0, 0 };
+
+///////////// cidd_shmem_key //////////////////////////
+//
+// The shared memory key for the CIDD coordinate struct.
+// When the user clicks in the CIDD main window, 
+// the coordinate struct is updated with the click lat long.
+// The time value is used to drive StationStripChart in REALTIME mode.
+// Type: int
+//
+
+cidd_shmem_key = 61500;
+
+///////////// update_interval_min /////////////////////
+//
+// Interval at which to request new data (minutes).
+// This program will schedule updates on the even interval.
+// Type: int
+//
+
+update_interval_min = 1;
+
+///////////// seconds_delay ///////////////////////////
+//
+// Seconds after the Update Interval to inititate data retrieval.
+// Minimum val: 0
+// Maximum val: 59
+// Type: int
+//
+
+seconds_delay = 0;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input SPDB data.
+// METAR data is stored in SPDB format at this URL.
+// Type: string
+//
+
+input_url = "spdbp:://wxdemo1::wwr/spdb/gauges_c?tunnel_url=http://www.rap.ucar.edu/DsServerTunnel";
+
+//======================================================================
+//
+// STATION DETAILS.
+//
+//======================================================================
+ 
+///////////// max_display_stations ////////////////////
+//
+// Max number of stations to display.
+// Type: int
+//
+
+max_display_stations = 10;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// stations ////////////////////////////////
+//
+// Information for each station to be displayed.
+// The name must be a 4 character ID of the Surface station Set 
+//   plot_fz_precip to TRUE if freezing precip indicator bits are valid in 
+//   the data for this station  - Set to false to avoid plotting false 
+//   negatives!.
+//
+// Type: struct
+//   typedef struct {
+//      string menu_name;
+//      string name;
+//      string color;
+//      boolean plot_fz_precip;
+//   }
+//
+// 1D array - variable length.
+//
+
+stations = {
+  { "PIT1", "PIT1", "green", TRUE},
+  { "PIT2", "PIT2", "gold", TRUE}
+};
+
+//======================================================================
+//
+// DISPLAY DETAILS.
+//
+//======================================================================
+ 
+///////////// window_label ////////////////////////////
+//
+// Label for window border.
+// This label will normally appear in the top border of the display 
+//   window.
+// Type: string
+//
+
+window_label = "Surface Station Time History";
+
+///////////// window_height ///////////////////////////
+//
+// The startup height for the window.
+// Type: int
+//
+
+window_height = 300;
+
+///////////// window_width ////////////////////////////
+//
+// The startup width for the window.
+// Type: int
+//
+
+window_width = 435;
+
+///////////// bottom_margin ///////////////////////////
+//
+// Width of bottom margin (pixels).
+// Type: int
+//
+
+bottom_margin = 15;
+
+///////////// trace_line_width ////////////////////////
+//
+// The width of the lines used for the plot traces.
+// Type: int
+//
+
+trace_line_width = 2;
+
+///////////// right_margin ////////////////////////////
+//
+// Width of right margin (pixels).
+// Type: int
+//
+
+right_margin = 3;
+
+///////////// plot_period_secs ////////////////////////
+//
+// The initial period for the plot - secs.
+// This is the initial time period for the plot in seconds. 
+//  The scale of the plot (pixels/sec) =  window_width/plot_period_secs. 
+//   If the window is resized, the plot period will change, keeping the 
+//   pixel/sec scale constant. - If keep_period_fixed is TRUE the .
+// Minimum val: 0
+// Type: int
+//
+
+plot_period_secs = 7200;
+
+///////////// keep_period_fixed ///////////////////////
+//
+// Do not expand the time range on window resize when true.
+// Type: boolean
+//
+
+keep_period_fixed = TRUE;
+
+///////////// spare1_scale ////////////////////////////
+//
+// Scale Spare1 values by this amount.
+// Type: float
+//
+
+spare1_scale = 1;
+
+///////////// spare1_bias /////////////////////////////
+//
+// Bias Spare1 values by this amount - After scaling.
+// Type: float
+//
+
+spare1_bias = 0;
+
+///////////// spare2_scale ////////////////////////////
+//
+// Scale Spare2 values by this amount.
+// Type: float
+//
+
+spare2_scale = 1;
+
+///////////// spare2_bias /////////////////////////////
+//
+// Bias Spare2 values by this amount - After scaling.
+// Type: float
+//
+
+spare2_bias = 0;
+
+///////////// display_variable ////////////////////////
+//
+// List of Variables to Display.
+// Choose from the field_name_t list above. The program will generate a 
+//   menu with the fields listed.
+//
+// Type: struct
+//   typedef struct {
+//      field_name_t field;
+//        Options:
+//          RATE
+//          ACCUMULATION
+//          CEILING
+//          VISIBILITY
+//          FLIGHT_CAT
+//          TEMPERATURE
+//          HUMIDITY
+//          WIND_SPEED
+//          WIND_DIRN
+//          PRESSURE
+//          ACCUMULATION2
+//          SPARE1
+//          SPARE2
+//          FZ_PRECIP
+//          DEWPT
+//          PRECIP_TYPE
+//      string label_str;
+//   }
+//
+// 1D array - variable length.
+//
+
+display_variable = {
+  { RATE, "Precip Rate"},
+  { ACCUMULATION, "Precip Accum"},
+  { CEILING, "Ceiling"},
+  { VISIBILITY, "Visibility"},
+  { FLIGHT_CAT, "Flt Cat"},
+  { TEMPERATURE, "Temperature"},
+  { HUMIDITY, "Humidity"},
+  { DEWPT, "Dew Point"},
+  { WIND_SPEED, "Wind Speed"},
+  { WIND_DIRN, "Wind Direction"},
+  { PRESSURE, "Barometer"},
+  { ACCUMULATION2, "Icing Rate "},
+  { SPARE1, "Frequency"},
+  { SPARE2, "Snow Depth"},
+  { FZ_PRECIP, "Freezing Precip"},
+  { PRECIP_TYPE, "Precip Type"}
+};
+
+///////////// starting_menu_selection /////////////////
+//
+// Which Menu Button to activate on startup.
+// Type: int
+//
+
+starting_menu_selection = 0;
+
+///////////// foreground_color ////////////////////////
+//
+// Color of the foreground in the display.
+// Type: string
+//
+
+foreground_color = "white";
+
+///////////// background_color ////////////////////////
+//
+// Color of the background in the display.
+// Type: string
+//
+
+background_color = "black";
+
+///////////// now_color ///////////////////////////////
+//
+// Color for the NOW line on the display.
+// Type: string
+//
+
+now_color = "red";
+
+///////////// font_name ///////////////////////////////
+//
+// Name of font for the text on the display.
+// Type: string
+//
+
+font_name = "6x13";
+
+///////////// min_ceiling_range ///////////////////////
+//
+// Minimum range for ceiling plot.
+// Type: float
+//
+
+min_ceiling_range = 20;
+
+///////////// min_prate_range /////////////////////////
+//
+// Minimum Precip Rate scale range mm/hr.
+// Type: float
+//
+
+min_prate_range = 5;
+
+//======================================================================
+//
+// Frozen Precip  CATEGORY .
+//
+//======================================================================
+ 
+///////////// no_fzra_color ///////////////////////////
+//
+// Color for No Frozen Precip.
+// Type: string
+//
+
+no_fzra_color = "dark green";
+
+///////////// fzfg_color //////////////////////////////
+//
+// Color for Frozen FOG.
+// Type: string
+//
+
+fzfg_color = "burlywood";
+
+///////////// frost_color /////////////////////////////
+//
+// Color for FROST.
+// Type: string
+//
+
+frost_color = "peru";
+
+///////////// lt_fzdz_color ///////////////////////////
+//
+// Color for -FZDZ.
+// Type: string
+//
+
+lt_fzdz_color = "LightSkyBlue";
+
+///////////// fzdz_color //////////////////////////////
+//
+// Color for FZDZ.
+// Type: string
+//
+
+fzdz_color = "Royal Blue";
+
+///////////// hv_fzdz_color ///////////////////////////
+//
+// Color for +FZDZ.
+// Type: string
+//
+
+hv_fzdz_color = "Dark Blue";
+
+///////////// lt_fzra_color ///////////////////////////
+//
+// Color for -FZRA.
+// Type: string
+//
+
+lt_fzra_color = "gold";
+
+///////////// fzra_color //////////////////////////////
+//
+// Color for FZRA.
+// Type: string
+//
+
+fzra_color = "plum";
+
+///////////// hv_fzra_color ///////////////////////////
+//
+// Color for +FZRA.
+// Type: string
+//
+
+hv_fzra_color = "magenta";
+
+//======================================================================
+//
+// RAIN and SNOW TYPES .
+//
+//======================================================================
+ 
+///////////// dz_color ////////////////////////////////
+//
+// Color for DZ.
+// Type: string
+//
+
+dz_color = "green4";
+
+///////////// lt_ra_color /////////////////////////////
+//
+// Color for -RA.
+// Type: string
+//
+
+lt_ra_color = "green3";
+
+///////////// ra_color ////////////////////////////////
+//
+// Color for RA.
+// Type: string
+//
+
+ra_color = "green2";
+
+///////////// hv_ra_color /////////////////////////////
+//
+// Color for +RA.
+// Type: string
+//
+
+hv_ra_color = "green1";
+
+///////////// lt_sn_color /////////////////////////////
+//
+// Color for -SN.
+// Type: string
+//
+
+lt_sn_color = "skyblue1";
+
+///////////// sn_color ////////////////////////////////
+//
+// Color for SN.
+// Type: string
+//
+
+sn_color = "deepskyblue1";
+
+///////////// hv_sn_color /////////////////////////////
+//
+// Color for +SN.
+// Type: string
+//
+
+hv_sn_color = "royalblue";
+
+///////////// pe_color ////////////////////////////////
+//
+// Color for PE.
+// Type: string
+//
+
+pe_color = "blue";
+
+//======================================================================
+//
+// FLIGHT CATEGORY AND SKY OBSCURATION.
+//
+//======================================================================
+ 
+///////////// flight_category /////////////////////////
+//
+// Array of flight category parameters.
+// The flight category at a station will be computed using the aeiling 
+//   (ft) and visibility (km) thresholds. If both values exceed the 
+//   threshold, the flight category will be equal to or greater that the 
+//   specified category.
+//
+// Type: struct
+//   typedef struct {
+//      flight_category_label_t label;
+//        Options:
+//          VFR
+//          MVFR
+//          IFR
+//      string label_str;
+//      string color;
+//      float ceiling_threshold;
+//      float visibility_threshold;
+//   }
+//
+// 1D array - variable length.
+//
+
+flight_category = {
+  { VFR, "VFR", "seagreen", 1500, 5},
+  { MVFR, "MVFR", "blue", 500, 1.6},
+  { IFR, "IFR", "orange", 0, 0}
+};
+
+///////////// flight_category_line_width //////////////
+//
+// The width of the lines used for flight category.
+// Type: int
+//
+
+flight_category_line_width = 10;
+
+//======================================================================
+//
+// HTML OUTPUT FOR INDIVIDUAL FIELDS.
+//
+//======================================================================
+ 
+///////////// output_html /////////////////////////////
+//
+// Option to generate html output.
+// If true, images suitable for html pages are generated for each 
+//   station and each field. See stations[] and xxxx_html_image.
+// Type: boolean
+//
+
+output_html = FALSE;
+
+///////////// show_window /////////////////////////////
+//
+//  - For HTML Mode. Option to run unmapped (off screen).
+// If false, the program should run hidden.
+// Type: boolean
+//
+
+show_window = TRUE;
+
+///////////// write_ldata_info ////////////////////////
+//
+//  - For HTML Mode. Option to output ldata info.
+// Use the Ldata FMQ, as the images come out fast.
+// Type: boolean
+//
+
+write_ldata_info = FALSE;
+
+///////////// html_output_dir /////////////////////////
+//
+// Where image files will be left.
+// This directory should be scrubbed by some mechanism.
+// Type: string
+//
+
+html_output_dir = "/tmp";
+
+///////////// filename_prefix /////////////////////////
+//
+// Html mode file name prefix string - strftime(3) format.
+// Often: %Y%m%d%H%M.
+// Type: string
+//
+
+filename_prefix = "";
+
+///////////// image_output_type ///////////////////////
+//
+// Image Output type. Imlib Library supported formats.
+// Legal image types are png,tiff,jpg,pgm,ppm,eim.
+// Type: string
+//
+
+image_output_type = "png";
+
+///////////// html_image_post_process_script //////////
+//
+// Conversion script to post process the ouput imagesNote: 
+//   StationStripChart calls this script and passes the name of theoutput 
+//   image as the first argument.
+//   Images are output in the chosen format. The script often copies the 
+//   image onto a web server and then removes the local copy.
+// Type: string
+//
+
+html_image_post_process_script = "ls -l";
+
+///////////// post_process_timeout ////////////////////
+//
+// Timeout (secs) for post processing script to prevent hanging.
+// Type: int
+//
+
+post_process_timeout = 10;
+

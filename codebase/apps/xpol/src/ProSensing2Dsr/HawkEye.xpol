@@ -1,0 +1,217 @@
+/**********************************************************************
+ * TDRP params for HawkEye
+ **********************************************************************/
+
+//======================================================================
+//
+// HawkEye is the engineering display for the HAWK moments data.
+//
+// This is a C++ application using the QT4 GUI toolkit.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "xpol";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Method for reading the input data.
+// DSR_FMQ_INPUT: read a Dsr moments stream from a file message queue. 
+//   IWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket. 
+//   SIMULATED_INPUT: internally-generated test pattern data.
+//
+// Type: enum
+// Options:
+//     DSR_FMQ_INPUT
+//     IWRF_TCP_INPUT
+//     SIMULATED_INPUT
+//
+
+input_mode = DSR_FMQ_INPUT;
+
+///////////// input_fmq_url ///////////////////////////
+//
+// DSR_FMQ_INPUT mode: input URL for moments data from an FMQ.
+// Full url is of the form fmqp:://hostname:port:path. Path does not in 
+//   lude the file extension.
+// Type: string
+//
+
+input_fmq_url = "$(DATA_DIR)/fmq/moments/xpol";
+
+///////////// seek_to_end_of_fmq //////////////////////
+//
+// Option to seek to the end of the input FMQ.
+// If TRUE, the program will seek to the end of the fmq and only read in 
+//   new data. If FALSE, it will start reading from the beginning of the 
+//   FMQ.
+// Type: boolean
+//
+
+seek_to_end_of_fmq = TRUE;
+
+///////////// input_tcp_host //////////////////////////
+//
+// IWRF_TCP_INPUT: name of host running IWRF moments server.
+// Type: string
+//
+
+input_tcp_host = "localhost";
+
+///////////// input_tcp_port //////////////////////////
+//
+// IWRF_TCP_INPUT: port for IWRF moments server.
+// Type: int
+//
+
+input_tcp_port = 11000;
+
+///////////// beam_queue_size /////////////////////////
+//
+// Size of the internal queue used to store beams.
+// The reader runs in a separate thread, and stored the beams in a 
+//   queue. The main thread then grabs the available beams from the queue 
+//   as they become available.
+// Type: int
+//
+
+beam_queue_size = 100;
+
+//======================================================================
+//
+// FIELDS TO BE DISPLAYED.
+//
+//======================================================================
+ 
+///////////// color_scale_dir /////////////////////////
+//
+// Directory for color scales.
+// Type: string
+//
+
+color_scale_dir = "$(PROJ_DIR)/display/color_scales";
+
+///////////// fields //////////////////////////////////
+//
+// Fields to be displayed.
+// label: appears on the GUI. raw_name: unfiltered field name. 
+//   filtered_name: field with clutter filter applied. units: units string 
+//   for color scale. color_map: name of color map in color_scale_dir. 
+//   shortcut: keyboard character for shortcut. Specified key will select 
+//   raw field. Use ALT-key to get filtered field.
+//
+// Type: struct
+//   typedef struct {
+//      string label;
+//      string raw_name;
+//      string filtered_name;
+//      string units;
+//      string color_map;
+//      string shortcut;
+//   }
+//
+// 1D array - variable length.
+//
+
+fields = {
+  { "DBZ", "DBZ", "DBZ_F", "dBZ", "dbz.colors", "0"},
+  { "VEL", "VEL", "VEL_F", "m/s", "vel.colors", "1"},
+  { "WIDTH", "WIDTH", "WIDTH_F", "m/s", "width.colors", "2"},
+  { "ZDR", "ZDR", "ZDR_F", "dB", "zdr.colors", "3"},
+  { "ZDRM", "ZDRM", "ZDRM_F", "dB", "zdr.colors", "4"},
+  { "PHIDP", "PHIDP", "PHIDP_F", "deg", "phidp.colors", "6"},
+  { "PHIDP0", "PHIDP0", "PHIDP0_F", "deg", "phidp.colors", "6"},
+  { "RHOHV", "RHOHV", "RHOHV_F", "", "rhohv.colors", "7"},
+  { "NCP", "NCP", "NCP_F", "", "ncp.colors", "9"},
+  { "SNRHC", "SNRHC", "SNRHC_F", "dBm", "snr.colors", "q"},
+  { "SNRVC", "SNRVC", "SNRVC_F", "dBm", "snr.colors", "w"},
+  { "DBMHC", "DBMHC", "DBMHC_F", "dBm", "dbm.colors", "t"},
+  { "DBMVC", "DBMVC", "DBMVC_F", "dBm", "dbm.colors", "u"}
+};
+
+//======================================================================
+//
+// DISPLAY DETAILS.
+//
+//======================================================================
+ 
+///////////// max_range_km ////////////////////////////
+//
+// Max range for the display (km).
+// Type: double
+//
+
+max_range_km = 75;
+
+///////////// main_window_width ///////////////////////
+//
+// Startup width of main window (pixels).
+// Type: int
+//
+
+main_window_width = 1000;
+
+///////////// main_window_height //////////////////////
+//
+// Startup height of main window (pixels).
+// Type: int
+//
+
+main_window_height = 600;
+
+///////////// main_window_start_x /////////////////////
+//
+// Startup X for main window (pixels).
+// Type: int
+//
+
+main_window_start_x = 0;
+
+///////////// main_window_start_y /////////////////////
+//
+// Startup Y for main window (pixels).
+// Type: int
+//
+
+main_window_start_y = 0;
+
+///////////// color_scale_width ///////////////////////
+//
+// Width of color scale (pixels).
+// Type: int
+//
+
+color_scale_width = 80;
+

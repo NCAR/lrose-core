@@ -1,0 +1,391 @@
+/****************************************************
+ * TDRP params for Alenia2Mom
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately. Use DEBUG_VERBOSE
+ *   for all debug messages.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Process instance.
+ * This is used by procmap utilities for registering the process
+ *   with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Input device type.
+ * For IN_TAPE, set input_tape_name, input_tape wait and short_tape.
+ *   For IN_UDP, set input_udp_port. For IN_SHMEM, set input_shmem_key.
+ *
+ * Type: enum
+ * Default: IN_UDP 
+ * Legal values: IN_TAPE, IN_UDP.
+ */
+input_device = IN_UDP;
+
+/*
+ * Tape device name for input.
+ *
+ * Type: string
+ * Default: "/dev/nrst0" 
+ */
+input_tape_name = "/dev/nrst0";
+
+/*
+ * Tape input read delay (millisecs).
+ * Wait between beam reads, to allow the user to simulate varying
+ *   data rates.
+ *
+ * Type: long
+ * Default: 30 
+ */
+input_tape_wait = 30;
+
+/*
+ * Input udp port number.
+ *
+ * Type: long
+ * Default: 3280 
+ */
+input_udp_port = 5002;
+
+/*
+ * Output format type.
+ * Output may be in Lincoln format (LL_FORMAT), DsRadar format
+ *   (DS_FORMAT) or unchanged from input (NATIVE_FORMAT).
+ *
+ * Type: enum
+ * Default: LL_FORMAT 
+ * Legal values: LL_FORMAT, DS_FORMAT, NATIVE_FORMAT.
+ */
+output_format = LL_FORMAT;
+
+/*
+ * Option to output FMQ.
+ * If set to TRUE, FMQ stream is output.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+write_fmq_output = TRUE;
+
+/*
+ * Option to output UDP.
+ * If set to TRUE, UDP stream is output.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+write_udp_output = FALSE;
+
+/*
+ * Output udp port number.
+ *
+ * Type: long
+ * Default: 54321 
+ */
+output_udp_port = 54321;
+
+/*
+ * Broadcast address for UDP output.
+ *
+ * Type: string
+ * Default: "128.117.197.255" 
+ */
+output_udp_address = "128.117.197.255";
+
+/*
+ * Path for output FMQ.
+ *
+ * Type: string
+ * Default: "output_fmq" 
+ */
+output_fmq_path = "/space/dixon/data/alenia_fmq";
+
+/*
+ * Size of output FMQ, in bytes.
+ * This is the total size of the output FMQ buffer. Some of this buffer
+ *   will be used for control bytes (12 bytes per message.
+ *
+ * Type: long
+ * Default: 2000000 
+ */
+output_fmq_size = 2000000;
+
+/*
+ * Number of slots in output FMQ.
+ * The number of slots corresponds to the maximum number of messages
+ *   which may be written to the buffer before overwrites occur.
+ *   However, overwrites may occur sooner if the size is not set large
+ *   enough.
+ *
+ * Type: long
+ * Default: 3600 
+ */
+output_fmq_nslots = 500;
+
+/*
+ * FMQ compression option.
+ * If TRUE FMQ messages are compressed.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+output_fmq_compress = FALSE;
+
+/*
+ * Option to write an FMQ for archive purposes.
+ * The archive FMQ is written in native RIDDS format. A separate
+ *   program reads this FMQ and archives the data to tape.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+write_archive_fmq = FALSE;
+
+/*
+ * Path for archive FMQ.
+ *
+ * Type: string
+ * Default: "archive_fmq" 
+ */
+archive_fmq_path = "/space/dixon/data/archive_fmq";
+
+/*
+ * Size of archive FMQ, in bytes.
+ * This is the total size of the archive FMQ buffer. Some of this
+ *   buffer will be used for control bytes (12 bytes per message.
+ *
+ * Type: long
+ * Default: 2000000 
+ */
+archive_fmq_size = 2000000;
+
+/*
+ * Number of slots in archive FMQ.
+ * The number of slots corresponds to the maximum number of messages
+ *   which may be written to the buffer before overwrites occur.
+ *   However, overwrites may occur sooner if the size is not set large
+ *   enough.
+ *
+ * Type: long
+ * Default: 3600 
+ */
+archive_fmq_nslots = 3600;
+
+/*
+ * Archive FMQ compression option.
+ * If TRUE FMQ messages are compressed.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+archive_fmq_compress = FALSE;
+
+/*
+ * Radar name.
+ *
+ * Type: string
+ * Default: "ALENIA" 
+ */
+radar_name = "ALENIA";
+
+/*
+ * Site name.
+ *
+ * Type: string
+ * Default: "Fossalon" 
+ */
+site_name = "GRADO";
+
+/*
+ * Radar location.
+ * Used if override_radar_location is TRUE. Lat and lon in degrees.
+ *   Alt in km.
+ *
+ * Type: struct
+ */
+radar_location = {
+  45.727777, /* latitude:double */
+  13.477777, /* longitude:double */
+  0.025  /* altitude:double */
+};
+
+/*
+ * Elevation angle table.
+ * Array of expected elevation angles (deg).These are used to
+ *   determine the tilt number for a beam.
+ *
+ * Type: double
+ * Array elem size: 8 bytes
+ * Array has no max number of elements
+ */
+elev_table = {0.5, 1.5, 2.5, 3.5, 4.5};
+
+/*
+ * Time correction (secs).
+ * Data time is adjusted by this number of seconds before output.
+ *
+ * Type: long
+ * Default: 0 
+ */
+time_correction = 0;
+
+/*
+ * Wallclock time override option.
+ * If set, wallclock time will be used to override data time.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+use_wallclock_time = TRUE;
+
+/*
+ * Radar polarization code.
+ * 1 = hor, 2 = ver, 3 = circ, 4 = ellip. Should be 3; 1 for Jing compatibility.
+ *
+ * Type: long
+ * Default: 3 
+ */
+polarization_code = 3;
+
+/*
+ * Beam width.
+ * Radar half-power beam width (deg).
+ *
+ * Type: double
+ * Default: 0.95 
+ * Min value: 0.01 
+ * Max value: 45 
+ */
+beam_width = 0.90;
+
+/*
+ * Wavelength.
+ * Radar wavelength (cm).
+ *
+ * Type: double
+ * Default: 10 
+ * Min value: 0.01 
+ * Max value: 1000 
+ */
+wavelength = 5;
+
+/*
+ * Average transmitter power (kW).
+ *
+ * Type: double
+ * Default: 7 
+ */
+avg_xmit_pwr = 2.5;
+
+/*
+ * Receiver noise.
+ * Receiver noise in units of dBZ at a range of 100km.
+ *
+ * Type: double
+ * Default: -8 
+ */
+noise_dbz_at_100km = -8;
+
+/*
+ * Option to include dBZ in output stream.
+ * dBZ, if available, will be first field in output data. If this
+ *   option is set, and no dBZ data is available, missing data will
+ *   be inserted.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+output_dbz = TRUE;
+
+/*
+ * Option to include Zdr in output stream.
+ * zdr, if available, will follow dBZ in output data. If this option
+ *   is set, and no zdr data is available, missing data will be inserted.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+output_zdr = TRUE;
+
+/*
+ * Option to include vel in output stream.
+ * vel, if available, will follow Zdr in output data. If this option
+ *   is set, and no vel data is available, missing data will be inserted.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+output_vel = TRUE;
+
+/*
+ * Option to include width in output stream.
+ * vel, if available, will follow vel in output data. If this option
+ *   is set, and no width data is available, missing data will be inserted.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+output_width = TRUE;
+
+/*
+ * Print summary option.
+ * If TRUE summaries are printed at given interval.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+print_summary = TRUE;
+
+/*
+ * Interval for summary printouts.
+ * See print_summary.
+ *
+ * Type: long
+ * Default: 90 
+ */
+summary_interval = 90;
+
+/*
+ * Print header option.
+ * If TRUE headers are printed at given interval.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+print_header = FALSE;
+
+/*
+ * Interval for header printouts.
+ * See print_header.
+ *
+ * Type: long
+ * Default: 360 
+ */
+header_interval = 1;
+
+

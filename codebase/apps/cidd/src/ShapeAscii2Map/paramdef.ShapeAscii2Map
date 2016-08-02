@@ -1,0 +1,124 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.ShapeAscii2Map
+ *
+ * This file contains the TDRP parameter definitions for
+ * ShapeAscii2Map.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  INPUT_POLYLINES,
+  INPUT_LOCATIONS,
+  INPUT_SIMPLE_LABELS
+} input_type_t;
+
+paramdef enum input_type_t
+{
+  p_descr = "Type of input ASCII file to process";
+  p_help = "\tINPUT_POLYLINES - "
+           "The input file contains a simple list of polyliness from the "
+           "original shape file. "
+           "Each polyline will begin with a line with the shapefile object "
+           "number for the polyline. "
+           "There will then be some number of lines with vertex locations "
+           "for the polyline, with the locations given as longitude "
+           "followed by latitude. "
+           "The polyline definition ends with a line containing 'END'.\n"
+           "\tINPUT_LOCATIONS - "
+           "The input file contains a comma-separated list of locations "
+           "of the following format:\n"
+           "\t\t<label>,<lon>,<lat>\n"
+           "The label can be omitted, but the following comma must exist. "
+           "The output is a map file full of labelled icons.\n"
+           "\tINPUT_SIMPLE_LABELS - "
+           "The input file contains a comma-separated list of locations "
+           "of the following format:\n"
+           "\t\t<label>,<lon>,<lat>\n"
+           "The output is a map file full of simple label objects. "
+           "Because simple lable map files require labels, input lines "
+           "that don't include a label won't be included in the map file.\n";
+  p_default = INPUT_POLYLINES;
+} input_type;
+
+paramdef long
+{
+  p_descr = "Number of header lines";
+  p_help = "This number of lines are skipped at the start of the input file.";
+  p_default = 0;
+} header_lines;
+
+paramdef string
+{
+  p_descr = "Name of icon";
+  p_help = "Used only if input_type is set to INPUT_LOCATIONS.";
+  p_default = "location";
+} icon_name;
+
+typedef struct
+{
+  int x;
+  int y;
+} icon_point_t;
+
+paramdef struct icon_point_t
+{
+  p_descr = "List of points defining the icon";
+  p_help = "Used only if input_type is set to INPUT_LOCATIONS. "
+           "Set both x and y to 9999 to get a pen-up.";
+  p_default = { { 0, -2 },
+                { 0, 2 },
+                { 9999, 9999 },
+                { -2, 0 },
+                { 2, 0 } };
+} icon_points[];

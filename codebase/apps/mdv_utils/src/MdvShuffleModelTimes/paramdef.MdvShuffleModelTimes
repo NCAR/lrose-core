@@ -1,0 +1,99 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "This is a rather arcane application that reads MDV data\n"
+	"and adjusts the time before writing it out. The reason for"
+	"doing this is that MM5 has a rather odd method of specifying\n"
+	"its lead time (from the cold start time). Niles Oien.";
+
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_ON, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "2005/06/27 00:00:00"; 
+  p_private = FALSE;
+  p_descr = "First generate time, UTC.";
+  p_help = "Set as appropriate.";
+} startGenTime;     
+               
+paramdef string {
+  p_default = "2005/06/27 12:00:00"; 
+  p_private = FALSE;
+  p_descr = "Last generate time, UTC.";
+  p_help = "Set as appropriate.";
+} endGenTime;     
+
+paramdef int {
+  p_default = 3600; 
+  p_private = FALSE;
+  p_descr = "Increment in generation time, seconds.";
+  p_help = "Set as appropriate.";
+} delGenTime;     
+      
+paramdef string {
+  p_default = "2005/05/08 13:00:00"; 
+  p_private = FALSE;
+  p_descr = "Input gen time, ie. cold start of MM5.";
+  p_help = "Set as appropriate.";
+} inputGenTime;     
+                  
+paramdef int {
+  p_default = 3600; 
+  p_private = FALSE;
+  p_descr = "Increment in lead time, seconds.";
+  p_help = "Set as appropriate.";
+} delLeadTime;  
+
+paramdef int {
+  p_default = 14; 
+  p_private = FALSE;
+  p_descr = "Number of increments in lead time.";
+  p_help = "Set as appropriate.";
+} numLeadTimes;  
+
+paramdef string {
+  p_default = ".";
+  p_private = FALSE;
+  p_descr = "URL where we find the single day of MDV data to replay.";
+  p_help = "Input data source.";
+} InUrl;
+
+paramdef string {
+  p_default = ".";
+  p_private = FALSE;
+  p_descr = "Place to write data to.";
+  p_help = "Output URL.";
+} OutUrl;
+

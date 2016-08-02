@@ -1,0 +1,41 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_sort_...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b><br>
+<b><a href=RSL_radar_struct.html>Radar</a> *RSL_sort_radar(<a href=RSL_radar_struct.html>Radar</a> *r);<br>
+<a href=RSL_volume_struct.html>Volume</a> *RSL_sort_sweeps_in_volume(<a href=RSL_volume_struct.html>Volume</a> *v);<br>
+<a href=RSL_volume_struct.html>Volume</a> *RSL_sort_volume(<a href=RSL_volume_struct.html>Volume</a> *v); <br>
+<a href=RSL_sweep_struct.html>Sweep</a> *RSL_sort_rays_by_time(<a href=RSL_sweep_struct.html>Sweep</a> *s);</b><b><a href=RSL_sweep_struct.html><br>
+Sweep</a> *RSL_sort_rays_in_sweep(<a href=RSL_sweep_struct.html>Sweep</a> *s);<br>
+<a href=RSL_volume_struct.html>Volume</a> *RSL_sort_rays_in_volume(<a href=RSL_volume_struct.html>Volume</a> *v);</b> 
+
+<h3>
+<hr>Description</h3>
+<b>RSL_sort_radar</b> calls RSL_sort_volume for the number of volumes. 
+
+<p><b>RSL_sort_volume</b> calls RSL_sort_sweeps_in_volume, then calls RSL_sort_rays_in_volume. This yields a completely sorted, by elevation angle and by azimuth angle, volume. 
+
+<p><b>RSL_sort_sweeps_in_volume</b> only orders the sweeps by elevation angle. It does not sort the rays by azimuth angle. 
+
+<p><b>RSL_sort_rays_in_sweep</b> orders the rays by azimuth angle: 0 through 360 degrees.<br>
+<b>RSL_sort_rays_in_volume</b> orders the rays in each sweep by calling sort_rays_in_sweep for the number of sweeps. <b>RSL_sort_rays_in_sweep</b> sorts the rays by azimuth angle placing the the smallest azimuth angle first. The input volume or sweep structure is <i>modified</i> and a pointer to the newly organized structure is returned. 
+
+<p><b>RSL_sort_rays_by_time</b> orders the rays in a sweep by time. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. Otherwise, a NULL pointer is returned and errno is set. 
+<hr>
+
+<p>Author: <a href=dennis.flanigan.html>Dennis Flanigan Jr.</a>
+</body>

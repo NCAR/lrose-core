@@ -1,0 +1,332 @@
+/**********************************************************************
+ * TDRP params for ./TsTcp2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// TsTcp2Fmq reads raw time-series data via TCP/IP. It saves the time 
+//   series data out to a file message queue (FMQ), which can be read by 
+//   multiple clients.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_NORM;
+//debug = DEBUG_EXTRA;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "DEBUG";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = TRUE;
+
+//======================================================================
+//
+// TCP DETAILS.
+//
+//======================================================================
+ 
+///////////// ts_tcp_server_host //////////////////////
+//
+// Host name on which Rvp8TsTcpServer is running.
+// This application normally reads data from Rvp8TsTcpServer running on 
+//   the rvp8 host.
+// Type: string
+//
+
+ts_tcp_server_host = "10.40.0.25";
+
+///////////// ts_tcp_server_port //////////////////////
+//
+// TCP/IP port on which TsTcpServer is listening.
+// Type: int
+//
+
+ts_tcp_server_port = 27015;
+
+//======================================================================
+//
+// FMQ DETAILS.
+//
+//======================================================================
+ 
+///////////// output_fmq_path /////////////////////////
+//
+// Path to output FMQ.
+// The FMQ consists of 2 files, ??.buf and ??.stat.
+// Type: string
+//
+
+output_fmq_path = "/tmp/fmq/ts-2";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer.
+// Type: int
+//
+
+output_fmq_size = 20000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in the output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 500;
+
+///////////// output_fmq_blocking /////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data. This should only be used if there is a single client reading 
+//   the FMQ.
+// Type: boolean
+//
+
+output_fmq_blocking = FALSE;
+
+//======================================================================
+//
+// CORRECT SWEEP NUMBER.
+//
+//======================================================================
+ 
+///////////// zero_sweep_number_at_start_of_vol ///////
+//
+// Option to correct the sweep number relative to the start of a volume.
+// Some radars set the sweep number to always increase, without 
+//   resetting to 0 when a new volume starts. If this parameter is TRUE, 
+//   the sweep number will be corrected so that it is zero at the start of 
+//   each volume.
+// Type: boolean
+//
+
+zero_sweep_number_at_start_of_vol = TRUE;
+
+//======================================================================
+//
+// READING SWEEP INFO FROM SHARED MEMORY.
+//
+//======================================================================
+ 
+///////////// read_sweep_info_from_shmem //////////////
+//
+// Option to read sweep information from shared memory.
+// TCP mode only. If true, the latest sweep information will be read 
+//   from shared memory, in binary. The struct sweep_info_packet_t is 
+//   defined in rapformats/DsRadarSweep.hh. The sweep info will be merged 
+//   with the time series data before being written out.
+// Type: boolean
+//
+
+read_sweep_info_from_shmem = FALSE;
+
+///////////// sweep_info_shmem_key ////////////////////
+//
+// Shared memory key for sweep info.
+// Key for shared memory holding sweep info. See SweepInfo2Spdb 
+//   application.
+// Type: int
+//
+
+sweep_info_shmem_key = 12500;
+
+///////////// increment_tilt_number_on_sweep_change ///
+//
+// Option to compute tilt number by incrementing each time the sweep 
+//   number changes.
+// Sometimes, the sweep number can be out of order in the input data. If 
+//   this param is set to TRUE, the tilt number will be incremented each 
+//   time the sweep number changes. If false, the tilt number will be 
+//   computed as the current sweep number minus the sweep number at the 
+//   start of the volume.
+// Type: boolean
+//
+
+increment_tilt_number_on_sweep_change = FALSE;
+
+//======================================================================
+//
+// READING POWER INFO FROM SHARED MEMORY.
+//
+//======================================================================
+ 
+///////////// max_time_error_for_sweep_info ///////////
+//
+// Max allowable time error in sweep info (secs).
+// The sweep information resides in shared memory, and is merged with 
+//   the time series data. The merger is only performed if the absolute 
+//   time difference between the sweep info time and time series pulse 
+//   time is less than this value.
+// Type: double
+//
+
+max_time_error_for_sweep_info = 2;
+
+///////////// read_power_info_from_shmem //////////////
+//
+// Option to read power information from shared memory.
+// TCP mode only. If true, the latest power information will be read 
+//   from shared memory, in binary. The struct power_info_packet_t is 
+//   defined in rapformats/DsRadarPower.hh. The power info will be merged 
+//   with the time series data before being written out.
+// Type: boolean
+//
+
+read_power_info_from_shmem = FALSE;
+
+///////////// power_info_shmem_key ////////////////////
+//
+// Shared memory key for power info.
+// Key for shared memory holding power info. See PowerInfo2Spdb 
+//   application.
+// Type: int
+//
+
+power_info_shmem_key = 12600;
+
+///////////// max_time_error_for_power_info ///////////
+//
+// Max allowable time error in power info (secs).
+// The power information resides in shared memory, and is merged with 
+//   the time series data. The merger is only performed if the absolute 
+//   time difference between the power info time and time series pulse 
+//   time is less than this value.
+// Type: double
+//
+
+max_time_error_for_power_info = 60;
+
+//======================================================================
+//
+// Pulse data PRE-Scaling DETAILS.
+//
+//======================================================================
+ 
+///////////// apply_scale /////////////////////////////
+//
+// Option to apply a scale and bias to each I and Q value before 
+//   writing.
+// Type: boolean
+//
+
+//apply_scale = false;
+apply_scale = true;
+
+///////////// scale ///////////////////////////////////
+//
+// Scale constant for I and Q data. Applied if apply_scale == TRUE.
+// Value written = Value_in * scale + bias.
+// Type: double
+//
+//  1/2^31   - 18 bits left / 8192
+scale = 4.656612873e-10;
+// 1/2^30
+//scale = 9.313225746e-10;
+// 1/2^29
+//scale = 1.862645149e-9;
+// 1/2^28
+//scale = 3.725290298e-9;
+// 1/2^27
+//scale = 7.450580597e-9;
+
+///////////// bias ////////////////////////////////////
+//
+// Bias for I and Q data. Applied if apply_scale == TRUE.
+// Value written = Value_in * scale + bias.
+// Type: double
+//
+
+bias = 0;
+
+//======================================================================
+//
+// TCP DETAILS.
+//
+//======================================================================
+ 
+///////////// n_pulses_per_power_info /////////////////
+//
+// The xmit_power packet will be written each time this number of pulses 
+//   is written.
+// Type: int
+//
+
+n_pulses_per_power_info = 1000;
+
+//======================================================================
+//
+// OUTPUT MESSAGE DETAILS.
+//
+// The output messages are written to the FMQ. To improve performance, 
+//   each message contains a number of time series pulses.
+//
+//======================================================================
+ 
+///////////// n_pulses_per_message ////////////////////
+//
+// Number of pulses per output message.
+// The actual number will sometimes be 1 less than this, because an info 
+//   data part may will be written once in a while.
+// Type: int
+//
+
+n_pulses_per_message = 20;
+
+///////////// n_pulses_per_info ///////////////////////
+//
+// How often to write an info part.
+// The info part includes data which does not change on a pulse-to-pulse 
+//   basis.
+// Type: int
+//
+
+n_pulses_per_info = 10000;
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+

@@ -1,0 +1,11 @@
+#
+#
+NNEXRAD	^SDUS.. .... (..)(....) /pN0Q([A-Z][A-Z][A-Z])	PIPE	-close	/home/ldm/exe/nids/ucnids -n -	data/ldm/nids/uc/nids/\3/BREF1/(\1:yyyy)(\1:mm)\1/(\1:yyyy)(\1:mm)\1.\2.BREF1
+NNEXRAD	^SDUS.. .... (..)(....) /pN1Q([A-Z][A-Z][A-Z])	PIPE	-close	/home/ldm/exe/nids/ucnids -n -	data/ldm/nids/uc/nids/\3/BREF2/(\1:yyyy)(\1:mm)\1/(\1:yyyy)(\1:mm)\1.\2.BREF2
+NNEXRAD	^SDUS.. .... (..)(....) /pN2Q([A-Z][A-Z][A-Z])	PIPE	-close	/home/ldm/exe/nids/ucnids -n -	data/ldm/nids/uc/nids/\3/BREF3/(\1:yyyy)(\1:mm)\1/(\1:yyyy)(\1:mm)\1.\2.BREF3
+NNEXRAD	^SDUS.. .... (..)(....) /pN3Q([A-Z][A-Z][A-Z])	PIPE	-close	/home/ldm/exe/nids/ucnids -n -	data/ldm/nids/uc/nids/\3/BREF4/(\1:yyyy)(\1:mm)\1/(\1:yyyy)(\1:mm)\1.\2.BREF4
+NNEXRAD	^SDUS.. .... (..)(....) /pN0U([A-Z][A-Z][A-Z])	PIPE	-close	/home/ldm/exe/nids/ucnids -n -	data/ldm/nids/uc/nids/\3/VEL1/(\1:yyyy)(\1:mm)\1/(\1:yyyy)(\1:mm)\1.\2.VEL1
+NNEXRAD	^SDUS.. .... (..)(....) /pN1U([A-Z][A-Z][A-Z])	PIPE	-close	/home/ldm/exe/nids/ucnids -n -	data/ldm/nids/uc/nids/\3/VEL2/(\1:yyyy)(\1:mm)\1/(\1:yyyy)(\1:mm)\1.\2.VEL2
+NNEXRAD	^SDUS.. .... (..)(....) /pN2U([A-Z][A-Z][A-Z])	PIPE	-close	/home/ldm/exe/nids/ucnids -n -	data/ldm/nids/uc/nids/\3/VEL3/(\1:yyyy)(\1:mm)\1/(\1:yyyy)(\1:mm)\1.\2.VEL3
+NNEXRAD	^SDUS.. .... (..)(....) /pN3U([A-Z][A-Z][A-Z])	PIPE	-close	/home/ldm/exe/nids/ucnids -n -	data/ldm/nids/uc/nids/\3/VEL4/(\1:yyyy)(\1:mm)\1/(\1:yyyy)(\1:mm)\1.\2.VEL4
+#

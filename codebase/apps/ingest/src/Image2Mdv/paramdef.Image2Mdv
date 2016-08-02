@@ -1,0 +1,222 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+commentdef {
+ p_header= "Image2Mdv";
+ p_text = " This program Converts all image formats supported by gdk_imlib images "
+		  "into MDV encapsulated TIFF Mdv (RGBA MDV files) files.";
+};
+
+commentdef {
+  p_header = "Image2Mdv Runtime Parameters";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_help = "Set to TRUE for diagnostic output";
+} debug;
+
+paramdef char* {
+  p_descr = "Directory to leave log files in";
+  p_default = {""};      
+} log_dir;       
+
+paramdef char* {
+  p_descr = "Process instance";
+  p_help = "This is used by the process mapper, procmap";
+  p_default = {"generic"};      
+} instance;       
+
+commentdef {
+  p_header = "Input Parameters";
+};
+
+paramdef boolean {
+  p_help = "Set to TRUE for continuous real-time operation";
+  p_default = FALSE;
+} realtime_mode;
+
+paramdef char* {
+  p_descr = "Input Dir - Only used when realtime_mode is set to TRUE ";
+  p_default = {"./"};      
+} input_dir;       
+
+paramdef char* {
+  p_descr = "Files must have this  file name extension to be processed";
+  p_help = "Leave blank to process all files";
+  p_default = {""};      
+} file_extension;       
+
+
+paramdef int {
+  p_default = 900;
+  p_desc = "Files must be newer than this time in seconds to be processed";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_descr = "Erase input file after processing";
+  p_default = TRUE;
+} erase_files;
+
+commentdef {
+  p_header = "Mdv Output Parameters";
+};
+
+paramdef char* {
+  p_descr = "Directory Base to leave Output into";
+  p_help = "Note: The file will appear in a  time stamped dir"
+		    "under the base dir. Named:  YYYYMMDD/HHMMSS.mdv"
+            "";
+  p_default = {"./"};      
+} output_dir;       
+
+paramdef boolean {
+  p_default = FALSE;
+  p_desc = "Enables Image Compression on write ";
+  p_help = "Set to TRUE to enable Internal Compression";
+}write_compressed_images;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_desc = "Enables Realtime Notification Mechanisms ";
+  p_help = "Set to TRUE to enable LdataInfo";
+}write_ldata_info;
+
+commentdef {
+  p_header = "Image Definition  Parameters";
+};
+
+paramdef int {
+  p_default = 0xff000000;
+  p_desc = "Pixels of this Color are not rendered";
+} missing_data_color;
+
+
+paramdef double {
+  p_descr = "Transparency value to assign to image";
+  p_help = "1.0 = opaque - 0.0 =  transparent";
+  p_default = "1.0";      
+} default_alpha;
+
+typedef struct {
+    int rval;
+    int gval;
+    int bval;
+} rgb_val_t;
+
+paramdef struct rgb_val_t {
+  p_default = {0,0,0};
+  p_desc = "RGB Value to set to Transparent";
+  p_help = "Usually set to 0,0,0 (black) or white (255,255,255)";
+}RGB_transparent_value;
+
+paramdef char* {
+  p_descr = "Short Name of image - For requests";
+  p_help = "";
+  p_default = "RGBA";      
+} field_name;
+
+paramdef char* {
+  p_descr = "Long Name of image - For Legends, Info, etc";
+  p_help = "";
+  p_default = "RGBA Image";      
+} field_name_long;
+
+paramdef char* {
+  p_descr = "Image Units";
+  p_default = "RGBA";      
+} field_units;
+
+commentdef {
+  p_header = "Image Projection Parameters";
+};
+
+typedef enum {
+  PROJ_LATLON, PROJ_ARTCC, PROJ_STEREOGRAPHIC, PROJ_LAMBERT_CONF, PROJ_MERCATOR, PROJ_POLAR_STEREO,
+  PROJ_POLAR_ST_ELLIP, PROJ_CYL_EQUIDIST, PROJ_FLAT, PROJ_POLAR_RADAR
+} proj_t;
+
+paramdef enum proj_t
+{
+  p_descr = "Enumerated Projection ID";
+  p_help = "Set this to the projection of the incoming image "
+		   "";
+  p_default = PROJ_LATLON;
+} in_projection;
+
+typedef struct {
+    double origin_lat;
+	double origin_lon;
+	double param1;
+	double param2;
+	double param3;
+	double param4;
+} proj_param_t;
+
+paramdef struct proj_param_t {
+    p_descr = "Projection Information";
+	p_help =
+	" The fields in the structure are as follows:\n"
+	"\n"
+	"  origin_lat: Projection Center - Latitude\n"
+	"  origin_lat: Projection Center - Longitude\n"
+	"  param1: \n"
+	"  param2: \n"
+	"  param3: \n"
+	"  param4: \n"
+	"";
+    
+	p_default = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+} proj;
+
+commentdef {
+  p_header = "Image Grid Parameters";
+};
+
+
+typedef struct {
+    double start_x;
+    double start_y;
+    double dx;
+    double dy;
+} grid_param_t;
+
+paramdef struct grid_param_t {
+    p_descr = "Grid Information";
+	p_help =
+	" The fields in the structure are as follows:\n"
+	"\n"
+	"  grid_start_x: Longitude or Km \n"
+	"  grid_start_y: Latitude or Km \n"
+	"  grid_dx: Size of grid cell in Degrees or Km \n"
+	"  grid_dy: Size of grid cell in Degrees or Km \n"
+	"";
+	p_default = { -124.757916665, 49.379603205, 0.00416667, -0.00416667 };
+} grid;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_help = "Set to FALSE for output mdv file with data. Otherwise mdv file is RGBA format";
+} create_image_mdv_file;
+
+

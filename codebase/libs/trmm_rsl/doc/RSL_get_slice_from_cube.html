@@ -1,0 +1,33 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_slice_from_cube</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href=RSL_carpi_struct.html>Slice</a> *RSL_get_slice_from_cube(</b><b><a href=RSL_cube_struct.html>Cube</a> *cube, int x, int y, int z);</b> 
+
+<h3>
+<hr>Description</h3>
+Given a Cube structure, extract one slice from it. x, y and z define the plane of the required slice. Two of the three parameters must equal -1 and the third must be nonnegative; eg, the vertical plane y=100 is specified by the parameters x=-1, y=100, z=-1. Assumes valid ranges for x, y, z are: <br>
+0 &lt;= x &lt;= nx-1, 0 &lt;= y &lt;= ny-1, 1 &lt;= z &lt;= nz<br>
+nx, ny and nz specify the dimensions of the cube structure and are members of it. The range of z starts at 1 , since a cappi (or carpi) at height z=0 makes no sense. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. Otherwise, a NULL pointer is returned and errno is set. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_volume_to_cube.html>RSL_volume_to_cube</a> 
+
+<p>
+<hr>Author: <a href=mike.kolander.html>Mike Kolander</a> 
+</body>

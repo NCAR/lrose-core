@@ -1,0 +1,33 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_free_...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>void RSL_free_ray(<a href=RSL_ray_struct.html>Ray</a> *r);<br>
+void RSL_free_sweep(<a href=RSL_sweep_struct.html>Sweep</a> *s);<br>
+void RSL_free_volume(<a href=RSL_volume_struct.html>Volume</a> *v);</b> 
+
+<h3>
+<hr>Description</h3>
+<b>RSL_free_volume</b> calls <b>RSL_free_sweep</b> for the number of sweeps, then frees the array of <b>Sweep</b> pointers, then frees itself. <b>RSL_free_sweep</b> calls <b>RSL_free_ray</b> for the number of rays, then frees the array of <b>Ray</b> pointers, then frees itself. Finally, <b>RSL_free_ray</b> frees the array of <b>Range</b>, then frees itself. Checks are made that non NULL pointers are freed. 
+<hr>
+
+<h3>Return value</h3>
+None. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_clear.html>RSL_clear_volume</a>, <a href=RSL_clear.html>RSL_clear_sweep</a>, <a href=RSL_clear.html>RSL_clear_ray</a>. 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

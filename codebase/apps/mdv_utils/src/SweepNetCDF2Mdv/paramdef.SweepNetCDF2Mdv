@@ -1,0 +1,272 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.SweepNetCDF2Mdv
+ *
+ * This file contains the TDRP parameter definitions for
+ * SweepNetCDF2Mdv
+ */
+
+commentdef
+{
+  p_header = "SweepNetCDF2Mdv";
+  p_text = "This program converts netCDF sweep files into MDV format.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  FILE_LIST,
+  INPUT_DIR,
+  INPUT_DIR_RECURSE,
+  LATEST_DATA
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tIn FILE_LIST mode, the program operates on the files specified "
+           "on the command line.\n"
+           "\tIn INPUT_DIR mode, the program will process new files as they "
+           "appear in the input_dir directory.\n"
+           "\tIn INPUT_DIR_RECURSE mode, the program will process new files "
+           "as they appear in the input_dir directory or in any "
+           "subdirectory.\n"
+           "\tIn LATEST_DATA mode, the program will process new files as they "
+           "appear in the _latest_data_info file in the input_dir directory.\n";
+  p_default = "FILE_LIST";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_default = "$(RAP_DATA_DIR)/raw/sweepNetCDF";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Input filename substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will only process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} input_substring;
+
+paramdef string
+{
+  p_descr = "Input filename exclude substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will not process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} exclude_substring;
+
+paramdef long
+{
+  p_descr = "Maximum number of seconds input files are valid.";
+  p_help = "Used only if trigger_mode is set to LATEST_DATA.";
+  p_default = 600;
+} max_valid_secs;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/sweepNetCDF";
+} output_url;
+
+
+/***********************************************************************
+ * netCDF file parameters.
+ */
+
+commentdef
+{
+  p_header = "NETCDF FILE PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Name used for the field list variable in the netCDF file";
+  p_help = "This must be specified because it seems to change between "
+           "files. "
+           "Files coming out of a1tonc use \"fields\". "
+           "Files coming out of xltrsii use \"field_names\".";
+  p_default = "fields";
+} field_list_var_name;
+
+paramdef string
+{
+  p_descr = "Name used for the number of gates dimension in the netCDF file";
+  p_help = "This must be specified because it seems to change between "
+           "files. "
+           "Files coming out of a1tonc and xltrsii use \"maxCells\". "
+           "Files coming out of foray use \"MaxCells\".";
+  p_default = "maxCells";
+} num_gates_dim_name;
+
+paramdef string
+{
+  p_descr = "Name used for the missing data attribute of the variables "
+            "in the netCDF file";
+  p_help = "This must be specified because it seems to change between "
+           "files. "
+           "Files coming out of a1tonc use \"_fillValue\". "
+           "Files coming out of xltrsii use \"_FillValue\".";
+  p_default = "_fillValue";
+} missing_data_value_att_name;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether a bias is specified in the input "
+            "files.";
+  p_help = "If a bias is specified, it is assumed that the bias field "
+           "name is add_offset.";
+  p_default = true;
+} bias_specified;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  START_TIME_VOL_TRIGGER,
+  VOL_NUMBER_VOL_TRIGGER
+} volume_trigger_t;
+
+paramdef enum volume_trigger_t
+{
+  p_descr = "Method used for determining the division between volumes";
+  p_help = "\tSTART_TIME_VOL_TRIGGER - A volume will be written out when "
+           "the volume_start_time field in the netCDF file changes.\n"
+           "\tVOL_NUMBER_VOL_TRIGGER - A volume will be written out when "
+           "the Volume_Number global attribute in the netCDF file changes.\n";
+  p_default = START_TIME_VOL_TRIGGER;
+} volume_trigger;
+
+paramdef double
+{
+  p_descr = "Output beam width";
+  p_help = "The output beams must be evenly spaced. "
+           "This parameter is used to define the output beam spacing. "
+           "The input beams will be remapped to the output beam spacing "
+           "by writing each beam to the output azimuth that is closest "
+           "to the input azimuth, where the output azimuths are evenly "
+           "spaced by the bandwidth starting at azimuth 0.0.";
+  p_default = 1.0;
+} output_beamwidth;
+
+paramdef boolean
+{
+  p_descr = "Force longitude to be negative flag";
+  p_help = "If TRUE, the program will force the longitude value to "
+           "be negative. "
+           "This was added to correct an error in the CHILL data "
+           "where they were sending a positive longitude instead "
+           "of negative.";
+  p_default = false;
+} force_negative_longitude;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to override the missing data value "
+            "specified in the netCDF file";
+  p_help = "This had to be added because the netCDF files I got indicated "
+           "in the headers that the missing data value was -32768, but "
+           "the data was obviously using -999 instead.";
+  p_default = false;
+} override_file_missing_data_value;
+
+paramdef double
+{
+  p_descr = "Actual missing data value used in the netCDF file.";
+  p_help = "Used only if override_file_missing_data_value is set to true.";
+  p_default = -999.0;
+} missing_data_value;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the missing beams should be detected "
+            "and set to missing data values.";
+  p_help = "For some reason, the missing wedges in the KFTG data are showing "
+           "up as all 0 dBZ rather than missing. "
+           "If this flag is set, the program will look for missing beams, "
+           "defined as beams whose data values are all 0 or missing, and "
+           "replace all of the data values with missing.";
+  p_default = false;
+} fix_missing_beams;
+

@@ -1,0 +1,20 @@
+TO Add New Products to XSpdbQuery:
+
+Prereqs:
+
+New Entries in: <Spdb/Product_defines.hh>
+
+Byte Swap and Print routines/methods for your new chunk data in rapformats library.
+
+1. Add the proper include to Print.cc
+
+2. Add a new print member function definition to Print.hh
+   (Copy the style of an existing one)
+
+3. Add the proper entries into the prod_info_t struct in XSpdbQuery.h
+   (This adds the proper label in the menu)
+
+4. Add the proper case in the function display_chunks(), calling your new
+   print function in xspdb_client_gui_proc.cc
+
+5. Make sure you do a 'make clean all'

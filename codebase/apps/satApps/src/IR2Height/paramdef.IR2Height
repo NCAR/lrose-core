@@ -1,0 +1,244 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "IR2Height reads a 3D temperature field output from\n"
+             "a model and an infrared temperature field from a\n"
+             "satellite, and then produces a field of cloud height.\n\n"
+             "Niles Oien October 4 1999.";
+
+}
+
+
+paramdef char* {
+  p_descr = "URL for infra red data.";
+  p_help = "Input satellite data are stored here.";
+  p_default = {""};
+} IR_URL;
+     
+paramdef char* {
+  p_descr = "URL for model temperature data";
+  p_help = "Input 3D temperature data, typically from a model, are here."; 
+  p_default = {""};
+} ModelURL;
+  
+paramdef char* {
+  p_descr = "URL to write MDV files of height.";
+  p_help = "Output height MDV files are written here.";
+  p_default = {"."};
+} OutputURL;
+
+paramdef int {
+  p_descr = "Infrared field number. This is used if greater\n"
+            "than -1, otherwise IRFieldName is used.";
+  p_help = "Set to the clear (usually 10 micron) IR channel";
+  p_default = -1;
+} IRFieldNum;
+
+paramdef string {
+  p_descr = "Infrared field name. This is used if IRFieldNum is less\n"
+            "than 0.";
+  p_help = "Set to the clear (usually 10 micron) IR channel";
+  p_default = "gms_t_11";
+} IRFieldName;
+
+paramdef string {
+  p_descr = "Model temperature field name.";
+  p_help = "Set to the name of the 3D temperature matrix.";
+  p_default = "Temperature";
+} ModelFieldName;
+
+
+paramdef char* {
+  p_descr = "Procmap instance";
+  p_help = "Used for process identification.";
+  p_default = {"primary"};
+} Instance;
+     
+paramdef int {
+  p_descr = "Allowable time error between a temperature and IR field, secs.";
+  p_help = "If no match can be made, then no output will be created.";
+  p_default = 7200;
+} MaxTimeMismatch;
+
+paramdef boolean {
+  p_descr = "Debug flag.";
+  p_help = "If set, more verbose output is printed on standard error.";
+  p_default = FALSE;
+} Debug;
+     
+paramdef boolean {
+  p_descr = "Remap flag.";
+  p_help = "If set, data are remapped to specified grid. If not,\n"
+           "the satellite grid is used.";
+  p_default = TRUE;
+} DoRemap;
+
+/////////// Grid parameters.
+commentdef {
+  p_header = " ------------ GRID PARAMETERS --------\n"
+  		"These specify the grid on which the\n"
+                "computations will be performed if DoRemap is TRUE.\n"
+	        "Otherwise the satellite grid is used and the model data\n"
+                "are remapped to this.\n\n"
+                "These must be specified - use the\n"
+                "print_mdv facility to get the satellite field\n"
+                "geometry if this is to be duplicated.";
+
+}
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-1000.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-1000.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} grid_rotation;
+
+typedef enum {
+  FLAT, LATLON, LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT and LATLON";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in X";
+  p_min = {1};
+  p_default = { 100 };
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in Y";
+  p_min = {1};
+  p_default = {100};
+} grid_ny;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in X";
+  p_default = {1.0};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in Y";
+  p_default = {1.0};
+} grid_dy;
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_miny;
+
+
+paramdef float {
+  p_descr = "Lambert true latitude 1";
+  p_help = "For use with Lambert projection only.";
+  p_default = {0};
+} grid_lat1;
+
+paramdef float {
+  p_descr = "Lambert true latitude 2";
+  p_help = "For use with Lambert projection only.";
+  p_default = {0};
+} grid_lat2;
+
+
+commentdef {
+  p_header = "------ End of grid parameters. ";
+}
+
+paramdef float {
+  p_descr = "Lower limit on height - same units as used in 3D Temperature field.";
+  p_help = "If the computed cloud height is less than this, set it to missing.";
+  p_default = {50.0};
+} MinHeight;
+
+paramdef float {
+  p_descr = "If the IR temperature is colder than any of the model temperaures\n"
+            "then use this height.";
+  p_help = "Set to a value one step above the top model temperature.";
+  p_default = {470.0};
+} MaxHeight;
+
+paramdef float {
+  p_descr = "Upper limit on IR temperature";
+  p_help = "If the temperature is warmer than this, set the output to missing.";
+  p_default = {0.0};
+} MaxIRTemperature;
+
+
+
+paramdef long {
+  p_descr = "Max age (in seconds) of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+  p_min = {0};
+  p_max = {86400};
+  p_default = {60};
+} MaxRealtimeValidAge;
+
+paramdef float {
+  p_descr = "Scale to aply to height";
+  p_help = "to change from Km to meters set to 1000.0";
+  p_default = {"1.0"};
+} Scale;
+
+paramdef char* {
+  p_descr = "Units for height";
+  p_help = "Should be the same as the height scale in the 3D\n"
+	   "temperature MDV file if Scale is 1.0.";
+  p_default = {"FL"};
+} HeightUnits;
+
+paramdef long {
+  p_descr = "Time in seconds before data expire.";
+  p_help = "Usually set to approximate incoming satellite data rate.";
+  p_default = {"3600"};
+} DataDuration;
+
+
+
+

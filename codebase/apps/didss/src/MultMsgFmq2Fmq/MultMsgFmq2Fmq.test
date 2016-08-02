@@ -1,0 +1,115 @@
+/**********************************************************************
+ * TDRP params for MultMsgFmq2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// MultMsgFmq2Fmq program.
+//
+// MultMsgFmq2Fmq reads an FMQ into which multiple messages have been 
+//   put by Fmq2MultMsgFmq, unpacks the messages and writes the individual 
+//   messages to an output FMQ. See Fmq2MultMsgFmq for details on writing 
+//   the multiple-message FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input FMQ.
+// Type: string
+//
+
+input_url = "fmqp:://localhost::fmq/dsRadarMult";
+
+///////////// msecs_sleep_blocking ////////////////////
+//
+// Number of millisecs to sleep while polling the input.
+// The reads are done in a polling-blocking mode. This is the number of 
+//   millisecs to sleep between polls.
+// Type: int
+//
+
+msecs_sleep_blocking = 50;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for output FMQ.
+// Type: string
+//
+
+output_url = "fmq/dsRadar";
+
+///////////// output_compression //////////////////////
+//
+// Output compression options.
+// The data may be optionally compressed for output. BZIP is generally 
+//   the slowest but most compact. ZLIB uses the gzip compression 
+//   algorithm, which is faster than BZIP, and for some data more compact 
+//   as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is 
+//   simple run-length encoding compression, which is the fastest and 
+//   least compact.
+//
+// Type: enum
+// Options:
+//   NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION
+//
+//
+
+output_compression = ZLIB_COMPRESSION;
+
+///////////// output_n_slots //////////////////////////
+//
+// Number of slots in output FMQ.
+// Type: int
+//
+
+output_n_slots = 10000;
+
+///////////// output_buf_size /////////////////////////
+//
+// Size of buffer in output FMQ.
+// Type: int
+//
+
+output_buf_size = 20000000;
+

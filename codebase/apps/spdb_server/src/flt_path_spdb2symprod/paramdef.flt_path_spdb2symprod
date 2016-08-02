@@ -1,0 +1,210 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.flt_path_spdb2symprod
+ *
+ * This file contains the TDRP parameter definitions for
+ * flt_path_spdb2symprod.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+paramdef enum debug_t
+{
+  p_descr = "debug level";
+  p_help = "Level of debug messages to print.";
+  p_options = { DEBUG_OFF,
+                DEBUG_ERRORS,
+                DEBUG_MSGS,
+                DEBUG_ROUTINES,
+                DEBUG_ALL };
+  p_default = { DEBUG_OFF };
+} debug;
+
+paramdef long
+{
+  p_descr = "malloc debug level";
+  p_help = "0 = none, 1 = corruption checking, 2 = record all malloc blocks and checks, 3 = printout of all mallocs, etc.";
+  p_default = { 0 };
+  p_min = { 0 };
+  p_max = { 3 };
+} malloc_debug_level;
+
+
+/***********************************************************************
+ * Operational parameters
+ */
+
+paramdef long
+{
+  p_descr = "wait msecs";
+  p_help = "Number of milliseconds to wait before timing out socket operations.";
+  p_default = { 100 };
+} wait_msecs;
+
+
+/***********************************************************************
+ * Input parameters
+ */
+
+paramdef string
+{
+  p_descr = "database directory";
+  p_help = "Directory containing SPDB database.";
+  p_default = { "." };
+} database_dir;
+
+paramdef string
+{
+  p_descr = "product label";
+  p_help = "The product label used in the SPDB database to uniquely identify this product.";
+  p_default = { "Flight Path Data" };
+} product_label;
+
+paramdef long
+{
+  p_descr = "product id";
+  p_help = "Number which uniquely identifies this product in the SPDB database.";
+  p_default = { 400 };
+} product_id;
+
+/***********************************************************************
+ * Output parameters
+ */
+
+paramdef long
+{
+  p_descr = "port";
+  p_help = "Server port number.";
+  p_default = { 62000 };
+} port;
+
+paramdef string
+{
+  p_descr = "servmap type";
+  p_help = "Server mapper type for this server.";
+  p_default = { "Spdb" };
+} servmap_type;
+
+paramdef string
+{
+  p_descr = "servmap subtype";
+  p_help = "Server mapper subtype for this server.  The type is always Spdb.";
+  p_default = { "Symprod" };
+} servmap_subtype;
+
+paramdef string
+{
+  p_descr = "servmap instance";
+  p_help = "Server mapper instance for this server.  The type is always Spdb.";
+  p_default = { "Test" };
+} servmap_instance;
+
+paramdef boolean
+{
+  p_descr = "realtime available flag";
+  p_help = "Flag indicating if realtime data is available from this server.";
+  p_default = { TRUE };
+} realtime_avail;
+
+paramdef boolean
+{
+  p_descr = "latest data for data type flag";
+  p_help = "If TRUE, only the latest data for any data type will be returned by the server.";
+  p_default = { FALSE };
+} latest_data_only_for_type;
+
+/***********************************************************************
+ * Display parameters
+ */
+
+paramdef string
+{
+  p_descr = "past polyline color";
+  p_help = "Name of color suggested for rendering the past polyline.";
+  p_default = { "gold" };
+} past_polyline_color;
+
+paramdef string
+{
+  p_descr = "future polyline color";
+  p_help = "Name of color suggested for rendering the future polyline.";
+  p_default = { "green" };
+} future_polyline_color;
+
+paramdef enum line_type_t
+{
+  p_descr = "polyline line type";
+  p_help = "Type of line suggested for rendering the polyline.";
+  p_options = { LINE_TYPE_SOLID,
+                LINE_TYPE_DASH,
+                LINE_TYPE_DOT_DASH };
+  p_default = { LINE_TYPE_SOLID };
+} polyline_line_type;
+
+paramdef long
+{
+  p_descr = "polyline width";
+  p_help = "Width of line suggested for rendering the polyline.";
+  p_min = { 1 };
+  p_default = { 1 };
+} polyline_line_width;
+
+paramdef enum capstyle_t
+{
+  p_descr = "polyline capstyle";
+  p_help = "Capstyle of line suggested for rendering the polyline.";
+  p_options = { CAPSTYLE_BUTT,
+                CAPSTYLE_NOT_LAST,
+                CAPSTYLE_PROJECTING,
+                CAPSTYLE_ROUND };
+  p_default = { CAPSTYLE_BUTT };
+} polyline_capstyle;
+
+paramdef enum join_style_t
+{
+  p_descr = "polyline join style";
+  p_help = "Join style of line suggested for rendering the polyline.";
+  p_options = { JOIN_STYLE_BEVEL,
+                JOIN_STYLE_MITER,
+                JOIN_STYLE_ROUND };
+  p_default = { JOIN_STYLE_BEVEL };
+} polyline_join_style;
+
+paramdef string
+{
+  p_descr = "current position icon color";
+  p_help = "Suggested color for rendering the current position icon.";
+  p_default = { "green" };
+} curr_pos_icon_color;
+
+paramdef long
+{
+  p_descr = "current position icon";
+  p_help = "Array defining the icon to be used for the current positions.  The icon is a bit-mapped 16x16 icon.  You put 1's in the positions of the icon where the bit should be displayed, and 0's in the positions that are not a part of the icon.  You may want to look at an example parameter file to see how this is done.";
+} curr_pos_icon[];
+

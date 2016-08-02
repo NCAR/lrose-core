@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<wxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML"
+	version="1.01"
+	xsi:schemaLocation="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML/wxml.1.01.xsd">
+<head>
+	<product concise-name="point" operational-mode="experimental">
+		<system>MUF</system>
+		<title>Made-Up Forecast</title>
+                <description>B08FDP MOS</description>
+		<category>forecast</category>
+		<creation-date refresh-frequency="PT6H">2006-02-17T12:00:00</creation-date>
+	</product>
+	<data-source>
+		<network type="AWS" name="AWS" />
+	</data-source>
+	<product-source>
+		<more-information>
+			http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/info.html
+		</more-information>
+		<production-center>Bureau of Meteorology
+			<sub-center>Research Centre</sub-center>
+		</production-center>
+		<disclaimer>http://www.bom.gov.au/other/disclaimer.shtml</disclaimer>
+		<credit>http://www.bom.gov.au</credit>
+		<credit-logo>http://www.bom.gov.au/images/bom_logo.gif</credit-logo>
+		<feedback>http://www.bom.gov.au/bmrc/wfhome.htm</feedback>
+	</product-source>
+</head>
+<data>
+	<location>
+		<location-key>00001</location-key>
+		<site latitude="40.1" longitude="116.4">Olympic Stadium</site>
+	</location>
+	<location>
+		<location-key>00002</location-key>
+		<site latitude="40.2" longitude="116.2">Beijing Intl Airport</site>
+	</location>
+	<location>
+		<location-key>00003</location-key>
+		<site latitude="39.7" longitude="116.5">Rowing venue</site>
+	</location>
+	<time-layout time-coordinate="UTC">
+		<layout-key>k-p1h-n6-1</layout-key>
+		<start-valid-time>2006-02-13T13:00:00</start-valid-time>
+		<start-valid-time>2006-02-13T14:00:00</start-valid-time>
+		<start-valid-time>2006-02-13T15:00:00</start-valid-time>
+		<start-valid-time>2006-02-13T16:00:00</start-valid-time>
+		<start-valid-time>2006-02-13T17:00:00</start-valid-time>
+		<start-valid-time>2006-02-13T18:00:00</start-valid-time>
+	</time-layout>
+	<parameters applicable-location="00001">
+		<temperature type="air" units="C" time-layout="k-p1h-n6-1">
+			<name>Air temperature (C)</name>
+			<value>26.7</value>
+			<value>26.3</value>
+			<value>25.6</value>
+			<value>25.2</value>
+			<value>24.2</value>
+			<value>23.4</value>
+		</temperature>
+	</parameters>
+	<parameters applicable-location="00002">
+		<temperature type="air" units="C" time-layout="k-p1h-n6-1">
+			<name>Air temperature (C)</name>
+			<value>26.6</value>
+			<value xsi:nil="true"/>
+			<value>25.2</value>
+			<value>24.8</value>
+			<value>24.3</value>
+			<value>23.5</value>
+		</temperature>
+	</parameters>
+	<parameters applicable-location="00003">
+		<temperature type="air" units="C" time-layout="k-p1h-n6-1">
+			<name>Air temperature (C)</name>
+			<value>26.2</value>
+			<value>26.2</value>
+			<value>25.1</value>
+			<value>24.5</value>
+			<value>24.0</value>
+			<value>23.1</value>
+		</temperature>
+	</parameters>
+</data>
+</wxml>

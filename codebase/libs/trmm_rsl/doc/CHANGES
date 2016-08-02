@@ -1,0 +1,1454 @@
+/*
+ *----------------------------------------------------------------------
+ * v1.24 Began 6/25/1999.  Released: 6/28/1999 (Severity: bug fix)
+ *
+ * 1. UF ingest improperly set the Fixed angle.
+ *
+ *----------------------------------------------------------------------
+ * v1.23 Began 3/31/1999.  Released: 4/2/1999 (Severity: upgrade)
+ *
+ * 1. Added EDGE format ingest.  This requires the library ETOR
+ *    which is obtained from Enterprise Electronics.
+ *    To build this component, set -DHAVE_EDGE in Makefile.
+ *
+ *----------------------------------------------------------------------
+ * v1.22 Began 3/4/1999.  Released: 3/4/1999 (Severity: bux fix)
+ *
+ * 1. Forgot to set the global 'rsl_kdp_wavelen' in nsig_to_radar.c.
+ *
+ *----------------------------------------------------------------------
+ * v1.21 Began 02/16/1999.  Released: 3/4/1999 (Severity: minor bux fix)
+ *
+ * 1. UF code didn't recognize VE, now it does.
+ * 2. RSL_SPEED_OF_LIGHT unifies c throughout the library.
+ * 3. Modification to KDP processing for Sigmet.  New
+ *    F and INVF functions.
+ *
+ *----------------------------------------------------------------------
+ * v1.20 Began 11/12/98.  Released: 01/25/1999 (Severity: bug fix/upgrade)
+ *
+ * 1. Fixed RADTEC ingest. Does RHI too, but,
+ *    RSL doesn't have any good RHI image routines.
+ *
+ * 2. Added: RSL_set_color_table
+ *           RSL_get_color_table
+ *
+ * 3. Added: '-b x' option to any_to_gif.  This makes images black below
+ *    x dbz.  This is a simple noise filter.
+ *----------------------------------------------------------------------
+ * v1.19 Began 9/15/98.  Released: 9/23/98 (Severity: bug fix)
+ *
+ * 1. Modified file volume.c . New INV_F, _F routines for diff refl.
+ *
+ * 2. Created examples/images to hold a base-line set of images
+ *    to compare when running 'run_tests'.  Modified run_tests
+ *    to compare images.
+ *
+ *----------------------------------------------------------------------
+ * v1.18 Began 4/28/98.  Released: 8/13/98 (Severity: upgrade)
+ *
+ * 1. Added routines: 
+ *      RSL_radtec_to_radar   -- in radtec_to_radar.c
+ *      RSL_fix_time          -- in volume.c
+ *
+ * 2. Added files:
+ *      radtec.c
+ *      radtec.h
+ *      radtec_to_radar.c
+ *
+ * 3. Modified image generation.  Images are produced out to 'range'
+ *    specified.  Each image pixels is no longer 1km, but radius/range.
+ *
+ * 4. any_to_gif can now accept range and image size arguments.
+ *
+ * 5. RADTEC requires PKWARE routines explode and crc32.
+ *    RADTEC is built into RSL, if you specify -DHAVE_PKWARE in 
+ *    the Makefile.  When using RADTEC, you must link your application
+ *    staticly; with -static.
+ *
+ *    Contact PKWARE at 414-354-8699.  
+ *
+ * 6. Modified radar_to_hdf_1.c. Removed ZDR data from 1C-51 HDF.
+ *
+ * 7. Moved HDF_FILE_VERSION definition from toolkit_1BC-51_appl.h
+ *    into the application level_1.c
+ *
+ *----------------------------------------------------------------------
+ * v1.17 Began 4/23/98.  Released: 4/28/98 (Severity: upgrade)
+ *
+ * 1. Finally received info regarding KDP (KD_INDEX) for SIGMET.
+ *    Assumming the units are similar for LASSEN.  Boosted nsig_to_radar
+ *    to recognize KDP.  It is really KDP * wavelength.  
+ *    The units are deg*cm/km.  You must divide out the wavelength,
+ *    if that is desired.
+ *
+ * 2. BADVAL/NOECHO mod for nsig_to_radar.c.  This should affect
+ *    the values that may be stored in any possible UF output.
+ *
+ * WTD : lassen_to_radar.c  - check the ZDR conversion, if any.  Do
+ *       we need this?
+ * WTD : RHI
+ *
+ *----------------------------------------------------------------------
+ * v1.16 Began 3/6/98.  Released: 4/21/98 (Severity: bug fix/upgrade)
+ *
+ * 1. Changed how any_to_gif output's filenames produced.  Now, they
+ *    are written to stdout.  -v (verbose) and -V (all volume) options
+ *    are added.  Changed image_gen.c (RSL_volume_to_gif) to output
+ *    filenames to stdout.
+ *
+ * 2. You really do need 'bison' (GNU yacc), 'flex' (GNU lex) and
+ *    make (GNU make) to build this library.  This has been true
+ *    since v1.15 when I introduced the rapic format.  These programs
+ *    are superior to those on your stock Unix system, so take the
+ *    time to install them.
+ *
+ * 3. README explains how to apply patches.
+ *
+ * 4. Eliminated the reduce/reduce conflict in rapic.y
+ *
+ * 5. Year 2000 compliant.
+ *
+ * 6. I forgot the format in sprintf.  See rapic.y.
+ *
+ *----------------------------------------------------------------------
+ * v1.15 Began 2/20/98.  Released: 3/4/98 (Severity: bug fix/upgrade)
+ *
+ * 1. Michael Whimpey from BMRC, Australia changed code, for the
+ *    different callibrations, between, Pre_mctex, mctex, Gunn_Pt
+ *    periods. Please see code where there is m.whimpey.  See
+ *    lassen_to_radar.c
+ *
+ * 2. Added RAPIC format ingest.  RSL_rapic_to_radar.
+ *    I used GNU Bison (YACC) and GNU Flex (LEX) to code the RAPIC ingest.
+ *    This format is used by the Berrimah radar.  See rapic_to_radar.c,
+ *    rapic_routines.c, rapic.y, and rapic.l.
+ *    Not tested w/ older YACC and LEX found on older Unix systems.
+ *
+ * 3. Fixed a bug regarding the reading of stdin streams.  Now
+ *    you can read compressed or uncompressed files from stdin.
+ *    Previously, you couldn't specify NULL as a filename and
+ *    have it work reliably in all cases for any file format.
+ *    This bug was found by accident and it is nothing you should
+ *    be worried about in earlier RSL releases.  The reason you need
+ *    not worry about it is because 'RSL_anyformat_to_radar' cannot
+ *    accept NULL as a filename.  For you to notice this, you must
+ *    have called the specific ingest routine for the format
+ *    being read: RSL_lassen_to_radar, for example.
+ *
+ * 4. Bug in the UF ingest.  The scale_factor needs to be float.
+ *    When it was 'int', round off errors (truncation) were
+ *    happening.  This affected the Velocity data, only.  The reflectivity
+ *    data seemed unaffected, because, the magnitude of the values
+ *    was high enough to avoid truncation.
+ *----------------------------------------------------------------------
+ * v1.14 Began 2/2/98.  Released: 2/3/98 (Severity: upgrade)
+ *
+ * 1. Added calibration for Gunn Point radar.   Assumes that
+ *    the radar name will be 'Gunn_Pt'.
+ *
+ *----------------------------------------------------------------------
+ * v1.13 Began 1/16/98.  Released: 1/26/98 (Severity: minor bug fix)
+ *
+ * 01/16/98
+ *
+ * 1. radar_to_hdf_1.c: Changed decision algorithm regarding
+ *    whether or not to write a VOS into a 1C-51 HDF file.
+ *    1C-51 HDF VOS time_slot status is encoded within the
+ *    metaData field 'TK_GEN_DATE_INPUT_FILES'.
+ *
+ *----------------------------------------------------------------------
+ * v1.12 Began 1/12/98.  Released: 1/12/98 (Severity: minor bug fix)
+ *
+ * 1. Changed HDF metadata item for empty granules.
+ *
+ *----------------------------------------------------------------------
+ * v1.11 Began 12/17/97.  Released: 12/17/97 (Severity: minor bug fix)
+ * 
+ * 1. Increased the size of pipecmd in RSL_write_gif and TK_MAX_FILENAME to 256.* 2. Modified image_gen.c to increase the data range of Zdr values.
+ * 3. Bug fix in radar_to_hdf_1.c: No longer dumps core for "tiny" sweeps
+	    having fewer than 5 rays.
+ *
+ *----------------------------------------------------------------------
+ * v1.10 Began 8/27/97.  Released: 10/21/97 (Severity: minor upgrade)
+ * 
+ * 1. Modified ZDR image generation: rsl.h, image_gen.c, ZDR color tables.
+ * 2. Added South Africa data format ingest.  Not possible to 
+ *    interface in RSL_anyformat_to_radar, at this time.  The format
+ *    is primitive and I need to convert RVPC to dBZ.
+ * 3. Modified HDF component to maintain integrity of anomalous_condition
+ *    flags. (RFVAL, APFLAG, NOECHO, BADVAL)
+ *    Files: toolkit_1BC-51_appl.h, hdf_to_radar.c, radar_to_hdf_2.c
+ * 4. Modified radar_to_hdf_1.c for TSDIS/DAAC metadata requirements.
+ * 5. Modified any_to_gif.c to output site and date/time for image filenames.
+ * 6. Added QC algorithm parameter. Modified files:
+ *    toolkit_1BC-51_appl.h, radar_to_hdf_1.c, radar_to_hdf_2.c,
+ *    hdf_to_radar.c
+ *
+ *----------------------------------------------------------------------
+ * v1.9 Began 8/18/97.  Released: 8/18/97 (Severity: bug fix)
+ *
+ * 1. Mofified radar_to_hdf_1.c : Metadata mods for TSDIS.
+ *
+ *----------------------------------------------------------------------
+ * v1.8 Began 7/30/97.  Released: 8/05/97 (Severity: upgrade)
+ *
+ * 1. Added RSL_read_these_sweeps.  Specify specific sweep numbers for
+ *    ingest. This drastically speeds up ingest, if you're only interested
+ *    in the first or first couple of sweeps.  For example, making 
+ *    base scan images.
+ *          wsr88d -done
+ *          UF     -done
+ *          sigmet -done
+ *          lassen -done
+ *          HDF    -done
+ *          toga   -done
+ *          mcgill -done.  BUT, apparently, mcgill ingest is broken!!!
+ *                         When did this happen?
+ *
+ * 2. Added RSL_load_zdr_color_table();
+ *    Includes color tables for this field.  See colors/
+ *
+ * 3. More HDF mods; more warning messages.  
+ *
+ * 4. The TRMM Office has fixed several bugs in the TSDIS toolkit.
+ *    For proper HDF creation, that conform to TSDIS HDF specifications,
+ *    you will need toolkit 4.5r1.1.
+ *
+ *    Toolkit 4.5r1.1 is an unofficial release; the TRMM office will
+ *    pass this out upon request.
+ *
+ *----------------------------------------------------------------------
+ * v1.7 Began 7/23/97.  Released: 7/25/97 (Severity: bug fix)
+ *
+ * 1. Handles corrupt SIGMET files more gracefully.
+ *
+ * 2. All lat/lon (degree,minute,second) triplets have the same sign.
+ *    Except, if UF, then what ever the file tells me and if they're
+ *    not all the same sign, then you'll have
+ *    to correct the UF w/ an RSL application.  In other words, UF
+ *    stores the lat/lon as deg/min/sec and they have their own signs;
+ *    Strict UF have deg/min/sec all w/ the same sign, anyway.
+ *
+ * 3. Minor changes to HDF component of RSL.
+ *----------------------------------------------------------------------
+ * v1.6 Began 5/02/97.  Released: 7/23/97 (Severity: bug fix)
+ *
+ * 1. wsr88d_to_radar.c -- Was too permissive. No longer defaults to KMLB.
+ *    If unable to establish a valid site based on callID or first_file,
+ *    returns NULL.
+ *
+ * 2. 18 Jul 97 Kolander
+ *    Modified radar_to_uf.c & uf_to_radar.c : Fixed some incorrect and
+ *    missing sweep and ray header values. Salvaged some numerical precision.
+ *
+ * 3. Fixed a time problem in nsig_to_radar.c.  Daylight savings time.
+ *
+ * 4. Saves lat/lon on each ray for UF.
+ *
+ *--------------------
+ * 16 Jun 97 Kolander
+ *
+ * Modifications to radar parameter calulations in:
+ * wsr88d_to_radar.c, wsr88d.h, wsr88d.c, nsig_to_radar.c,
+ * lassen_to_radar.c, rsl.h
+ *
+ *  Modified HDF-related files:
+ *    hdf_to_radar.c toolkit_1BC-51_appl.h
+ *  and  split file 'radar_to_hdf.c' into two files:
+ *    radar_to_hdf_1.c and radar_to_hdf_2.c
+ *  Can handle oddly sized and/or corrupt VOSs.
+ *----------------------------------------------------------------------
+ * v1.5 Began 3/17/97.  Released: 4/30/97 (Severity: minor upgrade)
+ *  
+ * 1. Additional error checking in wsr88d.c to warn when number of gates
+ *    expected is exceeded.
+ * 2. Changes by Mike Kolander affect the HDF component of RSL.  This
+ *    version of RSL works with the TSDIS toolkit 4.0.
+ * 3. Changes to carpi and cube functions, see below.
+ *-------------------------
+ * Date: 26 Mar 97  kolander
+ *
+ * Files: radar_to_hdf.c, hdf_to_radar.c
+ *   Moved QC parameters out of the metadata string into VOS comments
+ *   field.
+ *
+ * Files: rsl.h, anyformat_to_radar.c
+ *   Moved enum File_type definition from anyformat_to_radar.c into
+ *   rsl.h
+ *--------------------------
+ * Date: 17 Mar 97  kolander
+ *
+ * File: rsl.h
+ *   Changed carpi structure:
+ *     Added f, invf fields.
+ *     (Carpi_value **)data is now a doubly indexed array 'data[nrow][ncol]'
+ *   Changed slice structure:
+ *     Added f, invf fields.
+ *     (Slice_value **)data is now a doubly indexed array 'data[nrow][ncol]'
+ *   Added function prototypes for:
+ *      RSL_free_carpi, RSL_free_cube, RSL_free_slice, RSL_new_cube,
+ *      RSL_new_slice, RSL_carpi_to_cart, RSL_carpi_to_gif,
+ *      RSL_carpi_to_pict, RSL_carpi_to_ppm, RSL_carpi_to_pgm
+ *
+ * File: cube.c
+ *   Added functions:
+ *     RSL_free_slice, RSL_new_slice, RSL_new_cube, RSL_free_cube
+ *   Modified functions:
+ *     RSL_volume_to_cube, RSL_get_slice_from_cube
+ *
+ * File: carpi.c
+ *   Added functions:
+ *      RSL_free_carpi 
+ *   Modified functions:
+ *      RSL_new_carpi, RSL_find_rng_azm, RSL_cappi_to_carpi
+ *
+ * File: image_gen.c
+ *   Added functions: 
+ *     (These are modified clones of the sweep image_gen functions.)
+ *     RSL_carpi_to_cart, RSL_carpi_to_gif, RSL_carpi_to_pict,,
+ *     RSL_carpi_to_ppm, RSL_carpi_to_pgm
+ *
+ *----------------------------------------------------------------------
+ * v1.4 Began 12/24/96.  Released: 3/7/97 (Severity: bug fix)
+ *
+ * 1. Some WSR88D files have a 'radial status' of 28.  This is un-
+ *    documented.  I assume it means some catastrophic reset has occured.
+ *    Therefore, the code that counts the number of rays is modified
+ *    to rely on the 'ray_num' reported upon reading the file.
+ *    Also, I assume that when the status tells me that I'm reading
+ *    the 'start of a new elevation' (status == 0) that all subsequent
+ *    records will overwrite previously stored rays.
+ *
+ *    I've seen this status number(28) occur, rarely, in the
+ *    WSR88D data.  See wsr88d.c.
+ *
+ * 2. Removed kwaj component.  - Mike.
+ *
+ * 3. Installs toolkit_1BC-51_appl.h in INCDIR.  This file is needed
+ *    only if you plan to use the HDF component.
+ *
+ * 4. Fixes a freeing bug in nsig.c.  Added member nparams to the 
+ *    NSIG_Sweep structure to track this for the free routine.
+ *
+ * 5. Ray indexing bug fixed in wsr88d_to_radar.c which produced an
+ *    invalid time when the first wsr88d ray was null.  Basically, using
+ *    'i' instead of 'iray'.
+ *----------------------------------------------------------------------
+ * v1.3 Began 08/26/96.  Released: 12/17/96 (Severity: upgrade)
+ * 
+ * 1. Lassen field 'Zdr' loaded into RSL 'ZD' field, not the RSL 'DR' 
+ *    field, as originally envisioned within HDF functions. Henceforth, 
+ *    'ZD' represents (linear) reflectivity depolarization ratio:
+ *      ZD = 10log(Z_horiz/Z_vert) in units dB
+ *    as opposed to the circular depolarization ratio.
+ *    
+ *    What exactly are the RSL 'LR' and 'DR' fields??
+ *    
+ *    
+ *    For consistency of field nomenclature:
+ *    
+ *    Renamed 'CR' to 'CD'.  (corrected ZDR for 1C-51)
+ *            'MR' to 'MD'.   (1C-51 mask for ZDR)
+ *    
+ *    CD_F returns ZD_F
+ *    CD_INVF returns ZD_INVF
+ *    
+ * 2. Sort by time forgot to compare the hour field.  Minor fix.
+ *
+ * 3. Fix z_to_r to return proper value.   
+ *
+ * 4. Lassen ingest: fix the sign of deg/min/sec so they match.
+ *    Trusting that the sign of the deg is correct.
+ *
+ * 5. Added RSL_select_fields.  This reduces memory requirements
+ *    upon ingest.  You can select, "all" (default), "none" (just to
+ *    get header info) or "dz", "vr", ...
+ *
+ *    WHAT?    STATUS?
+ *    lassen   done
+ *    wsr88d   done
+ *    UF       done
+ *    nsig     done
+ *    nsig2    done
+ *    kwaj     not applicable as it only has DZ.
+ *    hdf      done
+ *    mcgill   not applicable as it only has DZ.
+ *    toga     not done.  If you want to do this, feel free.
+ *
+ * 6. Uses 'gzip -1'.  This cuts the time for making UF files in half.
+ *
+ * 7. Renamed 'makefile' to 'Makefile'
+ *
+ * 8. The HDF component has changed drastically and is not compatable
+ *    with previous versions.  It may change again, contingent upon
+ *    the TSDIS toolkit 3.5.2.1 (as of 12/17/96).  Expect minor changes
+ *    to the HDF component in the future.
+ *
+ * 9. Pruning of sweeps and rays now sets moved object pointers to
+ *    NULL.  See prune.c
+ *
+ *10. Updated nsig_to_radar.c to check for ant_scan_mode.  If mode is
+ *    RHI, then return NULL because RSL can't handle RHIs. --Paul
+ *
+ *11. Split memory management routines for hdf processing. --Mike K.
+ *----------------------------------------------------------------------
+ * v1.2 Began 08/26/96.  Released: 9/6/96 (Severity: minor bug-fix upgrade)
+ *
+ * 1. Eliminated zero sized arrays in lassen.h.  SGI 'cc' can't
+ *    handle zero sized arrays.  This brings back the -pedantic
+ *    compile flag.   
+ *
+ * 2. Implemented popen and pclose (called rsl_popen and rsl_pclose)
+ *    to eliminate the annoying message 'Broken pipe.' on SGI and HP
+ *    computers.
+ *
+ * 3. The HDF component is incompatable with earlier versions because
+ *    of the use of additional fields.  It now uses the MASK fields
+ *    and calibration information.  It should be considered that the 
+ *    HDF component is in a state of flux.
+ *
+ * 4. Minor bug in nsig.c wherein when rays are missing (0 sized)
+ *    that not all rays present will be ingested.  This is fixed.
+ *
+ * 5. Copyrighted the software.
+ *
+ * 6. 'anyformat_to_radar' can recognize HDF files.
+ *
+ *----------------------------------------------------------------------
+ * v1.1 Began 08/21/96.  Released: 08/22/96 (Severity: SERIOUS bug fix)
+ *      If you have already upgraded to RSL v1.0.1, then this is a minor
+ *      upgrade.
+ *
+ * 1. I should have left well enough alone.  But, getting rid
+ *    of rsl.h.template in favor of only having rsl.h has revealed
+ *    a serious bug.
+ *
+ *    THIS BUG IS IN V1.0 ONLY.
+ *
+ *    The type for 'Range' could be built into
+ *    the RSL differently than how your application is built.
+ *    For instance, if RSL is built with USE_TWO_BYTE_PRECISION, then
+ *    your application will think 'Range' is a one byte storage class,
+ *    because the default RSL configuration is to use one byte storage.
+ *
+ *    This bug slipped through all the tests that I perform and was 
+ *    discovered only when using the radar_to_hdf component of RSL.
+ *    Thanks to Mike Kolander for finding this one. 
+ *
+ *    Configuration instructions are changed so that you must edit
+ *    rsl.h to use one byte precision.
+ *
+ * 2. All MCTEX fields are recognized and loaded into Radar.
+ *    h.f and h.invf are modeled after LASSEN conversion functions.
+ * 3. Added radar_to_hdf.o to makefile.
+ * 4. In examples/any_to_gif.c, outputs all fields.
+ * 5. Three convience arrays are defined in rsl.h.
+ *    a. RSL_ftype[];
+ *    b. RSL_f_list[];
+ *    c. RSL_invf_list[];
+ *    Each array is MAX_RADAR_VOLUMES long and contain: strings 
+ *    representing the field type, a pointer
+ *    to the F function, and a pointer to the INVF function.
+ *
+ *    Usage is conditional by defining USE_RSL_VARS before including
+ *    rsl.h.  Use:
+ *       #define USE_RSL_VARS
+ *       #include "rsl.h"
+ *
+ *    Normally, you shouldn't worry about this.
+ *
+ * 6. Removed -pedantic compile flag because LASSEN code has a 0
+ *    sized array -- no warnings.
+ *----------------------------------------------------------------------
+ * v1.0 Began 04/19/96.  Released: 8/18/96 (Severity: minor upgrade)
+ *
+ * 1. Ignore SIGPIPE when making images.
+ * 2. Can read UF files of MCTEX data.  This UF file contains
+ *    RH and PH fields.  This is LASSEN data that has been converted
+ *    to UF via a sun program.  It is the LASSEN II format.
+ * 3. Fixed date/time == 0 when calling uf_to_radar multiple times.
+ *    The second and subsequent calls produced 0 for the
+ *    radar->h.year/month/day and radar->h.hour/min/second.
+ * 4. Always allocate MAX_RADAR_VOLUMES for new radars during ingest.
+ *    This will allow one to test any volume index for presence.
+ * 5. Set the default functions to DZ_F.  This sets CZ_F correctly.
+ *    It is unclear if the other conversion fuctions are properly
+ *    defined.
+ * 6. Pure UF file ingest bug fixes.
+ * 7. Added RSL_hdf_to_radar - Mike Kolander.
+ * 8. Added RSL_radar_to_hdf - Mike Kolander.
+ * 9. New field type: XZ for X-band Reflectivity.
+ * 10. Working version of nsig_to_radar. - Paul Kucera.
+ *     This version works on both big endian and little endian (Linux),
+ *     and, for both version 1 and version 2 formats.  Version 2
+ *     files are generated on big-endian machines (so far, SGI Iris 
+ *     computers), whereas, Version 1 files were written on
+ *     little-endian DEC computers.  Two routines are provided:
+ *
+ *     RSL_nsig_to_radar(char *infile);
+ *     RSL_nsig2_to_radar(char *infile);
+ *
+ *     Nsig ingest can handle nsig files/tapes that were
+ *     written on a DEC (little endian) or an SGI (big endian).
+ *     It is handled automatically by examination of the 'magic' bytes.
+ *     You will note that the byte-ordering in the file is dependant
+ *     on which machine wrote the tape or file.  The New-SIGMET 
+ *     documentation does not specify which byte-ordering is to be used
+ *     when the file is written.
+ *
+ *     Re-wrote nsig.c and beefed up nsig.h.  Now, there is an 
+ *     interface to read an entire nsig sweep.  You can loop through
+ *     the returned sweep and pick your values, and load RSL.
+ *     This re-write was done to make reading version 2 files easier.
+ *     Additionally, all NSIG code for version 1 and version 2 files
+ *     is centrally located in:
+ *           nsig.h
+ *           nsig.c
+ *           nsig_to_radar.c
+ *     To have both versions supported in the same files, I use #ifdef
+ *     and the C preprocessor.  'nsig.h' is saturated with #ifdef NSIG_VER2
+ *     constructs.  Thus, only one source is maintained for both NSIG versions.
+ *
+ * 11. Added RSL_print_version();
+ * 12. Added docs for users guide, hdf.
+ * 13. Added html 'grouping by functionality' page.
+ * 14. Restores stdin and stdout when creating pipes.
+ *     The pipe readers need to loop until no data available, because
+ *     'read/fread' will not get all the data in one call.
+ * 15. Added moving platform headers to Ray structure:
+ *      float pitch;       Pitch angle.
+ *      float roll;        Roll  angle.
+ *      float heading;     Heading.
+ *      float pitch_rate;  (angle/sec)
+ *      float roll_rate;   (angle/sec)
+ *      float heading_rate;  (angle/sec)
+ *      float lat;           Latitude (degrees)
+ *      float lon;           Longitude (degrees)
+ *      int   alt;           Altitude (m)
+ *      int   rvc;           Radial velocity correction (units of velocity)
+ *
+ *     This information typically comes from NSIG.  For other formats
+ *     the values are all zero.
+ * 16. Read version 1.3 and 1.4 of LASSEN data.  RSL_lassen_to_radar.
+ *     This means that RSL can read MCTEX data.
+ * 17. Users manual.  Walk a novice through a simple example and explain
+ *     what header information is important.  Teach how to take advantage
+ *     of the library.
+ * 18. Eliminated the #ifeq in makefile.  Thus, rsl.h.template is removed
+ *     and rsl.h is resurrected.
+ *----------------------------------------------------------------------
+ * v0.45 Began 03/26/96.  Froze: 03/27/96  (Severity: minor)
+ *
+ * 1. Fixed broken pipe problem on HP and SGI.  Cause unknown.
+ *    All I did was to remove the pclose in any_format_to_radar.c
+ *    It seems that if there is any data left in the pipe that a 
+ *    SIGPIPE is sent when trying to close the pipe.
+ *    On SGI's this causes a core dump.  This bug is difficult to
+ *    reproduce.
+ * 2. Nsig ingest is severly broken.  It always was.  Work in
+ *    progress.
+ * 3. It is important that TSDIS get this version to run on their SGI
+ *    as it prevents a core dump.  Normally, this shouldn't affect 
+ *    anyone.
+ *----------------------------------------------------------------------
+ * v0.44 Began 03/19/96.  Froze: 03/19/96.
+ *
+ * 1. In prune.c, pointers that are pruned are now set to NULL.
+ *    This elimated core dumps associated with trying to free structues.
+ * 2. On gzip-ed UF output, stdout is flushed before the pipe is opened.
+ * 3. Added reverse.c -- Reverse the order of the sweep pointers in
+ *    a volume.
+ *----------------------------------------------------------------------
+ * v0.43 Began 03/01/96.  Froze: 03/05/96.
+ *
+ * 1. farea.c -- nbins fix.
+ * 2. On UF output, checks for NOECHO.
+ *
+ *----------------------------------------------------------------------
+ * v0.42 Began 11/27/95.  Froze: 02/16/96.
+ *
+ * 1. Removed '#include <strings.h>'.
+ * 2. Added a couple of missing prototypes in rsl.h.template.
+ * 3. Added:
+ *     Ray    *RSL_prune_ray   (Ray  *ray);
+ *     Sweep  *RSL_prune_sweep (Sweep  *s);
+ *     Volume *RSL_prune_volume(Volume *v);
+ *     Radar  *RSL_prune_radar (Radar  *r);
+ *
+ *     These routine remove dataless substructures.  Prompted by
+ *     poor NCAR ingest routines for UF files; it is wise to prune
+ *     a Radar prior to calling RSL_radar_to_uf.  Therefore, if 
+ *     software cannot read the UF files created by RSL, then try these
+ *     prune functions before outputting the UF file.  In either case,
+ *     RSL_radar_to_uf produces valid UF files.
+ * 4. Removed trigraph in mcgill.c.
+ * 5. Fixed lassen ingest problem on Linux.  I think XDR has a bug
+ *    where bit fields are not loaded properly.  This is a kludge fix.
+ * 6. Removed column.c.  Code not mature and takes way too much
+ *    RAM.  Included in the removal are the vertical structure routines.
+ *    The code has been moved to the application (qcwin).
+ * 7. RSL_get_first_ray_of_sweep now returns when the ray number is 1 or
+ *    0.  This drasitically speeds the routine.
+ * 8. Increased the UF buffer size from 4096 to 16384.
+ *----------------------------------------------------------------------
+ * v0.41 Began 11/01/95.  Froze: 11/20/95.
+ *
+ * 1. Minor doc changes.  More up to date with implementation.
+ * 2. Implemented 'radar_type' in the radar_header structure.  Values
+ *    are strings and are: "wsr88d", "lassen", "uf", "nsig", "mcgill",
+ *    "kwajalein", "toga".
+ * 3. Increased range of data (internal storage conversion functions)
+ *    when using 2 byte storage.  Some nsig data can have values below the 
+ *    default wsr88d function range.
+ * 4. 'farea.c' -- Volumes are used to compute the fractional area.
+ *                 This matches the latest specification of the function.
+ * 5. Automatically uncompress files.  Transparently sets up
+ *    a decompression pipe.  If the input is not stdin, then 'anyformat_to...'
+ *    can peek inside a compressed file and determine what ingest routine to
+ *    use.  Reading copmressed files from disk and internally uncompressing
+ *    them turns out to be the fastest form of ingesting wsr88d (only format
+ *    timed) data on my 486.  However, I get mixed results on the HP 755.
+ *    'anyformat_to...' uses 'gunzip' to peek inside compressed files.
+ * 6. Can make gzip-ed UF files.  The new routine is 'RSL_radar_to_uf_gzip'.
+ *    Also, RSL_radar_to_uf_fp takes a file pointer.  Thus, you can
+ *    define your own output filter.
+ * 7. Added RSL_write_radar_fp, RSL_write_radar_gzip.
+ *----------------------------------------------------------------------
+ * v0.40 Began 10/24/95.  Froze: 10/24/95.
+ *
+ * 1. Type cast for Sweep_header and Ray_header was removed so that
+ *    stock 'cc' on SGI could digest the code.  File: column.c. Why?
+ *
+ * Version 0.39 was short lived. :-)
+ *----------------------------------------------------------------------
+ * v0.39 Began 7/1/95.  Froze: 10/24/95.
+ *
+ * 1. Mcgill library is not separate.  Included in rsl in whole.
+ * 2. Interpolation routines added.
+ * 3. Added RSL_load_height_color_table  -- and the colors/*height.clr
+ * 4. Added RSL_load_rainfall_color_table  -- and the colors/*rainfall.clr
+ * 5. Removed RSL_print_{volume,sweep,ray}
+ * 6. Removed some unused routines.
+ * 7. Vertical_structure is its own type composed of Vertical_sweeps and
+ *    Vertical_rays (columns).
+ * 8. Added doc/internal_routines.html.
+ * 9. UF is exchangable between big and little endian.  Finally, this
+ *    has been fixed.  Now UF can be generated on little endian machines
+ *    and read on big endian (the UF generated is in big endian format even
+ *    on the little endian machine).  And, visa versa.
+ *10. New version of RSL_get_vertical_structure in column.c.  Doc's updated.
+ *11. Fixed bug in radar_to_uf.  When the number of actual sweeps (and perhaps
+ *    volumes) is less than the determined max of the entire radar structure,
+ *    then the pointers may be erroneous.  Paul caught this flounder.
+ *12. Added RSL_uf_to_radar_fp.  The FILE *fp version of the UF ingest.
+ *    Also, passing NULL to RSL_uf_to_radar means to read from stdin.
+ *13. Added NOECHO flag for f and invf.  Currently, defined for UF, NSIG and
+ *    Kwaj data.
+ *14. Included source for libraries: wsr88d, lassen, tg, nsig, mcgill,
+ *    and kwajlein. Now linking needs only: -lrsl -lm
+ *15. Simplified the configuration procedure.  All configuration
+ *    is specified from 'makefile'.  See README for new install instructions.
+ *16. Removed ray_status, sec_num, atm_att, min_dif, sys_cal from ray
+ *    header.  These are not used and specific for wsr88d.
+ *17. Summary of routine that handle NULL filenames as STDIN.
+ *        RSL_wsr88d_to_radar
+ *        RSL_uf_to_radar         -- calls --> RSL_uf_to_radar_fp
+ *        RSL_lassen_to_radar
+ *        RSL_nsig_to_radar
+ *        RSL_toga_to_radar
+ *        RSL_mcgill_to_radar
+ *18. Removed RSL_get_sweep_index_from_volume.
+ *19. Removed RSL_X_ray_indexes.  Actually, just renamed the routine
+ *    to 'construct_sweep_hash_table'.  The hash table retains the hi and
+ *    low ray pointers for closest ray comparison.  Angle diff's removed.
+ *20. Removed hash table implementation in the Sweep structure.  It
+ *    is now implemented internally in RSL.
+ *21. BADVAL valued depends on Range type.  Picked to be out of range.
+ *
+ *----------------------------------------------------------------------
+ * v0.38 Began 6/1/95.  Froze 6/29/95.
+ *
+ * 1. Makes 2's compliment, instead of 1's compliment, in sweep_to_cart.
+ * 2. Modifications to eth functions.
+ * 3. Added routine RSL_get_column. See column.c.
+ * 4. Added Column data structure.
+ * 5. Static pointer for image generation.  Free up image pointer and
+ *    reallocate.  Otherwise, we've got a memory leak when making many
+ *    images.
+ * 6. Added Paul's and Dennis's modifications of the cappi routines.
+ *    I modified the cappi structure so that Sweep is a substructure.
+ *    This makes image generation and get_value_from_cappi easy to implement.
+ * 7. Added a test program in examples/cappi_image.c to test cappi
+ *    generation.
+ * 8. Change doc/ for the cappi routines.  Routines added/modified are:
+ *      float RSL_get_value_from_cappi(Cappi *cappi, float rng, float azm);
+ *      int RSL_fill_cappi(Volume *v, Cappi *cap, int method);
+ *      void RSL_free_cappi(Cappi *c);
+ *      Cappi *RSL_new_cappi(Sweep *sweep, float height);
+ *      Cappi *RSL_cappi_at_h(Volume  *v, float height, float max_range);
+ *      Carpi *RSL_cappi_to_carpi(Cappi *cappi, float dx, float dy,
+ * 9. Carpi structure modified to be compatable with cappi routines.
+ * 10. Added RSL_get_gr_slantr_h.  -> range.c
+ * 11. RSL_uf_to_radar only recognizes UF files.
+ * 12. RSL_uf_to_radar handles TRUE UF, 2 and 4 byte record length delimeters.
+ * 13. Minor bug fix in ray_indexes.c to handle RHI input.  The number of
+ *     hash table entries is now a function of the beam_width and not the
+ *     number of rays.
+ * 14. Bug fix in rebin_velocity_sweep.  New velocity color tables.
+ *     'examples/qlook.c' added.  Yet another image generation program;
+ *     redundant.
+ * 15. RSL_uf_to_radar allocated additional space for sweeps, when the
+ *     initial allocation is not enough.
+ * 16. Added a programmers guide.  See programmers_guide.html.
+ * 17. Get_closest routines removed.
+ * 18. Added RSL_kwaj_to_radar.  -- Mike Kolander.
+ * 19. Added docs for RSL_kwaj_to_radar.
+ *
+ * Note: Since v0.37 we've been using h.f and h.invf for the storage
+ * functions and, thus, the library is not compatable with earlier
+ * versions.  All subsequent version are, however, compatable.
+ * This means, code that used v0.36 and earlier will break (not
+ * even link) with v0.37 or later.
+ *
+ * You must now use:
+ *    ray->h.f(ray->range[i]) instead of F(ray->range[i])
+ * and
+ *    ray->h.invf(x) instead of INVF(x).
+ *
+ *----------------------------------------------------------------------
+ * v0.37 Began 5/24/95.  Froze 5/29/95.
+ *
+ * 1. Removed RSL_float_to_char; too specific.
+ * 2. Implemented seperate conversion functions for each field type.
+ *    This added h.f and h.invf to Volume, Sweep and Ray headers.
+ *    The ingest routines optionally define there own conversion function.
+ *    Most of the time, though, I use the default: wsr88d conversions.
+ *      Tested: wsr88d, lassen, mcgill, UF, rsl.
+ *      Coded but not tested: toga, nsig.
+ * 3. Added ETH routines:
+ *      Sweep *RSL_get_eth_sweep(Volume *v,float et_point);
+ *      float RSL_get_echo_top_height(Volume *v,float azim,float grange, float et_point);
+ * 4. If using #define USE_TWO_BYTE_PRECISION, uses 100 as a storage
+ *    factor.  Now, there is no loss of precision when converting between
+ *    internal and float.  Before there was just a minor round off when
+ *    using any data that used anything other than 1/2 dbz precision.
+ *    Using 100 is more than enough.
+ *----------------------------------------------------------------------
+ * v0.36 Began 5/19/95. Froze 5/19/95.
+ *
+ * 1. Magic in anyformat_to_radar was slightly different than expected
+ *    for lassen data.  Tested on lassen data.
+ * 2. DEFAULT is to use 2 byte storage precision.  See rsl.h.
+ * 3. Several changes to get_closest routines -- Flanigan.
+ *
+ *----------------------------------------------------------------------
+ * v0.35 Began 5/18/95. Froze 5/18/95.
+ *
+ * 1. Checks iazim validity in ray_indexes.c.  Bad angles use to cause
+ *    core dumps.
+ * 2. wsr88d_to_radar can handle bogus filenames and callid's.
+ *
+ *----------------------------------------------------------------------
+ * v0.34 Began 5/17/95. Froze 5/18/95.
+ * 
+ * 1. Modified the bscan interface.
+ *
+ * 2. Fixed a minor nrays bookkeeping bug in radar_to_uf.
+ *
+ * 3. Updated Sweep searching routines.
+ *
+ * 4. Added get_closest and get_next_closest ray searching routines.
+ *    Updated RSL_get_ray_from_sweep so that it uses the 
+ *    new_get_closest function.
+ *
+ *----------------------------------------------------------------------
+ * v0.33 Began 5/12/95. Froze 5/16/95.
+ *
+ * 1. Configure for building using 2 byte precision instead of 1 byte.
+ *    This should quell any accuracy problems associated with the
+ *    functions F and INVF.
+ *
+ * 2. Added 'RSL_mcgill_to_radar'.  Link with -lmcgill.
+ *
+ * 3. Bug fix in cube.c, cappi.c, and carpi.c.
+ *----------------------------------------------------------------------
+ *
+ * v0.32 Began 5/5/95. Froze 5/12/95.
+ *
+ *    1. Compiles with -Wall -ansi -pedantic.
+ *    2. Minor bug fixes in get_win.c
+ *    3. Compiles on SGI, 486, SUN, HP using gcc or stock cc.
+ *----------------------------------------------------------------------
+ * v0.31 Began 4/28/95. Froze 5/5/95.
+ *
+ *    1. Added ray_high and ray_low Azimuth_hash pointers
+ *       to Azimuth_hash data structure and code in the
+ *       the routine RSL_sweep_ray_indexes to set these
+ *       pointers.  ray_low points to the Azimuth_hash
+ *       with the next lowest ray_angle, with ray_high
+ *       points to the next highest.
+ *
+ *    2. Created internal routine dir_angle_diff.  Returns
+ *       negitive difference if the second angle in 
+ *       the parameter list is counter-clockwise to the
+ *       first angle.  Returns positive is second 
+ *       angle is clockwise tk first angle.
+ *    
+ *    3. Added internal routine the_closest_hash.  This
+ *       routine returns the an Azimuth_hash
+ *       data structure that contains the closest
+ *       ray to the requested angle.
+ *
+ *    4. Added two routines:  RSL_get_closest_ray_from_sweep and
+ *       RSL_get_next_closest_ray_from_sweep.
+ *
+ *	  5. Added routines: RSL_get_window_from_radar, 
+ *       RSL_get_window_from_volume, RSL_get_window_from_sweep, and 
+ *       RSL_get_window_from_ray.
+ *    
+ *    6. Modified farea.c.
+ *    7. Isolated contruction of azimuth table linked list.
+ *    8. Fixed get_sweep NULL sweep reference (See patch v0_29_3 also).
+ *    9. Compiles on HP CC, SGI CC, GNU CC.  I had to #ifdef the
+ *       varargs declaration in anyformat_to_radar.c.  Why?
+ *   10. Added examples/killer_sweep.c.  This randomizes the azimuth
+ *       values of each ray.  The output checks the sortedness of the
+ *       hi and low links in the hash table.
+ *   11. Added doc/...closest...   doc/...next_closest...
+ *
+ *-------------------------------------------------------------------------
+ * v0.30 Began 4/20/95.  Froze 4/27/95
+ *
+ *    0. IMPORTANT: Renamed libradar.a to librsl.a.  Also, radar.h to rsl.h.
+ *    1. Removed NOTFOUND_H reference in the get_ray function.
+ *    2. Simplified get_sweep.
+ *    3. Uses within 1/2 beam_width test in get_ray_from_sweep.
+ *    4. Checks -1 and +1 bin in azimuth hash table to really find the
+ *       closest ray that is within 1/2 beam_width of the target azim.
+ *       Surprisingly, it shortened the get_value_from_sweep routine.
+ *
+ *    5. Added anyformat_to_radar.c.  Uses magic information to determine
+ *       the file format.  Handles: UF, RSL, WSR88D, LASSEN.  Toga may
+ *       be difficult.  Unknown, yet, for NSIG.  Alan will get me that
+ *       information.
+ *    6. Added beam_width to the ray structure.
+ *-------------------------------------------------------------------------
+ * v0.29.1 Began 4/18/95. Froze 4/18/95.
+ *
+ *  1. Bug fix in endian.c.  Needed to initialize the word.val to 0.
+ *  2. Bug fix in radar_to_uf.c.  little_endian() call.
+ *  3. Added Azumuth_hash to structure list in doc/.
+ *  4. Other minor changes.
+ *-------------------------------------------------------------------------
+ * v0.29 Began 3/1/94. Froze ??/??/??
+ *
+ *  0. Thanks to Dennis Flanigan for helping with this release.
+ *
+ *  1. Modified sort_rays.c.  By Dennis Flanigan, Jr.
+ *     a. Added h.sorted_flag to Volume and Sweep header structures.
+ *
+ *     b. Added routines:
+ *        int     ray_sort_compare_by_time(Ray **r1,Ray **r2);
+ *        int     sweep_sort_compare(Sweep **s1, Sweep **s2)
+ *        Sweep  *RSL_sort_rays_by_time(Sweep *s);
+ *        Volume *RSL_sort_sweeps_in_volume(Volume *v)
+ *        Volume *RSL_sort_volume(Volume *v)
+ *        Radar  *RSL_sort_radar(Radar *r)
+ *
+ *     c. Routines that sort data structures now set the 
+ *        number of structures in the parent data structure.
+ *
+ *     d. Fixed: nsweeps was not being set correctly by
+ *        RSL_sort_sweeps_in_volume.
+ *
+ *  2. Removed sort calls in the ingest routines:  (whatever)_to_radar.
+ *
+ *  3. Removed the auxillary trig tables in image_gen.c.  It's just a 
+ *     memory hog.
+ *
+ *  4. Changed the extension of the tar archives to .tgz.  This
+ *     allows netscape to ftp the file rather than displaying it :-)
+ *
+ *  5. Added variables in the sweep data structures to represent
+ *     the half of the beam width angles.  These variables are 
+ *     vert_half_bw and horz_half_bw.   Also added code to all
+ *     RSL ingest routines (something_to_radar) to set these values.
+ *     The half angle values are used in the volume.c searching routines.
+ *
+ *  6. Added h.indexes to Sweep structure.  This is a simple hash
+ *     table for making azimuth lookup cake.  So far, I've only
+ *     got the malloc part placed in the routines that create the
+ *     radar structure.  Added the file 'ray_indexes.c'.  This changes
+ *     RSL_get_value_from_ray.
+ *
+ *     Code affected: 
+ *        Modify code:
+ *           RSL_copy...
+ *           RSL_free...
+ *           RSL_clear...
+ *           RSL_sort..??? really???
+ *           RSL_get...
+ *           RSL_{write,read}_radar
+ *           RSL_get_ray???
+ *
+ *        Modify doc
+ *           RSL_sweep_struct.html
+ *
+ *  7. Updated doc/.
+ *
+ *  8. Added CHECK_LIST.
+ *
+ *  9. Changed the name from radar-v0.?? to rsl-v0.??.
+ * 
+ *  
+ *-------------------------------------------------------------------------
+ * v0.28 Began 7/23/94.  Froze  2/16/95
+ * Changes:
+ *
+ *  1. Support for little endian machines (*86 PC's using Linux).
+ *     Includes 'endian.c' in 'uf_to_radar.c' and 'radar_to_uf'.  It is not
+ *     needed in 'lassen.c' because that program uses xdr to transfer the
+ *     data.  Nor is it required in 'wsr88d_to_radar.c', 'nsig_to_radar.c'
+ *     nor 'toga_to_radar.c' because the support for little endian is in
+ *     the respective libraries: libwsr88d.a, libnsig.a, libtg.a.
+ *
+ *     Requires:
+ *         wsr88d_v1.12.taz
+ *         lassen_v1.0.taz
+ *         libnsig_v1.3.taz
+ *         libtg_v1.1.taz
+ *
+ *     In order to make this library compatable with versions on either
+ *     big endian or little endian machines, it will be adopted that all
+ *     output will be in big endian format.  Little endian machines will
+ *     have to do the extra work of swapping bytes upon input as well as
+ *     swapping bytes on output.  I could adopt to use the xdr library,
+ *     however, it seems too complicated for the simple task of always
+ *     guarenteeing that the output is in big endian format.  After all,
+ *     we only support one output format: UF.  (Well, we will make our own
+ *     radar format output in big endian format too, but we keep that
+ *     knowledge hush hush).
+ * 
+ *  2. Documentation in the seperate directory complete for all routines
+ *     in the RSL.  Documentation froze at v0.27 and is in HTML format.
+ *     The documentation version number will be updated to match the version
+ *     number of the most current release of RSL.  Note: The live link is
+ *     in /PUBLIC/httpd/htdocs/trmm_office/software/radar/quick_reference.
+ *     It is a symbolic link to ~/proj/trmm/radar/doc/v0.xx.
+ *
+ *  3. Added RSL_ prefix to all documentation.  This renamed the HTML files
+ *     to begin with RSL_, also.
+ *
+ *  4. Prefixed all routines with RSL_.  Status is that it builds.
+ *  5. Combined radar.h, cube.h and volume.h into radar.h.
+ *
+ *-------------------------------------------------------------------------
+ * v0.27 Began 7/23/94.  Froze 9/13/94.
+ * Changes:
+ *
+ *  1. Beam width calculation in get_value_from_sweep is not 1/2 on either
+ *     side.  No provision for best fit.  See WTD #2.
+ *  2. Added sort_rays.c.  Sort rays in a sweeps and volumes.
+ *  3. Added Vset_earth_radius.  Set global variable 'Re' (Default: 4/3R).
+ *  4. Added trig modification of get_slantr_and_h.
+ *  5. Added sort rays call to: toga_to_radar, wsr88d_to_radar,
+ *     uf_to_radar, lassen_to_radar.
+ *  6. Added cube.c.  By Mike Kolander.
+ *  7. Added carpi.c
+ *  8. Added toga_to_radar.c.  By Mike Kolander.
+ *  9. Signed all source files.
+ * 10. Quieted some image print statements.  See image_gen.c.
+ * 11. Changed wsr88d_to_radar so it takes 'first_file' or the 4 character
+ *     call sign (eg. KMLB).
+ * 12. Fixed makefile so it removes libradar.a before building.  This prevents
+ *     duplicate object files, only the long filenamed ones, from
+ *     appearing in the archive file.
+ * 13. Added gts.c.  By Dave Wolff.
+ * 14. Fixed minor round off error in 'uf_to_radar' which caused a 0 dBZ spike.
+ * 15. Added histogram.c.  By Dave Wolff.
+ * 16. Added nsig_to_radar.c.  By Alan McConnell.
+ * 
+ * WTD:
+ *
+ *
+ *   2. Vget_value_from_sweep.  When the beam width is increased we
+ *      want to return the value that is the best fit for a ray and not
+ *      just the first fit.  Currently when the beam width is really
+ *      large then we will pick the wrong beam for the desired point.
+ *
+ *   3. Add the following to the ray header:
+ *        - u,v for ray.
+ *        - offset for azim, range, elev (for moving radar)
+ *        - lat/lon (for moving radar)
+ *
+ *   4. Bilinear interpolation.
+ *   6. Modify get_ray_above to return a good ray so that QC doesn't zap points
+ *      near the radar.
+ *   7. Optimize/Improve the get_value routine.
+ *   8. Remove V prefix to routine names?
+ *  10. Fix why there are bands of missing data when making images.
+ *  11. Specify resolution when making images.
+ *  14. Update: doc's (in HTML), README, etc.
+ *  16. NEED *TESTING* suite of programs.
+ *
+ * Proposed changes for v0.28
+ *  1. Add support for little endian machines (386, 486, etc.)
+ *  2. F(x, DZ) or ray->f.dz(x).  I.e., object function conversion functions.
+ *
+ *
+ *-------------------------------------------------------------------------
+ * v0.26 Began 7/23/94.
+ * Changes:
+ *  1. Adding cappi_to_carpi.
+ *  2. Enhanced the Cappi structure; not the same as a sweep anymore.
+ *
+ *-------------------------------------------------------------------------
+ * v0.26 Began 7/13/94. Froze 7/20/93.
+ * Changes:
+ *  1. Units for wavelength, in radar_to_uf, changed from meters to cm;
+ *     as they should be.
+ *  2. Library runs quietly.  No noisy print statements.  Call
+ *     radar_verbose_on() and radar_verbose_off() to control printing.
+ *-------------------------------------------------------------------------
+ * v0.25 Began 7/1/94.  Froze 7/1/94
+ * Changes:
+ *  1. Modifications to makefile to add portibility to building on 
+ *     other systems w/o gcc.  Change to CFLAGS.
+ *  2. Passes lint.
+ *  3. Moved documents radar.ez and volume.ez to ../doc (../doc_RCS).
+ *     This means that the version of the documentation will not be kept
+ *     up to the version of the RSL library.  Only changes to the doc. will
+ *     force a new version of the documentation.  I'll want to see if this
+ *     is a good idea.
+ *-------------------------------------------------------------------------
+ * v0.24 Began 6/29/94.  Froze 6/29/94
+ * Changes:
+ *  1. radar_to_uf, uf_to_radar.  Fixed inconsistant use of BADVAL vs.
+ *     UF_NO_DATA.  The latter is check and used.
+ *  2. Added function:
+ *       float get_nyquist_from_radar(Radar *radar);
+ *     Useful, for loading non-velocity fields with PRF, PRT and NYQUIST.
+ *  3. Made the makefile more general and added comments.
+ *
+ *  WTD:
+ *  1. Modify wsr88d_to_radar to fill PRF, PRT and NYQUIST values in
+ *     non-velocity rays.
+ *-------------------------------------------------------------------------
+ * v0.23 Began 6/27/94.  Froze 6/27/94
+ * Changes:
+ *  1. First distribution release.
+ *  2. Added README w/ installation instructions.
+ *  3. Made example_main and colors directories.
+ *  4. Shortened lassen.h to be close to minimial.
+ *  5. Modified makefile to only make libradar.a.  Example_main/ has it's
+ *     own makefile.
+ *-------------------------------------------------------------------------
+ * v0.22 Began 6/24/94.  Froze 6/24/94
+ * Changes:
+ *  1. radar_to_uf/uf_to_radar PRF/PRT calculation corrected.
+ *
+ *-------------------------------------------------------------------------
+ * v0.21 Began 6/24/94.  Froze 6/24/94
+ * Changes:
+ *  1. radar_to_uf: prf now in microseconds.
+ *  2. uf_to_radar: prf now converted from microseconds to seconds.
+ *
+ *-------------------------------------------------------------------------
+ * v0.20
+ * Changes:
+ *   Need to determine the changes.  
+ *-------------------------------------------------------------------------
+ * v0.19 Began 6/17/94.  Froze: 6/17/94.
+ * Changes:
+ *  1. Fixed NULL access in write_radar subroutine.
+ *
+ *-------------------------------------------------------------------------
+ * v0.19 Began 6/15/94.  Froze: 6/15/94.
+ * Changes:
+ *  1. Check for NULL in Vget_ray_from_sweep fixes a segmentation fault on
+ *     Sun.
+ *-------------------------------------------------------------------------
+ * v0.18 Began 6/11/94.  Froze: 6/12/94 2pm.
+ * Changes:
+ *  1. Minor changes in volume.c.  Vget_value_from_sweep now uses the
+ *     beam_width for matching rays.  See Vget_sweep too.
+ *  2. cappi.c sets the beam_width.
+ *  3. Added radar types.  There is no sure fire way to set
+ *     radar->h.radar_type to one of these values automatically, ie. from
+ *     information in the input file.  It may have to be done by the
+ *     application; a runtime parameter, option.
+ *     Types are:
+ *         TOGACOARE_TOGA_SIGMET
+ *		   TOGACOARE_MIT_SIGMET
+ *		   TRMM_DARWIN_LASSEN
+ *		   DARWIN_TOGA_SIGMET
+ *		   TRMM_MELBOURNE_WSR88D
+ *		   TRMM_KWAJALEIN_SIGMET
+ *		   TRMM_HOUSTON_WSR88D
+ *  4. Added function:
+ *         Sweep *Vget_first_sweep_of_volume(Volume *v);
+ *  5. Placed the wsr88d code in wsr88d_to_radar.c (removed from radar.c).
+ *
+ * WORK TO DO:
+ *  1. Rework Vget_value_from_sweep to do a better search for the value.
+ *
+ *-------------------------------------------------------------------------
+ * v0.17 Began 6/10/94.  Froze 6/10/94 3:30pm.
+ * Changes:
+ *  1. Corrected the pulse width calculation in uf_to_radar and in
+ *     radar_to_uf.
+ *-------------------------------------------------------------------------
+ * v0.16 Began 6/10/94.  Froze 6/10/94 12:30pm.
+ * Changes:
+ *  1. Minor changes to radar.c because v1.3 of the wsr88d library is
+ *     now using WSR88D_DZ, WSR88D_VR, WSR88D_SW as the field type mask.
+ *     REFLECTIVITY, VELOCITY and SPECTRUM_WIDTH are not used.
+ *
+ *-------------------------------------------------------------------------
+ * v0.15 Began 6/7/94.  Froze 6/7/94 1pm.
+ * Changes:
+ *  1. Discovered that the range to bin1 calculation in radar_to_uf.c and
+ *     uf_to_radar.c was incorrect.  See fh[2] and fh[3].
+ *
+ *-------------------------------------------------------------------------
+ * v0.14 Began 6/2/94.  Froze 6/2/94 1pm.
+ * Changes:
+ *  1. Modified the date for the Radar structure for UF reading to reflect
+ *     the time of the first ray.  It was the generation time of the radar
+ *     structure, however, Dave Wolff insists that it reflect the time of
+ *     the first ray.  Modification to 'uf_to_radar.c'
+ *
+ *-------------------------------------------------------------------------
+ * v0.13 Began 6/2/94.  Froze 6/2/94 11am.
+ * Changes:
+ *  1. Modified radar_to_uf.c to undo the faking of the headers.  This is
+ *     the correct way.
+ *
+ *-------------------------------------------------------------------------
+ * v0.12 Began 5/31/94.  Froze 5/31/94 7pm.
+ * Changes:
+ *  1. Check for malloc errors in Vnew* routines.
+ *  2. Fixed a nasty bug in radar_to_uf.  I was letting 'j' get to high
+ *     for a particular ray in a sweep.  'j' is looping on the maximum
+ *     rays possible.  I noticed this bug only after Vcopy_volume to 
+ *     replace a radar->v[i].
+ *-------------------------------------------------------------------------
+ * v0.11 Began 5/27/94.  Froze 5/27/94 12:50pm.
+ * Changes:
+ *  1. Modified radar_to_uf.c to fake header information when fields do
+ *     exist, eventually, but not in the current sweep.  This is to allow
+ *     brain dead UF ingestors (Zeb, RDSS, etc.) to read the UF file; they
+ *     assume that whatever fields exist in the first UF sweep is constant
+ *     throughout the file.
+ *
+ *  2. Added functions to volume.c
+ *       Ray *Vget_first_ray_of_sweep(Sweep *s);
+ *       Ray *Vget_first_ray_of_volume(Volume *v);
+ *
+ *-------------------------------------------------------------------------
+ * v0.10 Began 5/26/94.  Froze 5/27/94 9am.
+ * Changes:
+ *  1. Modified the names of the INDEX and MASK variables.
+ *
+ * ZT     Total Reflectivity (dBZ)               ZT_INDEX
+ *        May be uncommon, but important
+ *
+ * DZ     Reflectivity (dBZ), may contain some   DZ_INDEX
+ *        signal-processor level QC and/or      
+ *        filters. This field would contain 
+ *        Darwin's CZ, or WSR88D's standard 
+ *        reflectivity. In other words, unless
+ *        the field is described otherwise, it
+ *        should always go here. In essence, this
+ *        is the "cleanest" reflectivity field
+ *        for a radar.
+ *
+ * DR     Differential reflectivity              DR_INDEX
+ *        DR and LR are for dual-polarization
+ *        radars only. Unitless or in dB.
+ *
+ * LR     Another form of differential ref       LR_INDEX
+ *        called LDR, not sure of units
+ *
+ * CZ     QC Reflectivity (dBZ), contains
+ *        post-processed QC'd data               CZ_INDEX
+ *
+ * VR     Radial Velocity (m/s)                  VR_INDEX
+ *
+ * SW     Spectral Width (m2/s2)                 SW_INDEX
+ *
+ *  2. Fixed some MAX_RADAR_VOLUMES references in the wsr88d_to_radar code.
+ *
+ *-------------------------------------------------------------------------
+ * v0.9 Began 5/25/94.  Froze: 5/26/94, 10am.
+ * Changes:
+ *  1. Added lassen_to_radar.c
+ *  2. Added lassen.h
+ *
+ *-------------------------------------------------------------------------
+ * v0.8 Began 5/23/94. Froze: 5/24/94, 10am.
+ * Changes:
+ *  1. F and INVF handle APFLAG.
+ *  2. Image generation creates unsigned char images.
+ *  3. 255-val for negative dBz (val < 0).
+ *
+ *-------------------------------------------------------------------------
+ * v0.7 Began 4/30/94. Froze: 5/20/94.
+ *
+ *  Changes:
+ *
+ *   1. Uses char storage for data values, to reduce RAM allocation.
+ *
+ *   2. F(x) ((x-2)/2. - 64.)
+ *      0 is for BADVAL. Bad value.
+ *      1 is for RFVAL.  Range folded.
+ *
+ *   3. Added functions:
+ *        Vfloat_to_char(float *x, unsigned char *c, int n);
+ *        float F(unsigned char c);
+ *        unsigned char INVF(float x);   -- Inverse of F.
+ *        Radar *uf_to_radar(char *infile);
+ *        void radar_to_uf(Radar *radar, char *outfile);
+ *
+ *   4. Minor bug fix in wsr88d_to_radar routine.  It was setting the
+ *      number of volumes to six even though we were only asking for 3.
+ *
+ *   5. Changed the value of BADVAL to 0500 (Octal 500).  This is
+ *      a value higher than 255 (the maximum byte value) but small enough
+ *      to that when a scale factor (typically 100) is applied, the result
+ *      does not exceed the I*2 (short) magnitude.  I needed this for the
+ *      UF programs.  I could have tested for BADVAL, RFVAL, etc., and not
+ *      applied a scale factor when loading the UF buffer, however, changing
+ *      BADVAL and scaling everything was more general. 
+ *
+ *   6. Made some slight modifications to the Radar header and Volume header.
+ *
+ *-------------------------------------------------------------------------
+ * v0.6 Began 4/16/94.  Froze: 4/30/94.
+ *
+ *  Changes:
+ *
+ *   1. Azimuth angles range from -180,180 to 0,360.
+ *   2. New color index binning function for velocity.  -nyquist,nyquist
+ *      using 15 bin values.  See Vrebin_velocity_sweep.
+ *   3. Added the following routines:
+ *  
+ *       Memory management.
+ *         Ray    *Vcopy_ray(Ray    *r);
+ *         Sweep  *Vcopy_sweep(Sweep  *s);
+ *         Volume *Vcopy_volume(Volume *v);
+ *         Radar  *clear_radar(Radar *r);
+ *   void Vget_groundr_and_h(float slant_r, float elev, float *gr, float *h);
+ *   void Vget_slantr_and_elev(float gr, float h, float *slant_r, float *elev);
+ *   void Vget_slantr_and_h(float gr, float elev, float *slant_r, float *h);
+ *
+ *       Image generation preparation.
+ *         void Vrebin_velocity_ray   (Ray    *r);  /* Modifies r */
+ *         void Vrebin_velocity_sweep (Sweep  *s);  /* Modifies s */
+ *         void Vrebin_velocity_volume(Volume *v);  /* Modifies v */
+ *
+ *       Color table functions.
+ *         void load_red_table(char *infile);
+ *         void load_green_table(char *infile);
+ *         void load_blue_table(char *infile);
+ *
+ *   4. Added 4/3Re calculation to Vget_slantr_and_elev and Vget_groundr...
+ *   5. Checked for null in the Vclear routines.
+ *
+ *-------------------------------------------------------------------------
+ * v0.5 Began 4/7/94
+ *
+ *  Changes:
+ *
+ *   1. Color table functions taken out of the image routines.
+ *      You must call load_refl_table(), load_vel_table(), load_sw_table()
+ *      to load the appropriate color table before making color images.
+ *      There are seperate color tables for R, V, S.  See volume.h.
+ *
+ *   2. Range is now used in Vsweep_to_cart.
+ *   3. Gate size (pixel resolution in km) is now used.
+ *   4. Added range to cappi_at_h function.  It is the effective range.
+ *   5. Added the following routines:
+ *
+ *       Read radar from disk.
+ *         Ray    *read_ray   (FILE *fp);
+ *         Sweep  *read_sweep (FILE *fp);
+ *         Volume *read_volume(FILE *fp);
+ *         Radar  *read_radar (char *infile);
+ *
+ *       Write radar to disk
+ *         int write_ray   (Ray    *r, FILE *fp);
+ *         int write_sweep (Sweep  *s, FILE *fp);
+ *         int write_volume(Volume *v, FILE *fp);
+ *         int write_radar (Radar  *r, char *outfile);
+ *
+ *       Area calculations
+ *         float Varea_of_ray(Ray *r, float lo, float hi, float range);
+ *         float Vfractional_area_of_sweep(Sweep *s, float lo, float hi, float range);
+ *
+ *       Pixel fractions  
+ *         Vfraction_of_ray(Ray *r, float lo, float hi, float range);
+ *         Vfraction_of_sweep(Sweep *s, float lo, float hi, float range);
+ *         Vfraction_of_volume(Volume *v, float lo, float hi, float range);
+ *
+ *
+ *   6. radar.c calls wsr88d_get_site to get additional wsr88d information
+ *      not included in the file.  Routines compliments of Dan Austin.
+ *   7. Added RFVAL.  Range Folded value.  Any base data value of 0 is
+ *      data below SNR thresholds set for that specific base data.  Any
+ *      data value of 1 is data considered range ambiguous (folded).
+ *      A color table entry needs to be picked to represent this value.
+ *
+ *   To do:
+ *   o I have to do something about MAX_RADAR_VOLUMES.  We really should
+ *     rely on radar->h.nvolumes;
+ *
+ *   o Add 4/3Rearth calculation to get value routines.
+ *   o Incorporate nsig_to_radar.  Dennis Flanigan is writing that interface.
+ *   o Add fraction of area function.
+ *   o Add the following functions:  ??? really ???
+ *      Sweep *Vget_closest_sweep(Volume *v, float elev);
+ *      Ray   *Vget_closest_ray(Sweep *s, float azim);
+ *      float  Vget_closest_value_in_beam(Ray *ray, float range);
+ *      float  Vget_closest_value(Ray *ray, float range);
+ *        (I'm not sure how this will be different than Vget_value)
+ *       
+ *   o Sort the rays so locating azimuth is trivial; instead of a search
+ *     algorithm as it is now.  Hey, would a binary search be good enough or
+ *     do we need some hashing function?  Is the lookup fast enough already?
+ *   o Add CAPPI at h.  (Option for bilinear interpolation about h).
+ *-------------------------------------------------------------------------
+ * v0.4 Began 3/23/94  Froze: 4/7/94
+ *
+ *  Changes:
+ *
+ *   1. Made Sweep (sweep) and Ray (ray) members an array of pointers.
+ *      This changes the syntax of the access to be
+ *      v->sweep[is]->ray[ir]->range[ibin] instead of 
+ *      v.sweep[is].ray[ir].range[ibin].  The benifit of this is to
+ *      be able to dynamically specify the number of sweeps or rays,
+ *      even volumes for the Radar structure, and not allocate a maximum.
+ *      This makes Vnew_sweep and Vnew_ray useful.
+ *
+ *   2. Added the following functions:
+ *       Volume *Vget_volume(Radar *r, int itype);
+ *        	itype = REFLECTIVITY, VELOCITY, or SPECTRUM_WIDTH, etc.
+ *     
+ *       Sweep *Vget_sweep(Volume *v, float theta);
+ *       Ray   *Vget_ray  (Volume *v, float theta, float azimuth);
+ *       float Vget_value(Volume *v, float theta, float azimuth, float range);
+ *       Ray   *Vget_ray_from_sweep(Sweep *s, float azimuth, float range);
+ *       float Vget_value_from_sweep(Sweep *s, float azimuth, float range);
+ *       float Vget_value_from_ray(Ray *r, float range);
+ *       float Vget_value_at_h(Volume *v, float azim, float grnd_r, float h);
+ *
+ *       Ray    *QC_ray   (Ray       *ray, int radar_type);
+ *       Sweep  *QC_sweep (Sweep   *sweep, int radar_type);
+ *       Volume *QC_volume(Volume *volume, int radar_type);
+ *
+ *       Radar  *QC_radar (Radar   *radar);
+ *
+ *       void write_gif(char *outfile, char *image, int xdim, int ydim, char c_table[256][3]);
+ *       void write_pict(char *outfile, char *image, int xdim, int ydim, char c_table[256][3]);
+ *       char *Vsweep_to_cart(Sweep *s, int xdim, int ydim, float range);
+ *       void Vsweep_to_gif(Sweep *s, char *outfile, int xdim, int ydim, float range);
+ *       void Vsweep_to_pict(Sweep *s, char *outfile, int xdim, int ydim, float range);
+ *       void Vvolume_to_gif(Volume *v, char *basename, int xdim, int ydim, float range);
+ *       char *Vsweep_to_cart(
+ *   3. When a sweep does not have any rays with any bins, then NULL is
+ *      assigned to that Sweep pointer.  This occurs for reflectivity for
+ *      the 2-nd sweep index (as defined by the data) where the is no
+ *      reflectivity data, only doppler and spectrum width.  Velocity and
+ *      spectrum width data do not exist for sweep number 1 (index 0).
+ *
+ *   4. Speed ups in Vto_cart_sweep.  Math is precomputed and saved in
+ *      arrays for faster lookup.  Still the ppmtogif is a snail and it
+ *      overwhelms the runtime.  I only saw a 35 second improvment with
+ *      these new arrays when outputting 20 gif images.  I think the -O
+ *      compile flag is doing a good job.
+ *
+ *   5. Added CAPPI at h.  Routine in cappi.c.  Cappi type is syntatically
+ *      identical to the Sweep type.
+ *
+ *       Cappi *cappi_at_h(Volume *v, float h);
+ *
+ *   6. Make builds libradar.a which contains radar.c, volume.c, cappi.c and
+ *      image_gen.c.  Builds on SGI, SUN and HP.
+ *
+ *   7. Add QC routines.  See 2. above for the list.  Currently they are
+ *      place holding functions with only QC_ray needing to be coded.
+ *      Paul Kucera will take care of that.
+ *
+ *   8. Improvments to radar.ez and volume.ez.
+ *
+ *  To do:
+ *   o Add the following functions:
+ *      Sweep *Vget_closest_sweep(Volume *v, float elev);
+ *      Ray   *Vget_closest_ray(Sweep *s, float azim);
+ *      float  Vget_closest_value_in_beam(Ray *ray, float range);
+ *      float  Vget_closest_value(Ray *ray, float range);
+ *        (I'm not sure how this will be different than Vget_value)
+ *       
+ *   o Add range resolution to the image generation subroutines.
+ *   o Add range resolution to all the 'get_value' routines.
+ *   o Sort the rays so locating azimuth is trivial; instead of a search
+ *     algorithm as it is now.  Hey, would a binary search be good enough or
+ *     do we need some hashing function?  It the lookup fast enough already?
+ *   o Add CAPPI at h.  (Option for bilinear interpolation about h).
+ *
+ *-------------------------------------------------------------------------
+ * v0.3 Began 3/22/94 Froze 3/23/94.
+ *  
+ *  Changes:
+ *  1. Implimented the Radar structure.  The heart of it is an array of
+ *     Volume pointers.
+ *  2. Using 'data_mask' which is a bitwise ( | operator in C ) of
+ *     REFL_MASK, VEL_MASK, or SW_MASK, you can get any field type volume:
+ *     reflectivity, doppler velocity, or spectrum width respectively.
+ *  3. Load volume, sweep and ray header information.
+ *  4. Added Radar header information; need a good definition of say date and
+ *     time.
+ *
+ *  Work to do:
+ *   - Improve carteasean image generation.
+ *      Input: radar range, pix_width, pix_height.  No distortion.
+ *	 - Need to specify the output GIF filename as options.
+ *	 - Incorporate Vto_fraction (?? name ??) Dave's new function.
+ *-------------------------------------------------------------------------
+ * v0.2 Began 3/21/94  Froze 3/22/94.
+ *
+ *  I am freezing this here because both BSCAN and CARTESEAN image generation
+ *  works.  You have to hand edit the source to restrict the number of 
+ *  Sweeps that are converted to images, currently only sweep 0.  The inclusion
+ *  of sweep/ray header information and the collection of doppler and spectrum
+ *  width data requires substantial effort and will be in the next version.
+ *  This version freeze is a check point.
+ *  
+ *  Changes:
+ *  1. Name rsphere change to volume.
+ *  2. File rsphere.c changed to volume.c.  (Moved the RCS file rsphere.c,v
+ *     to the graveyard directory in RCS/
+ *  3. Added color gif support.  Reads red.clr, green.clr, blue.clr files.
+ *     This renamed the Vto_cart_pgm function to Vto_cart_gif.  It is likely
+ *     that ppm support is not needed.  We'll see.
+ *  4. Fixes minor glitches in output images where the tan is undefined.
+ *  5. Added BSCAN production as GIF files.
+ *  6. Output sweep.xx file names; sweep.00.gif, etc.  and bscan.00.gif too.
+ *
+ *  Work to do:
+ *    - Add routines to get volumes for doppler and spectrum width. (Radar lib?)
+ *    - Improve carteasean image generation.
+ *        Input: radar range, pix_width, pix_height.  No distortion.
+ *    - Add sweep header information.
+ *	- Need to specify the output GIF filename as options.
+ *	- Incorporate Vto_fraction (?? name ??) Dave's new function.
+ *
+ *-------------------------------------------------------------------------
+ *v0.1 3/21/94 by John Merritt.
+ *  1. First development version of the radar and rsphere library. 
+ *     Includes test driver.  radar.ez and rsphere.ez document the
+ *     functionality of the programs.  This version exists to check point
+ *     the development.
+ *-------------------------------------------------------------------------
+ */

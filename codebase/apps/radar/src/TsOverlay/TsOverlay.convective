@@ -1,0 +1,312 @@
+/**********************************************************************
+ * TDRP params for TsOverlay
+ **********************************************************************/
+
+//======================================================================
+//
+// TsOverlay reads raw time-series data from two sets of files. It 
+//   combines these time series by summing the I and Q data, to create an 
+//   overlaid data set. Typically this is used for combining clutter and 
+//   weather data together, for testing the clutter mitigation algorithms.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// primary_file_paths //////////////////////
+//
+// Primary time series data files.
+// This is an array of file paths, that are read in sequence, for the 
+//   primary data set.
+// Type: string
+// 1D array - variable length.
+//
+
+primary_file_paths = {
+ "/scr/eldora2/rsfdata/firestone/time_series/sband/save/20140929/20140929_213046.073_018_024.sur.iwrf_ts",
+ "/scr/eldora2/rsfdata/firestone/time_series/sband/save/20140929/20140929_220044.980_018_024.sur.iwrf_ts",
+ "/scr/eldora2/rsfdata/firestone/time_series/sband/save/20140929/20140929_221537.984_018_024.sur.iwrf_ts",
+ "/scr/eldora2/rsfdata/firestone/time_series/sband/save/20140606/20140606_194335.368_025_087.sur.iwrf_ts",
+ "/scr/eldora2/rsfdata/firestone/time_series/sband/save/20140606/20140606_192707.333_015_345.sur.iwrf_ts",
+ "/scr/eldora2/rsfdata/firestone/time_series/sband/save/20140606/20140606_193655.449_025_082.sur.iwrf_ts"
+};
+
+///////////// secondary_file_paths ////////////////////
+//
+// Secondary time series data files.
+// This is an array of file paths, that are read in sequence, for the 
+//   secondary data set.
+// Type: string
+// 1D array - variable length.
+//
+
+secondary_file_paths = {
+ "/scr/eldora2/rsfdata/firestone/time_series/sband/save/20140520/20140520_170947.332_004_276.sur.iwrf_ts",
+ "/scr/eldora2/rsfdata/firestone/time_series/sband/save/20140520/20140520_171347.438_015_288.sur.iwrf_ts",
+ "/scr/eldora2/rsfdata/firestone/time_series/sband/save/20140520/20140520_171014.589_025_297.sur.iwrf_ts"
+};
+
+///////////// primary_cal_file_path ///////////////////
+//
+// Path to XML calibration file for primary data.
+// Type: string
+//
+
+primary_cal_file_path = "./cal_weather.xml";
+
+///////////// secondary_cal_file_path /////////////////
+//
+// Path to XML calibration file for secondary data.
+// Type: string
+//
+
+secondary_cal_file_path = "./cal_clutter.xml";
+
+//======================================================================
+//
+// CONFIGURING THE INPUT DATA.
+//
+//======================================================================
+ 
+///////////// primary_start_azimuth ///////////////////
+//
+// Starting azimuth for the primary time series (deg).
+// Only pulses between the start and end azimuths will be used. Assumes 
+//   clockwise rotation - i.e. this is the couterclockwise limit.
+// Type: double
+//
+
+primary_start_azimuth = 0;
+
+///////////// primary_end_azimuth /////////////////////
+//
+// Ending azimuth for the primary time series (deg).
+// Only pulses between the start and end azimuths will be used. Assumes 
+//   clockwise rotation - i.e. this is the clockwise limit.
+// Type: double
+//
+
+primary_end_azimuth = 180;
+
+///////////// primary_start_range /////////////////////
+//
+// Starting range for the primary data (km).
+// Gates before this range will be discarded.
+// Type: double
+//
+
+primary_start_range = 0;
+
+///////////// primary_end_range ///////////////////////
+//
+// Ending range for the primary data (km).
+// Gates after this range will be discarded.
+// Type: double
+//
+
+primary_end_range = 140;
+
+///////////// secondary_start_azimuth /////////////////
+//
+// Starting azimuth for the secondary time series (deg).
+// Only pulses between the start and end azimuths will be used. Assumes 
+//   clockwise rotation - i.e. this is the couterclockwise limit.
+// Type: double
+//
+
+secondary_start_azimuth = 0;
+
+///////////// secondary_end_azimuth ///////////////////
+//
+// Ending azimuth for the secondary time series (deg).
+// Only pulses between the start and end azimuths will be used. Assumes 
+//   clockwise rotation - i.e. this is the clockwise limit.
+// Type: double
+//
+
+secondary_end_azimuth = 350;
+
+///////////// secondary_start_range ///////////////////
+//
+// Starting range for the secondary data (km).
+// Gates before this range will be discarded.
+// Type: double
+//
+
+secondary_start_range = 0;
+
+///////////// secondary_end_range /////////////////////
+//
+// Ending range for the secondary data (km).
+// Gates after this range will be discarded.
+// Type: double
+//
+
+secondary_end_range = 140;
+
+//======================================================================
+//
+// TIME, SCAN RATE FOR OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_start_time ///////////////////////
+//
+// Start time for output data.
+// The pulse times will start at this time, and the time will then be 
+//   incremented to simulate the reqested scan rate (see below).
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+output_start_time = {
+    year = 2014,
+    month = 9,
+    day = 29,
+    hour = 22,
+    min = 0,
+    sec = 0
+};
+
+///////////// output_scan_rate ////////////////////////
+//
+// Antenna rate for output data (deg/s).
+// The pulses will be time-tagged to yield this rate.
+// Type: double
+//
+
+output_scan_rate = 15;
+
+///////////// output_azimuth_start ////////////////////
+//
+// Starting azimuth for output pulses (deg).
+// The azimuth for each pulse will be computed from this starting point, 
+//   the scan rate and the elapsed time.
+// Type: double
+//
+
+output_azimuth_start = 0;
+
+///////////// output_azimuth_coverage /////////////////
+//
+// Coverage of output scan in azimuth (deg).
+// The output data will cover this angular width in azimuth.
+// Type: double
+//
+
+output_azimuth_coverage = 355;
+
+///////////// output_elevation_angle //////////////////
+//
+// Elevation angle for tagging the output data (deg).
+// The measured elevation angles will be overwritten.
+// Type: double
+//
+
+output_elevation_angle = 1;
+
+///////////// output_n_volumes ////////////////////////
+//
+// Number of volumes to generate.
+// The app keeps going until this number of volumes has been created.
+// Type: int
+//
+
+output_n_volumes = 10;
+
+///////////// output_delta_volume_time ////////////////
+//
+// Time between volumes (sec).
+// As each volume is written, the time is incremented by this value.
+// Type: double
+//
+
+output_delta_volume_time = 300;
+
+//======================================================================
+//
+// OUTPUT FILES.
+//
+//======================================================================
+ 
+///////////// primary_output_dir //////////////////////
+//
+// Path to output directory for primary data.
+// Files will be written under this directory in a sub-directory 
+//   computed from the date/time.
+// Type: string
+//
+
+primary_output_dir = "$(HOME)/data/CmdVerify/time_series/weather";
+
+///////////// secondary_output_dir ////////////////////
+//
+// Path to output directory for secondary data.
+// Files will be written under this directory in a sub-directory 
+//   computed from the date/time.
+// Type: string
+//
+
+secondary_output_dir = "$(HOME)/data/CmdVerify/time_series/clutter";
+
+///////////// combined_output_dir /////////////////////
+//
+// Path to output directory for combined data.
+// Files will be written under this directory in a sub-directory 
+//   computed from the date/time.
+// Type: string
+//
+
+combined_output_dir = "$(HOME)/data/CmdVerify/time_series/combined";
+
+///////////// use_fixed_angle_for_file_name ///////////
+//
+// Option to use the fixed angle (el or az) to compute the file name.
+// If false, the actual measured angle will be used.
+// Type: boolean
+//
+
+use_fixed_angle_for_file_name = TRUE;
+
+///////////// add_scan_mode_to_file_name //////////////
+//
+// Option to add a string indicating the scan mode to the file name.
+// Type: boolean
+//
+
+add_scan_mode_to_file_name = TRUE;
+

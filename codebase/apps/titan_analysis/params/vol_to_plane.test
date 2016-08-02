@@ -1,0 +1,23 @@
+########################################################################
+# parameters file for vol_to_plane
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# October 1991
+#
+#########################################################################
+
+vol_to_plane.debug: false
+vol_to_plane.malloc_debug_level: 0
+
+vol_to_plane.nx: 130
+vol_to_plane.ny: 130
+
+vol_to_plane.minx: -119.0
+vol_to_plane.miny: -119.0
+
+vol_to_plane.dx: 2.0
+vol_to_plane.dy: 2.0
+
+vol_to_plane.minz: 1.5
+vol_to_plane.maxz: 21.5

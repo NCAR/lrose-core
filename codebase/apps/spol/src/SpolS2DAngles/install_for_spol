@@ -1,0 +1,16 @@
+#! /bin/csh
+
+sudo /etc/init.d/angles stop
+sudo /etc/init.d/process-mapper stop
+
+cd ~/cvs/apps/spol/src/SpolS2DAngles
+sudo cp SpolS2DAngles /opt/bin
+sudo cp SpolS2DAngles.spol /opt/params
+sudo cp init_d_angles_script.spol /etc/init.d/angles
+
+sudo cp ~/cvs/apps/procmap/src/procmap/procmap /opt/bin
+sudo cp init_d_procmap_script /etc/init.d/process-mapper
+
+sudo /etc/init.d/process-mapper start
+sudo /etc/init.d/angles start
+

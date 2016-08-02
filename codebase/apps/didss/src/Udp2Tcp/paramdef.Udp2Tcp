@@ -1,0 +1,88 @@
+/*********************************************************
+ * parameter definitions for Udp2Tcp
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * August 1999
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef int {
+  p_default = 0;
+  p_min = 0;
+  p_max = 3;
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Number of messages for computing data rate.";
+  p_help = "In debug mode, the data rate is computed by summing the number of bytes sent and dividing by the time takes. This is done by summing over the number of messages specified here.";
+} nmessages_for_data_rate;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef int {
+  p_default = 3280;
+  p_descr = "Port number for input UDP data.";
+  p_help = "The program reads the UDP data from this port.";
+} input_udp_port;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to combine multiple UDP packets into a single message.";
+  p_help = "If TRUE, multiple packets of RIDDS-type data will be assembled before writing to TCP port. Only assembly of RIDDS UDP packets is supported.";
+} assemble_ridds_packets;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Number of packets per TCP message.";
+  p_help = "Assembling multiple packets into a single message allows the compression to be more effective.";
+} npackets_per_message;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Port number for output TCP data.";
+  p_help = "The program listens for a connection on this port. Once a connection is established, it starts to read the UDP data, optionally compress it, and then write it out on the TDP port.";
+} output_tcp_port;
+
+ typedef enum {
+  NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION
+} compression_t;
+  
+paramdef enum compression_t {
+  p_default = LZO_COMPRESSION;
+  p_descr = "Compression options.";
+  p_help = "The data may be optionally compressed for transmission.";
+} compression;
+
+
+

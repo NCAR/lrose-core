@@ -1,0 +1,243 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions MdvVerify
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// May 2006
+//
+
+commentdef {
+  p_text = "MdvVerify performs statistical verification for gridded data in MDV files. Output is in the form of ASCII text.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef struct {
+  string url;
+  string field_name;
+  boolean set_vlevel_limits;
+  double lower_vlevel;
+  double upper_vlevel;
+  boolean compute_composite;
+  double min_data_value;
+  double max_data_value;
+} data_set_t;
+
+paramdef struct data_set_t {
+  p_default = {
+    url = "mdv/test",
+    field_name = "target",
+    set_vlevel_limits = true,
+    lower_vlevel = 1.0,
+    upper_vlevel = 1.0,
+    compute_composite = false,
+    min_data_value = 0.0,
+    max_data_value = 100.0
+  };
+  p_descr = "Data set to be verified.";
+  p_help = "This is the data set which is to be compared to the truth for verification purposes. Specify the MDV url and field name. You can constrain the vertical levels by setting the vlevel limits. If you set the lower_vlevel equal to the upper_vlevel, you will specify a single plane. If you set compute_composite to true, the composite (max value at any height) will be computed and stored in a single plane. The min_data_value and max_data_value specify the range of values to be considered for the statistical comparison.";
+} target;
+
+paramdef struct data_set_t {
+  p_default = {
+    url = "mdv/test",
+    field_name = "truth",
+    set_vlevel_limits = true,
+    lower_vlevel = 1.0,
+    upper_vlevel = 1.0,
+    compute_composite = false,
+    min_data_value = 0.0,
+    max_data_value = 100.0
+  };
+  p_descr = "Data set to be used as truth.";
+  p_help = "This is the data set against which the target data set will be compared for verification purposes. See verify_data_set for further help.";
+} truth;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time offset for truth data (secs)";
+  p_help = "In the case of forecasts, the truth data may be at a different time from the target (forecast) data. This is the offset to be applied to the target data time when searching for the truth data. For forecast data, this will be negative. For example, suppose you are verifying a 1-hour forecast against truth. In this case, set truth_offset_secs to -3600.";
+} truth_offset_secs;
+
+paramdef int {
+  p_default = 180;
+  p_descr = "Time margin (secs)";
+  p_help = "Margin around actual file time used when searching for truth data.";
+} truth_margin_secs;
+
+commentdef {
+  p_header = "GRID REMAPPING";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remap grid in x,y for verification purposes.";
+  p_help = "If false, the native projection is used, and the grids of the verify and truth data sets must match. If true, the data is remapped before the statistical comparison is made.";
+} remap_xy;
+
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_FLAT = 8,
+  PROJ_OBLIQUE_STEREO = 12
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_FLAT;
+  p_descr = "Projection for remapping in x,y.";
+} remap_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
+  p_descr = "Grid parameters for remapping in x,y.";
+  p_help = "These params apply to all projection types.";
+} remap_grid;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin latitude.";
+  p_help = "Does not apply to PROJ_LATLON.";
+} remap_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin longitude.";
+  p_help = "Does not apply to PROJ_LATLON.";
+} remap_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 1.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} remap_lambert_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 2.";
+  p_help = "This applies only to PROJ_LAMBERT_CONF projections.";
+} remap_lambert_lat2;
+
+paramdef double {
+  p_default = 90.0;
+  p_descr = "Remapped grid tangent latitude.";
+  p_help = "This applies only to PROJ_OBLIQUE_STEREO projections.";
+} remap_stereo_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid tangent longitude.";
+  p_help = "This applies only to PROJ_OBLIQUE_STEREO projections.";
+} remap_stereo_tangent_lon;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Remapped grid central scale.";
+  p_help = "This applies only to PROJ_OBLIQUE_STEREO projections.";
+} remap_stereo_central_scale;
+
+commentdef {
+  p_header = "VERIFICATION METHOD";
+}
+
+typedef enum {
+  CONTINGENCY,
+  HISTOGRAM,
+  REGRESSION
+} method_t;
+
+paramdef enum method_t {
+  p_default = CONTINGENCY;
+  p_descr = "Method of operation. All output is to stdout.";
+  p_help = "Methods are CONTINGENCY - contingency table analysis for a grid. HISTOGRAM analysis - histogram . REGRESSION method - data pairs written out.";
+} method;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "REGRESSION only. Min regression data value";
+  p_help = "Only points with data above this value are included in the regresion analysis";
+} min_regression_val;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "REGRESSION only. Option to include missing data values in the output.";	
+  p_help = "If set, missing values are included in the output. Missing values appear as -9999.999.";	
+} regression_include_missing;
+
+typedef struct {
+  int n_intervals;
+  double low_limit;
+  double interval_size;
+} hist_t;
+
+paramdef struct hist_t {
+  p_descr = "HISTOGRAM only. Histogram parameters";
+  p_help = "This is a histogram of all of the truth data values for which the corresponding forecast data value falls between the forecast_level_lower and forecast_level_upper parameters.";
+  p_default = { 10, 5.0, 20.0 };
+} hist;
+
+

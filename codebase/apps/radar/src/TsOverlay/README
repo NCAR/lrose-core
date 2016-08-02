@@ -1,0 +1,40 @@
+# Readme for creating overlaid data from time series
+#
+Open 3 windows
+In each go to the directory with the TsOverlay param files.
+
+  cd ~/projDir/alg/params
+
+In window 1, run:
+
+  Dsr2Radx -params Dsr2Radx.overlay -debug
+
+In window 2, run:
+
+  Iq2Dsr -params Iq2Dsr.overlay -debug
+
+In window 3, run:
+
+  TsOverlay -params TsOverlay.test -debug
+
+TsOverlay can be rerun with many different settings.
+
+The data from Dsr2Radx will be put in:
+
+  ~/projDir/data/overlay8/cfradial
+  ~/projDir/data/overlay8/dorade
+
+After running a case, you can move it into the right place.
+For example, if you want to use column 3 in CIDD you would do
+the following in a window:
+
+  cd ~/projDir/data
+  /bin/rm -rf overlay3
+  mv overlay8 overlay3
+
+To run CIDD, open a separate window and run the following:
+
+  cd ~/projDir/display/params
+  CIDD -p CIDD.overlay &
+
+

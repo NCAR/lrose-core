@@ -1,0 +1,80 @@
+/****************************************************
+ * TDRP params for dva_mkgrid
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * MDV output grid parameters.
+ * Parameters of Cartesian output grid. NOTE: the (x,y) grid params
+ *   are integers, the z values are floating point.
+ *
+ * Type: struct
+ */
+output_grid = {
+  300, /* nx:long */
+  300, /* ny:long */
+  18, /* nz:long */
+  -150, /* minx:long */
+  -150, /* miny:long */
+  3, /* minz:double */
+  1, /* dx:long */
+  1, /* dy:long */
+  1.0  /* dz:double */
+};
+
+/*
+ * Ht of radar (km MSL).
+ *
+ * Type: double
+ * Default: 0 
+ */
+radar_ht = 1.719;
+
+/*
+ * Output directory for grid files.
+ *
+ * Type: string
+ * Default: "." 
+ */
+grid_files_dir = "$(DVA_HOME)/grids";
+
+/*
+ * Path for grid params ASCII file.
+ *
+ * Type: string
+ * Default: "grid_params" 
+ */
+grid_params_file_path = "$(DVA_HOME)/params/grid_params";
+
+

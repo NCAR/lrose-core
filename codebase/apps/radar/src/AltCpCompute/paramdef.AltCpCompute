@@ -1,0 +1,550 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for AltCpCompute
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Sept 2006
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "AltCpCompute analyses data from tsarchive time series files using the cross-polar technique to determine ZDR bias.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILE_INPUT, TS_FMQ_INPUT, CFRADIAL_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FILE_INPUT;
+  p_descr = "Input mode - files or time series API, or CfRadial moments.";
+  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line. If CFRADIAL, moments will be read from CfRadial files.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+commentdef {
+  p_header = "COMPUTING MOMENTS FROM TIME SERIES";
+};
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Number of pulse samples in a beam.";
+} n_samples;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Does the receiver path switch between each pulse.";
+  p_help = "In some alternating mode radars, the receiver chain switches between pulses. This is done to create a co-polar and cross-polar receiver system which is more stable for ZDR. If this is set to TRUE, then the receiver is assumed to switch and the data for each channel is gathered accordingly.";
+} switching_receiver;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to invert H/V flag in pulse data.";
+  p_help = "Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the data has the opposite sense, set this to true.";
+} invert_hv_flag;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of beams per stats analysis.";
+  p_help = "The stats will be computed each time this number of beams is reached. Set to -1 to analyze all input data.";
+} nbeams_per_analysis;
+
+commentdef {
+  p_header = "READING MOMENTS FROM CFRADIAL FILES";
+};
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} cfradial_input_dir;
+
+typedef enum {
+  CFRADIAL_REALTIME, CFRADIAL_ARCHIVE, CFRADIAL_FILELIST
+} cfradial_mode_t;
+
+paramdef enum cfradial_mode_t {
+  p_default = CFRADIAL_REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} cfradial_mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} cfradial_max_realtime_data_age_secs;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is _latest_data_info file available?";
+  p_help = "If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
+} cfradial_latest_data_info_avail;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to recurse to subdirectories while looking for new files.";
+  p_help = "If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE."; 
+} cfradial_search_recursively;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Maximum depth for recursive directory scan.";
+  p_help = "Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
+} cfradial_max_recursion_depth;
+
+paramdef int {
+  p_default = 2;
+  p_min = 1;
+  p_descr = "Sleep time between checking directory for input - secs.";
+  p_help = "If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.";
+} cfradial_wait_between_checks;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "File quiescence when checking for files - secs.";
+  p_help = "This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.";
+} cfradial_file_quiescence;
+
+paramdef string {
+  p_default = "nc";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} cfradial_search_ext;
+
+paramdef string {
+  p_default = "DBMHX";
+  p_descr = "Field name for dbm cross-polar H channel.";
+  p_help = "This field is not noise-corrected or filtered. Units are in dBm.";
+} cfradial_dbmhx_field_name;
+
+paramdef string {
+  p_default = "DBMVX";
+  p_descr = "Field name for dbm cross-polar V channel.";
+  p_help = "This field is not noise-corrected or filtered. Units are in dBm.";
+} cfradial_dbmvx_field_name;
+
+paramdef string {
+  p_default = "SNRHX";
+  p_descr = "Field name for snr cross-polar H channel.";
+  p_help = "Units are in dB.";
+} cfradial_snrhx_field_name;
+
+paramdef string {
+  p_default = "SNRVX";
+  p_descr = "Field name for snr cross-polar V channel.";
+  p_help = "Units are in dB.";
+} cfradial_snrvx_field_name;
+
+paramdef string {
+  p_default = "CPA";
+  p_descr = "Field name for clutter phase alignment field.";
+  p_help = "This can be used to determine clutter likelihood.";
+} cfradial_cpa_field_name;
+
+paramdef string {
+  p_default = "CMD";
+  p_descr = "Field name for clutter mitigation decision field.";
+  p_help = "This can be used to determine clutter likelihood.";
+} cfradial_cmd_field_name;
+
+paramdef string {
+  p_default = "RHO_VX_HX";
+  p_descr = "Field name for cross-correlation between vx and hx.";
+  p_help = "Should be close to 1 in valid gates.";
+} cfradial_rho_vx_hx_field_name;
+
+commentdef {
+  p_header = "CALIBRATION XML PATH";
+};
+
+paramdef string {
+  p_default = "./spol_cal.xml";
+  p_descr = "Path for XML calibration file.";
+  p_help = "At a minimum, the calibration file should contain noiseDbm, receiverGainDbm, dbz0 and radarConstant values for each channel.";
+} cal_xml_file_path;
+
+commentdef {
+  p_header = "ANALYSIS DETAILS";
+};
+ 
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Minimum SNR for analysis (dB).";
+  p_help = "Gates with SNR below this will be ignored.";
+} min_snr;
+
+paramdef double {
+  p_default = 60.0;
+  p_descr = "Maximum SNR for analysis (dB).";
+  p_help = "Gates with SNR above this will be ignored.";
+} max_snr;
+
+paramdef double {
+  p_default = -10;
+  p_descr = "Minimum valid Vx/Hx ratio (dB).";
+  p_help = "Sometimes, odd data leads to inappropriate ratios. This puts limits on the ratios to be used in the analysis.";
+} min_valid_ratio_db;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Maximum valid Vx/Hx ratio (dB).";
+  p_help = "Sometimes, odd data leads to inappropriate ratios. This puts limits on the ratios to be used in the analysis.";
+} max_valid_ratio_db;
+
+paramdef double {
+  p_default = 0.98;
+  p_descr = "Minimum RHO_VX_HX.";
+  p_help = "Used to limit analysis to above this value. See 'check_rho_vx_hx'.";
+} min_rho_vx_hx;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Maximum RHO_VX_HX.";
+  p_help = "Used to limit the analysis to below this value. See 'check_RHO_VX_HX'.";
+} max_rho_vx_hx;
+
+paramdef double {
+  p_default = 0.9;
+  p_descr = "Minimum CPA for clutter echoes.";
+  p_help = "Used to identify likely clutter points for analysis.";
+} min_cpa_for_clutter;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Maximum CPA for clutter echoes.";
+  p_help = "Used to identify likely clutter points for analysis.";
+} max_cpa_for_clutter;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum CPA for weather echoes.";
+  p_help = "Used to identify likely weather points for analysis.";
+} min_cpa_for_weather;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Maximum CPA for weather echoes.";
+  p_help = "Used to identify likely weather points for analysis.";
+} max_cpa_for_weather;
+
+paramdef double {
+  p_default = 0.8;
+  p_descr = "Minimum CMD for clutter echoes.";
+  p_help = "Used to identify likely clutter points for analysis. Only applies to CfRadial analysis.";
+} min_cmd_for_clutter;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Maximum CMD for clutter echoes.";
+  p_help = "Used to identify likely clutter points for analysis. Only applies to CfRadial analysis.";
+} max_cmd_for_clutter;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum CMD for weather echoes.";
+  p_help = "Used to identify likely weather points for analysis. Only applies to CfRadial analysis.";
+} min_cmd_for_weather;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Maximum CMD for weather echoes.";
+  p_help = "Used to identify likely weather points for analysis. Only applies to CfRadial analysis.";
+} max_cmd_for_weather;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum range for clutter analysis (km).";
+  p_help = "Ranges less than this will be not be used for clutter analysis.";
+} min_range_km_for_clutter;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Maximum range for clutter analysis (km).";
+  p_help = "Ranges greater than this will be not be used for clutter analysis.";
+} max_range_km_for_clutter;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum range for weather analysis (km).";
+  p_help = "Ranges less than this will be not be used for weather analysis.";
+} min_range_km_for_weather;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Maximum range for weather analysis (km).";
+  p_help = "Ranges greater than this will be not be used for weather analysis.";
+} max_range_km_for_weather;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum elevation for clutter analysis (deg).";
+  p_help = "Elevations less than this will be ignored for clutter analysis.";
+} min_elevation_deg_for_clutter;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Maximum elevation for clutter analysis (deg).";
+  p_help = "Elevations greater than this will be ignored for clutter analysis.";
+} max_elevation_deg_for_clutter;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Minimum elevation for weather analysis (deg).";
+  p_help = "Elevations less than this will be ignored for weather analysis.";
+} min_elevation_deg_for_weather;
+
+paramdef double {
+  p_default = 90.0;
+  p_descr = "Maximum elevation for weather analysis (deg).";
+  p_help = "Elevations greater than this will be ignored for weather analysis.";
+} max_elevation_deg_for_weather;
+
+commentdef {
+  p_header = "OUTPUT RESULTS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write the results to a file.";
+  p_help = "The file appears in output_dir, and the file name includes the start time for the analysis. If false, results are written to stdout.";
+} write_results_to_file;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write metadata at the top of the results file.";
+  p_help = "If true, the processing metadata will be written to the top of the results file. Each line of metadata will start with the '#' comment character.";
+} write_metadata_results_to_file;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Dir for output files.";
+  p_help = "The results will be written to sub-directories named from the data time.";
+} output_dir;
+
+paramdef string {
+  p_default = "cp_results";
+  p_descr = "Prefix for output file names.";
+} file_name_prefix;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Number of pairs for computing results in time series mode.";
+  p_help = "We print out results at this frequency.";
+} n_pairs_for_time_series_mode;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Min number of pairs for computing cp ratio in clutter.";
+} min_n_pairs_for_clutter;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Min number of pairs for computing cp ratio in weather.";
+} min_n_pairs_for_weather;
+
+paramdef string {
+  p_default = " ";
+  p_descr = "Delimiter between data columns in output file.";
+} column_delimiter_for_output_files;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write individual hx/vx data pairs to an output file.";
+  p_help = "The raw pairs can then be used for generating plots. The file appears in output_dir, and the file name includes the start time for the analysis.";
+} write_data_pairs_to_stdout;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write columns headers for pair data.";
+  p_help = "If true, the first line of output will be a list of column names for the output file.";
+} write_column_header_for_pair_data;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write running results to stdout.";
+  p_help = "If true, we print out the running and global results to stdout.";
+} write_running_results_to_stdout;
+
+commentdef {
+  p_header = "OUTPUT RATIO RESULTS TO SPDB XML";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out ratio results to SPDB.";
+  p_help = "The ratios will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
+} write_ratio_to_spdb;
+
+paramdef string {
+  p_default = "./spdb";
+  p_descr = "URL for SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} spdb_output_url;
+
+commentdef {
+  p_header = "RETRIEVING VALUES FROM CFRADIAL XML STATUS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to retrieve values from XML status block in CfRadial file.";
+  p_help = "If TRUE, we will retrieve the status, and add the values to the end of the line written to the ratio file.";
+} retrieve_vals_from_xml_status;
+
+typedef struct {
+  string xml_tag_list;
+  boolean specify_label;
+  string label;
+} xml_entry_t;
+
+paramdef struct xml_entry_t {
+  p_default = {
+    {
+      xml_tag_list = "<tag1><tag2><tag3>",
+      specify_label = true,
+      label = "myLabel"
+    }
+    ,
+    {
+      xml_tag_list = "<tag4><tag5>",
+      specify_label = false,
+      label = ""
+    }
+  };
+  p_descr = "Specify which XML entries to be retrieved.";
+  p_help =
+    "\txml_tag_list: list of XML tags used to identify entry. These should be delimited in xml format, using < and >\n"
+    "\tspecify_label: do you want to use a label instead of the tags to name the value?\n"
+    "\tlabel: the label to use if specify_label is true\n"
+    ".";
+} xml_status_entries[];
+
+commentdef {
+  p_header = "RETRIEVING SITE TEMPERATURE FROM SPDB";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read site temperature from SPDB.";
+  p_help = "The temperature closest to the radar volume time will be read in.";
+} read_site_temp_from_spdb;
+
+paramdef string {
+  p_default = "spdbp:://hail:0:pecan/spdb/KSMeso";
+  p_descr = "URL for temperatures from SPDB.";
+} site_temp_spdb_url;
+
+paramdef string {
+  p_default = "CRK1";
+  p_descr = "Station name for site temperature.";
+} site_temp_station_name;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding site temp data (secs).";
+  p_help = "We search for the temperature closest in time to the radar volume. This is the search margin on either side of the volume time.";
+} site_temp_search_margin_secs;
+
+commentdef {
+  p_header = "RETRIEVING VERT POINTING RESULTS FROM SPDB";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read vert pointing results from SPDB.";
+  p_help = "Vert pointing gives an independent estimate for ZDR correction.";
+} read_vert_point_from_spdb;
+
+paramdef string {
+  p_default = "spdbp:://hail:0:pecan/spdb/cal/zdr/vert";
+  p_descr = "URL for vert pointing results in SPDB.";
+} vert_point_spdb_url;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Radar name for vert pointing results.";
+} vert_point_radar_name;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding vert pointing results (secs).";
+  p_help = "We search for the vert pointing result closest in time to the radar volume. This is the search margin on either side of the volume time. We average the results within this time period.";
+} vert_point_search_margin_secs;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Min number of observations for valid vertical pointing results.";
+  p_help = "The vertical pointing results can only be trusted if there are sufficient observational points";
+} vert_point_min_valid_count;
+
+commentdef {
+  p_header = "RETRIEVING SUNSCAN RESULTS FROM SPDB";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read sun scan results from SPDB.";
+  p_help = "Sun scanning, when combined with the CP ratio, gives an independent estimate for ZDR correction.";
+} read_sunscan_from_spdb;
+
+paramdef string {
+  p_default = "spdbp:://hail:0:pecan/spdb/spol/suncal/sband";
+  p_descr = "URL for sun scan results in SPDB.";
+} sunscan_spdb_url;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding sun scan results (secs).";
+  p_help = "We search for the sun scan result closest in time to the radar volume. This is the search margin on either side of the volume time. We average the results within this time period.";
+} sunscan_search_margin_secs;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Min number of observations for valid sunscan results.";
+  p_help = "The sunscan results can only be trusted if there are sufficient observational points";
+} sunscan_min_valid_count;
+

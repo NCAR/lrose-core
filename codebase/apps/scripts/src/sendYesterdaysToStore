@@ -1,0 +1,77 @@
+#!/bin/sh
+
+#
+# Small script to send data from nightly copy to the mass store.
+# NOTE that Hierarchical Storage Interface (hsi) must be set up.
+# That is typically a sysadmin task. Niles Oien June 2011.
+#
+
+#
+# Should have two args, the root dir on the mass store and the file name.
+# Check that that's the case.
+#
+if [ $# -lt 2 ]
+then
+  echo
+  echo "Usage: `basename $0` <root dir on mass store> <file to send> [target date]"
+  echo
+  echo "You have to be in the same direcory as the file you want to send."
+  echo
+  echo "ie `basename $0` /RAPDMG/CWX/ATEC/RTTC rttc-anc.tar.gz"
+  echo "will put the file rttc-anc.tar.gz in /RAPDMG/CWX/ATEC/RTTC/2011/0612/"
+  echo "on the mass store (on June 13 2011 - the target directory will"
+  echo "use yesterday's date)."
+  echo
+  echo "You can also specify a target date, the command"
+  echo "`basename $0` /RAPDMG/CWX/ATEC/RTTC rttc-anc.tar.gz 2011/0603"
+  echo "will send the file to the directory /RAPDMG/CWX/ATEC/RTTC/2011/0603/"
+  echo
+  echo "Dates, times are UTC. Niles Oien."
+  echo
+  exit 1
+fi
+
+rootDir=$1
+filename=$2
+
+#
+# Check that the file to be sent exists.
+#
+if [ ! -f "$filename" ]
+then
+  echo $filename does not exist, nothing to send.
+  exit -1
+fi
+
+#
+# Get yesterday's date in a format that we can use in the path of
+# the target directory on the mass store.
+#
+if [ $# -gt 2 ]
+then
+  # We have a specified date, use that
+  date=$3
+else
+  # Use yesterday's date
+  date=`date -u --date='1 days ago' +%Y/%m%d`
+fi
+  targetPath=$rootDir/$date/
+
+#
+# Now have what we need - print a message.
+#
+echo Sending  $filename to $targetPath
+
+
+#
+# Just for reference, WSMR ANC data currently go to
+# /RAPDMG/CWX/ATEC/WSMR and Redstone ANC data go to
+# /RAPDMG/CWX/ATEC/RTTC
+#
+
+# Make the target dir, send the file, then move it into place.
+# For some reason copying directly into place is an issue.
+hsi mkdir -p $targetPath
+hsi cput -d -M 600 -P -p -t $filename
+hsi mv  $filename  $targetPath
+#

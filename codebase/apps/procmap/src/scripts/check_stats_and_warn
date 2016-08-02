@@ -1,0 +1,1146 @@
+#! /usr/bin/perl
+#
+# Check process and data stats files from hosts
+# email warning as applicable
+#
+# Returns 1 on error
+#         0 on success
+#
+##############################################################################
+
+use Getopt::Long;
+use Env;
+
+# Initialize command line arguments
+
+$opt_proc_list = "";
+($prog = $0) =~ s%.*/%%;
+
+# usage
+
+$usage =
+    "Usage : $prog [options]\n" .
+    "  -help, -h     : Print usage\n" .
+    "  -debug        : Print debug messages\n" .
+    "  -email        : Email warning if there are problems\n" .
+    "  -params ?     : Specify param file\n" .
+    "  -print_params : Print default param file to stdout\n" .
+    "  -verbose      : Print verbose debug messages\n" .
+    "Returns 1 on error, 0 on success\n";
+
+# parse command line args
+
+$options_result = &GetOptions('h', 'help',
+			      'debug',
+			      'params=s',
+			      'print_params',
+			      'verbose',
+			      'email');
+
+if ($options_result == 0 || $opt_help || $opt_h) {
+    print $usage;
+    exit 1;
+}
+
+$debug = 0;
+if ($opt_debug) {
+    $debug = 1;
+}
+
+$verbose = 0;
+if ($opt_verbose) {
+    $verbose = 1;
+    $debug = 1;
+}
+
+$send_email = 0;
+if ($opt_email) {
+    $send_email = 1;
+}
+
+$print_params = 0;
+if ($opt_print_params) {
+    $print_params = 1;
+}
+
+$params = "not-set";
+if ($opt_params) {
+    $params = $opt_params;
+}
+
+# get time
+
+$now = `date -u '+%Y %m %d %H %M %S'`;
+($year, $month, $day, $hour, $min, $sec) = split(' ', $now);
+$prev_hour = sprintf ("%.2d", ($hour - 1));
+if ($debug) {
+    print STDERR "------------ Running $prog -------------\n";
+    print STDERR "  time: ${year}/${month}/${day}:${hour}\n";
+    print STDERR "  prev hour: ${prev_hour}\n";
+    print STDERR "  params file: ${params}\n";
+    print STDERR "----------------------------------------\n";
+}
+
+# tmp file for compiling email output
+
+$out = "/tmp/check_stats_and_warn.out";
+unlink($out);
+system("echo \"########### HOST MONITOR PROBLEM REPORT##########\" >> $out"); 
+system("echo \"  Monitor host: `hostname`\" >> $out");
+system("echo \"  Time: $year/$month/$day $hour:$min:$sec\" >> $out"); 
+
+#############################
+# Set defaults for parameters
+#
+# stats directory
+
+$stats_dir = "not-set";
+
+# proc hostname list
+
+@proc_hostnames = ("host1", "host2", "host3", "host4");
+
+# data hostname list
+
+@data_hostnames = ("host2", "host4");
+
+# primary host details
+
+$set_primary_host = 0;
+$this_host = `hostname`;
+chop($this_host);
+$primary_host = $this_host;
+
+# email adresss list
+
+@email_list = ("monitoring\@rap.ucar.edu");
+
+#####################
+# read the param file
+
+if (!($params =~ /not-set/)) {
+    if ($debug) {
+	print STDERR "param file is $params\n";
+    }
+    $retval = &readParamFile($params);
+    if ($retval) {
+	exit 1;
+    }
+}
+
+###########################
+# print params if requested
+
+if ($print_params) {
+    generateParamFile(STDOUT);
+    exit 0;
+}
+
+if ($debug) {
+    generateParamFile(STDERR);
+}
+
+################
+# day directory
+
+$day_dir = "$stats_dir/${year}${month}${day}";
+
+#################################################
+# check if this is the primary host
+# If this host is not the primary host, and the
+# primary host is up, email is not sent
+
+$primary_host_up = 0;
+if ($this_host eq $primary_host) {
+    $this_host_is_primary = 1;
+} else {
+    $this_host_is_primary = 0;
+}
+
+#########################
+# initialize problem flag
+
+$problems_found = 0;
+
+############################################################
+# search through hosts for process problems
+
+foreach $host (@proc_hostnames) {
+    
+    # check the proc stats
+    
+    $proc_stats_path = "${day_dir}/${hour}_hourly_${host}_proc_check.stats";
+    $prev_proc_stats_path =
+	"${day_dir}/${prev_hour}_hourly_${host}_proc_check.stats";
+    
+    if ($debug) {
+	print STDERR "===============================================\n";
+	print STDERR "Checking for procs on host: $host\n";
+    }
+
+    if ($verbose) {
+	print STDERR "  proc_check stats file is: $proc_stats_path\n";
+	print STDERR "  prev_proc_check stats file is: $prev_proc_stats_path\n";
+    }
+
+    ($return_val, $nprocs_down)=
+	read_proc_check_stats($proc_stats_path, *proc_problems);
+
+    # is host down? If so, check if this is a new problem, or was the
+    # host down previously. Always report problems at hour 0.
+    
+    if ($return_val) {
+	$host_problem_new = 0;
+	if ($hour == 00) {
+	    $host_problem_new = 1;
+	} else {
+	    if (-e $prev_proc_stats_path) {
+		$host_problem_new = 1;
+	    }
+	}
+	if ($host_problem_new) {
+	    if ($debug) {
+		print STDERR "Host: $host is down\n";
+	    }
+	    system("echo \"============== Host check ================\" >> $out"); 
+	    system("echo \"  Host \'$host\' seems to be down\" >> $out");
+	    $problems_found = 1;
+	}
+	last;
+    }
+   
+    if ($debug) {
+	print STDERR "nprocs_down: $nprocs_down\n";
+	foreach $i (0..($nprocs_down - 1)) {
+	    print STDERR "  problem: $proc_problems[$i]\n";
+	}
+    }
+
+    if ($host eq $primary_host) {
+	$primary_host_up = 1;
+    }
+
+    # check if there is a process problem now
+
+    $proc_problem_now = 0;
+    if ($nprocs_down > 0) {
+	if ($hour == 00) {
+	    # at hour 00 always report on problems
+	    $proc_problem_now = 1;
+	} else {
+	    # check for change from previous hour
+	    if (check_change_in_proc_problems($nprocs_down, @proc_problems,
+					      $prev_proc_check_stats)) {
+		$proc_problem_now = 1;
+	    }
+	}
+    } # if ($nprocs_down > 0)
+
+    # if there is a problem now, concatenate the file into the
+    # tmp output file
+
+    if ($proc_problem_now) {
+	if ($debug) {
+	    print STDERR "Problems with processes on host: $host\n";
+	}
+	$problems_found = 1;
+	system("cat $proc_stats_path >> $out");
+    }
+    
+    # check for time problems at start of each day
+    
+    if ($hour == 00) {
+	$time_stats_path = "${day_dir}/${hour}_hourly_${host}_time_check.stats";
+	if (-e $time_stats_path) {
+	    if ($debug) {
+		print STDERR "Problems with time on host: $host\n";
+	    }
+	    system("cat $time_stats_path >> $out");
+	    $problems_found = 1;
+	}
+    }
+    
+} # foreach $host
+
+############################################################
+# search through hosts for data problems
+
+foreach $host (@data_hostnames) {
+
+    # check the data stats
+    
+    $data_stats_path = "${day_dir}/${hour}_hourly_${host}_data_check.stats";
+    $prev_data_stats_path =
+	"${day_dir}/${prev_hour}_hourly_${host}_data_check.stats";
+    
+    if ($debug) {
+	print STDERR "===============================================\n";
+	print STDERR "Checking for data sets on host: $host\n";
+    }
+
+    if ($verbose) {
+	print STDERR "  data_check stats file is: $data_stats_path\n";
+	print STDERR "  prev_data_check stats file is: $prev_data_stats_path\n";
+    }
+    
+    ($return_val, $ndata_late)=
+	read_data_check_stats($data_stats_path, *data_problems);
+
+    # is data stats there?
+    
+    if ($return_val) {
+	$data_problem_new = 0;
+	if ($hour == 00) {
+	    $data_problem_new = 1;
+	} else {
+	    if (-e $prev_data_stats_path) {
+		$data_problem_new = 1;
+	    }
+	}
+	if ($data_problem_new) {
+	    if ($debug) {
+		print STDERR "Host: $host is down\n";
+	    }
+	    system("echo \"=========== Host data problems? ==========\" >> $out"); 
+	    system("echo \"  Host: \'$host\' not reporting data\" >> $out");
+	    $problems_found = 1;
+	}
+	last;
+    }
+    
+    if ($debug) {
+	print STDERR "ndata_late: $ndata_late\n";
+	foreach $i (0..($ndata_late - 1)) {
+	    print STDERR "  problem: $data_problems[$i]\n";
+	}
+    }
+    
+    # check if there is a data set problem now
+    
+    $data_problem_now = 0;
+    if ($ndata_late > 0) {
+	if ($hour == 00) {
+	    # at hour 00 always report on problems
+	    $data_problem_now = 1;
+	} else {
+	    # check for change from previous hour
+	    if (check_change_in_data_problems($ndata_late, @data_problems,
+					      $prev_data_check_stats)) {
+		$data_problem_now = 1;
+	    }
+	}
+    } # if ($ndata_late > 0)
+
+    # if there is a problem now, concatenate the file into the
+    # tmp output file
+
+    if ($data_problem_now) {
+	if ($debug) {
+	    print STDERR "Problems with data setes on host: $host\n";
+	}
+	$problems_found = 1;
+	system("cat $data_stats_path >> $out");
+    }
+    
+} # foreach $host
+
+# write to end of file
+
+system("echo \"##########################################\" >> $out"); 
+
+system("echo \"This report was produced by: $prog\" >> $out");
+
+if ($problems_found) {
+
+    if ($debug) {
+	print STDERR "------>>> PROBLEMS FOUND <<<------\n";
+	system("cat $out");
+    }
+    # send email
+
+    if ($send_email) {
+
+	# if this is not the primary host and the primary is up
+	# we do not need to send email
+
+	$send_mail = 1;
+	if ($set_primary_host && !$this_host_is_primary && $primary_host_up) {
+	    $send_mail = 0;
+	}
+	if ($send_mail) {
+	    foreach $addr (@email_list) {
+		if ($debug) {
+		    print(STDERR "Sending email to: $addr\n");
+		}
+		system("mail -s 'Host Problem Report' $addr < $out");
+	    }
+	}
+    }
+}
+
+exit 0;
+
+#---------------------------------------------------------------------
+# Subroutine: read_proc_check_stats()
+#
+# Usage:      ($return_val, $nprocs_down)=
+#                  read_proc_check_stats($proc_check_stats_fname,
+#                                      *proc_problems)
+#
+# Input:      The proc_check_stats file to read.
+#
+# Output:     Returns (in $return_val), 0 if file there, -1 on error.
+#             Returns (in $nprocs_down), the total number of procs down
+#             Returns the array of proc problems
+
+sub read_proc_check_stats{
+
+    local ($proc_check_stats_fname, *proc_problems) = @_;
+    local ($return_val, $nprocs_down, $sub_name);
+    local ($processes_line_found, $line);
+
+    # Initialize
+    
+    $sub_name="read_proc_check_stats";
+    $return_val = -1;
+    $nprocs_down = 99;
+
+    # Open the proc_list file
+    
+    if ($verbose) {
+	print STDERR "==================================================\n";
+	print STDERR "Parsing proc check stats: $proc_check_stats_fname\n";
+    }
+    
+    unless (open(PROC_STATS, "$proc_check_stats_fname")) {
+	if ($debug) {
+	    print (STDERR "ERROR: $sub_name\n");
+	    print (STDERR "  Cannot open file: $proc_check_stats_fname\n");
+	}
+	return($return_val, $nprocs_down);
+    }
+    
+    # read through the file, searching for line with "process(es) in it"
+    
+    $processes_line_found = 0;
+    while ($line = <PROC_STATS>) {
+	if ($verbose) {
+	    print STDERR "Input line: $line";
+	}
+	if ($line =~ /process\(es\)/) {
+	    if ($verbose) {
+		print STDERR "Found processes line\n";
+	    }
+	    $processes_line_found = 1;
+	    last;
+	} else {
+	    if ($verbose) {
+		print STDERR "Skipping line: $line";
+	    }
+	}
+    }
+    
+    if ($processes_line_found) {
+	if ($verbose) {
+	    print STDERR "process line found\n";
+	}
+    } else {
+	if ($debug) {
+	    print (STDERR "ERROR: $sub_name\n");
+	    print (STDERR "  Cannot parse file: $proc_check_stats_fname\n");
+	}
+	close(PROC_STATS);
+	return($return_val, $nprocs_down);
+    }
+
+    ($nprocs_down) = split(' ', $line);
+    
+    if ($nprocs_down > 0) {
+	foreach $i (0..($nprocs_down - 1)) {
+	    $line = <PROC_STATS>;
+	    chop($line);
+	    $proc_problems[$i] = $line;
+	}
+    }
+
+    close(PROC_STATS);
+    $return_val = 0;
+    return($return_val, $nprocs_down);
+
+}
+
+#---------------------------------------------------------------------
+# Subroutine: check_change_in_proc_problems
+#
+# Checks current problems against previous problems.
+#
+# Usage:      ($return_val) =
+#             check_change_in_proc_problems($nprocs_down, @proc_problems,
+#                                           $prev_proc_check_stats)
+#
+# Output:     Returns (in $return_val), 0 if no change, -1 if change
+
+sub check_change_in_proc_problems {
+    
+    local ($nprocs_down, @proc_problems, $prev_proc_check_stats) = @_;
+    local ($return_val = -1);
+    local ($iret, $prev_nprocs_down, @prev_proc_problems);
+	   
+    # get problems from previous hour
+    
+    ($iret, $prev_nprocs_down)=
+	read_proc_check_stats($prev_proc_stats_path, *prev_proc_problems);
+    
+    if ($iret) {
+	
+	# cannot read file, so flag a problem
+	return $return_val;
+
+    } else {
+	
+	if ($nprocs_down > $prev_nprocs_down) {
+	    
+	    # nproblems vary from previous hour
+	    return $return_val;
+	    
+	} else {
+	    
+	    foreach $i (0..($nprocs_down - 1)) {
+		$matches = 0;
+		foreach $j (0..($prev_nprocs_down - 1)) {
+		    if ($proc_problems[$i] eq $prev_proc_problems[$j]) {
+			# problem matches entry from previous hour
+			$matches = 1;
+			last;
+		    }
+		} # j
+		if (!$matches) {
+		    # new problem
+		    return $return_val;
+		}
+	    } # i
+	    
+	}
+
+    }
+
+    # no change in problems
+
+    $return_val = 0;
+    return $return_val;
+}
+
+#---------------------------------------------------------------------
+# Subroutine: read_data_check_stats()
+#
+# Usage:      ($return_val, $ndata_late)=
+#                  read_data_check_stats($data_check_stats_fname,
+#                                      *data_problems)
+#
+# Input:      The data_check_stats file to read.
+#
+# Output:     Returns (in $return_val), 0 if file there, -1 on error.
+#             Returns (in $ndata_late), the total number of datas down
+#             Returns the array of data problems
+
+sub read_data_check_stats{
+
+    local ($data_check_stats_fname, *data_problems) = @_;
+    local ($return_val, $ndata_late, $sub_name);
+    local ($data_sets_line_found, $line);
+
+    # Initialize
+    
+    $sub_name="read_data_check_stats";
+    $return_val = -1;
+    $ndata_late = 99;
+
+    # Open the data_list file
+    
+    if ($verbose) {
+	print STDERR "==================================================\n";
+	print STDERR "Parsing data check stats: $data_check_stats_fname\n";
+    }
+    
+    unless (open(DATA_STATS, "$data_check_stats_fname")) {
+	if ($debug) {
+	    print (STDERR "ERROR: $sub_name\n");
+	    print (STDERR "  Cannot open file: $data_check_stats_fname\n");
+	}
+	return($return_val, $ndata_late);
+    }
+    
+    # read through the file, searching for line with "data set(es) in it"
+    
+    $data_sets_line_found = 0;
+    while ($line = <DATA_STATS>) {
+	if ($verbose) {
+	    print STDERR "Input line: $line";
+	}
+	if ($line =~ /data set\(s\)/) {
+	    if ($verbose) {
+		print STDERR "Found data_sets line\n";
+	    }
+	    $data_sets_line_found = 1;
+	    last;
+	} else {
+	    if ($verbose) {
+		print STDERR "Skipping line: $line";
+	    }
+	}
+    }
+    
+    if ($data_sets_line_found) {
+	if ($verbose) {
+	    print STDERR "data set line found\n";
+	}
+    } else {
+	if ($debug) {
+	    print (STDERR "ERROR: $sub_name\n");
+	    print (STDERR "  Cannot parse file: $data_check_stats_fname\n");
+	}
+	close(DATA_STATS);
+	return($return_val, $ndata_late);
+    }
+
+    ($ndata_late) = split(' ', $line);
+    
+    if ($ndata_late > 0) {
+	foreach $i (0..($ndata_late - 1)) {
+	    $line = <DATA_STATS>;
+	    chop($line);
+	    $data_problems[$i] = $line;
+	}
+    }
+
+    close(DATA_STATS);
+    $return_val = 0;
+    return($return_val, $ndata_late);
+
+}
+
+#---------------------------------------------------------------------
+# Subroutine: check_change_in_data_problems
+#
+# Checks current problems against previous problems.
+#
+# Usage:      ($return_val) =
+#             check_change_in_data_problems($ndata_late, @data_problems,
+#                                           $prev_data_check_stats)
+#
+# Output:     Returns (in $return_val), 0 if no change, -1 if change
+
+sub check_change_in_data_problems {
+    
+    local ($ndata_late, @data_problems, $prev_data_check_stats) = @_;
+    local ($return_val = -1);
+    local ($iret, $prev_ndata_late, @prev_data_problems);
+	   
+    # get problems from previous hour
+    
+    ($iret, $prev_ndata_late)=
+	read_data_check_stats($prev_data_stats_path, *prev_data_problems);
+    
+    if ($iret) {
+	
+	# cannot read file, so flag a problem
+	return $return_val;
+
+    } else {
+	
+	if ($ndata_late > $prev_ndata_late) {
+	    
+	    # nproblems vary from previous hour
+	    return $return_val;
+	    
+	} else {
+
+	    foreach $i (0..($ndata_late - 1)) {
+		$matches = 0;
+		foreach $j (0..($prev_ndata_late - 1)) {
+		    if ($data_problems[$i] eq $prev_data_problems[$j]) {
+			# problem matches entry from previous hour
+			$matches = 1;
+			last;
+		    }
+		} # j
+		if (!$matches) {
+		    # new problem
+		    return $return_val;
+		}
+	    } # i
+	    
+	}
+    }
+
+    # no change in problems
+
+    $return_val = 0;
+    return $return_val;
+}
+
+#------------------------------------------------------------------------
+#
+# Subroutine generateParamFile
+#
+# Usage: generateParamFile()
+#
+# Function: Generate a parameter file for this script.
+#           Outputs to STDOUT.
+#
+sub generateParamFile
+{
+  # Local variables
+
+  local ($out) = @_;
+  local($subname);
+
+  # Set defaults
+
+  $subname="generateParamFile";
+  
+  # Write params to $out
+
+  # ... print header ...
+
+  print($out "#=====================================================\n");
+  print($out "# Parameters for $prog\n");
+  print($out "# Generated at : ${year}/${month}/${day}:${hour}\n");
+  print($out "#=====================================================\n");
+  print($out "#\n");
+
+  # stats dir
+
+  print($out "#------ Stats directory ----\n");
+  print($out "# This is the directory for the statistics files\n");
+  print($out "#   generated by the host_check script.\n");
+  print($out "#\n");
+  print($out "stats_dir = $stats_dir\n");
+  print($out "#\n");
+
+  # process host list
+
+  print($out "#-------- process host list -------------\n");
+  print($out "# List of hosts to check for running processes\n");
+  print($out "# Comma-separated list\n");
+  print($out "# For example:\n");
+  print($out "#   proc_hostnames = host1,host2,host3\n");
+  print($out "#\n");
+  print($out "proc_hostnames = ");
+  $nproc_hosts = scalar(@proc_hostnames);
+  foreach $i (0..($nproc_hosts - 1)) {
+      print ($out "$proc_hostnames[$i]");
+      if ($i < $nproc_hosts - 1) {
+	  print ($out ",");
+      } else {
+	  print ($out "\n");
+      }
+  }
+  print($out "#\n");
+
+  # data host list
+
+  print($out "#-------- data host list -------------\n");
+  print($out "# List of hosts to check for data sets\n");
+  print($out "# Comma-separated list\n");
+  print($out "# For example:\n");
+  print($out "#   data_hostnames = host1,host2,host3\n");
+  print($out "#\n");
+  print($out "data_hostnames = ");
+  $ndata_hosts = scalar(@data_hostnames);
+  foreach $i (0..($ndata_hosts - 1)) {
+      print ($out "$data_hostnames[$i]");
+      if ($i < $ndata_hosts - 1) {
+	  print ($out ",");
+      } else {
+	  print ($out "\n");
+      }
+  }
+  print($out "#\n");
+
+  # send email?
+
+  print($out "#--------- Option to send email ---------\n");
+  print($out "# If TRUE, warning email will be sent to addresses\n");
+  print($out "#   in email list if problems are found\n");
+  print($out "#\n");
+
+  if ($send_email) {
+      print($out "send_email = TRUE\n");
+  } else {
+      print($out "send_email = FALSE\n");
+  }
+  print($out "email_list = ");
+  $nemails = scalar(@email_list);
+  foreach $i (0..($nemails - 1)) {
+      print ($out "$email_list[$i]");
+      if ($i < $nemails - 1) {
+	  print ($out ",");
+      } else {
+	  print ($out "\n");
+      }
+  }
+  print($out "#\n");
+
+  # set a primary host?
+
+  print($out "#------ Option to set a primary host ----\n");
+  print($out "# If TRUE, you will designate a primary host.\n");
+  print($out "# This is done if the script is running on multiple hosts.\n");
+  print($out "#   In this situation, email is not sent from other hosts\n");
+  print($out "#   unless the primary is not reporting. We determine if\n");
+  print($out "#   the primary is reporting by the presence of its\n");
+  print($out "#   process stats file\n");
+  print($out "#\n");
+
+  if ($set_primary_host) {
+      print($out "set_primary_host = TRUE\n");
+  } else {
+      print($out "set_primary_host = FALSE\n");
+  }
+  print($out "primary_host = $primary_host\n");
+
+  print($out "#\n");
+  print($out "#\n");
+  print($out "#=====================================================\n");
+
+}
+
+#-------------------------------------------------------------------------
+#
+# Subroutine readParamFile
+#
+# Usage: ($return_val) = readParamFile($param_file)
+#
+# Function: Read the $param_file.
+#
+# Input:    $param_file          file to read
+#
+# Output:   $ret_val             0 on success, -1 on error
+
+sub readParamFile
+{
+
+  local ($param_file) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="readParamFile";
+
+  # Debugging
+  
+  if ($debug) {
+      print(STDERR "$prog: $subname: Reading param file: $param_file\n");
+  }
+
+  # Open the param file
+  
+  $is_ok=open(PARAM_FILE, $param_file);
+  if (!$is_ok) {
+      print(STDERR "ERROR: $prog: $subname: Cannot open file $param_file\n");
+      return($return_val);
+  }
+
+  # Parse the file
+
+  while ($line = <PARAM_FILE>) {
+      
+      # Skip comment lines
+      
+      if ($line =~ /^#/) {
+	  next;
+      }
+
+      # Skip blank lines
+      
+      if ($line !~ /\w/) {
+	  next;
+      }
+
+      # Debug
+
+      if ($verbose) {
+	  print (STDERR "Param line: $line");
+      }
+      
+      # Have we found a line with an equals sign? Parse the keyword
+      
+      if ($line =~ /\=/) {
+	  
+	  # Split the line at the equals sign
+	  
+	  ($keyword, $keyvalue) = split('\=',$line);
+
+	  # Are there >1 equals signs? If so, just split at the first one
+	  
+	  @tmp=split('\=',$line);
+	  if (@tmp > 2) {
+	      $firstequals=index($line, "=");
+	      $keyword=substr($line, 0, $firstequals);
+	      $keyvalue=substr($line, $firstequals+1);
+	      if ($verbose) {
+		  print(STDERR "more than 1 equals sign in the line\n");
+		  print(STDERR "\tfirstequals: $firstequals, keyword: $keyword, keyvalue: $keyvalue\n");
+	      }
+	  }
+	  
+	  # Chop off any leading and trailing blanks, save the unstripped
+	  # keyvalue as we may need it in a special case
+
+	  $unstripped_keyvalue=$keyvalue;
+	  ($is_ok, $keyword)=&removeSpaces($keyword, $debug);
+	  ($is_ok, $keyvalue)=&removeSpaces($keyvalue, $debug);
+	  
+	  # Handle the keywords
+
+          if ($keyword eq "stats_dir") {
+	      
+	      $stats_dir = $keyvalue;
+
+	  } elsif ($keyword eq "proc_hostnames") {
+
+	      @proc_hostnames = split(',', $keyvalue);
+	      
+	  } elsif ($keyword eq "data_hostnames") {
+	      
+	      @data_hostnames = split(',', $keyvalue);
+	      
+	  } elsif ($keyword eq "send_email") {
+	      
+	      if ($keyvalue eq "TRUE") {
+		  $send_email = 1;
+	      } else {
+		  $send_email = 0;
+	      }
+
+	  } elsif ($keyword eq "email_list") {
+	      
+	      @email_list = split(',', $keyvalue);
+	      
+	  } elsif ($keyword eq "set_primary_host") {
+	      
+	      if ($keyvalue eq "TRUE") {
+		  $set_primary_host = 1;
+	      } else {
+		  $set_primary_host = 0;
+	      }
+
+	  } elsif ($keyword eq "primary_host") {
+	      
+	      $primary_host = $keyvalue;
+
+	  } else {
+	      
+	      print(STDERR "ERROR: Cannot parse keyword line: $line");
+
+	  }
+	  
+	  # End of keyword processing
+	  
+	  next;
+      }
+      
+  } # endwhile
+  
+  close(PARAM_FILE);
+  
+  # Set return
+
+  $return_val = 0;
+
+  # Done
+
+  return($return_val);
+
+}
+
+
+#------------------------------------------------------------------------
+#
+# Subroutine checkKeywordValue
+#
+# Usage: ($return_val, $valid_keyword_value) = 
+#              checkKeywordValue($keyword, $input_keyword_value, $type, 
+#                                *out_arr, $debug)
+#
+# Function: Check the $input_keyword_value against the $type and return
+#           a valid value in $valid_keyword_value.
+#
+# Input:    $keyword             keyword, needed for error messages
+#           $input_keyword_value value to check
+#           $type                type to check
+#           $debug               flag for debugging (1=on, 0=off)
+#
+# Output:   $return_val          1 on success, 0 on error
+#           $valid_keyword_value valid value for the keyword, may be the
+#                                  same as the $input_keyword_value
+#           *out_arr             output array (only used for some keywords)
+#
+# Overview:
+#
+
+sub checkKeywordValue
+{
+  local ($keyword, $input_keyword_value, $type, *out_arr, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($dbg2, $dbg3);
+  local($found, $found_valid, $valid_keyword_value, $tmp_keyword_value);
+  local($is_ok, $narr, $val);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="checkKeywordValue";
+
+  # Debug
+
+  if ($debug == 2) {
+      $dbg2=1;
+  } else {
+      $dbg2=0;
+  }
+
+  if ($debug == 3) {
+      $dbg3=1;
+      $dbg2=1;
+  } else {
+      $dbg3=0;
+  }
+
+  # Set the return value to equal the input value by default
+
+  $valid_keyword_value=$input_keyword_value;
+
+  # Deal with the various types if possible
+
+  $found=1;
+
+  # Is an int positive?
+
+  if ($type eq "int"){
+
+      if ($input_keyword_value < 0) {
+	  print(STDERR "ERROR: $keyword $input_keyword_value is less than 0, will set to 0\n");
+	  $valid_keyword_value=0;
+      } 
+  }
+
+  # Is a float positive?
+
+  if ($type eq "float"){
+
+      if ($input_keyword_value < 0) {
+	  print(STDERR "ERROR: $keyword $input_keyword_value is less than 0, will set to 0\n");
+	  $valid_keyword_value=0.0;
+      } 
+  }
+
+
+  # If a table type, is it a valid enum type?
+
+  elsif ($type eq "enum_table_type") {
+      $found_valid = 0;
+      foreach $valid_type (@ValidTableTypes) {
+	  if ($input_keyword_value eq $valid_type) {
+	      $found_valid = 1;
+	  }
+      }
+      if (!$found_valid) {
+	  print(STDERR "ERROR: Invalid enum $input_keyword_value for $keyword. Will set to $ValidTableTypes[0]\n");
+	  $valid_keyword_value=$ValidTableTypes[0];
+      }
+  }
+
+  # If a comma-delimited string, split the string
+
+  elsif ($type = "comma_delimited_string") {
+      @out_arr=split(',',$input_keyword_value);
+      $narr=@out_arr;
+
+      if ($dbg3) {
+	  print(STDERR "$subname: keyword: $keyword, keyvalue: $keyvalue, numarr: $narr\n");
+	  foreach $val (@out_arr) {
+	      print(STDERR "\t$val\n");
+	  }
+      }
+
+  } 
+
+  # Error condition
+
+  else {
+      if ($debug) {
+	  print(STDERR "$prog: $subname: Cannot resolve type: $type\n");
+      }
+      $found=0;
+  }
+
+  # Done
+
+  $return_val=$found;
+  return($return_val, $valid_keyword_value);
+}
+
+#------------------------------------------------------------------------------
+#
+# Subroutine removeSpaces
+#
+# Usage: ($return_val, $newstring)=removeSpaces($instring, $debug) 
+#
+# Function: Remove leading and trailing spaces from $instring and
+#           return in $newstring. If no spaces are found, returns
+#           the $instring.
+#
+# Input:    $instring            string to remove blanks from
+#           $debug               flag for debugging (1=on, 0=off)
+#
+# Output:   $ret_val             1 on success, 0 on error
+#           $newstring           $instring without leading/trailing
+#                                   blanks
+#
+# Overview:
+#
+
+sub removeSpaces
+{
+  local ($instring, $debug) = @_;
+
+  # Local variables
+
+  local($return_val, $subname);
+  local($dbg2);
+  local($is_ok, $newstring);
+
+  # Set defaults
+
+  $return_val=0;
+  $subname="removeSpaces";
+  $newstring=$instring;
+
+  # Debug
+
+  if ($debug == 2) {
+      $dbg2=1;
+  } else {
+      $dbg2=0;
+  }
+
+  # Do it
+
+  ($newstring) = split (' ', $instring);
+
+  # Done
+
+  $return_val=1;
+  return($return_val, $newstring);
+}
+
+

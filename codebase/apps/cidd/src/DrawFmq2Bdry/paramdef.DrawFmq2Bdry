@@ -1,0 +1,68 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//
+// 
+//
+
+paramdef char* {
+  p_descr = "Process instance";
+  p_descr = "This is used by the process mapper, procmap";
+  p_default = {"generic"};      
+} instance;       
+
+paramdef char* {
+  p_descr = "Input URL for Draw fmq ";
+  p_default = {"fmqp:://localhost::draw.fmq"};
+} draw_fmq_url;
+
+paramdef boolean {
+  p_descr = "Debug messaging option";
+  p_default = {FALSE};
+} debug;
+
+paramdef char* {
+  p_descr = "Directory for log file output";
+  p_default = {""};
+} log_dir;
+
+typedef struct {
+   string ID_label;
+   string dest_url;
+} HIB_t;
+
+paramdef struct HIB_t  {
+   p_default = 	{ { "Boundry-E", "spdbp:://localhost::test-e" },
+				{ "Boundry-F", "spdbp:://localhost::test-f" },
+				{ "Boundry-S", "spdbp:://localhost::test-s" } };
+
+  p_descr = "Boundry types to recognise. Match labels with those"
+			" defined in CIDD's DRAW_EXPORT param section";
+
+  p_help = " ID_label: - Type of product to match on. "
+		   " Dest_url: - Destination URL for SPDB Boundries ";
+		   "Use the SPDB distribution option (name a distrib param file)"
+		   " to send data to multiple hosts";
+
+} HIB[];  // Human Insert Boundry
+

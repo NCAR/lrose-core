@@ -1,0 +1,221 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+///////////////////////////////////////////////////////////////////////////
+// parameter definitions for SoundingText
+//
+// Mike Dixon, RAP, NCAR
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// April 2000
+
+commentdef {
+  p_header = "SoundingText";
+  p_text = "SoundingText samples model data from an MDV file and produces text output. The program responds to user clicks in the associated display (CIDD), and produces ASCII output for the point the user clicked on.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_descr = "Option to log data get errors to log directory.";
+  p_help = "If true, data errors will be logged to the directory specified by errors_log_dir. The reason for dealing with errors in this way is that stdout from this program is displayed as the main product. It is difficult to separate stderr from stdout and pipe stderr to a logging filter. Therefore we log the spdb errors directly.";
+  p_default = false;
+} log_data_errors;
+
+paramdef string {
+  p_descr = "Errors log directory.";
+  p_help = "See log_data_errors.";
+  p_default = "$(ERRORS_LOG_DIR)";
+} errors_log_dir;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "URL for input MDV data.";
+  p_help = "The program expects model data in MDV format.";
+} input_url;
+
+paramdef int {
+  p_default = 61500;
+  p_descr = "Display coordinates shared memory Key";
+  p_help = "This must match that set in CIDD's parameter file.";
+} coord_key;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Time margin for searching on read (sec)";
+  p_help = "The program searches for data from the sample time, back be the read_search_margin.";
+} read_search_margin;
+
+typedef struct {
+  double lat;
+  double lon;
+} point_t;       
+
+paramdef struct point_t {
+  p_default = { 25.0, 121.0 };
+  p_descr = "The point at which we gather the data in the absence of user clicks from the display.";
+  p_help = "This point is used at startup, and at set intervals. If no user input has been found, we sample this point.";
+} default_point;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Sampling rate (sec)";
+  p_help = "If no user input is detected in this interval, we go ahead and sample at the default_point.";
+} default_interval;
+
+commentdef {
+  p_header = "VARIABLE FIELD NAMES";
+  p_text = "Define U, V, temperature and humidity.";
+};
+
+paramdef string {
+  p_default = "U";
+  p_descr = "Field name in MDV file for U.";
+  p_help = "Set to 'none' if no U wind data available.";
+} u_field_name;
+
+paramdef string {
+  p_default = "V";
+  p_descr = "Field name in MDV file for V.";
+  p_help = "Set to 'none' if no V wind data available.";
+} v_field_name;
+
+paramdef string {
+  p_default = "Temp";
+  p_descr = "Field name in MDV file for temperature.";
+  p_help = "Set to 'none' if no temperature data available.";
+} temp_field_name;
+
+paramdef string {
+  p_default = "RH";
+  p_descr = "Field name in MDV file for RH.";
+  p_help = "Set to 'none' if no RH data available.";
+} rh_field_name;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to print lowest pressure levels first.";
+  p_help = "If TRUE, the output starts at the lowest pressure level and progresses upwards. If FALSE, the output starts at the uppermost pressure level and progresses downwards.";
+} lowest_first;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to print the dewpoint value.";
+  p_help = "If TRUE, the dewpoint is printed in addition to the RH.";
+} print_dewpoint;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to round the wind direction values.";
+  p_help = "If TRUE, wind direction is rounded to the nearest 10 degrees.";
+} round_wind_dirn;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to find the waypoint closest to the point clicked.";
+  p_help = "If TRUE, we search for the closest data point in the waypoint file, and print out the waypoint name alongside the lat/lon position.";
+} find_closest_waypoint;
+
+paramdef string {
+  p_default = "waypoint.dat";
+  p_descr = "Name of the file that lists the waypoint locations.";
+  p_help = "Format is StationType Lat Lon StationName";
+} waypoint_data_file;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Maximum distance from waypoint.";
+  p_help = "If click point is further away than this, no station name is printed.";
+} max_dist_from_waypoint;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write the data set to a CLASS format file.";
+  p_help = "If true, the data is written in CLASS format to the file specified in class_file_path.";
+} write_class_file;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/tmp/sounding.class";
+  p_descr = "Path to the CLASS format file.";
+  p_help = "See 'write_class_file'";
+} class_file_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to run a script after the class file is written.";
+  p_help = "If true, the script named by class_file_script is run\n"
+  "after the class file is written.";
+} run_class_file_script;
+
+paramdef string {
+  p_default = "SoundingPlot.py";
+  p_descr = "Script to run after the class file is written";
+  p_help = "Relevant only if run_class_file_script is true";
+} class_file_script;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Indicates if mdv wind speed is in kts.";
+  p_help = "If FALSE, mdv wind speed is assumed to be in m/s. If TRUE, wind speeds will be converted to m/s when writing the class file.";
+} mdv_wind_speed_kts;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Indicates if mdv wind speed is in kelvin.";
+  p_help = "If FALSE, mdv temp is assumed to be in C. If TRUE, temps will be converted to C when writing the class file.";
+} model_temp_in_kelvin;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of blank lines to print before data.";
+  p_help = "Set this to a suitable number if you want the old data to scroll off the top before printing the new data.";
+} n_blank_lines_between_pages;
+

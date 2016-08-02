@@ -1,0 +1,94 @@
+/**********************************************************
+ * paramdef.dist_spdb_data
+ *
+ * This file contains the TDRP parameter definitions for
+ * dist_spdb_data, the program for distributing SPDB data
+ * to a list of destinations.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+paramdef enum debug_t
+{
+  p_descr = "debug level";
+  p_help = "Debug level: DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS, DEBUG_ROUTINES, DEBUG_ALL.";
+  p_options = { DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS, DEBUG_ROUTINES, DEBUG_ALL };
+  p_default = { DEBUG_OFF };
+} debug;
+
+paramdef long
+{
+  p_descr = "malloc debug level";
+  p_help = "0 = none, 1 = corruption checking, 2 = record all malloc blocks and checks, 3 = printout of all mallocs, etc.";
+  p_default = { 0 };
+  p_min = { 0 };
+  p_max = { 3 };
+} malloc_debug_level;
+
+
+/***********************************************************************
+ * Operational parameters
+ */
+
+paramdef long
+{
+  p_help = "wait time";
+  p_descr = "Number of milliseconds to wait for a socket operations before going on to other work.";
+  p_default = { 100 };
+} wait_msecs;
+
+/***********************************************************************
+ * Process information
+ */
+
+paramdef string
+{
+  p_descr = "server mapper type";
+  p_help = "The server mapper type for registering with the server mapper.";
+  p_default = { "Spdb" };
+} servmap_type;
+
+paramdef string
+{
+  p_descr = "server mapper subtype";
+  p_help = "The server mapper subtype for registering with the server mapper.";
+  p_default = { "Dist" };
+} servmap_subtype;
+
+paramdef string
+{
+  p_descr = "instance";
+  p_help = "The instance for this server.  This is used for both the server mapper and the process mapper.";
+  p_default = { "Test" };
+} instance;
+
+/***********************************************************************
+ * Input parameters
+ */
+
+paramdef long
+{
+  p_descr = "input port";
+  p_help = "Port number to use for input.";
+  p_default = { 62000 };
+} input_port;
+
+/***********************************************************************
+ * Output parameters
+ */
+
+paramdef string
+{
+  p_descr = "output destination list";
+  p_help = "List of output destinations.  The destinations should be specified in the format used by the spdb_client routines.";
+} destinations[];
+
+paramdef string
+{
+  p_descr = "product label";
+  p_help = "Product label.  Used only for disk destinations.";
+  p_default = { "" };
+} product_label;

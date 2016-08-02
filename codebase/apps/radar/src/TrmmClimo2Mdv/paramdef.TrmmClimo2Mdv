@@ -1,0 +1,151 @@
+/*********************************************************
+ * parameter definitions for TrmmClimo2Mdv
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * May 2011
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TrmmClimo2Mdv reads netCDF files for the TRMM climatology data set, converts these to MDV or CF-netCDF, and writes them out as specified.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This program registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  FILELIST, REALTIME
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME mode only. In FILELIST mode, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DATA FIELD DETAILS";
+};
+
+paramdef string {
+  p_default = "rain_fraction";
+  p_descr = "Name of data field.";
+} field_name; 
+
+paramdef string {
+  p_default = "rain_time_fraction";
+  p_descr = "Long name of data field.";
+} field_name_long;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Units of data field.";
+} field_units;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write all climo fields to single file.";
+  p_help = "If true, the fields will be named field_name_jan, field_name_feb etc, and will be written to a single file. The data time will be the 00:00:00 on Jan 1 of the reference yearIf false, multiple files will be produced each with a single field. The file data times will be 00:00:00 for the first day of each month of the reference year.";
+} write_as_single_file;
+
+paramdef string {
+  p_default = {
+    "jan", "feb", "mar", "apr", "may", "jun",
+    "jul", "aug", "sep", "oct", "nov", "dec"
+  };
+  p_descr = "String for climatology period.";
+  p_help = "These are concatenated to the field_name, if write_as_single_file is true.";
+} time_period[]; 
+
+paramdef int {
+  p_default = 2003;
+  p_descr = "Reference year for the climatology";
+  p_help = "This climatology provides monthly fields. The time stamp for these fields is referenced to this year.";
+} reference_year;
+
+commentdef {
+  p_header = "DATA SET DETAILS";
+};
+
+paramdef string {
+  p_default = "TRMM CLIMATOLOGY";
+  p_descr = "Data set name.";
+  p_help = "This short string is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "Converted by TrmmClimo2Mdv.";
+  p_descr = "Data set source details.";
+  p_help = "This short string is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Data set info.";
+  p_help = "This long string is placed in the MDV master header for documentation purposes.";
+} data_set_info;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string {
+  p_default = "mdvp:://localhost::/tmp/mdv/trmm_climo";
+  p_descr = "URL for the output MDV files.";
+} output_url;
+
+typedef enum {
+  ENCODING_INT8 =  0,
+  ENCODING_INT16 =  1,
+  ENCODING_FLOAT32 =  2
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT16;
+  p_descr = "output encoding type.";
+} output_encoding;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Compress the output?";
+  p_help = "If true, the field data will be compressed using GZIP.";
+} compress_output;
+

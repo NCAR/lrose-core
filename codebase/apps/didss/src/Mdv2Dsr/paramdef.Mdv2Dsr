@@ -1,0 +1,304 @@
+////////////////////////////////////////////////////////
+//  paramdef for Mdv2Dsr
+//
+// $Id: paramdef.Mdv2Dsr,v 1.20 2009/05/04 03:06:39 dixon Exp $
+//
+///////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Mdv2Dsr PARAMETER FILE";
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Info option";
+  p_help = "Print info messages";
+} info;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "LOGGING"; 
+}
+
+paramdef string {
+  p_descr = "Directory for log file output";
+  p_default = "";
+} log_dir;
+
+commentdef {
+  p_header = "INPUT";
+}
+
+paramdef string {
+  p_descr = "Input files";
+  p_default = {};
+  p_help = "If no input files are specified, the input directory will be used";
+} input_files[];
+
+paramdef string {
+  p_descr = "Input directory path";
+  p_help = "The start and end times specified below will be used to select "
+           "files from this directory";
+  p_default = "";
+} input_dir;
+
+paramdef string {
+  p_descr = "Start time for files to be processed";
+  p_help = "Files from this time through the end time will be processed."
+    "\n\nSupported time formats are:\n  yyyy mm dd hh mm ss (preferred)\n  hh:mm:ss mm/dd/yyyy\n\n";
+  p_default = "00:00:00 12/31/1998";
+} start_time;
+
+paramdef string {
+  p_descr = "End time for files to be processed";
+  p_help = "Files from the start time through this time will be processed."
+    "\n\nSupported time formats are:\n  yyyy mm dd hh mm ss (preferred)\n  hh:mm:ss mm/dd/yyyy\n\n";
+  p_default = "00:00:00 12/31/1998";
+} end_time;
+
+commentdef {
+  p_header = "PROCESSING PARAMS";
+} 
+
+paramdef boolean {
+  p_descr = "Option to take nz and the array of elevation from the first "
+	"field header. By default, the radarParams stuct is used if it "
+	"is available, but this may not be correct if the MDV data have "
+	"been remapped so that the radar params are not current. Setting this "
+	"flag forces the use of field headers.";
+  p_help = "Default is to go for the brass ring and attempt to use "
+	"the radar parameters if they are there. This is almost always "
+	"correct.";
+  p_default = FALSE;
+} use_field_headers;
+
+paramdef boolean {
+  p_descr = "Use current time for beam times";
+  p_help = "The current time will be used for the beams as they are written "
+           "to the fmq";
+  p_default = FALSE;
+} use_current_time;
+
+paramdef boolean {
+  p_descr = "Use a simulated time for beam times";
+  p_help = "Use the times listed below to construct the data time "
+           "for the beams.  Note that this mode can only be used if "
+           "files are listed above, instead of specifying an input "
+           "directory";
+  p_default = FALSE;
+} simulate_time;
+
+typedef struct {
+  string simulate_start_time;
+  string simulate_end_time;
+} simulate_times_t;
+
+paramdef struct simulate_times_t {
+  p_descr = "Simulated start and end times for each file listed above";
+  p_help = "There must be one set of start and end times for each file listed in input_files above."
+  "\n\nSupported time formats are:\n  yyyy mm dd hh mm ss (preferred)\n  hh:mm:ss mm/dd/yyyy\n\n";
+  p_default = {{ "00:00:00 12/31/1998", "00:06:00 12/31/1998" }};
+} start_end_times[];
+
+paramdef int {
+  p_descr = "Wait per beam (milli-secs)";
+  p_default =  10 ;
+} beam_wait_msecs;
+
+paramdef int {
+  p_descr = "Wait per vol (secs)";
+  p_default =  1 ;
+} vol_wait_secs;
+
+paramdef boolean {
+  p_descr = "Loop through the data repeatedly, for simulate mode.";
+  p_help = "Should be used with 'use_current_time'.";
+  p_default = FALSE;
+} simulate_repeat_forever;
+
+commentdef {
+  p_header = "OPTION to override radar params";
+}
+
+paramdef boolean {
+  p_descr = "Override radar params in MDV file";
+  p_default = FALSE;
+} override_radar_params;
+
+typedef struct {
+
+  int     radarId;           // unique number
+  int     radarType;         // use radar type defs in ds_radar.h
+  int     samplesPerBeam;    // number of pulses per data beam
+  int     scanType;          // the current scan strategy
+  int     polarization;      // see ds_radar.h
+
+  double   radarConstant;     // radar constant
+  double   altitude;          // km
+  double   latitude;          // degrees
+  double   longitude;         // degrees
+  double   gateSpacing;       // km
+  double   startRange;        // km
+  double   horizBeamWidth;    // degrees
+  double   vertBeamWidth;     // degrees
+  double   pulseWidth;        // micro-seconds
+  double   pulseRepFreq;      // pulse repitition freq (/s)
+  double   wavelength;        // cm
+  double   xmitPeakPower;     // watts
+  double   receiverMds;       // dBm
+  double   receiverGain;      // dB
+  double   antennaGain;       // dB
+  double   systemGain;        // dB
+  double   unambigVelocity;   // m/s
+  double   unambigRange;      // km
+
+  string  radarName;         // name of radar site
+  string  scanTypeName;      // name of scanType
+
+} radar_params_t;
+
+paramdef struct radar_params_t {
+
+  p_descr = "Overrride radar params in file with these params.";
+
+  p_help =
+  "========== Radar params ==========\n"
+  "\t\n"
+  "\tradarId:            unique number\n"
+  "\tradarType:          use radar type defs in ds_radar.h\n"
+  "\tsamplesPerBeam:     number of pulses per data beam\n"
+  "\tscanType:           the current scan strategy\n"
+  "\tpolarization:       see ds_radar.h\n"
+  "\tradarConstant:      radar constant\n"
+  "\taltitude:           km\n"
+  "\tlatitude:           degrees\n"
+  "\tlongitude:          degrees\n"
+  "\tgateSpacing:        km\n"
+  "\tstartRange:         km\n"
+  "\thorizBeamWidth:     degrees\n"
+  "\tvertBeamWidth:      degrees\n"
+  "\tpulseWidth:         micro-seconds\n"
+  "\tpulseRepFreq:       pulse repitition freq (/s)\n"
+  "\twavelength:         cm\n"
+  "\txmitPeakPower:      watts\n"
+  "\treceiverMds:        dBm\n"
+  "\treceiverGain:       dB\n"
+  "\tantennaGain:        dB\n"
+  "\tsystemGain:         dB\n"
+  "\tunambigVelocity:    m/s\n"
+  "\tunambigRange:       km\n"
+  "\tradarName:          name of radar site\n"
+  "\tscanTypeName:       name of scanType\n"
+  "\t\n";
+
+  p_default = {
+    radarId = 0,
+    radarType = 0,
+    samplesPerBeam = 192,
+    scanType = 0,
+    polarization = 5,
+    radarConstant = -73.1,
+    altitude = 0.168,
+    latitude = -27.6692,
+    longitude = 152.862,
+    gateSpacing = 0.15,
+    startRange = 0,
+    horizBeamWidth = 0.93,
+    vertBeamWidth = 0.93,
+    pulseWidth = 1,
+    pulseRepFreq = 1000,
+    wavelength = 10.9,
+    xmitPeakPower = 4.9545e+08,
+    receiverMds = -112.63,
+    receiverGain = 44.83,
+    antennaGain = 45.3,
+    systemGain = 90.13,
+    unambigVelocity = 27.25,
+    unambigRange = 150,
+    radarName = "CP2_S",
+    scanTypeName = "Default_s"
+  };
+
+} radar_params;
+
+commentdef {
+  p_header = "DIAGNOSTICS";
+}
+
+paramdef boolean {
+  p_descr = "Print summary";
+  p_help = "If set to true, summaries are printed at given interval";
+  p_default = FALSE;
+} print_summary;
+
+paramdef int {
+  p_descr = "Summary interval";
+  p_help = "See print_summary";
+  p_default = 90;
+} summary_interval;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef string {
+  p_descr = "output fmq url";
+  p_help = "Path for FMQ output data.";
+  p_default = "fmqp:://localhost::./fmq.dsRadar";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Set encoding type for output data.";
+} output_encoding;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Blocking FMQ output";
+  p_help = "If TRUE, this application will wait for a reader to catch up. Can only be used with a single reader.";
+} write_blocking;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Offset to add to azimuth angles.";
+  p_help = "Will rotate data on output.";
+} az_offset;
+

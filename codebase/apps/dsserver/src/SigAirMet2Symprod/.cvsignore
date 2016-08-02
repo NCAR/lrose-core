@@ -1,0 +1,6 @@
+.deps
+SigAirMet2Symprod
+__makefile.template
+makefile
+makefile.am
+makefile.in

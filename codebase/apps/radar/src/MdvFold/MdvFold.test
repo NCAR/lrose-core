@@ -1,0 +1,162 @@
+/**********************************************************************
+ * TDRP params for MdvFold
+ **********************************************************************/
+
+//======================================================================
+//
+// MdvFold is intended to help simulate folded data. It takes MDV data 
+//   which is not folded and artificially folds the data. The folded data 
+//   can then be used to test algorithms.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "./input/mdv";
+
+//======================================================================
+//
+// INPUT FIELD INFORMATION.
+//
+// Names of input fields in the Dsr queue.
+//
+//======================================================================
+ 
+///////////// input_field_names ///////////////////////
+//
+// Name of fields to be read from the input MDV file and written to the 
+//   output MDV file.
+// Type: string
+// 1D array - variable length.
+//
+
+input_field_names = { "SNR_F", "DBZ_F", "VEL_F" };
+
+///////////// VEL_field_name //////////////////////////
+//
+// Field name for velocity data.
+// Type: string
+//
+
+VEL_field_name = "VEL_F";
+
+//======================================================================
+//
+// VELOCITY FOLDING.
+//
+//======================================================================
+ 
+///////////// apply_velocity_folding //////////////////
+//
+// Option to artificially fold the velocity data.
+// If TRUE, the velocity data will be folded using the folding_nyquist 
+//   value.
+// Type: boolean
+//
+
+apply_velocity_folding = TRUE;
+
+///////////// folding_nyquist /////////////////////////
+//
+// Nyquist to be applied to velocity data.
+// See apply_velocity_folding.
+// Type: double
+//
+
+folding_nyquist = 8;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// Output MDV data is written to this URL.
+// Type: string
+//
+
+output_url = "./output/mdv/folded";
+
+///////////// encoding_type ///////////////////////////
+//
+// Set output encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_ASIS
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+encoding_type = ENCODING_INT16;
+
+///////////// VEL_folded_field_name ///////////////////
+//
+// Output field name for folded velocity data.
+// Type: string
+//
+
+VEL_folded_field_name = "VEL_FOLD_8";
+

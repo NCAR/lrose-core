@@ -1,0 +1,268 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for DsSpdbServer
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Jan 1999
+ *
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress the use of threads. Set no_threads to TRUE for this type of debugging.";
+} no_threads;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+} instance;
+
+commentdef {
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int {
+  p_default = 5441;
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+} port;
+  
+paramdef int {
+  p_default = -1;
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, it will die gracefully. If set to -1, the server never exits.";
+} qmax;
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Max number of clients supported.";
+} max_clients;
+
+commentdef {
+  p_header = "Security";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run in secure mode.";
+  p_help = "If TRUE, the server will reject any URLs which specify an absolute path, or a path with .. in it. This prevents the server from writing any files which are not below DATA_DIR in the directory tree.";
+} run_secure;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run in read-only mode.";
+  p_help = "If TRUE, the server will respond only to read requests, and will ignore write requests.";
+} run_read_only;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to allow http requests.";
+  p_help = "If TRUE, the server will strip off header in request message.";
+} allow_http;
+
+commentdef {
+  p_header = "FAIL-OVER TO ALTERNATIVE URLs ON READ";
+  p_text = "Applies to read operations only";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to serve data from another url if the first url fails.";
+  p_help = "A list of urls is specified by the failover_urls parameter, and if one url does not deliver the data, the subsequent url is then checked. Also, the search margin may be specified, in seconds. If search_margin_secs < 0, it is ignored. If search_margin_secs >= 0, this margin is applied to the read request, if applicable.";
+} failover_on_read;
+
+typedef struct {
+  string url;
+  int search_margin_secs;
+} failover_entry_t;
+
+paramdef struct failover_entry_t {
+  p_default = {{ "spdbp:://localhost::spdb/dataset", -1 }};
+  p_descr = "The list of urls to search, and optional search_margins.";
+  p_help = "See failover_on_read";
+} failover_entries[];
+
+commentdef {
+  p_header = "SPECIALIZED SEARCHING";
+  p_text = "Applies to read operations only";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use search criteria for hybrid SPDB server";
+} use_search_criteria;
+
+typedef struct {
+  string subdir;
+  int   time_margin_min;
+} search_criterion_t;
+
+paramdef struct search_criterion_t {
+  p_descr = "Search criteria for reading from an spdb database.";
+  p_help = "Only valid for reading from not writing to an spdb database. "
+           "This parameter should only be specified as an override parameter "
+           "located in the url directory, i.e., $RAP_DATA_DIR/spdb/<database> "
+           "Subdirectories specified in the search criteria must exist. "
+           "below the url location being served. "
+           "Subdirectories are listed in order of highest priority to lowest. ";
+  p_default = {
+    {"profiler",     60},
+    {"ruc",         240},
+    {"sonde",      1440}
+  };
+} search_criteria[];
+
+commentdef {
+  p_header = "DATA TYPE SELECTION";
+  p_text = "Applies to read operations only";
+};
+
+typedef enum {
+  ALL, FIRST, LAST, MIN, MAX
+} data_type_select_t;
+
+paramdef enum data_type_select_t
+{
+  p_default = ALL;
+  p_descr = "Select from multiple chunks based on data type selection";
+  p_help = "Selections other than ALL will insure that no more than "
+           "one chunk is returned from the server.";
+} data_type_select;
+
+commentdef {
+  p_header = "DATA DISTRIBUTION.";
+  p_text = "The server can be used to forward data on to multiple URLs. In this case, the destination URLs may either be specified in an array (dest_url_list) or as a template (dest_url_template) which is merged with a destination host list (dest_host_list_file_path).";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to forward the data to specified URLs.";
+  p_help = "See parameters below.";
+} forward;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Use host list in the file to create the destination urls.";
+  p_help = "The host list file contains a list of destination hosts. Each entry in this list is merged with the url_template to create a list of destination urls.";
+} use_dest_host_list_file;
+
+paramdef string {
+  p_default = "dest_host_list";
+  p_descr = "Path for destination host list file";
+  p_help = "Only used if parameter 'use_dest_host_list_file' is TRUE.";
+} dest_host_list_file_path;
+
+paramdef string {
+  p_default = "spdbp:://::test_dir";
+  p_descr = "URL template for destination URLs.";
+  p_help = "Only used if parameter 'use_dest_host_list_file' is TRUE. The protocol should match that expected by the ServerMgr for the DsSpdbServer service. If the dir is missing, the current dir is used.";
+} dest_url_template;
+
+paramdef string {
+  p_default = {"spdbp:://targethost::"};
+  p_descr = "Specified URL list for destination hosts.";
+  p_help = "This is only used if parameter 'use_dest_host_list_file' is FALSE. The files will be distributed to this list of hosts. The protocol should match that expected by the ServerMgr for the DsSpdb service. If the dir is missing, the current dir is used.";
+} dest_url_list[];
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Timeout period for put operations - secs.";
+  p_help = "The server will allow this amount of time for the put to succeed. After this time, if the put is still active, it will be terminated.";
+} put_timeout_secs;
+  
+paramdef int {
+  p_default = 64;	
+  p_descr = "Max number	of active children putting the data.";
+  p_help = "If the number of active children exceeds this max, puts will be suspended.";
+} max_put_children;
+  
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compress the data for forwarding.";
+  p_help = "See parameters below.";
+} compress_for_forwarding;
+
+typedef enum {
+  COMPRESSION_GZIP, COMPRESSION_BZIP2
+} compression_method_t;
+
+paramdef enum compression_method_t {
+  p_default = COMPRESSION_GZIP;
+  p_descr = "Compression method for data transfer";
+  p_help = "See compress_for_forwarding.";
+} compression_method;
+
+commentdef {
+  p_header = "SAVING MESSAGES TO LOCAL DIRECTORY.";
+  p_text = "You have the option of saving the SPDB put messages to files in a local directory. This is controlled by the special keyword 'localfile' as a host name in the dest_host_list file.";
+};
+
+paramdef string {
+  p_default = "/tmp/spdb_msg_files";
+  p_descr = "Directory to place message files";
+  p_help = "This is used only if the destination url has localfile as the host.";
+} localfile_dest_dir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Command to run after localfile message file is written ";
+  p_help = "Command is run with the full path name written as the first argument.";
+} localfile_command;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Timeout (secs) for  command to run after localfile message file is written ";
+  p_help = "Command is run a a child process, and killed after timeout secs if it doesn't exit.";
+} localfile_command_timeout;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr =
+    "localfile gets replaced in the URL with the following host name"
+    " so the receiving side does the right thing with the message";
+  p_help = "Usually should be localhost";
+} localfile_host;
+
+

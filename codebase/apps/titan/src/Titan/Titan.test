@@ -1,0 +1,1376 @@
+/**********************************************************************
+ * TDRP params for Titan
+ **********************************************************************/
+
+//======================================================================
+//
+// Titan it the Thunderstorm Identification, Tracking, Analysis and 
+//   Nowcasting appliction. It identifies storms in 3-D radar data stored 
+//   in MDV format, tracks the storms and forecasts their position using 
+//   extrapolation.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_EXTRA
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In realtime mode, Titan waits for a new input MDV file. In archive 
+//   mode, it iterates through the files between the times set by the 
+//   user. In retrack mode the tracking algorithm is applied to existing 
+//   storm files.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     RETRACK
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// AUTO-RESTART OPTION.
+//
+// This allows you to automatically restart the program at a given time 
+//   of day (GMT). This keeps the output files simple - there is one 
+//   series of files per day. If storm tracking is running it is also 
+//   restarted.
+//
+//======================================================================
+ 
+///////////// auto_restart ////////////////////////////
+//
+// Auto-restart option. Always forced TRUE for REALTIME mode.
+// If set, the program restarts at restart_time (GMT). The data from the 
+//   previous 'restart_overlap_period' is copied into the new file, so 
+//   that tracks at restart time will have some history. Use of this 
+//   option ensures that the storm and track files will not grow forever.
+// Type: boolean
+//
+
+auto_restart = TRUE;
+
+///////////// restart_time ////////////////////////////
+//
+// The time in the day (UCT/GMT) at which restart occurs.
+// The program will check for the passing of this time. Once data beyond 
+//   this time is found, restart will occur.
+//
+// Type: struct
+//   typedef struct {
+//      int hour;
+//      int min;
+//   }
+//
+//
+
+restart_time = { 0, 0 };
+
+///////////// restart_overlap_period //////////////////
+//
+// The period copied to the new file on restart (secs).
+// On restart, the program copies some of the previous file, to provide 
+//   history for storm_track. This is the duration of the copied data.
+// Minimum val: 0
+// Type: int
+//
+
+restart_overlap_period = 3600;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input MDV data.
+// The input MDV data files are stored at this URL. In REALTIME mode the 
+//   program monitors the latest_data_info file for this URL and processes 
+//   a new scan each time new data arrives.
+// Type: string
+//
+
+input_url = "$(HOME)/data/nsslMosaic3D/merged/hgtThresh";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+///////////// input_search_sleep_msecs ////////////////
+//
+// Sleep interval which searching for new data - (millisecs).
+// This is the period of sleep time between successive checks for new 
+//   data. If you are searching on a remote URL, and the DataMapper is not 
+//   active, this should be set to 5000 or greater to avoid over-frequent 
+//   server requests.
+// Minimum val: 1000
+// Type: int
+//
+
+input_search_sleep_msecs = 1000;
+
+//======================================================================
+//
+// DATA FIELDS IN INPUT FILES.
+//
+//======================================================================
+ 
+///////////// dbz_field ///////////////////////////////
+//
+// Reflectivity field details.
+// If the field name is specified, that is used. If the field name is 
+//   empty, the field number is used.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      int num;
+//   }
+//
+//
+
+dbz_field = { "mrefl_mosaic", 0 };
+
+///////////// negate_dbz_field ////////////////////////
+//
+// Option to negate the data values in the dBZ field.
+// If true, the data values in the dbz field will be multiplied by -1. 
+//   This is useful for running Titan on fields such as satellite IR 
+//   fields, in which 'storms' are areas of high negaive instead of high 
+//   positive values.
+// Type: boolean
+//
+
+negate_dbz_field = FALSE;
+
+///////////// vel_field ///////////////////////////////
+//
+// Velocity field details.
+// If the field name is specified, that is used. If the field name is 
+//   empty, the field number is used. Note that the usage must be 
+//   consistent with the dbz_field parameter, i.e. if you specify the name 
+//   for reflectivity you must also specify the name for velocity, and 
+//   vice versa.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      int num;
+//   }
+//
+//
+
+vel_field = { "VEL", 0 };
+
+///////////// vel_available ///////////////////////////
+//
+// Flag to indicate if velocity data is available.
+// If this is set, velocity data is available in the radar volumes. 
+//   Velocity-based computations will be carried out. If not, 
+//   velocity-based computations will be omitted.
+// Type: boolean
+//
+
+vel_available = FALSE;
+
+///////////// vel_to_m_per_sec_scale //////////////////
+//
+// Factor to convert velocity field units to m/s.
+// This is included in case the velocity is not in m/s units.
+// Type: double
+//
+
+vel_to_m_per_sec_scale = 1;
+
+//======================================================================
+//
+// REMAPPING THE VERTICAL LEVELS TO CONSTANT SPACING.
+//
+// If the input files do not have constant vertical levels, you will 
+//   need to remap the vertical levels appropriately. See the following 
+//   parameters.
+//
+//======================================================================
+ 
+///////////// remap_z_to_constant_grid ////////////////
+//
+// Option to remap the Z levels onto a grid with constant dz.
+// Field data will be remapped onto the specified Z levels using the 
+//   nearest neighbor method. See 'remap_z_grid'. Note that this actually 
+//   changes the data. Whereas 'override_vlevels' only changes the vlevels 
+//   in the headers, and does not change the data.
+// Type: boolean
+//
+
+remap_z_to_constant_grid = TRUE;
+
+///////////// remap_z_grid ////////////////////////////
+//
+// Specified Z levels for remapping.
+//
+// Type: struct
+//   typedef struct {
+//      int nz;
+//      double minz;
+//      double dz;
+//   }
+//
+//
+
+remap_z_grid = { 36, 0.5, 0.5 };
+
+//======================================================================
+//
+// STORM IDENTIFICATION PARAMETERS.
+//
+//======================================================================
+ 
+///////////// low_dbz_threshold ///////////////////////
+//
+// Lower dBZ threshold for storm identification (dBZ).
+// Storms are defined as regions with reflectivity values in excess of 
+//   this value.
+// Type: double
+//
+
+low_dbz_threshold = 35;
+
+///////////// high_dbz_threshold //////////////////////
+//
+// Upper dBZ threshold (dBZ).
+// If a storm contains reflectivity in excess of this value, it will not 
+//   be processed.
+// Type: double
+//
+
+high_dbz_threshold = 80;
+
+///////////// discard_high_threashold_storms //////////
+//
+// Option to discard storms with dBZ exceeding the high threshold.
+// If true, a storm with reflectivity in excess of the 
+//   high_dbz_threshold will be discarded. If false, the storm will be 
+//   kept, but only those portions below the threshold will be regarded as 
+//   part of the storm.
+// Type: boolean
+//
+
+discard_high_threashold_storms = TRUE;
+
+///////////// min_grid_overlap ////////////////////////
+//
+// Min overlap between storm fragments.
+// A storm is made up of a series of adjacent 'runs' of data in the EW 
+//   direction. When testing for overlap, some minimum number of overlap 
+//   grids must be used. This is that minimum overlap in grid units.
+// Minimum val: 1
+// Type: int
+//
+
+min_grid_overlap = 1;
+
+///////////// set_dbz_threshold_for_tops //////////////
+//
+// Option to set specific dbz threshold for storm tops.
+// If FALSE, 'low_dbz_threshold' will be used to determine storm tops. 
+//   If TRUE, 'tops_dbz_threshold' will be used to determine storm tops.
+// Type: boolean
+//
+
+set_dbz_threshold_for_tops = FALSE;
+
+///////////// tops_dbz_threshold //////////////////////
+//
+// dBZ threshold for identification of storm tops (dBZ).
+// See 'set_dbz_threshold_for_tops'.
+// Type: double
+//
+
+tops_dbz_threshold = 18;
+
+//======================================================================
+//
+// OPTIONS TO USE DUAL THRESHOLDS.
+//
+//======================================================================
+ 
+///////////// use_dual_threshold //////////////////////
+//
+// Option to perform identification using dual thresholds.
+// If set, the identification is performed in multiple stages. First, an 
+//   outer storm envelope is computed, using the low_dbz_threshold. This 
+//   is the default method which has always been used in TITAN. Then, 
+//   using the dual_threshold parameters, a search is performed for storms 
+//   within the envelope exceeding the dbz_threshold. If there is only one 
+//   region at the higher reflectivity, the entire outer envelope is used. 
+//   If there are two or more regions which meet or exceed the required 
+//   characteristics, these regions are grown back out to the original 
+//   envelop, but stop growing where they meet between the 
+//   higher-reflectivity areas. The final storms are computed by breaking 
+//   the original storm into regions based upon these secondary areas.
+
+// NOTE: work done in South Africa by the SAWS found the following 
+//   parameter settings to be optimal for strong convection and squall 
+//   lines:
+// 	low_dbz_threshold: 33 dBZ
+// 	min_storm_size: 100 km3
+// 	dual dbz_threshold: 45 dBZ
+// 	min_fraction_all_parts: 0.10
+// 	min_fration_each_part: 0.005
+// 	min_area_each_part: 10 km2.
+// Type: boolean
+//
+
+use_dual_threshold = FALSE;
+
+///////////// dual_threshold //////////////////////////
+//
+// Parameters for dual threshold identification.
+// See 'use_dual_threshold'. dbz_threshold: threshold for this stage. A 
+//   number of regions may be identified at the higher threshold. 
+//   min_fraction_all_parts: we sum the sizes of the parts at the higher 
+//   threshold, and the sum divided by the original size of the envelope 
+//   must exceed this fraction. If it does not the original envelope is 
+//   used. min_fraction_each_part: for any part to be valid its size as a 
+//   fraction of all of the parts must exceed this value. 
+//   min_area_each_part: for any part to be valid its area must exceed 
+//   this value. If it does not the part is ignored. If only 1 part is 
+//   valid, the entire envelope is used.
+//
+// Type: struct
+//   typedef struct {
+//      double dbz_threshold;
+//      double min_fraction_all_parts;
+//      double min_fraction_each_part;
+//      double min_area_each_part;
+//   }
+//
+//
+
+dual_threshold = { 45, 0.5, 0.05, 20 };
+
+///////////// create_dual_threshold_files /////////////
+//
+// Option to create dual threshold files for debugging.
+// If this is set, dual threshold files will be stored at 
+//   dual_threshold_url.
+// Type: boolean
+//
+
+create_dual_threshold_files = FALSE;
+
+///////////// dual_threshold_url //////////////////////
+//
+// URL for dual_threshold data.
+// If create_dual_threshold_files is TRUE, the dual_threshold debugging 
+//   MDV files are stored at this URL.
+// Type: string
+//
+
+dual_threshold_url = "mdv/dual_threshold";
+
+//======================================================================
+//
+// LIMITS TO BASE, TOP, STORM SIZE.
+//
+//======================================================================
+ 
+///////////// base_threshold //////////////////////////
+//
+// Storm base threshold (km).
+// Storms identification is only performed using CAPPIs at or above this 
+//   threshold. Reflectivity values in CAPPIs below the base are ignored.
+// Type: double
+//
+
+base_threshold = 0;
+
+///////////// top_threshold ///////////////////////////
+//
+// Storm top threshold (km).
+// Storms identification is only performed using CAPPIs at or below this 
+//   threshold. Reflectivity values in CAPPIs above the top are ignored.
+// Type: double
+//
+
+top_threshold = 30;
+
+///////////// min_storm_size //////////////////////////
+//
+// Minimum storm size (km2 or km3 depending on input grid type).
+// Storms must exceed this size to be considered valie.  If the data is 
+//   2D (i.e. nz == 1), the units are km2; if the data is 3D, units are 
+//   km3.
+// Type: double
+//
+
+min_storm_size = 30;
+
+///////////// max_storm_size //////////////////////////
+//
+// Maximum storm size (km2 or km3 depending on input grid type).
+// Storms must not exceed this size to be considered valid.  If the data 
+//   is 2D (i.e. nz == 1), the units are km2; if the data is 3D, the units 
+//   are km3.
+// Type: double
+//
+
+max_storm_size = 1e+09;
+
+//======================================================================
+//
+// OPTIONS TO CHECK SECOND TRIP.
+//
+//======================================================================
+ 
+///////////// check_range_limits //////////////////////
+//
+// Option to check for storm range limits.
+// If the storm is at the limit of radar range, a flag is set.
+// Type: boolean
+//
+
+check_range_limits = FALSE;
+
+///////////// check_second_trip ///////////////////////
+//
+// Option to check for second trip characteristics.
+// If set, the storm orientation and shape are checked for second trip 
+//   characteristics. An elongated, low storm with a major axis lined up 
+//   with the radar indicates a likely second-trip echo. For a storm to be 
+//   considered second-trip, all 3 of the following tests must be passwd: 
+//   (a) the horizontal aspect ratio exceeds the given parameter; (b) the 
+//   vertical aspect ratio exceeds the given parameter; (c) the horizontal 
+//   orientation lies close to the line from the radra. If the storm is 
+//   thought to be second-trip, the second-trip flag is set.
+// Type: boolean
+//
+
+check_second_trip = FALSE;
+
+///////////// sectrip_vert_aspect /////////////////////
+//
+// Second trip detection vertical aspect threshold.
+// If the vertical aspect ratio exceeds this value, the storm may be 
+//   flagged as second-trip.
+// Minimum val: 1
+// Maximum val: 20
+// Type: double
+//
+
+sectrip_vert_aspect = 4;
+
+///////////// sectrip_horiz_aspect ////////////////////
+//
+// Second trip detection horizontal aspect threshold.
+// If the horizontal aspect ratio (based on the ellipse) exceeds this 
+//   value, the storm may be flagged as second-trip.
+// Minimum val: 1
+// Maximum val: 20
+// Type: double
+//
+
+sectrip_horiz_aspect = 4;
+
+///////////// sectrip_orientation_error ///////////////
+//
+// Allowable second trip orientation error.
+// For a storm to be flagged as second-trip, the orientation must be 
+//   aligned with the storm azimuth from the radar, within this allowable 
+//   error.
+// Minimum val: 1
+// Maximum val: 90
+// Type: double
+//
+
+sectrip_orientation_error = 10;
+
+//======================================================================
+//
+// PRECIP RATE AND MASS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// hail_dbz_threshold //////////////////////
+//
+// Hail reflectivity threshold.
+// The threshold between rain and hail (dBZ).
+// Type: double
+//
+
+hail_dbz_threshold = 55;
+
+///////////// ZR //////////////////////////////////////
+//
+// Z-R parameters for rainfall.
+// Parameters in Z-R relationship for rainfall.
+//
+// Type: struct
+//   typedef struct {
+//      double coeff;
+//      double expon;
+//   }
+//
+//
+
+ZR = { 200, 1.6 };
+
+///////////// ZM //////////////////////////////////////
+//
+// Z-M parameters for rain.
+// Parameters in Z-M relationship for rain.
+//
+// Type: struct
+//   typedef struct {
+//      double coeff;
+//      double expon;
+//   }
+//
+//
+
+ZM = { 20465, 1.75 };
+
+///////////// precip_computation_mode /////////////////
+//
+// Mode for computing precipitation.
+// PRECIP_FROM_COLUMN_MAX: compute precip from the column-max 
+//   reflectivity.
+
+// PRECIP_AT_SPECIFIED_HT: specify the height of the plane from which 
+//   precip is to be computed. See 'precip_plane_ht'.
+
+// PRECIP_FROM_LOWEST_VALID_HT: compute precip from the lowest valid 
+//   plane in the storm, i.e. the CAPPI corresponding to 'base_threshold'.
+
+// PRECIP_FROM_LOWEST_AVAILABLE_REFL: compute precip from lowest 
+//   available reflectivity in a column, i.e. from the lowest point at 
+//   which non-missing reflectivity appears.
+//
+// Type: enum
+// Options:
+//     PRECIP_FROM_COLUMN_MAX
+//     PRECIP_AT_SPECIFIED_HT
+//     PRECIP_AT_LOWEST_VALID_HT
+//     PRECIP_FROM_LOWEST_AVAILABLE_REFL
+//
+
+precip_computation_mode = PRECIP_FROM_COLUMN_MAX;
+
+///////////// precip_min_ht ///////////////////////////
+//
+// Minimum height for computing precip (km).
+// See 'precip_mode'. This is the minimum height, in km MSL, of any 
+//   plane used for computing precip, for the following modes: 
+//   PRECIP_FROM_COLUMN_MAX or PRECIP_FROM_LOWEST_AVAILABLE_REFL. Data 
+//   from planes outside these limits will not be used.
+// Type: double
+//
+
+precip_min_ht = 0;
+
+///////////// precip_max_ht ///////////////////////////
+//
+// Maximum height for computing precip (km).
+// See 'precip_mode'. This is the maximum height, in km MSL, of any 
+//   plane used for computing precip, for the following modes: 
+//   PRECIP_FROM_COLUMN_MAX or PRECIP_FROM_LOWEST_AVAILABLE_REFL. Data 
+//   from planes outside these limits will not be used.
+// Type: double
+//
+
+precip_max_ht = 6;
+
+///////////// precip_plane_ht /////////////////////////
+//
+// Height of precip plane (km).
+// See 'precip_mode'. This is the height, in km MSL, of the plane from 
+//   which precip will be computed if precip_mode is 
+//   PRECIP_AT_SPECIFIED_HT.
+// Type: double
+//
+
+precip_plane_ht = 2;
+
+//======================================================================
+//
+// REFLECTIVITY DISTRIBUTION.
+//
+// NOTE: the 2D reflectivity histogram will be computed for a plane in 
+//   the same manner as precipitation. See 'precip_mode' parameter for 
+//   more details.
+//
+//======================================================================
+ 
+///////////// dbz_hist_interval ///////////////////////
+//
+// Dbz histogram interval.
+// Reflectivity interval for the 2-D and 3-D reflectivity distributions.
+// Type: double
+//
+
+dbz_hist_interval = 3;
+
+//======================================================================
+//
+// OPTION FOR CALCULATING HAIL METRICS.
+//
+//======================================================================
+ 
+///////////// special_feature /////////////////////////
+//
+// Option for calculating additional special features.
+// Currently, 'hail' is the only special feature available. More 
+//   features may be available to choose from in the future.
+// Type: string
+//
+
+special_feature = "hail";
+
+///////////// hail_ZM /////////////////////////////////
+//
+// Z-M parameters for hail.
+// Parameters in Z-M relationship for hail.
+//
+// Type: struct
+//   typedef struct {
+//      double coeff;
+//      double expon;
+//   }
+//
+//
+
+hail_ZM = { 3.6683e+06, 1.416 };
+
+///////////// ht_of_freezing //////////////////////////
+//
+// Height of the 0C isotherm (km).
+// This value may be dynamically set in the future.
+// Type: double
+//
+
+ht_of_freezing = 6;
+
+///////////// hail_mass_dbz_threshold /////////////////
+//
+// Reflectivity threshold (dBZ) for hail mass.
+// This value is used for calculating VIHM (vertically integrated hail 
+//   mass) and Hail Mass Aloft.
+// Type: double
+//
+
+hail_mass_dbz_threshold = 45;
+
+//======================================================================
+//
+// The Foote-Krauss Category (FOKR).
+//
+// The FOKR Category is intended to separate non-hailstorms (Category 0 
+//   and 1) from potentially developing hailers (Cat. 2), likely 
+//   hailstorms (Cat. 3) and severe hailstorms (Cat. 4).
+//
+//======================================================================
+ 
+///////////// FOKR_cat1_zmax_thresh ///////////////////
+//
+// For S-band use 40, for C-band use use 40.
+// Type: double
+//
+
+FOKR_cat1_zmax_thresh = 40;
+
+///////////// FOKR_cat2_zmax_thresh ///////////////////
+//
+// For S-band use 45, for C-band use 45.
+// Type: double
+//
+
+FOKR_cat2_zmax_thresh = 45;
+
+///////////// FOKR_cat3_zmax_thresh ///////////////////
+//
+// For S-band use 55, for C-band use 45.
+// Type: double
+//
+
+FOKR_cat3_zmax_thresh = 55;
+
+///////////// FOKR_cat4_zmax_thresh ///////////////////
+//
+// For S-band use 65, for C-band use 55.
+// Type: double
+//
+
+FOKR_cat4_zmax_thresh = 65;
+
+//======================================================================
+//
+// OPTION TO CHECK STORM MORPHOLOGY.
+//
+// The storm morphology check allows you to erode minor connections 
+//   between storms when these connections really have no phyical 
+//   significance.
+//
+//======================================================================
+ 
+///////////// check_morphology ////////////////////////
+//
+// Option to check morphology.
+// If this is set, morphology will be used for storm definition. A check 
+//   is performed on storm morphology to reduce apparent mergers. The 
+//   technique is as follows: 1. Compute euclidean distance (ed) of each 
+//   point from edge of storm clump 2. Compute reflectivity excess above 
+//   threshold, and divide by morphology_refl_divisor (in dbz/km). 3. Add 
+//   ed to refl excess, to get interest map 4. Threshold interest map 
+//   using morphology_erosion_threshold (in km). 5. Erode points which do 
+//   not exceed the threshold, and which are not adjacent to a point which 
+//   exceeds the threshold.
+// Type: boolean
+//
+
+check_morphology = FALSE;
+
+///////////// create_morphology_files /////////////////
+//
+// Option to create morphology files for debugging.
+// If this is set, morphology MDV files will be stored at 
+//   morphology_url.
+// Type: boolean
+//
+
+create_morphology_files = FALSE;
+
+///////////// morphology_url //////////////////////////
+//
+// URL for morphology data.
+// If create_morphology_files is TRUE, the morphology MDV files are 
+//   stored at this URL.
+// Type: string
+//
+
+morphology_url = "mdv/morph";
+
+///////////// morphology_erosion_threshold ////////////
+//
+// Erosion threshold for morphology check (km).
+// Threshold to which morphology erosion is performed.
+// Minimum val: 0
+// Maximum val: 100
+// Type: double
+//
+
+morphology_erosion_threshold = 5;
+
+///////////// morphology_refl_divisor /////////////////
+//
+// Reflectivity divisor for morphology check (dbz/km).
+// The morphology value for a point (km) is obtained by adding the 
+//   euclidean distance to storm edge (km) to the reflectivity excess 
+//   (above threshold) divided by this value (dbz/km).
+// Minimum val: 0.1
+// Maximum val: 100
+// Type: double
+//
+
+morphology_refl_divisor = 10;
+
+//======================================================================
+//
+// OPTION TO CHECK STORM TOPS.
+//
+// The storm tops check allows you to remove areas with low tops prior 
+//   to performing the storm identification. In this manner you can ignore 
+//   regions of stratiform rain.
+//
+//======================================================================
+ 
+///////////// check_tops //////////////////////////////
+//
+// Option to check tops.
+// If this is active, areas with radar tops below min_radar_tops will be 
+//   removed from the data prior to storm identification. The 
+//   tops_edge_margin parameter allows you to account for tilted storms, 
+//   leaving a  margin around the area to be removed.
+// Type: boolean
+//
+
+check_tops = FALSE;
+
+///////////// create_tops_files ///////////////////////
+//
+// Option to create tops files for debugging.
+// If this is set, tops MDV files will be stored at tops_url.
+// Type: boolean
+//
+
+create_tops_files = FALSE;
+
+///////////// tops_url ////////////////////////////////
+//
+// Radar tops data directory.
+// If create_tops_files is TRUE, the tops MDV files are stored at this 
+//   URL.
+// Type: string
+//
+
+tops_url = "mdv/tops";
+
+///////////// min_radar_tops //////////////////////////
+//
+// Minimum radar tops (km).
+// Minimum radar tops for valid radar data - see check_tops.
+// Type: double
+//
+
+min_radar_tops = 4.5;
+
+///////////// tops_edge_margin ////////////////////////
+//
+// Margin placed around tops when computing min_tops field (km).
+// This takes into account the fact that some storms may be tilted. Grid 
+//   points within this margin are left intact.
+// Minimum val: 0
+// Type: double
+//
+
+tops_edge_margin = 1.5;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// storm_data_dir //////////////////////////
+//
+// Storms data directory - output.
+// The storm files are placed in this directory.
+// Type: string
+//
+
+storm_data_dir = "/tmp/titan/storms";
+
+///////////// store_storm_runs ////////////////////////
+//
+// Option to store runs in storm file.
+// If set, the raw storm runs are stored in the storm file. A run is a 
+//   contiguous block of reflectivity in the X direction for a given Y and 
+//   Z. This is a useful way of storing storm grid locations reasonably 
+//   efficiently. If the runs are stored, the exact 3D storm shape can be 
+//   recreated from the storm file.
+// Type: boolean
+//
+
+store_storm_runs = TRUE;
+
+//======================================================================
+//
+// OPTION TO CREATE VERIFICATION FILES.
+//
+//======================================================================
+ 
+///////////// create_verification_files ///////////////
+//
+// Option to create verification files.
+// If this is set, verification files will be stored at verify_url. The 
+//   verification files allow forecast verification against the regions 
+//   which were actually used by the program to compute the storms. There 
+//   are 2 fields: field 0 is the ALL_STORMS_FIELD - all storms above 
+//   threshold are stored even if they do not meet other criteria such as 
+//   minimum storm volume. Field 1 is the VALID_STORMS_FIELD, which only 
+//   include the valid storms included in the storm file.
+// Type: boolean
+//
+
+create_verification_files = FALSE;
+
+///////////// verify_url //////////////////////////////
+//
+// URL for verify data.
+// If create_verification_files is TRUE, the verification MDV files are 
+//   stored at this URL.
+// Type: string
+//
+
+verify_url = "mdv/verify";
+
+//======================================================================
+//
+// TRACKING PARAMETERS.
+//
+//======================================================================
+ 
+///////////// perform_tracking ////////////////////////
+//
+// Option to run tracking automatically.
+// If this is set, StormIdent will communicate with the storm tracking 
+//   program, so that the tracking is performed after each scan.
+// Type: boolean
+//
+
+perform_tracking = TRUE;
+
+///////////// tracking_max_speed //////////////////////
+//
+// Maximum allowable speed for tracks.
+// This value is used to limit the search for a match in the tracking 
+//   algorithm.
+// Type: double
+//
+
+tracking_max_speed = 100;
+
+///////////// tracking_max_delta_time /////////////////
+//
+// Max allowable time between scans (secs).
+// Max delta time (secs) for valid tracking - if there is a larger break 
+//   than this in the data, all tracks are terminated and new ones 
+//   started.
+// Type: int
+//
+
+tracking_max_delta_time = 1200;
+
+///////////// tracking_weight_distance ////////////////
+//
+// Matching parameter.
+// The weight for distance moved in the matching algorithm.
+// Minimum val: 0
+// Type: double
+//
+
+tracking_weight_distance = 1;
+
+///////////// tracking_weight_delta_cube_root_volume //
+//
+// Matching parameter.
+// The weight for delta_cube_root_volume in the matching algorithm.
+// Minimum val: 0
+// Type: double
+//
+
+tracking_weight_delta_cube_root_volume = 1;
+
+///////////// tracking_use_runs_for_overlaps //////////
+//
+// Option to use storm runs for overlaps.
+// If this is set, runs are used to compute the overlaps for identifying 
+//   mergers and splits. If not, the storm polygons are used.
+// Type: boolean
+//
+
+tracking_use_runs_for_overlaps = TRUE;
+
+///////////// tracking_min_sum_fraction_overlap ///////
+//
+// Min sum overlap fraction.
+// To characterize the overap of storm shapes at successive scan times, 
+//   two overlap fractions can be computed: (1) the overlap area divided 
+//   by the area of the storm at time 1, and (2) the overlap area divided 
+//   by the area of the storm at time 2. These two fractions are summed 
+//   and tested against this parameter. If the sum is less than the 
+//   parameter value, the overlap is not considered valid. For a perfect 
+//   overlap the sum will be 2.0. For no overlap at all the sum will be 
+//   0.0.
+// Maximum val: 2
+// Type: double
+//
+
+tracking_min_sum_fraction_overlap = 0.6;
+
+//======================================================================
+//
+// FORECAST PARAMETERS.
+//
+//======================================================================
+ 
+///////////// tracking_forecast_type //////////////////
+//
+// Forecast mode.
+// TREND - linear trend. PARABOLIC - parabolic trend on growth, linear 
+//   trend on decay. The parabola peaks at time parabolic_growth_period 
+//   from present. REGRESSION - uses regression equations for forecast 
+//   (experimental).
+//
+// Type: enum
+// Options:
+//     TREND
+//     PARABOLIC
+//     REGRESSION
+//
+
+tracking_forecast_type = TREND;
+
+///////////// tracking_parabolic_growth_period ////////
+//
+// Parabolic growth period (secs).
+// Time at which parabolic growth curve becomes flat.
+// Minimum val: 60
+// Type: int
+//
+
+tracking_parabolic_growth_period = 1800;
+
+///////////// tracking_zero_growth ////////////////////
+//
+// Option to force storm growth to be zero.
+// If this is set, the storm growth will be forced to zero. Storm decay 
+//   will be normal. Forecast movement will be normal.
+// Type: boolean
+//
+
+tracking_zero_growth = FALSE;
+
+///////////// tracking_zero_decay /////////////////////
+//
+// Option to force storm decay to be zero.
+// If this is set, the storm decay will be forced to zero. Storm growth 
+//   will be normal. Forecast movement will be normal.
+// Type: boolean
+//
+
+tracking_zero_decay = FALSE;
+
+///////////// tracking_forecast_weights ///////////////
+//
+// Weights for making the trend forecast.
+// A trend forecast is made using a weighted linear fit to the storm 
+//   history. These are the weights used. The first applies to the most 
+//   recent scan, and the last to the earliest scan used.
+// Minimum val: 0
+// Maximum val: 1
+// Type: double
+// 1D array - variable length.
+//
+
+tracking_forecast_weights = { 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4 };
+
+///////////// tracking_max_speed_for_valid_forecast ///
+//
+// Max allowable speed for valid forecast (km/hr).
+// If the speed exceeds this value, the forecast is marked invalid.
+// Type: double
+//
+
+tracking_max_speed_for_valid_forecast = 100;
+
+///////////// tracking_min_history_for_valid_forecast /
+//
+// Min history for valid forecast (secs).
+// If the history is less than this value, the forecast is marked 
+//   invalid.
+// Type: int
+//
+
+tracking_min_history_for_valid_forecast = 0;
+
+///////////// tracking_scale_forecasts_by_history /////
+//
+// Option to scale forecasts by history.
+// If this is set, forecasts are scaled by the ratio of history over 
+//   min_history_for_scaling.
+// Type: boolean
+//
+
+tracking_scale_forecasts_by_history = TRUE;
+
+///////////// tracking_history_for_scaling ////////////
+//
+// History value for scaling forecasts (secs).
+// If a storm has a history less than this value, the forecast values 
+//   are scaled by the ratio of history over history_for_scaling. If the 
+//   storm history exceeds this value, the scale factor is 1.0.
+// Type: double
+//
+
+tracking_history_for_scaling = 1200;
+
+///////////// tracking_limit_rel_speed_change /////////
+//
+// Option to limit relative changes in track speed.
+// If this is TRUE, a check is made for significant speed changes in the 
+//   track. First, the movements of the centroid from scan to scan for the 
+//   recent history are put into a list. The median of this list is 
+//   computed. If any value in the list exceeds the median by a given 
+//   factor, the value is replaced by the median. After this is done, the 
+//   history is updated. See 'tracking_max_rel_speed_change.'.
+// Type: boolean
+//
+
+tracking_limit_rel_speed_change = FALSE;
+
+///////////// tracking_rel_speed_max_change ///////////
+//
+// Maximum relative change in speed.
+// See 'tracking_limit_rel_speed_change'. This is the maximum allowable 
+//   relative change in speed relative to the median speed for the 
+//   history.
+// Type: double
+//
+
+tracking_rel_speed_max_change = 12;
+
+///////////// tracking_rel_speed_min_nscans ///////////
+//
+// Min number of scans for relative speed check.
+// See 'tracking_limit_rel_speed_change'. The track must have this 
+//   number of scans before the check can be applied. For the speed check 
+//   to work this number must be less than on equal to the size of the 
+//   tracking_forecast_weights array.
+// Minimum val: 3
+// Type: int
+//
+
+tracking_rel_speed_min_nscans = 5;
+
+//======================================================================
+//
+// SMOOTHING THE MOTION FORECAST.
+//
+// Options for smoothing motion forecasts. The smoothed motion is 
+//   computed using the motion of surrounding storms. The storms included 
+//   are out to a given radius from the storm undergoing smoothing.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// SMOOTHING CATEGORIES.
+//
+// For smoothing, you can turn on the following options separately or 
+//   together: (a) tracking_smooth_invalid_forecasts: smooth motion for 
+//   storms without a valid forecast; (b) tracking_spatial_smoothing: 
+//   smooth motion for storms with a valid forecast; (c) 
+//   tracking_smooth_fast_growth_decay: smooth the forecast for storms 
+//   which have a rapid growth or decay. In addition to these main 
+//   categories, you can set other parameters to control the way the 
+//   smoothing is done.
+//
+//======================================================================
+ 
+///////////// tracking_smooth_invalid_forecasts ///////
+//
+// Option to perform motion smoothing on invalid forecasts.
+// If this is TRUE, forecast motion is smoothed for storms WITHOUT a 
+//   valid forecast. The smoothed motion DOES NOT INCLUDE the motion of 
+//   the storm being smoothed. See also 
+//   tracking_max_speed_for_valid_forecast and 
+//   tracking_min_history_for_valid_forecast.
+// Type: boolean
+//
+
+tracking_smooth_invalid_forecasts = TRUE;
+
+///////////// tracking_spatial_smoothing //////////////
+//
+// Option to perform motion smoothing on valid forecasts.
+// If this is TRUE, spatial smoothing is performed on storms with a 
+//   valid forecast. The smoothed motion INCLUDES the motion of the storm 
+//   being smoothed. See also tracking_smooth_erratic_motion.
+// Type: boolean
+//
+
+tracking_spatial_smoothing = TRUE;
+
+///////////// tracking_smooth_erratic_only ////////////
+//
+// Option to only perform smoothing on storms which have an erratic 
+//   forecast.
+// This is a qualifier to tracking_spatial_smoothing. If TRUE, smoothing 
+//   is only performed on storms with an erratic motion forecast. The 
+//   smoothed motion DOES NOT INCLUDE the motion of the storm being 
+//   smoothed. A forecast is considered erratic if the speed or direction 
+//   of the forecast differs significantly from the mean motion of 
+//   surrounding storms. See also max_speed_error and max_dirn_error.
+// Type: boolean
+//
+
+tracking_smooth_erratic_only = TRUE;
+
+///////////// tracking_smooth_fast_growth_decay ///////
+//
+// Option to perform spatial smoothing on storms which are growing or 
+//   decaying fast.
+// If this is TRUE, spatial smoothing is performed on storms for which 
+//   the area is growing or decaying fast. The smoothed motion does not 
+//   include the motion of the storm being smoothed.
+// Type: boolean
+//
+
+tracking_smooth_fast_growth_decay = FALSE;
+
+//======================================================================
+//
+// SMOOTHING RADIUS OF INFLUENCE.
+//
+//======================================================================
+ 
+///////////// tracking_smoothing_radius ///////////////
+//
+// Radius for motion smoothing (km).
+// This is the maximum radius within which the smoothing algorithm will 
+//   search for candidates for smoothing data.
+// Minimum val: 1
+// Type: double
+//
+
+tracking_smoothing_radius = 120;
+
+///////////// tracking_smoothing_min_nstorms //////////
+//
+// Min number of other storms for smoothing.
+// This is the minumum number of storms to be used for smoothing. If 
+//   this criteria is not met, smoothing will not be performed.
+// Type: int
+//
+
+tracking_smoothing_min_nstorms = 5;
+
+//======================================================================
+//
+// SMOOTHING WEIGHTS.
+//
+//======================================================================
+ 
+///////////// smoothing_weight_uses_inverse_distance //
+//
+// Option to weight motion based on the inverse of the distacne apart.
+// If true, the motion of each storm is weighted by the inverse of the 
+//   distance away from the storm to be smoothed.
+// Type: boolean
+//
+
+smoothing_weight_uses_inverse_distance = TRUE;
+
+///////////// smoothing_weight_uses_mean_dbz //////////
+//
+// Option to weight motion based on the mean DBZ value for each storm.
+// If true, the motion of each storm is weighted by (mean_dbz - 
+//   low_dbz_threshold).
+// Type: boolean
+//
+
+smoothing_weight_uses_mean_dbz = TRUE;
+
+///////////// smoothing_weight_uses_top ///////////////
+//
+// Option to weight motion based on the top for each storm.
+// If true, the motion of each storm is weighted by (top - 
+//   base_threshold).
+// Type: boolean
+//
+
+smoothing_weight_uses_top = FALSE;
+
+//======================================================================
+//
+// SMOOTHING THRESHOLDS FOR FAST GROWTH AND DECAY.
+//
+//======================================================================
+ 
+///////////// tracking_smoothing_growth_threshold /////
+//
+// Area growth ratio threshold for smoothing motion.
+// See tracking_smooth_growth_decay. The area ratio is defined as (a2 - 
+//   a1) / a1, where a2 is the current area and a1 is the previous area. 
+//   Motion will only be smoothed if the ratio exceeds the specified 
+//   value. The normal checks on smoothing will apply - search radius, min 
+//   and max number of storms to be used for smoothing. If the smoothing 
+//   fails the forecast will be marked as invalid.
+// Type: double
+//
+
+tracking_smoothing_growth_threshold = 2;
+
+///////////// tracking_smoothing_decay_threshold //////
+//
+// Area decay ratio threshold for smoothing motion.
+// See tracking_smooth_growth_decay. The area ratio is defined as (a2 - 
+//   a1) / a1, where a2 is the current area and a1 is the previous area. 
+//   Motion will only be smoothed if the ratio is less than the specified 
+//   value. The normal checks on smoothing will apply - search radius, min 
+//   and max number of storms to be used for smoothing. If the smoothing 
+//   fails the forecast will be marked as invalid.
+// Type: double
+//
+
+tracking_smoothing_decay_threshold = -0.5;
+
+//======================================================================
+//
+// SMOOTHING - DETECTING ERRATIC FORECASTS.
+//
+// To determine whether a forecast is eratic, the error of the speed and 
+//   direction is computed for a storm as compared with the mean motion 
+//   for the storms within the radius of influence.
+//
+//======================================================================
+ 
+///////////// erratic_forecast_speed_error ////////////
+//
+// Speed error for erratic forecasts - percent.
+// The speed error is computed as:
+// 	(100 * abs(speed - mean_speed)) / max(speed, mean_speed)
+// If the speed error exceeds this this value, the forecast is 
+//   considered erratic.
+// Type: double
+//
+
+erratic_forecast_speed_error = 55;
+
+///////////// erratic_forecast_direction_error ////////
+//
+// Direction error for erratic forecasts - degrees.
+// If the forecast direction speed for a storm differes from the mean 
+//   direction by more than this value, the forecast is considered 
+//   erratic.
+// Type: double
+//
+
+erratic_forecast_direction_error = 50;
+

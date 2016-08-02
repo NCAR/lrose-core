@@ -1,0 +1,28 @@
+#!/bin/csh
+#
+# Script to make the executable that reads a WindTracer Lidar
+# *.prd file directly.
+#
+# Niles Oien, oien@ucar.edu September 2004.
+#
+#
+# Clean up previous build attempts.
+#
+\rm  *.o >& /dev/null
+\rm -f readPrd  >& /dev/null
+#
+# Compile the Fortran source to an object.
+#
+g77  -O2 -c readPrdMain.f
+#
+# Compile the C++ source. The -I option must be set so that
+# it points to where the netcdf.h header can be found.
+#
+g++   -Wall -DLINUX_IL6 -DBSD -D_BSD_SOURCE -D_SVID_SOURCE -O2 -c  readPrd.cc
+#
+# Link the ojects into an executable with g77. The -L option should
+# point at where the libnetcdf.a library can be found.
+#
+g77 -O2 -o readPrd readPrdMain.o readPrd.o -static  
+#
+#

@@ -1,0 +1,194 @@
+/**********************************************************************
+ * TDRP params for Storms2Xml2
+ **********************************************************************/
+
+//======================================================================
+//
+// The idea of Storms2Xml is that it will read a Titan
+// database and write XML (essentially ASCII) files
+// representing the storms tracked by the Titan system.
+
+// This can be done in realtime or archive mode. The program
+// was developed to allow the transfer of Titan data to
+// users outside of NCAR. The program does very little, if any,
+// translation or thresholding of the data - for instance, there
+// is no ability to only print data with an area greater than
+// a certain area. The outside user is expected to do that.
+
+// Units for speed are Km/Hr, area is square Km, and times
+// are GMT.
+
+// Niles Oien May 2003.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Set to print more messages as data are processed.
+// Can usually be FALSE.
+// Type: boolean
+//
+
+debug = FALSE;
+
+///////////// debugTitan //////////////////////////////
+//
+// Set to print titan read requests.
+// Can almost always be FALSE, it is rather verbose.
+// Type: boolean
+//
+
+debugTitan = FALSE;
+
+///////////// Instance ////////////////////////////////
+//
+// Instance to check in to Procmap with.
+// Set to something unique.
+// Type: string
+//
+
+Instance = "test";
+
+///////////// radar_name //////////////////////////////
+//
+// Radar site name.
+// Sets radar name for output to XML file.
+// Type: string
+//
+
+radar_name = "monclova";
+
+///////////// titanUrl ////////////////////////////////
+//
+// Input titan URL.
+// Program reads these data as input unless the trigger mode is
+// set to TRIGGER_LDATAINFO, in which case inputDir is used.
+// Type: string
+//
+
+titanUrl = "titanp:://localhost::/d2/dixon/mexico/storms";
+
+///////////// titanDir ////////////////////////////////
+//
+// Input titan directory.
+// If the trigger mode is TRIGGER_LDATAINFO, this is where the
+// titan data are read from, otherwise the titanUrl parameter is used.
+// Not relative to RAP_DATA_DIR.
+// Type: string
+//
+
+titanDir = "/d2/dixon/mexico/storms";
+
+///////////// outDir //////////////////////////////////
+//
+// Output directory.
+// Output file(s) written here. Not relative to RAP_DATA_DIR.
+// Type: string
+//
+
+outDir = "/tmp/Storms2Xml2/output";
+
+///////////// timestampFiles //////////////////////////
+//
+// Decision to overwrite output file or timestamp them.
+// If TRUE, then output files will be time stamped. If FALSE,a single 
+//   output file will be continually overwritten.
+// Type: boolean
+//
+
+timestampFiles = TRUE;
+
+///////////// outName /////////////////////////////////
+//
+// Output filename.
+// If timestampFiles is TRUE, the trigger time will be prepended
+// to the filename, otherwise the file will be continually overwritten.
+// Type: string
+//
+
+outName = "Titan.xml";
+
+///////////// triggerMode /////////////////////////////
+//
+// Decide how the program is triggered.
+// The program can be triggered in one of three ways.
+
+//  (1) TRIGGER_ARCHIVE - the program is run in archive mode
+//      on existing data. The start and end times are determined
+//      on the command line with -start and -end in the usual way.
+//      Specifying these argumnets automatically invokes this mode.     
+//   The time step is determined by the timeStep parameter.
+
+//  (2) TRIGGER_INTERVAL - the program wakes up at regular intervals and
+//      runs. These intervals are determined by the timeStep parameter.  
+//      This enables the program to run in realtime on a machine remote
+//      from where the data are.
+
+//  (3) TRIGGER_LDATAINFO - the program triggers directly from
+//      the titan output using the DsInputPath class. The timeStep
+//      parameter is ignored. This has the advantage that the program
+//      is triggered directly by Titan; but it does mean that it must
+//      run on the same machine as the Titan system (since DsInputPath
+//      is inherrently a local device at the time of writing).
+//
+// Type: enum
+// Options:
+//     TRIGGER_ARCHIVE
+//     TRIGGER_INTERVAL
+//     TRIGGER_LDATAINFO
+//
+
+triggerMode = TRIGGER_ARCHIVE;
+
+///////////// timeStep ////////////////////////////////
+//
+// Time increment between triggering for TRIGGER_ARCHIVE
+// and TRIGGER_INTERVAL triggering modes, seconds.
+// Typically set to approximate radar scan time.
+// Type: int
+//
+
+timeStep = 300;
+
+///////////// maxValidAge /////////////////////////////
+//
+// Maximum valid age for input files, seconds, if
+// the TRIGGER_LDATAINFO trigger method is invoked.
+// Defaults to half an hour.
+// Type: int
+//
+
+maxValidAge = 1800;
+
+///////////// lookBack ////////////////////////////////
+//
+// Time to look back, seconds.
+// Program looks back from now by this time to get
+// data interval. Set to be equal to or more than timeStep
+// for complete temporal coverage. Temporal window is from
+// triggerTime - lookBack to triggerTime, inclusive.
+// Type: long
+//
+
+lookBack = 720;
+
+///////////// runScriptWhenDone ///////////////////////
+//
+// Option to run a script when a file is written.
+// The output file name will be passed in as an argument
+// to this script.
+// Type: boolean
+//
+
+runScriptWhenDone = FALSE;
+
+///////////// scriptToRun /////////////////////////////
+//
+// Script to run when a file is written.
+// Only relevant if runScriptWhenDone is TRUE. The output
+// file name will be passed in as an argument to the script.
+// Type: string
+//
+
+scriptToRun = "copyXmlFile";
+

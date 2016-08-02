@@ -1,0 +1,375 @@
+/**********************************************************************
+ * TDRP params for RadxDiffFields
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxDiffFields computes statistics about the difference between 
+//   fields in Radx files. The fields can be in the same file, or in 
+//   different files. The results are written to SPDB as XML.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// primary_input_dir ///////////////////////
+//
+// Input directory for searching for primary files.
+//
+// The main input files are in this directory (or are specified on the 
+//   command line with -f). If we are diffing fields that are in the same 
+//   files, we only read from this directory. If we are diffing fields in 
+//   separate files we also need to read data from the secondary 
+//   directories.
+//
+//
+// Type: string
+//
+
+primary_input_dir = "/tmp/primary";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = FILELIST;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+//
+//
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 9999;
+
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+//
+// Only use sweeps within the specified fixed angle limits.
+//
+//
+// Type: boolean
+//
+
+set_fixed_angle_limits = FALSE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+lower_fixed_angle_limit = 0;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+upper_fixed_angle_limit = 90;
+
+//======================================================================
+//
+// FIELD DETAILS.
+//
+//======================================================================
+ 
+///////////// field_pairs /////////////////////////////
+//
+// Specify which fields are to be compared.
+//
+// You need to specify both the primary and secondary field names. If 
+//   the fields are in the same file, set 'fields_are_in_same_file' to 
+//   true. If this is false, specify the secondary_input_dir to point to 
+//   the location of the secondary files.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string primary_field_name;
+//      string secondary_field_name;
+//      boolean fields_are_in_same_file;
+//      string secondary_input_dir;
+//   }
+//
+// 1D array - variable length.
+//
+
+field_pairs = {
+  {
+    primary_field_name = "DBZ_F",
+    secondary_field_name = "DBZ_NAA_F",
+    fields_are_in_same_file = FALSE,
+    secondary_input_dir = "/tmp/secondary"
+  }
+  ,
+  {
+    primary_field_name = "ZDR_F",
+    secondary_field_name = "ZDR_F",
+    fields_are_in_same_file = TRUE,
+    secondary_input_dir = "/tmp/secondary"
+  }
+};
+
+///////////// secondary_file_time_tolerance_sec ///////
+//
+// Time tolerance for finding the secondary file (secs).
+//
+// We search secondary_input_dir for a file within this tolerance of the 
+//   primary data set.
+//
+//
+// Type: double
+//
+
+secondary_file_time_tolerance_sec = 30;
+
+///////////// secondary_ray_time_tolerance_sec ////////
+//
+// Time tolerance for matching rays between the primary and secondary 
+//   data sets (secs).
+//
+// We match up rays between the primary and secondary volumes, and 
+//   require that the rays must match in time by this tolerance or less.
+//
+//
+// Type: double
+//
+
+secondary_ray_time_tolerance_sec = 30;
+
+///////////// secondary_ray_elevation_tolerance_deg ///
+//
+// Elevation tolerance for matching rays between the primary and 
+//   secondary data sets (deg).
+//
+// We match up rays between the primary and secondary volumes, and 
+//   require that the rays must match in elevation by this tolerance or 
+//   less.
+//
+//
+// Type: double
+//
+
+secondary_ray_elevation_tolerance_deg = 0.1;
+
+///////////// secondary_ray_azimuth_tolerance_deg /////
+//
+// Azimuth tolerance for matching rays between the primary and secondary 
+//   data sets (deg).
+//
+// We match up rays between the primary and secondary volumes, and 
+//   require that the rays must match in azimuth by this tolerance or 
+//   less.
+//
+//
+// Type: double
+//
+
+secondary_ray_azimuth_tolerance_deg = 0.1;
+
+//======================================================================
+//
+// LIMITING ANALYSIS BASED ON CONDITION FIELD.
+//
+//======================================================================
+ 
+///////////// apply_condition_check ///////////////////
+//
+// Option to constrain the results based on the value of a conditioning 
+//   field.
+//
+// For example, you can limit the analysis to a range of SNR values.
+//
+//
+// Type: boolean
+//
+
+apply_condition_check = FALSE;
+
+///////////// condition_field_name ////////////////////
+//
+// Name of field for limiting analysis.
+//
+// This field must exist in the primay data set. See 
+//   'check_condition_field'.
+//
+//
+// Type: string
+//
+
+condition_field_name = "SNR";
+
+///////////// condition_field_min_value ///////////////
+//
+// Minimum valid value of the condition field.
+//
+// See 'check_condition_field'.
+//
+//
+// Type: double
+//
+
+condition_field_min_value = 20;
+
+///////////// condition_field_max_value ///////////////
+//
+// Maximum valid value of the condition field.
+//
+// See 'check_condition_field'.
+//
+//
+// Type: double
+//
+
+condition_field_max_value = 60;
+
+//======================================================================
+//
+// STATS.
+//
+// We compute the mean difference, and a specified set of percentiles.
+//
+//======================================================================
+ 
+///////////// result_percentiles //////////////////////
+//
+// Percentiles to be computed in addition to mean.
+//
+//
+// Type: int
+// 1D array - variable length.
+//
+
+result_percentiles = {
+ 25,
+ 50,
+ 75
+};
+
+//======================================================================
+//
+// WRITE RESULTS.
+//
+//======================================================================
+ 
+///////////// write_results_to_spdb ///////////////////
+//
+// Option to write out analysis results to SPDB.
+//
+// The results will be written in XML, stored in SPDB. The data can then 
+//   be retrieved for plotting or other purposes.
+//
+//
+// Type: boolean
+//
+
+write_results_to_spdb = TRUE;
+
+///////////// spdb_output_url /////////////////////////
+//
+// URL for writing results to SPDB XML.
+//
+// For local writes, specify the directory. For remote writes, specify 
+//   the full url: spdbp:://host::dir.
+//
+//
+// Type: string
+//
+
+spdb_output_url = "/tmp/spdb/diff_fields";
+

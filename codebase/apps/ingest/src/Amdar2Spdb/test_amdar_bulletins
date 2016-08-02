@@ -1,0 +1,16 @@
+#! /bin/csh
+
+set test_dir = /d1/cunning/test/amdar
+set table_dir = /d1/cunning/opera_bufr_3.2
+set decode_app = /d1/cunning/opera_bufr_3.2/decbufr
+
+foreach bufr_file ($test_dir/*bufr)
+
+    set decode_file = `echo $bufr_file | awk '{sub("bufr", "decoded"); print $0}'`
+    set app_out_file = `echo $bufr_file | awk '{sub("bufr", "decbufr_out"); print $0}'`
+
+    set command = "$decode_app -d $table_dir  $bufr_file $decode_file"
+
+    echo processing $bufr_file
+    `$command >& $app_out_file`
+end

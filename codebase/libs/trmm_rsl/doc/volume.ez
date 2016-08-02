@@ -1,0 +1,962 @@
+\begindata{text,1074075664}
+\textdsversion{12}
+\template{default}
+\define{typewriter
+menu:[Font~1,Typewriter~40]
+attr:[FontFace FixedFace Int Set]
+attr:[FontFamily AndyType Int 0]}
+\define{ttyleft
+menu:[,Tty_left]}
+\majorheading{\center{Volume documentation
+
+\smaller{\smaller{Version 0.27 (9/13/94)}}}}
+
+
+\bold{The documentation after this version is being migrated to HTML. 
+ Further additions to radar.ez and volume.ez are not expected.
+
+}\heading{
+Introduction}
+
+\bold{Volume} represents a particular radar field type: reflectivity, 
+velocity, spectrum width, etc., and is composed of  sweeps.  The 
+\bold{Volume} structure is hierarchically defined as an array of 
+\bold{Sweep}'s.  Each \bold{Sweep} is  an array of \bold{Ray}'s.  Each 
+\bold{Ray} is of an array of \bold{Range} values, typically one \bold{Range} 
+value is stored as a byte which is converted to a floating point value via 
+\bold{F(x)}.  The functions described within this document manipulate the 
+\bold{Volume} structure or any of the substructues: \bold{Sweep}, 
+ \bold{Ray},  \bold{Range}.  The scope of this library functionality is to 
+provide a rich toolkit for manipulating radar data which may originate from 
+an arbitrary radar site.  Included in this library are some general 
+functions to manipulate color lookup tables and to generate images which do 
+not directly manipulate any of the \bold{Volume} structures but are 
+included because their extent is so small that it seems unwarrented to 
+compose a separate library for them.
+
+
+Most of the functions defined return a pointer or value of the datatype 
+that we require.   All routine names begin with a capital \bold{V}. 
+ Routines that do not begin with \bold{V} are the general functions which 
+don't manipulate any \bold{Volume} structure.
+
+
+\heading{The structures
+
+}\flushleft{
+\typewriter{\smaller{typedef float Range;
+
+
+typedef struct \{
+
+    (numerious members, see volume.h)
+
+\} Ray_header;
+
+
+typedef struct \{              \
+
+
+        Ray_header h;    /* See volume.h, below, for details. */
+
+        Range *range;    /* range[0..nbins-1] */
+
+                         /* For wsr88d file:
+
+                          * 0..460 for reflectivity, 0..920 for velocity 
+and
+
+                          * spectrum width.  You must allocate this space.
+
+                          */
+
+  \} Ray;
+
+
+typedef struct \{
+
+  int sweep_num;   /* Integer sweep number.  This may be redundant, since
+
+                    * this will be the same as the Volume.sweep array 
+index.*/
+
+  float elev;      /* Elevation angle (mean) for the sweep. */
+
+  float beam_width;  /* Oh, I hate where this it.  It should be in
+
+                      * 'Radar_header', but I need this when searching
+
+                      * for a value in a sweep.  I need it in the \
+
+
+                      * sweep header, since I no longer have access to
+
+                      * the radar structure.  See routines Vget_value and
+
+                      * Vget_value_from_sweep.
+
+                      */
+
+
+  int nrays;
+
+\} Sweep_header;
+
+
+typedef struct \{           \
+
+
+  Sweep_header h;       \
+
+
+  Ray **ray;               /* phi[0..nrays-1] of Ray pointers. */
+
+\} Sweep;
+
+
+typedef struct \{
+
+  char *type_str;  /* One of:'Reflectivity', 'Velocity' or 'Spectrum width' 
+*/
+
+  int nsweeps;
+
+\} Volume_header;
+
+
+typedef struct \{
+
+        Volume_header h;   /* Specific info for each theta. */
+
+                              /* Includes resolution: km/bin. */
+
+        Sweep **sweep;         /* sweep[0..nsweeps-1] of Sweep pointers. */
+
+\} Volume;
+
+
+typedef Volume Rsphere;    /* Same thing, different name. */
+
+}}}\smaller{\flushleft{\typewriter{\smaller{
+}}}\typewriter{                          /* BADVAL taken from wsr88d.h */
+
+#define BADVAL  0500      /* non-meaningful value (500 octal) */
+
+#define RFVAL (BADVAL-1)
+
+#define APFLAG (BADVAL-2)
+
+#define NOTFOUND_H (BADVAL-3)
+
+#define NOTFOUND_V (BADVAL-4)
+
+
+}}With the following declaration,\bold{ Volume *v}\typewriter{; }you access 
+any element with \bold{F(v->sweep[is]->ray[ir]->range[ibin])}, provided 
+that all the memory locations exist, where \bold{is} is the sweep number, 
+\bold{ir} is the ray index and \bold{ibin} is the range bin index.  Now the 
+indexes can be ordinals or be the result of a binning function. When the 
+indexes are a function of a binning function, then you need to test \bold{v} 
+is not \bold{NULL}, then \bold{v->sweep[is]} is not \bold{NULL}, and 
+finally \bold{v->sweep[is]->ray[ir]} is not \bold{NULL},  before you can 
+access the element \bold{F(v->sweep[is]->ray[ir]->range[ibin])}.  When 
+using this data structure in a looping construct or when accessing it in an 
+orderly mannor, then this type of testing is not a burdon.  However, if you 
+plan to hop around in the data structure then the test becomes annoying.
+
+
+If all of this pointer stuff is confusing, perhaps I can help you 
+understand it with a simple C example:
+
+
+\flushleft{\typewriter{\smaller{\smaller{	Volume *v;
+
+
+	/* Allocate 20 Sweep pointers.
+
+          v->sweep is the pointer to the array of Sweep pointers (pointers 
+to Sweep).
+
+          It is the same as &v->sweep[0].
+
+          Each Sweep pointer is referenced as v->sweep[i] where i is the 
+sweep number.
+
+        */
+
+	v = Vnew_volume(20);	/* This allocates 20 Sweep pointers. */
+
+
+
+	/* Allocate 400 Ray pointers to each sweep.
+
+	   v->sweep[i]->ray is a pointer to an array of Ray pointers (pointers to 
+Ray) and
+
+	   is the same as &v->sweep[i]->ray[0].
+
+	 */
+
+	for (i=0; i<20; i++)
+
+		v->sweep[i] = Vnew_sweep(400);	/* This allocates 400 Ray pointers to each 
+sweep. */
+
+
+	/* Allocate 1000 bins to each ray.
+
+	   v->sweep[i]->ray[j]->range is a pointer to an array of bins of type 
+Range.
+
+	   Usually, Range is another name for float so it is just a pointer to an 
+array of floats.
+
+	   Access each bin via F(v->sweep[i]->ray[j]->range[ibin]), it is a Range 
+type.
+
+	 */
+
+	for (i=0; i<20; i++)
+
+		for (j=0; j<400; j++)
+
+			v->sweep[i]->ray[j] = Vnew_ray(1000); /* Allocate 1000 bins to each Ray 
+pointer. */
+
+}}}}
+\typewriter{\smaller{\smaller{
+}}}\typewriter{
+}\heading{Quick reference to functions}\smaller{ (coded in 
+trmm:~merritt/proj/trmm/radar/)}\heading{\typewriter{
+
+}}\typewriter{
+\smaller{\smaller{Volume  *Vnew_volume(int nsweeps);
+
+Sweep   *Vnew_sweep(int nrays);
+
+Ray     *Vnew_ray(int nbins);
+
+Volume *Vclear_volume(Volume *v);
+
+Sweep  *Vclear_sweep (Sweep  *s);
+
+Ray    *Vclear_ray   (Ray    *r);
+
+Volume *Vcopy_volume(Volume *v);
+
+Sweep  *Vcopy_sweep (Sweep  *s);
+
+Ray    *Vcopy_ray   (Ray    *r);
+
+void Vfree_volume (Volume *v);
+
+void Vfree_sweep  (Sweep  *s);
+
+void Vfree_ray    (Ray    *r);
+
+
+void Vprint_ray(Ray *r);
+
+void Vprint_sweep(Sweep *s);
+
+void Vprint_volume(Volume *v);
+
+
+\typewriter{void Vbscan_ray(Ray *r);
+
+void Vbscan_sweep(Sweep *s);
+
+}\typewriter{void Vbscan_volume(Volume *v);
+
+}}\typewriter{\smaller{
+void load_color_table(char *infile, char buffer[256], int *ncolors);
+
+void load_refl_color_table();
+
+void load_vel_color_table();
+
+void load_sw_color_table();
+
+void load_red_table(char *infile);
+
+void load_green_table(char *infile);
+
+void load_blue_table(char *infile);
+
+
+
+void write_gif(char *outfile, unsigned char *image, int xdim, int ydim, 
+char c_table[256][3]); \
+
+
+void write_pict(char *outfile, unsigned char *image, int xdim, int ydim, 
+char c_table[256][3]); \
+
+
+void write_ppm(char *outfile, unsigned char *image, int xdim, int ydim, 
+char c_table[256][3]); \
+
+
+void write_pgm(char *outfile, unsigned char *image, int xdim, int ydim);
+
+
+unsigned char *Vsweep_to_cart(Sweep *s, int xdim, int ydim, float range);
+
+
+void Vsweep_to_gif(Sweep *s, char *outfile, int xdim, int ydim, float 
+range);
+
+void Vvolume_to_gif(Volume *v, char *basename, int xdim, int ydim, float 
+range);
+
+void Vsweep_to_pict(Sweep *s, char *outfile, int xdim, int ydim, float 
+range);
+
+void Vvolume_to_pict(Volume *v, char *basename, int xdim, int ydim, float 
+range);
+
+void Vsweep_to_ppm(Sweep *s, char *outfile, int xdim, int ydim, float 
+range);
+
+void Vvolume_to_ppm(Volume *v, char *basename, int xdim, int ydim, float 
+range);
+
+void Vsweep_to_pgm(Sweep *s, char *outfile, int xdim, int ydim, float 
+range);
+
+void Vvolume_to_pgm(Volume *v, char *basename, int xdim, int ydim, float 
+}}}\typewriter{\smaller{\smaller{range);}\smaller{
+
+}}\smaller{\smaller{void Vrebin_velocity_ray(Ray *r);
+
+void Vrebin_velocity_sweep(Sweep *s)
+
+void Vrebin_velocity_volume(Volume *v);
+
+}\smaller{
+\flushleft{Volume *Vget_volume(Radar *r, int itype);
+
+	itype = REFLECTIVITY, VELOCITY, or SPECTRUM_WIDTH, etc.
+
+
+Sweep *Vget_sweep(Volume *v, float elev);
+
+Ray   *Vget_ray  (Volume *v, float elev, float azimuth);
+
+float *Vget_value(Volume *v, float elev, float azimuth, float range);
+
+float *Vget_value_at_h(Volume *v, float ground _range, float azimuth,float 
+h);
+
+void  Vfloat_to_char(float *x, unsigned char *c, int n);
+
+float F(unsigned char c);
+
+unsigned char INVF(float x);   -- Inverse of F.
+
+
+}}}}}\smaller{\smaller{Ray   *Vget_ray_from_sweep(Sweep *s, float azimuth, 
+float range);
+
+float *Vget_value_from_sweep(Sweep *s, float elev, float azimuth, float 
+range);
+
+float *Vget_value_from_ray(Ray *r, float range);
+
+void Vget_groundr_and_h(float slant_r, float elev, float *gr, float *h);
+
+void Vget_slantr_and_elev(float gr, float h, float *slant_r, float *elev);
+
+void Vget_slantr_and_h(float gr, float elev, float *slant_r, float *h);
+
+Ray *Vget_ray_above(Volume *v, Ray *current_ray);
+
+Ray *Vget_ray_below(Volume *v, Ray *current_ray);
+
+Ray *Vget_matching_ray(Volume *v, Ray *ray);
+
+Ray *Vget_first_ray_of_sweep(Sweep *s);
+
+Ray *Vget_first_ray_of_volume(Volume *v);
+
+}}\typewriter{\typewriter{\smaller{\smaller{\flushleft{
+}\typewriter{Cappi *cappi_at_h(Volume *volume, float height_km);
+
+}
+float Vfraction_of_ray(Ray *r, float lo, float hi, float range);
+
+float Vfraction_of_sweep(Sweep *s, float lo, float hi, float range);
+
+float Vfraction_of_volume(Volume *v, float lo, float hi, float range);
+
+
+float Varea_of_ray(Ray *r, float lo, float hi, float max_range);
+
+float Vfractional_area_of_sweep(Sweep *s, float lo, float hi, float 
+max_rng);
+
+
+/* I/O routines. */
+
+Ray    *Vread_ray   (FILE *fp);
+
+Sweep  *Vread_sweep (FILE *fp);
+
+Volume *Vread_volume(FILE *fp);
+
+int Vwrite_ray(Ray *r, FILE *fp);
+
+int Vwrite_sweep(Sweep *s, FILE *fp);
+
+int Vwrite_volume(Volume *v, FILE *fp);
+
+
+Histogram *Vallocate_histogram(int low, int hi);
+
+void Vfree_histogram(Histogram *histogram);
+
+void print_histogram(Histogram *histogram, int min_range, int max_range,
+
+                                         char *filename);
+
+Histogram *read_histogram(char *infile);
+
+int write_histogram(Histogram *histogram, char *outfile);
+
+Histogram *Vget_histogram_from_ray(Ray *ray, Histogram *histogram,
+
+        int low, int hi, int min_range, int max_range);
+
+Histogram *Vget_histogram_from_sweep(Sweep *sweep, Histogram *histogram, \
+
+
+        int low, int hi, int min_range, int max_range);
+
+Histogram *Vget_histogram_from_volume(Volume *volume, Histogram *histogram,
+
+        int low, int hi, int min_range, int max_range);
+
+
+}}
+
+
+}}\heading{Future functions (quick reference)
+
+}\typewriter{
+}\heading{
+
+Function definitions }\
+
+
+
+\flushleft{\typewriter{\ttyleft{\typewriter{\ttyleft{Sweep 
+*Vget_sweep(Volume volume, float elev);
+
+}}}}}\smaller{	Extract a sweep from the sphere data structure, given a 
+\bold{Volume} \bold{v} and an elevation angle \bold{elev}.  Returns a 
+pointer to a \bold{Sweep}. \
+
+
+	Input: \bold{Volume} and elevation angle.
+
+}\flushleft{\typewriter{\ttyleft{
+\typewriter{Ray *Vget_ray(Volume volume, float elev, float azimuth);
+
+}}}}\smaller{	Function: Extract a ray from the sphere.  Returns a pointer 
+to a \bold{Ray}.  You must copy the data from that location for the size of 
+the ray, if you want to write on the data without writing onto the Rsphere.
+
+	Input: \bold{Volume}, theta, azimuth.
+
+}\typewriter{
+float Vget_value(Volume *v, float elev, float azimuth, float range);
+
+}\smaller{	Find a value in the \bold{Volume} \bold{v} using polar 
+coordinate specification.  The search returns the closest point.  Although 
+there is no restriction concerning azimuth values, other functions rely on 
+the range being -180 to +180.  This may change.  Nexrad happened to use 
+this range so I use it for now.
+
+}\typewriter{
+Ray *Vget_ray_from_sweep(Sweep *s, float azim);
+
+}\smaller{	Return a pointer to a ray that is in the \bold{Sweep} \bold{s}, 
+for the azimuth angle \bold{azim}.}\typewriter{
+
+
+float Vget_value_from_sweep(Sweep *s, float elev, float azim, float r);
+
+}\smaller{	Get a value from a \bold{Sweep}, \bold{s}, given the azimuth 
+\bold{azim} and range \bold{r}.  The elevation angle, \bold{elev}, is 
+needed also and is used to determine if the requested value is within the 
+beam width.  Currently, the beam width constraint is not implimented in 
+that if a point does fall outside the beam width, the closest point is 
+returned.  This was to prevent some missing data circles appearing on 
+output images.  If you want the closest value, then set \bold{elev} = 0.0.
+
+}\typewriter{
+float Vget_value_from_ray(Ray *ray, float r);
+
+}\smaller{	Return a value for the slant range \bold{r}.
+
+}\typewriter{
+float Vget_value_at_h(Volume *v, float azim, float grnd_r, float h);
+
+}\smaller{	Returns a value when the coordinate is specified by ground range 
+and height.  Both ground range and height are specified in 
+\bold{km}.}\typewriter{
+
+
+\typewriter{void Vget_groundr_and_h(float slant_r, float elev, float *gr, 
+float *h);
+
+}}\smaller{	Given slant range, \bold{slant_r}, and the elevation angle, 
+\bold{elev}, compute the ground range, \bold{gr}, and height, \bold{h}. 
+ Range and height units are in km.  Angles are in degrees.  This is the 
+inverse fuction of \bold{Vget_slantr_and_elev}.  Although this function 
+does not manipulate any of the Volume data structures, the function name 
+begins with the character V.  This may not be appropriate, but will stand 
+for now.
+
+}\typewriter{\typewriter{
+void Vget_slantr_and_elev(float gr, float h, float *slant_r, float *elev);
+
+}}\smaller{	Given ground range, \bold{gr}, and height, \bold{h}, compute 
+the slant range, \bold{slant_r} and elevation angle, \bold{elev}.  Range 
+and height units are in km.  Angles are in degrees.  This is the inverse 
+function of  \bold{Vget_groundr_and_h}.  Although this function does not 
+manipulate any of the Volume data structures, the function name begins with 
+the character V.  This may not be appropriate, but will stand for 
+now.}\typewriter{\typewriter{
+
+
+}}\typewriter{\typewriter{void Vget_slantr_and_h(float gr, float elev, 
+float *slant_r, float *h);
+
+}}\smaller{	Given ground range, \bold{gr}, and elevation angle, 
+\bold{elev}, compute the slant range, \bold{slant_r} and height, \bold{h}. 
+ Range and height units are in km.  Angles are in degrees.  Although this 
+function does not manipulate any of the Volume data structures, the 
+function name begins with the character V.  This may not be appropriate, 
+but will stand for now.
+
+}\typewriter{\typewriter{
+}}\typewriter{\typewriter{void Vget_first_ray_of_sweep(Sweep *s);
+
+}}\smaller{	Searches the sweep until it finds a non NULL ray pointer.
+
+
+}\typewriter{\typewriter{void Vget_first_ray_of_volume(Volume *v);
+
+}}\smaller{	Searches a volume until it finds a non NULL ray pointer.  It 
+does this by calling \bold{Vget_first_ray_of_sweep} for each valid sweep 
+pointer.
+
+}\typewriter{\typewriter{
+}}\typewriter{Vfloat_to_char(float *x, unsigned char *c, int n);
+
+}	\smaller{Convert the array of float, \bold{x}, to unsigned character. 
+ The conversion function is \bold{INVF}.  This function unifies the 
+character storage representation in the volume.  Use this function when you 
+have  calibrated radar data and you are prepared to load the \bold{Volume} 
+structure.
+
+}
+\typewriter{float F(unsigned char c);
+
+}\smaller{	Convert one character to a floating point value.  The conversion 
+function is (c-2)/2. - 64.  Two additional values are known: BADVAL and 
+RFVAL, bad value and range folded value respectively.  They are stored as 0 
+and 1 respectively, hence the (c-2) operation.  Any additional reserved 
+values will be represented as 3, 4, etc.; the appropriate offset will be 
+applied to the function F.
+
+}\typewriter{
+unsigned char INVF(float x);
+
+}\smaller{	This is the inverse function of \bold{F}.  It, too, knows about 
+BADVAL and RFVAL.  This function prepares floating point data to be stored 
+in the Radar/Volume/Sweep/Ray/Range structure, actually just Range.  The 
+inverse function, \bold{F}, is used to recover the calibrated floating 
+point data value.}\typewriter{
+
+\typewriter{
+}}\typewriter{Ray *Vget_ray_above(Volume *v, Ray *current_ray);}
+
+\smaller{	Return a Ray pointer to the ray that exists at the next elevation 
+step.
+
+}\typewriter{
+Ray *Vget_ray_below(Volume *v, Ray *current_ray);}
+
+\smaller{	Return a Ray pointer to the ray that exists at the next elevation 
+step.
+
+
+}\typewriter{Ray *Vget_matching_ray(Volume *v, Ray *ray);}
+
+\smaller{	Return a Ray pointer to the ray that closly matches the elevation 
+and azimuth of the Ray \bold{ray}.  Use this function when locating a 
+similiar ray in another volume.
+
+}\typewriter{\typewriter{
+}}\typewriter{\typewriter{\subheading{Simple structure dump:
+
+}}void Vprint_ray(Ray *r);
+
+void Vprint_sweep(Sweep *s);
+
+void Vprint_volume(Volume *v);
+
+
+\subheading{Creating files:
+
+}void Vbscan_ray(Ray *r);
+
+void Vbscan_sweep(Sweep *s);
+
+}\typewriter{void Vbscan_volume(Volume *v);
+
+
+}\smaller{	You will use \bold{Vpgm_volume}, mostly.  It outputs filenames 
+\bold{bscan.01.gif}, \bold{bscan.02.gif}, etc. as gif images 1000x400. 
+ These are simple ray dumps; aka, \bold{B-SCANS}.  This interface is poor; 
+the output filenames are hard coded.  I wrote this quickly to test the 
+majority of the radar library.
+
+}\typewriter{
+\subheading{Cartesean image generation:
+
+
+}}The functions \bold{load_color_table}, \bold{write_gif}, 
+\bold{write_pict}, etc., do not manipulate any structure defined in 
+\bold{Volume}.  I list them here simply because I have no other place right 
+now.  I think that a seperate document will be written describing all the 
+image manipulation functions.  However, these functions work in concert 
+with \bold{Vsweep_to_gif} that it may be justified to list them here, I 
+don't know, it is really hard to say because there are so few image 
+functions so far.
+
+
+Efficiency note:  The functions \bold{Vvolume_to_gif} and 
+\bold{Vvolume_to_pict}. and any other output formats that may arrise, all 
+function identically with the only difference being the output pipe command 
+(ppmtogif, ppmtopict, etc.).  Each routine performs a polar to cartesean 
+mapping via \bold{Vsweep_to_cart}, then calls the appropriate write 
+function.  If you plan to output many image formats at once, it will be 
+wise to perform the polar to cartesean mapping once, then call 
+\bold{write_gif}, \bold{write_pict}, etc.  This could be done, for 
+instance, in a function called \bold{Vvolume_to_pict_and_gif}.
+
+\typewriter{\subheading{
+}unsigned char *Vsweep_to_cart(Sweep *s, int xdim, int ydim, float range);
+
+}\smaller{	Given a \bold{Sweep} pointer, \bold{s}, return a character image 
+of size \bold{xdim} by \bold{ydim} representing the mapping of polar to 
+cartesean with the radar at the center of the image.  The radial range, 
+\bold{range}, is mapped to the edge of the image.  The space for the 
+returned images is obtained via malloc.
+
+}\typewriter{
+}\typewriter{void  Vvolume_to_gif(Volume *v, char *basename, int xdim, int 
+ydim, float range);}
+
+	\smaller{Given a \bold{Volume} pointer, \bold{v}, output a series of GIF 
+images.  Output filenames are \bold{\italic{basename}.00.gif}, 
+\bold{\italic{basename}.01.gif}, etc., for the number of sweeps.
+
+}\typewriter{
+void  Vvolume_to_pict(Volume *v, char *basename, int xdim, int ydim, float 
+range);
+
+}\smaller{	Identical to Vvolume_to_gif except it writes PICT 
+files.}\typewriter{
+
+
+}\smaller{\typewriter{void  Vvolume_to_ppm(Volume *v, char *basename, int 
+xdim, int ydim, float range);
+
+}	Identical to \bold{Vvolume_to_gif} except it writes PPM  files.
+
+\typewriter{
+void  Vvolume_to_pgm(Volume *v, char *basename, int xdim, int ydim, float 
+range);
+
+}}\smaller{	Identical to \bold{Vvolume_to_gif} except it writes PGM  files.
+
+}\typewriter{\typewriter{
+}void  Vsweep_to_gif(Sweep *s, char *outfile, int xdim, int ydim, float 
+range);
+
+}\smaller{	Given a \bold{Sweep} pointer, \bold{s}, output a GIF image with 
+the filename specified in \bold{outfile}.  This function calls 
+\bold{Vsweep_to_cart} to do the polar to cartesean mapping, then calls 
+\bold{write_gif}.
+
+	}\typewriter{\
+
+
+}\smaller{\typewriter{void  Vsweep_to_pict(Sweep *s, char *outfile, int 
+xdim, int ydim, float range);
+
+}}\smaller{	Given a \bold{Sweep} pointer, \bold{s}, output a PICT image 
+with the filename specified in \bold{outfile}.  This function calls 
+Vsweep_to_cart to do the polar to cartesean mapping, then calls write_pict.
+
+}\typewriter{\smaller{	}\typewriter{\
+
+
+}\typewriter{void  Vsweep_to_ppm(Sweep *s, char *outfile, int xdim, int 
+ydim, float range);
+
+}}\smaller{	Given a \bold{Sweep} pointer, \bold{s}, output a PPM image with 
+the filename specified in \bold{outfile}.  This function calls 
+\bold{Vsweep_to_cart} to do the polar to cartesean mapping, then calls 
+\bold{write_ppm}.
+
+}\typewriter{\typewriter{
+}\typewriter{void  Vsweep_to_pgm(Sweep *s, char *outfile, int xdim, int 
+ydim, float range);
+
+}}\smaller{	Given a \bold{Sweep} pointer, \bold{s}, output a PGM image with 
+the filename specified in \bold{outfile}.  This function calls 
+\bold{Vsweep_to_cart} to do the polar to cartesean mapping, then calls 
+\bold{write_pgm}.
+
+}\typewriter{
+int load_color_table(char *infile, char c_table[256], int *ncolors);
+
+}\smaller{	Loads a color table.  Potential input filenames are defined in 
+volume.h, as REFL_RED_FILE, VEL_RED_FILE, etc.  The number of colors loaded 
+is returned in \bold{ncolors}.
+
+
+}\typewriter{void load_refl_color_table();
+
+void load_vel_color_table();
+
+void load_sw_color_table();
+
+}\smaller{	Hard coded versions to load the appropriate color table for each 
+radar field.  These functions call \bold{load_color_table}.  File names for 
+\bold{load_refl_color_table} are REFL_RED_FILE, REFL_GREEN_FILE, and 
+REFL_BLUE_FILE.  File names for \bold{load_vel_color_table} are 
+VEL_RED_FILE, VEL_GREEN_FILE, and VEL_BLUE_FILE.  File names for 
+\bold{load_sw_color_table} are SW_RED_FILE, SW_GREEN_FILE, and 
+SW_BLUE_FILE.}\typewriter{
+
+}\smaller{
+}\typewriter{void load_red_table(char *infile);
+
+void load_green_table(char *infile);
+
+void load_blue_table(char *infile);
+
+}\smaller{	Loads color tables, one file per color.  Maximum of 256 color 
+intensities are read per color file.  It is your responsibility to call 
+all, none, or some of the three routines to load the  red, green and blue 
+colors.  Use these routines when the default color tables, as defined by 
+\bold{load_refl_color_table}, \bold{load_vel_color_table}, or 
+\bold{load_sw_color_table} are not desired.}\typewriter{
+
+
+int write_gif(char *outfile, unsigned char *image, int xdim, int ydim, char 
+c_table[256][3]);
+
+}\smaller{	Writes a GIF file.  It uses \bold{ppmtogif} to convert the image 
+to GIF format, via a pipe.
+
+}\typewriter{
+int write_ppm(char *outfile, unsigned char *image, int xdim, int ydim, char 
+c_table[256][3]);
+
+}\smaller{	Writes a PPM image file.
+
+}\typewriter{
+}\typewriter{int write_pgm(char *outfile, unsigned char *image, int xdim, 
+int ydim, char c_table[256][3]);
+
+}\smaller{	Writes a PGM image file.
+
+}\typewriter{
+int write_pict(char *outfile, unsigned char *image, int xdim, int ydim, 
+char c_table[256][3]);
+
+}\smaller{	Writes a PICT image file.  It uses \bold{ppmtopict} to convert 
+the image to PICT format, via a pipe.  This is only the image portion of a 
+PICT formated file.  Additional programs, like \bold{mcvert} (when I get it 
+I will automatically place it in the pipeline), need to be run so they are 
+viewable on a MAC.
+
+}\typewriter{
+}\heading{CA*PI}
+
+\typewriter{Cappi *cappi_at_h(Volume *volume, float height_km);
+
+}\smaller{	Function: Produce a CAPPI from the Volume structure.
+
+   	Input: height in km of the CAPPI.
+
+}
+
+\typewriter{Carpi *volume_to_carpi(Volume *volume, float xrange, float 
+yrange);}
+
+\smaller{	Function: Produce a CARPI from the Volume structure.
+
+	Input: Dimensions of the rectangular gridded column.
+
+}
+
+\typewriter{Cube *volume_to_cube(Volume *volume, ... \
+
+
+}\smaller{	Function: Produce a cube, uniformly gridded.  Vegimatic slicing.
+
+	Input:	sphere data structure.
+
+			projection.  (Mercator, Lambert eq. area, etc.)
+
+			#xbins
+
+			#ybins
+
+			#zbins
+
+			#xresolution  (km/bin)
+
+			#yresolution  (km/bin)
+
+			#zresolution  (km/bin)
+
+}
+\typewriter{NuCube *volume_to_nucube(Volume *volume, ...
+
+}\smaller{	Function: Produce a cube, non-uniformly gridded.
+
+}
+[ Method for filling the cube bins may be a parameter if that does not
+
+  impact the code, otherwise we will have seperate names for the cube
+
+  filling method.  Eg, rsphere_to_cube_sliced_mode_fill(...).]
+
+
+
+\typewriter{\flushleft{Cross_section *volume_get_vertical_plane(Volume 
+volume, theta, xdim, ydim, ...);
+
+}}\smaller{	Function: Extract a vertical plane from the Volume.
+
+	Input: theta, dimensions of plane, resolution of plane, others?
+
+}
+\typewriter{Cross_section *volume_get_rhi(Volume volume, theta);
+
+} \smaller{   Function: Extract an rhi from the Volume.
+
+    Input: theta
+
+}
+\typewriter{Cross_section *volume_get_cross_section(Volume volume, ...);
+
+}\smaller{    Function: Extract a general cross section.
+
+    Input: theta, azim, range, and three points or a normal vector,
+
+           plane dimensions and resolution.
+
+}
+
+\typewriter{\flushleft{Carpi *cappi_to_carpi(Cappi *cappi, int xdim, int 
+ydim, float height, ...)
+
+}}\smaller{	Function: Convert a CAPPI to a CARPI.
+
+	Input: CAPPI, height, specification of CARPI (lat/lon, delta's, etc)
+
+}
+
+\typewriter{
+
+}\heading{Histogram
+
+
+}The histogram functions operate on Volumes, Sweeps and Rays.  They 
+generate histograms for a 1 dBZ bin size for specified radar ranges and dBZ 
+ranges.  Functions are provided for reading and writing from/to disk as 
+well as printing to stdout.  Memory management routines are also provided. 
+ Further information can be found in the HTML files which are accessed from 
+the top level \bold{rsl_index.html}.
+
+\heading{
+
+Memory managment routines
+
+}\typewriter{
+Volume  *Vnew_volume(int nsweeps);
+
+}\smaller{	Allocates memory for a \bold{Volume}.  It allocates space for 
+it's header and space for  \bold{nsweep} pointers to \bold{Sweep}.  It does 
+not allocate any sweeps, just the pointers.  You have to perform the 
+allocation of sweeps yourself.  Do this by looping on \bold{nsweeps} and 
+calling \bold{Vnew_sweep}.}
+
+\typewriter{
+Sweep   *Vnew_sweep(int nrays);
+
+}\smaller{	Allocates memory for a \bold{Sweep}.  It allocates space for 
+it's header and space for  \bold{nrays } pointers to \bold{Ray}.  It does 
+not allocate any rays, just the pointers.  You have to perform the 
+allocation of rays yourself.  Do this by looping on \bold{nrays} and 
+calling \bold{Vnew_ray}.}\typewriter{
+
+
+Ray     *Vnew_ray(int nbins);
+
+}\smaller{	Allocates memory for a \bold{Ray}.  It allocates space for it's 
+header and space for \bold{Range} array of size \bold{nbins. }  Since, the 
+\bold{Range} type is not a pointer, this function allocates an array of 
+ \bold{Range} of size \bold{nbins}.  Currently, \bold{Range} is just an 
+alias for \bold{float}.}\typewriter{
+
+
+Volume *Vclear_volume(Volume *v);
+
+Sweep  *Vclear_sweep (Sweep  *s);
+
+Ray    *Vclear_ray   (Ray    *r);
+
+}\smaller{	\bold{Vclear_volume} calls \bold{Vclear_sweep} for the number of 
+sweeps.  \bold{Vclear_sweep} calls \bold{Vclear_ray} for the number of 
+rays.  And \bold{Vclear_ray} clears the array of \bold{Range} of  size 
+\bold{nbins}.  All header information is preserved.  This may or may not be 
+a desired capability.}\typewriter{
+
+
+\typewriter{void Vfree_volume (Volume *v);
+
+void Vfree_sweep  (Sweep  *s);
+
+void Vfree_ray    (Ray    *r);
+
+}}\smaller{	\bold{Vfree_volume} calls \bold{Vfree_sweep} for the number of 
+sweeps, then frees the array of \bold{Sweep} pointers, then frees itself. 
+ \bold{Vfree_sweep} calls \bold{Vfree_ray} for the number of rays, then 
+frees the array of \bold{Ray} pointers, then frees itself.  Finally, 
+ \bold{Vfree_ray} frees the array of \bold{Range}, then frees itself. 
+ Checks are made that non NULL pointers are freed.
+
+}\typewriter{
+\typewriter{Ray    *Vcopy_ray    (Ray    *r);
+
+Sweep  *Vcopy_sweep  (Sweep  *s);
+
+Volume *Vcopy_volume (Volume *v);
+
+}}\smaller{	Makes a copy of the input structure.  Memory allocation is 
+performed by malloc.  \bold{Vcopy_volume} calls \bold{Vcopy_sweep} for the 
+number of sweeps.  \bold{Vcopy_sweep} calls \bold{Vcopy_ray} for the number 
+of rays.  Finally,  \bold{Vcopy_ray} copies the array of \bold{Range}.
+
+}\enddata{text,1074075664}

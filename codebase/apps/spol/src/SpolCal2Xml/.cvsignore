@@ -1,0 +1,6 @@
+.deps
+SpolCal2Xml
+__makefile.template
+makefile
+makefile.am
+makefile.in

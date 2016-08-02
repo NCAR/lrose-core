@@ -1,0 +1,388 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions metar_strip
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2000
+//
+
+commentdef {
+  p_header = "Program name: metar_strip";
+  p_text = "metar_strip displays a time-history of METAR data.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FOLLOW_CIDD
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, metar_strip retrieves data every poll_interval_secs and renders that data. In FOLLOW_CIDD mode, metar_strip watches the CIDD coordinate shared memory segment, and follows that time. In ARCHIVE mode, the program starts up at the archive_time.";
+} mode;
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} archive_time_t;
+
+paramdef struct archive_time_t {
+  p_default = {2000, 09, 05, 12, 00, 00};
+  p_descr = "The display time for ARCHIVE mode";
+  p_help = "See mode";
+} archive_time;
+
+paramdef int {
+  p_default = 61500;
+  p_descr = "The shared memory key for the CIDD coordinate struct.";
+  p_help = "When the user clicks in the CIDD main window, the coordinate struct is updated with the location and time. The time value is used to drive metar_strip in REALTIME mode.";
+} cidd_shmem_key;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Interval at which to poll the main display for new data (sec).";
+  p_help = "At this interval, the shared memory segment on the main display is checked for changes.";
+} poll_interval_sec;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "spdb/metar";
+  p_descr = "URL for input SPDB data.";
+  p_help = "METAR data is stored in SPDB format at this URL.";
+} input_url;
+
+commentdef {
+  p_header = "STATION DETAILS";
+}
+
+typedef struct {
+  string name;
+  string color;
+  string xwd_path;
+  string convert_command;
+} station_t;
+
+paramdef struct station_t {
+  p_default = {
+    {"RCTP",
+     "green",
+     "/tmp/RCTP.xwd",
+     "convert /tmp/RCTP.xwd /tmp/RCTP.gif"
+    }
+    ,
+    {"RCSS",
+     "green",
+     "/tmp/RCSS.xwd",
+     "convert /tmp/RCSS.xwd /tmp/RCSS.gif"
+    }
+    ,
+    {"RCKH",
+     "green",
+     "/tmp/RCKH.xwd",
+     "convert /tmp/RCKH.xwd /tmp/RCKH.gif"
+    }
+    ,
+    {"RCFN",
+     "green",
+     "/tmp/RCFN.xwd",
+     "convert /tmp/RCFN.xwd /tmp/RCFN.gif"
+    }
+    ,
+    {"Follow mouse",
+     "white",
+     "/tmp/FOLLOW.xwd",
+     "convert /tmp/FOLLOW.xwd /tmp/FOLLOW.gif"
+    }
+  }
+  p_descr = "Information for each station to be displayed.";
+  p_help = "The xwd_path designates the file to be created when doing window dumps for HTML generation. The convert_command converts the xwd file to a suitable file for web content. If you add a special station called 'Follow mouse' the station name will be set to the closest station to the last mouse click in the main display.";
+} stations[];
+
+commentdef {
+  p_header = "LOCATING STATIONS FROM MOUSE CLICKS";
+  p_text = "See stations parameter";
+}
+
+paramdef string {
+  p_descr = "Station location file - gives Lat, Lon and Alt for each station.";
+  p_help = "Each line in file is of form 4_CHAR_ID, Lat, Lon, Alt. Set to 'none; if no file will be used.";
+  p_default = "none";
+} station_location_file;
+
+paramdef double {
+  p_default = 250.0;
+  p_descr = "Search radius for locating station - km.";
+  p_help = "See station_location_file.";
+} search_radius;
+
+commentdef {
+  p_header = "DISPLAY DETAILS";
+}
+
+paramdef string {
+  p_default = "METAR TIME HISTORY";
+  p_descr = "Label for window border";
+  p_help = "This label will normally appear in the top border of the display window.";
+} window_label;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to map the main window to the screen.";
+  p_help = "If false, the main window will not be mapped to the screen. In this case html content will be generated in the background.";
+} show_window;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "The startup height for the window.";
+} window_height;
+
+paramdef int {
+  p_default = 435;
+  p_descr = "The startup width for the window.";
+} window_width;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Width of bottom margin (pixels).";
+} bottom_margin;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Width of right margin (pixels).";
+} right_margin;
+
+paramdef int {
+  p_min = 0;
+  p_default = 86400;
+  p_descr = "The initial period for the plot - secs.";
+  p_help = "This is the initial time period for the plot in seconds. If the window is resized, the plot period will change.";
+} plot_period_secs;
+
+typedef enum {
+  CEILING = 0, VISIBILITY, FLIGHT_CAT, TEMPERATURE, HUMIDITY, WIND_SPEED, WIND_DIRN, PRESSURE
+} field_name_t;
+
+paramdef enum field_name_t {
+  p_default = TEMPERATURE;
+  p_descr = "The name of the field on which the display should start.";
+} startup_field;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of the foreground in the display.";
+} foreground_color;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Color of the background in the display.";
+} background_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color for the NOW line on the display.";
+} now_color;
+
+paramdef string {
+  p_default = "6x13";
+  p_descr = "Name of font for the text on the display.";
+} font_name;
+
+paramdef float {
+  p_default = "20.0";
+  p_descr = "Minimum range for ceiling plot.";
+} min_ceiling_range;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "The width of the lines used for the plot traces.";
+} trace_line_width;
+
+commentdef {
+  p_header = "FLIGHT CATEGORY AND SKY OBSCURATION";
+  p_help = "Plotting of the icon for flight category and sky obscuration.";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the flight category time history.";
+} plot_flight_category;
+
+typedef enum {
+  VFR, MVFR, IFR
+} flight_category_label_t;
+
+typedef struct {
+  flight_category_label_t label;
+  string label_str;
+  string color;
+  float ceiling_threshold;
+  float visibility_threshold;
+} flight_category_t;
+
+paramdef struct flight_category_t {
+  p_default = {
+    { VFR, "VFR", "seagreen", 1500.0, 5.0 },
+    { MVFR, "MVFR", "blue", 500.0, 1.6 },
+    { IFR, "IFR", "orange", 0.0, 0.0 }
+  };
+  p_descr = "Array of flight category parameters.";
+  p_help = "The flight category at a station will be computed using the ceiling (ft) and visibility (km) thresholds. If both values exceed the threshold, the flight category will be equal to or greater that the specified category.";
+} flight_category[];
+
+paramdef int {
+  p_default = 10;
+  p_descr = "The width of the lines used for flight category.";
+} flight_category_line_width;
+
+commentdef {
+  p_header = "HTML OUTPUT FOR INDIVIDUAL FIELDS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to generate html output.";
+  p_help = "If true, images suitable for html pages are generated for each station and each field. See stations[] and xxxx_html_image.";
+} output_html;
+
+typedef struct {
+  string xwd_path;
+  string convert_command;
+} html_t;
+
+paramdef struct html_t {
+  p_default = { "ceiling.xwd",
+		"convert ceiling.xwd ceiling.gif" };
+  p_descr = "File path and conversion for ceiling HTML image";
+  p_help = "The xwd_path designates the file to be created when doing window dumps for HTML generation. The convert_command converts the xwd file to a suitable file for web content.";
+} ceiling_html;
+
+paramdef struct html_t {
+  p_default = { "visibility.xwd",
+		"convert visibility.xwd visibility.gif" };
+  p_descr = "File path and conversion for visibility HTML image";
+  p_help = "The xwd_path designates the file to be created when doing window dumps for HTML generation. The convert_command converts the xwd file to a suitable file for web content.";
+} visibility_html;
+
+paramdef struct html_t {
+  p_default = { "flight_cat.xwd",
+		"convert flight_cat.xwd flight_cat.gif" };
+  p_descr = "File path and conversion for flight_cat HTML image";
+  p_help = "The xwd_path designates the file to be created when doing window dumps for HTML generation. The convert_command converts the xwd file to a suitable file for web content.";
+} flight_cat_html;
+
+paramdef struct html_t {
+  p_default = { "temperature.xwd",
+		"convert temperature.xwd temperature.gif" };
+  p_descr = "File path and conversion for temperature HTML image";
+  p_help = "The xwd_path designates the file to be created when doing window dumps for HTML generation. The convert_command converts the xwd file to a suitable file for web content.";
+} temperature_html;
+
+paramdef struct html_t {
+  p_default = { "humidity.xwd",
+		"convert humidity.xwd humidity.gif" };
+  p_descr = "File path and conversion for humidity HTML image";
+  p_help = "The xwd_path designates the file to be created when doing window dumps for HTML generation. The convert_command converts the xwd file to a suitable file for web content.";
+} humidity_html;
+
+paramdef struct html_t {
+  p_default = { "wind_speed.xwd",
+		"convert wind_speed.xwd wind_speed.gif" };
+  p_descr = "File path and conversion for wind_speed HTML image";
+  p_help = "The xwd_path designates the file to be created when doing window dumps for HTML generation. The convert_command converts the xwd file to a suitable file for web content.";
+} wind_speed_html;
+
+paramdef struct html_t {
+  p_default = { "wind_dirn.xwd",
+		"convert wind_dirn.xwd wind_dirn.gif" };
+  p_descr = "File path and conversion for wind_dirn HTML image";
+  p_help = "The xwd_path designates the file to be created when doing window dumps for HTML generation. The convert_command converts the xwd file to a suitable file for web content.";
+} wind_dirn_html;
+
+paramdef struct html_t {
+  p_default = { "pressure.xwd",
+		"convert pressure.xwd pressure.gif" };
+  p_descr = "File path and conversion for pressure HTML image";
+  p_help = "The xwd_path designates the file to be created when doing window dumps for HTML generation. The convert_command converts the xwd file to a suitable file for web content.";
+} pressure_html;
+
+
+//////////////////////////////////////////////////////////
+// Field threshold definition and application
+//
+
+commentdef {
+  p_header = "FIELD THRESHOLD DEFINITION AND APPLICATION";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag to turn on and off application of an upper threshold to ceiling";
+} apply_ceiling;
+
+paramdef float {
+  p_default = 5000.0;
+  p_descr = "Ceiling threshold in feet.";
+} ceiling_threshold;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag to turn on and off application of an upper threshold to visibilty";
+} apply_visibility;
+
+paramdef float {
+  p_default = 10.0;
+  p_descr = "Visibility threshold in kilometers.";
+} visibility_threshold;
+

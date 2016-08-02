@@ -1,0 +1,279 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/********************************************************
+ * Parameter definitions for uf2mdv conversion routine.
+ * Enumerated types are dependent on <mdv/mdv_macros.h>
+ * and <mdv/mdv_file.h>.
+ *
+ *******************************************************/
+
+paramdef boolean {
+  p_descr = "Option to check if parameters are set";
+  p_default = {TRUE};
+  p_help = "If this is true, a check will be made on which parameters is set. A report will be generated for those params which are using the defaults";
+} check_params;
+
+paramdef boolean {
+  p_descr = "Option to print parameters ";
+  p_default = {FALSE};
+  p_help = "If this is true, used parameters will be printed at the beginning of the run.";
+} print_params;
+
+paramdef long {
+  p_descr = "debug level";
+  p_default = {0};
+  p_min = {0};
+  p_max = {10};
+  p_help = "0 - min\n 1 - explain each new scan beginning and end\n 2 - details about data\n 3 - extreme details 10 - excruciatingly extreme\n";
+} debug_level;
+
+
+paramdef enum processing
+{
+  p_options = { BROWSE, ANALYZE_DATA_RANGE, ANALYZE, ANALYZE_BUILD_OUTPUT };
+  p_default = { ANALYZE_BUILD_OUTPUT };
+  p_descr = "how much processing to do";
+  p_help = "BROWSE: read input data and output\n"
+	   "ANALYZE_DATA_RANGE: Read data one time, print out data ranges\n"
+	   "ANALYZE: Read data one time and create state information"
+	   "which can be printed\n"
+	   "ANALYZE_BUILD_OUTPUT:create state information, tnen"
+	   "produce output volumes"; 
+} processing;
+
+paramdef string {
+  p_descr = "input file names";
+  p_help = "Input file names";
+  p_default = { "input.file0"};
+} input_file[];
+
+paramdef enum  browse_level{
+  p_descr = "input browse level";
+  p_options = {BROWSE_NONE, BROWSE_1LINE, BROWSE_MULTILINE, BROWSE_MULTILINE_AND_DATA};
+  p_default = {BROWSE_NONE};
+  p_help = "none, one line, multiple lines, or multiple lines and data values";
+} browse_level;
+
+paramdef enum analyze_feedback {
+  p_descr = "analyze step feedback otuput";
+  p_options = {ANALYZE_FEEDBACK_NONE, ANALYZE_FEEDBACK_FINAL, ANALYZE_FEEDBACK_INIT_FINAL, ANALYZE_FEEDBACK_MEGA};
+  p_default = {ANALYZE_FEEDBACK_NONE};
+} analyze_feedback;
+ 
+paramdef enum input_data_format
+{
+  p_options = { UF_FORTRAN_BINARY, UF_PURE_DATA};
+  p_default = { UF_FORTRAN_BINARY };
+  p_descr = "input data types";
+  p_help = "universal format fortran binary has special stuff between records";
+} input_data_format;
+
+paramdef boolean {
+  p_descr = "Byte_swap";
+  p_help = "Perform byte swapping on incoming data if architecture expects it";
+  p_default = {TRUE};
+} byte_swap;
+
+paramdef boolean
+{
+  p_descr = "if azimuths stick, don't start new scan";
+  p_default = {FALSE};
+  p_help = "If this is true, new scans NOT started if azimuth value stays constant"; 
+} sticky_azimuths;
+
+paramdef double {
+  p_descr = "elevation wobble (degrees)";
+  p_help = "allowed wobble in elevation angles for same scan (degrees)";
+  p_default = {0.1};
+  p_min = {0.0};
+} elevation_wobble_max;
+
+paramdef double {
+  p_descr = "minimum allowed prf";
+  p_help = "minimum allowed prf";
+  p_default = {-100.0};
+  p_min = {-100000.0};
+  p_max = {100000.0};
+} min_prf;
+
+paramdef double {
+  p_descr = "maximum allowed prf";
+  p_help = "maximum allowed prf";
+  p_default = {20000.0};
+  p_min = {-100000.0};
+  p_max = {100000.0};
+} max_prf;
+
+typedef enum 
+{
+  FILTER_NONE, FILTER_NEGATIVE
+} input_filter;
+
+typedef struct 
+{
+ string         input_name;
+ input_filter filter;
+ double         scale;
+ double         bias;
+ string         output_name;
+} data_types_t;
+
+paramdef struct data_types_t {
+  p_descr = "data types";
+  p_help  = "universal format data types in, and what they mean, and how written";
+  p_default = {{"VE", FILTER_NONE, 0.25, -32.0,	"VEL"}};
+} data_types[];
+
+paramdef long
+{
+  p_descr = "year convert";
+  p_help = "add this # to year in data to get actual year, example if data says '02' and its really '2002', set this value to 2000";
+  p_default = {0};
+} year_convert;
+
+paramdef long 
+{
+  p_descr = "start time";
+  p_help = "year,month,day,hour,min,sec";
+  p_default = {1988,6,21,0,0,0};
+} start_time[6];
+
+paramdef long 
+{
+  p_descr = "stop time";
+  p_help = "year,month,day,hour,min,sec";
+  p_default = {1988,6,21,23,59,59};
+} stop_time[6];
+
+paramdef boolean
+{
+  p_descr = "filter_min_beams_per_scan";
+  p_help = "filter scans with too few beams if true";
+  p_default = {TRUE};
+} filter_min_beams;
+
+paramdef boolean
+{
+  p_descr = "filter redundant elevation scans using size test";
+  p_help = "filter_redundant elevations based on size comparison";
+  p_default = {TRUE};
+} filter_redundant_elev_based_on_size;
+ 
+paramdef long
+{
+  p_descr = "min beams per scan";
+  p_help = "minimum number of beams per allowable scan (if filter_min_beams)";
+  p_min = {0};
+  p_max = {3600};
+  p_default = {20};
+}  min_beams_per_scan;
+
+typedef struct
+{
+   double az0;
+   double delta_az;
+   long naz;
+   double gt0;
+   double delta_gt;
+   long ngt;
+   double elev0;
+   double delta_elev;
+   long nelev;
+} grid_params;
+
+paramdef struct grid_params
+{
+  p_descr = "spherical grid parameters";
+  p_help  = "az0, daz, naz, gt0, dgt, ngt, elev0, delev, nelev";
+} grid_params;
+
+paramdef boolean 
+{
+  p_descr = "Vertical levels or not";
+  p_help = "FALSE to use fixed grid (elevations) TRUE to use vertical levels";
+  p_default = {FALSE};
+} use_vertical_levels;
+
+paramdef double 
+{
+  p_descr = "Vertical levels";
+  p_help = "list of vertical elevation levels, in ascending order (degrees)";
+  p_default = {0.0, 0.5};
+} vertical_levels[];
+
+paramdef char* {
+  p_descr = "output file suffix";
+  p_default = {"mdv"};
+} output_file_suffix;
+
+paramdef char* {
+  p_descr = "Output File directory (top directory)";
+  p_help = "Name of directory where mdv files will be placed.";
+} output_dir;
+
+paramdef long {
+  p_descr = "Output Encoding Type";
+  p_default = {0};
+  p_min = {0};
+  p_max = {1};
+  p_help = "0 - None (data written as unsigned char), 1 - URL 8bit encoding.";
+} output_encoding_type;
+
+paramdef boolean
+{
+  p_descr = "Override sensor location";
+  p_help = "Override sensor location from data with configuration values";
+  p_default = {FALSE};
+} override_sensor_location;
+ 
+paramdef double {
+  p_descr = "Sensor Latitude ";
+  p_help = "Sensor Latitude (if override)";
+  p_default = {0.0};
+  p_min = {-90.0};
+  p_max = {90.0};
+} sensor_latitude;
+
+paramdef double {
+  p_descr = "Sensor Longitude ";
+  p_help = "Sensor Longitude (if override)";
+  p_default = {0.0};
+  p_min = {-180.0};
+  p_max = {180.0};
+} sensor_longitude;
+
+paramdef double {
+  p_descr = "Sensor Altitude (KM)";
+  p_help = "Sensor Altitude (if override)";
+  p_default = {0.0};
+  p_min = {0.0};
+} sensor_altitude;
+
+// New idea..do someday.
+//paramdef boolean
+//{
+//  p_descr = "Save memory";
+//  p_help = "Slow down program, but use less memory if TRUE\n";
+//  p_default = {FALSE};
+//} save_memory;

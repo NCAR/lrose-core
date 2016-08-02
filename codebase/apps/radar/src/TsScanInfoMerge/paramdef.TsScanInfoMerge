@@ -1,0 +1,111 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions TsScanInfoMerge
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Feb 2010
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsScanInfoMerge reads time-series data from 2 file message queues, a master and a slave. The master queue contains metadata not available in the slave. The slave queue is missing angle and scan meta data, and perhaps time. The program synchronizes the two queues based on either (a) the pulse sequence number in the pulse headers or (b) the times in the pulse headers. It then copies information from the master to the slave. It writes out the updated slave queue, and optionally also echoes the master queue to an output queue.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "FMQ INPUT - file message queues";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts/shmem_10100";
+  p_descr = "Name for input master FMQ.";
+} master_input_fmq_name;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts/shmem_10200";
+  p_descr = "Name for input slave FMQ.";
+} slave_input_fmq_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to start reading at beginning of input FMQs.";
+  p_help = "Normally, we start reading at the end of the queues. For debugging, however, it is sometimes helpful to start at the beginning of the queues.";
+} start_reading_at_fmq_start;
+
+commentdef {
+  p_header = "FMQ OUTPUT for merged data";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts/shmem_10400";
+  p_descr = "Name for output FMQ.";
+} output_fmq_name;
+
+paramdef int {
+  p_default = "200";
+  p_descr = "Number of pulses per output message.";
+  p_help = "The actual number will sometimes be 1 less than this, because an info data part may will be written once in a while.";
+} n_pulses_per_message;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+commentdef {
+  p_header = "SYNCHRONIZATION MODE";
+};
+
+typedef enum {
+  SYNC_USING_NUMBERS, SYNC_USING_TIME
+} sync_mode_t;
+
+paramdef enum sync_mode_t {
+  p_default = SYNC_USING_NUMBERS;
+  p_descr = "Method for synchronizing the queues";
+  p_help = "NUMBERS: match pulse sequence numbers, TIME: sync based on time. The angle info will be interpolated based on time.";
+} sync_mode;
+
+commentdef {
+  p_header = "MERGE ANGLES";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to merge in scan information from the master.";
+  p_help = "If false, the scan information will not be merged, and the scan information in the slave will be unchanged.";
+} merge_scan_info;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to merge in angles from the master.";
+  p_help = "If false, the angles will not be merged, and the angles in the slave will be unchanged.";
+} merge_angles;
+

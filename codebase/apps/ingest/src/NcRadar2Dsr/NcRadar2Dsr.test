@@ -1,0 +1,344 @@
+/**********************************************************************
+ * TDRP params for NcRadar2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// NcRadar2Dsr reads netCDF radar beam-by-beam files and copies the 
+//   contents into a DsRadar FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the list of file names specified on the 
+//   command line. In SIMULATE mode, the program moves repeatedly through 
+//   the file list, creating output files with times set to now. This is 
+//   useful for simulating an operational radar.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     SIMULATE
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// NETCDF FILE DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "$(HOME)/data/nc/radar";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+///////////// max_elev_change /////////////////////////
+//
+// Delta elevation (in degrees) for identifying unwanted beams.
+// Used for eliminating beams as the radar is moving around, for example 
+//   when the radar is dropping down to begin a new volume scan.
+// Type: float
+//
+
+max_elev_change = 0.5;
+
+//======================================================================
+//
+// RADAR CHARACTERISTICS.
+//
+// If any of the characteristics are set in the input data files, the 
+//   values in those characteristics will be taken from the input data 
+//   stream rather than from the parameter file.
+//
+//======================================================================
+ 
+///////////// radar_params ////////////////////////////
+//
+// Default radar characteristics. If any of the characteristics are set 
+//   in the input data files, the values in those characteristics will be 
+//   taken from the input data stream rather than from the parameter file.
+// ========== Radar characteristics ==========
+// 	
+// samples_per_beam: number of samples used in computing fields
+// polarization: polarization type
+// altitude: km
+// latitude: degrees
+// longitude: degrees
+// gate_spacing: km
+// start_range: km
+// beam_width: half-power beam width - degrees
+// pulse_width: nano-secs
+// prf: /s
+// wavelength: cm
+// radar_constant: dB
+// xmit_peak_pwr: watts
+// receiver_mds: dBm
+// receiver_gain: dB
+// antenna_gain: dB
+// system_gain: dB
+// unambig_velocity: m/s
+// unambig_range: km
+// 	.
+//
+// Type: struct
+//   typedef struct {
+//      int radar_id;
+//      string radar_name;
+//      string site_name;
+//      int samples_per_beam;
+//      polar_t polarization;
+//        Options:
+//          HORIZONTAL
+//          VERTICAL
+//          CIRCULAR
+//          ELLIPTICAL
+//      double altitude;
+//      double latitude;
+//      double longitude;
+//      double gate_spacing;
+//      double start_range;
+//      double beam_width;
+//      double pulse_width;
+//      double prf;
+//      double wavelength;
+//      double radar_constant;
+//      double xmit_peak_pwr;
+//      double receiver_mds;
+//      double receiver_gain;
+//      double antenna_gain;
+//      double system_gain;
+//      double unambig_velocity;
+//      double unambig_range;
+//   }
+//
+//
+
+radar_params = {
+    radar_id = 0,
+    radar_name = "SPOL",
+    site_name = "Boulder",
+    samples_per_beam = 96,
+    polarization = CIRCULAR,
+    altitude = 1103,
+    latitude = 39.7611,
+    longitude = -102.093,
+    gate_spacing = 149.896,
+    start_range = 150,
+    beam_width = 1,
+    pulse_width = 9.94021e-07,
+    prf = 960,
+    wavelength = 10.6726,
+    radar_constant = 70.1652,
+    xmit_peak_pwr = 400000,
+    receiver_mds = -113,
+    receiver_gain = 46.05,
+    antenna_gain = 45.66,
+    system_gain = 46.05,
+    unambig_velocity = 25,
+    unambig_range = 150
+};
+
+///////////// scan_type_id ////////////////////////////
+//
+// Scan type id.
+// Unique identifier for scan strategy.
+// Type: int
+//
+
+scan_type_id = 0;
+
+///////////// scan_type_name //////////////////////////
+//
+// Scan type name.
+// Descriptive name for scan strategy.
+// Type: string
+//
+
+scan_type_name = "Default";
+
+///////////// override_radar_location /////////////////
+//
+// Option to override input data stream with user-specified latitude, 
+//   longitude and altitude.
+// If TRUE, the radar location in the characteristics will be used 
+//   instead of the values in the input files.
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+//======================================================================
+//
+// OUTPUT FIELDS.
+//
+// Only the following fields will included in the output. If the field 
+//   is not in the input file, it will be left out.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Output radar fields.
+// List of fields to be output if available in the input data. If a 
+//   field does not exist in the input data it will not be output either.
+//
+// Type: struct
+//   typedef struct {
+//      string nc_name;
+//      string name;
+//      string units;
+//      double scale;
+//      double bias;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    nc_name = "DZ",
+    name = "DBZ",
+    units = "dBZ",
+    scale = 0.5,
+    bias = -32
+  }
+  ,
+  {
+    nc_name = "VE",
+    name = "VEL",
+    units = "m/s",
+    scale = 0.5,
+    bias = -63.5
+  }
+};
+
+//======================================================================
+//
+// OUTPUT Dsr FMQ.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for DsRadar data via FMQ.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://$(HOST)::/tmp/fmq/dsRadar";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 20000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 360;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// beam_wait_msecs /////////////////////////
+//
+// Wait per beam (milli-secs).
+// Type: int
+//
+
+beam_wait_msecs = 30;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+// Type: boolean
+//
+
+write_blocking = TRUE;
+

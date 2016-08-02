@@ -1,0 +1,29 @@
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_Draw: Parameter definitions for Human Drawn
+// Products
+
+commentdef {
+  p_header = "Draw/Export Parameters";
+};
+
+typedef struct {
+  char* id_label;
+  char* url;
+  double valid_minutes;
+  int default_id_no;
+  char* default_label;
+} dexport_t;
+
+paramdef struct dexport_t {
+  p_default = {{"Not Defined", "Not Defined", 60.0, 0, "" }};
+  p_descr = "Human Drawn Products for Export Parameters.";
+  p_help = 
+  " Each Entry needs:\n";
+  "ID_Label FMQ_URL Valid_Minutes Default_ID_no"
+  "    ID_LABEL - This is used to designate Product types\n"
+  "    FMQ_URL: example: fmqp:://host::dir/file \n"
+   "   Valid_Minutes: How many minutes the product is valid by default\n"
+   "   Default_ID_no: Default Data Type (Enumerated ID)\n"
+   "   Default_label: Test to place into Label field by default\n"
+   "\n";
+} dexport_info[];

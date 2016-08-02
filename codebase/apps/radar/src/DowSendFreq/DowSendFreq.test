@@ -1,0 +1,204 @@
+/**********************************************************************
+ * TDRP params for DowSendFreq
+ **********************************************************************/
+
+//======================================================================
+//
+// DowSendFreq provides the RF frequency for both the high and low 
+//   frequency radars, via a socket, to a device designed to control the 
+//   magnetron frequencies. The control device will act as a server, to 
+//   which this application will connect.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = TRUE;
+
+//======================================================================
+//
+// READING THE HIGH FREQUENCY INFO.
+//
+//======================================================================
+ 
+///////////// high_frequency_active ///////////////////
+//
+// Option to read info for high frequency transmitter.
+// If false, the default value will be passed to the frequency 
+//   controller.
+// Type: boolean
+//
+
+high_frequency_active = TRUE;
+
+///////////// high_freq_input_fmq_name ////////////////
+//
+// Name for high frequency FMQ.
+// Type: string
+//
+
+high_freq_input_fmq_name = "$(DATA_DIR)/fmq/ts/shmem_high_no_angles_10100";
+
+///////////// high_freq_default_mhz ///////////////////
+//
+// Option to read info for high frequency transmitter.
+// This is the ideal frequency for the high transmitter. If we cannot 
+//   read in the measured high frequency, this value will be used instead.
+// Type: double
+//
+
+high_freq_default_mhz = 9550;
+
+//======================================================================
+//
+// READING THE LOW FREQUENCY INFO.
+//
+//======================================================================
+ 
+///////////// low_frequency_active ////////////////////
+//
+// Option to read info for low frequency transmitter.
+// If false, the default value will be passed to the frequency 
+//   controller.
+// Type: boolean
+//
+
+low_frequency_active = TRUE;
+
+///////////// low_freq_input_fmq_name /////////////////
+//
+// Name for low frequency FMQ.
+// Type: string
+//
+
+low_freq_input_fmq_name = "$(DATA_DIR)/fmq/ts/shmem_low_no_angles_10200";
+
+///////////// low_freq_default_mhz ////////////////////
+//
+// Option to read info for low frequency transmitter.
+// This is the ideal frequency for the low transmitter. If we cannot 
+//   read in the measured low frequency, this value will be used instead.
+// Type: double
+//
+
+low_freq_default_mhz = 9400;
+
+//======================================================================
+//
+// CONTROLLING THE FMQ.
+//
+//======================================================================
+ 
+///////////// start_reading_at_fmq_start //////////////
+//
+// Option to start reading at beginning of input FMQs.
+// Normally, we start reading at the end of the queues. For debugging, 
+//   however, it is sometimes helpful to start at the beginning of the 
+//   queues.
+// Type: boolean
+//
+
+start_reading_at_fmq_start = FALSE;
+
+///////////// time_between_reads_secs /////////////////
+//
+// Sleep this amount of time between reads (secs).
+// Type: double
+//
+
+time_between_reads_secs = 1;
+
+//======================================================================
+//
+// TCP OUTPUT - to frequency controller.
+//
+//======================================================================
+ 
+///////////// output_interval_secs ////////////////////
+//
+// Rate at which frequency will be reported to the contol device.
+// Type: double
+//
+
+output_interval_secs = 1;
+
+///////////// tcp_mode ////////////////////////////////
+//
+// Mode for sending data.
+// TCP_MODE_SERVER: this app listens on a port, and when it gets a 
+//   connection from a client it starts to send data to the client. 
+//   TCP_MODE_CLIENT: this application acts as a client and connects to a 
+//   server, sending data to that server.
+//
+// Type: enum
+// Options:
+//     TCP_MODE_SERVER
+//     TCP_MODE_CLIENT
+//
+
+tcp_mode = TCP_MODE_CLIENT;
+
+///////////// remote_server_host //////////////////////
+//
+// Name of host for frequency control server. This can also be the IP 
+//   address.
+// Applies to TCP_MODE_CLIENT.
+// Type: string
+//
+
+remote_server_host = "localhost";
+
+///////////// remote_server_port //////////////////////
+//
+// Port number for frequency control device server.
+// Applies to TCP_MODE_CLIENT.
+// Type: int
+//
+
+remote_server_port = 11000;
+
+///////////// local_listening_port ////////////////////
+//
+// Port in which to listen for connections.
+// Applies to TCP_MODE_SERVER.
+// Type: int
+//
+
+local_listening_port = 10000;
+

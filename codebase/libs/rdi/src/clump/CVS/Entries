@@ -1,0 +1,14 @@
+/Makefile/1.5/Tue Sep 18 21:18:28 2012//
+/Makefile.orig/1.1/Tue Aug 29 23:34:35 1995//
+/alloc.c/1.4/Thu Mar  3 18:47:03 2016//
+/clump.doc/1.1/Tue Aug 29 23:34:37 1995//
+/clump.h.org/1.1/Tue Aug 29 23:34:38 1995//
+/clump_intervals.c/1.7/Thu Mar  3 18:47:03 2016//
+/find_overlap.c/1.4/Thu Mar  3 18:47:03 2016//
+/overlap.c/1.4/Thu Mar  3 18:47:03 2016//
+/overlap_plane.c/1.4/Thu Mar  3 18:47:03 2016//
+/overlap_rows.c/1.4/Thu Mar  3 18:47:03 2016//
+/print_mallinfo.c/1.2/Tue Sep 18 21:18:28 2012//
+/stack_interval.c/1.5/Thu Mar  3 18:47:03 2016//
+/test_clump_intervals.c/1.2/Tue Sep 18 21:18:28 2012//
+D

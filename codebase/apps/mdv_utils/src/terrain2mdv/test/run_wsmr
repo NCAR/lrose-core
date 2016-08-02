@@ -1,0 +1,4 @@
+#!/bin/csh
+
+../terrain2mdv -params params.wsmr -if files.wsmr
+

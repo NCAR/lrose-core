@@ -1,0 +1,74 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+	p_header = "Small program to send a few fake beams\n"
+	"to an FMQ. The intent is to cause Dsr2Vol to write\n"
+	"out the last volume if the end of vol decision\n"
+	"is set to AUTOMATIC. All data values are missing.\n"
+	"Niles Oien.";
+}
+
+paramdef string {
+  p_default = "2010/01/24 19:00:00.";
+  p_descr = "Data time";
+  p_help = "Set to about the time of the last volume to\n"
+	"avoid exceeding Dsr2Vol's max duration and to give\n"
+	"output MDV files accurate timing.";
+} dataTime;
+
+
+typedef struct {
+	int nGates;
+	int nFields;
+	double elevation;
+	double startAz;
+	double endAz;
+	double delAz;
+} geom_t;
+
+paramdef struct geom_t {
+  p_default = { 800, 3, 0.0, 0.0, 360.0, 1.0 };
+  p_descr = "Beam geometry";
+  p_help = "Set in such a way that Dsr2Vol will write out the last volume\n"
+	"if the end of vol decision is AUTOMATIC.";
+} geom;
+
+typedef struct {
+	string fmqUrl;
+	long fmqSizeBytes;
+	long fmqNumSlots;
+	boolean fmqCompress;
+	string fmqMsgLogDir;
+	boolean fmqBlockingWrites;
+	int microSecBetweenBeams;	
+} fmq_t;
+
+paramdef struct fmq_t {
+  p_default = {"fmqp:://localhost::fmq/dsRadar", 20000000, 30, FALSE, "./", TRUE, 100 };
+  p_descr = "FMQ details.";
+  p_help = "Set to match your fmq.";
+} fmq;
+

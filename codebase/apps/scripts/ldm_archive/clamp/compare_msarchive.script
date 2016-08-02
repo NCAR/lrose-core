@@ -1,0 +1,77 @@
+#!/bin/csh -x
+#
+# 8/19/2003  Celia Chen
+# This script has been modified to verify that the daily model data archive 
+# files, arrived via LDM's CONDUIT feed, were indeed sent and received by 
+# SCD's MassStore correctly.  It gets a listing of MassStore files for a
+# particular model, compares the entries in that listing
+# to the files on the local disk.  If the files don't match, then it 
+# resends the file(s) to the MassStore.
+#
+# This script was written originally by Peter Neilley.
+###########################################################################
+
+set EXE_home = /home/rapdmg/exe
+set ARC_home  = /home/rapdmg/archive_staging
+set ARC_SCRIPTS_home = /home/rapdmg/archive_scripts
+# MSS_path = /RAPDMG/grib/model_ID/date/model_output_file_name
+set MS_dir = $ARC_home/MSlist
+ 
+set time1 = `date`
+echo "Start time: " $time1
+
+ 
+#set ardate = `$EXE_home/gemtime -o -24h %Y%m%d`
+#set armmdd = `$EXE_home/gemtime -o -24h %m%d`
+#
+set ardate = `$EXE_home/gemtime -o -48h %Y%m%d`
+set armmdd = `$EXE_home/gemtime -o -48h %m%d`
+set mid = $1
+set mid_dir = /grib/$mid/$ardate
+echo "mid_dir = $mid_dir"
+set MSS_path = /RAPDMG/grib/$mid/$ardate
+echo " MSS_path = /RAPDMG/grib/$mid/$ardate"
+
+# Get msls for the model
+if (-e $MS_dir) then
+  $ARC_SCRIPTS_home/get_msls.script $mid
+else
+  mkdir $MS_dir
+  $ARC_SCRIPTS_home/get_msls.script $mid
+endif
+# Go to the model directory
+cd $mid_dir
+
+foreach file (*)
+  set local_size = `ls -l $file | awk '{print $5}'`
+  #set msfile = `echo $file | tr "[a-z]" "[A-Z]"`
+  set msls_file = $MS_dir/$mid"_msls_"$ardate 
+  echo "msls file: " $msls_file
+  set ms_size = `grep $file $msls_file | awk '{print $5}'`
+  echo "file,ms_size,local_size:" $file, $ms_size, $local_size
+
+  # if the MSS file exists and has the same file size, do nothing 
+  if ( $ms_size >= $local_size ) then
+     echo " Local file $file found on the MSS with the same file size"
+     #rm $file
+  # Otherwise, resend the file to the MSS
+  else
+     msrcp -pr 48500002 -pe 4096 $mid_dir/$file mss:$MSS_path/$file
+     msclass -class -R reliability=economy $MSS_path/$file
+     echo "Resend file: msrcp -pr 48500002 -pe 4096 $mid_dir/$file mss:$MSS_path/$ardate/$file"
+  endif
+end
+
+  $ARC_SCRIPTS_home/get_msls.script $mid
+
+
+
+
+
+
+
+
+
+
+
+

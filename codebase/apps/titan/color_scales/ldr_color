@@ -1,0 +1,19 @@
+# test returned power color scale
+
+# Nancy Rehak, April 1995
+
+-53	-46	#005a00
+-46	-39	#007000
+-39	-32	#087fdb
+-32	-25	#1c47e8
+-25	-18	#6e0dc6
+-18	-11	#c80f86
+-11	-4	#c06487
+-4	4	#d2883b
+4	11	#fac431
+11	18	#fefa03
+18	25	#fe9a58
+25	32	#fe5f05
+32	39	#fd341c
+39	46	#bbb
+46	53	#eee

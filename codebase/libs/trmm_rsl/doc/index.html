@@ -1,0 +1,258 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+   <title>TRMM Office Web Site</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#FF0000" vlink="#FF0000">
+&nbsp;
+<table BORDER=0 CELLSPACING=4 CELLPADDING=4 COLSPAN="2" >
+<tr>
+<td VALIGN=TOP WIDTH="110" BGCOLOR="#0000AA"><!--
+This is where the left hand column goes.
+**********************************************************************
+-->
+<p><br>
+<center>
+<p><a href="http://trmm.gsfc.nasa.gov/trmm_office/index.html"><img SRC="http://trmm.gsfc.nasa.gov/trmm_office/gifs/trmm_office_logo.gif" BORDER=0 height=90 width=90></a></center>
+
+<p><br>
+<p>
+<hr><font color="#FFFFFF"><a href="/trmm_office/whats_new/whats_new.html">What's
+New??&nbsp;</a></font>
+<br><font color="#FFFFFF"><a href="/trmm_office/information/information.html">TRMM
+Info&nbsp;</a></font>
+<br><font color="#FFFFFF"><a href="/trmm_office/data/data.html">GV Data</a></font>
+<br><font color="#FFFFFF"><a href="/trmm_office/field_campaigns/field_campaigns.html">Field
+Campaigns</a></font>
+<br><font color="#FFFFFF"><a href="/trmm_office/software/software.html">Software</a></font>
+<br><font color="#FFFFFF"><a href="/trmm_office/staff/staff.html">Staff</a></font>
+<br><font color="#FFFFFF"><a href="http://trmm.gsfc.nasa.gov/">TRMM Project</a></font>
+<br><font color="#FFFFFF"><a href="http://tsdis.gsfc.nasa.gov/tsdis/tsdis.html">TSDIS</a></font>
+<br><font color="#FFFFFF"><a href="http://trmm.gsfc.nasa.gov/jcetop/jcet.html">JCET&nbsp;</a></font>
+<br><font color="#FFFFFF"><a href="http://daac.gsfc.nasa.gov">GSFC/DAAC&nbsp;</a></font>
+<br><font color="#FFFFFF"><a href="ftp://trmm.gsfc.nasa.gov/">FTP&nbsp;</a></font>
+<p>
+<hr>
+<center><img SRC="http://trmm.gsfc.nasa.gov/cgi-bin/Count.cgi?df=rsl.dat&ft=0" height=20 width=90 align=ABSCENTER></center>
+<!--
+End left hand column
+**********************************************************************
+--></td>
+
+<td WIDTH="500"><!--
+This is where the main header goes
+**********************************************************************
+-->
+<center><table CELLPADDING=0 >
+<tr>
+<td ALIGN=CENTER><a href="http://www.nasa.gov/"><img SRC="http://trmm.gsfc.nasa.gov/trmm_office/gifs/NASAlogo.gif" BORDER=0 </A height=65 width=75 align=BOTTOM></a><a href="http://www.gsfc.nasa.gov/"><img SRC="http://trmm.gsfc.nasa.gov/trmm_office/gifs/gsfcline-small.gif" BORDER=0 NATURALSIZEFLAG="3" height=86 width=79 align=BOTTOM></a><a href="http://dao.gsfc.nasa.gov/lab/lab_brochure.html"><img SRC="http://trmm.gsfc.nasa.gov/trmm_office/gifs/lab_for_atmos.gif" BORDER=0 height=88 width=88 align=BOTTOM></a><a href="http://trmm.gsfc.nasa.gov"><img SRC="http://trmm.gsfc.nasa.gov/trmm_office/gifs/trmm_project.gif" BORDER=0 </A height=90 width=90 align=BOTTOM></a></td>
+</tr>
+</table></center>
+<!--
+End header
+**********************************************************************
+-->
+<hr>
+<center><table BORDER=2 >
+<caption>
+<center>
+<h1>
+TRMM Office Radar Software Library</h1></center>
+</caption>
+
+<tr>
+<td><img SRC="rsl3.gif" ></td>
+</tr>
+</table></center>
+
+<center>
+<p>
+<hr></center>
+
+<h2>
+Current RSL Version 1.24, released 6/28/1999</h2>
+
+<h4>
+By: John H. Merritt</h4>
+In support of the <a href="http://trmm.gsfc.nasa.gov">Tropical Rainfall
+Measuring Mission</a>'s (TRMM) <a href="http://trmm.gsfc.nasa.gov/trmm_office/index.html">Global
+Validation Program</a>, the NASA TRMM Office has developed a Radar Software
+Library for working with the various input radar formats. This is an object-oriented
+library written in C. It and other software are available via <a href="ftp://trmm.gsfc.nasa.gov/pub/software">anonymous
+ftp</a>.
+<p>This library is an object oriented programming environment for writing
+software applicable to all RADAR data related to the <a href="http://trmm.gsfc.nasa.gov/trmm_office/index.html">TRMM
+GV</a> effort. This library reads the WSR88D, Lassen, Sigmet, McGill, UF,
+HDF, RAPIC, RADTEC and native RSL file formats. Additional functions are
+provided to manipulate the RSL objects. Nearly all of the functions return
+objects. When they don't, they usually perform actions like output, making
+images, etc. The most general object in RSL is <b>Radar</b>. The structure
+<b>Radar</b>
+is the method used to define the ideal or universal radar representation
+in RAM while keeping the natural resolution of the data unchanged. More
+simply, <b>Radar</b> represents the super set of all radar file formats.
+The <a href="RSL_structures.html">Radar structure</a> is hierarchically
+defined such that it is composed of <b>Volumes</b>, each containing one
+field type. <b>Volumes</b> are composed of <b>Sweeps</b>.
+<b>Sweeps</b>
+are composed of <b>Rays</b> and <b>Rays</b> contains a vector of the field
+type. Some field types are Reflectivity(DZ), Velocity(VR), Spectrum Width(SW),
+etc. There are approximately 20 field types. See the
+<a href="users_guide.html">Users
+Guide</a> for more information.&nbsp; Also, check out <a href="whats_new.html">What's
+New</a>.
+<center>
+<h4>
+<a href="quick_ref.html">Indexed Reference<br>
+</a><a href="ftp://trmm.gsfc.nasa.gov/pub/software/rsl-LATEST.tgz">Download
+latest version</a></h4></center>
+
+<center>
+<hr></center>
+
+<center><table BORDER=2 WIDTH="400" >
+<caption>
+<h1>
+Supported Radar Data Formats</h1>
+</caption>
+
+<tr>
+<td><b>Format Type</b></td>
+
+<td><b>Input</b></td>
+
+<td><b>Output</b></td>
+</tr>
+
+<tr>
+<td>Lassen</td>
+
+<td>Yes</td>
+
+<td>No</td>
+</tr>
+
+<tr>
+<td>McGill</td>
+
+<td>Yes</td>
+
+<td>No</td>
+</tr>
+
+<tr>
+<td>Sigmet</td>
+
+<td>Yes</td>
+
+<td>No</td>
+</tr>
+
+<tr>
+<td>WSR-88D</td>
+
+<td>Yes</td>
+
+<td>No</td>
+</tr>
+
+<tr>
+<td>RAPIC</td>
+
+<td>Yes</td>
+
+<td>No</td>
+</tr>
+
+<tr>
+<td>UF - Universal Format</td>
+
+<td>Yes</td>
+
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>HDF - Hierarchical Data Format</td>
+
+<td>Yes</td>
+
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>RADTEC</td>
+
+<td>Yes</td>
+
+<td>No</td>
+</tr>
+
+<tr>
+<td>EDGE</td>
+
+<td>Yes</td>
+
+<td>No</td>
+</tr>
+</table></center>
+
+<hr><!--
+##### Insert your text for the main header here
+**********************************************************************
+--><!--
+**********************************************************************
+End right hand column
+--><!--
+**********************************************************************
+This is the trailer. Should be on each page.
+-->
+<center>
+<hr><img SRC="http://trmm.gsfc.nasa.gov/trmm_office/gifs/rainbow_nasa.gif" height=24 width=542></center>
+
+<center><table BORDER=0 WIDTH="400" >
+<tr>
+<td>Otto W. Thiele</td>
+
+<td>Brad L. Fisher</td>
+</tr>
+
+<tr>
+<td>Head, TRMM Office</td>
+
+<td>NASA/TRMM Office</td>
+</tr>
+
+<tr>
+<td>NASA/GSFC/910.1</td>
+
+<td>NASA/GSFC/910.1</td>
+</tr>
+
+<tr>
+<td>Greenbelt, MD 20771</td>
+
+<td>Greenbelt, MD 20771 USA</td>
+</tr>
+
+<tr>
+<td><a href="mailto:thiele@trmm.gsfc.nasa.gov">thiele@trmm.gsfc.nasa.gov</a></td>
+
+<td><a href="mailto:fisher@trmm.gsfc.nasa.gov">fisher@trmm.gsfc.nasa.gov</a></td>
+</tr>
+</table></center>
+<!--
+End trailer
+**********************************************************************
+--><!--
+**********************************************************************
+End the page
+**********************************************************************
+--></td>
+</tr>
+</table>
+
+</body>
+</html>

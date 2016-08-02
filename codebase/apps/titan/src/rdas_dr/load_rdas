@@ -1,0 +1,24 @@
+#! /bin/sh
+
+module="rdas_dr"
+device="rdas"
+group="wheel"
+mode="666"
+
+# invoke insmod with all args we got. dirver will dynamically request major device no.
+/sbin/insmod -f $module $* || exit 1
+
+# remove stale node
+rm -f /dev/${device}
+
+#get major number
+major=`cat /proc/devices | awk "\\$2==\"$module\" {print \\$1}"`
+
+# make the device node
+mknod /dev/${device} c $major 0
+
+# give appropriate permissions
+chgrp $group /dev/${device}
+chmod $mode  /dev/${device}
+
+

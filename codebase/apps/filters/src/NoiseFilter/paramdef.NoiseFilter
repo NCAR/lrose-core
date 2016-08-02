@@ -1,0 +1,133 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+////////////////////////////////////////////////////////
+// parameter definitions for NoiseFilter
+///////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "NoiseFilter PARAMETER FILE";
+  p_text = "NoiseFilter does simple noise filtering on radar data "
+           "based on a single radar field.";
+}
+
+commentdef
+{
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+  p_default = FALSE;
+} debug;
+
+paramdef string
+{
+  p_descr = "Instance";
+  p_help = "Used for process registration";
+  p_default = "Test";
+} instance;
+
+commentdef
+{
+  p_header = "INPUT";
+}
+
+paramdef string
+{
+  p_descr = "Input DsRadar FMQ URL";
+  p_default = "fmqp:://localhost::fmq/dsRadar";
+} input_fmq_url;
+
+commentdef
+{
+  p_header = "OUTPUT";
+}
+
+paramdef string
+{
+  p_descr = "Output DsRadar FMQ URL";
+  p_default = "fmqp:://localhost::fmq/dsRadarFilt";
+} output_fmq_url;
+
+paramdef long
+{
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. "
+           "Some of this buffer will be used for control bytes "
+           "(12 bytes per message).";
+  p_default = 2000000;
+} output_fmq_size;
+
+paramdef long
+{
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of "
+           "messages which may be written to the buffer before "
+           "overwrites occur. "
+           "However, overwrites may occur sooner if the size is not "
+           "set large enough.";
+  p_default = 3600;
+} output_fmq_nslots;
+
+paramdef boolean
+{
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+  p_default = FALSE;
+} output_fmq_compress;
+
+commentdef
+{
+  p_header = "FILTERING";
+}
+
+typedef struct
+{
+  string field_name;
+  double filter_value;
+  boolean keep_data_above_filter_value;
+} filter_field_info;
+
+paramdef struct filter_field_info
+{
+  p_descr = "List of fields to use for filtering out noise";
+  p_help = "The following information is given for each filter field:\n"
+           "\tfield_name - filter field name. "
+           "This must match the name in the input DsRadar FMQ exactly.\n"
+           "\tfilter_value - the field value to use for filtering.\n"
+           "\tkeep_data_above_filter_value - flag indicating how to do the "
+           "filtering. "
+           "If true, data values at locations where the filter field value "
+           "is greater than the indicated value will be kept (and the other "
+           "data values will be set to missing). "
+           "If false, data values at locations where the filter field value "
+           "is less than the indicated value will be kept.\n"
+           "The data is considered to be noise if ALL of the specified "
+           "filter conditions are true. "
+           "I.e., the filter conditions are combined using AND.\n";
+  p_default = { { "NCP", 0.45, true } };
+} filter_fields[];

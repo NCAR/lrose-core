@@ -1,0 +1,241 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+////////////////////////////////////////////////////////////////////////////////
+//
+// Parameter definitions for class2shapefile
+//
+// Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
+// January 2003
+//
+////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Runtime Management";
+} 
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME.";
+} mode;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+} debug;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Instance";
+  p_help = "Process instance for registration with process mapper";
+} instance;
+
+
+commentdef {
+  p_header = "Sounding Identification";
+} 
+
+paramdef long {
+  p_descr = "Numeric site identifier";
+  p_help = "Treated independently of the header content "
+           "within the input sounding file";
+  p_default = { 00000 };
+  p_max = { 99999 };
+  p_min = { 00000 };
+} site_id;
+
+paramdef char* {
+  p_descr = "Site name";
+  p_help = "Limited to a four letter code, e.g., KFTG. "
+           "Treated independently of the header content "
+           "within the input sounding file";
+  p_default = "";
+} site_name;
+
+commentdef {
+  p_header = "Sounding Header Information";
+} 
+
+typedef enum {
+  PROJECT_ID, 
+  LAUNCH_SITE_TYPE,
+  LAUNCH_LOCATION,
+  LAUNCH_TIME_UTC,
+  SONDE_TYPE,
+  SONDE_MANUFACTURER,
+  SENSOR_ID,
+  SONDE_SERIAL_NO,
+  SONDE_OPERATOR,
+  SONDE_ASCENSION_NO
+} header_id_t;
+
+typedef struct {
+  string       headerName;
+  header_id_t  headerId;
+  boolean      includeInShapefile;
+} header_info_t;
+
+paramdef struct header_info_t {
+  p_descr = "Header information.";
+  p_help = "List of header fields to be included in output shapefile. "
+           "Note that both SONDE_TYPE and SONDE_MANUFACTURER will result "
+           "in a single shapefile field, i.e., are considered to contain "
+           "comparable information. "
+           " Similarly with SENSOR_ID and SONDE_SERIAL_NO ";
+  p_default = {
+    { "Project ID",                 PROJECT_ID,          FALSE },
+    { "Launch Site Type",           LAUNCH_SITE_TYPE,    FALSE },
+    { "Launch Location",            LAUNCH_LOCATION,     TRUE },
+    { "UTC Release Time",           LAUNCH_TIME_UTC,     TRUE },
+    { "Sonde Type",                 SONDE_TYPE,          TRUE },
+    { "Radiosonde Manufacturer",    SONDE_MANUFACTURER,  FALSE },
+    { "Sensor ID",                  SENSOR_ID,           TRUE },
+    { "Radiosonde Serial Number",   SONDE_SERIAL_NO,     TRUE },
+    { "System Operator",            SONDE_OPERATOR,      TRUE },
+    { "Ascension No",               SONDE_ASCENSION_NO,  FALSE }
+  };
+} header_info[];
+
+paramdef char* {
+  p_descr = "Site description";
+  p_help = "Limited to 32 characters. "
+           "If specified, overrides the 'Launch Site Type' header "
+           "from within the input sounding file";
+  p_default = "";
+} site_descrip;
+
+commentdef {
+  p_header = "Sounding Data Input";
+} 
+
+typedef struct {
+  string    classFieldName;
+  string    shapeFieldName;
+  int       fieldWidth;
+  int       fieldPrecision;
+  string    fieldUnits;
+  double    missingVal;
+} field_info_t;
+
+paramdef struct field_info_t {
+  p_descr = "Field parameter information.";
+  p_help = "List of sounding parameters to be included in output shapefile.";
+  p_default = {
+    { "Time",   "timeoffset",   6, 1,   "s",     9999.0 },
+    { "Press",  "pressure",     6, 1,   "mb",    9999.0 },
+    { "Temp",   "temperature",  5, 1,   "degC",   999.0 },
+    { "Dewpt",  "dewpoint",     5, 1,   "degC",   999.0 },
+    { "RH",     "relHumid",     5, 1,   "pct",    999.0 },
+    { "Uwind",  "windU",        6, 1,   "m/s",   9999.0 },
+    { "Vwind",  "windV",        6, 1,   "m/s",   9999.0 },
+    { "Wspd",   "windSpeed",    5, 1,   "m/s",    999.0 },
+    { "Dir",    "windDir",      5, 1,   "deg",    999.0 },
+    { "dZ",     "ascentRate",   5, 1,   "m/s",    999.0 },
+    { "Lon",    "LON",          8, 3,   "deg",   9999.0 },
+    { "Lat",    "LAT",          7, 3,   "deg",    999.0 },
+    { "Elev",   "elevation",    5, 1,   "deg",    999.0 },
+    { "Azim",   "azimuth",      5, 1,   "deg",    999.0 },
+    { "Alt",    "height",       7, 1,   "m",    99999.0 }
+  };
+} field_info[];
+
+commentdef {
+  p_header = "Sounding File Input Specifications";
+} 
+
+paramdef char* {
+  p_default = {"./"};
+  p_descr = "Input directory";
+  p_help = "Directory which contains input CLASS files";
+} input_dir;
+
+paramdef char* {
+  p_default = {"class"};
+  p_descr = "Input file suffix";
+  p_help = "Input file suffixes will be checked against this string";
+} input_suffix;
+
+paramdef char* {
+  p_descr = "Directory for writing index file for input file management.";
+  p_help = "The index file stores the name of the last processed input file, "
+           "which prevents earlier input files from being re-processed "
+           "when the application restarts.\n"
+           "If set to an empty string, the index file will be written "
+           "to the the input_dir.";
+  p_default = {""};
+} index_dir;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "On startup, ignore index file.";
+  p_help = "If set to true, index file will not be checked on startup, "
+           "and all input files will be processed.";
+} ignore_index_at_start;
+
+paramdef long {
+  p_default = {180};
+  p_descr = "File check frequency";
+  p_help = "Only used in REALTIME mode.  Number of seconds to wait before "
+           "the input directory is checked for a newly arriving file";
+} check_seconds;
+
+commentdef {
+  p_header = "Shapefile format Sounding Output";
+}
+
+paramdef char* {
+  p_default = {"./shapefile"};
+  p_descr = "Input directory";
+  p_help = "Directory for writting output shapefile";
+} output_dir;
+
+paramdef char* {
+  p_default = {"soundings"};
+  p_descr = "Base filename for shapefile";
+  p_help = "Shapefile extensions will automatically be added "
+           "to the base filename.\n"
+           "NOTE: Shapefiles of the same name will be overwritten!\n"
+           "NOTE: Leave blank if only event file is needed";
+} shapefile_name;
+
+paramdef char* {
+  p_default = {"events"};
+  p_descr = "Base filename for events table";
+  p_help = "Dbf extension will automatically be added to the base filename.\n"
+           "NOTE: Files of the same name will be overwritten!\n"
+           "NOTE: Leave blank if only shape file is needed";
+} eventfile_name;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Input one level only.";
+  p_help = "This option is used only for testing and will "
+           "not ingest a full sounding.";
+} single_level;
+

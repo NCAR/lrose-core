@@ -1,0 +1,133 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+*********************************************************
+ * parameter definitions for DataMapperLite
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 2002
+ *
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress the use of threads. Set no_threads to TRUE for this type of debugging.";
+} no_threads;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+} instance;
+
+commentdef {
+  p_header = "RECOGNIZED DATA TYPES";
+  p_text = "These are the data types which the DataMapper automatically recognizes. If an entry arrives without the data type specified, the type will be automatically determined by the DataMapper by searching the directory string for one if these types.";
+}
+
+paramdef string {
+  p_default = {
+    "gif",
+    "grib",
+    "html",
+    "jpg",
+    "md",
+    "mdv",
+    "nc",
+    "other",
+    "png",
+    "rapic",
+    "raw",
+    "sim",
+    "simulate",
+    "spdb",
+    "titan",
+    "www",
+    "www_content",
+    "xml"
+  };
+
+  p_descr = "Recognized data types.";
+  p_help = "The DataMapper will attempt to determine the data type from the URL, using the types in this list. If it does not recognize the data type, none will be displayed.";
+} data_types[];
+
+commentdef {
+  p_header = "SAVING STATE TO FILE";
+  p_text = "This controls saving the DataMapper state table to a file at set intervals. This facilitiates the restart of the DataMapper without significantly losing state.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to save state, so that on restart the DataMapper will have the same state as when it last exited.";
+  p_help = "See parameter save_state_path.";
+} save_state;
+
+paramdef string {
+  p_default = "/tmp/_dmap_table";
+  p_descr = "File path for DataMapper state table.";
+  p_help = "If save_state is true, the info table is saved to this file every save_state_secs.";
+} save_state_path;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Frequency at which state is saved to file - secs.";
+  p_help = "See 'save_state'.";
+} save_state_secs;
+  
+commentdef {
+  p_header = "PURGING ENTRIES AUTOMATICALLY";
+  p_text = "Option to purge entries which have not been updated within a given interval.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to purge data entries if no regsitration has beed received for a while.";
+  p_help = "If true, data entries state will be removed from the table if registration has not been received withing the prescribed interval. See parameter purge_age_days.";
+} purge_old_entries;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Purge age for table entries - days.";
+  p_help = "If an entry is not updated within this number of days, it is removed from the table. See parameter purge_old_entries.";
+} purge_age_days;
+  
+  

@@ -1,0 +1,95 @@
+#! /bin/bash
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 23:12:35 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
+#--------------------------------------------------------------------
+#
+# prepare Radx release
+#
+# Mike Dixon, RAP, NCAR, Boulder, CO, USA
+# July 2010
+#
+#--------------------------------------------------------------------
+
+# set the path
+
+export PATH=.:/bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin
+
+#######################################################
+# get run time
+
+year=`date +'%Y'`
+month=`date +'%m'`
+day=`date +'%d'`
+hour=`date +'%H'`
+min=`date +'%M'`
+sec=`date +'%S'`
+
+#--------------------------------------------------------------------
+
+echo
+echo "*********************************************************************"
+echo
+echo "  Preparing Radx release"
+echo
+echo "  NCAR, Boulder, CO, USA"
+echo
+echo "  $year/$month/$day $hour:$min:$sec"
+echo
+echo "*********************************************************************"
+echo
+
+# compute release name and dir name
+
+today=${year}${month}${day}
+distName=RadxLib-${today}
+tarName=${distName}.src.tgz
+
+echo Preparing release file $tarName
+
+# make dist dir and copy the required files there
+
+mkdir $distName || exit 1
+
+# populate the distribution dir
+
+cp aclocal.m4 $distName
+cp config.h.in $distName
+cp configure $distName
+cp configure.ac $distName
+cp depcomp $distName
+cp -r doc $distName
+cp doxygen.conf $distName
+cp install-sh $distName
+cp Makefile $distName
+cp makefile.am $distName
+cp makefile.in $distName
+cp README $distName
+cp run_autoconf* $distName
+cp -r src $distName
+
+# make the tar file
+
+tar cvfz $tarName $distName
+
+# clean up
+
+/bin/rm -rf  $distName
+
+#--------------------------------------------------------------------
+# done
+
+echo
+echo "  ************"
+echo "  *** Done ***"
+echo "  *** tar file name: $tarName ***"
+echo "  ************"
+echo
+
+exit 0

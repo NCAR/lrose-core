@@ -1,0 +1,90 @@
+plot "/tmp/ZvCalib.log3" using 11:13
+set xlabel "E (/km)"                
+set ylabel "dBZ"
+replot
+set ylabel "E (/km)" 
+set xlabel "dBZ"    
+plot "/tmp/ZvCalib.log3" using 13:11
+set title "E vs dBZ, NY, Snow cases"
+replot
+
+
+  set out "zv.ps"
+  load 'saveplot'
+  !lpr -Pteerlp1 force.ps
+
+
+
+plot "output/ZvCalib.log2.snow" using 13:11 
+plot "output/ZvCalib.log2.rain" using 13:11 
+set title "E vs dBZ, NY, Rain cases"       
+plot "output/ZvCalib.log2.rain" using 13:11
+set out "zv.snow.ps"                       
+set out "zv.rain.ps" 
+plot "output/ZvCalib.log2.rain" using 13:11
+load 'saveplot'                            
+!lpr -Pmum zv.rain.ps                      
+set yrange [0:4]
+replot
+load 'saveplot'      
+!lpr -Pmum zv.rain.ps
+
+plot "output/ZvCalib.log2.rain" using 13:11, (0 + .04 * x)
+load 'saveplot'      
+set out "zv.rain.ps"                                      
+load 'saveplot' 
+!lpr -Pmum zv.rain.ps
+
+set out "zv.rain.ps"                                      
+plot "output/ZvCalib.log2.rain" using 13:11, (0 + .04 * x) 
+load 'saveplot'                                           
+!lpr -Pmum zv.rain.ps                                     
+
+set yrange [0:4]
+set xrange [10:40]
+set title "E vs dBZ, JFK, Feb - April 2002"
+set ylabel "E (/km)"
+set xlabel "dBZ"
+e(x) = 0.07 * 10 ** (x * 0.1 * b)
+fit e(x) "jfk.all.winter2002" using 12:(($12 > 10 && $11 > 0.1)? $11 : 1/0) via b
+plot "jfk.all.winter2002" using 12:(($12 > 10 && $11 > 0.1)? $11 : 1/0) title 'E vs Dbz', e(x) title 'E = 0.07 (Z ** 0.34)' ls 1
+set logscale y
+set yrange [0.05:4]
+set xrange [10:40]
+set title "E vs dBZ, LGA, Feb - April 2002"
+set ylabel "E (/km)"
+set xlabel "dBZ"
+e(x) = 0.07 * 10 ** (x * 0.1 * b)
+fit e(x) "lga.all.winter2002" using 12:(($12 > 10 && $11 > 0.5)? $11 : 1/0) via b
+plot "lga.all.winter2002" using 12:(($12 > 10 && $11 > 0.5)? $11 : 1/0) title 'E vs Dbz', e(x) title 'E = 0.07 (Z ** 0.39)' ls 1
+set yrange [0:4]
+set xrange [-10:40]
+set title "E vs dBZ, LGA + JFK + EWR, Feb - April 2002"
+set ylabel "E (/km)"
+set xlabel "dBZ"
+e(x) = 0.07 * 10 ** (x * 0.1 * b)
+fit e(x) "all.winter2002" using 12:(($12 > -10 && $11 > 0.05)? $11 : 1/0) via b
+plot "all.winter2002" using 12:(($12 > -10 && $11 > 0.05)? $11 : 1/0) title 'E vs Dbz', e(x) title 'E = 0.07 (Z ** 0.27)' ls 1
+set yrange [0.5:4]
+set xrange [10:40]
+set title "E vs dBZ, LGA + JFK + EWR, Feb - April 2002: upper values only"
+set ylabel "E (/km)"
+set xlabel "dBZ"
+e(x) = 0.07 * 10 ** (x * 0.1 * b)
+fit e(x) "all.winter2002" using 12:(($12 > 10 && $11 > 0.5)? $11 : 1/0) via b
+plot "all.winter2002" using 12:(($12 > 10 && $11 > 0.5)? $11 : 1/0) title 'E vs Dbz for E > 0.5, Dbz > 10', e(x) title 'E = 0.07 (Z ** 0.39)' ls 1
+set yrange [0:4]
+set xrange [-10:40]
+set title "E vs dBZ, EWR, Feb - April 2002"
+set ylabel "E (/km)"
+set xlabel "dBZ"
+e(x) = 0.07 * 10 ** (x * 0.1 * b)
+fit e(x) "ewr.all.winter2002" using 12:(($12 > -10 && $11 > 0.1)? $11 : 1/0) via b
+plot "ewr.all.winter2002" using 12:(($12 > -10 && $11 > 0.1)? $11 : 1/0) title 'E vs Dbz', e(x) title 'E = 0.07 (Z ** 0.33)' ls 1
+set title "E vs dBZ, NY, Snow cases"
+set ylabel "E (/km)" 
+set xlabel "dBZ"    
+set out "zv.snow.ps"                       
+set yrange [0:2]
+plot "output/ZvCalib.log2.snow" using 13:11 
+

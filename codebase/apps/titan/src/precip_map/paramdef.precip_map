@@ -1,0 +1,234 @@
+/*********************************************************
+ * parameter definitions for precip_map
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 1993
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {ARCHIVE};
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the analysis is performed for each volume scan as it becomes available. In archiv mode, all of the scans in a track file are processed";
+} mode;
+
+paramdef enum map_type {
+  p_options = {FORECAST, PERSISTENCE, VERIFY, REFL_FORECAST,
+		 ACCUM_PERIOD, ACCUM_FROM_START};
+  p_default = {FORECAST};
+  p_descr = "Map type";
+  p_help = "Map type may be 1) FORECAST - from advecting reflectivity using storm tracks, 2) PERSISTENCE - from current reflectivity for entire forecast period, 3) VERIFY  - from on the actual reflectivity data, 4) REFL_FORECAST - forecast of refl. at the forecast duration, 5) ACCUM_PERIOD - precip accumulation for specified duration (accum_duration), 6) ACCUM_FROM_START - precip accumulation from start.";
+} map_type;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Option to produce thresholded forecast";
+  p_help = "Thresholded forecast uses individual storm motion. Unthresholded forecast uses area-weighted mean storm motion";
+} thresholded_forecast;
+
+paramdef double {
+  p_default = {100.0};
+  p_min = {1.0};
+  p_descr = "Min area for unthresholded forecast";
+  p_help = "For unthresholded forecasts, the storms areas are summed. The sum must exceed the min area for a valid forecast. If not, forecast speed is set to 0";
+} min_area_unthresholded;
+
+paramdef double {
+  p_default = {50.0};
+  p_min = {1.0};
+  p_descr = "Smoothing radius for unthresholded refl forecast";
+  p_help = "For unthresholded reflectivity forecasts, the motion for a storm is applied to the forecast grid in a manner which will move the individual storm elements, as well as the elements of the grid adjacent to the storm. All points within a distance of proj_area_major_radius from the storm centroid are given a velocity equal to storm speed. Points outside this radius but within a concentric radius given by (proj_area_major_radius + smoothing radius) are given a lesser velocity - the velocity decreases linearly from storm velocity at the inner radius to 0 at the outer radius.";
+} smoothing_radius;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to write debug motion grids for precip forecast";
+  p_help = "If set, the motion grids are written to motion_grid_dir.";
+} write_motion_grid_files;
+
+paramdef char* {
+  p_default = {"."};
+  p_descr = "Directory for motion grid files";
+  p_help = "The motion grid files reside in this directory.";
+} motion_grid_dir;
+
+paramdef double {
+  p_default = {360.0};
+  p_min = {1.0};
+  p_descr = "Max valid age of input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this.";
+} max_realtime_valid_age;
+
+paramdef double {
+  p_default = {0.0};
+  p_min = {0.0};
+  p_descr = "Min altitude CAPPI used in composite (km).";	
+  p_help = "All maps are based on composite reflectivity. This altitude forms the base CAPPI for the composite. Only CAPPI's above this are used in making the composite.";
+} composite_min_altitude;
+
+paramdef double {
+  p_default = {25.0};
+  p_min = {0.0};
+  p_descr = "Max altitude CAPPI used in composite (km).";	
+  p_help = "All maps are based on composite reflectivity. This altitude forms the top CAPPI for the composite. Only CAPPI's below this are used in making the composite.";
+} composite_max_altitude;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Radar data directory";
+  p_help = "Upper level directory for dobson cartesian radar data files";
+} rdata_dir;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Storms data directory";
+  p_help = "Directory for storm and track data files";
+} storms_dir;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Precip map directory";
+  p_help = "Upper level directory for dobson precip map files";
+} map_dir;
+
+paramdef char* {
+  p_default = {"mdv"};
+  p_descr = "Output file extension";
+  p_help = "File name extension for dobson cartesian radar data files";
+  p_private = TRUE;
+} output_file_ext;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Reflectivity field position";
+  p_help = "Position of reflectivity (dBZ) data in the radar volumes";
+} dbz_field;
+
+paramdef double {
+  p_default = {-30.0};
+  p_min = {-50.0};
+  p_max = {100.0};
+  p_descr = "Min dbz value";
+  p_help = "For reflectivity forecasts, reflectivity values below this are not used.";
+} min_dbz;
+
+paramdef double {
+  p_default = {10.0};
+  p_min = {-40.0};
+  p_max = {70.0};
+  p_descr = "Low reflectivity threshold (dBZ).";
+  p_help = "Reflectivity below this threshold is ignored.";
+} low_refl_threshold;
+
+paramdef double {
+  p_default = {55.0};
+  p_min = {40.0};
+  p_max = {70.0};
+  p_descr = "Hail reflectivity threshold (dBZ).";
+  p_help = "The threshold between rain and hail.";
+} hail_refl_threshold;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to use separate file for Z-R";
+  p_help = "If set, the Z-R parameters are obtained from a file residing in the zr_dir directory.";
+} get_zr_from_file;
+
+paramdef char* {
+  p_default = {"."};
+  p_descr = "Directory for ZR files";
+  p_help = "The ZR files reside in this directory.";
+} zr_dir;
+
+paramdef struct ZR {
+  p_descr = "Z-R parameters";
+  p_help = "Parameters in Z-R relationship";
+  p_field_type = {double, double};
+  p_field_name = {coeff, expon};
+} ZR;
+
+paramdef double {
+  p_default = {120.0};
+  p_min = {0.0};
+  p_max = {10800.0};
+  p_descr = "Time delay for precip to hit ground (secs)";
+  p_help = "This delay is used to drift the reflectivity before computing the precipitation";
+} time_to_ground;
+
+paramdef double {
+  p_default = {1800.0};
+  p_min = {0.0};
+  p_max = {10800.0};
+  p_descr = "Forecast durations (secs)";
+  p_help = "Array of duration of precip forecast map. For REFL_FORECAST map_type and file_time_stamp FORECAST_TIME, all durations are used. For all other cases, only the first duration is used, the rest are ignored.";
+} forecast_durations[];
+
+paramdef double {
+  p_default = {1800.0};
+  p_min = {0.0};
+  p_max = {10800.0};
+  p_descr = "Accumulation duration (secs)";
+  p_help = "Duration of precip accumulation map. ACCUM_PERIOD map_type only.";
+} accum_duration;
+
+paramdef double {
+  p_default = {360.0};
+  p_min = {0.0};
+  p_max = {1800.0};
+  p_descr = "Radar vol scan interval (secs)";
+  p_help = "Interval between radar volume scans (secs)";
+} scan_interval;
+
+paramdef enum file_time_stamp
+{
+  p_options = {GENERATE_TIME, FORECAST_TIME};
+  p_default = {GENERATE_TIME};
+  p_descr = "File time stamp - REFL_FORECAST map_type only";
+  p_help = "If GENERATE_TIME, file names match generate data time. If FORECAST_TIME, file names match forecast time. This applies only to the REFL_FORECAST map_type.";
+} file_time_stamp;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to round the forecast times";
+  p_help = "Option to round the forecast times. The interval used is given by parameter rounding_interval";
+} round_forecast_times;
+
+paramdef double {
+  p_default = {600.0};
+  p_min = {10.0};
+  p_max = {86400.0};
+  p_descr = "Rounding interval for forecast times (secs)";
+  p_help = "If round_forecast_times is TRUE, the forecast times are rounded to this interval";
+} rounding_interval;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to force file overwrites.";
+  p_help = "If set, previously generated files will be overwritten whenever the program is rerun on the same date set in REALTIME mode. In ARCHIVE mode, overwrites always occur. IF file_time_stamp is set to FORECAST_TIME, overwrites always occur.";
+} overwrite;
+
+
+

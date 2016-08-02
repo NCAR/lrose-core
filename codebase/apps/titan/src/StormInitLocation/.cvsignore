@@ -1,0 +1,6 @@
+.deps
+StormInitLocation
+__makefile.template
+makefile
+makefile.am
+makefile.in

@@ -1,0 +1,222 @@
+/****************************************************
+ * TDRP params for bprp_filter
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_EXTRA;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process instance.
+ * Used for registration with procmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "rdas";
+
+/*
+ * Input data host.
+ * TCP/IP name/address of host for input data.
+ *
+ * Type: string
+ * Default: "localhost" 
+ */
+input_host = "localhost";
+
+/*
+ * Input data port.
+ * TCP/IP port number for input data.
+ *
+ * Type: long
+ * Default: 10000 
+ * Min value: 5000 
+ * Max value: 65535 
+ */
+input_port = 12000;
+
+/*
+ * Output data port.
+ * TCP/IP port number for output data.
+ *
+ * Type: long
+ * Default: 10000 
+ * Min value: 5000 
+ * Max value: 65535 
+ */
+output_port = 49000;
+
+/*
+ * Option to check radar ID.
+ * If this is set, only beams with the correct radar id are included
+ *   in the outptu data stream.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+check_radar_id = FALSE;
+
+/*
+ * Time computation mode.
+ * If AS_IS, time is accepted as is. Otherwise, it is assumed local
+ *   and changed to UCT.
+ *
+ * Type: enum
+ * Default: LOCAL_TO_UCT 
+ * Legal values: LOCAL_TO_UCT, AS_IS.
+ */
+time_mode = AS_IS;
+
+/*
+ * Target radar ID.
+ * The radar ID to be used for filtering the input data.
+ *
+ * Type: long
+ * Default: 0 
+ */
+target_radar_id = 1;
+
+/*
+ * Radar constant.
+ * Value of radar constant for Met type radar.
+ *
+ * Type: double
+ * Default: -157 
+ */
+radar_constant = -154.91;
+
+/*
+ * Atmospheric attenuation.
+ * Atmospheric attenuation correction (dB/km).
+ *
+ * Type: double
+ * Default: 0.014 
+ * Min value: 0 
+ */
+atmos_attenuation = 0.014;
+
+/*
+ * Beam width.
+ * Radar half-power beam width (deg).
+ *
+ * Type: double
+ * Default: 1 
+ * Min value: 0.01 
+ * Max value: 45 
+ */
+beam_width = 1.6;
+
+/*
+ * Samples per beam.
+ * Number of pulse samples used to compute data from a beam.
+ *
+ * Type: long
+ * Default: 8 
+ * Min value: 1 
+ */
+samples_per_beam = 32;
+
+/*
+ * Pulse width.
+ * Radar pulse width (microsecs).
+ *
+ * Type: double
+ * Default: 2 
+ * Min value: 0.001 
+ */
+pulse_width = 2;
+
+/*
+ * PRF.
+ * Radar pulse repitition frequency (pulses per sec).
+ *
+ * Type: double
+ * Default: 250 
+ * Min value: 1 
+ */
+prf = 250;
+
+/*
+ * Wavelength.
+ * Radar wavelength (cm).
+ *
+ * Type: double
+ * Default: 5 
+ * Min value: 0.01 
+ * Max value: 1000 
+ */
+wavelength = 5;
+
+/*
+ * Gate spacing.
+ * Radar range gate spacing (km).
+ *
+ * Type: double
+ * Default: 0.6 
+ * Min value: 0.001 
+ * Max value: 100 
+ */
+gate_spacing = 0.6;
+
+/*
+ * Start range.
+ * Range to center of first radar gate (km).
+ *
+ * Type: double
+ * Default: 0.3 
+ * Min value: 0.001 
+ * Max value: 1000 
+ */
+start_range = 0.3;
+
+/*
+ * Radar altitude.
+ * Radar altitude (km MSL).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -2 
+ * Max value: 25 
+ */
+radar_altitude = 1.57;
+
+/*
+ * Radar latitude.
+ * Radar latitude (deg.decimal).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -90 
+ * Max value: 90 
+ */
+radar_latitude = 39.787;
+
+/*
+ * Radar longitude.
+ * Radar longitude (deg.decimal).
+ *
+ * Type: double
+ * Default: 0 
+ * Min value: -180 
+ * Max value: 180 
+ */
+radar_longitude = -104.546;

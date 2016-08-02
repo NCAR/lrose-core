@@ -1,0 +1,4 @@
+#! /bin/csh
+
+RdasSim -params RdasSim.test -debug
+

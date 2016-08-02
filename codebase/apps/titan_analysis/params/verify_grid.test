@@ -1,0 +1,67 @@
+/**************************************************
+ *
+ * run-time parameters file for verify_grid
+ *
+ * Mike Dixon RAP NCAR Boulder Colorado USA
+ *
+ * August 1993
+ *
+ * Check file paramdef.verify_grid in the src directory
+ * for explanation of the parameters
+ *
+ **************************************************/
+
+debug = DEBUG_OFF;
+malloc_debug_level = 0;
+
+mode = CONT;
+
+output_scan_cont = TRUE;
+scan_cont_file_path = "cont";
+
+truth_data_dir = "/home/dixon/titan/precip_verify";
+
+truth_label = "Verification_precip";
+detect_label = "Forecast_precip";
+
+truth_field = 0;
+detect_field = 0;
+
+output_scan_cont = FALSE;
+scan_cont_file_path = "(null)";
+
+time_lag = 0;
+time_margin = 180;
+
+relaxed_contingency = FALSE;
+relaxed_margin = 0;
+
+check_range = TRUE;
+max_range = 150.0;
+
+min_regression_val = 0.5;
+
+truth_level_lower = 30.0;
+truth_level_upper = 80.0;
+
+detect_level_lower = 30.0;
+detect_level_upper = 80.0;
+
+/*
+ * hist params - {n_intervals, low_limit, interval_size}
+ */
+
+hist = {10, 5.0, 20.0};
+
+/*
+ * grid params - {nx, ny, minx, miny, dx, dy}
+ */
+
+use_native_grid = FALSE;
+grid = {60, 60, -147.5, -147.5, 5.0, 5.0};
+
+
+
+
+
+

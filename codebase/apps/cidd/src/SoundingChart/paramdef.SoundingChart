@@ -1,0 +1,404 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "SoundingChart is a program that works\n"
+	   "with CIDD to plot sounding data.\n"
+	"Niles Oien and Frank Hage February 2004.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+////////////////////////////////////////////////////////////////////////
+// Window Atributes
+
+commentdef {
+  p_header = "Window Attributes";
+}
+
+paramdef int {
+  p_descr = "Default Window Height";
+  p_default = 500;
+} window_height;
+
+paramdef int {
+  p_descr = "Default Window Width";
+  p_default = 500;
+} window_width;
+
+paramdef string {
+  p_default = "Sounding - Model Sounding Time Series Plot";
+  p_descr = "Window is labeled with this  Text";
+} window_title ;
+
+paramdef string {
+  p_default = "White";
+  p_descr = "Foreground Color - Used for Axes, labels";
+} foreground_color;
+
+paramdef string {
+  p_default = "Orange";
+  p_descr = "Reference Line Color";
+} reference_color;
+
+
+paramdef string {
+  p_default = "Black";
+  p_descr = "Background Color";
+} background_color;
+
+
+paramdef string {
+  p_default = "6x13";
+  p_descr = "Name of font for the text on the display.";
+} font_name;
+
+////////////////////////////////////////////////////////////////////////
+// user interface
+
+commentdef {
+  p_header = "USER INTERFACE";
+}
+
+paramdef boolean {
+  p_descr = "Use Cidd time";
+  p_help = "Use times from Cidd to retrieve data";
+  p_default = false;
+} use_cidd_time;
+
+paramdef int {
+  p_descr = "mouse button recognized";
+  p_help = "0 = any, 1 = left button, 2 = middle, 3 = right button.";
+  p_default = 0;
+} mouse_button;
+
+paramdef int {
+  p_descr = "sleep milli-seconds";
+  p_help = "Number of milli-seconds to sleep between checks for mouse clicks.";
+  p_min = 20;
+  p_default = 250;
+} sleep_msecs;
+
+paramdef int {
+  p_descr = "Automatic click interval - secs";
+  p_help = "Number of seconds between automatic clicks.  If the user hasn't clicked anywhere after this number of seconds, we will simulate a user click in the same place as before and will update the information.  If <= 0, no automatic updates of the display are done.";
+  p_default = 60;
+} auto_click_interval;
+
+paramdef struct origin_t {
+  p_descr = "startup click location";
+  p_help = "Lat/lon position to display if the user hasn't clicked on a location.";
+  p_field_name = { lat,
+                   lon };
+  p_field_type = { double,    /* lat */
+                   double };  /* lon */
+} startup_location;
+
+paramdef string {
+  p_descr = "SPDB URL to Click point reference markers";
+  p_help = "This Url is used to ourput click points for plotting on CIDD";
+  p_default = "spdb/sounding_click_point";
+} click_point_url;
+
+paramdef string {
+   p_descr = "Label to use for SPDB data base and invalidating CIDD data";
+   p_default = "Click Point";
+} click_point_label;
+
+
+////////////////////////////////////////////////////////////////////////
+// PLOT Params.
+
+commentdef {
+  p_header = "Plot Parameters ";
+}
+
+paramdef int {
+  p_descr = "Size of Left Margin in Pixels.";
+  p_default = 20;
+} left_margin;
+
+paramdef int {
+  p_descr = "Size of Right Margin in Pixels.";
+  p_default = 40;
+} right_margin;
+
+paramdef int {
+  p_descr = "Size of Top Margin in Pixels.";
+  p_default = 20;
+} top_margin;
+
+paramdef int {
+  p_descr = "Size of Bottom Margin in Pixels.";
+  p_default = 20;
+} bottom_margin;
+
+paramdef double {
+  p_descr = "Min Height - Kilometers ";
+  p_default = 0;
+} min_height_km;
+
+paramdef double {
+  p_descr = "Max Height - Kilometers ";
+  p_default = 20;
+} max_height_km;
+
+paramdef double {
+  p_descr = "Additional Time to look back before CIDD epoch-  hours";
+  p_help = "Temporal window is defined by this + CIDD's epoch + lookAhead.";
+  p_default = 12;
+} lookBack;
+
+paramdef double {
+  p_descr = "Additional Time to look  & plot ahead of CIDD's epoch- hours.";
+  p_help = "Temporal window is defined by this + CIDD's epoch + lookBack.";
+  p_default = 12;
+} lookAhead;
+
+////////////////////////////////////////////////////////////////////////
+// Shared memory information
+
+commentdef {
+  p_header = "DATA TO DISPLAY";
+}
+
+paramdef int {
+  p_descr = "Shared memory status key";
+  p_help = "Id for the shared memory status segment used for communicating with the display.";
+  p_default = 61500;
+} coord_shmem_key;
+
+paramdef boolean {
+  p_descr = "Flag to not wait for display shared memory.";
+  p_help = "If set, this program will not wait for shared memory segment from the display to be set ready.";
+  p_default = false;
+} no_wait_for_shmem;
+
+paramdef int {
+  p_descr = "Don't collect new data until last request was this old (secs)";
+  p_default = 10;
+} max_data_age;
+
+paramdef string {
+  p_descr = "URL for Locating Station ID's by Lat Lon ";
+  p_help = "Sounding Locations are looked up in this data base.";
+  p_default = "http://www.rap.ucar.edu/maps/world_stations.dat";
+} StationLocatorURL;
+
+paramdef boolean {
+  p_descr = "";
+  p_default = TRUE;
+} useStationLocator;
+
+paramdef int {
+  p_descr = "If not using the StationLocator, request this station";
+  p_help  = "Set to 0 to gather any/all soundings from the url";
+  p_default = 0;
+} station_id;
+
+paramdef double {
+  p_descr = "Maximum distance to a valid station";
+  p_help = "Locater will not return station further than this from the interest point";
+  p_default = 3000.0;
+} max_station_dist_km;
+
+paramdef string {
+  p_descr = "Comma delimited list of URL's to color scales";
+  p_help = "Directory containing Color scale files";
+  p_default = ".,http://www.rap.ucar.edu/colorscales";
+} cscale_dir;
+
+////////////////////////////////////////////////////////////////////////
+// Shared memory information
+
+commentdef {
+  p_header = "URLs for Sounding  Data ";
+}
+
+paramdef boolean {
+  p_descr = "If set, actual soundings are collected and displayed.";
+  p_default = TRUE;
+} doSoundings;
+
+paramdef boolean {
+  p_descr = "If set, SPDB GenPt reference points are output.";
+  p_default = TRUE;
+} output_ref_points;
+
+paramdef boolean {
+  p_descr = "Toggle to Set Sounding winds to ON at startup";
+  p_default = TRUE;
+} sound_winds_on;
+
+paramdef boolean {
+  p_descr = "Toggle to Set Plotting 3d  to ON at startup";
+  p_default = TRUE;
+} plot_3d_border;
+
+paramdef boolean {
+  p_descr = "Toggle to Set Sounding Line plots to ON at startup";
+  p_default = TRUE;
+} sound_lines_on;
+
+paramdef boolean {
+  p_descr = "Toggle to Set Sounding Color Cells to ON at startup";
+  p_default = TRUE;
+} sound_color_on;
+
+paramdef string {
+  p_descr = "Color to render the Sounding Wind Barbs in";
+  p_default = "White";
+} sound_winds_color;
+
+paramdef double {
+  p_descr = "Sounding will be rendered this many minutes wide"; 
+  p_default = 120.0;
+} sounding_width_minutes;
+
+typedef enum {
+    VSCALE_MB,VSCALE_KM
+} vscale_type_t;
+
+paramdef enum vscale_type_t {
+  p_default = VSCALE_MB;
+  p_descr = "Average & Plot data on this vertical scale";
+} vscale_type;
+
+paramdef double {
+  p_descr = "Sounding values will be averaged into vertical bins of this size "
+            "when vscale_type =  VSCALE_KM"; 
+  p_default = 0.5;
+} sounding_interval_km;
+
+paramdef double {
+  p_descr = "Sounding values will be averaged into vertical bins of this size"
+            "when vscale_type =  VSCALE_MB"; 
+  p_default = 20.0;
+} sounding_interval_mbar;
+
+typedef enum {
+    TEMP,RH,DEWPT,W_WIND,W_SPD,W_DIR,ASCEN_R,PRESS,SPARE1,SPARE2,SPARE3
+} sounding_fld_t;
+
+typedef struct {
+	string label;
+	string url;
+	sounding_fld_t field;
+	string cscale;
+	string units;
+} soundingSrc_t;
+
+paramdef struct soundingSrc_t {
+	 p_default = {
+	  { "TEMP", "spdbp:://sydney::IHOP/spdb/RaobCollectives", TEMP, "deg_c.colors", "C" },
+	  { "RH",   "spdbp:://sydney::IHOP/spdb/RaobCollectives", RH,   "humid.colors", "%" },
+	  { "CAPE", "spdbp:://host::/dir", SPARE1, "cape.colors", "Cape" },
+	  { "CIN",  "spdbp:://host::/dir", SPARE2, "cin.colors", "Cin" }
+	 };
+	 p_help = "Spdb Sounding or Sounding Plus data URL and field to display.\n"
+			  "TEMP - Temperature\n"
+			  "PRES - Pressure mb\n"
+			  "RH - Rel Humid %\n"
+			  "DEWPT - Dew point C\n"
+			  "W_WIND - Vertical Winds m/s\n"
+			  "W_SPD - Wind Speed m/s\n"
+			  "W_DIR - Wind Direction degrees\n"
+			  "ASCEN_R - Asention Rate m/s\n"
+			  "SPARE1 - Spare value\n"
+			  "SPARE2 - Second Spare"
+			  "SPARE3 - 3rd Spare\n";
+	 p_desc = "Program will locate and load the closest station to the CIDD click point.";
+} soundingSrc[];
+
+////////////////////////////////////////////////////////////////////////
+//  MDV GRID Params
+
+commentdef {
+  p_header = "Gridded Data Params";
+}
+
+paramdef boolean {
+  p_descr = "Toggle to Set Grid winds to ON at startup";
+  p_default = TRUE;
+} grid_winds_on;
+
+paramdef boolean {
+  p_descr = "Toggle to Set Grid Line Plots to ON at startup";
+  p_default = TRUE;
+} grid_lines_on;
+
+paramdef boolean {
+  p_descr = "Toggle to Set Grid Color Cells to ON at startup";
+  p_default = TRUE;
+} grid_color_on;
+
+paramdef string {
+  p_descr = "Color to render the Grid Wind Barbs in";
+  p_default = "White";
+} grid_winds_color;
+
+paramdef boolean {
+  p_descr = "If set, MDV soundings are collected and displayed.";
+  p_default = TRUE;
+} doMdv;
+
+typedef struct {
+	string label;
+	string url;
+	string fieldname;
+	string u_fname;
+	string v_fname;
+	string cscale; 
+	string units; 
+} GridSrc_t;
+
+paramdef struct GridSrc_t {
+    p_default = {
+	    { "Temperature", "mdvp:://gauss.rap::/d3/data/IHOP/mdv/ruc10km/pressure/f00", "TMP", "UGRD", "VGRD", "temp.colors","C" },
+	    { "RH",     "mdvp:://host::dir/dir",                                     "RH",  "UGRD", "VGRD", "humid.colors", "%" }
+	};
+	p_help = "label = Menu Label \n"
+			 "url = MDV URL to data \n"
+			 "fieldname = Short Field name in Mdv File\n"
+			 "u_fname = Short Field name of E-W Wind componet\n"
+			 "v_fname = Short Field name of N-S Wind componet\n"
+			 "cscale = Name of Colorscale to use for drawing";
+
+	p_descr = "List of Gridded/MDV data fields to display";
+} GridSrc[];

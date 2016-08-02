@@ -1,0 +1,28 @@
+#!/bin/sh
+
+proc_name=$1
+instance=$2
+sub_dir=$3
+
+if [ "$sub_dir" = no-params ]
+then
+
+  running "$proc_name -instance $instance"
+  if [ $? = 1 ]; then
+    $proc_name -instance $instance 2>&1 | \
+      LogFilter -d $ERRORS_LOG_DIR -p $proc_name -i $instance &
+  fi
+
+
+else
+
+  cd $PROJ_DIR/$sub_dir/params
+
+  running "$proc_name -params $proc_name.$instance"
+  if [ $? = 1 ]; then
+    $proc_name -params $proc_name.$instance 2>&1 | \
+      LogFilter -d $ERRORS_LOG_DIR -p $proc_name -i $instance &
+  fi
+
+fi
+

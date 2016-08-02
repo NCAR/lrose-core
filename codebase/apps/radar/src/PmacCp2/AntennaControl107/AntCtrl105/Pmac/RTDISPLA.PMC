@@ -1,0 +1,84 @@
+;do the real time display
+;needs i127 and i227 to be set
+;also m161 and m261
+close
+delete gather delete trace
+open plc 10 
+clear
+command "wy$7d0,$16"      ;you have to do this for some reason
+;clear display 
+
+
+
+
+
+while (2>1)  ;PLC's do one while evalulation/cycle
+
+;reset the display every once in a while
+p301=p301+1
+if (p301%10000=0)
+display 0  "                                        "
+display 40 "                                        "
+p12=i127/360.
+p13=i227/360
+display 0  "Az Cmd         Az Vel       Az Err"
+display 40 "El Cmd         El Vel       El Err"
+endif
+
+;display azimuth command m161->d:$0028
+p10=(m161/(i108*32))%i127 ; scale and mod
+p10=p10/p12 ;convert to degrees
+display 7, 7.3, P10
+
+;display azimuth velocity m166->x:$33,0,24,s
+p11=(m170/(i108*32))%i127      ;actual az
+p22=m0                         ;servo clock now
+
+p11=p11/p12
+
+        if (abs(p22-p21)>2259) ;1 sec
+p14=(p11-p20)/((p22-p21)/2259) ;compute velocity,standard servo clk
+p20=p11                        ;save az now
+p21=p22                        ;save clock now
+display 21,6.2,p14
+endif
+
+;display az following error
+;actual azimuth m162->d:$002b
+p14=((m170-m161)/(i108*32))%i127 ; scale and mod
+p14=p14/p12 ;convert to degrees
+if (p14>180)
+p14=p14-360
+endif
+display 35,5.2,p14
+
+
+;display elevation velocity m266->x:$33,0,24,s
+p11=(m270/(i208*32))%i227       ;actual az
+p22=m0                          ;servo clock now
+p11=p11/p13
+        if (abs(p22-p28)>2259)  ;1 sec
+p14=(p11-p29)/((p22-p28)/2259)  ;compute velocity,standard servo clk
+p29=p11                         ;save el now
+p28=p22                         ;save clock now
+display 61,6.2,p14
+endif
+
+;display elevation command m261->d:$0064
+p11=(m261/(i208*32))%i227 ;scale and mod
+p11=p11/p13 ;convert to degrees
+display 47, 7.3, P11
+
+;display elevation following error
+;actual elevation  m262->d:$67
+p14=((m270-m261)/(i208*32))%i227 ; scale and mod
+p14=p14/p13 ;convert to degrees
+if (p14>180) 
+p14=p14-360
+endif
+display 75,5.2,p14
+
+
+endwhile
+close
+enable plc 10

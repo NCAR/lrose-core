@@ -1,0 +1,325 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+p_header =
+
+"MdvMultFilt - 
+"
+"This program performs a sequence of filters on input MDV data.  One input MDV url and input field is processed via a sequence of filters. Results are written to an output MDV url. Each filtering step can optionally be written to this URL (or not).\n"
+"\n"
+"The filtering steps are specified through the FiltParm array below. Each element of this array consists of filter type, filter index, input field, output field, indication as to whether the output field should be written to the output url, and output units.\n"
+"\n"
+"For each filter type, the filter index indicates the position in an array of parameters for this filter type (filter_index = 0,1,2...). For example if filter type = SMOOTH and filter index = 3, then the smooth filtering paramters MdvSmooth[3] will be used.\n"
+"\n"
+"For each filtering step, the input field must either be an output field from a previous filtering step, or must be the original input field.\n"
+"\n"
+"Currently the following filter types are supported:\n"
+"\n"
+"THRESH = same action as program MdvThresh\n"
+"SMOOTH = same action as MdvSmooth\n"
+"COMBINE = combines two fields, similar to MdvMerge2 but much simpler.\n"
+"EXPAND = takes a particular value from a field and expands it in the output.\n"
+"PASS = passthrough - useful for seeing effect on input when remapGrid=TRUE.\n"
+"\n"
+"Other filters can be added as needed. Please contact Dave Albo.\n";
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_default = "input";
+  p_private = FALSE;
+  p_descr = "Input field name to process - or use '#2' to indicate field\n"
+            "two (fields start at 0 in this case).";
+} InFieldName;   
+
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "more than one field can be written here";
+  p_default = {"mdvp:://localhost::mdv/thresh"};
+} OutUrl;
+
+typedef enum
+{
+  ENCODING_INT8,
+  ENCODING_INT16,
+  ENCODING_FLOAT32
+} encoding_type_t;
+
+paramdef enum encoding_type_t
+{
+  p_descr = "Output encoding type";
+  p_default = ENCODING_INT8;
+} output_encoding_type;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+
+typedef enum {THRESH, SMOOTH, COMBINE, EXPAND, PASS} filter_t;
+typedef struct
+{
+  filter_t FilterType;
+  int           FilterIndex;
+  string InFieldName;
+  string OutFieldName;
+  boolean OutToUrl;
+  string OutFieldUnits;
+} filter_parm_t;
+
+paramdef struct filter_parm_t
+{
+  p_descr = "The filtering steps in order";
+  p_help = "\n"
+       "FilterType = one of the known filters to perform\n"
+       "FilterIndex = index to params for this kind of filter below (0,1,..)\n"
+       "InFieldName = name of input field. Must be OutFieldName of a previous step, or the main InFieldName above\n"
+       "OutFieldName = name of output field. Cannot be InFieldName above\n"
+       "OutToUrl = TRUE to output the results of this filter to url\n"
+       "OutFieldUnits = units of output (when written to output url, otherwise unused\n";
+  p_default =
+  {
+   {THRESH,  0, "input",   "Thresh", FALSE, ""},
+   {SMOOTH,  0, "Thresh",  "Smooth", TRUE,  "dBZ"},
+   {COMBINE, 0, "Smooth",  "Combine",FALSE, ""},
+   {SMOOTH,  1, "Combine", "Final",  TRUE,  "dBZ"}
+  };
+} FiltParm[];
+
+typedef struct
+{
+  double MinThresh;
+  double MaxThresh;
+  boolean ReplacePassValues;
+  double PassValue;
+} mdv_thresh_parm_t;
+
+paramdef struct mdv_thresh_parm_t
+{
+  p_descr = "params for THRESH filter";
+  p_help = "MinThresh = data must be >= this to pass.\n"
+           "            Set to hugely negative value to have no effect.\n" 
+           "MaxThresh =  data must be <= this to pass\n"
+           "             Set to hugely positive value to have no effect.\n"
+	   "ReplacePassValue = Set to replace values that pass thresholding\n"
+           "                   with a contsant value specified by PassValue\n"
+           "                   If FALSE the data values that pass are sent\n"
+           "                   to the output\n"
+           "PassValue = Value to use for data points that pass the\n"
+           "            threshold test.  Has effect only if\n"
+           "            ReplacePassValues is TRUE\n";
+  p_default = {{-5000.0, 5000.0, FALSE, 1.0}};
+} MdvThresh[];
+
+typedef enum {SMOOTH_MIN, SMOOTH_MAX, SMOOTH_MEAN,
+	SMOOTH_MEDIAN} smoothing_method_t;
+
+typedef struct 
+{
+  int HalfWin;
+  smoothing_method_t SmoothingMethod;
+} mdv_smooth_parm_t;
+  
+paramdef struct mdv_smooth_parm_t
+{
+  p_descr = "params for SMOOTH filter";
+  p_help = "HalfWin = defines the window size\n"
+           "          Actual window is 2*HalfWin + 1 square,\n"
+           "          ie. HalfWin = 1   =>  3x3 window\n" 
+	   "SmoothingMethod = To take the median, min, mean or max\n"
+           "                  from the window. Typically set to SMOOTH_MEAN";
+  p_default = {{1, SMOOTH_MAX}, {1, SMOOTH_MEAN}};
+} MdvSmooth[];
+
+typedef enum {COMB_MIN, COMB_MAX, COMB_MEAN} combine_method_t;
+typedef struct
+{
+  string SecondInpFieldName;
+  combine_method_t CombineMethod;
+} mdv_combine_parm_t;
+
+paramdef struct mdv_combine_parm_t
+{
+  p_descr = "params for COMBINE filter";
+  p_help = "SecondInpFieldName = name of second input field from previous \n"
+           "                     OutFieldName above (or main InFieldName)\n"
+	   "CombineMethod = one of COMB_MIN, COMB_MAX, or COMB_MEAN\n";
+  p_default = {{"input", COMB_MEAN}};
+} MdvCombine[];
+
+typedef struct
+{
+  double Value;
+  double Tol;
+  int HalfWin;
+} mdv_expand_value_parm_t;
+
+paramdef struct mdv_expand_value_parm_t
+{
+  p_descr = "params for EXPAND filter";
+  p_help = "Value = data value to expand in image\n"
+           "Tol   = Tolerance in data value [Value-Tol,Value+Tol]=range\n"
+           "HalfWin = defines the window size\n"
+           "          Actual window is 2*HalfWin + 1 square,\n"
+           "          ie. HalfWin = 1   =>  3x3 window";
+  p_default = {{1.0, 0.01, 1.0}};
+} MdvExpand[];
+
+/////////// Grid parameters.
+
+commentdef {
+  p_header = " ------------ GRID PARAMETERS --------\n"
+  		"These specify the grid on which the\n"
+                "computations will be performed.\n"
+		"These are used only if RemapGrid is set\n"
+		"to TRUE. If RemapGrid is FALSE then it is assumed\n"
+		"that the input field is already on the correct grid.";
+}
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to TRUE to remap the data - useful if visible is at\n"
+	    "four times the resolution of the IR channels.";
+  p_help = "Defaults to FALSE";
+} RemapGrid;   
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} grid_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} grid_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} grid_lat2;
+
+typedef enum {
+  FLAT, LATLON, LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT, LATLON and LAMBERT";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in X";
+  p_min = {1};
+  p_default = { 100 };
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in Y";
+  p_min = {1};
+  p_default = {100};
+} grid_ny;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in X";
+  p_default = {1.0};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in Y";
+  p_default = {1.0};
+} grid_dy;
+
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_miny;
+
+commentdef {
+  p_header = "------ End of grid parameters. ";
+}

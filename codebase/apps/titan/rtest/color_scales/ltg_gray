@@ -1,0 +1,18 @@
+# gray scale for lightning strikes
+
+# Nancy Rehak, January 1997
+
+0	1	#000000
+1	2	#111111
+2	4	#333333
+4	6	#444444
+6	8	#555555
+8	10	#666666
+10	13	#777777
+13	16	#888888
+16	20	#999999
+20	25	#aaaaaa
+25	30	#bbbbbb
+30	40	#cccccc
+40	50	#dddddd
+50	60	#eeeeee

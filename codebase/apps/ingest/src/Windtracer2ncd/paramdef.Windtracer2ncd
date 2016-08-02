@@ -1,0 +1,167 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Windtracer2ncd is a small program that reads\n"
+  "Windtracer lidar output files and writes netcdf formatted\n"
+  "files of lidar data.\n\nNiles Oien February 2004.";
+}
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Output directory.";
+  p_help = "Directory path for output data files.";
+} OutDir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to retain file names.";
+  p_help = "If set, output file name is the same as the input file name with\n"
+	"a .nc extension. Added for backward compatibility.";
+} retainFilenames;
+
+paramdef string {
+  p_default = "Pentagon";
+  p_descr = "Output file base name. Not used if retainFilenames is TRUE.";
+  p_help = "Default is for output files to be named Pentagon_YYYYMMDD_hhmmss.nc";
+} baseName;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = "./ascii_header.txt";
+  p_descr = "The CTI data file has an ASCII section embedded in it.\n"
+	"During processing this ascii section is written to this temporary\n"
+	"file (which is overwritten each time a new CTI file is processed).";
+  p_help = "ASCII section contains information on LIDAR setup.";
+} temp_file;
+
+paramdef string {
+  p_default = "# VELOCITY, ASCOPE, VAD, UVW, BACK PROP RAW DATA PARAMETERS SECTION";
+  p_descr = "The ASCII section of the CTI file has several sections in\n"
+	"it. The YEAR, MONTH, DAY and SAMPLE_FREQUENCY are read from the\n"
+	"start of the file, but other parameters such as the RAW_DATA_OFFSET_METERS,\n"
+	"RANGE_GATES and GATES_TO_MERGE appear several times in different\n"
+	"sections of the file. The tag_line parameter allows the user to\n"
+	"determines which section to read these parameters from.";
+  p_help = "You can use the less command to view the ASCII section of a CTI\n"
+	"lidar file - it is towards the front of the file.";
+} tag_line;
+
+
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_DATA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+
+
+
+commentdef {
+  p_header = "LIDAR PARAMETERS";
+}
+
+
+paramdef double {
+  p_default = {0};
+  p_descr = "Azimuth offset, degrees.";
+  p_help = "An offset added to the azimuth to correct misalignment.";
+} azimuth_offset;
+
+paramdef double {
+  p_default = {0};
+  p_descr = "Elevation offset, degrees";
+  p_help = "An offset added to the elevation angle to correct for\n"
+	"misalignment.";
+} elevation_offset;
+
+paramdef string {
+  p_default = "These data reformatted by Windtracer2ncd.";
+  p_descr = "Documentation string.";
+  p_help = "Will be included in the netcdf output as an attribute.";
+} commentString;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Expected number of merged gates.";
+  p_help = "One means no gate merging.";
+} expected_merged_gates;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to exit if merged gates is an unexpected value.";
+  p_help = "Typically will not need to do this.";
+} exit_on_unexpected_merge;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to attempt to gzip the output files. This usually\n"
+  "is quite effective for netcdf data.";
+  p_help = "Program will attempt to execute the command gzip -f <outfile>";
+} zip_output;
+

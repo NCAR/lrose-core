@@ -1,0 +1,104 @@
+<html>
+<head>
+<title> Image2Mdv </title>
+</head>
+
+<body>
+
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" >
+
+
+
+<P> <big><big><big>
+ Getting background imagery into CIDD from ESRI - an example
+</big></big></big> </p>
+
+<P>
+Here is one approach.
+</P>
+
+<P> <B> Step One : </b> Get the ESRI system to produce images on
+a lat/lon grid with a world file. <B> <I> This is essential </i> </b>
+and I realise that if you're reading this, you may already have the
+imagery you want and it's <i> not </i> lat/lon, or there is no world file.
+What to do in that case is something of a "black art" and you are welcome
+to see me and ask me to try to work with it, but no promises!
+</P>
+
+<P>
+The good news (possibly) is that the format of the world file is
+failry simple (see below) so if you know the details of the lat/lon
+projection you have, you may be able to edit one.
+</P>
+
+<P> <B> Step Two : </b> Look at the world file
+to check it for sanity. The filename will end in
+"w" - for <b> boulder.jpg </b> the world file is <b> boulder.jgw </b>,
+for <b> boulder.tif </b> the world file is <b> boulder.tfw. </b> If
+it is on a lat/lon projection, it will look something like this :
+<PRE>
+0.0000090909
+0.0000000000
+0.0000000000
+-0.0000090909
+-105.3020984545
+40.1371535545
+</PRE>
+
+The format of the file is :
+
+<UL>
+  <LI> Line 1: x-dimension of a pixel in map units (dx, degrees)
+  <LI> Line 2: rotation parameter (should be 0.0)
+  <LI> Line 3: rotation parameter (should be 0.0)
+  <LI> Line 4: NEGATIVE of y-dimension of a pixel in map units (-dy, degrees)
+  <LI> Line 5: x-coordinate of center of upper left pixel (longitude)
+  <LI> Line 6: y-coordinate of center of upper left pixel (latitude)
+</UL>
+</P>
+
+
+<P> <B> Step Three : </b> Get the dimensions of the image
+with the <b> identify </b> command (or view it in xv, but
+these images are typically very large so that might be a time consuming way to get Nx and Nx).
+</P>
+
+<P> <B> Step Four : </b> Chose the lat/lon range that needs to be
+covered and decide on the number of points you need in X
+for each image you want (ie. each CIDD zoom state). The
+number of points in Y will be calculated for you to keep a
+the aspect ratio consistent with the lat/lon range you
+have specified.
+</P>
+
+<P>
+Then generate a param file for the app apps/ingest/src/Image2MdvAdjunct
+with the command <br> <br> <b>
+Image2MdvAdjunct -print_params > Image2MdvAdjunct.params <br> <br> </b>
+Edit the lat/lon range information (along with the information from
+step three and various other tidbits like the type of output image
+you want and the filename for the input image) into this param file.
+Be sure that <b> Image2Mdv </b> is in your path, ie. the system can
+find that executable.
+</P>
+
+<P>
+<b> NOTE: </b> The app apps/ingest/src/Image2MdvAdjunct/adjunctAdjunct
+may be useful in setting up the param file for Image2MdvAdjunct.
+</P>
+
+<P> <B> Step Five : </b> Run 
+<b> Image2MdvAdjunct -params Image2MdvAdjunct.params </b> which
+will procude a csh script named <B> Runner </b> and param files
+to drive the <b> convert </b> program and <b> Image2Mdv. </b>
+</P>
+
+<P>
+Then run the <B> Runner </b> script, which will produce MDV files. It
+will drive the <b> convert </b> program, which is uses a lot
+of resources and may take some time.
+</P>
+
+
+<P> <small> Niles Oien October 2006 </small> </p>

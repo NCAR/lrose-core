@@ -1,0 +1,286 @@
+/**********************************************************************
+ * TDRP params for OpticalFlow
+ **********************************************************************/
+
+//======================================================================
+//
+// OpticalFlow performs optical flow tracking on MDV fields separated in 
+//   time. The objective is to estimate the 2D velocity of the field. 
+//   Output is the original tracked field, plus the U,V components of the 
+//   velocity.
+//
+// The optical flow code was provided courtesy of Alan Seed of the 
+//   Australian Bureau or Meteorology.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+// input_url = "$(DATA_DIR)/silke/mdv/rico";
+input_url = "/d1/dixon/data/bom/perth/mdv";
+
+///////////// set_vlevel_limits ///////////////////////
+//
+// Option to set vertical level limits.
+// The tracking is performed on a composite (maximum value transform) 
+//   made up from a number of layers in the input data. If you set 
+//   vertical limits, the composite will be created using the data between 
+//   the limits. If you do not set the limits, all of the layers will be 
+//   used to create the composite.
+// Type: boolean
+//
+
+set_vlevel_limits = FALSE;
+
+///////////// lower_vlevel ////////////////////////////
+//
+// Lower plane vlevel limit.
+// The units of the vlevel will be determined from the input file.
+// Type: float
+//
+
+lower_vlevel = 0;
+
+///////////// upper_vlevel ////////////////////////////
+//
+// Upper plane vlevel limit.
+// The units of the vlevel will be determined from the input file.
+// Type: float
+//
+
+upper_vlevel = 0;
+
+///////////// tracking_field_name /////////////////////
+//
+// Name of the field to be tracked.
+// This field must exist in the input files.
+// Type: string
+//
+
+// tracking_field_name = "lwp";
+tracking_field_name = "DBZ";
+
+///////////// max_time_between_files //////////////////
+//
+// Maximum time allowed between input files used for tracking (secs).
+// A pair of data files are required for tracking. It does not make 
+//   sense to try to compute tracking between files which are too far 
+//   apart in time.
+// Type: int
+//
+
+max_time_between_files = 3000;
+
+///////////// min_time_between_files //////////////////
+//
+// Minimum time allowed between input files used for tracking (secs).
+// A pair of data files are required for tracking. If files are too 
+//   close together in time, the tracking algorithm will not work well.
+// Type: int
+//
+
+min_time_between_files = 300;
+
+//======================================================================
+//
+// OPTICAL FLOW ALGORITHM PARAMETERS.
+//
+//======================================================================
+ 
+///////////// scale_factor ////////////////////////////
+//
+// Scale factor for tracking resolution levels.
+// Type: double
+// Minimum val: 0.1
+// Maximum val: 0.9
+//
+
+scale_factor = 0.6;
+
+///////////// max_levels //////////////////////////////
+//
+// Maximum numer of tracking resolution levels.
+// Type: int
+//
+
+max_levels = 100;
+
+///////////// window_size /////////////////////////////
+//
+// Blur operation kernel size.
+// Type: int
+//
+
+window_size = 5;
+
+///////////// n_iterations ////////////////////////////
+//
+// Number of blur iterations at each resolution.
+// Type: int
+//
+
+n_iterations = 3;
+
+///////////// polygon_neighborhood ////////////////////
+//
+// Controls polygon expansion.
+// Type: int
+//
+
+polygon_neighborhood = 5;
+
+///////////// polygon_sigma ///////////////////////////
+//
+// Controls polygon expansion.
+// Type: double
+//
+
+polygon_sigma = 1.1;
+
+///////////// seed_with_previous_vectors //////////////
+//
+// Option to use previous vectors to seed latest time step.
+// If true, we use the previously determined vectors to seed the current 
+//   time step. If false, the vectors are determined from scratch.
+// Type: boolean
+//
+
+seed_with_previous_vectors = FALSE;
+
+///////////// tracking_threshold //////////////////////
+//
+// Only track points with values above this threshold.
+// All other points will be regarded as background.
+// Type: double
+//
+
+// tracking_threshold = 0.05;
+tracking_threshold = 10;
+
+///////////// interp_over_missing_areas ///////////////
+//
+// Option to interpolate tracking vectors in regions of no data.
+// If true, we interpolate between areas with valid data.
+// Type: boolean
+//
+
+interp_over_missing_areas = FALSE;
+
+///////////// interp_spacing //////////////////////////
+//
+// Sample spacing for interpolation algorithm.
+// Type: int
+//
+
+interp_spacing = 8;
+
+///////////// min_frac_bins_for_avg ///////////////////
+//
+// Fraction of points in sample square required for valid interpolation.
+// Type: double
+//
+
+min_frac_bins_for_avg = 0.05;
+
+///////////// idw_low_res_pwr /////////////////////////
+//
+// Power term in inverse distance weighting interpolation low-res pass.
+// Type: double
+//
+
+idw_low_res_pwr = 4;
+
+///////////// idw_high_res_pwr ////////////////////////
+//
+// Power term in inverse distance weighting interpolation high-res pass.
+// Type: double
+//
+
+idw_high_res_pwr = 3;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// Output data is written to this URL.
+// Type: string
+//
+
+output_url = "$(DATA_DIR)/silke/mdv/oflow";
+
+///////////// output_encoding_type ////////////////////
+//
+// Set encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding_type = ENCODING_FLOAT32;
+

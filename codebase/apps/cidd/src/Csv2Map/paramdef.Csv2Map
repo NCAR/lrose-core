@@ -1,0 +1,153 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Csv2Map
+ *
+ * This file contains the TDRP parameter definitions for
+ * Csv2Map.
+ */
+
+
+/***********************************************************************
+ * Input/output parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Path of input file";
+  p_default = "./input.csv";
+} input_path;
+
+paramdef string
+{
+  p_descr = "Path of output icons map file";
+  p_default = "./icons.map";
+} output_icons_path;
+
+paramdef string
+{
+  p_descr = "Path of output labels-only map file";
+  p_help = "Set to empty string to not produce labels-only map";
+  p_default = "./labels.map";
+} output_labels_path;
+
+
+/***********************************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to include the labels in "
+            "the icons map."
+  p_default = true;
+} include_labels_in_icons_map;
+
+paramdef long
+{
+  p_descr = "Index of latitude value";
+  p_help = "The input file must contain a latitude value.";
+  p_default = 1;
+  p_min = 0;
+} lat_index;
+
+paramdef long
+{
+  p_descr = "Index of longitude value";
+  p_help = "The input file must contain a longitude value.";
+  p_default = 2;
+  p_min = 0;
+} lon_index;
+
+paramdef long
+{
+  p_descr = "Index of label value";
+  p_help = "If the file doesn't contain a label value, set this "
+           "to -1. "
+           "In this case, no label file will be produced.";
+  p_default = 0;
+  p_min = -1;
+} label_index;
+
+paramdef long
+{
+  p_descr = "Index of type value";
+  p_help = "If the file doesn't contain a type value or if you don't want "
+           "to filter on type, set this to -1.";
+  p_default = 4;
+  p_min = -1;
+} type_index;
+
+paramdef string
+{
+  p_descr = "The line type to process. "
+            "Any line in the input file with a type different than the "
+            "one specified will be ignored.";
+  p_help = "Used only if type_index is not set to -1";
+  p_default = "WYP";
+} desired_type_string;
+
+paramdef string
+{
+  p_descr = "Name of icon";
+  p_default = "WYP";
+} icon_name;
+
+typedef struct
+{
+  int x;
+  int y;
+} icon_point_t;
+
+paramdef struct icon_point_t
+{
+  p_descr = "List of points defining the icon";
+  p_help = "Set both x and y to 9999 to get a pen-up.";
+  p_default = { { 0, -4 },
+                { 4, 5 },
+                { -4, 5 },
+                { 0, -4 } };
+} icon_points[];
+
+typedef struct
+{
+  int x_offset;
+  int y_offset;
+} pixel_offset_t;
+
+paramdef struct pixel_offset_t
+{
+  p_descr = "Pixel offsets to use for labels";
+  p_default = { 4, 4 };
+} label_pixel_offset;

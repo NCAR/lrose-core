@@ -1,0 +1,87 @@
+/*
+ *
+ * Parameter definitions for metar_repeat_day application
+ *
+ * $Id: paramdef.metar_repeat_day,v 1.3 1999/03/26 19:55:41 jaimi Exp $
+ *
+ */
+
+commentdef {
+  p_header = "metar_repeat_day Parameter File";
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Debug messaging option";
+  p_help = "If set to true, debug messages will be printed";
+} debug;
+
+paramdef boolean {
+  p_descr = "Info messaging option";
+  p_help = "If set to true, info messages will be printed";
+  p_default = {TRUE};
+} info;
+
+paramdef char* {
+  p_descr = "Directory for log file output";
+  p_help = "If this parameter contains anything but an empty string, a log will be created containing the types of messages which are enabled";
+  p_default = {""};
+} log_dir;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Instance";
+  p_help = "Instance used for registration with procmap";
+} instance;
+
+commentdef {
+  p_header = "INPUT";
+}
+
+paramdef char* {
+  p_default = {"."};
+  p_descr = "Input directory";
+  p_help = "Directory where input data can be found";
+} input_dir;
+
+paramdef char* {
+  p_default = {"record_obs"};
+  p_descr = "Metar file prefix";
+  p_help = "Prefix on metar files";
+} file_prefix;
+
+paramdef long {
+  p_default = {180};
+  p_descr = "Metar file check frequency";
+  p_help = "Number of seconds to wait before we check the input directory for a 
+new file again";
+} check_seconds;
+
+
+commentdef {
+  p_header = "LOCATION TRANSLATION";
+}
+
+typedef struct {
+  char* orig_location;
+  char* new_location;
+} location_t;
+
+paramdef struct location_t {
+  p_default = { {"KMGW", "KMGW"} };
+  p_descr = "Mapping of the original location names to new location names";
+} location_translation[];
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef char* {
+  p_default = {"."};
+  p_descr = "Output directory";
+  p_help = "Directory for output data";
+} output_dir;

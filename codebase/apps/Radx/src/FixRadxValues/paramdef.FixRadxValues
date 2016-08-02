@@ -1,0 +1,267 @@
+/*********************************************************
+ * parameter definitions for FixRadxValues
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * May 2012
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Adjusts values in CfRadial files to correct for errors.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+commentdef {
+  p_header = "OUTPUT FORMAT";
+}
+
+typedef enum {
+  OUTPUT_FORMAT_CFRADIAL,
+  OUTPUT_FORMAT_DORADE,
+  OUTPUT_FORMAT_FORAY,
+  OUTPUT_FORMAT_NEXRAD,
+  OUTPUT_FORMAT_UF,
+  OUTPUT_FORMAT_MDV_RADIAL
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = OUTPUT_FORMAT_CFRADIAL;
+  p_descr = "Format for the output files.";
+} output_format;
+
+typedef enum {
+  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
+} netcdf_style_t;
+
+paramdef enum netcdf_style_t {
+  p_default = NETCDF4;
+  p_descr = "NetCDF style - if output_format is CFRADIAL";
+  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
+} netcdf_style;
+
+commentdef {
+  p_header = "OUTPUT BYTE-SWAPPING and COMPRESSION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to leave data in native byte order.";
+  p_help = "If false, data will be byte-swapped as appropriate on output.";
+} output_native_byte_order;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compress data fields on output.";
+  p_help = "Applies to netCDF and Dorade. UF does not support compression.";
+} output_compressed;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Compression level for output, if compressed.";
+  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
+} compression_level;
+
+commentdef {
+  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY,
+  SPECIFY_FILE_NAME
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.";
+} output_filename_mode;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+paramdef string {
+  p_default = "cfradial.test.nc";
+  p_descr = "Name of output file.";
+  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
+} output_filename;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out individual sweeps if appropriate.";
+  p_help = "If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.";
+} write_individual_sweeps;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
+commentdef {
+  p_header = "MEASURED ANGLE CORRECTION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply an offset to the scan fixed angles.";
+  p_help = "This should be used if you want to adjust the fixed angles.";
+} correct_fixed_angles;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "This value is added to the fixed angles.";
+  p_help =  "See 'correct_fixed_angles'.";
+} fixed_angle_offset;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply an offset to the measured elevation angles.";
+  p_help = "This should be used if there is a systematic bias in the measured elevation angles.";
+} correct_elevation_angles;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "This value is added to the measured elevation angles.";
+  p_help =  "See 'correct_elevation_angles'.";
+} elevation_angle_offset;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply an offset to the measured azimuth angles.";
+  p_help = "This should be used if there is a systematic bias in the measured azimuth angles.";
+} correct_azimuth_angles;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "This value is added to the measured azimuth angles.";
+  p_help =  "See 'correct_azimuth_angles'.";
+} azimuth_angle_offset;
+
+commentdef {
+  p_header = "PLATFORM GEOREFERENCE CORRECTION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to correct for the orientation of the platform.";
+  p_help = "This should be used if the platform was tilted or rotated, relative to the ideal orientation.";
+} correct_for_platform_orientation;
+
+typedef enum {
+  GEOREF_TILT_VECTOR,
+  GEOREF_ROLL_PITCH
+} georef_mode_t;
+
+paramdef enum georef_mode_t {
+  p_default = GEOREF_TILT_VECTOR;
+  p_descr = "Mode for specifying georeference corrections.";
+  p_help = "TILT_VECTOR mode: supply the tilt angle and azimuth. ROLL_PITCH: supply the roll and pitch angles. Supply heading in both modes.";
+} georef_mode;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Heading of platform, in degrees True North.";
+  p_help =  "Applies to both TILT_VECTOR and ROLL_PITCH modes. This is the angle between TN and the longitudinal axis of the platform.";
+} platform_heading_deg;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Pitch of the platform, in degrees.";
+  p_help =  "Applies to ROLL_PITCH mode. This is the angle between the true horizontal plane and the longitudinal axis of the platform.";
+} platform_pitch_deg;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Roll of the platform, in degrees.";
+  p_help =  "Applies to ROLL_PITCH mode. This is the angle between the true vertical plane and the lateral (wing) axis of the platform.";
+} platform_roll_deg;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Angle of tilt of platform vertical axis, in degrees.";
+  p_help =  "Applies to TILT_VECTOR mode. This is the angle between the vertical axis of the platform and the true vertical axis.";
+} platform_tilt_amount_deg;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Direction of tilt, in degrees.";
+  p_help =  "Applies to TILT_VECTOR mode. This is the angle between the platform heading, or north, and the vertical plane in which the tilted vector lies, clockwise. See also tilt_direction_is_relative_to_north.";
+} platform_tilt_direction_deg;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, platform_tilt_direction is relative to true north.";
+  p_help = "If false, platform_tilt_direction is relative to the longitudinal axis of the platform. The difference between these is the heading of the platform relative to true north.";
+} tilt_direction_is_relative_to_north;
+

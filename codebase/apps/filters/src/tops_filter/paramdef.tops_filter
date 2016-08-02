@@ -1,0 +1,226 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for tops_filter
+ *
+ * Nancy Rehak, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * June 1998
+ */
+
+commentdef
+{
+  p_header = "Filters regions with low tops from radar data stored in an MDV file.";
+};
+
+/*********************************************************
+ * Debugging parameters.
+ */
+
+commentdef
+{
+  p_header = "Debugging parameters";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,
+  DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "Sets level of debug messages to be printed";
+  p_default = DEBUG_OFF;
+} debug_level;
+
+
+/*********************************************************
+ * Operational parameters.
+ */
+
+commentdef
+{
+  p_header = "Operational parameters";
+}
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+typedef enum
+{
+  REALTIME,
+  ARCHIVE
+} mode_t;
+
+paramdef enum mode_t 
+{
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; "
+           "archive mode runs on file list";
+  p_default = REALTIME;
+} mode;
+
+paramdef long
+{
+  p_descr = "Sleep msecs between checks for new data";
+  p_help = "Only used in REALTIME mode";
+  p_min = 0;
+  p_default = 1000;
+} sleep_msecs;
+
+
+/*********************************************************
+ * Input/output parameters.
+ */
+
+commentdef
+{
+  p_header = "Input/output parameters";
+}
+
+paramdef string 
+{
+  p_descr = "URL for radar data";
+  p_default = "mdvp:://localhost:port:directory";
+} radar_data_url;
+
+paramdef long
+{
+  p_descr = "Field number for radar data to be filtered.";
+  p_min = 0;
+  p_default = 0;
+} radar_field_num;
+
+paramdef string 
+{
+  p_descr = "URL for tops data";
+  p_default = { "mdvp:://localhost:port:directory" };
+} tops_data_url;
+
+paramdef long
+{
+  p_descr = "Field number for tops data in MDV files";
+  p_min = 0;
+  p_default = 0;
+} tops_field_num;
+
+paramdef long
+{
+  p_descr = "Level number for tops data in MDV files";
+  p_min = 0;
+  p_default = 0;
+} tops_level_num;
+
+paramdef long
+{
+  p_descr = "Maximum valid age in seconds for radar data";
+  p_min = 0;
+  p_default = 3600;
+} max_valid_age;
+
+paramdef long
+{
+  p_descr = "Maximum data offset time in seconds";
+  p_help = "Maximum amount of time allowed between the radar data time and "
+           "the tops data time for the filtering to be done.  "
+           "If there is no tops data within this range of the radar data, "
+           "the radar field will be written out unchanged.";
+  p_default = 150;
+} time_offset_max;
+
+paramdef string 
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost:port:directory";
+} output_url;
+
+
+/*********************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "Algorithm parameters";
+}
+
+paramdef long
+{
+  p_descr = "minimum height, in feet, for valid data";
+  p_help = "Any radar data corresponding to tops data below this value "
+           "will be set to missing.";
+  p_default = 0;
+} min_valid_height;
+
+typedef enum
+{
+  UNITS_FEET,
+  UNITS_KFEET
+} tops_units_t;
+
+paramdef enum tops_units_t
+{
+  p_descr = "Units the tops value is stored in in the tops data file";
+  p_default = UNITS_KFEET;
+} tops_units;
+
+paramdef boolean
+{
+  p_descr = "leave missing data alone flag";
+  p_help = "If TRUE, radar data values will be left unchanged when the "
+           "tops data value is missing.  "
+           "If FALSE, radar data values will be set to missing in this "
+           "situation.";
+  p_default = FALSE;
+} leave_missing_data_alone;
+
+paramdef double
+{
+  p_descr = "radius of influence around each grid point";
+  p_help = "This is the number of grid spaces around each grid point that "
+           "affect the calculated tops value for that grid point.  The tops "
+           "value for a grid point is the maximum tops value within this "
+           "radius of the current grid point.";
+  p_min = 0.1;
+  p_default = 0.5;
+} radius_of_influence;
+
+paramdef long
+{
+  p_descr = "number of ignored top grid values";
+  p_top = "Within the radius of influence, this number of the top grid values "
+          "are ignored and the maximum of the remaining grid values is used. "
+          "This is done because outliers in the tops data were causing areas "
+          "of invalid data to get through the filter.";
+  p_min = 0;
+  p_default = 0;
+} num_ignored_top_values;

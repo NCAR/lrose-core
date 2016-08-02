@@ -1,0 +1,195 @@
+
+** Program 'MdvComp'
+** Copyright (c) 1992-2004 UCAR
+** University Corporation for Atmospheric Research - UCAR.
+** National Center for Atmospheric Research - NCAR.
+** Research Applications Program - RAP.
+** P.O.Box 3000, Boulder, Colorado, 80307, USA.
+** Run-time 2004/02/24 20:08:18.
+
+/**********************************************************************
+ * TDRP params for MdvComp
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: MdvConvert.
+//
+// MdvConvert reads mdv data, and creates composite output. The usage is 
+//   'MdvConvert -params params_file'.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// input_url ///////////////////////////////
+//
+// URL for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_url = "mdv/input";
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// Output data is written to this URL.
+// Type: string
+//
+
+output_url = "./output";
+
+///////////// comp_method /////////////////////////////
+//
+// Composite method - either full or layered.
+// COMP_FULL: a single composite is computed using the full depth of the 
+//   data. COMP_LAYERED: a multi-layered composite is computed, using the 
+//   layer_limits array.
+//
+// Type: enum
+// Options:
+//     COMP_FULL
+//     COMP_LAYERED
+//
+
+comp_method = COMP_FULL;
+
+///////////// field_select ////////////////////////////
+//
+// Field selection mode.
+// ALL_FIELDS: composite all fields, using the specified comp_method. 
+//   SOME_FIELDS: composite the specified fields using the specified 
+//   comp_method - see field_names array. COMBO_FIELDS: composite 
+//   specified fields over the range of vlevels specified in the 
+//   field_vlevel_combo array.
+//
+// Type: enum
+// Options:
+//     ALL_FIELDS
+//     SOME_FIELDS
+//     COMBO_FIELDS
+//
+
+field_select = ALL_FIELDS;
+
+///////////// field_names /////////////////////////////
+//
+// List of specified field names.
+// Only used for SOME_FIELDS - see field_select.
+// Type: string
+// 1D array - variable length.
+//
+
+field_names = { "none" };
+
+///////////// layer_vlevels ///////////////////////////
+//
+// Array of layer vlevel values.
+// This array of layers is used to compute the layered composite if 
+//   comp_method is COMP_LAYERED. It does not apply if COMBO_FIELDS is 
+//   selected. The mid_vlevel value is used as the height of the layer.
+//
+// Type: struct
+//   typedef struct {
+//      float lower_vlevel;
+//      float mid_vlevel;
+//      float upper_vlevel;
+//   }
+//
+// 1D array - variable length.
+//
+
+layer_vlevels = {
+  { 1, 2, 3}
+};
+
+///////////// field_vlevel_combo //////////////////////
+//
+// Specifications for taking individual fields and creating composites 
+//   with varying vlevel limits.
+// See field_select.
+//
+// Type: struct
+//   typedef struct {
+//      string in_fld_name;
+//      string out_fld_name;
+//      float lower_vlevel;
+//      float upper_vlevel;
+//   }
+//
+// 1D array - variable length.
+//
+
+field_vlevel_combo = {
+  { "none", "none", 1, 2}
+};
+
+///////////// output_compression_type /////////////////
+//
+// Set compression type.
+//
+// Type: enum
+// Options:
+//     COMPRESSION_ASIS
+//     COMPRESSION_NONE
+//     COMPRESSION_RLE
+//     COMPRESSION_LZO
+//     COMPRESSION_ZLIB
+//     COMPRESSION_BZIP
+//
+
+output_compression_type = COMPRESSION_ZLIB;
+
+///////////// output_path_in_forecast_format //////////
+//
+// Option to create output path in forecast format.
+// This option is only applicable to forecast data sets. If false, the 
+//   output path is determined  using the valid time: 
+//   topdir/yyyymmdd/hhmmss.mdv. If true, the output path is determined 
+//   using the model initialization (generate) time and the forecast lead 
+//   time in secs: yyyymmdd/g_hhmmss/f_ssssssss.mdv.
+// Type: boolean
+//
+
+output_path_in_forecast_format = FALSE;
+

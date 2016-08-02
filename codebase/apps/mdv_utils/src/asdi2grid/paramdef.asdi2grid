@@ -1,0 +1,232 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*
+-------------------------------------------------------------------------------
+parameter definitions for asdi2grid
+-------------------------------------------------------------------------------
+*/
+
+commentdef
+   {
+   p_header = "DEBUGGING AND PROCESS CONTROL";
+   }
+
+//--- debug_level
+
+paramdef int
+   {
+   p_default = 0;
+   p_descr   = "Debug level, [0,N]";
+   p_help    = "If 0, no debug output will be generated.\n"
+               "For values > 0, increasingly verbose debug output\n"
+               "will be generated\n";
+   }
+debug_level;
+
+//--- instance
+
+paramdef string
+   {
+   p_default = "primary";
+   p_descr   = "Process instance.";
+   p_help    = "Used for procmap registration and auto restarting";
+   }
+instance;
+
+//--- run_mode_t
+
+typedef enum
+   {
+   REALTIME,
+   ARCHIVE_FILE_LIST,
+   ARCHIVE_START_END_TIMES
+   }
+run_mode_t;
+
+//--- run_mode
+
+paramdef enum run_mode_t
+   {
+   p_default = {REALTIME};
+   p_descr   = "Operating mode";
+   p_help    = "REALTIME:\n"
+               "   'radar_input_dir' is watched for new incoming files.\n"
+               "ARCHIVE_FILE_LIST:\n"
+               "   A list of input files is explicitly specified using\n"
+               "   the '-file_list' command line option\n"
+               "ARCHIVE_START_END_TIMES:\n"
+               "   'radar_input_dir' is searched for all files whose\n"
+               "   time and date fall between the start and end times\n"
+               "   as specified with the '-start_time' and '-end_time'\n"
+               "   command line parameters";
+   }
+run_mode;
+
+//--- max_input_valid_age_sec
+
+paramdef int
+   {
+   p_default = 360;
+   p_min     = 1;
+   p_descr   = "Max valid age of input files in realtime mode (secs)\n";
+   p_help    = "This the max valid age for an incoming file.\n";
+   }
+max_input_valid_age_sec;
+
+//--- use_ldata_info_file
+
+paramdef boolean
+   {
+   p_default = true;
+   p_descr   = "Option to use _latest_data_info file as input trigger.";
+   p_help    = "Used in REALTIME mode only. If true, waits on\n"
+               "_latest_data_info file. If false, scans 'input_dir'\n"
+               " tree for new file.";
+   }
+use_ldata_info_file;
+
+//----------------------------------------------------------------------------
+
+commentdef
+   {
+   p_header = "INPUT AND OUTPUT DIRECTORIES";
+   }
+
+//--- input_dir
+
+paramdef string
+   {
+   p_default = "./";
+   p_descr   = "Root directory of input data file tree";
+   p_help    = "Used when 'run_mode' is either REALTIME or\n"
+               "ARCHIVE_START_END_TIMES\n";
+   }
+input_dir;
+
+//--- output_dir
+
+paramdef string
+   {
+   p_default = "./";
+   p_descr   = "Output file directory\n";
+   p_help    = "Directory where output netcdf files will be written\n";
+   }
+output_dir;
+
+//--- cdlPath
+
+paramdef string {
+  p_descr = "Path to cdl file";
+  p_help = "The cdl file will be used to define dimensions, global "
+           "attributes and variables and their attributes in the "
+           "netcdf output files";
+  p_default = {"./example.cdl"};
+} cdlPath;
+
+
+//----------------------------------------------------------------------------
+
+commentdef {
+   p_header = "ALGORITHM PARAMS";
+}
+
+paramdef int {
+   p_default = 15;
+   p_descr   = "How many minutes of ASDI data to use for the grid counts.\n";
+   p_help    = "Must be a even multiple of the length of the input netcdf files.\n";
+} grid_collection_mins;
+
+typedef enum {
+  PROJ_LATLON		= 0,
+  PROJ_LAMBERT_CONF	= 3,
+  PROJ_FLAT		= 8
+} projection_t;
+
+typedef struct {
+  projection_t type;
+  double rotation;
+  double origin_lat;
+  double origin_lon;
+  double ref_lat_1;
+  double ref_lat_2;
+} projection_info_t;
+
+paramdef struct projection_info_t {
+  p_descr = "This is the user defined projection";
+  p_help = "If remap_output is true this defines the projection to remap too."
+           "The choice of projections are PROJ_LATLON, PROJ_LAMBERT_CONF and "
+           "PROJ_FLAT. PROJ_LATLON is a latitude/longitude projection, and if "
+           "it is chosen the remaining parameters can be ignored. PROJ_FLAT is "
+           "a flat projection, and if it is chosen the parameters rotation, "
+           "origin_lat, origin_lon must be set. PROJ_LAMBERT_CONF is a Lambert "
+           "conformal projection, and if it is chosen the parameters origin_lat, "
+           "origin_lon, ref_lat_1 and ref_lat_2 must be set.";
+  p_default = {PROJ_LAMBERT_CONF, 0.0, 25.0, -95.0, 25.0, 25.0};
+} projection_info; 
+  
+typedef struct {
+  int nx;
+  int ny;
+  int nz;
+  double minx;
+  double miny;
+  double minz;
+  double dx;
+  double dy;
+  double dz;
+} grid_info_t;
+
+paramdef struct grid_info_t {
+  p_descr = "This is the user defined grid";
+  p_help = "if remap_output is true this defines the grid info for the remap.";
+  p_default = {451, 337, 26, -3332.142334, -588.890442, 200, 13.545087, 13.545087, 10};
+} grid_info; 
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4, 
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_ZLIB;
+  p_descr = "Set compression type.";
+} compression_type;
+
+typedef enum {
+  ENCODING_ASIS =      0, 
+  ENCODING_INT8 =      1,  // unsigned 8 bit IEEE integer 
+  ENCODING_INT16 =     2,  // unsigned 16 bit IEEE integer
+  ENCODING_FLOAT32 =   5,  // 32 bit IEEE float
+  ENCODING_RGBA32 =    7  // RGBA image (4 x 8 bits) - Exactly like TIFF RGBA
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Set encoding type.";
+} encoding_type;

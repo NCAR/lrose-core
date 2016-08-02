@@ -1,0 +1,401 @@
+/**********************************************************************
+ * TDRP params for Metar2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// Metar2Spdb reads METAR records from ASCII files, interprets the 
+//   METARs, converts them to station_report_t format and writes them to 
+//   an SPDB data base.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In this 
+//   mode it is optional to watch for a latest_data_info file. In ARCHIVE 
+//   mode, it processes all of the data files in the input directory 
+//   between the start and end times set on the command line. In FILELIST 
+//   mode, it processes all of the files in the list specified on the 
+//   command line. In FILELIST mode paths must be fully qualified with 
+//   respect to the date and time - so if each date has a separate 
+//   subdirectory the date part of the path must be included.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Directory where input data files can be found.
+// Type: string
+//
+
+input_dir = "./raw/metars";
+
+///////////// latest_data_info_avail //////////////////
+//
+// Set to true if there is a latest_data_info file available in the 
+//   input directory.
+// REALTIME mode only.
+// Type: boolean
+//
+
+latest_data_info_avail = TRUE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// strict_subdir_check /////////////////////
+//
+// When set, only checks input_dir for subdirs of the form YYYYMMDD.
+// Only in REALTIME mode with latest_data_info_avail FALSE.
+// Type: boolean
+//
+
+strict_subdir_check = FALSE;
+
+///////////// file_name_check /////////////////////////
+//
+// When set, check file name contains specified sub-string.
+// See file_match_string.
+// Type: boolean
+//
+
+file_name_check = FALSE;
+
+///////////// file_match_string ///////////////////////
+//
+// Input filename match string.
+// Files must contain this string to be processed.
+// Type: string
+//
+
+file_match_string = "METAR";
+
+//======================================================================
+//
+// STATION SELECTION.
+//
+//======================================================================
+ 
+///////////// st_location_path ////////////////////////
+//
+// Path to station location file.
+// Since the METAR reports do not contain lat/lon information, we must 
+//   determine this from a separate file. The station location file should 
+//   contain a four letter station identification followed by the latitude 
+//   and longitude for each station to be processed. Stations not in this 
+//   file will be ignored.
+// Type: string
+//
+
+// st_location_path = "./station_location.txt";
+st_location_path = "/h/eol/dixon/cvs/projects/hawk/front/projDir/system/params/stations_gthompson.txt";
+///////////// useAcceptedStationsList /////////////////
+//
+// Set to TRUE to use the acceptedStations list (below).
+// Only accept stations in this list.
+// Type: boolean
+//
+
+useAcceptedStationsList = FALSE;
+
+///////////// acceptedStations ////////////////////////
+//
+// List of accepted station IDs.
+// If a station is not on this list, it is not stored.
+// Type: string
+// 1D array - variable length.
+//
+
+acceptedStations = {
+ "RCTP",
+ "RCFG",
+ "RCSS",
+ "RCGM",
+ "RCNO",
+ "RCQC",
+ "RCBS"
+};
+
+///////////// useRejectedStationsList /////////////////
+//
+// Set to TRUE to use the rejectedStations list (below).
+// Reject stations in this list.
+// Type: boolean
+//
+
+useRejectedStationsList = FALSE;
+
+///////////// rejectedStations ////////////////////////
+//
+// List of rejected station IDs.
+// If a station is not on this list, it is not stored.
+// Type: string
+// 1D array - variable length.
+//
+
+rejectedStations = {
+ "RCFN",
+ "RCAY",
+ "RCQS",
+ "RCFS",
+ "RCMT"
+};
+
+///////////// checkBoundingBox ////////////////////////
+//
+// Set to TRUE to check that METAR is within a bounding box.
+// Type: boolean
+//
+
+checkBoundingBox = FALSE;
+
+///////////// boundingBox /////////////////////////////
+//
+// Bounding box to check if checkBoundingBox is TRUE.
+// Only Metars which fall inside this box will be stored.
+//
+// Type: struct
+//   typedef struct {
+//      double min_lat;
+//      double max_lat;
+//      double min_lon;
+//      double max_lon;
+//   }
+//
+//
+
+boundingBox = {
+    min_lat = -90,
+    max_lat = 90,
+    min_lon = -180,
+    max_lon = 180
+};
+
+///////////// altUnits ////////////////////////////////
+//
+// Units used for the altitude value in the station locations file.
+//
+// Type: enum
+// Options:
+//     ALT_FEET
+//     ALT_METERS
+//
+
+altUnits = ALT_FEET;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_decoded_metars ////////////////////
+//
+// Option to store decoded METARS.
+// If TRUE, decoded METARS will be written to decoded_output_url.
+// Type: boolean
+//
+
+write_decoded_metars = TRUE;
+
+///////////// decoded_output_url //////////////////////
+//
+// Output URL for decoded metars.
+// See the DIDSS docs for details on URL usage.
+// Type: string
+//
+
+decoded_output_url = "spdbp:://localhost:0:/tmp/spdb/metar";
+
+///////////// decoded_compression /////////////////////
+//
+// Option to compress the decoded METARS.
+// Set desired output compression. Compression should only be done for 
+//   data in which the individual chunks are large.
+//
+// Type: enum
+// Options:
+//     COMPRESSION_NONE
+//     COMPRESSION_GZIP
+//     COMPRESSION_BZIP2
+//
+
+decoded_compression = COMPRESSION_NONE;
+
+///////////// write_ascii_metars //////////////////////
+//
+// Option to store ASCII METARS.
+// If TRUE, ascii METARS will be written to ascii_output_url.
+// Type: boolean
+//
+
+write_ascii_metars = FALSE;
+
+///////////// ascii_output_url ////////////////////////
+//
+// Output URL for ASCII metars.
+// See the DIDSS docs for details on URL usage.
+// Type: string
+//
+
+ascii_output_url = "spdbp:://localhost::spdb/ascii_metar";
+
+///////////// expire_seconds //////////////////////////
+//
+// Expire time in seconds for each metar.
+// This value will be added to the metar time to determine the expire 
+//   time for the metar.
+// Type: int
+//
+
+expire_seconds = 7200;
+
+///////////// guess_time_if_missing ///////////////////
+//
+// Option to guess METAR time if time field is missing.
+// If TRUE, and time field is missing or garbled, METAR time is set to 
+//   the start of the last hour. Realtime mode only.
+// Type: boolean
+//
+
+guess_time_if_missing = FALSE;
+
+///////////// use_metar_date //////////////////////////
+//
+// Option to use date from METAR.
+// If TRUE, date field from METAR is used to set the METAR valid time.  
+//   If FALSE, the current date is used.
+// Type: boolean
+//
+
+use_metar_date = FALSE;
+
+///////////// valid_past_margin ///////////////////////
+//
+// Margin in seconds for valid METARs in the past.
+// If > 0 , METARs where (now - datefield) > valid_past_margin will be 
+//   rejected.  This test is only applied if use_metar_date is TRUE.
+// Type: int
+//
+
+valid_past_margin = -1;
+
+///////////// valid_future_margin /////////////////////
+//
+// Margin in seconds for valid METARs in the future.
+// If > 0 , METARs where (datefield - now) > valid_future_margin will be 
+//   rejected.  This test is only applied if use_metar_date is TRUE.
+// Type: int
+//
+
+valid_future_margin = -1;
+
+///////////// output_report_type //////////////////////
+//
+// Type of station report to put in the output SPDB database.
+//
+// Type: enum
+// Options:
+//     METAR_REPORT
+//     STATION_REPORT
+//     PRESSURE_STATION_REPORT
+//     REPORT_PLUS_METAR_XML
+//     REPORT_PLUS_FULL_XML
+//     XML_ONLY
+//     METAR_WITH_REMARKS_REPORT
+//
+
+output_report_type = METAR_REPORT;
+
+///////////// dress_raw_metar_text ////////////////////
+//
+// Option to dress the metar_text field with the report type 
+//   (METAR/SPECI) and report ending character (=).
+// The report type and ending character are stripped off during the 
+//   process of decoding. This option allows these fields to be added back 
+//   to the original raw metar text before output.
+// Type: boolean
+//
+
+dress_raw_metar_text = FALSE;
+
+///////////// force_put_when_valid_time_changes ///////
+//
+// Option to force a put to the SPDB data base whenever the valid time 
+//   changes.
+// Normally, the data from all METARs in a file are saved as SPDB chunks 
+//   in memory until the entire file has been read. Then, all of these 
+//   chunks are written to the data base in a single action. This is the 
+//   most efficient way to update the data base. If you set this to TRUE, 
+//   all of the saved chunks will be written to the data base whenever the 
+//   valid time of a METAR changes. Use this with caution, and only if you 
+//   are not distributing the data to remote hosts. DO NOT do this if the 
+//   SPDB data will be distributed to remote hosts. If you do, the the 
+//   DsSpdbServer may not be able to spawn enough children to handle the 
+//   traffic. The server has a limit to the number of children, so some of 
+//   the put requests may be denied by the server and data will be lost.
+// Type: boolean
+//
+
+force_put_when_valid_time_changes = FALSE;
+

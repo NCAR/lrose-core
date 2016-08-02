@@ -1,0 +1,7 @@
+uf2mdv:  universal format to mdv.
+
+The first pass is to analyze the data and build tables that determine
+scan and volume boundaries, and wanted and unwanted data.
+
+The next pass re-reads the data and builds output volumes from it.
+

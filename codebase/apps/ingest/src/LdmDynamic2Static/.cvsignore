@@ -1,0 +1,6 @@
+.deps
+LdmDynamic2Static
+__makefile.template
+makefile
+makefile.am
+makefile.in

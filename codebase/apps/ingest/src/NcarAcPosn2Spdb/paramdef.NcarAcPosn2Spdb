@@ -1,0 +1,158 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for NcarAcPosn2Spdb
+ *
+ * Mike Dixon, EOL, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 2015
+ */
+
+commentdef {
+  p_header = "NcarAcPosn2Spdb reads aircraft position data from ASCII file in JSON format. These files updated frequently and are overwritten. They are read each time they update, and the position data is then stored in SPDB.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  REALTIME_JSON, SIM
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME_JSON;
+  p_descr = "Operating mode";
+  p_help = "\tREALTIME_JSON: JSON files are read and processed as they update.\n\tSIM: aircraft data is generated for simulation putposes.";
+} mode;
+
+commentdef {
+  p_header = "REALTIME JSON MODE";
+}
+
+typedef struct {
+  string callsign;
+  string input_path;
+} aircraft_json_t;
+
+paramdef struct aircraft_json_t {
+  p_default = {
+    { "N43RF", "/net/www/docs/flight_data/N43RF/position.json" },
+    { "DC8", "/net/www/docs/flight_data/DC8/position.json" },
+    { "WKA", "/net/www/docs/flight_data/WKA/position.json" }
+  };
+  p_descr = "Details of JSON files for each aircraft in realtime mode.";
+  p_help = "The JSON files update every few seconds. We watch the files and reread them when they change, storing the data in SPDB using the callsign as the data_type.";
+} aircraft_json[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Repeat the last location at regular intervals if it does not change";
+  p_help = "This can be used with mobile ground assets that stop reporting when then are stationary. See 'repeat_period_secs'.";
+} repeat_location_if_no_change;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Period at which to repeat the location if the position has not been updated (secs)";
+  p_help = "See 'repeat_location_if_no_change'.";
+} repeat_period_secs;
+
+paramdef int {
+  p_default = 43200;
+  p_descr = "Age at which we no longer repeat the data (secs)";
+  p_help = "If the input file exceeds this age, the data is no longer repeated.";
+} repeat_max_age_secs;
+
+commentdef {
+  p_header = "SIMULATION MODE";
+}
+
+typedef struct {
+  string callsign;
+  double start_lat;
+  double start_lon;
+  double altitude;
+  double speed;
+} sim_aircraft_t;
+
+paramdef struct sim_aircraft_t {
+  p_default = {
+    { "JRA", -27.43, 28.87, 9500, 150 },
+    { "JRB", -28.57, 28.86, 10500, 250 },
+    { "CAN", -28.19, 27.76, 11500, 150 }
+  };
+  p_descr = "Details of aircraft for SIM mode.";
+  p_help = "The test aircraft have a starting location, speed (knots) and altitude (ft). They wander randomly around. If they go further that 100 km from their starting location they are brought back to the start.";
+} sim_aircraft[];
+
+commentdef {
+  p_header = "DATA QUALITY";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Change the latitude sign";
+  p_help = "Use if southern latitudes are positive.";
+} change_lat_sign;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Change the longitude sign";
+  p_help = "Use if western longitudes are positive.";
+} change_lon_sign;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "/tmp/spdb/ac_posn";
+  p_descr = "Output SPDB URL.";
+  p_help = "This is the path to the output data directory. You can use full URL sytnax and optionally put the data to a remote machine.";
+} output_url;
+
+paramdef int {
+  p_default = 120;
+  p_min = 1;
+  p_descr = "Valid period (secs)";
+  p_help = "Time period over which the aircraft position is considered valid.";
+} valid_period;
+

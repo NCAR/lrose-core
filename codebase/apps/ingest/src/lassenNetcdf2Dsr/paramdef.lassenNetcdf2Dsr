@@ -1,0 +1,184 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Ingest Lassen format radar data that have\n"
+	"been converted to netcdf format at CU. Program\n"
+	"runs only in archive mode, these data are not\n"
+	"available in real time. Niles Oien August 2008";
+
+}
+
+paramdef boolean {
+  p_descr = "Option to print debugging messages.";
+  p_help = "Defaults to TRUE since we run in archive mode."; 
+  p_default = TRUE;
+} debug;
+
+paramdef string {
+  p_descr = "Format for directory where input reflectivity (Z) files are.";
+  p_help = "The fields that are printed into this to construe the\n"
+	"filename are : the last 2 digits of the year, the day of the\n"
+	"year, the location and field characters, the last two digits of\n"
+	"the year and the day of the year (again), the hour, the minute, and\n"
+	"the tilt character."; 
+  p_default = "/home/data/ucar/test_data/%02d%03d/Albis/reflectivity/%c%c_%02d%03d%02d%02d_%c.nc";
+} Zdir;
+ 
+paramdef string {
+  p_descr = "Format forirectory where input reflectivity (U) files are";
+  p_help = "See comments for Zdir."; 
+  p_default = "/home/data/ucar/test_data/%02d%03d/Albis/velocity/%c%c_%02d%03d%02d%02d_%c.nc";
+} Udir;
+ 
+paramdef string {
+  p_default = "AZ_070010000_B.nc";
+  p_help = "Start file name for program."; 
+  p_descr = "Program will progress from this file. The saveState\n"
+	"parameter may override this.";
+} startFile;
+ 
+paramdef int {
+  p_descr = "Maximum time, seconds, to allow between tilts.";
+  p_help = "Used when searching for new files."; 
+  p_default = 900;
+} searchTime;
+
+typedef struct {
+        long fmqSizeBytes;
+        long fmqNumSlots;
+        boolean fmqCompress;
+        string fmqUrl;
+        string fmqMsgLogDir;
+        int fmqBeamsPerRadarParams;
+        int delayAfterSendingTiltSecs;
+} output_t;
+
+paramdef struct output_t {
+  p_default = { 25000000, 6000, FALSE, "fmqp:://localhost::fmq/dsRadar", "/Some/Dir/", 30, 1 };
+  p_descr = "Specifications for the FMQ that we are to write to.";
+  p_help = "Set as appropriate, try to avoid overwrites.";
+} outputFmq;
+
+paramdef boolean {
+  p_descr = "Option to send an EOV if the tilt angle decreases.\n"
+  "Due to the unusual scan pattern used in meteoswiss, the\n"
+  "default is not to do this.";
+  p_help = "Meteoswiss use a scan pattern in which the tilt\n"
+  "angles increase through the first part of the volume, then\n"
+  "the antenna returns to a lower elevation and the tilt angles\n"
+  "then increase again in the second part of the scan pattern.\n"
+  "The two halves of the scan cover different elevation angles.\n\n"
+  "By default, an end of volume flag is sent only at the\n"
+  "end of this entire process, however, setting this to TRUE\n"
+  "means that an end of volume flag will be sent between the two\n"
+  "halves of the scan. Setting end_of_vol_decision=AUTOMATIC; in\n"
+  "Dsr2Vol would have the same effect, meaning that the MDV\n"
+  "volumes would alternate in the elevation angles they contain.\n"
+  "This makes the display of the data rather ugly in a movie loop.";
+  p_default = FALSE;
+ } sendEOVonTiltDecrease;
+
+
+paramdef boolean {
+  p_descr = "Option to take location from first character in file.";
+  p_help = "The file does have a lat lon in it, but it is occasionally\n"
+        "wrong, and there is no elevation (at least at the time of writing).\n"
+        "If this is set to TRUE (default) then the first character in\n"
+        "the filename determines the location as follows :\n\n"
+        "A => lat=47.28540 & lon=8.51301 & alt = 930 (Albis)\n"
+        "D => lat=46.42616 & lon=6.10016 & alt = 1680 (Dole)\n"
+        "L => lat=46.04179 & lon=8.83436 & alt = 1630 (Lema)\n";
+  p_default = TRUE;
+} useLocationChars;
+
+typedef struct {
+	boolean applyLowerLimit;
+	double lowerLimit;
+} lowerLimit_t;
+
+
+paramdef struct lowerLimit_t {
+  p_descr = "Option to set dbz values to missing if they are below\n"
+	"a certain threshold.";
+  p_help = "Defaults to TRUE since this works out to be a sensible\n"
+	"limit to apply."; 
+  p_default = { TRUE, -30.0 };
+} lowerLimit;
+
+typedef struct {
+	int postVolSleepSecs;
+	boolean callScriptPostVol;
+	string postVolScript;
+} postVol_t;
+
+paramdef struct postVol_t {
+  p_descr = "Optional stuff to do after processing a volume.";
+  p_help = "Can sleep for a given number of seconds (set to 0\n"
+	"to disable) and/or call a script to keep Dsr2Vol running."; 
+  p_default = { 0 , FALSE, "/Some/script/file" };
+} postVol;
+
+typedef struct {
+	boolean callScriptPostTilt;
+	string postTiltScript;
+} postTilt_t;
+
+paramdef struct postTilt_t {
+  p_descr = "Optional stuff to do after processing a tilt.";
+  p_help = "Can call a script to keep Dsr2Vol running."; 
+  p_default = { FALSE, "/Some/script/file" };
+} postTilt;
+
+typedef struct {
+	boolean stopAfterThisTime;
+	int year;
+	int month;
+	int day;
+	int hour;
+	int min;
+	int sec;
+	boolean runStopScript;
+	string stopScript;
+} stopTime_t;
+
+paramdef struct stopTime_t {
+  p_descr = "Optional to stop after a certain time.";
+  p_help = "May be useful for after the fact patch jobs."; 
+  p_default = { FALSE, 2007, 12, 30, 23, 59, 59, FALSE, "killDsr2Vol" };
+} stopTime;
+
+typedef struct {
+	boolean doSaveState;
+	string stateFilename;
+	boolean readStateAtStart;
+} saveState_t;
+
+paramdef struct saveState_t {
+  p_descr = "Options to save the last filename processed and use\n"
+	"it on startup. If on startup no state file is found then\n"
+	"the filename specified by startFile is used.";
+  p_help = "May be useful for long runs."; 
+  p_default = { FALSE, "./lassenNetcdf2Dsr.state", FALSE };
+} saveState;

@@ -1,0 +1,136 @@
+/**********************************************************************
+ * TDRP params for TsMerge
+ **********************************************************************/
+
+//======================================================================
+//
+// TsMerge reads raw time-series data from 2 sets of files, one for 
+//   clutter and one for weather. It merges them on a beam-by-beam basis. 
+//   The intention is to provide a merged data set for which the clutter 
+//   and weather components are known.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// DATA INPUT PARAMS.
+//
+//======================================================================
+ 
+///////////// clutter_start_az ////////////////////////
+//
+// Start azimuth of clutter (deg).
+// Type: double
+//
+
+clutter_start_az = 210;
+
+///////////// weather_start_az ////////////////////////
+//
+// Start azimuth of weather (deg).
+// Type: double
+//
+
+weather_start_az = 350;
+
+///////////// sector_width ////////////////////////////
+//
+// Width of sector (deg).
+// Type: double
+//
+
+sector_width = 270;
+
+///////////// antenna_speed ///////////////////////////
+//
+// Simulated antenna speed (deg/s).
+// Type: double
+//
+
+antenna_speed = 15;
+
+///////////// clutter_reduction_db ////////////////////
+//
+// Reduction in clutter power (dB).
+// The power in the clutter data is reduced by this amount before 
+//   merging with the weather data. Clutter power can only be reduced, not 
+//   increased.
+// Minimum val: 0
+// Type: int
+//
+
+clutter_reduction_db = 60;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory for time series files.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// output_time /////////////////////////////
+//
+// Time for output data,.
+// The time series data will be time-stamped starting at this time.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+output_time = { 2007, 1, 1, 6, 0, 0 };
+
+///////////// output_time_delta ///////////////////////
+//
+// Time between output files (secs).
+// Three output files are produced: (1) the clutter file, (2) the 
+//   weatehr file and (3) the merged file. The time stamps for these three 
+//   files are separted by this amount of time.
+// Type: int
+//
+
+output_time_delta = 300;
+
+///////////// output_elevation ////////////////////////
+//
+// Elevation angle for output data (deg).
+// Type: double
+//
+
+output_elevation = 0.5;
+

@@ -1,0 +1,832 @@
+#!/usr/bin/env perl
+#
+# Retrieve RUC2 model output files from the National Centers for
+# Environmental Prediction (NCEP) anonymous FTP server at the Office of
+# Systems Operations (OSO).  This retrieves either the upper-air 
+# pressure-level or upper-air hybrid-b-level data files.
+#
+# 
+# Greg Thompson <gthompsn\@ncar.ucar.edu>
+# F. Hage <fhage@ucar.edu> - PMU layer 
+# Deirdre Garvey <deirdre@ucar.edu> - mods for Nowcast
+# Jaimi Yee <jaimi@ucar.edu> - Mods for Nowcast
+#
+# This should be run in a cron, instead of using the auto-restarter.
+# The cron should be set to run this script for every model time,
+# but should allow for a delay in the time it takes from the model
+# time for the file to appear on the ftp site.  In other words,
+# if we are looking for ruc files with a model time of 0Z, cron
+# should fire off this script at 0Z + $modelDelay.
+#
+
+########################################################
+# Includes
+########################################################
+use Net::FTP;
+use Time::Local;
+use Env qw( RAP_LIB_DIR );
+use Env qw( RAP_SHARED_LIB_DIR );
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+use Toolsa;
+ 
+#######################################################
+# Misc.
+#######################################################
+( $prog = $0 ) =~ s%.*/%%;               # Determine program basename.
+$| = 1;                                  # Unbuffer standard output.
+umask 002;                               # Set file permissions.
+
+#######################################################
+# Global variables
+#######################################################
+$rapDataDir = $ENV{'RAP_DATA_DIR'};
+$ftpHost = "narf.fsl.noaa.gov";          # The ruc20 FTP server's domain name.
+$ftpTimeout = 240;                       # Time to allow for single file transfer
+$user = "ftprap20";                      # The remote username.
+$pass = "ros7coe";                       # The remote password.
+$modelDelay = 360 * 20;                  # Seconds model will be delayed
+$modelWaitTime = 5 * 60;                 # Delay for checks for data avail.
+$modelNumTries = 2;                      # Number of tries to get a file.
+$updateFreq = 1 * 3600;                  # Update frequency of model (3 hours).
+$defaultRegInterval = 120;               # Expected Heartbeat rate in seconds.
+$sysTimeout = 10;                        # Timeout for system calls
+
+$ruc20Dir = "maps_fcst"; 
+
+$ruc2bLocalExt = "RUCb.grb";
+
+@months = ( "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug",
+            "Sep","Oct","Nov","Dec" );
+@modelTimes = ( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 );
+@forecastTimes = ( 3 );
+
+
+#############################################################
+# Command line defaults
+#############################################################
+use Getopt::Long;
+use Env;
+use Cwd;
+Env::import();
+
+sub badArg;
+sub translateDataDir;
+sub verifyDataDir;
+
+$OutputDir = "$rapDataDir/other/ruc/hybrid";  # Local data directory.
+$TmpDir    = "$OutputDir/.$prog.tmp";         # Local temporary directory.
+$Instance  = "cronus";                        # Instance
+$Ruc_model = "ruc2b";                         # Ruc model (ruc2b, ruc2p, ruc2sfc)
+$OverWrite = 0;                               # Do not overwrite existing files
+$moveWaitTime = 1 * 60;                       # Delay for file move.
+
+#############################################################
+# Save the usage to print to the user if there is a problem
+#############################################################
+$usage =                                                 
+    "\nUsage: $prog [-h] [-dfioprtw]\n" .
+    "   -d  --debug                    : Print extra debugging messages\n" .
+    "   -h  --help                     : Print this usage message\n" .
+    "   -i  --instance <instance-name> : Instance name\n" .
+    "   -o  --outdir <output-dir-name> : Output directory for retrieved files\n" .
+    "   -f  --forecast                 : Name output files using the RAP forecast style\n" .
+    "   -r  --ruc <model>              : Specify ruc2p, ruc2b or ruc2sfc model\n" .
+    "   -t  --tmpdir <tmp-dir-name>    : Directory name for temporary files\n" .
+    "   -w --writeover                 : Overwrite existing files\n" .
+    "   -m --movesecs <move-wait-secs> : Number of seconds to wait after moving the final output file, must be greater than 0\n";
+
+############################################################
+# Get the arguments from the command line
+############################################################
+$result = &GetOptions( 'debug', 
+		       'help', 
+		       'instance=s',
+		       'outdir=s',
+		       'forecast',
+		       'ruc=s',
+		       'tmpdir=s',
+                       'writeover',
+		       'movesecs=i',
+                       '<>', \&badArg );
+
+if ( $result == 0 || $opt_help ) {
+   print( STDERR $usage );
+   exit 0;
+}
+
+if ( $opt_debug ) {
+    print( STDERR "Input options specified: \n" );
+    print( STDERR "  debug: $opt_debug\n" );
+    print( STDERR "  instance: $opt_instance\n" );
+    print( STDERR "  output dir: $opt_outdir\n" );
+    print( STDERR "  forecast: $opt_forecast\n" );
+    print( STDERR "  ruc: $opt_ruc\n" );
+    print( STDERR "  tmp dir: $opt_tmpdir\n" );
+    print( STDERR "  overwrite: $opt_overwrite\n" );
+    print( STDERR "  movewait: $opt_movewait\n");
+    $debug = 1;
+}
+
+# Error checking on command line args
+
+if ( $opt_instance ) {
+    $Instance=$opt_instance;
+}
+
+if ( $opt_outdir ) {
+    $OutputDir=$opt_outdir;
+}
+
+if ( $opt_tmpdir ) {
+    $TmpDir=$opt_tmpdir;
+}
+
+if ( $opt_ruc ) {
+    if ( $opt_ruc eq "ruc2b" ) {
+	$Ruc_model=$opt_ruc;
+    }
+    elsif ( $opt_ruc eq "ruc2p" ) {
+	$Ruc_model=$opt_ruc;
+    }
+    elsif ( $opt_ruc eq "ruc2sfc" ) {
+        $Ruc_model=$opt_ruc;
+    }
+    else {
+	tidyAndExit( "Options are ruc2b, ruc2p or ruc2sfc\n", -1 );
+    }
+}
+
+if ( $opt_writeover ) {
+   $OverWrite = 1;
+}
+
+if ( $opt_movesecs )
+{
+    $moveWaitTime = $opt_movesecs;
+}
+
+if ( $opt_debug ) {
+    print( STDERR "\nInput options used: \n" );
+    print( STDERR "  debug: $opt_debug\n" );
+    print( STDERR "  instance: $Instance\n" );
+    print( STDERR "  output dir: $OutputDir\n" );
+    print( STDERR "  forecast: $opt_forecast\n" );
+    print( STDERR "  ruc: $Ruc_model\n" );
+    print( STDERR "  tmp dir: $TmpDir\n" );
+    print( STDERR "  overwrite: $OverWrite\n" );
+    print( STDERR "  movewait: $moveWaitTime\n" );
+    $debug = 1;
+}
+
+
+
+#######################################################################
+# Start of main
+#######################################################################
+
+    #
+    # Make sure the registration interval is at least 
+    #   as big as the ftp timeout
+    #
+    $regInterval = ( $defaultRegInterval > int($ftpTimeout/1.8) ) ? 
+		     $defaultRegInterval : int($ftpTimeout/1.8);
+
+    #
+    # Make sure the move wait time is no bigger than the registration
+    # interval
+    #
+    $mvWaitTime = ( $moveWaitTime > $regInterval ) ?
+                    $regInterval : $moveWaitTime;
+
+    #
+    # Initialize the Process Manager
+    #
+    Toolsa::PMU_auto_init( $prog, $Instance, $regInterval ); 
+
+    #
+    # Set up signal handling
+    #
+    $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'KILL'} = $SIG{'TERM'} = 'sigHandler'; 
+
+    #
+    # Create a clean temporary directory.
+    #
+    if( -e $TmpDir ) {
+       system( "/bin/rm -rf $TmpDir" );
+    }
+
+    $cmd = "mkdir -p -m 0755 $TmpDir";
+    $status = Toolsa::safe_system( $cmd, $sysTimeout, $debug );
+    unless( defined( $status ) ) {
+       tidyAndExit( "Could not create temporary directory\n", -1 );
+    }
+
+    #
+    # Make sure the output directory exists
+    #
+    $cmd = "mkdir -p -m 0755 $OutputDir";
+    $status = Toolsa::safe_system( $cmd, $sysTimeout, $debug );
+    unless( defined( $status ) ) {
+       tidyAndExit( "Could not create output directory\n", -1 );
+    }
+
+    #
+    # Poll the ftp site for a current directory listing
+    #
+    ( $year, $month, $day, $cycleStartTime, $modelTime, 
+      $modelUTime, $fslDir, @dirListing ) = &pollFtp();
+
+print( STDERR "pollFtp() returns:\n");
+print( STDERR "   year: $year\n");
+print( STDERR "   month: $month\n");
+print( STDERR "   day: $day\n");
+print( STDERR "   cycleStartTime: $cycleStartTime\n");
+print( STDERR "   modelTime: $modelTime\n");
+print( STDERR "   modelUTime: $modelUTime\n");
+print( STDERR "   fslDir: $fslDir\n");
+
+    #
+    # Registration
+    #
+    Toolsa::PMU_force_register( "Looking at file list" );
+
+    #
+    # Print directory listing
+    #
+    if( $debug ) {
+      foreach $listItem (@dirListing ) {
+	 print( STDERR "$listItem\n" );
+	 print "$listItem\n";
+      }
+
+    }
+
+    #
+    # Initialize the wait time for files that are not ready yet
+    #
+    $startWaitTime = $cycleStartTime;
+
+    foreach $fcastTime ( @forecastTimes ) {
+
+      if( $debug ) {
+	 print( STDERR "Forecast time is $fcastTime\n" );
+      }
+
+      #
+      # Build up the file name that we want
+      #
+      if( $fcastTime eq 0 ) {
+        $fcastExt = "anl";
+      } else {
+        $fcastStr = sprintf( "%02d", $fcastTime );
+        $fcastExt = "f${fcastStr}";
+      }
+
+      if( $Ruc_model eq "ruc2b" ) {
+        $fileExt = "bgrb${fcastExt}";
+      }
+      elsif( $Ruc_model eq "ruc2p" ) {
+        $fileExt = "pgrb${fcastExt}";
+      }
+      elsif( $Ruc_model eq "ruc2sfc" ) {
+        $fileExt = "sgrb${fcastExt}";
+      }
+
+      if($fcastTime < 10) {
+	  $fcastTime = "0" . "$fcastTime";
+      }
+      $fname = "${filedate}0000${fcastTime}.grib";
+
+      if( $debug ) {
+	 print( STDERR "Looking for file $fname\n" );
+      }
+
+      #
+      # See if we have a match in the directory list
+      #
+      $fileIdex = &fileAvail( $fname, @dirListing );
+      if( $fileIdex < 0 ) {
+
+	#
+	# The file is not in the list, so go on
+	#
+	if( $debug ) {
+	   print( STDERR "File $fname not ready yet\n" );
+	}
+
+	$count = 0;
+	while( $fileIdex < 0 && $count < $modelNumTries ) {
+	   $startWaitTime = $startWaitTime + $modelWaitTime;
+	   &ftpWait( $startWaitTime, $modelWaitTime );
+	   $fileIdex = &fileAvail( $fname, @dirListing );
+	   $count = $count + 1;
+	}
+	next;
+      }
+      else {
+
+	#
+	# The file is in the list
+	#
+	if( $fname eq $lastFile ) {
+
+	   # 
+	   # We already processed the file, so go on
+	   #
+	   if( $debug ) {
+	      print( STDERR "File $fname already retrieved\n" );
+	   }
+
+	   next;
+	} 
+	else {
+
+	   #
+	   # Set up the local directories for the file
+	   #
+	   $dateDir = sprintf( "%04d%02d%02d", $year, $month, $day );
+
+	   $modelTimeStr = sprintf( "%02d", $modelTime );
+
+	   if ($opt_forecast)
+	   {
+	       $genTimeDirString = "g_" . $modelTimeStr . "0000";
+
+	       $localDir = "${OutputDir}/${dateDir}/${genTimeDirString}";
+	       $ldataDir = $OutputDir;
+	   }
+	   else
+	   {
+	       $fcastTimeStr = "f" . "$fcastTime";
+
+	       $localDir = "${OutputDir}/${fcastTimeStr}/${dateDir}";
+	       $ldataDir = "${OutputDir}/${fcastTimeStr}";
+	   }
+
+	   if( $debug ) {
+	      print( STDERR "Local directory $localDir\n" );
+	   }
+
+	   $cmd = "mkdir -p -m 0755 ${localDir}";
+	   $status = Toolsa::safe_system( $cmd, $sysTimeout, $debug );
+	   unless( defined( $status ) ) {
+	      tidyAndExit( "Could not create local directory\n", -1 );
+	   }
+
+	   #
+	   # Set up local file name
+	   #
+	   if( $Ruc_model eq "ruc2b" ) {
+	     $localFileExt = $ruc2bLocalExt;
+	   }
+	   elsif( $Ruc_model eq "ruc2p" ) {
+	     $localFileExt = $ruc2pLocalExt;
+	   }
+	   elsif( $Ruc_model eq "ruc2sfc" ) {
+	     $localFileExt = $ruc2sfcLocalExt;
+	   }
+
+	   if ($opt_forecast)
+	   {
+	       $fcastSecs = $fcastTime * 3600;
+	       $localFname = sprintf( "%08d", $fcastSecs);
+	       $localFname = $localFname . ".${localFileExt}";;
+	   }
+	   else
+	   {
+	       $localFname = "${modelTimeStr}0000.${localFileExt}";
+	   }
+
+	   if ($debug)
+	   {
+	       print( STDERR "Local file name: $localFname\n");
+	   }
+
+	   #
+	   # If we don't want to overwrite existing files,
+	   # and the file exists, skip it
+	   #
+	   if( !$OverWrite ) {
+	      if( -e "$localDir/$localFname" ) {
+		 print( STDERR "$localFname already exists\n" );
+		 next;
+	      }
+	   }
+
+	   #
+	   # Connect to the ftp server
+	   #
+	   Toolsa::PMU_force_register( "Connecting to the ftp server" );
+	   if( $debug ) {
+	      print( STDERR "Connecting to the ftp server\n" );
+	   }
+
+	   $ftp = Net::FTP->new( $ftpHost, Passive=>true, 
+				 Timeout=>$ftpTimeout ) 
+	      or tidyAndExit( "Could not connect to ftp server\n", -1 );
+
+	   #
+	   # Log in
+	   #
+	   $ftp->login( $user, $pass ) 
+	      or tidyAndExit( "Could not log into ftp server\n", -1 );
+
+	   #
+	   # Set the modes and change the directory
+	   #
+	   $ftp->binary 
+	      or tidyAndExit( "ftp-binary mode failed\n", -1 );
+	   $ftp->cwd( $fslDir ) 
+	      or tidyAndExit( "ftp-cwd failure\n", -1 );
+
+	   #
+	   # Get the file
+	   #
+	   if( $debug ) {
+	      print( STDERR "Retrieving $fname\n" );
+	   }
+
+	   $ftp->get( $fname, "${TmpDir}/${fname}" ) 
+	      or tidyAndExit( "ftp-get failure for $fname\n", -1 );
+
+	   #
+	   # End the ftp session
+	   #
+	   $ftp->quit;
+
+	   Toolsa::PMU_force_register( "FTP $fname complete" );
+
+	   #
+	   # Move the file to the correct place and rename it
+	   # 
+	   if( $debug ) {
+	     print( STDERR "Renaming ${TmpDir}/${fname} to " );
+	     print( STDERR "${localDir}/${localFname}\n" );
+	   }
+
+	   $cmd = "mv ${TmpDir}/${fname} ${localDir}/${localFname}";
+	   $status = Toolsa::safe_system( $cmd, $sysTimeout, $debug );
+	   unless( defined( $status ) ) {
+	      tidyAndExit( "Could not move temporary file\n", -1 );
+	   }
+
+	   sleep $mvWaitTime;
+
+	   #
+	   # Update the ldata info file
+	   #
+	   $latestTimeStr = sprintf("%04d%02d%02d%02d0000",
+				    $year, $month, $day, $modelTime);
+
+	   if ($debug)
+	   {
+	       print(STDERR "Writing Ldata info file to dir: $ldataDir\n");
+	       print(STDERR "    latestTimeStr: $latestTimeStr\n");
+	   }
+
+	   if ($opt_forecast)
+	   {
+	       $leadTimeSecs = $fcastTime * 3600;
+	       $cmd = "LdataWriter -dir $ldataDir -ext $localFileExt " .
+		   "-lead $leadTimeSecs -ltime $latestTimeStr";
+	   }
+	   else
+	   {
+	     $cmd = "LdataWriter -dir $ldataDir -ext $localFileExt " .
+		 "-ltime $latestTimeStr";
+	   }
+
+	   $status = Toolsa::safe_system($cmd, $sysTimeout, $debug);
+	   unless(defined($status))
+	   {
+	       tidyAndExit("Could not write ldata file with LdataWriter", -1);
+	   }
+
+	   if( $debug ) {
+	      print( STDERR "Done retrieving file $fname\n" );
+	   }
+
+	   $lastFile = $fname;
+	}
+    }
+    print( STDERR "\n\n" );
+
+  }
+
+  tidyAndExit( "Done\n", 0 );
+
+############################################################
+# End of Main
+############################################################
+               
+
+############################################################
+# Start of Subroutines
+############################################################
+
+
+############################################################
+# &getTime: Get current time from gmtime command
+# Package: main
+# Returns: year, month, day and hour 
+############################################################
+sub getTime {
+  local( $gmYear, $gmMonth, $gmDay, $gmHour, $gmMin, $gmSec,
+         $currentTime );
+
+  $currentTime = time();
+  $modelSearchTime = $currentTime - $modelDelay;
+
+  if( $debug ) {
+      print( STDERR "\ngetTime: Calculating modelSearchTime (currentTime - modelDelay($modelDelay)\n" );
+  }
+
+  ( $gmSec, $gmMin, $gmHour, $gmDay, $gmMonth, $gmYear ) = 
+       (gmtime( $modelSearchTime ))[0...5];
+  
+  return( $gmYear+1900, $gmMonth+1, $gmDay, $gmHour, $gmMin,
+          $gmSec, $modelSearchTime, $currentTime );
+}
+
+##############################################################
+# &ftpWait
+# Package: main
+# Returns: nothing
+#############################################################
+sub ftpWait {
+   local( $cycleStartTime, $waitTime ) = @_;
+   $nextTryTime = $cycleStartTime + $waitTime;
+
+   print( STDERR "Sleeping until $nextTryTime\n" );
+
+   while( time() < $nextTryTime ) {
+
+      #
+      # Register with the process mapper
+      #
+      Toolsa::PMU_force_register( "Sleeping" );
+
+      #
+      # Sleep
+      #
+      $sleepTime = ( ($nextTryTime - time()) > $regInterval ) ? 
+	  $regInterval : ( $nextTryTime - time() );
+	if( $sleepTime > 0 ) {
+	    sleep $sleepTime;
+	}
+    }
+}
+
+######################################################################
+# &dirList 
+# Package: pollFtp
+# Returns: a listing of files in the directory which 
+#          match the pattern string from a remote host
+#          Each entry in the array is a single line of 
+#          ftp's dir command.
+######################################################################
+sub dirList {
+    local($rdir, $matchString) = @_;
+    local($ftp, @listings);
+
+    #
+    # Log in to ftp site
+    #
+    $ftp = Net::FTP->new( $ftpHost, Passive=>true, 
+                          Timeout=>$ftpTimeout ) 
+       or tidyAndExit( "Could not create ftp connection\n", -1 );
+    $ftp->login( $user, $pass )
+       or tidyAndExit( "ftp-login failure\n", -1 );
+    $ftp->binary 
+       or tidyAndExit( "ftp-binary mode failure\n", -1 );
+    $ftp->cwd( $rdir ) 
+       or tidyAndExit( "ftp-cwd failure\n", -1 );
+
+    #
+    # Do a directory listing and capture the output
+    #
+    @listings = $ftp->dir( $matchString );
+    $ftp->quit;
+
+    return (@listings);
+}
+
+###############################################################
+# &numerically
+# Package: pollFtp
+# Returns: an integer less than, equal to or greater than
+#          zero depending on how the inputs are ordered
+###############################################################
+sub numerically { $a <=> $b; }
+
+###############################################################
+# &pollFtp
+# Package: main
+# Returns: the current model time and a list of files 
+###############################################################
+sub pollFtp {
+
+  local( @sortedModelTimes, $year, $month, $day, $hour, $min, $sec,
+         $modelSearchTime, $cycleStartTime, $currentModelTime, $rucModelTime, 
+         $modelUTime, $modelString, $dirString, $ncepExt, $fslDir, @dirListing, 
+         $gotDir, $nextTryTime, $sleepTime );
+
+  $fslDir = $ruc20Dir;
+  #
+  # Make sure the model times are in order
+  #
+  @sortedModelTimes = sort numerically @modelTimes;
+
+  $gotDir = 0;
+
+  $dirListCount = 0;
+
+  while( !$gotDir && $dirListCount < $modelNumTries ) {
+
+      #
+      # Get the modelsearchTime and currentTime(cycleStartTime)
+      #
+      ( $year, $month, $day, $hour, $min, $sec, 
+        $modelSearchTime, $cycleStartTime ) = getTime();
+
+      if( $debug ) {
+	 print( STDERR "\npollFtp: model search time is $year $month $day $hour:${min}Z \n" );
+	 print( STDERR "\npollFtp: Looking for modelTime nearest modelSearchTime but less than modelSearchTime \n" );
+      }
+      
+      #
+      # Set the current model time to be that
+      # which is <= modelSearchTime (currentTime - modelDelay)
+      #
+      $currentModelTime = $sortedModelTimes[0];
+      foreach $rucModelTime ( @sortedModelTimes ) {
+	 if( $hour * 60 * 60 + $min * 60 + $sec >= $rucModelTime * 60 * 60 ) {
+	   $currentModelTime = $rucModelTime;
+	 }
+      }
+      if( $debug ) {
+	 print( STDERR "pollFtp: Looking for model time: $currentModelTime\n" );
+      }
+
+      #
+      # Find the unix time that goes with the model time
+      #
+      $modelUTime = $modelSearchTime - 
+	 (( $hour * 60 * 60 ) + ( $min * 60 ) + $sec ) +
+	    ( $currentModelTime * 60 * 60 );
+      $julian_day = &julianDate($modelSearchTime);
+
+      #
+      # Set up the directory string that will be used
+      # at the ftp site
+      #
+      $filedate = sprintf( "%02d%03d%02d", substr($year,3,4), $julian_day, $currentModelTime );
+      $modelString = sprintf( "%02d", $currentModelTime );
+      if( $debug ) {
+	 print( STDERR "pollFtp: filedate: $filedate\n" );
+	 print( STDERR "pollFtp: modelString $modelString\n" );
+      }
+      $dirString = "${filedate}0000??.grib";
+
+      #
+      # Procmap registration
+      #
+      Toolsa::PMU_force_register( "FTP directory list $dirString" );
+
+      #
+      # Request a directory listing from the ftp site
+      #
+
+      @dirListing = &dirList( $fslDir, $dirString );
+
+      if( $debug ) {
+	 print( STDERR "pollFtp: fslDir : $fslDir\n" );
+	 print( STDERR "pollFtp: dirString : $dirString\n" );
+      }
+
+      #
+      # If we didn't get a directory listing, sleep a while
+      #
+      if( @dirListing ) {
+	 $gotDir = 1;
+         if( $debug ) {
+	    print( STDERR "Got directory listing\n" );
+         }
+      }
+      else {
+         $gotDir = 0;
+         if( $debug ) {
+            print( STDERR "No matching files in directory. Going to sleep...\n" );
+         }
+         &ftpWait( $cycleStartTime, $modelWaitTime );
+      }
+
+      $dirListCount++;
+  }
+    
+  return( $year, $month, $day, $cycleStartTime, $currentModelTime, 
+          $modelUTime, $fslDir, @dirListing );
+
+}
+
+
+#************************************************************************
+#****   Return 1 if we are after the leap day in a leap year.       *****
+#************************************************************************
+                           
+sub leapDay                  
+{                            
+    my($year,$month,$day) = @_;
+
+    if (year % 4) {
+        return(0);
+    }
+
+if (!(year % 100)) {             # years that are multiples of 100
+                                     # are not leap years
+        if (year % 400) {            # unless they are multiples of 400
+            return(0);
+        }
+    }
+    if (month < 2) {
+        return(0);
+    } elsif ((month == 2) && (day < 29)) {
+        return(0);
+    } else {
+        return(1);
+    }
+}
+    
+#************************************************************************
+#****   Pass in the date, in seconds, of the day you want the       *****
+#****   julian date for.  If your localtime() returns the year day  *****
+#****   return that, otherwise figure out the julian date.          *****
+#************************************************************************
+            
+sub julianDate      
+{           
+    my($dateInSeconds) = @_;
+    my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday);
+
+    ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday) =
+        gmtime($dateInSeconds);
+    if (defined($yday)) {
+        return($yday+1);
+    } else {
+        return($theJulianDate[$mon] + $mday + &leapDay($year,$mon,$mday));
+    }
+
+}
+
+
+########################################################################
+# &fileAvail: Determine if a file is in the file list
+# Package: main
+# Returns: index of file in listing or -1 if not found
+########################################################################
+sub fileAvail {
+    local( $fname, @listings ) = @_;
+    local( $listing, $count );
+
+    $count = 0;
+    foreach $listing ( @listings ) {
+       chomp $listing;
+
+       if( $listing =~ /$fname/ ) {
+          return( $count );
+       }
+
+       $count += 1;
+    }
+
+    return( -1 );
+}
+
+########################################################################
+# &tidyAndExit
+# Package: main
+# Returns: nothing
+########################################################################
+sub tidyAndExit {
+   local( $errStr, $errCode ) = @_;
+
+   print( STDERR $errStr );
+   Toolsa::PMU_auto_unregister();
+
+   exit $errCode;
+}
+
+######################################################################
+# &sigHandler
+# Package: main
+# Returns: nothing
+######################################################################
+sub sigHandler {
+   local( $sig ) = @_;
+   
+   print( STDERR "Exiting\n" );
+   Toolsa::PMU_auto_unregister();
+
+   exit(0);
+}

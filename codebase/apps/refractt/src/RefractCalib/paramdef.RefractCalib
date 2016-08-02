@@ -1,0 +1,384 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.RefractCalib
+ *
+ * This file contains the TDRP parameter definitions for
+ * RefractCalib
+ */
+
+
+commentdef
+{
+  p_header = "RefractCalib";
+  p_text = "This program creates the calibration file used by Refract.";
+};
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_EXTRA,
+  DEBUG_VERBOSE
+} debug_level_t;
+
+paramdef enum debug_level_t
+{
+  p_descr = "Debug level";
+  p_default = DEBUG_OFF;
+} debug_level;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to write debug MDV files";
+  p_default = false;
+} write_debug_mdv_files;
+
+paramdef string
+{
+  p_descr = "Debug MDV file URL";
+  p_default = "mdvp:://localhost::mdv/debug/RefractCalib";
+} debug_mdv_url;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Input data information
+ */
+
+commentdef
+{
+  p_header = "INPUT DATA PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the raw I and Q values are included in "
+            "the input stream.";
+  p_help = "If true, the raw fields will be read from the input stream. "
+           "If false, the raw fields will be calculated from the NIQ/AIQ "
+           "values which must be inluded in the input stream instead.";
+  p_default = true;
+} raw_iq_in_input;
+
+paramdef string
+{
+  p_descr = "Raw I field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to TRUE.";
+  p_default = "MeanI";
+} raw_i_field_name;
+
+paramdef string
+{
+  p_descr = "Raw Q field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to TRUE.";
+  p_default = "MeanQ";
+} raw_q_field_name;
+
+paramdef string
+{
+  p_descr = "NIQ field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to FALSE.";
+  p_default = "NIQ";
+} niq_field_name;
+
+paramdef double
+{
+  p_descr = "Input NIQ scale value";
+  p_help = "The NIQ value from the input source is multiplied by this "
+           "value before the data is used. "
+           "For most radars this value should be 0.1. "
+           "For SPOL this value should be 0.025.";
+  p_default = 0.1;
+} input_niq_scale;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to invert the sign of the target angles.";
+  p_help = "This fix should be done upstream, but is added here "
+           "just in case.\n"
+           "Used only if raw_iq_in_input is set to FALSE.";
+  p_default = false;
+} invert_target_angle_sign;
+
+paramdef string
+{
+  p_descr = "AIQ field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to FALSE.";
+  p_default = "AIQ";
+} aiq_field_name;
+
+paramdef string
+{
+  p_descr = "Signal-to-noise ratio field name in the input stream.";
+  p_default = "SNR";
+} snr_field_name;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to specify the desired elevation by "
+            "index or by angle limits.";
+  p_help = "If true, the elevation is specfied by index in the elevation_num "
+           "parameter.\n"
+           "If false, the elevation is specified by angle in the "
+           "elevation_angle parameter.\n";
+  p_default = true;
+} specify_elevation_by_index;
+
+paramdef long
+{
+  p_descr = "Elevation number to use from the MDV files.";
+  p_help = "Used only if specify_elevation_by_index is set to true.";
+  p_default = 0;
+} elevation_num;
+
+typedef struct
+{
+  double min_angle;
+  double max_angle;
+} elevation_angle_t;
+
+paramdef struct elevation_angle_t
+{
+  p_descr = "The angle limits for the desired elevation angle. "
+            "Only sweeps with elevation angles between these limits will "
+            "be used in the calibration.";
+  p_help = "Used only if specify_elevation_by_index is set to false.";
+  p_default = { 0.3, 0.5 };
+} elevation_angle;
+
+paramdef string
+{
+  p_descr = "List of files to use for target identification";
+  p_default = { "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804183718.KFTG_RVP.0.0.4_SUR_v368",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804183832.KFTG_RVP.0.0.4_SUR_v370",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804184738.KFTG_RVP.0.0.4_SUR_v375",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804185329.KFTG_RVP.0.0.4_SUR_v383",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804185919.KFTG_RVP.0.0.4_SUR_v391",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804190509.KFTG_RVP.0.0.4_SUR_v399",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804191100.KFTG_RVP.0.0.4_SUR_v407",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804191650.KFTG_RVP.0.0.4_SUR_v415",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804192240.KFTG_RVP.0.0.4_SUR_v423",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804192830.KFTG_RVP.0.0.4_SUR_v431",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804193420.KFTG_RVP.0.0.4_SUR_v439",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804194010.KFTG_RVP.0.0.4_SUR_v447",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804194600.KFTG_RVP.0.0.4_SUR_v455",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804195150.KFTG_RVP.0.0.4_SUR_v463",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804195740.KFTG_RVP.0.0.4_SUR_v471",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804200330.KFTG_RVP.0.0.4_SUR_v479",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804200919.KFTG_RVP.0.0.4_SUR_v487",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804201508.KFTG_RVP.0.0.4_SUR_v495",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804202058.KFTG_RVP.0.0.4_SUR_v503",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804202647.KFTG_RVP.0.0.4_SUR_v511",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804210134.KFTG_RVP.0.0.4_SUR_v517",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804210207.KFTG_RVP.0.0.4_SUR_v518",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804210756.KFTG_RVP.0.0.4_SUR_v526",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804211346.KFTG_RVP.0.0.4_SUR_v534",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804211936.KFTG_RVP.0.0.4_SUR_v542" };
+} target_id_file_list[];
+
+paramdef string
+{
+  p_descr = "List of files to use for calibration";
+  p_default = { "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807000458.KFTG_RVP.0.0.5_SUR_v8",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807000602.KFTG_RVP.0.0.6_SUR_v10",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807001047.KFTG_RVP.0.0.5_SUR_v16",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807001635.KFTG_RVP.0.0.5_SUR_v24",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807002224.KFTG_RVP.0.0.5_SUR_v32",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807002813.KFTG_RVP.0.0.5_SUR_v40",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807003401.KFTG_RVP.0.0.5_SUR_v48",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807003950.KFTG_RVP.0.0.5_SUR_v56",
+                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807004539.KFTG_RVP.0.0.5_SUR_v64" };
+} calibration_file_list[];
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Reference file path";
+  p_help = "Full path for the file containing calibration information.  "
+           "This is the file that is created by the calibration and used "
+           "as input to the Refract algorithm.";
+  p_default = "";
+} ref_file_path;
+
+paramdef long
+{
+  p_descr = "Number of azimuths used in data processing";
+  p_min = 1;
+  p_default = 360;
+} num_azim;
+
+paramdef long
+{
+  p_descr = "Number of range bins";
+  p_min = 1;
+  p_default = 450;
+} num_range_bins;
+
+paramdef double
+{
+  p_descr = "Antenna beam width in degrees";
+  p_default = 0.92;
+} beam_width;
+
+paramdef long
+{
+  p_descr = "Min range gate of ground echo";
+  p_min = 1;
+  p_default = 4;
+} r_min;
+
+paramdef double
+{
+  p_descr = "Side lobe power";
+  p_help = "Echoes below this value of integrated power are considered "
+           "to be from sidelobes.";
+  p_max = -10.0;
+  p_default = -75.0;
+} side_lobe_pow;
+
+typedef enum
+{
+  ENTER_N,
+  ENTER_P_T_TD
+} entry_type_t;
+
+paramdef enum entry_type_t
+{
+  p_descr = "Type of data entry for the calibration calculation.";
+  p_help = "\tENTER_N - N is entered directly in the calib_n parameter.\n"
+           "\tENTER_P_T_TD - Pressure is entered in the calib_pressure "
+           "parameter, temperature is entered in the calib_temperature "
+           "parameter and dew point temperature is entered in the "
+           "calib_dewpoint_temperature paramtere.\n";
+  p_default = ENTER_N;
+} entry_type;
+
+paramdef double
+{
+  p_descr = "N value to use in the calibration.";
+  p_help = "Used only if entry_type is set to ENTER_N.";
+  p_default = 1.0;
+} calib_n;
+
+paramdef double
+{
+  p_descr = "Pressure value to use in the calibration.";
+  p_help = "This is the station pressure, NOT the sea level pressure. "
+           "Used only if entry_type is set to ENTER_P_T_TD.";
+  p_default = 260.0;
+} calib_pressure;
+
+paramdef double
+{
+  p_descr = "Temperature value to use in the calibration.";
+  p_help = "Used only if entry_type is set to ENTER_P_T_TD.";
+  p_default = 1.0;
+} calib_temperature;
+
+paramdef double
+{
+  p_descr = "Dewpoint temperature to use in the calibration.";
+  p_help = "Unsed only if entry_type is set to ENTER_P_T_TD.";
+  p_default = 1.0;
+} calib_dewpoint_temperature;
+
+
+/***********************************************************************
+ * Colorscale parameters.
+ */
+
+commentdef
+{
+  p_header = "COLORSCALE PARAMETERS";
+  p_text = "These colorscale files can be generated as a convenience to the "
+           "user. "
+           "They are not required for the calculating of the calibration.";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to create the strength colorscale "
+            "file.";
+  p_help = "This creates a CIDD colorscale file that matches the colors "
+           "used by Frederic Fabry in his original n_viewcalib program.";
+  p_default = false;
+} create_strength_colorscale;
+
+paramdef string
+{
+  p_descr = "Full path for the strength colorscale file.";
+  p_help = "Used only if create_strength_colorscale is set to true.";
+  p_default = "colorscales/strength.colors";
+} strength_colorscale_path;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to create the quality colorscale file.";
+  p_help = "This creates a CIDD colorscale file that matches the colors "
+           "used by Frederic Fabry in his original n_viewcalib program.";
+  p_default = false;
+} create_quality_colorscale;
+
+paramdef string
+{
+  p_descr = "Full path for the quality colorscale file.";
+  p_help = "Used only if create_quality_colorscale is set to true.";
+  p_default = "colorscales/quality.colors";
+} quality_colorscale_path;

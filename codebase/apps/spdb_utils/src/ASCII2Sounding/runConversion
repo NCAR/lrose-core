@@ -1,0 +1,11 @@
+#!/bin/csh
+#
+# Small script that runs conversion to SPDB for Rong's
+# temperature profiles. Crude yet somewhat effective. Niles.
+#
+foreach i ( $1/*.prof )
+  echo $i
+  ASCII2Sounding $i
+end
+
+#

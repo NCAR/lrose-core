@@ -1,0 +1,7 @@
+#!/bin/csh
+#
+# Niles - this dumps core - I am debugging it.
+#
+./surf_interp -params surf_interp.test -start "2003 05 06 00 00 00" -end "2003 05 06 02 00 00"
+
+#

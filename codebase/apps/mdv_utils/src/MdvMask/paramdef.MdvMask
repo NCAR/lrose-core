@@ -1,0 +1,444 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvMask uses a template to mask out unwanted "
+             "regions and set the values therein to missing. "
+             "In conjuction with a land/sea mask, this could "
+             "be used to only allow vales over land.\n"
+             "The program uses a template MDV file, which could "
+             "be from a dynamically updating URL or from a specific "
+	     "filename.";
+
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+
+/***********************************************************************
+ * Process triggering.
+ */
+
+commentdef
+{
+  p_header = "PROCESS TRIGGERING PARAMETERS";
+  p_text = "Parameters describing the process triggering.";
+};
+
+typedef enum
+{
+  COMMAND_LINE,
+  LATEST_DATA,
+  REALTIME,
+  REALTIME_FCST_DATA,
+  TIME_LIST,
+  ARCHIVE,
+  MULTIPLE_URL
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tCOMMAND_LINE uses a file specified on the command line to "
+           "compute a trigger time. Only works with data in forecast dirs.\n"
+	   "\tIn LATEST_DATA mode, the program watches the latest data file "
+           "in the directory specified by the TriggerUrl parameter.\n"
+           "\tREALTIME mode is the same as LATEST_DATA mode.\n"
+           "\tIn REALTIME_FCST_DATA mode, the program watches the latest data "
+           "file specified by the TriggerUrl parameter. "
+           "The difference between LATEST_DATA mode and REALTIME_FCST_DATA "
+           "mode is that in REALTIME_FCST_DATA mode the program will use the "
+           "lead time in the trigger for requesting the input data.\n"
+           "\tIn TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n"
+	   "\tARCHIVE mode is the same as TIME_LIST mode.\n"
+           "\tIn MULTIPLE_URL mode, the program is triggered by multiple URLs. "
+           "The trigger_type defines how the URLs are used and the "
+           "multiple_url_trigger parameter specifies the list of URLs. "
+           "This is a realtime mode.";
+  p_default = "REALTIME";
+} Mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string {
+  p_descr = "URL to trigger off";
+  p_help = "Program runs when new data appear here.  "
+           "This is generally the same as InputUrl or MaskUrl, but "
+           "doesn't have to be."; 
+  p_default = "mdvp:://localhost::mdv/trigger";
+} TriggerUrl;
+
+paramdef string
+{
+  p_descr = "List of URLs for triggering in MULTIPLE_URL mode";
+  p_default = { "mdvp:://localhost::mdv/derived_ruc" };
+} multiple_url_trigger[];
+
+typedef enum
+{
+  TRIGGER_ALL,
+  TRIGGER_ANY_ONE
+} trigger_type_t;
+
+paramdef enum trigger_type_t
+{
+ p_descr = "Triggering method when triggering in MULTIPLE_URL mode";
+ p_help  = "If TRIGGER_ALL, triggers when all url's update\n "
+           "If TRIGGER_ANY_ONE, triggers when any url updates\n";
+ p_default = "TRIGGER_ALL";
+} trigger_type;
+
+
+/***********************************************************************
+ * Input/output parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT PARAMETERS";
+};
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set true to time stamp output with trigger time.\n "
+            "Otherwise, output time stamped with time from\n "
+            "InputUrl.\n";
+  p_help = "Defaults to FALSE";
+} output_with_trigger_time;   
+
+paramdef string {
+  p_descr = "URL for input data.";
+  p_default = "mdvp:://localhost::mdv/input";
+} InputUrl;
+
+paramdef long {
+  p_descr = "Maximum number of seconds allowed between trigger time "
+            "and input data time.";
+  p_min = 0;
+  p_default = 0;
+} maxInputValidSecs;
+
+paramdef boolean {
+  p_descr = "ReadFromPath controls where the mask data are read\n"
+            "from - if set to FALSE then the mask data are read\n"
+            "from the MaskUrl in real time, if set to TRUE then\n"
+            "the data are read from the static file specified\n"
+            "by MaskPath";
+  p_help = "Set to TRUE to use a static mask."; 
+  p_default = TRUE;
+} ReadFromPath;
+
+paramdef string {
+  p_descr = "URL to look for the mask in, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Not used if ReadFromPath is set to TRUE."; 
+  p_default = {"mdvp:://localhost::mdv/mask"};
+} MaskUrl;
+
+paramdef int {
+  p_descr = "Maximum attempts to read mask data before giving up";
+  p_min = 1;
+  p_default = 50;
+} max_mask_read_attempts;
+
+paramdef long {
+  p_descr = "Maximum number of seconds allowed between trigger time "
+            "and mask data time.";
+  p_help = "Used only if ReadFromPath is set to FALSE.";
+  p_min = 0;
+  p_default = 0;
+} maxMaskValidSecs;
+
+paramdef string {
+  p_descr = "Path to read mask data from if ReadFromPath is TRUE";
+  p_help = "Use this to use a static MDV file as the mask."; 
+  p_default = {"/Some/Directory/Structure/File.mdv"};
+} MaskPath;
+
+paramdef string {
+  p_descr = "Field name to use to get mask data.";
+  p_help = "Set tot he name of the field to use as mask data."; 
+  p_default = {"FieldName"};
+} MaskFieldName;
+
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Output data are written here."; 
+  p_default = {"mdvp:://localhost::mdv/smoothed"};
+} OutUrl;
+
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME modes only.";
+} MaxRealtimeValidAge;         
+
+paramdef int {
+  p_default = 0;
+  p_private = FALSE;
+  p_descr = "Only has effect if ReadFromPath is FALSE and the masks are being\n"
+	"read from a URL. This is the number of seconds to search back from\n"
+	"to read the new mask time.";
+  p_help = "Defaults to 0 seconds, ie. mask and trigger must be at the same time.";
+} lookbackForMask;
+
+paramdef string {
+  p_default = { "VisField", "IRField" };
+  p_private = FALSE;
+  p_descr = "Input field names to process - or use '#2' to indicate field\n"
+            "two (fields start at 0 in this case).";
+  p_help = "Must have matching entry in TakeMaximum array (below) for\n"
+           "each field name entered.";
+} InFieldName[];   
+
+paramdef string {
+  p_default = { "VisField", "IRField" };
+  p_private = FALSE;
+  p_descr = "Output field names to process.";
+  p_help = "Must be one output name for each input field.";
+} OutFieldName[];   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to true to write as forecast data (g_HHMMSS/f_00000000.mdv\n "
+            "Otherwise, output will just be written to a day dir.\n ";
+  p_help = "Defaults to FALSE";
+} write_as_forecast;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+paramdef boolean {
+  p_descr = "Flag indicating direction of mask.";
+  p_help = "If false, the input grid points will be set to missing "
+           "everywhere the mask grid points are missing.\n"
+           "If true, the input grid points will be set to missing "
+           "everywhere the mask grid has valid data.";
+  p_default = false;
+} ReverseMask;
+
+paramdef boolean {
+  p_descr = "Flag indicating apply threshold to mask.";
+  p_help = "If true, the MaskThresholdValue will be tested against mask values";
+  p_default = false;
+} ApplyMaskThreshold;
+
+paramdef double {
+  p_descr = "Threshold  value to apply to mask field data.";
+  p_help = "If ApplyMaskThreshold is set to true, then mask values will be tested to "
+	   "be greater than threshold.";
+  p_default = { 0.0 };
+} MaskThresholdValue;
+
+paramdef boolean {
+  p_descr = "Flag to change test to be less than threshold instead of "
+  	    " greater than.";
+  p_help  = "";
+  p_default = false;
+} use_less_than_threshold;
+
+paramdef boolean {
+  p_descr = "Flag indicating apply single data value to mask.";
+  p_help = "If true, the MaskSingleValue will be tested against mask values";
+  p_default = false;
+} ApplyMaskSingleValue;
+
+paramdef double {
+  p_descr = "Single value to apply to mask field data.";
+  p_help = "If ApplyMaskSingleValue is set to true, then mask values will be tested to "
+	   "be equal to the single value.";
+  p_default = { 0.0 };
+} MaskSingleValue;
+
+paramdef boolean {
+  p_descr = "Flag indicating if the data should pass through when mask is not available.";
+  p_help = "If true, the data will pass through and be written unchanged to the output file.";
+  p_default = false;
+} ProcessIfNoMask;
+
+
+/***********************************************************************
+ * Grid parameters.
+ */
+
+commentdef {
+  p_header = "GRID PARAMETERS";
+  p_text = "These specify the grid on which the "
+                "computations will be performed. "
+		"These are used only if RemapGrid is set "
+		"to TRUE. If RemapGrid is FALSE then it is assumed "
+		"that the fields are already on the same grid.";
+
+}
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to TRUE to remap the data - useful if visible is at\n"
+	    "four times the resolution of the IR channels.";
+  p_help = "Defaults to FALSE, set to TRUE if mask data and input\n"
+           "data are on different grids.";
+} RemapGrid;   
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef double {
+  p_descr = "Rotation (in degrees) of grid from true north";
+  p_help = "Usually 0 - applied to flat earth only";
+  p_min = {-360.0};
+  p_default = { 0.0};
+} grid_rotation;
+
+paramdef double {
+  p_descr = "First true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.1};
+} grid_lat1;
+
+paramdef double {
+  p_descr = "Second true latitude for LAMBERT projection.";
+  p_help = "Applies only to LAMBERT.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 25.0};
+} grid_lat2;
+
+typedef enum {
+  FLAT, LATLON, LAMBERT
+} projection_t;
+
+paramdef enum projection_t {
+  p_descr = "Projection type of grid";
+  p_default = {FLAT};
+  p_help = "Projections currently supported are FLAT, LATLON and LAMBERT";
+} grid_projection;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in X";
+  p_min = {1};
+  p_default = { 100 };
+} grid_nx;
+
+paramdef int {
+  p_descr = "Number of cells in the grid in Y";
+  p_min = {1};
+  p_default = {100};
+} grid_ny;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in X";
+  p_default = {1.0};
+} grid_dx;
+
+paramdef float {
+  p_descr = "Size of the cells in the output grid in Y";
+  p_default = {1.0};
+} grid_dy;
+
+
+paramdef float {
+  p_descr = "X at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_minx;
+
+paramdef float {
+  p_descr = "Y at grid's lower left corner";
+  p_help = "Units for this parameter will depend upon the output grid_projection.";
+  p_default = {0};
+} grid_miny;

@@ -1,0 +1,6 @@
+.deps
+IR2Height
+__makefile.template
+makefile
+makefile.am
+makefile.in

@@ -1,0 +1,188 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.AverageSpdbSndg
+ *
+ * This file contains the TDRP parameter definitions for
+ * AverageSpdbSndg.
+ */
+
+commentdef
+{
+  p_header = "AverageSpdbSndg";
+  p_text = "This program averages the indicated fields in an SPDB sounding "
+           "database and puts the average values in an SPDB GenPt database.";
+
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program waits for new data from the "
+           "MDV location specified by the latest_data_trigger parameter.\n"
+           "In TIME_LIST mode, the program operates on archive data as "
+           "specified in the time_list_trigger parameter.\n";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} time_list_trigger_t;
+
+paramdef struct time_list_trigger_t
+{
+  p_descr = "Trigger information used when using the TIME_LIST trigger";
+  p_help = "url specifies the URL to use to get the available data times.\n"
+           "start_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "end_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} time_list_trigger;
+
+paramdef string
+{
+  p_descr = "Input URL.";
+  p_help = "URL for the input SPDB Sndg database.";
+  p_default = "spdbp:://localhost::spdb/sndg";
+} input_url;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "URL for the output SPDB GenPt database.";
+  p_default = "spdbp:://localhost::spdb/genpt";
+} output_url;
+
+
+/***********************************************************************
+ * Algorithm parameters.
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  SNDG_PLUS_FORMAT,
+  SNDG_OLD_FORMAT
+} sndg_format_t;
+
+paramdef enum sndg_format_t
+{
+  p_descr = "Format of SPDB database used on input";
+  p_help = "\tSNDG_PLUS_FORMAT - New, expanded format for soundings. "
+           "This is the format that should be used for all new database.\n"
+           "\tSNDG_OLD_FORMAT - The original, more limited sounding "
+           "format.\n";
+  p_default = SNDG_PLUS_FORMAT;
+} input_database_format;
+
+typedef enum
+{
+  U,
+  V,
+  W,
+  RH,
+  TEMP,
+  DEWPT,
+  WIND_SPEED,
+  WIND_DIR
+} sndg_field_t;
+
+paramdef enum sndg_field_t
+{
+  p_descr = "List of fields in the sounding to average";
+  p_default = { RH, TEMP, DEWPT };
+} average_fields[];
+
+typedef struct
+{
+  double min_pressure;
+  double max_pressure;
+} pressure_limits_t;
+
+paramdef struct pressure_limits_t
+{
+  p_descr = "Only points between these pressure levels will be included "
+            "in the average.";
+  p_default = { 0.0, 10000.0 };
+} pressure_limits;

@@ -1,0 +1,15 @@
+/DbConnect.pm/1.1/Fri May  6 15:36:26 2016//
+/Makefile/1.5/Wed May  4 17:39:40 2016//
+/MetarUtils.pm/1.1/Wed Jun 10 17:59:39 2015//
+/Monitor.pm/1.1/Wed Aug 26 22:15:51 2015//
+/NavAids.pm/1.1/Wed Aug 26 21:47:03 2015//
+/StationUtils.pm/1.1/Fri May  6 15:36:26 2016//
+/StationUtils.text.pm/1.5/Wed Oct 28 16:49:59 2015//
+/WMO_CodeLookup.pm/1.1/Fri May  6 15:36:26 2016//
+/addLocationToMetarCsv.pl/1.6/Wed Jun 10 19:19:16 2015//
+/metarCsv2PostGIS.pl/1.4/Fri May 13 16:05:08 2016//
+/metarScrubPostGIS.pl/1.1/Thu May 12 19:00:27 2016//
+/parseMetar.pl/1.13/Mon Jun 27 18:32:47 2016//
+/parsePirep.new.pl/1.1/Tue May  3 19:53:27 2016//
+/parsePirep.pl/1.10/Thu Mar 10 17:30:27 2016//
+D

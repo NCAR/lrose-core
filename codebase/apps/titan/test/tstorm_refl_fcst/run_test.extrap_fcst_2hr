@@ -1,0 +1,9 @@
+#!/bin/csh -f
+
+/bin/rm -r data/mdv/extrap_fcst_2hr
+/bin/rm test.log
+
+tstorm_refl_fcst -params tstorm_refl_fcst.extrap_fcst_2hr \
+	-starttime "2002/05/31_15:45:00" -endtime "2002/05/31_16:30:00"
+#    >&! test.log
+

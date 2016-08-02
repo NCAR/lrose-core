@@ -1,0 +1,241 @@
+/**********************************************************************
+ * TDRP params for ProSensing2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: ProSensing2Dsr.
+//
+// ProSensing2Dsr reads radar data from the ProSensing xpold server over 
+//   a socket and writes the data to a DsRadarQueue beam by beam.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL AND DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "xpol";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// xpold_host //////////////////////////////
+//
+// Host running the xpold server.
+// Communication with xpold is via TCP.
+// Type: string
+//
+
+xpold_host = "drx";
+
+///////////// xpold_port //////////////////////////////
+//
+// Port for xpold server.
+// Communication with xpold is via TCP.
+// Type: int
+//
+
+xpold_port = 3000;
+
+//======================================================================
+//
+// RADAR CALIBRATION.
+//
+//======================================================================
+ 
+///////////// cal_file_xml_path ///////////////////////
+//
+// Path to XML file containing calibration.
+// This will be read in at startup. Edit the file by hand to set the 
+//   calibration values.
+// Type: string
+//
+
+cal_file_xml_path = "$(PROJ_DIR)/ingest/params/xpol_cal.xml";
+
+//======================================================================
+//
+// RADAR PARAMETERS.
+//
+// Some radar parameters may be included in the time series data. This 
+//   section allows you to optionally override some of those values.
+//
+//======================================================================
+ 
+///////////// override_radar_name /////////////////////
+//
+// Option to override the radar name.
+// If true, the name in this file will be used. If not, the name in the 
+//   time series data will be used.
+// Type: boolean
+//
+
+override_radar_name = TRUE;
+
+///////////// radar_name //////////////////////////////
+//
+// Name of the radar.
+// See 'override_radar_name'.
+// Type: string
+//
+
+radar_name = "XPOL-FL";
+
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_latitude_deg = 39.9321;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_longitude_deg = -105.182;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude msl (meters).
+// See override_radar_location.
+// Type: double
+//
+
+radar_altitude_meters = 1742;
+
+///////////// override_azimuth_offset /////////////////
+//
+// Option to override the azimuth offset from the server.
+// The azimuth_offset is the offset between the actual pointing azimuth 
+//   of the radar and TN. It should be set by the server and come though 
+//   in the data. If this is not working properly, you can override the 
+//   offset by setting this to true and also setting azimuth_offset_deg 
+//   appropriately.
+// Type: boolean
+//
+
+override_azimuth_offset = TRUE;
+
+///////////// azimuth_offset_deg //////////////////////
+//
+// Azimuth offset (deg).
+// See override_azimuth_offset.
+// Type: double
+//
+
+azimuth_offset_deg = 120;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL for DSR radar data FMQ.
+// This program outputs beam-by-beam data to a file message queue (FMQ). 
+//   This is the URL for that queue. It is of the form 
+//   'fmqp:://host::dir/name'. If the output is to the local host you can 
+//   use just 'dir/name'.
+// Type: string
+//
+
+output_url = "$(DATA_DIR)/fmq/moments/xpol";
+
+///////////// write_blocking //////////////////////////
+//
+// Option to block on write when the radar queue fills up.
+// If false, the program writes data to the output queue without regard 
+//   to whether the reader is keeping up. If the FMQ fills without being 
+//   read it will overflow and overwrite data which has not been read. 
+//   This is the normal mode for REALTIME operations. If true, the program 
+//   will not overwrite data in the queue which has not been read by the 
+//   reader. In this mode there should be only one reader. If you need to 
+//   service more than one reader, use Fmq2Fmq in write blocking mode with 
+//   multiple output urls to multiplex the queue.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+///////////// output_compression //////////////////////
+//
+// Option to compress output infor FMQ.
+// If compression is on, this increases the amount of data you can store 
+//   in the output FMQ before overflow. However, this causes increased CPU 
+//   load.
+// Type: boolean
+//
+
+output_compression = FALSE;
+
+///////////// output_n_slots //////////////////////////
+//
+// Number of slots in output FMQ.
+// Type: int
+//
+
+output_n_slots = 10000;
+
+///////////// output_buf_size /////////////////////////
+//
+// Size of buffer in output FMQ.
+// Type: int
+//
+
+output_buf_size = 10000000;
+
+///////////// override_time ///////////////////////////
+//
+// Option to override data time with current time.
+// If true, the data will be time-stamped with the current time set on 
+//   the host computer.
+// Type: boolean
+//
+
+override_time = FALSE;
+

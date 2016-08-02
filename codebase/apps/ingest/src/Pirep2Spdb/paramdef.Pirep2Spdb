@@ -1,0 +1,208 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.Pirep2Spdb
+ *
+ * Mike Dixon, RAL, NCAR, Boulder, Colorado
+ *
+ * Sept 2005
+ *
+ * Based on twnairep2spdb.
+ */
+
+commentdef {
+  p_header = "Program Pirep2Spdb";
+  p_text = "This program reads pirep/airep data from ascii input and stores it in spdb data base. You can write the data out in decoded binary format or ascii format. For binary format, the struct pirep_t in include/rapformats/pirep.h will be used.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_descr = "Process instance for procmap.";
+  p_help = "This program uses this instance when registering with the process mapper.";
+  p_default = "test";
+} instance;
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; archive mode runs on single file";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  INPUT_XML_ADDS, INPUT_XML_OTHER, INPUT_CSV
+} input_t;
+
+paramdef enum input_t {
+  p_default = INPUT_XML_ADDS;
+  p_descr = "Input type option";
+  p_help = "Can process raw PIREPs or decoded XML from ADDS.";
+} input_type;
+
+paramdef string {
+  p_default = "raw/pireps";
+  p_descr = "Path for directory to the input files.";
+  p_help = "If possible, the file names should include date/time information. Acceptable options are: yyyymmdd/hhmmss*, *yyyymmdd?hhmmss*, *yyyymmddhhmmss*, *yyyymmddhhmm*, *yyyymddhh*, *yyyymmdd?hhmm, *yyyymmdd?hh, *yyyymmdd*";
+} input_dir;
+
+typedef struct {
+  string time;
+  string lat;
+  string lon;
+  string altitude;
+  string raw;
+  string aircraft;
+  string type;
+  string ice_cond;
+  string ice_type;
+  string ice_int;
+  string ice_top;
+  string ice_base;
+  string turb_cond;
+  string turb_type;
+  string turb_int;
+  string turb_freq;
+  string turb_top;
+  string turb_base;
+  string sky_cond;
+  string sky_cover;
+  string cloud_top;
+  string cloud_base;
+  string clear_above;
+  string temp;
+  string wind_dir;
+  string wind_speed;
+  string visibility;
+} xml_names_t;
+
+paramdef struct xml_names_t {
+  p_descr = "Names of XML tags";
+  p_help = "";
+  p_default = {"observation_time",
+               "latitude",
+               "longitude",
+               "altitude_ft_msl",
+               "raw_text",
+               "aircraft_ref",
+               "report_type",
+               "icing_condition",
+               "icing_type",
+               "icing_intensity",
+               "icing_top_ft_msl",
+               "icing_base_ft_msl",
+               "turbulence_condition",
+               "turbulence_type",
+               "turbulence_intensity",
+               "turbulence_freq",
+               "turbulence_top_ft_msl",
+               "turbulence_base_ft_msl",
+               "sky_condition",
+               "sky_cover",
+               "cloud_top_ft_msl",
+               "cloud_base_ft_msl",
+               "clear_above",
+               "temp_c",
+               "wind_dir_degrees",
+               "wind_speed_kt",
+               "visibility_statute_mi"
+              };
+} xml_names;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef char* {
+  p_default = "./world_stations.loc";
+  p_descr = "Path to reporting point file.";
+  p_help = "The station location file is used to provide a lat/lon position for a PIREP reporting point. This should be an ASCII file with one line per reporting point. Format is comma-delimited: ident,latitude,longitude,altitude.";
+} reporting_point_file_path;
+
+commentdef {
+  p_header = "DECODERS";
+};
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef boolean {
+  p_descr = "Save decoded data out in Spdb.";
+  p_help = "If true, data will be written to decoded_spdb_url.";
+  p_default = true;
+} write_decoded_spdb;
+
+paramdef string {
+  p_descr = "Spdb URL for decoded pirep data.";
+  p_help = "The name of the URL which will be used as the destination for the SPDB data. If the dir does not start with / or ., it is relative to $DATA_DIR.";
+  p_default = "spdbp:://localhost::spdb/pirep";
+} decoded_spdb_url;
+
+paramdef boolean {
+  p_descr = "Save ascii data out in Spdb.";
+  p_help = "If true, data will be written to ascii_spdb_url.";
+  p_default = true;
+} write_ascii_spdb;
+
+paramdef string {
+  p_descr = "Spdb URL for ASCII pirep data.";
+  p_help = "The name of the URL which will be used as the destination for the ASCII SPDB data. If the dir does not start with / or ., it is relative to $DATA_DIR.";
+  p_default = "spdbp:://localhost::spdb/airep";
+} ascii_spdb_url;
+
+paramdef int {
+  p_descr = "Data expire period - seconds";
+  p_help = "In the SPDB data base, the data is set as expired after this period.";
+  p_default = 21600;
+} expire_secs;

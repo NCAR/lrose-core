@@ -1,0 +1,52 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2001 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Program(RAP) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2001/11/19 23:31:42 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************************
+ * TDRP params for area_compute
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Option to print debugging messages.
+// Type: boolean
+//
+
+debug = FALSE;
+
+///////////// shape ///////////////////////////////////
+//
+// Shape type.
+// The program will compute the area of a square, circle or equilateral 
+//   triangle.
+//
+// Type: enum
+// Options:
+//   SQUARE, CIRCLE, EQ_TRIANGLE
+//
+//
+
+shape = SQUARE;
+
+///////////// size ////////////////////////////////////
+//
+// Size of the shape.
+// Minimum val: 0
+// Type: float
+//
+
+size = 1;
+
+///////////// output_path /////////////////////////////
+//
+// The path of the file to which the output is written.
+// The directory which contains this path must exist.
+// Type: string
+//
+
+output_path = "./area_compute.out";
+

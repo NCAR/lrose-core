@@ -1,0 +1,408 @@
+/*********************************************************
+ * parameter definitions for EsdAcIngest
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 2000
+ */
+
+commentdef {
+  p_header = "EsdAcIngest reads aircraft data from an ASCII string and stores it in Spdb";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  REALTIME, ARCHIVE, TCP, TEST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the aircraft data is read in from the serial connection. In ARCHIVE mode the data is read in from files, using the -f command line option. In TCP mode, reads data from a TCP server. In TEST mode, aircraft data is generated for testing purposes.";
+} mode;
+
+commentdef {
+  p_header = "SERIAL DATA INPUT.";
+  p_text = "The original system used a fixed-length preformatted string. The newer system uses a comma-delimited string. The program automatically determines which type of input string is being used.";
+}
+
+typedef enum {
+  AUTOMATIC_FORMAT,
+  COMMA_DELIMITED_FORMAT,
+  LONG_FIXED_STRING_FORMAT,
+  WMI_LONG_STRING_FORMAT,
+  WMI_STRING_FORMAT,
+  SEA_M300_FORMAT,
+  CSV_GPS_FORMAT,
+  POLCAST2_FORMAT
+} input_format_t;
+
+paramdef enum input_format_t {
+  p_default = AUTOMATIC_FORMAT;
+  p_descr = "Data input format";
+  p_help = "\tAUTOMATIC_FORMAT - The program automatically determine the "
+           "data format. "
+           "This can only be done if the data is in one of the following "
+           "formats:\n"
+           "\t\tCOMMA_DELIMITED_FORMAT\n"
+           "\t\tLONG_FIXED_STRING_FORMAT\n"
+           "\t\tWMI_LONG_STRING_FORMAT\n"
+           "\t\tWMI_STRING_FORMAT\n"
+           "\tCOMMA_DELIMITED_FORMAT - The fields in the data are delimited "
+           "by commas. "
+           "The line begins with the following fields:\n"
+	   "\t\tcall sign\n"
+           "\t\tyear\n"
+           "\t\tmonth\n"
+           "\t\tday\n"
+           "\t\thour\n"
+           "\t\tminute\n"
+           "\t\tsecond\n"
+           "\t\tlatitude\n"
+           "\t\tlongitude\n"
+           "\t\taltitude\n"
+           "These fields are followed by the optional fields "
+           "specified in the optional_field_names parameter.\n"
+           "\tLONG_FIXED_STRING_FORMAT - The data is in a white-space "
+           "delimited format. "
+           "The fields appear in the following order:\n"
+           "\t\thour\n"
+           "\t\tminute\n"
+           "\t\tsecond\n"
+           "\t\tpressure\n"
+           "\t\ttemperature\n"
+           "\t\tdew point\n"
+           "\t\twind speed\n"
+           "\t\twind direction\n"
+           "\t\tlongitude\n"
+           "\t\tlatitude\n"
+           "\t\taltitude\n"
+           "\t\tking lwc\n"
+           "\t\tfssp conc\n"
+           "\t\trosemount volts\n"
+           "Since the call sign isn't specified in the data, the first "
+           "call sign in the callsigns parameter is used as the call sign "
+           "for this data. "
+           "If the callsigns parameter is empty, the resulting AC position "
+           "record won't have a call sign associated with it.\n"
+           "\tWMI_LONG_STRING_FORMAT - The data is in the WMI long string "
+           "format. "
+           "In this format, the data is all in a long line with no delimiters "
+           "with the following fields:\n"
+           "\t\tcall sign\n"
+           "\t\tlatitude * 10000\n"
+           "\t\tlongitude * 10000\n"
+           "\t\ttas\n"
+           "\t\tGPS altitude * 100\n"
+           "\t\tpressure altitude\n"
+           "\t\ttdry * 10\n"
+           "\t\tlwjw * 100\n"
+           "\t\tdew point * 10\n"
+           "\t\tfssp\n"
+           "\t\tburn in place\n"
+           "\t\tnumber of burn in place\n"
+           "\t\tejectable\n"
+           "\t\tnumber of ejectable\n"
+           "\t\tleft burn\n"
+           "\t\tright burn\n"
+           "\t\tice hopper\n"
+           "\t\tGPS time string\n"
+           "\t\tGPS var\n"
+           "\t\tGPS error\n"
+           "\t\tGPS warn\n"
+	   "\tWMI_STRING_FORMAT - The data is received in the old WMI "
+           "string format. "
+           "In this format, the data is all in a long line with no delimiters "
+           "with the following fields:\n"
+           "\t\tcall sign\n"
+           "\t\tlatitude\n"
+           "\t\tlongitude\n"
+           "\t\ttas\n"
+           "\t\tGPS altitude\n"
+           "\t\tpressure altitude\n"
+           "\t\ttdry\n"
+           "\t\tlwjw\n"
+           "\t\t???\n"
+           "\t\tnumber of burn in place\n"
+           "\t\tnumber of ejectable\n"
+           "\t\tright burn\n"
+           "\t\tleft burn\n"
+           "\t\t???\n"
+           "\t\tburn in place\n"
+           "\t\tejectable\n"
+           "\t\tGPS hour\n"
+           "\t\tGPS minute\n"
+           "\t\tGPS second\n"
+           "\t\tGPS var\n"
+           "\t\tGPS error\n"
+           "\t\tairnav warn\n"
+           "\tSEA_M300_FORMAT - This data is in white-space "
+           "delimited files and contains the following fields:\n"
+           "\t\ttime in hh:mm:ss format\n"
+           "\t\tdate in m/dd/yyyy format\n"
+           "\t\tlatitude\n"
+           "\t\tlongitude\n"
+           "\t\taltitude in feet\n"
+           "\t\taltitude in meters\n"
+           "\t\ttemperature\n"
+           "\t\trelative humidity\n"
+           "\t\tCN concentration\n"
+           "\t\tCCN concentration\n"
+           "\t\tCCNSS\n"
+           "\t\tCCN flag\n"
+           "\t\tPCASP\n"
+           "\t\tP1 - P15\n"
+           "\t\tSPPRng\n"
+           "\t\tSPP\n"
+           "\t\tSPPLWC\n"
+           "\t\tKPLWC\n"
+           "\t\tmean dia\n"
+           "\t\tMVD\n"
+           "\t\tEffRad\n"
+           "\t\tstandard deviation\n"
+           "\t\tdisp\n"
+           "\t\t2DCshad\n"
+           "\t\t2DPshad\n"
+           "\t\tS1 - S20\n"
+           "\tPOLCAST2_FORMAT - This data is in white-space "
+           "delimited files and contains the following fields:\n"
+           "\t\ttail number\n"
+           "\t\tyear\n"
+           "\t\tmonth\n"
+           "\t\tday\n"
+           "\t\thour\n"
+           "\t\tminute\n"
+           "\t\tsecond\n"
+           "\t\tlatitude (deg)\n"
+           "\t\tlongitude (deg)\n"
+           "\t\taltitude (m)\n"
+           "\t\tground speed (knots)\n"
+           "\t\tflare voltage (volts)\n";
+} input_format;
+
+typedef enum {
+  GS,
+  TAS,
+  TEMP,
+  DEW_PT,
+  LW,
+  ERROR_FLAGS,
+  R_BURN,
+  L_BURN,
+  BURN_IN_PLACE,
+  EJECTABLE,
+  N_BURN_IN_PLACE,
+  N_EJECTABLE
+} field_name_t;
+
+paramdef enum field_name_t {
+  p_default = { GS, ERROR_FLAGS,
+		R_BURN, L_BURN,
+		BURN_IN_PLACE, EJECTABLE,
+		N_BURN_IN_PLACE, N_EJECTABLE };
+  p_descr = "Array of variable fields following fixed fields.";
+  p_help = "Used for comma-delimited format only. The comma-delimited format has 10 fixed fields: callsign, year, month, day, hour, min, sec, lat, lon, alt. These are followed by optional fields. This array specifies the optional field list.";
+} optional_field_names[];
+
+paramdef int {
+  p_default = 240;
+  p_descr = "Nominal burn time for burn-in-place flares (secs).";
+  p_help = "It is assumed that all burn-in-place flares will burn for this length of time. The program will keep track of how many flares are burning on each aircraft, and store that number in SPDB.";
+} burn_in_place_time;
+
+commentdef {
+  p_header = "SERIAL TTY input";
+}
+
+paramdef string {
+  p_default = "/dev/ttyS1";
+  p_descr = "Name of input serial port device.";
+  p_help = "Normally /dev/ttyS0 (COM1) or /dev/ttyS1 (COM2). Check that you set the permissions on the serial device to rw-rw-rw-, (666), so that we have read-write permissions for the port.";
+} input_device;
+
+typedef enum {
+  BAUD_300,
+  BAUD_1200,
+  BAUD_2400,
+  BAUD_4800,
+  BAUD_9600,
+  BAUD_19200,
+  BAUD_38400
+} baud_rate_t;
+
+paramdef enum baud_rate_t
+{
+  p_default = BAUD_9600;
+  p_descr = "Baud rate";
+  p_help = "Baud rate for incoming serial data port";
+} baud_rate;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag for 7-bit data";
+  p_help = "Set TRUE for 7-bit data, FALSE for 8-bit data.";
+} dataIs7Bit;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag for two stop bits";
+  p_help = "If TRUE, 2 stop bits. If FALSE, 1 stop bit.";
+} twoStopBits;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag for enabling parity checking.";
+  p_help = "If TRUE, parity generation is enabled for outgoing characters, and checking enabled for incoming characters. If FALSE, parity generation and checking is off.";
+} enableParity;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag for parity type.";
+  p_help = "If TRUE, odd parity. If FALSE, even parity. Only applies if enableParity is TRUE.";
+} oddParity;
+
+commentdef {
+  p_header = "TCP input";
+}
+
+paramdef string {
+  p_default = "192.168.1.1";
+  p_descr = "Name of TCP server host.";
+  p_help = "For connection TCP. The name of the host for the TCP server.";
+} tcp_server_host_name;
+
+paramdef int {
+  p_default = 2003;
+  p_descr = "TCP server port number.";
+  p_help = "For connection TCP. The number of the port for the TCP server.";
+} tcp_server_port;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to send TCP handshake sequence to the server to trigger the data flow.";
+  p_help = "If true, a sequence of bytes will be sent to the server to trigger the data flow. See 'tcp_handshape_bytes'.";
+} send_tcp_handshake;
+
+paramdef int {
+  p_default = { 13, 10 };
+  p_descr = "List of bytes to be sent to server for handshaking.";
+  p_help = "This array of decimal integers is interpreted as a sequence of individual bytes which are to be sent to the server to trigger the data flow.";
+} tcp_handshake_bytes[];
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check callsigns.";
+  p_help = "If TRUE, only aircraft in the callsigns array are stored. If FALSE, data from all aircraft is stored.";
+} check_callsigns;
+
+paramdef string {
+  p_default = {"UND"};
+  p_descr = "Callsign array";
+  p_help = "Array of valid callsigns";
+} callsigns[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to echo incoming data string.";
+  p_help = "If TRUE, the incoming strings are echoed to stdout.";
+} echo;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to add new line to echo output.";
+  p_help = "If FALSE, carriage return is used instead of new line.";
+} new_line_on_echo;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/spdb/ac_posn";
+  p_descr = "Output SPDB URL.";
+  p_help = "This is the path to the output data directory. You can use full URL sytnax and optionally put the data to a remote machine.";
+} output_url;
+
+paramdef int {
+  p_default = 120;
+  p_min = 1;
+  p_descr = "Valid period (secs)";
+  p_help = "Time period over which the aircraft position is considered valid.";
+} valid_period;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to output ASCII to separate SPDB data base.";
+  p_help = "If TRUE, the incoming data strings will be stored as ASCII in a separate SPDB dir.";
+} output_ascii;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/spdb/ascii_ac_posn";
+  p_descr = "ASCII SPDB URL.";
+  p_help = "Use if 'output_ascii' is TRUE.";
+} ascii_url;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Interval at which the data is written to the data base (secs)";
+  p_help = "This prevents extremely rapid updates to the data base.";
+} output_interval;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Change the latitude sign";
+  p_help = "Use if southern latitudes are positive.";
+} change_lat_sign;
+
+commentdef {
+  p_header = "TEST SETUP.";
+}
+
+typedef struct {
+  string callsign;
+  double start_lat;
+  double start_lon;
+  double altitude;
+  double speed;
+  boolean right_burn;
+  boolean left_burn;
+  double ejectable_interval;
+  int burn_in_place_interval;
+  int n_bip_at_a_time;
+} test_aircraft_t;
+
+paramdef struct test_aircraft_t {
+
+  p_default =
+  {
+    { "JRA", -27.43, 28.87, 9500, 150, TRUE, TRUE, -1, -1, 0},
+    { "JRB", -28.57, 28.86, 10500, 250, FALSE, FALSE, 10, -1, 0},
+    { "CAN", -28.19, 27.76, 11500, 150, FALSE, FALSE, -1, 60, 2}
+  };
+
+  p_descr = "Details of aircraft for TEST mode.";
+  
+  p_help = "The test aircraft have a starting location, speed (knots) and altitude (ft). They wander randomly around. If they go further that 100 km from their starting location they are brought back to the start. right_burn and left_burn indicate whether the burners should be on or off. ejectable_interval indicates the time beteen ejectable flares - set to -1 for no ejectables. burn_in_place_interval indicates the time between starting burn_in_place flares - set to -1 for no burn_in_place flares. n_bip_at_a_time indictes the number of burn_in_place flares to start at a time.";
+
+} test_aircraft[];
+

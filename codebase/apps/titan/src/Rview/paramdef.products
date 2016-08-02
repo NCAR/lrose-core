@@ -1,0 +1,139 @@
+/////////////////////////////////////////////////////////////////////////
+// paramdef.prod_sel_v
+//
+// This file contains the TDRP parameter definitions for
+// prod_sel_v.
+//
+
+ccommentdef {
+  p_header = "TDRP parameters for product rendering.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+typedef enum {
+  RETRIEVE_CLOSEST,
+  RETRIEVE_FIRST_BEFORE,
+  RETRIEVE_FIRST_AFTER,
+  RETRIEVE_INTERVAL,
+  RETRIEVE_VALID,
+} retrieval_type_t;
+
+typedef struct {
+  string menu_label;
+  string url;
+  int data_type;
+  retrieval_type_t retrieval_type;
+  int time_margin;
+  int interval_before;
+  int interval_after;
+  boolean use_frame_time;
+  int expire_secs;
+  boolean select_list_flag;
+  boolean make_unique;
+} prod_info_t;
+
+paramdef struct prod_info_t {
+
+  p_descr = "product information array";
+  
+  p_help =
+  "The fields in the structure are as follows:\n"
+  "\n"
+  "  menu_label: label to be used for the product in menu.\n"
+  "\n"
+  "  url: for retrieving the data.\n"
+  "\n"
+  "  data_type: data type used when querying the SPDB data server\n"
+  "    (set to 0 to retrieve all data regardless of type).\n"
+  "\n"
+  "  retrieval_type: how to retrieve data. Choose from:\n"
+  "    RETRIEVE_CLOSEST: single entry with valid time closest to the\n"
+  "      requested time, within time_margin seconds;\n"
+  "    RETRIEVE_FIRST_BEFORE: single entry with valid time at or\n"
+  "	 before the request time, within interval_before secs;\n"
+  "    RETRIEVE_FIRST_AFTER: single entry with valid time at or\n"
+  "      after the request time, within interval_after secs;\n"
+  "    RETRIEVE_INTERVAL: all entries valid in interval between\n"
+  "      (requested time - interval_before) and\n"
+  "      (requested time + interval_after)\n"
+  "    RETRIEVE_VALID: all entries valid at requested time.\n"
+  "\n"
+  "  time_margin: seconds - see retrieval type.\n"
+  "\n"
+  "  interval_after: seconds - see retrieval type.\n"
+  "\n"
+  "  interval_before: seconds - see retrieval type.\n"
+  "\n"
+  "  use_frame_time: the display requests data at the frame_time.\n"
+  "    However, the data is normally returned at a different time,\n"
+  "    the data_time. If this flag is TRUE, products are requested at\n"
+  "    the frame time. If FALSE, they are requested at the data time;\n"
+  "\n"
+  "  expire_secs: expire product after this time. If set to -1, the\n"
+  "    expire time in the product is used.\n"
+  "\n"
+  "  select_list_flag: indicates whether the individual product times\n"
+  "    should appear in the right-hand side of the GUI. This should\n"
+  "    be set to FALSE for products with many instances,\n"
+  "    (e.g. lightning);\n"
+  "\n"
+  "  make_unique: only display unique product instances. If more than\n"
+  "    one instance of a given data_type is received, remove all but\n"
+  "    the latest instance.\n";
+  
+  p_default = {
+    {
+      menu_label = "product_1",
+      url = "spdb/test1",
+      data_type = 0,
+      retrieval_type = RETRIEVE_CLOSEST,
+      time_margin = 300,
+      interval_before = 300,
+      interval_after = 300,
+      use_frame_time = FALSE,
+      expire_secs = 300,
+      select_list_flag = FALSE,
+      make_unique = TRUE
+    }
+    ,
+    {
+      menu_label = "product_2",
+      url = "spdb/test2",
+      data_type = 0,
+      retrieval_type = RETRIEVE_CLOSEST,
+      time_margin = 300,
+      interval_before = 300,
+      interval_after = 300,
+      use_frame_time = FALSE,
+      expire_secs = 300,
+      select_list_flag = FALSE,
+      make_unique = TRUE
+    }
+    ,
+    {
+      menu_label = "product_3",
+      url = "spdb/test3",
+      data_type = 0,
+      retrieval_type = RETRIEVE_CLOSEST,
+      time_margin = 300,
+      interval_before = 300,
+      interval_after = 300,
+      use_frame_time = FALSE,
+      expire_secs = 300,
+      select_list_flag = FALSE,
+      make_unique = TRUE
+    }
+  }
+  
+} prod_info[];
+

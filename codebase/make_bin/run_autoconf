@@ -1,0 +1,9 @@
+#!/bin/sh --
+# 
+# Run the scripts for autoconf
+
+aclocal
+autoheader
+automake --add-missing
+autoconf
+

@@ -1,0 +1,326 @@
+/**********************************************************************
+ * TDRP params for PointingCpCompute
+ **********************************************************************/
+
+//======================================================================
+//
+// PointingCpCompute analyses time series data from pointing operations. 
+//   This is part of the ZDR calibration procedure.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or time series API.
+// If TS_FMQ_INPUT, the application will read the time series from a 
+//   file message queue and process the pulses as they come in. If 
+//   TS_FILE_INPUT, the application will process all the files specified 
+//   on the command line.
+//
+// Type: enum
+// Options:
+//     TS_FILE_INPUT
+//     TS_FMQ_INPUT
+//
+
+input_mode = TS_FILE_INPUT;
+
+///////////// input_fmq_name //////////////////////////
+//
+// FMQ name. For TS_FMQ_INPUT only.
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+// Type: string
+//
+
+input_fmq_name = "/tmp/fmq/ts";
+
+//======================================================================
+//
+// H/V flag availability.
+//
+//======================================================================
+ 
+///////////// hv_flag_set /////////////////////////////
+//
+// Flag to indicate that the H/V flag is set in the data.
+// If true, the H/V flag will be 1 for H, 0 for V, toggling for 
+//   simultaneous. If false, the flag is not set and you need to use -fh 
+//   and -fv on the command line.
+// Type: boolean
+//
+
+hv_flag_set = FALSE;
+
+///////////// set_hv_from_file_path ///////////////////
+//
+// Flag to set H or V from the file path.
+// If true, the H/V flag will be 1 for H for paths with 'horiz_' in 
+//   them, and 0 for V for paths with 'vert_' in them.
+// Type: boolean
+//
+
+set_hv_from_file_path = TRUE;
+
+///////////// v_data_start_time ///////////////////////
+//
+// If H/V flag is not set, you need to specify the start and end times 
+//   for V data. Data outside this interval will be assumed to be H.
+// Start time for V data.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+v_data_start_time = { 2010, 10, 15, 15, 33, 4 };
+
+///////////// v_data_end_time /////////////////////////
+//
+// If H/V flag is not set, you need to specify the start and end times 
+//   for V data. Data outside this interval will be assumed to be H.
+// End time for V data.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+v_data_end_time = { 2010, 10, 15, 15, 35, 30 };
+
+//======================================================================
+//
+// RANGE LIMITS.
+//
+//======================================================================
+ 
+///////////// analysis_start_range ////////////////////
+//
+// Start range for analysis (km).
+// Minimum val: 0
+// Type: double
+//
+
+analysis_start_range = 20;
+
+///////////// analysis_end_range //////////////////////
+//
+// End range for analysis (km).
+// Type: double
+//
+
+analysis_end_range = 100;
+
+///////////// data_gate_spacing ///////////////////////
+//
+// Expected gate spacing for pulse data (km).
+// Type: double
+//
+
+data_gate_spacing = 0.15;
+
+///////////// data_start_range ////////////////////////
+//
+// Expected gate spacing for pulse data (km).
+// Type: double
+//
+
+data_start_range = 0.15;
+
+//======================================================================
+//
+// SNR LIMITS.
+//
+//======================================================================
+ 
+///////////// min_snr /////////////////////////////////
+//
+// Minimum x-polar SNR for analysis.
+// Gates with SNR below this will be ignored.
+// Type: double
+//
+
+min_snr = 10;
+
+///////////// max_snr /////////////////////////////////
+//
+// Maximum x-polar SNR for analysis.
+// Gates with SNR above this will be ignored.
+// Type: double
+//
+
+max_snr = 60;
+
+///////////// delta_snr ///////////////////////////////
+//
+// SNR interval for the analysis.
+// The data is partitioned into SNR intervals, and statistics are 
+//   computed for each interval as well as for all values between the min 
+//   and max snr.
+// Type: double
+//
+
+delta_snr = 10;
+
+//======================================================================
+//
+// CPA LIMITS.
+//
+//======================================================================
+ 
+///////////// min_cpa /////////////////////////////////
+//
+// Mimimum clutter phase alignment value.
+// Type: double
+//
+
+min_cpa = 0.8;
+
+//======================================================================
+//
+// RATIO LIMITS.
+//
+// When computing the ratio, exclude gates at which the ratio is not 
+//   reasonable.
+//
+//======================================================================
+ 
+///////////// min_valid_ratio /////////////////////////
+//
+// Minimum valid Vx/Hx ratio.
+// Sometimes, odd data leads to bogus ratios. This puts limits on the 
+//   ratios at a gate to be used in the analysis.
+// Type: double
+//
+
+min_valid_ratio = 0.01;
+
+///////////// max_valid_ratio /////////////////////////
+//
+// Maximum valid Vx/Hx ratio.
+// Sometimes, odd data leads to bogus ratios. This puts limits on the 
+//   ratios to be used in the analysis.
+// Type: double
+//
+
+max_valid_ratio = 100;
+
+//======================================================================
+//
+// CALIBRATION XML PATH.
+//
+//======================================================================
+ 
+///////////// cal_xml_file_path ///////////////////////
+//
+// Path for XML calibration file.
+// At a minimum, the calibration file should contain noiseDbm and 
+//   receiverGainDbm values for each channel.
+// Type: string
+//
+
+cal_xml_file_path = "./spol_cal.xml";
+
+///////////// subtract_noise_power ////////////////////
+//
+// Option to subtract the noise before computing the power ratio.
+// Type: boolean
+//
+
+subtract_noise_power = TRUE;
+
+//======================================================================
+//
+// OUTPUT RESULTS.
+//
+//======================================================================
+ 
+///////////// write_results_to_stdout /////////////////
+//
+// Option to write line-by-line results to stdout.
+// If true, the gate-by-gate results are written to stdout.
+// Type: boolean
+//
+
+write_results_to_stdout = TRUE;
+
+///////////// write_output_files //////////////////////
+//
+// Option to write detailed output to files.
+// If true, files will be written to output_dir.
+// Type: boolean
+//
+
+write_output_files = TRUE;
+
+///////////// output_dir //////////////////////////////
+//
+// Dir for output files.
+// The results will be written to sub-directories named from the data 
+//   time.
+// Type: string
+//
+
+output_dir = "./output";
+

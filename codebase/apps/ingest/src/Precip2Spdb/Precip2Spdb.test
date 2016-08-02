@@ -1,0 +1,334 @@
+/**********************************************************************
+ * TDRP params for Precip2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// Precip2Spdb reads precip accumulation data from ASCII files, and 
+//   saves them out to SPDB using XML in the WxObs format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file. In this 
+//   mode it is optional to watch for a latest_data_info file. In ARCHIVE 
+//   mode, it processes all of the data files in the input directory 
+//   between the start and end times set on the command line. In FILELIST 
+//   mode, it processes all of the files in the list specified on the 
+//   command line. In FILELIST mode paths must be fully qualified with 
+//   respect to the date and time - so if each date has a separate 
+//   subdirectory the date part of the path must be included.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA FILES.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+//
+// Directory where input data files can be found.
+//
+//
+// Type: string
+//
+
+input_dir = "/tmp/step_precip";
+
+///////////// latest_data_info_avail //////////////////
+//
+// Set to true if there is a latest_data_info file available in the 
+//   input directory.
+//
+// REALTIME mode only.
+//
+//
+// Type: boolean
+//
+
+latest_data_info_avail = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+//
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+max_realtime_valid_age = 3600;
+
+///////////// strict_subdir_check /////////////////////
+//
+// When set, only checks input_dir for subdirs of the form YYYYMMDD.
+//
+// Only in REALTIME mode with latest_data_info_avail FALSE.
+//
+//
+// Type: boolean
+//
+
+strict_subdir_check = FALSE;
+
+///////////// file_name_check /////////////////////////
+//
+// When set, check file name contains specified sub-string.
+//
+// See file_match_string.
+//
+//
+// Type: boolean
+//
+
+file_name_check = FALSE;
+
+///////////// file_match_string ///////////////////////
+//
+// Input filename match string.
+//
+// Files must contain this string to be processed.
+//
+//
+// Type: string
+//
+
+file_match_string = "txt";
+
+//======================================================================
+//
+// INTERPRETING THE INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_format ////////////////////////////
+//
+// Format for input ASCII data.
+//
+// RAL_STEP_ASCII: precip accumulation data in the RAL STEP format, from 
+//   Kyoko Ikeda. RAL_NCDC_CSV: comma-separated data from NCDC translated 
+//   by Andy Newman at RAL.
+//
+//
+// Type: enum
+// Options:
+//     RAL_STEP_ASCII
+//     RAL_NCDC_CSV
+//
+
+input_format = RAL_STEP_ASCII;
+
+///////////// data_column_delimiter ///////////////////
+//
+// Delimiter for data in ASCII input files.
+//
+// Normally columns are space-delimited or comma-delimited.
+//
+//
+// Type: string
+//
+
+data_column_delimiter = " ";
+
+///////////// comment_character ///////////////////////
+//
+// Character in first position to indicate a comment line.
+//
+// Normally comment lines begin with #.
+//
+//
+// Type: string
+//
+
+comment_character = "#";
+
+//======================================================================
+//
+// USE BOUNDING BOX.
+//
+//======================================================================
+ 
+///////////// constrain_using_bounding_box ////////////
+//
+// Option to limit data to within a given bounding box.
+//
+// If true, only stations within the box will be accepted.
+//
+//
+// Type: boolean
+//
+
+constrain_using_bounding_box = FALSE;
+
+///////////// bounding_box_min_lat ////////////////////
+//
+// Minimum latitude for bounding box.
+//
+//
+// Type: double
+//
+
+bounding_box_min_lat = -90;
+
+///////////// bounding_box_max_lat ////////////////////
+//
+// Maximum latitude for bounding box.
+//
+//
+// Type: double
+//
+
+bounding_box_max_lat = 90;
+
+///////////// bounding_box_min_lon ////////////////////
+//
+// Minimum longitude for bounding box.
+//
+//
+// Type: double
+//
+
+bounding_box_min_lon = -180;
+
+///////////// bounding_box_max_lon ////////////////////
+//
+// Maximum longitude for bounding box.
+//
+//
+// Type: double
+//
+
+bounding_box_max_lon = 180;
+
+//======================================================================
+//
+// TIME CORRECTION.
+//
+//======================================================================
+ 
+///////////// adjust_observed_time ////////////////////
+//
+// Option to adjust the observed time.
+//
+// This is normally done to correct from local to UTC time.
+//
+//
+// Type: boolean
+//
+
+adjust_observed_time = FALSE;
+
+///////////// time_correction_secs ////////////////////
+//
+// This is added to the observed time.
+//
+// See 'adjust_observed_time'.
+//
+//
+// Type: int
+//
+
+time_correction_secs = 0;
+
+///////////// hour_if_time_missing ////////////////////
+//
+// This hour of the day is used if missing in the data.
+//
+// Applies to RAL_NCDC_CSV data, in which the hour is sometimes missing.
+//
+//
+// Type: int
+//
+
+hour_if_time_missing = 7;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL for precip data.
+//
+// See the DIDSS docs for details on URL usage.
+//
+//
+// Type: string
+//
+
+output_url = "spdbp:://localhost::$(DATA_DIR)/spdb/precip_accum";
+
+///////////// expire_seconds //////////////////////////
+//
+// Expire time in seconds for each metar.
+//
+// This value will be added to the metar time to determine the expire 
+//   time for the metar.
+//
+//
+// Type: int
+//
+
+expire_seconds = 21600;
+

@@ -1,0 +1,126 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "Small program to write the same sounding data\n"
+             "to an SPDB database for sim purposes. Niles.";
+
+}
+
+
+commentdef {
+  p_header = "LOCATION INFORMATION - these three arrrays should be the same length.";
+}
+
+paramdef double {
+  p_default = {37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0};
+  p_descr = "Latitudes at which sounding data are to be written.";
+} lats[];
+
+paramdef double {
+  p_default = {-107.0, -106.0, -105.0, -104.0, -103.0, -102.0, -101.0};
+  p_descr = "Longitudes at which sounding data are to be written.";
+} lons[];
+
+paramdef double {
+  p_default = {1700, 1650, 1600, 1600, 1575, 1550, 1525 };
+  p_descr = "Altitudes at which sounding data are to be written.";
+} alts[];
+
+paramdef int {
+  p_default = {42000, 43000, 44000, 45000, 46000, 47000, 48000 };
+  p_descr = "5 digit sounding IDs.";
+} ids[];
+
+
+commentdef {
+  p_header = "DATA - the same thing gets written out again and again. All arrays to be the same length.";
+}
+
+paramdef double {
+  p_default = -9999.0;
+  p_descr = "Bad data value. If this appears in the following data arrays it is taken as missing data.";
+} badVal;
+
+paramdef double {
+  p_default = {0, 100, 200, 300, 400, 500, 1000, 1500, 2000, 2500, 3000, 4000, 5000 };
+  p_descr = "Heights above the deck, meters. Pressures are taken from the standard atmosphere.";
+} heights[];
+
+paramdef double {
+  p_default = {5,  2,   0,   -2,  -5, -10, -20,   -20,  -15,  -10,  -10,   -10,  -10 }  ;
+  p_descr = "Temperature profile.";
+} temp[];
+
+paramdef double {
+  p_default = {0.5, 1.0, 2,   5,   10,  10,  10,   -5,   -5,    -5,   -5,    -5,  -5 }  ;
+  p_descr = "U wind profile.";
+} u[];
+
+paramdef double {
+  p_default = {-0.5, -1.0, -2, -5, -10, -10,-10,    5,    5,     5,    5,     5,   5 }  ;
+  p_descr = "V wind profile.";
+} v[];
+
+paramdef double {
+  p_default = {100,100,100, 90,  80, 70, 40,   20,  20,  10,     10,   10,  10 }  ;
+  p_descr = "Humidity profile.";
+} relHum[];
+
+
+
+commentdef {
+  p_header = "Time step information - start, delta, end.";
+}
+
+paramdef string {
+  p_default = "2002 03 10 00 00 00";
+  p_descr = "Start time in YYYY MM DD hh mm ss format.";
+} Start;
+
+paramdef string {
+  p_default = "2002 03 20 00 00 00";
+  p_descr = "End time in YYYY MM DD hh mm ss format.";
+} End;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Time delta, hours.";
+} TimeStep;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+
+paramdef string {
+  p_default = "spdbp:://localhost::$(PROJECT)/spdb/NWSsoundings";
+  p_descr = "URL for output SPDB data.";
+} OutUrl;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "How long data are valid, seconds.";
+} expiry;
+

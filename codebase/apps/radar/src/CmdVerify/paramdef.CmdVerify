@@ -1,0 +1,287 @@
+/*********************************************************
+ * parameter definitions for CmdVerify
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 2015
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Reads CMD data from CfRadial files, containing (a) weather only, (b) clutter only, (c) merged. Verifies the performance of CMD against the known truthiness. Also writes data out to ASCII file in column format, for analysis by other apps.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in FILELIST mode, at least) MUST contain a "
+           "day-directory below the data file -- ./data_file.ext will not "
+           "work as a file path";
+} mode;
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Input directory path.";
+  p_help = "Applies to ARCHIVE mode only.";
+} input_dir;
+
+paramdef string {
+  p_default = "2014 05 20 20 00 00";
+  p_descr = "Start time for reading data.";
+  p_help = "Applies to ARCHIVE mode only.";
+} start_time;
+
+paramdef string {
+  p_default = "2014 05 20 22 00 00";
+  p_descr = "Start time for reading data.";
+  p_help = "Applies to ARCHIVE mode only.";
+} end_time;
+
+commentdef {
+  p_header = "READ OPTIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the number of gates to be constant.";
+  p_help = "If TRUE, the number of gates on all rays will be set to the maximum, and gates added to shorter rays will be filled with missing values.";
+} set_ngates_constant;
+
+commentdef {
+  p_header = "OPTION TO SPECIFY OUTPUT FIELD NAMES";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the field names for output";
+  p_help = "If false, all fields will be used.";
+} set_output_fields;
+
+paramdef string {
+  p_default = {
+    "DBZ_WX",
+    "VEL_WX",
+    "WIDTH_WX",
+    "CLUT_WX",
+    "ZDR_WX",
+    "RHOHV_WX",
+    "PHIDP_WX",
+    "SNRHC_WX",
+    "SNRVC_WX",
+    "DBMHC_WX",
+    "DBMVC_WX",
+    "NCP_WX",
+    "CPA_WX",
+    "TDBZ_WX",
+    "SPIN_WX",
+    "ZDR_SDEV_WX",
+    "PHIDP_SDEV_WX",
+    "CMD_WX",
+    "CMD_FLAG_WX",
+    "DBZ_CLUT",
+    "VEL_CLUT",
+    "WIDTH_CLUT",
+    "CLUT_CLUT",
+    "ZDR_CLUT",
+    "RHOHV_CLUT",
+    "PHIDP_CLUT",
+    "SNRHC_CLUT",
+    "SNRVC_CLUT",
+    "DBMHC_CLUT",
+    "DBMVC_CLUT",
+    "NCP_CLUT",
+    "CPA_CLUT",
+    "TDBZ_CLUT",
+    "SPIN_CLUT",
+    "ZDR_SDEV_CLUT",
+    "PHIDP_SDEV_CLUT",
+    "CMD_CLUT",
+    "CMD_FLAG_CLUT",
+    "DBZ_COMB",
+    "DBZ_F_COMB",
+    "VEL_COMB",
+    "VEL_F_COMB",
+    "WIDTH_COMB",
+    "WIDTH_F_COMB",
+    "CLUT_COMB",
+    "ZDR_COMB",
+    "ZDR_F_COMB",
+    "RHOHV_COMB",
+    "RHOHV_F_COMB",
+    "PHIDP_COMB",
+    "PHIDP_F_COMB",
+    "SNRHC_COMB",
+    "SNRHC_F_COMB",
+    "SNRVC_COMB",
+    "SNRVC_F_COMB",
+    "DBMHC_COMB",
+    "DBMHC_F_COMB",
+    "DBMVC_COMB",
+    "DBMVC_F_COMB",
+    "NCP_COMB",
+    "NCP_F_COMB",
+    "CPA_COMB",
+    "TDBZ_COMB",
+    "SPIN_COMB",
+    "ZDR_SDEV_COMB",
+    "PHIDP_SDEV_COMB",
+    "CMD_COMB",
+    "CMD_FLAG_COMB",
+    "CSR"
+  };
+  p_descr = "Names of output fields to be written";
+} output_field_names[];
+
+commentdef {
+  p_header = "CENSORING";
+  p_text = "You have the option of censoring the data based in input fields - i.e. omitting the data at gates which meet certain criteria.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply censoring based on field values and thresholds.";
+  p_help = "If TRUE, censoring will be performed. See 'censoring_fields' for details on how the censoring is applied.";
+} apply_censoring;
+
+typedef enum {
+  LOGICAL_AND, LOGICAL_OR
+} logical_t;
+
+typedef struct {
+  string name;
+  double min_valid_value;
+  double max_valid_value;
+  logical_t combination_method;
+} censoring_field_t;
+
+paramdef struct censoring_field_t {
+  p_default = {
+    { "CMD_WX", 0.0, 0.35, LOGICAL_AND },
+    { "CMD_CLUT", 0.35, 1.0, LOGICAL_AND }
+  };
+  p_descr = "Fields to be used for censoring.";
+  p_help = "Specify the fields to be used to determine whether a gate should be censored. The name refers to the input data field names. Valid field values lie in the range from min_valid_value to max_valid_value inclusive. If the value of a field at a gate lies within this range, it is considered valid. Each specified field is examined at each gate, and is flagged as valid if its value lies in the valid range. These field flags are then combined as follows: first, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true. The combined_or flag is then combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true. If this final flag is true, then the data at the gate is regarded as valid and is retained. If the final flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.";
+} censoring_fields[];
+  
+commentdef {
+  p_header = "SPECIFYING FIELDS TO BE COMBINED";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to combine some fields to produce derived fields";
+  p_help = "We can combine pairs of fields using simple algorithms. This created derived fields. The fields to be combined must already have been specified as 'output_fields' above.";
+} add_combined_fields;
+
+typedef enum {
+  COMBINE_MEAN,
+  COMBINE_UNBIASED_MEAN,
+  COMBINE_GEOM_MEAN,
+  COMBINE_MAX,
+  COMBINE_MIN,  
+  COMBINE_SUM,
+  COMBINE_DIFF
+} combine_method_t;
+
+typedef struct {
+  string field_name_1;
+  string field_name_2;
+  string combined_name;
+  string long_name;
+  combine_method_t combine_method;
+  boolean require_both;
+} combined_field_t;
+
+paramdef struct combined_field_t {
+  p_default = {
+    {
+      field_name_1 = "DBZ1",
+      field_name_2 = "DBZ2",
+      combined_name = "DBZ_MEAN",
+      long_name = "mean_of_DBZ1_and_DBZ2",
+      combine_method = COMBINE_MEAN,
+      require_both = TRUE
+    }
+    ,
+    {
+      field_name_1 = "DBZ1",
+      field_name_2 = "DBZ2",
+      combined_name = "DBZ_MAX",
+      long_name = "max_of_DBZ1_and_DBZ2",
+      combine_method = COMBINE_MAX,
+      require_both = FALSE
+    }
+  };
+  p_descr = "Specs of fields to be combined.";
+  p_help = "field_name_1 and field_name_2 must be in the output_field_names list, or in the input file if all fields are used. If 'require_both' is TRUE, both fields needs to be non-missing to produce an output field. MEAN: arimthmetic mean. UNBIASED_MEAN: first remove any consistent bias between field1 and field2, by adjusting field2 to field 1. Then compute the arithmetic mean. This reduces noise in the fields without changing the value of field1. GEOM_MEAN: geometric mean. MAX: maximum of the two fields. MIN: minimum of the two fields. SUM: field1 + field2. DIFF: field1 - field2.";
+} combined_fields[];
+
+commentdef {
+  p_header = "WRITING OUTPUT";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Write comma-delimited file to standard out.";
+} write_table_to_stdout;
+
+paramdef string {
+  p_default = ",";
+  p_descr = "String to use to delimit values in table.";
+} delimiter_string;
+
+paramdef string {
+  p_default = "#";
+  p_descr = "String to use at start of comments - i.e. label line.";
+} comment_start_string;
+
+paramdef string {
+  p_default = "NaN";
+  p_descr = "String to use for missing data values.";
+  p_help = "This string will be used to represent missing data in the output.";
+} missing_data_string;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to add the column number to the column labels.";
+  p_help = "The column number, in parens, will be added to the label. For example, DBZ_WX will become DBZ_WX(11) if this is column index 11. Indices are 0-based.";
+} add_col_num_to_col_labels;
+

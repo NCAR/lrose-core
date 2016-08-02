@@ -1,0 +1,45 @@
+/.cvsignore/1.1/Fri Oct 23 21:59:07 2015//
+/Makefile/1.19/Wed Jul  2 01:42:52 2014//
+/Makefile.wsddm/1.2/Tue Nov  9 19:28:17 2004//
+D/ASCII2Sounding////
+D/AcPolygonStats////
+D/AdvectPolygon////
+D/Airep2Spdb////
+D/AverageSpdbSndg////
+D/CalcStnPressure////
+D/ConvertStnPressure////
+D/FixStationAltitudes////
+D/GenPoly2Mdv////
+D/GenPolyStats2Ascii////
+D/Hash////
+D/Ltg2RampClosures////
+D/NegateSndgUV////
+D/NetCDF2Spdb////
+D/PrintGenPt1D////
+D/PrintHydroStation////
+D/PrintLtg////
+D/PrintSigAirMet////
+D/PrintSpdbMetar////
+D/Rhi2Spdb////
+D/Sigmet2Mdv////
+D/Sndg2Ascii////
+D/SndgAscii2Spdb////
+D/Spdb2netCDF////
+D/SpdbBdry2Axf////
+D/SpdbCollate////
+D/SpdbCollector////
+D/SpdbMultSim////
+D/SpdbXmlPut////
+D/StationCompare////
+D/Taf2Spdb////
+D/checktime2json////
+D/extractStationLocationList////
+D/run_PrintSigAirMet////
+D/simStations////
+D/spdbIntervalCount////
+D/spdbLatencies////
+D/spdb_merge////
+D/spdb_repair////
+D/station2ascii////
+D/station2json////
+D/_makefiles////

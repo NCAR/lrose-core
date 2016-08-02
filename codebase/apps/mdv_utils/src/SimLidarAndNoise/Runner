@@ -1,0 +1,386 @@
+#!/bin/csh
+
+# Direction : 225
+#    Distance : 2 : 38.881, -77.0392
+#    Distance : 4 : 38.8683, -77.0556
+#    Distance : 6 : 38.8555, -77.0719
+#    Distance : 8 : 38.8428, -77.0882
+#
+# Direction : 135
+#    Distance : 2 : 38.881, -77.0066
+#    Distance : 4 : 38.8683, -76.9902
+#    Distance : 6 : 38.8555, -76.9739
+#    Distance : 8 : 38.8428, -76.9576
+
+\rm -rf fmq 
+
+## SW runs
+
+########### Normal noise runs with lidar at 2,4,6 and 8 Km to SW
+
+setenv SIM_OUT_DIR simLidarNormal2KmSW
+setenv SIM_NOISE_SCALE 2.5e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.881
+setenv SIM_LIDAR_LON -77.0392
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarNormal4KmSW
+setenv SIM_NOISE_SCALE 2.5e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.8683
+setenv SIM_LIDAR_LON -77.0556
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarNormal6KmSW
+setenv SIM_NOISE_SCALE 2.5e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.8555
+setenv SIM_LIDAR_LON -77.0719
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarNormal8KmSW
+setenv SIM_NOISE_SCALE 2.5e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.8428
+setenv SIM_LIDAR_LON -77.0882
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+########### Low noise runs with lidar at 2,4,6 and 8 Km to SW
+
+setenv SIM_OUT_DIR simLidarLow2KmSW
+setenv SIM_NOISE_SCALE 1.25e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.881
+setenv SIM_LIDAR_LON -77.0392
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarLow4KmSW
+setenv SIM_NOISE_SCALE 1.25e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.8683
+setenv SIM_LIDAR_LON -77.0556
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarLow6KmSW
+setenv SIM_NOISE_SCALE 1.25e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.8555
+setenv SIM_LIDAR_LON -77.0719
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarLow8KmSW
+setenv SIM_NOISE_SCALE 1.25e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.8428
+setenv SIM_LIDAR_LON -77.0882
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+########### High noise runs with lidar at 2,4,6 and 8 Km to SW
+
+setenv SIM_OUT_DIR simLidarHigh2KmSW
+setenv SIM_NOISE_SCALE 5e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.881
+setenv SIM_LIDAR_LON -77.0392
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarHigh4KmSW
+setenv SIM_NOISE_SCALE 5e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.8683
+setenv SIM_LIDAR_LON -77.0556
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarHigh6KmSW
+setenv SIM_NOISE_SCALE 5e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.8555
+setenv SIM_LIDAR_LON -77.0719
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarHigh8KmSW
+setenv SIM_NOISE_SCALE 5e-10
+setenv SIM_AZ_MIN 0.0
+setenv SIM_AZ_MAX 90.0
+setenv SIM_LIDAR_LAT 38.8428
+setenv SIM_LIDAR_LON -77.0882
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+
+
+## SE runs
+
+
+
+########### Normal noise runs with lidar at 2,4,6 and 8 Km to SE
+
+setenv SIM_OUT_DIR simLidarNormal2KmSE
+setenv SIM_NOISE_SCALE 2.5e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.881
+setenv SIM_LIDAR_LON -77.0066
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarNormal4KmSE
+setenv SIM_NOISE_SCALE 2.5e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.8683
+setenv SIM_LIDAR_LON -76.9902
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarNormal6KmSE
+setenv SIM_NOISE_SCALE 2.5e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.8555
+setenv SIM_LIDAR_LON -76.9739
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarNormal8KmSE
+setenv SIM_NOISE_SCALE 2.5e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.8428
+setenv SIM_LIDAR_LON -76.9576
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+########### Low noise runs with lidar at 2,4,6 and 8 Km to SE
+
+setenv SIM_OUT_DIR simLidarLow2KmSE
+setenv SIM_NOISE_SCALE 1.25e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.881
+setenv SIM_LIDAR_LON -77.0066
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarLow4KmSE
+setenv SIM_NOISE_SCALE 1.25e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.8683
+setenv SIM_LIDAR_LON -76.9902
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarLow6KmSE
+setenv SIM_NOISE_SCALE 1.25e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.8555
+setenv SIM_LIDAR_LON -76.9739
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarLow8KmSE
+setenv SIM_NOISE_SCALE 1.25e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.8428
+setenv SIM_LIDAR_LON -76.9576
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+########### High noise runs with lidar at 2,4,6 and 8 Km to SE
+
+setenv SIM_OUT_DIR simLidarHigh2KmSE
+setenv SIM_NOISE_SCALE 5e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.881
+setenv SIM_LIDAR_LON -77.0066
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarHigh4KmSE
+setenv SIM_NOISE_SCALE 5e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.8683
+setenv SIM_LIDAR_LON -76.9902
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarHigh6KmSE
+setenv SIM_NOISE_SCALE 5e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.8555
+setenv SIM_LIDAR_LON -76.9739
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+setenv SIM_OUT_DIR simLidarHigh8KmSE
+setenv SIM_NOISE_SCALE 5e-10
+setenv SIM_AZ_MIN 270.0
+setenv SIM_AZ_MAX 360.0
+setenv SIM_LIDAR_LAT 38.8428
+setenv SIM_LIDAR_LON -76.9576
+
+
+snuff Dsr2Vol
+Dsr2Vol -params Dsr2Vol.params >& Dsr2Vol.log &
+./SimLidarAndNoise -params SimLidarAndNoise.params 
+
+#################################################
+
+#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#

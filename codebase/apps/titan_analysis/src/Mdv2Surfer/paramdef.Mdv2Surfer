@@ -1,0 +1,81 @@
+/*********************************************************
+ * parameter definitions for Mdv2Surfer
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 1999
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field names";
+} set_field_names;
+
+paramdef string {
+  p_default = {};
+  p_descr = "Array of fields to be written to output files.";
+  p_help = "Only these fields will be output. Active if set_field_names is true.";
+} field_names[];
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Path for input dir.";
+  p_help = "If start and end times are specified, the files will be searched for in this directory.";
+} input_dir;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Path for output dir.";
+  p_help = "The output files will be written to this directory.";
+} output_dir;
+
+paramdef string {
+  p_default = "sanbern";
+  p_descr = "Output file label.";
+  p_help = "The output file names will start with this label.";
+} output_file_label;
+
+paramdef string {
+  p_default = "SURF";
+  p_descr = "Output file extension.";
+  p_help = "The output file names will have this extension.";
+} output_file_ext;
+
+paramdef float {
+  p_default = 0.0;
+  p_descr = "Missing value in output.";
+  p_help = "Missing values in the output data are set to this value.";
+} missing_output_val;
+
+

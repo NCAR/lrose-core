@@ -1,0 +1,79 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/********************************************************
+ * Parameter definitions for SpdbMultSim
+ *
+ *******************************************************/
+commentdef {
+  p_header = "simStations param file.";
+  p_text = "Used to genetrate SPDB station data for simulation.\n"
+	"Niles Oien April 2006.";
+};
+
+typedef struct {
+	string ID;
+	double lat;
+	double lon;
+	double alt;
+   	double temp;
+	double relhum;
+	double pres;
+        double windSpeed;
+} station_t;
+
+paramdef struct station_t {
+   p_header = "Station data."; 
+   p_help = "Temp, relhum, pressure";
+   p_default = {
+                { "KN01", 34.5, -86.7, 100.0, 17.0, 20.0, 1000.0, 5.0 },
+                { "KN02", 37.7, -83.2, 100.0, 17.0, 20.0, 1000.0, 5.0 },
+                { "KN03", 37.3, -90.5, 100.0, 17.0, 20.0, 1000.0, 5.0 },
+                { "KN04", 33.0, -88.9, 100.0, 17.0, 20.0, 1000.0, 5.0 },
+                { "KN05", 34.2, -84.8, 100.0, 17.0, 20.0, 1000.0, 5.0 }
+  };
+} station[];
+
+paramdef string {
+   p_header = "Instance to check in with."; 
+   p_help = "Used in procmap.";
+   p_default = "sim";
+} instance;
+
+paramdef string {
+   p_header = "Output URL"; 
+   p_help = "Data are written here.";
+   p_default = "spdbp:://localhost::$(PROJECT)/spdb/metar";
+} outUrl;
+
+paramdef int {
+   p_header = "Frequency with which to write."; 
+   p_help = "Seconds. Default is 6 minutes.";
+   p_default = "360";
+} frequency;
+
+
+
+
+
+

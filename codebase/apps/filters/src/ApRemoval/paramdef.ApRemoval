@@ -1,0 +1,712 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for ApRemoval
+ *
+ * Jaimi Yee, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 2002
+ */
+
+commentdef {
+  p_header = "ApRemoval identifies Anomalous Propagation (AP) echoes in a DSR-format radar data FMQ. It filters the AP and writes the filtered data back to the FMQ."; 
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "Print debug messages";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Info option";
+  p_help = "Print info messages";
+} info;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with the process mapper";
+} instance;
+
+commentdef {
+  p_header = "LOGS.";
+}
+
+paramdef string {
+  p_descr = "Directory for log file output";
+  p_default = "";
+} log_dir;
+
+commentdef {
+  p_header = "INPUT";
+}
+
+paramdef string {
+  p_descr = "Input URL for DsRadar data via FMQ";
+  p_default = "fmqp:://localhost::./fmq.dsRadar";
+} input_fmq_url;
+
+paramdef string {
+  p_descr = "Velocity field name";
+  p_default = "VEL";
+} vel_field_name;
+
+paramdef string {
+  p_descr = "Reflectivity field name";
+  p_default = "DBZ";
+} refl_field_name;
+
+paramdef string {
+  p_descr = "Spectrum Width field name";
+  p_default = "WIDTH";
+} sw_field_name;
+
+paramdef boolean {
+  p_descr = "Use terrain data?";
+  p_default = FALSE;
+} use_terrain;
+
+paramdef string {
+  p_descr = "Terrain url";
+  p_help = "Url for terrain data.  Must be cartesian data";
+  p_default = "mdvp:://localhost::./terrain.mdv";
+} terrain_url;
+
+paramdef string {
+  p_descr = "Terrain field name";
+  p_help = "Field name for the field to use from the terrain file";
+  p_default = "Elevation";
+} terrain_field_name;
+
+paramdef boolean {
+  p_descr = "Does the radar scan top-down, instead of bottom-up?";
+  p_descr = "Most radars scan bottom-up. If the scan is top-down, we need to reverse the oder in which we are handling the tilts.";
+  p_default = FALSE;
+} radar_scans_top_down;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef string {
+  p_descr = "Output URL for filtered radar data via FMQ";
+  p_default = "fmqp:://localhost::./fmq.ap";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of output fmq, in bytes";
+  p_help = "This is the total size of the output fmq buffer. "
+           "Some of this buffer will be used for control bytes - "
+           "12 bytes per message";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in output fmq";
+  p_help = "The number of slots corresponds to the maximum number "
+           "of messages which may be written to the buffer before "
+           "overwrites occur. However, overwrites may occur sooner "
+           "if the size is not set large enough";
+} output_fmq_nslots;
+
+commentdef {
+  p_header = "FILTERING PARAMETERS";
+}
+
+paramdef string {
+  p_default = { "DBZ", "VEL", "WIDTH" };
+  p_descr = "Names of fields to be filtered";
+  p_help = "List the names of the fields you want to be filtered";
+} filter_field_names[];
+
+typedef struct {
+  double min_elev;
+  double max_elev;
+} filter_range_t;
+
+paramdef struct filter_range_t {
+  p_default = {0.0, 4.0};
+  p_descr = "Elevation range for data that should be filtered";
+  p_help = "Data from tilts not in this range will not be filtered";
+} filter_range;
+
+paramdef double {
+  p_default = 250;
+  p_descr = "Expected gate spacing in meters";
+  p_help = "If gate spacing is different than this value, the tilt will "
+           "be ignored";
+} gate_spacing;
+
+paramdef long {
+  p_default = 1000;
+  p_descr = "Maximum number of gates expected";
+  p_help = "This is used to construct the terrain mask. "
+           "It is also used for storing the beam data as it is received. "
+           "The beam data is stored internally in buffers that have this "
+           "number of gates. "
+           "This allows us to handle radars that truncate beams in the higher "
+           "tilts to save space. "
+           "If a beam is encountered that has more than this number of gates, "
+           "it will NOT be processed. "
+           "So, you need to keep this number as low as possible to save "
+           "memory, but not so low that beams will be skipped.";
+} max_num_gates;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Delta azimuth for filtering";
+  p_help = "The internal representation of a given tilt will assume this "
+           "delta azimuth";
+} delta_azimuth;
+
+typedef struct {
+  double latitude;
+  double longitude;
+} radar_loc_t;
+
+paramdef struct radar_loc_t {
+  p_default = {0.0, 0.0};
+  p_descr = "Latitude and longitude of radar";
+} radar_location;
+
+typedef struct {
+  int azimuth_radius;
+  int gate_radius;
+} radius_info_t;
+
+paramdef struct radius_info_t {
+  p_default = { 2, 4 };
+  p_descr = "Radius in azimuth and gates for area used in computation of "
+            "interest fields related to the reflectivity field";
+  p_help = "If the azimuth radius is set to 2 and the gate radius is "
+           "set to 4, for example, the area used to compute the interest "
+           "functions below will be a wedge in polar space consisting "
+           "of the 45 gates that fall within 2 azimuths on each side "
+           "of the given azimuth and 4 gates on each side of the given "
+           "gate";
+} dbz_radius_info;
+
+paramdef struct radius_info_t {
+  p_default = { 1, 1 };
+  p_descr = "Radius in azimuth and gates for area used in computation of "
+            "interest fields related to the velocity and spectral width "
+            "fields";
+  p_help = "If the azimuth radius is set to 2 and the gate radius is "
+           "set to 4, for example, the area used to compute the interest "
+           "functions below will be a wedge in polar space consisting "
+           "of the 45 gates that fall within 2 azimuths on each side "
+           "of the given azimuth and 4 gates on each side of the given "
+           "gate";
+} vel_radius_info;
+
+typedef struct {
+  double           x1;
+  double           y1;
+  double           x2;
+  double           y2;
+  double           x3;
+  double           y3;
+  double           x4;
+  double           y4;
+  double           x5;
+  double           y5;
+  double           x6;
+  double           y6;
+} range_weight_func_t;
+
+paramdef struct range_weight_func_t {
+  p_default = { 0, 1, 40, 1, 120, 0.75, 200, 0.5, 300, 0, 500, 0 };
+  p_descr = "Range weight function";
+  p_help = "Apply a range weight to given feature fields below according"
+           " to this function.  X coordinates are given in km";
+} range_weight_func;
+
+typedef enum {
+  TDBZ, GDZ, MVE, MSW, SDVE, SDSW, SPIN, SIGN, RGDZ, SRDZ, RSINZ
+} interest_field_t;
+
+typedef struct {
+  interest_field_t interest_field;
+  double           weight;
+  double           x1;
+  double           y1;
+  double           x2;
+  double           y2;
+  double           x3;
+  double           y3;
+  double           x4;
+  double           y4;
+  double           x5;
+  double           y5;
+  double           x6;
+  double           y6;
+} interest_func_t;
+
+paramdef struct interest_func_t {
+  p_default = {
+    { TDBZ, 1, -100, 0, 0, 0, 55, 1, 60, 1, 100, 1, 10000, 1},
+    { GDZ, 1, -1000, 1, -100, 1, -15, 1, 0, 0, 50, 0, 100, 0},
+    { MVE, 1, -50, 0, -30, 0, -2.3, 0, 0, 1, 2.3, 0, 50, 0},
+    { MSW, 1, -50, 0, 0, 1, 5, 0, 10, 0, 20, 0, 50, 0},
+    { SDVE, 1, -50, 0, 0, 1, 0.7, 0, 10, 0, 20, 0, 50, 0},
+    { SDSW, 0, -50, 0, 0, 1, 0.7, 0, 10, 0, 20, 0, 50, 0},
+    { SPIN, 1, -100, 0, -50, 0, 0, 0, 50, 1, 100, 0, 200, 0},
+    { SIGN, 0, -10, 0, -0.3, 0, 0, 1, 0.3, 0, 10, 0, 50, 0},
+    { RGDZ, 0, -1000, 1, -100, 1, -8, 1, 0, 0, 50, 0, 100, 0},
+    { SRDZ, 0, -100, 1, -10, 1, 0, 0, 10, 1, 50, 1, 100, 1},
+    { RSINZ, 1, -500, 1, -60, 1, -30, 0, 30, 0, 60, 1, 500, 1}
+  };
+  p_descr = "Interest function description for ap filtering";
+} ap_interest_func[];
+
+paramdef struct interest_func_t {
+  p_default = {};
+  p_descr = "Confidence function description for ap filtering";
+} ap_confidence_func[];
+
+paramdef struct interest_func_t {
+  p_default = {
+    { TDBZ, 1, -100, 0, 0, 0, 55, 1, 60, 1, 100, 1, 10000, 1},
+    { GDZ, 1, -1000, 1, -100, 1, -15, 1, 0, 0, 50, 0, 100, 0},
+    { MVE, 0, -50, 0, -30, 0, -5, 0, 0, 1, 5, 0, 50, 0},
+    { MSW, 1, -50, 0, 0, 1, 6, 0, 10, 0, 20, 0, 50, 0},
+    { SDVE, 1, -50, 0, 0, 1, 0.7, 0, 10, 0, 20, 0, 50, 0},
+    { SDSW, 0, -50, 0, 0, 1, 0.7, 0, 10, 0, 20, 0, 50, 0},
+    { SPIN, 1, -100, 0, -50, 0, 0, 0, 40, 0, 60, 1, 200, 1},
+    { SIGN, 0, -10, 0, -0.6, 0, 0, 1, 0.6, 0, 10, 0, 50, 0},
+    { RGDZ, 1, -1000, 1, -100, 1, -15, 1, 0, 0, 50, 0, 100, 0},
+    { SRDZ, 0, -500, 1, -20, 1, 0, 0, 20, 1, 200, 1, 500, 1},
+    { RSINZ, 1, -1000, 0, -80, 0, -20, 1, -10, 1, 0, 0, 1000, 0}
+  };
+  p_descr = "Interest function description for sea clutter filtering";
+} sc_interest_func[];
+
+paramdef struct interest_func_t {
+  p_default = {};
+  p_descr = "Confidence function description for sea clutter filtering";
+} sc_confidence_func[];
+
+paramdef struct interest_func_t {
+  p_default = {
+    { TDBZ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { MVE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { SPIN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { SIGN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+  };
+  p_descr = "Interest function description for precipitation filtering";
+} p_interest_func[];
+
+paramdef struct interest_func_t {
+  p_default = {};
+  p_descr = "Confidence function description for precipitation filtering";
+} p_confidence_func[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Flag indicating whether to filter out low dbz values when "
+            "calculating the precip filter final interest value.";
+} p_filter_low_dbz;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Minimum dbz value to use when filtering low dbz values for the "
+            "final precip interest value.";
+  p_help = "Used only if p_filter_low_dbz is set to true.\n"
+           "If set, the final precip interest value will be set to 0 "
+           "anywhere the original dbz value is less than this value.";
+} p_low_dbz_threshold;
+
+paramdef double {
+  p_default = 10.0; 
+  p_descr = "Distance for slant range gdz field";
+} slant_range_dist;
+
+typedef enum {
+  LAND, WATER, ALL
+} terrain_t;
+
+paramdef enum terrain_t {
+  p_default = ALL;
+  p_descr = "Where to filter AP";
+  p_help = "This parameter tells us how to use the terrain data for AP "
+           "removal.  If set to LAND, we will only filter data over the "
+           "land.  If set to WATER, we will only filter data over the "
+           "water.  If set to ALL, we will filter data everywhere, "
+           "without reguard to the terrain data";
+} ap_terrain_use_type;
+
+paramdef enum terrain_t {
+  p_default = ALL;
+  p_descr = "Where to filter sea clutter";
+  p_help = "This parameter tells us how to use the terrain data for sea "
+           "clutter removal.  If set to LAND, we will only filter data "
+           "over the land.  If set to WATER, we will only filter data over "
+           "the water.  If set to ALL, we will filter data everywhere, "
+           "without reguard to the terrain data";
+} sc_terrain_use_type;
+
+paramdef enum terrain_t {
+  p_default = ALL;
+  p_descr = "Where to filter precipitation";
+  p_help = "This parameter tells us how to use the terrain data for "
+           "precipitation removal.  If set to LAND, we will only filter data "
+           "over the land.  If set to WATER, we will only filter data over "
+           "the water.  If set to ALL, we will filter data everywhere, "
+           "without reguard to the terrain data";
+} p_terrain_use_type;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Spin threshold for sea clutter";
+  p_help = "Differences in reflectivity between adjacent gates will be "
+           "counted for the spin calculation if they are greater than this "
+           "value";
+} sc_spin_threshold;
+
+paramdef double {
+  p_default = 11.0;
+  p_descr = "Spin threshold for AP";
+  p_help = "Differences in reflectivity between adjacent gates will be "
+           "counted for the spin calculation if they are greater than this "
+           "value";
+} ap_spin_threshold;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Spin threshold for precipitation";
+  p_help = "Differences in reflectivity between adjacent gates will be "
+           "counted for the spin calculation if they are greater than this "
+           "value";
+} p_spin_threshold;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Interest threshold for AP removal";
+  p_help = "A final interest value greater than this value will indicate "
+           "the presence of ap";
+} ap_interest_threshold;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Interest threshold for sea clutter removal";
+  p_help = "A final interest value greater than this value will indicate "
+           "the presence of sea clutter";
+} sc_interest_threshold;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Interest threshold for precip removal";
+  p_help = "A final interest value less than this value will indicate "
+           "the presence of precipitation";
+} p_interest_threshold;
+
+paramdef boolean {
+  p_default = {TRUE};
+  p_descr = "Trigger filtering by the end of volume flag";
+  p_help = "Filtering will always be triggered when two tilts are buffered "
+           "and the next tilt starts coming in.  If this flag is set to "
+           "TRUE, filtering will also be triggered when an end of volume "
+           "flag is detected.  In this case, all remaining tilts in the "
+           "volume will be filtered, if they are within the filtering "
+           "range, and written out before the next volume is processed. "
+           "Note that if you do not have a delay at the end of a volume, "
+           "and you are filtering all the tilts in a volume, you may want "
+           "to set this to FALSE to insure that beams are not dropped in "
+           "the next scan";
+} eov_trigger;
+
+typedef enum
+{
+  APDA,
+  SCDA,
+  PDA
+} filter_type_t;
+
+typedef enum
+{
+  AND_FILTER,
+  OR_FILTER
+} filter_comb_type_t;
+
+typedef struct
+{
+  filter_type_t filter_type;
+  filter_comb_type_t comb_type;
+} filter_comb_t;
+
+paramdef struct filter_comb_t
+{
+  p_descr = "Parameter defining how to combine the filters when applying "
+            "the final interest fields to the input fields.";
+  p_help = "Filter types:\n"
+           "\tAPDA - AP filter final interest field\n"
+           "\tSCDA - Sea clutter filter final interest field\n"
+           "\tPDA - Precipitation filter final interest field\n"
+           "Combination type:\n"
+           "\tAND_FILTER - The final interest field from this filter will "
+           "be anded with the other filter fields when determining the "
+           "final filtering\n"
+           "\tOR_FILTER - The final interest field from this filter will "
+           "be ored with the other filter fields when determining the "
+           "final filtering\n"
+           "The filters will be applied in the order specified."
+           "The combination type specified for the first filter in the list "
+           "will be ignored.\n"
+           "Note that only the filters specified in this list will be "
+           "calculated.";
+  p_default = { { APDA, AND_FILTER },
+                { SCDA, AND_FILTER },
+                { PDA, AND_FILTER } };
+} filter_combination[];
+
+commentdef {
+  p_header = "INTEREST OUTPUT";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write interest fields to fmq";
+  p_help = "If set to true, the interest fields will be written to an fmq ";
+} write_ap_interest;
+
+paramdef string {
+  p_descr = "Output URL for interest fields via FMQ";
+  p_default = {"fmqp:://localhost::./fmq.interest"};
+} ap_interest_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of interest fmq, in bytes";
+  p_help = "This is the total size of the interest fmq buffer. "
+           "Some of this buffer will be used for control bytes - "
+           "12 bytes per message";
+} ap_interest_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in interest fmq";
+  p_help = "The number of slots corresponds to the maximum number "
+           "of messages which may be written to the buffer before "
+           "overwrites occur. However, overwrites may occur sooner "
+           "if the size is not set large enough";
+} ap_interest_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write interest fields to fmq";
+  p_help = "If set to true, the interest fields will be written to an fmq ";
+} write_sc_interest;
+
+paramdef string {
+  p_descr = "Output URL for interest fields via FMQ";
+  p_default = {"fmqp:://localhost::./fmq.interest"};
+} sc_interest_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of interest fmq, in bytes";
+  p_help = "This is the total size of the interest fmq buffer. "
+           "Some of this buffer will be used for control bytes - "
+           "12 bytes per message";
+} sc_interest_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in interest fmq";
+  p_help = "The number of slots corresponds to the maximum number "
+           "of messages which may be written to the buffer before "
+           "overwrites occur. However, overwrites may occur sooner "
+           "if the size is not set large enough";
+} sc_interest_fmq_nslots;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Write interest fields to fmq";
+  p_help = "If set to true, the interest fields will be written to an fmq ";
+} write_p_interest;
+
+paramdef string {
+  p_descr = "Output URL for interest fields via FMQ";
+  p_default = {"fmqp:://localhost::./fmq.interest"};
+} p_interest_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of interest fmq, in bytes";
+  p_help = "This is the total size of the interest fmq buffer. "
+           "Some of this buffer will be used for control bytes - "
+           "12 bytes per message";
+} p_interest_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in interest fmq";
+  p_help = "The number of slots corresponds to the maximum number "
+           "of messages which may be written to the buffer before "
+           "overwrites occur. However, overwrites may occur sooner "
+           "if the size is not set large enough";
+} p_interest_fmq_nslots;
+
+commentdef {
+  p_header = "CONFIDENCE OUTPUT";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write confidence fields to fmq";
+  p_help = "If set to true, the confidence fields will be written to an fmq ";
+} write_ap_confidence;
+
+paramdef string {
+  p_descr = "Output URL for confidence fields via FMQ";
+  p_default = {"fmqp:://localhost::./fmq.confidence"};
+} ap_confidence_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of confidence fmq, in bytes";
+  p_help = "This is the total size of the confidence fmq buffer. "
+           "Some of this buffer will be used for control bytes - "
+           "12 bytes per message";
+} ap_confidence_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in confidence fmq";
+  p_help = "The number of slots corresponds to the maximum number "
+           "of messages which may be written to the buffer before "
+           "overwrites occur. However, overwrites may occur sooner "
+           "if the size is not set large enough";
+} ap_confidence_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write confidence fields to fmq";
+  p_help = "If set to true, the confidence fields will be written to an fmq ";
+} write_sc_confidence;
+
+paramdef string {
+  p_descr = "Output URL for confidence fields via FMQ";
+  p_default = {"fmqp:://localhost::./fmq.confidence"};
+} sc_confidence_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of confidence fmq, in bytes";
+  p_help = "This is the total size of the confidence fmq buffer. "
+           "Some of this buffer will be used for control bytes - "
+           "12 bytes per message";
+} sc_confidence_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in confidence fmq";
+  p_help = "The number of slots corresponds to the maximum number "
+           "of messages which may be written to the buffer before "
+           "overwrites occur. However, overwrites may occur sooner "
+           "if the size is not set large enough";
+} sc_confidence_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write confidence fields to fmq";
+  p_help = "If set to true, the confidence fields will be written to an fmq ";
+} write_p_confidence;
+
+paramdef string {
+  p_descr = "Output URL for confidence fields via FMQ";
+  p_default = {"fmqp:://localhost::./fmq.confidence"};
+} p_confidence_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of confidence fmq, in bytes";
+  p_help = "This is the total size of the confidence fmq buffer. "
+           "Some of this buffer will be used for control bytes - "
+           "12 bytes per message";
+} p_confidence_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in confidence fmq";
+  p_help = "The number of slots corresponds to the maximum number "
+           "of messages which may be written to the buffer before "
+           "overwrites occur. However, overwrites may occur sooner "
+           "if the size is not set large enough";
+} p_confidence_fmq_nslots;
+
+commentdef {
+  p_header = "FEATURE DATA OUTPUT";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write feature data fields to fmq";
+  p_help = "If set to true, the feature data fields will be written to "
+           "an fmq";
+} write_feature_data;
+
+paramdef string {
+  p_descr = "Output URL for feature data fields via FMQ";
+  p_default = {"fmqp:://localhost::./fmq.feature"};
+} feature_fmq_url;
+
+paramdef int {
+  p_default = 2000000;
+  p_descr = "Size of feature data fmq, in bytes";
+  p_help = "This is the total size of the feature data fmq buffer. "
+           "Some of this buffer will be used for control bytes - "
+           "12 bytes per message";
+} feature_fmq_size;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Number of slots in feature data fmq";
+  p_help = "The number of slots corresponds to the maximum number "
+           "of messages which may be written to the buffer before "
+           "overwrites occur. However, overwrites may occur sooner "
+           "if the size is not set large enough";
+} feature_fmq_nslots;
+
+commentdef { 
+  p_header = "TERRAIN DATA OUTPUT";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write out terrain data mask to an mdv file";
+  p_help = "This will only apply if we are using the mask";
+} write_terrain;
+
+paramdef string {
+  p_default = "./terrainMask.mdv";
+  p_descr = "File path for output terrain data mask mdv file";
+} terrain_output_path;

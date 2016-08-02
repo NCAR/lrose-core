@@ -1,0 +1,29 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_sweep_index_from_volume</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>int RSL_get_sweep_index_from_volume(Volume *v, float elev,int *next_closest);</b> 
+
+<h3>
+<hr>Description</h3>
+Return the index of the closest sweep. Also, returns the next closest sweep index. Use the index returned, if called <b>i</b>, in v-&gt;sweep[i]. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a valid index into the v-&gt;sweep[i] structure is returned. Otherwise, -1 is returned and *next_closest is undefined. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_get_sweep.html>RSL_get_sweep</a>, <a href=RSL_get_ray.html>RSL_get_ray</a> 
+<hr>Author: <a href=dennis.flanigan.html>Dennis Flanigan Jr.</a> 
+</body>

@@ -1,0 +1,32 @@
+#! /usr/bin/perl
+
+#
+# script to check library dependencies from includes
+#
+# The script must be run from lib dir: libs/xxx
+#
+
+use Cwd;
+
+# do the grep
+
+open(GREPLIST, "grep include */*c */*/*c */*/*/*c */*h */*/*h */*/*/*h | grep -v directory | ");
+
+while (<GREPLIST>) {
+
+    next unless /^(.*)#include/;
+    next unless ($match) = m|<(\w+)/|;
+    push(@list, $match) unless $seen{$match}++;
+
+}
+
+$dir = cwd();
+#$lib = ( $dir =~ m|/(.*)$| );
+#print "dir is $dir\n";
+#print "lib is $lib\n";
+
+print "Lib $dir depends on: @list\n";
+
+exit (0);
+
+

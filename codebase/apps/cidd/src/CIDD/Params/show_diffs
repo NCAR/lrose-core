@@ -1,0 +1,15 @@
+#!/bin/csh
+#
+#  A quick jiffy to show diffs between CIDD parameter files.
+#  Usage: show_diff file1 file2
+#
+if( $#argv < 2 ) then
+    echo "Usage: show_diff file1 filesr"
+else
+    grep cidd\.  $1 | sort  > /tmp/$$_$1
+    grep cidd\.  $2 | sort  > /tmp/$$_$2
+    echo "<  $1                $2    >"
+    diff -bd /tmp/$$_$1 /tmp/$$_$2 | less
+    \rm /tmp/$$_$1 /tmp/$$_$2
+endif
+

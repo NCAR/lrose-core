@@ -1,0 +1,6 @@
+.deps
+GetPortNumber
+__makefile.template
+makefile
+makefile.am
+makefile.in

@@ -1,0 +1,4 @@
+#! /bin/csh
+
+QpeVerify -params QpeVerify.test -verbose -start "2015 05 19 23 00 00" -end "2015 05 20 00 00 00"
+

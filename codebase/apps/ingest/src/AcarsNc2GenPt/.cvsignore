@@ -1,0 +1,6 @@
+.deps
+AcarsNc2GenPt
+__makefile.template
+makefile
+makefile.am
+makefile.in

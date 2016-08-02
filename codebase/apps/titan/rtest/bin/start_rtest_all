@@ -1,0 +1,8 @@
+#! /bin/csh -f
+
+start_rtest_ingest
+start_rtest_servers
+start_rtest_tracking
+start_rtest_display
+
+

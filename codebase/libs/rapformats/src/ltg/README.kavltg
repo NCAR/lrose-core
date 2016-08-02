@@ -1,0 +1,41 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:51 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+		Kavouras Lightning Data Format
+		------------------------------
+
+Kavouras collects data from ARSI on a continous basis via a dedicated
+land line to their computer facility in Melbourne FL.  As the data is
+received at Kavouras, it is converted into the Kavouras format, and
+placed into a buffer.  At one minute intervals, this buffer is uplinked,
+sent as a discreet file on the Kavouras 280Kb uplink.
+
+The lightning data files are named DLTGhhmm.LTG, where hhmm is the
+Greenwich Mean Time (GMT) in which the file was uplinked.  Each file
+consists of a variable number of fixed length records, with one record
+for each lightning stroke which has occurred during that interval.  Each
+record consists of a series of integer values:
+
+	- 4 byte signed int Date/Time 		(Julian time)
+	- 4 byte signed int Latitude		(Degrees * 1000)
+	- 4 byte signed int Longitude		(Degrees * 1000)
+	- 2 byte signed int Amplitude 		(Kiloamps)
+	- 2 byte signed int Type 		(0 or 1)
+
+DATE/TIME FORMAT
+The 4 byte Julian time is the number of seconds elapsed since midnight
+Jan 1, 1970.  This is the internal format used by Microsoft 'C'.
+
+LAT/LONG FORMAT
+Latitude and longitudes are expressed in decimal degrees.  West is '-'
+and East is '+'.
+
+For each lightning stroke there will be a 16 byte record.  Each stroke
+record will be appended to a file, and the file will be uplinked once
+per minute.

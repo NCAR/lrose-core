@@ -1,0 +1,169 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_dpd Parameter definitions for
+// Display Page Description's - IE. What to render
+
+typedef enum {
+  ON_TOP = 1, ON_BOT = 2 
+} render_order_t;
+
+typedef enum {
+  SOLID = 1, DASHED = 2 , DOTTED = 3
+} line_style_t;
+
+typedef enum {
+  NONE = 1, SIMPLE = 2 , BEST = 3
+} cont_label_style_t;
+
+
+typedef enum {
+  ARROWS = 1, TUFTS = 2 , VECTORS = 3, TICVECTOR = 4, 
+  BARB = 5, LABELED_BARB = 6
+} wind_barb_style_t;
+
+typedef enum {
+  FIRST_STAGE = 1, LAST_STAGE = 2 
+} syprod_placement_t;
+
+
+//////////////////////////////////////////////////////////
+commentdef {
+  p_header = "Single Graphical Context Parameters";
+  p_text = "Testing";
+};
+
+typedef struct {
+  char* grid_id;
+  boolean is_on;
+} grid_t;
+
+typedef struct {
+  char* grid_id;
+  render_order_t render_order;
+} key_grid_t;
+
+
+typedef struct {
+  char* grid_id;
+  char* colorname;
+  int  number_contours;  // The number of defined levels
+  double start_value;    // The value at of the first contour level
+  double delta_value;    // The increment between levels
+  int  line_width;
+  line_style_t line_style;
+  cont_label_style_t label_style;
+  boolean is_on;
+} contour_t;
+
+typedef struct {
+  char* grid_U_id;
+  char* grid_V_id;
+  char* grid_W_id;
+  char* colorname;
+  int  decimate_to;   // Decimate vectors so that less than this number
+		      // plot along one row across the screen
+  wind_barb_style_t wind_barb_style;
+  boolean is_on;
+} wind_grid_t;
+
+typedef struct {
+  char* grid_U_id;   // west-east wind componet
+  char* grid_V_id;   // south-north wind componet
+  char* grid_W_id;   // Vertical wind componet
+  char* grid_T_id;   // Temperature
+  char* grid_I_id;   // Icing
+  char* grid_R_id;   // Turbulence
+  char* colorname;   // Colors for Labels, etc
+  boolean is_on;
+} route_t;
+
+typedef struct {
+  char* syprod_id;
+  syprod_placement_t placement; // First, with the grids, or last, on top
+  boolean is_on;
+} syprod_t;
+
+
+//////////////////////////////////////////////////////////
+commentdef { p_text = "ONE Mandantory KEY Grid"; };
+
+paramdef struct key_grid_t {
+    p_default = { "Not Defined",  ON_TOP};
+    p_descr = "The Key gridded field - Used for labeling, etc - MUST BE SET!";
+    p_help = "Selects Grid for pronicipal data field - Always On.";
+} key_grid;
+
+
+commentdef { p_text = "ONE Optional Terrain Grid"; };
+
+paramdef struct grid_t {
+    p_default = {"Not Defined", FALSE};
+    p_descr = "The Terrain field - Used for toographic based masking - Optional";
+    p_help = "Selects Grid, ON_state for terrain data field.";
+} terrain_grid;
+
+commentdef { p_text = "One Optional Route Info"; };
+paramdef struct route_t {
+  p_default = {"Not Defined", "Not Defined", "Not Defined", "Not Defined",
+	       "Not Defined", "Not Defined",  "Not Defined", FALSE };
+  p_help = "U_ID V_ID W_ID Temp_ID Ice_ID Turb_ID, Color,  Is_On";
+} route;
+
+commentdef { p_text = "Array of Optional Grids - Rendered in order"; };
+paramdef struct grid_t {
+  p_default = {{"Not Defined", FALSE}};
+  p_descr = "Array of layerd grids to render.";
+  p_help = "Grid_ID  Is_On";
+} layer_grid[];
+
+
+commentdef { p_text = "Array of Optional Contour Sets - Rendered in order"; };
+paramdef struct contour_t {
+  p_default = {{"Not Defined", "Not Defined", 0, 0.0, 0.0, 1, SOLID, SIMPLE, FALSE }};
+  p_descr = "Contour Display Parameters.";
+  p_help = "Grid_ID Color Num Start Delta Width Style Labels Is_On.";
+} contour_grid[];
+
+
+commentdef { p_text = "Array of Map Overlays - Rendered in order"; };
+paramdef char* {
+    p_default = {"Not Defined"};
+    p_descr = "Map ID's";
+    p_help = "Map_ID Map_ID Map_ID ...";
+} map[];
+
+commentdef { p_text = "Array of Wind Grid Overlays - Rendered in order"; };
+paramdef struct wind_grid_t {
+    p_default = { {"Not Defined", "Not Defined", "Not Defined", "Not Defined",
+		   0, ARROWS, FALSE }};
+    p_descr = "Wind field Display Parameters";
+} wind_grid[];
+
+commentdef { p_text = "Array of Symbolic Product Overlays - Rendered in order"; };
+paramdef struct syprod_t {
+    p_default = {{ "Not Defined", FIRST_STAGE, FALSE}};
+    p_descr = "Symbolic field Display Parameters";
+} syprod[];
+

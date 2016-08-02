@@ -1,0 +1,43 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_value...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>float RSL_get_value(<a href=RSL_volume_struct.html>Volume</a> *v, float elev, float azimuth, float range);<br>
+float RSL_get_value_at_h(<a href=RSL_volume_struct.html>Volume</a> *v, float azim, float grnd_r, float h);<br>
+float RSL_get_value_from_ray(<a href=RSL_ray_struct.html>Ray</a> *ray, float r);<br>
+float RSL_get_value_from_sweep(<a href=RSL_sweep_struct.html>Sweep</a> *s, float azim, float r);
+
+<p>
+<hr></b>
+
+<h3>
+<hr>Description</h3>
+<b>RSL_get_value</b>: Find a value in the Volume v using polar coordinate specification. The search returns the closest point. Although there is no restriction concerning azimuth values, other functions rely on the range being 0 to +360. This may change. Nexrad happened to use this range so I use it for now. 
+
+<p><b>RSL_get_value_at_h</b>: Returns a value when the coordinate is specified by ground range and height. Both ground range and height are specified in km. 
+
+<p><b>RSL_get_value_from_ray</b>: Return a value for the slant range <b>r</b>. Basically, r is converted to an index based on the gate size. 
+
+<p><b>Vget_value_from_sweep</b>: Get a value from a Sweep, <b>s</b>, given the azimuth <b>azim</b> and range <b>r</b>. 
+
+<p>
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a valid floating point number is returned. Note, the value could be BADVAL. 
+<hr>
+
+<h3>See also</h3>
+
+<hr>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

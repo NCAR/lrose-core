@@ -1,0 +1,22 @@
+# colorscale for velocity field
+
+# Mike Dixon, April 1991
+
+-48	-42     DarkSlateBlue
+-42 	-38 	NavyBlue
+-36	-30 	Blue
+-30 	-24	MediumBlue
+-24 	-18 	SkyBlue
+-18 	-12 	DarkGreen
+-12	-06	ForestGreen
+-06 	-01	YellowGreen
+-01	01	Gray
+ 01  	06 	Wheat
+ 06  	12 	Gold
+ 12  	18 	Yellow
+ 18	24	Coral
+ 24	30	Orange
+ 30	36	MediumVioletRed
+ 36	42	OrangeRed
+ 42	48	Red
+

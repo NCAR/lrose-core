@@ -1,0 +1,19 @@
+#! /bin/csh -f
+
+cd $RTEST_HOME/params
+
+#setenv DISPLAY $HOST":"0.0
+
+running "rview -params rview.rtest"
+if ($status == 1) then
+  kill_rtest_display
+  rview -params rview.rtest &
+endif
+
+sleep 5
+
+running "time_hist -params time_hist.rtest"
+if ($status == 1) then
+  kill_rtest_display
+  rview -params rview.rtest &
+endif

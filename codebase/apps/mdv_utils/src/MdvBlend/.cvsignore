@@ -1,0 +1,9 @@
+.deps
+Makefile
+MdvBlend
+Params.cc
+Params.hh
+__makefile.template
+makefile
+makefile.am
+makefile.in

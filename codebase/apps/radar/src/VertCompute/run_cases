@@ -1,0 +1,25 @@
+#! /bin/csh
+
+VertCompute -params VertCompute.test -nsamples 512 -f ~/data/time_series/tsarchive/spol/vert/20060709/20060709_* -debug
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060720/20060720_*
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060725/20060725_*
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060726/20060726_01*
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060802/20060802_235*
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060814/20060814_2*
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060818/20060818_213*
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060831/20060831_*
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20061009/20061009_17*
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20061009/20061009_19*
+
+VertCompute -params VertCompute.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20061009/20061009_21*
+
+

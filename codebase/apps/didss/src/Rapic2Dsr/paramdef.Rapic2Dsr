@@ -1,0 +1,225 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for Rapic2Dsr
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Dec 2000
+//
+
+commentdef {
+  p_header = "Program name: Rapic2Dsr";
+  p_text = "Rapic2Dsr reads Rapic radar volume files and writes the data to a DsRadarQueue beam by beam.";
+}
+
+commentdef {
+  p_header = "PROCESS CONTROL AND DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Directory for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be valid. If the input file is older than this, the program waits for new data.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to watch for _latest_data_info file in input dir.";
+  p_help = "For realtime only. If true the program watches for the _latest_data_info file to change. If false, it scans the directory for new file.";
+} use_latest_data_info;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to only process the latest file in the directory.";
+  p_help = "For realtime mode only, and only if use_latest_data_info is false, which implies that the program is scanning the input_dir for new files. If true, only the latest file will be processed. If false, all files younger than max_realtime_valid_age will be processed.";
+} latest_file_only;
+
+paramdef string {
+  p_default = "Refl";
+  p_descr = "Name of DBZ field.";
+} dbz_field_name;
+
+paramdef string {
+  p_default = "Vel";
+  p_descr = "Name of VEL field.";
+} vel_field_name;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "Radar site name.";
+  p_help = "Only images with names matching the radar name will be processed. If the string is empty, no check is done.";
+} radar_name;
+
+paramdef int {
+  p_min = 0;
+  p_default = 0;
+  p_descr = "Option to only process specified VOLUMEID.";
+  p_help = "Only data with VOLUMEID matching that specified will be processed. If volume_id is not defined then volume_id = 0 is assumed.";
+} volume_id;
+
+paramdef string {
+  p_default = "/tmp/fmq/rapic";
+  p_descr = "Output URL for DsRadarQueue fmq.";
+  p_help = "The URL is of the form 'fmqp:://host::dir/name'. If the output is to the local host you can use just 'dir/name'.";
+} output_url;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQs are written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to block on write when the radar queue fills up.";
+  p_help = "If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.";
+} write_blocking;
+
+paramdef int {
+  p_min = 0;
+  p_default = 0;
+  p_descr = "Delay between writing output beams - millisecs.";
+  p_help = "Should normally be 0. Can be set to positive values to simulate the rate at which data would arrive from a radar on a beam-by-beam basis.";
+} write_delay_msecs;
+
+typedef enum {
+  NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION
+} compression_t;
+  
+paramdef enum compression_t {
+  p_default = NO_COMPRESSION;
+  p_descr = "Output compression options.";
+  p_help = "The data may be optionally compressed for output. BZIP is generally the slowest but most compact. ZLIB uses the gzip compression algorithm, which is faster than BZIP, and for some data more compact as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is simple run-length encoding compression, which is the fastest and least compact.";
+} output_compression;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Number of slots in output FMQ.";
+} output_n_slots;
+
+paramdef int {
+  p_default = 10000000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_buf_size;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Scan strategy type.";
+  p_help = "Indicates which scan strategy is in use.";
+} scan_type;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time correction (secs).";
+  p_help = "Data time is adjusted by this number of seconds before output.";
+} time_correction;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Wallclock time override option.";
+  p_help = "If set, wallclock time will be used to override data time.";
+} use_wallclock_time;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Change the sign of the latitude.";
+  p_help = "The Rapic files seem to have Southern latitudes as positive. If this flag is set, the sign of the latitude is changed.";
+} change_latitude_sign;
+
+paramdef double {
+  p_default = -157.0;
+  p_descr = "Radar constant";
+  p_help = "Value of radar constant for Met type radar";
+} radar_constant;
+
+paramdef int {
+  p_default = 64;
+  p_min = 1;
+  p_descr = "Samples per beam";
+  p_help = "Number of pulses used to compute data from a beam";
+} samples_per_beam;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Radar polarization code.";
+  p_help = "1 = hor, 2 = ver, 3 = circ, 4 = ellip. Should be 3; 1 for Jing compatibility.";
+} polarization_code;
+
+paramdef double {
+  p_default = 0.95;
+  p_min = 0.01;
+  p_max = 45.0;
+  p_descr = "Beam width";
+  p_help = "Radar half-power beam width (deg)";
+} beam_width;
+
+paramdef double {
+  p_default = 7.0;
+  p_descr = "Average transmitter power (kW)";
+  p_help = "For output_format = LL_FORMAT only.";
+} avg_xmit_pwr;
+
+paramdef double {
+  p_default = -113.0;
+  p_descr = "Receiver MDS (dBM)";
+  p_help = "Receiver minimum detectable signal (dMD) - for DS_FORMAT only.";
+} receiver_mds;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Gain of the receiver (dB) - for DS_FORMAT only";
+} receiver_gain;
+
+paramdef double {
+  p_default = 45.0;
+  p_descr = "Gain of the antenna (dB) - for DS_FORMAT only";
+} antenna_gain;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Gain of the system (dB) - for DS_FORMAT only";
+} system_gain;
+
+

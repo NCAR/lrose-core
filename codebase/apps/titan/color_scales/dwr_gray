@@ -1,0 +1,19 @@
+# test dual wavelength ratio gray scale
+
+# Nancy Rehak, April 1995
+
+-30	-26	#111
+-26	-22	#222
+-22	-18	#333
+-18	-14	#444
+-14	-10	#555
+-10	-6	#666
+-6	-2	#777
+-2	2	#888
+2	6	#999
+6	10	#aaa
+10	14	#bbb
+14	18	#ccc
+18	22	#ddd
+22	26	#eee
+26	30	#fff

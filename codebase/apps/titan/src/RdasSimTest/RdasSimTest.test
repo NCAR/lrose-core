@@ -1,0 +1,65 @@
+/**********************************************************************
+ * TDRP params for RdasSimTest
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: RdasSimTest.
+//
+// RdasSimTest connects to RdasSim to test out the socket protocol.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL AND DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_host //////////////////////////////
+//
+// Input data host.
+// TCP/IP name/address of host for input data.
+// Type: string
+//
+
+input_host = "localhost";
+
+///////////// input_port //////////////////////////////
+//
+// Input data port.
+// TCP/IP port number for input data.
+// Type: int
+//
+
+input_port = 10000;
+

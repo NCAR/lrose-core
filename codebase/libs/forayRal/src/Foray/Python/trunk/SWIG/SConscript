@@ -1,0 +1,27 @@
+import os
+import distutils.sysconfig
+
+Import('env')
+
+versionLibrary = env.SharedLibrary('_version.so', ['version.i'],
+                                   SWIGFLAGS=['-c++','-python'],
+                                   CPPPATH=[distutils.sysconfig.get_python_inc(),env.forayInc,env.netcdfInc],
+                                   LIBPATH=[distutils.sysconfig.get_config_var('LIBPL'),env.forayLib,env.netcdfLib],
+                                   LIBS=[distutils.sysconfig.get_config_var('LIBS').split(),distutils.sysconfig.get_config_var('LIBRARY'),env.forayLIBS,env.netcdfLIBS],
+                                   SHLIBPREFIX="")
+
+faultLibrary = env.SharedLibrary('_fault.so', ['fault.i'],
+                                   SWIGFLAGS=['-c++','-python'],
+                                   CPPPATH=[distutils.sysconfig.get_python_inc(),env.forayInc,env.netcdfInc],
+                                   LIBPATH=[distutils.sysconfig.get_config_var('LIBPL'),env.forayLib,env.netcdfLib],
+                                   LIBS=[distutils.sysconfig.get_config_var('LIBS').split(),distutils.sysconfig.get_config_var('LIBRARY'),env.forayLIBS,env.netcdfLIBS],
+                                   SHLIBPREFIX="")
+
+env.forayPythonPackagePath = os.path.join(env['packagePath'],'foray')
+env.Alias('install',env.forayPythonPackagePath)
+
+env.Default([versionLibrary,faultLibrary])
+env.Install(env.forayPythonPackagePath,['_version.so','version.py','__init__.py','_fault.so','fault.py'])
+
+
+

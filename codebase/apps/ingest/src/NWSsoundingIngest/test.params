@@ -1,0 +1,218 @@
+/**********************************************************************
+ * TDRP params for ./NWSsoundingIngest
+ **********************************************************************/
+
+//======================================================================
+//
+// NWSsoundingIngest is a program that reads WMO format
+// upper air sounding data and writes them to an SPDB
+// database. Niles Oien February 2002.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// printBeforeSave /////////////////////////
+//
+// Debug option.
+// If set, soundings will be printed before they are saved.
+// Type: boolean
+//
+
+printBeforeSave = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// InDir ///////////////////////////////////
+//
+// Input directory - top level. Set to the
+// the directory in which the input files appear.Used in realtime mode 
+//   only.
+// Directory path for input data files.
+// Type: string
+//
+
+InDir = "./raw/NWSsoundings";
+
+///////////// useLdataInfo ////////////////////////////
+//
+// Option to use _latest_data_info file.
+// Set to TRUE if the input source writes an _latest_data_info
+// file. If set to FALSE the input dir is polled recursively.
+// Type: boolean
+//
+
+useLdataInfo = FALSE;
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+// If string is NULL, all extensions are valid.
+// Type: string
+//
+
+fileExtension = "";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 7200;
+
+//======================================================================
+//
+// LOCATION INFORMATION.
+//
+//======================================================================
+ 
+///////////// siteLocations ///////////////////////////
+//
+// Given an input sounding ID, this table
+// is used to locate the station in lat, lon and alt.
+// See http://www.met.fsu.edu/Classes/Common/00zua.gif and
+// http://www.ofcm.gov/fmh3/text/append-c.html and
+// http://tgsv5.nws.noaa.gov/er/bgm/upper_air.html.
+//
+// Type: struct
+//   typedef struct {
+//      int soundingSiteId;
+//      double lat;
+//      double lon;
+//      double alt;
+//   }
+//
+// 1D array - variable length.
+//
+
+siteLocations = {
+  { 72649, 44.85, -93.9, 288},
+  { 72645, 44.4833, -88.1333, 214},
+  { 72632, 42.7, -83.4667, 329},
+  { 74455, 41.6167, -90.5833, 229},
+  { 74560, 40.15, -89.3333, 178},
+  { 72426, 39.4167, -83.8167, 323},
+  { 72318, 37.2, -80.4167, 648},
+  { 72327, 36.25, -86.5667, 180}
+};
+
+///////////// processIfNotLocated /////////////////////
+//
+// Option to write data for stations whos ID number
+// does not appear in the siteLocations table above.
+// Default is to simply skip these stations; setting this option
+// causes them to be written out with silly lat,lon and alt
+// values.
+// Used primarily for debugging.
+// Type: boolean
+//
+
+processIfNotLocated = FALSE;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// OutUrl //////////////////////////////////
+//
+// URL for output SPDB data.
+// Type: string
+//
+
+OutUrl = "spdbp:://localhost::/home/oien/rap/apps/ingest/src/NWSsoundingIngest/Out";
+
+///////////// expiry //////////////////////////////////
+//
+// How long data are valid, seconds.
+// Type: int
+//
+
+expiry = 1800;
+
+///////////// soundingMergeEpsilon ////////////////////
+//
+// Maximum vertical distance between sounding points for them to be
+// considered distinct points, meters.
+// The WMO input encoding scheme is such that different parts of the
+// sounding are in different input messages. The merging of these
+// messages into one coherrent sounding requires that a decision
+// be made as to if two points in two different messages are
+// at the same height.
+
+// If the heights differ by less than soundingMergeEpsilon
+// vertical meters, then they are taken to be at the same
+// height and merged. If not, they are taken to be at different
+// heights and interleaved.
+
+// Values of less than 0.5 for
+// epsilon are problematic and are not allowed (points are
+// (never merged if epsilon is 0.0, even if they are identical).
+// Minimum val: 0.5
+// Maximum val: 500
+// Type: double
+//
+
+soundingMergeEpsilon = 10.0;
+
+///////////// doInterp ////////////////////////////////
+//
+// Interpolation option.
+// If set, vertical interpolation is done through the profile.
+// This fills in missing points. The only reason not to to this is
+// when debugging.
+// Type: boolean
+//
+
+doInterp = TRUE;
+
+///////////// maxInterpDist ///////////////////////////
+//
+// Maximum vertical interpolation distance, meters.
+// Missing values are only filled in with interpolation
+// if the vertical distance to the next valid point is
+// less than or equal to this distance.
+// Type: double
+//
+
+maxInterpDist = 500;
+

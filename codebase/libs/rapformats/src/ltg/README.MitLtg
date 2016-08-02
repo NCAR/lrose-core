@@ -1,0 +1,114 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:51 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+ we currently read lightning data from    address 129.55.56.2, port 9301
+
+( your code should have the IP/port a parameter )
+
+it is a simple TCP/IP - connection ;;
+
+here is the structures you get when you read our lightning stream:
+
+the data is in packages ::  the package wrappers tell you what type
+of structure it is  ignore any message type you do not care about :
+
+
+/*
+ *   structure of wrapper   - 8 bytes 
+ *
+ 
+BYTE       SC_PAC_8                             
+
+ 0       rec_type msb           <--|  2 Bytes: record ID
+ 1       rec_type lsb           <--|      ignore any you do not care about
+
+
+ 2       rec_len  msb            <--|  2 bytes:  
+ 3       rec_len  lsb            <--|      record length in 2-byte shorts ( i.e  10 ==> 20 bytes )
+                                         -- include the lenght of this header ( 8 bytes or 4 2-byte shorts )
+
+
+ 4       rec_seq  msb-msw        <--|   4 bytes:  
+ 5       rec_seq  lsb-msw        <--|   
+ 6       rec_seq  msb-lsw        <--|   sequence number  of no real significance 
+ 7       rec_seq  lsb-lsw        <--|
+
+
+
+after the header you can get   you get two types of structures : 
+  i think you can disregard the status and just read the LRTC_LGHT_ARSI's ( 3321 )
+
+  lr_lght_status   -- Record ID ::  LRTC_LGHT_STATUS      3322
+
+  lr_lght_arsi     -- Record ID ::  LRTC_LGHT_ARSI        3321
+
+
+--------------------------------
+
+
+struct lr_time6 {
+    short		month;   /* 1-12 */
+    short		day;
+    short		year;
+    short		hour;
+    short		minute;
+    short		second;
+};
+typedef struct lr_time6	LR_Time6;
+
+
+
+struct lr_lght_status 
+{
+  LR_Time6	UNIX_time;
+  LR_Time6	LGHT_time;
+  int           status;
+};
+typedef struct lr_lght_status      LR_lght_status;
+
+
+
+----------------------------
+
+here are some status mesages  - 
+
+
+
+REC_HDR 3322  34  5089
+0000:	0cfa 0011 0000 13e1    0002 001c 07d2 0014 0000 0021    0002 001c 07d2 0014 0000 0000   0400
+                          STATUS  2/28/2002  20:00:33 - UNIX     2/28/2002  20:00:00  - NETWORK  [ 1024.1024.1024 ]
+REC_HDR 3322  34  5090
+0000:	0cfa 0011 0000 13e2    0002 001c 07d2 0014 0001 0003    0002 001c 07d2 0014 0000 001e   0400
+                          STATUS  2/28/2002  20:01:03 - UNIX     2/28/2002  20:00:30  - NETWORK      [ 1024.1024.1024 ] 
+
+ 
+ ----------------------------
+
+
+
+struct lr_lght_arsi
+{
+   LR_Time6	time;		 /* timestruct */
+   int          millisecs;       /* milliseconds - add to time6.seconds for precise time */
+   long         lat;      	 /* latitude of flash  x 10000 */
+   long         lon;             /* longitude of flash x 10000 */
+   long         strength;        /* strength and polarity   x 1000 */
+   int          type ;           /* type of lightning - see lght_defs  */
+   int          status;          /* general status - bits to be defined  */
+  };
+typedef struct lr_lght_arsi      LR_lght_arsi;
+
+
+
+ 
+i think you can ignore strength, type and status,  --- the record is then just  time, lat, long
+----------------
+
+
+-- no lightning right now -- have to wait to get  some records to see the hex dumps --
+

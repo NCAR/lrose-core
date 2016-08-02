@@ -1,0 +1,22 @@
+clump_2d(intervals, num_intervals, num_rows)
+     Interval intervals[];
+     int num_intervals;
+     int num_rows;
+
+Input arguments:
+
+intervals: the input array of intervals
+num_intervals: the size of the array, intervals
+num_rows: the number of rows in the 2d data set
+
+The function clump_2d returns the number of clumps.  Every time this
+function is invoked, make sure to initialize all the clump id's to
+NULL_ID, for example,
+
+for (i=0; i<num_intervals; i++)
+	intervals[i].id = NULL_ID;
+
+
+
+
+

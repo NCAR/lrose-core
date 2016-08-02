@@ -1,0 +1,54 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	AltCpCompute \
+	CalCompute \
+	ChillSdb2Dsr \
+	ChillSdbServer \
+	ChillTsFile2Fmq \
+	ChillTsTcp2Fmq \
+	Cov2Mom \
+        DowSendFreq \
+	DsrGrabber \
+	DsrMerge \
+	DualDopplerLobes \
+	HawkEye \
+	IntfRemove \
+	Iq2Dsr \
+	Mdv2Vad \
+	MdvPartRain \
+	MdvRadarShear \
+	PartRain \
+	PowerInfo2Spdb \
+	Qmap2Cidd \
+	RadarCal \
+	RadarConst \
+	RadarMdvCompare \
+	RapMap2Chill \
+	SimCpCompute \
+	SpectraPrint \
+        StaggeredLimits \
+	SunCal \
+	SunCpCompute \
+	SweepInfo2Spdb \
+	TsCalAuto \
+	TsConvert \
+	TsFile2Fmq \
+	TsFmq2Tcp \
+	TsMerge \
+	TsPrint \
+        TsScanInfoMerge \
+        TsStatusMonitor \
+	TsSmartSave \
+	TsTcp2File \
+	TsTcp2Fmq \
+	UfRadarPrint \
+	VertCompute
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

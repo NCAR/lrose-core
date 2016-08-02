@@ -1,0 +1,10 @@
+#! /bin/csh -f
+
+running "procmap_auto_restart rtest_procs"
+
+if ($status == 1) then
+  cd $RTEST_HOME/params
+  procmap_auto_restart rtest_procs $HOST 30 $RTEST_HOME/log/restart.log &
+endif
+
+

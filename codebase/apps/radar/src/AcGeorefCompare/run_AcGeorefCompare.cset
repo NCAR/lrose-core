@@ -1,0 +1,104 @@
+#! /bin/csh
+
+setenv PROJ_DIR $HOME/cvs/projects/hcr/projDir
+setenv DATA_DIR /scr/eldora1/rsfdata/cset
+
+#cd $PROJ_DIR/qc/params
+
+# flightNum: rf01
+# startTime: 2015/07/01 17:25:00
+# endTime: 2015/07/01 22:25:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 01 17 25 00" -end "2015 07 01 22 25 00" > AcGeorefCompare.rf01.20150701_172500.to.20150701_222500.txt
+
+# flightNum: rf02
+# startTime: 2015/07/07 14:55:00
+# endTime: 2015/07/07 21:15:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 07 14 55 00" -end "2015 07 07 21 15 00" > AcGeorefCompare.rf02.20150707_145500.to.20150707_211500.txt
+
+# flightNum: rf03
+# startTime: 2015/07/09 16:30:00
+# endTime: 2015/07/09 23:38:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 09 16 30 00" -end "2015 07 09 23 40 00" > AcGeorefCompare.rf03.20150709_163000.to.20150709_234000.txt
+
+# flightNum: rf04
+# startTime: 2015/07/12 14:50:00
+# endTime: 2015/07/12 21:28:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 12 14 50 00" -end "2015 07 12 21 30 00" > AcGeorefCompare.rf04.20150712_145000.to.20150712_213000.txt
+
+# flightNum: rf05
+# startTime: 2015/07/14 16:40:00
+# endTime: 2015/07/15 00:18:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 14 16 40 00" -end "2015 07 15 00 20 00" > AcGeorefCompare.rf05.20150714_164000.to.20150715_002000.txt
+
+# flightNum: rf06
+# startTime: 2015/07/17 14:55:00
+# endTime: 2015/07/17 21:50:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 17 14 55 00" -end "2015 07 17 21 50 00" > AcGeorefCompare.rf06.20150717_145500.to.20150717_215000.txt
+
+# flightNum: rf07
+# startTime: 2015/07/19 16:22:00
+# endTime: 2015/07/20 00:05:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 19 16 20 00" -end "2015 07 20 00 05 00" > AcGeorefCompare.rf07.20150719_162000.to.20150720_000500.txt
+
+# flightNum: rf08
+# startTime: 2015/07/22 15:00:00
+# endTime: 2015/07/22 22:10:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 22 15 00 00" -end "2015 07 22 22 10 00" > AcGeorefCompare.rf08.20150722_150000.to.20150722_221000.txt
+
+# flightNum: rf09
+# startTime: 2015/07/24 16:25:00
+# endTime: 2015/07/25 00:30:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 24 16 25 00" -end "2015 07 25 00 30 00" > AcGeorefCompare.rf09.20150724_162500.to.20150725_003000.txt
+
+
+# flightNum: rf10
+# startTime: 2015/07/27 14:59:00
+# endTime: 2015/07/27 22:11:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 27 14 55 00" -end "2015 07 27 22 15 00" > AcGeorefCompare.rf10.20150727_145500.to.20150727_221500.txt
+
+# flightNum: rf11
+# startTime: 2015/07/29 16:30:00
+# endTime: 2015/07/30 00:08:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 07 29 16 30 00" -end "2015 07 30 00 10 00" > AcGeorefCompare.rf11.20150729_163000.to.20150730_001000.txt
+
+# flightNum: rf12
+# startTime: 2015/08/01 14:50:00
+# endTime: 2015/08/01 22:40:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 08 01 14 50 00" -end "2015 08 01 22 40 00" > AcGeorefCompare.rf12.20150801_145000.to.20150801_224000.txt
+
+# flightNum: rf13
+# startTime: 2015/08/03 16:24:00
+# endTime: 2015/08/03 23:45:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 08 03 16 20 00" -end "2015 08 03 23 45 00" > AcGeorefCompare.rf13.20150803_162000.to.20150803_234500.txt
+
+# flightNum: rf14
+# startTime: 2015/08/07 14:50:00
+# endTime: 2015/08/07 22:00:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 08 07 14 50 00" -end "2015 08 07 22 00 00" > AcGeorefCompare.rf14.20150807_145000.to.20150807_220000.txt
+
+# flightNum: rf15
+# startTime: 2015/08/09 16:25:00
+# endTime: 2015/08/09 23:44:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 08 09 16 25 00" -end "2015 08 09 23 45 00" > AcGeorefCompare.rf15.20150809_162500.to.20150809_234500.txt
+
+# flightNum: rf16
+# startTime: 2015/08/12 15:25:00
+# endTime: 2015/08/12 22:05:00
+
+AcGeorefCompare -params AcGeorefCompare.test -debug -start "2015 08 12 15 25 00" -end "2015 08 12 22 05 00" > AcGeorefCompare.rf16.20150812_152500.to.20150812_220500.txt
+

@@ -1,0 +1,6 @@
+#!/bin/csh
+#
+# Exampe of how to run this application. Niles Oien.
+#
+./toneDownColorscale terrain_low.colors 0.5 > terrain_low_tonedDown.colors
+#

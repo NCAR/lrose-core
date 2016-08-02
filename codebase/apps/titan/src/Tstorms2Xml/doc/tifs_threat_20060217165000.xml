@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<wxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML"
+	version="2.1"
+	xsi:schemaLocation="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML/wxml.2.1.xsd">
+<head>
+	<product concise-name="area" operational-mode="experimental">
+		<system>tifs</system>
+		<title>Thunderstorm Interactive Forecast System Threat Area</title>
+                <description>B08FDP TIFS area</description>
+		<category>forecast</category>
+		<creation-date refresh-frequency="PT10M">2006-02-17T16:50:00</creation-date>
+	</product>
+	<data-source>
+		<network type="radar" name="Beijing composite" />
+		<network type="lightning" name="GPATS" />
+                <domain>Inner</domain>
+	</data-source>
+	<product-source>
+		<more-information>
+			http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/info.html
+		</more-information>
+		<production-center>Bureau of Meteorology
+			<sub-center>Research Centre</sub-center>
+		</production-center>
+		<disclaimer>http://www.bom.gov.au/other/disclaimer.shtml</disclaimer>
+		<credit>http://www.bom.gov.au</credit>
+		<credit-logo>http://www.bom.gov.au/images/bom_logo.gif</credit-logo>
+	</product-source>
+</head>
+<data>
+	<location>
+		<location-key>00001</location-key>
+		<area>
+			<polygon>
+				<point latitude="39.42" longitude="115.88" />
+				<point latitude="39.76" longitude="115.97" />
+				<point latitude="40.03" longitude="116.10" />
+				<point latitude="40.09" longitude="116.78" />
+				<point latitude="39.82" longitude="117.07" />
+				<point latitude="39.53" longitude="117.21" />
+				<point latitude="39.22" longitude="116.89" />
+				<point latitude="38.99" longitude="116.54" />
+				<point latitude="38.34" longitude="116.29" />
+				<point latitude="38.25" longitude="116.06" />
+				<point latitude="38.74" longitude="115.94" />
+				<point latitude="39.42" longitude="115.88" />
+			</polygon>
+		</area>
+	</location>
+	<time-layout time-coordinate="UTC">
+		<layout-key>k-p1h-n1-1</layout-key>
+		<start-valid-time>2006-02-13T16:50:00</start-valid-time>
+		<end-valid-time>2006-02-13T17:50:00</end-valid-time>
+	</time-layout>
+	<parameters applicable-location="00001">
+		<weather time-layout="k-p1h-n1-1">
+			<weather-conditions>
+				<value weather-type="thunderstorms" coverage="widespread" intensity="strong"/>
+				<value weather-type="damaging winds" coverage="chance" intensity="strong"/>
+			</weather-conditions>
+		</weather>
+	</parameters>
+</data>
+</wxml>

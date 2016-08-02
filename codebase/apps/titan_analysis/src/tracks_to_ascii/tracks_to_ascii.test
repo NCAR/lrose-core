@@ -1,0 +1,108 @@
+########################################################################
+# parameters file for tracks_to_ascii
+#
+# Mike Dixon RAP NCAR Boulder Colorado USA
+#
+# October 1991
+#
+#########################################################################
+
+#
+# debugging
+#
+
+tracks_to_ascii.debug: false
+tracks_to_ascii.malloc_debug_level: 0
+
+#
+# target
+#
+
+tracks_to_ascii.target_entity: trends
+tracks_to_ascii.target_entity: complete_track
+tracks_to_ascii.target_entity: track_entry
+
+#
+# track set to use - set both to true to get all tracks
+#
+
+tracks_to_ascii.use_simple_tracks: true
+tracks_to_ascii.use_complex_tracks: true
+
+#
+# for track_entry - if (sample_interval == -1) then all
+# entries are printed
+#
+
+tracks_to_ascii.sample_interval: -1
+tracks_to_ascii.scan_interval: 6.0
+
+#
+# for filtering out track entries
+#
+
+tracks_to_ascii.min_duration: 900
+tracks_to_ascii.min_duration: 0
+
+#
+# computing trends
+#
+
+tracks_to_ascii.nscans_pre_trend: 5
+tracks_to_ascii.min_nscans_pre_trend: 3
+
+tracks_to_ascii.nscans_post_trend: 5
+tracks_to_ascii.min_nscans_post_trend: 5
+
+tracks_to_ascii.min_nscans_monotonic: 4
+
+#
+# for regression paramaters
+#
+
+tracks_to_ascii.vol_percentile: 98
+tracks_to_ascii.dbz_for_max_ht: 45
+tracks_to_ascii.dbz_for_percent_vol_above: 45
+
+#
+# limits verification to cases where there is at least 
+# some positive POD
+#
+
+tracks_to_ascii.nonzero_verification_only: false
+
+#
+# geographical limits
+#
+
+tracks_to_ascii.use_box_limits: false
+tracks_to_ascii.box_min_x: -55.0
+tracks_to_ascii.box_min_y: -55.0
+tracks_to_ascii.box_max_x: 88.0
+tracks_to_ascii.box_max_y: 88.0
+tracks_to_ascii.min_percent_in_box: 75.0
+tracks_to_ascii.min_nstorms_in_box: 3
+
+#
+# limits on tracks with missing data
+#
+
+tracks_to_ascii.max_top_missing: 5
+tracks_to_ascii.max_range_limited: 2
+tracks_to_ascii.max_vol_at_start_of_sampling: 100
+tracks_to_ascii.max_vol_at_end_of_sampling: 100
+
+#
+# set to true if you only want to count the number of 
+# storms in a given category
+#
+
+tracks_to_ascii.storm_count_only: false
+
+#
+# set print_polygons to true if you want polygon ray data printed
+# out with target_entity set to track_entry
+#
+
+tracks_to_ascii.print_polygons: true
+

@@ -1,0 +1,159 @@
+/*********************************************************
+ * parameter definitions for ClutterAuto
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 2003
+ * 
+ */
+
+commentdef {
+  p_text = "ClutterAuto computes the auto-correlation for points in a series of MDV files. The auto-correlation, standard deviation and mean data are written out to MDV files. Points with high correlation are regarded as having a high likelihood of representing clutter. The output files are used by ClutterRemove.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+  p_text = "Modes and trigger mechanism.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the analysis is performed for each data volume as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+
+paramdef int {
+  p_default = 86400;
+  p_descr = "Interval for trigger - secs.";
+  p_help = "For trigger, this is the interval between trigger events. In REALTIME mode, a trigger always occurs on the hour, and at constant intervals thereafter. In ARCHIVE mode the trigger starts at start_time and at constant intervals thereafter.";
+} trigger_interval;
+
+paramdef int {
+  p_default = 86400;
+  p_descr = "Lookback duration (secs).";
+  p_help = "The program reads all data in this period and uses it to compute the statistics.";
+} lookback_duration;
+
+commentdef {
+  p_header = "INPUT DATA.";
+}
+
+paramdef string {
+  p_default = "mdv/radar/cart";
+  p_descr = "URL for input radar data.";
+  p_help = "Input data is in MDV format, and must contain a reflectivity field. The statistics are computed using the reflectivity data. The geometry of the input files must be constant.";
+} input_url;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Name of dBZ field in input MDV files.";
+} dbz_field_name;
+
+commentdef {
+  p_header = "STATISTICS GENERATION.";
+}
+
+paramdef float {
+  p_default = -1.0;
+  p_descr = "Min vert level for stats computations (km or deg).";	
+  p_help = "Only data above this vlevel will be considered.";
+} min_v_level;
+
+paramdef float {
+  p_default = 30.0;
+  p_descr = "Max vert level for stats computations (km or deg).";	
+  p_help = "Only data below this vlevel will be considered.";
+} max_v_level;
+
+typedef enum {
+  DBZ_THRESHOLD, SNR_THRESHOLD
+} threshold_method_t;
+
+paramdef enum threshold_method_t {
+  p_default = DBZ_THRESHOLD;
+  p_descr = "Thresholding method.";
+  p_help = "If DBZ, only grid cells with reflectivity above min_dbz will be included in the compuations. If SNR, min_snr will be the criteria.";
+} threshold_method;
+
+paramdef float {
+  p_default = 10.0;
+  p_descr = "Low DBZ threshold.";
+  p_help = "For threshold_method = DBZ_THRESHOLD. Only data exceeding this threshold will be included in the computations.";
+} min_dbz;
+
+paramdef float {
+  p_default = 10.0;
+  p_descr = "Low SNR threshold.";
+  p_help = "For threshold_method = SNR_THRESHOLD. Only data exceeding this threshold will be included in the computations.";
+} min_snr;
+
+paramdef float {
+  p_default = 10.0;
+  p_descr = "Noise value expressed as dBZ at 100 km range.";
+  p_help = "Used for computing the SNR grid.";
+} noise_dbz_at_100km;
+
+commentdef {
+  p_header = "FILE LABEL DETAILS";
+}
+
+paramdef string {
+  p_default = "Clutter statistics.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "Computed by ClutterAuto.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/clutter_auto";
+  p_descr = "Output directory.";
+  p_help = "The clutter statistics are output to this directory in MDV format.";
+} output_url;
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Set encoding type.";
+} output_encoding_type;
+
+

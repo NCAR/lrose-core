@@ -1,0 +1,19 @@
+
+
+
+UpdateMdvOrigin was written as a "quick fix" to
+move the origin (lat, lon, grid_minx, grid_miny) in
+MDV files. This is desired since our servers currently
+have a problem if the origin of flat earth projection
+data is anywhere other than the center of the
+grid. UpdateMdvOrigin was copied from UpdateMdvFieldNames.
+
+UpdateMdvFieldNames was copied almost wholesale from
+update_mdv_times (by Nancy Rehak) - only minor edits
+were required to change the short field names rather 
+than adding an offset to the file times.
+
+
+Niles Oien April 2000 (WSMR install).
+
+

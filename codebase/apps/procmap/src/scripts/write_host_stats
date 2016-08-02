@@ -1,0 +1,192 @@
+#! /usr/bin/perl
+
+# script to check this host using procmap_list_check and
+# DataMapper_list_check and put output into dated stats file
+#
+# Usage: write_host_stats, no args
+
+use Getopt::Long;
+use Env;
+
+# Initialize command line arguments
+
+$opt_proc_list = "";
+($prog = $0) =~ s%.*/%%;
+
+# usage
+
+$usage =
+    "Usage : $prog [options]\n" .
+    "  -help, -h     : Print usage\n" .
+    "  -debug        : Print debug messages\n" .
+    "  -host ?       : Set host name\n" .
+    "  -params ?     : Set params dir\n" .
+    "                  proc_list and data_list files are here\n" .
+    "  -stats ?      : Directory for stats files\n" .
+    "  -verbose      : Print verbose debug messages\n" .
+    "Returns 1 on error, 0 on success\n";
+
+# parse command line args
+
+$options_result = &GetOptions('h', 'help',
+			      'debug',
+			      'verbose',
+                              'host=s',
+                              'params=s',
+                              'stats=s');
+
+if ($options_result == 0 || $opt_help || $opt_h) {
+    print $usage;
+    exit 1;
+}
+
+$debug = 0;
+$debugStr = "";
+if ($opt_debug) {
+    $debug = 1;
+    $debugStr = "-debug";
+}
+
+$verbose = 0;
+if ($opt_verbose) {
+    $verbose = 1;
+    $debug = 1;
+}
+
+$host = "localhost";
+if ($opt_host) {
+    $host = $opt_host;
+}
+
+if ($opt_params) {
+    $params_dir = $opt_params;
+} else {
+    print STDERR "ERROR - $prog\n";
+    print STDERR "  You must set the params directory\n";
+    exit 1;
+}
+
+if ($opt_stats) {
+    $stats_dir = $opt_stats;
+} else {
+    print STDERR "ERROR - $prog\n";
+    print STDERR "  You must set the stats directory\n";
+    exit 1;
+}
+
+if ($debug) {
+    print STDERR "Checking host: $host\n";
+}
+
+#######################################################
+# get run time
+
+$nowstr = `date -u '+%Y/%m/%d %H:%M:%S'`;
+chop($nowstr);
+$now = `date -u '+%Y %m %d %H %M %S'`;
+($year, $month, $day, $hour, $min, $sec) = split(' ', $now);
+if ($debug) {
+    print STDERR "Time is : ${year}/${month}/${day}_${hour}:${min}:${sec}\n";
+}
+
+#######################################################
+# set variables
+
+$daystr = "${year}${month}${day}";
+$daydir = "${stats_dir}/${daystr}";
+system("mkdir -p $daydir");
+
+if ($debug) {
+    print STDERR "params_dir: ${params_dir}\n";
+    print STDERR "stats_dir: ${stats_dir}\n";
+    print STDERR "daystr: ${daystr}\n";
+    print STDERR "daydir: ${daydir}\n";
+}
+
+#######################################################
+# do the proc check, output to stats file
+
+$proc_stats_base = "${daystr}/${hour}_hourly_${host}_proc_check";
+$proc_stats_name = "${proc_stats_base}.stats";
+$proc_stats_path = "${stats_dir}/${proc_stats_name}";
+$proc_list = "${params_dir}/proc_list.${host}";
+
+if ($debug) {
+    print STDERR "proc_stats_base: ${proc_stats_base}\n";
+    print STDERR "proc_stats_name: ${proc_stats_name}\n";
+    print STDERR "proc_stats_path: ${proc_stats_path}\n";
+    print STDERR "proc_list: ${proc_list}\n";
+}
+
+system("echo \"=========== Process check ================\" > $proc_stats_path");
+system("echo \"  Host: $host\" >> $proc_stats_path");
+system("echo \"  Time: $nowstr\" >> $proc_stats_path");
+
+$proc_cmd = "procmap_list_check -host $host -proc_list $proc_list -percent $debugStr >> $proc_stats_path";
+$ldata_cmd = "LdataWriter -dir $stats_dir -dtype stats -ext stats -rpath $proc_stats_name -writer host_check $debugStr";
+
+if (-e $proc_list) {
+
+    if ($debug) {
+        print STDERR "Running command: $proc_cmd\n";
+    }
+    system($proc_cmd);
+    if ($debug) {
+        print STDERR "Running command: $ldata_cmd\n";
+    }
+    system($ldata_cmd);
+}
+
+if ($debug) {
+    print STDERR "Contents of file: $proc_stats_path\n";
+    $contents = `cat $proc_stats_path`;
+    print STDERR "---------------------------------------------\n";
+    print STDERR "$contents\n";
+    print STDERR "---------------------------------------------\n";
+}
+
+#######################################################
+# do the data check, output to stats file
+
+$data_stats_base = "${daystr}/${hour}_hourly_${host}_data_check";
+$data_stats_name = "${data_stats_base}.stats";
+$data_stats_path = "${stats_dir}/${data_stats_name}";
+$data_list = "${params_dir}/data_list.${host}";
+
+if ($debug) {
+    print STDERR "data_stats_base: ${data_stats_base}\n";
+    print STDERR "data_stats_name: ${data_stats_name}\n";
+    print STDERR "data_stats_path: ${data_stats_path}\n";
+    print STDERR "data_list: ${data_list}\n";
+}
+
+if (-e $data_list) {
+    
+    system("echo \"============= Data check =================\" > $data_stats_path");
+    system("echo \"  Host: $host\" >> $data_stats_path");
+    system("echo \"  Time: $nowstr\" >> $data_stats_path");
+    
+    $dlist_cmd = "DataMapper_list_check -host $host -vlate -data_list $data_list -percent $debugStr >> $data_stats_path";
+    $ldata_cmd = "LdataWriter -dir $stats_dir -dtype stats -ext stats -rpath $data_stats_name -writer host_check $debugStr";
+    
+    if ($debug) {
+        print STDERR "Running command: $dlist_cmd\n";
+    }
+    system($dlist_cmd);
+    if ($debug) {
+        print STDERR "Running command: $ldata_cmd\n";
+    }
+    system($ldata_cmd);
+    
+    if ($debug) {
+        print STDERR "Contents of file: $data_stats_path\n";
+        $contents = `cat $data_stats_path`;
+        print STDERR "---------------------------------------------\n";
+        print STDERR "$contents\n";
+        print STDERR "---------------------------------------------\n";
+    }
+
+}
+
+exit 0;
+

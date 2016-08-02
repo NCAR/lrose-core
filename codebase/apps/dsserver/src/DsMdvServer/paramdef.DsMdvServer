@@ -1,0 +1,759 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for DsFileServer
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Jan 1999
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress the use of threads. Set no_threads to TRUE for this type of debugging.";
+} no_threads;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting. If an empty instance name is provided, the server automatically uses the port number as its instance name";
+} instance;
+
+commentdef {
+  p_header = "SERVER MANAGER SUPPORT";
+};
+
+paramdef int {
+  p_default = 5440;
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+} port;
+  
+paramdef int {
+  p_default = 1800;
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, it will die gracefully.";
+} qmax;
+  
+paramdef int {
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 32;
+} max_clients;
+
+commentdef {
+  p_header = "SECURITY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run in secure mode.";
+  p_help = "If TRUE, the server will reject any URLs which specify an absolute path, or a path with .. in it. This prevents the server from writing any files which are not below DATA_DIR in the directory tree.";
+} run_secure;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run in read-only mode.";
+  p_help = "If TRUE, the server will respond only to read requests, and will ignore write requests.";
+} run_read_only;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to allow http requests.";
+  p_help = "If TRUE, the server will strip off header in request message.";
+} allow_http;
+
+commentdef {
+  p_header = "MEMORY MANAGEMENT FOR MESSAGES";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to copy memory from the messages into the message objects.";
+  p_help = "Setting to FALSE will reduce the memory usage for the program.";
+} copy_message_memory;
+
+commentdef {
+  p_header = "VERTICAL SECTIONS - READ OPERATIONS ONLY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to disable interpolation in vertical sections.";
+  p_help = "Some data is not amenable to interpolation. Setting this to TRUE will disable interpolation when vertical sections are computed.";
+} vsection_set_nsamples;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of samples in the vertical section.";
+} vsection_nsamples;
+  
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to disable interpolation in vertical sections.";
+  p_help = "Some data is not amenable to interpolation. Setting this to TRUE will disable interpolation when vertical sections are computed.";
+} vsection_disable_interp;
+
+commentdef {
+  p_header = "STATIC FILES - READ OPERATIONS ONLY";
+  p_text = "Option to serve out data from a static file if a time-based request is made.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to serve out data from a static file.";
+  p_help = "If set, the data will always be read from a static file. The file url is specified below. The times in the header will be set to match the request time.";
+} use_static_file;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "URL for static file.";
+} static_file_url;
+  
+
+commentdef {
+  p_header = "FAILOVER OPTION - READ OPERATIONS ONLY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to serve data from another url if the first url fails.";
+  p_help = "A list of urls is specified by the failover_urls parameter, and if one url does not deliver the data, the subsequent url is then checked. This applies to read operations only.";
+} use_failover_urls;
+
+paramdef string {
+  p_default = { "mdvp:://fastUnreliable::mdv/data",
+                "mdvp:://slowReliable::mdv/data"  };
+  p_descr = "The list of urls to check if use_failover_urls is TRUE.";
+  p_help = "Relevant only if use_failover_urls is true.";
+} failover_urls[];
+
+
+commentdef {
+  p_header = "MULTIPLE DOMAINS - READ OPERATIONS ONLY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to serve out data from multiple domains. - So called Smart Zoom";
+  p_help = "This is applicable for data sets which are available in different resolutions, covering different domains. Generally, the finest resolution data will cover the
+  smallest domain, with increasing resolution covering larger domains. The search is made from the top to the bottom of the list. The required domain is assumed to be the
+  first one which fully encompasses the requested horizontal limits. If no horizontal limits are specified, the bottom (largest) domain is used. Note, problems getting this
+  mechanism to work correctly have been observed when running the DsMdvServer on an alternate port. In this circumstance, the sub-URL would not work when using the full URL
+  form which includes the hosts name or localhost.  Proper function was observed when the sub url contained only the directory path part of the URL.";
+} serve_multiple_domains;
+
+typedef struct {
+  double min_lat;
+  double min_lon;
+  double max_lat;
+  double max_lon;
+  string url;
+} domain_t;
+
+paramdef struct domain_t {
+  p_default = {{ -90.0, -180.0, 90.0, 180.0, "none" }};
+  p_descr = "Domain specifications - serve_multiple_domains.";
+  p_help = "The domains should be listed from smallest to largest, which normally corresponds to finest to coarsest resolution. Specify the URL from which the data for each
+  domain should be retrieved. If a URL in this list matches the current one it is ignored. Note for proper function, urls pointing to data on the localhost should never
+  include the host portion in the URL; Use only the path part.";
+} domains[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to switch to an alternative domain if the request to the most appropriate one fails.";
+  p_help = "The server will first try the domain selected as above. If this fails, it will try the next larger domain, and so on. If no larger domain succeeds, it will try the next smaller domain. If no domain succeeds the call will fail.";
+} auto_fail_over;
+
+
+commentdef {
+  p_header = "OVERRIDING DATA SET SOURCE, NAME AND INFO - READ OPERATIONS ONLY";
+  p_text = "The following options allow you to override the data set source, name and info when reading. These will be replaced by the specified XML strings, for use by the client.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the data set name on read.";
+  p_help = "If TRUE, the data_set_name in the master header will be overridden by the XML specified in data_set_name parameter. The maximum number of characters supported is 127.";
+} override_data_set_name_on_read;
+
+paramdef string {
+  p_default = "<name></name>";
+  p_descr = "XML string used for overriding data_set_name in the master header";
+  p_help = "It is suggested that you use the <name> and </name> tags to delimit the name. The maximum number of characters in the string, including the tags, is 127. If more characters are used, the string will be truncated at 127.";
+} data_set_name_read_xml;
+  
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the data set source on read.";
+  p_help = "If TRUE, the data_set_source in the master header will be overridden by the XML specified in data_set_source parameter. The maximum number of characters supported is 127.";
+} override_data_set_source_on_read;
+
+paramdef string {
+  p_default = "<source></source>";
+  p_descr = "XML string used for overriding data_set_source in the master header";
+  p_help = "It is suggested that you use the <source> and </source> tags to delimit the source. The maximum number of characters in the string, including the tags, is 127. If more characters are used, the string will be truncated at 127.";
+} data_set_source_read_xml;
+  
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the data set info on read.";
+  p_help = "If TRUE, the data_set_info in the master header will be overridden by the XML specified in data_set_info parameter. The maximum number of characters supported is 511.";
+} override_data_set_info_on_read;
+
+paramdef string {
+  p_default = "<info></info>";
+  p_descr = "XML string used for overriding data_set_info in the master header";
+  p_help = "It is suggested that you use the <info> and </info> tags to delimit the info. Other XML tags can be used to further delimit individual fields. The maximum number of characters in the string, including the tags, is 511. If more characters are used, the string will be truncated at 511.";
+} data_set_info_read_xml;
+  
+
+commentdef {
+  p_header = "REMAP TO LAT-LON - READ OPERATIONS ONLY";
+  p_text = "Option to remap the projection to a Lat-lon grid.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to auto-remap to lat-lon grid.";
+  p_help = "If set, the data will be automaticall remapped to a lat-lon grid before being returned to the client. The grid parameters will be chosen to fit the data set as well as possible.";
+} auto_remap_to_latlon;
+
+commentdef {
+  p_header = "CONSTRAIN THE LEAD TIMES FOR FORECAST DATA - READ OPERATIONS ONLY";
+  p_text = "This option allows you to select only certain lead times to be served out. You can also specify that the search time be interpreted as the generate time.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to constrain the lead times to be considered.";
+  p_help = "If true, only forecast lead times within the specified limits will be considerd. Also, you can specify to request the data by generate time rather than valid time. The valid time will be computed as the request_time plus the mean of the min and max lead times.";
+} constrain_forecast_lead_times;
+
+typedef struct {
+  int min_lead_time;
+  int max_lead_time;
+  boolean request_by_gen_time;
+} forecast_constraints_t;
+
+paramdef struct forecast_constraints_t {
+  p_default = {
+    min_lead_time = 0,
+    max_lead_time = 0,
+    request_by_gen_time = false
+  };
+  p_descr = "Set constraints for forecast lead times.";
+  p_help = "See constrain_forecast_lead_times. Only forecast lead times within the specified limits will be considerd. If request_by_gen_time is true, the search_time specified will be interpreted as the generate time rather than the valid time. The valid time will be computed as the search_time plus the mean of the min and max lead times specified.";
+} forecast_constraints;
+
+commentdef {
+  p_header = "CREATE COMPOSITE - READ OPERATIONS ONLY";
+  p_text = "Option to create a composite - max at any height.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create composite on read.";
+  p_help = "If true, compute the max-in-column on the fly during the read.";
+} create_composite_on_read;
+
+commentdef {
+  p_header = "DECIMATION - READ OPERATIONS ONLY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to decimate to control number of grid cells served out.";
+  p_help = "This controls the decimation feature. If TRUE, the server decimates the output data to keep the total number of xy points below 'decimation_max_nxy'.";
+} decimate;
+
+paramdef int {
+  p_default = 1000000;
+  p_descr = "Maximum number of XY points.";
+  p_help = "See 'decimate'.";
+} decimation_max_nxy;
+
+commentdef {
+  p_header = "MEASURED RHI DATA OPTION - READ OPERATIONS ONLY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to serve out data for measured RHIs.";
+  p_help = "Normally a vertical section from polar radar data is served out as a reconstructed RHI. If this option is set, the server will try to read measured RHI data and return this. If the measured request fails, the server will revert to serving out the reconstructed RHI data.";
+} serve_rhi_data;
+
+paramdef string {
+  p_default = "none";
+  p_descr = "URL for measured RHI data.";
+} rhi_url;
+  
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to serve out polar data for RHI.";
+  p_help = "If true, the raw polar RHI data is returned. If false, the RHI is remapped onto a grid with height in km.";
+} polar_rhi;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Time margin when searching for RHIs.";
+  p_help = "The server will look for RHI files, in time, before and after the main field file (PPI or SURVEILLANCE). This is the time margin for the search.";
+} rhi_time_margin;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Maximum azimuth error for retrieving RHI.";
+  p_help = "The user selects a vertical cross-section in the normal manner. The azimuth of the mid-point of the vert section is computed and the RHI closest to this azimuth is selected. If the azimuth difference between the selected azimuth and the closest RHI exceeds this max error, the RHI request fails and a normal vertical section is returned.";
+} rhi_max_az_error;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to respect user distance for measured RHI.";
+  p_help = "If false (default) then the end points of the measured RHI are returned. If TRUE then the start point is the sensor but the end point is obtained by travelling in the direction of the RHI azimuth for the distance specified by the user.";
+} respect_user_rhi_distance;
+
+
+commentdef {
+  p_header = "VERTICAL UNITS SPECIFICATION - READ OPERATIONS ONLY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the vertical units for the returned data.";
+  p_help = "If set, the vertical units will be converted, if possible, as specified by 'vertical_units'. If the conversion is not possible, the data will be returned in the normal units.";
+} specify_vertical_units;
+
+typedef enum {
+  HEIGHT_KM, PRESSURE_MB, FLIGHT_LEVEL
+} vertical_units_t;
+
+paramdef enum vertical_units_t {
+  p_default = HEIGHT_KM;
+  p_descr = "Vertical units";
+  p_help = "See 'specify_vertical_units'. If this is TRUE, vert units will be converted as specified if possible.";
+} vertical_units;
+
+commentdef {
+  p_header = "DERIVED FIELDS - READ OPERATIONS ONLY";
+  p_text = "Creating derived fields on the fly.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to allow the option of computing derived fields on the fly.";
+  p_help = "If TRUE, the server will check the requested fields against the derived_fields array. If any requested field name matches an entry in the derived fields array, it will create the derived field on the fly and add it to the Mdvx object which is returned to the client. All other fields (i.e. those which do not appear in the derived_fields array) will be returned as normal.";
+} handle_derived_fields;
+
+typedef enum {
+  FUNC_LINEAR,
+  FUNC_SPEED_FROM_U_V,
+  FUNC_DIRN_FROM_U_V,
+  FUNC_DIFF_FIELDS_SAME_FILE,
+  FUNC_DIFF_FIELDS,
+  FUNC_DIFF_IN_TIME,
+  FUNC_VERT_COMPOSITE
+} function_t;
+
+typedef struct {
+  string name;
+  string long_name;
+  string units;
+  string transform;
+  function_t function;
+  string field_name_1;
+  string field_name_2;
+  string url_2;
+  string url_3;
+  string s_arg_1;
+  string s_arg_2;
+  string s_arg_3;
+  string s_arg_4;
+  string s_arg_5;
+  string s_arg_6;
+  int i_arg_1;
+  int i_arg_2;
+  int i_arg_3;
+  double d_arg_1;
+  double d_arg_2;
+  double d_arg_3;
+  double multiplier;
+  double constant;
+} derived_field_t;
+
+paramdef struct derived_field_t {
+
+  p_default = {
+    {
+      name = "unknown",
+      long_name = "unknown",
+      units = "none",
+      transform = "none",
+      function = FUNC_SPEED_FROM_U_V,
+      field_name_1 = "U",
+      field_name_2 = "V",
+      url_2 = "",
+      url_3 = "",
+      s_arg_1 = "",
+      s_arg_2 = "",
+      s_arg_3 = "",
+      s_arg_4 = "",
+      s_arg_5 = "",
+      s_arg_6 = "",
+      i_arg_1 = 0,
+      i_arg_2 = 0,
+      i_arg_3 = 0,
+      d_arg_1 = 0.0,
+      d_arg_2 = 0.0,
+      d_arg_3 = 0.0,
+      multiplier = 1.0,
+      constant = 0.0
+    }
+  };
+  
+  p_descr = "Specifications for derived fields supported by the server.";
+
+  p_help = "If a requested field name matches one specified in this array, and handle_derived_fields is TRUE, the server will attempt to derive the field on the fly. It will use the function specified, along with the arguments in the struct, to derive the field. The arguments actually used will be dependent on the particular function chosen. The arguments which are relevant to each function type are documented below.\n\n"
+
+  "After the field has been derived, a linear function will be applied to produce the final field as follows:\n     final = derived * multiplier + constant.\n\nThis allows a simple linear scaling and offset to be applied. The field will be added to the returned Mdvx object, with the supplied name, long_name, units and transform filled in.\n\n"
+
+  "SUPPORTED FUNCTIONS\n\n"
+
+  "FUNC_LINEAR:\n  read in the field specified in field_name_1 and apply the linear scaling. This can be used for units conversion. Examples are (a) converting from m/s to knots (multiplier = 0.53996847, constant = 0.0), (b) converting degrees celsius to farenheight (multiplier = 1.8, constant = 32.0)\n\n"
+
+  "FUNC_SPEED_FROM_U_V:\n  compute speed from U and V fields. U field name is in field_name_1, and V field name is in field_name_2. U and V field data must both be in the same file, at the given URL.\n\n"
+
+  "FUNC_DIRN_FROM_U_V:\n  compute direction from U and V fields. U field name is in field_name_1, and V field name is in field_name_2. U and V field data must both be in the same file, at the given URL. Direction returned in deg T.\n\n"
+
+  "FUNC_DIFF_FIELDS_SAME_FILE:\n  compute difference between two fields from the same file. Data for both fields must be present in the file at the requested URL. First field name is in field_name_1, and second field name is in field_name_2. Difference is computed as (field_1 - field_2). Apply a multiplier of -1 to change the sign.\n\n"
+
+  "FUNC_DIFF_FIELDS:\n  compute difference between two fields. Field data not necessarily in same file. First field name is in field_name_1, and second field name is in field_name_2. First field is in the current file. Second field URL is url_2. Difference is computed as (field_1 - field_2). Apply a multiplier of -1 to change the sign. If i_arg_1 is not 0, the second field search time will be the first field time plus i_arg_1 in secs.\n\n"
+
+  "FUNC_DIFF_IN_TIME:\n  compute difference between data now and at a different time. Field name is given in field_name_1. Time difference in seconds is given in i_arg_1. So time for second file is time for first file plus i_arg_1. Data difference is computed as value now minus the value at the different time. Apply a multiplier of -1 to change the sign.\n\n"
+
+  "FUNC_VERT_COMPOSITE:\n  compute a vertical composite, which is the maximum value at any level. Optionally you can specify vertical level limits. Field name to be composited is given in field_name_1. If i_arg_1 is 0, the composite is computed from all vertical levels. If i_arg_1 is 1, the minimum vertical level is given in d_arg_1 and the maximum level in d_arg_2.\n\n"
+
+  "  \n\n";
+
+} derived_fields[];
+
+commentdef {
+  p_header = "CLIMATOLOGY DATA";
+  p_text = "Option to serve out data from a climatology directory if a "
+           "time-based request is made.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to serve out data from a climatology directory.";
+  p_help = "If set, the data will always be read from a "
+           "climatology data directory. "
+           "The climatology type and URL are specified below.";
+} use_climatology_url;
+
+typedef enum
+{
+  CLIMO_HOURLY,
+  CLIMO_HOURLY_BY_MONTH,
+  CLIMO_3HOURLY_BY_MONTH,
+  CLIMO_HOURLY_DIURNAL,
+  DIURNAL_CLIMATOLOGY,
+  CLIMO_3HOURLY_DIURNAL,
+  CLIMO_DAILY,
+  CLIMO_DAILY_BY_YEAR,
+  CLIMO_MONTHLY,
+  CLIMO_MONTHLY_BY_YEAR
+} climatology_type_t;
+
+paramdef enum climatology_type_t
+{
+  p_descr = "Type of climatology to collect.";
+  p_help = "\tCLIMO_HOURLY - Collect the data at hourly intervals. "
+           "With this type of collection, there will be a climo file "
+           "for every hour of the year, with the hourly cut off times "
+           "being at the top of the hour "
+	   "(so you'll have data for 1:00-2:00 UTC in one file, etc). "
+	   "The climo files will be named at the half hour "
+           "(so the 1:00 - 2:00 data will be in the 013000.mdv file).\n"
+           "\tCLIMO_HOURLY_BY_MONTH - Collect the data at hourly intervals, "
+           "but store all of the data for the entire month for a given "
+           "hour in the same file "
+           "(so you'll have data for 1:00-2:00 UTC for every day of "
+           "June in one file, etc). "
+           "The climo files will be named at the half hour for the 15th "
+           "day of the month.\n"
+           "\tCLIMO_3HOURLY_BY_MONTH - Collect the data at 3-hourly "
+           "intervals, but store all of the data for the entire month for "
+           "a given 3-hour period in the same file "
+           "(so you'll have data for 0:00-2:59 UTC for every day of "
+           "June in one file, etc). "
+           "The climo file will be named at the center of the 3-hour time "
+           "period (1:30, 4:30, etc) for the 15th day of the month.\n"
+           "\tCLIMO_HOURLY_DIURNAL - Collect the data at hourly intervals "
+           "and store all of the data for a given hour in the same file. "
+           "All of the data will be stored under June 15, 2003.\n"
+	   "\tDIURNAL_CLIMATOLOGY - Server data from a diurnal climatology "
+           "generated externally (not using MdvXxxClimo). "
+           "In this case, the server will search for the climatology file "
+           "in the climatology_dir directory that is closest in time to "
+           "the requested data, ignoring the date information in the request.\n"
+           "\tCLIMO_3HOURLY_DIURNAL - Collect the data at 3-hour intervals "
+           "and store all of the data under June 15, 2003.\n"
+           "\tCLIMO_DAILY - Collect the data daily and store under the "
+           "current date in the year 2003 at time 12:00:00.\n"
+           "\tCLIMO_DAILY_BY_YEAR - Collect the data daily and store under "
+           "the current date at time 12:00:00. "
+           "Note that this climatology doesn't go back through all time but "
+           "keeps daily statistics for each year instead. "
+           "This is useful for computing other statistics through all time.\n"
+           "\tCLIMO_MONTHLY - Collect the data monthly and store under the "
+           "15th of the month in the year 2003 at time 12:00:00.\n"
+           "\tCLIMO_MONTHLY_BY_YEAR - Collect the data monthly and store "
+	   "under the 15th of the current month at time 12:00:00. "
+           "Note that this climatology doesn't go back through all time but "
+           "keeps monthly statistics for each year instead. "
+           "This is useful for computing other statistics through all time.\n";
+  p_default = CLIMO_HOURLY;
+} climatology_type;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Directory containing the climatology data.";
+  p_help = "Used only if climatology_type is set to DIURNAL_CLIMATOLOGY.";
+} climatology_dir;
+
+commentdef {
+  p_header = "FILLING IN REGIONS OF MISSING DATA - READ OPERATIONS ONLY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to fill in regions of missing data from surrounding areas.";
+  p_help = "If set, the server will attempt to fill in missing regions, using adjacent data. This will only be done if less than 20% of the area is missing.";
+} fill_missing_regions;
+
+commentdef {
+  p_header = "SETTING VALID TIME SEARCH WEIGHT - READ OPERATIONS ONLY";
+  p_text = "Only applies to forecast data sets stored in the gen_time/forecast_time format.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to sey valid time search weight.";
+  p_help = "This applies to finding the best forecast when forecast data is stored in the gen_time/lead_time directory structure.\n\n"
+    "When the data is stored in this manner, forecast times (valid times) from one gen time often overlap with forecast times from a different generate time. As a result there is ambiguity about which is the 'best forecast' to use.\n\n"
+    "In this discussion, we will use 'valid time' and 'forecast time' synonymously, referring to the time at which a forecast is valid. The 'generate time' refers to the time at which a model was initialized (the analysis) or the time at which a forecast was made. The 'request time' is the time for which the client has requested the 'best forecast'.\n\n"
+    "Model data is generally written out at even intervals (on say even hour or half-hour intervals), so that the valid times match exactly. Other forecast systems, such as the auto-nowcaster, produce forecasts at times which are not at even times relative to the hour, so when forecasts overlap the valid times do not match exactly.\n\n"
+    "The Mdvx classes perform what amounts to a 2-D search in the time domain, where one axis is valid time and the other axis is generate time. For each applicable file, the following are computed: (a) the difference between the request time and the valid time, say deltaV, and (b) the difference between the request time and generate time, say deltaG.\n\n"
+    "The following quantities are then computed:\n\n"
+    "\twtdDeltaV = weight * deltaV;\n\tdelta2D = sqrt((deltaG * deltaG) + (wtdDeltaV * wtdDeltaV))\n\n"
+    "The 'best forecast' is the forecast with the lowest delta2D.\n\n"
+    "The optimum weight depends on the relative spacing between the valid times and the gen times. If gen times are much more widely spaced than valid times, a higher weight is needed to make sure we make the decision more on valid time than gen time.\n\n"
+    "For model data, the user generally wants to see a valid time closest to the time requested. To achieve this, we want to weight deltaV heavily. If the gen time spacing is 3 hours and the forecast spacing is 1 hour, a weight of 10 seems to work well. If the gen times are 6 hours apart and the forecast times only 30 minutes apart, a weight of 15 or more is recommended.\n\n"
+    "For nowcast-type applications, in which the gen time spacing is similar to or less than the valid time spacing, a value of 2.5 seems to work OK.\n\n"
+    "If set_valid_time_search_wt is FALSE, the default of 2.5 in the MdvxTimeList class is used.\n\nYou can also set this client-side, using setValidTimeSearchWt() in Mdvx.";
+} set_valid_time_search_wt;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "See 'set_valid_time_search_wt.'";
+} valid_time_search_wt;
+
+commentdef {
+  p_header = "FORWARD ON WRITE - WRITE OPERATIONS ONLY";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to forward to multiple URLs on write.";
+  p_help = "A list of urls is specified by the 'forward_on_write_urls' parameter. The data is written to these URLs in ADDITION to the client-specified URL.";
+} forward_on_write;
+
+paramdef string {
+  p_default = { "mdvp:://localhost::mdv/data/set1",
+                "mdvp:://remotehost::mdv/data/set1"  };
+  p_descr = "The list of ADDITIONAL urls to which data will be written.";
+  p_help = "See 'forward_on_write'. The data is always written to the original URL, and will be optioanlly written to the additional specified URLs.";
+} forward_on_write_urls[];
+
+commentdef {
+  p_header = "OVERRIDE FORMAT for WRITES";
+  p_text = "If set, these override the write format specified in the message from the client.\n\nFORMAT_MDV: normal legacy MDV format\n\nFORMAT_XML: XML format. XML data consists of 2 buffers/files: an XML text buffer for the headers/meta-data, and a data buffer for the data. NOTE: only COMPRESSION_NONE and COMPRESSION_GZIP_VOL are supported in XML. File extensions are .mdv.xml and .xml.buf\n\nFORMAT_NCF: netCDF CF format. File extension is .mdv.nc";
+};
+
+typedef enum {
+  FORMAT_MDV,
+  FORMAT_XML,
+  FORMAT_NCF
+} data_format_t;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override write format as specified by the client.";
+  p_help = "If specified, this will override that specified by the client. Default is MDV.\n\nHowever, if the environment variable MDV_WRITE_FORMAT is set, that will override this write_format parameter.\n\nThe environment variable MDV_WRITE_FORMAT can take the value 'FORMAT_MDV', 'FORMAT_XML' or 'FORMAT_NCF'.";
+} override_write_format;
+
+paramdef enum data_format_t {
+  p_default = FORMAT_MDV;
+  p_descr = "Specify format of data files to be written.";
+  p_help = "See 'override_write_format'";
+} write_format;
+
+commentdef {
+  p_header = "WRITE IN FORECAST PATH STYLE";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set to write the data as forecast in mdv format.";
+  p_help = "This forces a forecast style write.";
+} write_as_forecast;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set to write the files in forecast style, if the data is of a forecast type.";
+  p_help = "This only writes out in forecast style if the data_collection_type in the master header is of type FORECAST or EXTRAPOLATED.";
+} if_forecast_write_as_forecast;
+
+commentdef {
+  p_header = "WRITE USING EXTENDED PATHS";
+  p_text = "This will be overridden if the environment variable MDV_WRITE_USING_EXTENDED_PATHS exists and is set to TRUE.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write files with extended paths.";
+  p_help = "If specified, this will override that specified by the client. Default is FALSE.\n\nIf set, paths will include a separate year subdirectory, and the file name will include date and time.\n\nNon-forecast path:\n  dir/yyyy/yyyymmdd/yyyymmdd_hhmmss.mdv.\n\nForecast path:\n  dir/yyyy/yyyymmdd/yyyymmdd_g_hhmmss_f_llllllll.mdv.";
+} write_using_extended_paths;
+
+commentdef {
+  p_header = "NETCDF CF SUPPORT.";
+  p_text = "The following parameters control conversion of MDV files to NetCDF CF-compliant files."; 
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set parameters for converting MDV to NCF.";
+  p_help = "If TRUE, the following netCDF-specific parameters will be used. If FALSE, these are ignored and the default conversion is performed.";
+} control_mdv2ncf;
+
+typedef struct {
+  string institution;
+  string references;
+  string comment;
+} ncf_global_attributes_t;
+
+paramdef struct  ncf_global_attributes_t {
+  p_default = {"UCAR", "", "Converted by DsMdvServer"};
+  p_descr = "Global attributes for netCDF file";
+  p_help = "These strings will be included as global attributes in the NetCDF file. Other global attributes will be determined from the MDV headers."; 
+} ncf_global_attributes;
+
+typedef enum {
+  DATA_PACK_FLOAT, DATA_PACK_SHORT, DATA_PACK_BYTE, DATA_PACK_ASIS
+} data_pack_t;
+
+typedef struct {
+  string mdv_field_name;
+  string ncf_field_name;
+  string ncf_standard_name;
+  string ncf_long_name;
+  string ncf_units;
+  boolean do_linear_transform;
+  float linear_multiplier;
+  float linear_const;
+  data_pack_t packed_data_type;
+} mdv2ncf_field_transform_t;
+
+paramdef struct mdv2ncf_field_transform_t {
+  p_default = { { "mdv_field_name", "ncf_field_name", "ncf_standard_name", "ncf_long_name", "ncf_units", false, 1.0, 0.0, DATA_PACK_ASIS} };
+ p_descr = "List of transforms. If mdv_field_name is found in the MDV data, these other parameters will be used to set the field variable in the netCDF file.";
+} mdv2ncf_field_transforms[];
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compress field data.";
+  p_help = "Only applies to NETCDF4 and  NETCDF4_CLASSIC files.";
+} ncf_compress_data;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Compression level from 1 to 9 with 9 being the greatest compression. Default is 9.";
+  p_help = "Only applies to NETCDF4 and  NETCDF4_CLASSIC files.";
+} ncf_compression_level;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Suffix of netCDF files";
+  p_help = "File extension is always .nc. File name will end with mdv.suffix.nc. Set to the empty string for no suffix, in which case file name will end with .mdv.nc.";
+} ncf_filename_suffix;
+
+typedef enum {
+  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
+} ncformat_t;
+
+paramdef enum ncformat_t {
+  p_default = "NETCDF4";
+  p_descr = "NetCDF file format";
+  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
+} ncf_file_format;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true latitude and longitude arrays of each grid point are output";
+  p_help = "The CF convention requires that these arrays are present in the netCDF file; however, the information is redundant since the lat and lon arrays could be constructed using the other projection and grid information required with a gridded data field";
+} ncf_output_latlon_arrays;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output non-CF compliant MDV attributes.";
+  p_help = "If true, MDV attributes which are not CF compliant will be output. This will facilitate the translation of the data back into MDV with the minimal loss of information.";
+} ncf_output_mdv_attributes;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output non-CF compliant MDV chunks.";
+  p_help = "If true, MDV chunks will be included as byte binary variables.";
+} ncf_output_mdv_chunks;
+

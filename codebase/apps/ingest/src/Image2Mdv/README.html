@@ -1,0 +1,189 @@
+<html>
+<head>
+<title> Image2Mdv </title>
+</head>
+
+<body>
+
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" >
+
+
+
+<P> <big><big><big>
+ Notes and Info on converting Geo-tiffs and other Images to MDV
+</big></big></big> </p>
+
+<P> <big><big>
+  1.0 Data sources
+</big></big> </p>
+
+<P> US Shaded relief maps CONUS Only : See.
+<A HREF=http://pubs.usgs.gov/of/of99-011/1readme.html>
+   http://pubs.usgs.gov/of/of99-011/1readme.html
+</A>
+</P>
+
+<P> North American Shaded Reliefs - Shuttle Radar Topography
+Mission (SRTM) based - see
+<A HREF=http://photojournal.jpl.nasa.gov/catalog/PIA03377>
+http://photojournal.jpl.nasa.gov/catalog/PIA03377
+</A>
+</P>
+
+<P>
+Derived from the GTOPO30 elevation data. GTOPO30 is a global digital
+elevation model (DEM) with a horizontal grid spacing of 30 arc seconds
+(approximately 1 kilometer) - see
+<A HREF=http://nationalatlas.gov>
+http://nationalatlas.gov
+</A>
+</P>
+
+<P> WORLD Shaded reliefs - 
+ NASA  Global Land One-km Base Elevation (GLOBE) Project
+ 5 second grid.
+<A HREF=http://www.ngdc.noaa.gov/mgg/topo/globega2.html>
+http://www.ngdc.noaa.gov/mgg/topo/globega2.html
+</A>
+</P>
+
+
+<HR>
+
+<P> <big> <big>
+2.0 Preparing images for MDV and nesting the grids for auto 
+domain switching.
+</big></big></P>
+
+<P>
+<B> <blink> NOTE : </blink> </b> There is a way to 
+<A HREF=Example.html> do this stuff automatically
+</A> if you have lat/lon projection data.
+</P>
+
+<P>
+ <UL>
+
+<LI>  One can't display grid cells smaller than the pixel size on
+  your screen.  Current PC screens have at most about 3.2 Mpixels. Most
+  windows and images are under 1 Mpixel. Do not deliver more grid cells
+  than you can render. Use the nested grids and the decimation features
+  on the MDV server to pair down the number of grid cells delivered to
+  a display client. <br> <br>
+
+
+<LI> Select a good image - rules of thumb :
+   <UL>
+		<LI> The image map projection has to be known and supported. You need to know the
+		  projection parameters and the location of a corner,
+		  and the exact pixel size in some known units of
+		  measure. Many times this information is included in
+		  a separate "geo" file or included in the header info.
+		  Recovering this information is not within the scope
+		  of this document. Follow the above links to some images
+		  which have the required info.
+
+        <LI> Keep images under 20 megapixels for better disk acesses.
+		<LI> Use standard image tools to view and covert to a supported format
+			(PNG,JPG,TIF,GIF)
+		<LI> I use Imagemagic tools (convert, display, import etc) to do a bunch from
+		the command line, which I record in simple scripts for repition.
+
+		<LI> It takes a powerful machine to deal with images larger than 100 megapixels.
+ </UL><br> <br>
+
+<LI> Decimate huge images for improved performance. See the rules of thumb above. <br>
+     Examples: <b> convert -geometry <width>x<height>+<x>+<y> input.img output.img  <br>
+                   convert -resize <width>x<height> <br> </b>
+     If you are running kde, the <b> kruler </b> utility can be very useful for helping
+     to determine what pixels to extract.
+
+
+
+	 Multiples of 2 work pretty well. Divide the image in 2 a couple of times to
+	 get it under 40 Mpixels. <br> <br>
+
+<LI> 	 Crop out small areas of the highest resolution images for your local / regional
+	 views. Keep the nested images less than 40Mpixels. <br>
+
+Here's the process with an example: <br>
+
+
+Desired Domain - Picked visually. <br>
+Lon:  -108 to -118 <br>
+Lat: 36 to 44 <br> <br>
+
+Original input image is on a lon/lat: grid = { -124.758, 49.3796, 0.00416667, -0.00416667 }; <br>
+
+Do the math to relate the desire lat/lon range to the subimage pixel references : <br>
+
+<B> (124.758 - 118) / 0.00416667 = 1621.9187 </b> -- the number of pixels to use for cropping <br>
+
+Round to integer : <br>
+
+1622 = Number to crop in X. <br> <br>
+
+For any C/C++ coders reading this, in C this calculation might be written as : <br>
+ <b> int numToCropX = (int)rint( ( ImageMinLon - DesiredMinLon ) / deltaLon); </b> <br> <br>
+
+True ll corner into Image2Mdv param file: <br>
+
+1622 * 0.00416667 + -124.758 = -117.99966 <br> 
+
+Same for Latitude <br>
+
+(49.3796 - 44 )/ -0.00416667 = 1291 crop <br>
+
+1291 * 0.00416667 - 49.3796 = true new lat = 44.00039 <br> <br>
+
+Now figure how how many pixels to crop TO (eg: width and height) <br> 
+
+118 - 108 = 10 degrees <br>
+
+10 degrees / -0.00416667 degr/pixel =~ 2400 pixels <br>
+8 degrees / -0.00416667 degr/pixel =~ 1920 pixels <br>
+
+Hence the convert command is : <br> <br>
+
+<b> convert -crop 2400x1920+1622+1291 fromImage toImage </b>
+
+</ul>
+</p>
+
+<HR>
+
+<P> <big> <big>
+3.0 Additional information
+</big></big></P>
+
+<P>
+If an image comes from a GIS system then it may have an ASCII file associated
+with it describing the projection details of the grid. It has been
+<A HREF=http://support.esri.com/index.cfm?fa=knowledgebase.techArticles.articleShow&d=17489> suggested </a>
+that these files are known as <b> world files </b> and that their
+format is :
+<UL>
+  <LI> Line 1: x-dimension of a pixel in map units
+  <LI> Line 2: rotation parameter
+  <LI> Line 3: rotation parameter
+  <LI> Line 4: NEGATIVE of y-dimension of a pixel in map units
+  <LI> Line 5: x-coordinate of center of upper left pixel
+  <LI> Line 6: y-coordinate of center of upper left pixel 
+</UL>
+Which may not be enough to define the grid for our purposes.
+</P>
+
+<P>
+If the image file name has a 3-character extension (image1.tif), the world file has
+the same name followed by an extension containing the first and last letters of the
+image's extension and ending with a 'w' (image1.tfw). If the extension has more or
+less than 3 characters, including no extension at all, then the world file name is
+formed by simply appending a 'w' to the image file name. 
+</P>
+
+
+
+<P> <small>
+David Hahn, Frank Hage, Niles Oien
+</small> </p> 

@@ -1,0 +1,438 @@
+/**********************************************************************
+ * TDRP params for PrecipAccum
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+// Modes and trigger mechanism.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// trigger /////////////////////////////////
+//
+// Trigger mechanism. REALTIME mode only.
+// TIME_TRIGGER: the program is triggered at constant time intervals - 
+//   see time_trigger_interval. FILE_TRIGGER: the program watches the 
+//   first input_dir and triggers based on data in that directory.
+//
+// Type: enum
+// Options:
+//     TIME_TRIGGER
+//     FILE_TRIGGER
+//
+
+trigger = TIME_TRIGGER;
+
+///////////// time_trigger_interval ///////////////////
+//
+// Interval for TIME_TRIGGER - secs.
+// For TIME_TRIGGER, this is the interval between trigger events. In 
+//   REALTIME mode, a time trigger always occurs on the hour, and at 
+//   constant intervals thereafter. In ARCHIVE mode the trigger starts at 
+//   start_time and at constant intervals thereafter.
+// Minimum val: 0
+// Type: int
+//
+
+time_trigger_interval = 300;
+
+///////////// trigger_time_margin /////////////////////
+//
+// Max time diff for searching for files relative to the trigger time - 
+//   secs.
+// When matching files up with the trigger time, the difference between 
+//   the trigger time and file time must be less than this margin. This 
+//   value is also used as the max age of the latest data info file when 
+//   in REALTIME mode with FILE_TRIGGER.
+// Minimum val: 0
+// Type: int
+//
+
+trigger_time_margin = 600;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_rdata_dir /////////////////////////
+//
+// Directory for input radar data.
+// Input data is in MDV format, and must contain a reflectivity field. 
+//   The reflectivity data is used for computing the precip rate.
+// Type: string
+//
+
+input_rdata_dir = "/d1/denverData/radarCart";
+
+///////////// check_input_geom ////////////////////////
+//
+// Option to check that the input grid geometry does not change.
+// If this is TRUE, the input grid geometry is checked. If it changes, 
+//   the accumulation routine will return an error.
+// Type: boolean
+//
+
+check_input_geom = TRUE;
+
+///////////// dbz_field ///////////////////////////////
+//
+// dBZ field position in input MDV files.
+// Position of reflectivity (dBZ) data in the radar volumes.
+// Type: int
+//
+
+dbz_field = 0;
+
+//======================================================================
+//
+// ACCUMULATION METHOD.
+//
+//======================================================================
+ 
+///////////// accum_method ////////////////////////////
+//
+// Accumulation method.
+// Two methods are available: RUNNING_ACCUM: preform a running 
+//   accumulation over a given period prior to the trigger time.
+//  ACCUM_FROM_TIME_OF_DAY: perform an accumulation from a given time of 
+//   day until the trigger time. When the selected time of day is reached, 
+//   the accumulation starts again at zero. The time of day is stored in 
+//   an array, so that multiple restarts may be set for each day.
+// TOTAL_ACCUM: accumulate for the entire period, output result at the 
+//   end of the period. ARCHIVE mode only.
+//
+// Type: enum
+// Options:
+//     RUNNING_ACCUM
+//     ACCUM_FROM_TIME_OF_DAY
+//     TOTAL_ACCUM
+//
+
+accum_method = ACCUM_FROM_TIME_OF_DAY;
+
+///////////// running_duration ////////////////////////
+//
+// Accumulation duration (secs).
+// For RUNNING ACCUM method only. This is the duration of the period 
+//   over which the accumulation is computed.
+// Minimum val: 0
+// Type: int
+//
+
+running_duration = 3600;
+
+///////////// use_elapsed_time ////////////////////////
+//
+// Option to force the use of elapsed time.
+// PrecipAccum usually adjusts the precip amount based on the observed 
+//   times from the data files. However, sometimes these times are not 
+//   correctly placed in the files. Therefore we may need to override and 
+//   use elapsed time instead.
+// Type: boolean
+//
+
+use_elapsed_time = FALSE;
+
+///////////// restart_time_of_day /////////////////////
+//
+// The times in the day (UCT/GMT) at which accumulation restart occurs.
+// For ACCUM_FROM_TIME_OF_DAY method only. The program cycles through 
+//   the times of day, zeroing out the accumulation at each specified 
+//   time.
+//
+// Type: struct
+//   typedef struct {
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+// 1D array - variable length.
+//
+
+restart_time_of_day = {
+  { 9, 0, 0}
+};
+
+//======================================================================
+//
+// PRECIP ESTIMATION.
+//
+//======================================================================
+ 
+///////////// override_volume_duration ////////////////
+//
+// Option to override volume duration in input MDV files.
+// If TRUE, the duration for each volume is set to the parameter 
+//   volume_duration. If FALSE, the volume duration is computed by taking 
+//   the difference between the start and end times in the MDV file 
+//   header.
+// Type: boolean
+//
+
+override_volume_duration = FALSE;
+
+///////////// volume_duration /////////////////////////
+//
+// Specified volume duration - secs.
+// If override_volume_duration is TRUE, this value is used instead of 
+//   computing the volume duraiton from the MDV file header.
+// Type: int
+//
+
+volume_duration = 300;
+
+///////////// adjust_for_expected_total_duration //////
+//
+// Option to adjust the precip accum for the expected total duration.
+// If TRUE, the computed accumulation is adjusted for the total expected 
+//   duration. This corrects for the problem of incorrect volume duration 
+//   in the file headers, or missing data. The correction is not done if 
+//   override_volume_duration is TRUE.
+// Type: boolean
+//
+
+adjust_for_expected_total_duration = TRUE;
+
+///////////// composite_min_altitude //////////////////
+//
+// Min altitude CAPPI used in composite (km).
+// All precip estimates are computed from composite reflectivity, i.e. 
+//   the max reflectivity over a given point between two height limits. 
+//   This is the altitude of lower CAPPI for the composite. If you want to 
+//   use reflectivity at a single height only, set this equal to 
+//   composite_max_altitude.
+// Type: float
+//
+
+composite_min_altitude = 0;
+
+///////////// composite_max_altitude //////////////////
+//
+// Max altitude CAPPI used in composite (km).
+// All precip estimates are computed from composite reflectivity, i.e. 
+//   the max reflectivity over a given point between two height limits. 
+//   This is the altitude of upper CAPPI for the composite. If you want to 
+//   use reflectivity at a single height only, set this equal to 
+//   composite_min_altitude.
+// Type: float
+//
+
+composite_max_altitude = 25;
+
+///////////// set_max_precip_depth ////////////////////
+//
+// Option to contrain precip depth to a max value.
+// If set, the precip depth at any point will be constrained to 
+//   max_precip_depth. The reason to do this is to prevent certain points, 
+//   normally ground clutter, from causing large apparent precip depths, 
+//   thereby losing precision for the lower depths.
+// Type: boolean
+//
+
+set_max_precip_depth = FALSE;
+
+///////////// max_precip_depth ////////////////////////
+//
+// Max precip depth (mm) if set_max_precip_depth is TRUE.
+// See set_max_precip_depth.
+// Type: float
+//
+
+max_precip_depth = 250;
+
+///////////// low_dbz_threshold ///////////////////////
+//
+// Low reflectivity threshold (dBZ).
+// Reflectivity below this threshold is ignored in making the 
+//   computations. This prevents clear air returns from creating areas of 
+//   low precipitation.
+// Minimum val: -40
+// Maximum val: 90
+// Type: float
+//
+
+low_dbz_threshold = 10;
+
+///////////// hail_dbz_threshold //////////////////////
+//
+// Hail reflectivity threshold (dBZ).
+// The reflectivity threshold between rain and hail. dBZ values above 
+//   this threshold are truncated to the threshold prior to the 
+//   computation of precipitation rate.
+// Minimum val: 40
+// Maximum val: 90
+// Type: float
+//
+
+hail_dbz_threshold = 52;
+
+///////////// get_zr_from_database ////////////////////
+//
+// Option to use ZR from SPDB data base.
+// If set, the Z-R parameters are obtained from the closest entry in the 
+//   ZR data base. This option is not yet implemented.
+// Type: boolean
+//
+
+get_zr_from_database = FALSE;
+
+///////////// zr_spdb_url /////////////////////////////
+//
+// URL for ZR SPDB data.
+// The ZR data is obtained from a server at this URL.
+// Type: string
+//
+
+zr_spdb_url = "zr";
+
+///////////// zr //////////////////////////////////////
+//
+// ZR function parameters.
+// These are used if the ZR function is considered constant and is not 
+//   obtained from the data base.
+//
+// Type: struct
+//   typedef struct {
+//      float coeff;
+//      float expon;
+//   }
+//
+//
+
+zr = { 500, 1.3 };
+
+//======================================================================
+//
+// FILE LABEL DETAILS.
+//
+//======================================================================
+ 
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "Precipitation accumulation.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_source = "Computed by applying ZR function to dBZ data and integrating.";
+
+///////////// generate_max_dbz_grid ///////////////////
+//
+// Option to generate additional MDV field for max_dbz.
+// If set, the max_dbz is computed in addition to the precip. This field 
+//   appears in the output MDV file.
+// Type: boolean
+//
+
+generate_max_dbz_grid = FALSE;
+
+///////////// generate_max_vil_grid ///////////////////
+//
+// Option to generate additional MDV field for max_vil.
+// If set, the max_vil is computed in addition to the precip. This field 
+//   appears in the output MDV file.
+// Type: boolean
+//
+
+generate_max_vil_grid = FALSE;
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_precip_dir ///////////////////////
+//
+// Output directory.
+// The precipitation accumulation data is output to this directory in 
+//   MDV format.
+// Type: string
+//
+
+output_precip_dir = "p_accum";
+
+///////////// output_encoding_type ////////////////////
+//
+// Set encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_ASIS
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding_type = ENCODING_INT8;
+
+///////////// store_precip_as_log /////////////////////
+//
+// Option to take the log of the precip accum before storing in the 
+//   file.
+// Type: boolean
+//
+
+store_precip_as_log = FALSE;
+

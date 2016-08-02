@@ -1,0 +1,27 @@
+#! /bin/csh
+
+echo test_script
+
+echo arg1 $1
+echo arg2 $2
+echo arg3 $3
+echo arg4 $4
+echo arg5 $5
+echo arg6 $6
+echo arg7 $7
+echo arg8 $8
+echo arg9 $9
+echo arg10 $10
+echo arg11 $11
+echo arg12 $12
+echo arg12 $13
+echo arg12 $14
+
+while (1)
+    echo "Sleeping ..."
+    sleep 5
+end
+
+
+
+

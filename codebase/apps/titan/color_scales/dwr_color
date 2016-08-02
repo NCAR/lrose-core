@@ -1,0 +1,19 @@
+# test dual wavelength ratio color scale
+
+# Nancy Rehak, April 1995
+
+-30	-26	#005a00
+-26	-22	#007000
+-22	-18	#087fdb
+-18	-14	#1c47e8
+-14	-10	#6e0dc6
+-10	-6	#c80f86
+-6	-2	#c06487
+-2	2	#d2883b
+2	6	#fac431
+6	10	#fefa03
+10	14	#fe9a58
+14	18	#fe5f05
+18	22	#fd341c
+22	26	#bbb
+26	30	#eee

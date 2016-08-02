@@ -1,0 +1,10 @@
+# gray scale for nevents
+
+# Mike Dixon, Sept 1993
+
+0	2	#111111
+2	4	#444444
+4	6	#777777
+6	8	#aaaaaa
+8	10	#cccccc
+10	20	#eeeeee

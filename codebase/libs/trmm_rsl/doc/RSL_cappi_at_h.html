@@ -1,0 +1,31 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_cappi_at_h</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<a href=RSL_cappi_struct.html><b>Cappi</b></a><b> *RSL_cappi_at_h(<a href=RSL_volume_struct.html>Volume</a> *v, float h, float max_range); </b>
+
+<h3>
+<hr>Description</h3>
+Produce a <b>C</b>onstant <b>A</b>ltitude <b>PPI</b> at <b>h</b> out to the maximum ground range <b>max_range</b>. <b>h</b> and <b>max_range</b> are expressed in km. Memory is allocated using the system calloc routine. A <a href=RSL_sweep_struct.html>Sweep</a> structure is used to store the data of the cappi. Thus, it is easy to make images by using <a href=RSL_sweep_to.html>RSL_sweep_to_gif</a>.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. Otherwise, a NULL pointer is returned and errno is set. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_free_cappi.html>RSL_free_cappi</a>, <a href=RSL_cappi_to_carpi.html>RSL_cappi_to_carpi</a>. 
+
+<p>
+<hr>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

@@ -1,0 +1,159 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body>
+<a href="index.html"><img SRC="rsl.gif" height=100 width=100></a>
+<hr>
+<br>&nbsp;
+<br>&nbsp;
+<h1>
+What's new?</h1>
+
+<h2>
+Version 1.23 release (what's new since v1.18).</h2>
+RSL&nbsp;now accpets the EDGE&nbsp;format.&nbsp; See <a href="RSL_edge_to_radar.html">RSL_edge_to_radar</a>.&nbsp;
+KDP definition changed.&nbsp; It now normalizes the value based on the
+radar wavelength.&nbsp; A bug in the RADTEC ingest routine was removed.&nbsp;
+Other than that, mostly bug fixes that were very minor.&nbsp; Added <a href="RSL_color_table.html">RSL_set_color_table</a>
+and <a href="RSL_color_table.html">RSL_get_color_table</a>.&nbsp; These
+routines permit better user control of the color table.
+<h2>
+Version 1.18 release (what's new since v1.15).</h2>
+This version adds the RADTEC format ingest routine.&nbsp; See <a href="RSL_radtec_to_radar.html">RSL_radtec_to_radar</a>.&nbsp;
+RADTEC requires the use of the PKWARE Data Compression Library, available
+from PKWARE, Inc., http://www.pkware.com.&nbsp; Also made several minor
+bug fixes and the image generation was enhanced to allow generation of
+images out to the range specified.&nbsp; Previously,&nbsp; image pixels
+were 1km, now they are range/radius.
+<h2>
+Version 1.15 release (what's new since v1.14).</h2>
+This version&nbsp; adds&nbsp; the RAPIC format ingest routine.&nbsp; See
+<a href="RSL_rapic_to_radar.html">RSL_rapic_to_radar</a>.&nbsp;
+A data truncation bug was fixed in the UF ingest.&nbsp; This bug only affects
+the velocity data.&nbsp; The Lassen ingest no longer depends on (radar->h.name),&nbsp;
+for calibration of Gunn Point data.&nbsp; It is now done based on time
+periods of the data.&nbsp; Please see the <a href="CHANGES">CHANGES</a>
+file for more information.
+<h2>
+Version 1.14 release (what's new since v1.11).</h2>
+This version continues the minor bug fixes to the HDF component.&nbsp;
+Additionally, it includes calibration for the Gunn Point radar, in Lassen
+format.&nbsp;&nbsp; The distinction of Gunn Point data from other lassen
+data is done by assumming the radar name (radar->h.name) is 'Gunn_Pt'.&nbsp;
+Please see the <a href="CHANGES">CHANGES</a> file for more information.
+<h2>
+Version 1.11 release (what's new since v1.8).</h2>
+Version 1.9 represented a bug fix to the HDF component.&nbsp; Version 1.10
+represented a minor
+<br>upgrade, mostly to the HDF component, but, other areas were modified
+and that's why it is called an upgrade rather than a bug fix.&nbsp; Version
+1.11 represents a minor bug fix release from v1.10.&nbsp; It only affects
+the
+<br>HDF components.&nbsp;&nbsp; Please see the <a href="CHANGES">CHANGES</a>
+file for more detailed information regarding what changed.
+<p>In version 1.10, ZDR color tables were modifed and a first draft of
+the South Africa data format ingest routine was added.
+<br>&nbsp;
+<h2>
+Version 1.8 release (what's new since v1.7).</h2>
+Added <a href="RSL_read_these_sweeps.html">RSL_read_these_sweeps</a>.&nbsp;
+Specify specific sweep numbers for ingest.&nbsp; This drastically speeds
+up ingest, if you're only interested in the first or first couple of sweeps.&nbsp;
+For example, making base scans images.
+<p>Added <a href="RSL_load_color_table.html">RSL_load_zdr_color_table</a>.
+<p>More HDF mods; more warning messages.
+<p>The TRMM Office has fixed several bugs in the TSDIS toolkit. For proper
+HDF creation, that conforming to TSDIS HDF specifications, you will need
+toolkit 4.5r1.1. Toolkit 4.5r1.1 is an unofficial release; the TRMM office
+will pass this out upon request.
+<br>&nbsp;
+<h2>
+Version 1.7 release (what's new since v1.6).</h2>
+This version fixes the lat/lon signs.&nbsp; Also, lat/lon are added to
+each ray for UF when extended headers are available in SIGMET files.&nbsp;
+Also, the HDF component has changed.&nbsp; This affects RSL_radar_to_hdf
+and RSL_hdf_to_radar.
+<h2>
+Version 1.6 release (what's new since v1.5).</h2>
+This version of RSL will work with TSDIS toolkit 4.5r1.&nbsp; UF now has
+lat/lon stored for each ray, suitable for moving platforms.&nbsp; Also,
+the wsr88d code does not default to KMLB.
+<h2>
+Version 1.5 release (what's new since v1.4).</h2>
+The HDF component has changed again. This version of RSL will work with
+toolkit 4.0 or toolkit 4.0.1. Version 4.0.1 is an un-official release of
+the TSDIS toolkit. This version removes the temporary files created during
+level 1 processing. There was only one file that changed, the file may
+be obtained from the TRMM Office, upon request.
+<p>One minor consistancy check was added to the wsr88d ingest; it checks
+that the number of bins in a ray is reasonable. This problem usually manifests
+itself from bad input files.
+<h2>
+Version 1.4 release (what's new since v1.0).</h2>
+The HDF component is in a state of flux. The <a href="http://tsdis/tsdis/tsdistk.html">TSDIS
+toolkit</a> keeps changing -- the interface keeps changing. The TSDIS toolkit
+is, in the TRMM Office opinion, not stable. Their latest release is 4.0
+and it has fixed many problems. One minor problem remains for level 1 processing:
+temporary config files are not removed when the toolkit is closed.
+<p>RSL is incorporated into a larger package called GVBOX. The latest version
+of GVBOX is 1.1. GVBOX is a complete ground validation system to generate
+TRMM GV products on pentium PCs running Linux. GVBOX is available on CDROM.
+<p>RSL is now LGPL-ed.
+<p>Added the routine <a href="RSL_select_fields.html">RSL_select_fields</a>
+to reduce memory requirements upon reading data. This works very nicely
+for LASSEN data where the number of fields is large, however, only 2 or
+3 are needed.
+<h2>
+Version 1.0 release (what's new since v0.45).</h2>
+Version 1.0 marks the jump from the previous stable version, version 0.45.
+A few very minor bugs were encountered and repaired. But, the bulk of this
+transisition is improved documentation with the addition of a Users Guide.
+Additionally, the SIGMET ingest was repaired and can now read version 2
+files, HDF I/O was added and the LASSEN ingest modified to read version
+1.4 files. Version 1.4 LASSEN files were used during the MCTEX experiment.
+Other than that, no major modifications were made. Technically, version
+1.0 is a minor upgrade to RSL 0.45. But, due to the witnessed stability
+of RSL, it was decided to call it version 1.0.
+<br>&nbsp;
+<h2>
+Can read compressed files automatically (new since v0.41)</h2>
+Transparent, to all ingest routines the capability of filtering the input
+data file through the GNU gzip program for decompressing the file has been
+added. This feature does not appear to slow the I/O time and, in some cases,
+especially on 486 pc's, improves overall throughput time. Two generic,
+internal routines, have been added: <b>compress_pipe</b> and <b>uncompress_pipe</b>.
+Each routine takes a <b>FILE *</b> and redirects it through <b>gzip</b>.
+Each routine returns a new <b>FILE *</b>. Wsr88d files occupy 1/10 the
+disk space when compressed and the TRMM Office plans to compress wsr88d
+files to CDROM and 8mm tape for overall throughput savings for the production
+system. It will no longer be necessary to decompress the data before processing
+level 1.
+<p>Similiarly, UF output can be saved using the gzip filter. The new routine
+added is <a href="RSL_radar_to_uf.html">RSL_radar_to_uf_gzip</a> which
+utilizes the gzip compression filter.
+<h2>
+Can read stdin (new since v0.39)</h2>
+A new routine is provided called <a href="RSL_uf_to_radar.html">RSL_uf_to_radar_fp</a>
+which takes an open file descriptor and returns a radar pointer. That file
+pointer can be <b>stdin</b>. This special interface syntax, for the UF
+ingest, is an exception to the interfaces that the other ingest routines
+have. All other ingest routines, including <a href="RSL_uf_to_radar.html">RSL_uf_to_radar</a>,
+have been modified to read stdin when the input filename is NULL. The complete
+list of routines is: <a href="RSL_wsr88d_to_radar.html">RSL_wsr88d_to_radar</a>,
+<a href="RSL_nsig_to_radar.html">RSL_nsig_to_radar</a>,
+<a href="RSL_lassen_to_radar.html">RSL_lassen_to_radar</a>,
+<a href="RSL_uf_to_radar.html">RSL_uf_to_radar</a>,
+<a href="RSL_mcgill_to_radar.html">RSL_mcgill_to_radar</a>
+and <a href="RSL_toga_to_radar.html">RSL_toga_to_radar</a>. The only routine
+that will not accept stdin will be <a href="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</a>.
+That routine will not be able to handle reading stdin because it needs
+to read the first few bytes of the file to determine which ingest routine
+to call. If you plan to make a filter program, you'll just have to know
+what file format you expect: UF, nsig, wsr88d, etc.
+<br>&nbsp;
+<br>&nbsp;
+</body>
+</html>

@@ -1,0 +1,23 @@
+Added in the following piece of code at line 402:
+
+
+/*
+ * Notify callback function for `f_config_tx9'.
+ */
+Panel_setting
+set_time_offset_proc(item, event)
+	Panel_item	item;
+	Event		*event;
+{
+	fields_pu_fields_pu_objects *ip = (fields_pu_fields_pu_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
+	char *	value = (char *) xv_get(item, PANEL_VALUE);
+	
+	fprintf(stderr, "cidd_gui: set_time_offset_proc: value: %s\n", value);
+	
+	/* gxv_start_connections DO NOT EDIT THIS SECTION */
+
+	/* gxv_end_connections */
+
+	return panel_text_notify(item, event);
+}
+=== END ===

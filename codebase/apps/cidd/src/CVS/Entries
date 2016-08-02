@@ -1,0 +1,66 @@
+/.cvsignore/1.1/Fri Oct 23 22:00:18 2015//
+/Makefile/1.37/Fri Apr 18 21:16:54 2014//
+/Makefile.InsituTurb/1.1/Thu Jan 13 23:12:35 2005//
+/Makefile.ThorRemote/1.1/Mon May 16 22:54:17 2005//
+/Makefile.ocnd/1.2/Tue Oct  5 19:35:55 1999//
+/Makefile.thornMit/1.1/Tue Jan 29 01:02:43 2002//
+/Makefile.wsddm/1.7/Fri Apr 18 16:24:18 2003//
+D/AsciiSelect////
+D/CIDD////
+D/CheckXDisplay////
+D/CiddClick2GenPt////
+D/CiddParams2JazzXml////
+D/Cidd_params////
+D/Cidd_snap////
+D/CronusPointSelect////
+D/Csv2Map////
+D/DrawFmq2Bdry////
+D/DrawFmq2MaskMdv////
+D/DrawFmq2Polygon////
+D/DrawFmqPolygonStats////
+D/EdrSelect////
+D/EventMan////
+D/GridPointSelect////
+D/MapCircles////
+D/MapGrid////
+D/MetarSelect////
+D/OverlayCreate////
+D/RemoteUI2Fmq////
+D/Shape2Map////
+D/ShapeAscii2Map////
+D/ShapeGridPt2Mdv////
+D/SoundingChart////
+D/SoundingPlot.py////
+D/SoundingText////
+D/StationStripChart////
+D/VeriPlot////
+D/ciddArchiveDriver////
+D/ciddView////
+D/cidd_client////
+D/cidd_clock////
+D/cindex_test////
+D/create_colorscale////
+D/cronus_point_select////
+D/cscale_edit////
+D/fix_map////
+D/get_url////
+D/initDrawQueue////
+D/inspectRawFmq////
+D/jvizMaps2ciddMaps////
+D/mdv_server////
+D/metar_strip////
+D/modelView////
+D/mos_strip////
+D/notify_cidd////
+D/old_cidd////
+D/pos_report////
+D/quickDirtyColorscale////
+D/quickROYGBVcolorScale////
+D/regis_tool////
+D/shapefile2Mapfile////
+D/skewt_util////
+D/test_server////
+D/test_xview////
+D/toneDownColorscale////
+D/view_colormap////
+D/_makefiles////

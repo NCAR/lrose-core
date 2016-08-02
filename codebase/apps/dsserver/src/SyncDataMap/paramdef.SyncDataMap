@@ -1,0 +1,75 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+*********************************************************
+ * parameter definitions for SyncDataMap
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * October 2002
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TDRP params for SyncDataMap";
+  p_text = "SyncDataMap synchronizes a local DataMapper with remote DataMappers on other hosts. It queries the remote DataMappers and writes their information to the local mapper. This is done on a polling basis at regular intervals.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+} instance;
+
+commentdef {
+  p_header = "POLLIING DETAILS";
+}
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Polling interval (secs).";
+  p_help = "This is the interval at which the remote DataMappers will be queried for their latest information.";
+} polling_interval_secs;
+  
+paramdef string {
+  p_default = {"host1", "host2", "host3:host4"};
+  p_descr = "Remote host list.";
+  p_help = "This is the list of hosts SyncDataMap will poll. You can request a DataMapper on a host to relay the request to another host. This allows you to get past firewalls provided you can run a DataMapper on a host which has access across the firewall. To request a relay, put the hosts in order separated by colons. For example host5:host6:host7 will ask host5 to relay to host6 which will relay to host7.";
+} remote_host_list[];
+

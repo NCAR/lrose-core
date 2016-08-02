@@ -1,0 +1,24 @@
+F. Hage  2003
+
+This program is a template for fixing minor problems in Spdb Databases.
+
+The program has a generic core which loads spdb records from a directory
+and then writes them back out to the same or another directory.
+It applies some random fix in the middle, for example removing bad data
+points, or resetting the wind direction, applying some scale or bias to
+the data values.
+
+ALWAYS RUN THE PROGRAM, PLACING THE OUTPUT IN A SEPARATE DIRECTORY!
+
+It's really easy to move files between directories. It much harder to
+retrieve overwritten data.
+
+Run the program: 'spdb_repair input_db_url out_db_url start_time end_time'
+
+In order for you to use this program template, you'll have to modify it
+to include the Spdb chunk data structure definitions for your product and the
+specific code that affects ther "repair".. 
+
+Don't worry about code that fixes other product types. It won't get called
+unless your data types match. The code is left there as an example. Add or
+replace code as needed to repair your spdb data.

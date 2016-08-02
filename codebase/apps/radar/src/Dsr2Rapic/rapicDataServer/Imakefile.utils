@@ -1,0 +1,134 @@
+include ../rapic.defs
+
+RDRCLASSES = \
+    expbuff.C \
+    radlcnvt.C \
+    radlpnt.C \
+    rdrglb.C \
+    scanmng.C \
+    threadobj.C \
+    rdrscan.C
+
+RDRUTILS = \
+    juldate.C \
+    rdrutils.C \
+    utils.C \
+    siteinfo.C \
+    latlong.C \
+    log.C \
+    rdrxlat.C \
+    histogram.C \
+    draw.C \
+    freelist.C \
+    rdrfilter.C \
+    spinlock.C
+
+RAPICUNUSED = \
+    $(RAPICHOME)/rapic/signals.C \
+    $(RAPICHOME)/rapic/cappi.C \
+    $(RAPICHOME)/rapic/vil.C \
+    $(RAPICHOME)/rapic/vxsect.C \
+    $(RAPICHOME)/rapic/playaifc.C \
+    $(RAPICHOME)/rapic/soundmng.C \
+    $(RAPICHOME)/rapic/rain_acc.C \
+    $(RAPICHOME)/rapic/writegif.C \
+    $(RAPICHOME)/rapic/histogram.C
+
+COMMS     = \
+    rxdevice.C \
+    txdevice.C \
+    commmng.C \
+    comms.C
+
+DB     = \
+    db.C
+
+NEXRAD	= \
+    NexRad.C \
+    NexRadMgr.C \
+    NexRadStnHdlr.C
+
+RPCONVERTCLASSES = \
+    rapicConvert.C
+#    rapicConvert.C
+#    rapic_data_range.C
+
+SRCS       = $(RDRCLASSES) $(RDRUTILS) $(COMMS) $(DB) $(NEXRAD)
+
+OBJS       = $(SRCS:.C=.o)
+
+PROGRAMS = \
+           rapicConvert \
+           rapicToNexrad \
+	   rapic_data_range
+
+rapicConvert: $(SRCS) rapicConvert.o
+
+rapic_data_range: $(SRCS) rapic_data_range.o
+
+rapicToNexrad: $(SRCS) $(NEXRAD) rapicToNexrad.o
+
+WOFFS                   = -woff 3262,3666,3937
+
+RAPIC++FLAGS            = -Dsgi +w -fullwarn $(WOFFS) -g -G 0 $(OPTIMIZER) -kpicopt -ptused
+RAPIC++INCLUDES         = -I$(RAPICHOME)/include -I$(TITANHOME)/include -I$(TITANHOME)/
+RAPICONVERTFLAGS	= -DNO_XWIN_GUI -DIRIX6 -DTHREAD_SPROC
+CXXFLAGS                = $(RAPIC++FLAGS) $(RAPIC++INCLUDES) $(RAPICONVERTFLAGS)
+
+DEP_LIBRARIES    =
+
+UNUSED_LIBRARIES  = \
+	-L$(RAPICHOME)/lib -L$(TITANHOME)/lib \
+	-lrapic -lrpuimx -lctpflib -ltitanui \
+	 -laudio -laudiofile -ljpeg -lGLC \
+	 -ltitan -lcdata_util -ltoolsa \
+	 -lrapmath -lmdv -ldataport -leuclid -ltdrp  -ltoolsa \
+	-lm -lfm -lgl -lmalloc -lC -lc
+
+#LOCAL_LIBRARIES = \
+#	$@.o -L$(RAPICHOME)/lib -L$(TITANHOME)/lib \
+#	 -ltitanui -ltitan -lcdata_util \
+#	 -lrapmath -lmdv -ldataport -ltoolsa \
+#	-lm -lmalloc -lgl -lgen -lctpflib
+
+LOCAL_LIBRARIES = \
+	$@.o -L$(RAPICHOME)/lib -L$(TITANHOME)/lib \
+	-lctpflib -lmalloc -lgen 
+
+CC               = CC
+
+AllTarget($(PROGRAMS))
+NormalProgramTarget($(PROGRAMS),$(OBJS),$(DEP_LIBRARIES),$(LOCAL_LIBRARIES),-lm)
+
+source_links:
+    ln -sf ../rapic/rdrscan.C .
+    ln -sf ../rapic/rxdevice.C .
+    ln -sf ../rapic/expbuff.C .
+    ln -sf ../rapic/scanmng.C .
+    ln -sf ../rapic/spinlock.C .
+    ln -sf ../rapic/juldate.C .
+    ln -sf ../rapic/utils.C .
+    ln -sf ../rapic/rdrutils.C .
+    ln -sf ../rapic/siteinfo.C .
+    ln -sf ../rapic/latlong.C .
+    ln -sf ../rapic/radlcnvt.C .
+    ln -sf ../rapic/log.C .
+    ln -sf ../rapic/radlpnt.C .
+    ln -sf ../rapic/rdrglb.C .
+    ln -sf ../rapic/comms.C .
+    ln -sf ../rapic/commmng.C .
+    ln -sf ../rapic/txdevice.C .
+    ln -sf ../rapic/db.C .
+    ln -sf ../rapic/rdrxlat.C .
+    ln -sf ../rapic/histogram.C .
+    ln -sf ../rapic/draw.C .
+    ln -sf ../rapic/freelist.C .
+    ln -sf ../rapic/threadobj.C .
+    ln -sf ../rapic/NexRad.C .
+    ln -sf ../rapic/NexRadMgr.C .
+    ln -sf ../rapic/NexRadStnHdlr.C .
+    ln -sf ../rapic/rdrfilter.C .
+
+sourcetar:
+        tar cvf rapic_utils_source.tar *.C Imakefile
+

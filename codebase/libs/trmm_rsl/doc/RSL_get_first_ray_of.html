@@ -1,0 +1,32 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_first_ray_of_...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<a href=RSL_ray_struct.html><b>Ray</b></a> <b>*RSL_get_first_ray_of_sweep(<a href=RSL_sweep_struct.html>Sweep</a> *s);</b><br>
+<a href=RSL_ray_struct.html><b>Ray</b></a> <b>*RSL_get_first_ray_of_volume(<a href=RSL_volume_struct.html>Volume</a> *v);</b> 
+
+<h3>
+<hr>Description</h3>
+<b>RSL_get_first_ray_of_sweep</b> returns a pointer to the first ray pointer in the <b>Sweep</b> structure <b>*s</b>, if one exist. Otherwise NULL is returned. Similiarly, for <b>RSL_get_first_ray_of_volume</b>; it finds the first sweep and returns the first ray of that sweep.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the Ray structure is returned. Otherwise, a NULL pointer is returned. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_get_first_sweep_of_volume.html>RSL_get_first_sweep_of_volume</a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

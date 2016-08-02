@@ -1,0 +1,58 @@
+/*********************************************************
+ * parameter definitions for dva_mkgrid
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ * Marion Mittermaier, SAWB, Bethlehem, RSA
+ *
+ * Aug 1998
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef struct output_grid {
+  p_descr = "MDV output grid parameters.";
+  p_help = "Parameters of Cartesian output grid. NOTE: the (x,y) grid params are integers, the z values are floating point.";
+  p_field_type = {long, long, long,
+		  long, long, double,
+		  long, long, double};
+  p_field_name = {nx, ny, nz,
+		  minx, miny, minz,
+		  dx, dy, dz};
+} output_grid;
+
+paramdef double {
+  p_default = {0.0};
+  p_descr = "Altitude of radar (km MSL).";
+} radar_altitude;
+
+paramdef char* {
+  p_default = {"."};
+  p_descr = "Output directory for grid files.";
+} grid_files_dir;
+
+paramdef char* {
+  p_default = {"grid_params"};
+  p_descr = "Path for grid params ASCII file.";
+} grid_params_file_path;
+
+

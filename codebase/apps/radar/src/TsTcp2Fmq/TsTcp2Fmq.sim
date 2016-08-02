@@ -1,0 +1,414 @@
+/**********************************************************************
+ * TDRP params for TsTcp2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// TsTcp2Fmq reads raw time-series data via TCP/IP, from 
+//   Rvp8TsTcpServer. It saves the time series data out to a file message 
+//   queue (FMQ), which can be read by multiple clients.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// DATA INPUT_MODE.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Data input mode.
+// TCP_MODE: the program either reads data via TCP, which is the normal 
+//   mode. FILE_MODE: read from files specified on the command line, use 
+//   the -f command line option to specify the file list. SIM_MDOE: 
+//   simulate mode. Use the -sim command line option to specify the list 
+//   of files. The program will repeatedly loop through these files, and 
+//   will substitute the current time for the original data time. And 
+//   end-of-volume flag will be sent at the end of each loop through the 
+//   file list.
+//
+// Type: enum
+// Options:
+//     TCP_MODE
+//     FILE_MODE
+//     SIM_MODE
+//
+
+input_mode = SIM_MODE;
+
+//======================================================================
+//
+// TCP DETAILS.
+//
+//======================================================================
+ 
+///////////// ts_tcp_server_host //////////////////////
+//
+// Host name on which Rvp8TsTcpServer is running.
+// This application normally reads data from Rvp8TsTcpServer running on 
+//   the rvp8 host.
+// Type: string
+//
+
+ts_tcp_server_host = "rvp8";
+
+///////////// ts_tcp_server_port //////////////////////
+//
+// TCP/IP port on which TsTcpServer is listening.
+// Type: int
+//
+
+ts_tcp_server_port = 12000;
+
+//======================================================================
+//
+// FMQ DETAILS.
+//
+//======================================================================
+ 
+///////////// output_fmq_path /////////////////////////
+//
+// Path to output FMQ.
+// The FMQ consists of 2 files, ??.buf and ??.stat.
+// Type: string
+//
+
+output_fmq_path = "$(DATA_DIR)/fmq/ts";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer.
+// Type: int
+//
+
+output_fmq_size = 100000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in the output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 100;
+
+///////////// output_fmq_blocking /////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data. This should only be used if there is a single client reading 
+//   the FMQ.
+// Type: boolean
+//
+
+output_fmq_blocking = TRUE;
+
+//======================================================================
+//
+// READING SWEEP INFO FROM SHARED MEMORY.
+//
+// Applies to TCP mode only.
+//
+//======================================================================
+ 
+///////////// read_sweep_info_from_shmem //////////////
+//
+// Option to read sweep information from shared memory.
+// TCP mode only. If true, the latest sweep information will be read 
+//   from shared memory, in binary. The struct sweep_info_packet_t is 
+//   defined in rapformats/DsRadarSweep.hh. The sweep info will be merged 
+//   with the time series data before being written out.
+// Type: boolean
+//
+
+read_sweep_info_from_shmem = FALSE;
+
+///////////// sweep_info_shmem_key ////////////////////
+//
+// Shared memory key for sweep info.
+// Key for shared memory holding sweep info. See SweepInfo2Spdb 
+//   application.
+// Type: int
+//
+
+sweep_info_shmem_key = 12500;
+
+///////////// increment_tilt_number_on_sweep_change ///
+//
+// Option to compute tilt number by incrementing each time the sweep 
+//   number changes.
+// Sometimes, the sweep number can be out of order in the input data. If 
+//   this param is set to TRUE, the tilt number will be incremented each 
+//   time the sweep number changes. If false, the tilt number will be 
+//   computed as the current sweep number minus the sweep number at the 
+//   start of the volume.
+// Type: boolean
+//
+
+increment_tilt_number_on_sweep_change = FALSE;
+
+//======================================================================
+//
+// READING POWER INFO FROM SHARED MEMORY.
+//
+// Applies to TCP mode only.
+//
+//======================================================================
+ 
+///////////// max_time_error_for_sweep_info ///////////
+//
+// Max allowable time error in sweep info (secs).
+// The sweep information resides in shared memory, and is merged with 
+//   the time series data. The merger is only performed if the absolute 
+//   time difference between the sweep info time and time series pulse 
+//   time is less than this value.
+// Type: double
+//
+
+max_time_error_for_sweep_info = 2;
+
+///////////// read_power_info_from_shmem //////////////
+//
+// Option to read power information from shared memory.
+// TCP mode only. If true, the latest power information will be read 
+//   from shared memory, in binary. The struct power_info_packet_t is 
+//   defined in rapformats/DsRadarPower.hh. The power info will be merged 
+//   with the time series data before being written out.
+// Type: boolean
+//
+
+read_power_info_from_shmem = FALSE;
+
+///////////// power_info_shmem_key ////////////////////
+//
+// Shared memory key for power info.
+// Key for shared memory holding power info. See PowerInfo2Spdb 
+//   application.
+// Type: int
+//
+
+power_info_shmem_key = 12600;
+
+///////////// max_time_error_for_power_info ///////////
+//
+// Max allowable time error in power info (secs).
+// The power information resides in shared memory, and is merged with 
+//   the time series data. The merger is only performed if the absolute 
+//   time difference between the power info time and time series pulse 
+//   time is less than this value.
+// Type: double
+//
+
+max_time_error_for_power_info = 60;
+
+//======================================================================
+//
+// OUTPUT MESSAGE DETAILS.
+//
+// The output messages are written to the FMQ. To improve performance, 
+//   each message contains a number of time series pulses.
+//
+//======================================================================
+ 
+///////////// n_pulses_per_message ////////////////////
+//
+// Number of pulses per output message.
+// The actual number will sometimes be 1 less than this, because an info 
+//   data part may will be written once in a while.
+// Type: int
+//
+
+n_pulses_per_message = 100;
+
+///////////// n_pulses_per_info ///////////////////////
+//
+// How often to write an info part.
+// The info part includes data which does not change on a pulse-to-pulse 
+//   basis.
+// Type: int
+//
+
+n_pulses_per_info = 5000;
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+// Type: int
+//
+
+data_mapper_report_interval = -1;
+
+//======================================================================
+//
+// SIMULATION MODE.
+//
+//======================================================================
+ 
+///////////// sim_mode_elevation_angles ///////////////
+//
+// List of elevation angles for simulate mode.
+// Used to compute the tilt number in SIM_MODE. The nearest angle is 
+//   used as tha target elevation.
+// Type: double
+// 1D array - variable length.
+//
+
+sim_mode_elevation_angles = { 0.5, 1.3, 2.2, 4.2, 6.2, 8.2 };
+
+///////////// simulate_sectors ////////////////////////
+//
+// Option to insert sectors into the simulation.
+// If true, a sector will be inserted after the surveillance scan.
+// Type: boolean
+//
+
+simulate_sectors = FALSE;
+
+///////////// sim_sector_start_az /////////////////////
+//
+// Start azimuth for the sector (deg).
+// Type: double
+//
+
+sim_sector_start_az = 45;
+
+///////////// sim_sector_end_az ///////////////////////
+//
+// End  azimuth for the sector (deg).
+// Type: double
+//
+
+sim_sector_end_az = 225;
+
+///////////// simulate_rhis ///////////////////////////
+//
+// Option to insert RHIs into the sequence in SIM mode.
+// If true, an RHI will be inserted after the surveillance, or the 
+//   sector if sector mode is also on.
+// Type: boolean
+//
+
+simulate_rhis = FALSE;
+
+///////////// sim_rhi_start_az ////////////////////////
+//
+// Start azimuth for the rhis (deg).
+// Type: double
+//
+
+sim_rhi_start_az = 330;
+
+///////////// sim_rhi_delta_az ////////////////////////
+//
+// Delta azimuth between rhis (deg).
+// Type: double
+//
+
+sim_rhi_delta_az = 2;
+
+///////////// sim_mode_radar_name /////////////////////
+//
+// Radar name for simulation mode.
+// Type: string
+//
+
+sim_mode_radar_name = "SPOL";
+
+///////////// sim_mode_site_name //////////////////////
+//
+// Site name for simulation mode.
+// Type: string
+//
+
+sim_mode_site_name = "Marshall";
+
+///////////// sim_mode_latitude_deg ///////////////////
+//
+// Radar latitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+sim_mode_latitude_deg = 39.9321;
+
+///////////// sim_mode_longitude_deg //////////////////
+//
+// Radar longitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+sim_mode_longitude_deg = -105.182;
+
+///////////// sim_mode_altitude_meters ////////////////
+//
+// Radar altitude (meters).
+// See override_radar_location.
+// Type: double
+//
+
+sim_mode_altitude_meters = 1742;
+
+///////////// sim_mode_beam_width_h ///////////////////
+//
+// Horizontal beam width (deg) for simulation mode.
+// Type: double
+//
+
+sim_mode_beam_width_h = 0.92;
+
+///////////// sim_mode_beam_width_v ///////////////////
+//
+// Vertical beam width (deg) for simulation mode.
+// Type: double
+//
+
+sim_mode_beam_width_v = 0.92;
+

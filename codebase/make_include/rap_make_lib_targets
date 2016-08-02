@@ -1,0 +1,100 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+##########################################################################
+#
+# Makefile targets for library files
+#
+# Mike Dixon
+#
+# RAP,NCAR,Boulder,Colorado,80307,USA
+# 
+# Dec 1995
+#
+###########################################################################
+
+install_lib: mk_lib_dir all
+	$(CP) $(LIBNAME) $(RAP_LIB_DIR)
+	if $(TEST) $(HAVE_RANLIB) = TRUE;\
+	then\
+		$(RANLIB) $(RAP_LIB_DIR)/$(LIBNAME);\
+	fi
+
+mk_lib_dir:
+	if $(TEST) -d $(RAP_LIB_DIR); then :; else \
+		$(MKDIR) $(RAP_LIB_DIR); fi
+
+install_shared_lib:
+	$(MAKE) RAP_LIB_DIR=$(RAP_SHARED_LIB_DIR) install_lib
+
+install_shared_include:
+	$(MAKE) RAP_INC_DIR=$(RAP_SHARED_INC_DIR) install_include
+
+install_profile_lib:
+	if $(TEST) -d $(RAP_PROFILE_LIB_DIR); then :; else \
+		$(MKDIR) $(RAP_PROFILE_LIB_DIR); fi
+	$(CP) $(LIBNAME) $(RAP_PROFILE_LIB_DIR)
+	if $(TEST) -f $(RANLIB);\
+	then\
+		$(RANLIB) $(RAP_PROFILE_LIB_DIR)/$(LIBNAME);\
+	fi
+
+install_insure_lib:
+	if $(TEST) -d $(RAP_INSURE_LIB_DIR); then :; else \
+		$(MKDIR) $(RAP_INSURE_LIB_DIR); fi
+	$(CP) $(LIBNAME) $(RAP_INSURE_LIB_DIR)
+	if $(TEST) -f $(RANLIB);\
+	then\
+		$(RANLIB) $(RAP_INSURE_LIB_DIR)/$(LIBNAME);\
+	fi
+
+install_pgi_lib:
+	if $(TEST) -d $(RAP_PGI_LIB_DIR); then :; else \
+		$(MKDIR) $(RAP_PGI_LIB_DIR); fi
+	$(CP) $(LIBNAME) $(RAP_PGI_LIB_DIR)
+	if $(TEST) -f $(RANLIB);\
+	then\
+		$(RANLIB) $(RAP_PGI_LIB_DIR)/$(LIBNAME);\
+	fi
+
+install_intel_lib:
+	if $(TEST) -d $(RAP_INTEL_LIB_DIR); then :; else \
+		$(MKDIR) $(RAP_INTEL_LIB_DIR); fi
+	$(CP) $(LIBNAME) $(RAP_INTEL_LIB_DIR)
+	if $(TEST) -f $(RANLIB);\
+	then\
+		$(RANLIB) $(RAP_INTEL_LIB_DIR)/$(LIBNAME);\
+	fi
+
+install_debug_lib:
+	if $(TEST) -d $(RAP_DEBUG_LIB_DIR); then :; else \
+		$(MKDIR) $(RAP_DEBUG_LIB_DIR); fi
+	$(CP) $(LIBNAME) $(RAP_DEBUG_LIB_DIR)
+	if $(TEST) -f $(RANLIB);\
+	then\
+		$(RANLIB) $(RAP_DEBUG_LIB_DIR)/$(LIBNAME);\
+	fi
+
+install_copyright:
+	if $(TEST) -f copyright_notice.txt ; then \
+		if $(TEST) -d $(RAP_COPYRIGHT_DIR); then :; else \
+			$(MKDIR) $(RAP_COPYRIGHT_DIR); fi ;\
+		$(CP) copyright_notice.txt $(RAP_COPYRIGHT_DIR)/$(LIBNAME)_copyright_notice.txt ;\
+	fi
+
+install_shared: \
+        install_shared_include install_shared_lib install_copyright
+
+install: \
+        install_include install_lib install_copyright
+
+clean_lib:
+	$(RM) $(LIBNAME)
+
+clean_all: clean clean_lib clean_insure
+

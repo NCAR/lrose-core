@@ -1,0 +1,101 @@
+/*********************************************************
+ * parameter definitions for TsSim
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 1999
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+typedef enum {
+  MODE_TEST, MODE_FFT, MODE_SPRT
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = MODE_TEST;
+  p_descr = "Mode for running this app";
+  p_help = "TsSim may be used in a variety of ways. The mode controls the processing to be simulated.";
+} mode;
+
+paramdef int {
+  p_default = 64;
+  p_descr = "The number of samples in each time series";
+} n_samples;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "The wavelength of the radar (cm)";
+} wavelength;
+
+paramdef double {
+  p_default = 1000;
+  p_descr = "The PRT of the data (miscro-secs)";
+} prt;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Power of weather in dBm";
+} wx_power_dbm;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Velocity of weather (m/s)";
+} wx_velocity;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "Spectrum width of weather (m/s)";
+} wx_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Power of clutter in dBm";
+} clut_power_dbm;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Velocity of clutter (m/s)";
+} clut_velocity;
+
+paramdef double {
+  p_default = 0.2;
+  p_descr = "Spectrum width of clutter (m/s)";
+} clut_width;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to simulate noise with the exponential function.";
+  p_help = "If FALSE a smooth gaussian is produced. If TRUE, the data is exponentially disctibuted about the the gaussian.";
+} use_exponential;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Mean of exponential distribution.";
+} exponential_lambda;
+
+paramdef double {
+  p_default = 1.0e-6;
+  p_descr = "Receiver noise (watts)";
+} receiver_noise;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the phase to 0.";
+  p_help = "This has the effect of generating only real parts.";
+} force_zero_phase;
+

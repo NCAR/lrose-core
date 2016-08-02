@@ -1,0 +1,158 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MDV_server
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * March 1997
+ */
+
+paramdef enum debug_t
+{
+  p_options = {DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately.";
+} debug_level;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Cidd"};
+  p_descr = "Server type";
+  p_help = "Used for registration with servmap.";
+  p_private = true;
+} type;
+
+paramdef char* {
+  p_default = {"MDV"};
+  p_descr = "Server subtype";
+  p_help = "Used for registration with servmap.";
+} subtype;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process and server instance";
+  p_help = "Used for registration with procmap and servmap.";
+} instance;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Server info";
+  p_help = "Used for registration with servmap.";
+} info;
+
+paramdef long {
+  p_default = {43000};
+  p_min = {10000};
+  p_descr = "Server port number.";
+  p_help = "TCP/IP port for this server.";
+} port;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Real-time flag";
+  p_help = "If set, indicates real-time data is available, shmem is created.";
+} realtime_avail;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to use real-time file";
+  p_help = "If set, servers uses a single file for GET_NEW requests.";
+} use_realtime_file;
+
+paramdef char* {
+  p_descr = "Path to realtime file";
+  p_help = "See use_realtime_file.";
+} realtime_file_path;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to compress data for transfer.";
+  p_help = "If set, data is run-length encoded for transfer over slow links.";
+} compress_for_transfer;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to free internal volume after transfer.";
+  p_help = "If set, the internal volume is freed after the data transfer.  This is used when system memory usage is a problem and you are generally requesting archive data.  For realtime data, this will just increase memory allocation/deallocation and so will slow things down.";
+} free_volume;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Time offset (secs).";
+  p_help = "Search for data which is offset by this amount from the requested time.";
+} time_offset;
+
+paramdef boolean {
+  p_default = { FALSE };
+  p_descr = "Option to use the data end time as the centroid time in realtime.";
+  p_help = "If set, the time returned as the centroid time for the data, when running in realtime mode and retrieving the latest data, will be the volume end time rather than the volume centroid time.  This is used to assure the users that they are getting the latest data since it is the volume centroid time that is displayed by our displays.";
+} use_endtime_flag;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Override lat and long.";
+  p_help = "If set to true, latitude and longitude given below will be substituted for the latitude and longitude given in the mdv file in communications with cidd.";
+} lat_lon_override;
+
+paramdef double {
+  p_default = {39.79};
+  p_descr = "Latitude.";
+  p_help = "If lat_lon_override is set to true, this value is used in place of the latitude given in the mdv file in communications with cidd.";
+} lat;
+
+paramdef double {
+  p_default = {-104.57};
+  p_descr = "Longitude";
+  p_help = "If lat_lon_override is set to true, this value is used in place of the longitude given in the mdv file in communications with cidd.";
+} lon;
+
+paramdef enum projection_t
+{
+  p_options = {PROJ_FLAT, PROJ_LATLON};
+  p_default = {PROJ_FLAT};
+  p_descr = "Grid projection";
+  p_help = "Local area flat grid, or lat-lon grid.";
+} projection;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Option to use static instead of time-dependent data.";
+  p_help = "If set, the MDV data is always retrieved from the specified file. The time returned with the data is the same as the requested time. This is useful for data sets such as terrain, which does not change with time.";
+} static_data_mode;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "File path for static data.";
+  p_help = "See static data mode. When this mode is active, the returned data always comes from this file.";
+} static_data_file_path;
+

@@ -1,0 +1,90 @@
+/****************************************************
+ * TDRP params for print_spdb
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Directory for data base.
+ *
+ * Type: string
+ * Default: "none" 
+ */
+data_base_dir = "none";
+
+/*
+ * Max length of any string in the input file.
+ * If an input string exceeds this length, it will be truncated.
+ *
+ * Type: long
+ * Default: 32 
+ */
+string_len = 8;
+
+/*
+ * Option to decode chunk data.
+ * If set, chunks will be decoded accroding to the data_format.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+decode_chunks = FALSE;
+
+/*
+ * Option for full printout.
+ * If set, valid and expire times are printed, along with chunk
+ *   number and size. If not set, only valid time is printed.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+full_printout = TRUE;
+
+/*
+ * Format template - specifies the product format in the text file.
+ * The template specifies the order and type of the fields in the
+ *   input file. Legal values are 'int', 'float' and 'string'. Strings
+ *   must be shorter than max_string_len. Multi-word strings must
+ *   be separated by underscores. The fields in the data line must
+ *   be delimited by spaces or tabs.
+ *
+ * Type: string
+ * Default: "float" 
+ * Array elem size: 4 bytes
+ * Array has no max number of elements
+ */
+data_format = {"int", "float", "string", "float", "float", "int", "float", "string"};
+
+/*
+ * Time search margin.
+ * This is used in searching for the closest data entry. The search
+ *   is confined to the margin interval around the requested time.
+ *
+ * Type: long
+ * Default: 86400 
+ * Min value: 1 
+ */
+time_margin = 86400;
+
+

@@ -1,0 +1,20 @@
+# -*- python -*-
+#
+#
+
+
+Import('env')
+
+#sources  = ['NcREAL_File.cpp','NcREAL_FileName.cpp','NcREAL_File_Protected.cpp'];
+sources  = ['NcREAL_File.cpp']
+#hFiles   = ['NcREAL_File.h','NcREAL_File_inline.h','NcREAL_FileName.h']
+hFiles   = ['NcREAL_File.h']
+
+libNode  = env.Library('ncreal',source = sources, CPPPATH=[env.installLocalInc,env.netcdfInc]);
+
+localInstallLibNode = env.Install(env.installLocalLib ,libNode);
+localInstallIncNode = env.Install(env.installLocalInc ,hFiles);
+
+env.Default([libNode,localInstallLibNode,localInstallIncNode])
+env.Install(env.installLib,libNode);
+env.Install(env.installInc,hFiles);

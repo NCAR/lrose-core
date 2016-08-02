@@ -1,0 +1,389 @@
+/*********************************************************
+ * parameter definitions for RadxEvad
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 2013
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "RadxEvad reads in Doppler data from a polar radar file, computes volumetric VAD (VVP) winds and writes them out to NetCDF.";
+  p_text = "The implementation in Mdv2Vad is based on the paper 'An Improved Version of the Extended Velocity-Azimuth Display Analysis of Single-Doppler Radar Data' by Thomas Metejka and Ramesh C. Srivastava, Journal of Atmospheric and Oceanic Technology, Vol 8, No 4, August 1991. The code is designed to match the terminology in the paper as fas as is posible. Please refer to the paper for a detailed explanation of the method.";
+}
+
+commentdef {
+  p_header = "Computes enhanced VAD from polar radar data.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+commentdef {
+  p_header = "READ OPTIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to aggregate sweep files into a volume on read.";
+  p_help = "If true, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.";
+} aggregate_sweep_files_on_read;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove rays taken while the antenna was in transition.";
+  p_help = "If true, rays with the transition flag set will not be used. The transiton flag is set when the antenna is in transtion between one sweep and the next.";
+} remove_rays_with_antenna_transitions;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of transition rays to include as a margin";
+  p_help =  "Sometimes the transition flag is turned on too early in a transition, on not turned off quickly enough after a transition. If you set this to a number greater than 0, that number of rays will be included at each end of the transition, i.e. the transition will effectively be shorter at each end by this number of rays.";
+} transition_nrays_margin;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
+  p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
+} trim_surveillance_sweeps_to_360deg;
+
+commentdef {
+  p_header = "OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS";
+  p_text = "Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only use sweeps within the specified fixed angle limits.";
+} set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower fixed angle limit - degrees.";
+} lower_fixed_angle_limit;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Upper fixed angle limit - degrees.";
+} upper_fixed_angle_limit;
+
+commentdef {
+  p_header = "OPTIONAL RANGE LIMITS";
+  p_help = "Can be useful for removing a test pulse at max range";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to remove long range rays.";
+  p_help = "Applies to NEXRAD data. If true, data from the non-Doppler long-range sweeps will be removed.";
+} remove_long_range_rays;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove short range rays.";
+  p_help = "Applies to NEXRAD data. If true, data from the Doppler short-range sweeps will be removed.";
+} remove_short_range_rays;
+
+commentdef {
+  p_header = "OPTION TO OVERRIDE RADAR NAME AND/OR LOCATION";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the radar name in input data.";
+} override_radar_name;
+
+paramdef string {
+  p_default = "NONE";
+  p_descr = "Specify radar name, to be used to override input data.";
+} radar_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar location.";
+  p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
+} override_radar_location;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_latitude_deg;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_longitude_deg;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} radar_altitude_meters;
+
+commentdef {
+  p_header = "INPUT FIELD INFORMATION";
+  p_text = "Velocity field - required.";
+}
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "Field name for VEL in the input file.";
+} VEL_field_name;
+
+commentdef {
+  p_header = "INPUT DATA CENSORING";
+  p_text = "You have the option to censor gates in the input data based on the value in an input field. Normally SNR or NCP is used for this purpose.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to censor the output using set thresholds.";
+  p_help = "If TRUE, the thresholding fields will be examined to see if it is within the desired range. Examples are SNR (Signal-to-noise) and NCP (normalized coherent power). If the specified field at a gate falls outside the specified range, all output fields will be set to missing for that gate.";
+} censor_using_thresholds;
+
+paramdef string {
+  p_default = "SNR";
+  p_descr = "Name of field for thresholding";
+  p_help = "This is the DSR (input) field name for the thresholding field. If this field is available, it is used for thresholding. If not, thresholding will not be performed.";
+} censor_field_name;
+
+paramdef double {
+  p_default = -3;
+  p_descr = "Minimum threshold - see 'censor_output_using_thresholds'.";
+  p_help = "The specified field at a gate must exceed this value for the gate to be accepted.";
+} censor_min_value;
+
+paramdef double {
+  p_default = 70;
+  p_descr = "Maximum threshold - see 'censor_output_using_thresholds'.";
+  p_help = "The specified field at a gate must be less than this value for the gate to be accepted.";
+} censor_max_value;
+
+commentdef {
+  p_header = "OPTION TO OVERRIDE NYQUIST velocity (m/s)";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the nyquist velocity.";
+  p_help = "If FALSE, the nyquist will be obtained from the RADAR chunk in the MDV file. If TRUE, the nyquist value will be set from the parameter file.";
+} set_nyquist_velocity;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Nyquist velocity (m/s).";
+  p_help = "Must be supplied if not in MDV file. See 'set_nyquist_velocity'.";
+} nyquist_velocity;
+
+commentdef {
+  p_header = "VAD COMPUTATIONS";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Minimum elevation angle for data in VAD - deg.";
+} min_elev;
+
+paramdef double {
+  p_default = 45.0;
+  p_descr = "Maximum elevation angle for data in VAD - deg.";
+} max_elev;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Minimum range for computing VAD circles - km.";
+} min_range;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Maximum range for computing VAD circles - km.";
+} max_range;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Delta range for computing VAD circles - km.";
+} delta_range;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Azimuth interval for separating data into azimuth slices (deg).";
+} slice_delta_azimuth;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of slices for computing median of the velocity in a series of slices.";
+  p_help = "This is used to condition the velocity when searching for folds.";
+} n_slices_for_vel_median;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Min number of valid velocity measurements per slice.";
+  p_help = "Velocity values are only included if the data at a gate meets the censoring limits. Slices with fewer velocity values than this are not included in the analysis.";
+} min_vel_values_per_slice;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Max size of missing sector for computing the VAD fit (deg).";
+  p_help = "The VAD computes wind vectors using series of rings at each elevation angle. The rings are broken into azimuth slices - see slice_delta_azimuth. The mean radial velocity is computed for each slice. Some slices may have no data because the signal is too low - see min_vel_values_per_slice. The VAD will not be reliable if large sectors have no data within the censoring limits. This parameter limits the size of any missing sectors. If the size of a missing sector in a ring exceeds this parameters, the data from that ring will not be used.";
+} max_missing_sector_size;
+
+paramdef double {
+  p_default = 45;
+  p_descr = "Max allowed_difference in to/from direction (deg).";
+  p_help = "The VAD computes wind vectors around the full circle. The max negative speed value indicates wind blowing towards the radar and the max positive speed value indicates wind blowing away from the radar. Ideally the directtions of these two vectors are 180 degrees apart. However, in reality there will be an error between these two ideal directions. If the error exceeds this value, the wind vector will not be considered valid.";
+} max_to_from_direction_error;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Max mean error of the model fit (m/s).";
+  p_help = "The VAD computes wind vectors around the full circle using a 3-term Fourier model. The standard error of estimate is computed from the root-mean-squared difference between the observations and the model. If the RMS error is less than the specified number, the fit is accepted and the wind estimate is considered valid.";
+} max_fit_rms_error;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "w - vertical velocity - at top of VAD profile (m/s).";
+  p_help = "Using the variational method for finding w requires an estimate of wtop - w at the top of the column.";
+} w_at_top_level;
+
+commentdef {
+  p_header = "REGULAR HEIGHT LEVELS FOR WIND PROFILE";
+  p_text = "Results will be interpolated onto this regular set of levels.";
+}
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minimum height for VAD profile - km.";
+} profile_min_height;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Maximum height for VAD profile - km.";
+} profile_max_height;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Height interval for VAD profile - km.";
+} profile_height_interval;
+
+commentdef {
+  p_header = "NETCDF OUTPUT";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write results to NetCDF files.";
+} write_results_to_netcdf;
+
+paramdef string {
+  p_default = "/tmp/vad/netcdf";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_netcdf_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
+commentdef {
+  p_header = "SPDB OUTPUT";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write results to SPDB data base.";
+} write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/vad/spdb";
+  p_descr = "Output URL.";
+  p_help = "Output SPDB data is written to this URL.";
+} output_spdb_url;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Length of time over which the measurement is considered valid (secs).";
+  p_help = "This will be used to set the expire time in SPDB.";
+} output_spdb_valid_period_secs;
+
+
+
+

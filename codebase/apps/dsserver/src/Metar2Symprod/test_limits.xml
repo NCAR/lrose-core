@@ -1,0 +1,44 @@
+<ogc:Filter>
+
+<!-- valid field names are:
+     visibilityKm
+     ceilingKm
+     temperatureC
+     rhPercent
+     rvrKm
+     windSpeedMps -->
+
+  <ogc:PropertyIsGreaterThan>
+    <ogc:PropertyName>temperatureC</ogc:PropertyName>
+    <ogc:Literal>27.5</ogc:Literal>
+  </ogc:PropertyIsGreaterThan>
+
+  <ogc:PropertyIsGreaterThan>
+    <ogc:PropertyName>rhPercent</ogc:PropertyName>
+    <ogc:Literal>80</ogc:Literal>
+  </ogc:PropertyIsGreaterThan>
+
+  <ogc:PropertyIsGreaterThan>
+    <ogc:PropertyName>windSpeedMps</ogc:PropertyName>
+    <ogc:Literal>4.0</ogc:Literal>
+  </ogc:PropertyIsGreaterThan>
+
+  <ogc:PropertyIsLessThan>
+    <ogc:PropertyName>visibilityKm</ogc:PropertyName>
+    <ogc:Literal>6.0</ogc:Literal>
+  </ogc:PropertyIsLessThan>
+
+  <ogc:PropertyIsLessThan>
+    <ogc:PropertyName>ceilingKm</ogc:PropertyName>
+    <ogc:Literal>6.0</ogc:Literal>
+  </ogc:PropertyIsLessThan>
+
+  <ogc:PropertyIsLessThan>
+    <ogc:PropertyName>rvrKm</ogc:PropertyName>
+    <ogc:Literal>0.1</ogc:Literal>
+  </ogc:PropertyIsLessThan>
+
+</ogc:Filter>
+
+
+

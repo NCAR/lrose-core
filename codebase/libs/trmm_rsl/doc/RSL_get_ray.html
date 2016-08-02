@@ -1,0 +1,31 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_ray</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href=RSL_ray_struct.html>Ray</a> *RSL_get_ray(<a href=RSL_volume_struct.html>Volume</a> volume, float elev, float azimuth);</b>
+
+<h3>
+<hr>Description</h3>
+Extract a Ray from a Volume. Returns a pointer to a Ray. You must copy the Ray returned with <a href=RSL_copy.html>RSL_copy_ray</a>, if you want to modify the contents of the Ray without destroying the original Ray. <b>elev</b> is the elevation angle in degrees and is used to find the appropriate Sweep using the routine <a href=RSL_get_sweep.html>RSL_get_sweep</a>. The azimuth angle within the appropriate Sweep must be within +/- 1/2 horizontal beam width of the target angle, <b>azimuth</b>.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the Ray structure is returned. Otherwise, a NULL pointer is returned. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_get_ray_from_sweep.html>RSL_get_ray_from_sweep</a>, <a href=RSL_get_ray_above-below.html>RSL_get_ray_above</a>, <a href=RSL_get_ray_above-below.html>RSL_get_ray_below</a>, <a href=RSL_get_first_ray_of.html>RSL_get_first_ray_of_sweep</a>, <a href=RSL_get_first_ray_of.html>RSL_get_first_ray_of_volume</a>.
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

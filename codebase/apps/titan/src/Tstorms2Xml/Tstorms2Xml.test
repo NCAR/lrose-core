@@ -1,0 +1,417 @@
+/**********************************************************************
+ * TDRP params for Tstorms2Xml
+ **********************************************************************/
+
+//======================================================================
+//
+// Tstorms2Symprod program.
+//
+// Tstorms2Symprod reads native TITAN data files, converts the data into 
+//   XML format, and writes the data out to XML files or SPDB.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// input_mode //////////////////////////////
+//
+// Operational mode.
+// In REALTIME mode, the program is run on output from each volume scan 
+//   as it becomes available. In ARCHIVE mode, all of the scans in a 
+//   series of track files are processed. In FILELIST mode, the program 
+//   processes a list of files specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+input_mode = REALTIME;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input TITAN storm data.
+// If this path is not absolute (starts with /) or relative (starts with 
+//   .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.
+// Type: string
+//
+
+input_dir = "$(DATA_DIR)/titan/storms";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of input data in realtime mode (secs).
+// REALTIME mode only. This the max valid age for input data. In 
+//   REALTIME mode, the program will wait for data more recent than this.
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// XML DETAILS.
+//
+// Details for the XML file.
+//
+//======================================================================
+ 
+///////////// xml_format //////////////////////////////
+//
+// Formal of XML output.
+// TSTORMS_FORMAT is a simple format. WXML is the Australian BOM output 
+//   format.
+//
+// Type: enum
+// Options:
+//     TSTORMS_FORMAT
+//     WXML_FORMAT
+//
+
+xml_format = TSTORMS_FORMAT;
+
+///////////// xml_indent_per_level ////////////////////
+//
+// Indent per level (spaces).
+// Number of spaces per indent level.
+// Type: int
+//
+
+xml_indent_per_level = 2;
+
+///////////// schema_instance /////////////////////////
+//
+// XML schema instance.
+// Type: string
+//
+
+schema_instance = "http://www.w3.org/2001/XMLSchema-instance";
+
+///////////// version /////////////////////////////////
+//
+// XML version.
+// Type: string
+//
+
+version = "1.0";
+
+///////////// schema_location /////////////////////////
+//
+// XML schema location.
+// Type: string
+//
+
+schema_location = "http://www.ral.ucar.edu/xml/schemas/ http://www.ral.ucar.edu/xml/schemas/titan_storms.1.0.xsd";
+
+///////////// namespace_location //////////////////////
+//
+// XML namespace location.
+// Type: string
+//
+
+namespace_location = "http://www.ral.ucar.edu/xml/schemas/";
+
+///////////// operational_mode ////////////////////////
+//
+// operational-mode - experimental, operational etc.
+// Type: string
+//
+
+operational_mode = "operational";
+
+///////////// product_description /////////////////////
+//
+// product -> description.
+// Type: string
+//
+
+product_description = "TITAN on SAWS Radar mosaic";
+
+///////////// refresh_frequency ///////////////////////
+//
+// product -> refresh-frequency.
+// Type: string
+//
+
+refresh_frequency = "PT10M";
+
+///////////// radar_name //////////////////////////////
+//
+// Radar site name.
+// Sets radar name for output to XML file.
+// Type: string
+//
+
+radar_name = "mosaic";
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+// Type: double
+//
+
+radar_latitude_deg = 0;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar laongitude (deg).
+// Type: double
+//
+
+radar_longitude_deg = 0;
+
+///////////// more_information ////////////////////////
+//
+// product-source -> more-information.
+// Type: string
+//
+
+more_information = "http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/info.html";
+
+///////////// production_center ///////////////////////
+//
+// product-source -> production-center.
+// Type: string
+//
+
+production_center = "South Arfican Weather Service";
+
+///////////// disclaimer //////////////////////////////
+//
+// product-source -> disclaimer.
+// Type: string
+//
+
+disclaimer = "http://www.weathersa.co.za/disclaimer";
+
+///////////// credit //////////////////////////////////
+//
+// product-source -> credit.
+// Type: string
+//
+
+credit = "http://www.weathersa.co.za/credit";
+
+///////////// credit_logo /////////////////////////////
+//
+// product-source -> credit-logo.
+// Type: string
+//
+
+credit_logo = "http://www.weathersa.co.za/images/saws_logo.png";
+
+//======================================================================
+//
+// ELLIPSES.
+//
+//======================================================================
+ 
+///////////// include_ellipse /////////////////////////
+//
+// Option to include ellipse data.
+// Ellipses are used for a simple storm shape and size description.
+// Type: boolean
+//
+
+include_ellipse = TRUE;
+
+//======================================================================
+//
+// POLYGONS.
+//
+//======================================================================
+ 
+///////////// include_polygon /////////////////////////
+//
+// Option to include polygon data.
+// Polygons are used for a more complex storm shape and size 
+//   description.
+// Type: boolean
+//
+
+include_polygon = TRUE;
+
+///////////// smooth_polygon //////////////////////////
+//
+// Smooth the storm polygon.
+// If TRUE, the storm polygon will be smoothed within the boundaries 
+//   defined by polygon_smooth_inner_mult and polygon_smooth_outer_mult.
+// Type: boolean
+//
+
+smooth_polygon = FALSE;
+
+///////////// polygon_smooth_inner_mult ///////////////
+//
+// Inner boundary multiplier for storm polygon smoothing.
+// Multipliers less than 1.0 produce an inner boundary smaller than the 
+//   original storm. Multipliers greater than 1.0 produce an inner 
+//   boundary larger than the original storm. inner_mult must be <= 
+//   outer_mult.
+// Minimum val: 0
+// Type: double
+//
+
+polygon_smooth_inner_mult = 1;
+
+///////////// polygon_smooth_outer_mult ///////////////
+//
+// Outer boundary multiplier for storm smoothing.
+// Multipliers less than 1.0 produce an outer boundary smaller than the 
+//   original storm. Multipliers greater than 1.0 produce an outer 
+//   boundary larger than the original storm. outer_bnd_multiplier must be 
+//   >= inner_bnd_multiplier.
+// Minimum val: 0
+// Type: double
+//
+
+polygon_smooth_outer_mult = 3;
+
+//======================================================================
+//
+// HISTORY.
+//
+//======================================================================
+ 
+///////////// include_history /////////////////////////
+//
+// Option to include history data.
+// If true, storm data from the past will be included. The program will 
+//   look back in time from the valid time, by 'history_secs'.
+// Type: boolean
+//
+
+include_history = FALSE;
+
+///////////// history_secs ////////////////////////////
+//
+// How far to look for history (secs).
+// If set to 0, the program only considers the latest scan. If greater 
+//   than 0, we look back by that number of seconds.
+// Type: int
+//
+
+history_secs = 600;
+
+//======================================================================
+//
+// FORECASTS.
+//
+//======================================================================
+ 
+///////////// generate_forecasts //////////////////////
+//
+// Option to generate forecast shapes.
+// If true, forecast shape data will be produced. These will be 
+//   polygons, ellipses or both, depending on the settings above.
+// Type: boolean
+//
+
+generate_forecasts = TRUE;
+
+///////////// forecast_lead_times /////////////////////
+//
+// Lead times for forecasts - secs.
+// Array of forecast lead times. Forecast shapes will be produced at 
+//   each of these times. See 'generate_forecasts'.
+// Type: int
+// 1D array - variable length.
+//
+
+forecast_lead_times = { 1800, 3600 };
+
+///////////// forecast_growth_and_decay ///////////////
+//
+// Allow growth and decay on forecasts.
+// If true, forecast shapes will be allowed to grow and decay according 
+//   to TITAN trends. If false, the shapes will stay the same size.
+// Type: boolean
+//
+
+forecast_growth_and_decay = FALSE;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_to_xml_files //////////////////////
+//
+// Option to write XML files.
+// Type: boolean
+//
+
+write_to_xml_files = TRUE;
+
+///////////// xml_dir /////////////////////////////////
+//
+// Dir for XML files. See write_to_xml_files.
+// Files will be written to dated subdirectories. See xml_name.
+// Type: string
+//
+
+xml_dir = "$(DATA_DIR)/titan/storms_xml";
+
+///////////// xml_name ////////////////////////////////
+//
+// Name used to create the file name.
+// Files name will be yyyymmdd/yyyymmdd_hhmmss_{xml_name}.xml.
+// Type: string
+//
+
+xml_name = "tstorms";
+
+///////////// write_to_spdb ///////////////////////////
+//
+// Option to write data to SPDB data base.
+// Type: boolean
+//
+
+write_to_spdb = TRUE;
+
+///////////// spdb_url ////////////////////////////////
+//
+// URL for TITAN XML SPDB data.
+// The XML will be stored in SPDB in exactly the same format as is 
+//   written to XML files.
+// Type: string
+//
+
+spdb_url = "$(DATA_DIR)/spdb/tstorms_xml";
+

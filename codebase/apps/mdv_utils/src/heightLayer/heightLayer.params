@@ -1,0 +1,161 @@
+/**********************************************************************
+ * TDRP params for heightLayer
+ **********************************************************************/
+
+//======================================================================
+//
+// threshOnHeight thresholds a 3D field above
+// and/or below a height. Height is obtained from a 2D
+// mdv field. Niles Oien April 2011.
+//
+//======================================================================
+ 
+///////////// TriggerUrl //////////////////////////////
+//
+// URL to trigger off, typically of the form
+// mdvp:://host.domain:[port]:dir/dir.
+// Program runs when new data appear here. This is the field
+// to be thresholded.
+// Type: string
+//
+
+TriggerUrl = "mdvp:://cospa22.rap.ucar.edu::/d1/fieldData/CoSPA/mdv/nsslMosaicCO";
+
+///////////// fieldName ///////////////////////////////
+//
+// Field to threshold.
+// Set as appropriate.
+// Type: string
+//
+
+fieldName = "mrefl_mosaic";
+
+///////////// heightUrl ///////////////////////////////
+//
+// URL for height data.
+// Set as appropriate.
+// Type: string
+//
+
+heightUrl = "mdvp:://cospa24.rap.ucar.edu::CoSPA/mdv/WRF_RR/pressure/f00/height263.15K";
+
+///////////// heightFieldName /////////////////////////
+//
+// 2D height field name.
+// Set as appropriate.
+// Type: string
+//
+
+heightFieldName = "fzgLevel";
+
+///////////// temporalTolerance ///////////////////////
+//
+// Temporal tolerance to use when looking for the height field.
+// Set as appropriate.
+// Type: int
+//
+
+temporalTolerance = 86400;
+
+///////////// heightAdjust ////////////////////////////
+//
+// Scale and bias to apply to the height field to adjust
+// the units so that they match the vlevel header in the
+// field to be thresholded. For example, if the 2D height
+// field is in meters and the vlevel is in Km then set the scale
+// to 0.001 and bias to 0.
+// Set as appropriate.
+//
+// Type: struct
+//   typedef struct {
+//      double scale;
+//      double bias;
+//   }
+//
+//
+
+heightAdjust = { 0.001, 0 };
+
+///////////// layerAdjust /////////////////////////////
+//
+// Scale and bias to apply to the field values that are above
+// the height.
+// Set as appropriate.
+//
+// Type: struct
+//   typedef struct {
+//      double scale;
+//      double bias;
+//   }
+//
+//
+
+layerAdjust = { 1, 0 };
+
+///////////// heightTolerance /////////////////////////
+//
+// Heigh tolerance to use when looking for the height field.
+// In adjusted height units.
+// Type: float
+//
+
+heightTolerance = 0.125;
+
+///////////// OutUrl //////////////////////////////////
+//
+// Output mdv URL, typically of the form
+// mdvp:://host.domain:[port]:dir/dir.
+// Derived satellite fields are written here.
+// Type: string
+//
+
+OutUrl = "./";
+
+///////////// Instance ////////////////////////////////
+//
+// Instance to check in to Procmap with.
+// Set to something unique.
+// Type: string
+//
+
+Instance = "test";
+
+///////////// Mode ////////////////////////////////////
+//
+// Operation mode.
+// Archive mode automatically invoked by -interval option.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+Mode = REALTIME;
+
+///////////// MaxRealtimeValidAge /////////////////////
+//
+// Maximum valid age for files.
+// REALTIME mode only.
+// Type: int
+//
+
+MaxRealtimeValidAge = 1800;
+
+///////////// Debug ///////////////////////////////////
+//
+// Set to print debugging messages.
+// Defaults to FALSE.
+// Type: boolean
+//
+
+Debug = true;
+
+///////////// vlevelVal ///////////////////////////////
+//
+// Set vlevel val for thresholded layer.
+// Type: float
+//
+
+vlevelVal = -10;
+

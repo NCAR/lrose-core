@@ -1,0 +1,202 @@
+/**********************************************************************
+ * TDRP params for TestDataMap
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// Operational mode.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Mode.
+// You can either test in latest_data mode, as in a normal client, or in 
+//   data_set mode as in the case of the Scout. Latest_data mode will use 
+//   either the current time or the latest_time parameter for 
+//   regsitration, depending on use_now_for_latest_time. You can also test 
+//   registering the status, and can delete a data set.
+//
+// Type: enum
+// Options:
+//   LATEST_DATA_INFO, STATUS_INFO, DATA_SET_INFO, DELETE_INFO
+//
+//
+
+mode = LATEST_DATA_INFO;
+mode = DELETE_INFO;
+
+///////////// use_now_for_latest_time /////////////////
+//
+// Option to use current time for latest time.
+// If set the program will operate in continuous mode, with the given 
+//   delay between hits. If not, it will operate only once and then exit.
+// Type: boolean
+//
+
+use_now_for_latest_time = TRUE;
+
+///////////// latest_time /////////////////////////////
+//
+// Data set start time.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+latest_time = { 2000, 07, 15, 12,30, 0 };
+
+///////////// forecast_lead_time //////////////////////
+//
+// Forecast lead time (secs).
+// If set to -1, no forecast time is active.
+// Type: int
+//
+
+forecast_lead_time = -1;
+
+///////////// continuous_operation ////////////////////
+//
+// Option to operate continuously.
+// If set the program will operate in continuous mode, with the given 
+//   delay between hits. If not, it will operate only once and then exit.
+// Type: boolean
+//
+
+continuous_operation = FALSE;
+
+///////////// delay_msecs /////////////////////////////
+//
+// Delay between hits - millisecs.
+// The program will delay by this amount between hits.
+// Type: int
+//
+
+delay_msecs = 10000;
+
+//======================================================================
+//
+// Data type and directory name.
+//
+//======================================================================
+ 
+///////////// data_type ///////////////////////////////
+//
+// Data type.
+// The data set type, e.g. mdv, spdb, titan.
+// Type: string
+//
+
+data_type = "raw";
+
+///////////// data_set_directory //////////////////////
+//
+// Data set directory.
+// This is the top directory of the data set.
+// Type: string
+//
+
+data_set_directory = "junk/test_dir";
+
+///////////// data_set_host ///////////////////////////
+//
+// Data set hostname.
+// Required for delete.
+// Type: string
+//
+
+data_set_host = "titan";
+
+//======================================================================
+//
+// DATA_SET_INFO parameters.
+//
+//======================================================================
+ 
+///////////// start_time //////////////////////////////
+//
+// Data set start time.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+start_time = { 1970, 1, 1, 0, 0, 0 };
+
+///////////// end_time ////////////////////////////////
+//
+// Data set end time.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+end_time = { 1999, 12, 31, 23, 59, 59 };
+
+///////////// nfiles //////////////////////////////////
+//
+// Number of files in data set.
+// Type: double
+//
+
+nfiles = 35;
+
+///////////// total_bytes /////////////////////////////
+//
+// Total number of bytes in data set.
+// Type: double
+//
+
+total_bytes = 2.5e+06;
+
+///////////// status //////////////////////////////////
+//
+// Status string.
+// Type: string
+//
+
+status = "OK";
+

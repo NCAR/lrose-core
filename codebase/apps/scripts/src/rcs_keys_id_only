@@ -1,0 +1,162 @@
+#! /usr/bin/perl
+
+#
+# script to remove rcs keywords notice from source code files
+# leaving only the Id for later reference if needed
+#
+
+#
+# usage rcs_keys_id_only target_files
+#
+
+#
+# loop through all the args as filenames
+#
+
+ FILE:
+
+foreach $filename (@ARGV) {
+
+  $OK = 0;
+  
+  print(STDERR "Removing rcs keywords except Id from $filename\n");
+
+  $bakfile = $filename . ".bak";
+  system ('/bin/mv', $filename, $bakfile);
+  
+  if (!open(SRCFILE, $bakfile)) {
+    print(STDERR "Cannot open source file $bakfile - continuing ... \n");
+    next FILE;
+  }
+
+  if (!open(STDOUT, ">$filename")) {
+    print(STDERR "Cannot open file $filename - continuing ... \n");
+    next FILE;
+  }
+  
+  $in_rcs_keys = 0;
+  $found_id = 0;
+  $in_rcs_id = 0;
+  $start_pattern = "/*-*-*-*-*-*-";
+  $end_pattern = "/**-*-*-*-*-*-";
+  $id_pattern = "\$Id";
+  $ifdef_pattern = "ifndef";
+  $endif_pattern = "endif";
+  
+  #
+  # loop through the lines in the file 
+  #
+
+  while ($line = <SRCFILE>) {
+
+    #
+    # if not in rcs_keys, look for start of rcs_keys
+    #
+
+    if (!$in_rcs_keys) {
+
+      if (index($line, $start_pattern) >= 0) {
+
+	#
+	# start of rcs_keys
+	#
+
+	$in_rcs_keys = 1;
+	$OK = 0;
+
+	#
+	# copy the start pattern
+	#
+	print (STDOUT $line);
+
+      } else {
+	
+	#
+	# not in rcs_keys, copy line out
+	#
+
+	print (STDOUT $line);
+
+      } # if (index($line, $start_pattern) >= 0)  
+
+    } else {
+
+      if (index($line, $id_pattern) >= 0) {
+
+	#
+	# copy the id pattern
+	#
+	if ( !$found_id ) {
+	  print (STDOUT "/*\n");
+	  print (STDOUT $line);
+	  print (STDOUT " */\n");
+	}
+
+	#
+	# only find id once 
+	#
+
+	$found_id = 1;
+	$OK = 1;
+
+      } # if (index($line, $id_pattern) >= 0) 
+
+      if (index($line, $ifdef_pattern) >= 0) {
+        
+	# in the RCSId section
+	  $in_rcs_id = 1;
+      }
+      
+      if ( $in_rcs_id ) {
+
+	#
+	# copy the line
+	#
+	print (STDOUT $line);
+        
+	if (index($line, $endif_pattern) >= 0) {
+        
+	# done with the RCSId section
+	  $in_rcs_id = 0;
+        }
+
+      }
+
+      if (index($line, $end_pattern) >= 0) {
+
+	#
+	# end of rcs_keys
+	#
+
+	$in_rcs_keys = 0;
+	$OK = 1;
+
+	#
+	# copy the end pattern
+	#
+	print (STDOUT $line);
+
+      } # if (index($line, $end_pattern) >= 0) 
+
+    } # if (!$in_rcs_keys) 
+
+  } # while 
+
+  #
+  # remove bak file
+  #
+	
+  if ($OK) {
+
+    unlink ($bakfile);
+
+  } else {
+
+    unlink($filename);
+    system ('/bin/mv', $bakfile, $filename);
+    printf(stderr "ERROR in file $filename - keys not removed\n");
+    
+  }
+
+} # foreach
+

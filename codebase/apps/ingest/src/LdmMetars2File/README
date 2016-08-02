@@ -1,0 +1,11 @@
+
+
+The idea of LdmMetars2File is that you can point it at a directory
+where metar files named InputDir/YYYYMMDD/YYYYMMDDHH.METAR are (the
+most recent one will be growing) and it will periodically write
+output files to OutDir/metar.YYYYMMDDHHmm - and these files
+do _not_ grow.
+
+The output files may then be used to make an SPDB.
+
+Niles Oien 2 April 1999.

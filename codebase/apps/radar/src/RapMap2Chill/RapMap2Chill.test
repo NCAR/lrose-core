@@ -1,0 +1,55 @@
+/**********************************************************************
+ * TDRP params for RapMap2Chill
+ **********************************************************************/
+
+//======================================================================
+//
+// RapMap2Chill converts NCAR/RAP style maps to CHILL maps.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// mode ////////////////////////////////////
+//
+// Mode.
+// Convert to gtk_display, or vchill. Vchill not yet implemented.
+//
+// Type: enum
+// Options:
+//     GTK_DISPLAY_MODE
+//     VCHILL_MODE
+//
+
+mode = GTK_DISPLAY_MODE;
+
+///////////// radar_latitude //////////////////////////
+//
+// Latitude of radar.
+// gtk_display maps are in km from the radar location.
+// Type: double
+//
+
+radar_latitude = 39.9321;
+
+///////////// radar_longitude /////////////////////////
+//
+// Longitude of radar.
+// gtk_display maps are in km from the radar location.
+// Type: double
+//
+
+radar_longitude = -105.182;
+

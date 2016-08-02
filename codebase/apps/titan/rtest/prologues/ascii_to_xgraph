@@ -1,0 +1,7 @@
+Device: Postscript
+Disposition: To Device
+Geometry: 1000x625+0+0
+TitleFont: fixed
+XUnitText: X
+YUnitText: Y
+BoundBox: true

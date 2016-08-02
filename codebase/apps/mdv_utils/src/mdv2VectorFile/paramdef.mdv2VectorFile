@@ -1,0 +1,110 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "mdv2VectorFile is a program that reads mdv files\n"
+  "and writes the data to ascii files. Each data point\n"
+  "is followed by a newline. The ordering of the indicies and\n"
+  "the decision as to if they increase or decrease is\n"
+  "configurable. Niles Oien January 2011.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output directory";
+  p_help = "Vector files are written here."; 
+  p_default = {"/some/dir/struct"};
+} OutDir;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef string {
+  p_default = { };
+  p_private = FALSE;
+  p_descr = "Field names.";
+  p_help = "If list is empty all fields are processed.";
+} fieldNames[];   
+
+paramdef double {
+  p_default = -999.0;
+  p_private = FALSE;
+  p_descr = "Value to print into the output files when input is bad or missing.";
+  p_help = "Default should be fine.";
+} badVal;
+
+typedef enum {
+  ORDER_XYZ, ORDER_XZY, ORDER_YXZ, ORDER_ZXY, ORDER_ZYX, ORDER_YZX
+} order_t;
+
+paramdef enum order_t {
+  p_default = ORDER_ZYX;
+  p_descr = "Determines which index changes fastest in the output file.";
+  p_help = "ORDER_ZYX means that X changes fastest in the output, then Y, then Z";
+} outputOrder;
+
+typedef struct {
+        boolean xIndexDecreases;
+        boolean yIndexDecreases;
+        boolean zIndexDecreases;
+} indexDecrease_t;
+
+paramdef struct indexDecrease_t {
+        p_descr = "Determines if MDV indices increase or decrease for\n"
+	"printing the file.";
+        p_help = "Affects order of data in output file.";
+        p_default = { FALSE, FALSE, FALSE };
+} indexDecrease;
+

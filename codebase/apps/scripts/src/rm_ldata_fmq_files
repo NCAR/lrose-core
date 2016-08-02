@@ -1,0 +1,11 @@
+#! /bin/csh
+
+#
+# remove all _latest_data_info.buf and _latest_data_info.stat files
+# from this directory downwards.
+#
+
+nice find . '(' -name core -o -name '_latest_data_info.buf' \
+     -o -name '_latest_data_info.stat' ')' \
+     -user $USER -type f -print -exec \rm '{}' \;
+

@@ -1,0 +1,83 @@
+/*********************************************************
+ * parameter definitions for MultMsgFmq2Fmq
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * November 1999
+ */
+
+commentdef {
+  p_header = "MultMsgFmq2Fmq program";
+  p_text = "MultMsgFmq2Fmq reads an FMQ into which multiple messages have been put by Fmq2MultMsgFmq, unpacks the messages and writes the individual messages to an output FMQ. See Fmq2MultMsgFmq for details on writing the multiple-message FMQ.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "fmq_input";
+  p_descr = "URL for input FMQ.";
+} input_url;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of millisecs to sleep while polling the input.";
+  p_help = "The reads are done in a polling-blocking mode. This is the number of millisecs to sleep between polls.";
+} msecs_sleep_blocking;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "fmq_output";
+  p_descr = "URL for output FMQ.";
+} output_url;
+
+typedef enum {
+  NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION
+} compression_t;
+  
+paramdef enum compression_t {
+  p_default = ZLIB_COMPRESSION;
+  p_descr = "Output compression options.";
+  p_help = "The data may be optionally compressed for output. BZIP is generally the slowest but most compact. ZLIB uses the gzip compression algorithm, which is faster than BZIP, and for some data more compact as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is simple run-length encoding compression, which is the fastest and least compact.";
+} output_compression;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of slots in output FMQ.";
+} output_n_slots;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_buf_size;
+
+
+
+
+

@@ -1,0 +1,96 @@
+/**********************************************************
+ * paramdef.NrlLtg2Spdb
+ *
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+  "appropriate level of detail.";
+} debug;
+
+paramdef string
+{
+  p_descr = "Process instance for procmap.";
+  p_help = "This program uses this instance when registering with the process mapper.";
+  p_default = "Test";
+} instance;
+
+commentdef {
+  p_header = "OPERATIONAL MODE.";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data; archive mode runs on single file";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be valid. "
+    "If the latest_data_info file is older than this, the program waits "
+    "for new data.";
+} max_realtime_valid_age;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_help = "Path for directory to the input lightning files.";
+  p_default = "raw/ltg";
+} input_dir;
+
+/***********************************************************************
+ * Data output
+ */
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef int
+{
+  p_descr = "lightning data expire seconds";
+  p_help = "Number of seconds the lightning data is valid before it should be expired.";
+  p_default = 60;
+} expire_secs;
+
+paramdef int
+{
+  p_descr = "Data period for each storage units - secs.";
+  p_help = "Each SPDB chunk will contain data from this period.";
+  p_default = 300;
+} store_period;
+
+paramdef string
+{
+  p_descr = "List of destination URLs for ltg data.";
+  p_help = "See DIDSS documentation for URL information.";
+  p_default = { "spdb/ltg" };
+} spdb_urls[];
+
+

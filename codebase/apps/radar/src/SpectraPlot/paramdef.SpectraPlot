@@ -1,0 +1,676 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SpectraPlot
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Oct 2008
+//
+
+commentdef {
+  p_header = "Program name: SpectraPlot";
+  p_text = "SpectraPlot displays radar spectra from SPDB or FMQ.";
+}
+
+commentdef {
+  p_header = "DEBUG AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Uses routines in stag_plot.cc, instead of spectra_plot.cc.";
+} staggered_mode;
+
+commentdef {
+  p_header = "GETTING CLICK-POINT INFO FROM CIDD";
+}
+
+paramdef int {
+  p_default = 61500;
+  p_descr = "The shared memory key for the CIDD coordinate struct.";
+  p_help = "When the user clicks in the CIDD main window, the coordinate struct is updated with the location and time. The time value is used to drive SpectraPlot in REALTIME mode.";
+} cidd_shmem_key;
+
+// paramdef double {
+//   p_default = 10.0;
+//   p_descr = "Max angular error when searching for spectra close to the click point (deg).";
+//   p_help = "When the user clicks in CIDD, the (x) location is saved. From this, the elevation, elevation and range of the click point can be determined. The data base is then searched for spectra from a beam close to this. This parameter gives the max angular error allowable in this search.";
+// } max_search_angle_error;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+// typedef enum {
+//   INPUT_SPDB, INPUT_FMQ
+// } input_mode_t;
+
+// paramdef enum input_mode_t {
+//   p_default = INPUT_SPDB;
+//   p_descr = "Mode for reading the data";
+//   p_help = "In SPDB mode, SpectraPlot watches the CIDD shared memory for updates of click points from the user. When a new click is detected, a query is made to the SPDB data base for spectra in a time interval ending with the click time. In FMQ mode, SpectraPlot reads the latest time series data from an FMQ - File Message Queue. It continually updates as new data is available in the FMQ.";
+// } input_mode;
+
+// paramdef string {
+//   p_default = "spdbp:://cp2cloud::spdb/spol_spectra";
+//   p_descr = "URL for input SPDB data.";
+//   p_help = "Spectra data is stored in SPDB format at this URL.";
+// } spectra_spdb_url;
+
+// paramdef int {
+//   p_default = 300;
+//   p_descr = "Length of search interval when reading data (secs).";
+//   p_help = "The search will end at the end time of the CIDD data, and will start search_interval_secs before that.";
+// } search_interval_secs;
+
+paramdef string {
+  p_default = "/tmp/data/time_series";
+  p_descr = "Directory for time series data.";
+  p_help = "This should be in IWRF format files, stored in daily subdirectories.";
+} time_series_data_dir;
+
+// paramdef boolean {
+//   p_default = FALSE;
+//   p_descr = "Search forward from current time.";
+//   p_help = "If TRUE, look forward from CIDD time by search_interval_secs to find spectra. Both look_forward and look_back can be TRUE.";
+// } look_forward;
+
+// paramdef boolean {
+//   p_default = TRUE;
+//   p_descr = "Search back from current time.";
+//   p_help = "If TRUE, look back from CIDD time by search_interval_secs to find spectra. Both look_forward and look_back can be TRUE.";
+// } look_back;
+
+// paramdef boolean {
+//   p_default = FALSE;
+//   p_descr = "Ignore elevation angle when searching for closest spectra to click point.";
+//   p_help = "Normally we compute the angle error by combining both azimuth and elevation. If TRUE, only the azimuth error is considered.";
+// } ignore_elevation_error;
+
+// paramdef string {
+//   p_default = "fmqp:://cp2cloud::fmq/spectra";
+//   p_descr = "URL for data to be read from File Message Queue.";
+//   p_help = "This can be on a remote host.";
+// } spectra_fmq_url;
+
+// paramdef boolean {
+//   p_default = FALSE;
+//   p_descr = "Option to seek to the start of the input FMQ.";
+//   p_help = "If FALSE, the program will seek to the end of the fmq and only read in new data. If TRUE, it will start reading from the beginning of the FMQ.";
+// } seek_to_start_of_fmq;
+
+// paramdef int {
+//   p_default = 1000;
+//   p_descr = "Delay between reads to the input FMQ (millisecs).";
+//   p_help = "Delaying the read operation allows you to manage the bandwidth usage. An increase in delay decreases the bandwidth needed. Set to 0 for no delay.";
+// } fmq_read_delay_msecs;
+
+commentdef {
+  p_header = "BEAM SAMPLING";
+};
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Number of samples (pulses) per dwell.";
+} n_samples;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Index the beams on even centers?";
+  p_help = "If false, the pulses are formed into beams sequentially, with no overlap.";
+} indexed_beams;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Dwell width in azimuth (deg).";
+  p_help = "Applies to PPI mode.";
+} indexed_resolution_az;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Dwell width in elevation (deg).";
+  p_help = "Applies to RHI mode.";
+} indexed_resolution_el;
+
+// paramdef boolean {
+//   p_default = FALSE;
+//   p_descr = "Does the receiver path switch every other pulse?";
+// } switching_receiver;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to invert the sense of the HV flag in alternating mode.";
+  p_help = "In alternating dual-pol mode, the HV flag indicates whether the pulse is horizontally or vertically polarized. Normally 1 indicates H and 0 V. This parameter allows you to invert the sense of the flag, so that 1 is interpreted as V and 0 as H.";
+} invert_hv_flag;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Does the PRT in the pulse header refer to the previous time interval?.";
+  p_help = "If TRUE, the PRT in the pulse header refers to the time from the PREVIOUS pulse to THIS pulse. If FALSE, the PRT in the header refers to the time from THIS pulse to the NEXT pulse.";
+} prt_is_for_previous_interval;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to check for missing pulses in the time series.";
+  p_help = "If missing pulses are found, the beam formed by those pulses will be discarded.";
+} check_for_missing_pulses;
+
+commentdef {
+  p_header = "OVERRIDING RADAR PARAMETERS";
+  p_text = "Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar name.";
+  p_help = "If true, the name in this file will be used. If not, the name in the time series data will be used.";
+} override_radar_name;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Name of the radar.";
+  p_help = "See 'override_radar_name'.";
+} radar_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar location.";
+  p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
+} override_radar_location;
+
+paramdef double {
+  p_default = 39.93208;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_latitude_deg;
+
+paramdef double {
+  p_default = -105.18175;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_longitude_deg;
+
+paramdef double {
+  p_default = 1742;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} radar_altitude_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the gate geometry.";
+  p_help = "If true, the gate_spacing and start_range in the time series data is overridden by the parameters in this file.";
+} override_gate_geometry;
+
+paramdef double {
+  p_default = 150;
+  p_descr = "Gate spacing (meters).";
+  p_help = "See override_gate_geometry.";
+} gate_spacing_meters;
+
+paramdef double {
+  p_default = 150;
+  p_descr = "Start range (meters).";
+  p_help = "See override_gate_geometry.";
+} start_range_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar wavelength.";
+  p_help = "If true, the radar wavelength in this file will be used. If not, the wavelength in the time series data will be used if available.";
+} override_radar_wavelength;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Radar wavelength (cm).";
+  p_help = "See override_radar_wavelength.";
+} radar_wavelength_cm;
+
+commentdef {
+  p_header = "RADAR CALIBRATION";
+}
+
+paramdef string {
+  p_default = "./radar_cal.xml";
+  p_descr = "File name for XML calibration file.";
+} cal_file_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override cal in time series data.";
+  p_help = "If false, the cal information in the time series data will be used. If true, the cal info in the param file will be used.";
+} use_cal_from_time_series;
+
+commentdef {
+  p_header = "FFT WINDOW";
+}
+
+typedef enum {
+  WINDOW_RECT,
+  WINDOW_VONHANN,
+  WINDOW_BLACKMAN
+} window_t;
+
+paramdef enum window_t {
+  p_default = WINDOW_VONHANN;
+  p_descr = "Window to be applied to time series before computing spectra.";
+} window;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Width of notch for computing TPSS.";
+  p_help = "TPSS - Time Series Power Periodicity - is computed as the sum-sq-power within a notch around DC divided by the power-sq in the rest of the spectrum of the time series power.";
+} tpss_notch_width;
+
+commentdef {
+  p_header = "WINDOW SIZE AT STARTUP";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "The startup x location for the main window.";
+} window_x;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "The startup y location for the main window.";
+} window_y;
+
+paramdef int {
+  p_default = 800;
+  p_descr = "The startup height for the window.";
+} window_height;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "The startup width for the window.";
+} window_width;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "The border width for the main window.";
+} window_border;
+
+commentdef {
+  p_header = "MARGINS";
+}
+
+paramdef int {
+  p_default = 70;
+  p_descr = "Height of top margin (pixels).";
+} top_margin;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Width of bottom margin (pixels).";
+} bottom_margin;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Width of left margin (pixels).";
+} left_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Width of right margin (pixels).";
+} right_margin;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Height of top margin of each subplot (pixels).";
+} subplot_top_margin;
+
+commentdef {
+  p_header = "PLOT DETAILS";
+}
+
+paramdef string {
+  p_default = "RADAR SPECTRA";
+  p_descr = "Label for window border";
+  p_help = "This label will normally appear in the top border of the display window.";
+} window_label;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Plot the power as a function of range, as in an A-Scope";
+} plot_ascope_power;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to plot text showing elevation, azimuth etc.";
+} plot_location_text;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to plot text showing moments values.";
+} plot_moments_text;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to plot text showing clutter properties.";
+} plot_clutter_text;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Plot power spectrum";
+  p_help = "This includes the filtered spectra.";
+} plot_power_spectrum;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot spectrum for next gate";
+  p_help = "This is overlaid on spectrum for selected gate. If this is active, it will be plotted instead of the regression filtered spectrum.";
+} plot_power_spectrum_for_next_gate;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Compute scale of power spectrum from data.";
+  p_help = "If FALSE, power_spec_min_db and power_spec_max_db will be used.";
+} autoscale_power_spectrum;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Include time series power plot";
+} plot_power_time_series;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Compute scale of power time series from data.";
+  p_help = "If FALSE, ts_power_min_db and ts_power_max_db will be used.";
+} autoscale_power_time_series;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Include plot of spectrum of real time series power";
+  p_help = "This will be plotted in the same panel as the power time series";
+} plot_real_power_spectrum_over_time_series;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Include adaptive-filtered spectrum plot";
+  p_help = "This will be plotted in the same panel as the power spectrum";
+} plot_adaptive_filtered_spectrum;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Include regression-filtered spectrum plot";
+  p_help = "This will be plotted in the same panel as the power spectrum";
+} plot_regression_filtered_spectrum;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Order of polynomial for regression filtering.";
+} regression_polynomial_order;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "For regression filter - should we interpolate across the notch?";
+  p_help = "The regression filter applies quite a deep notch around 0 m/s. This option allows you to interpolate across the notch.";
+} regression_interp_across_notch;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Include plot of time series phase";
+} plot_phase_time_series;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Compute scale of phase time series from data.";
+  p_help = "If FALSE, -180 and +180 will be used.";
+} autoscale_phase_time_series;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Include pulse-to-pulse phase difference plot";
+} plot_pulse_to_pulse_phase_diff;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Include cumulative phase difference plot";
+} plot_cumulative_phase_diff;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Include plot of fft phase";
+} plot_fft_phase_diff;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Include iq time series";
+} plot_iq_time_series;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot polynolial fit to time series on top of iq time series";
+} plot_polyfit_time_series;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot time series residuals after de-trending and/or polygon fit";
+} plot_residual_time_series;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot phase of time series residuals after polygon fit";
+} plot_residual_phase;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use order-1 polynomial-filtered time series for adaptive clutter filtering";
+  p_help = "This takes precedence over the detrended time series option.";
+} use_order_1_fit_time_series_for_adaptive_filter;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use detrended time series for adaptive clutter filtering";
+  p_help = "Only applies if order-1 option is false.";
+} use_detrended_time_series_for_adaptive_filter;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot spectrum of each half of the staggered time series.";
+} plot_staggered_half_spectra;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot phasor diagram of IQ time series.";
+} plot_iq_phasor;
+
+commentdef {
+  p_header = "DATA Y-SCALE RANGES";
+}
+
+paramdef double {
+  p_default = -120;
+  p_descr = "Min value of ascope power (dBm).";
+} ascope_power_min_db;
+
+paramdef double {
+  p_default = -30;
+  p_descr = "Max value of ascope power (dBm).";
+} ascope_power_max_db;
+
+paramdef double {
+  p_default = -120;
+  p_descr = "Min value of power spectrum power (dBm).";
+} power_spec_min_db;
+
+paramdef double {
+  p_default = -30;
+  p_descr = "Max value of power spectrum power (dBm).";
+} power_spec_max_db;
+
+paramdef double {
+  p_default = -120;
+  p_descr = "Min value of time series power (dBm).";
+} ts_power_min_db;
+
+paramdef double {
+  p_default = -30;
+  p_descr = "Max value of time series power (dBm).";
+} ts_power_max_db;
+
+commentdef {
+  p_header = "COLORS";
+}
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of the foreground in the display.";
+} foreground_color;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Color of the background in the display.";
+} background_color;
+
+paramdef string {
+  p_default = "gray20";
+  p_descr = "Color for grid lines on plot.";
+} grid_line_color;
+
+paramdef string {
+  p_default = "gray";
+  p_descr = "Color of the plot of power in ascope mode.";
+} ascope_power_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of the plot of power spectrum.";
+} power_spec_color;
+
+paramdef string {
+  p_default = "pink";
+  p_descr = "Color of the plot of filtered power spectrum.";
+} adaptive_filtered_spec_color;
+
+paramdef string {
+  p_default = "orange";
+  p_descr = "Color of the plot of regression-filtered spectrum.";
+} regression_filtered_spec_color;
+
+paramdef string {
+  p_default = "green";
+  p_descr = "Color of the plot of time series power.";
+} ts_power_color;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of the plot of spectrum of real power.";
+} power_real_spec_color;
+
+paramdef string {
+  p_default = "orange";
+  p_descr = "Color of the plot of time series phase.";
+} ts_phase_color;
+
+paramdef string {
+  p_default = "brown";
+  p_descr = "Color of the plot of residual time series phase.";
+} ts_residual_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of the plot of pulse-to-pulse phase difference.";
+} phase_diff_color;
+
+paramdef string {
+  p_default = "pink";
+  p_descr = "Color of the plot of cumulative phase difference.";
+} cumulative_phase_diff_color;
+
+paramdef string {
+  p_default = "magenta";
+  p_descr = "Color of the plot of fft phase.";
+} fft_phase_color;
+
+paramdef string {
+  p_default = "green";
+  p_descr = "Color of the plot of fft phase difference.";
+} fft_phase_diff_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of I time series.";
+} I_color;
+
+paramdef string {
+  p_default = "gray";
+  p_descr = "Color of polynomial fit to I time series.";
+} I_polynomial_color;
+
+paramdef string {
+  p_default = "magenta";
+  p_descr = "Color of Q time series.";
+} Q_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of polynomial fit to Q time series.";
+} Q_polynomial_color;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of detrended time series color.";
+} detrended_ts_color;
+
+paramdef string {
+  p_default = "green";
+  p_descr = "Color of short prt spectrum in staggered prt half-spectrum plot.";
+} short_prt_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of long prt spectrum in staggered prt half-spectrum plot.";
+} long_prt_color;
+
+paramdef string {
+  p_default = "brown";
+  p_descr = "Color of line showing noise level.";
+} noise_level_color;
+
+paramdef string {
+  p_default = "blue";
+  p_descr = "Color of line showing current range.";
+} range_line_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of IQ phasor diagram.";
+} iq_phasor_color;
+
+commentdef {
+  p_header = "FONTS";
+}
+
+paramdef string {
+  p_default = "6x13";
+  p_descr = "Name of font for the text on the display.";
+} font_name;
+
+commentdef {
+  p_header = "LINES";
+}
+
+paramdef int {
+  p_default = 1;
+  p_descr = "The width of the lines used for the plot traces.";
+} plot_line_width;
+

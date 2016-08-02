@@ -1,0 +1,189 @@
+/**********************************************************************
+ * TDRP params for QpeVerify
+ **********************************************************************/
+
+//======================================================================
+//
+// QpeVerify reads precip accumulation measurements from SPDB, and 
+//   compares these with radar-derived QPE values stored in gridded files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for new input data, and reads 
+//   data from the latest time back by a specified time margin. In ARCHIVE 
+//   mode, the program reads all of the SPDB data within a given time 
+//   interval, and processes it. For each SPDB precip entry, the QPE value 
+//   is found in the gridded files and these two values are then compared.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// MEASURED PRECIP ACCUMULATION AT POINTS.
+//
+//======================================================================
+ 
+///////////// measured_precip_spdb_url ////////////////
+//
+// URL for precip measurments.
+//
+// Measured precip accumulation is stored in XML format for Wx 
+//   observations.
+//
+//
+// Type: string
+//
+
+measured_precip_spdb_url = "$(DATA_DIR)/spdb/precip_accum";
+
+///////////// realtime_max_valid_age_secs /////////////
+//
+// Max valid age of precip input data (secs).
+//
+// REALTIME mode only. This the max valid age for incoming data. Earlier 
+//   data will be ignored.
+//
+//
+// Type: int
+//
+
+realtime_max_valid_age_secs = 3600;
+
+///////////// realtime_lookback_secs //////////////////
+//
+// How far back to look for realtime data (secs).
+//
+// REALTIME mode only.
+//
+//
+// Type: int
+//
+
+realtime_lookback_secs = 21600;
+
+///////////// accum_period_secs ///////////////////////
+//
+// Accumulation period for both measured and qpe data (secs).
+//
+// Accumulation period over which the measured and radar-estimated 
+//   values are compared.
+//
+//
+// Type: int
+//
+
+accum_period_secs = 86400;
+
+//======================================================================
+//
+// GRIDDED QPE.
+//
+//======================================================================
+ 
+///////////// qpe_url /////////////////////////////////
+//
+// URL for gridded QPE values.
+//
+// QPE is stored in grids in either MDV or netCDF. Both are accessed via 
+//   the MDV interface.
+//
+//
+// Type: string
+//
+
+qpe_url = "mdvp:://hail:0:pecan/mdv/qpe_accum_daily";
+
+///////////// qpe_field_name //////////////////////////
+//
+// Name of QPE accumulation field in gridded files.
+//
+//
+// Type: string
+//
+
+// qpe_field_name = "ACCUM_PID";
+// qpe_field_name = "ACCUM_HYBRID";
+// qpe_field_name = "ACCUM_ZH";
+qpe_field_name = "ACCUM_Z_ZDR";
+
+///////////// qpe_read_time_margin_secs ///////////////
+//
+// Time margin for searching for QPE data (secs).
+//
+// We search for the QPE data closest to the measured data time, and 
+//   within this time margin.
+//
+//
+// Type: int
+//
+
+qpe_read_time_margin_secs = 3600;
+
+///////////// qpe_grid_margin /////////////////////////
+//
+// Margin around the measurement location (grid units).
+//
+// We compute the mean QPE value by considering the surrounding points. 
+//   This is the number of grid points on each side of the measurement 
+//   location to be used when computing the mean. If the margin is 0, only 
+//   a single point is used. If the margin is 1, a 3x3 box is used to 
+//   compute the mean value. If the margin is 2, a 5x5 box is used, etc.
+//
+//
+// Type: int
+//
+
+qpe_grid_margin = 5;
+

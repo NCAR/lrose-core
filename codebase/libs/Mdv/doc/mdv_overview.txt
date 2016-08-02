@@ -1,0 +1,380 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1992 - 2010 */
+/* ** University Corporation for Atmospheric Research(UCAR) */
+/* ** National Center for Atmospheric Research(NCAR) */
+/* ** Research Applications Laboratory(RAL) */
+/* ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA */
+/* ** 2010/10/7 23:12:32 */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+MDV Concepts
+------------
+
+MDV (Meteorological Data Volume) is a general purpose data file format 
+for storing one- two- and three-dimensional gridded data.
+
+The MDV file format is self-documenting and provides capabilities for managing
+multiple data fields in a single file.  For example, one MDV file might
+contain a data volume with three tilts of radar reflectivity and radial 
+velocity, along with a model-generated volume of wind vectors at these 
+three tilts.
+
+MDV supports constant spacing of data in the x-y plane of each field, 
+i.e. a single delta-x and delta-y for all vertical levels within each field.  
+However, delta-x and delta-y may vary from field to field.  In the 
+third dimesion, MDV supports
+both variable and constant data spacing.  
+
+A simple example of a radar MDV file is one with two data fields, reflectivity
+and velocity, where (x,y,z) represents (range, azimuth, elevation) and where:
+
+    field   field   num num num    min   min   min    delta delta delta
+    name    units    x   y   z      x     y     z       x     y     z
+    -----   -----   --- --- ---   ----- ----- -----   ----- ----- -----
+    DBZ     dBZ     600 360  2    0.375  0.0   0.0    0.25   1.0   1.0
+    VEL     m/s     600 360  2    0.375  0.0   0.0    0.25   1.0   1.0
+
+In this example, a look into a few of the headers fields might reveal:
+
+    MasterHeader.vlevel_included:         true
+
+    FieldHeader(DBZ).proj_type:           Radar Polar
+
+    VlevelHeader(DBZ).vlevel_type[0]:     Elevation Angle
+    VlevelHeader(DBZ).vlevel_type[0]:     Elevation Angle
+    VlevelHeader(DBZ).vlevel_params[0]:   0.5
+    VlevelHeader(DBZ).vlevel_params[1]:   1.45
+  
+Units for x and y are defined implicitly by the field's projection type.
+In this example, the "Radar Polar" projection type prescribes units
+of km for x (r), deg for y (az).  The units for z are defined implicitly
+by the field's vlevel type.  In this example, vlevel headers are included
+so the type is taken from the vlevel header for each level
+and the "Elevation Angle"
+vlevel type prescribes units of deg for z.  The vlevel_params array
+gives the elevation angle for each vertical level.
+A more complex use of the MDV file format might be one in which 
+the above radar data is stored in the first two fields with a
+third field containing model data output in a cartesian projection
+with variable units in the z-dimension.
+
+The MDV file format is extensible in that it provides space and access 
+capabilities for generic "chunk" data defined by the MDV user.  Chunk
+data allows MDV users to attach to their datasets additional information 
+that is not already stored in the MDV header information.  Examples of
+chuck data might be detailed data collection information such as
+satellite or radar metadata.
+
+In addition to the defined MDV file format, a library of application 
+programmer's interface (API) functions provide simple facilities for 
+reading and writing MDV files.
+
+Other features of the MDV file format and library API include:
+
+   1.  a FORTRAN-compatible I/O structure (for non-compressed data);
+   2.  date/time stamping for creation, expiration, and forecasting;
+   3.  support for data compression/decompression;
+   4.  byte swapping to handle cross-platform data representation schemes.
+
+
+Overview of the MDV file format
+-------------------------------
+
+The MDV FILE STRUCTURE looks like the following:
+
+         MDV_master_header
+         MDV_field_header 1
+         MDV_field_header 2
+           ...
+         MDV_field_header n
+         MDV_vlevel_header 1  (optional)
+         MDV_vlevel_header 2
+           ...
+         MDV_vlevel_header n
+         MDV_chunk_header 1   (optional)
+         MDV_chunk_header 2
+           ...
+         MDV_chunk_header n
+         field 1 data
+         field 2 data
+           ...
+         field n data
+         chunk 1              (optional)
+           ...
+         chunk n
+
+All MDV header information appears at the beginning of the file
+followed by the field data and any chunk data.
+
+
+MDV Headers
+-----------
+A master header is followed by a field header for each of the fields 
+in the dataset.  The master header and field headers are required.
+
+Optional vlevel headers follow the field headers.  Vlevel headers are
+only necessary for data with variable spacing or variable units
+in the third
+dimension.  In such a case, the vlevel headers are used to store the
+details of the third dimension data, e.g. radar elevation angles.  
+For datasets
+with constant spacing and units in the third dimension, 
+the master header and/or field headers
+contain sufficient information for interpreting the data.  Although
+the vlevel headers are optional, if one vlevel header exists for a
+field, then a vlevel header must exist for each field in the dataset.  
+A flag in the master header indicates whether or not vlevel headers 
+are included in the dataset.
+
+Following the vlevel headers are optional chunk headers.  The structure
+and content of the chunk data is defined by the 
+application programmer.  Thus, interpreting chunk data requires "a priori"
+knowledge of the structure and contents of the chunk.
+
+
+MDV Data
+--------
+Data records for each MDV field follow all header information. Chunk data,
+if it is available, is at the end of the MDV file.  
+
+Because MDV is built upon an in-house portability library (dataport), datatypes
+within MDV are specified using dataport typedefs rather than
+compiler-specific data types.  Following are the dataport types used within MDV:
+
+     typedef signed char               si08;   // 1 byte
+     typedef unsigned char             ui08;   // 1 byte
+     typedef signed short              si16;   // 2 bytes
+     typedef unsigned short            ui16;   // 2 bytes
+     typedef signed int                si32;   // 4 bytes
+     typedef unsigned int              ui32;   // 4 bytes
+     typedef float                     fl32;   // 4 bytes
+     typedef double                    fl64;   // 8 bytes
+
+     // available only under IRIX6, DECOSF1, and SUNOS5_64
+     typedef signed long long int      si64;   // 8 bytes
+     typedef unsigned long long int    ui64;   // 8 bytes
+
+The MDV file format has been 
+designed to support various datatypes (bytes, shorts, integers, and floats).
+However, to date, only unsigned 8-bit integers (ui08) are implemented.  
+In order to handle
+data ranges beyond that available with ui08 (0-255), MDV provides
+a bias and scaling factor in each field header.  
+The sample code provided below shows examples
+of using bias and scale for reading and writing mdv data.
+
+MDV data may be stored in a compressed form.  The compression scheme used
+is a run-length encoding of the bytes in the data.  The data may be
+encoded on a plane-by-plane basis (MDV_PLANE_RLE8 format) or on a row-by-
+row basis (MDV_ROW_RLE8 format).  Again, only compression of byte data
+is supported.
+
+For a detailed explanation of MDV data compression, see the MDV file
+description in the mdv/mdv_file.h include file.
+
+
+Application Programmer's Interface (API)
+----------------------------------------
+There are two libraries which can be used for manipulating MDV files:
+libMdv.a which contains classes for manipulating the files within C++
+programs and libmdv.a which contains routines for manipulating the
+files with C programs.  Since RAP is moving towards using C++ for all
+new development, this is the only library that will be fully supported
+in the future.
+
+The API for MDV consists of one of the MDV libraries, the
+libraries upon which the MDV library is dependent,
+and the header files needed for compiling applications which read
+and write MDV files.  The C++ library, libMdv.a, is dependent on
+the following libraries:
+
+	libdidss.a
+	librapformats.a
+	libtoolsa.a
+	libdataport.a
+
+For the C++ library, the header file Mdv/Mdvx.hh gives the methods used
+for manipulating MDV files.  To simplify the file, this file includes
+several helper files (which should not be included directly in your
+programs) to help define the Mdvx class:
+
+	Mdvx_constants.hh	Constants used to define MDV files.
+	Mdvx_enum.hh		Enums used in MDV files.
+	Mdvx_typedefs.hh	Typedefs of headers, etc. in MDV files.
+	Mdvx_print.hh		Prototypes for Mdvx printing methods.
+	Mdvx_read.hh		Prototypes for Mdvx read methods.
+	Mdvx_write.hh		Prototypes for Mdvx write methods.
+	Mdvx_protected.hh	Protected members/methods for the Mdvx class.
+
+The C library, libmdv.a, is dependent on the following libraries:
+
+	librapformats.a
+	libdataport.a
+	libtoolsa.a
+
+For the C library, the header file mdv/mdv_file.h contains structure
+definitions for the MDV file format.  The header file mdv_macros.h
+contains constants used in the MDV structures.  Function prototypes
+for reading and writing MDV data are located in mdv_read.h and mdv_write.h
+respectively, while general MDV handle prototypes are defined in mdv_handle.h.
+
+
+Reading MDV Files in C++ Programs
+---------------------------------
+The easiest way to read or write an MDV file is using the Mdvx class
+within a C++ program.
+
+To read a file using the Mdvx class, you would use code like the
+following:
+
+        #include <Mdv/Mdvx.hh>
+
+        Mdvx mdv_file;
+
+	// Set up the read parameters
+
+        mdv_file.clearRead();
+        mdv_file.setReadPath("myfile.mdv");
+	mdv_file.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+        mdv_file.setReadCompressionType(Mdvx::COMPRESSION_NONE);
+        mdv_file.setReadScalingType(Mdvx::SCALING_NONE);
+
+	if (mdv_file.readVolume() != 0)
+	{
+	  cerr << "Error reading Mdv file myfile.mdv" << endl;
+          exit(-1);
+        }
+
+        // Process the data here
+
+If you only want to read particular fields, vertical levels, etc.,
+there are more "setRead" methods to customize the read operation and
+reduce the memory usage as needed.
+
+
+Reading MDV Files in C Programs
+-------------------------------
+The easiest way to read an MDV file within a C program is using the
+MDV handle routines in mdv/mdv_handle.h.  For example, you might use
+the following code:
+
+	#include <stdio.h>
+
+	#include <mdv/mdv_handle.h>
+	#include <mdv/mdv_read.h>
+
+	MDV_handle_t mdv_handle;
+
+	if (!MDV_init_handle(&mdv_handle))
+        {
+          fprintf(stderr, "Error initializing MDV handle structure.\n");
+          exit(-1);
+        }
+
+	if (!MDV_handle_read_all(&mdv_handle,
+                                 "myfile.mdv",
+                                 MDV_FLOAT32,
+                                 MDV_COMPRESSION_NONE,
+                                 MDV_SCALING_NONE,
+                                 1.0, 0.0))
+	{
+	  fprintf(stderr,
+	          "Error reading MDV file myfile.mdv.\n");
+
+	  exit(-1);
+	}
+
+	/*
+	 * Process the data here
+	 */
+
+	MDV_free_handle(&mdv_handle);
+
+The disadvantage to this method of reading an MDV file is that the entire
+file contents are stored in memory.  If memory is a problem or if you're
+only using a small portion of the MDV file, you may want to read in the
+pieces of the MDV file you need when you need them.  For example, the
+following code reads in the data for the third field (field number 2 since
+everything starts counting at 0) in an MDV file:
+
+	#include <stdio.h>
+
+	#include <mdv/mdv_file.h>
+	#include <mdv/mdv_read.h>
+
+	FILE *mdv_file;
+
+	MDV_master_header_t master_hdr;
+	MDV_field_header_t field_hdr;
+	ui08 *field_data;
+
+	/*
+	 * Open the MDV file
+	 */
+
+	if ((mdv_file = fopen("myfile.mdv", "r")) == NULL)
+	{
+	  fprintf(stderr,
+	          "Error opening MDV file myfile.mdv for reading.\n");
+
+	  exit(-1);
+	}
+
+	/*
+	 * Read in the master header to make sure there are at least
+	 * 3 fields in the file and to get the file contents locations.
+	 */
+
+	if (MDV_load_master_header(mdv_file, &master_hdr) != MDV_SUCCESS)
+	{
+	  fprintf(stderr,
+	          "Error reading master header from file.\n");
+	  fclose(mdv_file);
+	  exit(-1);
+	}
+
+	if (master_hdr.n_fields < 3)
+	{
+	  fprintf(stderr,
+	          "MDV file contains only %d fields, cannot get field 2.\n",
+	          master_hdr.n_fields);
+	  fclose(mdv_file);
+	  exit(-1);
+	}
+
+	/*
+	 * Read in the field header.
+	 */
+
+	if (MDV_load_field_header(mdv_file, &field_hdr, 2) != MDV_SUCCESS)
+	{
+	  fprintf(stderr,
+	          "Error reading field header from MDV file.\n");
+	  fclose(mdv_file);
+	  exit(-1);
+	}
+
+	/*
+	 * Now get the volume of data for the field.  The data will be
+	 * returned as unsigned bytes, regardless of the actual format
+	 * in the file.
+	 */
+
+	if ((field_data = (ui08 *)MDV_get_volume(mdv_file,
+	                                         &field_hdr,
+	                                         MDV_INT8))
+	                == NULL)
+	{
+	  fprintf(stderr,
+	          "Error reading data from MDV file.\n");
+	  fclose(mdv_file);
+	  exit(-1);
+	}
+
+	fclose(mdv_file);
+
+	/*
+	 * Process the data here.
+	 */
+
+	free(field_data);

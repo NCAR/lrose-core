@@ -1,0 +1,122 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for Mdv2Csv
+ *
+ */
+
+commentdef {
+  p_header = "Mdv2Csv: Write field data to csv file  ";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_VERBOSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME and in REALTIME_FCST mode, the program triggers off of a latest data info file. In FILELIST mode the program processed data between start and end times entered on the command line. In FILELIST mode the file processes files entered on the command line.";
+} mode;
+
+paramdef int {
+  p_default = 1402538700;
+  p_descr = "Start time in unix time";
+} startTime;
+
+paramdef int {
+  //p_default = 1409529600;
+  p_default =   1402542300;
+  p_descr = "Start time in unix time";
+} endTime;
+
+
+commentdef {
+  p_header = "DATA INPUT.";
+ }
+
+typedef struct
+{
+  string url;
+  string fieldname;
+} url_fieldname_t;
+
+paramdef struct url_fieldname_t
+{
+p_default = { {"mdvp:://cospa21::/d1/archiveAnalysis/wiebke_lightning/mdv/eval_LTGPOT/ldar5min_150s", "Ltg_Strikes"},
+              {"mdvp:://cospa21::/d1/archiveAnalysis/wiebke_lightning/mdv/eval_LTGPOT/ltgPotIndicators","maxRefl"},
+              {"mdvp:://cospa21::/d1/archiveAnalysis/wiebke_lightning/mdv/eval_LTGPOT/ltgPotIndicators","echoTopHgt"},
+	      {"mdvp:://cospa21::/d1/archiveAnalysis/wiebke_lightning/mdv/eval_LTGPOT/ltgPotIndicators","icemass"},
+	      {"mdvp:://cospa21::/d1/archiveAnalysis/wiebke_lightning/mdv/eval_LTGPOT/ltgPotIndicators","vahirr2"},
+	      {"mdvp:://cospa21::/d1/archiveAnalysis/wiebke_lightning/mdv/eval_LTGPOT/ltgPotIndicators","vahirr1"}, 
+	      {"mdvp:://cospa21::/d1/archiveAnalysis/wiebke_lightning/mdv/eval_LTGPOT/ltgPotIndicators","maxRefl"},
+              {"mdvp:://cospa21::/d1/archiveAnalysis/wiebke_lightning/mdv/eval_LTGPOT/ltgPotIndicators","cloudDepth"}}
+} urlFieldNames[];
+
+commentdef {
+  p_header = "PROCESSING.";
+}
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Maximum age(secs) of mdv dataset that will trigger processing.";
+} max_valid_realtime_age;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+paramdef float {
+  p_default = "$(RAP_DATA_DIR)/$(PROJECT)/csv/ltgIndTruth.csv";
+  p_descr = "Csv output file";
+} csvMissingVal;
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/$(PROJECT)/csv/ltgIndTruth";
+  p_descr = "Csv output file";
+} csvDir;

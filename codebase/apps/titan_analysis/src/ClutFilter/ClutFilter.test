@@ -1,0 +1,382 @@
+/**********************************************************************
+ * TDRP params for ClutFilter
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: ClutFilter.
+//
+// ClutFilter simulates IQ data with clutter and tests a filter on 
+//   removing the clutter.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// CREATING SPECTRA.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Mode for determining moments characteristics.
+// MODE_SINGLE: use single_moments parameter. MODE_MULTIPLE: use 
+//   multiple_moments parameter.
+//
+// Type: enum
+// Options:
+//     MODE_SINGLE
+//     MODE_MULTIPLE
+//
+
+mode = MODE_MULTIPLE;
+// mode = MODE_SINGLE;
+
+///////////// spectra_creation_method /////////////////
+//
+// Method for creating spectra.
+// MODELLED: spectra are created using gaussian models based on the 
+//   specified moments. RECONSTRUCTED: spectra are reconstructed from 
+//   measured spectra.
+//
+// Type: enum
+// Options:
+//     MODELLED
+//     RECONSTRUCTED
+//
+
+spectra_creation_method = RECONSTRUCTED;
+
+//======================================================================
+//
+// MOMENTS FOR MODELLING SPECTRA.
+//
+//======================================================================
+ 
+///////////// single_moments //////////////////////////
+//
+// vel and width values are in m/s. cwr_dbm is clutter/weather power 
+//   ratio, in dBM.
+//
+// Type: struct
+//   typedef struct {
+//      double weather_dbm;
+//      double weather_vel;
+//      double weather_width;
+//      double cwr_dbm;
+//      double clutter_vel;
+//      double clutter_width;
+//   }
+//
+//
+
+single_moments = {
+    weather_dbm = -20,
+    weather_vel = -23,
+    weather_width = 3,
+    cwr_dbm = 40,
+    clutter_vel = 0,
+    clutter_width = 0.25
+};
+
+///////////// mult_moments ////////////////////////////
+//
+// vel and width values are in m/s. cwr_dbm is clutter/weather power 
+//   ratio, in dBM.
+//
+// Type: struct
+//   typedef struct {
+//      double weather_dbm_min;
+//      double weather_dbm_max;
+//      double weather_dbm_delta;
+//      double weather_vel_min;
+//      double weather_vel_max;
+//      double weather_vel_delta;
+//      double weather_width_min;
+//      double weather_width_max;
+//      double weather_width_delta;
+//      double cwr_dbm_min;
+//      double cwr_dbm_max;
+//      double cwr_dbm_delta;
+//      double clutter_vel_min;
+//      double clutter_vel_max;
+//      double clutter_vel_delta;
+//      double clutter_width_min;
+//      double clutter_width_max;
+//      double clutter_width_delta;
+//   }
+//
+//
+
+mult_moments = {
+    weather_dbm_min = -20,
+    weather_dbm_max = -20,
+    weather_dbm_delta = 10,
+    weather_vel_min = -25,
+    weather_vel_max = 25,
+    weather_vel_delta = 0.25,
+    weather_width_min = 3,
+    weather_width_max = 3,
+    weather_width_delta = 1,
+    cwr_dbm_min = 40,
+    cwr_dbm_max = 40,
+    cwr_dbm_delta = 5,
+    clutter_vel_min = 0,
+    clutter_vel_max = 0,
+    clutter_vel_delta = 0.25,
+    clutter_width_min = 0.25,
+    clutter_width_max = 0.25,
+    clutter_width_delta = 0.25
+};
+
+///////////// nsamples ////////////////////////////////
+//
+// Number of samples in spectrum.
+// Type: int
+//
+
+nsamples = 64;
+
+///////////// use_exponential /////////////////////////
+//
+// Option to simulate noise with the exponential function.
+// If FALSE a smooth gaussian is produced. If TRUE, the data is 
+//   exponentially disctibuted about the the gaussian.
+// Type: boolean
+//
+
+use_exponential = TRUE;
+
+///////////// exponential_lambda //////////////////////
+//
+// Mean of exponential distribution.
+// Type: double
+//
+
+exponential_lambda = 0.5;
+
+///////////// force_zero_phase ////////////////////////
+//
+// Option to force the phase to 0.
+// This has the effect of generating only real parts.
+// Type: boolean
+//
+
+force_zero_phase = FALSE;
+
+//======================================================================
+//
+// FILES FOR RECONSTRUCTING SPECTRA.
+//
+//======================================================================
+ 
+///////////// weather_spectra_input_path //////////////
+//
+// Path to file containing measured weather spectra.
+// The weather spectra are used to reconstruct combined spectra.
+// Type: string
+//
+
+weather_spectra_input_path = "$(HOME)/projDir/spectra/spectra_wx_64.out";
+
+///////////// clutter_spectra_input_path //////////////
+//
+// Path to file containing measured clutter spectra.
+// The clutter spectra are used to reconstruct combined spectra.
+// Type: string
+//
+
+clutter_spectra_input_path = "$(HOME)/projDir/spectra/spectra_clutter_64.out";
+
+///////////// weather_spectrum_index //////////////////
+//
+// Index of specified spectrum in weather spectra file.
+// Type: int
+//
+
+weather_spectrum_index = 4612;
+
+///////////// clutter_spectrum_index //////////////////
+//
+// Index of specified spectrum in clutter spectra file.
+// Type: int
+//
+
+clutter_spectrum_index = 2525;
+
+///////////// n_reconstructed /////////////////////////
+//
+// Number of spectra to be reconstructed.
+// Type: int
+//
+
+n_reconstructed = 1000;
+
+///////////// reconstructed_cwr ///////////////////////
+//
+// Clutter-weather ratio for reconstructed spectra (dB).
+// Type: double
+//
+
+reconstructed_cwr = 10;
+
+///////////// reconstructed_max_clutter_abs_vel ///////
+//
+// Max clutter absolute velocity for reconstructed spectra (m/s).
+// Spectra which do not meet this criterion will not be used.
+// Type: double
+//
+
+reconstructed_max_clutter_abs_vel = 0.5;
+
+///////////// reconstructed_max_clutter_width /////////
+//
+// Max clutter width for reconstructed spectra (m/s).
+// Spectra which do not meet this criterion will not be used.
+// Type: double
+//
+
+reconstructed_max_clutter_width = 0.5;
+
+//======================================================================
+//
+// RADAR DETAILS.
+//
+//======================================================================
+ 
+///////////// wavelength //////////////////////////////
+//
+// The wavelength of the radar (cm).
+// Type: double
+//
+
+wavelength = 10;
+
+///////////// prt /////////////////////////////////////
+//
+// The PRT of the data (miscro-secs).
+// Type: int
+//
+
+prt = 1000;
+
+///////////// receiver_noise //////////////////////////
+//
+// Receiver noise (watts).
+// Type: double
+//
+
+receiver_noise = 1e-06;
+
+//======================================================================
+//
+// FILTER OPTIONS.
+//
+//======================================================================
+ 
+///////////// max_abs_clutter_vel /////////////////////
+//
+// Max clutter velocity for filter (m/s).
+// Type: double
+//
+
+max_abs_clutter_vel = 0.5;
+
+///////////// initial_notch_width /////////////////////
+//
+// Width of initial notch (m/s).
+// This is the first guess for the notch. By iterating the algorithm may 
+//   narrow the notch.
+// Type: double
+//
+
+initial_notch_width = 0;
+
+///////////// max_clutter_to_weather_ratio ////////////
+//
+// Max ratio of clutter power to weather power (dB).
+// If the ratio exceeds this, we will assume all of the power is from 
+//   clutter.
+// Type: double
+//
+
+max_clutter_to_weather_ratio = 50;
+
+///////////// spectral_noise_power ////////////////////
+//
+// Noise power for filter (mW).
+// This is the noise in the spectral domain.
+// Type: double
+//
+
+spectral_noise_power = 0;
+
+//======================================================================
+//
+// OUTPUT FILES.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory for spactra files.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// output_file_base ////////////////////////
+//
+// Base name for output files.
+// Output files will start with this, and end with names which describe 
+//   their specifics.
+// Type: string
+//
+
+output_file_base = "test";
+
+///////////// write_spectra_files /////////////////////
+//
+// Option to write spectra to files.
+// Type: boolean
+//
+
+write_spectra_files = TRUE;
+
+///////////// write_results_file //////////////////////
+//
+// Option to write results to files.
+// Type: boolean
+//
+
+write_results_file = TRUE;
+

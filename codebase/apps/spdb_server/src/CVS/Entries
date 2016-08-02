@@ -1,0 +1,24 @@
+/.cvsignore/1.1/Fri Oct 23 22:00:43 2015//
+/Makefile/1.22/Fri Nov  9 11:49:59 2001//
+/Makefile.aoaws/1.3/Fri Jun  4 16:22:37 1999//
+/Makefile.ocnd/1.1/Fri Oct  8 15:25:24 1999//
+/Makefile.wsddm/1.2/Wed Jun  2 20:37:26 1999//
+D/ac_spdb2symprod////
+D/bdry_spdb2symprod////
+D/chunk_spdb2symprod////
+D/dist_spdb_data////
+D/flt_path_spdb2symprod////
+D/ltg_spdb2symprod////
+D/mad_spdb2symprod////
+D/pirep_spdb2symprod////
+D/posn_rpt_spdb2symprod////
+D/sigmet_spdb2symprod////
+D/spdb_query////
+D/spdb_server////
+D/spdb_server_poll////
+D/trec_gauge_spdb2symprod////
+D/tstorms_spdb2symprod////
+D/vergrid_spdb2symprod////
+D/wxhazards_spdb2symprod////
+D/xspdb_query////
+D/_makefiles////

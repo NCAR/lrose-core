@@ -1,0 +1,43 @@
+/**********************************************************************
+ * TDRP params for DsMdvServer
+ **********************************************************************/
+
+//======================================================================
+//
+// Static file support.
+//
+// Option to serve out data from a static file if a time-based request 
+//   is made.
+//
+//======================================================================
+ 
+///////////// use_static_file /////////////////////////
+//
+// Option to serve out data from a static file.
+// If set, the data will always be read from a static file. The file url 
+//   is specified below. The times in the header will be set to match the 
+//   request time.
+// Type: boolean
+//
+
+use_static_file = TRUE;
+
+///////////// static_file_url /////////////////////////
+//
+// URL for static file.
+// Type: string
+//
+
+static_file_url = "mdv/constant/constant_vil_3.5_2km.mdv";
+
+///////////// fill_missing_regions ////////////////////
+//
+// Option to fill in regions of missing data from surrounding areas.
+// If set, the server will attempt to fill in missing regions, using 
+//   adjacent data. This will only be done if less than 20% of the area is 
+//   missing.
+// Type: boolean
+//
+
+fill_missing_regions = FALSE;
+

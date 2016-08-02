@@ -1,0 +1,271 @@
+/**********************************************************************
+ * TDRP params for MdvTSmooth
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: MdvTSmooth.
+//
+// MdvTSmooth performs temporal smoothing on Mdv data. It uses files 
+//   from the past to smooth out the current file. The usage is 
+//   'MdvTSmooth -params params_file'.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUG AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_url = "mdv/ctrec/ftg";
+
+///////////// set_vlevel_limits ///////////////////////
+//
+// Option to set plane vlevel limits.
+// Mutually exclusive with set_plane_num_limits.
+// Type: boolean
+//
+
+set_vlevel_limits = FALSE;
+
+///////////// lower_vlevel ////////////////////////////
+//
+// Lower plane vlevel limit.
+// Type: float
+//
+
+lower_vlevel = 0;
+
+///////////// upper_vlevel ////////////////////////////
+//
+// Upper plane vlevel limit.
+// Type: float
+//
+
+upper_vlevel = 0;
+
+///////////// composite ///////////////////////////////
+//
+// Option for creating composite.
+// Type: boolean
+//
+
+composite = FALSE;
+
+///////////// field_names_unsmoothed //////////////////
+//
+// List of field names to be included in the output file, but not 
+//   smoothed.
+// Type: string
+// 1D array - variable length.
+//
+
+field_names_unsmoothed = { "dBZ" };
+
+///////////// field_names_smoothed ////////////////////
+//
+// List of fields to be smoothed.
+// Type: string
+// 1D array - variable length.
+//
+
+field_names_smoothed = { "U comp", "V comp" };
+
+///////////// remap_xy ////////////////////////////////
+//
+// Option to remap grid in x,y.
+// If true, set the remap parameters below.
+// Type: boolean
+//
+
+remap_xy = FALSE;
+
+///////////// remap_projection ////////////////////////
+//
+// Projection for remapping in x,y.
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_FLAT
+//
+
+remap_projection = PROJ_FLAT;
+
+///////////// remap_grid //////////////////////////////
+//
+// Grid parameters for remapping in x,y.
+// These params apply to all projection types.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+remap_grid = { 1, 1, 0, 0, 1, 1 };
+
+///////////// remap_rotation //////////////////////////
+//
+// Remapped grid rotation.
+// This applies only to PROJ_FLAT projections.
+// Type: double
+//
+
+remap_rotation = 0;
+
+///////////// remap_origin_lat ////////////////////////
+//
+// Remapped grid origin latitude.
+// This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_origin_lat = 0;
+
+///////////// remap_origin_lon ////////////////////////
+//
+// Remapped grid origin longitude.
+// This applies only to PROJ_FLAT and PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_origin_lon = 0;
+
+///////////// remap_lat1 //////////////////////////////
+//
+// Remapped grid reference latitude 1.
+// This applies only to PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_lat1 = 0;
+
+///////////// remap_lat2 //////////////////////////////
+//
+// Remapped grid reference latitude 2.
+// This applies only to PROJ_LAMBERT_CONF projections.
+// Type: double
+//
+
+remap_lat2 = 0;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// Output data is written to this URL.
+// Type: string
+//
+
+output_url = "mdv/smoothed";
+
+///////////// smoothing_period ////////////////////////
+//
+// Files from this period in the past will be used for smoothing.
+// Smoothing period - secs.
+// Type: int
+//
+
+smoothing_period = 1800;
+
+///////////// current_weighting_factor ////////////////
+//
+// Weight applied to data at the current time.
+// Weighting factor for current data.
+// Type: float
+//
+
+current_weighting_factor = 1;
+
+///////////// past_weight_slope ///////////////////////
+//
+// e.g. if current_weighting_factor is 1.0, and the slope is -0.8, then 
+//   the weight at 30 mins in the past will be 0.6, and at 1 hour will be 
+//   0.2.
+// Slope for computing weights for past files (1/hr).
+// Type: float
+//
+
+past_weight_slope = -1;
+
+///////////// output_encoding_type ////////////////////
+//
+// Set encoding type.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding_type = ENCODING_INT8;
+

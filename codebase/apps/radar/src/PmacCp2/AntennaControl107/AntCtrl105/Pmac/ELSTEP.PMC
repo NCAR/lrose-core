@@ -1,0 +1,58 @@
+;step elevation back and forth with stepsize in elstep
+;steps are done at maximum performance
+&1a
+&2a
+#include "spoldefm.h"
+close
+open prog  311
+delete gather delete trace
+clear
+cmd "&2"
+b10
+while (2>1)
+;compute elevation basic parameters
+elacmax=360.*(i217/i227)*1000000.;get max el acceleration from i variables
+elvmax=360.*(i216/i227)*1000     ;get el max velocity deg/sec
+elts0=i221/1000                  ;get ts0
+elts03=elts0*elts0*elts0         ;cube it
+elk=elacmax/elts0                ;get el K value
+
+;compute elevation parameters for step transitions
+eltam=elvmax/elacmax+elts0       ;el max perf TA to max velocity
+eltlm=eltam-2*elts0              ;max perf TL
+temp2=elts0*eltlm*eltlm          ;ts0tl^2
+elxmv=3*elts0*elts0*eltlm+temp2+2*elts03
+elxmv=(elk/2)*elxmv
+elxts=elk*elts03                 ;x for TS
+
+;compute elevation transition time at maximum performance
+if (elstep>2*elxmv)      ;bigsteps
+        elta=eltam
+        elts=elts0
+        eltm=elta+(elstep/2-elxmv)/elvmax
+        elttt=eltm+elta
+else 
+   if (elstep>2*elxts)    ;medium steps
+        elts=elts0
+        temp1=9*elts03*elts0
+ temp1=temp1-4*elts0*(2*elts03-(elstep/elk))
+ temp2=(-3*elts0*elts0+sqrt(temp1))/(2*elts0)
+        elta=2*elts+temp2
+        eltm=elta
+        elttt=2*elta
+   else                  ;tiny steps
+        temp1=.333333*ln(elstep/(2*elk))
+        elts=exp(temp1)
+        elta=2*elts
+        eltm=elta
+        elttt=2*elta
+   endif
+endif
+ta(elta*1000) ts(elts*1000)
+;while (2>1)
+b10
+dwell(elta*2000)
+b(10+elstep)
+dwell(elta*2000)
+endwhile
+close

@@ -1,0 +1,4 @@
+#! /bin/csh
+
+RadxMergeFields -params RadxMergeFields.cmd -start "2014 09 29 22 00 00" -end "2014 09 29 23 59 59" -debug
+

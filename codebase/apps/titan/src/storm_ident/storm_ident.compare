@@ -1,0 +1,570 @@
+/**********************************************************************
+ * TDRP params for storm_ident
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: long
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In realtime mode, storm_ident waits for a new input file. In archive 
+//   mode, it moves through the files between the times set by the user.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+///////////// tracking ////////////////////////////////
+//
+// Option to run tracking.
+// If this is set, storm_ident will communicate with storm_track.
+// Type: boolean
+//
+
+tracking = FALSE;
+
+///////////// start_storm_track ///////////////////////
+//
+// Option to start storm_track automatically.
+// If this is set, storm_track will be started from within storm_ident.
+// Type: boolean
+//
+
+start_storm_track = FALSE;
+
+///////////// storm_track_command_line ////////////////
+//
+// Command line for starting storm_track.
+// Type: string
+//
+
+storm_track_command_line = "&";
+
+///////////// shmem_key ///////////////////////////////
+//
+// Shared mem key.
+// This key is used for shared memory communication with storm_track and 
+//   the track_server.
+// Minimum val: 10000
+// Type: long
+//
+
+shmem_key = 44000;
+
+///////////// rdata_dir ///////////////////////////////
+//
+// Radar data directory - input.
+// Type: string
+//
+
+rdata_dir = "/home/dixon/data/mdv/denCart";
+
+///////////// rdata_file_ext //////////////////////////
+//
+// Radar data files extension.
+// Type: string
+//
+
+rdata_file_ext = "mdv";
+
+///////////// storm_data_dir //////////////////////////
+//
+// Storms data directory - output.
+// Type: string
+//
+
+storm_data_dir = "./titan/storms";
+
+///////////// projection //////////////////////////////
+//
+// Input grid projection.
+// This is the projection of the input radar data.
+//
+// Type: enum
+// Options:
+//     PROJ_FLAT
+//     PROJ_LATLON
+//
+
+projection = PROJ_FLAT;
+
+///////////// dbz_field ///////////////////////////////
+//
+// dBZ field.
+// Field number in radar data for dBZ values.
+// Minimum val: 0
+// Type: long
+//
+
+dbz_field = 0;
+
+///////////// vel_field ///////////////////////////////
+//
+// Vel field.
+// Field number in radar data for velocity values.
+// Minimum val: 0
+// Type: long
+//
+
+vel_field = 1;
+
+///////////// vel_available ///////////////////////////
+//
+// Flag to indicate if velocity data is available.
+// If this is set, velocity data is available in the vel_field.
+// Type: boolean
+//
+
+vel_available = TRUE;
+
+///////////// low_dbz_threshold ///////////////////////
+//
+// Lower dBZ threshold.
+// Storms reflectivity must exceed this threshold.
+// Minimum val: -30
+// Maximum val: 180
+// Type: double
+//
+
+low_dbz_threshold = 35;
+
+///////////// high_dbz_threshold //////////////////////
+//
+// Upper dBZ threshold.
+// Storms reflectivity must not exceed this threshold.
+// Minimum val: -30
+// Maximum val: 180
+// Type: double
+//
+
+high_dbz_threshold = 80;
+
+///////////// base_threshold //////////////////////////
+//
+// Storm base threshold (km).
+// Storms identification is only performed above this threshold.
+// Minimum val: 0
+// Maximum val: 25
+// Type: double
+//
+
+base_threshold = 0;
+
+///////////// top_threshold ///////////////////////////
+//
+// Storm top threshold (km).
+// Storms identification is only performed below this threshold.
+// Minimum val: 0
+// Maximum val: 25
+// Type: double
+//
+
+top_threshold = 30;
+
+///////////// min_storm_size //////////////////////////
+//
+// Minimum storm size (km2 or km3 depending on data).
+// Storms must exceed this size.  If the data is 2D, the size is in km2 
+//   units; if the data is 3D, the size is in km3.  This parameter used to 
+//   be called volume_threshold.
+// Minimum val: 0
+// Type: double
+//
+
+min_storm_size = 30;
+
+///////////// max_storm_size //////////////////////////
+//
+// Maximum storm size (km2 or km3 depending on data).
+// Storms must not exceed this size.  If the data is 2D, the size is in 
+//   km2; if the data is 3D, the size is in km3.  This parameter used to 
+//   be called volume_limit.
+// Minimum val: 1
+// Type: double
+//
+
+max_storm_size = 1e+09;
+
+///////////// check_range_limits //////////////////////
+//
+// Option to check for storm range limits.
+// If the storm is at the limit of radar range, a flag is set.
+// Type: boolean
+//
+
+check_range_limits = TRUE;
+
+///////////// check_second_trip ///////////////////////
+//
+// Option to check for second trip.
+// Type: boolean
+//
+
+check_second_trip = TRUE;
+
+///////////// sectrip_vert_aspect /////////////////////
+//
+// Second trip detection vertical aspect threshold.
+// If the vertical aspect ratio exceeds this value, the storm is flagged 
+//   as second-trip, provided the orientation is aligned with the storm 
+//   azimuth from the radar.
+// Minimum val: 1
+// Maximum val: 20
+// Type: double
+//
+
+sectrip_vert_aspect = 4;
+
+///////////// sectrip_horiz_aspect ////////////////////
+//
+// Second trip detection horizontal aspect threshold.
+// If the horizontal aspect ratio (based on the ellipse) exceeds this 
+//   value, the storm is flagged as second-trip, provided the orientation 
+//   is aligned with the storm azimuth from the radar.
+// Minimum val: 1
+// Maximum val: 20
+// Type: double
+//
+
+sectrip_horiz_aspect = 4;
+
+///////////// sectrip_orientation_error ///////////////
+//
+// Allowable second trip orientation error.
+// For a storm to be flagged as second-trip, the orientation must be 
+//   aligned with the storm azimuth from the radar, within this allowable 
+//   error.
+// Minimum val: 1
+// Maximum val: 90
+// Type: double
+//
+
+sectrip_orientation_error = 10;
+
+///////////// hail_dbz_threshold //////////////////////
+//
+// Hail reflectivity threshold.
+// The threshold between rain and hail (dBZ).
+// Minimum val: 40
+// Maximum val: 70
+// Type: double
+//
+
+hail_dbz_threshold = 55;
+
+///////////// ZR //////////////////////////////////////
+//
+// Z-R parameters.
+// Parameters in Z-R relationship. As defaults use 200.0, 1.6.
+//
+// Type: struct
+//   typedef struct {
+//      double coeff;
+//      double expon;
+//   }
+//
+//
+
+ZR = { 200, 1.6 };
+
+///////////// ZM //////////////////////////////////////
+//
+// Z-M parameters.
+// Parameters in Z-M relationship. As defaults use 20465.0, 1.75.
+//
+// Type: struct
+//   typedef struct {
+//      double coeff;
+//      double expon;
+//   }
+//
+//
+
+ZM = { 20465, 1.75 };
+
+///////////// dbz_hist_interval ///////////////////////
+//
+// Dbz histogram interval.
+// Reflectivity interval for histogram computations related to the 
+//   reflectivity distribution.
+// Minimum val: 1
+// Maximum val: 10
+// Type: double
+//
+
+dbz_hist_interval = 3;
+
+///////////// store_storm_runs ////////////////////////
+//
+// Option to store runs in storm file.
+// Type: boolean
+//
+
+store_storm_runs = TRUE;
+
+///////////// store_proj_runs /////////////////////////
+//
+// Option to store projected area runs in storm file.
+// Type: boolean
+//
+
+store_proj_runs = TRUE;
+
+///////////// create_verification_files ///////////////
+//
+// Option to create verification files.
+// If this is set, verification files will be stored in verify_dir.
+// Type: boolean
+//
+
+create_verification_files = FALSE;
+
+///////////// verify_dir //////////////////////////////
+//
+// Verify data directory - output.
+// Type: string
+//
+
+verify_dir = "null";
+
+///////////// check_morphology ////////////////////////
+//
+// Option to check morphology.
+// If this is set, morphology will be used for storm definition. A check 
+//   is performed on storm morphology to reduce apparent mergers. The 
+//   technique is as follows: 1. Compute euclidean distance (ed) of each 
+//   point from edge of storm clump 2. Compute reflectivity excess above 
+//   threshold, and divide by morphology_refl_divisor (in dbz/km). 3. Add 
+//   ed to refl excess, to get interest map 4. Threshold interest map 
+//   using morphology_erosion_threshold (in km). 5. Erode points which do 
+//   not exceed the threshold, and which are not adjacent to a point which 
+//   exceeds the threshold.
+// Type: boolean
+//
+
+check_morphology = TRUE;
+
+///////////// create_morphology_files /////////////////
+//
+// Option to create morphology files.
+// If this is set, morphology files will be stored in morphology_dir.
+// Type: boolean
+//
+
+create_morphology_files = TRUE;
+
+///////////// morphology_dir //////////////////////////
+//
+// Morphology data directory - debugging.
+// Type: string
+//
+
+morphology_dir = "./mdv/morph";
+
+///////////// morphology_erosion_threshold ////////////
+//
+// Erosion threshold for morphology check (km).
+// Threshold to which morphology erosion is performed.
+// Minimum val: 0
+// Maximum val: 100
+// Type: double
+//
+
+morphology_erosion_threshold = 5;
+
+///////////// morphology_refl_divisor /////////////////
+//
+// Erosion threshold for morphology check (dbz/km).
+// The morphology field is obtained by adding the euclidean distance to 
+//   storm edge (km) to the reflectivity excess (above threshold) divided 
+//   by this value (dbz/km).
+// Minimum val: 0.1
+// Maximum val: 100
+// Type: double
+//
+
+morphology_refl_divisor = 10;
+
+///////////// check_tops //////////////////////////////
+//
+// Option to check tops.
+// If this is active, areas with radar tops below the threshold will be 
+//   removed from the data prior to storm identification. The margin 
+//   allows you to account for tilted storms, leaving a  margin around the 
+//   area to be removed.
+// Type: boolean
+//
+
+check_tops = TRUE;
+
+///////////// create_tops_files ///////////////////////
+//
+// Option to create tops files.
+// If this is set, tops files will be stored in tops_dir.
+// Type: boolean
+//
+
+create_tops_files = FALSE;
+
+///////////// tops_dir ////////////////////////////////
+//
+// Radar tops data directory - debugging.
+// Type: string
+//
+
+tops_dir = "null";
+
+///////////// min_radar_tops //////////////////////////
+//
+// Minimum radar tops (km).
+// Minimum radar tops for valid radar data.
+// Minimum val: 0
+// Maximum val: 25
+// Type: double
+//
+
+min_radar_tops = 4.5;
+
+///////////// tops_edge_margin ////////////////////////
+//
+// Margin placed on min_tops field (km).
+// This takes into account the fact that some storms may be tilted.
+// Minimum val: 0
+// Maximum val: 10
+// Type: double
+//
+
+tops_edge_margin = 1.5;
+
+///////////// vel_to_m_per_sec_scale //////////////////
+//
+// Factor to convert velocity field to m/s.
+// This is included in case the velocity is not in m/s.
+// Minimum val: 0
+// Type: double
+//
+
+vel_to_m_per_sec_scale = 1;
+
+///////////// max_missing_data_gap ////////////////////
+//
+// Max missing data gap (secs).
+// In archive mode, if reftime is set on the command line, storm_ident 
+//   searches backwards from the reftime for data files with no time gaps 
+//   exceeding max_missing_data_gap (secs), to search for the files for 
+//   analysis. If starttime and endtime are set, these are used instead. 
+//   In realtime mode, if auto_restart is false, storm_ident looks back 
+//   from latest data time for the first gap exceeding 
+//   max_missing_data_gap. Files since this gap are processed.
+// Minimum val: 1
+// Type: double
+//
+
+max_missing_data_gap = 3600;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this.
+// Minimum val: 1
+// Type: double
+//
+
+max_realtime_valid_age = 360;
+
+///////////// auto_restart ////////////////////////////
+//
+// Auto-restart option.
+// If set, the program restarts at restart_time (GMT), copying rome data 
+//   so that tracks will have some history. This ensures that the storm 
+//   and track files will not grow too big.
+// Type: boolean
+//
+
+auto_restart = FALSE;
+
+///////////// restart_time ////////////////////////////
+//
+// The time in the day (UCT/GMT) at which restart occurs.
+// The program will check for the passing of this time. Once data beyond 
+//   this time is found, restart will occur.
+//
+// Type: struct
+//   typedef struct {
+//      long hour;
+//      long min;
+//   }
+//
+//
+
+restart_time = { 0, 0 };
+
+///////////// restart_overlap_period //////////////////
+//
+// The period copied to the new file on restart (secs).
+// On restart, the program copies some of the previous file, to provide 
+//   history for storm_track. This is the duration of that data.
+// Minimum val: 1
+// Type: long
+//
+
+restart_overlap_period = 3600;
+
+///////////// remove_old_files_on_restart /////////////
+//
+// Cleanup on restart option.
+// If set, the program will delete old storm files on restart.
+// Type: boolean
+//
+
+remove_old_files_on_restart = FALSE;
+
+///////////// restart_no_delay ////////////////////////
+//
+// Flag to force restart at first opportunity.
+// Normally the restart time will be set so that at least one day 
+//   elapses before the restart. This flag forces the restart at the first 
+//   opportunity.
+// Type: boolean
+//
+
+restart_no_delay = FALSE;
+

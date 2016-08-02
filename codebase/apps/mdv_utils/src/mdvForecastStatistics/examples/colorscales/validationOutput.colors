@@ -1,0 +1,10 @@
+# Colors for output validation field from mdvForecastStatistics
+# Niles Oien October 2006
+
+-0.5 0.5 black ! Ignored
+0.5  1.5 green ! NonEvent
+1.5  2.5 red   ! FalseAlarm
+2.5  3.5 blue  ! Miss
+3.5  4.5 white ! Hit
+
+#

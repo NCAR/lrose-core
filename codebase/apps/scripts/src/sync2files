@@ -1,0 +1,342 @@
+#!/usr/bin/perl
+#
+# Name: sync2files
+#
+# Purpose: To rsync 2 files, one local and one remote, such that the latest
+#          file is made current in both places.
+#
+# Inputs:  See usage below
+#
+# Output:  Returns 1 on success, 0 on error.
+#
+# Deirdre Garvey      NCAR/RAP/SDG      10-AUG-1998
+#
+#===========================================================================
+
+# External libs
+
+use Getopt::Long;
+
+# Constants
+
+$MISSING=-1;                              # No data
+$FAILURE=0;                               # Error return
+$SUCCESS=1;                               # Successful return
+$MATCH=2;                                 # Files are a match
+$REMOTE_NEWER=3;                          # Remote file newer than local
+$LOCAL_NEWER=4;                           # Local file newer than remote
+
+# Get the program basename.
+
+($prog = $0) =~ s|.*/||;
+
+# Initialize program defaults
+
+$Tmp_dir="/tmp";                     # temp directory for writing rsync output to
+$Tmp_filename=$prog;                 # temp filename for writing rsync output to
+$Start_time=`date +%s`;              # timestamp for creating unique temp filename
+chop($Start_time);
+$Rsync_opts="-cvvu";                 # rsync options, need the -vv for sufficient output,
+$Rsync_noupdate_opts="-ncvvu";
+$Return_val=$SUCCESS;
+
+# Save the usage to print to the user if there is a problem
+
+$usage =
+    "Usage: $prog -l local-filename -r remote-filename [-dhn]\n" .
+    "Options:\n" .
+    "   -d --debug                    : Print debug messages\n" .
+    "   -h --help                     : Print this usage message\n" .
+    "   -l --local <local-filename>   : Local filename to sync. This must be a full filename\n" .
+    "   -n --notreally                : Do not sync files, just dry-run\n" .
+    "   -r --remote <remote-filename> : Remote filename to sync. This can be a directory.\n" .
+    "   -t --tmpdir                   : Temporary directory to use (/tmp is default)\n" .
+    "Purpose:\n" .
+    "   To sync 2 files, one remote and one local, so that the latest file\n" .
+    "   is made current in both locations.\n";
+
+# Get the arguments from the command line
+
+$result = &GetOptions('help',
+		      'local=s',
+		      'notreally',
+		      'remote=s',
+		      'tmpdir=s',
+		      'debug');
+
+if ($result == 0 || $opt_help) {
+    print $usage;
+    exit $FAILURE;
+}
+
+if ($opt_debug) 
+{
+    print "Command Line Options:\n";
+    print "   help = $opt_help\n";
+    print "   local_file = $opt_local\n";
+    print "   remote_file = $opt_remote\n";
+    print "   notreally = $opt_notreally\n";
+    print "   tmpdir = $opt_tmpdir\n";
+    print "   debug = $opt_debug\n";
+    print "\n";
+}
+
+# Error checking on command line
+
+if (!$opt_local) {
+    print("ERROR: You must specify a local-filename on the command line\n");
+    exit $FAILURE;
+}
+
+if (!$opt_remote) {
+    print("ERROR: You must specify a remote-filename on the command line\n");
+    exit $FAILURE;
+}
+
+if ($opt_tmpdir) {
+    $tmpdir=$opt_tmpdir;
+}
+else {
+    $tmpdir=$Tmp_dir;
+}
+
+if ($opt_notreally) {
+    $Rsync_opts=$Rsync_noupdate_opts;
+}
+
+# Build the temporary filename
+
+$tmp_fname=join('/', $tmpdir, $Tmp_filename);
+$tmp_fname_full=join('.', $tmp_fname, $Start_time);
+
+# Get just the filename portion of the local and remote files, skip
+# the rest of the strings. Need this for matches later on.
+
+(@locarr)=split('/', $opt_local);
+$numloc=@locarr;
+$local_fname_only=$locarr[$numloc-1];
+
+(@remarr)=split('/', $opt_remote);
+$numrem=@remarr;
+$remote_fname_only=$remarr[$numrem-1];
+
+if ($opt_debug) {
+    print("Local filename: $local_fname_only, remote: $remote_fname_only\n");
+}
+
+# Remove tmp files
+
+if ($opt_debug) {
+    print("Removing the temporary files $tmp_fname\n");
+}
+system ("rm -f $tmp_fname*");
+
+# Try to rsync from local to remote
+
+$string=join(" ", rsync, $Rsync_opts, $opt_local, $opt_remote, '>' ,$tmp_fname_full, '2>&1');
+
+if ($opt_debug) {
+    print("Rsync from LOCAL to REMOTE, $opt_local to $opt_remote\n");
+    print("Command string: $string\n");
+}
+
+system $string;
+
+# Parse the return from rsync
+
+($ret_val, $newer)=Parse_rsync_output($tmp_fname_full, $local_fname_only, $opt_notreally, $opt_debug);
+
+# Exit if major errors
+
+if ($ret_val == $FAILURE) {
+    exit $FAILURE;
+}
+
+# Remove tmp file
+
+if ($opt_debug) {
+    print("Removing the temporary file: $tmp_fname_full\n");
+}
+system ("rm -f $tmp_fname_full");
+
+# Info output
+
+if ($newer == $LOCAL_NEWER) {
+    print("Updated remote from local, $opt_remote from $opt_local\n");
+}
+
+# Need to rsync remote to local since remote is newer
+
+if ($newer == $REMOTE_NEWER) {
+
+    $string=join(" ", rsync, $Rsync_opts, $opt_remote, $opt_local, '>' ,$tmp_fname_full, '2>&1');
+
+    if ($opt_debug) {
+	print("Remote file is newer than local\n");
+	print("Rsync from REMOTE to LOCAL, $opt_remote to $opt_local\n");
+	print("Command string: $string\n");
+    }
+
+    system $string;
+
+    # Parse the return from rsync
+
+    ($ret_val, $newer)=Parse_rsync_output($tmp_fname_full, $local_fname_only, $opt_notreally, $opt_debug);
+    $Return_val = $ret_val;
+
+    # Info output
+
+    if ($ret_val == $SUCCESS) {
+	print("Updated local from remote, $opt_local from $opt_remote\n");
+    }
+}
+
+# Remove tmp files
+
+if ($opt_debug) {
+    print("Removing the temporary file: $tmp_fname_full\n");
+}
+system ("rm -f $tmp_fname_full");
+
+# Done
+
+exit $Return_val;
+
+
+#------------------------------------------------------------------------------
+# Subroutine: Parse_rsync_output()
+#
+# Usage: ($return_val, $newer)=Parse_rsync_output($rsync_outfile, 
+#                                         $local_fname_2sync, $notreally_flag,
+#                                         $debug_flag)
+#
+# Function: Parse the rsync output to look for clues on the success/failure of rsync
+#
+# Input: The rsync output in $rsync_outfile
+#        The name of the file to be rsynced in $local_fname_2sync
+#        The notreally flag
+#        The debug flag
+#
+# Output: Returns (in return_val), 1 if successful or 0 on error
+#         Returns (in newer), 1 if the remote file is newer than the local
+#                 2 if the local file is newer, or 0 if they are identical
+#
+#
+sub Parse_rsync_output
+{
+    local ($rsync_outfile, $local_fname_2sync, $notreally_flag, $debug_flag) = @_;
+
+    # Initialize
+
+    local($sub_name, $return_val);
+    $sub_name="Parse_rsync_output";
+    $return_val=$FAILURE;
+    $newer=$MISSING;
+    $data_pushed=$FAILURE;
+
+    # Open the temporary file
+
+    unless (open(TMPFILE, $rsync_outfile)) {
+	print("ERROR: $sub_name: Cannot open the file $rsync_outfile\n");
+	print("       containing results of rsync\n");
+	return($return_val, $newer);
+	}
+
+    # Read through the lines of the file
+
+    $line_num=0;
+    $found_fname=$FAILURE;
+    $found_data=$FAILURE;
+    $return_val=$SUCCESS;
+
+    while ($line = <TMPFILE>) {
+
+	if ($line =~ /$local_fname_2sync/) {
+
+	    $found_fname=$SUCCESS;
+	    $newer=$LOCAL_NEWER; # default
+
+	    # Remote file is newer than local, rsync did not update it
+	    # with local file
+
+	    if ($line =~ /is newer/) {
+		$newer=$REMOTE_NEWER;
+	    }
+
+	    # Files are a match
+
+	    if ($line =~ /uptodate/) {
+		$newer=$MATCH;
+		print("Files are a match. No update performed\n");
+	    }
+
+	} #endif (line=fname)
+
+	# Was data attempted to be transferred or not? If we did attempt the
+	# rsync, there will be a data value
+
+	if ($line =~ /data/) {
+
+	    $found_data=$SUCCESS;
+
+	    ($total, $matches, $tag_hits, $false_alarms, $data)=split(/=/, $line);
+	    
+	    if ($data > 0) {
+		$data_pushed=$SUCCESS;
+	    }
+	} #endif (line=data)
+
+	if ($debug_flag) {
+##	    print("line $line_num: $line");
+	}
+	
+	$line_num++;
+
+    } #endwhile
+
+    # Close the file
+
+    close(TMPFILE);
+
+    # Errors in file, skip if we are not-really doing this. Output from
+    # rsync is not identical if the -n flag is used vs when it is used.
+
+    if (!$notreally_flag) {
+
+	# Does the file contain a reference to the file being sync-d?
+	# if not, there is likely a serious problem.
+
+	if (!$found_fname) {
+	    print("ERROR: $sub_name: Problem detected, did NOT find filename reference to $local_fname_2sync\n");
+	    return($return_val, $newer);
+	}
+
+	# Does the file contain a total data reference?
+	# if not, there is likely a serious problem
+
+	if (!$found_data) {
+	    print("ERROR: $sub_name: Problem detected, did NOT find data transfer details\n");
+	    return($return_val, $newer);
+	}
+
+    } #endif (notreally_flag)
+
+    # Local file is newer than remote.
+    # Did the rsync succeed from local to remote?
+
+    if ($newer == $LOCAL_NEWER) {
+	if ($data_pushed > 0) {
+	    print("Success\n");
+	}
+	else {
+	    print("WARNING: Not sure we updated remote. Is it the same as local\n");
+	}
+    } #endif (newer=0)
+
+    # Return
+
+    $return_val=$SUCCESS;
+    return($return_val, $newer);
+}
+
+

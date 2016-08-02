@@ -1,0 +1,15 @@
+;GIL-3
+(
+	:interfaces             (load_pu.G c2s_base_win.G )
+	:actions                (
+		(
+		:from                   (c2s_base_win.G c2s_bw gen_skewt_file_bt)
+		:when                   (Notify )
+		:to                     (load_pu.G popup1)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Show)
+		)
+	)
+	:root_window            nil
+)

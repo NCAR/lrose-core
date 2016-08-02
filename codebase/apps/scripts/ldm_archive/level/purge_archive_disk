@@ -1,0 +1,35 @@
+#!/bin/csh -x
+# age off files that are 5 days old
+set age = "120 hour"
+#set age = 18h
+set EXE_home = /home/rapdmg/exe
+set old     = `date -u --date="-$age" +%Y%m%d`
+
+# Purge all the nexrad level-2 directories
+
+set root = /archive
+cd $root
+echo $root
+set dirs = `ls`
+#foreach dir ( $dirs )
+foreach dir ( acars_ua  acars_ups  amdar  ddp nids  nldn  nowrad  pirep  prof wxbug )
+   cd $root/$dir
+   echo $root/$dir
+   set date_fns = `ls`
+   foreach date_fn ( $date_fns )
+     set date = `echo $date_fn | cut -c1-8`
+     echo $date
+     if ( $date < $old ) then
+       if ( $1 == "-v" ) echo $root/$dir/$date_fn
+       echo "rm -rf $date_fn"
+       rm -rf $date_fn
+     endif
+   end
+end 
+
+
+
+
+
+
+

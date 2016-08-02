@@ -1,0 +1,6 @@
+set title "Example of reconstructed spectrum, CWR = 30"
+set xlabel "sample"
+set ylabel "Power (dB)" 
+set xrange [0:63]
+set logscale y
+plot 'ssef_wx_truth.real' title 'Weather' with lines, 'ssef_clutter_truth.real' title 'Clutter' with lines, 'ssef_unfiltered.real' title 'Combined' with lines

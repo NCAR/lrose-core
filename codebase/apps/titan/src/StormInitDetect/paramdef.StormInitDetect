@@ -1,0 +1,194 @@
+
+commentdef {
+  p_header = "StormInitDetect can be thought of as a lightweight\n"
+	"version of StormInitLocations which operates at a higher\n"
+	"speed (but gives results that are less complete).\n\n"
+	"The resulting StormInitlocations do not have a duration,\n"
+	"maximum dbz or area information attached to them, they\n"
+	"are simply lat/lon/time points with the complex and simple\n"
+	"track numbers attached. (Note that since an archived titan\n"
+	"database will almost certainly have different complex track\n"
+	"numbers for a given storm than the realtime database will,\n"
+	"archive and realtime output databases should be kept\n"
+	"separate).\n\n Niles Oien July 2003.";
+}
+
+paramdef enum triggerMode_t {
+  p_options = { TRIGGER_ARCHIVE, TRIGGER_LDATAINFO };
+  p_default = { TRIGGER_LDATAINFO };
+  p_descr = "Decide how the program is triggered.";
+  p_help = "The program can be triggered in one of three ways.\n\n"
+        " (1) TRIGGER_ARCHIVE - the program is run in archive mode\n"
+        "     on existing data. The start and end times are determined\n"
+        "     on the command line with -start and -end in the usual way.\n"
+        "     Specifying these arguments automatically invokes this mode.\n\n"
+        " (2) TRIGGER_LDATAINFO - the program triggers directly from\n"
+        "     the titan output. This has the advantage that the program\n"
+        "     is triggered directly by Titan; but it does mean that it must\n"
+        "     run on the same machine as the Titan system (since DsInputPath\n"
+        "     is inherrently a local device at the time of writing).";
+} triggerMode;
+
+
+paramdef string {
+  p_descr = "Directory to trigger from if triggerMode is TRIGGER_LDATAINFO.";
+  p_help = "Note that the data are not read from here - this is used\n"
+	"soley for triggering. Data are always read from titanUrl."; 
+  p_default = {"/Some/Directory/Structure"};
+} triggerDir;
+
+ paramdef long {
+  p_descr = "Maximum valid age if triggerMode is TRIGGER_LDATAINFO, seconds.\n";
+  p_help =  "The default should be fine.";
+  p_default = 1800;
+} maxValidAge;
+
+paramdef string {
+  p_descr = "Input titan URL";
+  p_help = "Program reads these data as input."; 
+  p_default = {"titanp:://localhost::titan/input"};
+} titanUrl;
+ 
+paramdef string {
+  p_descr = "Output SPDB URL";
+  p_help = "Locations at which storms initiated are written here\n"
+	"as GenPt structures with the dbz_max data."; 
+  p_default = {"spdbp:://localhost::spdb/StormInitLoc"};
+} outUrl;
+
+paramdef int {
+  p_descr = "Time margin to use when looking through titan database in\n"
+	"archive mode, seconds.";
+  p_help = "Set large enough to cover any gaps. If a gap is encountered that\n"
+	"exceeds this margin in a database in ARCHIVE mode, the program will\n"
+	"not complete its run."; 
+  p_default = 1800;
+} margin;
+
+paramdef boolean {
+  p_descr = "Set to print more messages as data are processed.";
+  p_help = "Can usually be FALSE"; 
+  p_default = FALSE;
+} debug;
+
+paramdef boolean {
+  p_descr = "Set to print the time of each scan as it is processed.";
+  p_help = "Can usually be FALSE"; 
+  p_default = FALSE;
+} printTimes;
+
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef long {
+  p_descr = "Valid time for output GenPts, secs.";
+  p_help =  "Output is considered valid for this time.";
+  p_default = 3600;
+} maxValidTime;
+
+
+commentdef {
+  p_header = "Below are parameters which allow the user to specify\n"
+	"that storm initialization points are only to be saved out if\n"
+	"they are close enough to specified radar locations.\n\n"
+	"The idea is that some storms will pass through the\n"
+	"region without initiating in the region. Since\n"
+	"these storms are picked up by titan upon their entry\n"
+	"into the region, rather than upon their initiation by\n"
+	"a physical process, these are not storms we want to study.\n"
+	"Only considering storms that initiate within the region,\n"
+	"ie. close to a radar, avoids this problem. The exclusion\n"
+	"process is optional and is only done if the boolean\n"
+	"apply_closeness_criteria (below) is set.";
+}
+
+paramdef boolean {
+  p_descr = "Option to apply a check to the initiation points\n"
+	"to be sure that they are close to a radar.";
+  p_help =  "Default is not to do this.";
+  p_default = FALSE;
+} apply_closeness_criteria;
+
+
+typedef struct {
+    double lat;
+    double lon;
+    double max_dist;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_descr = "List of radar locations and maximum distances (Km)\n"
+	"allowable from the radars for storm initiation points to\n"
+	"be considered valid.";
+  p_help =  "Relevant only if apply_closeness_criteria is TRUE.";
+  p_default = {
+		{41.608333, -88.090833, 200.0},
+		{41.358888, -85.7,      200.0}
+              };
+} radar_locations[];
+
+commentdef {
+  p_header = "The options below allow you to apply a bounding\n"
+	"box to the input - ie. only detect storm initiation\n"
+	"within a limitied range of latitude and longitude. This\n"
+	"may be useful in post analysis runs.";
+}
+
+
+paramdef boolean {
+  p_descr = "Option to only detect initiations within a bounded box.";
+  p_help =  "Default is not to do this.";
+  p_default = FALSE;
+} apply_bounding_box;
+
+typedef struct {
+    double min_lat;
+    double min_lon;
+    double max_lat;
+    double max_lon;
+} bounding_box_t;
+
+paramdef struct bounding_box_t {
+  p_descr = "Limited region of interest, probably for post-analysis.";
+  p_help =  "Relevant only if apply_bounding_box is TRUE.";
+  p_default = {40.0, -90.0, 42.0, -88.0 };
+} bounding_box;
+
+
+commentdef {
+  p_header = "Options pertaining to the setup of an FMQ to trigger\n"
+	"StormInit2Field.";
+}
+
+paramdef boolean {
+  p_descr = "Option to send FMQ trigger.";
+  p_default = FALSE;
+} sendStormInitFmq;
+
+paramdef string {
+  p_descr = "URL for output FMQ. Relevant only if SendStormInitFmq  is true.";
+  p_default = {"fmqp:://localhost::./fmq.StormInit"};
+} stormInitFmq;
+
+paramdef int {
+  p_descr = "Number of seconds to sleep after a run - just to avoid\n"
+	"overrunning an FMQ that triggers StormInit2Field.";
+  p_default = 0;
+}sleepAfterRun;
+
+paramdef boolean {
+  p_descr = "Option to only save data for the complex track numbers\n"
+	"listed in the complexTrackNumList array below.";
+  p_default = FALSE;
+} useComplexNumList;
+
+paramdef int {
+  p_descr = "Complex track numbers to look for if useComplexNumList is set.";
+  p_default = { 139, 183};
+} complexTrackNumList[];
+
+

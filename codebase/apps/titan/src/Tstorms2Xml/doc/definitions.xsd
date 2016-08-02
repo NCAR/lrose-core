@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:simpleType name="summarizationType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="none"/>
+			<xsd:enumeration value="mean"/>
+			<xsd:enumeration value="maximum"/>
+			<xsd:enumeration value="minimum"/>
+			<xsd:enumeration value="hourly"/>
+			<xsd:enumeration value="daily"/>
+			<xsd:enumeration value="12hourly"/>
+			<xsd:enumeration value="24hourly"/>
+			<xsd:enumeration value="monthly"/>
+			<xsd:enumeration value="3monthly"/>
+			<xsd:enumeration value="6monthly"/>
+			<xsd:enumeration value="seasonal"/>
+			<xsd:enumeration value="yearly"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+    <xsd:complexType name="categorical-definitionsType">
+	    <xsd:sequence>
+	        <xsd:element name="categorical-table" minOccurs="0" maxOccurs="unbounded">
+	            <xsd:complexType>
+	                <xsd:sequence>
+	                    <xsd:element name="categorical-key" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+	                    <xsd:element name="value" minOccurs="0" maxOccurs="unbounded">
+	                        <xsd:complexType>
+	                            <xsd:simpleContent>
+	                                <xsd:extension base="xsd:nonNegativeInteger">
+	                                    <xsd:attribute name="category" type="xsd:string" use="required"/>
+	                                </xsd:extension>
+	                            </xsd:simpleContent>
+	                        </xsd:complexType>
+	                        
+	                    </xsd:element>
+	                </xsd:sequence>
+	                <xsd:attribute name="units" type="xsd:string"/>
+	            </xsd:complexType>
+	        </xsd:element>
+	    </xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="conversion-definitionsType">
+		<xsd:sequence>
+			<xsd:element name="conversion-table" maxOccurs="unbounded" minOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>Holds the range of data associated with each equivalent value.</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="conversion-key" type="xsd:string" minOccurs="1" maxOccurs="1">
+							<xsd:annotation>
+								<xsd:documentation>The primary key relating the data in the parameter element to a particular conversion table.</xsd:documentation>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:sequence minOccurs="1" maxOccurs="unbounded">
+							<xsd:element name="start-value" type="xsd:anyType" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation>The starting value of the range of data for which the value is equivalent.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="end-value" type="xsd:anyType" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation>The ending value of the range of data for which the value is equivalent.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="equivalent-value" type="xsd:anyType" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation>The equivalent value of the data.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

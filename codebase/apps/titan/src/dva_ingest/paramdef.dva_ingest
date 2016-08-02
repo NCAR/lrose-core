@@ -1,0 +1,140 @@
+/*********************************************************
+ * parameter definitions for dva_ingest
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 1996
+ */
+
+paramdef enum debug
+{
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef char* {
+  p_default = {"rdas_cal_data"};
+  p_descr = "File for RDAS calibration data.";
+  p_help = "This file is either produced manually, or written by dva_ingest.";
+} rdas_cal_data_path;
+
+paramdef char* {
+  p_default = {"Unknown"};
+  p_descr = "Radar name";
+  p_help = "This is used to label the status file.";
+} radar_name;
+
+paramdef char* {
+  p_default = {"localhost"};
+  p_descr = "Input data host";
+  p_help = "TCP/IP name/address of host for input data";
+} input_host;
+
+paramdef long {
+  p_default = {10000};
+  p_min = {1000};
+  p_max = {65535};
+  p_descr = "Input data port";
+  p_help = "TCP/IP port number for input data";
+} input_port;
+
+paramdef char* {
+  p_default = {"null"};
+  p_descr = "Dir name for beam files.";
+  p_help = "The beam files are placed in this directory. At the end of a volume an index file is written to this directory";
+} beam_dir;
+
+paramdef char* {
+  p_default = {"null"};
+  p_descr = "File name for beam buffer";
+  p_help = "The beam buffer is placed in this file, in output_dir. The file extension is a number which cycles.";
+} beam_file_name;
+
+paramdef long {
+  p_default = {3};
+  p_min = {2};
+  p_max = {20};
+  p_descr = "Number of beam files.";
+  p_help = "The beam files form an output buffer system. The files have an extension based on their number in the system. They are overwritten whed the number repeats.";
+} n_beam_files;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option to write status file";
+  p_help = "If this is set, the status file will be written to output_dir every time a new status packet is received.";
+} write_status;
+
+paramdef char* {
+  p_default = {"null"};
+  p_descr = "Dir name for status files.";
+  p_help = "The status files are placed in this directory. Each time the status is updated an index file is written to this directory";
+} status_dir;
+
+paramdef char* {
+  p_default = {"null"};
+  p_descr = "File name for status information";
+  p_help = "The status information is placed in this file, in output_dir";
+} status_file_name;
+
+paramdef boolean {
+  p_default = {false};
+  p_descr = "Option to check radar ID";
+  p_help = "If this is set, only beams with the correct radar id are included in the output data stream";
+} check_radar_id;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Target radar ID";
+  p_help = "The radar ID to be used for filtering the input data";
+} target_radar_id;
+
+paramdef enum time_mode_t {
+  p_options = {LOCAL_TO_UCT, AS_IS};
+  p_default = {LOCAL_TO_UCT};
+  p_descr = "Time computation mode";
+  p_help = "If AS_IS, time is accepted as is. Otherwise, it is assumed local and changed to UCT";
+} time_mode;
+
+paramdef long {
+  p_default = {0};
+  p_descr = "Time correction (secs)";
+  p_help = "This correction is added to the radar beam time. Use negative times for the past.";
+} time_correction;
+
+paramdef char* {
+  p_default = {"none"};
+  p_descr = "Command line for running calib change script.";
+  p_help = "This script is run when the radar parameters or calibration changes. The script should kill dva_cart, rerun the lookup table generation and then erestart dva_cart. REMEMBER - you need an & at the end of the command line.";
+} calibration_change_command_line;
+
+paramdef double {
+  p_default = {-150.0};
+  p_descr = "Radar constant.";
+  p_help = "Used to calculate dbz values from power values.";
+} radar_constant;
+
+paramdef double {
+  p_default = {0.014};
+  p_min = {0.0};
+  p_descr = "Atmospheric attenuation";
+  p_help = "Atmospheric attenuation correction (dB/km)";
+} atmos_attenuation;
+
+
+

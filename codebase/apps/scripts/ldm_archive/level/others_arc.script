@@ -1,0 +1,203 @@
+#!/bin/csh -x
+#
+# Script to make an archive file of yesterdays DDP data and age off old data.
+# First get a date string for yesterday.  The program "yesterday" returns this
+# Alternatively, let the user specify the date sting on the command line.
+#
+set EXE_home = /home/rapdmg/exe
+set ARC_home  = /home/rapdmg/archive_staging
+set ARC_SCRIPTS_home  = /home/rapdmg/archive_scripts
+set WXBUG_home = /wxdata/surface/wxbug
+set SOUNDINGS_home = /d2/ldm/Soundings
+set AMDAR_home = /d2/ldm/AMDAR
+set NLDN_home = /d2/ldm/NLDN
+set PROF_home = /d2/ldm/PROF
+set PIREP_home = /d2/ldm/PIREPS
+set ACARS_UA_home = /d2/ldm/ACARS_UA
+set ACARS_UPS_home = /d2/ldm/ACARS_UPS
+set ARC_amdar = $ARC_home/amdar
+set ARC_nldn = $ARC_home/nldn
+set ARC_prof = $ARC_home/prof
+set ARC_pirep = $ARC_home/pirep
+set ARC_acars_ua = $ARC_home/acars_ua
+set ARC_acars_ups = $ARC_home/acars_ups
+set ARC_soundings = $ARC_home/soundings
+set ARC_wxbug = $ARC_home/wxbug
+set MSS_path = /RAPDMG/LDM/ARCHIVE
+
+set time1 = `date`
+echo "Start time: " $time1
+
+  if ( $1 == "" ) then
+    set aryr = `date --date="-24 hour" +%y`
+    set aryear = `date --date="-24 hour" +%Y`
+    set aryrmn = `date --date="-24 hour" +%Y%m`
+    set ardate = `date --date="-24 hour" +%Y%m%d`
+    set armmdd = `date --date="-24 hour" +%m%d`
+    echo "ardate, armmdd=" $ardate $armmdd
+  else
+    set ardate = $1
+    set aryear = `echo $ardate | awk '{print substr($1,1,4)}'`
+    set armmdd = `echo $ardate | awk '{print substr($1,5,8)}'`
+  endif
+ 
+    echo "ardate=" $ardate
+    echo "aryear=" $aryear
+    echo "armmdd=" $armmdd
+
+
+set TarList = $ARC_home/Tarlist_$ardate
+if (-e $TarList ) then
+   rm $TarList/*
+   echo "Removing files in directory: " $TarList
+else
+   mkdir $TarList
+   echo "Making files in directory: " $TarList
+endif
+
+# WXBUG data archive
+#
+  cd $WXBUG_home
+   tar cvf $ARC_wxbug/$ardate.wxbug.tar $ardate >$TarList/$ardate.wxbug
+   gzip $ARC_wxbug/$ardate.wxbug.tar
+   gzip $TarList/$ardate.wxbug
+
+# Send wxbug data to MSS
+   if (-e $ARC_wxbug/$ardate.wxbug.tar.gz) then
+     msrcp -pr 48500002 -pe 4096 $ARC_wxbug/$ardate.wxbug.tar.gz mss:$MSS_path/$aryear/$armmdd/$ardate.wxbug.tar.gz
+     msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate.wxbug.tar.gz
+    echo "msrcp-ed WXBUG data to MSS! "$ardate
+   else
+    echo "Tared WXBUG data file doesn't exist!!! "$ardate
+   endif
+#
+# SOUNDINGS data archive
+#
+  cd $SOUNDINGS_home
+   tar cvf $ARC_soundings/$ardate.soundings.tar $ardate >$TarList/$ardate.soundings
+   gzip $ARC_soundings/$ardate.soundings.tar
+   gzip $TarList/$ardate.soundings
+
+# Send soundings data to MSS
+   if (-e $ARC_soundings/$ardate.soundings.tar.gz) then
+     msrcp -pr 48500002 -pe 4096 $ARC_soundings/$ardate.soundings.tar.gz mss:$MSS_path/$aryear/$armmdd/$ardate.soundings.tar.gz
+     msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate.soundings.tar.gz
+    echo "msrcp-ed SOUNDINGS data to MSS! "$ardate
+   else
+    echo "Tared SOUNDINGS data file doesn't exist!!! "$ardate
+   endif
+#
+# AMDAR data archive
+#
+  cd $AMDAR_home
+   tar cvf $ARC_amdar/$ardate.amdar.tar $ardate >$TarList/$ardate.amdar
+   gzip $ARC_amdar/$ardate.amdar.tar
+   gzip $TarList/$ardate.amdar
+
+# Send amdar data to MSS
+   if (-e $ARC_amdar/$ardate.amdar.tar.gz) then
+     msrcp -pr 48500002 -pe 4096 $ARC_amdar/$ardate.amdar.tar.gz mss:$MSS_path/$aryear/$armmdd/$ardate.amdar.tar.gz
+     msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate.amdar.tar.gz
+    echo "msrcp-ed AMDAR data to MSS! "$ardate
+   else
+    echo "Tared AMDAR data file doesn't exist!!! "$ardate
+   endif
+#
+# PROF data archive
+#
+  cd $PROF_home
+   tar cvf $ARC_prof/$ardate.prof.tar $ardate* >$TarList/$ardate.prof
+   gzip $ARC_prof/$ardate.prof.tar
+   gzip $TarList/$ardate.prof
+
+# Send prof data to MSS
+   if (-e $ARC_prof/$ardate.prof.tar.gz) then
+     msrcp -pr 48500002 -pe 4096 $ARC_prof/$ardate.prof.tar.gz mss:$MSS_path/$aryear/$armmdd/$ardate.prof.tar.gz
+     msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate.prof.tar.gz
+    echo "msrcp-ed PROF data to MSS! "$ardate
+   else
+    echo "Tared PROF data file doesn't exist!!! "$ardate
+   endif
+#
+#
+# PIREP data archive
+#
+  cd $PIREP_home
+   tar cvf $ARC_pirep/$ardate.pirep.tar $ardate* >$TarList/$ardate.pirep
+   gzip $ARC_pirep/$ardate.pirep.tar
+   gzip $TarList/$ardate.pirep
+
+# Send pirep data to MSS
+   if (-e $ARC_pirep/$ardate.pirep.tar.gz) then
+     msrcp -pr 48500002 -pe 4096 $ARC_pirep/$ardate.pirep.tar.gz mss:$MSS_path/$aryear/$armmdd/$ardate.pirep.tar.gz
+     msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate.pirep.tar.gz
+    echo "msrcp-ed PROF data to MSS! "$ardate
+   else
+    echo "Tared PROF data file doesn't exist!!! "$ardate
+   endif
+#
+# NLDN data archive
+#
+  cd $NLDN_home
+   tar cvf $ARC_nldn/$ardate.nldn.tar $ardate* >$TarList/$ardate.nldn
+   gzip $ARC_nldn/$ardate.nldn.tar
+   gzip $TarList/$ardate.nldn
+
+# Send nldn data to MSS
+   if (-e $ARC_nldn/$ardate.nldn.tar.gz) then
+     msrcp -pr 48500002 -pe 4096 $ARC_nldn/$ardate.nldn.tar.gz mss:$MSS_path/$aryear/$armmdd/$ardate.nldn.tar.gz
+     msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate.nldn.tar.gz
+    echo "msrcp-ed NLDN data to MSS! "$ardate
+   else
+    echo "Tared NLDN data file doesn't exist!!! "$ardate
+   endif
+#
+# ACARS_UA data archive
+#
+  cd $ACARS_UA_home
+   tar cvf $ARC_acars_ua/$ardate.acars_ua.tar $ardate >$TarList/$ardate.acars_ua
+   gzip $ARC_acars_ua/$ardate.acars_ua.tar
+   gzip $TarList/$ardate.acars_ua
+
+# Send acars_ua data to MSS
+   if (-e $ARC_acars_ua/$ardate.acars_ua.tar.gz) then
+     msrcp -pr 48500002 -pe 4096 $ARC_acars_ua/$ardate.acars_ua.tar.gz mss:$MSS_path/$aryear/$armmdd/$ardate.acars_ua.tar.gz
+     msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate.acars_ua.tar.gz
+    echo "msrcp-ed ACARS_UA data to MSS! "$ardate
+   else
+    echo "Tared ACARS_UA data file doesn't exist!!! "$ardate
+   endif
+
+
+#
+# ACARS_UPS data archive
+#
+  cd $ACARS_UPS_home
+   tar cvf $ARC_acars_ups/$ardate.acars_ups.tar $ardate >$TarList/$ardate.acars_ups
+   gzip $ARC_acars_ups/$ardate.acars_ups.tar
+   gzip $TarList/$ardate.acars_ups
+
+# Send acars_ups data to MSS
+   if (-e $ARC_acars_ups/$ardate.acars_ups.tar.gz) then
+     msrcp -pr 48500002 -pe 4096 $ARC_acars_ups/$ardate.acars_ups.tar.gz mss:$MSS_path/$aryear/$armmdd/$ardate.acars_ups.tar.gz
+     msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate.acars_ups.tar.gz
+    echo "msrcp-ed ACARS_UPS data to MSS! "$ardate
+   else
+    echo "Tared ACARS_UPS data file doesn't exist!!! "$ardate
+   endif
+#
+# Now schedule a job to make sure the archive went OK, and if so, delete the archive files locally
+#
+
+#  sleep 10
+ $ARC_SCRIPTS_home/others_compare_msarc.script
+
+set time2 = `date`
+echo "End time: " $time2
+
+  exit
+
+
+
+
+

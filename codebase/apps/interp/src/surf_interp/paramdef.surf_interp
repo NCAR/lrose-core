@@ -1,0 +1,456 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Interpolator
+ *
+ * Niles Oien for
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 1998
+ * 
+ */
+
+commentdef {
+  p_header = "surf_interp program";
+  p_text = "surf_interp performs interpolation on point data at non-uniform grid locations. It produces an MDV file containing the interpolation results.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, ARCHIVE and REALTIME. In REALTIME mode, the analysis is performed for each volume scan as it becomes available. In ARCHIVE mode, the file list is obtained from the command line.";
+} mode;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Interval for TIME_TRIGGER - secs.";
+  p_help = "For TIME_TRIGGER, this is the interval between trigger events. In REALTIME mode, a time trigger always occurs on the hour, and at constant intervals thereafter. In ARCHIVE mode the trigger starts at start_time and at constant intervals thereafter.";
+} time_trigger_interval;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./terrain.mdv";
+  p_descr = "File of terrain data in LATLON projection.";
+  p_help = "Used to correct ceiling for height above sea.";
+} terrain_file;
+
+paramdef string {
+  p_default = "spdb/data";
+  p_descr = "Input URL";
+  p_help = "This is the URL that the station data are read from.";
+} input_source;
+
+paramdef int {
+  p_default = 5400;
+  p_descr = "Data duration";
+  p_help = "This is how far back from the start time to search.";
+} duration;
+
+commentdef {
+  p_header = "SOUNDING DATA INPUT";
+}
+
+paramdef boolean {
+
+  p_descr= "To read from sounding class files or from a\n"
+    "database.";
+  
+  p_help = "By default soundings are read directly from\n"
+    "class files in the sounding_dir. Setting\n"
+    "ReadSoundingClassFiles to FALSE causes the soundings\n"
+    "to be read from an spdb soundings database specified\n"
+    "by sounding_url - in which case the sounding_look_back,\n"
+    "sounding_alt_min and sounding_alt_max parameters are\n"
+    "relevant, and sounding_dir is ignored.\n"
+    "Note that all sounding parameters are ignored\n"
+    "if the lifted index field code (131) is not\n"
+                 "to be interpolated.";
+  
+  p_default = TRUE;
+
+} ReadSoundingClassFiles;
+
+paramdef string {
+  p_descr = "URL of sounding database.";
+  p_default = ".";
+} sounding_url;
+
+paramdef int {  
+  p_descr = "Time (in minutes) to search back for a sounding; "
+            "Default is 9 hours; max is 24 hours";
+  p_help = "This value is overridden by DsSpdbServer when using "
+           "a hybrid sounding database with search criteria.";
+  p_min = 0;
+  p_max = 1440;
+  p_default = 540;
+} sounding_look_back;
+
+paramdef double {
+  p_descr = "Minimum altitude (in km) for a sounding to be considered valid.";
+  p_help = "If the sounding does not include this height, it is skipped.\n"
+           "Set to include the pressure pres_li if lifted index is desired";
+  p_min = 0.0;
+  p_max = 10.0;
+  p_default = 0.5;
+} sounding_alt_min;
+
+paramdef double {
+  p_descr = "Maximum altitude (in km) for a sounding to be considered valid.";
+  p_help = "If the sounding does not include this height, it is skipped.\n"
+           "Set to include the pressure pres_li if lifted index is desired";
+  p_min = 0.0;
+  p_max = 10.0;
+  p_default = 2.0;
+} sounding_alt_max;
+
+paramdef string {
+  p_default = "./sounding_dir";
+  p_descr = "Directory where sounding files are.";
+  p_help="Used to read sounding data, if any, if ReadSoundingClass is false.";
+} sounding_dir;
+
+paramdef float {
+  p_default = 500.0;
+  p_descr = "Maximum distance between origin (SW corner) and Sounding, Km";
+  p_help = "If exceeded a message is printed - but calc is still done";
+} MaxSoundDist;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Maximum time difference between sounding and data time, days";
+  p_help = "If exceeded message is printed but calc is still done";
+} MaxSoundTimeDiff;
+
+paramdef float {
+  p_default = 500.0;
+  p_descr = "Pressure to take temperature from in soundings";
+  p_help = "For lifted index";
+} PresLi;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_private = FALSE;
+  p_descr = "Does not write MDV file if no soundings found within time/space range.";
+  p_help = "Only matters for the lift index.";
+} ExitOnSoundingError;
+
+
+commentdef {
+  p_header = "GRID";
+}
+
+paramdef int {
+  p_default = 134;
+  p_descr = "Grid size in X";
+  p_help = "Number of X points.";
+} nx;
+
+paramdef int {
+  p_default = 134;
+  p_descr = "Grid size in Y";
+  p_help = "Number of Y points.";
+} ny;
+
+paramdef float {
+  p_default = 3.0;
+  p_descr = "Grid spacing in X";
+  p_help = "Grid spacing in x, units determined by projection";
+} dx;
+
+paramdef float {
+  p_default = 3.0;
+  p_descr = "Grid spacing in Y";
+  p_help = "Grid spacing in y, units determined by projection";
+} dy;
+
+paramdef float {
+  p_default = 38.9753;
+  p_descr = "If LAT_LON projection, Latitude of SW corner. If flat earth, Latitude of center.";
+  p_help = "Defaults to New York radar";
+} lat_origin;
+
+paramdef float {
+  p_default = -77.477;
+  p_descr = "If LAT_LON projection, Longitude of SW corner. If flat earth, Longitude of center.";
+  p_help = "Defaults to New York radar";
+} lon_origin;
+
+paramdef float {
+  p_default = 1600.0;
+  p_descr = "Altitude of sensor";
+  p_help = "Defaults to New York (1600.0)";
+} altitude;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flat earth projection";
+  p_help = "If not use LatLon";
+} flat;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Allow terrain MDV file not to cover region";
+  p_help = "May be useful for an island.";
+} AllowOutsideTerrain;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "./Output";
+  p_descr = "Output URL.";
+  p_help = "The interpolated MDV data is written to this URL.";
+} output_url;
+
+paramdef string {
+  p_default = "Radar volume file type 2";
+  p_descr = "Dataset name";
+  p_help = "Radar, wind, temperature etc.";
+} dataset_name;
+
+commentdef {
+  p_header = "FIELDS";
+}
+
+paramdef int {
+  p_default = { 33, 34, 11, 17, 1, 20, 153, 154, 170};
+  p_descr = "Desired field numbers";
+
+  p_help = "FIELD CODES"
+	 " \n"
+	 " Fields codes have the following significance.\n"
+	 " \n"
+	 "  GRIB code    Significance \n"
+	 " \n"
+	 "*  33		U wind\n"
+	 "*  34		V wind\n"
+	 "*  11		Temperature, in C not K\n"
+	 "*  17		Dew point temp, C not K\n"
+	 "  131		Lifted index - requires soundings.\n"
+	 "  52		Relative humidity\n"
+	 "  118		Wind gust - grib code is undefined\n"
+	 "*  1		Pressure\n"
+         "   13         Potential temperature\n"
+	 "  263		liquid_accum\n"
+	 "   59		precip_rate\n"
+	 "*  20		visibility\n"
+	 "* 153		rvr - Runway visual Range - grib undefined.\n"
+	 "* 154		Cloud height - grib code is undefined.\n"
+	 "* 170		Convergance - calculated from U and V.\n"
+  	 "  185         Sea Level corrected ceiling - requires\n"
+  	 "               terrain file and needs ceiling to be specified.\n"
+  	 "  186         Flight Category\n"
+  	 "    5            Terrain from DEM\n"
+  	 "  171            Terrain from weather stations.\n"
+         "   18         Dew point depression\n"
+	 " \n"
+	 " A star (*) indicates that this field is included by default.\n"
+	 " The user specifies GRIB codes on the TDRP command line.\n"
+         " Soundings are only read if the lifted index (code 131)\n"
+         " is specified.";
+   
+} desired_fields[];
+
+
+commentdef {
+  p_header = "INTERPOLATION";
+}
+
+typedef enum {
+  INTERP_BARNES, INTERP_NEAREST
+} InterpMethod_t;
+
+paramdef enum InterpMethod_t {
+  p_default = INTERP_BARNES;
+  p_descr = "Interpolation option - choose the interpolation scheme";
+  p_help = "Must be the same length as the desired_fields array.\n"
+           "If this is not the case, Barnes interpolation is used\n"
+           "for all fields.";
+} InterpMethod[];
+
+paramdef float {
+  p_default = -1.0;
+  p_descr = "Max difference between altitude and terrain for VFR to work";
+  p_help = "If negative, no check is made. Units are feet";
+} MaxAltError;
+
+paramdef float {
+  p_default = 1e-4;
+  p_descr = "Minimum sum of weights in Barnes interpolation for valid data";
+  p_help = "If not reached, bad value output - effectively sets radius of influence.";
+} MinWeight;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "WindowSize for optional VFR median filter";
+  p_help = "Actual tile is 2W +1 by 2W + 1";
+} WindowSize;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of passes for VFR median filter";
+  p_help = "Used to smooth out VFR image";
+} NumPasses;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Minimum number of stations";
+  p_help = "If fewer stations report, don't bother.";
+} MinStations;
+
+paramdef float {
+  p_default = 50.0;
+  p_descr = "Maximum distance for interpolation to be valid, Km.";
+  p_help = "Works in conjunction with minimum weight parameter.";
+} MaxInterpDist;
+
+paramdef float {
+  p_default = 0.0;
+  p_descr = "Scale radius for interpolations.";
+  p_help = "Defaults to half of MaxInterpDist if 0 or less";
+} Rscale;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to accept stations outside the grid.";
+  p_help = "Default is to only accept stations within the grid.";
+} UseOutsideRegion;
+
+commentdef {
+  p_header = "FLIGHT CATEGORY";
+}
+
+paramdef float {
+  p_default = -1.0;
+  p_descr = "Value to use if ceiling is missing - if negative, use bad value.";
+  p_help = "Default sets both ceiling and flight cat to missingif ceiling is bad";
+} BadCeilingValue;
+
+paramdef float {
+  p_default = { 0.0, 1.6, 5.0  };
+  p_descr = "Thresholds for visibility in flight category, Km";
+  p_help = "Must be is ascending order. See comments for CeilThresh";
+} VisThresh[];
+
+paramdef float {
+  p_default = { 0.0, 500.0, 1500.0  };
+  p_descr = "Thresholds for ceiling in flight category, ft";
+  p_help = "Must be is ascending order. Every time a ceiling\n"
+	"and vis criteria is satisfied, 10 is added to the numerical\n"
+	"value of the flight category (which is initialised with\n"
+	"the value 10.0). Thus, the maximum numerical value for\n"
+	"flight category is 10.0 + NumThresholds*10.0.\n\n"
+	"The number of thresholds in ceiling and visibility"
+	"must be the same.\n";
+} CeilThresh[];
+
+paramdef float {
+  p_default = 30.0;
+  p_descr = "Maximum visibility from a station, Km";
+  p_help = "Values greater than this are set to missing.";
+} MaxVis;
+
+paramdef float {
+  p_default = 30.0;
+  p_descr = "Maximum cloud ceiling from a station, Km";
+  p_help = "Values greater than this are set to missing.";
+} MaxCeiling;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set to TRUE, ceiling values above ReplaceCeilingThreshold\n"
+            "are replaced with ReplaceCeilingValue. The reason is that in\n"
+            "some systems, a clear sky is reported as a ceiling of 10,000\n"
+            "feet - but the terrain may be near 10,000 feet which leads\n"
+            "to erroneous regions of bad flight cat.";
+  p_help = "No such processing occurrs if set to FALSE.";
+} ReplaceCeiling;
+
+paramdef float {
+  p_default = 9500.0;
+  p_descr = "Cloud ceiling threshold, ft.";
+  p_help = "If ReplaceCeiling is TRUE then values of ceiling at or above\n"
+           "this value are replaced with ReplaceCeilingValue.";
+} ReplaceCeilingThreshold;
+
+paramdef float {
+  p_default = 30000.0;
+  p_descr = "Cloud ceiling value, ft.";
+  p_help = "If ReplaceCeiling is TRUE then values of ceiling at or above\n"
+            "ReplaceCeilingThreshold are replaced with this value.";
+} ReplaceCeilingValue;
+
+commentdef {
+  p_header = "CONVERGENCE";
+}
+
+paramdef int {
+  p_default = 1;
+  p_min = 1;
+  p_descr = "Number of grid points over which convergance will be calculated.";
+  p_help = "By default the convergance is calculated using adjacent grid\n"
+	"points (converganceCalcPoints = 1). Adjusting this parameter allows\n"
+	"the convergance to be calculated over a larger spatial domain.";
+} converganceCalcPoints;
+
+
+
+
+
+
+
+
+
+
+
+

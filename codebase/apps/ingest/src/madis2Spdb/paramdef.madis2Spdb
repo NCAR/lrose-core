@@ -1,0 +1,536 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef
+{
+  p_header = "This is a small ingester for the netCDF formatted MADIS "
+	"surface station data. Not all the fields are decoded, but "
+	"the major ones are (precip type is not). "
+	"The station IDs seem to be up to six characters in "
+	"length, so a non- standard hashing is used to get "
+	"the dataType.";
+}
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Verbose debug option";
+  p_help = "If set, verbose debug messages will be printed appropriately";
+} verbose;
+
+paramdef string
+{
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef
+{
+  p_header = "DATA INPUT";
+}
+
+typedef enum
+{
+  ARCHIVE,
+  REALTIME
+} op_mode;
+
+paramdef enum op_mode
+{
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+           "In realtime mode, the conversion is performed for each input "
+           "file as it becomes available. "
+           "In archive mode, the file list is obtained from the command line.";
+} mode;
+
+paramdef string
+{
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef boolean
+{
+  p_default = false;
+  p_descr = "_latest_data_info file exists in InDir.";
+  p_help = "If true, the _latest_data_info file will be monitored for new data. If false, InDir will be scanned for new files.";
+} latest_data_info_avail;
+
+paramdef int
+{
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to uncompress input data.";
+  p_help = "Use this if inpu data are gzipped.";
+} inputDataCompressed;
+
+paramdef string
+{
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+commentdef
+{
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string
+{
+  p_default = "spdbp:://localhost::./spdb/surface";
+  p_descr = "Output url, of form spdbp:://host.domain:[port]:dir/dir ";
+  p_help = "Data are written here.";
+} output_url;
+
+paramdef boolean
+{
+  p_default = false;
+  p_descr = "Flag indicating that the output should be divided based on "
+            "provider.";
+  p_help = "If true, the output will be put in subdirectories of the "
+           "output_url. "
+           "These subdirectories will be named using the provider name.";
+} output_to_provider_subdirs;
+
+paramdef boolean
+{
+  p_default = TRUE;
+  p_descr = "Option to compress input data when finished with it.";
+  p_help = "netCDF data tend to compress well.";
+} outputDataCompressed;
+
+paramdef long
+{
+  p_descr = "How long the data are valid, seconds.";
+  p_help = "Depends on input frequency. "
+           "Given that these data can come in very quickly, having them "
+           "age off a display system equally quickly can avoid a lot "
+           "of clutter.";
+  p_default = 900;
+} Expiry;
+ 
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+}
+
+paramdef boolean
+{
+  p_descr = "Option to apply lat/lon limits.";
+  p_help = "May help reduce data volume.";
+  p_default = FALSE;
+} applyLatLonLimits;
+
+typedef struct
+{
+  double minLat;
+  double minLon;
+  double maxLat;
+  double maxLon;
+} limit_t;
+
+paramdef struct limit_t
+{
+  p_descr = "Lat/lon limits.";
+  p_help = "Relevant only if applyLatLonLimits is TRUE.";
+  p_default = {-90.0, -180.0, 90.0, 180.0};
+} latLonLimits;
+
+paramdef boolean
+{
+  p_descr = "Option to only accept certain data providers.";
+  p_help = "May help reduce data volume.";
+  p_default = FALSE;
+} applyDataProviderLimits;
+
+paramdef string
+{
+  p_descr = "List of data providers to accept. These are printed "
+            "if the program is run in debug mode, which may be a "
+	    "good way to ascertain what the strings are set to.";
+  p_help = "Only relevant if applyDataProviderLimits is TRUE";
+  p_default = { "UDFCD", "LSU-JSU", "WT-Meso", "FL-Meso", "WXforYou",
+	"APRSWXNET",  "OK-Meso", "MesoWest", "IEM", "RAWS", "WT-Meso" };
+} dataProviders[];
+
+commentdef
+{
+  p_header = "NETCDF FILE DESCRIPTION";
+}
+
+typedef struct
+{
+  string var_name;
+  string fill_value_name;
+  string missing_value_name;
+} nc_var_t;
+
+typedef struct
+{
+  string var_name;
+  string qc_var_name;
+  string fill_value_name;
+  string missing_value_name;
+} nc_qc_var_t;
+
+paramdef struct nc_var_t
+{
+  p_descr = "Information about the latitude variable in the netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n";
+  p_default = { "latitude", "_FillValue", "missing_value" };
+} latitude_var;
+
+paramdef struct nc_var_t
+{
+  p_descr = "Information about the longitude variable in the netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n";
+  p_default = { "longitude", "_FillValue", "missing_value" };
+} longitude_var;
+
+paramdef struct nc_var_t
+{
+  p_descr = "Information about the elevation variable in the netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n";
+  p_default = { "elevation", "_FillValue", "missing_value" };
+} elevation_var;
+
+paramdef struct nc_var_t
+{
+  p_descr = "Information about the observation time variable in the "
+            "netCDF file. "
+            "This variable must be stored as doubles in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n";
+  p_default = { "observationTime", "_FillValue", "missing_value" };
+} obs_time_var;
+
+paramdef struct nc_qc_var_t
+{
+  p_descr = "Information about the temperature variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tqc_var_name - The associated QC variable name exactly as it "
+           "appears in the netCDF file. "
+           "The data for this variable is set to missing anywhere the QC "
+           "variable value is non-zero.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the temperature variable is assumed to be stored in "
+           "kelvins in the netCDF file.\n";
+  p_default = { "temperature", "temperatureQCR",
+                "_FillValue", "missing_value" };
+} temperature_var;
+
+paramdef struct nc_qc_var_t
+{
+  p_descr = "Information about the dewpoint variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tqc_var_name - The associated QC variable name exactly as it "
+           "appears in the netCDF file.\n"
+           "The data for this variable is set to missing anywhere the QC "
+           "variable value is non-zero.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the dewpoint variable is assumed to be stored in "
+           "kelvins in the netCDF file.\n";
+  p_default = { "dewpoint", "dewpointQCR",
+                "_FillValue", "missing_value" };
+} dewpoint_var;
+
+paramdef struct nc_qc_var_t
+{
+  p_descr = "Information about the relative humidity variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tqc_var_name - The associated QC variable name exactly as it "
+           "appears in the netCDF file.\n"
+           "The data for this variable is set to missing anywhere the QC "
+           "variable value is non-zero.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the relative humidity variable is assumed to be stored "
+           "in percent (0-100) in the netCDF file.\n";
+  p_default = { "relHumidity", "relHumidityQCR",
+                "_FillValue", "missing_value" };
+} rh_var;
+
+paramdef struct nc_qc_var_t
+{
+  p_descr = "Information about the station pressure variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tqc_var_name - The associated QC variable name exactly as it "
+           "appears in the netCDF file.\n"
+           "The data for this variable is set to missing anywhere the QC "
+           "variable value is non-zero.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the station pressure variable is assumed to be stored "
+           "in pascals in the netCDF file.\n";
+  p_default = { "stationPressure", "stationPressureQCR",
+                "_FillValue", "missing_value" };
+} station_pressure_var;
+
+paramdef struct nc_qc_var_t
+{
+  p_descr = "Information about the sea level pressure variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tqc_var_name - The associated QC variable name exactly as it "
+           "appears in the netCDF file.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "The data for this variable is set to missing anywhere the QC "
+           "variable value is non-zero.\n"
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the sea level pressure variable is assumed to be stored "
+           "in pascals in the netCDF file.\n";
+  p_default = { "seaLevelPressure", "seaLevelPressureQCR",
+                "_FillValue", "missing_value" };
+} sea_level_pressure_var;
+
+paramdef struct nc_qc_var_t
+{
+  p_descr = "Information about the altimeter variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tqc_var_name - The associated QC variable name exactly as it "
+           "appears in the netCDF file.\n"
+           "The data for this variable is set to missing anywhere the QC "
+           "variable value is non-zero.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the altimeter variable is assumed to be stored "
+           "in pascals in the netCDF file.\n";
+  p_default = { "altimeter", "altimeterQCR",
+                "_FillValue", "missing_value" };
+} altimeter_var;
+
+paramdef struct nc_qc_var_t
+{
+  p_descr = "Information about the wind direction variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tqc_var_name - The associated QC variable name exactly as it "
+           "appears in the netCDF file.\n"
+           "The data for this variable is set to missing anywhere the QC "
+           "variable value is non-zero.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the wind direction variable is assumed to be stored "
+           "in degrees indicating the direction the wind is from  in the "
+           "netCDF file.\n";
+  p_default = { "windDir", "windDirQCR",
+                "_FillValue", "missing_value" };
+} wind_dir_var;
+
+paramdef struct nc_qc_var_t
+{
+  p_descr = "Information about the wind speed variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tqc_var_name - The associated QC variable name exactly as it "
+           "appears in the netCDF file.\n"
+           "The data for this variable is set to missing anywhere the QC "
+           "variable value is non-zero.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the wind speed variable is assumed to be stored "
+           "in m/s in the netCDF file.\n";
+  p_default = { "windSpeed", "windSpeedQCR",
+                "_FillValue", "missing_value" };
+} wind_speed_var;
+
+paramdef struct nc_var_t
+{
+  p_descr = "Information about the wind gust variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the wind gust variable is assumed to be stored "
+           "in m/s in the netCDF file.\n";
+  p_default = { "windGust", "_FillValue", "missing_value" };
+} wind_gust_var;
+
+paramdef struct nc_qc_var_t
+{
+  p_descr = "Information about the visibility variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tqc_var_name - The associated QC variable name exactly as it "
+           "appears in the netCDF file.\n"
+           "The data for this variable is set to missing anywhere the QC "
+           "variable value is non-zero.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the visibility variable is assumed to be stored "
+           "in meters in the netCDF file.\n";
+  p_default = { "visibility", "visibilityQCR",
+                "_FillValue", "missing_value" };
+} visibility_var;
+
+paramdef struct nc_qc_var_t
+{
+  p_descr = "Information about the precip rate variable in the "
+            "netCDF file. "
+            "This variable must be stored as floats in the netCDF file.";
+  p_help = "\tvar_name - The variable name exactly as it appears in "
+           "the netCDF file. "
+           "Set to an empty string if there is no temperature variable "
+           "in the netCDF file.\n"
+           "\tqc_var_name - The associated QC variable name exactly as it "
+           "appears in the netCDF file.\n"
+           "The data for this variable is set to missing anywhere the QC "
+           "variable value is non-zero.\n"
+           "\tfill_value_name - The name of the attribute that gives the "
+           "fill value used for this variable in the netCDF file.\n"
+           "\tmissing_value_name - The name of the attribute that gives "
+           "the missing value used for this variable in the netCDF file.\n"
+           "Note that the precip rate variable is assumed to be stored "
+           "in m/s in the netCDF file.\n";
+  p_default = { "precipRate", "precipRateQCR",
+                "_FillValue", "missing_value" };
+} precip_rate_var;
+
+
+paramdef boolean
+{
+  p_default = TRUE;
+  p_descr = "Option to try to take date (not time) from filename.";
+  p_help = "This is needed for some simulations. It is the default,\n"
+		   "because it should be the realtime behavior anyway. If\n"
+		   "this is TRUE then the program will check if the input\n"
+		   "file is named YYYYMMDD_HHMM, ie. 20100911_0830 - if\n"
+		   "so, the year, month and day from the filename will\n"
+		   "be used and the hour, minute and second from the\n"
+		   "data will be used. If this is FALSE, and/or the filename\n"
+		   "does not follow naming convention, the data time is used.";
+} takeFilenameDate;

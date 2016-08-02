@@ -1,0 +1,9 @@
+echo "Here we go . . ."
+./MM5toGrib -params ./MM5toGrib.params.gmod.d1 -f ./200308301000_MMOUTPUT_DOMAIN1.GRM -mdv -debug -verbose -mode ARCHIVE &>log1.txt
+
+./MM5toGrib -params ./MM5toGrib.params.gmod.d2 -f ./200308301000_MMOUTPUT_DOMAIN2.GRM -debug -mode ARCHIVE &>log2.txt
+
+./MM5toGrib -params ./MM5toGrib.params.gmod.d3 -f ./200308301000_MMOUTPUT_DOMAIN3.GRM -debug -mode ARCHIVE &>log3.txt
+
+./MM5toGrib -params ./MM5toGrib.params.gmod.d4 -f ./200308301000_MMOUTPUT_DOMAIN4.GRM -mdv -debug -verbose -mode ARCHIVE &>log4.txt
+

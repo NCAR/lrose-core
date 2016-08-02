@@ -1,0 +1,6 @@
+.deps
+RadxDiff
+__makefile.template
+makefile
+makefile.am
+makefile.in

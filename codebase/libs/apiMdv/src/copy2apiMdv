@@ -1,0 +1,68 @@
+#! /bin/csh
+
+# For stand alone compilation of apiTitan (without using the higher level 
+# build_titan_libs script) the RAP_DIR will need to be set appropriately
+
+# setenv RAP_DIR $HOME/rap 
+
+mkdir -p $RAP_DIR/libs/apiMdv/src/include
+
+/bin/cp -r $RAP_DIR/incs/* $RAP_DIR/libs/apiMdv/src/include
+/bin/cp -r $RAP_DIR/libs/Mdv/src/include/Mdv $RAP_DIR/libs/apiMdv/src/include
+/bin/cp -r $RAP_DIR/libs/dataport/src/include/dataport $RAP_DIR/libs/apiMdv/src/include
+/bin/cp -r $RAP_DIR/libs/didss/src/include/didss $RAP_DIR/libs/apiMdv/src/include
+/bin/cp -r $RAP_DIR/libs/dsserver/src/include/dsserver $RAP_DIR/libs/apiMdv/src/include
+/bin/cp -r $RAP_DIR/libs/rapformats/src/include/rapformats $RAP_DIR/libs/apiMdv/src/include
+/bin/cp -r $RAP_DIR/libs/toolsa/src/include/toolsa $RAP_DIR/libs/apiMdv/src/include
+
+/bin/cp -r $RAP_DIR/libs/Mdv/src/ClimoFileFinder $RAP_DIR/libs/apiMdv/src/Mdv_ClimoFileFinder
+/bin/cp -r $RAP_DIR/libs/Mdv/src/ClimoStatCalc $RAP_DIR/libs/apiMdv/src/Mdv_ClimoStatCalc
+/bin/cp -r $RAP_DIR/libs/Mdv/src/DsMdvx $RAP_DIR/libs/apiMdv/src/Mdv_DsMdvx
+/bin/cp -r $RAP_DIR/libs/Mdv/src/Mdvx $RAP_DIR/libs/apiMdv/src/Mdv_Mdvx
+/bin/cp -r $RAP_DIR/libs/Mdv/src/MdvxChunk $RAP_DIR/libs/apiMdv/src/Mdv_MdvxChunk
+/bin/cp -r $RAP_DIR/libs/Mdv/src/MdvxContour $RAP_DIR/libs/apiMdv/src/Mdv_MdvxContour
+/bin/cp -r $RAP_DIR/libs/Mdv/src/MdvxField $RAP_DIR/libs/apiMdv/src/Mdv_MdvxField
+/bin/cp -r $RAP_DIR/libs/Mdv/src/MdvxGrid $RAP_DIR/libs/apiMdv/src/Mdv_MdvxGrid
+/bin/cp -r $RAP_DIR/libs/Mdv/src/MdvxProj $RAP_DIR/libs/apiMdv/src/Mdv_MdvxProj
+/bin/cp -r $RAP_DIR/libs/Mdv/src/MdvxRadar $RAP_DIR/libs/apiMdv/src/Mdv_MdvxRadar
+/bin/cp -r $RAP_DIR/libs/Mdv/src/MdvxRemapLut $RAP_DIR/libs/apiMdv/src/Mdv_MdvxRemapLut
+/bin/cp -r $RAP_DIR/libs/Mdv/src/MdvxTimeList $RAP_DIR/libs/apiMdv/src/Mdv_MdvxTimeList
+/bin/cp -r $RAP_DIR/libs/Mdv/src/MdvxTimeStamp $RAP_DIR/libs/apiMdv/src/Mdv_MdvxTimeStamp
+/bin/cp -r $RAP_DIR/libs/Mdv/src/MdvxVsectLut $RAP_DIR/libs/apiMdv/src/Mdv_MdvxVsectLut
+
+/bin/cp -r $RAP_DIR/libs/dataport/src/bigend $RAP_DIR/libs/apiMdv/src/dataport_bigend
+/bin/cp -r $RAP_DIR/libs/dataport/src/smallend $RAP_DIR/libs/apiMdv/src/dataport_smallend
+/bin/cp -r $RAP_DIR/libs/dataport/src/swap $RAP_DIR/libs/apiMdv/src/dataport_swap
+
+/bin/cp -r $RAP_DIR/libs/didss/src/DataFileNames $RAP_DIR/libs/apiMdv/src/didss_DataFileNames
+/bin/cp -r $RAP_DIR/libs/didss/src/DsAccess $RAP_DIR/libs/apiMdv/src/didss_DsAccess
+/bin/cp -r $RAP_DIR/libs/didss/src/DsInputPath $RAP_DIR/libs/apiMdv/src/didss_DsInputPath
+/bin/cp -r $RAP_DIR/libs/didss/src/DsMessage $RAP_DIR/libs/apiMdv/src/didss_DsMessage
+/bin/cp -r $RAP_DIR/libs/didss/src/DsURL $RAP_DIR/libs/apiMdv/src/didss_DsURL
+/bin/cp -r $RAP_DIR/libs/didss/src/LdataInfo $RAP_DIR/libs/apiMdv/src/didss_LdataInfo
+/bin/cp -r $RAP_DIR/libs/didss/src/RapDataDir $RAP_DIR/libs/apiMdv/src/didss_RapDataDir
+
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DataMapper $RAP_DIR/libs/apiMdv/src/dsserver_DataMapper
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DsClient $RAP_DIR/libs/apiMdv/src/dsserver_DsClient
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DsLdataInfo $RAP_DIR/libs/apiMdv/src/dsserver_DsLdataInfo
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DsLocator $RAP_DIR/libs/apiMdv/src/dsserver_DsLocator
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DsServer $RAP_DIR/libs/apiMdv/src/dsserver_DsServer
+/bin/cp -r $RAP_DIR/libs/dsserver/src/DsSvrMgrSocket $RAP_DIR/libs/apiMdv/src/dsserver_DsSvrMgrSocket
+
+/bin/cp -r $RAP_DIR/libs/rapformats/src/DsRadar $RAP_DIR/libs/apiMdv/src/rapformats_DsRadar
+/bin/cp -r $RAP_DIR/libs/rapformats/src/var_elev $RAP_DIR/libs/apiMdv/src/rapformats_var_elev
+
+/bin/cp -r $RAP_DIR/libs/toolsa/src/Path $RAP_DIR/libs/apiMdv/src/toolsa_Path
+/bin/cp -r $RAP_DIR/libs/toolsa/src/URL $RAP_DIR/libs/apiMdv/src/toolsa_URL
+/bin/cp -r $RAP_DIR/libs/toolsa/src/compress $RAP_DIR/libs/apiMdv/src/toolsa_compress
+/bin/cp -r $RAP_DIR/libs/toolsa/src/file_io $RAP_DIR/libs/apiMdv/src/toolsa_file_io
+/bin/cp -r $RAP_DIR/libs/toolsa/src/fmq $RAP_DIR/libs/apiMdv/src/toolsa_fmq
+/bin/cp -r $RAP_DIR/libs/toolsa/src/mem $RAP_DIR/libs/apiMdv/src/toolsa_mem
+/bin/cp -r $RAP_DIR/libs/toolsa/src/pjg $RAP_DIR/libs/apiMdv/src/toolsa_pjg
+/bin/cp -r $RAP_DIR/libs/toolsa/src/pmu $RAP_DIR/libs/apiMdv/src/toolsa_pmu
+/bin/cp -r $RAP_DIR/libs/toolsa/src/port $RAP_DIR/libs/apiMdv/src/toolsa_port
+/bin/cp -r $RAP_DIR/libs/toolsa/src/sockutil $RAP_DIR/libs/apiMdv/src/toolsa_sockutil
+/bin/cp -r $RAP_DIR/libs/toolsa/src/str $RAP_DIR/libs/apiMdv/src/toolsa_str
+/bin/cp -r $RAP_DIR/libs/toolsa/src/umisc $RAP_DIR/libs/apiMdv/src/toolsa_umisc
+/bin/cp -r $RAP_DIR/libs/toolsa/src/utim $RAP_DIR/libs/apiMdv/src/toolsa_utim
+

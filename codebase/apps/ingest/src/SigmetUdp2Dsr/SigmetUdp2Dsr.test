@@ -1,0 +1,283 @@
+/**********************************************************************
+ * TDRP params for SigmetUdp2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// SigmetUdp2Dsr reads Sigmet moments data from UDP and writes the 
+//   contents into a DsRadar FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// udp_port ////////////////////////////////
+//
+// Port number for UDP input.
+// Type: int
+//
+
+udp_port = 30731;
+
+//======================================================================
+//
+// RADAR PARAMS.
+//
+// If any of the params are set in the input data files, the values in 
+//   those params will be taken from the input data stream rather than 
+//   from the parameter file.
+//
+//======================================================================
+ 
+///////////// radar ///////////////////////////////////
+//
+// Default radar params. If any of the params are set in the input data 
+//   files, the values in those params will be taken from the input data 
+//   stream rather than from the parameter file.
+// ========== Radar params ==========
+// 	
+// polarization: polarization type
+// altitude: km
+// latitude: degrees
+// longitude: degrees
+// horiz_beam_width: half-power beam width - degrees
+// vert_beam_width: half-power beam width - degrees
+// pulse_width: micro-secs
+// radar_constant: dB
+// xmit_peak_pwr: watts
+// receiver_mds: dBm
+// receiver_gain: dB
+// antenna_gain: dB
+// system_gain: dB
+// noise_value: dBM - system noise
+// min_dbz_at_1km: dBZ - min detectable dBZ at 1km range
+// 	.
+//
+// Type: struct
+//   typedef struct {
+//      int radar_id;
+//      polar_t polarization;
+//        Options:
+//          HORIZONTAL
+//          VERTICAL
+//          CIRCULAR
+//          ELLIPTICAL
+//      double altitude;
+//      double latitude;
+//      double longitude;
+//      double horiz_beam_width;
+//      double vert_beam_width;
+//      double pulse_width;
+//      double radar_constant;
+//      double xmit_peak_pwr;
+//      double receiver_mds;
+//      double receiver_gain;
+//      double antenna_gain;
+//      double system_gain;
+//      double noise_value;
+//      double min_dbz_at_1km;
+//   }
+//
+//
+
+radar = { 0, HORIZONTAL, 1.742, 39.9321, -105.182, 0.91, 0.91, 1, 70.1652, 8e+06, -113, 46.05, 45.2, 46.05, -110, -42 };
+
+///////////// scan_type_id ////////////////////////////
+//
+// Scan type id.
+// Unique identifier for scan strategy.
+// Type: int
+//
+
+scan_type_id = 0;
+
+///////////// scan_type_name //////////////////////////
+//
+// Scan type name.
+// Descriptive name for scan strategy.
+// Type: string
+//
+
+scan_type_name = "Surveillance";
+
+///////////// samples_per_beam ////////////////////////
+//
+// Number of IQ samples per beam.
+// Number of samples from which moments are computed.
+// Type: int
+//
+
+samples_per_beam = 64;
+
+///////////// check_task_name /////////////////////////
+//
+// Option to check the task name.
+// If TRUE, only data packets with the specified task name will be 
+//   processed. If FALSE, all task names will be accepted.
+// Type: boolean
+//
+
+check_task_name = FALSE;
+
+///////////// task_name ///////////////////////////////
+//
+// Specified task name.
+// See 'check_task_name'.
+// Type: string
+//
+
+task_name = "VOL_SCAN";
+
+//======================================================================
+//
+// TIME CORRECTION OPTION.
+//
+//======================================================================
+ 
+///////////// time_correction_secs ////////////////////
+//
+// Correction to input data times.
+// This correction is added to the incoming data times, to give the 
+//   output beam times. This can be used to (a) correct times when it is 
+//   known that there is a time error or (b) convert local time to UTC.
+// Type: int
+//
+
+time_correction_secs = 0;
+
+//======================================================================
+//
+// OUTPUT DsRadar FMQ.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// Output URL for DsRadar data via FMQ.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://$(HOST)::fmq/dsRadar";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+output_fmq_size = 2000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 3600;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+///////////// beam_wait_msecs /////////////////////////
+//
+// Wait per beam (milli-secs).
+// ARCHIVE and SIMULATE modes only.
+// Type: int
+//
+
+beam_wait_msecs = 0;
+
+///////////// set_end_of_vol_flag /////////////////////
+//
+// Option to set the end of volume flag in the FMQ.
+// Type: boolean
+//
+
+set_end_of_vol_flag = TRUE;
+
+///////////// volume_starts_at_bottom /////////////////
+//
+// Flag to indicate that elevation angles increase in the volume.
+// If the volume starts at the top, i.e. elevations decrease during the 
+//   volume, set this to FALSE.
+// Type: boolean
+//
+
+volume_starts_at_bottom = TRUE;
+
+///////////// el_change_for_end_of_vol ////////////////
+//
+// Change in elevation which triggers and end of volume.
+// If the elevation angle changes by this amount, and end of volume flag 
+//   will be set.
+// Minimum val: 0.1
+// Type: double
+//
+
+el_change_for_end_of_vol = 1.5;
+
+///////////// min_beams_per_vol ///////////////////////
+//
+// Min number of beams per volume.
+// Used to prevent end-of-volume conditions being determined during 
+//   antenna transition to the start of the next volume.
+// Type: int
+//
+
+min_beams_per_vol = 360;
+

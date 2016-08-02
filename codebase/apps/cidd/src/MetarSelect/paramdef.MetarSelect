@@ -1,0 +1,231 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MetarSelect
+ *
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_descr = "Option to log spdb get errors to log directory.";
+  p_help = "If true, SPDB errors will be logged to the directory specified by errors_log_dir. The reason for dealing with errors in this way is that stdout from this program is displayed as the main product. It is difficult to separate stderr from stdout and pipe stderr to a logging filter. Therefore we log the spdb errors directly.";
+  p_default = false;
+} log_spdb_errors;
+
+paramdef string {
+  p_descr = "Errors log directory.";
+  p_help = "See log_spdb_errors.";
+  p_default = "$(ERRORS_LOG_DIR)";
+} errors_log_dir;
+
+////////////////////////////////////////////////////////////////////////
+// user interface
+
+commentdef {
+  p_header = "USER INTERFACE";
+}
+
+paramdef boolean {
+  p_descr = "Use Cidd time";
+  p_help = "Use times from Cidd to retrieve data";
+  p_default = false;
+} use_cidd_time;
+
+paramdef int {
+  p_descr = "mouse button recognized";
+  p_help = "0 = any, 1 = left button, 2 = middle, 3 = right button.";
+  p_default = 0;
+} mouse_button;
+
+paramdef int {
+  p_descr = "sleep milli-seconds";
+  p_help = "Number of milli-seconds to sleep between checks for mouse clicks.";
+  p_min = 20;
+  p_default = 250;
+} sleep_msecs;
+
+paramdef int {
+  p_descr = "Automatic click interval - secs";
+  p_help = "Number of seconds between automatic clicks.  If the user hasn't clicked anywhere after this number of seconds, we will simulate a user click in the same place as before and will update the information.  If <= 0, no automatic updates of the display are done.";
+  p_default = 60;
+} auto_click_interval;
+
+paramdef struct origin_t {
+  p_descr = "startup click location";
+  p_help = "Lat/lon position of METAR station to display if the user hasn't clicked on a location.";
+  p_field_name = { lat,
+                   lon };
+  p_field_type = { double,    /* lat */
+                   double };  /* lon */
+} startup_location;
+
+////////////////////////////////////////////////////////////////////////
+// Shared memory information
+
+commentdef {
+  p_header = "Setup SHARED MEMORY or FMQ  WITH DISPLAY";
+}
+
+typedef enum {
+  MODE_SHMEM, MODE_FMQ
+} output_mode_t;
+
+paramdef enum output_mode_t {
+  p_default = MODE_SHMEM;
+  p_descr = "Interface type option";
+  p_help = "Take Clicks from CIDD or a FMQ.";
+} output_mode;
+
+paramdef string
+{
+  p_descr = "URL for Command FMQ";
+  p_help = "See DIDSS documentation for URL specs.";
+  p_default = "/tmp/METAR";
+} fmq_url;
+
+paramdef int {
+  p_descr = "Shared memory status key";
+  p_help = "Id for the shared memory status segment used for communicating with the display.";
+  p_default = 42500;
+} coord_shmem_key;
+
+paramdef boolean {
+  p_descr = "Flag to not wait for display shared memory.";
+  p_help = "If set, this program will not wait for shared memory segment from the display to be set ready.";
+  p_default = false;
+} no_wait_for_shmem;
+
+paramdef int {
+  p_descr = "Don't collect new data until last request was this old (secs)";
+  p_default = 10;
+} max_data_age;
+
+////////////////////////////////////////////////////////////////////////
+// SPDB data input
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string
+{
+  p_descr = "URL for reading SPDB data.";
+  p_help = "See DIDSS documentation for URL specs.";
+  p_default = "spdb/metar";
+} input_url;
+
+paramdef int
+{
+  p_descr = "Data retrieval period - seconds.";
+  p_help = "Retrieve data from now (or CIDD time) back by this number of seconds.";
+  p_default = 3600;
+} retrieval_period;
+
+paramdef boolean
+{
+  p_descr = "Option to sort entries by proximity to the click point.";
+  p_help = "If true, the data entries will first be sorted by proximity to the search point. Then they will be sorted in time order, latest first.";
+  p_default = false;
+} sort_by_location;
+
+paramdef boolean
+{
+  p_descr = "Option to use station location file to get metar station location..";
+  p_help = "If true, metar locations will be determined from the file. If false, the location in the data struct will be used.";
+  p_default = true;
+} use_location_file;
+
+paramdef string
+{
+  p_descr = "Station location file - gives Lat, Lon and Alt for each station.";
+  p_help = "Each line in file is of form 4_CHAR_ID, Lat, Lon, Alt";
+  p_default = "./StationLocation.dat";
+} station_location_file;
+
+/////////////////////////////////////////////////////////////////////////
+// display
+
+commentdef {
+  p_header = "DISPLAY OPTIONS";
+}
+
+typedef enum {
+  STYLE_WSDDM, STYLE_AOAWS, STYLE_WSDDM_ENGLISH, STYLE_WSDDM_E_HTML
+} output_style_t;
+
+paramdef enum output_style_t {
+  p_default = STYLE_WSDDM;
+  p_descr = "Style option";
+  p_help = "Style set according to project wishes.";
+} output_style;
+
+paramdef int
+{
+  p_descr = "Max number of items to print.";
+  p_default = 1;
+} nmax_items_print;
+
+paramdef string
+{
+  p_descr = "Message to print if no data are returned.";
+  p_help = "Message is printed followed by a new line if no data are found.";
+  p_default = "No data found.";
+} no_data_message;
+
+paramdef string
+{
+  p_descr = "Text to be printed when the visibility is a minimum value";
+  p_help = "The text is length is 5 characters.This parameter is only"
+           " used in the _printAoawsMetar method.";
+  p_default = " 10k+";
+} min_visibility_text;
+
+paramdef string
+{
+  p_descr = "Text to be printed when the ceiling is a minimum value";
+  p_help = "The text is length is 5 characters. This parameter is only"
+           " used in the _printAoawsMetar method.";
+  p_default = "     ";
+} min_ceiling_text;
+

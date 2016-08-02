@@ -1,0 +1,104 @@
+/**********************************************************************
+ * TDRP params for DsFile2Server
+ **********************************************************************/
+
+//======================================================================
+//
+// DsFile2Server opens files that contain Ds messages, reads
+// the messages, and sends them on their way. Said files were
+// typically written either by DsFileDist by setting the host to
+// 'localfile', or by DsSpdbServer. Normally files watched for and read
+// in realtime  but the -f option can be
+// used to specify input file(s) for debugging.
+
+
+// Niles Oien September 2004.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This program registers with procmap. This is
+// the instance registered.
+// Type: string
+//
+
+instance = "test";
+
+///////////// input_directory /////////////////////////
+//
+// The input directory in which DsMsg files appear.
+// These files are read and the messages sent to the
+// appropriate server via a socket.
+// Type: string
+//
+
+input_directory = "/tmp/spdb_msg_files";
+
+///////////// use_ldatainfo ///////////////////////////
+//
+// Option to Trigger off _ldatainfo files/queues.
+// Type: boolean
+//
+
+use_ldatainfo = FALSE;
+
+///////////// max_realtime_age ////////////////////////
+//
+// Maximum age of file to process, seconds.
+// Default is 15 minutes.
+// Type: int
+//
+
+max_realtime_age = 900;
+
+///////////// write_status_file ///////////////////////
+//
+// Option to Trigger off _ldatainfo files/queues.
+// Type: boolean
+//
+
+write_status_file = TRUE;
+
+///////////// IO_status_file //////////////////////////
+//
+// IO Statistics and status info file.
+// File is re-written every minute if write_status_file is TRUE.
+// Type: string
+//
+
+IO_status_file = "DsFile2Server.status";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, ARCHIVE and REALTIME.
+
+// In REALTIME mode, the analysis is performed as new data
+// arrives. In ARCHIVE mode, the file list is obtained from
+// the command line with the -f option. Specifying -f automatically
+// invokes archive mode.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = REALTIME;
+

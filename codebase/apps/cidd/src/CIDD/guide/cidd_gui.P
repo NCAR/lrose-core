@@ -1,0 +1,7 @@
+;GIL-3
+(
+	:interfaces             (page_pu.G fields_pu.G h_win.G movie_pu.G v_win.G data_pu.G zoom_pu.G save_pu.G over_pu.G status_pu.G draw_pu.G prod_pu.G fcast_pu.G status_pu.G route_pu.G gen_time_pu.G past_pu.G cmd_pu.G )
+	:actions                (
+	)
+	:root_window            nil
+)

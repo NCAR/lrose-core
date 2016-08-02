@@ -1,0 +1,7 @@
+<TsGrabberCommands>
+  <nSamples>1000</nSamples>
+  <startGate>50</startGate>
+  <nGates>500</nGates>
+  <fastAlternating>true</fastAlternating>
+  <labviewRequest>true</labviewRequest>
+</TsGrabberCommands>

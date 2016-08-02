@@ -1,0 +1,35 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_get_next_cwise_ray</h1>
+
+
+<h1>RSL_get_next_ccwise_ray</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><b><a href=RSL_ray_struct.html>Ray</a> *RSL_get_next_cwise_ray</b><b>(<a href=RSL_sweep_struct.html>Sweep</a> *s, <a href=RSL_ray_struct.html>Ray</a> *r);</b></b><br>
+<b><a href=RSL_ray_struct.html>Ray</a> *RSL_get_next_ccwise_ray</b><b>(<a href=RSL_sweep_struct.html>Sweep</a> *s, <a href=RSL_ray_struct.html>Ray</a> *r);</b>
+
+<h3>
+<hr>Description</h3>
+<b>cwise</b>, means clockwise and it is defined to mean &quot;in the direction of increasing azimuth angle (don't ask).&quot; <b>ccwise</b> means counter-clockwise and it is defined to mean &quot;in the direction of decreasing azimuth angle.&quot; Dennis Flanigan defined <b>cwise</b> and <b>ccwise</b>.
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the Ray structure is returned. Otherwise, a NULL pointer is returned. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_get_ray_from_sweep.html>RSL_get_ray_from_sweep</a>, <a href=RSL_get_ray_above-below.html>RSL_get_ray_above</a>, <a href=RSL_get_ray_above-below.html>RSL_get_ray_below</a>, <a href=RSL_get_first_ray_of.html>RSL_get_first_ray_of_sweep</a>, <a href=RSL_get_first_ray_of.html>RSL_get_first_ray_of_volume</a>. 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

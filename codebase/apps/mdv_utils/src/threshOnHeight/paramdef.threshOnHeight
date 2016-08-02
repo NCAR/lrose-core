@@ -1,0 +1,135 @@
+//
+// Copyright 2014 - University Corporation for Atmospheric Research
+// BoltAlert (TM)
+//
+
+commentdef {
+  p_header = "threshOnHeight thresholds a 3D field above\n"
+  "and/or below a height. Height is obtained from a 2D\n"
+  "mdv field. Niles Oien April 2011.\n"
+  " \n"
+  "BoltAlert (TM)\n";
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here. This is the field\n"
+  "to be thresholded."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+
+paramdef string {
+  p_descr = "Field to threshold.";
+  p_help = "Set as appropriate."; 
+  p_default = {"DBZ"};
+} fieldName;
+
+
+paramdef string {
+  p_descr = "URL for height data.";
+  p_help = "Set as appropriate."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} heightUrl;
+
+paramdef string {
+  p_descr = "2D height field name.";
+  p_help = "Set as appropriate."; 
+  p_default = {"fzgLevel"};
+} heightFieldName;
+
+paramdef boolean {
+  p_descr = "Option to use constant height threshhold.";
+  p_help = "This overrides using height field." ;
+  p_default = false;
+} useConstantHeightThresh;
+
+paramdef  float{
+  p_descr = "Constant threshold to use if useConstantHeightThresh = true.";
+  p_default = 5.5;
+} constantHeightThresh;
+
+
+
+paramdef int {
+  p_descr = "Temporal tolerance to use when looking for the height field.";
+  p_help = "Set as appropriate."; 
+  p_default = { 3600};
+} temporalTolerance;
+
+typedef struct {
+	double scale;
+	double bias;
+} scaleBias_t;
+
+paramdef struct scaleBias_t {
+  p_descr = "Scale and bias to apply to the height field to adjust\n"
+            "the units so that they match the vlevel header in the\n"
+	    "field to be thresholded. For example, if the 2D height\n"
+	    "field is in meters and the vlevel is in Km then set the scale\n"
+	    "to 0.001 and bias to 0.";
+  p_help = "Set as appropriate."; 
+  p_default = { 0.001, 0.0};	 
+} heightAdjust;
+ 
+paramdef struct scaleBias_t {
+  p_descr = "Scale and bias to apply to the field values that are above\n"
+  "the height.";
+  p_help = "Set as appropriate."; 
+  p_default = { 1.0, 0.0};	 
+} aboveAdjust;
+ 
+paramdef boolean {
+  p_descr = "Option to mark values above specified height as mssing.";
+  p_help = "If you do this the aboveAdjust parameters are ignored."; 
+  p_default = FALSE;
+} markAboveMissing;
+
+
+paramdef struct scaleBias_t {
+  p_descr = "Scale and bias to apply to the field values that are above\n"
+  "the height.";
+  p_help = "Set as appropriate."; 
+  p_default = { 0.0, 0.0};	 
+} belowAdjust;
+
+paramdef boolean {
+  p_descr = "Option to mark values below specified height as mssing.";
+  p_help = "If you do this the belowAdjust parameters are ignored."; 
+  p_default = FALSE;
+} markBelowMissing;
+
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Derived satellite fields are written here."; 
+  p_default = {"mdvp:://localhost::mdv/grad"};
+} OutUrl;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+

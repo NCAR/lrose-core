@@ -1,0 +1,25 @@
+# OVERLAY.INFO : Information about Map overlays required for the AWPG Display
+#
+#  MAP_CODE Must be less than 16 characters, Color must be regualr X color name
+#
+# MAP_CODE        Control_Label         Map_File_Name            On/OFF Detail_Thresh Color     
+#------------------------------------------------------------------------------------------
+#
+DIA_RUNW          DIA_runways           maps/DIA_runways.map      1	0.1     yellow
+DIA_TAXI          DIA_taxiways          maps/DIA_taxiways.map     1	3.0     gold
+DIA_CONC          DIA_concourse         maps/DIA_concourses.map   1	5.0     blue
+#
+Colo_Aviation     Colo_Aviation         maps/Colo_aviation.map    1	0.1     gold
+Colo_Towns        Colo_Towns            maps/Colo_towns.map       1	0.1     yellow
+Colo_roadmap_A    Colo_roadmap_A        maps/Colo_roadmap_A.map   0	0.1     grey
+Colo_counties     Colo_counties         maps/Colo_counties.map    1	0.1     blue
+UDFCD_mesonet     UDFCD_mesonet         maps/Colo_UDFCD_meso.map  1	3.0     white
+UDFCD_mesonet_ul  UDFCD_mesonet_ul      maps/Colo_UDFCD_meso_unlab.map  1   3.0     blue
+#
+RADARS            NWS_RADARS            maps/radars.map           0	0.1     red
+US_NEXRADS        US_NEXRADS            maps/US_nexrad.map        1	0.1     red
+#
+COUNTIES          US_Counties           maps/us_counties.map      0     0.1     white
+STATES            State_Borders         maps/usa.map              1	0.1     white
+#
+SAO_MOUNTAIN      SAO_MOUNTAIN          maps/mountain_sao.map     0     0.1     blue

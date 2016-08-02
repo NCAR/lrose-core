@@ -1,0 +1,375 @@
+/**********************************************************************
+ * TDRP params for Mdv2Vad
+ **********************************************************************/
+
+//======================================================================
+//
+// Mdv2Vad reads in Doppler data from a.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBU.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_dir = "mdv/radarPolar/cp2_s/sur";
+
+///////////// set_elev_limits /////////////////////////
+//
+// Option to set elevation limits.
+// Type: boolean
+//
+
+set_elev_limits = FALSE;
+
+///////////// lower_elev //////////////////////////////
+//
+// Lower elev limit (deg).
+// Type: float
+//
+
+lower_elev = 0;
+
+///////////// upper_elev //////////////////////////////
+//
+// Upper elev limit (deg).
+// Type: float
+//
+
+upper_elev = 0;
+
+//======================================================================
+//
+// INPUT FIELD INFORMATION.
+//
+// Names of input fields in the Dsr queue.
+//
+//======================================================================
+ 
+///////////// SNR_available ///////////////////////////
+//
+// Is the SNR field available?.
+// Type: boolean
+//
+
+SNR_available = TRUE;
+
+///////////// SNR_field_name //////////////////////////
+//
+// Field name for SNR in the input file.
+// Type: string
+//
+
+SNR_field_name = "SNR_F";
+
+///////////// DBZ_field_name //////////////////////////
+//
+// Field name for DBZ (ZH) in the input file.
+// Type: string
+//
+
+DBZ_field_name = "DBZ_F";
+
+///////////// VEL_field_name //////////////////////////
+//
+// Field name for VEL in the input file.
+// Type: string
+//
+
+VEL_field_name = "VEL_FOLD_8";
+
+//======================================================================
+//
+// INPUT DATA CENSORING.
+//
+// You have the option to censor gates in the input data based on the 
+//   value in an input field. Normally SNR is used for this purpose.
+//
+//======================================================================
+ 
+///////////// censor_using_thresholds /////////////////
+//
+// Option to censor the output using set thresholds.
+// If TRUE, the thresholding fields will be examined to see if it is 
+//   within the desired range. Examples are SNR (Signal-to-noise) and NCP 
+//   (normalized coherent power). If the specified field at a gate falls 
+//   outside the specified range, all output fields will be set to missing 
+//   for that gate.
+// Type: boolean
+//
+
+censor_using_thresholds = TRUE;
+
+///////////// censor_field_name ///////////////////////
+//
+// Name of field for thresholding.
+// This is the DSR (input) field name for the thresholding field. If 
+//   this field is available, it is used for thresholding. If not, 
+//   thresholding will not be performed.
+// Type: string
+//
+
+censor_field_name = "SNR_F";
+
+///////////// censor_min_value ////////////////////////
+//
+// Minimum threshold - see 'censor_output_using_thresholds'.
+// The specified field at a gate must exceed this value for the gate to 
+//   be accepted.
+// Type: double
+//
+
+censor_min_value = 10;
+
+///////////// censor_max_value ////////////////////////
+//
+// Maximum threshold - see 'censor_output_using_thresholds'.
+// The specified field at a gate must be less than this value for the 
+//   gate to be accepted.
+// Type: double
+//
+
+censor_max_value = 200;
+
+//======================================================================
+//
+// NYQUIST value (m/s).
+//
+//======================================================================
+ 
+///////////// set_nyquist_velocity ////////////////////
+//
+// Option to specify the nyquist velocity.
+// If FALSE, the nyquist will be obtained from the RADAR chunk in the 
+//   MDV file. If TRUE, the nyquist value will be set from the parameter 
+//   file.
+// Type: boolean
+//
+
+set_nyquist_velocity = TRUE;
+
+///////////// nyquist_velocity ////////////////////////
+//
+// Nyquist velocity (m/s).
+// Must be supplied if not in MDV file. See 'set_nyquist_velocity'.
+// Type: double
+//
+
+nyquist_velocity = 8;
+
+//======================================================================
+//
+// VAD COMPUTATIONS.
+//
+//======================================================================
+ 
+///////////// min_elev ////////////////////////////////
+//
+// Minimum elevation angle for data in VAD - deg.
+// Type: double
+//
+
+min_elev = 0.3;
+
+///////////// max_elev ////////////////////////////////
+//
+// Maximum elevation angle for data in VAD - deg.
+// Type: double
+//
+
+max_elev = 45;
+
+///////////// min_height //////////////////////////////
+//
+// Minimum height for VAD profile - km.
+// Type: double
+//
+
+min_height = 0.5;
+
+///////////// max_height //////////////////////////////
+//
+// Maximum height for VAD profile - km.
+// Type: double
+//
+
+max_height = 20;
+
+///////////// delta_height ////////////////////////////
+//
+// Delta height for VAD profile - km.
+// Type: double
+//
+
+delta_height = 1;
+
+///////////// min_range ///////////////////////////////
+//
+// Minimum range for computing VAD circles - km.
+// Type: double
+//
+
+min_range = 2;
+
+///////////// max_range ///////////////////////////////
+//
+// Maximum range for computing VAD circles - km.
+// Type: double
+//
+
+max_range = 30;
+
+///////////// delta_range /////////////////////////////
+//
+// Delta range for computing VAD circles - km.
+// Type: double
+//
+
+delta_range = 2;
+
+///////////// slice_delta_azimuth /////////////////////
+//
+// Azimuth interval for separating data into azimuth slices (deg).
+// Type: double
+//
+
+slice_delta_azimuth = 3;
+
+///////////// n_slices_for_vel_median /////////////////
+//
+// Number of slices for computing median of the velocity in a series of 
+//   slices.
+// This is used to condition the velocity when searching for folds.
+// Type: int
+//
+
+n_slices_for_vel_median = 9;
+
+///////////// min_vel_values_per_slice ////////////////
+//
+// Min number of valid velocity measurements per slice.
+// Velocity values are only included if the data at a gate meets the 
+//   censoring limits. Slices with fewer velocity values than this are not 
+//   included in the analysis.
+// Type: int
+//
+
+min_vel_values_per_slice = 3;
+
+///////////// max_missing_sector_size /////////////////
+//
+// Max size of missing sector for computing the VAD fit (deg).
+// The VAD computes wind vectors using series of rings at each elevation 
+//   angle. The rings are broken into azimuth slices - see 
+//   slice_delta_azimuth. The mean radial velocity is computed for each 
+//   slice. Some slices may have no data because the signal is too low - 
+//   see min_vel_values_per_slice. The VAD will not be reliable if large 
+//   sectors have no data within the censoring limits. This parameter 
+//   limits the size of any missing sectors. If the size of a missing 
+//   sector in a ring exceeds this parameters, the data from that ring 
+//   will not be used.
+// Type: double
+//
+
+max_missing_sector_size = 45;
+
+///////////// max_to_from_direction_error /////////////
+//
+// Max allowed_difference in to/from direction (deg).
+// The VAD computes wind vectors around the full circle. The max 
+//   negative speed value indicates wind blowing towards the radar and the 
+//   max positive speed value indicates wind blowing away from the radar. 
+//   Ideally the directtions of these two vectors are 180 degrees apart. 
+//   However, in reality there will be an error between these two ideal 
+//   directions. If the error exceeds this value, the wind vector will not 
+//   be considered valid.
+// Type: double
+//
+
+max_to_from_direction_error = 45;
+
+///////////// max_fit_rms_error ///////////////////////
+//
+// Max mean error of the model fit (m/s).
+// The VAD computes wind vectors around the full circle using a 3-term 
+//   Fourier model. The standard error of estimate is computed from the 
+//   root-mean-squared difference between the observations and the model. 
+//   If the RMS error is less than the specified number, the fit is 
+//   accepted and the wind estimate is considered valid.
+// Type: double
+//
+
+max_fit_rms_error = 3;
+
+//======================================================================
+//
+// SPDB DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_spdb_url /////////////////////////
+//
+// Output URL.
+// Output SPDB data is written to this URL.
+// Type: string
+//
+
+output_spdb_url = "./output/spdb/vad";
+

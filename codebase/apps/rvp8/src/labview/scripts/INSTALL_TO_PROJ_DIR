@@ -1,0 +1,168 @@
+#! /bin/bash
+
+#--------------------------------------------------------------------
+#
+# master script to install RVP8 ATE project to PROJ_DIR
+#
+# Mike Dixon, RAP, NCAR, Boulder, CO, USA
+# May 2007
+#
+#--------------------------------------------------------------------
+
+# set the path
+
+export PATH=.:/bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Usage: INSTALL_TO_PROJ_DIR [ -debug -h ]"
+    echo
+    echo "  -h:     produce this usage list"
+    echo "  -debug: turn debugging on"
+    echo
+}
+
+#--------------------------------------------------------------------
+# check args
+
+if [ $# -gt 1 ]
+then
+    echo "ERROR - bad command line"
+    usage
+    exit -1
+fi
+
+if [ "$1" == -h ] 
+then
+    usage
+    exit 0
+fi
+
+debug=false
+debug_str=""
+if [ "$1" == -debug -o "$2" == -debug -o "$3" == -debug ] 
+then
+    debug=true
+    debug_str="-debug"
+fi
+
+#--------------------------------------------------------------------
+
+echo
+echo "**************************************************************"
+echo
+echo "  PROJ_DIR INSTALLATION"
+echo
+echo "  FOR RVP8 ATE PROJECT"
+echo
+echo " " `date`
+echo
+if [ "$debug" == true ]
+then
+    echo "  debug mode on"
+    echo
+fi
+echo "**************************************************************"
+echo
+
+# directories
+
+home_dir=$HOME
+build_dir=$home_dir/rap
+proj_src_dir=$home_dir/rap/projects/rvp8/ate
+proj_dir=$home_dir/projDir
+bak_proj_dir=$home_dir/bak.projDir
+
+# check for existence of directories
+
+if [ ! -e $build_dir ]
+    then
+    echo -n X | tr X '\07'	# Beep.
+    echo "  ERROR - build dir does not exist: $build_dir"
+    echo
+    exit -1
+fi
+
+if [ ! -e $proj_src_dir ]
+    then
+    echo -n X | tr X '\07'	# Beep.
+    echo "  ERROR - proj_src dir does not exist: $proj_src_dir"
+    echo
+    exit -1
+fi
+
+# remove bak.projDir dir if it exists
+
+if [ -e ${bak_proj_dir} ]
+    then
+    echo -n X | tr X '\07'	# Beep.
+    echo "  WARNING - will remove backup dir: ${bak_proj_dir}"
+    echo
+    read -ep "Do you still wish to go ahead [yes/no] (no)? " proceed
+    if [ "$proceed" != yes ]
+	then
+	echo
+	echo "  Aborting ..."
+	echo -n X | tr X '\07'	# Beep.
+	echo
+	exit 0
+    fi
+    echo
+    /bin/rm -rf ${bak_proj_dir} | exit -1
+fi
+
+# move projDir to bak if it exists
+
+if [ -e $proj_dir ]
+    then
+    echo -n X | tr X '\07'	# Beep.
+    echo "  INFO - moving $proj_dir to ${bak_proj_dir}"
+    echo
+    /bin/mv $proj_dir ${bak_proj_dir} | exit -1
+fi
+
+# move .cshrc to .bak if it exists
+
+if [ -e $home_dir/.cshrc ]
+    then
+    echo -n X | tr X '\07'	# Beep.
+    echo "  INFO - moving $home_dir/.cshrc to $home_dir.cshrc.bak"
+    echo
+    /bin/mv $home_dir/.cshrc $home_dir/.cshrc.bak | exit -1
+fi
+
+# make proj dir
+
+mkdir -p $proj_dir | exit -1
+
+# copy in content
+
+cp -r $proj_src_dir/* $proj_dir | exit -1
+cp $proj_dir/dotfiles/cshrc $home_dir/.cshrc
+
+# make link for data dir
+
+cd $proj_dir
+mkdir -p ~/data
+ln -s ~/data
+
+# make link for log dir
+
+mkdir -p ~/data/logs
+cd $proj_dir
+ln -s ~/data/logs
+
+#-- done ------------------------------------------------------------
+
+echo "**************************************************************"
+echo
+echo "  Successful installation - DONE"
+echo
+echo "**************************************************************"
+echo
+
+exit 0

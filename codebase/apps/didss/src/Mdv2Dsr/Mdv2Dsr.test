@@ -1,0 +1,404 @@
+/**********************************************************************
+ * TDRP params for Mdv2Dsr
+ **********************************************************************/
+
+//======================================================================
+//
+// Mdv2Dsr PARAMETER FILE.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed.
+// Type: boolean
+//
+
+debug = FALSE;
+
+///////////// info ////////////////////////////////////
+//
+// Info option.
+// Print info messages.
+// Type: boolean
+//
+
+info = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// LOGGING.
+//
+//======================================================================
+ 
+///////////// log_dir /////////////////////////////////
+//
+// Directory for log file output.
+// Type: string
+//
+
+log_dir = "";
+
+//======================================================================
+//
+// INPUT.
+//
+//======================================================================
+ 
+///////////// input_files /////////////////////////////
+//
+// Input files.
+// If no input files are specified, the input directory will be used.
+// Type: string
+// 1D array - variable length.
+//
+
+input_files = { };
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory path.
+// The start and end times specified below will be used to select files 
+//   from this directory.
+// Type: string
+//
+
+input_dir = "";
+
+///////////// start_time //////////////////////////////
+//
+// Start time for files to be processed.
+// Files from this time through the end time will be processed.
+
+// Supported time formats are:
+//   yyyy mm dd hh mm ss (preferred)
+//   hh:mm:ss mm/dd/yyyy.
+// Type: string
+//
+
+start_time = "00:00:00 12/31/1998";
+
+///////////// end_time ////////////////////////////////
+//
+// End time for files to be processed.
+// Files from the start time through this time will be processed.
+
+// Supported time formats are:
+//   yyyy mm dd hh mm ss (preferred)
+//   hh:mm:ss mm/dd/yyyy.
+// Type: string
+//
+
+end_time = "00:00:00 12/31/1998";
+
+//======================================================================
+//
+// PROCESSING PARAMS.
+//
+//======================================================================
+ 
+///////////// use_field_headers ///////////////////////
+//
+// Option to take nz and the array of elevation from the first field 
+//   header. By default, the radarParams stuct is used if it is available, 
+//   but this may not be correct if the MDV data have been remapped so 
+//   that the radar params are not current. Setting this flag forces the 
+//   use of field headers.
+// Default is to go for the brass ring and attempt to use the radar 
+//   parameters if they are there. This is almost always correct.
+// Type: boolean
+//
+
+use_field_headers = FALSE;
+
+///////////// use_current_time ////////////////////////
+//
+// Use current time for beam times.
+// The current time will be used for the beams as they are written to 
+//   the fmq.
+// Type: boolean
+//
+
+use_current_time = TRUE;
+
+///////////// simulate_time ///////////////////////////
+//
+// Use a simulated time for beam times.
+// Use the times listed below to construct the data time for the beams.  
+//   Note that this mode can only be used if files are listed above, 
+//   instead of specifying an input directory.
+// Type: boolean
+//
+
+simulate_time = FALSE;
+
+///////////// start_end_times /////////////////////////
+//
+// Simulated start and end times for each file listed above.
+// There must be one set of start and end times for each file listed in 
+//   input_files above.
+
+// Supported time formats are:
+//   yyyy mm dd hh mm ss (preferred)
+//   hh:mm:ss mm/dd/yyyy.
+//
+// Type: struct
+//   typedef struct {
+//      string simulate_start_time;
+//      string simulate_end_time;
+//   }
+//
+// 1D array - variable length.
+//
+
+start_end_times = {
+  { "00:00:00 12/31/1998", "00:06:00 12/31/1998"}
+};
+
+///////////// beam_wait_msecs /////////////////////////
+//
+// Wait per beam (milli-secs).
+// Type: int
+//
+
+beam_wait_msecs = 30;
+
+///////////// vol_wait_secs ///////////////////////////
+//
+// Wait per vol (secs).
+// Type: int
+//
+
+vol_wait_secs = 1;
+
+///////////// simulate_repeat_forever /////////////////
+//
+// Loop through the data repeatedly, for simulate mode.
+// Should be used with 'use_current_time'.
+// Type: boolean
+//
+
+simulate_repeat_forever = TRUE;
+
+//======================================================================
+//
+// OPTION to override radar params.
+//
+//======================================================================
+ 
+///////////// override_radar_params ///////////////////
+//
+// Override radar params in MDV file.
+// Type: boolean
+//
+
+override_radar_params = TRUE;
+
+///////////// radar_params ////////////////////////////
+//
+// Overrride radar params in file with these params.
+// ========== Radar params ==========
+// 	
+// 	radarId:            unique number
+// 	radarType:          use radar type defs in ds_radar.h
+// 	samplesPerBeam:     number of pulses per data beam
+// 	scanType:           the current scan strategy
+// 	polarization:       see ds_radar.h
+// 	radarConstant:      radar constant
+// 	altitude:           km
+// 	latitude:           degrees
+// 	longitude:          degrees
+// 	gateSpacing:        km
+// 	startRange:         km
+// 	horizBeamWidth:     degrees
+// 	vertBeamWidth:      degrees
+// 	pulseWidth:         micro-seconds
+// 	pulseRepFreq:       pulse repitition freq (/s)
+// 	wavelength:         cm
+// 	xmitPeakPower:      watts
+// 	receiverMds:        dBm
+// 	receiverGain:       dB
+// 	antennaGain:        dB
+// 	systemGain:         dB
+// 	unambigVelocity:    m/s
+// 	unambigRange:       km
+// 	radarName:          name of radar site
+// 	scanTypeName:       name of scanType
+// 	.
+//
+// Type: struct
+//   typedef struct {
+//      int radarId;
+//      int radarType;
+//      int samplesPerBeam;
+//      int scanType;
+//      int polarization;
+//      double radarConstant;
+//      double altitude;
+//      double latitude;
+//      double longitude;
+//      double gateSpacing;
+//      double startRange;
+//      double horizBeamWidth;
+//      double vertBeamWidth;
+//      double pulseWidth;
+//      double pulseRepFreq;
+//      double wavelength;
+//      double xmitPeakPower;
+//      double receiverMds;
+//      double receiverGain;
+//      double antennaGain;
+//      double systemGain;
+//      double unambigVelocity;
+//      double unambigRange;
+//      string radarName;
+//      string scanTypeName;
+//   }
+//
+//
+
+radar_params = {
+    radarId = 0,
+    radarType = 0,
+    samplesPerBeam = 128,
+    scanType = 0,
+    polarization = 5,
+    radarConstant = -73.1,
+    altitude = $(RADAR_ALT_KM),
+    latitude = $(RADAR_LAT),
+    longitude = $(RADAR_LON),
+    gateSpacing = 0.15,
+    startRange = 0,
+    horizBeamWidth = 1.0,
+    vertBeamWidth = 1.0,
+    pulseWidth = 1,
+    pulseRepFreq = 1000,
+    wavelength = 3.2,
+    xmitPeakPower = 250e06,
+    receiverMds = -114,
+    receiverGain = 35.0,
+    antennaGain = 44.0,
+    systemGain = 50.0,
+    unambigVelocity = 27.25,
+    unambigRange = 150,
+    radarName = "MUAN",
+    scanTypeName = "Volume"
+};
+
+//======================================================================
+//
+// DIAGNOSTICS.
+//
+//======================================================================
+ 
+///////////// print_summary ///////////////////////////
+//
+// Print summary.
+// If set to true, summaries are printed at given interval.
+// Type: boolean
+//
+
+print_summary = FALSE;
+
+///////////// summary_interval ////////////////////////
+//
+// Summary interval.
+// See print_summary.
+// Type: int
+//
+
+summary_interval = 90;
+
+//======================================================================
+//
+// OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// output fmq url.
+// Path for FMQ output data.
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::$(DATA_DIR)/fmq/moments";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message.
+// Type: int
+//
+
+output_fmq_size = 100000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in output FMQ.
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+// Type: int
+//
+
+output_fmq_nslots = 7200;
+
+///////////// output_fmq_compress /////////////////////
+//
+// FMQ compression option.
+// If TRUE FMQ messages are compressed.
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// output_encoding /////////////////////////
+//
+// Set encoding type for output data.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding = ENCODING_INT16;
+
+///////////// write_blocking //////////////////////////
+//
+// Blocking FMQ output.
+// If TRUE, this application will wait for a reader to catch up. Can 
+//   only be used with a single reader.
+// Type: boolean
+//
+
+write_blocking = TRUE;
+
+///////////// az_offset ///////////////////////////////
+//
+// Offset to add to azimuth angles.
+// Will rotate data on output.
+// Type: double
+//
+
+az_offset = 0;
+

@@ -1,0 +1,48 @@
+//
+//
+// Turn debugging on.
+// 
+debug=DEBUG_ON;
+
+//
+// Set the wait between scans, in seconds.
+//
+Delay=60;     
+
+//               
+// Set the offset time added to the current GM time to 0 seconds. 
+//
+DelT=0;     
+                        
+//
+// Set single_pass to FALSE. If this is set, then one day
+// is converted all at once, and then the program exits.
+//
+single_pass=TRUE;
+
+//
+// Set the input directory, where files named hhmmss.mdv reside.
+//
+InDir="./Input";
+
+//
+// Set the output directory - files are then written
+// to OUTDIR/YYYYMMDD/hhmmss.mdv
+OutDir=".";
+
+//
+// Set the ProcMap instance.
+//
+instance="primary";
+
+
+
+        
+
+
+
+
+
+
+
+

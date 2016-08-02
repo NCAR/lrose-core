@@ -1,0 +1,34 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_clear_...</h1>
+
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b><a href=RSL_ray_struct.html>Ray</a> *RSL_clear_ray(<a href=RSL_ray_struct.html>Ray</a> *r);<br>
+<a href=RSL_sweep_struct.html>Sweep</a> *RSL_clear_sweep(<a href=RSL_sweep_struct.html>Sweep</a> *s);<br>
+<a href=RSL_volume_struct.html>Volume</a> *RSL_clear_volume(<a href=RSL_volume_struct.html>Volume</a> *v);</b> 
+
+<h3>
+<hr>Description</h3>
+<b>RSL_clear_volume</b> calls <b>RSL_clear_sweep</b> for the number of sweeps. <b>RSL_clear_sweep</b> calls <b>RSL_clear_ray</b> for the number of rays. And <b>RSL_clear_ray</b> clears the array of <b>Range</b> of size <b>nbins</b>. All header information is preserved. This may or may not be a desired capability. 
+<hr>
+
+<h3>Return value</h3>
+Upon successful completion, a pointer to the appropriate structure is returned. 
+<hr>
+
+<h3>See also</h3>
+<a href=../examples/Example_RSL_clear.c>Example</a><br>
+<a href=RSL_free.html>RSL_free_volume</a>, <a href=RSL_free.html>RSL_free_sweep</a>, <a href=RSL_free.html>RSL_free_ray</a> 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

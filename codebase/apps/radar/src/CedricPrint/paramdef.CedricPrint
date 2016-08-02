@@ -1,0 +1,83 @@
+/*********************************************************
+ * parameter definitions for CedricPrint
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 2012
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Path string - full path specified.";
+  p_help = "File will be read from ro written to this path.";
+} path;
+
+commentdef {
+  p_header = "READ CONTROL OPTIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field names";
+} set_field_names;
+
+paramdef string {
+  p_default = {"DBZ"};
+  p_descr = "Field name list.";
+} field_names[];
+
+commentdef {
+  p_header = "PRINT CONTROL";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print out data.";
+  p_help = "If true, data values will be printed.";
+} print_data;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print out in native format.";
+  p_help = "If false, printout will be in float mode.";
+} print_native;
+
+commentdef {
+  p_header = "SAVING THE DATA TO A FILE";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to save the resulting object to an Mdv file.";
+  p_help = "If true, the Cedric object which results from the read will be saved to the specified dir.";
+} save_to_file;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to save only, without printing.";
+  p_help = "If true, the Cedric object will be saved to a file, but the normal print to stdout will be suppressed.";
+} save_no_print;
+
+paramdef string {
+  p_default = "/tmp/cedric_output";
+  p_descr = "Dir to which the file should be saved.";
+  p_help = "See 'save_to_file.";
+} save_dir;
+

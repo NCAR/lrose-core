@@ -1,0 +1,122 @@
+/******************************************************************************
+**                                                                           **
+**  File name:   trec_params                                                 **
+**                                                                           **
+**  Written by:  Laura Stoltz                                                **
+**                                                                           **
+**  Contents:    parameters for trec_95 (for use with TDRP)                  **
+**                                                                           **
+******************************************************************************/
+debug = false;
+
+udp_port = 50015;
+udp_pkt_format = NCAR_UDP;
+
+read_delay = 0.05;
+nfields_raw = 4;         // number of fields in the data
+
+//
+// ngates_dropped_start: number of gates dropped at start of beam buffer to 
+//                       correct for range errors
+//
+ngates_dropped_start = 0;
+
+vel_field_pos = 3;       // pos of vel in moments data
+dbz_field_pos = 2;       // pos of dbz in moments data
+flg_field_pos = 4;       // pos of flags in moments data
+gate_spacing = 0.225;    // range gate spacing
+max_gates = 664;         // number of gates expected
+anal_fun = false;        // option for analytical functions
+
+check_prf = true; 
+prf_thr = 990.0;         // min target prf
+el_thr = 0.6;            // max target elevation
+elmax = 5.0;
+num_el = 2;              // max number of elevation angles to read
+dbz_max = 75.0;
+fract = 1.0;
+fractst = 1.0;          // fraction of second trip flags allowed
+
+#
+# Atlanta: lat 33.3636, lon -84.565
+#
+radar_lat_deg = 33;
+radar_lon_deg = -84;
+radar_lat_min = 21;
+radar_lon_min = 33;
+radar_lat_sec = 48.96;
+radar_lon_sec = 54.0;
+radar_altitude = 0.296;  // in km
+
+#
+# coordinates of analysis grid, wrt radar
+#
+grid_min_x = -105.0;
+grid_min_y = -105.0;
+grid_min_z = 0.0;
+grid_max_x = 108.0;
+grid_max_y = 108.0;
+grid_max_z = 3.0;
+
+#
+# grid spacing (in km)
+#
+grid_del_x = 3.0;
+grid_del_y = 3.0;
+grid_del_z = 0.5;
+
+bad = -32768;            // bad data value
+
+local_files = false;
+remote_files = true;
+target_machine_name = "draft";
+local_dir = "/home/awdl/atlanta/draft/trec/data";
+remote_dir = "/d2/atlanta/trec";
+trans_type = "cp";       // type of trasfer of output files
+file_suffix = ".trec";
+remote_user = "awdl";
+
+rng_skip = 3;
+array_size = 10.0;       // size of correlation boxes (in km)
+array_spacing = 4.0;
+max_vel = 10.0;
+vel_rad = 15.0;
+cor_min_thr = 0.3;
+cor_max_thr = 0.9;
+var_thr = 30.0;
+
+#
+# vel_dif_thr: max difference allowed between the measured Doppler velocity 
+#              and the TREC radial velocity
+#
+vel_dif_thr = 5.0;
+
+dif_mean_thr = 2.0;
+mag_thr = 0.5;
+
+#
+# horz_rad: radius of influence to use when interpolating vectors to a 
+#           Cartesian grid
+#
+horz_rad = 15.0;
+
+vert_rad = 1.0;
+
+#
+# num_vectors: constraint used during the interpolation process specifying the
+#              minimum number of vectors influencing a grid point
+#
+num_vectors = 6;
+
+#
+# num_oct: constraint used during the interpolation process specifying the 
+#          minimum number of quadrants that must have data values in them.
+# Trec does a 2d interpolation, so max number of quadrants is four.
+#
+num_oct = 4;
+
+track_fld = 1;
+delta = 3;
+despike_dif = 2.0;
+cntmin = 5;
+

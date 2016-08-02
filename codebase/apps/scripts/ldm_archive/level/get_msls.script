@@ -1,0 +1,44 @@
+#!/bin/csh
+
+set MSS_path = /RAPDMG/LDM/ARCHIVE
+set ARC_home = /home/rapdmg/archive_staging
+set MSlist_home = $ARC_home/MSlist
+set EXE_home = /home/rapdmg/exe
+
+set year = `date --date="-24 hour" +%Y`
+set aryrmn = `date --date="-24 hour" +%Y%m`
+set ardate = `date --date="-24 hour" +%Y%m%d` 
+set armmdd = `date --date="-24 hour" +%m%d` 
+
+if ( $1 == "" ) then
+   set outfile = $MSlist_home/msls.out
+else
+   set outfile = $1
+endif
+
+set outfile2 = $MSlist_home/msls_$ardate
+
+if ( -e $outfile ) then
+  rm -f $outfile
+  if ( -e $outfile ) echo "WARNING: Remove of $outfile failed"
+endif
+
+msls -lR $MSS_path/$year/$armmdd >$outfile
+msls -lR $MSS_path/$year >$outfile2
+
+set trips=0
+set maxtrips = 1000
+set short_interval = 10
+set long_interval = 30
+WAIT:
+  if ( -e $outfile ) goto RCVD
+  sleep $short_interval
+  @ trips = $trips + 1
+  if ( $trips < $maxtrips ) goto WAIT
+
+RCVD:
+  sleep $long_interval
+  exit
+
+
+

@@ -1,0 +1,62 @@
+
+<HEAD>
+  <TITLE>modelView</TITLE>
+  <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <LINK type="text/css" href="css/modelView.css" media="screen" rel="stylesheet" title="Default" />
+
+</HEAD>
+
+<BODY>
+
+
+ <P ALIGN=CENTER> <B> <big> modelView Technical Support </big> </b> </P>
+
+<P>
+This is some technical support for the modelView AJAX setup that allows the web display
+of images that CIDD dumps. The code is checked in under <B> apps/cidd/src/modelView </b>
+in the RAL CVS repository.
+</P>
+
+<P>
+To get it going, do the following on a machine that has a web server running 
+with PHP available :
+</P>
+
+<P>
+<B>  [1] </b> Get the model to dump images with names like  200601060500/d1_2mtempA10mwnd.gif
+into the subdirectory "images" this directory is usually a link).
+</P>
+
+<P>
+
+<B> [2] </b> Once the model is dumping images, edit the modelView.php file and change the
+     names of the fields, zoom states, heights etc. - there are comments in
+     there that will tell you what to do.
+</P>
+<P>
+<b> [3] </b> Link modelView.php to index.html with the command :
+</P>
+<P> <B>
+ln -s modelView.php index.html
+</B> </P>
+<P>
+Then point a browser at this directory.
+It should be OK after a couple of debugging runs. The browser needs
+to have javaScript enabled and be reasonably recent.
+</P>
+<P>
+Please do be careful about making changes to the code without a system to
+test if things are working after the changes you make! The distributed processing nature of
+this system means that breaking it can lead to some difficult debugging - especially
+if the browser is IE, which does not have as well developed debugging tools as
+other browsers at the time of writing.
+</P>
+<P>
+Niles Oien copying from Frank Hage, January 2006.
+</P>
+
+<P ALIGN=CENTER>
+Return to <A HREF=index.html> modelView </A> page
+</P>
+
+

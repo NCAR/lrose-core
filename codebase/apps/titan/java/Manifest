@@ -1,0 +1,2 @@
+Main-Class: TrControl
+Class-Path: jdom.jar params .

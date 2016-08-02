@@ -1,0 +1,432 @@
+/**********************************************************************
+ * TDRP params for LdataWatcher
+ **********************************************************************/
+
+//======================================================================
+//
+// LdataWatcher program.
+//
+// LdataWatcher watches ldata file in a directory, optionally registers 
+//   the latest time with the DataMapper, optionally writes an FMQ, and 
+//   optionally runs a script.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// procmap_register_interval ///////////////
+//
+// Register interval for procmap - secs.
+// If the script takes longer than 60 secs to complete, you will need to 
+//   set this to a higher value to avoid the process being killed and 
+//   restarted by the auto_restarter.
+// Type: int
+//
+
+procmap_register_interval = 60;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// inputPath ///////////////////////////////
+//
+// Directory path for input data.
+// This directory is watched for new _latest_data_info files.
+// Type: string
+//
+
+inputPath = "/tmp/test";
+
+///////////// use_url /////////////////////////////////
+//
+// Option to read from DsLdataServer.
+// If TRUE, inputUrl will be used. If FALSE, inputPath will be used.
+// Type: boolean
+//
+
+use_url = FALSE;
+
+///////////// inputUrl ////////////////////////////////
+//
+// Directory path for input data.
+// This directory is watched for new _latest_data_info files.
+// Type: string
+//
+
+inputUrl = "";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Maximum age for files, realtime mode, seconds.
+// Default is 15 minutes.
+// Type: int
+//
+
+max_realtime_valid_age = 900;
+
+///////////// read_ldata_fmq_from_start ///////////////
+//
+// Option to read FMQ for latest_data_info from start.
+// If TRUE, the all of the entries in the FMQ will be read, from the 
+//   start. This is useful for archive mode, or for debugging what is in 
+//   an FMQ.
+// Type: boolean
+//
+
+read_ldata_fmq_from_start = FALSE;
+
+///////////// save_read_state /////////////////////////
+//
+// Option to save read state.
+// If TRUE, each time a read is successful, a _latest_read_info XML file 
+//   will be written to a tmp directory, so that read state can be 
+//   maintained in case the application crashes.
+// Type: boolean
+//
+
+save_read_state = FALSE;
+
+//======================================================================
+//
+// REGISTER WITH DATA MAPPER WHEN DATA ARRIVES.
+//
+//======================================================================
+ 
+///////////// register_with_datamapper ////////////////
+//
+// Option to register the data set with the DataMapper.
+// If TRUE, when a new _latest_data_info file arrives, that info will be 
+//   used to register with the DataMapper on the local machine.
+// Type: boolean
+//
+
+register_with_datamapper = FALSE;
+
+///////////// data_type ///////////////////////////////
+//
+// Data type - typically mdv, spdb, www, netCDF.
+// Not used if set to null, or if register_with_datamapper is false.
+// Type: string
+//
+
+data_type = "";
+
+//======================================================================
+//
+// WRITE FMQ ON BEHALF OF DATA SET WRITER WHEN DATA ARRIVES.
+//
+//======================================================================
+ 
+///////////// write_fmq ///////////////////////////////
+//
+// Option to write out an FMQ which matches the _latest_data_info.
+// If TRUE, the info in the ldata file will be written to an FMQ in the 
+//   same directory. The intention is to provide a mechanism for adding 
+//   the FMQ to directories of data arriving from clients which cannot 
+//   write the FMQ directly.
+// Type: boolean
+//
+
+write_fmq = FALSE;
+
+//======================================================================
+//
+// CALL SCRIPT WHEN DATA ARRIVES.
+//
+//======================================================================
+ 
+///////////// call_script /////////////////////////////
+//
+// Option to spawn a script when a new file is detected.
+// If TRUE, the script 'script_to_call' will be called with the 
+//   following args derived from the latest_data_info file: unix_time, 
+//   year, month, day, hour, min, sec, file_ext, user_info1, user_info2, 
+//   n_fcasts, lead_time_1, lead_time_2, ... If n_fcasts is 0, that will 
+//   be the last arg and there will be no lead times.
+// Type: boolean
+//
+
+call_script = TRUE;
+
+///////////// script_style ////////////////////////////
+//
+// Type of script to call.
+
+// The original, and default, behavior is to call a script with an 
+//   ordered list of arguments - SCRIPT_WITH_ORDERED_ARGS. This is 
+//   difficult to maintain, since adding extra args can cause the script 
+//   to fail if the order changes. The new option, 
+//   SCRIPT_WITH_COMMAND_LINE_OPTIONS, precedes each argument with a 
+//   '-arg' style command line argument, so that order is not longer 
+//   important, and extra args can be added without causing problems for 
+//   client scripts.
+
+// For SCRIPT_WITH_ORDERED_ARGS, the args are in the following order:
+//   unix_time, year, month, day, hour, min, sec, file_ext, user_info1, 
+//   user_info2, fcast_flag. fcast_flag will be 1 if this is a forecast 
+//   data set, 0 if not. If fcast_flag is set, the next arg will be the 
+//   lead_time. If not, fcast_flag is the last parameter. 
+// If include_data_path is true, 2 extra args will be added at the start 
+//   of the list: the full data path and the directory relative to 
+//   $RAP_DATA_DIR. Therefore the arg list will be:
+//   full_data_path, rel_dir, unix_time ...
+// For the late_data_script, the data_late_secs parameter will be added 
+//   as the first arg. Therefore the arg list will be:
+//   data_late_secs, full_data_path, rel_dir, unix_time, ....
+
+// For SCRIPT_WITH_COMMAND_LINE_OPTIONS, the following command line args 
+//   will be included, in no particular order:
+//   -unix_time ? valid time in unix time
+//   -year ? valid time year
+//   -month ? valid time month
+//   -day ? valid time day
+//   -hour ? valid time hour
+//   -min ? valid time min
+//   -sec ? valid time sec
+//   -rap_data_dir ? RAP_DATA_DIR env var
+//   -abs_dir_path ? absolute path of directory containing 
+//   _latest_data_info
+//   -full_path ? same as abs_dir_path, backward-compatibility
+//   -rel_dir ? rel path of directory containing _latest_data_info
+//              relative to RAP_DATA_DIR
+//   -sub_dir ? same as rel_dir, backward-compatibility
+//   -rel_data_path ? path of data file rel to _latest_data_info
+//   -file_ext ? file extension
+//   -data_type ? data type string, for DataMapper
+//   -user_info1 ? info supplied by writer
+//   -user_info2 ? info supplied by writer
+//   -is_forecast ? true/false
+//   -forecast_lead_secs ? lead time in secs, if applicable
+//   -writer ? application writing the file
+//   -data_late_secs ? echo of data_late_secs parameters
+// and each arg will be followed by its respective value.
+
+// For SCRIPT_WITH_COMMAND_LINE_OPTIONS_DOUBLE_DASH, the command line 
+//   arguments are included as described for 
+//   SCRIPT_WITH_COMMAND_LINE_OPTIONS except that the option names are 
+//   preceded by two dashes rather than one for use with languages like 
+//   python.
+
+// For SCRIPT_WITH_SPECIFIED_ORDERED_ARGS, only the options specified in 
+//   the script_options parameter will be included on the command line. 
+//   The options will be included in the order specified with no preceding 
+//   tags.
+
+// For SCRIPT_WITH_SPECIFIED_OPTIONS, only the options specified in the 
+//   script_options parameter will be included on the command line.
+
+// For SCRIPT_WITH_SPECIFIED_OPTIONS_DOUBLE_DASH, only the options 
+//   specified in the script_options parameter will be included on the 
+//   command line and the options will be preceded with a double dash for 
+//   use by languages like python.
+//
+// Type: enum
+// Options:
+//     SCRIPT_WITH_ORDERED_ARGS
+//     SCRIPT_WITH_COMMAND_LINE_OPTIONS
+//     SCRIPT_WITH_COMMAND_LINE_OPTIONS_DOUBLE_DASH
+//     SCRIPT_WITH_SPECIFIED_ORDERED_ARGS
+//     SCRIPT_WITH_SPECIFIED_OPTIONS
+//     SCRIPT_WITH_SPECIFIED_OPTIONS_DOUBLE_DASH
+//
+
+script_style = SCRIPT_WITH_COMMAND_LINE_OPTIONS;
+
+///////////// script_options //////////////////////////
+//
+// List of options to include on the script command line.
+// Only used if script_style is set to SCRIPT_WITH_SPECIFIED_OPTIONS or 
+//   SCRIPT_WITH_SPECIFIED_OPTIONS_DOUBLE_DASH.
+//
+// Type: enum
+// Options:
+//     OPTION_UNIX_TIME
+//     OPTION_YEAR
+//     OPTION_MONTH
+//     OPTION_DAY
+//     OPTION_HOUR
+//     OPTION_MIN
+//     OPTION_SEC
+//     OPTION_RAP_DATA_DIR
+//     OPTION_FULL_PATH
+//     OPTION_ABS_DIR_PATH
+//     OPTION_SUB_DIR
+//     OPTION_REL_DIR
+//     OPTION_REL_DATA_PATH
+//     OPTION_FULL_FILE_PATH
+//     OPTION_REL_FILE_PATH
+//     OPTION_FILE_NAME
+//     OPTION_FILE_EXT
+//     OPTION_DATA_TYPE
+//     OPTION_USER_INFO1
+//     OPTION_USER_INFO2
+//     OPTION_IS_FORECAST
+//     OPTION_FORECAST_LEAD_SECS
+//     OPTION_WRITER
+//     OPTION_DATA_LATE_SECS
+//     OPTION_DEBUG
+//     OPTION_VERBOSE
+// 1D array - variable length.
+//
+
+script_options = { OPTION_UNIX_TIME };
+
+///////////// script_to_call //////////////////////////
+//
+// Name of script to call if call_script is true.
+// The script will be called with the args specified in the 'call_script 
+//   parameter'. Also, take note of the 'include_input_path' parameter 
+//   which places extra args at the start of the arg list. If you need 
+//   extra args ahead of these args, put them in this string after the 
+//   script name.
+// Type: string
+//
+
+script_to_call = "run_and_exit_script.pl";
+
+///////////// include_input_path //////////////////////
+//
+// Option to pass two additional arguments (RAP_DATA_DIR and inputPath) 
+//   to the called script.
+// The inputPath will be relative to RAP_DATA_DIR and will not include 
+//   the _latest_data_info file. Also, note that these two additional 
+//   arguments will occur BEFORE the standard arguments described in 
+//   'call_script' above.
+// Type: boolean
+//
+
+include_input_path = FALSE;
+
+///////////// run_script_in_background ////////////////
+//
+// Option to run script in background.
+// If TRUE, the script will be run in the background. Therefore, the 
+//   system call will return immediately. If FALSE, LdataWatcher will 
+//   register with procmap while waiting for the script to complete.
+// Type: boolean
+//
+
+run_script_in_background = FALSE;
+
+///////////// terminate_script_if_hung ////////////////
+//
+// Option to terminate script if it hangs.
+// If TRUE, the script will be killed if it does not return within 
+//   'script_max_run_secs'.
+// Type: boolean
+//
+
+terminate_script_if_hung = TRUE;
+
+///////////// script_max_run_secs /////////////////////
+//
+// Max time allowed for script - secs.
+// If 'terminate_script_if_hung' is TRUE, the script will be killed if 
+//   it does not complete withing this number of secs.
+// Type: int
+//
+
+script_max_run_secs = 3600;
+
+///////////// script_min_interval_secs ////////////////
+//
+// Min allowed interval between calling script - secs.
+// The script will only be called if at least this number of seconds has 
+//   elapsed since it was last called. If less time has gone by, the 
+//   program will queue up the script call until the interval has elapsed. 
+//   If multiple calls occur during a single interval, only the last one 
+//   will be activated.
+// Type: int
+//
+
+script_min_interval_secs = 0;
+
+///////////// supplementary_args //////////////////////
+//
+// Supplementary arguments to be added to end of argument list.
+// This allows you to add command line arguments for calling the script. 
+//   These are added at the END of the list. Only applies if script style 
+//   is one of the OPTIONS types, i.e. NOT ORDERED.
+// Type: string
+// 1D array - variable length.
+//
+
+supplementary_args = { "-params", "params.xml" };
+
+//======================================================================
+//
+// CALL SCRIPT WHEN DATA IS LATE.
+//
+//======================================================================
+ 
+///////////// call_data_late_script ///////////////////
+//
+// Option to spawn a script when data is late.
+// If TRUE, the script 'data_late_script_to_call' will be called when 
+//   data has not arrived within the last 'data_late_secs'. The call to 
+//   the script will be repeated every 'data_late_secs' until data 
+//   arrives. The script is called with the following args derived from 
+//   the latest_data_info file: data_late_secs, RAP_DATA_DIR, inputPath, 
+//   unix_time, year, month, day, hour, min, sec, file_ext, user_info1, 
+//   user_info2, n_fcasts, lead_time_1, lead_time_2, ... If n_fcasts is 0, 
+//   that will be the last arg and there will be no lead times. The 
+//   inputPath will be relative to RAP_DATA_DIR and will not include the 
+//   _latest_data_info file. The script will be run in the background. If 
+//   'terminate_script_if_hung' is TRUE, the script will be terminated if 
+//   it does not complete within 'script_max_run_secs'.
+// Type: boolean
+//
+
+call_data_late_script = FALSE;
+
+///////////// data_late_script ////////////////////////
+//
+// Name of script to call if call_data_late_script is true.
+// The script will be called with the args specified in the 
+//   'call_data_late_script' parameter. If you need extra args ahead of 
+//   these standard args, put them in this string after the script name.
+// Type: string
+//
+
+data_late_script = "data_late_script.pl";
+
+///////////// data_late_secs //////////////////////////
+//
+// Max data interval before it is considered late - secs.
+// If data has not arrived within this interval, and 
+//   call_data_late_script is true, the data late script is called.
+// Type: int
+//
+
+data_late_secs = 3600;
+

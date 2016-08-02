@@ -1,0 +1,201 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.MdvPlayback
+ *
+ * This file contains the TDRP parameter definitions for MdvPlayback
+ */
+
+commentdef
+{
+  p_header = "MdvPlayback";
+  p_text = "This program allows simulation of real time MDV data arrival from a set of URL's. It mirrors what came in from the original URL's, writing to similar URL's on localhost. The playback rate is based on the 'time_written' field in the MDV headers, and the writing is in order of 'time_written', with sleep between writes when appropriate.";
+};
+
+commentdef
+{ 
+  p_header = "Synchronization";
+  p_text = "Synchronization is supported, in which one particular input is synchronized with specific outputs, in that playback pauses until the outputs 'catch up' with input. This is for the case where an app or apps read the playback output and generate their own output.  The single synchronization input URL can be thought of as the most upstream input to the playback, and the synchronization outputs as the most downstream output.  The synchronization prevents playback from getting ahead of the downstream apps.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug";
+  p_help = "If TRUE, debugging is enabled";
+  p_default = FALSE;
+} debug;
+
+
+typedef struct
+{
+  string url;
+  boolean isObs;
+  boolean useDataTime;
+  double latencyHoursMax;
+} data_t;
+
+paramdef struct data_t
+{
+  p_descr = "The playback data";
+  p_help = "This is the data to be played back:\n"
+    "  url = source location, mdvp:://host::path\n"
+    "  isObs = TRUE for flat (non-forecast) data, FALSE for forecasts\n"
+    "  useDataTime = TRUE to ignore 'time_written' and use data_time\n"
+    "  latencyHoursMax = Expected maximum latency (hours) of the data\n"
+    "A positive latency means the time_written is ahead of the data_time, as would be found in most real-time numerical model data.";
+  p_default = {};
+} inputData[];
+
+typedef struct
+{
+  string input_path;
+  string output_path;
+} input_output_t;
+
+paramdef struct input_output_t
+{
+  p_descr = "Input/output path pairs";
+  p_help = "Each pair gives a subsitution string for input to output URL. The first string, if found in inputData[i].url will be replaced with the second string for plabyack into the corresponding output url. Either the input_path or output_path in the pair can be the empty string.  This is an easy way to playback by reading from one location and writing to another that differs slightly";
+  p_default = {{"", ""}};
+} path[];
+
+typedef enum {PRE_PLAYBACK, PLAYBACK} playback_t;
+
+paramdef enum playback_t
+{
+  p_descr = "playback mode";
+  p_help = "Two modes are supported. PRE_PLAYBACK mode is a way to create latest data info files for the very latest data for which time < start time. The purpose of this mode is to create a latest data info file that is what would be in existance at the start time of 'regular' playback.   PLAYBACK mode is the normal mode, in which data written between start_time and end_time is played back.";
+  p_default = PLAYBACK;
+} mode;
+
+paramdef int
+{
+  p_descr = "Start time";
+  p_default = {2012, 11, 1, 0, 0, 0};
+} start_time[6];
+
+paramdef int
+{
+  p_descr = "End time";
+  p_default = {2012, 11, 1, 1, 0, 0};
+} end_time[6];
+
+paramdef double
+{
+  p_descr = "speedup";
+  p_help = "Speed of playback.  Set to > 1 to speed up the playback. Set < 1 to slow down playback. If <= 0, it is an error.";
+  p_default = 1.0;
+} speedup;
+
+
+paramdef boolean
+{
+  p_descr = "show realtime";
+  p_help = "TRUE to print the real time each playback happens, FALSE to print only the time_written and data time";
+  p_default = FALSE;
+} show_realtime;
+
+paramdef double
+{
+   p_descr = "delay at end";
+   p_help = "Number of minutes to delay when playback is complete before exiting the app, typically to allow downstream apps to 'catch up' prior to exit.";
+   p_default = 0;
+} minutes_delay_before_exit;
+
+
+commentdef
+{
+  p_header = "Playback with synchronization";
+  p_text = "The input_sync_url is monitored, and the data times written to that URL are synchronized with a set of output_sync_url's. The input_sync_url should be one of the playback output URL's, and the output_sync_url's should be URL's that are written to by apps that are downstream of MdvPlayback.";
+};
+
+
+commentdef
+{
+  p_header = "Synchronization event";
+  p_text = "The event that triggers synchronization is a change in time values from the playback data stream.  If sync_to_time_written=TRUE, this event is when time_written changes from one 'interval' to the next. The 'intervals' are specified by 'resolution_minutes_sync'.  If sync_to_time_written=FALSE, this event is whenever data_time changes.  Using data_time only makes sense if playback data does not have any data with latency, because if there is latency in some but not all of the playback data, time will 'go backwards' when data with latency is played back, which confuses the synchronization";  
+};
+
+paramdef string
+{  
+  p_descr = "input sync";
+  p_help = "If empty, there is no playback synchronization. If it is not empty, time values for playback data from this URL are captured for use in synchronizing with downstream outputs. This must be one of the inputData[i] URL's after conversion to output using path[]";
+  p_default = "";
+} input_sync_url;
+
+paramdef string
+{  
+  p_descr = "output sync";
+  p_help = "Used only when input_sync_url is not empty. During the synchronization step, these URL's are queried until data_time values agree with the latest data_time value from input_sync_url.";
+  p_default = {};
+} output_sync_url[];
+
+paramdef double
+{
+  p_descr = "Max wait minutes";
+  p_help = "When synchronizing, the app will wait for times to match, but will give up after this many minutes of waiting";
+  p_default = 15.0;
+} max_sync_wait_minutes;
+
+paramdef boolean
+{
+  p_descr = "Synchronize using time written";
+  p_help = "If TRUE, synchronization is over fixed length intervals specified by resolution_minutes_sync, with sychronization happening whenever time_written changes to a newer interval.  If FALSE, synchronization is initiated whenever data_time values from the played back data change";
+  p_default = FALSE;
+} sync_to_time_written;
+
+paramdef double
+{
+  p_descr = "sync resolution minutes";
+  p_help = "Used only when sync_to_time_written=TRUE. In this case, The playback time range is broken into intervals of this length, with assumed alignment to minute/second=0,0. For example if resolution_minutes_sync=15, The intervals are [0,15), [15,30), [30,45), [45,60).  When time_written crosses over into a new interval, synchronization is initiated";
+  p_default = 15;
+} resolution_minutes_sync;
+
+paramdef boolean
+{
+  p_descr = "sync debugging";
+  p_help = "If TRUE and doing the synchronization actions, debug output regarding the synchronization will be printed";
+  p_default = FALSE;
+} debug_sync;
+
+
+commentdef
+{
+  p_header = "Threading";
+  p_text = "Threading is supported, with threading on the reading in of data. This speeds things up specifically for multiple inputs having the same written time";
+};
+
+paramdef int
+{
+  p_header = "Number of threads";
+  p_help = "Set to 0 for no threading";
+  p_default = 0;
+} num_threads;
+
+paramdef boolean
+{
+  p_header = "Thread debugging";
+  p_help = "Set to TRUE to see thread debug information";
+  p_default = FALSE;
+} thread_debug;

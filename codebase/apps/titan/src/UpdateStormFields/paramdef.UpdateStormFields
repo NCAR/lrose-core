@@ -1,0 +1,177 @@
+/*********************************************************
+ * parameter definitions for UpdateStormFields
+ *
+ * Nancy Rehak, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * March 1998
+ */
+
+commentdef
+{
+  p_text = "This program is used to update certain field values in"
+           "one TITAN SPDB database using the same field values from the"
+           "closest storm in another TITAN SPDB database.  "
+           "The database being updated is referred to as the \"storm\" "
+           "database while the database that provides the new field "
+           "values is referred to as the \"field\" database.";
+}
+
+/*********************************************************
+ * Debugging parameters
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,
+  DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = DEBUG_OFF;
+} debug_level;
+
+
+/*********************************************************
+ * Operational parameters
+ */
+
+commentdef
+{
+  p_header = "OPERATIONAL PARAMETERS";
+}
+
+paramdef string 
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+typedef enum
+{
+  REALTIME,
+  TIME_LIST
+} mode_t;
+
+paramdef enum mode_t 
+{
+  p_descr = "Operational mode";
+  p_help = "Realtime mode - waits for new data.\n"
+           "In TIME_LIST mode you must specify -starttime and -endtime "
+           "on the command line.";
+  p_default = REALTIME;
+} trigger_mode;
+
+typedef enum
+{
+  TRIGGER_OFF_STORM_DATA,
+  TRIGGER_OFF_FIELD_DATA
+} trigger_field_t;
+
+paramdef enum trigger_field_t
+{
+  p_descr = "Indicates which input field to trigger off of";
+  p_help = "If one of the data fields will be available much later than "
+           "the other one, you should trigger off of the later data field.";
+  p_default = TRIGGER_OFF_STORM_DATA;
+} trigger_field;
+
+
+/*********************************************************
+ * I/O parameters
+ */
+
+commentdef
+{
+  p_header = "I/O PARAMETERS";
+}
+
+paramdef string 
+{
+  p_descr = "Input directory for storm data";
+  p_help = "The is the SPDB database directory for the storm data for "
+           "which we'll keep the storm shapes but update the vectors.";
+  p_default = "spdbp:://localhost::spdb/input_storms";
+} storm_data_url;
+
+paramdef string 
+{
+  p_descr = "Input directory for field data";
+  p_help = "This is the SPDB database directory for "
+           "the storms whose fields will be used to update the fieldss of "
+           "the storms in the storm_data_dir directory.";
+  p_default = "spdbp:://localhost::spdb/field_storms";
+} field_data_url;
+
+paramdef long
+{
+  p_descr = "Maximum valid age in seconds for input data";
+  p_min = 0;
+  p_default = 3600;
+} max_valid_age;
+
+paramdef long
+{
+  p_descr = "Maximum data offset time in seconds";
+  p_help = "Look back in time for match. "
+           "If none is found then look forward "
+           "in time. Else, no output for this time.";
+  p_default = 150;
+} time_offset_max;
+
+paramdef long
+{
+  p_descr = "Sleep msecs between checks for new data";
+  p_min = 0;
+  p_default = 1000;
+} sleep_msecs;
+
+paramdef string 
+{
+  p_descr = "Output database URL";
+  p_default = { "spdbp:://localhost::spdb/output_storms" };
+} output_url;
+
+
+/*********************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+}
+
+paramdef double
+{
+  p_descr = "radius of influence in km";
+  p_help = "Only field storms within this radius from the edge of the "
+           "base storm will be used in calculating the new storm field "
+           "value.";
+  p_default = 100.0;
+} radius_of_influence;
+
+typedef enum
+{
+  DAREA_DT,
+  TOP,
+  ALGORITHM_VALUE,
+  INTENSITY_TREND,
+  SIZE_TREND
+} update_fields_t;
+
+paramdef enum update_fields_t
+{
+  p_descr = "List of fields to update in the TITAN database.";
+  p_default = { DAREA_DT };
+} update_fields[];

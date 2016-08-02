@@ -1,0 +1,201 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/****************************************************************
+ * parameter definitions for QNet2Spdb
+ *  
+ * Nancy Rehak
+ * October 2002
+ */
+
+/****************************************************************
+ * Debugging and process control.
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,		
+  DEBUG_VERBOSE	
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+           "appropriate level of detail.";
+  p_default = DEBUG_OFF;
+} debug;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/*********************************************************
+ * Input and output data
+ */
+
+commentdef
+{
+  p_header = "INPUT AND OUTPUT DATA.";
+}
+
+typedef enum
+{
+  LATEST_DATA,
+  TIME_LIST,
+  REALTIME_INTERVAL,
+  ARCHIVE_INTERVAL
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program triggers whenever new data "
+           "is written to the SPDB URL specified in the input_url "
+           "parameter.\n"
+           "In TIME_LIST mode, the program triggers at the data time "
+           "of every entry in the SPDB URL between the times specified "
+           "in the archive_times "
+           "parameter.\n"
+           "In REALTIME_INTERVAL mode, the program triggers at regular "
+           "intervals, starting at the top of the hour, based on the "
+           "interval_secs parameter.\n"
+           "In ARCHIVE_INTERVAL mode, the program triggers at regular "
+           "intervals (specified by the interval_secs parameter) "
+           "between the times specified in the archive_times parameter.";
+  p_default = "LATEST_DATA";
+} trigger_mode;
+
+typedef struct
+{
+  string start_time;
+  string end_time;
+} archive_times_t;
+
+paramdef struct archive_times_t
+{
+  p_descr = "Begin and end times for processing archive datasets.";
+  p_help = "Used if trigger_mode is set to TIME_LIST or ARCHIVE_INTERVAL.\n"
+           "\tstart_time specifies the archive start time in any format "
+           "recognized by the DateTime class.\n"
+           "\tend_time specifies the archive end time in any format "
+           "recognized by the DateTime class.";
+  p_default = { "2001/1/1 00:00:00",
+                "2002/1/2 00:00:00" };
+} archive_times;
+
+paramdef long
+{
+  p_descr = "Number of seconds between triggers.";
+  p_help = "Used when trigger_mode is set to REALTIME_INTERVAL or "
+           "ARCHIVE_INTERVAL.";
+  p_min = 1;
+  p_default = 600;
+} interval_secs;
+
+paramdef string
+{
+  p_descr = "Input SPDB database URL.";
+  p_default = "spdbp:://localhost::spdb/basin_precip";
+} input_url;
+
+paramdef string
+{
+  p_descr = "Input forecast SPDB database URL.";
+  p_default = "spdbp:://localhost::spdb/basin_precip_fcst";
+} input_fcst_url;
+
+paramdef long
+{
+  p_descr = "Input search margin in seconds";
+  p_help = "The data in the input_url closest to the trigger time, but still "
+           "within this number of seconds of the trigger time, will be "
+           "processed.";
+  p_min = 0;
+  p_default = 7200;
+} search_margin;
+
+
+/*********************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+}
+
+typedef struct
+{
+  string spdb_field_name;
+  string xml_field_name;
+  string output_dir;
+} output_field_info_t;
+
+paramdef struct output_field_info_t
+{
+  p_descr = "Information about the fields to output to the XML file.";
+  p_help = "\tspdb_field_name - The name of the field exactly as it "
+           "appears in the SPDB database.\n";
+           "\txml_field_name - The name of the field as it will appear "
+           "in the XML file. "
+           "This is the name that appears in the tags surrounding the "
+           "field information in the file.\n"
+	   "\toutput_dir - The output directory for the XML files created "
+           "for this field. "
+           "Each field must be put into a different XML file, so each "
+           "field must specify a different output directory.\n";
+  p_default = { { "avg", "AvgBasinPrecip", "$(RAP_DATA_DIR)/xml/avg" },
+                { "std", "StdBasinPrecip", "$(RAP_DATA_DIR)/xml/std" } };
+} output_field_info[];
+
+paramdef long
+{
+  p_descr = "List of output times in minutes.";
+  p_help = "For each basin, the output field values will be put in "
+           "the XML file for each of these time increments before the "
+           "trigger time.\n"
+	   "To include forecast data, use negative time values. "
+	   "This is a little confusing, but allows us to be backward "
+           "compatible.\n"
+           "For example, if this is set to { 120, 5, 0, -10 }, for each "
+           "basin the field values at 120 minutes before the trigger time, "
+	   "5 minutes before the trigger time, closest to the trigger time "
+	   "and a 10 minute forecast will be output.\n"
+	   "The past and current data are retrieved from the database "
+	   "specified by the input_url parameter. "
+	   "The forecast data are retrieved from the database specified "
+	   "by the input_fcst_url parameter.";
+  p_default = { 120, 5, 0, -10 };
+} output_times[];

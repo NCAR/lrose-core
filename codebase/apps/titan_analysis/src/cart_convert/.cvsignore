@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+cart_convert
+makefile
+makefile.am
+makefile.in

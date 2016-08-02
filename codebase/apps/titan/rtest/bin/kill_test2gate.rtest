@@ -1,0 +1,4 @@
+#! /bin/sh
+
+snuff "test2gate -params test2gate.rtest"
+

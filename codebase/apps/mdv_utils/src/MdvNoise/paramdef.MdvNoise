@@ -1,0 +1,137 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvNoise is a highly specific program. It generates\n"
+	"a noise field and puts it onto an MDV grid. The noise is a\n"
+	"Von Karman field defined by a length scale and a sigma beta\n"
+	"over mean beta field. These noise fields are necessary for the\n"
+	"DHS OSSE project.\n\n"
+	"The program operation will make software engineers cringe, but\n"
+	"it is not suitable for me to spend time improving it. What the\n"
+	"program does is to repeatedly run another program written\n"
+	"in Fortran 90 by Rod Frehlich, re-direct the output of that\n"
+	"program (the noise) to an ascii file, then read these data\n"
+	"and put them on an MDV grid.\n\n"
+	"Niles Oien May 2005.";
+
+}
+
+
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Noise fields are written here."; 
+  p_default = {"mdvp:://localhost::./mdv/noise"};
+} OutUrl;
+            
+paramdef int {
+  p_descr = "Number of points in X";
+  p_help = "Depends on desired coverage."; 
+  p_default = 100;
+} nx;
+
+paramdef int {
+  p_descr = "Number of points in Y";
+  p_help = "Depends on desired coverage."; 
+  p_default = 100;
+} ny;
+
+paramdef double {
+  p_descr = "Spacing in X, Km";
+  p_help = "Depends on desired coverage."; 
+  p_default = 0.005;
+} dx;
+
+paramdef double {
+  p_descr = "Spacing in Y, Km";
+  p_help = "Depends on desired coverage."; 
+  p_default = 0.005;
+} dy;
+
+paramdef double {
+  p_descr = "Used in nose generation scheme.";
+  p_help = "Determined elsewhere."; 
+  p_default = 0.02;
+} sigmaBetaOverMeanBeta;
+
+paramdef double {
+  p_descr = "Length scale, meters.";
+  p_help = "Used in noise generation."; 
+  p_default = 25.0;
+} L0;
+
+paramdef double {
+  p_descr = "Latitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-90.0};
+  p_max = {90.0};
+  p_default = { 34.0 };
+} grid_origin_lat;
+
+paramdef double {
+  p_descr = "Longitude of grid origin";
+  p_help = "Must be specified.";
+  p_min = {-180.0};
+  p_max = {180.0};
+  p_default = { -77.0};
+} grid_origin_lon;
+
+paramdef string {
+  p_descr = "Start time.";
+  p_help = "Format is YYYY MM DD hh mm ss"; 
+  p_default = "2005 05 18 03 00 00";
+} startTime;
+
+paramdef string {
+  p_descr = "End time.";
+  p_help = "Format is YYYY MM DD hh mm ss"; 
+  p_default = "2005 05 18 04 00 00";
+} endTime;
+
+paramdef int {
+  p_descr = "Time step, seconds.";
+  p_help = "Defines temporal resolution."; 
+  p_default = 300;
+} timeStep;
+
+paramdef double {
+  p_descr = "The data from Rod's program are normalized. We\n"
+	"apply a scale and a bias.";
+  p_help = "Defines the scale."; 
+  p_default = 1.0;
+} scale;
+
+paramdef double {
+  p_descr = "The data from Rod's program are normalized. We\n"
+	"apply a scale and a bias.";
+  p_help = "Defines the bias."; 
+  p_default = 0.0;
+} bias;
+
+
+
+
+
+

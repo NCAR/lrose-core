@@ -1,0 +1,173 @@
+#!/usr/bin/perl
+# pull_files: Pull input files from an input directory to another
+# directory.  Generally, this is used to pull files from a cross-mounted
+# disk to a local disk before processing them.
+#
+# Usage:
+#   pull_files <options>
+#
+# Options:
+#   -help                : Print usage
+#   -input_dir <dir>     : Input directory (default = "/kavouras/mcg")
+#   -output_dir <dir>    : Output directory (default = ".")
+#   -prefix <prefix>     : Input file prefix (default = "")
+#   -suffix <suffix>     : Input file suffix (default = "")
+#   -interval <interval> : Data dir polling interval (default = 2)
+#   -debug               : Print debug messages
+#
+# N. Rehak  Feb 1997 NCAR/RAP
+# Based on the script trans_nbr.cys. by F. Hage.
+#
+
+
+require 'stat.pl';
+
+use Getopt::Long;
+
+# Get the program basename.
+($prog = $0) =~ s|.*/||;
+
+# Unbuffer output.
+$| = 1;
+
+# Initialize command line arguments
+$opt_input_dir = "/kavouras/mcg";  # Remote data directory.
+$opt_output_dir = ".";             # Local data directory.
+$opt_prefix = "";                  # Prefix of files we want
+$opt_suffix = "";                  # Suffix of new files
+$opt_interval = 2;		   # Data directory polling interval.
+$opt_debug = 0;                    # Debug mode
+
+$temp_file = "temp";
+
+# Save the usage to print to the user if there is a problem
+$usage =
+    "Usage: $prog [options]\n" .
+    "Options:\n" .
+    "   -help                : Print usage\n" .
+    "   -input_dir <dir>     : Input dir (default = $opt_input_dir)\n" .
+    "   -output_dir <dir>    : Output dir (default = $opt_output_dir)\n" .
+    "   -prefix <prefix>     : Input file prefix (default = $opt_prefix)\n" .
+    "   -suffix <suffix>     : Input file suffix (default = $opt_suffix)\n" .
+    "   -interval <interval> : Data dir polling interval (default = $opt_interval\n" .
+    "   -debug               : Print debug messages\n";
+
+# Get the arguments from the command line
+
+$result = &GetOptions('help',
+		      'input_dir=s',
+		      'output_dir=s',
+		      'prefix=s',
+		      'suffix=s',
+		      'interval=i',
+		      'debug');
+
+if ($result == 0 ||
+    $opt_help)
+{
+    print $usage;
+    exit 0;
+}
+
+if ($opt_debug)
+{
+    print "Command Line Options:\n";
+    print "   help = $opt_help\n";
+    print "   input_dir = $opt_input_dir\n";
+    print "   output_dir = $opt_output_dir\n";
+    print "   prefix = $opt_prefix\n";
+    print "   suffix = $opt_suffix\n";
+    print "   interval = $opt_interval\n";
+    print "   debug = $opt_debug\n";
+    print "\n";
+}
+
+# Verify the local directory.
+die "$opt_output_dir: no such file or directory" unless -d $opt_output_dir;
+
+# Monitor the data directory for new files.
+while ()
+{
+    # Get the directory's modification time.
+    ($mtime = (stat($opt_input_dir))[$ST_MTIME]) ||
+	die "stat: $!";
+
+    if ($mtime > $old_mtime)
+    {
+	opendir(DIR, $opt_input_dir) ||
+	    die "Can't open directory $opt_input_dir";
+
+	# Skip the current and parent directory entries.
+	@files = grep(!/^\.\.?$/, readdir(DIR));
+	closedir(DIR);
+
+	# Exclude subdirectories.
+	@files = grep(!-d, @files);
+
+	# If the prefix is specified, pull out files without the prefix
+	if ($opt_prefix ne "")
+	{
+	    @files = grep(/^$opt_prefix/, @files);
+	}
+
+	# Also weed out based on the suffix
+	if ($opt_suffix ne "")
+	{
+	    @files = grep(/$opt_suffix$/, @files);
+	}
+
+	# Look for new files.  We'll always send what's lying around
+	# initially.
+	grep($mark{$_}++, @old_files);
+	@new_files = grep(!$mark{$_}, @files);
+
+	if ($opt_debug)
+	{
+	    $s = @new_files == 1 ? '' : 's';
+	    print join("\n  ", "New file$s:", @new_files), "\n"
+		if @new_files;
+	}
+
+	# Copy the files to the new directory
+	&copy_files(*new_files);
+
+	# Prepare for the next iteration of the loop.
+	$old_mtime = $mtime;
+	@old_files = @files;
+	undef %mark;
+	undef @new_files;
+    }
+    sleep($opt_interval);
+}
+
+
+# Copy the files to the new directory
+sub copy_files
+{
+    local(*files) = @_;
+
+    foreach $filename (@files)
+    {
+
+	if ($opt_debug)
+	{
+	    print "\n" .
+		"Copying: $opt_input_dir/$filename to " .
+		    "$opt_output_dir/$filename\n";
+	}
+	
+	# Copy the input file to the local temp file
+	((system("cp $opt_input_dir/$filename " .
+		 "$opt_output_dir/$temp_file") >> 8) == 0) ||
+		     warn "system: cp $opt_input_dir/$filename " .
+			 "$opt_output_dir/$temp_file: error";
+
+	# rename the local temp file
+	(rename("$opt_output_dir/$temp_file",
+		"$opt_output_dir/$filename") == 1) ||
+		    warn "rename: $opt_output_dir/$temp_dir to " .
+			"$opt_output_dir/$filename: error"; # 
+
+    } # end foreach - $filename
+}
+

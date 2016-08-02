@@ -1,0 +1,65 @@
+<HTML>
+<HEAD>
+   <META NAME="Description" CONTENT="CIDD FAQ">
+   <TITLE>CIDD FAQ</TITLE>
+</HEAD>
+<BODY>
+
+<CENTER> <H1> CIDD FAQ </H1> </CENTER>
+<BR>
+<B>
+ <A HREF="../cidd_examples.html">  CIDD HOME </A> <BR>
+ <A HREF="cidd_users.html">  CIDD User Documentation </A> <BR>
+ <A HREF="index.html">  CIDD Misc Documentation </A> <BR>
+</B>
+
+<H3> Current CIDD Executable Version : 2.79 </H3>
+	<I> Please check to see what version of CIDD you are running
+	before reporting bugs. (It reports this on startup) </I>
+
+<H3> INDEX </H3>
+<UL> 
+<LI><B>  X, Display Problems, Starting CIDD  </B>
+		 <UL>
+         <LI><A HREF="#Q1.1"> 1.1  Fonts do not fit in the buttons... </A>
+		 </UL>
+<LI><B>  Cidd Configuration </B>
+<LI><B>  Running CIDD </B>
+<LI><B>  Trouble Shooting </B>
+</UL>
+
+<A name="Q1.1"> 
+<B> 1.1 Fonts do not fit in the buttons. The menus and panels look
+	  terrible and some elements are obscured. What is going on and,
+	  most importantly, how can I fix it? </B>
+
+<BR><BLOCKQUOTE><I>
+   A: The XView toolkit that CIDD uses as a GUI layer has a relatively
+	  ambiguous specification for its default font. It finds a
+	  really big font because your X server lists big fonts first
+	  when it sets up the default X font path and XView does
+	  not scale the size of the widgets to fit the fonts.
+	  <P> A simple way to fix this problem is to reverse the order
+	  of the 75 dpi and 100 dpi font directories in your XServer
+	  configuration file, where it sets the default  font path,
+	  and then restart the X server.  You'll need root privilege
+	  to modify the /etc/X11/XF86Config* file.
+	  <BR>(*It may have a different name on your system)
+	  <P>You can also set your individual font path using 'xset
+	  fp=...'.  Use 'fp -q' to query what your X settings are
+	  currently.
+	  <P> Advanced control can be had via the OpenWindows X resources
+	  which control much of the look of the GUI, including which fonts
+	  are used.  See 'man 7x xview' on a Linux box with the libraries
+	  installed for detailed information. Skip over the first Usage
+	  section to the section on 'Command Line Resource Arguments'.
+	  Place these in your .Xresources file or use 'xrdb' from the
+	  command line.
+
+</I></BLOCKQUOTE>
+
+
+<HR>
+<BR>
+</BODY>
+</HTML>

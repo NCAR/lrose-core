@@ -1,0 +1,76 @@
+Close
+M900->Y:$FFD0,0,8 ; bits 0-7
+M901->Y:$FFD1,0,8 ; bits 8-15
+M902->Y:$FFD2,0,8 ; bits 16-23
+M903->Y:$FFD3,0,8 ; bits 24-31
+M904->Y:$FFD4,0,8 ; bits 32-39
+M905->Y:$FFD5,0,8 ; bits 40-47
+M906->Y:$FFD6,0,8 ; latch/Mask
+M907->Y:$FFD7,0,8 ; control Word
+
+M910->Y:$FFD0,0,16 ; To allow reading the 16 bit wide value as read wrongly at start up by the Ix10 addr
+M911->Y:$FFD3,0,16 ; To allow reading the 16 bit wide value as read wrongly at start up by the Ix10 addr
+
+Open plc 30 Clear
+M907=$00
+M907=$40 ; Access Inversion Control Register (1)
+M900=$FF ; non-inverting logic for bits 0-7
+M901=$FF ; non-inverting logic for bits 8-15
+M902=$FF ; non-inverting logic for bits 16-23 *
+M903=$FF ; non-inverting logic for bits 24-31 *
+M904=$FF ; non-inverting logic for bits 32-39 *
+M905=$FF ; non-inverting logic for bits 40-47 *
+
+M907=$80 ; Access Read Control Register (2)
+M900=$00 ; Read Latched Data for bits 0-7
+M901=$00 ; Read Latched Data for bits 8-15
+M902=$00 ; Read Latched Data for bits 16-23 *
+M903=$00 ; Read Latched Data for bits 24-31 *
+M904=$00 ; Read Latched Data for bits 32-39 *
+M905=$00 ; Read Latched Data for bits 40-47 *
+
+M907=$C0 ; Access Latch Control Register (3)
+M900=$FF ; Latch bits 0-7
+M901=$FF ; Latch bits 8-15
+M902=$FF ; Latch bits 16-23 *
+M903=$FF ; Latch bits 24-31 *
+M904=$FF ; Latch bits 32-39 *
+M905=$FF ; Latch bits 40-47 *
+
+M907=$0 ; Point to data as outputs*
+M900=$FF ; Set bits to High *
+M901=$FF ; Set bits to High *
+M902=$FF ; Set bits to High *
+M903=$FF ; Set bits to High *
+M904=$FF ; Set bits to High *
+M905=$FF ; Set bits to High*
+
+M907=$3F ; data as inputs only *
+
+
+; The statements below apply a position offset (Ix26) which corrects the incorrectly read 16bit (word-wode) value 
+; that was read as Absolute position at reset/startup as addressed by the Ix10 registers and puts in the correct
+; offset to make the absolute position right.
+; This is a kludge to get around the PMAC not correctly reading the Ix10 addressed absolute encoder values at reset
+; when using PMAC-Mini-PCI (Ver 1.17c) in conjunction with ACC-14P... 
+; Algotithm: 
+;    Do a HOMEZ to set current position to Zero
+;    Remove the initially read Ix10 word-wide (incorrect) absolute position 
+;    Apply a new position offset, read correctly using byte-wide reads into Ix26
+;    Re-initialize motor positions with $*
+; Achieved by:
+;    Read the 16bit word wide Initial Error value (eg. @ m910->Y:$FFD0,0,16)
+;    Subtract the byte-wide first byte (eg. @ m900->Y:$FFD0,0,8)
+;    Subtract 256* byte-wide second byte (eg. @ m901->Y:$FFD1,0,8) 
+;    scaled for Ix26 (16*)
+COMMAND"#1HMZ#2HMZ"
+I126=(m910-m900-m901*256)*16
+I226=(m911-m903-m904*256)*16
+COMMAND"#1$*#2$*"
+P189=0	; Reset the wait flag
+
+Displc30
+Close
+
+
+

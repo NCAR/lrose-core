@@ -1,0 +1,130 @@
+/**********************************************************************
+ * TDRP params for SnoTel
+ **********************************************************************/
+
+//======================================================================
+//
+// Small program to ingest SnoTel snow gauge data.
+// Data are stored as METARS with the data in the liquid_accum
+// field.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Avalanche";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// InDir ///////////////////////////////////
+//
+// Input directory.
+// Directory path for input data files.
+// Type: string
+//
+
+InDir = "./";
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+// Default is to search for anything - if string is NULL, all extensions 
+//   are valid.
+// Type: string
+//
+
+fileExtension = "";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+// For realtime only - max age of input data for it to be valid.
+// Type: int
+//
+
+max_realtime_valid_age = 7200;
+
+///////////// SnoTelLocationFile //////////////////////
+//
+// File that specifies snotel station locations.
+// Format is : 
+// STATION NAME LAT LON ALT (METERS) SPDB METAR ID.
+// Type: string
+//
+
+SnoTelLocationFile = "./snotel_station_locations.dat";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// snowPrecip //////////////////////////////
+//
+// Set to FALSE to get total precip.
+// Default is to get only snow precip.
+// Type: boolean
+//
+
+snowPrecip = TRUE;
+
+///////////// percentOfAverage ////////////////////////
+//
+// Set to TRUE to ingest data as percent of average.
+// Default is to ingest data as water equivalent.
+// Type: boolean
+//
+
+percentOfAverage = FALSE;
+
+///////////// OutUrl //////////////////////////////////
+//
+// URL for output SPDB data.
+// Type: string
+//
+
+OutUrl = "./Out";
+
+///////////// expiry //////////////////////////////////
+//
+// How long data are valid, seconds.
+// Type: int
+//
+
+expiry = 1800;
+

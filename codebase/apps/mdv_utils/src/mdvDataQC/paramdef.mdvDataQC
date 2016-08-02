@@ -1,0 +1,143 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "mdvDataQC does quality control on MDV data. If\n"
+	"the QC checks are passed, the data are written to\n"
+	"an output URL. An XML log file is overwritten every time\n"
+	"data are processed.\n\nNiles Oien April 2007.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/data"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Output data are written here."; 
+  p_default = {"mdvp:://localhost::mdv/data_qc"};
+} OutUrl;
+            
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "If set, MDV output is written in forecast mode.";
+  p_help = "If the input data follow the\n"
+	"20060305/g_210000/f_00075600.mdv naming convention, then\n"
+	"do this.";
+} forecastData;   
+
+paramdef string {
+  p_default = "/some/dir/structure/_dataCheck.xml";
+  p_private = FALSE;
+  p_descr = "File to write output log to. Overwritten every time\n"
+	"a new operation is performed.";
+  p_help = "Useful in some circumstances for interfacing to\n"
+	"the Zudnik system.";
+} logFilename;   
+
+paramdef boolean {
+  p_default = TRUE;
+  p_private = FALSE;
+  p_descr = "Requirement that all fields must pass their QC checks.";
+  p_help = "If TRUE (default) then if one field fails its QC check,\n"
+	"no output is generated. If FALSE, if only one field fails,\n"
+	"then output data are written without the failed field.";
+} allFieldsMustPass;   
+
+typedef struct {
+	string fieldName;
+
+	boolean limitVertical;
+	boolean usePlaneNumbers;
+	double vertMin;
+	double vertMax;
+
+	double pmBeforeMinMax;
+
+	boolean applyMinMax;
+	double min;
+	double max;
+	boolean allowOutsideRange;
+
+	double pmAfterMinMax;
+
+} field_t;
+
+paramdef struct field_t {
+  p_default = { { "uwind", TRUE, TRUE, 0, 0, 10.0, TRUE, -15.0, 15.0, TRUE, 20.0 },
+                { "vwind", TRUE, TRUE, 0, 0, 10.0, TRUE, -15.0, 15.0, TRUE, 20.0 } } ;
+  p_private = FALSE;
+  p_descr = "QC requirements to apply, on a field-by-field basis.";
+  p_help = "Entries have the following significance :\n"
+	"fieldName : Name of field to test.\n"
+	"limitVertical : Option to appply vertical limits to\n"
+	"data before doing QC tests. Note that even if vertical limits\n"
+	"are applied prior to QC, all vertical levels are saved to output URL.\n"
+	"usePlaneNumbers : If TRUE, vertMin and vertMax are integer plane numbers\n"
+	"(the lowest plane being plane 0). If FALSE, they are actual heights (in Km,\n"
+	"elevations degrees, flight levels or what have you).\n"
+	"pmBeforeMinMax : Upper limit on the percent missing before the min/max\n"
+	"criteria are applied.\n"
+	"applyMinMax : Option to apply a min/max test.\n"
+	"min : Minimum allowable value (inclusive) for data.\n"
+	"max : Maximum allowable value (inclusive) for data.\n"
+	"allowOutsideRange : If set to TRUE, finding a data value outside of the\n"
+	"range constitutes a fail. If FALSE, the data value is counted as missing\n"
+	"for QC purposes (but is still written to the output).\n"
+	"pmAfterMinMax : The maximum allowable percent missing after the min/max\n"
+	"criteria are applied.";
+} field[];

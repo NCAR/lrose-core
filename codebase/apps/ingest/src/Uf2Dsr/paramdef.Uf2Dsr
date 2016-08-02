@@ -1,0 +1,392 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions Uf2Dsr
+//
+// Mike Dixon
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// June 2002
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Uf2Dsr reads Universal Format radar beam-by-beam files and copies the contents into a DsRadar FMQ. Note that if an input file has a .gz extension then gunzip is run on it before processing it.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "MODE OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, SIMULATE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.";
+} mode;
+
+commentdef {
+  p_header = "UF FILE DATA INPUT";
+};
+
+paramdef string {
+  p_default = "$(HOME)/data/uf";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to check elevation for error.";
+  p_help = "If true, and elevation error exceeds 'max_elev_error', the beam is discarded.";
+} check_elev;
+
+paramdef float {
+  p_descr = "Error in elevation (in degrees) for identifying unwanted beams.";
+  p_help = "Used for eliminating beams as the radar is moving around, for example when the radar is dropping down to begin a new volume scan.";
+  p_default = 0.5;
+} max_elev_error;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override decoding errors.";
+  p_help = "Some UF files are not absolutely correctly written, and when checking is performed on decoding errors are generated and the record is ignored. If this is set to true, the decoding error will be ignored and the decoding will proceed.";
+} override_decode_errors_on_read;
+
+commentdef {
+  p_header = "RADAR PARAMS";
+};
+
+typedef enum {
+  USE_FILE_VALUE = -9999,
+  HORIZONTAL = 0,
+  VERTICAL = 1,
+  CIRCULAR = 2,
+  ELLIPTICAL = 3,
+} polar_t;
+
+typedef struct {
+
+  int radar_id;
+  string radar_name;
+  polar_t polarization;    // polarization type
+  boolean adj_start_range; // option to adjust start range
+  double altitude;         // km
+  double latitude;         // degrees
+  double longitude;        // degrees
+  double gate_spacing;     // km
+  double start_range;      // km
+  double beam_width;       // half-power beam width - degrees
+  double pulse_width;      // nano-secs
+  double prf;              // /s
+  double wavelength;       // cm
+  double radar_constant;   // dB
+  double xmit_peak_pwr;    // watts
+  double receiver_mds;     // dBm
+  double receiver_gain;    // dB
+  double antenna_gain;     // dB
+  double system_gain;      // dB
+  double unambig_velocity; // m/s
+  double unambig_range;    // km
+  
+} radar_params_t;
+
+paramdef struct radar_params_t {
+
+  p_descr = "Default radar params. If you set a parameter to -9999, or an empty string, the value in the data stream will be used. If you set the parameter to some other value, this will override the value in the data.";
+
+  p_help = "========== Radar params ==========\n"
+  "\t\n"
+  "polarization: polarization type\n"
+  "adj_start_range: option to adjust start range\n"
+  "altitude: km\n"
+  "latitude: degrees\n"
+  "longitude: degrees\n"
+  "gate_spacing: km\n"
+  "start_range: km\n"
+  "beam_width: half-power beam width - degrees\n"
+  "pulse_width: nano-secs\n"
+  "prf: /s\n"
+  "wavelength: cm\n"
+  "radar_constant: dB\n"
+  "xmit_peak_pwr: watts\n"
+  "receiver_mds: dBm\n"
+  "receiver_gain: dB\n"
+  "antenna_gain: dB\n"
+  "system_gain: dB\n"
+  "unambig_velocity: m/s\n"
+  "unambig_range: km\n"
+  "\t\n";
+  
+  p_default = { radar_id = 0,
+		radar_name = "",
+		polarization = USE_FILE_VALUE,
+		adj_start_range = false,
+                altitude = -9999,
+                latitude = -9999,
+                longitude = -9999,
+                gate_spacing = -9999,
+                start_range = -9999,
+                beam_width = -9999,
+                pulse_width = -9999,
+                prf = -9999,
+                wavelength = -9999,
+		radar_constant = -9999,
+		xmit_peak_pwr = 400000,
+		receiver_mds = -113.0,
+		receiver_gain = -9999,
+		antenna_gain = -9999,
+		system_gain = 46,
+		unambig_velocity = -9999,
+		unambig_range = 150.0
+  };
+  
+} radar;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Scan type id";
+  p_help = "Unique identifier for scan strategy";
+} scan_type_id;
+
+paramdef char* {
+  p_default = "Default";
+  p_descr = "Scan type name";
+  p_help = "Descriptive name for scan strategy";
+} scan_type_name;
+
+commentdef {
+  p_header = "TILT TABLE";
+  p_text = "Tilt may be computed from a table of tilt angles.";
+};
+
+typedef enum {
+  GET_TARGET_FROM_TABLE, COMPUTE_TILT_NUM_FROM_TABLE, DONT_USE_TABLE 
+} tilt_table_flag_t;
+
+paramdef enum tilt_table_flag_t {
+  p_default = GET_TARGET_FROM_TABLE;
+  p_descr = "tilt table enum";
+  p_help = "Enum indicating how to use the tilt table to determine the target elevation and tilt number for a tilt.";
+} tilt_table_flag;
+
+typedef struct {
+  double target_elevation;
+  int tilt_num;
+} tilt_table_t;
+
+paramdef struct tilt_table_t {
+  p_default = { { 0.5, 0 }, { 1.5, 1 } };
+  p_descr = "tilt table";
+  p_help = "Table of tilt information including target elevation.";
+} tilt_table[];
+
+commentdef {
+  p_header = "OUTPUT FIELDS";
+  p_text = "Only the following fields will included in the output. If the field is not in the input file, it will be left out.";
+};
+
+typedef struct {
+  string uf_name;
+  string name;
+  string units;
+  double scale;
+  double bias;
+} output_fields_t;
+
+paramdef struct output_fields_t {
+  p_default = {
+    { "DZ", "DBZ", "dBZ", 0.5, -32.0},
+    { "VE", "VEL", "m/s", 0.5, -63.5}
+  };
+  p_descr = "Field info";
+  p_help = "List of fields to be output if available in the input data. If a field does not exist in the input data all values in the field will be set to missing.";
+} output_fields[];
+
+typedef enum {
+  OUTPUT_INT8, OUTPUT_INT16, OUTPUT_FLOAT32 
+} output_data_type_t;
+
+paramdef enum output_data_type_t {
+  p_default = OUTPUT_INT16;
+  p_descr = "Output type for field data.";
+  p_help = "Data byte width is 1, 2 and 4 for INT8, INT16 and FLOAT32 respectively.";
+} output_data_type;
+
+commentdef {
+  p_header = "FILTERING OPTIONS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "set time to current flag";
+  p_help = "TRUE if data time is set to the current time; FALSE if the data time is sent unchanged.";
+} set_time_to_current;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "time correction -secs";
+  p_help = "Seconds added to the data time.";
+} time_correction;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "force volume change flag";
+  p_help = "If TRUE, volume number will be updated if tilt number in beam header is less than the previous tilt number.";
+} force_volume_change;
+
+typedef enum {
+  SCAN_SECTOR_MODE, SCAN_RHI_MODE, SCAN_SURVEILLANCE_MODE
+} scan_mode_t;
+
+paramdef enum scan_mode_t {
+  p_default = SCAN_SURVEILLANCE_MODE;
+  p_descr = "scan mode";
+  p_help = "SCAN_SECTOR_MODE, SCAN_RHI_MODE or SCAN_SURVEILLANCE_MODE";
+} scan_mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Check gate geometry flag";
+  p_help = "Check gate spacing and start range. If they do not match the target values do not process the beam.";
+} check_gate_geom;
+
+paramdef double {
+  p_default = 0.250;
+  p_descr = "Target gate spacing - km";
+} target_gate_spacing;
+
+paramdef double {
+  p_default = 0.125;
+  p_descr = "Target start range - km";
+  p_help = "Usually half of gate spacing.";
+} target_start_range;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Options to set number of output gates.";
+  p_help = "If true, number of output gates is set to ngates_out. Data is either truncated or filled with missing as appropriate.";
+} set_ngates_out;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of output gates, if set_ngates_out is true.";
+  p_help = "See set_ngates_out.";
+} ngates_out;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string {
+  p_descr = "Output URL for DsRadar data via FMQ";
+  p_default = "fmqp:://$(HOST)::fmq/dsRadar";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 10000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer
+ will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages wh
+ich may be written to the buffer before overwrites occur. However, overwrites ma
+y occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_descr = "Wait per beam (milli-secs)";
+  p_default = 0;
+} beam_wait_msecs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+
+commentdef {
+  p_header = "PRINT CONTROL";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print headers to stdout.";
+  p_help = "If TRUE, UF headers are printed to stdout.";
+} print_headers;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to print data to stdout.";
+  p_help = "If TRUE, UF data is printed to stdout.";
+} print_data;
+
+

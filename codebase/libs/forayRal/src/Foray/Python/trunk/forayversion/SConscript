@@ -1,0 +1,11 @@
+import os
+import distutils.sysconfig
+
+Import('env')
+
+env.Alias('install',env.forayBin)
+
+env.Install(env.forayBin,['forayversion.py'])
+
+
+

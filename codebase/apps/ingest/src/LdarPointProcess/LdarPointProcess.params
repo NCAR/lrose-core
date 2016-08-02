@@ -1,0 +1,478 @@
+/**********************************************************************
+ * TDRP params for LdarPointProcess
+ **********************************************************************/
+
+//======================================================================
+//
+// LdarPointProcess is a simple program to ingest ltg data from
+// the Kennedy Space Center's LDAR system.
+// Files are ASCII with (roughly) the following format :
+//
+// The following Lightning Detection and Ranging (LDAR) and Cloud to 
+//   Ground Lightning
+// Surveillance (CGLSS) data sets are displayed in a tab delimited 
+//   format:
+//
+// The EVENT TYPE field will display the data type as an LDAR EVENT, 
+//   GGLSS EVENT or
+// CAL EVENT. A CAL EVENT is a locally generated simulated lightning 
+//   event used to
+// validate the operation status of the Kennedy Space Center's LDAR 
+//   System.
+//
+// The X, Y and Z coordinates are in reference to the Kennedy Space 
+//   Center's LDAR
+// Central Site located at Latitude 28 32 18.55N and Longitude 80 38 
+//   33.48W
+//
+// JDAY	TIME(UTC)       	X(M)     	Y(M)      	Z(M)  	EVENT TYPE
+//
+// 109	03:00:00:010007  	+0050431	+0047426	+13249	LDAR EVENT
+// 109	03:00:00:018755  	+0049489	+0047438	+08848	4DLSS EVENT
+// 109	03:00:00:020457  	+0049351	+0046647	+12848	4DLSS EVENT.
+//
+//======================================================================
+ 
+///////////// outputType //////////////////////////////
+//
+// Format of the output file.
+//
+//
+// Type: enum
+// Options:
+//     SPDB
+//
+
+outputType = SPDB;
+
+///////////// output_url //////////////////////////////
+//
+// Output url, of form spdbp:://host.domain:[port]:dir/dir .
+//
+// Data are written here.
+//
+//
+// Type: string
+//
+
+output_url = "spdbp:://localhost::./spdb/LdarPoints";
+
+///////////// ascii_output_dir ////////////////////////
+//
+// Output location if writing wscii output.
+//
+// Data are written here.
+//
+//
+// Type: string
+//
+
+ascii_output_dir = "./ascii/LdarPoints";
+
+///////////// InDir ///////////////////////////////////
+//
+// Input directory.
+//
+// Directory path for input data files.
+//
+//
+// Type: string
+//
+
+InDir = "./";
+
+///////////// fileExtension ///////////////////////////
+//
+// Input file extension.
+//
+//
+// Type: string
+//
+
+fileExtension = ".txt";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data.
+//
+// For realtime only - max age of input data for it to be valid.
+//
+//
+// Type: int
+//
+
+max_realtime_valid_age = 7200;
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+//
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the conversion is performed for each input file as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     TIME_INTERVAL
+//
+
+mode = REALTIME;
+
+///////////// Expiry //////////////////////////////////
+//
+// How long the data are valid, seconds.
+//
+// Depends on input frequency. Given that these data can come in
+// very quickly, it having them age off a display system equally quickly
+// can avoid a lot of clutter.
+//
+//
+// Type: long
+//
+
+Expiry = 30;
+
+///////////// LDAR_Central_Site_Loc ///////////////////
+//
+// Latitude and Longitude of the LDAR.
+//
+// Used to compute the Lat and Lon of the
+// strokes.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double latOrigin;
+//      double lonOrigin;
+//   }
+//
+//
+
+LDAR_Central_Site_Loc = {
+    latOrigin = 28.538486,
+    lonOrigin = -80.642633
+};
+
+//======================================================================
+//
+// Options to select a subregion to ingest (the whole thing may
+// be a pretty big database). The limits on altitude may allow you to
+// effectively select cloud-to-cloud ltg.
+//
+//======================================================================
+ 
+///////////// minLat //////////////////////////////////
+//
+// Minimum latitude to accept, decimal degrees.
+//
+// Set to define the ingest region.
+//
+//
+// Type: double
+//
+
+minLat = -90;
+
+///////////// maxLat //////////////////////////////////
+//
+// Maximum latitude to accept, decimal degrees.
+//
+// Set to define the ingest region.
+//
+//
+// Type: double
+//
+
+maxLat = 90;
+
+///////////// minLon //////////////////////////////////
+//
+// Minimum longitude to accept, decimal degrees.
+//
+// Set to define the ingest region.
+//
+//
+// Type: double
+//
+
+minLon = -180;
+
+///////////// maxLon //////////////////////////////////
+//
+// Maximum longitude to accept, decimal degrees.
+//
+// Set to define the ingest region.
+//
+//
+// Type: double
+//
+
+maxLon = 180;
+
+///////////// minAlt //////////////////////////////////
+//
+// Minimum altitude to accept, m.
+//
+// Set to define the ingest region.
+//
+//
+// Type: double
+//
+
+minAlt = 0;
+
+///////////// maxAlt //////////////////////////////////
+//
+// Maximum altitude to accept, m.
+//
+// Set to define the ingest region. May also be used for
+// quality control - occasionally data with clearly erroneously high
+// altitudes come in.
+//
+//
+// Type: double
+//
+
+maxAlt = 20000;
+
+///////////// applyClosenessCriteria //////////////////
+//
+// Set to TRUE to only accept strikes close to the
+// location defined by the centralPoint parameter.
+//
+// Cuts down on the number of ingested strikes, which
+// could otherwise be so large as to be unmanagable.
+//
+//
+// Type: boolean
+//
+
+applyClosenessCriteria = FALSE;
+
+///////////// centralPoint ////////////////////////////
+//
+// Defines the location and maximum distance to test for if
+// we are applying a closeness criteria test.
+//
+// Relevant only if applyClosenessCriteria is TRUE.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//      double maxRangeKm;
+//   }
+//
+//
+
+centralPoint = {
+    lat = 28.5385,
+    lon = -80.6426,
+    maxRangeKm = 300
+};
+
+///////////// maxAllowedDist //////////////////////////
+//
+// The maximum allowable distance, Km,
+// between succesive points for LDAR entries to
+// be bundled into the same event.
+//
+// May be horizontal distance only, or may be 3D distance,
+// depending on the setting of considerVerticalDistance.
+//
+//
+// Type: double
+//
+
+maxAllowedDist = 30;
+
+///////////// maxAllowedTime //////////////////////////
+//
+// The maximum allowable time, seconds, betwen successive
+// points, for LDAR entries to
+// be bundled into the same event.
+//
+// The default seemed to work well for the STEPS case the program
+// was tested on.
+//
+//
+// Type: double
+//
+
+maxAllowedTime = 1.5;
+
+///////////// totalMaxAllowedDist /////////////////////
+//
+// The maximum allowable distance, Km,
+// from the first point for LDAR entries to
+// be bundled into the same event.
+//
+// May be horizontal distance only, or may be 3D distance,
+// depending on the setting of considerVerticalDistance.
+//
+//
+// Type: struct
+//   typedef struct {
+//      boolean applyLimit;
+//      double limit;
+//   }
+//
+//
+
+totalMaxAllowedDist = {
+    applyLimit = FALSE,
+    limit = 100
+};
+
+///////////// totalMaxAllowedTime /////////////////////
+//
+// The maximum allowable time, seconds,
+// from the first point for LDAR entries to
+// be bundled into the same event.
+//
+// The default seemed to work well for the STEPS case the program
+// was tested on.
+//
+//
+// Type: struct
+//   typedef struct {
+//      boolean applyLimit;
+//      double limit;
+//   }
+//
+//
+
+totalMaxAllowedTime = {
+    applyLimit = FALSE,
+    limit = 10
+};
+
+///////////// considerVerticalDistance ////////////////
+//
+// Option to consider the vertical component in the
+// calculation of distance. Default is not to do this.
+//
+// For the STEPS data I have, it turned out not to make much
+// difference anyway.
+//
+//
+// Type: boolean
+//
+
+considerVerticalDistance = FALSE;
+
+///////////// minNumEntries ///////////////////////////
+//
+// The minimum number of LDAR entires in a bundle for that
+// bundle to be written out as an SPDB GenPoint.
+//
+// The default was developed for a STEPS case in which there
+// was a lot of ltg activity, so it might be a bit high. The danger in
+// making it too low is that too much data results.
+//
+//
+// Type: int
+//
+
+minNumEntries = 1;
+
+///////////// saveBasedOnFirstPoint ///////////////////
+//
+// Option to use the lat,lon and time of the first LDAR entry.
+//
+// If set to FALSE then the last lat, lon and time are used.
+//
+//
+// Type: boolean
+//
+
+saveBasedOnFirstPoint = TRUE;
+
+///////////// saveAltFiles ////////////////////////////
+//
+// Option to save altitude files. This is a research option.
+//
+// By default, all the output goes to the GenPt SPDB database,
+// which saves statistics about the altitudes. This option allows ASCII
+// files of actual altitude to be written (.alt extension). File names
+// are NumEntries_lat*100_lon*100_unixTime.alt.
+//
+//
+// Type: boolean
+//
+
+saveAltFiles = FALSE;
+
+///////////// saveTraditional /////////////////////////
+//
+// Option to save the data to traditional_ltg_url in the
+// newer ltg struct which includes an altitude component.
+//
+//
+// Type: boolean
+//
+
+saveTraditional = FALSE;
+
+///////////// traditional_ltg_url /////////////////////
+//
+// Output url, of form spdbp:://host.domain:[port]:dir/dir
+// for traditional ltg structure output (2D).
+//
+// Only used if saveTraditional is TRUE.
+//
+//
+// Type: string
+//
+
+traditional_ltg_url = "spdbp:://localhost::./spdb/LdarPoints";
+
+///////////// format //////////////////////////////////
+//
+// Input data file format.
+//
+// See comments at top of param file.
+//
+//
+// Type: enum
+// Options:
+//     FORMAT_ONE
+//
+
+format = FORMAT_ONE;
+

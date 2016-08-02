@@ -1,0 +1,53 @@
+/**********************************************************************
+ * TDRP params for RadMon
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// Print debug messages.
+// Type: boolean
+//
+
+debug = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with the process mapper.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// fmq_url /////////////////////////////////
+//
+// URL for DsRadar data via FMQ.
+// Type: string
+//
+
+fmq_url = "fmqp:://localhost::../Test2Dsr/fmq/Test2Dsr";
+
+///////////// print_type //////////////////////////////
+//
+// Print type.
+// Sets the type of print out.  All information will be printed to 
+//   standard out.
+//
+// Type: enum
+// Options:
+//   MONITOR, SUMMARY, FULL, DATA
+//
+//
+
+print_type = MONITOR;
+
+///////////// update_interval /////////////////////////
+//
+// Update interval for radmon display in seconds.
+// Interval between beam prints.
+// Type: long
+//
+
+update_interval = -1;
+

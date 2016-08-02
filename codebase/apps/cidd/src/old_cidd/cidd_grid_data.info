@@ -1,0 +1,33 @@
+# CIDD_GRID_DATA.INFO:  Parameters for gridded Data
+#
+# Desc = Field Description- Should be unique ID - Used for ID'ing contour and grid overlay fields in other
+#        parameter files. 
+# Label = Label used in menus, popups and legends
+# host = Computer hostname or IP address of the server for this data field
+# port = TCP/IP Port the server resides on
+# Field = Numerical Index of the field in the files that the server reads
+# Color_file = Name of the color scale description file
+# units = String used to label the colorscale
+# Cont-lo-hi-interv = Three Numerical values describing the default base, top and interval of contours
+# format = Rendering method - "cart" = filled rectangles, "cont" = filled contours
+#                           - append "_comp" to generate a composite request, ie. cart_comp, etc
+#
+# S_type = Server Type Should be "Cidd", depreciated type; "Radial"
+# S_subtype = Server Subtype - Often refers to the underlying Data format. Usually now "MDV"
+# S_inst = Server Instance - A String used to determine HOST/PORT pairs when utilizing the Server mapper
+#
+# Disp = Display this field by default in the field menus and popups - Diagnostic fields often have this set =0
+# Rend = Background Render - IE. Automatically generate an image for this field - Interacts with the HTML MODE
+#            Set this field to 1 when you want this field rendered before a user selects it. This makes it
+#            "Instantly" available, for "toggling". Set this to 1 for any fields you want automatically
+#            output when CIDD is operating in HTML MODE.
+#  
+#Desc.   Label    host  port Field  Color_file units Cont-lo-hi-interv format S_type S_subtype S_inst Disp Rend
+#----------------------------------------------------------------------------------------------------------------
+WOKX OKX_0.5_REFL   splash   63100 0  winter_dbz.colors   dbZ    -5   60    5 cart Cidd  MDV OKX_nbra   1 0
+WDIX DIX_0.5_REFL   splash    63101 0 winter_dbz.colors   dbZ    -5   60    5 cart Cidd  MDV DIX_nbra   1 0
+WENX ENX_0.5_REFL   splash    63102 0  winter_dbz.colors   dbZ    -5   60 5  cart Cidd  MDV ENX_nbra   1 0
+WBGM BGM_0.5_REFL   splash    63103 0  winter_dbz.colors   dbZ    -5   60 5  cart Cidd  MDV BGM_nbra   1 0
+WDOX DOX_0.5_REFL   splash    63104 0  winter_dbz.colors   dbZ    -5   60 5  cart Cidd  MDV DOX_nbra   1 0
+WBOX BOX_0.5_REFL   splash    63105 0  winter_dbz.colors   dbZ    -5   60 5  cart Cidd  MDV BOX_nbra   1 0
+WCCX CCX_0.5_REFL   splash    63108 0  winter_dbz.colors   dbZ    -5   60 5  cart Cidd  MDV CCX_nbra   1 0

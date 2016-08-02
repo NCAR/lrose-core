@@ -1,0 +1,6 @@
+This directory contains shared archiving scripts.
+
+It is currently used by RTFDDA and MAGEN to archive forecast and final analysis files.
+
+collect_output.pl : archives model output files
+collect.cfg : sample configuration file

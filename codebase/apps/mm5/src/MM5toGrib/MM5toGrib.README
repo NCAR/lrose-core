@@ -1,0 +1,14 @@
+	
+Make:
+
+Rename "Makefile.LinuxCluster" into "Makefile"
+
+Make sure the path contains "/rap/bin", eg:
+
+set path = ( $path /rap/bin )
+
+Usage:
+
+MM5toGrib -params MM5toGrib.params -f MMOUT_DOMAIN1
+
+this produces a grib file called output4.grib

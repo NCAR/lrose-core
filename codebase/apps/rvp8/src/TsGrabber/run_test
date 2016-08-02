@@ -1,0 +1,3 @@
+#! /bin/csh
+
+TsGrabber -gate 50 -ngates 100 -f ~/data/time_series/tsarchive/spol/fastAlt/20070515/20070515_023052_3599_000.tsarchive -nsamples 1000 -alt

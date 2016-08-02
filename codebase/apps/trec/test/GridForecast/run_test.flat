@@ -1,0 +1,11 @@
+#!/bin/csh -f
+
+/bin/rm test.log
+/bin/rm -r mdv/flat/brightBand30
+/bin/rm -r mdv/flat/brightBand60
+/bin/rm -r mdv/flat/motion_dir
+
+../../src/GridForecast/GridForecast \
+    -params GridForecast.flat \
+    -start "2001 01 07 00 00 00" -end "2001 01 07 23 59 59"
+#	>&! test.log

@@ -1,0 +1,201 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "asdi2mdv is a small utility that reads the Aircraft\n"
+	"Situation Display to Industry (ASDI) data from a socket\n"
+	"or file. The data are then saved as MDV gridded fields.\n"
+	"\n\nNiles Oien May 2004.";
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed.";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, ARCHIVE_SPDB, REALTIME_FILE, REALTIME_STREAM, REALTIME_SPDB};
+  p_default = REALTIME_STREAM;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in several modes :\n"
+	"      ARCHIVE : Run on archived ASCII data - specify files with -f argument\n"
+	"      ARCHIVE_SPDB : Run on old SPDB input.\n"
+	"      REALTIME_FILE : Run on ASCII files as they arrive - not likely.\n"
+	"      REALTIME_STREAM : Read input from port@host\n"
+        "      REALTIME_SPDB : Run on realtime SPDB data from asdi2spdb.";
+} mode;
+      
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/$(PROJECT)/raw/Input";
+  p_descr = "Input directory - top level. Set to the\n"
+            "the directory in which the input files appear."
+            "Used in REALTIME_FILE mode only.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+
+paramdef string {
+  p_default = "128.117.200.202";
+  p_descr = "Host name for REALTIME_STREAM mode only.";
+  p_help = "Set to the machine which is producing the input stream.";
+} hostname;
+
+paramdef int {
+  p_default = 10018;
+  p_descr = "Port number for REALTIME_STREAM mode only.";
+  p_help = "Set to the port which is producing the input stream.";
+} port;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For REALTIME_FILE only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = TRUE;	
+  p_descr = "Option to take the maximum altitude if several aircraft cross through a grid point.";
+  p_help = "Default is to do this - if not, the minimum altitude is taken.";
+} takeMaxAltitude;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::$(PROJECT)/mdv/asdi";
+  p_descr = "URL for output MDV data.";
+} output_url;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "How long data are valid, seconds.";
+} Expiry;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to use the year and month specified in the\n"
+	"param file.";
+  p_help = "May be useful for reading old files in archived mode.";
+} dateSpecified;
+
+paramdef int {
+  p_default = 2004;
+  p_descr = "Year to use if dateSpecified is true.";
+} year;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Month to use, 1 to 12, if dateSpecified is true.";
+} month;
+
+paramdef int {
+  p_descr = "Output interval, seconds.";
+  p_help = "MDV files are produced every outputInterval.";
+  p_default = 120;
+} outputInterval;
+
+paramdef int {
+  p_descr = "Look back interval, seconds.";
+  p_help = "MDV files are produced every outputInterval, but they\n"
+	   "look back by this interval (seconds) which should be\n"
+	   "equal to or (more likely) greater than dataInterval.";
+  p_default = 300;
+} lookbackInterval;
+
+typedef enum {
+  TIMESTAMP_START, TIMESTAMP_MIDDLE, TIMESTAMP_END
+} timestamp_t;
+
+paramdef enum timestamp_t {
+  p_descr = "How to timestamp the data.";
+  p_help = "Controls if data are timestamped wit the start,\n"
+  "middle or end of the time interval.";
+  p_default = TIMESTAMP_END;
+} timestamp;
+
+commentdef {
+  p_header = "OUTPUT GRID DEFINITION";
+}
+
+typedef enum {
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON
+} output_projection_t;
+
+paramdef enum output_projection_t {
+  p_default = OUTPUT_PROJ_FLAT;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT - (x,y) Cartesian data in km from a given origin.\n"
+           "LATLON - lat/lon grid with constant grid spacing.\n";
+           "LAMBERT - Lambert Conformal projection with constant grid spacing.\n";
+} output_projection;
+
+
+typedef struct {
+  double lat;
+  double lon;
+} output_origin_t;
+
+paramdef struct output_origin_t {
+  p_descr = "Origin of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT.";
+  p_default = {40.0, -104.0};
+} output_origin;
+
+
+typedef struct {
+  long nx;
+  long ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_t;
+
+paramdef struct grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "The grid params for the output grid.";
+  p_default = {400, 400, -199.5, -199.5, 1.0, 1.0};
+} output_grid;
+
+paramdef boolean {
+  p_descr = "Option to take 0 as the bad value in MDV.";
+  p_help = "Generally useful for display purposes.";
+  p_default = TRUE;
+} takeZeroAsBadValue;

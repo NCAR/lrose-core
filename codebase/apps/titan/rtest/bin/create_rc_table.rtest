@@ -1,0 +1,3 @@
+#! /bin/csh -f
+
+rctable_generate -params $RTEST_HOME/params/rctable_generate.rtest &

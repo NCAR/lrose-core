@@ -1,0 +1,262 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for WMS2MdvServer
+ *
+ * F. Hage June 2003, from M. Dixon's DsMdvServer
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress the use of threads. Set no_threads to TRUE for this type of debugging.";
+} no_threads;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting. If an empty instance name is provided, the server automatically uses the port number as its instance name";
+} instance;
+
+commentdef {
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int {
+  p_default = 5440;
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+} port;
+  
+paramdef int {
+  p_default = 1800;
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, it will die gracefully.";
+} qmax;
+  
+paramdef int
+{
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = -1;
+} max_clients;
+
+commentdef {
+  p_header = "Security";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run in secure mode.";
+  p_help = "If TRUE, the server will reject any URLs which specify an absolute path, or a path with .. in it. This prevents the server from writing any files which are not below DATA_DIR in the directory tree.";
+} run_secure;
+
+commentdef {
+  p_header = "Memory management for messages.";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to copy memory from the messages into the message objects.";
+  p_help = "Setting to FALSE will reduce the memory usage for the program.";
+} copy_message_memory;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of samples in the vertical section.";
+} vsection_nsamples;
+  
+commentdef {
+  p_header = "WMS URL support.";
+  p_text = "Option to serve out data from a WMS source";
+};
+
+paramdef string {
+  p_default = "";
+  p_descr = "Base URL of  OGIS Web Map Server";
+} WMS_BASE;
+
+paramdef string {
+  p_default = "WMTVER=1.0.0";
+  p_descr = "WMS WMTVER Message Part.";
+} WMS_WMTVER;
+
+paramdef string {
+  p_default = "REQUEST=map";
+  p_descr = "WMS REQUEST Message Part.";
+} WMS_REQUEST;
+
+paramdef string {
+  p_default = "LAYERS=world,WorldBorder";
+  p_descr = "Base  LAYERS message part  "
+	  " - Requested field name will be appended to this.";
+} WMS_LAYERS;
+
+commentdef {
+  p_header = " WMS BBOX - Derived from MdvX request"
+	   " WIDTH from P->request_nx_pixels, HEIGHT from P->request_nx_pixels";
+};
+
+paramdef string {
+  p_default = "STYLES=default,default,citystyle";
+  p_descr = "WMS STYLES Message Part";
+} WMS_STYLES;
+
+paramdef string {
+  p_default = "SRS=EPSG:4326";
+  p_descr = "WMS SRS Message Part - Complete.";
+} WMS_SRS;
+
+paramdef string {
+  p_default = "FORMAT=jpg";
+  p_descr = "WMS FORMAT Message Part for static file.";
+} WMS_FORMAT;
+
+paramdef string {
+  p_default = "TRANSPARENT=FALSE";
+  p_descr = "WMS TRANSPARENT Message Part.";
+} WMS_TRANSPARENT;
+
+paramdef string {
+  p_default = "BGCOLOR=0xfff8ff";
+  p_descr = "WMS BGCOLOR Message Part.";
+} WMS_BGCOLOR;
+
+paramdef string {
+  p_default = "EXCEPTIONS=INIMAGE";
+  p_descr = "WMS EXCEPTIONS Message Part.";
+} WMS_EXCEPTIONS;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "WMS VENDOR Message Part.";
+} WMS_VENDOR;
+  
+commentdef {
+  p_header = "Image Detail support.";
+};
+
+paramdef int {
+  p_default = 768;
+  p_descr = "Number of X pixels to request.";
+  p_help = "Make this the width of the image on screen. - Note: modified to produce square pixels";
+} request_nx_pixels;
+
+paramdef int {
+  p_default = 768;
+  p_descr = "Number of Pixels in the Y dim to request.";
+  p_help = "Make this the height of the image on screen - Note: modified to produce square pixels";
+} request_ny_pixels;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Sets the Background to transparent. Any pixel which matches transparent_color"
+             " will be made transparent";
+  p_help = " Interacts with WMS_BGCOLOR setting.";
+} set_background_transparent;
+
+
+paramdef int {
+  p_default = 0x00000000;
+  p_descr = "Color to change to Transparent if set_background_transparent is TRUE";
+  p_help = " ORDER is: ABGR (Alpha bits ignored) - Red = 0x000000ff, Blue = 0x00ff0000";
+} transparent_color;
+  
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Alpha Channel assignment for images without alpha.";
+  p_help = "1.0 is completely opaque, 0.0, completely transparent";
+} default_alpha;
+
+commentdef {
+  p_header = "Image Conversion parameters.";
+};
+
+paramdef char* {
+  p_descr = "Image Units";
+  p_default = "RGBA";
+} field_units;
+
+typedef enum {
+  PROJ_LATLON, PROJ_ARTCC, PROJ_STEREOGRAPHIC, PROJ_LAMBERT_CONF, PROJ_MERCATOR,
+PROJ_POLAR_STEREO,
+  PROJ_POLAR_ST_ELLIP, PROJ_CYL_EQUIDIST, PROJ_FLAT, PROJ_POLAR_RADAR
+} proj_t;
+
+paramdef enum proj_t
+{
+  p_descr = "Enumerated Projection ID";
+  p_help = "Set this to the projection of the incoming image "
+           "";
+  p_default = PROJ_LATLON;
+} in_projection;
+
+typedef struct {
+    double origin_lat;
+    double origin_lon;
+    double param1;
+    double param2;
+    double param3;
+    double param4;
+} proj_param_t;
+
+paramdef struct proj_param_t {
+    p_descr = "Projection Information";
+    p_help =
+    " The fields in the structure are as follows:\n"
+    "\n"
+    "  origin_lat: Projection Center - Latitude\n"
+    "  origin_lat: Projection Center - Longitude\n"
+    "  param1: \n"
+    "  param2: \n"
+    "  param3: \n"
+    "  param4: \n"
+    "";
+
+    p_default = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+} proj;

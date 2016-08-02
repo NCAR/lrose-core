@@ -1,0 +1,18 @@
+# NAME dbz.colors
+
+# fhage 	6/9/1993 11:56:22
+
+-19	.005	blue4
+.005 	.07 	dark green
+.07	.14 	DarkOrchid4
+.14 	.23 	HotPink4
+.23 	.45 	maroon
+.45 	.60 	VioletRed4
+.60 	.76 	sienna
+.76 	1.5 	chocolate
+1.5 	3.3 	goldenrod
+3.3 	6.9 	yellow
+6.9 	12.0 	dark salmon
+12.0 	30.0 	salmon
+30.0	60.0 	firebrick2
+60.0 	100.0 	DeepPink1

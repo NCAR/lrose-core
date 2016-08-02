@@ -1,0 +1,34 @@
+#!/bin/csh
+#
+# Generate a plot from the txt file and display it
+#
+
+set pname=`basename $1`
+set pname=$pname:r
+
+set xmlname=$1:r.xml
+set label1="H Noise: `grep  i0DbmHc  $xmlname | cut -b 12-19` dBm"
+set label2="Slope: `grep  receiverSlopeDbHc  $xmlname | cut -b 22-28 `"
+set label3="V Noise: `grep  i0DbmVc  $xmlname | cut -b 12-19` dBm"
+set label4="Slope: `grep  receiverSlopeDbVc  $xmlname | cut -b 22-28 `"
+
+echo "set terminal png" > /tmp/gnulpot.cmd 
+echo "set output '/tmp/cal_plot.png'" >> /tmp/gnulpot.cmd
+echo "set title 'Receiver Calibration $pname'" >> /tmp/gnulpot.cmd
+echo "set xlabel 'Input Signal dBm'" >> /tmp/gnulpot.cmd
+echo "set ylabel 'Response Signal" >> /tmp/gnulpot.cmd
+echo "set label 1 '$label1' at graph 0.02,0.95 tc lt 1" >> /tmp/gnulpot.cmd
+echo "set label 2 '$label2' at graph 0.02,0.90 tc lt 1" >> /tmp/gnulpot.cmd
+echo "set label 3 '$label3' at graph 0.02,0.85 tc lt 2" >> /tmp/gnulpot.cmd
+echo "set label 4 '$label4' at graph 0.02,0.80 tc lt 2" >> /tmp/gnulpot.cmd
+
+
+echo -n "plot '$1' using 1:2 title 'Horiz', " >> /tmp/gnulpot.cmd
+echo " '$1' using 1:3 title 'Vert' " >> /tmp/gnulpot.cmd
+
+gnuplot /tmp/gnulpot.cmd
+#\rm /tmp/gnulpot.cmd
+display /tmp/cal_plot.png
+
+set newname=$1:r.png
+mv  /tmp/cal_plot.png $newname

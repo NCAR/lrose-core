@@ -1,0 +1,181 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Terascan2Mdv
+ *
+ * September 2001
+ */
+
+
+paramdef boolean
+{
+  p_descr = "Debug flag";
+  p_default = false;
+} debug;
+
+paramdef string
+{
+  p_descr = "Instance for process registration";
+  p_default = "Test";
+} instance;
+
+typedef enum
+{
+  REALTIME,
+  ARCHIVE
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operational mode";
+  p_default = REALTIME;
+} mode;
+
+typedef enum
+{
+  FLAT,
+  LATLON
+} proj_t;
+
+paramdef enum proj_t
+{
+  p_descr = "Map projection to use for output";
+  p_default = FLAT;
+} projection; 
+
+paramdef boolean
+{
+  p_descr = "Flag to decode data time from file name.";
+  p_help = "If false, will try to get the data time from within the "
+           "satellite dataset.";
+  p_default = true;
+} time_flag;
+
+paramdef string
+{
+  p_descr = "File containing lookup table to map lat/lon to xy.";
+  p_help = "This file is only used if projection is set to FLAT.";
+  p_default = "lookup.txt";
+} lookup_file_name;
+
+typedef struct
+{
+  string    name;
+  double    scale;
+  double    offset;
+  long      bad_val;
+  long      field_code;
+  string    field_name;
+  string    field_units;
+} field_t;
+
+paramdef struct field_t
+{
+  p_descr = "field info to read and output";
+  p_default = {
+        { "gvar_ch1", 0.4, 0.0, 255, 84, "albedo", "percent" },
+        { "gvar_ch2", 0.5, -63.5, 255, 11, "temperature", "Degrees C" },
+        { "gvar_ch3", 0.5, -63.5, 255, 11, "temperature", "Degrees C" },
+        { "gvar_ch4", 0.5, -63.5, 255, 11, "temperature", "Degrees C" },
+        { "gvar_ch5", 0.5, -63.5, 255, 11, "temperature", "Degrees C" }
+  };
+} grids[];
+
+paramdef long
+{
+  p_descr = "Valid duration for output data files - in seconds";
+  p_default = 3600;
+} valid_duration;
+
+typedef enum
+{
+  ROUNDED =    1,
+  INTEGRAL =   2,
+  DYNAMIC =    3,
+  SPECIFIED =  4
+} scaling_type_t;
+
+paramdef enum scaling_type_t
+{
+  p_descr = "Scaling type applied INT8 output."; 
+  p_default = SPECIFIED;
+  p_help = " For SCALING_DYNAMIC, the scale and bias is determined from the "
+           " dynamic range of the data.\n\n"
+           " For SCALING_ROUNDED, the operation is similar to SCALING_DYNAMIC, "
+           " except that the scale and bias are constrained to round to 0.2, 0.5 "
+           " or 1.0 multiplied by a power of 10.\n\n"
+           " For SCALING_INTEGRAL, the operation is similar to SCALING_DYNAMIC, "
+           " except that the scale and bias are constrained to integral values.\n\n"
+           " For SCALING_SPECIFIED, the specified scale and bias are used.\n\n"
+           " Output scale and bias are ignored for conversions to float, and "
+           " for SCALING_DYNAMIC and SCALING_INTEGRAL.\n\n";
+} scaling_type;
+
+typedef enum
+{
+  FLAT_DIRECTORY,
+  RAP_DIRECTORY
+} input_style_t;
+
+paramdef enum input_style_t
+{
+  p_descr = "Input file naming style in input directory.";
+  p_help = "FLAT_DIRECTORY - Terascan files are all put in a flat directory "
+           "and the files are named like they are on the Terascan system.\n"
+           "RAP_DIRECTORY - Terascan files are stored in a RAP-style "
+           "directory structure with the files stored in subdirectories named "
+           "YYYYMMDD and the files named HHMMSS.<ext>.\n"
+           "This parameter is ignored if -infile is specified on the command "
+           "line.";
+  p_default = FLAT_DIRECTORY;
+} input_style;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_help = "In ARCHIVE mode, all files in this directory will be processed.  "
+           "In REALTIME mode, any new files put in this directory will be "
+           "processed.  "
+           "This parameter is ignored if -infile is specified on the command "
+           "line.";
+  p_default = ".";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "This parameter is ignored if -outfile is specified on the "
+           "command line.";
+  p_default = "mdvp:://localhost::dir";
+} output_url;
+
+paramdef long
+{
+  p_descr = "Delay between reading new file and procesing new file - in seconds";
+  p_help = "This parameter is ignored if program running in archive mode. This "
+           "parameter should be used when multiple instances of Terascan2Mdv are "
+           "running on the same computer and ingest data from the same satellite.";
+  p_default = 0;
+} process_delay;
+

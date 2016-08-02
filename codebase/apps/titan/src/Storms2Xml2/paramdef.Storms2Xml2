@@ -1,0 +1,145 @@
+
+commentdef {
+  p_header = "The idea of Storms2Xml2 is that it will read a Titan\n"
+	"database and write XML files representing the storms \n"
+	"tracked by the Titan system.\n\n"
+	"This can be done in realtime or archive mode. The program\n"
+	"was developed to allow the transfer of Titan data to\n"
+	"users outside of NCAR. The program does very little, if any,\n"
+	"translation or thresholding of the data - for instance, there\n"
+	"is no ability to only print data with an area greater than\n"
+	"a certain area. The outside user is expected to do that.\n\n"
+	"Units for speed are Km/Hr, area is square Km, and times\n"
+	"are GMT.\n\nNiles Oien May 2003.";
+}
+
+paramdef boolean {
+  p_descr = "Set to print more messages as data are processed.";
+  p_help = "Can usually be FALSE"; 
+  p_default = FALSE;
+} debug;
+
+paramdef boolean {
+  p_descr = "Set to print titan read requests.";
+  p_help = "Can almost always be FALSE, it is rather verbose."; 
+  p_default = FALSE;
+} debugTitan;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef string {
+  p_descr = "Radar site name.";
+  p_help = "Sets radar name for output to XML file.";
+  p_default = "not-set";
+} radar_name;
+
+typedef struct {
+  double latitude;
+  double longitude;
+  double altitude;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 0.0, 0.0, 0.0 };
+  p_descr = "Radar location.";
+  p_help = "Note the altitude is in kilometers, not meters.";
+} radar_location;
+
+paramdef string {
+  p_descr = "Input titan URL";
+  p_help = "Program reads these data as input unless the trigger mode is\n"
+	"set to TRIGGER_LDATAINFO, in which case inputDir is used."; 
+  p_default = {"titanp:://localhost::titan/storms/[station]"};
+} titanUrl;
+ 
+paramdef string {
+  p_descr = "Input titan directory.";
+  p_help = "If the trigger mode is TRIGGER_LDATAINFO, this is where the\n"
+	"titan data are read from, otherwise the titanUrl parameter is used.";
+  p_default = {"$DATA_DIR/titan/storms/[station]/"};
+} titanDir;
+ 
+
+paramdef string {
+  p_descr = "Output directory.";
+  p_help = "Output file(s) written here. "; 
+  p_default = {"$DATA_DIR/titan/storms/[station]/xml/"};
+} outDir;
+
+paramdef boolean {
+  p_descr = "Decision to overwrite output file or timestamp them.";
+  p_help = "If TRUE, then output files will be time stamped. If FALSE,"
+	"a single output file will be continually overwritten."; 
+  p_default = FALSE;
+} timestampFiles;
+
+paramdef string {
+  p_descr = "Output filename.";
+  p_help = "If timestampFiles is TRUE, the trigger time will be prepended\n"
+	"to the filename, otherwise the file will be continually overwritten."; 
+  p_default = "Titan.xml";
+} outName;
+
+paramdef enum triggerMode_t {
+  p_options = { TRIGGER_ARCHIVE, TRIGGER_INTERVAL, TRIGGER_LDATAINFO };
+  p_default = { TRIGGER_LDATAINFO };
+  p_descr = "Decide how the program is triggered.";
+  p_help = "The program can be triggered in one of three ways.\n\n"
+	" (1) TRIGGER_ARCHIVE - the program is run in archive mode\n"
+	"     on existing data. The start and end times are determined\n"
+	"     on the command line with -start and -end in the usual way.\n"
+	"     Specifying these argumnets automatically invokes this mode."
+	"     The time step is determined by the timeStep parameter.\n\n"
+	" (2) TRIGGER_INTERVAL - the program wakes up at regular intervals and\n"
+	"     runs. These intervals are determined by the timeStep parameter."
+	"     This enables the program to run in realtime on a machine remote\n"
+	"     from where the data are.\n\n"
+	" (3) TRIGGER_LDATAINFO - the program triggers directly from\n"
+	"     the titan output using the DsInputPath class. The timeStep\n"
+	"     parameter is ignored. This has the advantage that the program\n"
+	"     is triggered directly by Titan; but it does mean that it must\n"
+	"     run on the same machine as the Titan system (since DsInputPath\n"
+	"     is inherrently a local device at the time of writing).";
+} triggerMode;
+
+paramdef int {
+  p_descr = "Time increment between triggering for TRIGGER_ARCHIVE\n"
+	"and TRIGGER_INTERVAL triggering modes, seconds.";
+  p_help = "Typically set to approximate radar scan time.";
+  p_default = 720;
+} timeStep;
+
+paramdef int {
+  p_descr = "Maximum valid age for input files, seconds, if\n"
+	"the TRIGGER_LDATAINFO trigger method is invoked.";
+  p_help = "Defaults to half an hour.";
+  p_default = 1800;
+} maxValidAge;
+
+paramdef long {
+  p_descr = "Time to look back, seconds.";
+  p_help =  "Program looks back from now by this time to get\n"
+	"data interval. Set to be equal to or more than timeStep\n"
+	"for complete temporal coverage. Temporal window is from\n"
+	"triggerTime - lookBack to triggerTime, inclusive.";
+  p_default = 720;
+} lookBack;
+
+paramdef boolean {
+  p_descr = "Option to run a script when a file is written.";
+  p_help = "The output file name will be passed in as an argument\n"
+	"to this script."; 
+  p_default = FALSE;
+} runScriptWhenDone;
+
+paramdef string {
+  p_descr = "Script to run when a file is written.";
+  p_help = "Only relevant if runScriptWhenDone is TRUE. The output\n"
+	"file name will be passed in as an argument to the script."; 
+  p_default = {"copyXmlFile"};
+} scriptToRun;
+

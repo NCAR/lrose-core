@@ -1,0 +1,44 @@
+
+These are a few notes on the LDM delivery method, which
+at the time of writing are going through some changes
+with the move to the build 5 format.
+
+
+The LDM is typically configured something like this :
+
+NEXRD2  ^L2-(.*)/(KYUX)/([0-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9])([0-2][0-9][0-5][0-9][0-5][0-9])/(.*)/(.*)
+        FILE    /ypg-vdras_d1/fieldData/ldmData/YPG/NEXRD2/\2/\3/\4_\6.\1
+
+Which at the time of writing results in both pre-build5 and build5
+data being delivered in *.BZIP2 files.
+
+The pre-build5 data files start with sequence number 0, ie.
+
+20040305/164310_0.BZIP2
+
+While the build 5 files start with sequence number 1 and have
+a slightly later time stamp :
+
+20040305/164327_1.BZIP2
+
+For these build 5 files, the first file consists of metdata
+and can be ignored. Running the first file through the nexradII_bz
+utility results in a file of zero size. It can be recognised
+as a build 5 file since the first four bytes will be the
+ASCII characters "AR2V" - important when distiguishing if a file with
+sequence number 1 is build 5 or not.
+
+For both build 5 and pre-build 5 .BZIP2 files, there is no compression
+in the files.
+
+The LDM can also be set up along the following lines :
+
+NEXRD2  ^L2-([^/]*)/(....)/([0-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9][0-2][0-9][0-5][0-9][0-5][0-9])
+        FILE    /ypg-vdras_d1/fieldData/ldmData/YPG/NEXRD2TEST/\2/\3.raw
+
+In which case .raw files are delivered. These files are complete volume
+files - in this case the files themselves are not compressed, but
+there is compression in the actual file. The nexrad2dsr TDRP parameter
+"oneFilePerVolume" should be set to TRUE in this case.
+
+Niles Oien March 2004

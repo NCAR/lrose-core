@@ -1,0 +1,108 @@
+/******************************************************************
+ *
+ * Parameter definitions for SweepInfo2Spdb
+ *
+ */
+
+commentdef {
+  p_header = "SweepInfo2Spdb reads sweep data from UDP or a catalog file, and writes the info to an SPDB data base.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Register this process with procmap?";
+} register_with_procmap;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, UDP
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program continually watches a catalog file, reading any new information added to the file. In ARCHIVE mode, the program reads in a series of catalog files and processes them. In UDP mode, the program listens for UDP packets containing scan information.";
+} mode;
+
+commentdef {
+  p_header = "FILE INPUT.";
+}
+
+paramdef string {
+  p_default = "./input/catalogs";
+  p_descr = "Catalog directory directory";
+  p_help = "The catalog files will be written into this directory. There may be more than 1 file. In REALTIME mode the latest file will be read.";
+} catalog_dir;
+
+paramdef string {
+  p_default = "sweep_cat";
+  p_descr = "Root string at start of catalog file name.";
+  p_help = "All catalog files will begin with this string.";
+} sweep_catalog_name_root;
+
+paramdef string {
+  p_default = "/tmp/SweepInfo2Spdb.status";
+  p_descr = "Temporary file for saving state.";
+  p_help = "Used on startup to restore state if program is restarted for any reason.";
+} state_file_path;
+
+commentdef {
+  p_header = "UDP INPUT.";
+}
+
+paramdef int {
+  p_default = 4567;
+  p_descr = "UDP port";
+  p_help = "UDP packets are broadcast to this port.";
+} udp_port;
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/sweepinfo";
+  p_descr = "Output URL for sweep information.";
+  p_help = "The format is spdbp::params//host:port:dir. Normally params is an empty string, and port is an empty string, so that the default behavior will occur.";
+} output_url;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Name of the radar platform.";
+  p_help = "This is inserted into the SPDB data.";
+} radar_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write the latest struct to shared memory in UDP mode.";
+  p_help = "If true, the latest sweep information will be written, in binary, toa shared memory segment. The struct sweep_info_packet_t is defined in rapformats/DsRadarSweep.hh. UDP mode only.";
+} write_to_shmem;
+
+paramdef int {
+  p_default = 12500;
+  p_descr = "Shared memory key for sweep info";
+  p_help = "Any client wishing to use this data, (e.g. TsTcp2Fmq) must attach to the same key.";
+} shmem_key;

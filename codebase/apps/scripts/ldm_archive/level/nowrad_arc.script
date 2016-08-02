@@ -1,0 +1,109 @@
+#!/bin/csh -x
+#
+# Script to make an archive file of yesterdays DDP data and age off old data.
+# First get a date string for yesterday.  The program "yesterday" returns this
+# Alternatively, let the user specify the date sting on the command line.
+#
+set EXE_home = /home/rapdmg/exe
+set ARC_home  = /home/rapdmg/archive_staging
+set ARC_SCRIPTS_home  = /home/rapdmg/archive_scripts
+#set NIDS_home = /d2/ldm/nids/raw/nids
+set NIDS_home = /nids/raw/nids
+#set NOWRAD_home = /d2/ldm/nids/nowrad
+set NOWRAD_home = /nids/raw/nowrad
+set ARC_nids = /nids/archive/nids # not used
+set ARC_nowrad = $ARC_home/nowrad
+set MSS_path = /RAPDMG/LDM/ARCHIVE
+
+set time1 = `date`
+echo "Start time: " $time1
+
+  if ( $1 == "" ) then
+    set aryr = `date --date="-24 hour" +%y`
+    set aryear = `date --date="-24 hour" +%Y`
+    set aryrmn = `date --date="-24 hour" +%Y%m`
+    set ardate = `date --date="-24 hour" +%Y%m%d`
+    set armmdd = `date --date="-24 hour" +%m%d`
+    echo "ardate, armmdd=" $ardate $armmdd
+    set nids_date = `date --date="-24 hour" +%y%m%d`
+  else
+    set ardate = $1
+    set nids_date = $ardate
+    set aryr = `date  --date="-0 hour" +%y`
+    set aryear = `date --date="-0 hour" +%Y`
+    set aryrmn = `date --date="-0 hour" +%Y%m`
+    set armmdd = `date --date="-0 hour" +%m%d`
+  endif
+
+    echo "ardate=" $ardate
+    echo "nids_date =" $nids_date
+
+set TarList = $ARC_home/Tarlist_$ardate
+if (-e $TarList ) then
+   rm $TarList/*
+   echo "Removing files in directory: " $TarList
+else
+  mkdir $TarList
+endif
+
+# NIDS data archive
+#
+#  cd $NIDS_home
+#  foreach i (FTG)
+#  foreach i (*)
+#   echo "ID " $i
+#   echo "DATE " $ardate $ardate"_"$i
+#   if (-e $NIDS_home/$i/BREF1/$ardate ) then
+#    tar cvf $ARC_nids/$ardate"_"$i.nids.tar $i/*/$ardate >$TarList/$ardate"_"$i
+    #tar cvf $ARC_nids/$ardate"_"$i.nids.tar $NIDS_home/$i/*/$ardate >$TarList/$ardate"_"$i
+#    gzip $ARC_nids/$ardate"_"$i.nids.tar
+#    gzip $TarList/$ardate"_"$i
+#  endif
+# end
+
+# Tar up all the gzipped nids files, remove the individual gzipped files and Send the ALL to MSS
+#  cd $ARC_nids
+#   tar cvf $ARC_nids/$ardate"_all.nids.tar" $ardate*.nids.tar.gz>$TarList/$ardate"_ALL.nids"
+#   rm -rf $ARC_nids/$ardate*.nids.tar.gz
+#   if (-e $ARC_nids/$ardate"_all.nids.tar") then
+#    msrcp -pe 4096 $ARC_nids/$ardate"_all.nids.tar" mss:$MSS_path/$aryear/$armmdd/$ardate"_all.nids.tar"
+#    msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate_all.nids.tar
+#    echo "msrcp-ed NIDS data to MSS! "$ardate
+#   else
+#    echo "Tared NIDS data file doesn't exist!!! "$ardate
+#   endif
+#
+# NOWRAD data archive
+#
+  cd $NOWRAD_home
+  foreach i (*)
+#   echo "ID " $i
+   echo "DATE " $ardate $ardate"_"$i
+   echo " FILE_DIR "  $i/$ardate
+   tar cvf $ARC_nowrad/$ardate"_"$i.nowrad.tar $i/$ardate>$TarList/$ardate"_"$i
+   gzip $ARC_nowrad/$ardate"_"$i.nowrad.tar
+   gzip $TarList/$ardate"_"$i
+
+# Send nowrad data to MSS
+   if (-e $ARC_nowrad/$ardate"_"$i.nowrad.tar.gz) then
+     msrcp -pr 48500002 -pe 4096 $ARC_nowrad/$ardate"_"$i.nowrad.tar.gz mss:$MSS_path/$aryear/$armmdd/$ardate"_"$i.nowrad.tar.gz
+     msclass -class reliability=economy $MSS_path/$aryear/$armmdd/$ardate"_"$i.nowrad.tar.gz
+    echo "msrcp-ed NOWRAD data to MSS! "$ardate
+   else
+    echo "Tared NOWRAD data file doesn't exist!!! "$ardate
+   endif
+ end
+
+
+#
+# Now schedule a job to make sure the archive went OK, and if so, delete the archive files locally
+#
+
+#  sleep 10
+ $ARC_SCRIPTS_home/nowrad_compare_msarc.script
+
+set time2 = `date`
+echo "End time: " $time2
+
+  exit
+

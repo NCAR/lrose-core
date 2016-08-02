@@ -1,0 +1,1482 @@
+/**********************************************************************
+ * TDRP params for RadxPartRain
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxPartRain reads moments from Radx-supported format files, computes 
+//   the PID and PRECIP rates and writes out the results to Radx-supported 
+//   format files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This application registers with procmap. This is the instance used 
+//   for registration.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// THREADING FOR SPEED.
+//
+//======================================================================
+ 
+///////////// use_multiple_threads ////////////////////
+//
+// Option to use multiple compute threads to improve performance.
+// The read and write stages occur in the main thread, since netCDF is 
+//   not thread safe. The compute stage can be multi-threaded to improve 
+//   performance.
+// Type: boolean
+//
+
+use_multiple_threads = TRUE;
+
+///////////// n_compute_threads ///////////////////////
+//
+// The number of compute threads.
+// The moments computations are segmented in range, with each thread 
+//   computing a fraction of the number of gates. For maximum performance, 
+//   n_threads should be set to the number of processors multiplied by 4. 
+//   For further tuning, use top to maximize CPU usage while varying the 
+//   number of threads.
+// Minimum val: 1
+// Type: int
+//
+
+n_compute_threads = 8;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+// Files will be searched for in this directory.
+// Type: string
+//
+
+input_dir = ".";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = FILELIST;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+// Only data less old than this will be used.
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+// If true, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = FALSE;
+
+///////////// remove_rays_with_antenna_transitions ////
+//
+// Option to remove rays taken while the antenna was in transition.
+// If true, rays with the transition flag set will not be used. The 
+//   transiton flag is set when the antenna is in transtion between one 
+//   sweep and the next.
+// Type: boolean
+//
+
+remove_rays_with_antenna_transitions = FALSE;
+
+///////////// transition_nrays_margin /////////////////
+//
+// Number of transition rays to include as a margin.
+// Sometimes the transition flag is turned on too early in a transition, 
+//   on not turned off quickly enough after a transition. If you set this 
+//   to a number greater than 0, that number of rays will be included at 
+//   each end of the transition, i.e. the transition will effectively be 
+//   shorter at each end by this number of rays.
+// Type: int
+//
+
+transition_nrays_margin = 0;
+
+///////////// trim_surveillance_sweeps_to_360deg //////
+//
+// Option to trip surveillance sweeps so that they only cover 360 
+//   degrees.
+// Some sweeps will have rays which cover more than a 360-degree 
+//   rotation. Often these include antenna transitions. If this is set to 
+//   true, rays are trimmed off either end of the sweep to limit the 
+//   coverage to 360 degrees. The median elevation angle is computed and 
+//   the end ray which deviates from the median in elevation is trimmed 
+//   first.
+// Type: boolean
+//
+
+trim_surveillance_sweeps_to_360deg = FALSE;
+
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+// Gates beyond this range are removed.
+// Type: double
+//
+
+max_range_km = 9999;
+
+///////////// set_ngates_constant /////////////////////
+//
+// Option to force the number of gates to be constant.
+// If TRUE, the number of gates on all rays will be set to the maximum, 
+//   and gates added to shorter rays will be filled with missing values.
+// Type: boolean
+//
+
+set_ngates_constant = FALSE;
+
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+// Only use sweeps within the specified fixed angle limits.
+// Type: boolean
+//
+
+set_fixed_angle_limits = FALSE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+// Type: double
+//
+
+lower_fixed_angle_limit = 0;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+// Type: double
+//
+
+upper_fixed_angle_limit = 90;
+
+///////////// set_sweep_num_limits ////////////////////
+//
+// Option to set sweep number limits.
+// Only read sweeps within the specified sweep number limits.
+// Type: boolean
+//
+
+set_sweep_num_limits = FALSE;
+
+///////////// lower_sweep_num /////////////////////////
+//
+// Lower sweep number limit.
+// Type: int
+//
+
+lower_sweep_num = 0;
+
+///////////// upper_sweep_num /////////////////////////
+//
+// Upper sweep number limit.
+// Type: int
+//
+
+upper_sweep_num = 0;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE RADAR LOCATION.
+//
+//======================================================================
+ 
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_latitude_deg = -999;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_longitude_deg = -999;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+// See override_radar_location.
+// Type: double
+//
+
+radar_altitude_meters = -999;
+
+//======================================================================
+//
+// INPUT FIELD INFORMATION.
+//
+// Names of fields in the input file. The following fields are required: 
+//   SNR, DBZ, ZDR, PHIDP and RHOHV. KDP is also required internally, but 
+//   if KDP is not available it will be computed from PHIDP. LDR is 
+//   optional, and is used for PID only.
+//
+//======================================================================
+ 
+///////////// SNR_available ///////////////////////////
+//
+// Is SNR data available?.
+// If not, SNR will be computed from the DBZ field. See 
+//   'noise_dbz_at_100km'.
+// Type: boolean
+//
+
+SNR_available = TRUE;
+
+///////////// SNR_field_name //////////////////////////
+//
+// Field name for SNR.
+// Signal-to-noise ratio (dB).
+// Type: string
+//
+
+SNR_field_name = "SNRHC_F";
+
+///////////// noise_dbz_at_100km //////////////////////
+//
+// The noise value, represented as dBZ at a range of 100km.
+// This is used for computing the SNR from the DBZ field. It is only 
+//   used if SNR_available is FALSE. The SNR will be computed by 
+//   range-correcting this value and using it as the noise value.
+// Type: double
+//
+
+noise_dbz_at_100km = 0;
+
+///////////// DBZ_field_name //////////////////////////
+//
+// Field name for DBZ.
+// Horizontally-polarized reflectivity factor.
+// Type: string
+//
+
+DBZ_field_name = "DBZ_F";
+
+///////////// ZDR_field_name //////////////////////////
+//
+// Field name for ZDR.
+// Type: string
+//
+
+ZDR_field_name = "ZDR_F";
+
+///////////// PHIDP_field_name ////////////////////////
+//
+// Field name for PHIDP.
+// Type: string
+//
+
+PHIDP_field_name = "PHIDP_F";
+
+///////////// RHOHV_field_name ////////////////////////
+//
+// Field name for RHOHV.
+// Type: string
+//
+
+RHOHV_field_name = "RHOHV_F";
+
+///////////// KDP_available ///////////////////////////
+//
+// Is KDP data available?.
+// If not, KDP will be computed from PHIDP.
+// Type: boolean
+//
+
+KDP_available = TRUE;
+
+///////////// KDP_field_name //////////////////////////
+//
+// Field name for KDP.
+// Type: string
+//
+
+KDP_field_name = "KDP_F";
+
+///////////// LDR_available ///////////////////////////
+//
+// Is LDR data available?.
+// Type: boolean
+//
+
+LDR_available = TRUE;
+
+///////////// LDR_field_name //////////////////////////
+//
+// Field name for LDR.
+// Type: string
+//
+
+LDR_field_name = "LDRH_F";
+
+//======================================================================
+//
+// COMPUTING KDP.
+//
+// Parameters for computing KDP. KDP will be computed if KDP_available 
+//   is FALSE.
+//
+//======================================================================
+ 
+///////////// KDP_fir_filter_len //////////////////////
+//
+// Filter length for the FIR filter for PHIDP (gates).
+// When computing KDP, an FIR filter is first applied to PHIDP to smooth 
+//   it. This is the length of that filter, in gates.
+//
+// Type: enum
+// Options:
+//     FIR_LEN_125
+//     FIR_LEN_60
+//     FIR_LEN_40
+//     FIR_LEN_30
+//     FIR_LEN_20
+//     FIR_LEN_10
+//
+
+KDP_fir_filter_len = FIR_LEN_20;
+
+///////////// KDP_n_filt_iterations_unfolded //////////
+//
+// Sets the number of iterations for the initial FIR filter for unfolded 
+//   PHIDP.
+// After unfolding PHIDP, the FIR filter is applied to the unfolded 
+//   phidp, a number of times, to smooth it. The effect of the filter is a 
+//   combination of the filter length and the number of iterations.
+// Type: int
+//
+
+KDP_n_filt_iterations_unfolded = 2;
+
+///////////// KDP_n_filt_iterations_conditioned ///////
+//
+// Sets the number of iterations for the final FIR filter for 
+//   conditioned PHIDP.
+// In order to identify phase shift on backscatter (PSOB), we condition 
+//   the PHIDP to keep it generally increasing with range. The FIR filter 
+//   is applied to the conditioned phidp a number of times, to smooth it. 
+//   The effect of the filter is a combination of the filter length and 
+//   the number of iterations.
+// Type: int
+//
+
+KDP_n_filt_iterations_conditioned = 4;
+
+///////////// KDP_ngates_for_stats ////////////////////
+//
+// Number of gates over which the phidp mean, sdev and jitter are 
+//   computed.
+// The mean, sdev and jitter of phidp are computed over a consecutive 
+//   number of gates in range, centered on the current gate of interest. 
+//   This parameter is the number of gates over which these statistics are 
+//   computed.
+// Type: int
+//
+
+KDP_ngates_for_stats = 9;
+
+///////////// KDP_phidp_sdev_max //////////////////////
+//
+// Sets the threshold for the standard deviation of phidp in range.
+// The sdev of phidp is a good test for valid phidp. The sdev is 
+//   computed in the circle, so that it takes account of folding if 
+//   present. If the sdev is less than this value, it is assumed we are in 
+//   weather. Applies to computation of KDP only.
+// Type: double
+//
+
+KDP_phidp_sdev_max = 20;
+
+///////////// KDP_phidp_jitter_max ////////////////////
+//
+// Sets the threshold for the jitter of phidp in range.
+// The jitter of phidp is defined as the mean absolute change in angle 
+//   between successive phidp measurements in range. It is computed on the 
+//   circle to take account of folding. If the jitter is less than this 
+//   value, it is assumed we are in weather. Applies to computation of KDP 
+//   only.
+// Type: double
+//
+
+KDP_phidp_jitter_max = 25;
+
+///////////// KDP_min_valid_abs_kdp ///////////////////
+//
+// Sets the min valid KDP value.
+// Values less than this are set to 0.
+// Type: double
+//
+
+KDP_min_valid_abs_kdp = 0.01;
+
+///////////// KDP_debug ///////////////////////////////
+//
+// Option to print debug messages in KDP computation.
+// Type: boolean
+//
+
+KDP_debug = FALSE;
+
+///////////// KDP_write_ray_files /////////////////////
+//
+// Option to write ray files to debug KDP computation.
+// Type: boolean
+//
+
+KDP_write_ray_files = FALSE;
+
+///////////// KDP_ray_files_dir ///////////////////////
+//
+// Directory for KDP ray files.
+// Type: string
+//
+
+KDP_ray_files_dir = "/tmp/kdp_ray_files";
+
+//======================================================================
+//
+// COMPUTING PID - HYDROMETEOR PARTICLE ID.
+//
+//======================================================================
+ 
+///////////// compute_pid /////////////////////////////
+//
+// Option to compute the particle ID product - PID.
+// Only applies to dual-polarization data.
+// Type: boolean
+//
+
+compute_pid = FALSE;
+
+///////////// pid_thresholds_file_path ////////////////
+//
+// File path for fuzzy logic thresholds for PID.
+// This file contains the thresholds and weights for computing particle 
+//   ID.
+// Type: string
+//
+
+// pid_thresholds_file_path = "$(PROJ_DIR)/alg/params/pid_thresholds.sband";
+pid_thresholds_file_path = "pid_thresholds.sband";
+
+///////////// PID_snr_threshold ///////////////////////
+//
+// Minimum SNR for valid PID.
+// If the SNR at a gate is below this, the PID is censored.
+// Type: double
+//
+
+PID_snr_threshold = 3;
+
+///////////// PID_snr_upper_threshold /////////////////
+//
+// Maximum SNR for valid PID.
+// If the SNR at a gate is above this value, the PID will be set to 
+//   SATURATED_SNR = 18.
+// Type: double
+//
+
+PID_snr_upper_threshold = 9999;
+
+///////////// PID_min_valid_interest //////////////////
+//
+// Minimum valid interest value for identifying a particle.
+// If the computed interest value is below this, the PID is set to 
+//   missing.
+// Type: double
+//
+
+PID_min_valid_interest = 0.5;
+
+///////////// PID_constrain_kdp_using_dbz /////////////
+//
+// For PID, constrain KDP to reasonable values using dbz.
+// If true, the KDP values will be checked against DBZ, and will be 
+//   limited to a reasonable range given the DBZ value.
+// Type: boolean
+//
+
+PID_constrain_kdp_using_dbz = FALSE;
+
+///////////// PID_apply_median_filter_to_DBZ //////////
+//
+// Option to filter DBZ with median filter.
+// The filter is computed in range.
+// Type: boolean
+//
+
+PID_apply_median_filter_to_DBZ = TRUE;
+
+///////////// PID_DBZ_median_filter_len ///////////////
+//
+// Length of median filter for DBZ - gates.
+// See 'PID_apply_median_filter_to_DBZ'.
+// Type: int
+//
+
+PID_DBZ_median_filter_len = 5;
+
+///////////// PID_apply_median_filter_to_ZDR //////////
+//
+// Option to filter ZDR with median filter.
+// The filter is computed in range.
+// Type: boolean
+//
+
+PID_apply_median_filter_to_ZDR = TRUE;
+
+///////////// PID_ZDR_median_filter_len ///////////////
+//
+// Length of median filter for ZDR - gates.
+// See 'PID_apply_median_filter_to_ZDR'.
+// Type: int
+//
+
+PID_ZDR_median_filter_len = 5;
+
+///////////// PID_apply_median_filter_to_RHOHV ////////
+//
+// Option to filter RHOHV with median filter.
+// The filter is computed in range.
+// Type: boolean
+//
+
+PID_apply_median_filter_to_RHOHV = TRUE;
+
+///////////// PID_RHOHV_median_filter_len /////////////
+//
+// Length of median filter for RHOHV - gates.
+// See 'PID_apply_median_filter_to_RHOHV'.
+// Type: int
+//
+
+PID_RHOHV_median_filter_len = 5;
+
+///////////// PID_apply_median_filter_to_LDR //////////
+//
+// Option to filter LDR with median filter.
+// The filter is computed in range.
+// Type: boolean
+//
+
+PID_apply_median_filter_to_LDR = TRUE;
+
+///////////// PID_LDR_median_filter_len ///////////////
+//
+// Length of median filter for LDR - gates.
+// See 'PID_apply_median_filter_to_LDR'.
+// Type: int
+//
+
+PID_LDR_median_filter_len = 5;
+
+///////////// PID_replace_missing_LDR /////////////////
+//
+// For PID, option to replace missing LDR values with a specified value.
+// When the SNR gets low, LDR is unreliable since there is not 
+//   sufficient dynamic range to provide an accurate cross-polar power 
+//   measurement. In these cases, it makes sense to replace LDR with a 
+//   neutral value, such as 0.0, so that we do not reject gates at which 
+//   valuable data is available.
+// Type: boolean
+//
+
+PID_replace_missing_LDR = TRUE;
+
+///////////// PID_LDR_replacement_value ///////////////
+//
+// Value to which LDR will be set if missing.
+// Type: double
+//
+
+PID_LDR_replacement_value = 0;
+
+///////////// PID_ngates_for_sdev /////////////////////
+//
+// Number of gates for computing standard deviations.
+// This applies to computing the standard deviation of zdr and phidp.
+// Type: int
+//
+
+PID_ngates_for_sdev = 9;
+
+//======================================================================
+//
+// SOUNDING INPUT FOR PID temperatures - OPTIONAL.
+//
+//======================================================================
+ 
+///////////// use_soundings_from_spdb /////////////////
+//
+// Option to read sounding data from SPDB.
+// If TRUE, the program will read the closest (in time) available 
+//   sounding from an SPDB data base. The temperature profile from the 
+//   sounding will be used to override the temperature profile in the PID 
+//   thresholds config file.
+// Type: boolean
+//
+
+use_soundings_from_spdb = FALSE;
+
+///////////// sounding_spdb_url ///////////////////////
+//
+// SPDB URL for sounding data.
+// Type: string
+//
+
+sounding_spdb_url = "spdbp:://tesla.eol.ucar.edu::spdb/soundings/gan";
+
+///////////// sounding_search_time_margin_secs ////////
+//
+// Time margin for retrieving sounding, in secs.
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+// Type: int
+//
+
+sounding_search_time_margin_secs = 86400;
+
+///////////// sounding_required_pressure_range_hpa ////
+//
+// Required pressure range for sounding to be valid (hPa).
+// This is used to provide a quality check on the sounding. If the 
+//   pressure data does not fully cover this range, the sounding is 
+//   rejected and we look back for the next available one.
+//
+// Type: struct
+//   typedef struct {
+//      double min_val;
+//      double max_val;
+//   }
+//
+//
+
+sounding_required_pressure_range_hpa = {
+    min_val = 300,
+    max_val = 950
+};
+
+///////////// sounding_required_height_range_m ////////
+//
+// Required height range for sounding to be valid (m).
+// This is used to provide a quality check on the sounding. If the 
+//   height data does not fully cover this range, the sounding is rejected 
+//   and we look back for the next available one.
+//
+// Type: struct
+//   typedef struct {
+//      double min_val;
+//      double max_val;
+//   }
+//
+//
+
+sounding_required_height_range_m = {
+    min_val = 500,
+    max_val = 15000
+};
+
+///////////// sounding_check_pressure_monotonically_decreasing 
+//
+// Option to check that pressure decreases monotonically.
+// If TRUE, we will check that pressure decreases monotonically. If not, 
+//   the sounding is rejected and we look back for the next available one.
+// Type: boolean
+//
+
+sounding_check_pressure_monotonically_decreasing = TRUE;
+
+//======================================================================
+//
+// SMOOTHING OUTPUT PID.
+//
+// This section gives you the option of smoothing the output pid field 
+//   in range by applying a median filter.
+//
+//======================================================================
+ 
+///////////// apply_median_filter_to_PID //////////////
+//
+// Option to filter PID with median filter.
+// The filter is computed in range, and affects both rain rate and PID.
+// Type: boolean
+//
+
+apply_median_filter_to_PID = FALSE;
+
+///////////// PID_median_filter_len ///////////////////
+//
+// Length of median filter for PID - gates.
+// See 'appply_median_filter_to_PID'.
+// Type: int
+//
+
+PID_median_filter_len = 7;
+
+//======================================================================
+//
+// COMPUTING PRECIP RATE.
+//
+//======================================================================
+ 
+///////////// compute_precip_rate /////////////////////
+//
+// Option to estimate the precip rate.
+// Only applies to dual-polarization data. A number of different 
+//   estimates are computed, from ZH, Z-ZDR, KDP, KDP-ZDR, and hybrids of 
+//   all of the above.
+// Type: boolean
+//
+
+compute_precip_rate = FALSE;
+
+///////////// PRECIP_snr_threshold ////////////////////
+//
+// Minimum SNR for valid PRECIP.
+// If the SNR at a gate is below this, the PRECIP is censored.
+// Type: double
+//
+
+PRECIP_snr_threshold = 3;
+
+///////////// PRECIP_apply_median_filter_to_DBZ ///////
+//
+// Option to filter DBZ with median filter.
+// The filter is computed in rang..
+// Type: boolean
+//
+
+PRECIP_apply_median_filter_to_DBZ = TRUE;
+
+///////////// PRECIP_DBZ_median_filter_len ////////////
+//
+// Length of median filter for DBZ - gates.
+// See 'PRECIP_apply_median_filter_to_DBZ'.
+// Type: int
+//
+
+PRECIP_DBZ_median_filter_len = 5;
+
+///////////// PRECIP_apply_median_filter_to_ZDR ///////
+//
+// Option to filter ZDR with median filter.
+// The filter is computed in range.
+// Type: boolean
+//
+
+PRECIP_apply_median_filter_to_ZDR = TRUE;
+
+///////////// PRECIP_ZDR_median_filter_len ////////////
+//
+// Length of median filter for ZDR - gates.
+// See 'PID_PRECIP_apply_median_filter_to_ZDR'.
+// Type: int
+//
+
+PRECIP_ZDR_median_filter_len = 5;
+
+///////////// PRECIP_min_DBZ_for_KDP_rates ////////////
+//
+// KDP-based rates will be set to 0 for gates with DBZ values below this 
+//   threshold.
+// KDP can be a noisy field, which can lead to large KDP-based estimates 
+//   even in low reflectivity areas. Use of this threshold prevents high 
+//   KDP estimates in low reflectivity regions.
+// Type: double
+//
+
+PRECIP_min_DBZ_for_KDP_rates = 30;
+
+///////////// PRECIP_constrain_kdp_using_dbz //////////
+//
+// For precip, constrain KDP to reasonable values using dbz.
+// If true, the KDP values will be checked against DBZ, and will be 
+//   limited to a reasonable range given the DBZ value.
+// Type: boolean
+//
+
+PRECIP_constrain_kdp_using_dbz = FALSE;
+
+///////////// PRECIP_constrain_zdr_using_dbz //////////
+//
+// For precip, constrain ZDR to reasonable values using dbz.
+// If true, the ZDR values will be checked against DBZ, and will be 
+//   limited to a reasonable range given the DBZ value.
+// Type: boolean
+//
+
+PRECIP_constrain_zdr_using_dbz = FALSE;
+
+///////////// PRECIP_min_valid_rate ///////////////////
+//
+// Minimum valid precip rate (mm/hr).
+// If any computed rate is less than this value, it is set to 0.
+// Type: double
+//
+
+PRECIP_min_valid_rate = 0.1;
+
+//======================================================================
+//
+// PRECIP COEFFICIENTS.
+//
+// Coefficients for the precip equations.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PRECIP_RATE_ZH.
+//
+// RATE_ZH = zh_aa * (ZH ** zh_bb).
+//
+//======================================================================
+ 
+///////////// zh_aa ///////////////////////////////////
+//
+// Coefficient for PRECIP_RATE_ZH.
+// Type: double
+//
+
+zh_aa = 0.027366;
+
+///////////// zh_bb ///////////////////////////////////
+//
+// Exponent for PRECIP_RATE_ZH.
+// Type: double
+//
+
+zh_bb = 0.69444;
+
+//======================================================================
+//
+// PRECIP_RATE_Z_ZDR.
+//
+// RATE_Z_ZDR = zzdr_aa * (ZH ** zzdr_bb) * (ZDR ** zzdr_cc).
+//
+//======================================================================
+ 
+///////////// zzdr_aa /////////////////////////////////
+//
+// Coefficient for PRECIP_RATE_ZZDR.
+// Type: double
+//
+
+zzdr_aa = 0.00684;
+
+///////////// zzdr_bb /////////////////////////////////
+//
+// ZH exponent for PRECIP_RATE_ZZDR.
+// Type: double
+//
+
+zzdr_bb = 1;
+
+///////////// zzdr_cc /////////////////////////////////
+//
+// ZDR exponent for PRECIP_RATE_ZZDR.
+// Type: double
+//
+
+zzdr_cc = -4.86;
+
+//======================================================================
+//
+// PRECIP_RATE_KDP.
+//
+// RATE_KDP = sign(KDP) * kdp_aa * (|KDP| ** kdp_bb).
+//
+//======================================================================
+ 
+///////////// kdp_aa //////////////////////////////////
+//
+// Coefficient for PRECIP_RATE_KDP.
+// Type: double
+//
+
+kdp_aa = 40.6;
+
+///////////// kdp_bb //////////////////////////////////
+//
+// Exponent for PRECIP_RATE_KDP.
+// Type: double
+//
+
+kdp_bb = 0.866;
+
+//======================================================================
+//
+// PRECIP_RATE_KDP_ZDR.
+//
+// RATE_KDP_ZDR = sign(KDP) * kdpzdr_aa * (|KDP| ** kdpzdr_bb) * (ZDR ** 
+//   kdpzdr_cc).
+//
+//======================================================================
+ 
+///////////// kdpzdr_aa ///////////////////////////////
+//
+// Coefficient for PRECIP_RATE_KDP_ZDR.
+// Type: double
+//
+
+kdpzdr_aa = 136;
+
+///////////// kdpzdr_bb ///////////////////////////////
+//
+// KDP exponent for PRECIP_RATE_KDP_ZDR.
+// Type: double
+//
+
+kdpzdr_bb = 0.968;
+
+///////////// kdpzdr_cc ///////////////////////////////
+//
+// ZDR exponent for PRECIP_RATE_KDP_ZDR.
+// Type: double
+//
+
+kdpzdr_cc = -2.86;
+
+//======================================================================
+//
+// PRECIP_RATE_HYBRID.
+//
+// The HYBRID rate is a combination of the other rates.
+//
+//======================================================================
+ 
+///////////// hybrid_aa ///////////////////////////////
+//
+// If RATE_ZH <= hybrid_aa, RATE_HYBRID = RATE_ZH.
+// Type: double
+//
+
+hybrid_aa = 10;
+
+///////////// hybrid_bb ///////////////////////////////
+//
+// Else if RATE_Z_ZDR <= hybrid_bb, RATE_HYBRID = RATE_Z_ZDR.
+// Type: double
+//
+
+hybrid_bb = 50;
+
+///////////// hybrid_cc ///////////////////////////////
+//
+// Else If RATE_Z_ZDR <= hybrid_cc, RATE_HYBRID = RATE_KDP_ZDR.
+// Else if RATE_Z_ZDR > hybrid_bb, RATE_HYBRID = RATE_KDP.
+// Type: double
+//
+
+hybrid_cc = 100;
+
+//======================================================================
+//
+// PRECIP_RATE_HIDRO.
+//
+// The HIDRO rate is based on the CSU-HIDRO algorithm. See 'A New 
+//   Dual-Polarization Radar Rainfall Algorithm: Application to Colorado 
+//   Precipition Events', Cifelli et al, JTech, Vol 28, 352 - 364. NOTE - 
+//   this algorithm is generally only applied to liquid and mixed-phase 
+//   precip, so you need to run PID for this to work as intended.
+// 	 For ice:
+// 	   RATE_HIDRO = MISSING
+// 	 For mixed_phase:
+// 	   if KDP >= threshold
+// 	     RATE_HIDRO = RATE_KDP
+// 	   else
+// 	     RATE_HIDRO = MISSING
+// 	 For liquid_phase:
+// 	   if KDP >= threshold and DBZ >= threhold
+// 	     if ZDR >= THRESHOLD
+// 	       RATE_HIDRO = RATE_KDPZDR
+// 	     else
+// 	       RATE_HIDRO = RATE_KDP
+// 	   else
+// 	     if ZDR >= THRESHOLD
+// 	       RATE_HIDRO = RATE_Z
+// 	     else
+// 	       RATE_HIDRO = RATE_ZZDR.
+//
+//======================================================================
+ 
+///////////// hidro_dbz_threshold /////////////////////
+//
+// Units are dBZ.
+// See notes above for details on use.
+// Type: double
+//
+
+hidro_dbz_threshold = 38;
+
+///////////// hidro_kdp_threshold /////////////////////
+//
+// Units are deg/km.
+// See notes above for details on use.
+// Type: double
+//
+
+hidro_kdp_threshold = 0.3;
+
+///////////// hidro_zdr_threshold /////////////////////
+//
+// Units are dB.
+// See notes above for details on use.
+// Type: double
+//
+
+hidro_zdr_threshold = 0.5;
+
+//======================================================================
+//
+// SPECIFYING FIELD NAMES AND OUTPUT ENCODING.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Indicate which fields should be written to the output file.
+// Choose the ID from the list. The name and units can be set however 
+//   the user prefers. The output_encoding and output_scaling apply to 
+//   CfRadial output only. If the output_scaling is DYNAMIC then the scale 
+//   and offset are computed using the dynamic range of the data. If the 
+//   output_scaling is SPECIFIED, then the specified scale and offset are 
+//   used.
+//
+// Type: struct
+//   typedef struct {
+//      output_field_id_t id;
+//        Options:
+//          SNR
+//          DBZ
+//          ZDR
+//          LDR
+//          RHOHV
+//          PHIDP
+//          KDP
+//          KDP_CONSTRAINED
+//          KDP_WITH_PSOB
+//          PSOB
+//          ZDP
+//          PRECIP_RATE_ZH
+//          PRECIP_RATE_Z_ZDR
+//          PRECIP_RATE_KDP
+//          PRECIP_RATE_KDP_ZDR
+//          PRECIP_RATE_HYBRID
+//          PRECIP_RATE_HIDRO
+//          DBZ_FOR_KDP
+//          PHIDP_FOR_KDP
+//          PHIDP_MEAN_FOR_KDP
+//          PHIDP_MEAN_UNFOLD_FOR_KDP
+//          PHIDP_SDEV_FOR_KDP
+//          PHIDP_JITTER_FOR_KDP
+//          PHIDP_UNFOLD_FOR_KDP
+//          PHIDP_FILT_FOR_KDP
+//          PHIDP_COND_FOR_KDP
+//          PHIDP_COND_FILT_FOR_KDP
+//          VALID_FLAG_FOR_KDP
+//          DBZ_FOR_RATE
+//          ZDR_FOR_RATE
+//          KDP_FOR_RATE
+//          PARTICLE_ID
+//          PID_INTEREST
+//          PARTICLE_ID2
+//          PID_INTEREST2
+//          DBZ_FOR_PID
+//          ZDR_FOR_PID
+//          LDR_FOR_PID
+//          PHIDP_FOR_PID
+//          RHOHV_FOR_PID
+//          KDP_FOR_PID
+//          SDZDR_FOR_PID
+//          SDPHIDP_FOR_PID
+//          TEMP_FOR_PID
+//      string name;
+//      string long_name;
+//      string standard_name;
+//      string units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_ENCODING_FL32
+//          OUTPUT_ENCODING_INT32
+//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_INT08
+//      output_scaling_t scaling;
+//        Options:
+//          OUTPUT_SCALING_DYNAMIC
+//          OUTPUT_SCALING_SPECIFIED
+//      double scale;
+//      double offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    id = KDP,
+    name = "KDP",
+    long_name = "specific_differential_phase",
+    standard_name = "specific_differential_phase_hv",
+    units = "deg/km",
+    encoding = OUTPUT_ENCODING_FL32,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = PSOB,
+    name = "PSOB",
+    long_name = "phase_shift_on_backscatter",
+    standard_name = "phase_shift_on_backscatter",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = PARTICLE_ID,
+    name = "PID",
+    long_name = "particle_id",
+    standard_name = "hydrometeor_type",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 1,
+    offset = 0
+  }
+  ,
+  {
+    id = TEMP_FOR_PID,
+    name = "TEMP_FOR_PID",
+    long_name = "temperature_for_computing_pid",
+    standard_name = "temperature",
+    units = "C",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PRECIP_RATE_ZH,
+    name = "RATE_ZH",
+    long_name = "precip_rate_from_z",
+    standard_name = "precip_rate_from_z",
+    units = "mm/hr",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PRECIP_RATE_Z_ZDR,
+    name = "RATE_Z_ZDR",
+    long_name = "precip_rate_from_z_and_zdr",
+    standard_name = "precip_rate_from_z_and_zdr",
+    units = "mm/hr",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PRECIP_RATE_KDP,
+    name = "RATE_KDP",
+    long_name = "precip_rate_from_kdp",
+    standard_name = "precip_rate_from_kdp",
+    units = "mm/hr",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PRECIP_RATE_KDP_ZDR,
+    name = "RATE_KDP_ZDR",
+    long_name = "precip_rate_from_kdp_and_zdr",
+    standard_name = "precip_rate_from_kdp_and_zdr",
+    units = "mm/hr",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PRECIP_RATE_HYBRID,
+    name = "RATE_HYBRID",
+    long_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
+    standard_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
+    units = "mm/hr",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PHIDP_FOR_KDP,
+    name = "PHIDP_FOR_KDP",
+    long_name = "phidp_for_computing_kdp",
+    standard_name = "specific_differential_phase",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PHIDP_COND_FOR_KDP,
+    name = "PHIDP_COND_FOR_KDP",
+    long_name = "conditioned_phidp_for_computing_kdp",
+    standard_name = "specific_differential_phase",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PHIDP_FILT_FOR_KDP,
+    name = "PHIDP_FILT_FOR_KDP",
+    long_name = "filtered_phidp_for_computing_kdp",
+    standard_name = "specific_differential_phase",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+};
+
+//======================================================================
+//
+// OUTPUT FILE FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+// If false, data will be byte-swapped as appropriate on output.
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+// Applies to netCDF and Dorade. UF does not support compression.
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+// Type: int
+//
+
+compression_level = 9;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+// Files will be written to this directory.
+// Type: string
+//
+
+output_dir = "$(DATA_DIR)/cfradial/partrain2/sband/sur";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+// Path will be output_dir/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+// Type: boolean
+//
+
+write_individual_sweeps = FALSE;
+

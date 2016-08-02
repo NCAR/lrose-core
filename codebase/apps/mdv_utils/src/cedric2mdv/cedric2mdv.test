@@ -1,0 +1,195 @@
+/**********************************************************************
+ * TDRP params for cedric2mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// cedric2mdv converts a CEDRIC file to MDV.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// REALTIME: watches input_dir, waits for a new input files to arrive. 
+//   ARCHIVE: processes files in input_dir between the start and end 
+//   times. FILELIST: processes the list of file names specified on the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+// This is used in REALTIME and ARCHIVE modes.
+// Type: string
+//
+
+input_dir = "./input";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+// Minimum val: 1
+// Type: int
+//
+
+max_realtime_valid_age = 360;
+
+///////////// input_file_extension ////////////////////
+//
+// Specify file extension.
+// If empty, all extensions will be accepted.
+// Type: string
+//
+
+input_file_extension = "";
+
+//======================================================================
+//
+// OUTPUT FIELD DETAILS.
+//
+//======================================================================
+ 
+///////////// specify_output_fields ///////////////////
+//
+// Option to specify which fields to write out.
+// If false, all fields in the input file will be written to the output 
+//   file.
+// Type: boolean
+//
+
+specify_output_fields = FALSE;
+
+///////////// output_fields ///////////////////////////
+//
+// Details of the output fields.
+// We search for the cedric_name. If the input file contains the 
+//   requested name, the field is added to the output file.
+//
+// Type: struct
+//   typedef struct {
+//      string cedric_name;
+//      string output_name;
+//      string units;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    cedric_name = "DBZ",
+    output_name = "DBZ",
+    units = "dBZ"
+  }
+  ,
+  {
+    cedric_name = "VEL",
+    output_name = "VEL",
+    units = "m/s"
+  }
+};
+
+///////////// output_encoding /////////////////////////
+//
+// Set encoding type for all output fields.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding = ENCODING_INT16;
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+// Output data is written to this dir.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This short string is placed in the MDV master header for 
+//   documentation purposes.
+// Type: string
+//
+
+data_set_source = "Converted by cedric2mdv.";
+
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+// This long string is placed in the MDV master header for documentation 
+//   purposes.
+// Type: string
+//
+
+data_set_info = "Unknown";
+

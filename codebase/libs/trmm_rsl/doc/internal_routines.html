@@ -1,0 +1,248 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+<center>
+
+<h1>RSL Internal Routines</h1>
+</center>
+<hr>RSL internal routines are routines used within the library and not meant for use in RSL application programs. Most of these routines are used only within the source code file that they exist, but a few are used in several different source code files. 
+
+<p>The routines are listed by the RSL source code file in which they can be found. 
+
+<p>As of version 0.39, the source code for the wsr88d (v1.14), lassen (v1.1), nsig (v1.3), tg (v1.1), and mcgill (v1.1) libraries are included in RSL. This precludes the need to specify a long list of additional libraries during the link step when building application. Also, it simplifies the RSL installation procedure. Still needed are two routines: ppmtogif and ppmtopict, from the pbmplus package. 
+<hr>
+
+<h2>New in v0.41</h2>
+
+
+<h2>gzip.c</h2>
+int no_command(char *cmd);<br>
+FILE *uncompress_pipe(FILE *fp);<br>
+FILE *compress_pipe(FILE *fp); 
+<hr>
+
+<h2>column.c</h2>
+
+<dl>
+<dt><b>Column *compute_column_products(Column *c);</b> 
+<dd>Compute the vertical structure values within the Column passed in the parameter list using the data values stored in the Column. Vertical_structure values computed are zmax,hzmax and the eth array (echo tops). The dBz, slant range and height values must exist within the Column before this routine is called. The array for echo top values must be allocated as well. 
+
+<p>
+<dt><b>Column *get_column_dbz(Volume *v,Column *c,float azim);</b> 
+<dd>Retrieve the dBz values from the Volume v using the nearest neighbor technique along a straight vertical line. The vertical line is positioned at the azimuth passed in the parameter list and the ground range that should already exist in Column c. The slant range array, height array and memory allocation for the dBz array should already exist as well. 
+
+<p>
+<dt><b>Column *get_column_range_coord(Volume *v,Column *c, float grange);</b> 
+<dd>Using the elevation angles from Volume v and the ground range (grange), calculate the slant ranges and heights for all points at the intersections of the Sweeps in Volume v and a straight vertical line at the ground range value grange. 
+
+<p>
+<dt><b>Column *new_column(int nsteps,float ett_start,float ett_int,int num_ett);</b> 
+<dd>Allocate space for a Column data structure and arrays within the Column. The value nsteps is the length of the dbz,height and slant range arrays. The lenght of the echo top array, and thus the number of thresholds, is num_ett. The first echo top threshold is ett_start followed by additional thresholds every ett_int. 
+
+<p>
+<dt><b>void copy_column_range_coord(Column *from,Column *to);</b> 
+<dd>Copy the range dependent coordinates from Column from to Column to. Range dependent variables in the Column data structure are ground_range, the h array (height) and slant_range array. No memory space is allocated for the Column to. </dl>
+
+
+<p>
+<hr>
+
+<h2>endian.c</h2>
+int big_endian(void);<br>
+int little_endian(void);<br>
+void swap_4_bytes(void *word);<br>
+void swap_2_bytes(void *word); 
+<hr>
+
+<h2>image_gen.c</h2>
+None. 
+<hr>
+
+<h2>interp.c</h2>
+
+<b>double dir_angle_diff(float x,float y);</b> Returns signed difference between angles x and y. Returns a positive value if y &gt; x and a negative value if y 
+<b>double from_dB(double db);</b> 
+Convert a decibel scale value to a linear scale value. 
+
+<p>
+<b>double get_linear_value_from_sweep(Sweep *sweep,float srange,float azim,float limit);</b> 
+Return an interpolate value between two rays within a sweep. Interpolation is done along the azimuth coordinate. No interpolation is done in the range direction. The routine expects to work with values that are in a decibel scale (reflectivity data), but it <b>returns values in linear scale</b>. 
+
+<p>
+<b>double to_dB(double value);</b> 
+Convert a linear scale value to a decibel scale value. 
+
+<p>
+<b>float get_dist(float r1,float a1,float e1,float r2,float a2,float e2);</b> 
+Compute the distence between two points in space given their spherical coordinates. r1 (range),a1 (azimuth angle) and e1 (elevation angle) are the coordinates for the first point. Angles are measured in degrees. 
+
+<p>
+<b>void get_surrounding_ray(Ray **ccwise,Ray **cwise,Sweep *s,float ray_angle);</b> 
+Return the two rays within a sweep that surround the angle ray_angle. The ray that is counter-clockwise to ray_angle is returned in ccwise. The ray that is clockwise to ray_angle is returned in cwise. **ccise and **cwise are pointers to ray pointers. For example, if r is of type *Ray, then &amp;r should be passed for either **ccwise or **cwise. 
+
+<p>
+<b>void get_surrounding_sweep(Sweep **below,Sweep **above, Volume *v,float elev);</b> 
+Return the sweeps that are above and below the elevation angle elev. **below and **above are pointers to Sweep pointers. if s is of type *Sweep, pass &amp;s as either **above or **below. If the conditionexist where a sweep does not exist for either the above or below case, then a the appropriate pointer is set to NULL. 
+
+<p>
+<b>void get_xyz_coord(double *x,double *y,double *z,double range,double azim,double elev);</b> 
+Convert a set of spherical coordinates to a set of cartesian coordinates. 
+
+<p>
+<hr>
+
+<h2>lassen_to_radar.c</h2>
+void lassen_load_sweep(Sweep *s, int isweep_num, unsigned int mask, int early, s truct sweep_index *ptr); 
+<hr>
+
+<h2>mcgill.c</h2>
+mcgFile_t *mcgFileOpen(int *code, char *filename);<br>
+int mcgFileClose(mcgFile_t *file);<br>
+int mcgRecordRead(mcgRecord_t *record, mcgFile_t *file);<br>
+mcgSegmentID mcgSegmentKeyIdentify(int key);<br>
+int mcgRayBuild(mcgRay_t *ray, mcgFile_t *file); 
+<hr>
+
+<h2>mcgill_to_radar.c</h2>
+void RayFill(Ray *rsl_ray, mcgRay_t *mcg_ray);<br>
+void Ray_headerInit(Ray *ray, mcgHeader_t *head, mcgRay_t *mcg_ray, int ray_num, int num_bins_rsl);<br>
+void Sweep_headerInit(Sweep *sweep, mcgRay_t *mcg_ray, int nrays);<br>
+void Volume_headerInit(Volume *volume, short vol_scan_format);<br>
+void Radar_headerInit(Radar *radar, mcgHeader_t *mcg_head); 
+<hr>
+
+<h2>nsig_to_radar.c</h2>
+Radar * nsig_to_radar_headers_only(char * filename);<br>
+Radar * n2r(char * filename, int data_flag, int misc_flag);<br>
+int Rset_header(Radar * Radptr, nsig_file * nsfile);<br>
+int Vset_header( Volume * volptr, int n, char * string);<br>
+int Swset_header( Sweep * sweepptr, int sweepnum, float elev, float beam_width, int nrays);<br>
+int set_mask(int k, int * array);<br>
+void sec2dhms(long sec, int * d, int * h, int * m, int *s);<br>
+int rtype2ntype( int j );<br>
+int ntype2rtype( int j );<br>
+char * get_type_string(int j);<br>
+int Rayset_header(Ray * rayptr, nsig_ray_data * ray_data_ptr, nsig_ingest_data_header * idhdptr, Fixed_Header * fhptr);<br>
+void Set_FixedHeader(Fixed_Header * FHptr, nsig_file * nsfile); 
+<hr>
+
+<h2>print_histogram_catelog.c</h2>
+void print_histogram_catalog(Histogram *histogram, int min_range, int max_range, char *da te, char *filename); 
+<hr>
+
+<h2>radar.c</h2>
+void print_vect(float v[], int istart, int istop);<br>
+void radar_load_date_time(Radar *radar); 
+
+<p>
+<hr>
+
+<h2>radar_to_uf.c</h2>
+none. 
+<hr>
+
+<h2>range.c</h2>
+none. 
+<hr>
+
+<h2>ray_indexes.c</h2>
+static void set_high_and_low_pointers(Sweep *s);<br>
+static Azimuth_hash *hash_add_node(Azimuth_hash *node, Ray *ray); 
+<hr>
+
+<h2>read_write.c</h2>
+Radar *set_default_function_pointers(Radar *radar); 
+<hr>
+
+<h2>sort_rays.c</h2>
+static int ray_sort_compare(Ray **r1, Ray **r2);<br>
+static int ray_sort_compare_by_time(Ray **r1, Ray **r2);<br>
+static int sweep_sort_compare(Sweep **s1, Sweep **s2); 
+<hr>
+
+<h2>toga_to_radar.c</h2>
+void fill_ray(Ray *ray, tg_file_str *tg_file, int datatype);<br>
+void fill_ray_header(Ray *ray, tg_file_str *tg_file, int elev_num, int datatype);<br>
+void fill_sweep_header(Radar *radar, tg_map_head_str *map_head, int sweep_num, int nrays);<br>
+void fill_volume_header(Radar *radar, tg_map_head_str *map_head);<br>
+void fill_radar_header(Radar *radar, tg_map_head_str *map_head); 
+<hr>
+
+<h2>uf_to_radar.c</h2>
+Volume *reset_nsweeps_in_volume(Volume *volume);<br>
+Radar *reset_nsweeps_in_all_volumes(Radar *radar);<br>
+Volume *copy_sweeps_into_volume(Volume *new_volume, Volume *old_volume);<br>
+void uf_into_radar(UF_buffer uf, Radar **the_radar);<br>
+void swap_uf_buffer(UF_buffer uf);<br>
+static enum UF_type type_of_uf_file(char *infile); 
+<hr>
+
+<h2>volume.c</h2>
+
+<dl>
+<dt><b>Azimuth_hash *the_closest_hash(Azimuth_hash *hash, float ray_angle);</b> 
+<dd>Return the hash pointer that contains the closest Ray to the angle ray_angle. The hash passed to this routine can be any hash within the a Sweep's hashing table, but for the quickest search it should be the hash pointer with the index returned by the internal routine hash_bin. 
+
+<p>
+<dt><b>double angle_diff(float x, float y);</b> 
+<dd>Return the absolute value of the difference between angle x and angle y. Angles are measure in degrees and the return value has a range from 0 to 180. 
+
+<p>
+<dt><b>double ccwise_angle_diff(float x,float y);</b> 
+<dd>Returns the counter-clockwise angle difference of x to y. Values returned will always be positive and exist in the range from 0 to 360. Examples: if x = 345 and y = 355 the value returned will be 350. On the other hand if x = 345 and y = 335 then the value returned will be 10. 
+
+<p>
+<dt><b>double cwise_angle_diff(float x,float y);</b> 
+<dd>Returns the clockwise angle difference of x to y. Values returned will always be positive and exist in the range from 0 to 360. 
+
+<p>
+<dt><b>int get_closest_sweep_index(Volume *v,float sweep_angle);</b> 
+<dt><b>int hash_bin(Sweep *s,float angle);</b> </dl>
+
+<hr>
+
+<h2>wsr88d_to_radar.c </h2>
+void float_to_range(float *x, Range *c, int n, Range (*function)(float x) );<br>
+int wsr88d_load_sweep_into_volume(Wsr88d_sweep ws, Volume *v, int nsweep, unsigned int vmask); 
+<hr>
+
+<h2>WSR88D library (v1.14)</h2>
+wsr88d.c<br>
+wsr88d.h<br>
+wsr88d_get_site.c<br>
+wsr88d_locations.dat 
+<hr>
+
+<h2>Lassen library (v1.1)</h2>
+accessvolhead.c<br>
+cvrt.h<br>
+freevol.c<br>
+lassen.h<br>
+portable.h<br>
+radar.h <br>
+radinfo.h<br>
+raw.h<br>
+read_head.c<br>
+readvol.c<br>
+sunrise_head.h<br>
+sunrise_time.h<br>
+xdr.h 
+<hr>
+
+<h2>NSIG library (v1.3)</h2>
+nsig.c<br>
+nsig.h 
+
+<h2>
+TG library (v1.1)</h2>
+toga.c<br>
+toga.h 
+
+<h2>
+McGill library (v1.1)</h2>
+mcgill.c<br>
+mcgill.h 
+</body>

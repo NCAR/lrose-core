@@ -1,0 +1,216 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "GenPoly2Mdv reads the SPDB GenPoly object written by\n"
+	" and writes gridded MDV files with\n"
+	"The program is run in archive mode with start\n"
+	"and end times specified in the following manner :\n\n"
+	"StormInit2Field -start YYYY MM DD hh mm ss -end YYYY MM DD hh mm ss\n"
+	"with quotes around the YYYY MM DD hh mm ss arguments.";
+}
+
+paramdef boolean {
+  p_descr = "Set to true to print debug messages";
+  p_default = FALSE;
+} debug;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique.";
+  p_default = {"primary"};
+} instance;
+
+commentdef {
+  p_header = "INPUT";
+}
+ 
+paramdef string {
+  p_descr = "Input SPDB URL";
+  p_help = "The GenPoly structures that drive the program\n"
+        "are read from this SPDB URL.";
+  p_default = {"spdbp:://localhost::spdb/genPoly"};
+} spdb_url;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for ARCHIVE mode only.";
+} start_time;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for ARCHIVE mode only.";
+} end_time;
+
+commentdef {
+  p_header = "TRIGGER MODE";
+}
+
+paramdef enum triggerMode_t {
+ 
+  p_options = { TRIGGER_ARCHIVE, TRIGGER_INTERVAL, TRIGGER_LDATAINFO, TRIGGER_FMQ };
+  p_default = { TRIGGER_LDATAINFO };
+  p_descr = "Decide how the program is triggered.";
+  p_help = "The program can be triggered in one of four ways.\n\n"
+        " (1) TRIGGER_ARCHIVE - the program is run in archive mode\n"
+        "     on existing data. The start and end times are determined\n"
+        "     on the command line with -start and -end in the usual way.\n"
+        "     Specifying these argumnets automatically invokes this mode."
+        "     The time step is determined by the timeStep parameter.\n\n"
+        " (2) TRIGGER_INTERVAL - the program wakes up at regular intervals and\n"
+        "     runs. These intervals are determined by the timeStep parameter."
+        "     This enables the program to run in realtime on a machine remote\n"
+        "     from where the data are.\n\n"
+        " (3) TRIGGER_LDATAINFO - the program triggers directly from\n"
+        "     the titan output using the DsInputPath class. The timeStep\n"
+        "     parameter is ignored. This has the advantage that the program\n"
+        "     is triggered directly by Titan; but it does mean that it must\n"
+        "     run on the same machine as the Titan system (since DsInputPath\n"
+        "     is inherrently a local device at the time of writing).\n"
+	" (4) TRIGGER_FMQ - the program triggers on a nowcast FMQ sent\n"
+	"     by the StormInitDetect process.";
+} triggerMode;
+
+paramdef string {
+  p_descr = "FMQ to trigger from if triggerMode is TRIGGER_FMQ.";
+  p_help = "FMQ will be sent by ??";
+  p_default = {"fmqp:://localhost::/fmq/??"};
+} trigger_fmq;
+
+paramdef string {
+  p_descr = "Directory to trigger from if triggerMode is TRIGGER_LDATAINFO.";
+  p_help = "Note that the data are not read from here - this is used\n"
+        "soley for triggering. Data are always read from spdb GenPoly url.";
+  p_default = {"/Some/Directory/Structure"};
+} trigger_dir;
+ 
+ paramdef long {
+  p_descr = "Maximum valid age if triggerMode is TRIGGER_LDATAINFO, seconds.\n";
+  p_help =  "The default should be fine.";
+  p_default = 1800;
+} max_valid_age;
+
+paramdef long
+{
+  p_descr = "Trigger interval, seconds.";
+  p_help = "Program wakes up every interval to process data in\n"
+        "REALTIME mode. In ARCHIVE mode, start and end times are\n"
+        "specified on the command line. The program begins at the\n"
+        "start time and increments its way to the end time in steps of\n"
+        "TriggerInterval.";
+  p_default = { 300 };
+} trigger_interval;
+
+paramdef long
+{
+  p_descr = "Time to look back on triggering, seconds.";
+  p_help = "While the TriggerInterval parameter defines how often the\n"
+        "program wakes up to process data, the LookBack parameter defines\n"
+        "how far back in time the program will look for data when it does\n"
+        "wake up.\n\nThe reason LookBack is not identical to TriggerInterval\n"
+        "is that the ltg data may take some time to arrive. Thus, making\n"
+        "LookBack larger than TriggerInterval allows for some temporal\n"
+        "overlap to ensure that all data are processed.";
+  p_default = { 360 };
+} lookback;
+
+
+commentdef {
+  p_header = "GRID GEOMETRY";
+}
+
+typedef enum {
+  OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON, OUTPUT_PROJ_LAMBERT
+} output_projection_t;
+ 
+paramdef enum output_projection_t {
+  p_default = OUTPUT_PROJ_FLAT;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT - (x,y) Cartesian data in km from a given origin.\n"
+           "LATLON - lat/lon grid with constant grid spacing.\n";
+           "LAMBERT - Lambert Conformal projection with constant grid spacing.\n";
+} output_projection;
+
+typedef struct {
+  double lat;
+  double lon;
+} output_origin_t;
+ 
+paramdef struct output_origin_t {
+  p_descr = "Origin of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT and OUTPUT_PROJ_LAMBERT.";
+  p_default = {40.0, -104.0};
+} output_origin;
+
+paramdef double {
+  p_descr = "Rotation of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT.";
+  p_default = 0.0;
+  p_min = 0.0;
+  p_max = 360.0;
+} output_rotation;
+
+typedef struct {
+  double lat_1;
+  double lat_2;
+} output_std_parallels_t;
+ 
+paramdef struct output_std_parallels_t {
+  p_descr = "Standard parallels of the output grid.";
+  p_help = "Used with OUTPUT_PROJ_LAMBERT only.";
+  p_default = {20.0, 45.0};
+} output_std_parallels;
+
+typedef struct {
+  long nx;
+  long ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_t;
+ 
+paramdef struct grid_t {
+  p_descr = "Output grid parameters.";
+  p_help = "The grid params for the output grid.";
+  p_default = {300, 300, -149.5, -149.5, 1.0, 1.0};
+} output_grid;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+paramdef string {
+  p_descr = "Output MDV URL";
+  p_default = {"mdvp:://localhost::mdv/polygon"};
+} mdv_url;
+
+paramdef enum timestampMode_t {
+  p_options = { TIMESTAMP_START, TIMESTAMP_MIDDLE, TIMESTAMP_END };
+  p_default = {TIMESTAMP_END};
+  p_descr = "Timestamp mode";
+  p_help = "To timestamp at start, middle or end of the window considered.";
+} time_stamp_mode;
+

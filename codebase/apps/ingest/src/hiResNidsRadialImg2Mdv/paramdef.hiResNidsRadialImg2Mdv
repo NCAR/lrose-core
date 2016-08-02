@@ -1,0 +1,217 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "hiResNidsVil2Mdv reads the high resolution NIDS\n"
+  "VIL level three radial data files, remaps them to\n"
+  "cartesian ordinates and writes the data out as mdv.\n"
+  "This format started in late 2010. Niles Oien.";
+}
+
+paramdef string {
+  p_default = { "$(RADAR1)", "$(RADAR2)", "$(RADAR3)", "$(RADAR4)", "$(RADAR5)",
+  	        "$(RADAR6)", "$(RADAR7)", "$(RADAR8)", "$(RADAR9)", "$(RADAR10)" };
+  p_descr = "List of radars to process.";
+  p_help = "Used to construe input file directories and output URLs. Note\n"
+  "that if an environment variable is used that is not set as a radar name,\n"
+  "then that entry is skipped.";
+} radars[];
+
+typedef struct {
+	string inFieldName;
+        int productCode;
+	string outDirName;
+        string outFieldName;
+        string outFieldNameLong;
+	string outFieldUnits;
+	boolean saveAsRadial;
+} field_t;
+
+
+paramdef struct field_t {
+  p_default = {{ "DVL", 134, "vil", "vil", "vil", "none", TRUE }};
+  p_descr = "List of fields to process for each radar, and option"
+  "to save as radial (preferred).";
+  p_help = "Set as appropriate";
+} fields[];
+
+
+paramdef string {
+  p_default = "/raid/ext_obs/ldm/nids/uc/nids";
+  p_descr = "Top input directory.";
+  p_help = "Files are named by convention :\n"
+  "{topInDir}/{radar}/{inField}/{date}/{date}.{time}.{inField}\n"
+  "for instance\n"
+  "/raid/ext_obs/ldm/nids/uc/nids/LWX/BREF1/20101104/20101104.1611.BREF1\n"
+  "would be a typical name.";
+} topInDir;
+
+paramdef string {
+  p_default = "mdvp:://localhost::$(PROJECT)/mdv";
+  p_descr = "Top output URL for mdv data.";
+  p_help = "This has the output field name and the radar\n"
+  "name appened to it, so mdvp:://localhost::$(PROJECT)/mdv\n"
+  "for field dbz1 and radar LWX will become\n"
+  "mdvp:://localhost::$(PROJECT)/mdv/dbz1/LWX";
+} topOutUrl;
+
+
+paramdef string {
+  p_default = "spdbp:://localhost::$(PROJECT)/spdb";
+  p_descr = "Top output URL for spdb data (currently just Melting Layer).";
+  p_help = "This has the elevation reference and the radar\n"
+  "name appened to it, so mdvp:://localhost::$(PROJECT)/spdb\n"
+  "for  and radar LWX will become\n"
+  "mdvp:://localhost::$(PROJECT)/spdb/LWX/N0M\n"
+  "NOM = .5 deg, NAM = .8 deg, N1M = 1.5 deg, NBM = 1.8 deg, N2M = 2.4 deg,N3M 3.4 deg\n"  ;
+} topOutSpdbUrl;
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to use a lightweight file search in realtime.";
+  p_help = "This helps with load issues. If FALSE then a\n"
+  "DsInputPath search is done which may be harder on the filesystem.\n"
+  "Lightweight assumes that YYYYMMDD directory names are used.";
+} lightweightFileSearch;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to debug looking for new files in realtime mode only.";
+  p_help = "Generally should not have to do this.";
+} debugRealtimeFileSearch;
+
+paramdef int
+{
+  p_default = 30;
+  p_descr = "Number of seconds to wait between searches for new files.";
+  p_help = "Range will be truncated from 5 to 50 internally.\n"
+  "Setting this too low can cause the load to be very high as\n"
+  "a large number of directories may be used for input, and there are\n"
+  "no _latest_data_info files.";
+} dirScanSleep;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime.\n"
+  "In realtime mode files are converted as they come in, in\n"
+  "archive mode all files in the tree are converted.";
+} mode;
+  
+paramdef int {
+  p_default = 60;
+  p_descr = "Max age of input data files, seconds";
+  p_help = "For realtime only. Keep this *very* short or the load\n"
+  "will spike like crazy on startup in realtime mode - or set\n"
+  "staggerProcs to TRUE.";
+} max_realtime_valid_age;
+
+typedef struct {
+	boolean staggerProcs;
+	int procStaggerSecs;
+} stagger_t;
+
+
+paramdef struct stagger_t {
+  p_default = { FALSE, 15 };
+  p_descr = "Option to stagger startup of child processes\n"
+  "in realtime mode.";
+  p_help = "If staggerProcs s TRUE, child processes are\n"
+  "initially delayed so that they only start at intervals\n"
+  "of procStaggerSecs seconds to avoid them all starting\n"
+  "at once. The default of 15 second should be fine. Only\n"
+  "has an effect on startup, the intent is to avoid\n"
+  "a load spike for startup in realtime mode.\n\n"
+  "The other option is to keep max_realtime_valid_age\n"
+  "small, like 60 seconds.";
+} stagger;
+
+paramdef long {
+  p_descr = "How long the data are valid, seconds.";
+  p_help = "Depends on input frequency.";
+  p_default = 600;
+} expiry;
+
+typedef struct {
+	double delta;
+	double dist;
+} res_t;
+
+paramdef struct res_t {
+  p_descr = "Cartesian resolution and overage, Km.";
+  p_help = "Delta is the resoltion to remap to.\n"
+  "dist is the max range to be covered from the radar to the end\n"
+  "of the data.\n\n"
+  "If delta in negative, the polar resolution is used.\n"
+  "If dist is negative, the maximum range for the data is used.";
+  p_default = { 0.25, -1.0 };
+} res;
+
+paramdef boolean
+{
+  p_default = TRUE;
+  p_descr = "Option to swap bytes.";
+  p_help = "On a PC, set to TRUE.";
+} byteSwap;
+
+paramdef boolean
+{
+  p_default = TRUE;
+  p_descr = "Option to fork processes.";
+  p_help = "If FALSE, threads are used instead.";
+} forkIt;
+
+typedef struct {
+	boolean limitNumThreads;
+	int maxNumThreads;
+} threadLimit_t;
+
+paramdef struct threadLimit_t
+{
+  p_default = { TRUE, 3};
+  p_descr = "If threads are used (forkIt is FALSE) then only\n"
+  "allow maxNumThreads to be actively processing a file at once.";
+  p_help = "Useful to avoid load issues.";
+} threadLimit;
+

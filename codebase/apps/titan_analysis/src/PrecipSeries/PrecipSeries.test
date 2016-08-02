@@ -1,0 +1,215 @@
+/**********************************************************************
+ * TDRP params for PrecipSeries
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: int
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA DIRECTORIES.
+//
+//======================================================================
+ 
+///////////// input_rdata_dir /////////////////////////
+//
+// Radar data directory - input.
+// The input MDV files are stored in this directory. In REALTIME mode 
+//   the program watches the latest_data_info file in this directory and 
+//   processes a new scan each time the info file updates.
+// Type: string
+//
+
+input_rdata_dir = "$(RAP_DATA_DIR)/mdv/radarCart";
+
+//======================================================================
+//
+// DATA FIELDS IN INPUT FILES.
+//
+//======================================================================
+ 
+///////////// dbz_field ///////////////////////////////
+//
+// dBZ field number.
+// Field number for dBZ data in radar volumes.
+// Minimum val: 0
+// Type: int
+//
+
+dbz_field = 0;
+
+//======================================================================
+//
+// PRECIP ESTIMATION.
+//
+//======================================================================
+ 
+///////////// composite_min_altitude //////////////////
+//
+// Min altitude CAPPI used in composite (km).
+// All precip estimates are computed from composite reflectivity, i.e. 
+//   the max reflectivity over a given point between two height limits. 
+//   This is the altitude of lower CAPPI for the composite. If you want to 
+//   use reflectivity at a single height only, set this equal to 
+//   composite_max_altitude.
+// Type: float
+//
+
+composite_min_altitude = -1;
+
+///////////// composite_max_altitude //////////////////
+//
+// Max altitude CAPPI used in composite (km).
+// All precip estimates are computed from composite reflectivity, i.e. 
+//   the max reflectivity over a given point between two height limits. 
+//   This is the altitude of upper CAPPI for the composite. If you want to 
+//   use reflectivity at a single height only, set this equal to 
+//   composite_min_altitude.
+// Type: float
+//
+
+composite_max_altitude = 25;
+
+///////////// low_dbz_threshold ///////////////////////
+//
+// Low reflectivity threshold (dBZ).
+// Reflectivity below this threshold is ignored in making the 
+//   computations. This prevents clear air returns from creating areas of 
+//   low precipitation.
+// Minimum val: -40
+// Maximum val: 90
+// Type: float
+//
+
+low_dbz_threshold = 10;
+
+///////////// hail_dbz_threshold //////////////////////
+//
+// Hail reflectivity threshold (dBZ).
+// The reflectivity threshold between rain and hail. dBZ values above 
+//   this threshold are truncated to the threshold prior to the 
+//   computation of precipitation rate.
+// Minimum val: 40
+// Maximum val: 90
+// Type: float
+//
+
+hail_dbz_threshold = 53;
+
+///////////// zr //////////////////////////////////////
+//
+// ZR function parameters.
+// These are used if the ZR function is considered constant and is not 
+//   obtained from the data base.
+//
+// Type: struct
+//   typedef struct {
+//      float coeff;
+//      float expon;
+//   }
+//
+//
+
+zr = { 200, 1.6 };
+
+//======================================================================
+//
+// DATA SAMPLING.
+//
+//======================================================================
+ 
+///////////// locations ///////////////////////////////
+//
+// The program will sample precip data at each of these points.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//      string name;
+//   }
+//
+// 1D array - variable length - 7 elements.
+//
+
+locations = {
+  { 39, -104, "point_A"},
+  { 39.5, -104.5, "point_B"},
+  { 40, -105, "point_C"},
+  { 38.787, -104.546, "point_D"},
+  { 40.787, -104.546, "point_E"},
+  { 39.787, -103.546, "point_F"},
+  { 39.787, -105.546, "point_G"}
+};
+
+///////////// max_time_between_volumes ////////////////
+//
+// Max time between radar volumes (secs).
+// If the time between volumes exceeds this value, it is assumed that 
+//   the data is missing.
+// Type: int
+//
+
+max_time_between_volumes = 360;
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_precip_dir ///////////////////////
+//
+// Precip text file directory - output.
+// The text precip output files are written to this directory.
+// Type: string
+//
+
+output_precip_dir = "$(RAP_DATA_DIR)/ascii_precip";
+
+///////////// output_delta_t //////////////////////////
+//
+// Time between output values (secs).
+// The depth is interpolated to this delta-t before writing out.
+// Type: int
+//
+
+output_delta_t = 360;
+

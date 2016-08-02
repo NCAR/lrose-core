@@ -1,0 +1,284 @@
+/**********************************************************************
+ * TDRP params for SawsUm2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// SawsUm2Mdv Parameter file.
+//
+// SawsUm2Mdv reads in UM model data in grib format, and converts to 
+//   MDV.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// REALTIME: files are processed as they arrive in the input directory. 
+//   ARCHIVE: files in the input directory with times between the start 
+//   and end times are processed. FILELIST: the files specified on the 
+//   command line are processed in the order specified.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Directory which contains GRIB files. REALTIME and ARCHIVE modes only.
+// Type: string
+//
+
+input_dir = ".";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of input data files (secs).
+// REALTIME mode only. This the max valid age for an incoming file. 
+//   Files older than this will be ignored.
+// Type: int
+//
+
+max_realtime_valid_age = 7200;
+
+///////////// latest_data_info_avail //////////////////
+//
+// Is _latest_data_info fiel available in input_dir?.
+// REALTIME mode only. Set to TRUE if _latest_data_info file is 
+//   available, FALSE otherwise.
+// Type: boolean
+//
+
+latest_data_info_avail = TRUE;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Url for output mdv files.
+// Type: string
+//
+
+output_url = "mdvp:://localhost::mdv/saws/um";
+
+///////////// output_path_in_forecast_format //////////
+//
+// Option to create output path in forecast format.
+// If false, the output path is determined  using the valid time: 
+//   topdir/yyyymmdd/hhmmss.mdv. If true, the output path is determined 
+//   using the model initialization (generate) time and the forecast lead 
+//   time in secs: yyyymmdd/g_hhmmss/f_ssssssss.mdv.
+// Type: boolean
+//
+
+output_path_in_forecast_format = TRUE;
+
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_info = "This MDV file was created by SawsUm2Mdv.";
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "UM model data.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_source = "UM MDV output.";
+
+///////////// output_min_longitude ////////////////////
+//
+// Longitude of W side of output grid. (deg).
+// The output grid should span 360 degrees in longitude. You can choose 
+//   where to start the grid, so that your part of the world is not near 
+//   an edge.
+// Minimum val: -360
+// Maximum val: 0
+// Type: int
+//
+
+output_min_longitude = -180;
+
+///////////// output_fields ///////////////////////////
+//
+// List of output fields for MDV file.
+// Grib field list:
+//   PRES = 1: pressure (Pa)
+//   PRMSL = 2: pressure reduced to MSL (Pa)
+//   HGT = 7: geopotential height (m)
+//   TMP = 11: temperature (K)
+//   WSPD = 32: Wind speed derived from U and V (m/s)
+//   UGRD = 33: U wind (m/s)
+//   VGRD = 34: V wind (m/s)
+//   VVEL = 39: vertical velocity (m/s)
+//   RH = 52: relative humidity (%)
+// The WSPD field is derived from U and V, both of which must be present 
+//   if this is selected.
+//
+// Type: struct
+//   typedef struct {
+//      string mdv_name;
+//      string mdv_long_name;
+//      string mdv_units;
+//      grib_field_id_t grib_field_id;
+//        Options:
+//          PRES
+//          PRMSL
+//          HGT
+//          TMP
+//          WSPD
+//          UGRD
+//          VGRD
+//          VVEL
+//          RH
+//      units_conversion_t units_conversion;
+//        Options:
+//          NO_CHANGE
+//          MPS_TO_KNOTS
+//          PASCALS_TO_MBAR
+//          KELVIN_TO_CELSIUS
+//          PERCENT_TO_FRACTION
+//          WSPD_FROM_U_AND_V
+//      encoding_type_t encoding;
+//        Options:
+//          INT8
+//          INT16
+//          FLOAT32
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  { "U", "U-wind", "knots", UGRD, MPS_TO_KNOTS, INT16},
+  { "V", "V-wind", "knots", VGRD, MPS_TO_KNOTS, INT16},
+  { "Temp", "Temperature", "C", TMP, KELVIN_TO_CELSIUS, INT16},
+  { "RH", "Relative Humidity", "%", RH, NO_CHANGE, INT16},
+  { "WSPD", "Wind Speed", "knots", WSPD, WSPD_FROM_U_AND_V, INT16}
+};
+
+///////////// output_wind_speed ///////////////////////
+//
+// Output wind speed field, derived from U and V fields.
+// The wind speed field will be derived from the raw GRIB fields. For 
+//   this to succeed, there must be an output_field named 'U', and one 
+//   named 'V'. The wind speed will be computed from these two fields.
+// Type: boolean
+//
+
+output_wind_speed = TRUE;
+
+///////////// output_compression //////////////////////
+//
+// Compression type for output files.
+// See <mdv/mdv_macros.h> for the C definitions to which these 
+//   correspond.
+//
+// Type: enum
+// Options:
+//     _MDV_COMPRESSION_NONE
+//     _MDV_COMPRESSION_RLE
+//     _MDV_COMPRESSION_ZLIB
+//     _MDV_COMPRESSION_BZIP
+//     _MDV_COMPRESSION_GZIP
+//
+
+output_compression = _MDV_COMPRESSION_GZIP;
+
+///////////// output_level_type ///////////////////////
+//
+// Option to choose vertical levels for output file.
+// If FLIGHT_LEVELS or HEIGHT_LEVELS, vertical levels will be 
+//   interpolated accordingly. If NATIVE_PRESSURE_LEVELS, no interpolation 
+//   is done and the data is output on the original pressure levels.
+//
+// Type: enum
+// Options:
+//     NATIVE_PRESSURE_LEVELS
+//     FLIGHT_LEVELS
+//     HEIGHT_LEVELS
+//
+
+output_level_type = FLIGHT_LEVELS;
+
+///////////// flight_levels ///////////////////////////
+//
+// Array of output flight levels.
+// Only used if output_levels is FLIGHT_LEVELS. The flight levels in the 
+//   output are taken from this array.
+// Type: int
+// 1D array - variable length.
+//
+
+flight_levels = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 310, 330, 350, 370, 390, 410, 430, 450, 470, 490, 510, 530, 550 };
+
+///////////// height_levels ///////////////////////////
+//
+// Array of output height levels (km).
+// Only used if output_levels is HEIGHT_LEVELS. The height levels in the 
+//   output are taken from this array.
+// Type: double
+// 1D array - variable length.
+//
+
+height_levels = { 0.2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+

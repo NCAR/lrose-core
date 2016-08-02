@@ -1,0 +1,11 @@
+/*
+ * Parameter list for 'bearing2latlon'
+ */
+
+debug = DEBUG_OFF;
+malloc_debug_level = 0;
+origin = {0, 0};
+input_file = "none";
+
+
+

@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+forecast_monitor
+makefile
+makefile.am
+makefile.in

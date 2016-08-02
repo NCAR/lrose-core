@@ -1,0 +1,5 @@
+#!/bin/csh
+
+find /d2/oien/surface_obs -name \*.nc -exec ./procFile {} \;
+
+#

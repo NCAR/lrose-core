@@ -1,0 +1,214 @@
+/**********************************************************
+ * paramdef for Test2Dsr
+ *
+ * Mike Dixon
+ *
+ * May 1998
+ */
+
+paramdef enum debug_t {
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef long {
+  p_default = {0};
+  p_min = {0};
+  p_max = {3};
+  p_descr = "Malloc debug level";
+  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
+} malloc_debug_level;
+
+paramdef char* {
+  p_default = {"Test"};
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef char* {
+  p_descr = "Input URL for DsRadar data via FMQ";
+  p_default = {"fmqp:://localhost::./fmq.dsRadar"};
+} input_fmq_url;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_input;
+
+paramdef char* {
+  p_descr = "Dir of output MDV files.";
+  p_help = "This directory must exist.";
+  p_default = {"none"};
+} output_mdv_dir;
+
+paramdef char* {
+  p_descr = "General info on radar.";
+  p_help = "Used for data_set_info in MDV file.";
+  p_default = {"not-set"};
+} radar_info;
+
+paramdef boolean {
+  p_descr = "Option to override Dsr radar location.";
+  p_help = "If TRUE, the Mdv output will use location information specified in 'radar_location'.";
+  p_default = {FALSE};
+} override_radar_location;
+ 
+paramdef struct radar_location_t {
+  p_descr = ".";
+  p_help = "The radar_location need only be set if 'override_radar_location' is TRUE.";
+  p_field_type = { double, double, double };
+  p_field_name = { latitude, longitude, altitude };
+} radar_location;
+
+paramdef boolean {
+  p_descr = "Option to remove clutter.";
+  p_help = "If TRUE, clutter will be removed using the clutter table specified in 'clutter_table_path'.";
+  p_default = {FALSE};
+} remove_clutter;
+
+paramdef struct lookups_t {
+  p_descr = "Array of lookup table paths for given scan types.";
+  p_help = "This array specifies the lookup tables to be used for each scan type. If the first scan_type is set to -1 the first lookup table will be used with all scan types. The clutter_table_path need only be set if 'remove_clutter' is TRUE. If the chosen scan type is not available, the first lookup in the list is used.";
+  p_field_type = { int, char*, char* };	
+  p_field_name = { scan_type, lookup_table_path, clutter_table_path };
+} lookups[];
+
+paramdef boolean {
+  p_descr = "Option to specify output fields.";
+  p_help = "If TRUE, only the fields specified in the output_field_names array will be stored in the output file. If FALSE, all fields in the data will be stored.";
+  p_default = {FALSE};
+} specify_output_fields;
+
+paramdef char* {
+  p_descr = "Array of output field names.";
+  p_help = "See 'specify_output_fields'.";
+  p_default = {"DBZ"};
+} output_field_names[];
+
+paramdef boolean {
+  p_descr = "Option to check the signal/noise values.";
+  p_help = "If TRUE, the signal/noise value will be computed from the dBZ value at the gate. If this exceeds the parameter 'sn_threshold', it will be conditionally accepted. A second check is made to remove noise spikes. Looking along the radial the number of gates in a row (a 'run') with sn values above the threshold is computed. For the gates in this run to be accepted the length of the run must exceed 'sn_min_valid_run'.";
+  p_default = {FALSE};
+} check_sn;
+
+paramdef double {
+  p_descr = "Signal/noise threshold - for noise_removal.";
+  p_help = "See 'check_sn'.";
+  p_default = {0.0};
+} sn_threshold;
+
+paramdef long {
+  p_descr = "Signal/noise min valid run - for noise_removal.";
+  p_help = "This is the minimum valid run length along a radial - see 'check_sn'.";
+  p_default = {5};
+} sn_min_valid_run;
+
+paramdef double {
+  p_descr = "The noise represented as dBZ at 100km range.";
+  p_help = "This is used for computing the signal/noise value from the Reflectivity.";
+  p_default = {0.0};
+} noise_dbz_at_100km;
+
+paramdef boolean {
+  p_descr = "Option to create a field made up of time data.";
+  p_help = "If TRUE, a data field will be created which contains the "
+           "time to the nearest 10 seconds from the reference time for "
+           "each beam.";
+  p_default = {FALSE};
+} create_time_field;
+
+paramdef char* {
+  p_descr = "Input time field name.";
+  p_help = "Name of time field as it appears in the dsr stream.  "
+           "See DsrAddTime parameter file for field name.";
+  p_default = {"DATA_TIME"};
+} input_time_field_name;
+
+paramdef boolean {
+  p_descr = "Option to automatically compute the volume mid time.";
+  p_help = "If TRUE, the mid_time is the mean of the start and end times of the data in the volume. If FALSE, the mid time is computed as the end time minus 'age_at_end_of_volume'.";
+  p_default = {FALSE};
+} auto_mid_time;
+
+paramdef long {
+  p_descr = "Specified age (secs) of the data relative to the data time at the end of the volume.";
+  p_help = "Used if 'auto_mid_time' is FALSE.";
+  p_default = {0};
+} age_at_end_of_volume;
+
+paramdef long {
+  p_descr = "Maximum volume duration (secs).";
+  p_help = "If a volume exceeds this duration it is not saved. This takes care of cases in which the radar data stops in the middle of a voluem for some reason. Then the early data in the volume will not match the late data.";
+  p_default = {900};
+} max_vol_duration;
+
+paramdef double {
+  p_descr = "Angular azimuth offset to be used when computing the azimuth beam position.";
+  p_help = "The lookup tables are computed making the assumption that the beams occur at regular intervals and that a beam index may be assigned to each beam. When computing the index the beam azimuth must be rounded to a theoretical index. This offset is added to the actual azimuth before truncation to the index value.";
+  p_default = {0.5};
+} azimuth_offset;
+
+paramdef boolean {
+  p_descr = "Option to check the number of beams missing from the volume.";
+  p_help = "If TRUE the number of missing beams will be computed. If this number exceeds max_missing_beams the volume will not be written.";
+  p_default = {FALSE};
+} check_missing_beams;
+
+paramdef long {
+  p_descr = "The maximum number of missing beams for a valid volume.";
+  p_help = "The is used if 'check_missing_beams' is TRUE.";
+  p_default = {200};
+} max_missing_beams;
+
+paramdef boolean {
+  p_descr = "Option to use data from elevation angles which are repeated in the volume.";
+  p_help = "Some radar scan types repeat tilts at certain angles. If TRUE the latest data will be used for each tilt. If FALSE the earliest data will be used.";
+  p_default = {TRUE};
+} use_repeated_elevations;
+
+paramdef double
+{
+  p_descr = "Minimum elevation to process, in degrees.";
+  p_default = 0.0;
+} min_elevation;
+
+paramdef double
+{
+  p_descr = "Maximum elevation to process, in degrees.";
+  p_default = 90.0;
+} max_elevation;
+
+paramdef enum end_of_vol_decision_t {
+  p_options = {END_OF_VOL_FLAG, LAST_TILT_IN_VOL};
+  p_default = {END_OF_VOL_FLAG};
+  p_descr = "Decision type for end-of-volume.";
+  p_help = "If END_OF_VOL_FLAG, the end-of-volume flag in the data will be used to trigger the end of volume. If LAST_TILT_IN_VOL, the end of the tilt number given by 'last_tilt_in_vol' will be used  to trigger the end-of-volume.";
+} end_of_vol_decision;
+
+paramdef long {
+  p_descr = "The tilt number used to end the volume.";
+  p_help = "Only applies if 'end_of_vol_decision' is set to LAST_TILT_IN_VOL.";
+  p_default = {0};
+} last_tilt_in_vol;
+
+paramdef boolean {
+  p_descr = "Option to write intermediate files during the volume.";
+  p_help = "Some people like the display to update at intervals during the volume rather than waiting for the end of the volume to see the latest data. If TRUE an intermediate file of the specified name will be written to the output directory at the specified interval. See 'intermediate_file_name' and 'intermediate_file_frequency'.";
+  p_default = {FALSE};
+} write_intermediate_files;
+
+paramdef char* {
+  p_descr = "Name of intermediate file.";
+  p_help = "See 'write_intermediate_files'.";
+  p_default = {"latest.mdv"};
+} intermediate_file_name;
+
+paramdef long {
+  p_descr = "The frequency (secs) at which the intermediate files are written.";
+  p_help = "See 'write_intermediate_files'.";
+  p_default = {30};
+} intermediate_file_frequency;
+

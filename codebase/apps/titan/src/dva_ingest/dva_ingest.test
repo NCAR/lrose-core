@@ -1,0 +1,214 @@
+/**********************************************************************
+ * TDRP params for dva_ingest
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: long
+//
+
+malloc_debug_level = 2;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+///////////// rdas_cal_data_path //////////////////////
+//
+// File for RDAS calibration data.
+// This file is either produced manually, or written by dva_ingest.
+// Type: string
+//
+
+rdas_cal_data_path = "../dva_cart/params/rdas_cal_data";
+
+///////////// radar_name //////////////////////////////
+//
+// Radar name.
+// This is used to label the status file.
+// Type: string
+//
+
+radar_name = "MRL5";
+
+///////////// input_host //////////////////////////////
+//
+// Input data host.
+// TCP/IP name/address of host for input data.
+// Type: string
+//
+
+input_host = "localhost";
+
+///////////// input_port //////////////////////////////
+//
+// Input data port.
+// TCP/IP port number for input data.
+// Minimum val: 1000
+// Maximum val: 65535
+// Type: long
+//
+
+input_port = 12000;
+
+///////////// beam_dir ////////////////////////////////
+//
+// Dir name for beam files.
+// The beam files are placed in this directory. At the end of a volume 
+//   an index file is written to this directory.
+// Type: string
+//
+
+beam_dir = "../dva_cart/beams";
+
+///////////// beam_file_name //////////////////////////
+//
+// File name for beam buffer.
+// The beam buffer is placed in this file, in output_dir. The file 
+//   extension is a number which cycles.
+// Type: string
+//
+
+beam_file_name = "beams";
+
+///////////// n_beam_files ////////////////////////////
+//
+// Number of beam files.
+// The beam files form an output buffer system. The files have an 
+//   extension based on their number in the system. They are overwritten 
+//   whed the number repeats.
+// Minimum val: 2
+// Maximum val: 20
+// Type: long
+//
+
+n_beam_files = 3;
+
+///////////// write_status ////////////////////////////
+//
+// Option to write status file.
+// If this is set, the status file will be written to output_dir every 
+//   time a new status packet is received.
+// Type: boolean
+//
+
+write_status = TRUE;
+
+///////////// status_dir //////////////////////////////
+//
+// Dir name for status files.
+// The status files are placed in this directory. Each time the status 
+//   is updated an index file is written to this directory.
+// Type: string
+//
+
+status_dir = "./status_dir";
+
+///////////// status_file_name ////////////////////////
+//
+// File name for status information.
+// The status information is placed in this file, in output_dir.
+// Type: string
+//
+
+status_file_name = "status";
+
+///////////// check_radar_id //////////////////////////
+//
+// Option to check radar ID.
+// If this is set, only beams with the correct radar id are included in 
+//   the output data stream.
+// Type: boolean
+//
+
+check_radar_id = FALSE;
+
+///////////// target_radar_id /////////////////////////
+//
+// Target radar ID.
+// The radar ID to be used for filtering the input data.
+// Type: long
+//
+
+target_radar_id = 22;
+
+///////////// time_mode ///////////////////////////////
+//
+// Time computation mode.
+// If AS_IS, time is accepted as is. Otherwise, it is assumed local and 
+//   changed to UCT.
+//
+// Type: enum
+// Options:
+//     LOCAL_TO_UCT
+//     AS_IS
+//
+
+time_mode = AS_IS;
+
+///////////// time_correction /////////////////////////
+//
+// Time correction (secs).
+// This correction is added to the radar beam time. Use negative times 
+//   for the past.
+// Type: long
+//
+
+time_correction = 0;
+
+///////////// calibration_change_command_line /////////
+//
+// Command line for running calib change script.
+// This script is run when the radar parameters or calibration changes. 
+//   The script should kill dva_cart, rerun the lookup table generation 
+//   and then erestart dva_cart. REMEMBER - you need an & at the end of 
+//   the command line.
+// Type: string
+//
+
+calibration_change_command_line = "none";
+
+///////////// radar_constant //////////////////////////
+//
+// Radar constant.
+// Used to calculate dbz values from power values.
+// Type: double
+//
+
+radar_constant = -154.91;
+
+///////////// atmos_attenuation ///////////////////////
+//
+// Atmospheric attenuation.
+// Atmospheric attenuation correction (dB/km).
+// Minimum val: 0
+// Type: double
+//
+
+atmos_attenuation = 0.014;
+

@@ -1,0 +1,7 @@
+set title ""
+set xlabel "Velocity (neg is towards, pos is away)"
+set ylabel "Power" 
+set xrange [-25:25]
+set yrange [1.e-10:10]
+set logscale y
+plot 'f2_wx_truth.real' title 'Weather' with lines, 'f2_clutter_truth.real' title 'Clutter' with lines, 'f2_unfiltered.real' with lines title 'Combined', 'f2_notched_0.real' title 'Notch' with lines lt -1

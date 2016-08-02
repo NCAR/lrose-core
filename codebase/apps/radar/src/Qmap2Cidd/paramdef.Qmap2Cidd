@@ -1,0 +1,30 @@
+/*********************************************************
+ * parameter definitions for Qmap2Cidd
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 1999
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Change map format from Queensland format to CIDD format";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Unknown";
+  p_descr = "Name of map";
+  p_help = "Appears at top of map file";
+} map_name;
+

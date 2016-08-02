@@ -1,0 +1,12 @@
+#! /bin/csh -f
+
+snuff "test2gate -params test2gate.ppi"
+snuff "polar_ingest -params polar_ingest.ppi"
+snuff "polar2mdv -params polar2mdv.ppi"
+
+
+
+
+
+
+

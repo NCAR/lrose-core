@@ -1,0 +1,7 @@
+set title "SSEF on reconstructed spectrum, peaks"
+set xlabel "sample"
+set ylabel "Power (dB)" 
+set xrange [0:63]
+set yrange [1.e-10:10]
+set logscale y
+plot 'ssef_unfiltered.real' title 'Combined' with lines, 'ssef_blockMeans.real' title 'Power distribution' with lines, 'ssef_peaks.real' title 'Clutter and Wx peaks' with lines

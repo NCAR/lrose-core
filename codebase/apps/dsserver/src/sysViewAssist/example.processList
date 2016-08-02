@@ -1,0 +1,81 @@
+##############################################################################
+#
+# Contents: Ingest1 host in realtime mode 
+#
+#############################################################################
+
+# ----- Data Service -----
+
+DsServerMgr     primary         start_DsSupport      snuff_inst      localhost
+Janitor         primary         start_DsSupport      snuff_inst      localhost
+DsFileDist      primary         start_DsFileDist     snuff_inst      localhost
+
+# ----- Radar Ingest ----
+
+nexrad2dsr  ?radar1?               start_radar_ingest1.radarLookup  snuff_inst localhost
+nexrad2dsr  ?radar2?               start_radar_ingest1.radarLookup  snuff_inst localhost
+nexrad2dsr  ?radar3?               start_radar_ingest1.radarLookup  snuff_inst localhost
+nexrad2dsr  ?radar4?               start_radar_ingest1.radarLookup  snuff_inst localhost
+nexrad2dsr  ?radar5?               start_radar_ingest1.radarLookup  snuff_inst localhost
+
+# ---- Dealiasing ----
+
+JamesD      ?radar1?               start_radar_ingest1.radarLookup  snuff_inst localhost
+JamesD      ?radar2?               start_radar_ingest1.radarLookup  snuff_inst localhost
+JamesD      ?radar3?               start_radar_ingest1.radarLookup  snuff_inst localhost
+JamesD      ?radar4?               start_radar_ingest1.radarLookup  snuff_inst localhost
+JamesD      ?radar5?               start_radar_ingest1.radarLookup  snuff_inst localhost
+
+vadAnalysis JamesD.?radar1?        start_radar_ingest1.radarLookup  snuff_inst localhost
+vadAnalysis JamesD.?radar2?        start_radar_ingest1.radarLookup  snuff_inst localhost
+vadAnalysis JamesD.?radar3?        start_radar_ingest1.radarLookup  snuff_inst localhost
+vadAnalysis JamesD.?radar4?        start_radar_ingest1.radarLookup  snuff_inst localhost
+vadAnalysis JamesD.?radar5?        start_radar_ingest1.radarLookup  snuff_inst localhost
+
+
+# ---- Reformatting ----
+
+Dsr2Vol     ?radar1?raw		      start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar1?raw2tilt	      start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol	    ?radar1?polarPPI2tilt     start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar1?cartPPIfullVol    start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar1?halfDegreePpi500m start_radar_ingest1.radarLookup  snuff_inst localhost
+
+
+Dsr2Vol     ?radar2?raw               start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar2?raw2tilt	      start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar2?polarPPI2tilt     start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar2?cartPPIfullVol    start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar2?halfDegreePpi500m start_radar_ingest1.radarLookup  snuff_inst localhost
+
+Dsr2Vol     ?radar3?raw               start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar3?raw2tilt	      start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar3?polarPPI2tilt     start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar3?cartPPIfullVol    start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar3?halfDegreePpi500m start_radar_ingest1.radarLookup  snuff_inst localhost
+
+Dsr2Vol     ?radar4?raw               start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar4?raw2tilt	      start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar4?polarPPI2tilt     start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar4?cartPPIfullVol    start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar4?halfDegreePpi500m start_radar_ingest1.radarLookup  snuff_inst localhost
+
+Dsr2Vol     ?radar5?raw               start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar5?raw2tilt	      start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar5?polarPPI2tilt     start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar5?cartPPIfullVol    start_radar_ingest1.radarLookup  snuff_inst localhost
+Dsr2Vol     ?radar5?halfDegreePpi500m start_radar_ingest1.radarLookup  snuff_inst localhost
+
+# ---- Nids Ingest and Reformatting ----
+
+getNIDSvad.pl       EWX        start_getNIDSvad   snuff_inst    localhost
+getNIDSvad.pl       FDR        start_getNIDSvad   snuff_inst    localhost
+getNIDSvad.pl       FWS        start_getNIDSvad   snuff_inst    localhost
+getNIDSvad.pl       SHV        start_getNIDSvad   snuff_inst    localhost
+getNIDSvad.pl       SJT        start_getNIDSvad   snuff_inst    localhost
+getNIDSvad.pl       DYX        start_getNIDSvad   snuff_inst    localhost
+getNIDSvad.pl       TLX        start_getNIDSvad   snuff_inst    localhost
+getNIDSvad.pl       GRK        start_getNIDSvad   snuff_inst    localhost
+
+
+NidsVad2Spdb     primary       start_NidsVad2Spdb snuff_inst    localhost

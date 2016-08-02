@@ -1,0 +1,4 @@
+#define IDD_SHUTDOWN 102
+#define IDC_USERPASS	1000
+#define IDC_USERNAME	1001
+#define IDC_STATIC   -1

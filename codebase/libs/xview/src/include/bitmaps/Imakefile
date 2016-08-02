@@ -1,0 +1,50 @@
+#include <XView.tmpl>
+
+/**/########################################################################
+/**/# @(#)Imakefile	1.6 28 Jun 1993 SMI
+/**/# Imakefile for images directory.  XView release 2.0.
+
+
+CORE_BITMAPS = \ 
+	1x1           escherknot    mailemptymsk  sipb          txtmvok \
+	2x2           flagdown      mailfull      star          txtmvokmask\
+	flagup        mailfullmsk   starMask      txtmvokmore \
+	flipped_gray  mensetmanus   stipple       vlines2 \
+	gray          menu10        target        vlines3 \
+	black         gray1         menu12        terminal      weird_size \
+	boxes         gray3         menu16        tie_fighter   wide_weave \
+	calculator    hlines2       menu8         txtdup        wierd_size \
+	cntr_ptr      hlines3       noletters     txtdupmask    wingdogs \
+	cntr_ptrmsk   icon          opendot       txtdupmore    woman \
+	cross_weave   keyboard16    opendotMask   txtdupok      xfd_icon \
+	dimple1       left_ptr      plaid         txtdupokmask  xlogo11 \
+	dimple3       left_ptrmsk   right_ptr     txtdupokmore  xlogo16 \
+	dot           letters       right_ptrmsk  txtmv         xlogo32 \
+	dropbar7      light_gray    root_weave    txtmvmask     xlogo64 \
+	dropbar8      mailempty     scales        txtmvmore
+
+BITMAPS = $(CORE_BITMAPS) 
+
+
+INCLUDES_SRCS = \
+	$(CORE_BITMAPS) 
+
+SRCS =  \
+	$(CORE_BITMAPS) 
+
+ALLFILES = $(BITMAPS) 
+
+all: $(SRCS)
+
+BuildIncludes($(INCLUDES_SRCS),$(BITMAP_INCDIR),/**/)
+
+install:: $(SRCS)
+	$(MKDIRHIER) $(DESTDIR)$(HEADER_DEST)/$(BITMAPINC)
+	
+InstallMultiple($(SRCS),$(HEADER_DEST)/$(BITMAPINC))
+
+PopulateSCCSTree(h,$(ALLFILES))
+
+clean::
+
+depend::

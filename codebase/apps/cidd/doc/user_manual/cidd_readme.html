@@ -1,0 +1,177 @@
+<HTML>
+<HEAD>
+<TITLE> CIDD README </TITLE>
+</HEAD> 
+
+<BODY BGcolor=white> 
+<H3> CIDD README</H3>
+
+<PRE>
+# CIDD's README
+#
+# -F. Hage.  Feb 1994.
+# Last Update:  12/12/-00- F. Hage - HTML'ized 
+# Still lacks list of current ancillary programs
+</PRE>
+
+
+<P>
+Cidd has two major code branches: "Little cidd",
+which has the original code base as used and fielded from 1991 to
+1998. "Big CIDD" is the code base that is currently being maintained and
+went into use in late 1998 and throughout 1999. Its code has been
+"cleaned up" and converted to compile under C++, although the design
+remains primarily procedural C code. The new CIDD also uses the common
+C++ class libraries for accessing data and ingest s and renders Symbolic product data
+natively.
+
+<P>
+Major enhancements in the new CIDD code base:
+<UL>
+<LI> Unified config files in to one param file with delineated sections.
+<LI> Now uses URLs to designate sources of data.
+<LI> Only one server per machine need be run to serve out all gridded data.
+<LI> Can use HTTP (protocol)  to load config files including Maps and Color scales.
+<LI> Can use HTTP proxies and a "data tunnel" to pass data through port 80
+  for both outgoing and incoming firewalls.
+<LI> Has a configurable main menu bar, which allows for customized and specialized
+   control setups.
+<LI> Has a simple, integrated mechanism to draw features for export into product
+  databases.
+<LI> Has hooks for driving netscape to specific URLS for help info and supplementary data.
+</UL>
+
+<HR>
+<H2> Nowcast project  configuration notes and instructions </h2>
+<P>
+CIDD related Applications and their Configuration Files:
+
+<P>
+CIDD Uses a unified configuration file delineated by XML like tags. Is is NOT XML, however.
+Not even close.
+
+<P> Usage: <H4> CIDD -p http://www.rap.ucar.edu/CIDD/aoaws.CIDD &amp; </H4>
+
+<UL>
+<LI>   &lt;GRIDS&gt; section:   Determines which Gridded data sources are available from 
+        CIDD's menus. Specifies the Labels, URL, colorscales, units label
+	default contour levels, rendering style, etc.
+
+<LI>   &lt;WINDS&gt; section: Determines which data fields will be represented by wind 
+	vectors, or barbs. Sets their Label, URL, colors, etc..
+
+<LI>   &lt;MAPS&gt; section:  Determines which map overlays are loaded, on by default,
+   	and their initial colors. Note that these files are in the same format
+	as the product files that prds and exprt are compatible with.
+
+<LI>    &lt;DRAW_EXPORT&gt; section:  Determines parameters used to export simple line based
+		  features to other programs. 
+
+<LI> &lt;MAIN_PARAMS&gt;  Contains most of start up parameters, such as window sizes, fonts, 
+       menu configurations, zoom defines, map projection, the location/URL
+       of the map and colorscale files, and many other parameters which
+       control basic functionality and capabilities.
+
+<LI> &lt;SYMPRODS&gt;  Contains parameters defining which Symbolic products to load and render.
+<LI> &lt;DRAW_EXPORT&gt;  Contains parameters defining a set of Human Drawn Products to Export. 
+<LI> &lt;TERRAIN&gt;  Contains parameters defining a source of terrain data and land use data
+					  render under the data grids. Terrain data is also displayed in cross section.
+<LI> &lt;ROUTE_WINDS&gt;  Contains parameters defining a set of predefined routes and
+			sources of data to use for producing summary information about winds along the route.
+			It also controls the automatic warning feature for Icing and Turbulence along
+			the route.
+
+<LI> </LI>
+<LI> COLORSCALES:  Each line in the &lt;GRIDS&gt; section specifies a colorscale file.
+                    They are read either from a http URL or directly from a 
+		    local directory. CIDD first looks for a copy in the local
+		    directory, which allows one to used modified colorscales.
+
+<LI> MAP FILES:    Each overlay file listed in the &lt;MAPS&gt; section is loaded
+		    from the given http URL or a specified directory.
+</UL>
+
+<H5> See: <A HREF="http://www.rap.ucar.edu/CIDD"> 
+http://www.rap.ucar.edu/CIDD</A>
+for examples </H5>
+
+<HR>
+<U> Configuring CIDD</U>
+<OL>
+   <LI> <STRONG> Change </STRONG> the following sections and parameters
+        in the parameter file 
+        <UL>
+        <LI><KBD> origin_longitude</KBD>
+        <LI><KBD> origin_latitude</KBD>
+        <LI><KBD> horiz_frame_label</KBD>
+        <LI> list of available MDV products in the <KBD> GRID</KBD> section
+        <LI> list of available u/v products in the <KBD> WINDS</KBD> section
+        <LI> list of available map products in the <KBD> MAPS</KBD> section
+        <LI> list of desired zoom levels
+        <LI> list of desired contour fields
+        <LI> list of desired http bookmarks
+        </UL>
+   <LI> <STRONG> Verify </STRONG> the following parameters
+        in the parameter file 
+        <UL>
+        <LI><KBD> horiz_image_command</KBD>
+        <LI><KBD> vert_image_command</KBD>
+        <LI> list of menu bar buttons
+        </UL>
+   </UL>
+<P>
+
+To configure CIDD for automatic image generation, in addition to the 
+above changes...
+<OL>
+   <LI> <STRONG> Uncomment </STRONG> the following parameters
+        in the file <KBD> CIDD.gif</KBD>
+        <UL>
+        <LI><KBD> html_image_dir</KBD>
+        <LI><KBD> html_convert_script</KBD>
+        <LI> list of desired MDV products in the image dump
+        <LI> list of desired zoom levels in the image dump
+        </UL>
+   <LI> <STRONG> NOTE: </STRONG> CIDD will dump an image for each field 
+        listed in the <KBD> GRID</KBD> section at each of the 
+        defined zoom states.
+   </UL>
+</OL>
+<HR>
+
+
+<P>
+<H4>  PROD_SEL98 - Product selector'98 - NOW OBSOLETE  </H4>
+    Do a prod_sel98 -print_params  to see the list of parameters
+
+<P>
+<H4>  RDI compatible PRODUCT SELECTOR: ( prds) - NOW OBSOLETE </H4>
+
+<UL>
+   <LI> prds.conf :   Determines which products are available, and their 
+	timeouts, etc.
+   <LI> prds_maps:    Contains a static list of overlays. WARNING: These files 
+	have a local origin. CIDD must be set to the same origin. 
+   <LI> prds_in_pipe:  This is a temporary file used to communicate between prds
+	& awps2prds.
+   <LI> prod.tmp:     The file used to directly import symbolic products.
+   <LI> prod.data:    A File used to archive products which were written to 
+	prod.tmp.
+</UL>
+
+
+<P>
+<H4> EXPRT.  - NOW OBSOLETE - USE the Native Drawing Feature</H4>
+<BR>
+   A. exprt.conf:  Determines which products can be manually exported and 
+	their parameters.
+
+
+<P>
+<H4> POS_REPORT: A simple positional locator and reporting system. </H4>
+
+<BR>
+   A. pos_report.defaults:  Contains the list of origins, window, defaults, 
+	etc.
+</BODY>
+</HTML>

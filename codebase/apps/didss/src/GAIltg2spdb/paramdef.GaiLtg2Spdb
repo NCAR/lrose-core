@@ -1,0 +1,132 @@
+/**********************************************************
+ * paramdef.GAIltg2spdb
+ *
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = { false };
+} debug;
+
+/***********************************************************************
+ * Operational information
+ */
+
+paramdef string
+{
+  p_descr = "procmap instance";
+  p_default = { "Test" };
+} instance;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Max valid age of input data in realtime mode (secs).";
+  p_help = "REALTIME mode only. This the max valid age for input data. In REALTIME mode, the program wi
+ll wait for data more recent than this.";
+} max_realtime_valid_age;
+
+paramdef string
+{
+  p_descr = "input directory";
+  p_help = "Path for directory where GAI data is stored.";
+  p_default = { "." };
+} input_dir;
+
+paramdef string
+{
+  p_descr = "input file substring";
+  p_help = "Substring which is a part of every input file to be processed.";
+  p_default = { ".GAI" };
+} input_substring;
+
+paramdef long
+{
+  p_descr = "lightning data expire seconds";
+  p_help = "Number of seconds the lightning data is valid before it should be expired.";
+  p_default = { 60 };
+} expire_secs;
+
+paramdef boolean
+{
+  p_descr = "process old data flag";
+  p_help = "If TRUE, all existing files in the input directory will be processed; if FALSE, only files received after starting this process will be used.";
+  p_default = { true };
+} process_old_data;
+
+paramdef long
+{
+  p_descr = "processing delay in seconds";
+  p_help = "The number of seconds to wait before processing an input file.  This delay allows activity on t
+he file to finish before we start reading it.";
+  p_default = { 1 };
+} processing_delay;
+
+
+paramdef boolean
+{
+  p_descr = "check for existing data flag";
+  p_help = "If TRUE, check the output SPDB database to see if each record already exists before adding it; if FALSE, always add the data to the database. Execution is quicker if you skip this step, but if the server is restarted this check may be necessary to prevent duplicate data in the database.";
+  p_default = { false };
+} check_old_data;
+
+paramdef double
+{
+  p_descr = "Minimum latitude of lightning strikes to process";
+  p_min = -90.0;
+  p_max = 90.0;
+  p_default = -90.0;
+} min_strike_lat;
+
+paramdef double
+{
+  p_descr = "Maximum latitude of lightning strikes to process";
+  p_min = -90.0;
+  p_max = 90.0;
+  p_default = 90.0;
+} max_strike_lat;
+
+paramdef double
+{
+  p_descr = "Minimum longitude of lightning strikes to process";
+  p_min = -180.0;
+  p_max = 360.0;
+  p_default = -180.0;
+} min_strike_lon;
+
+paramdef double
+{
+  p_descr = "Maximum longitude of lightning strikes to process";
+  p_min = -180.0;
+  p_max = 360.0;
+  p_default = 180.0;
+} max_strike_lon;
+
+paramdef string
+{
+  p_descr = "destination SPDB database";
+  p_help = "The name of the directory which will be used as the destination for the SPDB data.";
+  p_default = { "." };
+} spdb_database;
+
+paramdef enum runmode_t
+{
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the analysis is performed for each dataset as it becomes available. In archive mode, the file list is obtained from the parameter file.";
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+} mode;
+
+paramdef boolean
+{
+  p_descr = "flag to enable 5 fields instead of 6 ";
+  p_help = "New GAI data has six fields per strike instead of five.";
+  p_default = { false };
+} five_fields;
+

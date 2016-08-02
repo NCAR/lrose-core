@@ -1,0 +1,185 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+
+commentdef {
+  p_header = "httpFileFetch is designed to drive the wget utility\n"
+	"to get data files from a remote URL using the HTTP protocol.\n"
+	"wget itself has some idiosyncrasies that make it unsuitable\n"
+	"in many cases for the kind of data file fetching we do if it\n"
+	"is driven directly.\n\n"
+	"Niles Oien September 2006";
+}
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Output directory.";
+  p_help = "Directory where data files will be written.";
+} outDir;
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Index directory.";
+  p_help = "Directory in which index.html file will be written. It is\n"
+	"a good idea to send this somewhere other than the data directory\n"
+	"to avoid data ingesters trying to read the index.html file.";
+} indexDir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "String that the file name MUST contain for download.";
+  p_help = "If string is empty (default), all file names are valid.";
+} filenameSubString;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_descr = "Options to use with wget.";
+  p_help = "Using -v or -nv instead of -q may be good for debugging. See the\n"
+	"man page on wget for more information. The -P option is\n"
+	"added internally to specify an output directory.";
+  p_default = {"-q -N -nd"};
+} wgetOptions;
+ 
+paramdef string {
+  p_descr = "URL to fetch data from.";
+  p_help = "Should point to a directory with nothing but the data files.";
+  p_default = "http://www.rap.ucar.edu/~oien/trial";
+} url;
+ 
+paramdef boolean {
+  p_descr = "Set protocol.";
+  p_help = "Set to TRUE if FTP is being used rather than http.";
+  p_default = FALSE;
+} isFtp;
+
+paramdef boolean {
+  p_descr = "Option to write ldata_info files in the output directory.";
+  p_help = "Default is to do this. Every attempt will be made to\n"
+	"write this file correctly even if the data file is\n"
+	"zipped in some way and is unzipped with a post-download\n"
+	"command. ";
+  p_default = TRUE;
+} writeLdata;
+
+paramdef string {
+  p_descr = "Data type for LdataInfo file.";
+  p_help = "Relevant only if writeLdata is TRUE. Goes in ldata file and\n"
+	"is reported to the DataMapper.";
+  p_default = "unknown";
+} dataType;
+
+ paramdef boolean {
+  p_descr = "Option to use the remote file timestamp when writing the\n"
+	"ldatainfo file. Default is not to do this, instead the time\n"
+	"of download is used.";
+  p_help = "Relevant only if writeLdata is TRUE.";
+  p_default = FALSE;
+} useRemoteFileTimes;
+ 
+ paramdef boolean {
+  p_descr = "Option to ignore times, get all files.";
+  p_help = "Not useful for realtime operations. Good for\n"
+	"getting all data in a directory.";
+  p_default = FALSE;
+} ignoreTimes;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to leave the index file, index.html, in the\n"
+	"output directory when done with the download.";
+  p_help = "May be handy for debugging.";
+} leaveIndexFileWhenDone;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run once only.";
+  p_help = "May be handy for debugging or for cron-driven systems.";
+} runOnce;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of seconds to sleep after downloading a file.";
+  p_help = "Can set to 0 but probably best to avoid hogging resources.";
+} fileDownloadDelay;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Number of seconds to sleep between checks of remote system.";
+  p_help = "Depends on data input frequency.";
+} sleepBetweenChecks;
+
+paramdef long {
+  p_default = 86400;
+  p_descr = "Maximum age of file RELATIVE TO MOST RECENT FILE IN THE\n"
+	"REMOTE DIRECTORY to download, seconds.";
+  p_help = "Allows partial download of directory.";
+} maxRelativeFileAge;
+
+paramdef long {
+  p_default = 86400;
+  p_descr = "Maximum age of file to download, seconds.";
+  p_help = "NOTE that the remote system may well be using a different\n"
+	"time zone, which could lead to unexpected results with this\n"
+	"parameter.";
+} maxAbsoluteFileAge;
+
+paramdef long {
+  p_default = 10;
+  p_descr = "Maximum age of a file for it to be considered new, seconds.";
+  p_help = "Used to determine if an ldatainfo file should be written\n"
+	"or not. The default should be fine.";
+} maxAgeForNewFile;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run a command on a file once it has been downloaded.";
+  p_help = "The file name is appended to the command.";
+} doPostDownloadCommand;
+
+paramdef string {
+  p_default = "gunzip -f";
+  p_descr = "Command to run on a downloaded file after download.";
+  p_help = "Relevant only if doPostDownloadCommand is TRUE.";
+} postDownloadCommand;
+
+paramdef string {
+  p_default = { };
+  p_descr = "Required substrings.";
+  p_help = "All of these stings must be substrings in the file name for it to be downloaded.";
+} requiredSubstrings[];
+
+

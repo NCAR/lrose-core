@@ -1,0 +1,224 @@
+/**********************************************************************
+ * TDRP params for file_repeat_day
+ **********************************************************************/
+
+//======================================================================
+//
+// Program file_repeat_day.
+//
+// This program provides a mechanism to simulate the arrival of files 
+//   which are named by time and in a dated directory. As as example, you 
+//   can copy the GTS files from an archived day into a simulated realtime 
+//   directory. The files are placed in a directory for the current day. 
+//   As an option you can modify date information in the files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance for procmap.
+// This program uses this instance when registering with the process 
+//   mapper.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// InDir ///////////////////////////////////
+//
+// Input directory.
+// For files of type HHMMSS (see FilenameType below) and/or 
+//   InputDataFromCompleteMonth is true, if the input files are stored in 
+//   the relevant date subdirectory of this directory. For other types the 
+//   input files are stored in this directory.
+// Type: string
+//
+
+InDir = "/d1/dixon/downloads/simdata_aoaws/caf";
+
+///////////// InDay ///////////////////////////////////
+//
+// Specified Day.
+// Type: int
+//
+
+InDay = 1;
+
+///////////// InMonth /////////////////////////////////
+//
+// Specified Month.
+// Type: int
+//
+
+InMonth = 10;
+
+///////////// InYear //////////////////////////////////
+//
+// Specified Year.
+// Type: int
+//
+
+InYear = 2009;
+
+///////////// RepeatMonth /////////////////////////////
+//
+// Input data includes files from a complete month (day 01 to day 31).
+// In this case, InDir points to the directory containing the complete 
+//   month. From the current time, the day of the month is computed. and 
+//   the simulated data for that day is selected. If the data for that day 
+//   is not available, the closest available day of the month is used. The 
+//   data is assumed be be stored as YYYYMMDD/HHMMSS.ext.
+// Type: boolean
+//
+
+RepeatMonth = TRUE;
+
+///////////// FilenameType ////////////////////////////
+//
+// Naming convention for input files.
+// File are named as follows: HHMMSS: hhmmss.ext, YYYYMMDDHHMM: 
+//   YYYYMMDDhhmm.ext, YYYYMMDDHHMMSS: YYYYMMDDhhmmss.ext, MMDD_HHMM: 
+//   MMDD_hhmm.ext, XMMDDHH_MM: prefixMMDDhh_mm, NNNYYYYMMDDHHMM: 
+//   nnnYYYYMMDDhhmm.ext, YYYY_MM_DD_HHMM: YYYY-MM-DD_HHMM, 
+//   XYYYYMMDD_HHMMSS, XYYYYMMDD_HHMMSSZ, MOD_TIME: use input file names, 
+//   trigger based on modify time.
+//
+// Type: enum
+// Options:
+//     HHMMSS
+//     YYYYMMDDHHMM
+//     YYYYMMDDHHMMSS
+//     MMDD_HHMM
+//     XMMDDHH_MM
+//     NNNYYYYMMDDHHMM
+//     YYYY_MM_DD_HHMM
+//     XYYYYMMDD_HHMMSS
+//     XYYYYMMDD_HHMMSSZ
+//     MOD_TIME
+//
+
+FilenameType = HHMMSS;
+
+///////////// FileExtension ///////////////////////////
+//
+// Extension for files.
+// Type: string
+//
+
+FileExtension = "caf";
+
+///////////// FilePrefix //////////////////////////////
+//
+// Prefix for files (only required and valid for 
+//   FilenameType=XMMDDHH_MM, XYYYYMMDD_HHMMSS).
+// Type: string
+//
+
+FilePrefix = "";
+
+///////////// FilePreservePreExtension ////////////////
+//
+// Additional text exists between the date and FileExtension (only valid 
+//   for FilenameType=YYYY_MM_DD_HHMM). For example 
+//   YYYY-MM-DD_HHMM.keepthis.ext.
+// Type: boolean
+//
+
+FilePreservePreExtension = FALSE;
+
+///////////// FileSuffix //////////////////////////////
+//
+// Suffix for files (only required and valid for 
+//   FilenameType=XYYYYMMDD_HHMMSSZ). Defines what the Z is, ie for files 
+//   named 20050624_235802_base.prd set FilePrefix to an empty srting, set 
+//   FileSuffix to _base and FileExtension to prd.
+// Type: string
+//
+
+FileSuffix = "";
+
+//======================================================================
+//
+// DATA TIMING.
+//
+//======================================================================
+ 
+///////////// MultipleFilesForOneTime /////////////////
+//
+// Multiple files exist for one input (data) time, Serve the multiple 
+//   files.
+// Type: boolean
+//
+
+MultipleFilesForOneTime = FALSE;
+
+///////////// SleepSecsBetweenFilesForOneDataTime /////
+//
+// Only valid if MultipleFilesForOneTime = TRUE. The number of sleep 
+//   seconds between the multiple files with the same data-time.
+// Type: int
+//
+
+SleepSecsBetweenFilesForOneDataTime = 0;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// OutDir //////////////////////////////////
+//
+// Output directory.
+// Type: string
+//
+
+OutDir = "/tmp/data/raw/caf";
+
+///////////// OverwriteDay ////////////////////////////
+//
+// Option to override day/time fields in text files.
+// If true, the program will search for strings of the types ddhhmm or 
+//   hhmmssZ. The day 'dd' will be constrained to be the day of the month 
+//   on which the input data was received. The day will be overwritten 
+//   with the current day.
+// Type: boolean
+//
+
+OverwriteDay = FALSE;
+
+///////////// WriteLData //////////////////////////////
+//
+// Option to write _latest_data_info or not.
+// Type: boolean
+//
+
+WriteLData = TRUE;
+

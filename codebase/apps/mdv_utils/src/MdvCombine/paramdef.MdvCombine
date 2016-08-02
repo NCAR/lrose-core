@@ -1,0 +1,174 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MdvCombine
+ *
+ * Gary Cunning, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * January 2001
+ * 
+ * MdvCombine takes MDV field data from a number of input directories and 
+ * combines them into a single output directory. The grid and projection
+ * information is preserved from each input directory
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME, MULTIPLE_URL, SPEC_FCAST_REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "In REALTIME mode, the program waits for new data from the "
+           "MDV location specified by the trigger_url parameter.\n"
+           "In ARCHIVE mode, the program operates on archive data.\n "
+           "In SPEC_FCAST_REALTIME mode, the program waits for new forecast "
+           "data from the MDV location specified by the trigger_url parameter.\n"
+           "In MULTIPLE_URL mode, the program will not run until data "
+           "is available for all of the URLs in the multiple_url_trigger.";
+} mode;
+
+typedef struct
+{
+  int lead_time_secs;
+  boolean use_gen_time;
+} fcast_lead_time_t;
+
+paramdef struct fcast_lead_time_t {
+  p_default = { 0, false };
+  p_descr = "Forecast lead time information for forecast "
+            "files to be processed.";
+  p_help = "Used only if mode is set to SPEC_FCAST_REALTIME.";
+} fcast_lead_time;
+      
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+typedef struct
+{
+  string url;
+  long field_num;
+  string field_name;
+} field_info_t;
+
+paramdef struct field_info_t
+{
+  p_descr = "An array of field descriptors";
+  p_help = "If available, the indicated field from each URL will be "
+           "combined in the output file. "
+           "If field_name is specified it will be used. "
+           "Otherwise, field_num will be used.";
+  p_default = { { "mdvp:://localhost::mdv/dir1", 0, "" },
+                { "mdvp:://localhost::mdv/dir2", 1, "" } };
+} field_info[];
+
+paramdef string {
+  p_default = "mdvp:://localhost:43000:mdv/trigger";
+  p_descr = "Trigger URL.";
+  p_help = "This URL triggers the combination of the URLs list in field_info.";
+} trigger_url;
+
+paramdef int
+{
+  p_default = 0;
+  p_descr = "Number of seconds to sleep after triggering before processing the data. " 
+            "The intent is to allow realtime URLs that come in nearly simultaneously "
+            "to have a chance to catch up.";
+  p_help = "Only applies in REALTIME or SPEC_FCAST_REALTIME modes.";
+} sleepAfterTrigger;
+
+paramdef long {
+  p_min = {0};
+  p_default = {300};
+  p_descr = "Interval for TIME_TRIGGER - secs.";
+  p_help = "In REALTIME mode, a time trigger always occurs on the hour, and "
+           "at constant intervals thereafter. "
+           "In ARCHIVE mode the trigger starts at start_time and at constant "
+           "intervals thereafter.";
+} time_trigger_interval;
+
+paramdef string
+{
+  p_descr = "List of URLs for triggering in latest data mode";
+  p_default = { "mdvp:://localhost::mdv" };
+} multiple_url_trigger[];
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+
+paramdef string {
+  p_default = "mdvp:://localhost:43000:mdv/output";
+  p_descr = "Output URL.";
+  p_help = "The merged files are placed in this URL.";
+} output_url;
+
+paramdef string {
+  p_default = {"Unknown"};
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation "
+           "purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = {"Combined data created by MdvCombine."};
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation "
+           "purposes.";
+} data_set_source;
+
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Write mdv files in a forecast directory structure";
+  p_help = "If this is true, mdv files will be written in the "
+           "rap forecast directory structure. "
+           "If this is FALSE, mdv files will be written in the "
+           "rap non-forecast directory structure.";
+} write_forecast;
+ 
+paramdef boolean {
+  p_default = {FALSE};
+  p_descr = "Write missing fields with missing data";
+  p_help = "If this is true, the fields that were missing "
+           "will be written to the output file with each "
+           "gridpoint set to the missing data value.";
+} write_blank_if_missing;
+ 

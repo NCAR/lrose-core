@@ -1,0 +1,10 @@
+#! /bin/csh
+
+#
+# run rctable_generate to prepare the cartesian lookup table
+#
+
+rctable_generate -params $TITAN_HOME/params/rctable_generate.test
+
+
+

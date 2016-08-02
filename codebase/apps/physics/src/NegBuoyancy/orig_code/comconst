@@ -1,0 +1,13 @@
+      dimension psadiprs(150),psadithte(150),psaditmk(150,150)
+      common /const/ rgas,rgasmd,grav,cp,cpmd,ds,dskm,
+     &   gamma,gammamd,thtecon1,thtecon2,thtecon3,eps,ezero,
+     &   xlhc0,xlhctd,xlhf,celkel,abscoef,ussalr,eslcon1,eslcon2,
+     &   esicon1,esicon2,flmin,frmax,fbmin,ftmax,dsc,dskmc,
+     &   tlclc1,tlclc2,tlclc3,tlclc4,
+     &   xlatc,xlonc,rhoice,rhowat,mdateb,mhourb,rhourb,
+     &   miycors,mjxcors,refrat,yicorn,xjcorn,iice,rpd,pi,
+     &   rktpmps,true1,true2,abscoefi,nproj,sclht,rmsg,
+     &   psadiprs,psadithte,psaditmk,ilandset,iplevdata
+      common /unitnum/ iuinput,iustnlist,iutserstn,
+     &   iutserdat,iunewdom,iutrajout,iudiagout,
+     &   iutrajin,iup,iupt

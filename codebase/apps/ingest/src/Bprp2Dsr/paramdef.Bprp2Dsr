@@ -1,0 +1,276 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for Bprp2Dsr
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// June 2002
+//
+
+commentdef {
+  p_header = "Program name: Bprp2Dsr";
+  p_text = "Bprp2Dsr reads bprp data over a socket and writes the data to a DsRadarQueue beam by beam.";
+}
+
+commentdef {
+  p_header = "PROCESS CONTROL AND DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Input data host";
+  p_help = "TCP/IP name/address of host for input data";
+} input_host;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Input data port";
+  p_help = "TCP/IP port number for input data";
+} input_port;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set options for PACER radar";
+  p_help = "If this is set, processing is done as for the PACER radar data system.";
+} pacer;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to check radar ID";
+  p_help = "If this is set, only beams with the correct radar id are included in the output data stream";
+} check_radar_id;
+
+typedef enum {
+  LOCAL_TO_UCT, AS_IS
+} time_mode_t;
+
+paramdef enum time_mode_t {
+  p_default = AS_IS;
+  p_descr = "Time computation mode";
+  p_help = "If AS_IS, time is accepted as is. Otherwise, it is assumed local and changed to UCT";
+} time_mode;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Time correction (secs).";
+  p_help = "Data time is adjusted by this number of seconds before output.";
+} time_correction;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Target radar ID";
+  p_help = "The radar ID to be used for filtering the input data";
+} target_radar_id;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "fmq/rapic";
+  p_descr = "Output URL for DsRadarQueue fmq.";
+  p_help = "The URL is of the form 'fmqp:://host::dir/name'. If the output is to the local host you can use just 'dir/name'.";
+} output_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to block on write when the radar queue fills up.";
+  p_help = "If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.";
+} write_blocking;
+
+typedef enum {
+  NO_COMPRESSION = 0,
+  RLE_COMPRESSION = 1,
+  ZLIB_COMPRESSION = 3
+} compression_t;
+  
+paramdef enum compression_t {
+  p_default = ZLIB_COMPRESSION;
+  p_descr = "Output compression options.";
+  p_help = "The data may be optionally compressed for output. BZIP is generally the slowest but most compact. ZLIB uses the gzip compression algorithm, which is faster than BZIP, and for some data more compact as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is simple run-length encoding compression, which is the fastest and least compact.";
+} output_compression;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Number of slots in output FMQ.";
+} output_n_slots;
+
+paramdef int {
+  p_default = 10000000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_buf_size;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write dbz data out as 32-bit floats.";
+  p_help = "If false, the dbz output is as 8-bit ints.";
+} dbz_as_float32;
+
+commentdef {
+  p_header = "RADAR PARAMETERS";
+}
+
+paramdef string {
+  p_default = "Bethlehem";
+  p_descr = "Name of radar site";
+} site_name;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Scan strategy type.";
+  p_help = "Indicates which scan strategy is in use.";
+} scan_type;
+
+paramdef string {
+  p_default = "Surveillance";
+  p_descr = "Scan strategy name";
+  p_help = "Descriptive name for scan strategy";
+} scan_name;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Radar altitude";
+  p_help = "Radar altitude (km MSL)";
+} radar_altitude;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Radar latitude";
+  p_help = "Radar latitude (deg.decimal)";
+} radar_latitude;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Radar longitude";
+  p_help = "Radar longitude (deg.decimal)";
+} radar_longitude;
+
+paramdef int {
+  p_default = 32;
+  p_descr = "Samples per beam";
+  p_help = "Number of pulse samples used to compute data from a beam. Documentation purposes only.";
+} samples_per_beam;
+
+paramdef double {
+  p_default = 0.014;
+  p_descr = "Atmospheric attenuation";
+  p_help = "Atmospheric attenuation correction (dB/km). S-band: 0.012, C-band: 0.014, X-band: 0.024.";
+} atmos_attenuation;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Beam width";
+  p_help = "Radar half-power beam width (deg). Documentation purposes only.";
+} beam_width;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Pulse width";
+  p_help = "Radar pulse width (microsecs). Documentation purposes only.";
+} pulse_width;
+
+paramdef double {
+  p_default = 250.0;
+  p_descr = "PRF";
+  p_help = "Radar pulse repitition frequency (pulses per sec)";
+} prf;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Wavelength";
+  p_help = "Radar wavelength (cm)";
+} wavelength;
+
+paramdef double {
+  p_default = -157.0;
+  p_descr = "Radar constant";
+  p_help = "Value of radar constant for Met type radar";
+} radar_constant;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Radar polarization code.";
+  p_help = "1 = hor, 2 = ver, 3 = circ, 4 = ellip. Should be 3; 1 for Jing compatibility. Documentation purposes only.";
+} polarization_code;
+
+paramdef double {
+  p_default = 250;
+  p_descr = "Peak transmitter power (kW)";
+  p_help = "Documentation purposes only.";
+} peak_xmit_pwr;
+
+paramdef double {
+  p_default = -113.0;
+  p_descr = "Receiver MDS (dBM)";
+  p_help = "Receiver minimum detectable signal (dMD) - for DS_FORMAT only. Documentation purposes only.";
+} receiver_mds;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Gain of the receiver (dB) - for DS_FORMAT only";
+  p_help = "Documentation purposes only.";
+} receiver_gain;
+
+paramdef double {
+  p_default = 45.0;
+  p_descr = "Gain of the antenna (dB) - for DS_FORMAT only";
+  p_help = "Documentation purposes only.";
+} antenna_gain;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Gain of the system (dB) - for DS_FORMAT only";
+  p_help = "Documentation purposes only.";
+} system_gain;
+
+paramdef double {
+  p_default = -1;
+  p_descr = "Unambiguous velocity - m/s";
+  p_help = "Documentation purposes only.";
+} unambig_velocity;
+
+

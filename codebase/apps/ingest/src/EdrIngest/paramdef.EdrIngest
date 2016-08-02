@@ -1,0 +1,188 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for EdrIngest
+ *
+ * Sue Dettling, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 2004
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Param file for EdrIngest";
+}
+
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Program instance for process registration.";
+  p_help = "This program registers with procmap. This is the instance used for registration.";
+} instance;
+
+typedef enum {
+  REALTIME, FILELIST, TIME_INTERVAL
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+} mode;
+
+typedef enum {
+  FILE_INPUT, TCP_IP   
+} input_stream_t;
+
+paramdef char* {
+  p_descr = "Input file containing UAL encoded tailnums";
+  p_default = {""};
+} encodedTailnumFile;
+
+commentdef {
+  p_header = "MESSAGE FORMAT";
+};
+
+typedef enum {
+  ASCII, BUFR
+} message_format_t; 
+
+paramdef enum message_format_t {
+  p_descr = "Type of radar input stream";
+  p_default = {BUFR};
+} message_format;
+
+
+commentdef {
+  p_header = "INPUT DATA";
+};
+
+paramdef char* {
+  p_descr = "Input directory";
+  p_default = {"$RAP_DATA_DIR/edr"};
+} input_dir;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Interval at which to look for new data";
+  p_help =  "Used in REALTIME mode only.";
+} check_input_sec;
+
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Maximum age of file in minutes";
+  p_help =  "Used in REALTIME mode only.";
+} max_valid_age_min;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "_latest_data_info  available";
+  p_help =  "Used in REALTIME mode only.";
+} ldata_info_avail;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Age of file before use";
+  p_help =  "Gives time for file to be written to input directory before use.";
+} file_quiescence_sec;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for TIME_INTERVAL mode only.";
+} start_time;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for TIME_INTERVAL mode only.";
+} end_time;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Lookback is the amount of time before the current record time in which we will look for previous data from aircraft to be used for interpolating time and location of reports.";
+} lookback;
+
+commentdef {
+  p_header = "OUTPUT DATA";
+};
+
+paramdef char* {
+  p_descr = "Duplicate report url";
+  p_default = "spdbp:://localhost::InsituTurb/spdb/edr";
+  p_help = "Problems were encountered when getting previous reports when using the distrib url mechanism when multiple distribution of spdb data is required.  This url is used to indicate which data store to use for resolving duplicate reports. When not distributing to mulitple locations, this should be set to the output_url location.";
+} duplicate_report_url;
+
+paramdef char* {
+  p_descr = "Output url";
+  p_default = "spdbp:://localhost::InsituTurb/spdb/edr";
+} output_url;
+
+paramdef int {
+  p_descr = "Seconds after which data should expire";
+  p_default = "600";
+} expire_sec;
+
+
+/***************************************************
+ * XML specific parameters
+ */
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Used to create and send XML data to a WFS server defined by the soap_cmd below.  Both outpu_XML_url and soap_cmd must be defined if set to true.";
+} createWfsData;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Default (false) will allow XML output to be created without putting data into the WFS server.";
+} sendToWfsServer;
+
+paramdef string
+{
+  p_descr = "Output URL for XML edr data";
+  p_help = "These files are used with the soap_cmd to send data to the WFS";
+  p_default = "$(RAP_DATA_DIR)/InsituTurb/XML/Delta";
+} output_XML_url;
+
+paramdef string
+{
+  p_descr = "Command that defines the WFS server and port information for XML edr data";
+  p_help = "Currently using a python scripa, soap_sender.py, for this (JVM too expensive).  It is assumed the script is installed in a location reachable by this program.  Default hostname used is localhost.  The insert header is supplied by the python script";
+  //p_default = "soap_sender.py --port 8084 --url /insitu/wfs/soap --msg insert ";
+  p_default = "soap_sender.py --debug --port 8084 --url /insitu/wfs/soap --msg insert ";
+} soap_cmd;
+

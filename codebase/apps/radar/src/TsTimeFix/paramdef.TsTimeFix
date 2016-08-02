@@ -1,0 +1,115 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for TsTimeFix
+//
+// EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Dec 2014
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsTimeFix reads raw time-series data, adjusts the time of selected components, and writes the results out to a specified directory.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+commentdef {
+  p_header = "INPUT MODE.";
+}
+
+typedef enum {
+  INPUT_MODE_FMQ, INPUT_MODE_FILES
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = INPUT_MODE_FMQ;
+  p_descr = "Operating mode";
+  p_help = "In FMQ mode, it reads data from a file message queue. In FILES mode, it processes the list of file names specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts/shmem_10100";
+  p_descr = "Fully-qualified path for input FMQ.";
+  p_help = "INPUT_MODE_FMQ only.";
+} input_fmq_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set input FMQ to the start of the queue.";
+  p_help = "Normally we read from the current end of the queue.";
+} position_fmq_at_start;
+
+commentdef {
+  p_header = "FIXING THE TIME";
+};
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Numnber of seconds to add to times in data (secs).";
+  p_help = "This correction will be applied to all packets, except as specified in these params.";
+} time_offset_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to preserve the georeference time.";
+  p_help = "If true, the time on georeference packets will be preserved, and the location of the georeference packets will be changed to place them in the corrected time series in the correct order.";
+} preserve_georef_time;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Time margin for matching georef packets to pulses (secs).";
+  p_help = "If the time difference is greater than this, no match is made.";
+} georef_time_margin_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Apply the georeference data to compute az and el angles.";
+  p_help = "We use roll, pitch, heading and drift to compute az/el in world coords.";
+} apply_georef_to_compute_angles;
+
+commentdef {
+  p_header = "OUTPUT LOCATION";
+};
+
+paramdef string {
+  p_default = "/tmp/time_series";
+  p_descr = "Path to output directory.";
+  p_help = "Files will be written under this directory in a sub-directory computed from the date/time.";
+} output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to use the fixed angle (el or az) to compute the file name.";
+  p_help = "If false, the actual measured angle will be used.";
+} use_fixed_angle_for_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to add a string indicating the scan mode to the file name.";
+} add_scan_mode_to_file_name;
+

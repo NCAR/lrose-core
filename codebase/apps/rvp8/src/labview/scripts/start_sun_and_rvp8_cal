@@ -1,0 +1,6 @@
+#! /bin/csh
+
+set logfile=~/projDir/logs/run_sun_and_rvp8_cal.log
+
+run_sun_and_rvp8_cal >>& $logfile &
+

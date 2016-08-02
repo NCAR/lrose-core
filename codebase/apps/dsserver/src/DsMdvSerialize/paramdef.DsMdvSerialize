@@ -1,0 +1,83 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "DsMdvSerialize will serialize your data right\n"
+	     "out from under you!\n\nNiles Oien Sptember 2004";
+
+}
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+
+typedef struct {
+  string url;
+  string uniqueName;
+} input_url_t;
+
+paramdef struct input_url_t {
+  p_default = {
+    {
+      url = "mdvp:://localhost::mdv/radar/cart",
+      uniqueName = "Radar"
+    },
+    {
+      url = "mdvp:://localhost::mdv/sat/vis",
+      uniqueName = "satVis"
+    }
+  };
+  p_descr = "Array of input data URLs and unique names.";
+  p_help = "URLs to monitor and send. The unique name is used\n"
+	"to construe the serialized file anme.";
+} input_urls[];
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Maximum file age in REALTIME file triggered mode, seconds.";
+  p_help = "Applies to all URLs specified.";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = "/Some/Dir/Structure";
+  p_descr = "Directory under which output data will be written.";
+  p_help = "Not relative to RAP_DATA_DIR.";
+} outDir;
+
+paramdef string {
+  p_default = "fmqp:://localhost::./fmq.dsSerial";
+  p_descr = "FMQ to write filenames to.";
+  p_help = "Only the filename gets written here.";
+} outFMQ;
+
+
+
+
+
+
+
+

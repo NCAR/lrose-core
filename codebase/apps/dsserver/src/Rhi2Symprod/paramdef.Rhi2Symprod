@@ -1,0 +1,262 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for Rhi2Symprod
+//
+// Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// Jan 2003
+
+commentdef {
+  p_header = "Rhi2Symprod - converts RHI spdb data to symbolic product";
+  p_text = "The RHI azimuths are rendered as tick lines along the direction of each RHI.";
+}
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string {
+  p_default = "manager";
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+} instance;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+    "the use of threads. Set no_threads to TRUE for this type "
+    "of debugging.";
+} no_threads;
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef {
+  p_header = "Server details for support from ServerMgr";
+};
+
+paramdef int {
+  p_default = 5473;
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+} port;
+  
+paramdef int {
+  p_default = -1;
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+    "it will die gracefully. If set to -1, the server never exits.";
+} qmax;
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+    "produce to handle client requests.  If the maximum is reached, "
+    "new clients will receive a SERVICE_DENIED error message and will "
+    "have to request the data again.  If set to -1, no maximum is "
+    "enforced.";
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef {
+  p_header = "AZIMUTH TICKS";
+};
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Tick color";
+  p_help = "Name of color suggested for the tick lines along each azimuth.";
+} tick_color;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Line thickness of icon lines";
+  p_help = "Thickness in pixels.";
+} tick_line_width;
+
+typedef enum {
+  LINETYPE_SOLID,
+  LINETYPE_DASH,
+  LINETYPE_DOT_DASH
+} line_style_t;
+
+paramdef enum line_style_t {
+  p_descr = "Line style for tick marks";
+  p_default = LINETYPE_SOLID;
+} tick_line_style;
+
+typedef struct {
+  double start_range;
+  double end_range;
+} tick_range_t;
+
+paramdef struct tick_range_t {
+  p_default = {
+    { 45, 55 },
+    { 95, 105 },
+    { 145, 155 },
+    { 195, 205 },
+    { 245, 255 }
+  };
+  p_descr = "Array of tick mark ranges.";
+  p_help = "Tick marks will be rendered along the RHI azimuth, between the given ranges, for each set of range limits.";
+} tick_range[];
+
+commentdef {
+  p_header = "RADAR ICON";
+};
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Size of radar icon in pixels";
+  p_help = "The radar position is represented by a cross. This is the length of each arm of the cross in pixels.";
+} radar_icon_size;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Line thickness of radar icon lines";
+  p_help = "Thickness in pixels.";
+} radar_icon_line_width;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of radar icon";
+} radar_icon_color;
+
+commentdef {
+  p_header = "TIME LABEL";
+};
+
+typedef struct {
+  long x;
+  long y;
+} text_offset_t;
+
+typedef enum {
+  VERT_ALIGN_TOP,
+  VERT_ALIGN_CENTER,
+  VERT_ALIGN_BOTTOM
+} vert_align_t;
+
+typedef enum {
+  HORIZ_ALIGN_LEFT,
+  HORIZ_ALIGN_CENTER,
+  HORIZ_ALIGN_RIGHT
+} horiz_align_t;
+
+typedef enum {
+  TEXT_NORM,
+  TEXT_BOLD,
+  TEXT_ITALICS,
+  TEXT_SUBSCRIPT,
+  TEXT_SUPERSCRIPT,
+  TEXT_UNDERLINE,
+  TEXT_STRIKETHROUGH
+} font_style_t;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to add a text label representing the time of the RHI data used.";
+  p_help = "The time label will be placed relative to the radar location.";
+} label_time;
+
+typedef enum {
+  TIME_LABEL_HHMM,
+  TIME_LABEL_HHMMSS,
+  TIME_LABEL_YYYYMMDDHHMMSS
+} time_format_t;
+
+paramdef enum time_format_t {
+  p_default = TIME_LABEL_HHMMSS;
+  p_descr = "Time label format";
+  p_help = "Only relevant if do_time_labelling is TRUE";
+} time_format;
+
+paramdef struct text_offset_t {
+  p_descr = "Pixel offset values for starting the time labelling text";
+  p_help = "Only relevant if do_time_labelling is TRUE";
+  p_default = {0, 15};
+} time_text_offset;
+
+paramdef string {
+  p_descr = "Color for time labels.";
+  p_help = "Only relevant if do_time_labelling is TRUE";
+  p_default = "cyan";
+} time_label_color;
+
+paramdef string {
+  p_descr = "Text background color.";
+  p_help = "Set to empty string to use display background color.";
+  p_default = "";
+} time_label_background_color;
+
+paramdef enum vert_align_t {
+  p_descr = "Vertical alignment for the text";
+  p_default = VERT_ALIGN_CENTER;
+} time_label_vert_align;
+
+paramdef enum horiz_align_t {
+  p_descr = "Horizontal alignment for the text";
+  p_default = HORIZ_ALIGN_CENTER;
+} time_label_horiz_align;
+
+paramdef enum font_style_t {
+  p_descr = "Font style for the text";
+  p_default = TEXT_NORM;
+} time_label_font_style;
+
+paramdef int {
+  p_descr = "Size of font to use for text";
+  p_default = 0;
+} time_label_font_size;
+
+paramdef string {
+  p_descr = "Font name.";
+  p_default = "";
+} time_label_font_name;

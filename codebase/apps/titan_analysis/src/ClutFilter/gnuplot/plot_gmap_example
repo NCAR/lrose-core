@@ -1,0 +1,7 @@
+set title "Example of GMAP on reconstructed spectrum"
+set xlabel "sample"
+set ylabel "Power (dB)" 
+set xrange [0:63]
+set yrange [1.e-10:10]
+set logscale y
+plot 'gmap_filtered.real' title 'Filtered' with lines, 'gmap_unfiltered.real' title 'Combined' with lines, 'gmap_wx_truth.real' title 'Wx truth' with lines

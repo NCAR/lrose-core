@@ -1,0 +1,13 @@
+#! /bin/csh -f
+
+snuff "storm_ident -params storm_ident.rtest"
+snuff "storm_track -params storm_track.rtest"
+snuff "precip_map -params precip_map.refl_fcast"
+snuff "precip_map -params precip_map.precip_fcast"
+snuff "precip_map -params precip_map.precip_accum"
+snuff "forecast_monitor -params forecast_monitor.rtest"
+
+
+
+
+

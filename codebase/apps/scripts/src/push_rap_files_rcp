@@ -1,0 +1,409 @@
+#!/usr/bin/perl
+# push_files_rcp: Push input files from an input directory to another
+# directory using the rcp command.
+#
+# Usage:
+#   push_files_rcp <options>
+#
+# Options:
+#   -help                : Print usage
+#   -copy                : Specify the remote copy command (default = rcp)
+#   -input_dir <dir>     : Input directory (default = ".)
+#   -output_host <host>  : Output host (default = "localhost")
+#   -output_dir <dir>    : Output directory (default = ".")
+#   -output_file <file>  : Gives the filename to use on output if the latest
+#                            input file should always overwrite this given
+#                            output filename.  The default is to have the
+#                            output filename match the input filename.
+#   -flat_output         : Indicates that all of the files should be
+#                          put directly into the output directory and
+#                          not into the individual subdirectories in
+#                          which the source files were found
+#   -date_fname          : Adds the file date to the output filename.  This
+#                          option is only used with the -flat_output option.
+#   -file_perm <perm>    : Makes sure the file has the given permissions
+#                          on the destination host, for example you might
+#                          use -file_perm 0664.
+#   -interval <interval> : Data dir polling interval (default = 2)
+#   -instance <instance> : Procmap instance (default = "Test")
+#   -dont_send_ldata     : Indicates that the latest_data_info file SHOULDN'T
+#                          be copied to the output directory.
+#   -debug               : Print debug messages
+#
+# N. Rehak  June 1997 NCAR/RAP
+#
+
+
+require 'stat.pl';
+
+use Getopt::Long;
+
+#
+# Get the required RAP libraries
+#
+
+use Env qw(RAP_LIB_DIR);
+use Env qw(RAP_SHARED_LIB_DIR);
+use lib "$RAP_SHARED_LIB_DIR/perl5/";
+use lib "$RAP_LIB_DIR/perl5/";
+use Toolsa;
+
+# Get the program basename.
+($prog = $0) =~ s|.*/||;
+
+# Unbuffer output.
+$| = 1;
+
+# Initialize command line arguments
+$opt_copy = "rcp";                 # Remote copy command
+$opt_input_dir = ".";              # Local input data directory.
+$opt_output_host = "localhost";    # Remote output host
+$opt_output_dir = ".";             # Remote output data directory.
+$opt_output_file = "";             # Output filename.
+$opt_file_perm = "";               # Destination file permissions
+$opt_interval = 2;		   # Data directory polling interval.
+$opt_instance = "Test";            # Procmap instance
+$opt_debug = 0;                    # Debug mode
+
+# Save the usage to print to the user if there is a problem
+$usage =
+    "Usage: $prog [options]\n" .
+    "Options:\n" .
+    "   -help                : Print usage\n" .
+    "   -copy                : Specify the remote copy command (default = $opt_copy)\n" .
+    "   -input_dir <dir>     : Local input dir (default = $opt_input_dir)\n" .
+    "   -output_host <host>  : Remote output host (default = $opt_output_host)\n" .
+    "   -output_dir <dir>    : Remote output dir (default = $opt_output_dir)\n" .
+    "   -output_file <file>  : Gives the filename to use on output if the latest\n" .
+    "                            input file should always overwrite this given\n" .
+    "                            output filename.  The default is to have the\n" .
+    "                            output filename match the input filename.\n" .
+    "   -flat_output         : Indicates that all of the files should be\n" .
+    "                          put directly into the output directory and\n" .
+    "                          not into the individual subdirectories in\n" .
+    "                          which the source files were found\n" .
+    "   -date_fname          : Adds the file date to the output filename.  This\n" .
+    "                          option is only used with the -flat_output option.\n" .
+    "   -file_perm <perm>    : Makes sure the file has the given permissions\n" .
+    "                          on the destination host, for example you might\n" .
+    "                          use -file_perm 664.\n" .
+    "   -interval <interval> : Data dir polling interval (default = $opt_interval\n" .
+    "   -instance <instance> : Procmap instance (default = $opt_instance)\n" .
+    "   -dont_send_ldata     : Indicates that the latest_data_info file SHOULDN'T\n" .
+    "                          be copied to the output directory.\n" .
+    "   -debug               : Print debug messages\n";
+
+# Get the arguments from the command line
+
+$result = &GetOptions('help',
+		      'copy=s',
+		      'input_dir=s',
+		      'output_host=s',
+		      'output_dir=s',
+		      'output_file=s',
+		      'flat_output',
+		      'date_fname',
+		      'file_perm=s',
+		      'interval=i',
+		      'instance=s',
+		      'dont_send_ldata',
+		      'debug');
+
+if ($result == 0 ||
+    $opt_help)
+{
+    print $usage;
+    exit 0;
+}
+
+if ($opt_debug)
+{
+    print "Command Line Options:\n";
+    print "   help = $opt_help\n";
+    print "   copy = $opt_copy\n";
+    print "   input_dir = $opt_input_dir\n";
+    print "   output_host = $opt_output_host\n";
+    print "   output_dir = $opt_output_dir\n";
+    print "   output_file = $opt_output_file\n";
+    print "   flat_output = $opt_flat_output\n";
+    print "   date_fname = $opt_date_fname\n";
+    print "   file_perm = $opt_file_perm\n";
+    print "   interval = $opt_interval\n";
+    print "   instance = $opt_instance\n";
+    print "   dont_send_ldata = $opt_dont_send_ldata\n";
+    print "   debug = $opt_debug\n";
+    print "\n";
+}
+
+# Verify the local directory.
+die "$opt_input_dir: no such file or directory" unless -d $opt_input_dir;
+
+# Initialize PMU usage
+&Toolsa::PMU_auto_init($prog, $opt_instance, 60);
+
+# Set up signal handlers so we unregister from the process mapper
+# when we quit
+
+$SIG{INT} = \&tidy_and_exit;
+$SIG{KILL} = \&tidy_and_exit;
+$SIG{HUP} = \&tidy_and_exit;
+$SIG{TERM} = \&tidy_and_exit;
+
+# Monitor the data directory for new files.
+while ()
+{
+    # Register with the process mapper
+    &Toolsa::PMU_auto_register("Waiting for data");
+
+    # Get the current index file's modification time.
+    ($mtime = (stat("$opt_input_dir/_latest_data_info"))[$ST_MTIME]) ||
+	next;
+
+    if ($mtime > $old_mtime)
+    {
+	if ($opt_debug)
+	{
+	    print "Index file changed\n";
+	}
+
+	# We have a new input file, read the latest_data_info to
+	# determine the input file's name
+	open(LDATA_FILE, "$opt_input_dir/_latest_data_info") ||
+	    die "Can't open $opt_input_dir/_latest_data_info";
+
+	# Read the contents of the current index file.  It contains:
+	chop($ldata_date_string = <LDATA_FILE>);
+	chop($ldata_ext = <LDATA_FILE>);
+	
+	close(LDATA_FILE);
+
+	# Extract the date information
+	($ldata_unix_time, $ldata_year, $ldata_month, $ldata_day,
+	 $ldata_hour, $ldata_min, $ldata_sec) = split ' ', $ldata_date_string;
+
+	# Build the paths
+	$data_dir = sprintf("%d%02d%02d",
+			    $ldata_year,
+			    $ldata_month,
+			    $ldata_day);
+
+	$data_filename = sprintf("%02d%02d%02d.%s",
+				 $ldata_hour,
+				 $ldata_min,
+				 $ldata_sec,
+				 $ldata_ext);
+
+	if ($opt_debug)
+	{
+	    print "file = $opt_input_dir/$data_dir/$data_filename\n";
+	}
+
+	# Determine the input and output paths
+	$input_file = "$opt_input_dir/$data_dir/$data_filename";
+
+	if (length($opt_output_file) > 0)
+	{
+	    $output_file = "$opt_output_host:$opt_output_dir/$opt_output_file";
+	}
+	elsif ($opt_flat_output)
+	{
+	    if ($opt_date_fname)
+	    {
+		$output_file = "$opt_output_host:$opt_output_dir/$data_dir\_$data_filename";
+	    }
+	    else
+	    {
+		$output_file = "$opt_output_host:$opt_output_dir/$data_filename";
+	    }
+	}
+	else
+	{
+	    $output_file = "$opt_output_host:$opt_output_dir/$data_dir/$data_filename";
+	}
+	
+	# Register with the process mapper
+	&Toolsa::PMU_auto_register("Copying $input_file to $output_file");
+
+	# Make sure the remote directory exists
+	if (!$opt_flat_output &&
+	    length($opt_output_file) <= 0)
+	{
+	    $command = "mkdir $opt_output_dir/$data_dir";
+
+	    if ($opt_debug)
+	    {
+		print "\n" .
+		    "Executing command: $command on host $opt_output_host\n";
+	    }
+	
+	    rsh($opt_output_host, 10, $command);
+	}
+
+	# check that remote location is available before any copying occurs
+	if ($opt_copy eq "scp")
+	{
+	    $rsh_cmd = "ssh";
+	}
+	elsif ($opt_copy eq "rcp")
+	{
+	    $rsh_cmd = "rsh";
+	}
+	else
+	{
+	    die "unknown copy command $opt_copy.\n";
+	}
+
+	if ($opt_debug)
+	{
+	    print "using $rsh_cmd shell.\n";
+	}
+
+	unless(@dir_stuff = qx/$rsh_cmd $opt_output_host "ls -a1 $opt_output_dir"/) {
+	    die "unable to find $opt_output_host:$opt_output_dir\n";
+	}
+
+	if ($opt_debug)
+	{
+	    print "the contents of $opt_output_host:$opt_output_dir are:\n @dir_stuff\n";
+	}
+
+	# Change the file permissions if requested
+
+	if (length($opt_file_perm) > 0)
+	{
+	    # Change the file permissions
+
+	    $file_perm = oct($opt_file_perm);
+
+	    chmod($file_perm, $input_file);
+	}
+
+	# Copy the file to the remote host
+
+	$command = "$opt_copy -p $input_file $output_file";
+
+	if ($opt_debug)
+	{
+	    print "\n" .
+		"Executing command: $command\n";
+	}
+	
+	((system($command) >> 8) == 0) ||
+	    warn "system: $command: error";
+
+	# Copy the current file index to the remote location
+
+	if (!$opt_dont_send_ldata)
+	{
+	    $command = "$opt_copy $opt_input_dir/_latest_data_info " .
+		"$opt_output_host:$opt_output_dir/.";
+
+	    ((system($command) >> 8) == 0) ||
+		warn "system: $command: error";
+	}
+
+	# Prepare for the next iteration of the loop.
+
+	$old_mtime = $mtime;
+    }
+}
+continue
+{
+    sleep($opt_interval);
+}
+
+
+# &rsh: Run a command on a remote system, with a timeout.
+# Arguments:
+#     $remote: the name of the remote system.
+#     $timeout: the timeout, in seconds.
+#     @rcmd: an array consisting of shell commands to be passed to the
+#         remote system.  The elements of the array are (implicitly)
+#         joined with a space character before being passed to exec().
+# Returns: the output of rsh(1), or undef on timeout or authentication
+#     failure.
+sub rsh
+{
+    my($remote, $timeout, @rcmd) = @_;
+    my($ruser, $result, $cpid, $tmp);
+
+    # Has a different remote user been specified?
+    ($ruser, $remote) = split(/@/, $remote, 2) if $remote =~ /@/;
+
+    if ($opt_copy eq "scp")
+    {
+	$rsh_cmd = "ssh";
+    }
+    elsif ($opt_copy eq "rcp")
+    {
+	$rsh_cmd = "rsh";
+    }
+    else
+    {
+	die "unknown copy command $opt_copy.\n";
+    }
+
+    if ($ruser)
+    {
+	$rcmd = "$rsh_cmd $remote -n -l $ruser @rcmd";
+    }
+    else
+    {
+	$rcmd = "$rsh_cmd $remote -n @rcmd";
+    }
+
+    # Child code.
+    unless ($cpid = fork)
+    {
+	# Temporary file for output.
+	$tmp = "/tmp/rshout.$$";
+	open(STDOUT, ">$tmp") || die "$$: open: $tmp: $!";
+	open(STDERR, ">&STDOUT");
+
+	# Set up the timeout.
+	alarm($timeout);
+
+	exec("$rcmd");
+	die "exec: $!";
+    }
+
+    # wait(2) for the child process to exit.
+    warn "waitpid: $!" if waitpid($cpid, 0) < 0;
+
+    # The child terminated abnormally or with a bad exit status.
+    if ($? >> 8)
+    {
+	print "Remote command error: PID $cpid.\n" if $debug;
+	undef $result;
+    }
+    # The process completed normally.  Gather the output.
+    else
+    {
+	# Ensure a null string is returned if there is no output
+	# from rsh(1).
+	$result = "";
+
+	$tmp = "/tmp/rshout.$cpid";
+	open(TMP, $tmp) || die "open: $tmp: $!";
+	while (<TMP>)
+	{
+	    $result .= $_;
+	    $result .= "\n" unless /\n$/;
+	}
+	close(TMP) || warn "close: $tmp: $!";
+    }
+    unlink($tmp) || warn "unlink: $tmp: $!" if -f $tmp;
+
+    # Return the result.
+    $result;
+}
+
+# Exit in a "tidy" fashion
+
+sub tidy_and_exit
+{
+    my $signame = shift;
+    &Toolsa::PMU_auto_unregister();
+    die "Exiting on signal SIG$signame";
+}
+

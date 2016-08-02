@@ -1,0 +1,113 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvFine2Coarse runs an averaging window over MDV\n"
+	"data to effect a change from a fine grid to a coarse\n"
+	"grid. This differs from the typical MDV remapping in that\n"
+	"averaging, rather than nearest neighbor, is used.\n"
+         "User can select Min, Mean or Max filtering.";
+
+}
+
+paramdef string {
+  p_descr = "URL to trigger off, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Program runs when new data appear here."; 
+  p_default = {"mdvp:://localhost::mdv/input"};
+} TriggerUrl;
+ 
+paramdef string {
+  p_descr = "Output mdv URL, typically of the form\n"
+	    "mdvp:://host.domain:[port]:dir/dir";
+  p_help = "Derived satellite fields are written here."; 
+  p_default = {"mdvp:://localhost::mdv/smoothed"};
+} OutUrl;
+
+paramdef int {
+  p_descr = "HalfWin defines the window size";
+  p_help = "Actual window is 2*HalfWin + 1 square,\n"
+           "ie. HalfWin = 2   =>  5x5 window"; 
+  p_default = 2;
+} HalfWin;
+          
+typedef enum {
+  MIN, MAX, MEAN, MEDIAN
+} smoothing_method_t;
+
+paramdef enum smoothing_method_t {
+  p_descr = "To take the median, min, mean or max from the window.";
+  p_default = MEAN;
+  p_help = "Typically set to MEAN";
+} SmoothingMethod;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef enum mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = {REALTIME};
+  p_descr = "Operation mode";
+  p_help = "Archive mode automatically invoked by -interval option.";
+} Mode;
+    
+paramdef int {
+  p_default = 1800;
+  p_private = FALSE;
+  p_descr = "Maximum valid age for files";
+  p_help = "REALTIME mode only.";
+} MaxRealtimeValidAge;         
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_private = FALSE;
+  p_descr = "Set to print debugging messages.";
+  p_help = "Defaults to FALSE";
+} Debug;   
+
+paramdef string {
+  p_default = { "VisField", "IRField" };
+  p_private = FALSE;
+  p_descr = "Input field names to process - or use '#2' to indicate field\n"
+            "two (fields start at 0 in this case).";
+  p_help = "Must have matching entry in TakeMaximum array (below) for\n"
+           "each field name entered.";
+} InFieldName[];   
+
+paramdef string {
+  p_default = { "DBZ" };
+  p_private = FALSE;
+  p_descr = "Input field names to undo the log function in\n"
+	"dbz for.";
+  p_help = "These input fields are taken as being DBZ. The\n"
+	"dbz = 10*log10(Z) relationship is undone to obtain\n"
+	"Z values in these cases, the smoothing is done on Z,\n"
+	"and then the dbz = 10*log10(Zsmoothed) relationship is\n"
+	"applied before output.";
+} undoLogDbzNames[];   
+
+

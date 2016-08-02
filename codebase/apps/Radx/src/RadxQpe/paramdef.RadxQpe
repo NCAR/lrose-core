@@ -1,0 +1,564 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for RadxQpe
+//
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "RadxQpe program";
+  p_text = "Produce quantitative precipitation estimates on a grid";
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+commentdef
+{
+  p_header = "PROCESS CONTROL";
+  p_text = "Parameters associated with process control (registering, signals..)";
+}
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = FALSE;
+} debug_norm;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "Debug flag.";
+  p_default = FALSE;
+} debug_verbose;
+
+paramdef boolean
+{
+  p_default = FALSE;
+} debug_triggering;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_help = "TRUE to show real time in all logged messages";
+} debug_show_realtime;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_help = "TRUE to show the C++ class and method in the logged messages";
+} debug_show_class_and_method;
+
+
+commentdef {
+  p_header = "THREADING FOR SPEED.";
+}
+
+paramdef int {
+  p_default = 4;
+  p_min = 1;
+  p_descr = "The number of compute threads.";
+  p_help = "The interpolation are segmented in azimuth, with each thread computing an azimuth. For maximum performance, n_threads should be set to the number of processors multiplied by 4. For further tuning, use top to maximize CPU usage while varying the number of threads. If set to 1, threading is disabled";
+} n_compute_threads;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Thread debug";
+  p_help = "Set to true to see debug information regarding threading";
+} threads_debug;
+
+///////////////////////////////////////////////////////////////////////////////
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+  p_text = "Parameters to control the QPE algorithm itself.";
+}
+
+paramdef double
+{
+  p_descr = "azimuth res";
+  p_help = "Output azimuthal resolution in degrees";
+  p_default = 1.0;
+} azimuthal_resolution_degrees;
+
+paramdef double
+{
+  p_descr = "SNR threshold";
+  p_help = "When SNR < min_snr a higher elevation angle is used, which happens only when there is input SNR data configured for";
+  p_default = 5.0;
+} min_snr;
+
+paramdef double
+{
+  p_descr = "Beam blockage threshold";
+  p_help = "When beam blockage percentage > max_beam_block_percent, a higher elevation angle is used";
+  p_default = 0.25;
+} max_beam_block_percent;
+
+paramdef double
+{
+  p_descr = "Max height of beam for valid precip rate (km MSL).";
+  p_help = "If beam is above this height, the precip rate is set to 0.";
+  p_default = 6.0;
+} max_beam_height_km_msl;
+
+paramdef double
+{
+  p_descr = "Minimum valid precip rate (mm/hr).";
+  p_help = "If rate is less than this, it is set to 0.";
+  p_default = 1.0;
+} min_valid_precip_rate;
+
+///////////////////////////////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "INPUTS/OUTPUTS";
+  p_text = "Parameters associated with inputs and outputs. The input precip fields are found in the rainrate_fields struct. One rainrate output field is produced for each precip field. Additional diagnostic output fields are given in the output_fields struct array.\n"
+"Up to two output formats are allowed, Polar and Cartesian, where the Cartesian is an interpolation of the Polar, and the Polar is a two dimensional grid with the same radar polar dimensions as the input data. To disable either of these outputs, set its URL to the empty string.";
+}
+
+paramdef string
+{
+  p_header = "input data";
+  p_help = "URL of input data";
+  p_default = "unknown";
+} data_url;
+
+paramdef int
+{
+  p_header = "time margin";
+  p_help = "expected maximum difference between start and end times for volume, in seconds";
+  p_default = 500;
+} volume_time_margin_seconds;
+
+paramdef string
+{
+  p_header = "input data signal to noise ratio name";
+  p_help = "field name, SNR, empty for no SNR useage";
+  p_default = "SNR";
+} snr_field;
+
+paramdef string
+{
+  p_header = "input data PID name";
+  p_help = "field name, PID";
+  p_default = "PID";
+} pid_field;
+
+paramdef string
+{
+  p_header = "input beam block data";
+  p_help = "path of input beam block data (assumed on local host, RadxVol)";
+  p_default = "unknown";
+} beam_block_path;
+
+paramdef string
+{
+  p_header = "input beam block field name to use";
+  p_help = "field name, extended maximum beam blockage percentage";
+  p_default = "BEAME";
+} beam_block_field;
+
+typedef enum {
+  OUTPUT_FLOAT, OUTPUT_SHORT, OUTPUT_BYTE
+} output_encoding_t;
+  
+  
+typedef struct {
+  string input_precip_name;
+  string output_rainrate_name;
+  string long_name;
+  string standard_name;
+  string units;
+  output_encoding_t encoding;
+} rainrate_field_t;
+
+paramdef struct rainrate_field_t {
+  p_default = {
+    {"RATE_HIDRO", "RATE_HIDRO", "RATE_HIDRO", "RATE_HIDRO", "mm/h",  OUTPUT_FLOAT}
+  };
+  p_descr = "The array of rain rate input/output fields.";
+  p_help = "The program will read in one precip field per entry here, and produce an output rain rate field from it. Long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data.";
+} rainrate_fields[];
+
+
+typedef enum {
+  PID, HEIGHT, RANGE, NUM_BLOCKED, NUM_LOW_SNR, NUM_CLUTTER, MASK
+} output_data_t;
+
+typedef struct {
+  string name;
+  string long_name;
+  string standard_name;
+  string units;
+  output_encoding_t encoding;
+  output_data_t type;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    {"PID",    "PID", "PID", "none",  OUTPUT_FLOAT, PID},
+    {"HEIGHT", "HEIGHT", "HEIGHT", "km",  OUTPUT_FLOAT, HEIGHT},
+    {"RANGE", "RANGE", "RANGE", "km",  OUTPUT_FLOAT, RANGE},
+    {"NBLOCK", "NBLOCK", "NBLOCK", "count", OUTPUT_FLOAT, NUM_BLOCKED},
+    {"NLOW_SNR", "NLOW_SNR", "NLOW_SNR", "count", OUTPUT_FLOAT, NUM_LOW_SNR},
+    {"NCLUT", "NCLUT", "NCLUT", "count", OUTPUT_FLOAT, NUM_CLUTTER},
+    {"MASK", "MASK", "MASK", "mask", OUTPUT_FLOAT, MASK}
+  };
+  p_descr = "Array of additional output fields besides the rain rate fields.";
+  p_help = "The program will output these fields in addition to the rain rate output fields. long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data. These fields are more for diagnostic use. The MASK field itself is set to 1 over the entire grid so you can see the domain.";
+} output_fields[];
+
+
+commentdef {
+  p_header = "POLAR OUTPUT DATA SET INFORMATION";
+  p_text = "The output is CfRadial files, and other formats to the extent supported by the format.";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "Title string for netCDF file.";
+} title;
+
+paramdef string {
+  p_default = "EOL/NCAR";
+  p_descr = "Institution string for netCDF file.";
+} institution;
+
+paramdef string {
+  p_default = "";
+  p_descr = "References string for netCDF file.";
+} references;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Source string for netCDF file.";
+} source;
+
+paramdef string {
+  p_default = "";
+  p_descr = "History string for netCDF file.";
+} history;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Comment string for netCDF file.";
+} comment;
+
+commentdef {
+  p_header = "POLAR OUTPUT FORMAT";
+}
+
+typedef enum {
+  OUTPUT_FORMAT_CFRADIAL,
+  OUTPUT_FORMAT_DORADE,
+  OUTPUT_FORMAT_FORAY,
+  OUTPUT_FORMAT_NEXRAD,
+  OUTPUT_FORMAT_UF,
+  OUTPUT_FORMAT_MDV_RADIAL
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = OUTPUT_FORMAT_CFRADIAL;
+  p_descr = "Format for the output files.";
+} output_format;
+
+typedef enum {
+  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
+} netcdf_style_t;
+
+paramdef enum netcdf_style_t {
+  p_default = NETCDF4;
+  p_descr = "NetCDF style - if output_format is CFRADIAL";
+  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
+} netcdf_style;
+
+commentdef {
+  p_header = "POLAR OUTPUT BYTE-SWAPPING and COMPRESSION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to leave data in native byte order.";
+  p_help = "If false, data will be byte-swapped as appropriate on output.";
+} output_native_byte_order;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compress data fields on output.";
+  p_help = "Applies to netCDF and Dorade. UF does not support compression.";
+} output_compressed;
+
+commentdef {
+  p_header = "POLAR OUTPUT OPTIONS FOR CfRadial FILES";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the use of ragged arrays for CfRadial files.";
+  p_help = "Only applies to CfRadial. If true, forces the use of ragged arrays even if the number of gates for all rays is constant.";
+} output_force_ngates_vary;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Compression level for output, if compressed.";
+  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
+} compression_level;
+
+commentdef {
+  p_header = "POLAR OUTPUT DIRECTORY AND FILE NAME";
+}
+
+paramdef string {
+  p_default = "/tmp/RadxQpe/polar";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory. Set empty for no polar output";
+} output_dir;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.";
+} output_filename_mode;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out individual sweeps if appropriate.";
+  p_help = "If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.";
+} write_individual_sweeps;
+
+commentdef {
+  p_header = "REGISTERING LATEST DATA INFO";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
+commentdef {
+  p_header = "CARTESIAN GRID PROJECTION AND XY DETAILS, AND OUTPUT SPECIFICATION";
+  p_text = "The Cartesian grid is an additional optional output, where the polar data is interpolated to a PPI grid.";
+}
+
+
+paramdef string {
+  p_default = "/tmp/RadxQpe/cart";
+  p_descr = "Output directory path for cartesian data.";
+  p_help = "Regridded cartesian files will be written to this directory. Set to empty for no cartesian output";
+} output_cartesian_dir;
+
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_MERCATOR =  4,
+  PROJ_POLAR_STEREO = 5,
+  PROJ_FLAT = 8,
+  PROJ_OBLIQUE_STEREO = 12,
+  PROJ_TRANS_MERCATOR = 15,
+  PROJ_ALBERS = 16,
+  PROJ_LAMBERT_AZIM = 17,
+  PROJ_VERT_PERSP = 18
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_FLAT;
+  p_descr = "Projection for cartesian grid. See projection param below.";
+  p_help =
+  "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
+  "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
+  "\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n"
+  "\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n"
+  "\tPROJ_MERCATOR: Mercator - EW orientation\n"
+  "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
+  "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
+  "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
+  "\tPROJ_ALBERS: Albers Equal Area Conic\n"
+  "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
+} grid_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_xy_geom_t;
+
+paramdef struct grid_xy_geom_t {
+  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
+  p_descr = "Cartesian grid parameters in x,y.";
+  p_help = "Units in km, except LATLON, which is in degrees.";
+} grid_xy_geom;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Cartesian Grid rotation.";
+  p_help = "This applies only to PROJ_FLAT projections.";
+} grid_rotation;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to set the Cartesian grid origin at the radar.";
+  p_help = "If true, the latitude and longitude of the grid origin will be set at the radar location. If false, grid_origin_lat and grid_origin_lon will be used. This does not apply for moving platforms.";
+} center_grid_on_radar;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Cartesian Grid origin latitude.";
+   p_help = "This applies to all projections except LATLON. Not used if 'center_grid_on_radar' is true.";
+} grid_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Cartesian Grid origin longitude.";
+  p_help = "This applies to all projections except LATLON. Not used if 'center_grid_on_radar' is true.";
+} grid_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Cartesian Grid reference latitude 1.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} grid_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Cartesian Grid reference latitude 2.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} grid_lat2;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Cartesian Central scale for projections.";
+  p_help = "This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR projections.";
+} grid_central_scale;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Cartesian Tangent latitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO only.";
+} grid_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Cartesian Tangent longitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
+} grid_tangent_lon;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
+  p_help = "This applies to POLAR_STEREO. If false, the projection is over thouth pole.";
+} grid_pole_is_north;
+
+paramdef double {
+  p_default = 35786;
+  p_descr = "Radius of perspective point (km).";
+  p_help = "This applies to VERT_PERSP.";
+} grid_persp_radius;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "False northing correction.";
+  p_help = "Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude";
+} grid_false_northing;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "False easting correction.";
+  p_help = "Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.";
+} grid_false_easting;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Do you want to specify an offset origin using lat/lon instead of false_northing and false_easting?";
+  p_help = "If true, set grid_offset_origin_latitude and grid_offset_origin_longitude.";
+} grid_set_offset_origin;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Latitude of offset origin.";
+  p_help = "See grid_set_offset_origin.";
+} grid_offset_origin_latitude;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Longitude of offset origin.";
+  p_help = "See grid_set_offset_origin.";
+} grid_offset_origin_longitude;
+
+paramdef int {	
+  p_default = 3;
+  p_min = 1;
+  p_max = 8;
+  p_descr = "Minimum number of valid data points for the interpolation.";
+  p_help = "The program performs an 8-point linear interpolation. This is the number of valid data points, out of the possible 8, which must be present for interpolation to proceed. A high number will exclude marginal points. A low number will include marginal points.";
+} min_nvalid_for_interp;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set 'is_discrete' flag for individual fields.";
+  p_descr = "If TRUE, the specified fields will be treated as holding discrete values, and the nearest neighbor approach will be used rather than nearest neighbor. You should do this for fields such as PID (particle ID).";
+} set_discrete_fields;
+
+typedef struct {
+  string input_name;
+  boolean is_discrete;
+} discrete_field_t;
+
+paramdef struct discrete_field_t {
+  p_default = {
+    {
+      input_name = "PID",
+      is_discrete = TRUE
+    }
+  };
+  p_descr = "Use this to set the 'is_discrete' flag on a field.";
+  p_help = "If this is specified, nearest neighbor will be used for this field. You can use this to override the is_discrete flag on a field.";
+} discrete_fields[];
+
+commentdef {
+  p_header = "SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the standard 4/3 earth radius model for refraction.";
+  p_help = "If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.";
+} override_standard_pseudo_earth_radius;
+
+paramdef double {
+  p_default = 1.33333333;
+  p_descr = "Ratio for computing the pseudo earth radius for beam height computations.";
+  p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
+} pseudo_earth_radius_ratio;
+
+
+

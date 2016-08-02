@@ -1,0 +1,63 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "The idea here is that many ltg input files\n"
+	"can be processed into a single file for lmaGridder";
+
+}
+
+paramdef string {
+  p_descr = "Input directory.";
+  p_help = "LMA files with names like\n"
+	"LYLOUT_071128_235000_0060.dat should\n"
+	"be in here"; 
+  p_default = {"/Some/Directory/Structure"};
+} inDir;
+ 
+paramdef string {
+  p_descr = "Output file to write.";
+  p_help = "Name of the output file."; 
+  p_default = {"/some/output/file.dat"};
+} outFile;
+
+paramdef string {
+  p_descr = "Output file that is a list of the input files used.";
+  p_help = "May be useful for debugging."; 
+  p_default = {"/some/output/list.dat"};
+} listFile;
+
+paramdef string {
+  p_descr = "Time range to do extraction over.";
+  p_help = "UTC. Only full days are allowed."; 
+  p_default = {"2007/11/29 2007/11/30"};
+} timeRange;
+
+
+paramdef boolean {
+  p_descr = "Option to print verbose messages while processing.";
+  p_help = "May be worth doing if it takes a long time and\n"
+	"we want to monitor progress."; 
+  p_default = FALSE;
+} verbose;

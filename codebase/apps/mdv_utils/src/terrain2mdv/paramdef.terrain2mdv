@@ -1,0 +1,186 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for terrain2mdv
+ *
+ */
+
+paramdef enum debug_t {
+  p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
+  p_default = {DEBUG_OFF};
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef enum proj_t {
+  p_options = {FLAT, LATLON};
+  p_default = {FLAT};
+  p_descr = "Map projection to use for output";
+  p_help = "Map projection to use for output";
+} proj; 
+
+paramdef enum output_type_t {
+  p_options = {MDV, NETCDF};
+  p_default = {MDV};
+  p_descr = "File type to use for output - mdv or NetCDF";
+  p_help = "File type to use for output - mdv or NetCDF";
+} output_type;
+
+paramdef enum input_type_t {
+  p_options = {USGS, GTOPO30};
+  p_default = {USGS};
+  p_descr = "File type to use for input - USGS 3sec ascii or Global 30sec binary";
+  p_help = "File type to use for intput - USGS 3sec ascii or Global 30sec binary";
+} input_type;
+
+paramdef boolean {
+  p_descr = "Set missing data to zero (oceans are sometimes flagged missing)";
+  p_default = {TRUE};
+} missing_is_zero;
+
+paramdef double {
+  p_descr = "South grid edge in degrees";
+  p_help  = "South grid edge in degrees";
+  p_default = { 38.0 };
+} map_south;
+
+paramdef double {
+  p_descr = "North grid edge in degrees";
+  p_help  = "North grid edge in degrees";
+  p_default = { 40.0 };
+} map_north;
+
+paramdef double {
+  p_descr = "West grid edge - West longitude is negative - in degrees";
+  p_help  = "West grid edge - West longitude is negative - in degrees";
+  p_default = { -92.0 };
+} map_west;
+
+paramdef double {
+  p_descr = "East grid edge - West longitude is negative - in degrees";
+  p_help  = "East grid edge - West longitude is negative - in degrees";
+  p_default = { -90.0};
+} map_east;
+
+paramdef double {
+  p_descr = "Scale value for MDV file";
+  p_help  = "Scale value for MDV file";
+  p_default = { 10.0};
+} scale;
+
+paramdef double {
+  p_descr = "Bias  value for MDV file";
+  p_help  = "Bias  value for MDV file";
+  p_default = { 0.0};
+} bias;
+
+paramdef double {
+  p_descr = "Grid latitude center for XY projection";
+  p_help  = "Grid latitude center for XY projection";
+  p_default = { 40.0};
+} lat;
+
+paramdef double {
+  p_descr = "Grid longitude center for XY projection";
+  p_help  = "Grid longitude center for XY projection";
+  p_default = { -98.0};
+} lon;
+
+paramdef long   {
+  p_descr = "Grid minimum X value (km)";
+  p_help  = "Grid minimum X value (km)";
+  p_default = { -100.0};
+} xmin;
+
+paramdef long   {
+  p_descr = "Grid minimum Y value (km)";
+  p_help  = "Grid minimum Y value (km)";
+  p_default = { -100.0};
+} ymin;
+
+paramdef long   {
+  p_descr = "Grid maximum X value (km)";
+  p_help  = "Grid maximum X value (km)";
+  p_default = { 100.0};
+} xmax;
+
+paramdef long   {
+  p_descr = "Grid maximum Y value (km)";
+  p_help  = "Grid maximum Y value (km)";
+  p_default = { 100.0};
+} ymax;
+
+paramdef char* {
+  p_default = {"terrain.mdv"};
+  p_descr = "Output file name ";
+} outfname;
+
+paramdef char* {
+  p_default = {"null"};
+  p_descr = "Output directory";
+  p_help = "Path of output directory";
+} output_dir;
+
+paramdef double {
+  p_descr = "SW corner latitude of input file/tile in degrees";
+  p_help  = "SW corner latitude of input file/tile in degrees";
+  p_default = { 30.0 };
+} tile_lat;
+
+paramdef double {
+  p_descr = "SW corner longitude of input file/tile in degrees";
+  p_help  = "SW corner longitude of input file/tile in degrees";
+  p_default = { -100.0 };
+} tile_lon;
+
+paramdef long {
+  p_descr = "Number of rows in input file/tile";
+  p_help  = "Number of rows in input file/tile";
+  p_default = { 3600.0 };
+} tile_nlats;
+
+paramdef long {
+  p_descr = "Number of columns in input file/tile";
+  p_help  = "Number of columns in input file/tile";
+  p_default = { 4800.0 };
+} tile_nlons;
+
+paramdef double {
+  p_descr = "grid spacing of input file/tile in arc seconds";
+  p_help  = "grid spacing of input file/tile in arc seconds";
+  p_default = { 30 };
+} tile_delta;
+
+paramdef double {
+  p_descr = "input data set bad-value";
+  p_help  = "input data set bad-value";
+  p_default = { -9999.0 };
+} input_bad_value;
+
+paramdef long   {
+  p_descr = "Output grid max size";
+  p_help  = "Output grid max size";
+  p_default = { 750};
+} output_grid_size;
+

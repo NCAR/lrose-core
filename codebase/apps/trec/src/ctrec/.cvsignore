@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+ctrec
+makefile
+makefile.am
+makefile.in

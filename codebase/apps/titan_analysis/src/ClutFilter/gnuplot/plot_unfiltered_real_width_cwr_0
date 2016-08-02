@@ -1,0 +1,7 @@
+set title "SPECTRUM WIDTH, Unfiltered real spectra, CWR 0 dB"
+set xlabel "Width truth (m/s)" 
+set ylabel "Width unfiltered (m/s)"
+set xrange [0:6]
+set yrange [0:6]
+plot 'ssef_real_cwr_0.out' using 5:11 title ''
+

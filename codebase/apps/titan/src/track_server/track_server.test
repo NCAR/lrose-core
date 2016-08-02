@@ -1,0 +1,230 @@
+/****************************************************
+ * TDRP params for track_server
+ ****************************************************/
+
+/*
+ * Debug option.
+ * If set, debug messages will be printed appropriately. DEBUG_EXTRA
+ *   and above suppresses the spawning of child processes.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM,
+ *   DEBUG_EXTRA, DEBUG_VERBOSE.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * Malloc debug level.
+ * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
+ *   and checks, 3 - printout of all mallocs etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * Process and server instance.
+ * Used for registration with procmap and servmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+instance = "Test";
+
+/*
+ * Server subtype.
+ * Used for registration with servmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+subtype = "Dobson";
+
+/*
+ * Server info.
+ * Used for registration with servmap.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+info = "Test";
+
+/*
+ * Server port number.
+ * TCP/IP port for this server.
+ *
+ * Type: long
+ * Default: 44000 
+ * Min value: 10000 
+ */
+port = 44011;
+
+/*
+ * Storm data directory.
+ * Directory holding the storm data.
+ *
+ * Type: string
+ * Default: "." 
+ */
+storm_data_dir = "$(TITAN_HOME)/storms";
+
+/*
+ * Use memory-mapped IO.
+ * Use memory-mapped IO for access to storm and track files.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+use_mmio = FALSE;
+
+/*
+ * Real-time flag.
+ * If set, indicates real-time data is available, shmem is created.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+realtime_avail = FALSE;
+
+/*
+ * Max packet length.
+ * Max length of packets for communicating with clients.
+ *
+ * Type: long
+ * Default: 100000 
+ * Min value: 10000 
+ */
+max_packet_length = 100000;
+
+/*
+ * Send invalid forecasts flag.
+ * Product output mode. If set, all forecasts will be sent. If not,
+ *   only those marked valid will be sent.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_send_invalid_forecasts = FALSE;
+
+/*
+ * Forecast lead time (secs).
+ * Lead time for forecast shapes and positions.
+ *
+ * Type: long
+ * Default: 1800 
+ */
+product_mode_forecast_lead_time = 1800;
+
+/*
+ * Product id.
+ * The product server uses this id to select a transformation routine.
+ *
+ * Type: long
+ * Default: 10100 
+ * Min value: 1 
+ */
+product_mode_product_id = 10100;
+
+/*
+ * Plot current shape flag.
+ * Product output mode. If set, the current storm shape will be
+ *   sent.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_plot_current = FALSE;
+
+/*
+ * Plot forecast shape flag.
+ * Product output mode. If set, the forecast storm shape will be
+ *   sent.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_plot_forecast = FALSE;
+
+/*
+ * Plot shape as ellipse.
+ * Product output mode. If set, the storm shape will be represented
+ *   by and ellipse.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_plot_ellipse = FALSE;
+
+/*
+ * Plot shape as polygon.
+ * Product output mode. If set, the storm shape will be represented
+ *   by and polygon.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_plot_polygon = FALSE;
+
+/*
+ * Plot trend.
+ * Product output mode. If set, the storm size and intensity trend
+ *   will be included as text: '+' or '-'.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_plot_trend = TRUE;
+
+/*
+ * Plot speed as knots.
+ * Product output mode. Default is speed as km/hr.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_speed_knots = FALSE;
+
+/*
+ * Plot speed rounded to nearest 5.
+ * Product output mode. Default is not rounded.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_speed_round = FALSE;
+
+/*
+ * Fixed length arrows flag.
+ * Product output mode. If flag set, direction arrows are of fixed
+ *   lenght. If not set, arrows are scaled to length for time product_mode_forecast_lead_time.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_fixed_length_arrows = FALSE;
+
+/*
+ * Zero growth forecast flag.
+ * Product output mode. If flag set, growth forecasts are forced
+ *   to zero. Default is growth is non-zero.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_zero_growth_forecast = FALSE;
+
+/*
+ * Option to resend old data.
+ * Product output mode. If flag set, previously sent data will
+ *   be resent if the algorithms are rerun. If not, only data later
+ *   than that previously sent will be sent.
+ *
+ * Type: boolean
+ * Default: FALSE 
+ */
+product_mode_resend_old_data = FALSE;
+

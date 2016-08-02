@@ -1,0 +1,234 @@
+/**********************************************************************
+ * TDRP params for RadxMon
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If TRUE, debug messages will be printed.
+// Type: boolean
+//
+
+debug = FALSE;
+
+///////////// verbose /////////////////////////////////
+//
+// Verbose debug option.
+// If TRUE, verbose debug messages will be printed.
+// Type: boolean
+//
+
+verbose = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with the process mapper.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - how the data is read.
+// 	FMQ_INPUT: the application will read the moments a file message 
+//   queue./n/tTCP_INPUT: the app will read the data from a server, via a 
+//   socket./n/tFILE_INPUT: the application will read the files specified 
+//   on the command line.
+//
+// Type: enum
+// Options:
+//     FILE_INPUT
+//     FMQ_INPUT
+//     TCP_INPUT
+//
+
+input_mode = FMQ_INPUT;
+
+///////////// fmq_url /////////////////////////////////
+//
+// FMQ url. For FMQ_INPUT only.
+// URL to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions. For local FMQ, this can be the file path. For a remote 
+//   FMQ, this will be a full URL: 'fmqp:://host::dir'.
+// Type: string
+//
+
+fmq_url = "/tmp/fmq/moments";
+
+///////////// seek_to_start_of_fmq ////////////////////
+//
+// Option to seek to the start of the input FMQ.
+// If FALSE, the program will seek to the end of the fmq and only read 
+//   in new data. If TRUE, it will start reading from the beginning of the 
+//   FMQ.
+// Type: boolean
+//
+
+seek_to_start_of_fmq = FALSE;
+
+///////////// tcp_server_host /////////////////////////
+//
+// Name of host for TCP server. For TCP_INPUT only.
+// Type: string
+//
+
+tcp_server_host = "localhost";
+
+///////////// tcp_server_port /////////////////////////
+//
+// Port for TCP server. For TCP_INPUT only.
+// Type: int
+//
+
+tcp_server_port = 12000;
+
+//======================================================================
+//
+// PRINT MODE.
+//
+//======================================================================
+ 
+///////////// print_mode //////////////////////////////
+//
+// Sets the type of printout. All information will be printed to stdout.
+// MONITOR: single line which overwrites itself. Suitable for a small 
+//   window with a single output line. SUMMARY: scrolling summary. FULL: 
+//   radar, field and beam params in full. DATA: data as well - very 
+//   verbose. SINGLE_GATE: data for a single gate at specficied range. 
+//   POWER_AND_FREQ: power and frequency summary.
+//
+// Type: enum
+// Options:
+//     MONITOR
+//     SUMMARY
+//     FULL
+//     DATA
+//     SINGLE_GATE
+//     POWER_AND_FREQ
+//
+
+print_mode = SUMMARY;
+
+///////////// range_for_single_gate ///////////////////
+//
+// Range for printing out data for single gate - km.
+// For print_type = SINGLE_GATE.
+// Type: double
+//
+
+range_for_single_gate = 1;
+
+//======================================================================
+//
+// PRINT DETAILS.
+//
+//======================================================================
+ 
+///////////// labels_in_monitor_mode //////////////////
+//
+// Option to print label line in monitor mode.
+// If TRUE, a line containing labels is printed ahead of the data line 
+//   in monitor mode.
+// Type: boolean
+//
+
+labels_in_monitor_mode = FALSE;
+
+///////////// volume_num_in_monitor_mode //////////////
+//
+// Option to print volume number in monitor mode.
+// If TRUE, the volume number is printed at the start of the line in 
+//   monitor mode.
+// Type: boolean
+//
+
+volume_num_in_monitor_mode = FALSE;
+
+///////////// flags_in_monitor_mode ///////////////////
+//
+// Option to print start of tilt, end of volume, etc. flags in monitor 
+//   mode.
+// If TRUE, a 3-letter string is added to the end of the line. The 
+//   strings are EOT (end-of-tilt), EOV (end-of-volume), SOT 
+//   (start-of-tilt), SOV (start-of-volume) and NST (new-scan-type).
+// Type: boolean
+//
+
+flags_in_monitor_mode = FALSE;
+
+///////////// flags_in_summary_mode ///////////////////
+//
+// Option to print start/end of tilt flags in summary mode.
+// If TRUE, the start and end of tilts will be printed in summary mode.
+// Type: boolean
+//
+
+flags_in_summary_mode = FALSE;
+
+///////////// subsecs_precision_in_summary_mode ///////
+//
+// Number of decimals for partial secs in summary mode.
+// If TRUE, the time will be printed out to this number of decimals.
+// Type: int
+//
+
+subsecs_precision_in_summary_mode = 0;
+
+///////////// update_interval /////////////////////////
+//
+// Update interval for display in secs.
+// Set to negative values to update based on count rather than seconds 
+//   between beam timestamps. If 0, prints on every beam.
+// Type: int
+//
+
+update_interval = 1;
+
+///////////// n_monitor_line_feeds ////////////////////
+//
+// Number of line feeds in monitor mode.
+// The number of line feeds inserted before refreshing the line in 
+//   monitor mode.
+// Type: int
+//
+
+n_monitor_line_feeds = 0;
+
+//======================================================================
+//
+// CHECK FOR MISSING DATA.
+//
+//======================================================================
+ 
+///////////// check_for_missing_beams /////////////////
+//
+// Option to check for missing beams.
+// If TRUE, RadxMon will check for missing beams by computing the change 
+//   in angle since the previous beam. If this exceeds 'max_delta_angle', 
+//   a warning message will be printed.
+// Type: boolean
+//
+
+check_for_missing_beams = FALSE;
+
+///////////// max_delta_angle /////////////////////////
+//
+// Max delta angle for missing beam check (deg).
+// If the angle of the latest beam differs from the angle of the 
+//   previous beam by more than this value, it will be assumed that one or 
+//   more beams are missing. For RHI scans, the 'angle' referred to here 
+//   is the 'elevation angle'. For other scans, it is the 'azimuth angle'.
+// Type: double
+//
+
+max_delta_angle = 1;
+

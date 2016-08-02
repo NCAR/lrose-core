@@ -1,0 +1,161 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+commentdef
+{
+  p_header = "CwbSfc2Mdv reads netcdf sfc files "
+	     "and writes MDV data.";
+}
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string
+{
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum
+{
+  ARCHIVE,
+  REALTIME
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+           "In realtime mode, the conversion is performed for each "
+           "input file as it becomes available. "
+           "In archive mode, the file list is obtained from the command line.";
+  p_default = REALTIME;
+} mode;
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT";
+}
+
+paramdef string
+{
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for nssl netCDF data files.";
+} InDir;
+
+paramdef string
+{
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int
+{
+  p_default = 3600;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean
+{
+  p_default = true;
+  p_descr = "Use _latest_data_info";
+  p_help = "If false, will scan the directory for new files.";
+} use_ldata_info;
+
+paramdef boolean
+{
+  p_default = true;
+  p_descr = "Write _latest_data_info files for output files.";
+  p_help = "If false, will suppress writing of _latest_data_info files.";
+} writeLdataInfo;
+
+paramdef string
+{
+  p_descr = "Output URL to write MDV data to, in form:\n"
+            "mdvp:://host.dom::dir/dir";
+  p_help = "Set to where output MDV data should be written."; 
+  p_default = "mdvp:://localhost::Some/dir";
+} outUrl;
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Set encoding type.";
+} encoding_type;
+
+typedef enum {
+  COMPRESSION_NONE =  0,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4, 
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_GZIP;
+  p_descr = "Set compression type.";
+} compression_type;
+
+paramdef int
+{
+  p_descr = "Time before data expire, seconds.";
+  p_help = "Default is half an hour."; 
+  p_default = 1800;
+} Expiry;
+
+commentdef
+{
+  p_header = "FILE TYPE SPECIFICATIONS";
+}
+
+paramdef string
+{
+  p_descr = "List of input fields to process";
+  p_default = { "rr" };
+} input_field_list[];
+
+

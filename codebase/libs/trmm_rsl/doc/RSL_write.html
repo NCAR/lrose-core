@@ -1,0 +1,40 @@
+<head>
+</head>
+
+<body>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+
+<h1>RSL_write...</h1> 
+<hr>
+
+<h3>Synopsis</h3>
+<b>#include &quot;rsl.h&quot;</b> <br>
+<b>void RSL_write_gif(char *outfile, unsigned char *image, int xdim, int ydim, char c_t able[256][3]);<br>
+void RSL_write_pict(char *outfile, unsigned char *image, int xdim, int ydim, char c_table[256][3]);<br>
+void RSL_write_pgm(char *outfile, unsigned char *image, int xdim, int ydim);<br>
+void RSL_write_ppm(char *outfile, unsigned char *image, int xdim, int ydim, char c_table[256][3]); </b>
+
+<h3>
+<hr>Description</h3>
+<b>RSL_write_gif</b>: Writes a GIF file. It uses ppmtogif to convert the image to GIF format, via a pipe.<br>
+<b>RSL_write_pict</b>: Writes a PPM image file.<br>
+<b>RSL_write_pgm</b>: Writes a PGM image file.<br>
+<b>RSL_write_ppm</b>: Writes a PICT image file. It uses ppmtopict to convert the image to PICT format, via a pipe. This is only the image portion of a PICT formated file. Additional programs, like mcvert (when I get it I will automatically place it in the pipeline), need to be run so they are viewable on a MAC. 
+<hr>
+
+<h3>Return value</h3>
+None. 
+<hr>
+
+<h3>See also</h3>
+<a href=RSL_rebin_velocity.html>RSL_rebin_velocity_ray</a>, <a href=RSL_rebin_velocity.html>RSL_rebin_velocity_sweep</a>, <a href=RSL_rebin_velocity.html>RSL_rebin_velocity_volume</a>,<br>
+<a href=RSL_sweep_to.html>RSL_sweep_to_gif</a>, <a href=RSL_sweep_to.html>RSL_sweep_to_pict</a>, <a href=RSL_sweep_to.html>RSL_sweep_to_pgm</a>, <a href=RSL_sweep_to.html>RSL_sweep_to_ppm</a>,<br>
+<a href=RSL_load_color_table.html>RSL_load_color_table</a>, <a href=RSL_load_color_table.html>RSL_load_green_table</a>, <a href=RSL_load_color_table.html>RSL_load_red_table</a>, <a href=RSL_load_color_table.html>RSL_load_blue_table</a>,<br>
+<a href=RSL_load_color_table.html>RSL_load_refl_color_table</a>, <a href=RSL_load_color_table.html>RSL_load_sw_color_table</a>, <a href=RSL_load_color_table.html>RSL_load_vel_color_table</a>,<br>
+<a href=RSL_volume_to.html>RSL_volume_to_gif</a>, <a href=RSL_volume_to.html>RSL_volume_to_pict</a>, <a href=RSL_volume_to.html>RSL_volume_to_pgm</a>, <a href=RSL_volume_to.html>RSL_volume_to_ppm</a>. 
+<hr>
+
+<p>Author: <a href=john.merritt.html>John H. Merritt</a> 
+</body>

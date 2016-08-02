@@ -1,0 +1,208 @@
+/****************************************************
+ * TDRP params for trec_gauge_spdb2symprod
+ ****************************************************/
+
+/*
+ * debug level.
+ * Debug level: DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS, DEBUG_ROUTINES,
+ *   DEBUG_ALL.
+ *
+ * Type: enum
+ * Default: DEBUG_OFF 
+ * Legal values: DEBUG_OFF, DEBUG_ERRORS, DEBUG_MSGS,
+ *   DEBUG_ROUTINES, DEBUG_ALL.
+ */
+debug = DEBUG_OFF;
+
+/*
+ * malloc debug level.
+ * 0 = none, 1 = corruption checking, 2 = record all malloc blocks
+ *   and checks, 3 = printout of all mallocs, etc.
+ *
+ * Type: long
+ * Default: 0 
+ * Min value: 0 
+ * Max value: 3 
+ */
+malloc_debug_level = 0;
+
+/*
+ * database directory.
+ * Directory containing SPDB database.
+ *
+ * Type: string
+ * Default: "." 
+ */
+database_dir = ".";
+
+/*
+ * product label.
+ * The product label used in the SPDB database to uniquely identify
+ *   this product.
+ *
+ * Type: string
+ * Default: "TREC_GAUGE" 
+ */
+product_label = "TREC_GAUGE";
+
+/*
+ * product id.
+ * Number which uniquely identifies this product in the SPDB database.
+ *
+ * Type: long
+ * Default: 20200 
+ */
+product_id = 20200;
+
+/*
+ * output port.
+ * Port number to use for output.
+ *
+ * Type: long
+ * Default: 62030 
+ */
+port = 62030;
+
+/*
+ * servmap type.
+ * Server mapper type for this server.
+ *
+ * Type: string
+ * Default: "Spdb" 
+ */
+servmap_type = "Spdb";
+
+/*
+ * servmap subtype.
+ * Server mapper subtype for this server. The type is always Spdb.
+ *
+ * Type: string
+ * Default: "Trec_Gauge" 
+ */
+servmap_subtype = "Trec_Gauge";
+
+/*
+ * servmap instance.
+ * Server mapper instance for this server. The type is always Spdb.
+ *
+ * Type: string
+ * Default: "Test" 
+ */
+servmap_instance = "Test";
+
+/*
+ * realtime available flag.
+ * Flag indicating if realtime data is available from this server.
+ *
+ * Type: long
+ * Default: 1 
+ */
+realtime_avail = 1;
+
+/*
+ * Plot current shape flag.
+ * If set, the current storm shape will be sent.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+plot_dbz_text = TRUE;
+
+/*
+ * display vector flag.
+ * If TRUE, the motion vector will be displayed.
+ *
+ * Type: boolean
+ * Default: TRUE 
+ */
+plot_vectors = TRUE;
+
+/*
+ * Length of arrow head (km).
+ *
+ * Type: double
+ * Default: 2 
+ * Min value: 0 
+ */
+arrow_head_len = 2;
+
+/*
+ * Half angle of arrow head (deg).
+ *
+ * Type: double
+ * Default: 20 
+ * Min value: 0 
+ * Max value: 90 
+ */
+arrow_head_half_angle = 20;
+
+/*
+ * motion vector color.
+ * Name of color suggested for rendering the motion vector.
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+vector_color = "yellow";
+
+/*
+ * text color.
+ * Name of color suggested for rendering the text.
+ *
+ * Type: string
+ * Default: "yellow" 
+ */
+text_color = "yellow";
+
+/*
+ * text font name.
+ * The name of the X font to be used when rendering the text.
+ *
+ * Type: string
+ * Default: "8x13" 
+ */
+text_font = "8x13";
+
+/*
+ * display line type.
+ * Line type suggested for using on the display.
+ *
+ * Type: enum
+ * Default: LINETYPE_SOLID 
+ * Legal values: LINETYPE_SOLID, LINETYPE_DASH,
+ *   LINETYPE_DOT_DASH.
+ */
+suggested_line_type = LINETYPE_SOLID;
+
+/*
+ * display line width.
+ * Line width suggested for using on the display.
+ *
+ * Type: long
+ * Default: 1 
+ */
+suggested_line_width = 1;
+
+/*
+ * display capstyle.
+ * Capstyle suggested for using on the display.
+ *
+ * Type: enum
+ * Default: CAPSTYLE_BUTT 
+ * Legal values: CAPSTYLE_BUTT, CAPSTYLE_NOT_LAST,
+ *   CAPSTYLE_PROJECTING, CAPSTYLE_ROUND.
+ */
+suggested_capstyle = CAPSTYLE_BUTT;
+
+/*
+ * display joinstyle.
+ * Joinstyle suggested for using on the display.
+ *
+ * Type: enum
+ * Default: JOINSTYLE_BEVEL 
+ * Legal values: JOINSTYLE_BEVEL, JOINSTYLE_MITER,
+ *   JOINSTYLE_ROUND.
+ */
+suggested_joinstyle = JOINSTYLE_BEVEL;
+
+

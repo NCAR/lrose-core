@@ -1,0 +1,136 @@
+/*
+ *
+ * Parameter definitions for metar2spdb application
+ *
+ * $Id: paramdef.metar2spdb,v 1.16 2001/03/24 05:47:39 aoaws Exp $
+ *
+ */
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug messaging option";
+  p_help = "If set to true, debug messages will be printed";
+} debug;
+
+paramdef boolean {
+  p_descr = "Info messaging option";
+  p_help = "If set to true, info messages will be printed";
+  p_default = TRUE;
+} info;
+
+paramdef string {
+  p_descr = "Directory for log file output";
+  p_help = "If this parameter contains anything but an empty string, a log will be created containing the types of messages which are enabled";
+  p_default = "";
+} log_dir;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Instance";
+  p_help = "Instance used for registration with procmap";
+} instance;
+
+paramdef enum mode_t {
+  p_options = {ARCHIVE, REALTIME, REALTIME_WITH_LDATA, SINGLE_FILE};
+  p_default = REALTIME;
+  p_descr = "Operational mode.";
+  p_help = "The REALTIME mode watches the input_dir for the arrival of new files. The REALTIME_WITH_LDATA uses a latest_data_info file to trigger on incoming data. ARCHIVE mode processes all files in the input_dir. In ARCHIVE and REALTIME modes, the input file name is 'prefix.yyyymmddhh[mm]'. In REALTIME_WITH_LDATA mode, the input file name is 'yyyymmdd/hhmmss.ext'. See also file_prefix and file_ext. In SINGLE_FILE_MODE the input file is specified with the -f option on the command line - if mode is not SINGLE_FILE then the -f option is ignored (ie -f does not automatically invoke SINGLE_FILE mode). The date must be encoded in the filename.";
+} mode;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory";
+  p_help = "Directory where input data can be found";
+} input_dir;
+
+paramdef int {
+  p_default = 180;
+  p_descr = "File check frequency";
+  p_help = "REALTIME mode. Number of seconds to wait before we check the input directory for a new file again";
+} check_seconds;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = "/tmp";
+  p_descr = "REALTIME mode only. Directory for time-stamp file.";
+  p_help = "In REALTIME mode the program keeps track of which files have been processed by writing a time-stamp file. The file is written to this directory. The time-stamp file path is 'time_stamp_dir/metar2spdb.tstamp.instance'.";
+} time_stamp_dir;
+
+paramdef string {
+  p_default = "./station_location.txt";
+  p_descr = "Path to station location file";
+  p_help = "The station location file should contain a four letter station identification followed by the latitude and longitude for each station that should be added to the metar SPDB";
+} st_location_path;
+
+paramdef string {
+  p_default = "record_obs";
+  p_descr = "Metar file prefix";
+  p_help = "Used in ARCHIVE and REALTIME mode only. In these modes, the input file name is 'prefix.yyyymmddhh[mm]'. ";
+} file_prefix;
+
+paramdef string {
+  p_default = "metar";
+  p_descr = "Metar file extension.";
+  p_help = "Used in REALTIME_WITH_LDATA mode only. In this mode, the input file name is 'yyyymmdd/hhmmss.ext'. ";
+} file_ext;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "On startup, ignore any existing index files";
+  p_help = "Only used in realtime mode.  If set to true, index file will not be checked on startup";
+} ignore_index_at_start;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Expire time in seconds for each metar";
+  p_help = "This value will be added to the metar time to determine the expire time for the metar";
+} expire_seconds;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to guess METAR time if time field is missing.";
+  p_help = "If TRUE, and time field is missing or garbled, METAR time is set to the start of the last hour. Realtime mode only.";
+} guess_time_if_missing;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If set, store the ASCII metar messages in an SPDB database.";
+  p_help = "METARS are stored in the location specified by ascii_output_url or raw_destinations.";
+} store_raw_metars;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use the new URL-based Spdb functionality.";
+  p_help = "If TRUE, the new Spdb library will be used. If TRUE, make use of the decoded_output_url and raw_output_url parameters instead of destinations[] and raw_destinations[].";
+} use_URLs;
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/metar";
+  p_descr = "Output URL for decoded metars.";
+  p_help = "See the DIDSS docs for details on URL usage.";
+} decoded_output_url;
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/raw_metar";
+  p_descr = "Output URL for decoded metars.";
+  p_help = "See the DIDSS docs for details on URL usage.";
+} raw_output_url;
+
+paramdef string {
+  p_default = "./spdb_data";
+  p_descr = "List of spdb destinations";
+  p_help = "A destination can be either a socket or a disk location.  If the destination is a socket, this parameter should contian the host and port information for the socket in the form port@host.  If the destination is a disk location, this parameter should contain the directory path for the data base";
+} destinations[];
+
+paramdef string {
+  p_default = {"./raw_data"};
+  p_descr = "Location of SPDB database in which to store METARS";
+  p_help = "Used if store_raw_metars is TRUE";
+} raw_destinations[];
+

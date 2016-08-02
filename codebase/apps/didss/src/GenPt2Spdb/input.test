@@ -1,0 +1,53 @@
+**start-of-record**
+RCSS
+2000 03 26 12 00 00
+21.0 121.5
+5 1
+precip:mm,T:C,RH:%,pressure:mb,wind speed:m/s
+0 15 50 1013 20
+Text string
+**end-of-record**
+**start-of-record**
+RCSS
+2000 03 26 12 00 00
+21.0 121.5
+5 1
+precip:mm,T:C,RH:%,pressure:mb,wind speed:m/s
+0 15 50 1013 20
+**end-of-record**
+**start-of-record**
+RCSS
+2000 03 26 12 00 00
+21.0 121.5
+5 1
+precip:mm,T:C,RH:%,pressure:mb,wind speed:m/s
+0 15 50 1013 20
+Text string
+**end-of-record**
+**start-of-record**
+RCSS
+2000 03 26 12 00 00
+21.0 121.5
+5 5
+precip:mm,T:C,RH:%,pressure:mb,wind speed:m/s
+0 15 50 1013 20
+0 15 50 1013 20
+0 15 50 1013 20
+0 15 50 1013 20
+0 15 50 1013 20
+Text string
+**end-of-record**
+**start-of-record**
+RCKS
+2000 03 26 13 00 00
+20.0 120.5
+5 5
+precip:mm,T:C,RH:%,pressure:mb,wind speed:m/s
+1 16 51 1014 21
+1 16 51 1014 21
+1 16 51 1014 21
+1 16 51 1014 21
+1 16 51 1014 21
+Text string
+**end-of-record**
+

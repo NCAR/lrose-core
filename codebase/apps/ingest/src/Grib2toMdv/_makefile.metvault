@@ -1,0 +1,61 @@
+###########################################################################
+#
+# Makefile for Grib2toMdv program
+#
+# RAP, NCAR, Boulder, CO, 80307, USA
+#
+# June 2006
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGET_FILE = Grib2toMdv
+MODULE_TYPE = progcpp
+
+
+LOC_INCLUDES = -I/opt/jasper/include
+LOC_CPPC_CFLAGS =
+LOC_LDFLAGS = -L/opt/jasper/lib
+LOC_LIBS =  -lMdv -ldsserver -ldidss -lrapformats -lgrib2 -leuclid \
+	-ltoolsa -lpng -lz -ldataport -ltdrp -lrapmath -lm -lpthread 
+
+HDRS = \
+	$(PARAMS_HH) \
+	Args.hh \
+	Grib2Mdv.hh \
+	InputPath.hh \
+	OutputFile.hh \
+	Grib2toMdv.hh
+
+
+CPPC_SRCS = \
+	$(PARAMS_CC) \
+	Args.cc \
+	Grib2Mdv.cc \
+	InputPath.cc \
+	OutputFile.cc \
+	Grib2toMdv.cc \
+	main.cc
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+
+#
+# standard targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+
+#
+# tdrp
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+
+#
+# local targets
+#
+
+depend: depend_generic
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

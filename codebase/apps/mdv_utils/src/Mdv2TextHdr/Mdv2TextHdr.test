@@ -1,0 +1,175 @@
+/**********************************************************************
+ * TDRP params for Mdv2TextHdr
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: Mdv2TextHdr.
+//
+// Mdv2TextHdr reads the master header from an mdv file, and writes text 
+//   information to an output file. The format of the output text is 
+//   controlled by this parameter file. The usage is 'Mdv2TextHdr -params 
+//   params_file'.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// MODE OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in FILELIST mode, at 
+//   least) MUST contain a day-directory below the data file -- 
+//   ./data_file.mdv will not work as a file path.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input data.
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+// Type: string
+//
+
+input_url = "mdv/input";
+
+//======================================================================
+//
+// OUTPUT TEXT FORMATTING.
+//
+//======================================================================
+ 
+///////////// text_lines //////////////////////////////
+//
+// Specify output fields, with labels.
+// The fields will be printed in order. The label first, followed by the 
+//   value, followed by the ending and a new line. The value is formatted 
+//   according to the format string. For time values, the format is passed 
+//   to strftime. If NO_VALUE is specified, the label is followed 
+//   immediately by the ending.
+//
+// Type: struct
+//   typedef struct {
+//      string label;
+//      master_hdr_entry_t entry;
+//        Options:
+//          TIME_GEN
+//          TIME_BEGIN
+//          TIME_END
+//          TIME_CENTROID
+//          TIME_EXPIRE
+//          N_FIELDS
+//          N_CHUNKS
+//          SENSOR_LON
+//          SENSOR_LAT
+//          SENSOR_ALT
+//          DATA_SET_INFO
+//          DATA_SET_NAME
+//          DATA_SET_SOURCE
+//          NO_VALUE
+//      string format;
+//      string ending;
+//   }
+//
+// 1D array - variable length.
+//
+
+text_lines = {
+  { "start_time = ", TIME_BEGIN, "%Y/%m/%d %H:%M:%S", ""},
+  { "centroid_time = ", TIME_CENTROID, "%Y/%m/%d %H:%M:%S", ""},
+  { "end_time = ", TIME_END, "%Y/%m/%d %H:%M:%S", ""},
+  { "n_fields = ", N_FIELDS, "%d", ""},
+  { "n_chunks = ", N_CHUNKS, "%d", ""},
+  { "lat = ", SENSOR_LAT, "%g", ""},
+  { "lon = ", SENSOR_LON, "%g", ""},
+  { "alt = ", SENSOR_ALT, "%g", ""},
+  { "info = ", DATA_SET_INFO, "%s", ""},
+  { "name = ", DATA_SET_NAME, "%s", ""},
+  { "source = ", DATA_SET_SOURCE, "%s", ""},
+  { "mode = ", NO_VALUE, "", "test"}
+};
+
+//======================================================================
+//
+// OUTPUT FILE.
+//
+//======================================================================
+ 
+///////////// tmp_dir /////////////////////////////////
+//
+// Temporary directory.
+// Output files are written to this directory first, and then renamed to 
+//   the correct path.
+// Type: string
+//
+
+tmp_dir = "/tmp";
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory for text files.
+// The file paths will be computed in the same way as the MDV files. 
+//   i.e. yyyymmdd/hhmmss.ext.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// output_file_ext /////////////////////////
+//
+// File extension for output files.
+// Type: string
+//
+
+output_file_ext = "hdr";
+

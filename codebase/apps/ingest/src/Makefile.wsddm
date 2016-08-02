@@ -1,0 +1,18 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	LdmMetars2File \
+	PrintNids \
+	NidsRadial2Mdv \
+	Nids2Mdv \
+	LdmMetars2File \
+	Metar2Spdb \
+	WsiNidsIngest
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

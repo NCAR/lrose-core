@@ -1,0 +1,55 @@
+////////////////////////////////////////////////////////
+// parameter definitions for Dsr2File
+///////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "Dsr2File PARAMETER FILE";
+  p_text = "Dsr2File reads messages from a dsRadar FMQ and "
+           "writes those messages to a binary file on disk. "
+           "This application is used to archive the exact "
+           "data from the FMQ so it can be played back again "
+           "later using File2Dsr.";
+}
+
+commentdef
+{
+  p_header = "PROGRAM MODES OF OPERATION";
+}
+
+paramdef boolean
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed";
+  p_default = FALSE;
+} debug;
+
+paramdef string
+{
+  p_descr = "Instance";
+  p_help = "Used for process registration";
+  p_default = "Test";
+} instance;
+
+commentdef
+{
+  p_header = "INPUT";
+}
+
+paramdef string
+{
+  p_descr = "Input DsRadar FMQ URL";
+  p_default = "fmqp:://localhost::fmq/dsRadar";
+} input_fmq_url;
+
+commentdef
+{
+  p_header = "OUTPUT";
+}
+
+paramdef string
+{
+  p_descr = "Output directory";
+  p_default = "$(RAP_DATA_DIR)/dsRadarBinary";
+} output_dir;
+

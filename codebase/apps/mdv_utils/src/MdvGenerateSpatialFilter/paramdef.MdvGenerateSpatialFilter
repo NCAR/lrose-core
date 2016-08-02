@@ -1,0 +1,112 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+commentdef {
+  p_header = "MdvGenerateSpatialFilter by Niles Oien March 2005\n"
+	"This is a program that generates a spatial filter that\n"
+	"can be used by the mdvFusion program to blend different\n"
+	"datasets. The system used is to normalize the X and Y\n"
+	"axes in an MDV file so that they run from 0.0 to 1.0 and\n"
+	"then fit a spline function to these normalized axes. The\n"
+	"minimu value in X or Y is taken as the data value at any\n"
+	"given point. The output is written to a path, and the user\n"
+	"must typically set up a DsMdvServer param file to serve\n"
+	"out this static path.";
+
+}
+
+typedef enum {
+  PROJ_FLAT, PROJ_LATLON, PROJ_LAMBERT
+} projection_t;
+
+
+paramdef enum projection_t {
+  p_default = PROJ_FLAT;
+  p_descr = "Projection of output grid.";
+  p_help = "FLAT - (x,y) Cartesian data in km from a given origin.\n"
+           "LATLON - lat/lon grid with constant grid spacing.\n";
+           "LAMBERT - Lambert Conformal projection with constant grid spacing.\n";
+} output_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double latOrig;
+  double lonOrig;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  double lambertLat1;
+  double lambertLat2;
+  double flatEarthRotation;
+} grid_t;
+
+paramdef struct grid_t {
+  p_descr = "Output grid definition.";
+  p_help = "All input grids are remapped to this.";
+  p_default = {300, 300, 40.0, -104.0, -149.5, -149.5, 1.0, 1.0, 35.0, 40.0, 0.0 };
+} output_grid;
+ 
+ 
+paramdef string {
+  p_descr = "Output path to write to.";
+  p_help = "The filter data are written here."; 
+  p_default = {"./mdv/filter/filter.mdv"};
+} OutPath;
+
+typedef struct {
+  double x;
+  double y;
+} tag_t;
+
+paramdef struct tag_t {
+  p_descr = "Spline tag points, for X on range 0 to 1.0 inclusive.";
+  p_help = "Note that the spline is symetric, so that if (x,y) is\n"
+	"a tag point then (1.0-x,y) is also a tag point. Default\n"
+	"is an elongated sinusoid that affects 20% of the data near\n"
+	"the edges of the grid.";
+  p_default = {
+{ 0,    0.0      },
+{ 0.02, 0.0244717},
+{ 0.04, 0.0954915},
+{ 0.06, 0.206107 },
+{ 0.08, 0.345492 },
+{ 0.1,  0.5      },
+{ 0.12, 0.654508 },
+{ 0.14, 0.793893 },
+{ 0.16, 0.904508 },
+{ 0.18, 0.975528 },
+{ 0.2,  1.0      }
+ };
+} tagPoints[];
+ 
+ 
+paramdef double {
+  p_descr = "Overall weight.";
+  p_help = "Data values from spline are multiplied by this.";
+  p_default = {1.0 };
+} scaleWeight;
+ 
+ 

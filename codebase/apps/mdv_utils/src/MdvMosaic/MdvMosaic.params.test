@@ -1,0 +1,378 @@
+/**********************************************************************
+ * TDRP params for MdvMosaic
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//   DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE
+//
+//
+
+debug = DEBUG_OFF;
+
+///////////// malloc_debug_level //////////////////////
+//
+// Malloc debug level.
+// 0 - none, 1 - corruption checking, 2 - records all malloc blocks and 
+//   checks, 3 - printout of all mallocs etc.
+// Minimum val: 0
+// Maximum val: 3
+// Type: long
+//
+
+malloc_debug_level = 0;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archiv mode, the file list is obtained from the command 
+//   line.
+//
+// Type: enum
+// Options:
+//   ARCHIVE, REALTIME
+//
+//
+
+mode = REALTIME;
+
+///////////// trigger /////////////////////////////////
+//
+// Trigger mechanism.
+// TIME_TRIGGER: the program is triggered at constant time intervals - 
+//   see time_trigger_interval. FILE_TRIGGER: the program watches the 
+//   first input_dir and triggers based on data in that directory.
+//
+// Type: enum
+// Options:
+//   TIME_TRIGGER, FILE_TRIGGER
+//
+//
+
+trigger = TIME_TRIGGER;
+
+///////////// time_trigger_interval ///////////////////
+//
+// Interval for TIME_TRIGGER - secs.
+// For TIME_TRIGGER, this is the interval between trigger events. In 
+//   REALTIME mode, a time trigger always occurs on the hour, and at 
+//   constant intervals thereafter. In ARCHIVE mode the trigger starts at 
+//   start_time and at constant intervals thereafter.
+// Minimum val: 0
+// Type: long
+//
+
+time_trigger_interval = 600;
+
+///////////// trigger_time_margin /////////////////////
+//
+// Max time diff for searching for files relative to the trigger time - 
+//   secs.
+// When matching files up with the trigger time, the difference between 
+//   the trigger time and file time must be less than this margin. This 
+//   value is also used as the max age of the latest data info file when 
+//   in REALTIME mode with FILE_TRIGGER.
+// Minimum val: 0
+// Type: long
+//
+
+trigger_time_margin = 1500;
+
+///////////// input_dirs //////////////////////////////
+//
+// Array of input directories.
+// If available, data from these directories will be merged.
+// Type: string
+// 1D array - variable length - 1 elements.
+//
+
+input_dirs = {
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/abr",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/abx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ahg",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/aih",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/akq",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ama",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/amx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/apd",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/apx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/arx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/atx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/bbx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/bgm",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/bhx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/bis",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/blx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/bmx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/box",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/bro",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/buf",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/byx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/cae",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/cbw",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/cbx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ccx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/cle",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/clx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/crp",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/cxx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/cys",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/dax",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ddc",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/dfx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/dix",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/dlh",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/dmx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/dox",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/dtx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/dvn",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/dyx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/eax",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/emx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/enx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/eox",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/epz",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/esx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/evx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ewx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/eyx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/fcx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/fdr",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/fdx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ffc",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/fsd",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/fsx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ftg",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/fws",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ggw",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/gjx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/gld",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/grb",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/grk",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/grr",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/gsp",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/gwx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/gyx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/hdx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/hgx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/hki",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/hkm",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/hmo",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/hnx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/hpx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/htx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/hwa",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ict",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/icx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/iln",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ilx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ind",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/inx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/iwa",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/iwx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/jan",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/jax",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/jgx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/jkl",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/jua",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/lbb",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/lch",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/lix",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/lnx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/lot",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/lrx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/lsx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ltx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/lvx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/lwx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/lzk",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/maf",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/max",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mbx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mhx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mkx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mlb",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mob",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mpx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mqt",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mrx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/msx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mtx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mux",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mvx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/mxx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/nkx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/nqa",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/oax",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/ohx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/okx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/otx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/pah",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/pbz",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/pdt",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/poe",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/pux",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/rax",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/rgx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/riw",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/rlx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/rtx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/sfx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/sgf",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/shv",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/sjt",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/sox",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/srx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/tbw",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/tfx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/tlh",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/tlx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/twx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/tyx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/udx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/uex",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/vax",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/vbx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/vnx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/vtx",
+  "/home/petach/rap/apps/ingest/src/NidsRaster2Mdv/output_vil/yux"
+};
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+// The merged files are placed in this directory.
+// Type: string
+//
+
+output_dir = "output_vil_mrg";
+
+///////////// output_projection ///////////////////////
+//
+// Projection of output grid.
+// FLAT - (x,y) Cartesian data in km from a given origin. LATLON - 
+//   lat/lon grid with constant grid spacing.
+//
+// Type: enum
+// Options:
+//   OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LATLON
+//
+//
+
+output_projection = OUTPUT_PROJ_LATLON;
+
+///////////// output_origin ///////////////////////////
+//
+// Origin of output grid.
+// Used with OUTPUT_PROJ_FLAT only.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+output_origin = { 40, -104 };
+
+///////////// output_grid /////////////////////////////
+//
+// Output grid parameters.
+// The grid params for the output grid.
+//
+// Type: struct
+//   typedef struct {
+//      long nx;
+//      long ny;
+//      long nz;
+//      double minx;
+//      double miny;
+//      double minz;
+//      double dx;
+//      double dy;
+//      double dz;
+//   }
+//
+//
+
+output_grid = { 1830, 918, 1, -129.98088, 20.017969, 0.5, 0.038239, 0.0359331, 1 };
+
+///////////// field_list //////////////////////////////
+//
+// List of field numbers to be processed from input files.
+// These fields will be read from the input files and merged into the 
+//   output files.
+// Type: long
+// 1D array - variable length - 1 elements.
+//
+
+field_list = { 0 };
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "Unknown";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_source = "Merged data created by MdvMosaic.";
+
+///////////// data_scale //////////////////////////////
+//
+// scale value used for converting between byte values and data values.
+// The byte value is calculated from the byte value using the following 
+//   formula: byte = (value - data_bias) / data_scale. Only used if 
+//   compute_scale_and_bias is TRUE.
+// Type: double
+//
+
+data_scale = 0.3;
+
+///////////// data_bias ///////////////////////////////
+//
+// bias value used for converting between byte values and data values.
+// The byte value is calculated from the byte value using the following 
+//   formula: byte = (value - data_bias) / data_scale. .
+// Type: double
+//
+
+data_bias = 0;
+
+///////////// compute_scale_and_bias //////////////////
+//
+// Option to automatically compute the data scale and bias.
+// If set to TRUE, the data scale and bias will automatically be 
+//   computed from the input data, otherwise the data_scale and data_bias 
+//   parameter values will be used.
+// Type: boolean
+//
+
+compute_scale_and_bias = FALSE;
+

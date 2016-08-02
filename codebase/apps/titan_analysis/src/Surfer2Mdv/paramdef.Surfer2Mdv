@@ -1,0 +1,159 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions Surfer2Mdv
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// July 2000
+//
+
+commentdef {
+  p_header = "Program name: Surfer2Mdv";
+  p_text = "Surfer2Mdv converts surfer format files into MDV files.";
+}
+
+commentdef {
+  p_header = "DEBUGGING and PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA CONVERSION";
+}
+
+typedef enum {
+  INCHES, MM
+} input_units_t;
+
+paramdef enum input_units_t
+{
+  p_default = INCHES;
+  p_descr = "Units of input data.";
+  p_help = "Data is input in rainfall accumulation depth. This specifies the units of the input data.";
+} input_units;
+
+paramdef float {
+  p_default = 900;
+  p_descr = "Accumulation period of input data (secs).";
+} input_accum_period;
+
+typedef enum {
+  DBZ, PRECIP_DEPTH, PRECIP_RATE, PRECIP_INCHES
+} output_units_t;
+
+paramdef enum output_units_t
+{
+  p_default = DBZ;
+  p_descr = "Units of output data.";
+  p_help = "Data is input in rainfall accumulation depth. This allows you to convert to dBZ or rate (mm/hr), or output accum (mm).";
+} output_units;
+
+paramdef float {
+  p_default = 200;
+  p_descr = "ZR coeff for converting rain rate to dBZ.";
+} zr_coefficient;
+
+paramdef float {
+  p_default = 1.6;
+  p_descr = "ZR exponent for converting rain rate to dBZ.";
+} zr_exponent;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output URL.";
+  p_help = "Output data is written to this URL in Mdv format.";
+} output_url;
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} output_encoding_t;
+
+paramdef enum output_encoding_t {
+  p_default = ENCODING_INT8;
+  p_descr = "Set encoding type.";
+} output_encoding;
+
+typedef enum {
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4 
+} output_compression_t;
+
+paramdef enum output_compression_t {
+  p_default = COMPRESSION_ZLIB;
+  p_descr = "Set compression type.";
+} output_compression;
+
+typedef enum {
+  SCALING_ROUNDED =    1,
+  SCALING_INTEGRAL =   2,
+  SCALING_DYNAMIC =    3,
+  SCALING_SPECIFIED =  4
+} output_scaling_t;
+
+paramdef enum output_scaling_t {
+  p_default = SCALING_ROUNDED;
+  p_descr = "Set scaling type.";
+  p_help = "This is only relevant when converting from float32 to int8 or int16.";
+} output_scaling;
+
+paramdef float {
+  p_default = 1.0;
+  p_descr = "Input scaling scale.";
+  p_help = "For SCALING_SPECIFIED only.";
+} output_scale;
+
+paramdef float {
+  p_default = 0.0;
+  p_descr = "Input scaling bias.";
+  p_help = "For SCALING_SPECIFIED only.";
+} output_bias;
+
+paramdef string {
+  p_default = "This MDV file was created by Surfer2Mdv.";
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+} data_set_info;
+
+paramdef string {
+  p_default = "WSI radar mosaic.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "WSI corp via NEXRAIN corp.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+} data_set_source;
+
+
+
+

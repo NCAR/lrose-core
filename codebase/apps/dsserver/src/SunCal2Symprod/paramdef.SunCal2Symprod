@@ -1,0 +1,269 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////
+// parameter definitions for SunCal2Symprod
+//
+// Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+//
+// Nov 2010
+
+//////////////////////////////////////////////////////////
+// Debugging
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+  p_default = DEBUG_OFF;
+} debug;
+
+//////////////////////////////////////////////////////////
+// Process control
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string {
+  p_descr = "Process instance.";
+  p_help = "Used for procmap registration and auto restarting.";
+  p_default = "";
+} instance;
+
+paramdef boolean {
+  p_descr = "Option to prevent server from using a thread per client.";
+  p_help = "For debugging purposes it it sometimes useful to suppress "
+           "the use of threads. Set no_threads to TRUE for this type "
+           "of debugging.";
+  p_default = FALSE;
+} no_threads;
+
+//////////////////////////////////////////////////////////
+// Server manager interaction
+
+commentdef {
+  p_header = "SERVER MANAGER";
+};
+
+paramdef int {
+  p_descr = "Port number.";
+  p_help = "The server listens on this port for client requests.";
+  p_default = 5487;
+} port;
+  
+paramdef int {
+  p_descr = "Max quiescent period (secs).";
+  p_help = "If the server does not receive requests for this time period, "
+           "it will die gracefully. If set to -1, the server never exits.";
+  p_default = -1;
+} qmax;
+
+paramdef int {
+  p_descr = "Maximum number of clients";
+  p_help = "This is the maximum number of threads the application will "
+           "produce to handle client requests.  If the maximum is reached, "
+           "new clients will receive a SERVICE_DENIED error message and will "
+           "have to request the data again.  If set to -1, no maximum is "
+           "enforced.";
+  p_default = 64;
+} max_clients;
+
+//////////////////////////////////////////////////////////
+// Rendering
+
+commentdef {
+  p_header = "PLOT CENTROID LOCATION LINES";
+};
+
+paramdef boolean {
+  p_descr = "Plot lines to indicate sun centroid location";
+  p_default = TRUE;
+} plot_centroid_location;
+
+paramdef string {
+  p_descr = "Color for centroid location lines";
+  p_default = "white";
+} centroid_line_color;
+
+paramdef int {
+  p_descr = "Width for centroid location lines";
+  p_default = 2;
+} centroid_line_width;
+
+commentdef {
+  p_header = "PLOT SUN CIRCLE";
+};
+
+paramdef boolean {
+  p_descr = "Plot circles centered on sun centroid";
+  p_default = TRUE;
+} plot_sun_circles;
+
+paramdef string {
+  p_descr = "Color for sun circle";
+  p_default = "white";
+} sun_circle_color;
+
+paramdef int {
+  p_descr = "Width for sun circle line";
+  p_default = 1;
+} sun_circle_line_width;
+
+paramdef double {
+  p_descr = "Diameter of sun circle (deg)";
+  p_help = "This is an array - one circle is plotted per entry.";
+  p_default = { 1.0, 2,0 };
+} sun_circle_diameter_deg[];
+
+commentdef {
+  p_header = "PLOT CENTROID TEXT";
+};
+
+paramdef boolean {
+  p_descr = "Plot text for centroid location?";
+  p_default = TRUE;
+} plot_centroid_text;
+
+paramdef string {
+  p_descr = "Color of text for centroid location";
+  p_default = "white";
+} centroid_text_color;
+
+paramdef string {
+  p_descr = "Centroid text background color";
+  p_help = "Set to blank string (the default) to plot the text with no background. Set to a color name to add a background color.";
+  p_default = "";
+} centroid_text_background_color;
+
+paramdef int {
+  p_descr = "Horizontal offset, pixels.";
+  p_help = "Option to move text to either side of the centroid. "
+    "If this is negative the text moves to the left rather than the right.";
+  p_default = 10;
+} centroid_text_horizontal_offset;
+
+paramdef int {
+  p_descr = "Vertical offset, pixels.";
+  p_help = "Option to move text to either above or below the centroid. "
+    "If this is negative the text is below, positive is above.";
+  p_default = 20;
+} centroid_text_vertical_offset;
+
+paramdef int {
+  p_descr = "Vertical line spacing, pixels.";
+  p_help = "Optionally, the user may choose to plot various "
+	"parameters (storm speed, simple and complex track number, "
+	"trend etc). The selected poltting elements are then draw vertically "
+	"above each other on the display, separated by plot_text_line_offset "
+	"pixels in the vertical. If this is negative then the column of "
+	"numbers will ascend rather than descend on the display. "
+        "Does not apply to XML data.";
+  p_default = 16;
+} centroid_text_line_spacing;
+
+paramdef string {
+  p_descr = "text font name";
+  p_help = "The name of the X font to be used when rendering the text.";
+  p_default = "8x13";
+} centroid_text_font;
+
+paramdef int {
+  p_descr = "text font size";
+  p_help = "The size of the font to be used when rendering the text.";
+  p_default = 12;
+} centroid_text_font_size;
+
+paramdef boolean {
+  p_descr = "Include guidance on how to correct the SPOL thumbwheels";
+  p_default = FALSE;
+} plot_spol_thumbwheel_guidance;
+
+commentdef {
+  p_header = "PLOT ZDR CALIBRATION TEXT";
+  p_text = "Only applies for alternating mode radars.";
+};
+
+paramdef boolean {
+  p_descr = "Plot text showing ZDR calibration stats";
+  p_default = FALSE;
+} plot_zdr_calibration_text;
+
+paramdef int {
+  p_descr = "Horizontal offset for zdr calibration text, pixels.";
+  p_help = "Option to move text to either side of the centroid. "
+    "If this is negative the text moves to the left rather than the right.";
+  p_default = 10;
+} zdr_cal_text_horizontal_offset;
+
+paramdef int {
+  p_descr = "Vertical offset for zdr calibration text, pixels.";
+  p_help = "Option to move text to either above or below the centroid. "
+    "If this is negative the text is below, positive is above.";
+  p_default = -20;
+} zdr_cal_text_vertical_offset;
+
+paramdef int {
+  p_descr = "Vertical line spacing, pixels.";
+  p_help = "Optionally, the user may choose to plot various "
+	"parameters (storm speed, simple and complex track number, "
+	"trend etc). The selected poltting elements are then draw vertically "
+	"above each other on the display, separated by plot_text_line_offset "
+	"pixels in the vertical. If this is negative then the column of "
+	"numbers will ascend rather than descend on the display. "
+        "Does not apply to XML data.";
+  p_default = -16;
+} zdr_cal_text_line_spacing;
+
+paramdef string {
+  p_descr = "Color of text for zdr_cal location";
+  p_default = "orange";
+} zdr_cal_text_color;
+
+paramdef string {
+  p_descr = "Zdr_Cal text background color";
+  p_help = "Set to blank string (the default) to plot the text with no background. Set to a color name to add a background color.";
+  p_default = "";
+} zdr_cal_text_background_color;
+
+paramdef string {
+  p_descr = "text font name";
+  p_help = "The name of the X font to be used when rendering the text.";
+  p_default = "8x13";
+} zdr_cal_text_font;
+
+paramdef int {
+  p_descr = "text font size";
+  p_help = "The size of the font to be used when rendering the text.";
+  p_default = 12;
+} zdr_cal_text_font_size;
+

@@ -1,0 +1,22 @@
+# NAME sat_gray
+
+# dixon 	6/29/1992 10:35:13
+
+0 	16 	gray0
+16 	32 	gray11
+32 	48 	gray21
+48 	64 	gray31
+64 	80 	gray41
+80 	96 	gray51
+96 	112 	gray61
+112 	128 	gray67
+128 	144 	gray73
+144 	160 	gray79
+160 	176 	gray85
+176 	192 	gray91
+192 	200 	gray100
+
+#192 	208 	gray94
+#208 	224 	gray96
+#224 	240 	gray98
+#240 	256 	gray100

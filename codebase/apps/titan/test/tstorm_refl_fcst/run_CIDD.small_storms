@@ -1,0 +1,22 @@
+#!/bin/csh -f
+
+#
+# Start up the needed Symprod servers
+#
+
+Tstorms2Symprod -params Tstorms2Symprod.small_storms &
+
+#
+# Start up CIDD.  Don't do it in the background
+# so we can exit the Symprod servers when CIDD
+# exits.
+#
+
+CIDD -p CIDD.small_storms
+
+#
+# Since CIDD has exited, now kill the Symprod
+# servers
+#
+
+snuff "Tstorms2Symprod -params Tstorms2Symprod.small_storms"

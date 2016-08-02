@@ -1,0 +1,7 @@
+# CHOOSE At most 3 set of wind vectors
+# Desc  host     port     U V W_fields units  S_type S_subtype S_instance Display 
+#--------------------------------------------------------------------------------
+#SURF     babinet  65034  0  1  -1     m/sec Cidd cedric_data  Ops_surf  0
+#SURF4    frost     65018  0  1  -1     m/sec Cidd CCM        Ops_surf4  0
+#TREC     babinet  65013  0  1  2      m/sec Cidd cedric_data  Ops_trec 0
+#CCM1     frost    65016  0  1  2      m/sec Cidd CCM        Ops_ccm1   1

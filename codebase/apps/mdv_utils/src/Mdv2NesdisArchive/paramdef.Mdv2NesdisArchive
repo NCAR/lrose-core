@@ -1,0 +1,205 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Mdv2NesdisArchive
+ *
+ * Gary Cunning, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * December 2007
+ * 
+ * Mdv2NesdisArchive is yet another MDV reformatter, designed to create files that
+ * are compatiible with old inflight icing applications
+ */
+
+commentdef {
+  p_header = "Program name: Mdv2NesdisArchive";
+  p_text = "Mdv2NesdisArchive is yet another MDV reformatter, designed to create "
+    "files that are compatiible with old inflight icing applications";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "TRUE or FALSE";
+} debug;
+
+/***********************************************************************
+ * Process control parameters.
+ */
+
+commentdef
+{
+  p_header = "PROCESS CONTROL PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+
+/***********************************************************************
+ * Input and output parameters.
+ */
+
+commentdef
+{
+  p_header = "INPUT AND OUTPUT PARAMETERS";
+};
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in FILELIST mode, at least) MUST contain a "
+           "day-directory below the data file -- ./data_file.mdv will not "
+           "work as a file path";
+} mode;
+
+paramdef string {
+  p_default = "mdv/input";
+  p_descr = "URL for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef int {
+  p_descr = "maximum age of valid of data";
+  p_help = "The units are seconds.";
+  p_default = 0;
+} max_valid_age;
+
+typedef struct {
+  string field_name;
+  boolean reset_bad_and_missing;
+  float missing_value;
+  float bad_value;
+  boolean reset_special;
+  float original_special;
+  float new_special;
+  string output_dir;
+} output_t;
+
+paramdef struct output_t
+{
+  p_descr = "List of MDV fields to process.";
+} output_list[];
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write files into a RAP directory and filename, under output_dir";
+  p_help = "";
+} use_rap_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Write files with a little-endian byte order"; 
+  p_help = "If stet to FALSE, byte order is big endian";
+} output_le;
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_ASIS;
+  p_descr = "Set encoding type.";
+} encoding_type;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write files that hold the latitudes and longitudes of underlying projection of data";
+  p_help = "The latutedes and longitudes are represented as four-byte floating values. The byte "
+           "order is set by output_le. The extensions for the latitude and longitude files are "
+           "'.lat' and '.lon', respectively.";
+} write_naviagation;
+
+paramdef int {
+  p_descr = "number of seconds to offset centroid time in field header";
+  p_help = "This offset will appear in the output file name.";
+  p_default = 0;
+} centroid_offset;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Prepend Mdv field name to output file name";
+  p_help = "";
+} prepend_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "applies file_prefix to filename";
+  p_help = "";
+} add_prefix;
+
+paramdef string {
+  p_default = "";
+  p_descr = "file name prefix.";
+  p_help = "Added to default filename, if add_prefix is TRUE. prepend_field_name should be FALSE.";
+} file_prefix;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write a fortran binary file.";
+  p_help = "If true, a four byte header and trailer is written for each record. The header and"
+           " trailer contain the record's size in bytes.";
+} write_fortran_binary;
+
+
+typedef enum {
+  GRID_REF_CENTER = 0,
+  GRID_REF_LOWER_LEFT =  1,
+  GRID_REF_UPPER_LEFT =  2,
+  GRID_REF_UPPER_RIGHT = 3,
+  GRID_REF_LOWER_RIGHT = 4
+} grid_reference_t;
+
+paramdef enum grid_reference_t {
+  p_default = GRID_REF_CENTER;
+  p_descr = "Set output grid reference.";
+} output_grid_reference;

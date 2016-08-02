@@ -1,0 +1,141 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.ShapeGridPt2Mdv
+ *
+ * This file contains the TDRP parameter definitions for
+ * ShapeGridPt2Mdv.
+ */
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = false;
+} debug;
+
+
+/***********************************************************************
+ * Input/output parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Input path";
+  p_default = "./grid.txt";
+} input_path;
+
+paramdef string
+{
+  p_descr = "Output path";
+  p_default = "./grid.mdv";
+} output_path;
+
+
+/***********************************************************************
+ * Algorithm parameters
+ */
+
+commentdef
+{
+  p_header = "ALGORITHM PARAMETERS";
+};
+
+typedef enum
+{
+  PROJ_LATLON,
+  PROJ_FLAT,
+  PROJ_LC
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+  long nx;
+  long ny;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} proj_t;
+
+paramdef struct proj_t
+{
+  p_descr = "Output projection";
+  p_default = { PROJ_LATLON,
+                -12.24166666667, 10.141666666679,
+                0.00833333333333, 0.00833333333333,
+                1979, 1783,
+                0.0, 0.0, 0.0, 0.0, 0.0 };
+} output_proj;
+
+paramdef string
+{
+  p_descr = "Output field name";
+  p_default = "Terrain";
+} output_field_name;
+
+paramdef string
+{
+  p_descr = "Output field units";
+  p_default = "m";
+} output_field_units;
+
+typedef struct
+{
+  double input_value;
+  double output_value;
+} convert_t;
+
+paramdef struct convert_t
+{
+  p_descr = "Table of value conversions";
+  p_help = "If any of the given input values are found in the input "
+           "file, they are changed to the given output value before "
+           "being written to the output MDV file. "
+           "This was added for the terrain files that were using the value "
+           "55537 to indicate ocean.";
+  p_default = {};
+} conversion_table[];

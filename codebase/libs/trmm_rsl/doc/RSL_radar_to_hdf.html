@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.0b5aGold (X11; I; Linux 1.3.91 i586) [Netscape]">
+</HEAD>
+<BODY>
+<a HREF="index.html"> <IMG SRC="rsl.gif"> </a>
+<hr>
+
+<H1>RSL_radar_to_hdf</H1>
+
+<P>
+<HR></P>
+
+<H3>Synopsis</H3>
+
+<P><B>#include &quot;rsl.h&quot; <BR>
+int RSL_radar_to_hdf(<A HREF="RSL_radar_struct.html">Radar</A> *radar,
+char *outfile);</B> 
+<HR></P>
+
+<H3>Description</H3>
+
+<P>Writes HDF&nbsp;files. The output file is specified by <I>outfile.</I>
+The organization of the data within the HDF&nbsp;file is specified in NASA
+document TSDIS-P907. This is also known as TSDIS ICS Volume 3 (Release
+3/Draft). You must preceed the call to RSL_radar_to_hdf with a call to
+<A HREF="RSL_set_hdf_qc_parameters.html">RSL_set_hdf_qc_parameters</A>.</P>
+
+<P>
+<HR></P>
+
+<H3>Return value</H3>
+
+<P>Upon successful completion, RSL_radar_to_hdf returns 0. Upon failure,
+-1 is returned. 
+<HR></P>
+
+<H3>See also</H3>
+
+<P><A HREF="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar </A></P>
+
+<P><A HREF="RSL_set_hdf_qc_parameters.html">RSL_set_hdf_qc_parameters</A>
+<HR></P>
+
+<P>Author: <A HREF="mike.kolander.html">Mike Kolander</A>.</P>
+
+</BODY>
+</HTML>

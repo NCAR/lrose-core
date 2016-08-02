@@ -1,0 +1,153 @@
+
+commentdef {
+  p_header = "StormInitFieldExtract is a simple program that\n"
+	"reads an SPDB database of storm initialization\n"
+	"points written by StormInitLocation, and for\n"
+	"each point reads the corresponding gridded field\n"
+	"and outputs an ASCII file with the field values at\n"
+	"that point.\n\n"
+	"The program must be given a start and end time to\n"
+	"run, usually with the -start and -end options.\n"
+	"There is also a -yesterday option that can be used\n"
+	"to run the program from 00:00:00 to 23:59:59 on\n"
+	"yesterday's data (allowing it to be run by cron).\n\n"
+	"The output ASCII file contains white space separated\n"
+	"colums of data, hopefully suitable for processing in\n"
+	"other software packages.\n\n"
+	"The output colums have the following format :\n\n"
+	"YYYY MM DD HH MM SS lat lon Area Dur DBZ\n"
+	"Sn Cn v1 v2 .. vN\n\n"
+	"Where : \n\n"
+	"YYYY MM DD HH MM SS are the year, month day, hour minute and\n"
+	"second of the SPDB GenPt.\n\n"
+	"lat and lon are the latitude and longitude of the GenPt.\n\n"
+	"Area is the maximum area the storm covered.\n\n"
+	"Dur is the duration of the storm, in minutes.\n"
+	"The storm must be above the StormInitLocation thresholds\n"
+	"to have endured.\n\n"
+	"DBZ is the maximum DBZ the storm echo returned.\n\n"
+	"Sn and Cn are the simple and complex titan track numbers.\n\n"
+	"v1 v2 .. vN are the data values extracted from the gridded\n"
+	"data at that space/time. Niles Oien September 2002.";
+
+}
+
+paramdef string {
+  p_descr = "Input SPDB URL";
+  p_help = "The GenPt structures that drive the program\n"
+	"are read from this SPDB URL."; 
+  p_default = {"spdbp:://localhost::spdb/StormInitLoc"};
+} spdbUrl;
+
+paramdef boolean {
+  p_descr = "Option to only read MDV data before\n"
+	"the SPDB data time.";
+  p_help = "If not set, the closest MDV data time is used, even\n"
+	"if it is after the SPDB time. This may be more accurate\n"
+	"given that the program is run post facto but does not\n"
+	"reflect realtime operations."; 
+  p_default = FALSE;
+} readFirstBefore;
+
+paramdef long {
+  p_descr = "Maxiumum time difference between SPDB and MDV data, secs.";
+  p_help = "Program will not find any data if this is too small."; 
+  p_default = 1800;
+} searchMargin;
+
+typedef struct {
+  string  URL;
+  string  FieldName;
+  boolean applyVlevelLimits;
+  int     minVlevelPlaneNum;
+  int     maxVlevelPlaneNum;
+  int     gridWindow;
+} MDV_Field_t;
+
+paramdef struct MDV_Field_t {
+  p_descr = "List of MDV fields to output.";
+  p_help = "This is a list of structures with the following entries :\n\n"
+	" * The URL to read the MDV data from,\n"
+	" * The field name to read from that URL,\n"
+	" * A boolean determining if vertical limits are to be applied,\n"
+	" * The lower vertical plane number limit for that field,\n"
+	"   which is only relevant if vertical limits are being applied,\n"
+	" * The upper vertical plane number limit for that field,\n"
+	"   which is only relevant if vertical limits are being applied,\n"
+	" * The number of grid points to average over. Averaging is done by\n"
+	"    +/- gridWindow, so setting gridWindow=0 means no averaging,\n"
+	"    gridWindow=1 => 3x3 window, gridWindow=2 => 5x5 window, etc."; 
+  p_default = {
+    { "mdvp:://localhost::mdv/someData", "FieldName", FALSE, 0, 0, 0},
+    { "mdvp:://localhost::mdv/someData", "FieldName", TRUE,  0, 1, 1}
+  };
+} MDV_Fields[];
+ 
+paramdef double {
+  p_descr = "Value to output when data are bad/missing.";
+  p_help = "Set to something physical values cannot reach.";
+  p_default = -999.0;
+} badVal;
+ 
+paramdef string {
+  p_descr = "Output directory.";
+  p_help = "Data files are written here, stamped with the start time\n"
+	"of the run."; 
+  p_default = {"./some/directory/structure"};
+} outDir;
+ 
+paramdef boolean {
+  p_descr = "Set to print more messages as data are processed.";
+  p_help = "Can usually be FALSE"; 
+  p_default = FALSE;
+} debug;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef int {
+  p_descr = "Time offset, seconds.";
+  p_help = "The time that MDV data are fetched for is the storm\n"
+	"initialization time plus this time, so that if a storm\n"
+	"initialized at 13:00 then :\n"
+	"Setting this to -3600 would make the MDV search time 12:00\n"
+	"Setting this to 3600  would make the MDV search time 14:00\n"; 
+  p_default = 0;
+} timeOffset;
+ 
+commentdef {
+  p_header = "AREA, DURATION THESHOLDS";
+}
+
+typedef struct {
+  double min;
+  double max;
+} thresh_t;
+
+paramdef boolean {
+  p_descr = "Option to apply thresholds to maximum storm area.";
+  p_help = "By default all areas are included.";
+  p_default = FALSE;
+} applyAreaThresholds;
+
+paramdef struct thresh_t {
+  p_descr = "Threshold to apply to maximum storm area.";
+  p_help = "Relevant only if applyAreaThresholds is TRUE.";
+  p_default = {0, 30000};
+} areaThresholds;
+
+paramdef boolean {
+  p_descr = "Option to apply thresholds to maximum storm duration.";
+  p_help = "By default all durations are included.";
+  p_default = FALSE;
+} applyDurationThresholds;
+
+paramdef struct thresh_t {
+  p_descr = "Threshold to apply to maximum storm duration.";
+  p_help = "Relevant only if applyDurationThresholds is TRUE.";
+  p_default = {0, 30000};
+} durationThresholds;
+

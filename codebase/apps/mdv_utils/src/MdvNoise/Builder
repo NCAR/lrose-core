@@ -1,0 +1,5 @@
+#!/bin/csh
+
+pgf90 simbetavk2d_dhs.f -o simbetavk2d_dhs
+
+#

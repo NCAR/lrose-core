@@ -1,0 +1,245 @@
+/*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+ ** Copyright UCAR (c) 1992 - 1997
+ ** University Corporation for Atmospheric Research(UCAR)
+ ** National Center for Atmospheric Research(NCAR)
+ ** Research Applications Program(RAP)
+ ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
+ ** All rights reserved. Licenced use only.
+ ** Do not copy or distribute without authorization
+ ** 1997/9/26 13:58:59
+ *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
+/*********************************************************
+ * parameter definitions for TrecGauge2Spdb
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 1997
+ */
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_LOG, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option.";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail. For DEBUG_LOG, the output is in the form of one line per calibration time, suitable for reading into other applications.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+  "In realtime mode, the analysis is performed for each volume scan "
+  "as it becomes available. In archive mode, the file list is obtained "
+  "from the command line.";
+} mode;
+
+commentdef {
+  p_header = "INPUT DATA.";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv/trec";
+  p_descr = "URL for input TREC grid files";
+  p_help = "The files in this URL are sampled to get the data for this program.";
+} trec_input_url;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input trec data";
+  p_help = "For realtime only - max age of trec data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef string {
+  p_default = "dBZ";
+  p_descr = "File label for dbz field";
+  p_help = "This is used to determine the field position in the data file.";
+} dbz_label;
+
+paramdef string {
+  p_default = "U comp";
+  p_descr = "File label for u field";
+  p_help = "This is used to determine the field position in the data file.";
+} u_label;
+
+paramdef string {
+  p_default = "V comp";
+  p_descr = "File label for v field";
+  p_help = "This is used to determine the field position in the data file.";
+} v_label;
+
+paramdef char* {
+  p_default = "spdbp:://localhost::spdb/gauges";
+  p_descr = "URL for input gauge data.";
+  p_help = "URL form: spdbp:[transformation]:[paramfile]//host:[port]:dir\n "
+    "OR /dir OR ./dir OR dir (relative to RAP_DATA_DIR).";
+} physical_gauge_input_url;
+
+commentdef {
+  p_header = "ANALYSIS PARAMETERS.";
+}
+
+paramdef boolean {
+  p_default = "FALSE";
+  p_descr = "Treat Missing data cells as low reflectivity for averages";
+  p_help = " Turning this on may improve the accuracy of the mean reflectivity calc.";
+} treat_missing_as_low;
+
+paramdef float {
+  p_default = "-40.0";
+  p_descr = "Reflectivity value to use for dbZ averaging in missing data cells";
+  p_help = "See the treat_missing_as_low control flag.";
+} missing_dbz_value;
+
+typedef enum {
+  TREC_ONLY_MOTION, MEAN_WIND_MOTION, ZERO_MOTION
+} motion_t;
+
+paramdef enum motion_t {
+  p_default = TREC_ONLY_MOTION;
+  p_descr = "Procedure for computing motion.";
+  p_help = "The motion may be computed in the following ways: (a) using the trec vectors only, (b) computing the mean wind as a weighted average of trec and the gauge-measured wind, or (c) setting the motion to zero.";
+} motion;
+
+typedef enum {
+  SPATIAL_AVERAGE, TEMPORAL_AVERAGE
+} trec_motion_method_t;
+
+paramdef enum trec_motion_method_t {
+  p_default = SPATIAL_AVERAGE;
+  p_descr = "Procedure for computing average trec motion.";
+  p_help = "SPATIAL_AVERAGE: average motion is computed upwind of the gauge. TEMPORAL_AVERAGE: motion is computed at the gauge going back in time.";
+} trec_motion_method;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Period for computing the mean gauge wind (secs).";
+  p_help = "If motion is MEAN_WIND, this is the time period over which the gauge-measured wind is computed.";
+} gauge_wind_averaging_period;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Period for computing the mean trec motion (secs).";
+  p_help = "Applies if trec_motion_method is TEMPORAL_AVERAGE.";
+} trec_motion_averaging_period;
+
+typedef struct {
+  string name;
+  double lat;
+  double lon;
+  double trec_weight;
+  double gauge_weight;
+  int vel_kernel_size;
+  int dbz_kernel_size;
+} gauge_t;
+
+paramdef struct gauge_t {
+  p_default = {
+    {
+      name = "DIA1",
+      lat = 39.83206,
+      lon = -104.72360,
+      trec_weight = 0.25,
+      gauge_weight = 0.75,
+      vel_kernel_size = 10,
+      dbz_kernel_size = 10
+    }
+    ,
+    {
+      name = "BRI1",
+      lat = 39.97139,
+      lon = -104.68139,
+      trec_weight = 0.5,
+      gauge_weight = 0.5,
+      vel_kernel_size = 10,
+      dbz_kernel_size = 10
+    }
+    ,
+    {
+      name = "PLT1",
+      lat = 39.88206,
+      lon = -104.7236,
+      trec_weight = 0.5,
+      gauge_weight = 0.5,
+      vel_kernel_size = 10,
+      dbz_kernel_size = 10
+    }
+    ,
+    {
+      name = "CHL1",
+      lat = 39.88206,
+      lon = -104.7236,
+      trec_weight = 0.5,
+      gauge_weight = 0.5,
+      vel_kernel_size = 10,
+      dbz_kernel_size = 10
+    }
+    ,
+    {
+      name = "MAR1",
+      lat = 39.93208,
+      lon = -105.18175,
+      trec_weight = 0.5,
+      gauge_weight = 0.5,
+      vel_kernel_size = 10,
+      dbz_kernel_size = 10
+    }
+  }
+  p_descr = "Gauge parameters.";
+  p_help = "Parameters for each gauge in the array. The lat and lon specify the gauge position. The weights are used only if motion is set to MEAN_WIND. In that case, the weight values are those applied to the trec and gauge wind in ordre to compute the mean wind. Also specified are the kernel sizes for averaging reflectivity and velocity. To compute the velocity vector at a gauge, the velocity data in the trec grid is averaged over a square kernel of size vel_kernel_size. Similarly for dbz.";
+} gauges[];
+
+commentdef {
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef string {
+  p_default = "./spdb/trec_gauge";
+  p_descr = "List of destinations for SPDB output grid files";
+  p_help = "URL form: spdbp:[transformation]:[paramfile]//host:[port]:dir\n "
+    "OR /dir OR ./dir OR dir (relative to RAP_DATA_DIR).";
+} output_url;
+
+paramdef int {
+  p_default = 10;
+  p_min = 1;
+  p_descr = "Number of forecast times.";
+  p_help = "This is the number of times for which dbz data is computed for each gauge. Trec has computed the (u,v) vector components around each gauge. Moving upstream against this vector allows us to sample the reflectivity values which should appear over the gauge at each forecast time.";
+} n_forecasts;
+
+paramdef int {
+  p_default = 300;
+  p_min = 1;
+  p_descr = "Time between forecast points (secs).";
+  p_help = "This is the time spacing between forecast times. First forecast time is at 0 secs.";
+} forecast_delta_time;
+
+paramdef int {
+  p_default = 300;
+  p_min = 1;
+  p_descr = "Valid period for product (secs).";
+  p_help = "All SPDB products have an expire time. The valid_period is used to compute the expire time, by adding it to the data time.";
+} product_valid_period;
+
+
+

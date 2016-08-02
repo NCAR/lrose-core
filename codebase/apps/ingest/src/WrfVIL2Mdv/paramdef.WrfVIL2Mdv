@@ -1,0 +1,253 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+commentdef
+{
+  p_header = "WrfVIL2Mdv reads netcdf files from the WRF"
+             "and writes MDV data.";
+}
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string
+{
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum
+{
+  ARCHIVE,
+  REALTIME
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+           "In realtime mode, the conversion is performed for each "
+           "input file as it becomes available. "
+           "In archive mode, the file list is obtained from the command line.";
+  p_default = REALTIME;
+} mode;
+
+commentdef
+{
+  p_header = "INPUT/OUTPUT";
+}
+
+paramdef string
+{
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for nssl netCDF data files.";
+} InDir;
+
+paramdef boolean
+{
+  p_descr = "Use latest_data_info when checking for new files";
+  p_help = "Set to FALSE to watch the directory recursively for new files";
+  p_default = TRUE;
+} use_ldata_info;
+
+paramdef string
+{
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int
+{
+  p_default = 3600;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+paramdef boolean
+{
+  p_descr = "Write output to forecast directory structure";
+  p_help = "Set to FALSE to write to the flat directory structure";
+  p_default = FALSE;
+} writeAsForecast;
+
+paramdef string
+{
+  p_descr = "Output URL to write MDV data to, in form:\n"
+            "mdvp:://host.dom::dir/dir";
+  p_help = "Set to where output MDV data should be written."; 
+  p_default = "mdvp:://localhost::Some/dir";
+} outUrl;
+
+paramdef int
+{
+  p_descr = "Time before data expire, seconds.";
+  p_help = "Default is half an hour."; 
+  p_default = 1800;
+} Expiry;
+
+commentdef
+{
+  p_header = "FILE TYPE SPECIFICATIONS";
+}
+
+paramdef string
+{
+  p_descr = "List of input fields to process";
+  p_default = { "rr" };
+} input_field_list[];
+
+commentdef
+{
+  p_header = "REMAPPING PARAMETERS";
+}
+
+paramdef boolean
+{
+  p_descr = "Option to remap to flat earth grid from internal "
+	"lat/lon grid.";
+  p_help = "AreaIngest uses an internal lat/lon grid specified "
+	"by the Dx, Dy, lonMin, lonMax, latMin, and latMax parameters "
+	"above. This option allows the data to be remapped to a "
+	"flat earth grid. If this option is selected, the flatEarthGrid "
+	"parameters below are utilized. It should not be used in conjunction "
+	"with remapToLambert.";
+  p_default = FALSE;
+} remapToFlat;
+
+typedef struct
+{
+	 int nx;
+	 int ny;
+	 double minx;
+	 double miny;
+	 double dx;
+	 double dy;
+	 double origin_lat; 
+	 double origin_lon;
+	 double rotation;
+} flat_remap_t;
+
+paramdef struct flat_remap_t
+{
+  p_descr = "Grid parameters for flat earth.";
+  p_help = "Used only if remapToFlat is TRUE.";
+  p_default = { 500, 500,
+                -250.0, -250.0,
+                1.0, 1.0,
+                37.0, -98.0, 0.0};
+} flatEarthGrid;
+
+
+paramdef boolean
+{
+  p_descr = "Option to remap to latlon earth grid from internal "
+            "lat/lon grid.";
+  p_help = "AreaIngest uses an internal lat/lon grid specified "
+           "by the Dx, Dy, lonMin, lonMax, latMin, and latMax parameters "
+           "above. "
+           "This option allows the data to be remapped to a latlon "
+           "earth grid. If this option is selected, the latlonEarthGrid "
+           "parameters below are utilized. "
+           "It should not be used in conjunction with remapToFlat.";
+  p_default = FALSE;
+} remapToLatlon;
+
+
+typedef struct
+{
+	 int nx;
+	 int ny;
+	 double minx;
+	 double miny;
+	 double dx;
+	 double dy;
+} ll_remap_t;
+
+paramdef struct ll_remap_t
+{
+  p_descr = "Grid parameters for lambert conformal grid.";
+  p_help = "Used only if remapToLambert is TRUE.";
+  p_default = { 50, 500,
+                0.0, 0.0,
+                1.0, 1.0};
+} latlonEarthGrid;
+
+paramdef boolean
+{
+  p_descr ="User defines the bad and missing values of the input data.";
+  p_help = "Used since netCDF file may not define bad or missing data. Note that this sets the value of bad and missing in the MdvFieldHeader.";
+  p_default = false; 
+}user_defined_bad_missing;
+
+paramdef float 
+{
+  p_descr = "Bad and missing data value of the input data.";
+  p_default = -999.0;
+}bad_missing_val;
+
+paramdef boolean
+{
+  p_descr ="User redefines bad and missing values of the input data.";
+  p_help = "Used since netCDF file may not define bad or missing data.Note that the MdvFieldHeader will be changed and the bad missing data value in the gridded data will be changed to parameter new_bad_missing_val ";
+  p_default = false;
+}redefine_bad_missing;
+
+paramdef float
+{
+  p_descr = "The bad/missing data values in the gridded data will be changed to this value if redefine_bad_missing is set to true.";
+  p_default = 0.0;
+}new_bad_missing_val;
+
+
+paramdef boolean
+{
+  p_descr ="Option to scale data";
+  p_default = false;
+}scale_data;
+
+paramdef float
+{
+  p_descr ="Used to scale data";
+  p_default = 0.00328084;
+}multiplicative_factor;
+
+

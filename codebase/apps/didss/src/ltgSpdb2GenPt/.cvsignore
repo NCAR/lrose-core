@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+ltgSpdb2GenPt
+makefile
+makefile.am
+makefile.in

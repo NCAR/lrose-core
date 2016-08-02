@@ -1,0 +1,121 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "mdlBdry2Spdb reads ascii files of boundaries\n"
+             "and writes SPDB boundaries. The input file format\n"
+             "is as follows:\n\n"
+             "#---------------------------------\n"
+             "1\n"
+             "2006/03/22 20:15:24     1143058524\n"
+             "3\n"
+             "43.6441 -110.569 0 0\n"
+             "40.8384 -113.662 0 0\n"
+             "39.178 -110.408 0 0\n"
+             "\n"
+             "#---------------------------------\n"
+             "1\n"
+             "2006/03/22 20:15:24     1143058524\n"
+             "4\n"
+             "43.6441 -110.569 0 0\n"
+             "40.8384 -113.662 0 0\n"
+             "39.8985 -111.659 0 0\n"
+             "38.2818 -111.967 0 0\n\n"
+             "The first integer is taken as the boundary ID and the\n"
+             "second is the number of points.\n\nNiles Oien April 2006.";
+
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed.";
+} debug;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to use latest data info file.";
+  p_help = "Set to TRUE if the input files come with a latest_data_info file.";
+} ldataInfoAvailable;
+
+paramdef boolean
+{
+  p_default = TRUE;
+  p_descr = "Option to only process most recent file on startup.";
+  p_help = "Default is to do this.";
+} latestFileOnly;
+
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "ARCHIVE needs a filename from the command line with the -f option.";
+} mode;
+      
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "$(RAP_DATA_DIR)/$(PROJECT)/raw/mdlBoundaries";
+  p_descr = "Input directory - top level. Set to the\n"
+            "the directory in which the input files appear."
+            "Used in realtime mode only.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+
+paramdef string {
+  p_default = "spdbp:://localhost::$(PROJECT)/spdb/mdlBoundaries";
+  p_descr = "URL for output SPDB data.";
+} OutUrl;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "How long data are valid, seconds.";
+} expiry;
+

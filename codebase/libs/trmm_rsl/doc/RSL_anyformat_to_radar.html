@@ -1,0 +1,67 @@
+<HTML>
+<HEAD>
+<TITLE>Title</TITLE>
+<!--Created by Applixware HTML Author, Release 4.4 on Thu Jan 28 09:55:22 1999-->
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="GENERATOR" CONTENT="Mozilla/4.05 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+<!--Ax:WP:DocVar:HTMLOriginalPath@:"/tmp/ex16388g.aw"-->
+</HEAD>
+<BODY>
+<P><A HREF="index.html"><IMG SRC="rsl.gif" ALT="rsl.gif" HEIGHT=100></A>
+</P>
+<HR>
+<H1>RSL_anyformat_to_radar</H1>
+<HR>
+<H3>Synopsis</H3>
+<P><B>#include &quot;rsl.h&quot;</B><BR>
+<A HREF="RSL_radar_struct.html">Radar</A><B> *RSL_anyformat_to_radar(char
+*infile [, char *callid_or_first_file]);</B></P>
+<HR>
+<H3>Description</H3>
+<P>Reads radar input files. The format of the input file is automatically
+determined by using magic numbers. The input file may be compressed (with old
+unix <B>compress</B> or GNU <B>gzip</B>) and the magic numbers are obtained by
+passing the data through the GNU <B>gzip</B> decompression filter. Magic
+numbers are standard for the following file formats and, thus, are recognized
+by RSL_anyformat_to_radar: <BR>
+&nbsp;</P>
+<P>WSR-88D (NEXRAD)</P>
+<P>LASSEN (version 1.3 and version 1.4 files)</P>
+<P>Universal Format (UF)</P>
+<P>NSIG (SIGMET version 1 and version 2 raw product files)</P>
+<P>MCGILL</P>
+<P>RSL output format</P>
+<P>RAPIC (Berrimah Austrailia)</P>
+<P>RADTEC (SPANDAR, requires PKWARE compression tools)</P>
+<P>For TOGA and KWAJALEIN files, there is no standard magic information
+available. It may not be possible for RSL_anyformat_to_radar to recognize
+them. The optional second argument is valid for reading wsr88d files. See 
+<A HREF="RSL_wsr88d_to_radar.html">RSL_wsr88d_to_radar</A>. Once the file type
+is determined, the appropriate ingest routine is called.</P>
+<P>In order to reduce the memory requirements during ingest, you can call 
+<A HREF="RSL_select_fields.html">RSL_select_fields</A> to specify the field
+types. For instance, you can select to read only DZ from the input file. The
+input file may contain other fields, but, they will be ignored.</P>
+<P>PKWARE compression tools are required for the RADTEC module.&nbsp; The data
+has been <BR>
+compressed with <B>implode</B> and must be uncompressed with <B>explode
+</B>.<BR>
+</P>
+<HR>
+<H3>Return value</H3>
+<P>Upon successful completion, RSL_anyformat_to_radar returns a pointer to the
+structure <B>Radar</B>. Otherwise, NULL is returned.<BR>
+</P>
+<HR>
+<H3>See also</H3>
+<P><A HREF="RSL_wsr88d_to_radar.html">RSL_wsr88d_to_radar</A>, <A HREF="RSL_lassen_to_radar.html">RSL_lassen_to_radar
+</A>, <A HREF="RSL_read_radar.html">RSL_read_radar</A>, <A HREF="RSL_uf_to_radar.html">RSL_uf_to_radar
+</A>, <A HREF="RSL_toga_to_radar.html">RSL_toga_to_radar</A>, <A HREF="RSL_nsig_to_radar.html">RSL_nsig_to_radar
+</A>, <A HREF="RSL_nsig_to_radar.html">RSL_nsig2_to_radar</A>, <A HREF="RSL_mcgill_to_radar.html">RSL_mcgill_to_radar
+</A><A HREF="RSL_kwaj_to_radar.html"> RSL_kwaj_to_radar</A>, <A HREF="RSL_rapic_to_radar.html">RSL_rapic_to_radar
+</A>, <A HREF="RSL_radtec_to_radar.html">RSL_radtec_to_radar</A>.<BR>
+</P>
+<HR>
+<P>Author: <A HREF="john.merritt.html">John H. Merritt</A>.</P>
+</BODY>
+</HTML>

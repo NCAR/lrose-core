@@ -1,0 +1,12 @@
+#! /bin/csh -f
+
+snuff "test2gate -params test2gate.rtest"
+snuff "polar_ingest -params polar_ingest.rtest"
+snuff "polar2mdv -params polar2mdv.rtest"
+
+
+
+
+
+
+

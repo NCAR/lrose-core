@@ -1,0 +1,332 @@
+/**********************************************************************
+ * TDRP params for ChillCal2Xml
+ **********************************************************************/
+
+//======================================================================
+//
+// ChillCal2Xml reads in CHILL calibration files, and produces a 
+//   DsRadarCalib XML format file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "ops";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+// Type: boolean
+//
+
+register_with_procmap = TRUE;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file to process. 
+//   In ARCHIVE mode, it moves through the list of file names specified on 
+//   the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = REALTIME;
+
+///////////// chill_cal_dir ///////////////////////////
+//
+// Directory for input CHILL calibration files.
+// Type: string
+//
+
+chill_cal_dir = "/dsk/nas/calibration";
+
+///////////// current_cal_file_name ///////////////////
+//
+// Name of file to watch in chill_cal_dir.
+// Type: string
+//
+
+current_cal_file_name = "current_cal.conf";
+
+//======================================================================
+//
+// OVERRIDE CALIBRATION PARAMETERS.
+//
+//======================================================================
+ 
+///////////// radarName ///////////////////////////////
+//
+// Radar name.
+// Type: string
+//
+
+radarName = "CSU-CHILL";
+
+///////////// wavelengthCm ////////////////////////////
+//
+// Radar wavelength (cm).
+// Type: double
+//
+
+wavelengthCm = 11.0016;
+
+///////////// xmitPowerDbmH ///////////////////////////
+//
+// Transmitter peak power H (dBm).
+// Type: double
+//
+
+xmitPowerDbmH = 87.24;
+
+///////////// xmitPowerDbmV ///////////////////////////
+//
+// Transmitter peak power V (dBm).
+// Type: double
+//
+
+xmitPowerDbmV = 86.42;
+
+///////////// pulseWidthUs ////////////////////////////
+//
+// Transmit pulse width (micro_secs).
+// Type: double
+//
+
+pulseWidthUs = 1;
+
+///////////// beamWidthDegH ///////////////////////////
+//
+// Antenna 3dB beam width H (deg).
+// Type: double
+//
+
+beamWidthDegH = 1.0;
+
+///////////// beamWidthDegV ///////////////////////////
+//
+// Antenna 3dB beam width V (deg).
+// Type: double
+//
+
+beamWidthDegV = 1.0;
+
+///////////// antGainDbH //////////////////////////////
+//
+// Antenna gain H (dB).
+// Type: double
+//
+
+antGainDbH = 42.2;
+
+///////////// antGainDbV //////////////////////////////
+//
+// Antenna gain V (dB).
+// Type: double
+//
+
+antGainDbV = 42.2;
+
+///////////// twoWayWaveguideLossDbH //////////////////
+//
+// 2-way waveguide loss H (dB).
+// This is the loss from the measurement plane to the feed-horn and 
+//   back. Sometimes it is set to 0 and the loss is incorporated in the 
+//   antenna gain.
+// Type: double
+//
+
+twoWayWaveguideLossDbH = 0;
+
+///////////// twoWayWaveguideLossDbV //////////////////
+//
+// 2-way waveguide loss V (dB).
+// This is the loss from the measurement plane to the feed-horn and 
+//   back. Sometimes it is set to 0 and the loss is incorporated in the 
+//   antenna gain.
+// Type: double
+//
+
+twoWayWaveguideLossDbV = 0;
+
+///////////// twoWayRadomeLossDbH /////////////////////
+//
+// 2-way loss through the radome - H.
+// Set to 0 if no radome.
+// Type: double
+//
+
+twoWayRadomeLossDbH = 0.0;
+
+///////////// twoWayRadomeLossDbV /////////////////////
+//
+// 2-way loss through the radome - V.
+// Set to 0 if no radome.
+// Type: double
+//
+
+twoWayRadomeLossDbV = 0.0;
+
+///////////// receiverMismatchLossDb //////////////////
+//
+// Receiver mismatch loss - (dB).
+// This is the loss which results from the fact that the receiver 
+//   bandwidth is not exactly the same as the pulse width. The calibration 
+//   procedure is carries out with a CW signal, so the redeiver bandwidth 
+//   is not a factor. However, during operations, the receiver loses some 
+//   power because of the bandwidth mismatch. This loss must be taken into 
+//   account.
+// Type: double
+//
+
+receiverMismatchLossDb = 0.0;
+
+///////////// noiseSourcePowerDbmH ////////////////////
+//
+// Noise source power - H (dBm).
+// Some operational calibrations are computed with a calbrated noise 
+//   source of known power.
+// Type: double
+//
+
+noiseSourcePowerDbmH = -40;
+
+///////////// noiseSourcePowerDbmV ////////////////////
+//
+// Noise source power - V (dBm).
+// Some operational calibrations are computed with a calbrated noise 
+//   source of known power.
+// Type: double
+//
+
+noiseSourcePowerDbmV = -40;
+
+///////////// powerMeasLossDbH ////////////////////////
+//
+// Power measurement loss - H (dBm).
+// This is the power loss from the signal generator to the waveguide 
+//   coupler.
+// Type: double
+//
+
+powerMeasLossDbH = 58.56;
+
+///////////// powerMeasLossDbV ////////////////////////
+//
+// Power measurement loss - V (dBm).
+// This is the power loss from the signal generator to the waveguide 
+//   coupler.
+// Type: double
+//
+
+powerMeasLossDbV = 57.61;
+
+///////////// couplerForwardLossDbH ///////////////////
+//
+// Coupler loss - H (dB).
+// This is the power loss in the directional coupler itself.
+// Type: double
+//
+
+couplerForwardLossDbH = 35.9;
+
+///////////// couplerForwardLossDbV ///////////////////
+//
+// Coupler loss - V (dB).
+// This is the power loss in the directional coupler itself.
+// Type: double
+//
+
+couplerForwardLossDbV = 35.6;
+
+///////////// zdrCorrectionDb /////////////////////////
+//
+// Correction to ZDR (dB).
+// True ZDR = measured ZDR + zdrCorrectionDb.
+// Type: double
+//
+
+zdrCorrectionDb = 0;
+
+///////////// ldrCorrectionDbH ////////////////////////
+//
+// Correction to LDR - H (dB).
+// True LDRH = measured LDRH + ldrCorrectionDbH.
+// Type: double
+//
+
+ldrCorrectionDbH = 0;
+
+///////////// ldrCorrectionDbV ////////////////////////
+//
+// Correction to LDR - V (dB).
+// True LDRV = measured LDRV + ldrCorrectionDbV.
+// Type: double
+//
+
+ldrCorrectionDbV = 0;
+
+///////////// systemPhidpDeg //////////////////////////
+//
+// System PHIDP (deg).
+// This is the approximate PHIDP value in the meteorlogical echo closest 
+//   to the radar. Compute PHIDP is corrected using this value, so that 
+//   the computed PHIDP closest to the radar is set to a value which 
+//   minimizes the chance of folding.
+// Type: double
+//
+
+systemPhidpDeg = -60;
+
+//======================================================================
+//
+// OUTPUT RESULTS.
+//
+//======================================================================
+ 
+///////////// xml_output_dir //////////////////////////
+//
+// Dir for output files.
+// The results will be written to sub-directories named from the cal 
+//   time.
+// Type: string
+//
+
+xml_output_dir = "$(DATA_DIR)/cal/auto";
+

@@ -1,0 +1,54 @@
+2000-03-28  Frank Warmerdam  <warmerda@cs46980-c>
+
+	* Release as 1.2.8.
+
+	* Incorporated a -version-info fix and added mkinstalldirs from Jan.
+
+2000-03-17  Frank Warmerdam  <warmerda@cs46980-c>
+
+	* Added shared library hack to Makefile.
+
+	* Fixed up test scripts to look in ./ for executables.
+
+Wed Feb 16 11:20:29 2000  Frank Warmerdam  <warmerda@gdal.velocet.ca>
+
+	* Release 1.2.7.
+
+	* Modified SHPReadObject() so that will return NULL (type 0) shapes
+	in a sort of sensible way.
+
+Wed Dec 15 08:49:53 1999  Frank Warmerdam  <warmerda@gdal.velocet.ca>
+
+	* Fixed record size written at beginning of records in .shp
+	file.  It was 4 bytes to long (thanks to Mikko Syrja of 3D-system Oy)
+	
+	* Use atof() instead of sscanf() in dbfopen.c, and add stdlib.h.
+
+Mon Dec 13 12:29:01 1999  Frank Warmerdam  <warmerda@gdal.velocet.ca>
+
+	* Added support for uppercase .DBF extention c/o 
+          Dennis Christopher <dennis@avenza.com>
+
+Fri Nov  5 09:12:31 1999  Frank Warmerdam  <warmerda@gdal.velocet.ca>
+
+	* Updated license headers to include the option of use of the code
+	  under the LGPL.
+	  
+1999-09-15 <warmerda@CS46980-B>
+
+	* Added shapelib.dll target to makefile.vc.
+
+Mon May 10 23:19:42 1999  Frank Warmerdam  <warmerda@gdal.velocet.ca>
+
+	* Added candrsn's improvements to extension handling in dbfopen.c
+
+	* Added ``raw tuple'' api to dbfopen.c, still not in dbf_api.html.
+	  From candrsn.
+	
+
+Tue May  4 11:04:31 1999  Frank Warmerdam  <warmerda@gdal.velocet.ca>
+
+	* Prepare 1.2.5 release.
+
+	* Added support for 'F' fields.
+

@@ -1,0 +1,33 @@
+#!/bin/sh
+
+#
+# This is a small script that will move a log file
+# from the LogFilter utility to a timestamped file. If an app is
+# crashing, the last few messages will be at the end of the timestamped file.
+# This makes it easier to see where the app crashed in some cases.
+#
+# The intent is that this should be used as a debugging tool invoked
+# in the start script for an app, so that when the app restarts its
+# previous log file is moved. An example of using this in a start script :
+#
+# running "DrawFmq2Bdry -params DrawFmq2Bdry.niwot"
+# if ($status == 1) then
+#  saveLogFilterFile $LOG_DIR DrawFmq2Bdry niwot
+#  echo "Starting DrawFmq2Bdry -params DrawFmq2Bdry.niwot"
+#  DrawFmq2Bdry -params DrawFmq2Bdry.niwot |& \
+#  LogFilter -d $LOG_DIR -p DrawFmq2Bdry -i niwot >& /dev/null &
+# endif
+#
+#
+# Niles Oien May 7 2010
+#
+if  [ $# != 3 ]; then
+  echo USAGE : $0 logDir progName instanceName
+  exit
+fi
+
+Date=`date -u +%Y%m%d`
+dateTime=`date -u +%Y%m%d_%H%M%S`
+/bin/mv -f $1/$Date/$2.$3.log $1/$Date/$2.$3.log.$dateTime
+#
+

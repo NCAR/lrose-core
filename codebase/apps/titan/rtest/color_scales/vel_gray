@@ -1,0 +1,12 @@
+# gray scale for velocity field
+
+# Mike Dixon, April 1991
+
+-24 	-12 	#373737
+-12 	-05 	#5a5a5a
+-05 	-02 	#7d7d7d
+-02  	02 	#0a0a0a
+ 02  	05 	#8c8c8c
+ 05  	12 	#bebebe
+ 12  	24 	#ffffff
+

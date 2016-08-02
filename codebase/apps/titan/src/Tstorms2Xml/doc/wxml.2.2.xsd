@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!--   **********************************************************************   
+                                                                           
+       WxML.2.2.xsd - Top level XML Schema for WxML Markup Language   
+
+       John L. Schattel          MDL                4 August 2004  
+       Red Hat Linux                                Apache Server  
+        
+       Sandy Dance               modify for WxML    Feb 2006
+       Elena Dozortseva	                            March 2006
+       
+      *************************************************************************   -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML"
+targetNamespace="http://www.bom.gov.au/bmrc/wefor/projects/b08fdp/WxML"
+elementFormDefault="qualified">
+
+	<xsd:include schemaLocation="meta_data.2.1.xsd"/>
+	<xsd:include schemaLocation="adfd_data.xsd"/>
+	<xsd:include schemaLocation="nowcast_data.2.2.xsd"/>
+	<xsd:element name="wxml">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="head" type="headType" minOccurs="1" maxOccurs="1"/>
+				<xsd:choice>
+					<xsd:element name="data" type="dataType" minOccurs="1" maxOccurs="1">
+						<xsd:keyref name="applicable-locationKey" refer="locationKey">
+							<xsd:selector xpath="data/parameters"/>
+							<xsd:field xpath="@applicable-location"/>
+						</xsd:keyref>
+
+						<xsd:key name="locationKey">
+							<xsd:selector xpath=".//location"/>
+							<xsd:field xpath="location-key"/>
+						</xsd:key>
+						<xsd:keyref name="applicable-timeKey" refer="timeKey">
+							<xsd:selector xpath="data/parameters/*"/>
+							<xsd:field xpath="@time-layout"/>
+						</xsd:keyref>
+						<xsd:key name="timeKey">
+							<xsd:selector xpath=".//time-layout"/>
+							<xsd:field xpath="layout-key"/>
+						</xsd:key>
+					</xsd:element>
+					<xsd:element name="nowcast-data" type="nowcast-dataType" minOccurs="1" maxOccurs="1"/>
+				</xsd:choice>
+			</xsd:sequence>
+			<xsd:attribute name="version" type="xsd:string" default="1.0"/>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

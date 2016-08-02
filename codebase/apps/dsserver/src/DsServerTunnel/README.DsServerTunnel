@@ -1,0 +1,83 @@
+DsServerTunnel.pm (c)  F. Hage NCAR/RAP 2001
+
+# Tres Hofmeister <tres@ucar.edu>  Tue May  8 16:30:35 MDT 2012
+
+The current version of the DsServerTunnel module has been tested
+under Apache 2.2.16 on a Debian 6.0 ("squeeze") system.  It includes a
+configuration file, DsServerTunnel.cf, to allow access control, limiting
+which hosts the module may communicate with.  It also incorporates fairly
+extensive code cleanup, repaired and improved logging (it now works;
+messages are tagged "DsServerTunnel" in the Apache access and error logs),
+and debugging support.
+
+To use the module on a Debian 6 system:
+
+1. Install both the module and the configuration file, DsServerTunnel.cf,
+in /etc/apache2/Apache2
+
+2. Add a stanza in the Apache site configuration file similar to the following:
+
+# Tunneling module for the RAL DsServerTunnel protocol.
+<Location /DsServerTunnel>
+  SetHandler perl-script
+  PerlHandler Apache2::DsServerTunnel
+</Location>
+
+
+3. Edit the configuration file, specifying which hosts the tunnel may access.
+
+4. Install and enable the Apache2 Perl module, as root:
+
+# aptitude install libapache2-mod-perl2
+# a2enmod perl
+
+
+5. Test the Apache configuration, as root:
+
+# apache2cl configtest
+
+
+6. Restart the Apache service, as root:
+
+# service apache2 restart
+
+
+Frank Hage's original text follows:
+
+This module provides a mechanism to tunnel the DsServer protocols through the
+Apache http server. This module is placed in /usr/lib/perl5/Apache, where
+a bunch of other stuff necessary for the mod_perl extension to the apache
+server lives. Usually only the web administrator has privleges to do this.
+Additionally, check to make sure the Apache mod_perl extensions have been
+loaded. A line similar to:
+LoadModule perl_module /usr/lib/apache/1.3/mod_perl.so
+should appear in /etc/apache/httpd.conf
+
+
+The following section of text between the Start and End is placed into
+/etc/apache/access.conf.
+Note 1: The actual location of the apache config file may be different.
+Note 2: For added security, the "Location" directive may be set to point to
+        an access-restricted directory.
+
+---Start-------
+#
+# This is a Tunneling Module for RAP's DsServer protocols
+#
+
+<Location /DsServerTunnel>
+SetHandler perl-script
+PerlHandler Apache::DsServerTunnel
+</Location>
+
+---End--------
+
+
+To install: Copy DsServerTunnel.pm into /usr/lib/perl5/Apache
+
+Then (on Our Current Debian release),
+
+Restart the Apache server with '/etc/init.d/apache restart'
+
+Then check /var/log/apache/error.log for errors
+

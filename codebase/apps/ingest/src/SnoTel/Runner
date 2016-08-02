@@ -1,0 +1,6 @@
+#!/bin/csh
+
+
+SnoTel -params test.params -f co.txt  
+
+#

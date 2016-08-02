@@ -1,0 +1,409 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body>
+<a href="index.html"><img SRC="rsl.gif" height=100 width=100></a>
+<hr>
+<br>&nbsp;
+<br>&nbsp;
+<h1>
+Programming Guide for RSL.</h1>
+
+<h2>
+Design philosophy:</h2>
+The design philosophy is simple. Routines are functions. Routines are short
+and simple. And, higher level routines are built upon lower level routines;
+a hierarchical modular design.
+<p>Each procedure in the RSL is a function that returns a pointer to an
+object that it is designed, or self documented, to return. In the case
+of scalar functions, scalar values are returned. There are exceptions to
+this rule wherein we have procedures that modify their arguments, but,
+these are few. Also, each function does one thing well. This makes the
+implementation of each function simple and easy to understand and, therefore,
+easy to maintain. The power of the library has come from building higher
+level functions from many lower level functions. Eventually, the highest
+level function takes a filename as an argument and returns a Radar pointer.
+<p>The Radar data structure is designed to contain values and header information
+making it a superset of all the radar data formats currently encountered.
+Currently RSL can ingest the following file formats: nexrad, lassen both
+1.3 and 1.4 file format versions (MCTEX too), UF, toga, new sigment (nsig)
+both version 1 and version 2 file formats, mcgill, kwajalein and rapic
+(Berrimah data).
+<br>&nbsp;
+<h2>
+<a href="whats_new.html">What's New?</a></h2>
+
+<h2>
+Future plans.</h2>
+There are no plans for added functionality to the library. However, there
+are always new functions that pop-up. The documentation must be improved.
+Other than that, bug fixes and optimizations will be incorporated. Therefore
+all furture releases are expected to be minor.
+<h2>
+Can read compressed files automatically (new since v0.41)</h2>
+Transparent, to all ingest routines the capability of filtering the input
+data file through the GNU gzip program for decompressing the file has been
+added. This feature does not appear to slow the I/O time and, in some cases,
+especially on 486 pc's, improves overall throughput time. Two generic,
+internal routines, have been added: <b>compress_pipe</b> and <b>uncompress_pipe</b>.
+Each routine takes a <b>FILE *</b> and redirects it through <b>gzip</b>.
+Each routine returns a new <b>FILE *</b>. Wsr88d files occupy 1/10 the
+disk space when compressed and the TRMM Office plans to compress wsr88d
+files to CDROM and 8mm tape for overall throughput savings for the production
+system. It will no longer be necessary to decompress the data before processing
+level 1.
+<p>Similiarly, UF output can be saved using the gzip filter. The new routine
+added is <a href="RSL_radar_to_uf.html">RSL_radar_to_uf_gzip</a> which
+utilizes the gzip compression filter.
+<h2>
+Can read stdin (new since v0.39)</h2>
+A new routine is provided called <a href="RSL_uf_to_radar.html">RSL_uf_to_radar_fp</a>
+which takes an open file descriptor and returns a radar pointer. That file
+pointer can be <b>stdin</b>. This special interface syntax, for the UF
+ingest, is an exception to the interfaces that the other ingest routines
+have. All other ingest routines, including <a href="RSL_uf_to_radar.html">RSL_uf_to_radar</a>,
+have been modified to read stdin when the input filename is NULL. The complete
+list of routines is: <a href="RSL_wsr88d_to_radar.html">RSL_wsr88d_to_radar</a>,
+<a href="RSL_nsig_to_radar.html">RSL_nsig_to_radar</a>,
+<a href="RSL_lassen_to_radar.html">RSL_lassen_to_radar</a>,
+<a href="RSL_uf_to_radar.html">RSL_uf_to_radar</a>,
+<a href="RSL_mcgill_to_radar.html">RSL_mcgill_to_radar</a>
+and <a href="RSL_toga_to_radar.html">RSL_toga_to_radar</a>. The only routine
+that will not accept stdin will be <a href="RSL_anyformat_to_radar.html">RSL_anyformat_to_radar</a>.
+That routine will not be able to handle reading stdin because it needs
+to read the first few bytes of the file to determine which ingest routine
+to call. If you plan to make a filter program, you'll just have to know
+what file format you expect: UF, nsig, wsr88d, etc.
+<h2>
+Verbose print mode:</h2>
+The function <a href="RSL_radar_verbose.html">RSL_radar_verbose_on()</a>
+and <a href="RSL_radar_verbose.html">RSL_radar_verbose_off()</a> control
+whether or not the radar library prints diagnostic messages during execution.
+These routines simply toggle an externally defined variable, <b>radar_verbose_flag</b>.
+If you're writing a new library function and you want the user (another
+programmer) to control the printing of diagnostic messages or not, you
+simply place print statement as the consequence of testing the variable
+<b>radar_verbose_flag</b>.
+For example:
+<pre>extern int radar_verbose_flag; /* Define before usage. */
+&nbsp;/* Somewhere in the code. */
+&nbsp;if (radar_verbose_flag) printf("I'm here now. Whatever.\n");</pre>
+
+<h2>
+Writing methods (structure specific interfaces for routines):</h2>
+The natural hierarchy of Radar makes it easy to construct routines that
+have interfaces that work on each of the substructures. When writing a
+function that manipulates the Ray data, it is easy to provide the interface
+for the Sweep, Volume and Radar without much extra effort. I will illustrate
+with an example that adds two Rays.
+<pre>Ray *add_rays(Ray *ray1, Ray *ray2)
+{
+int i;
+Ray *ray_new;
+if (ray1 == NULL) return NULL;
+if (ray2 == NULL) return NULL;
+ray_new = RSL_new_ray(ray1->h.nbins); /* Allocate the new ray. */
+if (ray_new == NULL) return NULL;
+ray_new->h = ray_new->h; /* Copy the header information. */&nbsp;
+for (i=0; i &lt;= ray_new->h.nbins; i++) /* Add each range element. */
+&nbsp; ray_new->range[i] = ray1->range[i] + ray2->range[i];
+return ray_new; /* Return this new ray. */
+}</pre>
+It is valid for the routine to accept NULL's. This should be checked and
+appropriate values returned. In the case above, we return NULL. We could
+easily return the ray that is not NULL, too. The choice is up to you. The
+routine is a function and returns a structure pointer similar to those
+it manipulates; or self documented to return. Space is allocated and header
+information is copied. You might ask, "Why don't we call RSL_copy_ray,
+then call RSL_clear_ray?". This is a viable approach and it will work well
+at the ray level, however, for the sweep, volume, and radar interfaces
+we don't want to recursively copy all substructures because it is more
+troublesome to copy, clear and set all the levels, than to simply allocate
+and set at each level. To construct the interfaces for Sweeps and Volumes
+is easy. For the Sweep interface we recognize that a Sweep is an array
+of Rays. You will notice that this routine is coded almost identically
+to the ray routine.
+<pre>Sweep *add_sweeps(Sweep *s1, Sweep *s2)
+{
+int i;
+Sweep *s_new;
+if (s1 == NULL) return NULL;
+if (s2 == NULL) return NULL;
+s_new = RSL_new_sweep(s1->h.nrays);
+s_new->h = s1->h;
+for (i=0; i &lt;= s1->h.nrays; i++)
+&nbsp; s_new->ray[i] = add_rays(s1->ray[i], s2->ray[i]);
+return s_new;</pre>
+
+<pre>}</pre>
+The pattern continues for making the Volume interface.
+<pre>Volume *add_volumes(Volume *v1, Volume *v2)
+{
+int i;
+Volume *v_new;
+if (v1 == NULL) return NULL;
+if (v2 == NULL) return NULL;
+v_new = RSL_new_volume(v1->h.nsweeps);
+v_new->h = v1->h;
+for (i=0; i &lt;= v1->h.nsweeps; i++)
+&nbsp; v_new->sweep[i] = add_sweeps(v1->sweep[i], v2->sweep[i]);
+return v_new;
+}</pre>
+And finally, for Radar.
+<pre>Radar *add_radars(Radar *r1, Radar *r2)
+{
+int i;
+Radar *r_new;
+if (r1 == NULL) return NULL;
+if (r2 == NULL) return NULL;
+r_new = RSL_new_radar(r1->h.nvolumes);
+r_new->h = r1->h;
+for (i=0; i &lt;= r1->h.nvolumes; i++)
+&nbsp; r_new->v[i] = add_volumes(r1->v[i], r2->v[i]);
+return r_new;
+}</pre>
+These four functions allow us to add two radars, add two volumes, add two
+sweeps or add two rays. The development was simple. For the radar routine
+we loop on the number of volumes and call the volume routine. For the volume
+routine we loop on the number of sweeps and call the sweep routine. For
+the sweep routine we loop on the number of rays and call the ray routine.
+For the ray routine we loop on the number of bins and perform the work.
+Simple. This is how many of the RSL routines were written.
+<h2>
+Using h.f and h.invf and defining your own function:</h2>
+The header members <b>f</b> and <b>invf</b> are provided to allow you to
+define the conversion function for internal/float storage. These header
+members are in the structures <a href="RSL_volume_struct.html">Volume</a>,
+<a href="RSL_sweep_struct.html">Sweep</a>,
+and <a href="RSL_ray_struct.html">Ray</a>.
+<b>f</b> takes a value of type
+<b>Range</b>
+and returns a value of type
+<b>float</b>. <b>invf</b> takes a value of
+type <b>float</b> and returns a value of type <b>Range</b>.
+<b>f</b> and
+<b>invf</b> should be inverse functions. That is, c == invf(f(c)) and x
+== f(invf(x)). <b>Range</b> is a datatype that represents the type of data
+for internal storage. Typically,
+<b>Range</b> will be <b>unsigned char</b>
+or <b>unsigned short</b> depending on the configuration option USE_TWO_BYTE_PRECISION
+the file makefile during the build and install step of RSL. There are several
+predefined functions and they are based on the WSR88D, or NEXRAD, encoding.
+There is a function for each field type: reflectivity, velocity, spectral
+width, etc. However, only two distinct functions are provided because the
+other field types can use these functions as well: DZ_F (and DZ_INVF) and
+VR_F (and VR_INVF). DZ_F and DZ_INVF apply to reflectivity data and VR_F
+and VR_INVF apply to all remaining field types by default. There are no
+restrictions for
+<b>f</b> and <b>invf</b>. Typically, you either pick the
+default functions DZ_F, DZ_INVF, VR_F and VR_INVF and assign them to the
+header member <b>h.f</b> and <b>h.invf</b>, appropriately, in the routine
+that is ingesting data from disk and constructing the Radar data structure.
+You can define your own encoding functions and assign them to <b>h.f</b>
+and <b>h.invf</b>. To illustrate:
+<pre>static Range invf(float x) {
+&nbsp;return (Range) (x/2 + 10);
+}
+
+static float f (Range x) {
+&nbsp;return (float) (x - 10)*2; /* Not quite a perfect inverse function. */
+}
+
+Volume *volume_routine(Volume *v)
+{
+&nbsp;v->h.f = f; /* Assign the float function. */
+&nbsp;v->h.invf = invf; /* Assign the Range function. */
+&nbsp;return v;
+}</pre>
+So far in the construction of RSL, the only location where you assign h.f
+and h.invf is in the ingest routine for a particular data format. The routines
+<a href="RSL_uf_to_radar.html">RSL_uf_to_radar</a>,
+<a href="RSL_lassen_to_radar.html">RSL_lassen_to_radar</a>,
+<a href="RSL_wsr88d_to_radar.html">RSL_wsr88d_to_radar</a>,
+<a href="RSL_nsig_to_radar.html">RSL_nsig_to_radar</a>,
+<a href="RSL_toga_to_radar.html">RSL_toga_to_radar</a>,
+and <a href="RSL_mcgill_to_radar.html">RSL_mcgill_to_radar</a> each define
+the invf and f functions; in some cases the default functions are used.
+The file <b>volume.c</b> contains the default specification for DZ_F, DZ_INVF,
+etc.
+<h2>
+Image generation:</h2>
+The image generation section was initially written to test and debug the
+development of the library. However, some of the image generation capabilities
+are becoming a permanent feature of RSL. There are two parts to image generation.
+One, defining the color table and two, making PPM images. Assigning colors
+is critical to making color images, otherwise the resultant images will
+be black. The color table in RSL is global to the image functions and is
+statically allocated so that once the color table is defined, that's it.
+There are several routines that load color tables, but the main idea is
+that there is a red table, a green table and a blue table. Each of these
+tables is a separate file on disk stored in <b>/usr/local/trmm/lib/colors</b>
+The <b>/usr/local/trmm</b> prefix may be different on your system. These
+are the default color files and so you can use any file you like. Each
+file can contain up to 256 bytes, each byte represents a color intensity
+in the range 0 - 255. The color are ordered, in the file, by color index.
+The first byte is for color index 0, the second byte for color index 1,
+etc. There is only one type of image made, PPM. Well, I can make PBM and
+PGM too, but I consider them similar to PPM. To make other types of images
+like GIF, PICT, etc. I pipe the output into the ppmtogif, ppmtopict, command
+appropriately. I do this because I don't want to include all the different
+conversion sources in RSL. If you don't have the pbmplus software on your
+system, you can still use these image functions by either making your own
+ppmtogif command which is a csh script with the sole command 'cat' in it
+or modify the RSL library routine to not pass the data through the pipe.
+Also, when making PGM files, I pipe them into gzip so that the output files
+are small. The image generation functions are designed to meet our specific
+needs and I cannot say that they will be suitable for your needs.
+<h2>
+Writing a new ingest routine:</h2>
+Here we explain how to interface a new file format into RSL. This means
+we read the file format and assign values to the appropriate structure
+members. The interface will return a pointer to Radar, allocating all memory.
+Or, it will return NULL indicating an error.
+<pre>Radar *RSL_something_to_radar(char *infile);</pre>
+The file added to RSL will be called something.c. All the code needed to
+ingest the file and create the Radar structure will be in that file. It
+may be necessary to rely on another library that can ingest the data file
+utilizing a nicer interface. That is ok, go ahead and use it. This new
+interface definition will be placed in the prototype section of rsl.h so
+that other routines are aware of it. Also, code to automatically determine
+the type of input file must be placed in anyformat.c. If it is not possible
+to automatically determine the type of file, then this must be documented
+as such and an explanation that when anyformat_to_radar returns NULL, it
+may be necessary to call RSL_something_to_radar directly. Memory allocation
+routines you will need are: <a href="RSL_new.html">RSL_new_radar</a>, <a href="RSL_new.html">RSL_new_volume</a>,
+<a href="RSL_new.html">RSL_new_sweep</a>
+and <a href="RSL_new.html">RSL_new_ray</a>. You may not know ahead of time
+just how many substructures to allocate, so allocate some reasonable maximum.
+You can reset the value of nvolumes, nsweeps, or nrays after the ingest
+is complete.
+<pre>radar = RSL_new_radar(20);
+...load radar->v[i] ...
+...keep track of the max index for v[i] ...
+radar->h.nvolumes = max_vol_index;
+return radar;</pre>
+You don't have to worry about deallocating the extra memory. Output routines
+-- to disk -- will ignore it. And, after re-reading it, the right amount
+of memory will be allocated.
+<p>New in v0.41 is the implementation of the radar structure member <b>radar_type</b>.
+Assign a descriptive string indicating the origin or the format type of
+the data. Currently used strings are: "wsr88d", "lassen", "nsig", "uf",
+"mcgill", "toga", "kwajalein". The string may not exceed 50 characters,
+including the null character.
+<p>Common problems that have occurred are:
+<ol>
+<li>
+Not setting the beamwidth member in the sweep header. This affects image
+generation because the pixel size relies on it.</li>
+
+<li>
+The number of rays, sweeps, or volumes is not set or exceeds the amount
+allocated.</li>
+
+<li>
+Not calling RSL_rebin_velocity_... before generating velocity images.</li>
+
+<li>
+Not calling the RSL_load_..._color_table(). This results in black images.</li>
+</ol>
+
+<h2>
+RSL_copy versus RSL_new:</h2>
+It is important to note the differences between these two routines. RSL_copy_{radar,
+volume, sweep, ray} returns a complete duplicate of the input structure.
+It duplicates all of the substructures. This means that it allocates the
+exact amount of memory that the argument occupies. If a Radar occupies
+15 Mbytes of RAM, then a RSL_copy_radar will result in 15Mbytes of new
+memory allocated. The total memory occupied will be 30 Mbytes: 15 for the
+original and 15 for the copy.
+<p>On the other hand, RSL_new_{radar, volume, sweep, ray} allocates memory
+for the header structure and only the pointers to the substructure. You
+have to allocate the substructure yourself. For instance, if you call
+<pre>RSL_new_radar(4); /* Four volumes. */</pre>
+you will have to call RSL_new_volume four times. Do that with,
+<pre>for (i=0; i&lt;=radar->h.nvolumes; i++) {
+&nbsp; radar->v[i] = RSL_new_volume(40); /* 40 sweep pointers. */
+&nbsp;&nbsp; ... construct the volume ...
+}</pre>
+Here only 40 pointers for the sweeps are allocated and not the space for
+the entire sweep which would include all the rays. For each sweep you must
+use the code,
+<pre>for (i=0; i&lt;volume->h.nsweeps; i++) {
+&nbsp; volume->sweep[i] = RSL_new_sweep(400);&nbsp; /* 400 is a good max. */
+
+&nbsp; ... construct the sweep ...
+
+}</pre>
+
+<h2>
+Using RSL_new to copy instead of RSL_copy:</h2>
+Let's say you want to create the triplet, or quadruplet, set of routines
+that function like the RSL_copy function in that they allocate new memory
+and return a pointer to the appropriate structure, but, the routines are
+executing an algorithm on the data and so the result is a mathematical
+manipulation of the input structure. In other words:
+<pre>my_new_volume = RSL_some_function_of_volume(volume);</pre>
+The natural hierarchical construction will be:
+<pre>Radar *RSL_some_function_of_radar(radar);
+Volume *RSL_some_function_of_volume(volume);
+Sweep *RSL_some_function_of_sweep(sweep);
+Ray *RSL_some_function_of_ray(ray);</pre>
+As I've stated before, the radar routine will loop on the number of volumes
+and call the volume routine. The volume routine will loop on the number
+of sweeps and call the sweep routine. The sweep routine will loop on the
+number of rays and call the ray routine. The ray routine will perform the
+actual function. One approach might be to define the radar routine as:
+<pre>Radar *RSL_some_function_of_radar(Radar *radar)
+{
+&nbsp; int i;
+&nbsp; Volume *volume;
+&nbsp; Radar *new_radar;
+&nbsp; if (radar == NULL) return NULL;
+&nbsp; new_radar = RSL_copy_radar(radar);&nbsp; /* This is bad, bad, bad. */
+
+&nbsp; for (i=0; i&lt;=radar->h.nvolumes; i++)
+&nbsp;&nbsp;&nbsp; new_radar->v[i] = RSL_some_function_of_volume(radar->v[i]);
+
+&nbsp; return new_radar;
+}</pre>
+Now, why did I place the comment /* bad, bad, bad */ in the code? At first,
+it seems, it may not be all that bad. But, remember that RSL_copy_radar
+will copy all the volumes and sweeps and rays and bins. The line that assigns
+new_radar->v[i] is allocating space for a volume too. Therefore, we are
+more than doubling the memory requirements, if we code the volume and sweep
+routines similarly. The amount of memory allocated will be nvolumes*space_allocated_to_a_volume
++ nsweeps*space_allocated_to_a_sweep + nrays*space_allocated_to_a_ray.
+That is a tremendous amount of memory, you're talking 3*15*15Mbytes (675Mbytes).
+In order to use RSL_copy_{radar,volume,sweep,ray} you will need to clear
+out all the volumes, sweeps and rays with a call to RSL_clear_{volume,sweep,ray}
+and you will have to pass the target structure to the routine which will
+make it an argument that is modified. This goes against the design of the
+typical RSL interface where a pointer to an object is returned by a function.
+A better solution is to allocate a new radar and copy the header information.
+Instead of writing,
+<pre>new_radar = RSL_copy_radar(radar);</pre>
+you write,
+<pre>new_radar = RSL_new_radar(radar->h.nvolumes);
+new_radar->h = radar->h;</pre>
+The volume, sweep and ray routine can be coded similarly. For example,
+here is the sweep routine:
+<pre>Sweep *RSL_some_function_of_sweep(Sweep *sweep)
+{
+int i;
+Ray *ray;
+Sweep *new_sweep;
+if (sweep == NULL) return NULL;
+new_sweep = RSL_new_sweep(sweep->h.nrays);
+new_sweep->h = sweep->h;
+
+for (i=0; i&lt;=sweep->h.nrays; i++)
+&nbsp; new_sweep->ray[i] = RSL_some_function_of_ray(sweep->ray[i]);&nbsp;
+
+return new_sweep;
+}</pre>
+
+</body>
+</html>

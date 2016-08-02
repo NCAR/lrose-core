@@ -1,0 +1,100 @@
+/**********************************************************************
+ * TDRP params for Mdv2Surfer
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// set_field_names /////////////////////////
+//
+// Option to set field names.
+// Type: boolean
+//
+
+set_field_names = FALSE;
+
+///////////// field_names /////////////////////////////
+//
+// Array of fields to be written to output files.
+// Only these fields will be output. Active if set_field_names is true.
+// Type: string
+// 1D array - variable length.
+//
+
+field_names = { };
+
+///////////// input_dir ///////////////////////////////
+//
+// Path for input dir.
+// If start and end times are specified, the files will be searched for 
+//   in this directory.
+// Type: string
+//
+
+input_dir = "$(HOME)/nexrain/mdv/grid_stats/monthly";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Path for output dir.
+// The output files will be written to this directory.
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// output_file_label ///////////////////////
+//
+// Output file label.
+// The output file names will start with this label.
+// Type: string
+//
+
+output_file_label = "sanbern";
+
+///////////// output_file_ext /////////////////////////
+//
+// Output file extension.
+// The output file names will have this extension.
+// Type: string
+//
+
+output_file_ext = "SURF";
+

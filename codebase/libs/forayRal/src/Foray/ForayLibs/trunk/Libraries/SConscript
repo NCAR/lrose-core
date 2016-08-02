@@ -1,0 +1,9 @@
+
+SConscript(['ForayUtility/SConscript'])
+SConscript(['RayFile/SConscript'])
+SConscript(['Dorade/SConscript'])
+SConscript(['NcRadar/SConscript'])
+SConscript(['NcREAL/SConscript'])
+SConscript(['RayFileFactory/SConscript'])
+
+

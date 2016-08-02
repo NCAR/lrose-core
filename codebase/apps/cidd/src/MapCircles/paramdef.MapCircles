@@ -1,0 +1,110 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for MapCircles
+ *
+ * Mike Dixon, RAP, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 2002
+ */
+
+commentdef {
+  p_header = "MapCircles program";
+  p_text = "MapCircles creates a map file, with circles of a given radius around a set of points. Map file data is written to stdout.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "Arcs around points.";
+  p_descr = "String to go at the head of the map file as a comment.";
+} map_file_header;
+
+commentdef {
+  p_header = "ARC SPECIFICATION.";
+  p_text = "Use this for placing arcs or circles around a point.";
+}
+
+typedef struct {
+  string label;
+  double center_lat;
+  double center_lon;
+  double start_az_deg;
+  double end_az_deg;
+  double radius_km;
+  int n_segments;
+} arc_t;
+
+paramdef struct arc_t {
+  p_default = {
+    {"unknown", 0.0, 0.0, 10.0, 0.0, 360.0, 180}
+  };
+  p_descr = "Array of points around which arcs should be placed.";
+  p_help = "The arcs are computed around each point at the given radius in km. If a complete circle is required, set start_az_deg to 0 and end_az_deg to 360.0. If a partial circle is required, set the start and end azimuths accordingly. If the parial arc crosses north, set the start_az_deg to a negative value. The arc is represented by a poly-line with the specified number of segments.";
+} arcs[];
+
+commentdef {
+  p_header = "AZIMUTH LINE SPECIFICATION.";
+  p_text = "Use this for placing azimuth radiating out from a point to a given maximum range, as in a radar plot.";
+}
+
+typedef struct {
+  string label;
+  double center_lat;
+  double center_lon;
+  double start_az_deg;
+  double delta_az_deg;
+  int n_lines;
+  double min_radius_km;
+  double max_radius_km;
+} az_line_t;
+
+paramdef struct az_line_t {
+  p_default = {
+    {"unknown", 0.0, 0.0, 0.0, 45.0, 8, 0, 150}
+  };
+  p_descr = "Array of lines radiating out from a point, as in radar plot.";
+  p_help = "The lines are spaced evenly, starting at start_az_deg and then every delta_az_deg above that. The line is drawn form the minimum radius to the maximum radius.";
+} az_lines[];
+

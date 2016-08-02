@@ -1,0 +1,6 @@
+.deps
+UpdateStormFields
+__makefile.template
+makefile
+makefile.am
+makefile.in

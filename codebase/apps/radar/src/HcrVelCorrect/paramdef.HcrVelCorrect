@@ -1,0 +1,500 @@
+/*********************************************************
+ * parameter definitions for HcrVelCorrect
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * March 2015
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "HcrVelCorrect reads in HCR moments, computes the apparent velocity of the ground echo, filters the apparent velocity in time to remove spurious spikes, and then corrects the weather echo velocity using the filtered ground velocity as the correction to be applied.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write filtered data to stdout.";
+  p_help = "If TRUE, the filtered data will be written to stdout in a manner suitable for plotting via gnuplot and python.";
+} write_results_to_stdout;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to register this process with the process mapper (procmap).";
+  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
+} register_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST, FMQ
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "\nREALTIME: wait for a new input file.  "
+           "\n\nARCHIVE: move through the data between the start "
+           "and end times set on the command line. "
+           "\n\nFILELIST: move through the list of file names "
+           "specified on the command line. "
+           "\nPaths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will."
+           "\n\nFMQ: read data from one moments FMQ, combine the dwells "
+           "and write to an output queue.";
+
+} mode;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory. REALTIME, ARCHIVE and FILELIST modes .";
+} input_dir;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is _latest_data_info file available?";
+  p_help = "If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
+} latest_data_info_avail;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to recurse to subdirectories while looking for new files.";
+  p_help = "If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE."; 
+} search_recursively;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Maximum depth for recursive directory scan.";
+  p_help = "Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
+} max_recursion_depth;
+
+paramdef int {
+  p_default = 2;
+  p_min = 1;
+  p_descr = "Sleep time between checking directory for input - secs.";
+  p_help = "If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.";
+} wait_between_checks;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "File quiescence when checking for files - secs.";
+  p_help = "This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.";
+} file_quiescence;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} search_ext;
+
+paramdef string {
+  p_default = "fmqp:://localhost::/tmp/fmq/input";
+  p_descr = "FMQ from which to read the moments stream.";
+  p_help = "FMQ mode only.";
+} input_fmq_url;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_input_fmq;
+
+commentdef {
+  p_header = "COMPUTING THE SURFACE ECHO VELOCITY";
+}
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Name of field used to identify the surface from the data.";
+  p_help = "The surface will be identified at the gate with the maximum value in this field.";
+} dbz_field_name;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minumum range to the surface (km).";
+  p_help = "We will search for the surface echo in the gates beyound this range.";
+} min_range_to_surface_km;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Minumum dbz value for a valid surface return.";
+  p_help = "Gates with values below this will not be used.";
+} min_dbz_for_surface_echo;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of gates needed for identifying surface echo.";
+  p_help = "We require this number of gates to exceed min_dbz_for_surface_echo.";
+} ngates_for_surface_echo;
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "Name of field used to compute the apparent velocity of the surface echo.";
+} vel_field_name;
+
+paramdef string {
+  p_default = "VEL_CORR";
+  p_descr = "Name of field for corrected velocity.";
+  p_descr = "This is the main output field from this app. It will be added to the input data as an extra field.";
+} corrected_vel_field_name;
+
+commentdef {
+  p_header = "OUTPUT FIELD DETAILS";
+}
+
+typedef enum {
+  OUTPUT_ENCODING_FLOAT32,
+  OUTPUT_ENCODING_INT32,
+  OUTPUT_ENCODING_INT16,
+  OUTPUT_ENCODING_INT08
+} output_encoding_t;
+
+paramdef enum output_encoding_t {
+  p_default = OUTPUT_ENCODING_FLOAT32;
+  p_descr = "Output encoding for all fields, if requested.";
+} output_encoding;
+
+commentdef {
+  p_header = "OUTPUT FORMAT";
+}
+
+typedef enum {
+  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
+} netcdf_style_t;
+
+paramdef enum netcdf_style_t {
+  p_default = NETCDF4;
+  p_descr = "NetCDF style - if output_format is CFRADIAL";
+  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
+} netcdf_style;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Compression level for output, if compressed.";
+  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
+} compression_level;
+
+commentdef {
+  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY,
+  SPECIFY_FILE_NAME
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.";
+} output_filename_mode;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional prefix for output filename.";
+  p_help = "If empty, the standard prefix will be used.";
+} output_filename_prefix;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the instrument name in the file name.";
+  p_help = "Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.";
+} include_instrument_name_in_file_name;
+
+paramdef string {
+  p_default = "cfradial.test.nc";
+  p_descr = "Name of output file.";
+  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
+} output_filename;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
+commentdef {
+  p_header = "OUTPUT IN FMQ MODE";
+}
+
+paramdef string {
+  p_default = "fmqp:://localhost::/tmp/fmq/output";
+  p_descr = "FMQ to which the combined dwells are written.";
+  p_help = "FMQ mode only.";
+} output_fmq_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compress the output fmq.";
+  p_help = "The default is for no compression.";
+} output_fmq_compress;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Number of slots in output FMQ.";
+} output_fmq_n_slots;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_fmq_buf_size;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to block on write when the radar queue fills up.";
+  p_help = "If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.";
+} output_fmq_write_blocking;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQs are written to. If <= 0, registration will not be performed.";
+} output_fmq_data_mapper_report_interval;
+
+commentdef {
+  p_header = "FIR FILTERING";
+}
+
+paramdef double {
+  p_default = 0.11;
+  p_descr = "Threshold for removing spikes in the original data and resetting the value to that form the short filter.";
+  p_help = "We apply both the stage-1 and spike filters to the time series of surface velocity. If the absolute difference between the two exceeds this threshold, then the conditioned data is set to the output from the stage-1 filter. If the absolute difference is below this threshold then the original data point is retained. After this step the final filter it applied to the conditioned data to compute the final filtered value.";
+} spike_filter_difference_threshold;
+
+paramdef double {
+  p_default = {
+    1.6976992e-02,
+    2.3294990e-02,
+    3.0244475e-02,
+    3.7550056e-02,
+    4.4888313e-02,
+    5.1908191e-02,
+    5.8254533e-02,
+    6.3592862e-02,
+    6.7633391e-02,
+    7.0152222e-02,
+    7.1007947e-02,
+    7.0152222e-02,
+    6.7633391e-02,
+    6.3592862e-02,
+    5.8254533e-02,
+    5.1908191e-02,
+    4.4888313e-02,
+    3.7550056e-02,
+    3.0244475e-02,
+    2.3294990e-02,
+    1.6976992e-02
+  };
+  p_descr = "Coefficients for stage-1 FIR filter.";
+  p_help =  "Initial filtering step. This is normally a 21-point FIR filter.";
+  p_private = TRUE;
+} stage1_filter[];
+
+paramdef double {
+  p_default = {
+    1.4102747e-09,
+    9.6755464e-09,
+    3.9114620e-08,
+    1.2097842e-07,
+    3.1591184e-07,
+    7.3214001e-07,
+    1.5507567e-06,
+    3.0594395e-06,
+    5.6957251e-06,
+    1.0100617e-05,
+    1.7182765e-05,
+    2.8192724e-05,
+    4.4805905e-05,
+    6.9211797e-05,
+    1.0420588e-04,
+    1.5327948e-04,
+    2.2070176e-04,
+    3.1158693e-04,
+    4.3193918e-04,
+    5.8866742e-04,
+    7.8956192e-04,
+    1.0432208e-03,
+    1.3589249e-03,
+    1.7464536e-03,
+    2.2158418e-03,
+    2.7770754e-03,
+    3.4397322e-03,
+    4.2125742e-03,
+    5.1031044e-03,
+    6.1171018e-03,
+    7.2581539e-03,
+    8.5272083e-03,
+    9.9221654e-03,
+    1.1437535e-02,
+    1.3064185e-02,
+    1.4789188e-02,
+    1.6595812e-02,
+    1.8463629e-02,
+    2.0368790e-02,
+    2.2284434e-02,
+    2.4181247e-02,
+    2.6028147e-02,
+    2.7793078e-02,
+    2.9443896e-02,
+    3.0949289e-02,
+    3.2279725e-02,
+    3.3408367e-02,
+    3.4311933e-02,
+    3.4971458e-02,
+    3.5372918e-02,
+    3.5507705e-02,
+    3.5372918e-02,
+    3.4971458e-02,
+    3.4311933e-02,
+    3.3408367e-02,
+    3.2279725e-02,
+    3.0949289e-02,
+    2.9443896e-02,
+    2.7793078e-02,
+    2.6028147e-02,
+    2.4181247e-02,
+    2.2284434e-02,
+    2.0368790e-02,
+    1.8463629e-02,
+    1.6595812e-02,
+    1.4789188e-02,
+    1.3064185e-02,
+    1.1437535e-02,
+    9.9221654e-03,
+    8.5272083e-03,
+    7.2581539e-03,
+    6.1171018e-03,
+    5.1031044e-03,
+    4.2125742e-03,
+    3.4397322e-03,
+    2.7770754e-03,
+    2.2158418e-03,
+    1.7464536e-03,
+    1.3589249e-03,
+    1.0432208e-03,
+    7.8956192e-04,
+    5.8866742e-04,
+    4.3193918e-04,
+    3.1158693e-04,
+    2.2070176e-04,
+    1.5327948e-04,
+    1.0420588e-04,
+    6.9211797e-05,
+    4.4805905e-05,
+    2.8192724e-05,
+    1.7182765e-05,
+    1.0100617e-05,
+    5.6957251e-06,
+    3.0594395e-06,
+    1.5507567e-06,
+    7.3214001e-07,
+    3.1591184e-07,
+    1.2097842e-07,
+    3.9114620e-08,
+    9.6755464e-09,
+    1.4102747e-09
+  };
+  p_descr = "Coefficients for spike FIR filter.";
+  p_help =  "Applying this filter onces is equivalent to applying the stage-1 filter five times in succession on a time series. Normally this will have 101 entries.";
+  p_private = TRUE;
+} spike_filter[];
+
+paramdef double {
+  p_default = {
+    2.8821826e-04,
+    7.9095771e-04,
+    1.5695770e-03,
+    2.6840635e-03,
+    4.1883217e-03,
+    6.1251990e-03,
+    8.5216287e-03,
+    1.1384298e-02,
+    1.4696240e-02,
+    1.8414716e-02,
+    2.2470653e-02,
+    2.6769843e-02,
+    3.1195919e-02,
+    3.5615037e-02,
+    3.9882036e-02,
+    4.3847698e-02,
+    4.7366679e-02,
+    5.0305553e-02,
+    5.2550426e-02,
+    5.4013588e-02,
+    5.4638695e-02,
+    5.4013588e-02,
+    5.2550426e-02,
+    5.0305553e-02,
+    4.7366679e-02,
+    4.3847698e-02,
+    3.9882036e-02,
+    3.5615037e-02,
+    3.1195919e-02,
+    2.6769843e-02,
+    2.2470653e-02,
+    1.8414716e-02,
+    1.4696240e-02,
+    1.1384298e-02,
+    8.5216287e-03,
+    6.1251990e-03,
+    4.1883217e-03,
+    2.6840635e-03,
+    1.5695770e-03,
+    7.9095771e-04,
+    2.8821826e-04
+  };
+  p_descr = "Coefficients for final FIR filter.";
+  p_help =  "Before applying this filter, we first compute the conditioned time series. We compute the difference between the results of the stage-1 and spike filters - if this difference exceeds spike_filter_difference_threshold we use the spike filter result. Otherwise we use the stage-1 result.";
+  p_private = TRUE;
+} final_filter[];
+

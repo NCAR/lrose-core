@@ -1,0 +1,7 @@
+set title ""
+set xlabel "Velocity (neg is towards, pos is away)"
+set ylabel "Power" 
+set xrange [-25:25]
+set yrange [1.e-10:10]
+set logscale y
+plot 'f1_wx_truth.real' title 'Weather' with lines, 'f1_clutter_truth.real' title 'Clutter' with lines, 'f1_unfiltered.real' with lines title 'Combined', 'f1_gaussian_2.real' title 'Gaussian fit' pt 7, 'f1_filtered_2.real' title 'Filtered' with lines lt -1

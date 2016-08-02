@@ -1,0 +1,170 @@
+/**********************************************************
+ * paramdef for RdasSim
+ *
+ * Mike Dixon
+ *
+ * Jan 2003
+ */
+
+commentdef {
+  p_header = "RDAS Simulator";
+  p_text = "This program simulates RDAS radar data and serves the data out on a socket";
+};
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+};
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default =  "null" ;
+  p_descr = "Path for Input MDV file.";
+  p_help = "The file contains radar data which is sampled and served out to the client.";
+} input_mdv_path;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Name of DBZ data field.";
+} dbz_field_name;
+
+commentdef {
+  p_header = "SERVER DETAILS";
+};
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "Port for serving out radar data.";
+  p_help = "RdasSim listens on this port. When a connection from a client is established, it receives commands from the client and sends beam data to the client.";
+} server_port;
+
+commentdef {
+  p_header = "CALIB PROPERTIES";
+};
+
+paramdef double {
+  p_descr = "Calibration slope (count/dB)";
+  p_default = 220;
+} calib_slope;
+
+paramdef double {
+  p_descr = "Calibration offset at 1km range (count)";
+  p_default = 8800;
+} calib_offset_1km;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef int {
+  p_descr = "Wait per beam (milli-secs)";
+  p_default =  30 ;
+} beam_wait_msecs;
+
+paramdef boolean {
+  p_descr = "Output is in Big-Endian byte order";
+  p_help = "If FALSE, order is Little-Endian";
+  p_default = TRUE;
+} big_endian;
+
+commentdef {
+  p_header = "BPRP OPTIONS";
+};
+
+paramdef boolean {
+  p_descr = "If true, output is in old BPRP format";
+  p_default = FALSE;
+} bprp_format;
+
+paramdef int {
+  p_descr = "VIP HI calibration value for BPRP format (counts)";
+  p_default = 3800;
+} bprp_viphi;
+
+paramdef int {
+  p_descr = "VIP LO calibration value for BPRP format (counts)";
+  p_default = 800;
+} bprp_viplo;
+
+paramdef int {
+  p_descr = "Power HI calibration value for BPRP format (dBm)";
+  p_default = -40;
+} bprp_phi;
+
+paramdef int {
+  p_descr = "Power LO calibration value for BPRP format (dBm)";
+  p_default = -90;
+} bprp_plo;
+
+paramdef double {
+  p_descr = "Transmitter power (dBm)";
+  p_default = -90;
+} bprp_xmt;
+
+paramdef double {
+  p_descr = "Radar constant (dB)";
+  p_default = -154;
+} bprp_radar_constant;
+
+paramdef int {
+  p_descr = "Min detectable signal (counts)";
+  p_default = 50;
+} bprp_mds;
+
+paramdef int {
+  p_descr = "Min usable signal (counts)";
+  p_default = 50;
+} bprp_mus;
+
+paramdef int {
+  p_descr = "Radar ID for bprp mode";
+  p_default = 1;
+} bprp_radar_id;
+
+paramdef int {
+  p_descr = "Test count loaded into all gates (counts)";
+  p_default = 2000;
+} bprp_test_count;
+
+commentdef {
+  p_header = "CALIBRATION OUTPUT";
+};
+
+paramdef int {
+  p_descr = "Start gate number for calibration pulse";
+  p_default = 100;
+} pulse_gate_start;
+
+paramdef int {
+  p_descr = "End gate number for calibration pulse";
+  p_default = 120;
+} pulse_gate_end;
+
+paramdef int {
+  p_descr = "Height of calibration pulse in counts";
+  p_default = 1000;
+} pulse_height_count;
+
+paramdef int {
+  p_descr = "Change in ht per keystroke";
+  p_default = 100;
+} pulse_height_delta;
+

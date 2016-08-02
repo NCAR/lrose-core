@@ -1,0 +1,246 @@
+/**********************************************************************
+ * TDRP params for MosFcastAdjust
+ **********************************************************************/
+
+//======================================================================
+//
+// MosFcastAdjust reads actual metars and adjusts the
+// pseudo-model metars accordingly. Niles Oien.
+//
+//======================================================================
+ 
+///////////// TriggerUrl //////////////////////////////
+//
+// URL to trigger off, typically of the form
+// spdbp:://host.domain:[port]:dir/dir.
+// Program runs when new metar data appear here.
+// Type: string
+//
+
+TriggerUrl = "spdbp:://localhost::spdb/metar";
+
+///////////// ModelUrl ////////////////////////////////
+//
+// Model URL.
+// Pseudo-metar model data are stored here and this
+// program will adjust them using the actual metars.
+// Type: string
+//
+
+ModelUrl = "spdbp:://localhost::spdb/mos_raw";
+
+///////////// OutUrl //////////////////////////////////
+//
+// Output URL.
+// Forecast spdb files are written here.
+// Type: string
+//
+
+OutUrl = "spdbp:://localhost::spdb/mos_adjusted";
+
+///////////// SaveCorrections /////////////////////////
+//
+// Set to TRUE to save out correction factors/offsets
+// used to correct model pseudo-metars given an
+// actual metar.
+// Set to something unique.
+// Type: boolean
+//
+
+SaveCorrections = TRUE;
+
+///////////// OutDeltaUrl /////////////////////////////
+//
+// Output URL for correction factors/offsets.
+// Correction factors/offsets are written to this URL
+// using the METAR structure to store the information.
+// They are best thought of as Delta Metars, since
+// the structures contain not weather information per se
+// but the information used to adjust model weather information
+// to an actual METAR value.
+
+// A field in these Delta Metars
+// may be an offset or a bias depending on the settings used
+// in this params file. Only relevant if SaveCorrections is TRUE.
+// Type: string
+//
+
+OutDeltaUrl = "spdbp:://localhost::spdb/DeltaMetars";
+
+///////////// Instance ////////////////////////////////
+//
+// Instance to check in to Procmap with.
+// Set to something unique.
+// Type: string
+//
+
+Instance = "NilesWanky";
+
+///////////// Mode ////////////////////////////////////
+//
+// Operation mode.
+// Archive mode automatically invoked by -interval option.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+Mode = REALTIME;
+
+///////////// LookBack ////////////////////////////////
+//
+// Look back time, seconds.
+// Program will look back by this time from trigger time
+// when looking for actual METAR data.
+// Type: int
+//
+
+LookBack = 3600;
+
+///////////// LookAhead ///////////////////////////////
+//
+// Look ahead time, seconds.
+// Program will look ahead by this time from trigger time
+// when looking for actual METAR data.
+// Type: int
+//
+
+LookAhead = 3600;
+
+///////////// TriggerInterval /////////////////////////
+//
+// Trigger interval, seconds.
+// Program will trigger regularly at this interval.
+// Type: int
+//
+
+TriggerInterval = 1800;
+
+///////////// MaxLeadTime /////////////////////////////
+//
+// Maximum lead time, hours.
+// When a real METAR comes in, the program will look
+// for pseudo METARS from the model data, starting at the time
+// of the real metar and ending at the real metar plus this lead
+// time. This effectively sets the limit on the lead time
+// of the MOS forcasts.
+// Type: int
+//
+
+MaxLeadTime = 36;
+
+///////////// TimeBeforeExpire ////////////////////////
+//
+// Time before data expire, seconds.
+// Forecasts expire at the valid time + TimeBeforeExpire .
+// Type: int
+//
+
+TimeBeforeExpire = 1800;
+
+///////////// PMU_String //////////////////////////////
+//
+// PMU registration string.
+// While waiting for data the program registers with this string.
+// Type: string
+//
+
+PMU_String = "Waiting for data";
+
+///////////// Debug ///////////////////////////////////
+//
+// Debug flag.
+// Set for more verbose output.
+// Type: boolean
+//
+
+Debug = TRUE;
+
+///////////// TempAdjust //////////////////////////////
+//
+// Method to use when adjusting temperature - either
+// ADJUST_SCALE or ADJUST_OFFSET.
+// Program will adjust using either a bias or an offset.
+//
+// Type: enum
+// Options:
+//     ADJUST_SCALE
+//     ADJUST_OFFSET
+//
+
+TempAdjust = ADJUST_SCALE;
+
+///////////// HumidityAdjust //////////////////////////
+//
+// Method to use when adjusting humidity - either
+// ADJUST_SCALE or ADJUST_OFFSET.
+// Program will adjust using either a bias or an offset.
+//
+// Type: enum
+// Options:
+//     ADJUST_SCALE
+//     ADJUST_OFFSET
+//
+
+HumidityAdjust = ADJUST_SCALE;
+
+///////////// WindSpeedAdjust /////////////////////////
+//
+// Method to use when adjusting wind speed - either
+// ADJUST_SCALE or ADJUST_OFFSET. Wind direction is always
+// adjusted by offset.
+// Program will adjust using either a bias or an offset.
+//
+// Type: enum
+// Options:
+//     ADJUST_SCALE
+//     ADJUST_OFFSET
+//
+
+WindSpeedAdjust = ADJUST_SCALE;
+
+///////////// PressureAdjust //////////////////////////
+//
+// Method to use when adjusting pressure - either
+// ADJUST_SCALE or ADJUST_OFFSET.
+// Program will adjust using either a bias or an offset.
+//
+// Type: enum
+// Options:
+//     ADJUST_SCALE
+//     ADJUST_OFFSET
+//
+
+PressureAdjust = ADJUST_SCALE;
+
+///////////// VisibilityAdjust ////////////////////////
+//
+// Method to use when adjusting visibility - either
+// ADJUST_SCALE or ADJUST_OFFSET.
+// Program will adjust using either a bias or an offset.
+//
+// Type: enum
+// Options:
+//     ADJUST_SCALE
+//     ADJUST_OFFSET
+//
+
+VisibilityAdjust = ADJUST_OFFSET;
+
+///////////// CeilingAdjust ///////////////////////////
+//
+// Method to use when adjusting ceiling - either
+// ADJUST_SCALE or ADJUST_OFFSET.
+// Program will adjust using either a bias or an offset.
+//
+// Type: enum
+// Options:
+//     ADJUST_SCALE
+//     ADJUST_OFFSET
+//
+
+CeilingAdjust = ADJUST_OFFSET;
+
+

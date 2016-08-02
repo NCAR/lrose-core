@@ -1,0 +1,326 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
+
+commentdef {
+  p_header = "lmaPointProcess is a simple program to ingest ltg data from\n"
+  "the U of New Mexico Ltg Mapping Array. The altitude information\n"
+  "is discarded. Files are ASCII with (roughly) the following format :\n\n"
+  "New Mexico Tech's Lightning Mapping System -- Ananlyzed Data\n"
+  "Data start time: 08/21/02 05:45:00\n"
+  "Number of seconds analyzed:  600\n"
+  "Location: New Mexico 2002\n"
+  "Analysis program: analysis_v6 -n1\n"
+  "Analysis started : Fri Jun 27 13:17:57 2003\n"
+  "Analysis finished: Fri Jun 27 13:19:05 2003\n"
+  "Number of active stations: 8\n"
+  "Active stations: A B C D E F G I\n"
+  "Data: time (UT sec of day), lat, lon, alt(m), reduced chi^2, # of stations contributed\n"
+  "Data format: 15.9f 10.6f 10.6f 7.1f 5.2f 2d\n"
+  "Number of events:        25939\n"
+  "*** data ***\n"
+  " 20707.488263089  -7.778016 -48.345406 25514939.5  1.13  6\n"
+  " 20707.527138089  33.909109 -107.008366  5261.2  0.00  6\n"
+  " 20707.536238566  33.915601 -107.005872  5404.0  1.46  6\n"
+  " 20707.537721091  33.915629 -107.005798  5467.0  1.65  6\n"
+  " 20707.544873473  33.859059 -106.852575  8290.4  1.15  6\n"
+  " 20707.550234035  33.913167 -107.013857  7726.4  1.79  6\n"
+  " 20707.553575905  33.901588 -106.985319  6727.9  1.82  7\n"
+  "\n\nThe output is a 2D and 3D gridded field of counts of LMA\n"
+  "activity.\nNiles Oien January 2003.\n\n"
+  "NOTE : I just added a new format, so if your data looks something\n"
+  "like this :\n\n"
+  "04/25/05 19:47:04.063769   32.6116  -97.8602     7374\n"
+  "04/25/05 19:48:35.404669   32.4400  -98.0730     7614\n"
+  "04/25/05 19:48:35.448107   32.4350  -98.0804     7484\n"
+  "04/25/05 19:48:35.449442   32.4375  -98.0767     7550\n"
+  "04/25/05 19:48:35.495172   32.4307  -98.0543     6930\n"
+  "04/25/05 19:49:01.900245   32.7168  -97.9040     8919\n"
+  "04/25/05 19:49:01.933207   32.7185  -97.8996     8758\n"
+  "04/25/05 19:49:01.936794   32.7164  -97.8962     8438\n"
+  "04/25/05 19:49:02.018703   32.7026  -97.8878     8245\n"
+  "04/25/05 19:49:29.987431   32.7164  -97.8927     8765\n"
+  "04/25/05 19:49:30.000040   32.7161  -97.8837     8576\n"
+  "04/25/05 19:49:30.090099   32.7172  -97.8950     8667\n"
+  "04/25/05 19:50:12.657643   32.6337  -97.8279     6382\n\n"
+  "Then use the FORMAT_TWO option rather than FORMAT_ONE\n\n"
+  "A Third format is now available:\n\n"
+  "Data: time (UT sec of day), lat, lon, alt(m), reduced chi^2, P(dBW), mask\n"
+  "Data format: 15.9f 10.6f 11.6f 7.1f 5.2f 5.1f 4x\n"
+  "Number of events: 219\n"
+  "*** data ***\n"
+  "10813.894135780  33.526691  -87.155466  5143.8  0.51  10.4 01d6\n"
+  "10814.010797168  33.576237  -87.134562  8106.6  0.09  15.0 2156\n"
+  "10814.171478723  33.637351  -87.109934  9051.5  2.17  13.1 11d6\n"
+  "10814.301532186  33.552997  -87.141906  9619.2  1.36  25.4 05cc\n\n"
+  "Use the FORMAT_THREE option for this data type\n\n";
+}
+
+paramdef enum op_outputType{
+  p_options = {SPDB};
+  p_default = SPDB;
+  p_descr = "Format of the output file.";
+} outputType;
+
+paramdef string {
+  p_default = "spdbp:://localhost::./spdb/lmaPoints";
+  p_descr = "Output url, of form spdbp:://host.domain:[port]:dir/dir ";
+  p_help = "Data are written here.";
+} output_url;
+
+paramdef string {
+ p_default = "";
+ p_descr = "Output location if writing wscii output.";
+ p_help =  "Data are written here.";
+}ascii_output_dir;
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory.";
+  p_help = "Directory path for input data files.";
+} InDir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file extension.";
+  p_help = "If string is NULL, all extensions are valid.";
+} fileExtension;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Max age of input data";
+  p_help = "For realtime only - max age of input data for it to be valid";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+
+paramdef enum op_mode {
+  p_options = {ARCHIVE, REALTIME, TIME_INTERVAL};
+  p_default = REALTIME;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. In realtime mode, the conversion is performed for each input file as it becomes available. In archive mode, the file list is obtained from the command line.";
+} mode;
+  
+
+paramdef long {
+  p_descr = "How long the data are valid, seconds.";
+  p_help = "Depends on input frequency. Given that these data can come in\n"
+  "very quickly, it having them age off a display system equally quickly\n"
+  "can avoid a lot of clutter.";
+  p_default = 30;
+} Expiry;
+ 
+commentdef {
+  p_header = "Options to select a subregion to ingest (the whole thing may\n"
+  "be a pretty big database). The limits on altitude mat allow you to\n"
+  "effectively select cloud-to-cloud ltg.";
+}
+
+paramdef double {
+  p_descr = "Minimum latitude to accept, decimal degrees.";
+  p_help = "Set to define the ingest region.";
+  p_default = -90.0;
+} minLat;
+ 
+paramdef double {
+  p_descr = "Maximum latitude to accept, decimal degrees.";
+  p_help = "Set to define the ingest region.";
+  p_default = 90.0;
+} maxLat;
+ 
+paramdef double {
+  p_descr = "Minimum longitude to accept, decimal degrees.";
+  p_help = "Set to define the ingest region.";
+  p_default = -180.0;
+} minLon;
+ 
+paramdef double {
+  p_descr = "Maximum longitude to accept, decimal degrees.";
+  p_help = "Set to define the ingest region.";
+  p_default = 180.0;
+} maxLon;
+ 
+paramdef double {
+  p_descr = "Minimum altitude to accept, m.";
+  p_help = "Set to define the ingest region.";
+  p_default = 0.0;
+} minAlt;
+ 
+paramdef double {
+  p_descr = "Maximum altitude to accept, m.";
+  p_help = "Set to define the ingest region. May also be used for\n"
+  "quality control - occasionally data with clearly erroneously high\n"
+  "altitudes come in.";
+  p_default = 20000.0;
+} maxAlt;
+ 
+paramdef boolean {
+  p_descr = "Set to TRUE to only accept strikes close to the\n"
+  "location defined by the centralPoint parameter.";
+  p_help = "Cuts down on the number of ingested strikes, which\n"
+  "could otherwise be so large as to be unmanagable.";
+  p_default = FALSE;
+} applyClosenessCriteria;
+
+typedef struct {
+  double lat;
+  double lon;
+  double maxRangeKm;
+} centralPoint_t;
+
+paramdef struct centralPoint_t {
+  p_descr = "Defines the location and maximum distance to test for if\n"
+  "we are applying a closeness criteria test.";
+  p_help = "Relevant only if applyClosenessCriteria is TRUE.";
+  p_default = {39.3669, -101.7003, 300.0 };
+} centralPoint;
+
+paramdef double {
+  p_descr = "Maximum value for chi-square measure to accept an entry.";
+  p_help = "Each entry has such a measure associated with it.";
+  p_default = 10.0;
+} maxChiSqrd;
+
+paramdef int {
+  p_descr = "Minimum number of stations reporting to accept an entry.";
+  p_help = "Each entry has such a measure associated with it.";
+  p_default = 6;
+} minNumStations;
+
+paramdef double {
+ p_descr = "Minimum power.";
+ p_help =  "Only used with FORMAT_THREE.";
+ p_default = -38;
+} minPower;
+
+paramdef double {
+  p_descr = "The maximum allowable distance, Km,\n"
+	"between succesive points for LMA entries to\n"
+  "be bundled into the same event.";
+  p_help = "May be horizontal distance only, or may be 3D distance,\n"
+  "depending on the setting of considerVerticalDistance.";
+  p_default = 30.0;
+} maxAllowedDist;
+
+paramdef double {
+  p_descr = "The maximum allowable time, seconds, betwen successive\n"
+	"points, for LMA entries to\n"
+  "be bundled into the same event.";
+  p_help = "The default seemed to work well for the STEPS case the program\n"
+  "was tested on.";
+  p_default = 1.5;
+} maxAllowedTime;
+
+typedef struct {
+	boolean applyLimit;
+	double limit;
+} optionalLimit_t;
+
+paramdef struct optionalLimit_t {
+  p_descr = "The maximum allowable distance, Km,\n"
+	"from the first point for LMA entries to\n"
+  "be bundled into the same event.";
+  p_help = "May be horizontal distance only, or may be 3D distance,\n"
+  "depending on the setting of considerVerticalDistance.";
+  p_default = {FALSE, 100.0};
+} totalMaxAllowedDist;
+
+paramdef struct optionalLimit_t {
+  p_descr = "The maximum allowable time, seconds,\n"
+	"from the first point for LMA entries to\n"
+  "be bundled into the same event.";
+  p_help = "The default seemed to work well for the STEPS case the program\n"
+  "was tested on.";
+  p_default = {FALSE, 10};
+} totalMaxAllowedTime;
+
+paramdef boolean {
+  p_descr = "Option to consider the vertical component in the\n"
+  "calculation of distance. Default is not to do this.";
+  p_help = "For the STEPS data I have, it turned out not to make much\n"
+  "difference anyway.";
+  p_default = FALSE;
+} considerVerticalDistance;
+
+paramdef int {
+  p_descr = "The minimum number of LMA entires in a bundle for that\n"
+   "bundle to be written out as an SPDB GenPoint.";
+  p_help = "The default was developed for a STEPS case in which there\n"
+  "was a lot of ltg activity, so it might be a bit high. The danger in\n"
+  "making it too low is that too much data results.";
+  p_default = 20;
+} minNumEntries;
+
+paramdef boolean {
+  p_descr = "Option to use the lat,lon and time of the first LMA entry.";
+  p_help = "If set to FALSE then the last lat, lon and time are used.";
+  p_default = TRUE;
+} saveBasedOnFirstPoint;
+
+paramdef boolean {
+  p_descr = "Option to save altitude files. This is a research option.";
+  p_help = "By default, all the output goes to the GenPt SPDB database,\n"
+  "which saves statistics about the altitudes. This option allows ASCII\n"
+  "files of actual altitude to be written (.alt extension). File names\n"
+  "are NumEntries_lat*100_lon*100_unixTime.alt";
+  p_default = FALSE;
+} saveAltFiles;
+
+paramdef boolean {
+  p_descr = "Option to save the data to traditional_ltg_url in the\n"
+  "newer ltg struct which includes an altitude component.";
+  p_default = FALSE;
+} saveTraditional;
+
+paramdef string {
+  p_default = "spdbp:://localhost::./spdb/lmaPoints";
+  p_descr = "Output url, of form spdbp:://host.domain:[port]:dir/dir\n"
+  "for traditional ltg structure output (2D).";
+  p_help = "Only used if saveTraditional is TRUE.";
+} traditional_ltg_url;
+
+paramdef enum in_format {
+  p_options = {FORMAT_ONE, FORMAT_TWO, FORMAT_THREE};
+  p_default = FORMAT_ONE;
+  p_descr = "Input data file format.";
+  p_help = "See comments at top of param file.";
+} format;
+  

@@ -1,0 +1,426 @@
+#! /usr/bin/perl
+#
+# script to check processes listed in the process list file
+#
+# Returns 1 on error
+#         0 on success
+#
+# Prints number of down processes to STDOUT.
+#
+# See procmap_list_start for more info on the process list.
+#
+##############################################################################
+#
+# Mike Dixon, Jan 2002
+#
+##############################################################################
+
+use Getopt::Long;
+
+# Initialize command line arguments
+
+$opt_proc_list = "";
+($prog = $0) =~ s%.*/%%;
+
+# usage
+
+$usage =
+    "Usage : $prog [options]\n" .
+    "  -help, -h     : Print usage\n" .
+    "  -debug        : Print debug messages\n" .
+    "  -percent      : Include a line indicating the up percentage\n" .
+    "  -proc_list ?  : Process list file - required'\n" .
+    "  -host ?       : Specify host if not local'\n" .
+    "  -ok           : Also list processes which are OK'\n" .
+    "  -silent       : Be silent except for ndown, only print number of down processes\n" .
+    "                  If not silent, missing proc info also goes to STDOUT\n" .
+    "  -verbose      : Print verbose debug messages\n" .
+    "Returns 1 on error, 0 on success\n";
+
+# parse command line args
+
+$options_result = &GetOptions('h', 'help',
+			      'debug',
+			      'ok',
+			      'silent',
+			      'percent',
+			      'proc_list=s',
+			      'host=s',
+			      'verbose');
+
+if ($options_result == 0 || $opt_help || $opt_h) {
+    print $usage;
+    exit 1;
+}
+
+$debug = 0;
+if ($opt_debug) {
+    $debug = 1;
+}
+
+$verbose = 0;
+if ($opt_verbose) {
+    $verbose = 1;
+    $debug = 1;
+}
+
+$ok = 0;
+if ($opt_ok) {
+    $ok = 1;
+}
+
+$silent = 0;
+if ($opt_silent) {
+    $silent = 1;
+}
+
+$percent = 0;
+if ($opt_percent) {
+    $percent = 1;
+}
+
+if ($opt_proc_list) {
+    $proc_list_file=$opt_proc_list;
+} else {
+    print(STDERR "Must specify proc_list file\n");
+    exit 1;
+}
+
+$host_is_local = 1;
+$host = "localhost";
+if ($opt_host) {
+    $host_is_local = 0;
+    $host = $opt_host;
+}
+
+if ($debug) {
+    print(STDERR "reading proc_list file: $proc_list_file\n");
+}
+
+if (!-e $proc_list_file) {
+    print(STDERR "Cannot find proc_list file: $proc_list_file\n");
+    exit 1;
+}
+
+# read proc list file
+
+($retval, $nexpected) =
+    &read_proc_list_file($proc_list_file, *expected_names, *expected_instances);
+if ($retval) {
+    print(STDERR "ERROR - cannot read print_procmap\n");
+    exit 1;
+}
+
+# read the running processes from procmap
+
+($retval, $nrunning) =
+    &read_print_procmap(*running_names, *running_instances,
+			*ages, *max_ages);
+if ($retval) {
+    print STDERR "failed to get proc list from print_procmap\n";
+    exit 1;
+}
+
+# debug print
+
+if ($debug) {
+    print(STDERR "======================================================\n");
+    print(STDERR "Expected number of processes: $nexpected\n");
+    foreach $i (0..($nexpected - 1)) {
+	print(STDERR
+	      "  Expecting name, instance:" .
+	      " $expected_names[$i], $expected_instances[$i]\n");
+    }
+}
+if ($debug) {
+    print(STDERR "======================================================\n");
+    print(STDERR "Number of running processes: $nrunning\n");
+    foreach $i (0..($nrunning - 1)) {
+	print(STDERR
+	      "  name, instance, age, max_age:" .
+	      " $running_names[$i], $running_instances[$i]," .
+	      " $ages[$i], $max_ages[$i]\n");
+    }
+    print(STDERR "======================================================\n");
+}
+
+# check for processes which are late or missing
+
+$nproblems = 0;
+$nok = 0;
+foreach $i (0..($nexpected - 1)) {
+    
+    $found = 0;
+    $late = 0;
+    
+    foreach $j (0..($nrunning - 1)) {
+	if ($running_names[$j] eq $expected_names[$i] &&
+	    $running_instances[$j] eq $expected_instances[$i]) {
+	    $found = 1;
+	    if ($ages[$j] > $max_ages[$j]) {
+		$late = 1;
+	    }
+	    break;
+	}
+    }
+    
+    if ($found) {
+	if ($late) {
+	    $problem_names[$nproblems] = $expected_names[$i];
+	    $problem_instances[$nproblems] = $expected_instances[$i];
+	    $problem_types[$nproblems] = late;
+	    $nproblems++;
+	} else {
+            $ok_names[$nok] = $expected_names[$i];
+	    $ok_instances[$nok] = $expected_instances[$i];
+	    $nok++;
+        }
+    } else {
+	$problem_names[$nproblems] = $expected_names[$i];
+	$problem_instances[$nproblems] = $expected_instances[$i];
+	$problem_types[$nproblems] = missing;
+	$nproblems++;
+    }
+    
+} # i
+
+# print the number of late and missing processes
+
+print STDOUT "  $nproblems process(es) down\n";
+if ($ok) {
+    print STDOUT "  $nok process(es) OK\n";
+}
+if (!$silent) {
+    if ($ok) {
+        foreach $i (0..($nok - 1)) {
+            print STDOUT
+                "    $ok_names[$i] $ok_instances[$i] OK\n";
+        }
+    }
+    foreach $i (0..($nproblems - 1)) {
+	print STDOUT
+	    "    $problem_names[$i] $problem_instances[$i] $problem_types[$i]\n";
+    }
+}
+if ($percent) {
+    $nup = $nexpected - $nproblems;
+    $percent_up = ($nup / $nexpected) * 100.0;
+    printf STDOUT "  Percentage up: %.2f%%\n", $percent_up, "\n";
+}
+
+
+exit 0;
+
+#---------------------------------------------------------------------
+# Subroutine: read_print_procmap()
+#
+# Usage:      ($return_val, $num_procs)=
+#                  read_print_procmap(*names, *instances, *ages, *max_ages)
+#
+# Output:     Returns (in $return_val), 0 if okay, -1 on error.
+#             Returns (in $num_procs), the number of running processes.
+#             Returns the array of process names in names.
+#             Returns the array of instances in instances.
+#             Returns the array of process ages since hb in ages.
+#             Returns the array of process max ages in max_ages.
+
+sub read_print_procmap {
+    
+    local (*names, *instances, *ages, *max_ages) = @_;
+    local ($name, $instance, $hostname, $user, $pid);
+    local ($max_age, $time_since_hb, $age);
+    local ($return_val);
+    
+    # Initialize
+    
+    $return_val = -1;
+    $num_procs = 0;
+    
+    # Open print_procmap as a file handle
+
+    $cmdStr = "print_procmap -plain |";
+    if (!$host_is_local) {
+        $cmdStr = "print_procmap -plain -host $host |";
+    }
+    if ($debug) {
+        print STDERR "Running cmd: $cmdStr\n";
+    }
+
+    if (open(PROCMAP, $cmdStr) == 0) {
+        print(STDERR "ERROR getting print_procmap list\n");
+        print(STDERR "  No procmap running on $host\n");
+        return($return_val, $num_procs);
+    }
+
+# the first entry in the host, or error message
+    
+    $first_line = <PROCMAP>;
+    if ($first_line =~ m/^No procmap reachable on/) {
+	print(STDERR "ERROR - no procmap: $first_line\n");
+	return($return_val, $num_procs);
+    }
+
+# second line is uptime
+    
+    $uptime = <PROCMAP>;
+    
+# now read available processes
+    
+    if ($verbose) {
+	print STDERR "========== Processes from procmap ============\n";
+    }
+
+    while ($line = <PROCMAP>) {
+	
+	# parse the line
+	
+	($name, $instance, $hostname, $user, $pid,
+	 $max_age, $time_since_hb) = split(/\s+/, $line);
+	$age = $time_since_hb * -1;
+	
+	if ($verbose) {
+	    print (STDERR
+		   "name: $name, " .
+		   "inst: $instance, " .
+		   "host: $hostname, " .
+		   "user: $user, " .
+		   "pid: $pid, " .
+		   "max_age: $max_age, " .
+		   "age: $age\n");
+	}
+	
+	$names[$num_procs] = $name;
+	$instances[$num_procs] = $instance;
+	$ages[$num_procs] = $age;
+	$max_ages[$num_procs] = $max_age;
+	$num_procs++;
+	
+    } # while
+    
+# Close the PROCMAP
+    
+    close(PROCMAP);
+    $return_val = 0;
+    return($return_val, $num_procs);
+}
+
+#---------------------------------------------------------------------
+# Subroutine: read_proc_list_file()
+#
+# Usage:      ($return_val, $num_procs)=
+#                  read_proc_list_file($proc_list_fname,
+#                                      *names, *instances)
+#
+# Input:      The proc_list file to read.
+#
+# Output:     Returns (in $return_val), 0 if okay, -1 on error.
+#             Returns (in $num_procs), the total number of expected procs
+#             Returns the array of names in names
+#             Returns the array of instances in instances
+
+sub read_proc_list_file{
+
+    local ($proc_list_fname, *names, *instances) = @_;
+    local ($return_val, $sub_name);
+    local ($name, $instance);
+    
+    # Initialize
+    
+    $sub_name="read_proc_list_file";
+    $return_val = -1;
+    $num_procs = 0;
+
+    # Open the proc_list file
+    
+    if ($verbose) {
+	print STDERR "======================================================\n";
+	print STDERR "Parsing data list file: $proc_list_fname\n";
+    }
+    
+    unless (open(EXPECTED, "$proc_list_fname")) {
+	print (STDERR "ERROR: $sub_name\n");
+	print (STDERR "  Cannot open expected proc list file $proc_list_fname\n");
+	return($return_val, $num_procs);
+    }
+
+    # loop through the expected entries, ignoring
+    # comments and blank lines
+    
+    while ($line = <EXPECTED>) {
+	
+	if ($verbose) {
+	    print STDERR "Input line: $line";
+	}
+
+	# Read the entry line, skip if not what we want
+	
+	$use_line=&check_proc_list_file_line($line);
+
+	if ($use_line == 1) {
+	    
+	    if ($verbose) {
+		print STDERR "  Input line is valid\n";
+	    }
+
+	    ($name, $instance) = split(/\s+/, $line);
+	    
+	    if (length($name) != 0 && length($instance) != 0) {
+
+		$names[$num_procs] = $name;
+		$instances[$num_procs] = $instance;
+		$num_procs++;
+		if ($verbose) {
+		    print (STDERR
+			   "Successful parse, name, instance: " .
+			   " $name, $instance\n");
+		}
+		
+	    }
+
+	} else {
+	    
+	    if ($verbose) {
+		print STDERR "  Input line rejected\n";
+	    }
+
+	}
+	
+    } # while
+    
+    close(EXPECTED);
+    $return_val = 0;
+    
+    return($return_val, $num_procs);
+}
+
+#---------------------------------------------------------------------
+# Subroutine: check_proc_list_file_line
+#
+# Function:   Check a line from a proc_list file to see whether to
+#             parse it or skip it.
+# Input:      An entry line from a proc_list
+# Output:     Returns 1 if a line to parse, 0 if a line to skip.
+# a
+# Overview:   Reads the input line and tests whether it contains text to
+#             parse. Returns 0 if a blank line or a comment.
+#
+
+sub check_proc_list_file_line {
+    
+    local ($entry_line) = @_;
+
+    # Skip lines with leading comment characters or blank lines
+
+    if ($entry_line =~ /^#/) {
+	 return(0);
+     }
+    
+    if ($entry_line !~ /\S/) {
+	return(0);
+    }
+    
+    return(1);
+}
+
+
+

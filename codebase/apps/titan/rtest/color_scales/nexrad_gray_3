@@ -1,0 +1,7 @@
+# gray scale for dbz field - nexrad
+
+# Mike Dixon, April 1991
+
+30	39	#222222
+39	47	#555555
+47	80	#aaaaaa
