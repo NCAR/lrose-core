@@ -27,7 +27,7 @@ set path = ($RAP_BIN_DIR $path)
 
 set os_type = `uname`
 if ($os_type == "Linux") then
-setenv HOST_OS LINUX_IL6
+setenv HOST_OS LINUX_64
 else if ($os_type == "SunOS") then
 setenv HOST_OS SUNOS4
 else if ($os_type == "IRIX") then
