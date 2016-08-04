@@ -16,8 +16,10 @@ then
     export HOST_OS=LINUX
 fi
 
-export RAP_MAKE_INC_DIR=$LROSE_DIR/make_include
-export RAP_MAKE_BIN_DIR=$LROSE_DIR/make_bin
+export LROSE_CORE_DIR=$HOME/git/lrose-core
+export RAP_MAKE_INC_DIR=$LROSE_CORE_DIR/codebase/make_include
+export RAP_MAKE_BIN_DIR=$LROSE_CORE_DIR/codebase/make_bin
+
 export RAP_INC_DIR=$LROSE_DIR/include
 export RAP_LIB_DIR=$LROSE_DIR/lib
 export RAP_BIN_DIR=$LROSE_DIR/bin

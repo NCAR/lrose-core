@@ -15,8 +15,10 @@ if ($status == 1) then
     setenv HOST_OS LINUX
 endif
 
-setenv RAP_MAKE_INC_DIR $LROSE_DIR/make_include
-setenv RAP_MAKE_BIN_DIR $LROSE_DIR/make_bin
+setenv LROSE_CORE_DIR $HOME/git/lrose-core
+setenv RAP_MAKE_INC_DIR $LROSE_CORE_DIR/codebase/make_include
+setenv RAP_MAKE_BIN_DIR $LROSE_CORE_DIR/codebase/make_bin
+
 setenv RAP_INC_DIR $LROSE_DIR/include
 setenv RAP_LIB_DIR $LROSE_DIR/lib
 setenv RAP_BIN_DIR $LROSE_DIR/bin
