@@ -1428,13 +1428,13 @@ void OdimHdf5RadxFile::_readHow(Group &how, const string &label)
     }
   }
   
-  if (_utils.loadAttribute(how, "antgainH", label, decodedAttr) == 0) {
+  if (_utils.loadAttribute(how, "nomAntgainH", label, decodedAttr) == 0) {
     _antennaGainH = decodedAttr.getAsDouble();
     if (_debug) {
       cerr << "  " << label << " _antennaGainH: " << _antennaGainH << endl;
     }
   }
-  if (_utils.loadAttribute(how, "antgainV", label, decodedAttr) == 0) {
+  if (_utils.loadAttribute(how, "nomAntgainV", label, decodedAttr) == 0) {
     _antennaGainV = decodedAttr.getAsDouble();
     if (_debug) {
       cerr << "  " << label << " _antennaGainV: " << _antennaGainV << endl;
@@ -3632,11 +3632,13 @@ int OdimHdf5RadxFile::_doWrite(const RadxVol &vol,
   double beamWidthH = vol.getRadarBeamWidthDegH();
   Hdf5Utils::addAttr(how, "beamwidth", beamWidthH);
 
+  // nominal antenna gain
+
   double antennaGainH = vol.getRadarAntennaGainDbH();
-  Hdf5Utils::addAttr(how, "antgain", antennaGainH);
-  Hdf5Utils::addAttr(how, "antgainH", antennaGainH);
+  Hdf5Utils::addAttr(how, "nomAntgain", antennaGainH);
+  Hdf5Utils::addAttr(how, "nomAntgainH", antennaGainH);
   double antennaGainV = vol.getRadarAntennaGainDbV();
-  Hdf5Utils::addAttr(how, "antgainV", antennaGainV);
+  Hdf5Utils::addAttr(how, "nomAntgainV", antennaGainV);
   
   Hdf5Utils::addAttr(how, "RXbandwidth", vol.getPlatform().getRadarReceiverBandwidthMhz());
   
