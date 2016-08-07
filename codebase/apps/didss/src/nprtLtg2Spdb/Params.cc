@@ -1,3 +1,9 @@
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c) 1992 - 2016
+// ** University Corporation for Atmospheric Research(UCAR)
+// ** National Center for Atmospheric Research(NCAR)
+// ** Boulder, Colorado, USA
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -447,9 +453,9 @@ using namespace std;
   void Params::usage(ostream &out)
   {
     out << "TDRP args: [options as below]\n"
-        << "   [ -params path ] specify params file path\n"
-        << "   [ -check_params] check which params are not set\n"
-        << "   [ -print_params [mode]] print parameters\n"
+        << "   [ -params/--params path ] specify params file path\n"
+        << "   [ -check_params/--check_params] check which params are not set\n"
+        << "   [ -print_params/--print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
