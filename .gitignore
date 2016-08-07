@@ -1,10 +1,46 @@
 # .gitignore at top level
 
+# build files
+
 *.so
 *.o
 *.a
 *.la
 ~*
+
+# distro makefiles
+
+codebase/apps/Radx/src/makefile
+codebase/apps/awc/src/makefile
+codebase/apps/cidd/src/makefile
+codebase/apps/didss/src/makefile
+codebase/apps/dsserver/src/makefile
+codebase/apps/filedist/src/makefile
+codebase/apps/filters/src/makefile
+codebase/apps/hydro/src/makefile
+codebase/apps/ingest/src/makefile
+codebase/apps/interp/src/makefile
+codebase/apps/makefile
+codebase/apps/mdv_utils/src/makefile
+codebase/apps/mm5/src/makefile
+codebase/apps/physics/src/makefile
+codebase/apps/procmap/src/makefile
+codebase/apps/radar/src/makefile
+codebase/apps/refractt/src/makefile
+codebase/apps/satCodebase/Apps/src/makefile
+codebase/apps/scripts/src/makefile
+codebase/apps/spdb_server/src/makefile
+codebase/apps/spdb_utils/src/makefile
+codebase/apps/spol/src/makefile
+codebase/apps/symprod/src/makefile
+codebase/apps/tdrp/src/makefile
+codebase/apps/titan/src/makefile
+codebase/apps/titan_analysis/src/makefile
+codebase/apps/trec/src/makefile
+codebase/apps/xpol/src/makefile
+codebase/libs/makefile
+
+# apps
 
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
