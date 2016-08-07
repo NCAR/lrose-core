@@ -27,7 +27,7 @@ codebase/apps/physics/src/makefile
 codebase/apps/procmap/src/makefile
 codebase/apps/radar/src/makefile
 codebase/apps/refractt/src/makefile
-codebase/apps/satCodebase/Apps/src/makefile
+codebase/apps/satApps/src/makefile
 codebase/apps/scripts/src/makefile
 codebase/apps/spdb_server/src/makefile
 codebase/apps/spdb_utils/src/makefile
