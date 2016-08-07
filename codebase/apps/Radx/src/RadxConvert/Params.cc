@@ -908,6 +908,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'clear_transition_flag_on_all_rays'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("clear_transition_flag_on_all_rays");
+    tt->descr = tdrpStrDup("Option to clear the transition flag on all rays.");
+    tt->help = tdrpStrDup("If true, for all rays on which the transition flag is set, this flag will be removed, so that all rays are considered to be NOT in transition.");
+    tt->val_offset = (char *) &clear_transition_flag_on_all_rays - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'remove_rays_with_antenna_transitions'
     // ctype is 'tdrp_bool_t'
     

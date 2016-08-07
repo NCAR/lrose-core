@@ -497,6 +497,8 @@ public:
 
   tdrp_bool_t remove_rays_with_all_data_missing;
 
+  tdrp_bool_t clear_transition_flag_on_all_rays;
+
   tdrp_bool_t remove_rays_with_antenna_transitions;
 
   int transition_nrays_margin;
@@ -710,7 +712,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[152];
+  mutable TDRPtable _table[153];
 
   const char *_className;
 

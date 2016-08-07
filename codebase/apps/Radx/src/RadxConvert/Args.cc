@@ -271,6 +271,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "remove_rays_with_all_data_missing = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-clear_trans")) {
+      
+      sprintf(tmp_str, "clear_transition_flag_on_all_rays = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-rem_trans")) {
       
       sprintf(tmp_str, "remove_rays_with_antenna_transitions = TRUE;");
@@ -743,6 +748,8 @@ void Args::_usage(ostream &out)
       << "  [ -cf_classic4 ] output classic-style netcdf4\n"
       << "  [ -cf_nc64bit ] output 64-bit NC netcdf\n"
       << "     The above only apply to cfradial and foray output.\n"
+      << "\n"
+      << "  [ -clear_trans ] clear antenna transition flag on all rays\n"
       << "\n"
       << "  [ -comment ? ] override the comment string\n"
       << "\n"

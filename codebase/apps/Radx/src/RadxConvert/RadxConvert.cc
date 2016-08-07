@@ -642,6 +642,15 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     vol.trimSurveillanceSweepsTo360Deg();
   }
 
+  // clear antenna transition flags if requested
+  
+  if (_params.clear_transition_flag_on_all_rays) {
+    if (_params.debug) {
+      cerr << "DEBUG - clearing transition flag on all rays" << endl;
+    }
+    vol.clearTransitionFlagOnAllRays();
+  }
+  
   // remove transitions if requested
   
   if (_params.remove_rays_with_antenna_transitions) {

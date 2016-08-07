@@ -200,6 +200,12 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = false;
+  p_descr = "Option to clear the transition flag on all rays.";
+  p_help = "If true, for all rays on which the transition flag is set, this flag will be removed, so that all rays are considered to be NOT in transition.";
+} clear_transition_flag_on_all_rays;
+
+paramdef boolean {
+  p_default = false;
   p_descr = "Option to remove rays taken while the antenna was in transition.";
   p_help = "If true, rays with the transition flag set will not be used. The transiton flag is set when the antenna is in transtion between one sweep and the next.";
 } remove_rays_with_antenna_transitions;

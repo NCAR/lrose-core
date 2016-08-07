@@ -2034,6 +2034,27 @@ void RadxVol::removeBadRays(vector<RadxRay *> &goodRays,
 }
 
 ///////////////////////////////////////////////////////////
+/// Clear antenna transition flag on all rays
+
+void RadxVol::clearTransitionFlagOnAllRays()
+
+{
+
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RadxRay *ray = _rays[iray];
+    if (ray->getAntennaTransition()) {
+      ray->setAntennaTransition(false);
+    }
+  }
+
+  // load up the volume and sweep information from the rays
+
+  loadSweepInfoFromRays();
+  loadVolumeInfoFromRays();
+  
+}
+
+///////////////////////////////////////////////////////////
 /// Remove rays with the antenna transition flag set.
 
 void RadxVol::removeTransitionRays()
@@ -2366,7 +2387,7 @@ void RadxVol::trimSurveillanceSweepsTo360Deg()
   }
 
   // loop through sweeps
-  // If the sweep covers more than 360 degrees, set transition flag
+  // If the sweep covers more than 360 degrees, set flag
   // on extra rays. Use the elevation angle to determine which 
   // rays to remove.
 
@@ -2437,7 +2458,7 @@ void RadxVol::trimSurveillanceSweepsTo360Deg()
         break;
       }
 
-      // we have wrapped, so set one transition flag
+      // we have wrapped, so set one flag
 
       double elErrorLow = 
         fabs(medianElev - _rays[lowIndex]->getElevationDeg());

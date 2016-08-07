@@ -241,6 +241,12 @@ paramdef double {
 } min_angle_change_for_moving_antenna;
 
 paramdef boolean {
+  p_default = false;
+  p_descr = "Option to clear the transition flag on all rays.";
+  p_help = "If true, for all rays on which the transition flag is set, this flag will be removed, so that all rays are considered to be NOT in transition.";
+} clear_transition_flag_on_all_rays;
+
+paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to ignore rays for which the transition flag is set.";
   p_help = "If TRUE, the program will filter out rays which are computed when the antenna is moving from one sweep to the next, or one volume to the next.";

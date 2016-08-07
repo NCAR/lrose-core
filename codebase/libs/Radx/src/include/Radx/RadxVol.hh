@@ -818,6 +818,10 @@ public:
   void removeBadRays(vector<RadxRay *> &goodRays,
                      vector<RadxRay *> &badRays);
   
+  /// Clear antenna transition flag on all rays
+
+  void clearTransitionFlagOnAllRays();
+
   /// Remove rays with the antenna transition flag set.
   
   void removeTransitionRays();

@@ -533,13 +533,20 @@ int Dsr2Radx::_readMsg(DsRadarQueue &radarQueue,
   // check for transitions
 
   if (ray != NULL) {
-    if (_antenna->getInTransition()) {
-      ray->setAntennaTransition(true);
-    }
+
     bool ignoreRay = false;
-    if (_params.filter_antenna_transitions && _antenna->getInTransition()) {
-      ignoreRay = true;
+
+    if (_params.clear_transition_flag_on_all_rays) {
+      ray->setAntennaTransition(false);
+    } else {
+      if (_antenna->getInTransition()) {
+        ray->setAntennaTransition(true);
+        if (_params.filter_antenna_transitions) {
+          ignoreRay = true;
+        }
+      }
     }
+
     if (ignoreRay) {
       if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "Transition, ignoring, el, az: "

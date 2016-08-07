@@ -472,6 +472,8 @@ public:
 
   double min_angle_change_for_moving_antenna;
 
+  tdrp_bool_t clear_transition_flag_on_all_rays;
+
   tdrp_bool_t filter_antenna_transitions;
 
   tdrp_bool_t filter_when_scan_idle;
@@ -655,7 +657,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[147];
+  mutable TDRPtable _table[148];
 
   const char *_className;
 
