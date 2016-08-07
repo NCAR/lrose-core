@@ -42,6 +42,9 @@ codebase/libs/makefile
 
 # apps
 
+codebase/apps/tdrp/src/TdrpTest/TdrpTest
+codebase/apps/tdrp/src/tdrp_test/tdrp_test
+
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
 codebase/apps/Radx/src/FixRadxPointing/FixRadxPointing
