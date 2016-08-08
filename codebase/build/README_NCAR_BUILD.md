@@ -12,9 +12,9 @@ Therefore, before performing the build, you need to set up the correct environme
   
 The build will be installed in:
 
-  $LROSE_INSTALL_DIR/bin
-  $LROSE_INSTALL_DIR/lib
-  $LROSE_INSTALL_DIR/include
+  LROSE_INSTALL_DIR/bin
+  LROSE_INSTALL_DIR/lib
+  LROSE_INSTALL_DIR/include
 
 2. Set the environment variable to point to the git lrose-core directory:
 
