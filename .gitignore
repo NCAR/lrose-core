@@ -7,6 +7,12 @@
 *.a
 *.la
 ~*
+.dirstamp
+.deps
+makefile.in
+makefile.am
+__makefile.template
+makefile
 
 # distro makefiles
 
