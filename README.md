@@ -17,6 +17,10 @@ If you just wish to use the software, the automake/configure build is preferable
 
 #### Buildling with the NCAR development environment
 
-See [./codebase/build/README_NCAR_BUILD.md]
+See:
+
+[README_NCAR_BUILD.md](./codebase/build/README_NCAR_BUILD.md)
+
+for details.
 
 
