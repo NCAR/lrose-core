@@ -6,7 +6,7 @@ The software development system at NCAR/RAL (formerly RAP) and NCAR/EOL makes us
 
 Therefore, before performing the build, you need to set up the correct environment, as follows:
 
-1. Set the environment variable for the directory into which you wish to install the build:
+###### Set the environment variable for the directory into which you wish to install the build:
 
 ```
   LROSE_INSTALL_DIR
@@ -20,7 +20,7 @@ The build will be installed in:
   $LROSE_INSTALL_DIR/include
 ```
 
-2. Set the environment variable to point to the git lrose-core directory:
+###### Set the environment variable to point to the git lrose-core directory:
 
 ```
   LROSE_CORE_DIR
@@ -28,7 +28,7 @@ The build will be installed in:
 
 This should point to the top of the distribution, i.e. lrose-core.
 
-3. Source the environment, depending on the shell you are using:
+###### Source the environment, depending on the shell you are using:
 
 ```
   cd $LROSE_CORE_DIR/codebase
