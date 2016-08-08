@@ -54,6 +54,20 @@ This will set the following important environnent variables:
  $RAP_BIN_DIR: the binary install directory
 ```
 
+### Installing HDF5 and NetCDF
+
+To install the correct HDF5 and NetCDF support, you need to download lrose-netcdf:
+
+[https://github.com/NCAR/lrose-netcdf]
+
+Follow the instructions for performing the build.
+
+Install the build in:
+
+```
+  $LROSE_INSTALL_DIR
+```
+
 ### Installing the makefiles
 
 The `make` application can use makefiles named either `Makefile` or `makefile`.
