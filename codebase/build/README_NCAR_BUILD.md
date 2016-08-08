@@ -54,18 +54,64 @@ This will set the following important environnent variables:
  $RAP_BIN_DIR: the binary install directory
 ```
 
-4. Build the libs:
+### Installing the makefiles
 
-  cd libs
-  make -j 8 install_include
+The `make` application can use makefiles named either `Makefile` or `makefile`.
+The lower-case version takes preference.
+
+The codebase is checked in with upper-case Makefiles throughout the tree.
+
+To get the build you want, you must install the lower-case makefiles relevant to the distribution you need.
+
+To install the **lrose** standard distribution makefiles, perform the following:
+
+```
+  cd $LROSE_CORE_DIR/codebase
+  ./make_bin/install_distro_makefiles.py
+```
+This is equivalent to the following
+
+```
+  cd $LROSE_CORE_DIR/codebase
+  ./make_bin/install_distro_makefiles.py --distro lrose
+```
+
+If you want to perform a partial build for a particular distribution, you can specify the distribution on the command line.
+
+For example, to install the makefile for the **radx** distribtion, run the following:
+
+```
+  cd $LROSE_CORE_DIR/codebase
+  ./make_bin/install_distro_makefiles.py --distro radx
+```
+
+### Performing the build
+
+#### Building and installing the TDRP parameter handling utility
+
+```
+  cd $LROSE_CORE_DIR/codebase/libs/tdrp/src
+  make opt install
+  cd $LROSE_CORE_DIR/codebase/apps/tdrp/src
+  make opt install
+```
+
+#### Building and installing the libraries
+
+```
+  cd $LROSE_CORE_DIR/codebase/libs/
+  make install_include
   make -j 8 opt
-  make -j 8 install
+  make install
+```
 
-5. Build the apps:
+#### Building and installing the applications
 
-  cd ../apps
+```
+  cd $LROSE_CORE_DIR/codebase/apps
   make -j 8 opt
-  make -j 8 install
+  make install
+```
 
 
 
