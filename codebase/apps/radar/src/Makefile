@@ -22,6 +22,7 @@ SUB_DIRS = \
 	SweepInfo2Spdb \
 	TsFmq2Tcp \
 	TsFile2Fmq \
+	TsGamic2Iwrf \
 	TsSmartSave \
 	TsTcp2File \
 	TsTcp2Fmq \

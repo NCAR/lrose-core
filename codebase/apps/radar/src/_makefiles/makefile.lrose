@@ -54,6 +54,7 @@ SUB_DIRS = \
 	TsConvert \
 	TsFile2Fmq \
 	TsFmq2Tcp \
+        TsGamic2Iwrf \
 	TsMerge \
 	TsOverlay \
 	TsPrint \

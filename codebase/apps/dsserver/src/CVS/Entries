@@ -1,14 +1,3 @@
-/.cvsignore/1.1/Fri Oct 23 21:52:49 2015//
-/Makefile/1.49/Mon Mar  7 17:24:53 2011//
-/Makefile.ThorRemote/1.1/Mon May 16 22:54:17 2005//
-/Makefile.dsadmin/1.2/Mon Jun 30 21:07:01 2008//
-/Makefile.jaws/1.1/Fri Feb 20 23:34:23 2009//
-/Makefile.juneau/1.2/Tue Apr  6 21:19:21 2004//
-/Makefile.relay/1.1/Tue Nov 30 22:00:42 1999//
-/Makefile.thornMit/1.1/Tue Jan 29 01:02:44 2002//
-/Makefile.vdras/1.1/Wed Jun 13 20:18:29 2001//
-/Makefile.wsddm/1.5/Thu May 29 18:26:58 2003//
-/start_testing/1.1/Tue Jan 12 21:43:33 1999//
 D/AcTrack2Symprod////
 D/Acars2Symprod////
 D/Amdar2Symprod////
@@ -88,3 +77,14 @@ D/resolve_host////
 D/simpleAcTrack2Symprod////
 D/sysViewAssist////
 D/_makefiles////
+/.cvsignore/1.1/Tue Aug  2 20:19:48 2016//
+/Makefile/1.49/Tue Aug  2 20:19:48 2016//
+/Makefile.ThorRemote/1.1/Tue Aug  2 20:19:48 2016//
+/Makefile.dsadmin/1.2/Tue Aug  2 20:19:48 2016//
+/Makefile.jaws/1.1/Tue Aug  2 20:19:48 2016//
+/Makefile.juneau/1.2/Tue Aug  2 20:19:48 2016//
+/Makefile.relay/1.1/Tue Aug  2 20:19:48 2016//
+/Makefile.thornMit/1.1/Tue Aug  2 20:19:48 2016//
+/Makefile.vdras/1.1/Tue Aug  2 20:19:48 2016//
+/Makefile.wsddm/1.5/Tue Aug  2 20:19:48 2016//
+/start_testing/1.1/Tue Aug  2 20:19:48 2016//

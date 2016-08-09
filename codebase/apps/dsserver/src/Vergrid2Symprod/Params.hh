@@ -372,6 +372,8 @@ public:
 
   int max_clients;
 
+  tdrp_bool_t jazz_penup;
+
   tdrp_bool_t plot_truth;
 
   double truth_percentage_threshold;
@@ -409,7 +411,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[26];
+  mutable TDRPtable _table[27];
 
   const char *_className;
 

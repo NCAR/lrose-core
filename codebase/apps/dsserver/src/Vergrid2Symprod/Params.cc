@@ -636,6 +636,18 @@ using namespace std;
     tt->single_val.i = 64;
     tt++;
     
+    // Parameter 'jazz_penup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("jazz_penup");
+    tt->descr = tdrpStrDup("Is this for a Jazz display?");
+    tt->help = tdrpStrDup("Jazz needs a different PENUP value to display the product properly.");
+    tt->val_offset = (char *) &jazz_penup - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));

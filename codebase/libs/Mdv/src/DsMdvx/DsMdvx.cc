@@ -2814,9 +2814,10 @@ int DsMdvx::readRadx(const string &url)
   }
 
   // ignore rays with antenna transitions
-  
-  inFile.setReadIgnoreTransitions(true);
-  inFile.setReadRemoveLongRange(true);
+  // inFile.setReadIgnoreTransitions(true);
+
+  // remove long-range rays from NEXRAD
+  // inFile.setReadRemoveLongRange(true);
 
   // read file in to RadxVol object
   

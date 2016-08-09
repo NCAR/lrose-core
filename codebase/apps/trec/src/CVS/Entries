@@ -1,6 +1,3 @@
-/.cvsignore/1.1/Fri Oct 23 21:43:25 2015//
-/Makefile/1.11/Fri Mar  3 22:32:48 2000//
-/Makefile.wsddm/1.2/Tue Oct  5 20:13:38 1999//
 D/GridForecast////
 D/TrecGauge2Spdb////
 D/VariationalEchoTracker////
@@ -9,3 +6,6 @@ D/ptrec////
 D/ptrec.udp////
 D/trecCast////
 D/_makefiles////
+/.cvsignore/1.1/Tue Aug  2 20:19:51 2016//
+/Makefile/1.11/Tue Aug  2 20:19:51 2016//
+/Makefile.wsddm/1.2/Tue Aug  2 20:19:51 2016//

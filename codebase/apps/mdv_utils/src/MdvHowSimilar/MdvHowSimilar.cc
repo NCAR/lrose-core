@@ -403,6 +403,8 @@ void MdvHowSimilar::_compareInputFiles()
     int vDiffs = 0; //# of vertical levels with significant differences
     float rmsTotal = 0;
     float diffTotal = 0.0;
+    float absDiffTotal = 0.0;
+    int count = 0;
     for (int iz=0; iz < fh1.nz; iz++){
       string header(fci.field_name );
       header += " : k = ";
@@ -417,15 +419,17 @@ void MdvHowSimilar::_compareInputFiles()
       fl32 *d2level = data2 + vLevelOffset;
   
       float totalDiffLevel = 0.0;
+      float absDiffLevel = 0.0;
 
-      float rms = _doStatisticsForOneLevel(header, fh1, d1level, fh2, d2level, fci.significant_difference, outDataLevel, totalDiffLevel);
+      float rms = _doStatisticsForOneLevel(header, fh1, d1level, fh2, d2level, fci.significant_difference, outDataLevel, totalDiffLevel, absDiffLevel);
       rmsTotal += rms;
       diffTotal += totalDiffLevel;
+      absDiffTotal += absDiffLevel;
       if (rms > fci.rms_sig_diff){
 	vDiffs++;
       }				
     }
-    _printFieldSummary(fci.field_name, vDiffs, rmsTotal/fh1.nz, diffTotal);
+    _printFieldSummary(fci.field_name, vDiffs, rmsTotal/fh1.nz, diffTotal, absDiffTotal);
 
     if (_args->outFile != ""){
       _addFieldToOutput(fci.field_name);
@@ -435,16 +439,16 @@ void MdvHowSimilar::_compareInputFiles()
 }	
 
 
-void MdvHowSimilar::_printFieldSummary(const string fieldName, const int vDiffs, const float avgRMS, const float diffTotal)
+void MdvHowSimilar::_printFieldSummary(const string fieldName, const int vDiffs, const float avgRMS, const float diffTotal, const float absDiffTotal)
 {
-  *rout << "\nSUMMARY for " << fieldName << " -- AVG RMS: " << avgRMS << " | " << vDiffs << " level(s) have significant differences | DIFF TOTAL: " << diffTotal << "\n\n";
+  *rout << "\nSUMMARY for " << fieldName << " -- AVG RMS: " << avgRMS << " | " << vDiffs << " level(s) have significant differences | DIFF TOTAL: " << diffTotal << " | ABS DIFF TOTAL: " << absDiffTotal << "\n\n";
 }
 
 
 float MdvHowSimilar::_doStatisticsForOneLevel(const string header, const Mdvx::field_header_t& fh1,
                                               const fl32* data1, const Mdvx::field_header_t& fh2,
                                               const fl32* data2, const float sigDiff, fl32* outData,
-                                              float& totalDiff)
+                                              float& totalDiff, float& totalAbsDiff)
 {
   int nGoodPoints=0;
   double mean=0;
@@ -452,6 +456,7 @@ float MdvHowSimilar::_doStatisticsForOneLevel(const string header, const Mdvx::f
   double RMS = 0;
   // double totalDiff = 0.0;
   totalDiff = 0.0;
+  totalAbsDiff = 0.0;
   int nDiffPoints = 0;
   int totalGridPoints = _nx * _ny;
 
@@ -479,6 +484,7 @@ float MdvHowSimilar::_doStatisticsForOneLevel(const string header, const Mdvx::f
     }
 
     totalDiff += outData[ix];				 
+    totalAbsDiff += fabs(outData[ix]);
     nGoodPoints++;
   }
 
@@ -512,8 +518,8 @@ float MdvHowSimilar::_doStatisticsForOneLevel(const string header, const Mdvx::f
   }	
 
   char tmpBuff[1024];
-  sprintf(tmpBuff,"%s   nDiffPts: %10i   TotalDiff: %10.4f   MeanDiff: %10.4f   STD: %10.4f   RMS: %10.4f Bad1: %i Bad2: %i\n",
-	  header.c_str(), nDiffPoints, totalDiff, mean, STD, RMS, bad1, bad2);
+  sprintf(tmpBuff,"%s   nDiffPts: %10i   TotalDiff: %10.4f   TotalAbsDiff: %10.4f   MeanDiff: %10.4f   STD: %10.4f   RMS: %10.4f Bad1: %i Bad2: %i\n",
+	  header.c_str(), nDiffPoints, totalDiff, totalAbsDiff, mean, STD, RMS, bad1, bad2);
   *rout << tmpBuff;
   return RMS;
 

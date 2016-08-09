@@ -35,6 +35,7 @@
 #include "Server.hh"
 #include <rapformats/VerGridRegion.hh>
 #include <toolsa/pjg.h>
+
 using namespace std;
 #define NSEGMENTS 36
 
@@ -384,9 +385,15 @@ void Server::add_circle(Params *serverParams,
     point.lat = SegLat[i+1];
     pointsBuf.add(&point, sizeof(point));
 
-    point.lon = Symprod::WPT_PENUP;
-    point.lat = Symprod::WPT_PENUP;
-    pointsBuf.add(&point, sizeof(point));
+    if (serverParams->jazz_penup){
+        point.lon = Symprod::PPT_PENUP;
+        point.lat = Symprod::PPT_PENUP;
+    }
+    else {
+        point.lon = Symprod::WPT_PENUP;
+        point.lat = Symprod::WPT_PENUP;
+    }
+      pointsBuf.add(&point, sizeof(point));
 
   } // i
 
@@ -398,7 +405,6 @@ void Server::add_circle(Params *serverParams,
 		   serverParams->suggested_line_width,
 		   convert_capstyle_param(serverParams->suggested_capstyle),
 		   convert_joinstyle_param(serverParams->suggested_joinstyle));
-
 }
 
 

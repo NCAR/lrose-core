@@ -8,7 +8,6 @@
 /IwrfMoments.cc/1.5/Tue Aug  2 20:19:53 2016//
 /Makefile/1.10/Tue Aug  2 20:19:53 2016//
 /MomentsFields.cc/1.83/Tue Aug  2 20:19:53 2016//
-/NoiseLocator.cc/1.28/Tue Aug  2 20:19:53 2016//
 /PhaseCoding.cc/1.5/Tue Aug  2 20:19:53 2016//
 /RadarFft.cc/1.9/Tue Aug  2 20:19:53 2016//
 /RadarMoments.cc/1.228/Tue Aug  2 20:19:53 2016//
@@ -16,4 +15,5 @@
 /Sz864.cc/1.6/Tue Aug  2 20:19:53 2016//
 /cpa.c/1.4/Tue Aug  2 20:19:53 2016//
 /viraq_products.c/1.1/Tue Aug  2 20:19:53 2016//
+/NoiseLocator.cc/1.29/Tue Aug  9 22:17:11 2016//
 D

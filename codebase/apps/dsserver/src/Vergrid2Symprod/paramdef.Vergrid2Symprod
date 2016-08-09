@@ -111,6 +111,13 @@ paramdef int
   p_default = 64;
 } max_clients;
 
+paramdef boolean
+{
+  p_default = {FALSE};
+  p_descr = "Is this for a Jazz display?";
+  p_help = "Jazz needs a different PENUP value to display the product properly.";
+} jazz_penup;
+
 //////////////////////////////////////////////////////////
 // Rendering
 

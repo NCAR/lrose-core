@@ -1,5 +1,3 @@
-/.cvsignore/1.1/Fri Oct 23 20:57:32 2015//
-/Makefile/1.7/Tue Jan 11 15:17:49 2005//
 D/_makefiles////
 D/BasinGenPt2Symprod////
 D/BasinPrecip////
@@ -8,3 +6,5 @@ D/PrecipAccum////
 D/RateAccum////
 D/RainGage////
 D/Shape2Map////
+/.cvsignore/1.1/Tue Aug  2 20:19:48 2016//
+/Makefile/1.7/Tue Aug  2 20:19:48 2016//

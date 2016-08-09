@@ -33,7 +33,7 @@
  * 
  *  @date September 2015
  *
- *  @version $Id: MdvHowSimilar.hh,v 1.7 2016/03/04 02:22:11 dixon Exp $
+ *  @version $Id: MdvHowSimilar.hh,v 1.8 2016/08/04 20:32:47 mccabe Exp $
  */
 
 
@@ -132,12 +132,12 @@ private:
 	void _printFieldSummary(const string fieldName, const int vDiffs);
 	float _doStatisticsForOneLevel(const string header, const Mdvx::field_header_t& fh1, const fl32* data1, 
 	                                              const Mdvx::field_header_t& fh2, const fl32* data2,
-				       const float sigDiff, fl32* outData, float& totalDiff);
+				       const float sigDiff, fl32* outData, float& totalDiff, float& totalAbsDiff);
 
 	bool _allocateOutputData();
 
 	void _writeOutput();
-	void _printFieldSummary(const string fieldName, const int vDiffs, const float avgRMS, const float diffTotal);
+	void _printFieldSummary(const string fieldName, const int vDiffs, const float avgRMS, const float diffTotal, const float absDiffTotal);
 
 	void _cleanupOutputData();
 	void _setFieldHeader(Mdvx::field_header_t& hdr, const string& name);

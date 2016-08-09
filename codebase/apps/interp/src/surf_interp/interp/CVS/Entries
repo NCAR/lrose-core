@@ -1,12 +1,12 @@
-/Main.c/1.2/Thu Jan 14 20:53:15 1999//
-/Makefile/1.2/Thu Jan 14 20:53:15 1999//
-/calc_li.c/1.1/Wed Jan 13 22:34:28 1999//
-/fort_stuff.c/1.1/Wed Jan 13 22:34:29 1999//
-/fort_stuff.h/1.1/Wed Jan 13 22:34:29 1999//
-/get_spdb_metars.c/1.1/Wed Jan 13 22:34:29 1999//
-/pints.c/1.1/Wed Jan 13 22:34:30 1999//
-/pints.h/1.1/Wed Jan 13 22:34:30 1999//
-/read_sounding_class.c/1.1/Wed Jan 13 22:34:31 1999//
-/read_sounding_class.h/1.1/Wed Jan 13 22:34:31 1999//
-/write_mdv.c/1.1/Thu Jan 14 20:53:15 1999//
+/Main.c/1.2/Tue Aug  2 20:19:49 2016//
+/Makefile/1.2/Tue Aug  2 20:19:49 2016//
+/calc_li.c/1.1/Tue Aug  2 20:19:49 2016//
+/fort_stuff.c/1.1/Tue Aug  2 20:19:49 2016//
+/fort_stuff.h/1.1/Tue Aug  2 20:19:49 2016//
+/get_spdb_metars.c/1.1/Tue Aug  2 20:19:49 2016//
+/pints.c/1.1/Tue Aug  2 20:19:49 2016//
+/pints.h/1.1/Tue Aug  2 20:19:49 2016//
+/read_sounding_class.c/1.1/Tue Aug  2 20:19:49 2016//
+/read_sounding_class.h/1.1/Tue Aug  2 20:19:49 2016//
+/write_mdv.c/1.1/Tue Aug  2 20:19:49 2016//
 D
