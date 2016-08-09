@@ -7,6 +7,7 @@
 *.a
 *.la
 ~*
+*~
 
 # configure
 
