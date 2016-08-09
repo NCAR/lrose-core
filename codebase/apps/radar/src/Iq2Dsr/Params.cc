@@ -2668,6 +2668,18 @@ using namespace std;
     tt->single_val.i = 2500;
     tt++;
     
+    // Parameter 'set_equal_noise_bias_in_all_channels'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_equal_noise_bias_in_all_channels");
+    tt->descr = tdrpStrDup("Option to force the noise bias to be the same in all channels.");
+    tt->help = tdrpStrDup("The H co-polar channel is used as the master, if available, and the noise bias in all channels is set to that for Hc. If Hc is not available, Vc is used.");
+    tt->val_offset = (char *) &set_equal_noise_bias_in_all_channels - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));

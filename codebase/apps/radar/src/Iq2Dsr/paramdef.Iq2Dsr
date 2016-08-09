@@ -1084,6 +1084,12 @@ paramdef int {
   p_help = "When noise is located at a gate, the power values are stored in arrays. When we have accumulated enough gates, the mean is computed.";
 } noise_ngates_for_running_median;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the noise bias to be the same in all channels.";
+  p_help = "The H co-polar channel is used as the master, if available, and the noise bias in all channels is set to that for Hc. If Hc is not available, Vc is used.";
+} set_equal_noise_bias_in_all_channels;
+
 commentdef {
   p_header = "INTEREST MAPS and WEIGHTS for NOISE LOCATION";
   p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.";

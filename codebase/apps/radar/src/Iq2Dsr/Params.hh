@@ -947,6 +947,8 @@ public:
 
   int noise_ngates_for_running_median;
 
+  tdrp_bool_t set_equal_noise_bias_in_all_channels;
+
   interest_map_point_t *_phase_change_error_for_noise_interest_map;
   int phase_change_error_for_noise_interest_map_n;
 
@@ -1150,7 +1152,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[243];
+  mutable TDRPtable _table[244];
 
   const char *_className;
 

@@ -3357,6 +3357,10 @@ int Beam::_noiseInit()
     _noise->setComputeRayMedian(_params.noise_min_ngates_for_ray_median);
   }
 
+  if (_params.set_equal_noise_bias_in_all_channels) {
+    _noise->setEqualBiasInAllChannels(true);
+  }
+
   // interest maps for for noise
   
   vector<InterestMap::ImPoint> pts;
