@@ -121,6 +121,18 @@ public:
                    double nanoSecs,
                    double elevation, 
                    double azimuth);
+
+  //////////////////////////////////////////////////////////
+  // set flag to indicate that the noise bias should be set
+  // to the same value for all channels
+  //
+  // Use Hc if appropriate for computing bias,
+  // and set all channels to Hc bias.
+  // If no Hc, use Vc.
+
+  void setEqualBiasInAllChannels(bool state) {
+    _equalBiasInAllChannels = state;
+  }
   
   //////////////////////////////////////////////
   // perform noise location
@@ -239,6 +251,11 @@ private:
   double _azimuth;
   IwrfCalib _calib;
 
+  // flag to indicate that the noise bias should be set
+  // to the same value for all channels
+
+  bool _equalBiasInAllChannels;
+  
   // results
 
   vector<bool> _noiseFlag;

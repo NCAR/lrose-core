@@ -740,6 +740,16 @@ void NoiseLocator::computeNoiseDpAltHvCoOnly(MomentsFields *mfields)
   _noiseBiasDbHc = _medianNoiseDbmHc - _calib.getNoiseDbmHc();
   _noiseBiasDbVc = _medianNoiseDbmVc - _calib.getNoiseDbmVc();
 
+  // if required, set equal bias in both channels
+  // use Hc bias as the master
+
+  if (_equalBiasInAllChannels) {
+    _noiseBiasDbVc = _noiseBiasDbHc;
+    _medianNoiseDbmVc = _calib.getNoiseDbmVc() + _noiseBiasDbVc;
+  }
+
+  // set noise moment for each gate
+
   for (int igate = 0; igate < _nGates; igate++) {
     MomentsFields &mfield = mfields[igate];
     mfield.noise_bias_db_hc = _noiseBiasDbHc;
@@ -882,6 +892,20 @@ void NoiseLocator::computeNoiseDpAltHvCoCross(MomentsFields *mfields)
   _noiseBiasDbHx = _medianNoiseDbmHx - _calib.getNoiseDbmHx();
   _noiseBiasDbVx = _medianNoiseDbmVx - _calib.getNoiseDbmVx();
 
+  // if required, set equal bias in both channels
+  // use Hc bias as the master
+
+  if (_equalBiasInAllChannels) {
+    _noiseBiasDbVc = _noiseBiasDbHc;
+    _medianNoiseDbmVc = _calib.getNoiseDbmVc() + _noiseBiasDbVc;
+    _noiseBiasDbHx = _noiseBiasDbHc;
+    _medianNoiseDbmHx = _calib.getNoiseDbmHx() + _noiseBiasDbHx;
+    _noiseBiasDbVx = _noiseBiasDbHc;
+    _medianNoiseDbmVx = _calib.getNoiseDbmVx() + _noiseBiasDbVx;
+  }
+
+  // set noise moment for each gate
+
   for (int igate = 0; igate < _nGates; igate++) {
     MomentsFields &mfield = mfields[igate];
     mfield.noise_bias_db_hc = _noiseBiasDbHc;
@@ -995,6 +1019,16 @@ void NoiseLocator::computeNoiseDpSimHv(MomentsFields *mfields)
   _noiseBiasDbHc = _medianNoiseDbmHc - _calib.getNoiseDbmHc();
   _noiseBiasDbVc = _medianNoiseDbmVc - _calib.getNoiseDbmVc();
 
+  // if required, set equal bias in both channels
+  // use Hc bias as the master
+
+  if (_equalBiasInAllChannels) {
+    _noiseBiasDbVc = _noiseBiasDbHc;
+    _medianNoiseDbmVc = _calib.getNoiseDbmVc() + _noiseBiasDbVc;
+  }
+
+  // set noise moment for each gate
+
   for (int igate = 0; igate < _nGates; igate++) {
     MomentsFields &mfield = mfields[igate];
     mfield.noise_bias_db_hc = _noiseBiasDbHc;
@@ -1107,6 +1141,16 @@ void NoiseLocator::computeNoiseDpHOnly(MomentsFields *mfields)
   _noiseBiasDbHc = _medianNoiseDbmHc - _calib.getNoiseDbmHc();
   _noiseBiasDbVx = _medianNoiseDbmVx - _calib.getNoiseDbmVx();
 
+  // if required, set equal bias in both channels
+  // use Hc bias as the master
+
+  if (_equalBiasInAllChannels) {
+    _noiseBiasDbVx = _noiseBiasDbHc;
+    _medianNoiseDbmVx = _calib.getNoiseDbmVx() + _noiseBiasDbVx;
+  }
+
+  // set noise moment for each gate
+
   for (int igate = 0; igate < _nGates; igate++) {
     MomentsFields &mfield = mfields[igate];
     mfield.noise_bias_db_hc = _noiseBiasDbHc;
@@ -1218,6 +1262,16 @@ void NoiseLocator::computeNoiseDpVOnly(MomentsFields *mfields)
 
   _noiseBiasDbHx = _medianNoiseDbmHx - _calib.getNoiseDbmHx();
   _noiseBiasDbVc = _medianNoiseDbmVc - _calib.getNoiseDbmVc();
+  
+  // if required, set equal bias in both channels
+  // use Vc bias as the master
+
+  if (_equalBiasInAllChannels) {
+    _noiseBiasDbHx = _noiseBiasDbVc;
+    _medianNoiseDbmHx = _calib.getNoiseDbmHx() + _noiseBiasDbHx;
+  }
+
+  // set noise moment for each gate
 
   for (int igate = 0; igate < _nGates; igate++) {
     MomentsFields &mfield = mfields[igate];
