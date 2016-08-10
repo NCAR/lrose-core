@@ -66,18 +66,25 @@ def doInstall():
     if (options.debug == True):
         print >>sys.stderr, "Searching for makefiles: ", distroMakefileName
 
+    # first remove any existing 'makefile' files
+
+    for root, dirs, files in os.walk(".", topdown=False):
+        for dir in dirs:
+            dirPath = os.path.join(root, dir)
+            # check if makefile exists, remove it if it does
+            makefilePath = os.path.join(root, "makefile")
+            if (os.path.isfile(makefilePath)):
+                if (options.debug):
+                    print >>sys.stderr, "Removing " + makefilePath
+                os.remove(makefilePath)
+
     # find _makefiles dirs in tree
 
     for root, dirs, files in os.walk(".", topdown=False):
         for dir in dirs:
             if (dir == "_makefiles"):
                 dirPath = os.path.join(root, dir)
-                # check if makefile already exists, remove it if it does
                 makefilePath = os.path.join(root, "makefile")
-                if (os.path.isfile(makefilePath)):
-                    if (options.debug):
-                        print >>sys.stderr, "Removing " + makefilePath
-                    os.remove(makefilePath)
                 # check if distro makefile exists
                 distroMakefilePath = os.path.join(dirPath, distroMakefileName)
                 if (os.path.isfile(distroMakefilePath)):
