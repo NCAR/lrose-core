@@ -118,7 +118,7 @@ startingDir=`pwd`
 
 ./make_bin/install_distro_makefiles.py --distro ${package} --codedir .
 
-exit
+# set up automake configure
 
 if [ "$static" == "true" ]
 then
