@@ -116,7 +116,7 @@ startingDir=`pwd`
 
 # create project-specific makefiles
 
-./make_bin/install_distro_makefiles.py --distro ${package}
+./make_bin/install_distro_makefiles.py --distro ${package} --codedir .
 
 exit
 
