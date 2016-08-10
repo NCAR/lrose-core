@@ -3,6 +3,8 @@
 #--------------------------------------------------------------------
 #
 # install lrose binary development release
+# binaries, includes and libraries are all installed to
+# provide a development environment
 #
 # Mike Dixon, EOL, NCAR, Boulder, CO, USA
 # August 2015

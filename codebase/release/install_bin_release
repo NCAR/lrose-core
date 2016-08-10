@@ -3,6 +3,7 @@
 #--------------------------------------------------------------------
 #
 # install lrose binary release
+# only the executables are installed.
 #
 # Mike Dixon, EOL, NCAR, Boulder, CO, USA
 # Sept 2013
