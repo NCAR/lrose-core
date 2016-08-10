@@ -1,0 +1,152 @@
+#! /bin/bash
+
+#--------------------------------------------------------------------
+#
+# Run autoconf on LROSE source tree to prepare for configure
+#
+# Mike Dixon, EOL, NCAR, Boulder, CO, USA
+# August 2016
+#
+#--------------------------------------------------------------------
+
+# set the path
+
+export PATH=.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Usage: run_autoconf [options below]"
+    echo "  -h:  produce this usage list"
+    echo "  -d:  turn debugging on"
+    echo "  -s:  statically-linked release"
+    echo "       default is dynamic linking"
+    echo "  -v:  turn verbose on"
+    echo
+}
+
+#--------------------------------------------------------------------
+
+# defaults
+
+package=lrose
+debug=true
+verbose=false
+static=false
+
+# Parse command line options.
+while getopts hdsv OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        v)
+            verbose=true
+            ;;
+        s)
+            static=true
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running run_autoconf"
+  echo "  package: $package"
+  echo "  debug: $debug"
+  echo "  verbose: $verbose"
+  echo "  static: $static"
+fi
+
+# Remove the switches we parsed above.
+shift `expr $OPTIND - 1`
+
+#######################################################
+# get run time
+
+year=`date -u +'%Y'`
+month=`date -u +'%m'`
+day=`date -u +'%d'`
+hour=`date -u +'%H'`
+min=`date -u +'%M'`
+sec=`date -u +'%S'`
+
+#--------------------------------------------------------------------
+
+echo
+echo "*********************************************************************"
+echo
+echo "  Running autoconf for ${package} release"
+echo
+echo "  NCAR, Boulder, CO, USA"
+echo
+echo "  $year/$month/$day $hour:$min:$sec"
+echo
+echo "*********************************************************************"
+echo
+
+# set the path
+
+export PATH=${PATH}:/bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:/usr/lib64/qt4/bin:/usr/lib/qt4/bin:.
+startingDir=`pwd`
+
+# copy in top-level template files
+
+/bin/cp ./build/configure.base .
+/bin/cp ./build/configure.base.shared .
+/bin/cp ./build/Makefile.top ./Makefile
+
+# create project-specific makefiles
+
+./make_bin/install_distro_makefiles.py --distro ${package} --codedir .
+
+# create configure.ac, makefile.am files
+# run AutoConf
+
+if [ "$static" == "true" ]
+then
+
+    if [ "$verbose" == "true" ]
+    then
+        ./make_bin/createConfigure.am.py --dir . --pkg ${package} --verbose || exit 1
+    else
+        ./make_bin/createConfigure.am.py --dir . --pkg ${package} --debug || exit 1
+    fi
+
+else
+
+    if [ "$verbose" == "true" ]
+    then
+        ./make_bin/createConfigure.am.py --dir . --baseName configure.base.shared \
+            --verbose --shared --pkg ${package} || exit 1
+    else
+        ./make_bin/createConfigure.am.py --dir . --baseName configure.base.shared \
+            --debug --shared --pkg ${package} || exit 1
+    fi
+
+
+fi
+
+#--------------------------------------------------------------------
+# done
+
+echo
+echo "  **************************************************"
+echo "  *** Done with run_autoconf ***"
+echo "  **************************************************"
+echo
+
+exit 0

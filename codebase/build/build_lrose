@@ -3,6 +3,9 @@
 # Building LROSE and required libraries
 # =====================================
 #
+# This requires automake-stype makefile.am files
+#
+# 
 # Downloading:
 # ------------
 #

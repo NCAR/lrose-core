@@ -1,6 +1,7 @@
+#######################################################
+# Makefile.top
 #
-# Recursive make - makes the subdirectory code
-#
+# Top level Makefile for NCAR-RAP-style recursive build
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
