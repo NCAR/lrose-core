@@ -67,10 +67,13 @@ cp $release ${target_dir}
 
 tar_url=ftp://ftp.rap.ucar.edu/pub/titan/${sub_dir}/${release}
 formula_name="${package}.rb"
-./distribs/${package}/build_${package}_formula $tar_url $release $formula_name
+./build/${package}/build_${package}_formula $tar_url $release $formula_name
 
-/bin/cp -f ./distribs/${package}/docs/*.TXT ${target_dir}
-/bin/cp -rf ./distribs/${package}/RELEASE_NOTES/* ${target_dir}
+/bin/cp -f ./build/docs/*.TXT .
+/bin/cp -f ../docs/${package}_release_notes.txt .
+
+/bin/cp -f ./build/docs/*.TXT ${target_dir}
+/bin/cp -f ../docs/${package}_release_notes.txt ${target_dir}
 /bin/mv -f $formula_name ${target_dir}
 
 #--------------------------------------------------------------------

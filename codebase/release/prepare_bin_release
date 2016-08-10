@@ -117,7 +117,7 @@ mkdir -p $tarDir || exit 1
 
 # perform the build
 
-./build_netcdf ${prefix} || exit 1
+./build_and_install_netcdf ${prefix} || exit 1
 ./build_${package} ${prefix} || exit 1
 
 # set the LD library path

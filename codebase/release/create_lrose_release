@@ -116,8 +116,9 @@ cd $dist_dir
 
 # perform checkout
 
-cvs co distribs/$package
-./distribs/$package/do_src_checkout
+git pull http://github.com/NCAR/lrose-netcdf
+git pull http://github.com/NCAR/lrose-core
+cd lrose-core/codebase
 
 # prepare src release
 
@@ -125,21 +126,21 @@ if [ "$static" == "true" ]
 then
     if [ "$verbose" == "true" ]
     then
-        ./distribs/$package/prepare_src_release -s -v
+        ./release/prepare_src_release -s -v
     else
-        ./distribs/$package/prepare_src_release -s -d
+        ./release/prepare_src_release -s -d
     fi
 else
     if [ "$verbose" == "true" ]
     then
-        ./distribs/$package/prepare_src_release -v
+        ./release/prepare_src_release -v
     else
-        ./distribs/$package/prepare_src_release -d
+        ./release/prepare_src_release -d
     fi
 fi
 
 # install src release
 
-./distribs/$package/install_src_release $package $package $release_dir
+./release/install_src_release $package $package $release_dir
 
 exit 0

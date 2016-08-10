@@ -110,9 +110,9 @@ startingDir=`pwd`
 # create configure.ac, makefile.am files
 # run AutoConf
 
-/bin/cp distribs/${package}/configure.base .
-/bin/cp distribs/${package}/configure.base.shared .
-/bin/cp distribs/${package}/Makefile.top ./Makefile
+/bin/cp ./build/configure.base .
+/bin/cp ./build/configure.base.shared .
+/bin/cp ./build/Makefile.top ./Makefile
 
 if [ "$static" == "true" ]
 then
@@ -140,19 +140,19 @@ fi
 
 # copy docs to this level
 
-cp distribs/${package}/docs/*.TXT .
-cp -r distribs/${package}/RELEASE_NOTES/${package}_release_notes.txt .
+cp ./build/docs/*.TXT .
+cp -r ../docs/${package}_release_notes.txt .
 
 # copy build scripts to this level
 
-/bin/cp distribs/${package}/build_netcdf .
-/bin/cp distribs/${package}/build_${package} .
-/bin/cp distribs/${package}/prepare_bin_release .
+/bin/cp ../../lrose-netcdf/build_and_install_netcdf .
+/bin/cp ./build/build_${package} .
+/bin/cp ./release/prepare_bin_release .
 
 # copy in the package tar file dependencies
 
 mkdir -p netcdf_tar_files
-/bin/cp -rf $HOME/netcdf_tar_files/* netcdf_tar_files
+/bin/cp -rf ../../lrose-netcdf/tar_files/* netcdf_tar_files
 
 # compute release name and dir name
 
