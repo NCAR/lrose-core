@@ -154,7 +154,10 @@ cd $startingDir
 # copy into releases dir
 
 releaseDir=$WORK/releases/${package}
-cp $binTarName $releaseDir
+if [ -e $releaseDir ]
+then
+  cp $binTarName $releaseDir
+fi
 
 # Check the build
 # ---------------
