@@ -157,8 +157,8 @@ cp -r ../docs/${package}_release_notes.txt .
 
 # copy in the package tar file dependencies
 
-mkdir -p netcdf_tar_files
-/bin/cp -rf ../../lrose-netcdf/tar_files/* netcdf_tar_files
+mkdir -p tar_files
+/bin/cp -rf ../../lrose-netcdf/tar_files/* tar_files
 
 # compute release name and dir name
 
