@@ -114,6 +114,10 @@ startingDir=`pwd`
 /bin/cp ./build/configure.base.shared .
 /bin/cp ./build/Makefile.top ./Makefile
 
+# create project-specific makefiles
+
+./make_bin/install_distro_makefiles.py --distro ${package}
+
 if [ "$static" == "true" ]
 then
 

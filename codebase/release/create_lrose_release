@@ -116,8 +116,8 @@ cd $dist_dir
 
 # perform checkout
 
-git pull http://github.com/NCAR/lrose-netcdf
-git pull http://github.com/NCAR/lrose-core
+git clone https://github.com/NCAR/lrose-netcdf
+git clone https://github.com/NCAR/lrose-core
 cd lrose-core/codebase
 
 # prepare src release
