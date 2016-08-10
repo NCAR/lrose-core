@@ -80,8 +80,8 @@ However, you also can run the checks independently:
 
 After the build, you can check the build as follows:
 
-  ./distribs/lrose/check_libs -p /usr/local
-  ./distribs/lrose/check_apps -p /usr/local
+  ./build/check_libs -p /usr/local
+  ./build/check_apps -p /usr/local
 
 5. Handling build errors
 ------------------------

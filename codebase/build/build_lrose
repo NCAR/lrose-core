@@ -76,10 +76,11 @@ rm -f moc_*   # remove any old moc_* files before we (re)generate them
 qmake-qt4 -o Makefile.qmake
 make -f Makefile.qmake mocables
 
-#  Build HDF5, NETCDF and UDUNITS
-#  ------------------------------
+# Build HDF5, NETCDF and UDUNITS
+# ------------------------------
 
-# ./distribs/lrose/build_netcdf ${prefix} || exit 1
+# Checkout https://github.com/NCAR/lrose-netcdf
+# build from there
 
 # Build lrose - libraries and binaries
 # ------------------------------------
@@ -126,4 +127,4 @@ cd apps/scripts/src
 # ------------------
 
 cd $startingDir
-./distribs/lrose/check_build $prefix
+./build/check_build $prefix

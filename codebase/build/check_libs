@@ -50,7 +50,7 @@ shift `expr $OPTIND - 1`
 echo "Checking lrose build"
 
 ./make_bin/check_libs.pl \
-  -list ./distribs/lrose/libs_check_list \
+  -list ./build/libs_check_list \
   -dir $prefix/lib \
   -label "LROSE" || exit 1
 

@@ -47,9 +47,9 @@ echo "Using prefix: $prefix"
 
 echo
 echo "============= Checking libs for LROSE - ============="
-./distribs/lrose/check_libs -p $prefix || exit 1
+./build/check_libs -p $prefix || exit 1
 echo "===================================================="
 echo
 echo "============= checking apps for LROSE ============="
-./distribs/lrose/check_apps -p $prefix || exit 1
+./build/check_apps -p $prefix || exit 1
 echo "=================================================="
