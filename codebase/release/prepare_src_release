@@ -118,6 +118,8 @@ startingDir=`pwd`
 
 ./make_bin/install_distro_makefiles.py --distro ${package}
 
+exit
+
 if [ "$static" == "true" ]
 then
 
