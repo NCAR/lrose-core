@@ -99,6 +99,7 @@ SCRIPTS = \
 	rm_objs \
 	rm_wspace \
 	rm_wspace_all \
+	rm_makefile \
 	rm_makefile.am \
 	rucPoll \
 	rucRetrieve \

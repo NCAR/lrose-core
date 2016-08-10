@@ -54,6 +54,8 @@ SCRIPTS = \
 	rm_core \
 	rm_junk \
 	rm_ldata_fmq_files \
+	rm_makefile \
+	rm_makefile.am \
 	rm_objs \
 	rm_wspace \
 	rm_wspace_all \
