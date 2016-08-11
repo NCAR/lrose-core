@@ -49,10 +49,10 @@ shift `expr $OPTIND - 1`
 
 echo "Checking lrose build"
 
-./make_bin/check_apps.pl \
-  -list ./build/apps_check_list \
-  -dir $prefix/bin \
-  -label "LROSE" || exit 1
+./make_bin/check_apps.py \
+  -listPath ./build/apps_check_list \
+  -appDir $prefix/bin \
+  -label "LROSE" --maxAge 900 || exit 1
 
 
 
