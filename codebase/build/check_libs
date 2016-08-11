@@ -50,9 +50,9 @@ shift `expr $OPTIND - 1`
 echo "Checking lrose build"
 
 ./make_bin/check_libs.py \
-  -listPath ./build/libs_check_list \
-  -libDir $prefix/lib \
-  -label "LROSE" --maxAge 900 || exit 1
+  --listPath ./build/libs_check_list \
+  --libDir $prefix/lib \
+  --label "LROSE" --maxAge 900 || exit 1
 
 
 

@@ -388,6 +388,7 @@ codebase/apps/radar/src/TsCalAuto/TsCalAuto
 codebase/apps/radar/src/TsConvert/TsConvert
 codebase/apps/radar/src/TsFile2Fmq/TsFile2Fmq
 codebase/apps/radar/src/TsFmq2Tcp/TsFmq2Tcp
+codebase/apps/radar/src/TsGamic2Iwrf/TsGamic2Iwrf
 codebase/apps/radar/src/TsMerge/TsMerge
 codebase/apps/radar/src/TsOverlay/TsOverlay
 codebase/apps/radar/src/TsPrint/TsPrint

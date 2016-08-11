@@ -15,6 +15,7 @@ libeuclid.a
 libgrib.a    # Depends on gfortran app and development library
 libgrib2.a   # Depends on gfortran, and jasper library
 libhydro.a
+libkd.a
 libmm5.a
 libphysics.a
 librapformats.a

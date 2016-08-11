@@ -70,19 +70,19 @@ def main():
         print >>sys.stderr, "  n libraries missing: " + str(len(missingLibs))
         for index, lib in enumerate(missingLibs):
             print >>sys.stderr, "    missing lib: " + requiredLibsLine[lib]
-        print >>sys.stderr, "================================================="
     else:
-        print >>sys.stderr, "================>> SUCCESS <<=================="
+        print >>sys.stderr, "=================>> SUCCESS <<==================="
         print >>sys.stderr, "=========>> ALL " + options.label + " LIBS INSTALLED <<========"
-        print >>sys.stderr, "==============================================="
 
     if (len(oldLibs) > 0):
         print >>sys.stderr, "=================>> WARNING <<==================="
         print >>sys.stderr, "===========>> SOME " + options.label + " LIBS ARE OLD <<========="
         print >>sys.stderr, "  n old libs: " + str(len(oldLibs))
+        print >>sys.stderr, "  These libs may not have been built"
         for lib in oldLibs:
-            print >>sys.stderr, "    old lib: " + lib
-        print >>sys.stderr, "================================================="
+            print >>sys.stderr, "    lib out-of-date: " + lib
+
+    print >>sys.stderr, "================================================="
 
     sys.exit(0)
 
@@ -148,7 +148,6 @@ def checkForLibs():
             if (options.debug == True):
                 print >>sys.stderr, "   .... found"
             age = getFileAge(path)
-            print >>sys.stderr, "   .... age: ", age
             if (age > float(options.maxAge)):
                 oldLibs.append(name)
                 if (options.debug == True):
