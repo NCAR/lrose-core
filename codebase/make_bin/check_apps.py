@@ -83,12 +83,6 @@ def main():
             print >>sys.stderr, "    old app: " + app
         print >>sys.stderr, "================================================="
 
-    #os.chdir(options.codedir)
-
-    # install the makefiles
-
-    #doInstall()
-            
     sys.exit(0)
 
 ########################################################################
@@ -147,7 +141,7 @@ def checkForApps():
             if (options.debug == True):
                 print >>sys.stderr, "   .... found"
             age = getFileAge(path)
-            if (age > options.maxAge):
+            if (age > float(options.maxAge)):
                 oldApps.append(path)
                 if (options.debug == True):
                     print >>sys.stderr, "   file is old, age: ", age

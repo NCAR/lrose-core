@@ -67,7 +67,7 @@ def main():
     if (len(missingLibs) > 0):
         print >>sys.stderr, "==================>> ERROR <<===================="
         print >>sys.stderr, "=====>> INCOMPLETE " + options.label + " LIBS INSTALLATION <<===="
-        print >>sys.stderr, "  n liblications missing: " + str(len(missingLibs))
+        print >>sys.stderr, "  n libraries missing: " + str(len(missingLibs))
         for index, lib in enumerate(missingLibs):
             print >>sys.stderr, "    missing lib: " + requiredLibsLine[lib]
         print >>sys.stderr, "================================================="
@@ -77,19 +77,13 @@ def main():
         print >>sys.stderr, "==============================================="
 
     if (len(oldLibs) > 0):
-        print >>sys.stderr, "==================>> WARNING <<===================="
-        print >>sys.stderr, "=====>> SOME " + options.label + " LIBS ARE OLD <<===="
+        print >>sys.stderr, "=================>> WARNING <<==================="
+        print >>sys.stderr, "===========>> SOME " + options.label + " LIBS ARE OLD <<========="
         print >>sys.stderr, "  n old libs: " + str(len(oldLibs))
         for lib in oldLibs:
             print >>sys.stderr, "    old lib: " + lib
         print >>sys.stderr, "================================================="
 
-    #os.chdir(options.codedir)
-
-    # install the makefiles
-
-    #doInstall()
-            
     sys.exit(0)
 
 ########################################################################
@@ -154,7 +148,8 @@ def checkForLibs():
             if (options.debug == True):
                 print >>sys.stderr, "   .... found"
             age = getFileAge(path)
-            if (age > options.maxAge):
+            print >>sys.stderr, "   .... age: ", age
+            if (age > float(options.maxAge)):
                 oldLibs.append(name)
                 if (options.debug == True):
                     print >>sys.stderr, "   file is old, age: ", age
