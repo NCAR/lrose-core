@@ -1,7 +1,15 @@
 #! /bin/bash -f
 #
-# prepare a LROSE release
+# create a release
+# package defaults to lrose
 #
+
+# Mike Dixon, EOL, NCAR, Boulder, CO, USA
+# August 2016
+
+# set the path
+
+export PATH=.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin
 
 #--------------------------------------------------------------------
 # usage function
@@ -9,13 +17,17 @@
 
 function usage() {
     echo
-    echo "Usage: prepare_lrose_release [options below]"
-    echo "  -h:  produce this usage list"
-    echo "  -d:  turn debugging on"
-    echo "  -v:  turn verbose debugging on"
-    echo "  -f:  force, do not request user to check it is OK to proceed"
-    echo "  -s:  produce distribution for static linking"
-    echo "       default is dynamic linking"
+    echo "Usage: create_release [options below]"
+    echo "  -h   :  produce this usage list"
+    echo "  -d   :  turn debugging on"
+    echo "  -f   :  force, do not request user to check it is OK to proceed"
+    echo "  -p ? :  set package name"
+    echo "           default is 'lrose'"
+    echo "  -r ? :  set release dir"
+    echo "           default is $HOME/releases"
+    echo "  -s   :  produce distribution for static linking"
+    echo "           default is dynamic linking"
+    echo "  -v   :  turn verbose debugging on"
     echo
 }
 
@@ -24,15 +36,14 @@ function usage() {
 # defaults
 
 package=lrose
-dist_dir=$WORK/src/${package}
-release_dir=$WORK/releases
+release_dir=$HOME/releases
 debug=true
 verbose=false
 static=false
 force=false
 
 # Parse command line options.
-while getopts hdfsv OPT; do
+while getopts hdvfsp:r: OPT; do
     case "$OPT" in
         h)
             usage
@@ -50,6 +61,12 @@ while getopts hdfsv OPT; do
         s)
             static=true
             ;;
+        p)
+            package=$OPTARG
+            ;;
+        r)
+            release_dir=$OPTARG
+            ;;
         \?)
             # getopts issues an error message
             echo "Problems with command line usage"
@@ -59,12 +76,14 @@ while getopts hdfsv OPT; do
     esac
 done
 
+dist_dir=$release_dir/${package}
+
 if [ "$debug" == "true" ]
 then
   echo "Running create_lrose_release"
   echo "  package: $package"
-  echo "  dist_dir: $dist_dir"
   echo "  release_dir: $release_dir"
+  echo "  dist_dir: $dist_dir"
   echo "  debug: $debug"
   echo "  verbose: $verbose"
   echo "  static: $static"
@@ -79,7 +98,7 @@ shift `expr $OPTIND - 1`
 if [ -d $dist_dir ]
 then
 
-# go to release dir
+# go to release distribution dir
 
     cd $dist_dir
 
@@ -122,25 +141,24 @@ cd lrose-core/codebase
 
 # prepare src release
 
+debug_str=" "
+if [ "$verbose" == "true" ]
+then
+    debug_str=-v
+else
+    debug_str=-d
+fi
+
+
 if [ "$static" == "true" ]
 then
-    if [ "$verbose" == "true" ]
-    then
-        ./release/prepare_src_release -s -v
-    else
-        ./release/prepare_src_release -s -d
-    fi
+    ./release/prepare_src_release -s $debug_str -p $package
 else
-    if [ "$verbose" == "true" ]
-    then
-        ./release/prepare_src_release -v
-    else
-        ./release/prepare_src_release -d
-    fi
+    ./release/prepare_src_release $debug_str -p $package
 fi
 
 # install src release
 
-./release/install_src_release $package $package $release_dir
+./release/install_src_release $debug_str -p $package -r $release_dir
 
 exit 0

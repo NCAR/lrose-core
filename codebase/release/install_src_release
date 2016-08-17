@@ -2,22 +2,81 @@
 
 #--------------------------------------------------------------------
 #
-# install source lrose release
+# install source release
 #
-# Mike Dixon, RAP, NCAR, Boulder, CO, USA
-# July 2010
+# Mike Dixon, EOL, NCAR, Boulder, CO, USA
+# August 2016
 #
 #--------------------------------------------------------------------
 
-# set the path
+#--------------------------------------------------------------------
+# usage function
+#
 
-export PATH=.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin
+function usage() {
+    echo
+    echo "Usage: install_src_release [options below]"
+    echo "  -h   :  produce this usage list"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set package name"
+    echo "           default is 'lrose'"
+    echo "  -r ? :  set release dir"
+    echo "           default is $HOME/releases"
+    echo "  -v   :  turn verbose debugging on"
+    echo
+}
 
-# set package name
+#--------------------------------------------------------------------
 
-package=$1
-sub_dir=$2
-release_dir=$3
+# defaults
+
+package=lrose
+release_dir=$HOME/releases
+debug=true
+verbose=false
+
+# Parse command line options.
+while getopts hdvfsp:r: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        v)
+            verbose=true
+            ;;
+        p)
+            package=$OPTARG
+            ;;
+        r)
+            release_dir=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+dist_dir=$release_dir/${package}
+
+if [ "$debug" == "true" ]
+then
+  echo "Running install_src_release"
+  echo "  package: $package"
+  echo "  release_dir: $release_dir"
+  echo "  dist_dir: $dist_dir"
+  echo "  debug: $debug"
+  echo "  verbose: $verbose"
+fi
+
+# Remove the switches we parsed above.
+shift `expr $OPTIND - 1`
 
 #######################################################
 # get run time
@@ -49,8 +108,7 @@ release=`ls ${package}-????????.src.tgz`
 
 # make sure previous_releases dir exists
 
-target_dir=${release_dir}/${sub_dir}
-prevdir=${target_dir}/previous_releases
+prevdir=${dist_dir}/previous_releases
 if [ -f $prevdir ]
 then
   /bin/rm -f $prevdir
@@ -59,22 +117,30 @@ mkdir -p $prevdir
 
 # move old release out of the way
 
-/bin/mv -f ${target_dir}/${package}-????????.src.tgz ${target_dir}/previous_releases
+/bin/mv -f ${dist_dir}/${package}-????????.src.tgz ${dist_dir}/previous_releases
 
 # copy in new release
 
-cp $release ${target_dir}
+cp $release ${dist_dir}
 
-tar_url=ftp://ftp.rap.ucar.edu/pub/titan/${sub_dir}/${release}
+tar_url=https://www.eol.ucar.edu/software/lrose-core/${release}
+if [ "$package" = radx ]
+then
+  tar_url=https://www.eol.ucar.edu/software/radx/${release}
+elif [ "$package" = cidd ]
+then
+  tar_url=https://www.eol.ucar.edu/software/cidd-cartesian-interactive-data-display/${release}
+fi
+
 formula_name="${package}.rb"
 ./build/${package}/build_${package}_formula $tar_url $release $formula_name
 
 /bin/cp -f ./build/docs/*.TXT .
 /bin/cp -f ../docs/${package}_release_notes.txt .
 
-/bin/cp -f ./build/docs/*.TXT ${target_dir}
-/bin/cp -f ../docs/${package}_release_notes.txt ${target_dir}
-/bin/mv -f $formula_name ${target_dir}
+/bin/cp -f ./build/docs/*.TXT ${dist_dir}
+/bin/cp -f ../docs/${package}_release_notes.txt ${dist_dir}
+/bin/mv -f $formula_name ${dist_dir}
 
 #--------------------------------------------------------------------
 # done

@@ -9,10 +9,6 @@
 #
 #--------------------------------------------------------------------
 
-# set the path
-
-export PATH=.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin
-
 #--------------------------------------------------------------------
 # usage function
 #
@@ -22,6 +18,8 @@ function usage() {
     echo "Usage: prepare_src_release [options below]"
     echo "  -h:  produce this usage list"
     echo "  -d:  turn debugging on"
+    echo "  -p ? :  set package name"
+    echo "           default is 'lrose'"
     echo "  -s:  statically-linked release"
     echo "       default is dynamic linking"
     echo "  -v:  turn verbose on"
@@ -49,6 +47,9 @@ while getopts hdsv OPT; do
             ;;
         v)
             verbose=true
+            ;;
+        p)
+            package=$OPTARG
             ;;
         s)
             static=true
@@ -147,7 +148,7 @@ fi
 # copy docs to this level
 
 cp ./build/docs/*.TXT .
-cp -r ../docs/${package}_release_notes.txt .
+cp -r ../release_notes/${package}_release_notes.txt .
 
 # copy build scripts to this level
 
