@@ -36,7 +36,7 @@ verbose=false
 static=false
 
 # Parse command line options.
-while getopts hdsv OPT; do
+while getopts hdsvp: OPT; do
     case "$OPT" in
         h)
             usage
@@ -103,9 +103,8 @@ echo
 
 /bin/rm -f *.tgz
 
-# set the path
+# save the start location
 
-export PATH=${PATH}:/bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:/usr/lib64/qt4/bin:/usr/lib/qt4/bin:.
 startingDir=`pwd`
 
 # create configure.ac, makefile.am files
@@ -121,28 +120,20 @@ startingDir=`pwd`
 
 # set up automake configure
 
+debug_str=
+if [ "$verbose" == "true" ]
+then
+    debug_str=--verbose
+else
+    debug_str=--debug
+fi
+
 if [ "$static" == "true" ]
 then
-
-    if [ "$verbose" == "true" ]
-    then
-        ./make_bin/createConfigure.am.py --dir . --pkg ${package} --verbose || exit 1
-    else
-        ./make_bin/createConfigure.am.py --dir . --pkg ${package} --debug || exit 1
-    fi
-
+    ./make_bin/createConfigure.am.py --dir . --pkg ${package} $debug_str || exit 1
 else
-
-    if [ "$verbose" == "true" ]
-    then
-        ./make_bin/createConfigure.am.py --dir . --baseName configure.base.shared \
-            --verbose --shared --pkg ${package} || exit 1
-    else
-        ./make_bin/createConfigure.am.py --dir . --baseName configure.base.shared \
-            --debug --shared --pkg ${package} || exit 1
-    fi
-
-
+    ./make_bin/createConfigure.am.py --dir . --baseName configure.base.shared \
+        $debug_str --shared --pkg ${package} || exit 1
 fi
 
 # copy docs to this level
