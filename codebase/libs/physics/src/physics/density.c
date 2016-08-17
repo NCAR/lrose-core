@@ -206,7 +206,7 @@ double PHYdenDPT(double ew)
 {
 /* Define saturation vapor pressure (mb) over water at 0C */
 
-#define ES0 6.1078
+  const double ES0 = 6.1078;
 
   double x;
   double dnm;
@@ -369,16 +369,16 @@ double PHYdenESAT(double t)
 
 double PHYdenESGG(double t)
 {
-#define EWS 1013.246  /* saturation vapor pressure (mb) over liquid */
+  const double EWS = 1013.246;  /* saturation vapor pressure (mb) over liquid */
                       /*   water at 100C */
-#define TS 373.15     /* boiling point of water (K) */
+  const double TS = 373.15;     /* boiling point of water (K) */
 
-#define ESGG_C1 -7.90298
-#define ESGG_C2 5.02808
-#define ESGG_C3 1.3816e-7
-#define ESGG_C4 11.344
-#define ESGG_C5 8.1328e-3
-#define ESGG_C6 -3.49149
+  const double ESGG_C1 = -7.90298;
+  const double ESGG_C2 = 5.02808;
+  const double ESGG_C3 = 1.3816e-7;
+  const double ESGG_C4 = 11.344;
+  const double ESGG_C5 = 8.1328e-3;
+  const double ESGG_C6 = -3.49149;
 
   double tk;
   double rhs;
@@ -414,14 +414,14 @@ double PHYdenESGG(double t)
 
 double PHYdenESICE(double t)
 {
-#define EIS 6.1071  /* saturation vapor pressure (mb) over a water-ice */
+  const double EIS = 6.1071;  /* saturation vapor pressure (mb) over a water-ice */
                     /*   mixture at 0C */
 
 /* Empirical coefficients in the Goff-Gratch formule. */
 
-#define ESICE_C1 -9.09718
-#define ESICE_C2 3.56654
-#define ESICE_C3 0.876793
+  const double ESICE_C1 = -9.09718;
+  const double ESICE_C2 = 3.56654;
+  const double ESICE_C3 = 0.876793;
 
   double tf;
   double tk;
@@ -469,13 +469,13 @@ double PHYdenESILO(double t)
 {
 /* Polynomial coefficients */
 
-#define ESILO_A0 6.109177956
-#define ESILO_A1 5.034698970e-1
-#define ESILO_A2 1.886013408e-2
-#define ESILO_A3 4.176223716e-4
-#define ESILO_A4 5.824720280e-6
-#define ESILO_A5 4.838803174e-8
-#define ESILO_A6 1.838826904e-10
+  const double ESILO_A0 = 6.109177956;
+  const double ESILO_A1 = 5.034698970e-1;
+  const double ESILO_A2 = 1.886013408e-2;
+  const double ESILO_A3 = 4.176223716e-4;
+  const double ESILO_A4 = 5.824720280e-6;
+  const double ESILO_A5 = 4.838803174e-8;
+  const double ESILO_A6 = 1.838826904e-10;
 
   if (t > 0.0)
   {
@@ -505,13 +505,13 @@ double PHYdenESLO(double t)
 {
 /* Polynomial coefficients */
 
-#define ESLO_A0 6.107799961
-#define ESLO_A1 4.436518521e-1
-#define ESLO_A2 1.428945805e-2
-#define ESLO_A3 2.650648471e-4
-#define ESLO_A4 3.031240396e-6
-#define ESLO_A5 2.034080948e-8
-#define ESLO_A6 6.136820929e-11
+  const double ESLO_A0 = 6.107799961;
+  const double ESLO_A1 = 4.436518521e-1;
+  const double ESLO_A2 = 1.428945805e-2;
+  const double ESLO_A3 = 2.650648471e-4;
+  const double ESLO_A4 = 3.031240396e-6;
+  const double ESLO_A5 = 2.034080948e-8;
+  const double ESLO_A6 = 6.136820929e-11;
 
   double es;
   
@@ -540,13 +540,13 @@ double PHYdenESLO(double t)
 
 double PHYdenESRW(double t)
 {
-#define TS 373.15    /* Temperature of the boiling point of water (K) */
-#define EWS 1013.25  /* Saturation vapor pressure over liquid water at 100C */
+  const double TS = 373.15;    /* Temperature of the boiling point of water (K) */
+  const double EWS = 1013.25;  /* Saturation vapor pressure over liquid water at 100C */
 
-#define ESRW_C1 13.3185
-#define ESRW_C2 -1.9760
-#define ESRW_C3 -0.6445
-#define ESRW_C4 -0.1299
+  const double ESRW_C1 = 13.3185;
+  const double ESRW_C2 = -1.9760;
+  const double ESRW_C3 = -0.6445;
+  const double ESRW_C4 = -0.1299;
 
   double tk;
   double x;
@@ -579,20 +579,20 @@ double PHYdenESRW(double t)
 
 double PHYdenESW(double t)
 {
-#define ES0 6.1078  /* saturation vapor pressure over liquid water at 0C */
+  const double ES0 = 6.1078;  /* saturation vapor pressure over liquid water at 0C */
 
 /* Polynomial coefficients */
 
-#define ESW_A0 0.99999683
-#define ESW_A1 -0.90826951e-2
-#define ESW_A2 0.78736169e-4
-#define ESW_A3 -0.61117958e-6
-#define ESW_A4 0.43884187e-8
-#define ESW_A5 -0.29883885e-10
-#define ESW_A6 0.21874435e-12
-#define ESW_A7 -0.17892321e-14
-#define ESW_A8 0.11112018e-16
-#define ESW_A9 -0.30994571e-19
+  const double ESW_A0 = 0.99999683;
+  const double ESW_A1 = -0.90826951e-2;
+  const double ESW_A2 = 0.78736169e-4;
+  const double ESW_A3 = -0.61117958e-6;
+  const double ESW_A4 = 0.43884187e-8;
+  const double ESW_A5 = -0.29883885e-10;
+  const double ESW_A6 = 0.21874435e-12;
+  const double ESW_A7 = -0.17892321e-14;
+  const double ESW_A8 = 0.11112018e-16;
+  const double ESW_A9 = -0.30994571e-19;
 
   double pol;
   
@@ -616,7 +616,7 @@ double PHYdenESW(double t)
 
 double PHYdenES(double t)
 {
-#define ES0 6.1121  /* saturation vapor pressure over liquid water at 0C */
+  const double ES0 = 6.1121;  /* saturation vapor pressure over liquid water at 0C */
 
   return ES0 * exp((17.67 * t) / (t + 243.5));
 }
@@ -642,17 +642,17 @@ double PHYdenHEATL(int key, double t)
 {
 /* Polynomial coefficients */
 
-#define HEATL_A0 3337118.5
-#define HEATL_A1 -3642.8583
-#define HEATL_A2 2.1263947
+  const double HEATL_A0 = 3337118.5;
+  const double HEATL_A1 = -3642.8583;
+  const double HEATL_A2 = 2.1263947;
 
-#define HEATL_B0 -1161004.0
-#define HEATL_B1 9002.2648
-#define HEATL_B2 -12.931292
+  const double HEATL_B0 = -1161004.0;
+  const double HEATL_B1 = 9002.2648;
+  const double HEATL_B2 = -12.931292;
 
-#define HEATL_C0 2632536.8
-#define HEATL_C1 1726.9659
-#define HEATL_C2 -3.6248111
+  const double HEATL_C0 = 2632536.8;
+  const double HEATL_C1 = 1726.9659;
+  const double HEATL_C2 = -3.6248111;
 
   double hltnt = 0.0;
   double tk = TEMP_C_TO_K(t);
@@ -715,14 +715,14 @@ double PHYdenHUM(double t, double td)
 double PHYdenLCL(double pressure, double height,
 		 double temp, double mixing_ratio)
 {
-#define CP 1004.0    /* J/K/kg  Note: not using Bolton's value of 1005.7 per RIP code comment */
-#define CPMD 0.887
-#define EPS 0.622
-#define TLCLC1 2840.0
-#define TLCLC2 3.5
-#define TLCLC3 4.805
-#define TLCLC4 55.0
-#define GRAVITY_CONSTANT 9.806      /* m/s^2 */
+  const double CP = 1004.0;    /* J/K/kg  Note: not using Bolton's value of 1005.7 per RIP code comment */
+  const double CPMD = 0.887;
+  const double EPS = 0.622;
+  const double TLCLC1 = 2840.0;
+  const double TLCLC2 = 3.5;
+  const double TLCLC3 = 4.805;
+  const double TLCLC4 = 55.0;
+  const double GRAVITY_CONSTANT = 9.806;      /* m/s^2 */
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
   double tk = TEMP_C_TO_K(temp);
@@ -787,7 +787,7 @@ double PHYdenOS(double t, double p)
  * for dry air.
  */
 
-#define B 2.6518986
+  const double B = 2.6518986;
 
   double tk = TEMP_C_TO_K(t);
   double osk = tk * pow(1000.0 / p, 0.286) * exp((B * PHYdenW(p, t)) / tk);
@@ -1002,7 +1002,7 @@ double PHYdenPCON(double p, double t, double tc)
  *         (gas constant for dry air)
  */
 
-#define AKAPI 3.5037
+  const double AKAPI = 3.5037;
 
   double tk = TEMP_C_TO_K(t);
   double tck = TEMP_C_TO_K(tc);
@@ -1027,7 +1027,7 @@ double PHYdenPOWT(double t, double p, double td)
  *        (specific heat at constant pressure for dry air)
  */
 
-#define AKAP 0.28541
+  const double AKAP = 0.28541;
 
   double tk;
   double ptk;
@@ -1064,7 +1064,7 @@ double PHYdenPOWT(double t, double p, double td)
 
 double PHYdenPRECPW(double *td, double *p, int n)
 {
-#define G 980.616  /* Acceleration due to the Earth's gravity (cm/s**2) */
+  const double G = 980.616;  /* Acceleration due to the Earth's gravity (cm/s**2) */
 
   double pw;
   int nl;
@@ -1132,7 +1132,7 @@ void PHYdenPTLCL(double p, double t, double td, double *pc, double *tc)
  *        (specific heat at constant pressure for dry air)
  */
 
-#define AKAP 0.28541
+  const double AKAP = 0.28541;
 
   double tk = TEMP_C_TO_K(t);
   double c1 = 4098.026 / pow(td + 237.2, 2.0);
@@ -1163,7 +1163,7 @@ double PHYdenSATLFT(double thw, double p)
  *        (specific heat at constant pressure for dry air)
  */
 
-#define AKAP 0.28541
+  const double AKAP = 0.28541;
 
   double pwrp;
   double tone;
@@ -1409,7 +1409,7 @@ double PHYdenTLCL(double t, double td)
 
 double PHYdenTMLAPS(double thetae, double p)
 {
-#define CRIT 0.1   /* Convergence criterion (Kelvin) */
+  const double CRIT = 0.1;   /* Convergence criterion (Kelvin) */
 
   double eq0;
   double eq1;
@@ -1487,12 +1487,12 @@ double PHYdenTMLAPS(double thetae, double p)
 
 double PHYdenTMR(double w, double p)
 {
-#define TMR_C1 0.0498646455
-#define TMR_C2 2.4082965
-#define TMR_C3 7.07475
-#define TMR_C4 38.9114
-#define TMR_C5 0.0915
-#define TMR_C6 1.2035
+  const double TMR_C1 = 0.0498646455;
+  const double TMR_C2 = 2.4082965;
+  const double TMR_C3 = 7.07475;
+  const double TMR_C4 = 38.9114;
+  const double TMR_C5 = 0.0915;
+  const double TMR_C6 = 1.2035;
 
   double x;
   double tmrk;
@@ -1525,7 +1525,7 @@ double PHYdenTSA(double os, double p)
  * pressure of dry air.
  */
 
-#define B 2.6518986
+  const double B = 2.6518986;
 
   double a = TEMP_C_TO_K(os);
   double tq = 253.15;      /* First guess for tsa */
@@ -1576,7 +1576,7 @@ double PHYdenTV(double t, double td, double p)
  * to that of dry air (28.966 g/mole)
  */
 
-#define EPS 0.62197
+  const double EPS = 0.62197;
 
   double tk = TEMP_C_TO_K(t);
   
@@ -1669,7 +1669,7 @@ double PHYdenWMR(double p, double t)
  * to that of dry air (28.966 g/mole).
  */
 
-#define EPS 0.62197
+  const double EPS = 0.62197;
 
   /* The next two lines contain a formula by Herman Wobus for the correction
    * factor wfw for the departure of the mixture of air and water vapor
@@ -1828,14 +1828,14 @@ double PHYdenZ(double pt, double *p, double *t, double *td, int n)
  * the mixing ratio w from g/kg to a dimensionless ratio.
  */
 
-#define C1 0.0006078
+  const double C1 = 0.0006078;
 
 /* C2 = R / (2.0 * G) where R is the gas constant for dry air (287 kg/J/K)
  * and G is the acceleration due to the Earth's gravity (9.8 m/s**2).  The
  * factor of 2 is used in averaging the two virtual temperatures.
  */
 
-#define C2 14.64285
+  const double C2 = 14.64285;
 
   double *tk;
   int i;
