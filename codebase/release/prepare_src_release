@@ -141,7 +141,7 @@ cp -r ../release_notes/${package}_release_notes.txt . || exit 1
 
 /bin/cp ../../lrose-netcdf/build_and_install_netcdf . || exit 1
 /bin/cp ./build/build_${package} . || exit 1
-/bin/cp ./release/prepare_bin_release . || exit 1
+/bin/cp ./release/prepare_bin_release.${package} . || exit 1
 
 # copy in the package tar file dependencies
 
