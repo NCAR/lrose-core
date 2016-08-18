@@ -2,7 +2,7 @@
 
 #--------------------------------------------------------------------
 #
-# prepare lrose binary release
+# prepare radx binary release
 #
 # Mike Dixon, EOL, NCAR, Boulder, CO, USA
 # Sept 2013
@@ -24,7 +24,7 @@ function usage() {
 
 # set the path
 
-export PATH=${PATH}:.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin:/usr/lib64/qt4/bin:/usr/lib/qt4/bin
+export PATH=.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin
 startingDir=`pwd`
 
 #######################################################
@@ -39,11 +39,14 @@ sec=`date -u +'%S'`
 
 # set package name
 
-package=lrose
+package=radx
 
 # set default prefix to temporary staging area
+# this is set to a very long name because on macosx
+# we need to reset the library paths and we need to
+# ensure there is space available for the rename
 
-prefix=/tmp/${package}
+prefix=/tmp/${package}_prepare_bin_release_directory
 
 # set the install prefix from command line, if provided
 
@@ -64,28 +67,23 @@ echo "Using tmp area: $prefix"
 /bin/rm -rf ${prefix}
 mkdir -p ${prefix}
 
-# copy in CIDD build if available
-
-ciddBinDir=/tmp/cidd/bin
-if [ -e $ciddBinDir ]
-then
-  rsync -av $ciddBinDir $prefix
-fi
-ciddBinDir=/tmp/cidd_prepare_bin_release_directory/bin
-if [ -e $ciddBinDir ]
-then
-  rsync -av $ciddBinDir $prefix
-fi
-
 #--------------------------------------------------------------------
 
-# is this 32-bit or 64-bit?
+# get operating system, 32-bit or 64-bit, linux or macosx
 
 os_type=x86_64
 uname -a | grep x86_64
 if [ "$?" = 1 ]
 then
     os_type=i686
+fi
+if [ "$os_type" = "x86_64" ]
+then
+    uname -a | grep Darwin
+    if [ "$?" != 1 ]
+    then
+        os_type=macosx_x64
+    fi
 fi
 
 echo "os_type is: $os_type"
@@ -117,8 +115,13 @@ mkdir -p $tarDir || exit 1
 
 # perform the build
 
-./build_and_install_netcdf ${prefix} || exit 1
+./build_netcdf ${prefix} || exit 1
 ./build_${package} ${prefix} || exit 1
+
+# perl modules
+
+mkdir -p ${prefix}/lib/perl5
+cp -f libs/perl5/src/*pm ${prefix}/lib/perl5
 
 # set the LD library path
 #export LD_LIBRARY_PATH=${prefix}/lib
@@ -127,18 +130,27 @@ mkdir -p $tarDir || exit 1
 # copy the dynamic libraries into runtime area:
 #     $prefix/bin/${package}_runtime_libs
 
-./make_bin/installOriginLibFiles.py --binDir ${prefix}/bin \
-    --relDir ${package}_runtime_libs --debug || exit 1
+if [ "$os_type" = "macosx_x64" ]
+then
+    ./make_bin/installOriginLibFiles.py --binDir ${prefix}/bin \
+        --relDir ${package}_runtime_libs --debug \
+        --osx --ignore "libSystem,libc++" || exit 1
+else
+    ./make_bin/installOriginLibFiles.py --binDir ${prefix}/bin \
+        --relDir ${package}_runtime_libs --debug || exit 1
+fi
 
 # copy the required files into the tar dir
 
-/bin/cp -f ./build/docs/*.TXT $tarDir
-/bin/cp -f ../docs/${package}_release_notes.txt $tarDir
-/bin/cp -f ./release/install_bin_release $tarDir || exit 1
-/bin/cp -f ./release/install_devel_release $tarDir || exit 1
+/bin/cp -f ./distribs/${package}/docs/README_INSTALL_BIN.TXT $tarDir
+/bin/cp -f ./distribs/${package}/docs/LICENSE.TXT $tarDir
+/bin/cp -rf ./distribs/${package}/RELEASE_NOTES $tarDir
+/bin/cp -f ./distribs/${package}/install_bin_release $tarDir || exit 1
+/bin/cp -f ./distribs/${package}/install_devel_release $tarDir || exit 1
 /bin/cp -rf ${prefix}/bin $tarDir || exit 1
 /bin/cp -rf ${prefix}/lib $tarDir || exit 1
 /bin/cp -rf ${prefix}/include $tarDir || exit 1
+/bin/cp -rf projects $tarDir || exit 1
 
 # strip the binaries
 
@@ -154,16 +166,13 @@ cd $startingDir
 # copy into releases dir
 
 releaseDir=$WORK/releases/${package}
-if [ -e $releaseDir ]
-then
-  cp $binTarName $releaseDir
-fi
+cp $binTarName $releaseDir
 
 # Check the build
 # ---------------
 
 cd $startingDir
-./build/check_build $prefix
+./distribs/${package}/check_build $prefix
 
 #--------------------------------------------------------------------
 # done
