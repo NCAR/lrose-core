@@ -50,10 +50,13 @@ function usage() {
 # set the path
 
 export PATH=.:/bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin
+startingDir=`pwd`
 
 # set the install prefix
 
 prefix=/usr/local
+package=radx
+PACKAGE=RADX
 
 if [ $# -gt 0 ]
 then
@@ -106,15 +109,13 @@ make install-strip || exit 1
 # Checking the build
 # ------------------
 
+cd $startingDir
 echo
-echo
-echo
-echo "============= Checking libs for RADX - ============="
-./distribs/radx/check_libs -p $prefix || exit 1
+echo "============= Checking libs for $PACKAGE - ============="
+./build/check_libs -p $package -x $prefix
 echo "===================================================="
 echo
-echo
-echo
-echo "============= checking apps for RADX ============="
-./distribs/radx/check_apps -p $prefix || exit 1
+echo "============= checking apps for $PACKAGE ============="
+./build/check_apps -p $package -x $prefix
 echo "=================================================="
+
