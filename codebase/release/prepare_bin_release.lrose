@@ -133,8 +133,9 @@ mkdir -p $tarDir || exit 1
 
 # copy the required files into the tar dir
 
-/bin/cp -f ./build/docs/*.TXT $tarDir
 /bin/cp -f ../docs/${package}_release_notes.txt $tarDir
+/bin/cp -f ../LICENSE.txt $tarDir
+/bin/cp -f ./build/docs/*.TXT $tarDir
 /bin/cp -f ./release/install_bin_release $tarDir || exit 1
 /bin/cp -f ./release/install_devel_release $tarDir || exit 1
 /bin/cp -rf ${prefix}/bin $tarDir || exit 1

@@ -143,11 +143,11 @@ fi
 
 # copy the required files into the tar dir
 
-/bin/cp -f ./distribs/${package}/docs/README_INSTALL_BIN.TXT $tarDir
-/bin/cp -f ./distribs/${package}/docs/LICENSE.TXT $tarDir
-/bin/cp -rf ./distribs/${package}/RELEASE_NOTES $tarDir
-/bin/cp -f ./distribs/${package}/install_bin_release $tarDir || exit 1
-/bin/cp -f ./distribs/${package}/install_devel_release $tarDir || exit 1
+/bin/cp -f ../docs/${package}_release_notes.txt $tarDir
+/bin/cp -f ../LICENSE.txt $tarDir
+/bin/cp -f ./build/docs/*.TXT $tarDir
+/bin/cp -f ./release/install_bin_release $tarDir || exit 1
+/bin/cp -f ./release/install_devel_release $tarDir || exit 1
 /bin/cp -rf ${prefix}/bin $tarDir || exit 1
 /bin/cp -rf ${prefix}/lib $tarDir || exit 1
 /bin/cp -rf ${prefix}/include $tarDir || exit 1
