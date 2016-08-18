@@ -1,0 +1,63 @@
+#!/usr/bin/python
+import subprocess
+import sys
+import os
+
+template = """
+require 'formula'
+
+class Radx < Formula
+  homepage 'http://www.ral.ucar.edu/projects/titan/docs/radial_formats/radx.html'
+
+  url '{0}'
+  version '{1}'
+  sha1 '{2}'
+
+  depends_on 'hdf5' => 'enable-cxx'
+  depends_on 'udunits'
+  depends_on 'netcdf' => 'enable-cxx-compat'
+  depends_on 'fftw'
+
+  def install
+    system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
+    system "make install"
+  end
+
+  def test
+    system "#{{bin}}/RadxPrint", "-h"
+  end
+end
+"""
+
+if "check_output" not in dir( subprocess ): # duck punch it in!
+    def f(*popenargs, **kwargs):
+        if 'stdout' in kwargs:
+            raise ValueError('stdout argument not allowed, it will be overridden.')
+        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            raise CalledProcessError(retcode, cmd)
+        return output
+    subprocess.check_output = f
+
+def build_radx_formula(tar_url, tar_name, formula_name):
+    """ build a Homebrew forumula file for radx """	
+    dash = tar_name.find('-')
+    period = tar_name.find('.', dash)
+    version = tar_name[dash+1:period]
+    checksum = subprocess.check_output(("sha1sum", tar_name))
+    checksum = checksum.split()[0]
+    formula = template.format(tar_url, version, checksum)
+    outf = open(formula_name, 'w')
+    print >>outf, formula
+    outf.close()
+
+if __name__ == '__main__':
+    if len(sys.argv) == 4:
+	build_radx_formula(sys.argv[1], sys.argv[2], sys.argv[3])
+    else:
+	print "usage: {0} ftp_dir tar_name formula_name".format(sys.argv[0])
