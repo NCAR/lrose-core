@@ -76,14 +76,14 @@ while getopts hdvfsp:r: OPT; do
     esac
 done
 
-dist_dir=$release_dir/${package}
+tmp_dir=$release_dir/${package}/tmp
 
 if [ "$debug" == "true" ]
 then
-  echo "Running create_lrose_release"
+  echo "Running create_release"
   echo "  package: $package"
   echo "  release_dir: $release_dir"
-  echo "  dist_dir: $dist_dir"
+  echo "  tmp_dir: $tmp_dir"
   echo "  debug: $debug"
   echo "  verbose: $verbose"
   echo "  static: $static"
@@ -93,14 +93,14 @@ fi
 # Remove the switches we parsed above.
 shift `expr $OPTIND - 1`
 
-# delete contents of dist_dir
+# delete contents of tmp_dir
 
-if [ -d $dist_dir ]
+if [ -d $tmp_dir ]
 then
 
 # go to release distribution dir
 
-    cd $dist_dir
+    cd $tmp_dir
 
 # check that we should proceed
 
@@ -123,15 +123,15 @@ then
     echo "  Removing all contents in dir: `pwd`"
 
     cd ..
-    echo /bin/rm -rf $dist_dir
-    /bin/rm -rf $dist_dir
+    echo /bin/rm -rf $tmp_dir
+    /bin/rm -rf $tmp_dir
 
 fi
 
 # mkdir again, go there
 
-mkdir -p $dist_dir
-cd $dist_dir
+mkdir -p $tmp_dir
+cd $tmp_dir
 
 # perform checkout
 

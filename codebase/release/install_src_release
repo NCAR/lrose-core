@@ -64,6 +64,7 @@ while getopts hdvfsp:r: OPT; do
 done
 
 dist_dir=$release_dir/${package}
+tmp_dir=$dist_dir/tmp
 
 if [ "$debug" == "true" ]
 then
@@ -71,6 +72,7 @@ then
   echo "  package: $package"
   echo "  release_dir: $release_dir"
   echo "  dist_dir: $dist_dir"
+  echo "  tmp_dir: $tmp_dir"
   echo "  debug: $debug"
   echo "  verbose: $verbose"
 fi
@@ -108,7 +110,8 @@ release=`ls ${package}-????????.src.tgz`
 
 # make sure previous_releases dir exists
 
-prevdir=${dist_dir}/previous_releases
+cd $dist_dir
+prevdir=previous_releases
 if [ -f $prevdir ]
 then
   /bin/rm -f $prevdir
@@ -117,11 +120,11 @@ mkdir -p $prevdir
 
 # move old release out of the way
 
-/bin/mv -f ${dist_dir}/${package}-????????.src.tgz ${dist_dir}/previous_releases
+/bin/mv -f ${package}-????????.src.tgz previous_releases
 
 # copy in new release
 
-cp $release ${dist_dir}
+cp ${tmp_dir}/$release . || exit 1
 
 tar_url=https://www.eol.ucar.edu/software/lrose-core/${release}
 if [ "$package" = radx ]
@@ -133,14 +136,10 @@ then
 fi
 
 formula_name="${package}.rb"
-./build/${package}/build_${package}_formula $tar_url $release $formula_name
+$tmp_dir/codebase/build/build_${package}_formula $tar_url $release $formula_name
 
-/bin/cp -f ./build/docs/*.TXT .
-/bin/cp -f ../docs/${package}_release_notes.txt .
-
-/bin/cp -f ./build/docs/*.TXT ${dist_dir}
-/bin/cp -f ../docs/${package}_release_notes.txt ${dist_dir}
-/bin/mv -f $formula_name ${dist_dir}
+/bin/cp -f $tmp_dir/codebase/build/docs/*.TXT .
+/bin/cp -f $tmp_dir/release_notes/${package}_release_notes.txt .
 
 #--------------------------------------------------------------------
 # done
