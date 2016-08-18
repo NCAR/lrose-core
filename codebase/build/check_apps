@@ -12,13 +12,15 @@ function usage() {
     echo "Usage: check_apps [options below] prefix"
     echo "  -h:  produce this usage list"
     echo "  -d:  turn debugging on"
-    echo "  -p:  set prefix (default is /usr/local)"
+    echo "  -p:  set package name (default is lrose)"
+    echo "  -x:  set prefix (default is /usr/local)"
     echo
 }
 
 #--------------------------------------------------------------------
 # check args
 
+package=lrose
 prefix=/usr/local
 debug=false
 
@@ -33,6 +35,9 @@ while getopts hdp: OPT; do
             debug=true
             ;;
         p)
+            package=$OPTARG
+            ;;
+        x)
             prefix=$OPTARG
             ;;
         \?)
@@ -50,9 +55,9 @@ shift `expr $OPTIND - 1`
 echo "Checking lrose build"
 
 ./make_bin/check_apps.py \
-  --listPath ./build/apps_check_list \
+  --listPath ./build/apps_check_list.${package} \
   --appDir $prefix/bin \
-  --label "LROSE" --maxAge 900 || exit 1
+  --label $package --maxAge 900 || exit 1
 
 
 
