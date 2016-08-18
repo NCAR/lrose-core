@@ -64,7 +64,8 @@ while getopts hdvfsp:r: OPT; do
 done
 
 dist_dir=$release_dir/${package}
-tmp_dir=$dist_dir/tmp
+core_dir=$dist_dir/tmp/lrose-core
+codebase_dir=$dist_dir/tmp/lrose-core/codebase
 
 if [ "$debug" == "true" ]
 then
@@ -72,7 +73,7 @@ then
   echo "  package: $package"
   echo "  release_dir: $release_dir"
   echo "  dist_dir: $dist_dir"
-  echo "  tmp_dir: $tmp_dir"
+  echo "  codebase_dir: $codebase_dir"
   echo "  debug: $debug"
   echo "  verbose: $verbose"
 fi
@@ -124,7 +125,7 @@ mkdir -p $prevdir
 
 # copy in new release
 
-cp ${tmp_dir}/$release . || exit 1
+cp ${codebase_dir}/$release . || exit 1
 
 tar_url=https://www.eol.ucar.edu/software/lrose-core/${release}
 if [ "$package" = radx ]
@@ -136,10 +137,10 @@ then
 fi
 
 formula_name="${package}.rb"
-$tmp_dir/codebase/build/build_${package}_formula $tar_url $release $formula_name
+$codebase_dir/build/build_${package}_formula $tar_url $release $formula_name
 
-/bin/cp -f $tmp_dir/codebase/build/docs/*.TXT .
-/bin/cp -f $tmp_dir/release_notes/${package}_release_notes.txt .
+/bin/cp -f $codebase_dir/build/docs/*.TXT .
+/bin/cp -f $core_dir/release_notes/${package}_release_notes.txt .
 
 #--------------------------------------------------------------------
 # done
