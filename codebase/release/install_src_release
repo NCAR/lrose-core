@@ -121,7 +121,7 @@ mkdir -p $prevdir
 
 # move old release out of the way
 
-/bin/mv -f ${package}-????????.src.tgz previous_releases
+/bin/mv -f ${package}-????????*.tgz previous_releases
 
 # copy in new release
 
