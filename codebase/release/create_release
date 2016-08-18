@@ -152,13 +152,13 @@ fi
 
 if [ "$static" == "true" ]
 then
-    ./release/prepare_src_release -s $debug_str -p $package
+    ./release/prepare_src_release -s $debug_str -p $package || exit 1
 else
-    ./release/prepare_src_release $debug_str -p $package
+    ./release/prepare_src_release $debug_str -p $package || exit 1
 fi
 
 # install src release
 
-./release/install_src_release $debug_str -p $package -r $release_dir
+./release/install_src_release $debug_str -p $package -r $release_dir || exit 1
 
 exit 0

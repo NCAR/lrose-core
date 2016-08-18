@@ -103,20 +103,16 @@ echo
 
 /bin/rm -f *.tgz
 
-# save the start location
-
-startingDir=`pwd`
-
 # create configure.ac, makefile.am files
 # run AutoConf
 
-/bin/cp ./build/configure.base .
-/bin/cp ./build/configure.base.shared .
-/bin/cp ./build/Makefile.top ./Makefile
+/bin/cp ./build/configure.base . || exit 1
+/bin/cp ./build/configure.base.shared . || exit 1
+/bin/cp ./build/Makefile.top ./Makefile || exit 1
 
 # create project-specific makefiles
 
-./make_bin/install_distro_makefiles.py --distro ${package} --codedir .
+./make_bin/install_distro_makefiles.py --distro ${package} --codedir . || exit 1
 
 # set up automake configure
 
@@ -138,19 +134,19 @@ fi
 
 # copy docs to this level
 
-cp ./build/docs/*.TXT .
-cp -r ../release_notes/${package}_release_notes.txt .
+cp ./build/docs/*.TXT . || exit 1
+cp -r ../release_notes/${package}_release_notes.txt . || exit 1
 
 # copy build scripts to this level
 
-/bin/cp ../../lrose-netcdf/build_and_install_netcdf .
-/bin/cp ./build/build_${package} .
-/bin/cp ./release/prepare_bin_release .
+/bin/cp ../../lrose-netcdf/build_and_install_netcdf . || exit 1
+/bin/cp ./build/build_${package} . || exit 1
+/bin/cp ./release/prepare_bin_release . || exit 1
 
 # copy in the package tar file dependencies
 
-mkdir -p tar_files
-/bin/cp -rf ../../lrose-netcdf/tar_files/* tar_files
+mkdir -p tar_files || exit 1
+/bin/cp -rf ../../lrose-netcdf/tar_files/* tar_files || exit 1
 
 # compute release name and dir name
 
@@ -166,16 +162,16 @@ mkdir -p $distName || exit 1
 
 # move everything there
 
-mv * $distName
+mv * $distName || exit 1
 
 # make the tar file
 
-tar cvfz $srcTarName --dereference $distName
+tar cvfz $srcTarName --dereference $distName || exit 1
 
 # move everything back
 
-mv $distName/* .
-/bin/rm -rf $distName
+mv $distName/* . || exit 1
+/bin/rm -rf $distName || exit 1
 
 #--------------------------------------------------------------------
 # done
