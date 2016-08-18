@@ -52,7 +52,7 @@ done
 # Remove the switches we parsed above.
 shift `expr $OPTIND - 1`
 
-echo "Checking lrose build"
+echo "Checking $package build"
 
 ./make_bin/check_libs.py \
   --listPath ./build/libs_check_list.${package} \
