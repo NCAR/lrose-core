@@ -162,7 +162,7 @@ mkdir -p $distName || exit 1
 
 # move everything there
 
-mv * $distName || exit 1
+mv * $distName
 
 # make the tar file
 
