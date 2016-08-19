@@ -11,22 +11,28 @@
 
 export PATH=.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin
 
+# save starting location and script name
+
+startingDir=`pwd`
+runDir=$(basename $startingDir)
+scriptName=$(basename $0)
+
 #--------------------------------------------------------------------
 # usage function
 #
 
 function usage() {
     echo
-    echo "Usage: create_release [options below]"
+    echo "Usage: $scriptName [options below]"
     echo "  -h   :  produce this usage list"
     echo "  -d   :  turn debugging on"
     echo "  -f   :  force, do not request user to check it is OK to proceed"
     echo "  -p ? :  set package name"
-    echo "           default is 'lrose'"
-    echo "  -r ? :  set release dir"
-    echo "           default is $HOME/releases"
+    echo "            default is 'lrose'"
+    echo "  -r ? :  set top release dir"
+    echo "            default is $HOME/releases"
     echo "  -s   :  produce distribution for static linking"
-    echo "           default is dynamic linking"
+    echo "            default is dynamic linking"
     echo "  -v   :  turn verbose debugging on"
     echo
 }
@@ -36,7 +42,7 @@ function usage() {
 # defaults
 
 package=lrose
-release_dir=$HOME/releases
+release_top=$HOME/releases
 debug=true
 verbose=false
 static=false
@@ -65,7 +71,7 @@ while getopts hdvfsp:r: OPT; do
             package=$OPTARG
             ;;
         r)
-            release_dir=$OPTARG
+            release_top=$OPTARG
             ;;
         \?)
             # getopts issues an error message
@@ -76,34 +82,55 @@ while getopts hdvfsp:r: OPT; do
     esac
 done
 
-tmp_dir=$release_dir/${package}/tmp
+release_dir=${release_top}/${package}
+tmpDir=${release_dir}/tmp
 
 if [ "$debug" == "true" ]
 then
-  echo "Running create_release"
+  echo "Running $scriptName"
   echo "  package: $package"
+  echo "  release_top: $release_top"
   echo "  release_dir: $release_dir"
-  echo "  tmp_dir: $tmp_dir"
-  echo "  debug: $debug"
-  echo "  verbose: $verbose"
+  echo "  tmpDir: $tmpDir"
   echo "  static: $static"
   echo "  force: $force"
+  echo "  debug: $debug"
+  echo "  verbose: $verbose"
 fi
 
 # Remove the switches we parsed above.
 shift `expr $OPTIND - 1`
 
-# delete contents of tmp_dir
+# set up debug string
 
-if [ -d $tmp_dir ]
+debug_str=
+if [ "$verbose" == "true" ]
 then
+    debug_str=--verbose
+else
+    debug_str=--debug
+fi
 
-# go to release distribution dir
+# make sure previous_releases dir exists
 
-    cd $tmp_dir
+cd $release_dir
+prev_dir=previous_releases
+if [ -f $prev_dir ]
+then
+#   file instead of directory, so remove
+    /bin/rm -f $prev_dir
+fi
+mkdir -p $prev_dir
 
-# check that we should proceed
+# move old releases into prev dir
 
+/bin/mv -f ${package}-????????*.tgz $prev_dir
+
+# delete tmpDir if it exists
+
+if [ -d $tmpDir ]
+then
+    cd $tmpDir
     if [ "$force" != "true" ]
     then
         echo "WARNING: you are about to remove all contents in dir: `pwd`"
@@ -118,47 +145,107 @@ then
             exit 1
         fi
     fi
-
     echo "Proceeding ......."
-    echo "  Removing all contents in dir: `pwd`"
-
-    cd ..
-    echo /bin/rm -rf $tmp_dir
-    /bin/rm -rf $tmp_dir
-
+    echo "  Removing all contents in dir: $tmpDir"
+    cd $release_dir
+    echo /bin/rm -rf $tmpDir
+    /bin/rm -rf $tmpDir
 fi
 
-# mkdir again, go there
+# make tmp dir, go there
 
-mkdir -p $tmp_dir
-cd $tmp_dir
+mkdir -p $tmpDir
+cd $tmpDir
 
 # perform checkout
 
 git clone https://github.com/NCAR/lrose-netcdf
 git clone https://github.com/NCAR/lrose-core
-cd lrose-core/codebase
 
-# prepare src release
+# dir paths
 
-debug_str=" "
-if [ "$verbose" == "true" ]
-then
-    debug_str=-v
-else
-    debug_str=-d
-fi
+coreDir=$tmpDir/lrose-core
+codebaseDir=$coreDir/codebase
 
+# in codebase
+# create configure.ac, makefile.am files
+# run AutoConf
+
+cd $codebaseDir
+/bin/cp ../build/configure.base . || exit 1
+/bin/cp ../build/configure.base.shared . || exit 1
+/bin/cp ../build/Makefile.top Makefile || exit 1
+
+# create project-specific makefiles
+
+./make_bin/install_distro_makefiles.py --distro ${package} --codedir . || exit 1
+
+# set up automake configure
 
 if [ "$static" == "true" ]
 then
-    ./release/prepare_src_release -s $debug_str -p $package || exit 1
+    ./make_bin/createConfigure.am.py --dir . --pkg ${package} $debug_str || exit 1
 else
-    ./release/prepare_src_release $debug_str -p $package || exit 1
+    ./make_bin/createConfigure.am.py --dir . --baseName configure.base.shared \
+        $debug_str --shared --pkg ${package} || exit 1
 fi
 
-# install src release
+# copy in the netcdf support from the lrose-netcdf repo
 
-./release/install_src_release $debug_str -p $package -r $release_dir || exit 1
+cd $coreDir
+mkdir netcdf_support
+/bin/cp ../lrose-netcdf/build_and_install_netcdf netcdf_support || exit 1
+mkdir -p netcdf_support/tar_files || exit 1
+/bin/cp -rf ../lrose-netcdf/tar_files/* netcdf_support/tar_files || exit 1
+
+# copy docs to this level
+
+#cp ../LICENSE.txt . || exit 1
+#cp ./build/docs/*.TXT . || exit 1
+#cp -r ../release_notes/${package}_release_notes.txt . || exit 1
+
+# copy build scripts to top level
+
+#/bin/cp ../../lrose-netcdf/build_and_install_netcdf . || exit 1
+#/bin/cp ./build/build_${package} . || exit 1
+#/bin/cp ./release/prepare_bin_release.${package} . || exit 1
+
+# copy in the package tar file dependencies
+
+#mkdir -p tar_files || exit 1
+#/bin/cp -rf ../../lrose-netcdf/tar_files/* tar_files || exit 1
+
+# compute release name and dir name
+
+today=${year}${month}${day}
+distName=${package}-${today}.src
+srcTarName=${distName}.tgz
+echo Preparing source release file $srcTarName
+
+# create brew formula for mac OSX
+
+tar_url=https://github.com/NCAR/lrose-core/releases/${srcTarName}
+formula_name="${package}.rb"
+./build/build_${package}_formula $tar_url $srcTarName $formula_name
+
+# make temporary dist dir
+
+/bin/rm -rf ${package}-????????* || exit 1
+mkdir -p $distName || exit 1
+
+# move everything there
+
+mv * $distName
+
+# make the tar file
+
+tar cvfz $srcTarName --dereference $distName || exit 1
+
+# move everything back, remove distName dir
+
+mv $distName/* . || exit 1
+/bin/rm -rf $distName || exit 1
+
+echo "-------- done --------"
 
 exit 0

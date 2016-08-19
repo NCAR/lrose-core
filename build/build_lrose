@@ -38,12 +38,11 @@
 
 export PATH=${PATH}:.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin:/usr/lib64/qt4/bin:/usr/lib/qt4/bin
 
-# save starting location
+# save starting location and script name
 
 startingDir=`pwd`
-
+runDir=$(basename $startingDir)
 scriptName=$(basename $0)
-runDir=$(basename `pwd`)
 
 # defaults
 
@@ -146,13 +145,11 @@ export F90 gfortran
 cd $startingDir
 ./configure --with-hdf5=${prefix} --with-netcdf=${prefix} --prefix=${prefix} || exit 1
 
-cd $startingDir
-cd libs
+cd $startingDir/libs
 make -k -j 8
 make -k install-strip
 
-cd $startingDir
-cd apps
+cd $startingDir/apps
 make -k -j 8
 make -k install-strip
 
@@ -167,12 +164,10 @@ mkdir -p ${prefix}/lib/perl5
 # Install scripts
 #----------------
 
-cd $startingDir
-cd apps/procmap/src/scripts
+XFcd $startingDir/apps/procmap/src/scripts
 ./install_scripts.lrose ${prefix}/bin
 
-cd $startingDir
-cd apps/scripts/src
+cd $startingDir/apps/scripts/src
 ./install_scripts.lrose ${prefix}/bin
 
 # Checking the build
@@ -180,8 +175,15 @@ cd apps/scripts/src
 
 cd $startingDir
 echo
-echo "============= Checking libs for $package - ============="
+echo "============= Checking libs for $package ============="
+
+./make_bin/check_libs.py \
+  --listPath ./build/libs_check_list.${package} \
+  --libDir $prefix/lib \
+  --label $package --maxAge 900 || exit 1
+
 ./build/check_libs -p $package -x $prefix
+
 echo "===================================================="
 echo
 echo "============= checking apps for $package ============="

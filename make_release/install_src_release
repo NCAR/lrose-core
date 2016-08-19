@@ -9,19 +9,26 @@
 #
 #--------------------------------------------------------------------
 
+# save starting location and script name
+# script must be run from top level in lrose-core
+
+startingDir=`pwd`
+runDir=$(basename $startingDir)
+scriptName=$(basename $0)
+
 #--------------------------------------------------------------------
 # usage function
 #
 
 function usage() {
     echo
-    echo "Usage: install_src_release [options below]"
+    echo "Usage: $scriptName [options below]"
     echo "  -h   :  produce this usage list"
     echo "  -d   :  turn debugging on"
     echo "  -p ? :  set package name"
-    echo "           default is 'lrose'"
-    echo "  -r ? :  set release dir"
-    echo "           default is $HOME/releases"
+    echo "            default is 'lrose'"
+    echo "  -r ? :  set top release dir"
+    echo "            default is $HOME/releases"
     echo "  -v   :  turn verbose debugging on"
     echo
 }
@@ -31,7 +38,7 @@ function usage() {
 # defaults
 
 package=lrose
-release_dir=$HOME/releases
+release_top=$HOME/releases
 debug=true
 verbose=false
 
@@ -63,16 +70,16 @@ while getopts hdvfsp:r: OPT; do
     esac
 done
 
-dist_dir=$release_dir/${package}
-core_dir=$dist_dir/tmp/lrose-core
-codebase_dir=$dist_dir/tmp/lrose-core/codebase
+release_dir=${release_top}/${package}
+core_dir=$release_dir/tmp/lrose-core
+codebase_dir=$release_dir/tmp/lrose-core/codebase
 
 if [ "$debug" == "true" ]
 then
-  echo "Running install_src_release"
+  echo "Running $scriptName"
   echo "  package: $package"
+  echo "  release_top: $release_top"
   echo "  release_dir: $release_dir"
-  echo "  dist_dir: $dist_dir"
   echo "  codebase_dir: $codebase_dir"
   echo "  debug: $debug"
   echo "  verbose: $verbose"
@@ -108,20 +115,6 @@ echo
 echo "Installing the src release ...."
 
 release=`ls ${package}-????????.src.tgz`
-
-# make sure previous_releases dir exists
-
-cd $dist_dir
-prevdir=previous_releases
-if [ -f $prevdir ]
-then
-  /bin/rm -f $prevdir
-fi
-mkdir -p $prevdir
-
-# move old release out of the way
-
-/bin/mv -f ${package}-????????*.tgz previous_releases
 
 # copy in new release
 

@@ -2,12 +2,19 @@
 
 #--------------------------------------------------------------------
 #
-# prepare lrose release
+# prepare source release
 #
-# Mike Dixon, RAP, NCAR, Boulder, CO, USA
-# July 2010
+# Mike Dixon, EOL, NCAR, Boulder, CO, USA
+# Aug 2016
 #
 #--------------------------------------------------------------------
+
+# save starting location and script name
+# script must be run from top level in lrose-core
+
+startingDir=`pwd`
+runDir=$(basename $startingDir)
+scriptName=$(basename $0)
 
 #--------------------------------------------------------------------
 # usage function
@@ -15,13 +22,13 @@
 
 function usage() {
     echo
-    echo "Usage: prepare_src_release [options below]"
+    echo "Usage: $scriptName [options below]"
     echo "  -h:  produce this usage list"
     echo "  -d:  turn debugging on"
     echo "  -p ? :  set package name"
-    echo "           default is 'lrose'"
+    echo "            default is 'lrose'"
     echo "  -s:  statically-linked release"
-    echo "       default is dynamic linking"
+    echo "         default is dynamic linking"
     echo "  -v:  turn verbose on"
     echo
 }
@@ -65,7 +72,7 @@ done
 
 if [ "$debug" == "true" ]
 then
-  echo "Running prepare_src_release"
+  echo "Running $scriptName"
   echo "  package: $package"
   echo "  debug: $debug"
   echo "  verbose: $verbose"
@@ -99,16 +106,14 @@ echo
 echo "*********************************************************************"
 echo
 
-# remove any previous tar files
-
-/bin/rm -f *.tgz
-
+# in codebase
 # create configure.ac, makefile.am files
 # run AutoConf
 
-/bin/cp ./build/configure.base . || exit 1
-/bin/cp ./build/configure.base.shared . || exit 1
-/bin/cp ./build/Makefile.top ./Makefile || exit 1
+cd $startingDir/codebase
+/bin/cp ../build/configure.base . || exit 1
+/bin/cp ../build/configure.base.shared . || exit 1
+/bin/cp ../build/Makefile.top Makefile || exit 1
 
 # create project-specific makefiles
 
@@ -132,22 +137,30 @@ else
         $debug_str --shared --pkg ${package} || exit 1
 fi
 
+# copy in the netcdf support from the lrose-netcdf repo
+
+cd $startingDir
+mkdir netcdf_support
+/bin/cp ../lrose-netcdf/build_and_install_netcdf netcdf_support || exit 1
+mkdir -p netcdf_support/tar_files || exit 1
+/bin/cp -rf ../lrose-netcdf/tar_files/* netcdf_support/tar_files || exit 1
+
 # copy docs to this level
 
-cp ../LICENSE.txt . || exit 1
-cp ./build/docs/*.TXT . || exit 1
-cp -r ../release_notes/${package}_release_notes.txt . || exit 1
+#cp ../LICENSE.txt . || exit 1
+#cp ./build/docs/*.TXT . || exit 1
+#cp -r ../release_notes/${package}_release_notes.txt . || exit 1
 
-# copy build scripts to this level
+# copy build scripts to top level
 
-/bin/cp ../../lrose-netcdf/build_and_install_netcdf . || exit 1
-/bin/cp ./build/build_${package} . || exit 1
-/bin/cp ./release/prepare_bin_release.${package} . || exit 1
+#/bin/cp ../../lrose-netcdf/build_and_install_netcdf . || exit 1
+#/bin/cp ./build/build_${package} . || exit 1
+#/bin/cp ./release/prepare_bin_release.${package} . || exit 1
 
 # copy in the package tar file dependencies
 
-mkdir -p tar_files || exit 1
-/bin/cp -rf ../../lrose-netcdf/tar_files/* tar_files || exit 1
+#mkdir -p tar_files || exit 1
+#/bin/cp -rf ../../lrose-netcdf/tar_files/* tar_files || exit 1
 
 # compute release name and dir name
 
@@ -156,7 +169,7 @@ distName=${package}-${today}.src
 srcTarName=${distName}.tgz
 echo Preparing source release file $srcTarName
 
-# make dist dir
+# make temporary dist dir
 
 /bin/rm -rf ${package}-????????* || exit 1
 mkdir -p $distName || exit 1
@@ -169,17 +182,23 @@ mv * $distName
 
 tar cvfz $srcTarName --dereference $distName || exit 1
 
-# move everything back
+# move everything back, remove distName dir
 
 mv $distName/* . || exit 1
 /bin/rm -rf $distName || exit 1
+
+# create brew formula for mac OSX
+
+tar_url=https://github.com/NCAR/lrose-core/releases/${srcTarName}
+formula_name="${package}.rb"
+./build/build_${package}_formula $tar_url $srcTarName $formula_name
 
 #--------------------------------------------------------------------
 # done
 
 echo
 echo "  **************************************************"
-echo "  *** Done preparing release ***"
+echo "  *** Done preparing srcTarName ***"
 echo "  *** source tar file name: $srcTarName ***"
 echo "  **************************************************"
 echo
