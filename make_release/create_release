@@ -17,6 +17,16 @@ startingDir=`pwd`
 runDir=$(basename $startingDir)
 scriptName=$(basename $0)
 
+#######################################################
+# get run time
+
+year=`date -u +'%Y'`
+month=`date -u +'%m'`
+day=`date -u +'%d'`
+hour=`date -u +'%H'`
+min=`date -u +'%M'`
+sec=`date -u +'%S'`
+
 #--------------------------------------------------------------------
 # usage function
 #
