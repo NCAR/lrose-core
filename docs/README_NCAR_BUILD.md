@@ -31,14 +31,14 @@ This should point to the top of the distribution, i.e. lrose-core.
 ###### Source the environment, depending on the shell you are using:
 
 ```
-  cd $LROSE_CORE_DIR/codebase
+  cd $LROSE_CORE_DIR
   source build/set_build_env.sh
 ```  
 
 for sh or bash, or
 
 ```
-  cd $LROSE_CORE_DIR/codebase
+  cd $LROSE_CORE_DIR
   source build/set_build_env.csh
 ```
 
@@ -126,9 +126,4 @@ For example, to install the makefile for the **radx** distribtion, run the follo
   make -j 8 opt
   make install
 ```
-
-
-
-
-
 
