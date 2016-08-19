@@ -169,8 +169,9 @@ cd $tmpDir
 
 # perform checkout
 
-git clone https://github.com/NCAR/lrose-netcdf
 git clone https://github.com/NCAR/lrose-core
+cd lrose-core
+git clone https://github.com/NCAR/lrose-netcdf
 
 # dir paths
 
@@ -202,8 +203,8 @@ fi
 
 # copy in the netcdf support from the lrose-netcdf repo
 
-cd $coreDir
-rsync -av ../lrose-netcdf .|| exit 1
+#cd $coreDir
+#rsync -av ../lrose-netcdf .|| exit 1
 
 # copy docs to this level
 
@@ -229,29 +230,52 @@ distName=${package}-${today}.src
 srcTarName=${distName}.tgz
 echo Preparing source release file $srcTarName
 
-# create brew formula for mac OSX
-
-tar_url=https://github.com/NCAR/lrose-core/releases/${srcTarName}
-formula_name="${package}.rb"
-./build/build_${package}_formula $tar_url $srcTarName $formula_name
-
 # make temporary dist dir
 
-/bin/rm -rf ${package}-????????* || exit 1
+#/bin/rm -rf ${package}-????????* || exit 1
+cd $coreDir
 mkdir -p $distName || exit 1
 
 # move everything there
 
-mv * $distName
+echo 4444444444444
+pwd
+echo 444444444444444
+
+echo 111111111111111
+mv LICENSE.txt README.md build codebase docs lrose-netcdf make_release release_notes $distName
+echo 222222222222222
 
 # make the tar file
 
+echo ===============
+pwd
+echo ===============
+echo "tar cvfz $srcTarName --dereference $distName" || exit 1
 tar cvfz $srcTarName --dereference $distName || exit 1
+echo ===============
 
 # move everything back, remove distName dir
 
-mv $distName/* . || exit 1
-/bin/rm -rf $distName || exit 1
+echo 55555555555
+pwd
+ls $distName
+echo "mv $distName/* ." || exit 1
+cd $distName
+mv LICENSE.txt README.md build codebase docs lrose-netcdf make_release release_notes ..
+cd ..
+#mv $distName/LICENSE.txt $distName/README.md $distName/build $distName/codebase $distName/docs $distName/lrose-netcdf $distName/make_release $distName/release_notes . || exit 1
+#mv $distName/* . || exit 1
+echo "/bin/rm -rf $distName"
+#/bin/rm -rf $distName || exit 1
+echo 5555555555555
+
+# create brew formula for mac OSX
+
+cd $coreDir
+tar_url=https://github.com/NCAR/lrose-core/releases/${srcTarName}
+formula_name="${package}.rb"
+./build/build_${package}_formula $tar_url $srcTarName $formula_name
 
 echo "-------- done --------"
 
