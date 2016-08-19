@@ -3,23 +3,15 @@
 # Building LROSE and required libraries
 # =====================================
 #
-# This requires automake-stype makefile.am files
+# This requires automake makefile.am files
 #
+# This script must be run from the 'lrose-core/codebase' subdirectory.
 # 
-# Downloading:
-# ------------
-#
-# Download the source tar file from:
-#
-#    ftp.rap.ucar.edu/pub/titan/lrose
-#
-# untar, and cd into the resulting directory.
-#
 # By default the libraries and applications will be installed in:
 #
-#   /usr/local/include
-#   /usr/local/lib
-#   /usr/local/bin
+#   /usr/local/lrose/include
+#   /usr/local/lrose/lib
+#   /usr/local/lrose/bin
 #
 # You can change the install location by specifying it as
 # a single argument to this script.
@@ -34,58 +26,113 @@
 #   /tmp/lrose/lib
 #   /tmp/lrose/bin
 
+# Delend on HDF5, NETCDF and UDUNITS
+# ----------------------------------
+# Before running this,
+# checkout https://github.com/NCAR/lrose-netcdf
+# build and install hdf5, netcdf, udunits
+
+################################################################################
+
+# set the path
+
+export PATH=${PATH}:.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin:/usr/lib64/qt4/bin:/usr/lib/qt4/bin
+
+# save starting location
+
+startingDir=`pwd`
+
+scriptName=$(basename $0)
+runDir=$(basename `pwd`)
+
+# defaults
+
+prefix=/usr/local/lrose
+package=lrose
+debug=true
+
 #--------------------------------------------------------------------
 # usage function
 #
 
 function usage() {
     echo
-    echo "Usage: build_lrose [ -h ] [ prefix ]"
-    echo
-    echo "  -h: produce this usage list"
-    echo "  optionally set the prefix"
+    echo "Usage: $scriptName [options below]"
+    echo "  -h   :  produce this usage list"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set package"
+    echo "           default is 'lrose'"
+    echo "  -x ? :  set prefix"
+    echo "           default is '/usr/local/lrose'"
     echo
 }
 
-# set the path
+# Parse command line options.
+while getopts hdp:x: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            package=$OPTARG
+            ;;
+        x)
+            prefix=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
 
-export PATH=${PATH}:.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin:/usr/lib64/qt4/bin:/usr/lib/qt4/bin
-startingDir=`pwd`
-
-# set the install prefix
-
-prefix=/usr/local/lrose
-package=lrose
-PACKAGE=LROSE
-
-if [ $# -gt 0 ]
+if [ "$debug" == "true" ]
 then
-  if [ "$1" == -h -o "$2" == -h ] 
-  then
-    usage
-    exit 0
-  fi
-  prefix=$1
+  echo "Running $scriptName"
+  echo "  package: $package"
+  echo "  prefix: $prefix"
+  echo "  runDir: $runDir"
 fi
 
-echo "Using prefix: $prefix"
+# Remove the switches we parsed above.
+shift `expr $OPTIND - 1`
 
 # set RPATH to be locatable relative to $ORIGIN, via LDFLAGS
 
 export "LDFLAGS=-L${prefix}/lib -Wl,-rpath,'\$\$ORIGIN'/lrose_runtime_libs:${prefix}/lib"
 
+# check we are in the correct place - i.e. have apps and libs below us
+
+ls libs 2>&1 1> /dev/null
+if [ $? -ne 0 ]
+then
+  echo "runDir incorrect: $runDir"
+  echo "  Should have libs and apps in this directory"
+  echo "  current dir: $startingDir"
+  exit 1
+fi
+
+ls apps 2>&1 1> /dev/null
+if [ $? -ne 0 ]
+then
+  echo "runDir incorrect: $runDir"
+  echo "  Should have libs and apps in this directory"
+  echo "  cwd: `pwd`"
+  exit 1
+fi
+
 # first create the 'moc'-able files for Qt apps
 
-cd apps/radar/src/HawkEye
+cd $startingDir/apps/radar/src/HawkEye
 rm -f moc_*   # remove any old moc_* files before we (re)generate them
 qmake-qt4 -o Makefile.qmake
 make -f Makefile.qmake mocables
-
-# Build HDF5, NETCDF and UDUNITS
-# ------------------------------
-
-# Checkout https://github.com/NCAR/lrose-netcdf
-# build from there
 
 # Build lrose - libraries and binaries
 # ------------------------------------
@@ -133,11 +180,11 @@ cd apps/scripts/src
 
 cd $startingDir
 echo
-echo "============= Checking libs for $PACKAGE - ============="
+echo "============= Checking libs for $package - ============="
 ./build/check_libs -p $package -x $prefix
 echo "===================================================="
 echo
-echo "============= checking apps for $PACKAGE ============="
+echo "============= checking apps for $package ============="
 ./build/check_apps -p $package -x $prefix
 echo "=================================================="
 
