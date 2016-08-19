@@ -193,10 +193,7 @@ fi
 # copy in the netcdf support from the lrose-netcdf repo
 
 cd $coreDir
-mkdir netcdf_support
-/bin/cp ../lrose-netcdf/build_and_install_netcdf netcdf_support || exit 1
-mkdir -p netcdf_support/tar_files || exit 1
-/bin/cp -rf ../lrose-netcdf/tar_files/* netcdf_support/tar_files || exit 1
+rsync -av ../lrose-netcdf .|| exit 1
 
 # copy docs to this level
 
