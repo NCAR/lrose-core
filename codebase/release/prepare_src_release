@@ -134,6 +134,7 @@ fi
 
 # copy docs to this level
 
+cp ../LICENSE.txt . || exit 1
 cp ./build/docs/*.TXT . || exit 1
 cp -r ../release_notes/${package}_release_notes.txt . || exit 1
 
