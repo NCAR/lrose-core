@@ -92,15 +92,15 @@ while getopts hdvfsp:r: OPT; do
     esac
 done
 
-release_dir=${release_top}/${package}
-tmpDir=${release_dir}/tmp
+releaseDir=${release_top}/${package}
+tmpDir=${releaseDir}/tmp
 
 if [ "$debug" == "true" ]
 then
   echo "Running $scriptName"
   echo "  package: $package"
   echo "  release_top: $release_top"
-  echo "  release_dir: $release_dir"
+  echo "  releaseDir: $releaseDir"
   echo "  tmpDir: $tmpDir"
   echo "  static: $static"
   echo "  force: $force"
@@ -123,7 +123,7 @@ fi
 
 # make sure previous_releases dir exists
 
-cd $release_dir
+cd $releaseDir
 prev_dir=previous_releases
 if [ -f $prev_dir ]
 then
@@ -157,7 +157,7 @@ then
     fi
     echo "Proceeding ......."
     echo "  Removing all contents in dir: $tmpDir"
-    cd $release_dir
+    cd $releaseDir
     echo /bin/rm -rf $tmpDir
     /bin/rm -rf $tmpDir
 fi
@@ -269,6 +269,11 @@ formula_name="${package}.rb"
 # move the tar file and formula up into release dir
 
 mv ${srcTarName} $formula_name ../..
+
+# clean up tmp dir
+
+cd $releaseDir
+/bin/rm -rf $tmpDir
 
 echo "-------- done --------"
 
