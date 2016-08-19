@@ -165,24 +165,23 @@ fi
 # make tmp dir, go there
 
 mkdir -p $tmpDir
-cd $tmpDir
+
+# temp dir path for core
+
+tmpCoreDir=$tmpDir/lrose-core
 
 # perform checkout
 
+cd $tmpDir
 git clone https://github.com/NCAR/lrose-core
-cd lrose-core
+cd $tmpCoreDir
 git clone https://github.com/NCAR/lrose-netcdf
-
-# dir paths
-
-coreDir=$tmpDir/lrose-core
-codebaseDir=$coreDir/codebase
 
 # in codebase
 # create configure.ac, makefile.am files
 # run AutoConf
 
-cd $codebaseDir
+cd $tmpCoreDir/codebase
 /bin/cp ../build/configure.base . || exit 1
 /bin/cp ../build/configure.base.shared . || exit 1
 /bin/cp ../build/Makefile.top Makefile || exit 1
@@ -203,7 +202,7 @@ fi
 
 # copy in the netcdf support from the lrose-netcdf repo
 
-#cd $coreDir
+#cd $tmpCoreDir
 #rsync -av ../lrose-netcdf .|| exit 1
 
 # copy docs to this level
@@ -233,49 +232,43 @@ echo Preparing source release file $srcTarName
 # make temporary dist dir
 
 #/bin/rm -rf ${package}-????????* || exit 1
-cd $coreDir
+cd $tmpCoreDir
 mkdir -p $distName || exit 1
 
 # move everything there
 
-echo 4444444444444
-pwd
-echo 444444444444444
-
-echo 111111111111111
 mv LICENSE.txt README.md build codebase docs lrose-netcdf make_release release_notes $distName
-echo 222222222222222
 
 # make the tar file
 
-echo ===============
-pwd
-echo ===============
 echo "tar cvfz $srcTarName --dereference $distName" || exit 1
 tar cvfz $srcTarName --dereference $distName || exit 1
-echo ===============
 
 # move everything back, remove distName dir
 
-echo 55555555555
-pwd
-ls $distName
-echo "mv $distName/* ." || exit 1
-cd $distName
-mv LICENSE.txt README.md build codebase docs lrose-netcdf make_release release_notes ..
-cd ..
+#echo 55555555555
+#pwd
+#ls $distName
+#echo "mv $distName/* ." || exit 1
+#cd $distName
+#mv LICENSE.txt README.md build codebase docs lrose-netcdf make_release release_notes ..
+#cd ..
 #mv $distName/LICENSE.txt $distName/README.md $distName/build $distName/codebase $distName/docs $distName/lrose-netcdf $distName/make_release $distName/release_notes . || exit 1
 #mv $distName/* . || exit 1
-echo "/bin/rm -rf $distName"
+#echo "/bin/rm -rf $distName"
 #/bin/rm -rf $distName || exit 1
-echo 5555555555555
+#echo 5555555555555
 
 # create brew formula for mac OSX
 
-cd $coreDir
+cd $tmpCoreDir
 tar_url=https://github.com/NCAR/lrose-core/releases/${srcTarName}
 formula_name="${package}.rb"
-./build/build_${package}_formula $tar_url $srcTarName $formula_name
+./${distName}/build/build_${package}_formula $tar_url $srcTarName $formula_name
+
+# move the tar file and formula up into release dir
+
+mv ${srcTarName} $formula_name ../..
 
 echo "-------- done --------"
 
