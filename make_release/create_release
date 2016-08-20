@@ -52,7 +52,7 @@ function usage() {
 # defaults
 
 package=lrose
-release_top=$HOME/releases
+releaseTop=$HOME/releases
 debug=true
 verbose=false
 static=false
@@ -81,7 +81,7 @@ while getopts hdvfsp:r: OPT; do
             package=$OPTARG
             ;;
         r)
-            release_top=$OPTARG
+            releaseTop=$OPTARG
             ;;
         \?)
             # getopts issues an error message
@@ -92,14 +92,14 @@ while getopts hdvfsp:r: OPT; do
     esac
 done
 
-releaseDir=${release_top}/${package}
+releaseDir=${releaseTop}/${package}
 tmpDir=${releaseDir}/tmp
 
 if [ "$debug" == "true" ]
 then
   echo "Running $scriptName"
   echo "  package: $package"
-  echo "  release_top: $release_top"
+  echo "  releaseTop: $releaseTop"
   echo "  releaseDir: $releaseDir"
   echo "  tmpDir: $tmpDir"
   echo "  static: $static"
@@ -124,17 +124,24 @@ fi
 # make sure previous_releases dir exists
 
 cd $releaseDir
-prev_dir=previous_releases
-if [ -f $prev_dir ]
+prevDir=previous_releases
+if [ -f $prevDir ]
 then
 #   file instead of directory, so remove
-    /bin/rm -f $prev_dir
+    /bin/rm -f $prevDir
 fi
-mkdir -p $prev_dir
+mkdir -p $prevDir
 
 # move old releases into prev dir
 
-/bin/mv -f ${package}-????????*.tgz $prev_dir
+cd $releaseDir
+tarPath=`ls *.tgz`
+echo $tarPath
+tarPath=`ls ${releaseDir}/${package}-20160819.src.tgz`
+echo $tarPath
+res=`mv -f ${releaseDir}/${package}-????????*.tgz ${releaseDir}/${prevDir}`
+echo $res
+exit 1
 
 # delete tmpDir if it exists
 
