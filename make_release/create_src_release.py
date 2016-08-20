@@ -29,7 +29,7 @@ def main():
     global tmpDir
     global coreDir
     global codebaseDir
-    global dateStr
+    global versionStr
     global debugStr
     global releaseName
     global tarName
@@ -80,7 +80,7 @@ def main():
     now = time.gmtime()
     nowTime = datetime(now.tm_year, now.tm_mon, now.tm_mday,
                        now.tm_hour, now.tm_min, now.tm_sec)
-    dateStr = nowTime.strftime("%Y%m%d")
+    versionStr = nowTime.strftime("%Y%m%d")
 
     # set globals
 
@@ -91,7 +91,7 @@ def main():
 
     # compute release name and dir name
     
-    releaseName = options.package + "-" + dateStr + ".src"
+    releaseName = options.package + "-" + versionStr + ".src"
     tarName = releaseName + ".tgz"
     tarDir = os.path.join(coreDir, releaseName)
 
@@ -103,7 +103,7 @@ def main():
         print >>sys.stderr, "  tmpDir: ", tmpDir
         print >>sys.stderr, "  force: ", options.force
         print >>sys.stderr, "  static: ", options.static
-        print >>sys.stderr, "  dateStr: ", dateStr
+        print >>sys.stderr, "  versionStr: ", versionStr
         print >>sys.stderr, "  releaseName: ", releaseName
         print >>sys.stderr, "  tarName: ", tarName
         
@@ -122,6 +122,10 @@ def main():
     # set up autoconf
 
     setupAutoconf()
+
+    # create the release information file
+    
+    createReleaseInfoFile()
 
     # create the tar file
 
@@ -239,6 +243,29 @@ def setupAutoconf():
                  " --pkg " + options.package + debugStr)
 
 ########################################################################
+# write release information file
+
+def createReleaseInfoFile():
+
+    # go to core dir
+    os.chdir(coreDir)
+
+    # open info file
+
+    releaseInfoPath = os.path.join(coreDir, "ReleaseInfo.txt")
+    info = open(releaseInfoPath, 'w')
+
+    # write release info
+
+    info.write("package:" + options.package + "\n")
+    info.write("version:" + versionStr + "\n")
+    info.write("release:" + releaseName + "\n")
+
+    # close
+
+    info.close()
+
+########################################################################
 # create the tar file
 
 def createTarFile():
@@ -250,7 +277,7 @@ def createTarFile():
 
     # move lrose contents into tar dir
 
-    for fileName in [ "LICENSE.txt", "README.md" ]:
+    for fileName in [ "LICENSE.txt", "README.md", "ReleaseInfo.txt" ]:
         os.rename(fileName, os.path.join(tarDir, fileName))
 
     for dirName in [ "build", "codebase", "docs", "make_release", "release_notes" ]:
