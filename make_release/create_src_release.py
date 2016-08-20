@@ -11,21 +11,29 @@ import sys
 import shutil
 import subprocess
 from optparse import OptionParser
+import time
 from datetime import datetime
+from datetime import date
+from datetime import timedelta
 import glob
 
 def main():
 
     # globals
 
-    global options
     global thisScriptName
+    thisScriptName = os.path.basename(__file__)
+
+    global options
     global releaseDir
     global tmpDir
     global coreDir
     global codebaseDir
+    global dateStr
     global debugStr
-    thisScriptName = os.path.basename(__file__)
+    global releaseName
+    global tarName
+    global tarDir
 
     # parse the command line
 
@@ -67,10 +75,25 @@ def main():
     elif (options.debug):
         debugStr = " --debug "
 
+    # runtime
+
+    now = time.gmtime()
+    nowTime = datetime(now.tm_year, now.tm_mon, now.tm_mday,
+                       now.tm_hour, now.tm_min, now.tm_sec)
+    dateStr = nowTime.strftime("%Y%m%d")
+
+    # set globals
+
     releaseDir = os.path.join(options.releaseTopDir, options.package)
     tmpDir = os.path.join(releaseDir, "tmp")
     coreDir = os.path.join(tmpDir, "lrose-core")
     codebaseDir = os.path.join(coreDir, "codebase")
+
+    # compute release name and dir name
+    
+    releaseName = options.package + "-" + dateStr + ".src"
+    tarName = releaseName + ".tgz"
+    tarDir = os.path.join(coreDir, releaseName)
 
     if (options.debug == True):
         print >>sys.stderr, "Running %s:" % thisScriptName
@@ -80,7 +103,10 @@ def main():
         print >>sys.stderr, "  tmpDir: ", tmpDir
         print >>sys.stderr, "  force: ", options.force
         print >>sys.stderr, "  static: ", options.static
-
+        print >>sys.stderr, "  dateStr: ", dateStr
+        print >>sys.stderr, "  releaseName: ", releaseName
+        print >>sys.stderr, "  tarName: ", tarName
+        
     # save previous releases
 
     savePrevReleases()
@@ -97,92 +123,23 @@ def main():
 
     setupAutoconf()
 
-    sys.exit(0)
+    # create the tar file
 
-    # go to the src dir
+    createTarFile()
 
-    srcDir = os.path.join(options.dir, 'src')
-    if (options.debug == True):
-        print >>sys.stderr, "src dir: ", srcDir
-    os.chdir(srcDir)
+    # create the brew formula for OSX builds
 
-    # get makefile name in use
-    # makefile has preference over Makefile
+    createBrewFormula()
 
-    makefileName = '__makefile.template'
-    if (os.path.exists(makefileName) == False):
-        makefileName = 'makefile'
-        if (os.path.exists(makefileName) == False):
-            makefileName = 'Makefile'
-            if (os.path.exists(makefileName) == False):
-                print >>sys.stderr, "ERROR - ", thisScriptName
-                print >>sys.stderr, "  Cannot find makefile or Makefile"
-                print >>sys.stderr, "  dir: ", options.dir
-                sys.exit(1)
+    # move the tar file up into release dir
 
-    # copy makefile in case we rerun this script
+    os.chdir(releaseDir)
+    os.rename(os.path.join(coreDir, tarName),
+              os.path.join(releaseDir, tarName))
+              
+    # delete the tmp dir
 
-    if (makefileName != "__makefile.template"):
-        shutil.copy(makefileName, "__makefile.template")
-
-    if (options.debug == True):
-        print >>sys.stderr, "-->> using makefile template: ", makefileName
-
-    # get the lib name
-
-    thisLibName = ""
-    getLibName()
-    if (options.debug == True):
-        print >>sys.stderr, "  Lib name: ", thisLibName
-
-    # get list of subdirs and their makefiles
-
-    getSubDirList()
-
-    if (options.debug == True):
-        print >>sys.stderr, "======================="
-        for subDir in subDirList:
-            print >>sys.stderr, "subDir, makefile: %s, %s" % \
-                (subDir.subDirName, subDir.makefilePath)
-        print >>sys.stderr, "======================="
-
-    # load list of files to be compiled
-
-    compileFileList = []
-    for subDir in subDirList:
-        addSubDirToCompileList(subDir)
-
-    if (options.debug == True):
-        print >>sys.stderr, "======================="
-        for compileFile in compileFileList:
-            print >>sys.stderr, "compileFile: %s" % (compileFile)
-        print >>sys.stderr, "======================="
-
-    # get list of header files
-
-    loadHeaderFileList()
-    if (options.debug == True):
-        print >>sys.stderr, "======================="
-        for headerFile in headerFileList:
-            print >>sys.stderr, "headerFile: %s" % (headerFile)
-        print >>sys.stderr, "======================="
-
-    # get list of include directories to be referenced
-
-#    for headerFile in headerFileList:
-#        setIncludeList(headerFile)
-
-#    for compileFile in compileFileList:
-#        setIncludeList(compileFile)
-
-#    if (options.debug == True):
-#        for lib in includeList:
-#            if (lib.used == True):
-#                print >>sys.stderr, "Use lib for include: %s" % (lib.name)
-
-    # write out makefile.am
-
-    writeMakefileAm()
+    shutil.rmtree(tmpDir)
 
     sys.exit(0)
 
@@ -251,7 +208,6 @@ def createTmpDir():
 def gitCheckout():
 
     os.chdir(tmpDir)
-
     shellCmd("git clone https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
 
@@ -281,6 +237,63 @@ def setupAutoconf():
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + options.package + debugStr)
+
+########################################################################
+# create the tar file
+
+def createTarFile():
+
+    # go to core dir, make tar dir
+
+    os.chdir(coreDir)
+    os.makedirs(tarDir)
+
+    # move lrose contents into tar dir
+
+    for fileName in [ "LICENSE.txt", "README.md" ]:
+        os.rename(fileName, os.path.join(tarDir, fileName))
+
+    for dirName in [ "build", "codebase", "docs", "make_release", "release_notes" ]:
+        os.rename(dirName, os.path.join(tarDir, dirName))
+
+    # move netcdf support into tar dir
+
+    netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
+    netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
+    os.makedirs(netcdfSubDir)
+    
+    for name in [ "README.md", "build_and_install_netcdf", "tar_files" ]:
+        os.rename(os.path.join(netcdfDir, name),
+                  os.path.join(netcdfSubDir, name))
+
+    # create the tar file
+
+    shellCmd("tar cvfz " + tarName + " " + releaseName)
+    
+########################################################################
+# create the brew formula for OSX builds
+
+def createBrewFormula():
+
+    # go to core dir
+
+    os.chdir(coreDir)
+
+    # create the brew formula file
+
+    tarUrl = "https://github.com/NCAR/lrose-core/releases/" + tarName
+    formulaName = options.package + ".rb"
+    scriptName = "build_" + options.package + "_formula"
+    buildDirPath = os.path.join(tarDir, "build")
+    scriptPath = os.path.join(buildDirPath, scriptName)
+    
+    shellCmd(scriptPath + " " + tarUrl + " " +
+             tarName + " " + formulaName)
+
+    # move it up into the release dir
+
+    os.rename(os.path.join(coreDir, formulaName),
+              os.path.join(releaseDir, formulaName))
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
