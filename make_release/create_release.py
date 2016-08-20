@@ -252,8 +252,8 @@ def gitCheckout():
 
     os.chdir(tmpDir)
 
-    runCommand("git clone https://github.com/NCAR/lrose-core")
-    runCommand("git clone https://github.com/NCAR/lrose-netcdf")
+    shellCmd("git clone https://github.com/NCAR/lrose-core")
+    shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
 
 ########################################################################
 # set up autoconf for configure etc
@@ -264,7 +264,7 @@ def setupAutoconf():
 
     # install the distribution-specific makefiles
 
-    runCommand("./make_bin/install_distro_makefiles.py --distro " + 
+    shellCmd("./make_bin/install_distro_makefiles.py --distro " + 
                options.package + " --codedir .")
 
     # create files for configure
@@ -273,19 +273,19 @@ def setupAutoconf():
 
     if (options.static):
         shutil.copy("../build/configure.base", "./configure.base")
-        runCommand("./make_bin/createConfigure.am.py --dir ." +
-                   " --baseName configure.base" +
-                   " --pkg " + options.package + debugStr)
+        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+                 " --baseName configure.base" +
+                 " --pkg " + options.package + debugStr)
     else:
         shutil.copy("../build/configure.base.shared", "./configure.base.shared")
-        runCommand("./make_bin/createConfigure.am.py --dir ." +
-                   " --baseName configure.base.shared --shared" +
-                   " --pkg " + options.package + debugStr)
+        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+                 " --baseName configure.base.shared --shared" +
+                 " --pkg " + options.package + debugStr)
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
 
-def runCommand(cmd):
+def shellCmd(cmd):
 
     if (options.debug):
         print >>sys.stderr, "running cmd:", cmd, " ....."
