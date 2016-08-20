@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# Create an LROSE source release
+# Prepare an LROSE binary release
 #
 #===========================================================================
 
@@ -42,7 +42,7 @@ def main():
     releaseDirDefault = os.path.join(homeDir, 'releases')
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default=True,
+                      dest='debug', default=False,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--verbose',
