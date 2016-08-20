@@ -12,12 +12,19 @@ import shutil
 import subprocess
 from optparse import OptionParser
 from datetime import datetime
+import glob
 
 def main():
+
+    # globals
 
     global options
     global thisScriptName
     global releaseDir
+    global tmpDir
+    global coreDir
+    global codebaseDir
+    global debugStr
     thisScriptName = os.path.basename(__file__)
 
     # parse the command line
@@ -54,17 +61,43 @@ def main():
     if (options.verbose == True):
         options.debug = True
         
+    debugStr = " "
+    if (options.verbose):
+        debugStr = " --verbose "
+    elif (options.debug):
+        debugStr = " --debug "
+
     releaseDir = os.path.join(options.releaseTopDir, options.package)
+    tmpDir = os.path.join(releaseDir, "tmp")
+    coreDir = os.path.join(tmpDir, "lrose-core")
+    codebaseDir = os.path.join(coreDir, "codebase")
 
     if (options.debug == True):
         print >>sys.stderr, "Running %s:" % thisScriptName
         print >>sys.stderr, "  package: ", options.package
         print >>sys.stderr, "  releaseTopDir: ", options.releaseTopDir
         print >>sys.stderr, "  releaseDir: ", releaseDir
+        print >>sys.stderr, "  tmpDir: ", tmpDir
         print >>sys.stderr, "  force: ", options.force
         print >>sys.stderr, "  static: ", options.static
 
-    exit(0)
+    # save previous releases
+
+    savePrevReleases()
+
+    # create tmp dir
+
+    createTmpDir()
+
+    # get repos from git
+
+    gitCheckout()
+
+    # set up autoconf
+
+    setupAutoconf()
+
+    sys.exit(0)
 
     # go to the src dir
 
@@ -85,7 +118,7 @@ def main():
                 print >>sys.stderr, "ERROR - ", thisScriptName
                 print >>sys.stderr, "  Cannot find makefile or Makefile"
                 print >>sys.stderr, "  dir: ", options.dir
-                exit(1)
+                sys.exit(1)
 
     # copy makefile in case we rerun this script
 
@@ -169,317 +202,109 @@ def savePrevReleases():
     # ensure dir exists
     
     if (os.path.isdir(prevDirPath) == False):
-        os.remove(prevDirPath)
+        os.makedirs(prevDirPath)
 
-    valueList = []
+    # get old releases
 
+    pattern = options.package + "-????????*.tgz"
+    oldReleases = glob.glob(pattern)
+
+    for name in oldReleases:
+        newName = os.path.join(prevDirPath, name)
+        if (options.debug):
+            print >>sys.stderr, "saving oldRelease: ", name
+            print >>sys.stderr, "to: ", newName
+        os.rename(name, newName)
+
+########################################################################
+# create the tmp dir
+
+def createTmpDir():
+
+    # check if exists already
+
+    if (os.path.isdir(tmpDir)):
+
+        if (options.force == False):
+            print("WARNING: you are about to remove all contents in dir: " + tmpDir)
+            print("===============================================")
+            contents = os.listdir(tmpDir)
+            for filename in contents:
+                print("  " + filename)
+            print("===============================================")
+            answer = raw_input("WARNING: do you wish to proceed (y/n)? ")
+            if (answer != "y"):
+                print("  aborting ....")
+                sys.exit(1)
+                
+        # remove it
+
+        shutil.rmtree(tmpDir)
+
+    # make it clean
+
+    os.makedirs(tmpDir)
+
+########################################################################
+# check out repos from git
+
+def gitCheckout():
+
+    os.chdir(tmpDir)
+
+    runCommand("git clone https://github.com/NCAR/lrose-core")
+    runCommand("git clone https://github.com/NCAR/lrose-netcdf")
+
+########################################################################
+# set up autoconf for configure etc
+
+def setupAutoconf():
+
+    os.chdir(codebaseDir)
+
+    # install the distribution-specific makefiles
+
+    runCommand("./make_bin/install_distro_makefiles.py --distro " + 
+               options.package + " --codedir .")
+
+    # create files for configure
+
+    shutil.copy("../build/Makefile.top", "Makefile")
+
+    if (options.static):
+        shutil.copy("../build/configure.base", "./configure.base")
+        runCommand("./make_bin/createConfigure.am.py --dir ." +
+                   " --baseName configure.base" +
+                   " --pkg " + options.package + debugStr)
+    else:
+        shutil.copy("../build/configure.base.shared", "./configure.base.shared")
+        runCommand("./make_bin/createConfigure.am.py --dir ." +
+                   " --baseName configure.base.shared --shared" +
+                   " --pkg " + options.package + debugStr)
+
+########################################################################
+# Run a command in a shell, wait for it to complete
+
+def runCommand(cmd):
+
+    if (options.debug):
+        print >>sys.stderr, "running cmd:", cmd, " ....."
+    
     try:
-        fp = open(path, 'r')
-    except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open file:", path
-        print >>sys.stderr, "  dir: ", options.dir
-        return valueList
-
-    lines = fp.readlines()
-    fp.close()
-
-    foundKey = False
-    multiLine = ""
-    for line in lines:
-        if (foundKey == False):
-            if (line[0] == '#'):
-                continue
-        if (line.find(key) >= 0):
-            foundKey = True
-            multiLine = multiLine + line
-            if (line.find("\\") < 0):
-                break;
-        elif (foundKey == True):
-            if (line[0] == '#'):
-                break
-            if (len(line) < 2):
-                break
-            multiLine = multiLine + line;
-            if (line.find("\\") < 0):
-                break;
-
-    if (foundKey == False):
-        return valueList
-
-    multiLine = multiLine.replace(key, " ")
-    multiLine = multiLine.replace("=", " ")
-    multiLine = multiLine.replace("\t", " ")
-    multiLine = multiLine.replace("\\", " ")
-    multiLine = multiLine.replace("\r", " ")
-    multiLine = multiLine.replace("\n", " ")
-
-    toks = multiLine.split(' ')
-    for tok in toks:
-        if (len(tok) > 0):
-            valueList.append(tok)
-
-    return valueList
-
-########################################################################
-# parse the RAL Makefile to get the lib name
-
-def getLibName():
-
-    global thisLibName
-
-    # search for MODULE_NAME key in makefile
-
-    valList = getValueListForKey(makefileName, "MODULE_NAME")
-
-    if (len(valList) < 1):
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot find MODULE_NAME in ", makefileName
-        print >>sys.stderr, "  dir: ", options.dir
-        exit(1)
-
-    thisLibName = valList[len(valList)-1]
-
-########################################################################
-# get list of makefiles - using RAL Makefile to locate subdirs
-
-def getSubDirList():
-
-    global subDirList
-    subDirList = []
-
-    # search for SUB_DIRS key in makefile
-
-    subNameList = getValueListForKey(makefileName, "SUB_DIRS")
-
-    if (len(subNameList) < 1):
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot find SUB_DIRS in ", makefileName
-        print >>sys.stderr, "  dir: ", options.dir
-        exit(1)
-
-    for subName in subNameList:
-        if (os.path.isdir(subName) == True):
-            makefilePath = os.path.join(subName, 'makefile')
-            if (os.path.isfile(makefilePath) == True):
-                subDir = SubDir(subName, makefilePath)
-                subDirList.append(subDir)
-            else:
-                makefilePath = os.path.join(subName, 'Makefile')
-                if (os.path.isfile(makefilePath) == True):
-                    subDir = SubDir(subName, makefilePath)
-                    subDirList.append(subDir)
-
-########################################################################
-# append to list of files to be compiled
-
-def addSubDirToCompileList(subDir):
-                    
-    global compileFileList
-    
-    srcTypeList = [ 'SRCS', 'C_SRCS', 'F_SRCS', 'F_CPP_SRCS', 
-                    'F90_SRCS', 'F95_SRCS', 'PGF90_SRCS', 
-                    'PGF_SRCS', 'CC_SRCS', 'CPPC_SRCS', 
-                    'CPP_SRCS', 'CXX_SRCS' ]
-    
-    fp = open(subDir.makefilePath, 'r')
-    lines = fp.readlines()
-
-    for srcType in srcTypeList:
-        handleSrcType(subDir, lines, srcType)
-    
-########################################################################
-# append to compile list for given srcType
-
-def handleSrcType(subDir, lines, srcType):
-
-    # build up multiLine string containing all compile files
-
-    srcTypeFound = False
-    multiLine = ""
-    for line in lines:
-        line = line.strip()
-        if (srcTypeFound == False):
-            if (len(line) < 2):
-                continue
-            if (line[0] == '#'):
-                continue
-            if (line.find(srcType) == 0):
-                srcTypeFound = True
-                multiLine = multiLine + line;
-                if (line.find("\\") < 0):
-                    break;
+        retcode = subprocess.check_call(cmd, shell=True)
+        if retcode != 0:
+            print >>sys.stderr, "Child exited with code: ", retcode
+            sys.exit(1)
         else:
-            if (len(line) < 2):
-                break
-            if (line[0] == '#'):
-                break
-            multiLine = multiLine + line;
-            if (line.find("\\") < 0):
-                break;
-            
-    if (srcTypeFound == False):
-        return
+            if (options.verbose):
+                print >>sys.stderr, "Child returned code: ", retcode
+    except OSError, e:
+        print >>sys.stderr, "Execution failed:", e
+        sys.exit(1)
 
-    # remove strings we don't want
-
-    multiLine = multiLine.replace(srcType, " ")
-    multiLine = multiLine.replace("=", " ")
-    multiLine = multiLine.replace("\t", " ")
-    multiLine = multiLine.replace("\\", " ")
-    multiLine = multiLine.replace("\r", " ")
-    multiLine = multiLine.replace("\n", " ")
-
-    toks = multiLine.split(' ')
-    for tok in toks:
-        if (tok.find(".") > 0):
-            compileFilePath = os.path.join(subDir.subDirName, tok)
-            compileFileList.append(compileFilePath)
-
-########################################################################
-# load up header file list
-
-def loadHeaderFileList():
-
-    global headerFileList
-    headerFileList = []
-
-    global includesInSubDir
-    includesInSubDir = False
-
-    subdirList = os.listdir("include")
-
-    for subdir in subdirList:
-        incDir = os.path.join("include", subdir)
-        if ((os.path.isdir(incDir) == True) and (subdir != "CVS")):
-            appendToHeaderFileList(incDir)
-            includesInSubDir = True
-
-    if (includesInSubDir == False):
-        appendToHeaderFileList("include")
-            
-########################################################################
-# append to header file list
-
-def appendToHeaderFileList(dir):
-
-    global headerFileList
-
-    fileList = os.listdir(dir)
-    for fileName in fileList:
-        last2 = fileName[-2:]
-        last3 = fileName[-3:]
-        if (last2 == ".h") or (last3 == ".hh"):
-            filePath = os.path.join(dir, fileName)
-            headerFileList.append(filePath)
-
-########################################################################
-# set the list of libs to be used for include
-
-def setIncludeList(sourceFile):
-                    
-    global includeList
+    if (options.debug):
+        print >>sys.stderr, ".... done"
     
-    if (options.verbose == True):
-        print >>sys.stderr, "-->> looking for includes in: ", sourceFile
-
-    fp = open(sourceFile, 'r')
-    lines = fp.readlines()
-    
-    for line in lines:
-        if ((line[0] != '#') or
-            (line.find("include") < 0) or
-            (line.find("/") < 0) or
-            (line.find("<") < 0) or
-            (line.find(">") < 0)):
-            continue
-
-        if (options.verbose == True):
-            print >>sys.stderr, "  -->> ", line.strip()
-        
-        for lib in includeList:
-            if (lib.name == thisLibName):
-                # skip this lib
-                continue
-            searchStr = "<%s/" % lib.name
-            if (line.find(searchStr) > 0):
-                if (options.verbose == True):
-                    print >>sys.stderr, "  -->> found lib", lib.name
-                lib.used = True
-            
-########################################################################
-# Write out makefile.am
-
-def writeMakefileAm():
-
-    fo = open("makefile.am", "w")
-
-    fo.write("###############################################\n")
-    fo.write("#\n")
-    fo.write("# makefile template for automake\n")
-    fo.write("#\n")
-    fo.write("# library name: %s\n" % thisLibName)
-    fo.write("#\n")
-    fo.write("# written by script createMakefile.am.lib\n")
-    fo.write("#\n")
-    fo.write("# created %s\n" % datetime.now())
-    fo.write("#\n")
-    fo.write("###############################################\n")
-    fo.write("\n")
-    fo.write("# compile flags - include header subdirectory\n")
-    fo.write("\n")
-    fo.write("AM_CFLAGS = -I./include\n")
-    fo.write("# NOTE: X11R6 is for Mac OSX location of XQuartz\n")
-    fo.write("AM_CFLAGS += -I/usr/X11R6/include\n")
-    if (options.shared == True):
-        fo.write("ACLOCAL_AMFLAGS = -I m4\n")
-    #    fo.write("AM_CFLAGS += -I$(prefix)/include\n")
-
-    for lib in libList:
-        # if (lib.used):
-        #fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib.name)
-        fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib)
-    fo.write("\n")
-    fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
-    fo.write("\n")
-    fo.write("# target library file\n")
-    fo.write("\n")
-    if (options.shared == True):
-        fo.write("lib_LTLIBRARIES = lib%s.la\n" % thisLibName)
-    else:
-        fo.write("lib_LIBRARIES = lib%s.a\n" % thisLibName)
-    fo.write("\n")
-    fo.write("# headers to be installed\n")
-    fo.write("\n")
-    if (includesInSubDir == True):
-        fo.write("includedir = $(prefix)/include/%s\n" % thisLibName)
-    else:
-        fo.write("includedir = $(prefix)/include\n")
-    fo.write("\n")
-
-    fo.write("include_HEADERS = \\\n")
-    for index, headerFile in enumerate(headerFileList):
-        fo.write("\t%s" % headerFile)
-        if (index == len(headerFileList) - 1):
-            fo.write("\n")
-        else:
-            fo.write(" \\\n")
-    fo.write("\n")
-
-    if (options.shared == True):
-        fo.write("lib%s_la_SOURCES = \\\n" % thisLibName)
-    else:
-        fo.write("lib%s_a_SOURCES = \\\n" % thisLibName)
-    for index, compileFile in enumerate(compileFileList):
-        fo.write("\t%s" % compileFile)
-        if (index == len(compileFileList) - 1):
-            fo.write("\n")
-        else:
-            fo.write(" \\\n")
-    fo.write("\n")
-
-    fo.close
-
 ########################################################################
 # Run - entry point
 

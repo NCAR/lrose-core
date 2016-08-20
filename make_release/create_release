@@ -143,7 +143,6 @@ tarPath=`ls /home/mdtest/releases/lrose/lrose-????????*.tgz`
 echo $tarPath
 res=`mv -f ${releaseDir}/${package}-????????*.tgz ${releaseDir}/${prevDir}`
 echo $res
-exit 1
 
 # delete tmpDir if it exists
 
