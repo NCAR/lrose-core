@@ -134,10 +134,12 @@ mkdir -p $prevDir
 
 # move old releases into prev dir
 
+ls /home/mdtest/releases/lrose/lrose-????????*.tgz
+
 cd $releaseDir
 tarPath=`ls *.tgz`
 echo $tarPath
-tarPath=`ls ${releaseDir}/${package}-20160819.src.tgz`
+tarPath=`ls /home/mdtest/releases/lrose/lrose-????????*.tgz`
 echo $tarPath
 res=`mv -f ${releaseDir}/${package}-????????*.tgz ${releaseDir}/${prevDir}`
 echo $res
