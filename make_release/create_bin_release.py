@@ -35,6 +35,10 @@ def main():
     global tarName
     global tarDir
 
+    global package
+    global version
+    global release
+
     # parse the command line
 
     usage = "usage: %prog [options]"
@@ -42,27 +46,16 @@ def main():
     releaseDirDefault = os.path.join(homeDir, 'releases')
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default=False,
+                      dest='debug', default=True,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--verbose',
                       dest='verbose', default=False,
                       action="store_true",
                       help='Set verbose debugging on')
-    parser.add_option('--package',
-                      dest='package', default='lrose',
-                      help='Package name, default is lrose')
-    parser.add_option('--releaseDir',
-                      dest='releaseTopDir', default=releaseDirDefault,
-                      help='Top-level release dir')
-    parser.add_option('--force',
-                      dest='force', default=False,
-                      action="store_true",
-                      help='force, do not request user to check it is OK to proceed')
-    parser.add_option('--static',
-                      dest='static', default=False,
-                      action="store_true",
-                      help='produce distribution for static linking, default is dynamic')
+    parser.add_option('--prefix',
+                      dest='prefix', default='/tmp/lrose',
+                      help='Prefix name for install')
 
     (options, args) = parser.parse_args()
 
@@ -84,29 +77,36 @@ def main():
 
     # set globals
 
-    releaseDir = os.path.join(options.releaseTopDir, options.package)
-    tmpDir = os.path.join(releaseDir, "tmp")
-    coreDir = os.path.join(tmpDir, "lrose-core")
-    codebaseDir = os.path.join(coreDir, "codebase")
+    #releaseDir = os.path.join(options.releaseTopDir, options.package)
+    #tmpDir = os.path.join(releaseDir, "tmp")
+    #coreDir = os.path.join(tmpDir, "lrose-core")
+    #codebaseDir = os.path.join(coreDir, "codebase")
 
     # compute release name and dir name
     
-    releaseName = options.package + "-" + dateStr + ".src"
-    tarName = releaseName + ".tgz"
-    tarDir = os.path.join(coreDir, releaseName)
+    #releaseName = options.package + "-" + dateStr + ".src"
+    #tarName = releaseName + ".tgz"
+    #tarDir = os.path.join(coreDir, releaseName)
+
+    # read in release info
+
+    readReleaseInfoFile()
 
     if (options.debug == True):
         print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  package: ", options.package
-        print >>sys.stderr, "  releaseTopDir: ", options.releaseTopDir
-        print >>sys.stderr, "  releaseDir: ", releaseDir
-        print >>sys.stderr, "  tmpDir: ", tmpDir
-        print >>sys.stderr, "  force: ", options.force
-        print >>sys.stderr, "  static: ", options.static
+        print >>sys.stderr, "  prefix: ", options.prefix
         print >>sys.stderr, "  dateStr: ", dateStr
-        print >>sys.stderr, "  releaseName: ", releaseName
-        print >>sys.stderr, "  tarName: ", tarName
-        
+        print >>sys.stderr, "  package: ", package
+        print >>sys.stderr, "  version: ", version
+        print >>sys.stderr, "  release: ", release
+        #print >>sys.stderr, "  releaseTopDir: ", options.releaseTopDir
+        #print >>sys.stderr, "  releaseDir: ", releaseDir
+        #print >>sys.stderr, "  tmpDir: ", tmpDir
+        #print >>sys.stderr, "  releaseName: ", releaseName
+        #print >>sys.stderr, "  tarName: ", tarName
+
+    sys.exit(0)
+
     # save previous releases
 
     savePrevReleases()
@@ -142,6 +142,59 @@ def main():
     shutil.rmtree(tmpDir)
 
     sys.exit(0)
+
+########################################################################
+# read release information file
+
+def readReleaseInfoFile():
+
+    global package
+    global version
+    global release
+
+    package = "unknown"
+    version = "unknown"
+    release = "unknown"
+
+    # open info file
+    
+    releaseInfoPath = "ReleaseInfo.txt"
+    if (options.verbose):
+        print >>sys.stderr, "==>> reading info file: ", releaseInfoPath
+        
+    info = open(releaseInfoPath, 'r')
+
+    # read in lines
+
+    lines = info.readlines()
+    
+    # close
+
+    info.close()
+
+    # decode lines
+
+    if (len(lines) < 1):
+        print >>sys.stderr, "ERROR reading info file: ", releaseInfoPath
+        print >>sys.stderr, "  No contents"
+        sys.exit(1)
+
+    for line in lines:
+        line = line.strip()
+        toks = line.split(":")
+        if (options.verbose):
+            print >>sys.stderr, "  line: ", line
+            print >>sys.stderr, "  toks: ", toks
+        if (len(toks) == 2):
+            if (toks[0] == "package"):
+                package = toks[1]
+            if (toks[0] == "version"):
+                version = toks[1]
+            if (toks[0] == "release"):
+                release = toks[1]
+        
+    if (options.verbose):
+        print >>sys.stderr, "==>> done reading info file: ", releaseInfoPath
 
 ########################################################################
 # move previous releases
