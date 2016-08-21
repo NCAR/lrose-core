@@ -30,6 +30,7 @@ def main():
     global coreDir
     global codebaseDir
     global dateStr
+    global timeStr
     global debugStr
     global releaseName
     global tarName
@@ -38,6 +39,9 @@ def main():
     global package
     global version
     global release
+
+    global ostype
+    global prefix
 
     # parse the command line
 
@@ -54,7 +58,7 @@ def main():
                       action="store_true",
                       help='Set verbose debugging on')
     parser.add_option('--prefix',
-                      dest='prefix', default='/tmp/lrose',
+                      dest='prefix', default='not-set',
                       help='Prefix name for install')
 
     (options, args) = parser.parse_args()
@@ -74,7 +78,24 @@ def main():
     nowTime = datetime(now.tm_year, now.tm_mon, now.tm_mday,
                        now.tm_hour, now.tm_min, now.tm_sec)
     dateStr = nowTime.strftime("%Y%m%d")
+    timeStr = nowTime.strftime("%Y%m%d%H%M%S")
 
+    # read in release info
+
+    readReleaseInfoFile()
+
+    # get the OS type
+    
+    getOsType()
+
+    # set default prefix to temporary staging area
+    # this is set to a very long name because on macosx
+    # we need to reset the library paths and we need to
+    # ensure there is space available for the rename
+
+    if (options.prefix == "not-set"):
+        prefix = os.path.join("/tmp", package + "_prepare_release_bin_directory")
+    
     # set globals
 
     #releaseDir = os.path.join(options.releaseTopDir, options.package)
@@ -84,26 +105,25 @@ def main():
 
     # compute release name and dir name
     
-    #releaseName = options.package + "-" + dateStr + ".src"
-    #tarName = releaseName + ".tgz"
+    releaseName = package + "-" + dateStr + "." + ostype
+    tarName = releaseName + ".tgz"
     #tarDir = os.path.join(coreDir, releaseName)
-
-    # read in release info
-
-    readReleaseInfoFile()
 
     if (options.debug == True):
         print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  prefix: ", options.prefix
+        print >>sys.stderr, "  ostype: ", ostype
         print >>sys.stderr, "  dateStr: ", dateStr
+        print >>sys.stderr, "  timeStr: ", timeStr
+        print >>sys.stderr, "  prefix: ", options.prefix
         print >>sys.stderr, "  package: ", package
         print >>sys.stderr, "  version: ", version
         print >>sys.stderr, "  release: ", release
         #print >>sys.stderr, "  releaseTopDir: ", options.releaseTopDir
         #print >>sys.stderr, "  releaseDir: ", releaseDir
         #print >>sys.stderr, "  tmpDir: ", tmpDir
-        #print >>sys.stderr, "  releaseName: ", releaseName
-        #print >>sys.stderr, "  tarName: ", tarName
+        print >>sys.stderr, "  prefix: ", prefix
+        print >>sys.stderr, "  releaseName: ", releaseName
+        print >>sys.stderr, "  tarName: ", tarName
 
     sys.exit(0)
 
@@ -196,6 +216,36 @@ def readReleaseInfoFile():
     if (options.verbose):
         print >>sys.stderr, "==>> done reading info file: ", releaseInfoPath
 
+########################################################################
+# get the OS type
+
+def getOsType():
+
+    global ostype
+    ostype = "x86_64"
+    tmpFile = os.path.join("/tmp", "ostype." + timeStr + ".txt")
+
+    shellCmd("uname -a > " + tmpFile)
+    f = open(tmpFile, 'r')
+    lines = f.readlines()
+    f.close()
+
+    if (len(lines) < 1):
+        print >>sys.stderr, "ERROR getting OS type"
+        print >>sys.stderr, "  'uname -a' call did not succeed"
+        sys.exit(1)
+
+    for line in lines:
+        line = line.strip()
+        if (options.verbose):
+            print >>sys.stderr, "  line: ", line
+        if (line.find("x86_64") > 0):
+            ostype = "x86_64"
+        elif (line.find("Darwin") > 0):
+            ostype = "macosx_64"
+        elif (line.find("i686") > 0):
+            ostype = "i686"
+            
 ########################################################################
 # move previous releases
 
