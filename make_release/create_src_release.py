@@ -82,7 +82,7 @@ def main():
                        now.tm_hour, now.tm_min, now.tm_sec)
     versionStr = nowTime.strftime("%Y%m%d")
 
-    # set globals
+    # set directories
 
     releaseDir = os.path.join(options.releaseTopDir, options.package)
     tmpDir = os.path.join(releaseDir, "tmp")

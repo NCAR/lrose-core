@@ -25,6 +25,7 @@ def main():
     thisScriptName = os.path.basename(__file__)
 
     global options
+    global runDir
     global releaseDir
     global tmpDir
     global coreDir
@@ -38,10 +39,9 @@ def main():
 
     global package
     global version
-    global release
+    global srcRelease
 
     global ostype
-    global prefix
 
     # parse the command line
 
@@ -50,7 +50,7 @@ def main():
     releaseDirDefault = os.path.join(homeDir, 'releases')
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default=True,
+                      dest='debug', default=False,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--verbose',
@@ -59,7 +59,11 @@ def main():
                       help='Set verbose debugging on')
     parser.add_option('--prefix',
                       dest='prefix', default='not-set',
-                      help='Prefix name for install')
+                      help='Prefix name for install location')
+    parser.add_option('--force',
+                      dest='force', default=False,
+                      action="store_true",
+                      help='force, do not request user to check if it is OK to proceed')
 
     (options, args) = parser.parse_args()
 
@@ -79,61 +83,83 @@ def main():
                        now.tm_hour, now.tm_min, now.tm_sec)
     dateStr = nowTime.strftime("%Y%m%d")
     timeStr = nowTime.strftime("%Y%m%d%H%M%S")
+    dateTimeStr = nowTime.strftime("%Y/%m/%d-%H:%M:%S")
+    runDir = os.getcwd()
 
     # read in release info
 
     readReleaseInfoFile()
 
-    # get the OS type
+    # get the OS type - x86_64, i686, macosx_64
     
     getOsType()
 
-    # set default prefix to temporary staging area
+    # set tmpDir temporary staging area
     # this is set to a very long name because on macosx
     # we need to reset the library paths and we need to
     # ensure there is space available for the rename
 
     if (options.prefix == "not-set"):
-        prefix = os.path.join("/tmp", package + "_prepare_release_bin_directory")
-    
-    # set globals
+        tmpDir = os.path.join("/tmp", package + "_prepare_release_bin_directory")
+    else:
+        tmpDir = options.prefix
 
-    #releaseDir = os.path.join(options.releaseTopDir, options.package)
-    #tmpDir = os.path.join(releaseDir, "tmp")
-    #coreDir = os.path.join(tmpDir, "lrose-core")
-    #codebaseDir = os.path.join(coreDir, "codebase")
+    # set directories
+
+    coreDir = os.path.join(tmpDir, "lrose-core")
+    codebaseDir = os.path.join(coreDir, "codebase")
 
     # compute release name and dir name
     
     releaseName = package + "-" + dateStr + "." + ostype
     tarName = releaseName + ".tgz"
-    #tarDir = os.path.join(coreDir, releaseName)
+    tarDir = os.path.join(tmpDir, releaseName)
+    
+    print >>sys.stderr, "*********************************************************************"
+    print >>sys.stderr, "  Running " + thisScriptName
+    print >>sys.stderr, ""
+    print >>sys.stderr, "  Preparing " + package + " binary release"
+    print >>sys.stderr, "  OS type: " + ostype
+    print >>sys.stderr, ""
+    print >>sys.stderr, "  NCAR, Boulder, CO, USA"
+    print >>sys.stderr, ""
+    print >>sys.stderr, "  " + dateTimeStr
+    print >>sys.stderr, ""
+    print >>sys.stderr, "*********************************************************************"
+    print >>sys.stderr, "  dateStr: ", dateStr
+    print >>sys.stderr, "  timeStr: ", timeStr
+    print >>sys.stderr, "  prefix: ", options.prefix
+    print >>sys.stderr, "  package: ", package
+    print >>sys.stderr, "  version: ", version
+    print >>sys.stderr, "  srcRelease: ", srcRelease
+    print >>sys.stderr, "  tmpDir: ", tmpDir
+    print >>sys.stderr, "  releaseName: ", releaseName
+    print >>sys.stderr, "  tarName: ", tarName
+    print >>sys.stderr, "  tarDir: ", tarDir
+    print >>sys.stderr, "*********************************************************************"
 
-    if (options.debug == True):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  ostype: ", ostype
-        print >>sys.stderr, "  dateStr: ", dateStr
-        print >>sys.stderr, "  timeStr: ", timeStr
-        print >>sys.stderr, "  prefix: ", options.prefix
-        print >>sys.stderr, "  package: ", package
-        print >>sys.stderr, "  version: ", version
-        print >>sys.stderr, "  release: ", release
-        #print >>sys.stderr, "  releaseTopDir: ", options.releaseTopDir
-        #print >>sys.stderr, "  releaseDir: ", releaseDir
-        #print >>sys.stderr, "  tmpDir: ", tmpDir
-        print >>sys.stderr, "  prefix: ", prefix
-        print >>sys.stderr, "  releaseName: ", releaseName
-        print >>sys.stderr, "  tarName: ", tarName
+    # create tmp dir for staging area
+
+    createTmpDir()
+
+    # For full LROSE package, copy in CIDD binaries if they are available
+
+    if (package == "lrose"):
+        copyCiddBinaries()
+
+    # create the tar dir
+        
+    os.makedirs(tarDir)
+
+    # build netcdf support
+
+    buildNetcdf()
 
     sys.exit(0)
 
     # save previous releases
 
     savePrevReleases()
-
-    # create tmp dir
-
-    createTmpDir()
 
     # get repos from git
 
@@ -170,11 +196,11 @@ def readReleaseInfoFile():
 
     global package
     global version
-    global release
+    global srcRelease
 
     package = "unknown"
     version = "unknown"
-    release = "unknown"
+    srcRelease = "unknown"
 
     # open info file
     
@@ -211,7 +237,7 @@ def readReleaseInfoFile():
             if (toks[0] == "version"):
                 version = toks[1]
             if (toks[0] == "release"):
-                release = toks[1]
+                srcRelease = toks[1]
         
     if (options.verbose):
         print >>sys.stderr, "==>> done reading info file: ", releaseInfoPath
@@ -286,13 +312,14 @@ def createTmpDir():
     if (os.path.isdir(tmpDir)):
 
         if (options.force == False):
-            print("WARNING: you are about to remove all contents in dir: " + tmpDir)
-            print("===============================================")
+            print("\n===============================================")
+            print("WARNING: you are about to remove all contents in dir:")
+            print("    " + tmpDir)
+            print("Contents:")
             contents = os.listdir(tmpDir)
             for filename in contents:
                 print("  " + filename)
-            print("===============================================")
-            answer = raw_input("WARNING: do you wish to proceed (y/n)? ")
+            answer = raw_input("Do you wish to proceed (y/n)? ")
             if (answer != "y"):
                 print("  aborting ....")
                 sys.exit(1)
@@ -306,13 +333,25 @@ def createTmpDir():
     os.makedirs(tmpDir)
 
 ########################################################################
-# check out repos from git
+# copy in CIDD binaries if they exist
 
-def gitCheckout():
+def copyCiddBinaries():
 
-    os.chdir(tmpDir)
-    shellCmd("git clone https://github.com/NCAR/lrose-core")
-    shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
+    ciddBinDir = "/tmp/cidd_prepare_bin_release_directory/bin"
+    if (os.path.isdir(ciddBinDir)):
+        if (options.debug):
+            print >>sys.stderr, "Copying in CIDD binaries from: "
+            print >>sys.stderr, "  " + ciddBinDir
+        shellCmd("rsync -av " + ciddBinDir + " " + tmpDir)
+
+########################################################################
+# build netCDF
+
+def buildNetcdf():
+
+    netcdfDir = os.path.join(runDir, "lrose-netcdf")
+    os.chdir(netcdfDir)
+    shellCmd("./build_and_install_netcdf tmpDir")
 
 ########################################################################
 # set up autoconf for configure etc
