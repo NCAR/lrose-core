@@ -40,8 +40,7 @@ export PATH=${PATH}:.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr
 
 # save starting location and script name
 
-startingDir=`pwd`
-runDir=$(basename $startingDir)
+runDir=`pwd`
 scriptName=$(basename $0)
 
 # defaults
@@ -106,29 +105,20 @@ shift `expr $OPTIND - 1`
 
 export "LDFLAGS=-L${prefix}/lib -Wl,-rpath,'\$\$ORIGIN'/lrose_runtime_libs:${prefix}/lib"
 
-# check we are in the correct place - i.e. have apps and libs below us
+# check we are in the correct place - i.e. have codebase below us
 
-ls libs 2>&1 1> /dev/null
+ls codebase 2>&1 1> /dev/null
 if [ $? -ne 0 ]
 then
   echo "runDir incorrect: $runDir"
-  echo "  Should have libs and apps in this directory"
-  echo "  current dir: $startingDir"
+  echo "  Should have codebase in this directory"
   exit 1
 fi
-
-ls apps 2>&1 1> /dev/null
-if [ $? -ne 0 ]
-then
-  echo "runDir incorrect: $runDir"
-  echo "  Should have libs and apps in this directory"
-  echo "  cwd: `pwd`"
-  exit 1
-fi
+codebaseDir=${runDir}/codebase
 
 # first create the 'moc'-able files for Qt apps
 
-cd $startingDir/apps/radar/src/HawkEye
+cd $codebaseDir/apps/radar/src/HawkEye
 rm -f moc_*   # remove any old moc_* files before we (re)generate them
 qmake-qt4 -o Makefile.qmake
 make -f Makefile.qmake mocables
@@ -142,21 +132,21 @@ export FC gfortran
 export F77 gfortran
 export F90 gfortran
 
-cd $startingDir
+cd $codebaseDir
 ./configure --with-hdf5=${prefix} --with-netcdf=${prefix} --prefix=${prefix} || exit 1
 
-cd $startingDir/libs
+cd $codebaseDir/libs
 make -k -j 8
 make -k install-strip
 
-cd $startingDir/apps
+cd $codebaseDir/apps
 make -k -j 8
 make -k install-strip
 
 # Install perl lib modules
 #-------------------------
 
-cd $startingDir
+cd $codebaseDir
 cd libs/perl5/src
 mkdir -p ${prefix}/lib/perl5
 /bin/cp *pm ${prefix}/lib/perl5
@@ -164,29 +154,33 @@ mkdir -p ${prefix}/lib/perl5
 # Install scripts
 #----------------
 
-XFcd $startingDir/apps/procmap/src/scripts
+cd $codebaseDir/apps/procmap/src/scripts
 ./install_scripts.lrose ${prefix}/bin
 
-cd $startingDir/apps/scripts/src
+cd $codebaseDir/apps/scripts/src
 ./install_scripts.lrose ${prefix}/bin
 
 # Checking the build
 # ------------------
 
-cd $startingDir
+cd $runDir
 echo
 echo "============= Checking libs for $package ============="
 
-./make_bin/check_libs.py \
+./codebase/make_bin/check_libs.py \
   --listPath ./build/libs_check_list.${package} \
-  --libDir $prefix/lib \
-  --label $package --maxAge 900 || exit 1
-
-./build/check_libs -p $package -x $prefix
+  --libDir ${prefix}/lib \
+  --label $package --maxAge 3600
 
 echo "===================================================="
+
 echo
 echo "============= checking apps for $package ============="
-./build/check_apps -p $package -x $prefix
+
+./codebase/make_bin/check_apps.py \
+  --listPath ./build/apps_check_list.${package} \
+  --appDir ${prefix}/bin \
+  --label $package --maxAge 3600
+
 echo "=================================================="
 

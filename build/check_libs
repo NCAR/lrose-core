@@ -54,7 +54,7 @@ shift `expr $OPTIND - 1`
 
 echo "Checking $package build"
 
-./make_bin/check_libs.py \
+./codebase/make_bin/check_libs.py \
   --listPath ./build/libs_check_list.${package} \
   --libDir $prefix/lib \
   --label $package --maxAge 900 || exit 1

@@ -155,37 +155,65 @@ def main():
 
     buildNetcdf()
 
-    sys.exit(0)
+    # build the package
 
-    # save previous releases
+    buildPackage()
 
-    savePrevReleases()
+    # detect which dynamic libs are needed
+    # copy the dynamic libraries into runtime area:
+    #     $prefix/bin/${package}_runtime_libs
 
-    # get repos from git
+    os.chdir(runDir)
+    shellCmd("./make_bin/installOriginLibFiles.py --binDir " + \
+             tmpDir + "/bin " + \
+             "--relDir " + package + "_runtime_libs --debug")
 
-    gitCheckout()
+    # copy the required files and directories into the tar directory
+    
+    shellCmd("/bin/cp -f LICENSE.txt " + tarDir)
+    shellCmd("/bin/cp -rf release_notes " + tarDir)
+    shellCmd("/bin/cp -f docs/README_INSTALL_BIN.txt " + tarDir)
+    shellCmd("/bin/cp -f ./make_release/install_bin_release " + tarDir)
+    shellCmd("/bin/cp -f ./make_release/install_devel_release " + tarDir)
+    shellCmd("/bin/cp -rf " + tmpDir + "/bin " + tarDir)
+    shellCmd("/bin/cp -rf " + tmpDir + "/lib " + tarDir)
+    shellCmd("/bin/cp -rf " + tmpDir + "/include " + tarDir)
 
-    # set up autoconf
+    # strip the binaries
 
-    setupAutoconf()
+    shellCmd("strip " + tarDir + "/bin/*")
 
-    # create the tar file
+    # make the tar file, copy into run dir
 
-    createTarFile()
+    os.chdir(tmpDir)
+    shellCmd("tar cvfz " + tarName + " " + releaseName)
+    shellCmd("mv " + tarName + "  " + runDir)
+    os.chdir(runDir)
 
-    # create the brew formula for OSX builds
-
-    createBrewFormula()
-
-    # move the tar file up into release dir
-
-    os.chdir(releaseDir)
-    os.rename(os.path.join(coreDir, tarName),
-              os.path.join(releaseDir, tarName))
-              
-    # delete the tmp dir
-
-    shutil.rmtree(tmpDir)
+    # check the build
+    
+    os.chdir(runDir)
+    print("============= Checking libs for " + package + " =============")
+    shellCmd("./codebase/make_bin/check_libs.py " + \
+             "--listPath ./build/libs_check_list." + package + " " + \
+             "--libDir " + tmpDir + "/lib " + \
+             "--label " + package + " --maxAge 3600")
+    print("====================================================")
+    print("============= Checking apps for " + package + " =============")
+    shellCmd("./codebase/make_bin/check_apps.py " + \
+             "--listPath ./build/apps_check_list." + package + " " + \
+             "--appDir " + tmpDir + "/bin " + \
+             "--label " + package + " --maxAge 3600")
+    print("====================================================")
+    
+    #--------------------------------------------------------------------
+    # done
+    
+    print("  **************************************************")
+    print("  *** Done preparing binary release ***")
+    print("  *** binary tar file name: " + tarName + " ***")
+    print("  *** installed in run dir: " + runDir + " ***")
+    print("  **************************************************")
 
     sys.exit(0)
 
@@ -273,36 +301,6 @@ def getOsType():
             ostype = "i686"
             
 ########################################################################
-# move previous releases
-
-def savePrevReleases():
-
-    os.chdir(releaseDir)
-    prevDirPath = os.path.join(releaseDir, 'previous_releases')
-
-    # remove if file instead of dir
-
-    if (os.path.isfile(prevDirPath)):
-        os.remove(prevDirPath)
-
-    # ensure dir exists
-    
-    if (os.path.isdir(prevDirPath) == False):
-        os.makedirs(prevDirPath)
-
-    # get old releases
-
-    pattern = options.package + "-????????*.tgz"
-    oldReleases = glob.glob(pattern)
-
-    for name in oldReleases:
-        newName = os.path.join(prevDirPath, name)
-        if (options.debug):
-            print >>sys.stderr, "saving oldRelease: ", name
-            print >>sys.stderr, "to: ", newName
-        os.rename(name, newName)
-
-########################################################################
 # create the tmp dir
 
 def createTmpDir():
@@ -354,31 +352,12 @@ def buildNetcdf():
     shellCmd("./build_and_install_netcdf -x " + tmpDir)
 
 ########################################################################
-# set up autoconf for configure etc
+# build package
 
-def setupAutoconf():
+def buildPackage():
 
-    os.chdir(codebaseDir)
-
-    # install the distribution-specific makefiles
-
-    shellCmd("./make_bin/install_distro_makefiles.py --distro " + 
-               options.package + " --codedir .")
-
-    # create files for configure
-
-    shutil.copy("../build/Makefile.top", "Makefile")
-
-    if (options.static):
-        shutil.copy("../build/configure.base", "./configure.base")
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
-                 " --baseName configure.base" +
-                 " --pkg " + options.package + debugStr)
-    else:
-        shutil.copy("../build/configure.base.shared", "./configure.base.shared")
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
-                 " --baseName configure.base.shared --shared" +
-                 " --pkg " + options.package + debugStr)
+    os.chdir(runDir)
+    shellCmd("./build/build_lrose -x " + tmpDir + " -p " + package)
 
 ########################################################################
 # create the tar file
@@ -412,31 +391,6 @@ def createTarFile():
 
     shellCmd("tar cvfz " + tarName + " " + releaseName)
     
-########################################################################
-# create the brew formula for OSX builds
-
-def createBrewFormula():
-
-    # go to core dir
-
-    os.chdir(coreDir)
-
-    # create the brew formula file
-
-    tarUrl = "https://github.com/NCAR/lrose-core/releases/" + tarName
-    formulaName = options.package + ".rb"
-    scriptName = "build_" + options.package + "_formula"
-    buildDirPath = os.path.join(tarDir, "build")
-    scriptPath = os.path.join(buildDirPath, scriptName)
-    
-    shellCmd(scriptPath + " " + tarUrl + " " +
-             tarName + " " + formulaName)
-
-    # move it up into the release dir
-
-    os.rename(os.path.join(coreDir, formulaName),
-              os.path.join(releaseDir, formulaName))
-
 ########################################################################
 # Run a command in a shell, wait for it to complete
 
