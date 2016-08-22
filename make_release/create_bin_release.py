@@ -164,7 +164,7 @@ def main():
     #     $prefix/bin/${package}_runtime_libs
 
     os.chdir(runDir)
-    shellCmd("./make_bin/installOriginLibFiles.py --binDir " + \
+    shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
              tmpDir + "/bin " + \
              "--relDir " + package + "_runtime_libs --debug")
 
@@ -181,7 +181,7 @@ def main():
 
     # strip the binaries
 
-    shellCmd("strip " + tarDir + "/bin/*")
+    #shellCmd("strip " + tarDir + "/bin/*")
 
     # make the tar file, copy into run dir
 
