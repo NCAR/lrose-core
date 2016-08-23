@@ -11,9 +11,7 @@ SUB_DIRS = \
 	FixCfradialPaths \
 	FixRadxPointing \
 	Radx2Dsr \
-	Radx2Grid \
 	RadxCheck \
-	RadxClutMon \
 	RadxConvert \
 	RadxCov2Mom \
 	RadxDiff \
@@ -21,7 +19,6 @@ SUB_DIRS = \
 	RadxFilter \
 	RadxMergeFields \
 	RadxMon \
-	RadxPartRain \
 	RadxPrint
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
