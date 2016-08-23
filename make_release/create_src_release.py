@@ -142,10 +142,6 @@ def main():
     
     createReleaseInfoFile()
 
-    # copy release-specific files to top of tree
-
-    copyReleaseFiles()
-
     # create the tar file
 
     createTarFile()
@@ -283,19 +279,6 @@ def createReleaseInfoFile():
     info.close()
 
 ########################################################################
-# copy release-specific files to top of tree
-
-def copyReleaseFiles():
-
-    # go to core dir
-
-    os.chdir(coreDir)
-
-    # copy files
-
-    shellCmd("cp make_release/create_bin_release.py .")
-
-########################################################################
 # create the tar file
 
 def createTarFile():
@@ -305,11 +288,15 @@ def createTarFile():
     os.chdir(coreDir)
     os.makedirs(tarDir)
 
+    # copy in script to make binary release
+
+    shellCmd("cp make_release/create_bin_release.py " + tarDir)
+
     # move lrose contents into tar dir
 
-    for fileName in [ "LICENSE.txt", "README.md", "ReleaseInfo.txt" ]:
+    for fileName in [ "LICENSE.txt", "README.md", "ReleaseInfo.txt", "create_bin_release.py" ]:
         os.rename(fileName, os.path.join(tarDir, fileName))
-
+        
     for dirName in [ "build", "codebase", "docs", "make_release", "release_notes" ]:
         os.rename(dirName, os.path.join(tarDir, dirName))
 
