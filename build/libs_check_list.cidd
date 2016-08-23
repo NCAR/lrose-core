@@ -1,0 +1,25 @@
+####################################
+# list of requried CIDD libraries
+####################################
+libFmq.a
+libMdv.a
+libRadx.a
+libSpdb.a
+libcidd.a
+libdataport.a
+libdevguide.a
+libdidss.a
+libdsdata.a
+libdsserver.a
+libeuclid.a
+libolgx.a
+libphysics.a
+libradar.a
+librapformats.a
+librapmath.a
+librapplot.a
+libshapelib.a
+libtdrp.a
+libtitan.a
+libtoolsa.a
+libxview.a
