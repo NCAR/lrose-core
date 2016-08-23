@@ -11,11 +11,7 @@ SUB_DIRS = \
 	tdrp \
 	procmap \
 	didss \
-	ingest \
 	dsserver \
-	mdv_utils \
-        physics \
-	spdb_utils \
 	filters \
 	radar \
         Radx
