@@ -300,6 +300,9 @@ def createTarFile():
     for dirName in [ "build", "codebase", "docs", "make_release", "release_notes" ]:
         os.rename(dirName, os.path.join(tarDir, dirName))
 
+    if (package == "cidd"):
+        os.rename("cidd", os.path.join(tarDir, "cidd"))
+
     # move netcdf support into tar dir
 
     netcdfDir = os.path.join(tmpDir, "lrose-netcdf")

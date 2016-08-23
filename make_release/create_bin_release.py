@@ -179,9 +179,12 @@ def main():
     shellCmd("/bin/cp -rf " + tmpDir + "/lib " + tarDir)
     shellCmd("/bin/cp -rf " + tmpDir + "/include " + tarDir)
 
+    if (package == "cidd"):
+        shellCmd("/bin/cp -f ./cidd/* " + tarDir)
+
     # strip the binaries
 
-    #shellCmd("strip " + tarDir + "/bin/*")
+    # shellCmd("strip " + tarDir + "/bin/*")
 
     # make the tar file, copy into run dir
 
@@ -376,6 +379,9 @@ def createTarFile():
 
     for dirName in [ "build", "codebase", "docs", "make_release", "release_notes" ]:
         os.rename(dirName, os.path.join(tarDir, dirName))
+
+    if (package == "cidd"):
+        os.rename("cidd", os.path.join(tarDir, "cidd"))
 
     # move netcdf support into tar dir
 
