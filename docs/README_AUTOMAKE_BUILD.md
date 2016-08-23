@@ -60,11 +60,17 @@ For the **hcr** distribtion, run the following:
 
 ### Running autoconf
 
-First, go to the top-level 'lrose-core' directory.
+First, go to the top-level
 
-Then run:
+```
+  lrose-core
+```
 
+directory. Then run:
+
+```
   ./build/run_autoconf -p package_name
+```
 
 where package_name can be 'lrose' (the default), 'radx', 'cidd' or 'hcr'.
 
