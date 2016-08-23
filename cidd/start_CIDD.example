@@ -1,0 +1,30 @@
+#! /bin/csh -f
+
+# set X resources
+
+set timestr = `date -u +%Y%m%d%H%M%S`
+set XResourcesFile = /tmp/XResources4CIDD.${timestr}
+touch $XResourcesFile
+echo "OpenWindows.MonospaceFont: 7x13" >> $XResourcesFile
+echo "OpenWindows.RegularFont: 6x13" >> $XResourcesFile  
+echo "OpenWindows.BoldFont: 6x13bold" >> $XResourcesFile
+xrdb -nocpp -override $XResourcesFile
+/bin/rm -f $XResourcesFile
+
+if (-e ~/.Xdefaults) then
+  xrdb -nocpp -override ~/.Xdefaults
+endif
+
+# set the font path
+# try various options because fonts are not always in the same place
+
+xset fp= /usr/share/X11/fonts/misc/,/usr/share/X11/fonts/75dpi/,/usr/share/X11/fonts/100dpi/ >& /dev/null
+xset fp= /usr/share/fonts/X11/misc/,/usr/share/fonts/X11/75dpi/,/usr/share/fonts/X11/100dpi/ >& /dev/null
+xset fp= /usr/share/fonts/misc/,/usr/share/fonts/75dpi/,/usr/share/fonts/100dpi/ >& /dev/null
+xset fp= /usr/X11R6/lib/X11/fonts/misc/,/usr/X11R6/lib/X11/fonts/75dpi/,/usr/X11R6/lib/X11/fonts/100dpi/ >& /dev/null
+
+# start CIDD
+
+CIDD -font fixed -p http://front.eol.ucar.edu/content/projects/hawk/front/projDir/display/params/CIDD.pecan >& /dev/null &
+
+
