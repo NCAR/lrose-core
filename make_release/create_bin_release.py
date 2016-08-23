@@ -60,6 +60,9 @@ def main():
     parser.add_option('--prefix',
                       dest='prefix', default='not-set',
                       help='Prefix name for install location')
+    parser.add_option('--releaseDir',
+                      dest='releaseTopDir', default=releaseDirDefault,
+                      help='Top-level release dir')
     parser.add_option('--force',
                       dest='force', default=False,
                       action="store_true",
@@ -106,6 +109,7 @@ def main():
 
     # set directories
 
+    releaseDir = os.path.join(options.releaseTopDir, package)
     coreDir = os.path.join(tmpDir, "lrose-core")
     codebaseDir = os.path.join(coreDir, "codebase")
 
@@ -192,6 +196,11 @@ def main():
     shellCmd("tar cvfz " + tarName + " " + releaseName)
     shellCmd("mv " + tarName + "  " + runDir)
     os.chdir(runDir)
+
+    # copy into release dir if it exists
+
+    if (os.path.isdir(releaseDir)):
+        shellCmd("cp " + tarName + "  " + releaseDir)
 
     # check the build
     
