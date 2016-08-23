@@ -1,13 +1,11 @@
 ####################################
 # list of HCR applications
 ####################################
-
 DataMapper
 DataMapper_list_check
 DissectURL
 DsFCopyServer
 DsFileDist
-DsFmq2Tape
 DsFmqServer
 DsLdataServer
 DsMdvServer
@@ -16,18 +14,15 @@ DsServerMgr
 DsServerQuery
 DsSpdbServer
 DsTitanServer
-Dsr2File
 Dsr2Radx
 DsrGrabber
 DsrMerge
 DualDopplerLobes
-File2Dsr
 FixCfradialPaths
 FixRadxPointing
 Fmq2Fmq
 Fmq2MultMsgFmq
 FmqMon
-GenPt2Spdb
 GetPortNumber
 HawkEye
 HcrVelCorrect
@@ -52,7 +47,6 @@ RadarCal
 RadarConst
 Radx2Dsr
 RadxCheck
-RadxClutMon
 RadxConvert
 RadxCov2Mom
 RadxDiff
@@ -60,11 +54,9 @@ RadxDwellCombine
 RadxFilter
 RadxMergeFields
 RadxMon
-RadxPartRain
 RadxPrint
 ResolveUrl
 Scout
-Socket2File
 SpdbQuery
 SpectraPrint
 StaggeredLimits
@@ -72,7 +64,6 @@ SunCal
 SunCpCompute
 SyncDataMap
 TdrpTest
-Test2Dsr
 TestDataMap
 TimeCalc
 Ts2NetCDF
