@@ -167,6 +167,9 @@ def main():
 
 def savePrevReleases():
 
+    if (os.path.isdir(releaseDir) == False):
+        return
+    
     os.chdir(releaseDir)
     prevDirPath = os.path.join(releaseDir, 'previous_releases')
 
