@@ -294,7 +294,7 @@ def createTarFile():
 
     # move lrose contents into tar dir
 
-    for fileName in [ "LICENSE.txt", "README.md", "ReleaseInfo.txt", "create_bin_release.py" ]:
+    for fileName in [ "LICENSE.txt", "README.md", "ReleaseInfo.txt" ]:
         os.rename(fileName, os.path.join(tarDir, fileName))
         
     for dirName in [ "build", "codebase", "docs", "make_release", "release_notes" ]:
