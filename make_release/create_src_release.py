@@ -134,8 +134,6 @@ def main():
     trimToMakefiles("libs")
     trimToMakefiles("apps")
 
-    sys.exit(0)
-
     # set up autoconf
 
     setupAutoconf()
