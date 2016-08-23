@@ -74,19 +74,30 @@ directory. Then run:
 
 where package_name can be 'lrose' (the default), 'radx', 'cidd' or 'hcr'.
 
+### Running configure
+
+First, go to the codebase directory, and run configure:
+
+```
+  cd lrose-core/codebase
+  ./configure --prefix=/tmp/lrose
+```
+
+or whatever install location you want.
+
 ### Performing the build
 
 #### Building and installing the libraries
 
 ```
-  cd codebase/libs/
+  cd lrose-core/codebase/libs/
   make -j 8 install
 ```
 
 #### Building and installing the applications
 
 ```
-  cd codebase/apps
+  cd lrose-core/codebase/apps
   make -j 8 install
 ```
 
