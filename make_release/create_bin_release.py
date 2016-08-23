@@ -352,7 +352,7 @@ def buildNetcdf():
 
     netcdfDir = os.path.join(runDir, "lrose-netcdf")
     os.chdir(netcdfDir)
-    shellCmd("./build_and_install_netcdf -x " + tmpDir)
+    shellCmd("./build_and_install_netcdf -x " + tmpDir + " -p " + package)
 
 ########################################################################
 # build package
