@@ -90,13 +90,27 @@ This is equivalent to the following
   ./make_bin/install_distro_makefiles.py --distro lrose
 ```
 
-If you want to perform a partial build for a particular distribution, you can specify the distribution on the command line.
+If you want to perform a partial build for a sub distribution, you can specify that on the command line.
 
-For example, to install the makefile for the **radx** distribtion, run the following:
+For the **radx** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
   ./make_bin/install_distro_makefiles.py --distro radx
+```
+
+For the **cidd** distribtion, run the following:
+
+```
+  cd $LROSE_CORE_DIR/codebase
+  ./make_bin/install_distro_makefiles.py --distro cidd
+```
+
+For the **hcr** distribtion, run the following:
+
+```
+  cd $LROSE_CORE_DIR/codebase
+  ./make_bin/install_distro_makefiles.py --distro hcr
 ```
 
 ### Performing the build

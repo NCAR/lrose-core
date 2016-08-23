@@ -22,6 +22,8 @@ function usage() {
     echo "Usage: run_autoconf [options below]"
     echo "  -h:  produce this usage list"
     echo "  -d:  turn debugging on"
+    echo "  -p ? :  set package"
+    echo "           default is 'lrose'"
     echo "  -s:  statically-linked release"
     echo "       default is dynamic linking"
     echo "  -v:  turn verbose on"
@@ -38,7 +40,7 @@ verbose=false
 static=false
 
 # Parse command line options.
-while getopts hdsv OPT; do
+while getopts hdsvp: OPT; do
     case "$OPT" in
         h)
             usage
@@ -52,6 +54,9 @@ while getopts hdsv OPT; do
             ;;
         s)
             static=true
+            ;;
+        p)
+            package=$OPTARG
             ;;
         \?)
             # getopts issues an error message
@@ -105,9 +110,10 @@ startingDir=`pwd`
 
 # copy in top-level template files
 
-/bin/cp ./build/configure.base .
-/bin/cp ./build/configure.base.shared .
-/bin/cp ./build/Makefile.top ./Makefile
+cd codebase
+/bin/cp ../build/configure.base .
+/bin/cp ../build/configure.base.shared .
+/bin/cp ../build/Makefile.top ./Makefile
 
 # create project-specific makefiles
 
