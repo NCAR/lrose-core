@@ -1,0 +1,70 @@
+#!/usr/bin/python
+import subprocess
+import sys
+import os
+
+template = """
+require 'formula'
+
+class cidd < Formula
+  homepage 'http://www.ral.ucar.edu/CIDD'
+
+  url '{0}'
+  version '{1}'
+  sha1 '{2}'
+
+  depends_on :x11
+  depends_on 'png'
+  depends_on 'jasper'
+  depends_on 'expat'
+  depends_on 'flex'
+  depends_on 'libz'
+
+  fails_with :clang do
+    build 421
+    cause "DsMdvx/msg_add.cc:516:11: error: '_printVsectWayPtsBuf' is a protected member of 'Mdvx'"
+  end
+
+  def install
+    system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
+    system "make install"
+  end
+
+  def test
+    system "#{{bin}}/tdrp_test", "-h"
+  end
+end
+"""
+
+if "check_output" not in dir( subprocess ): # duck punch it in!
+    def f(*popenargs, **kwargs):
+        if 'stdout' in kwargs:
+            raise ValueError('stdout argument not allowed, it will be overridden.')
+        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            raise CalledProcessError(retcode, cmd)
+        return output
+    subprocess.check_output = f
+
+def build_cidd_formula(tar_url, tar_name, formula_name):
+    """ build a Homebrew forumula file for cidd """	
+    dash = tar_name.find('-')
+    period = tar_name.find('.', dash)
+    version = tar_name[dash+1:period]
+    checksum = subprocess.check_output(("sha1sum", tar_name))
+    checksum = checksum.split()[0]
+    formula = template.format(tar_url, version, checksum)
+    outf = open(formula_name, 'w')
+    print >>outf, formula
+    outf.close()
+
+if __name__ == '__main__':
+    if len(sys.argv) == 4:
+	build_cidd_formula(sys.argv[1], sys.argv[2], sys.argv[3])
+    else:
+	print "usage: {0} ftp_dir tar_name formula_name".format(sys.argv[0])
