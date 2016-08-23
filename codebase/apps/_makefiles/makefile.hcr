@@ -1,0 +1,31 @@
+#
+# makefile as template for configure, for hcr
+# does not include scripts
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	tdrp \
+	procmap \
+	didss \
+	ingest \
+	dsserver \
+	mdv_utils \
+        physics \
+	spdb_utils \
+	filters \
+	radar \
+        Radx
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+
+
+
+
+
+
+
+
