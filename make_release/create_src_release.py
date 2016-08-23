@@ -333,14 +333,22 @@ def createBrewFormula():
 
     os.chdir(coreDir)
 
-    # create the brew formula file
-
     tarUrl = "https://github.com/NCAR/lrose-core/releases/" + tarName
     formulaName = options.package + ".rb"
     scriptName = "build_" + options.package + "_formula"
     buildDirPath = os.path.join(tarDir, "build")
     scriptPath = os.path.join(buildDirPath, scriptName)
-    
+
+    # check if script exists
+
+    if (os.path.isfile(scriptPath) == False):
+        print >>sys.stderr, "WARNING - ", thisScriptName
+        print >>sys.stderr, "  No script: ", scriptPath
+        print >>sys.stderr, "  Will not build brew formula for package"
+        return
+
+    # create the brew formula file
+
     shellCmd(scriptPath + " " + tarUrl + " " +
              tarName + " " + formulaName)
 
