@@ -65,9 +65,13 @@ def main():
                       help='produce distribution for static linking, default is dynamic')
 
     (options, args) = parser.parse_args()
-
+    
     if (options.verbose == True):
         options.debug = True
+
+    # for CIDD, set to static linkage
+    if (options.package == "cidd"):
+        options.static = True
         
     debugStr = " "
     if (options.verbose):
@@ -118,6 +122,19 @@ def main():
     # get repos from git
 
     gitCheckout()
+
+    # install the distribution-specific makefiles
+
+    os.chdir(codebaseDir)
+    shellCmd("./make_bin/install_distro_makefiles.py --distro " + 
+               options.package + " --codedir .")
+
+    # trim libs and apps to those required by distribution makefiles
+
+    trimToMakefiles("libs")
+    trimToMakefiles("apps")
+
+    sys.exit(0)
 
     # set up autoconf
 
@@ -222,11 +239,6 @@ def setupAutoconf():
 
     os.chdir(codebaseDir)
 
-    # install the distribution-specific makefiles
-
-    shellCmd("./make_bin/install_distro_makefiles.py --distro " + 
-               options.package + " --codedir .")
-
     # create files for configure
 
     shutil.copy("../build/Makefile.top", "Makefile")
@@ -321,6 +333,92 @@ def createBrewFormula():
 
     os.rename(os.path.join(coreDir, formulaName),
               os.path.join(releaseDir, formulaName))
+
+########################################################################
+# get string value based on search key
+# the string may span multiple lines
+#
+# Example of keys: SRCS, SUB_DIRS, MODULE_NAME, TARGET_FILE
+#
+# value is returned
+
+def getValueListForKey(path, key):
+
+    valueList = []
+
+    try:
+        fp = open(path, 'r')
+    except IOError as e:
+        print >>sys.stderr, "ERROR - ", thisScriptName
+        print >>sys.stderr, "  Cannot open file:", path
+        print >>sys.stderr, "  dir: ", options.dir
+        return valueList
+
+    lines = fp.readlines()
+    fp.close()
+
+    foundKey = False
+    multiLine = ""
+    for line in lines:
+        if (foundKey == False):
+            if (line[0] == '#'):
+                continue
+        if (line.find(key) >= 0):
+            foundKey = True
+            multiLine = multiLine + line
+            if (line.find("\\") < 0):
+                break;
+        elif (foundKey == True):
+            if (line[0] == '#'):
+                break
+            if (len(line) < 2):
+                break
+            multiLine = multiLine + line;
+            if (line.find("\\") < 0):
+                break;
+
+    if (foundKey == False):
+        return valueList
+
+    multiLine = multiLine.replace(key, " ")
+    multiLine = multiLine.replace("=", " ")
+    multiLine = multiLine.replace("\t", " ")
+    multiLine = multiLine.replace("\\", " ")
+    multiLine = multiLine.replace("\r", " ")
+    multiLine = multiLine.replace("\n", " ")
+
+    toks = multiLine.split(' ')
+    for tok in toks:
+        if (len(tok) > 0):
+            valueList.append(tok)
+
+    return valueList
+
+########################################################################
+# Trim libs and apps to those required by distribution
+
+def trimToMakefiles(subDir):
+
+    print >>sys.stderr, "Trimming unneeded dirs, subDir: " + subDir
+
+    # get list of subdirs in makefile
+
+    dirPath = os.path.join(codebaseDir, subDir)
+    os.chdir(dirPath)
+    subNameList = getValueListForKey("makefile", "SUB_DIRS")
+    
+    for subName in subNameList:
+        if (os.path.isdir(subName)):
+            print >>sys.stderr, "  need sub dir: " + subName
+            
+    # get list of files in subDir
+
+    entries = os.listdir(dirPath)
+    for entry in entries:
+        if (os.path.isdir(entry)):
+            if (entry not in subNameList):
+                print >>sys.stderr, "discarding unneeded dir: " + entry
+                shutil.rmtree(entry)
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
