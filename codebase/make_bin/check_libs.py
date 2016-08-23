@@ -108,6 +108,8 @@ def readRequiredList(path):
     
     for line in lines:
         line = line.strip()
+        if (len(line) < 1):
+            continue
         if (line[0] == '#'):
             continue
         toks = line.split(" ")
