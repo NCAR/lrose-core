@@ -142,6 +142,10 @@ def main():
     
     createReleaseInfoFile()
 
+    # copy release-specific files to top of tree
+
+    copyReleaseFiles()
+
     # create the tar file
 
     createTarFile()
@@ -277,6 +281,19 @@ def createReleaseInfoFile():
     # close
 
     info.close()
+
+########################################################################
+# copy release-specific files to top of tree
+
+def copyReleaseFiles():
+
+    # go to core dir
+
+    os.chdir(coreDir)
+
+    # copy files
+
+    shellCmd("cp make_release/create_bin_release.py .")
 
 ########################################################################
 # create the tar file
