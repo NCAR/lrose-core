@@ -316,7 +316,16 @@ def createTarFile():
     netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
     os.makedirs(netcdfSubDir)
     
-    for name in [ "README.md", "build_and_install_netcdf", "tar_files" ]:
+    if (options.package == "cidd"):
+        name = "build_and_install_netcdf.m32"
+        os.rename(os.path.join(netcdfDir, name),
+                  os.path.join(netcdfSubDir, name))
+    else:
+        name = "build_and_install_netcdf"
+        os.rename(os.path.join(netcdfDir, name),
+                  os.path.join(netcdfSubDir, name))
+
+    for name in [ "README.md", "tar_files" ]:
         os.rename(os.path.join(netcdfDir, name),
                   os.path.join(netcdfSubDir, name))
 
