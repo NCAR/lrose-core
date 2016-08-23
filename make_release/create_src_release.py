@@ -430,6 +430,8 @@ def trimToMakefiles(subDir):
 
     entries = os.listdir(dirPath)
     for entry in entries:
+        if (entry == "scripts"):
+            continue
         if (os.path.isdir(entry)):
             if (entry not in subNameList):
                 print >>sys.stderr, "discarding unneeded dir: " + entry
