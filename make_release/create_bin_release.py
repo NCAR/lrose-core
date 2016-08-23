@@ -352,7 +352,10 @@ def buildNetcdf():
 
     netcdfDir = os.path.join(runDir, "lrose-netcdf")
     os.chdir(netcdfDir)
-    shellCmd("./build_and_install_netcdf -x " + tmpDir + " -p " + package)
+    if (package == "cidd"):
+        shellCmd("./build_and_install_netcdf.m32 -x " + tmpDir)
+    else:
+        shellCmd("./build_and_install_netcdf -x " + tmpDir)
 
 ########################################################################
 # build package
