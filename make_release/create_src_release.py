@@ -131,8 +131,9 @@ def main():
 
     # trim libs and apps to those required by distribution makefiles
 
-    trimToMakefiles("libs")
-    trimToMakefiles("apps")
+    if (options.package != "lrose"):
+        trimToMakefiles("libs")
+        trimToMakefiles("apps")
 
     # set up autoconf
 
