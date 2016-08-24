@@ -20,7 +20,7 @@ Build and install netcdf into the temporary build area:
 ```
   git clone https://github.com/NCAR/lrose-netcdf
   cd lrose-netcdf
-  ./build_and_install_netcdf.m32 /tmp/cidd_m32
+  ./build_and_install_netcdf.m32 -x /tmp/cidd_m32
 ```
 
 This will install in `/tmp/cidd_m32`
