@@ -60,36 +60,18 @@ This is equivalent to the following
 
 If you want to perform a partial build for a sub distribution, you can specify that on the command line.
 
-For the **radx** distribtion, run the following:
+As an example, for the **radx** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
   ./make_bin/install_package_makefiles.py --package radx
 ```
 
-For the **cidd** distribtion, run the following:
-
-```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package cidd
-```
-
-For the **hcr** distribtion, run the following:
-
-```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package hcr
-```
-
 ### Running autoconf
 
-First, go to the top-level
+First, go to the top-level direectory: `lrose-core`
 
-```
-  lrose-core
-```
-
-directory. Then run:
+Then run:
 
 ```
   ./build/run_autoconf -p package_name
@@ -106,21 +88,13 @@ First, go to the codebase directory, and run configure:
   ./configure --prefix=/tmp/lrose
 ```
 
-or whatever install location you want.
+where prefix points to the install location, most commonly `/usr/local/lrose`.
 
 ### Performing the build
 
-#### Building and installing the libraries
+Got to the codebase directory, and run the make:
 
 ```
-  cd lrose-core/codebase/libs/
+  cd lrose-core/codebase
   make -j 8 install
 ```
-
-#### Building and installing the applications
-
-```
-  cd lrose-core/codebase/apps
-  make -j 8 install
-```
-
