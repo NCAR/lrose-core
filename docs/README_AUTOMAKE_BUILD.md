@@ -1,6 +1,6 @@
 # Building using AUTOMAKE and CONFIGURE
 
-### Chose your install location
+### Choose your install location
 
 The default is: `/usr/local/lrose`
 
