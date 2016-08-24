@@ -40,22 +40,22 @@ The following are the package options:
 
 | Package       | Comments      |
 | ------------- |:-------------:|
-| lrose         | standard full build    |
+| lrose         | standard full build - the default |
 | radx          | Radx apps only |
-| cidd          | CIDD apps only, 32-bit build |
 | hcr           | HCR (Hiaper Cloud Radar) build |
+| cidd          | CIDD display apps only, 32-bit build |
 
 To install the makefiles for the **lrose** standard package, perform the following:
 
 ```
   cd lrose-core/codebase
-  ./make_bin/install_distro_makefiles.py
+  ./make_bin/install_package_makefiles.py
 ```
 This is equivalent to the following
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_distro_makefiles.py --distro lrose
+  ./make_bin/install_package_makefiles.py --package lrose
 ```
 
 If you want to perform a partial build for a sub distribution, you can specify that on the command line.
@@ -64,21 +64,21 @@ For the **radx** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_distro_makefiles.py --distro radx
+  ./make_bin/install_package_makefiles.py --package radx
 ```
 
 For the **cidd** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_distro_makefiles.py --distro cidd
+  ./make_bin/install_package_makefiles.py --package cidd
 ```
 
 For the **hcr** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_distro_makefiles.py --distro hcr
+  ./make_bin/install_package_makefiles.py --package hcr
 ```
 
 ### Running autoconf
