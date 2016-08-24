@@ -2,11 +2,8 @@
 
 ### Chose your install location
 
-The default is:
+The default is: ``` /usr/local/lrose ```
 
-```
-  /usr/local/lrose
-```
 ### Check out, build and install netcdf support
 
 The default install:
@@ -17,7 +14,7 @@ The default install:
   ./build_and_install_netcdf
 ```
 
-or, say, installing in ```/tmp/mybuild:```
+or, say, installing in ```/tmp/mybuild```:
 
 ```
   ./build_and_install_netcdf /tmp/mybuild
@@ -37,21 +34,21 @@ The lower-case version takes preference.
 
 The codebase contains, by default, upper-case Makefiles throughout the tree. These are NOT appropriate for the build.
 
-To get the correct build, you must install the lower-case makefiles relevant to the distribution you need.
+To get the correct build, you must install the lower-case makefiles relevant to the package you want to build.
 
-The following are the build makefile options:
+The following are the package options:
 
-| Name          | Comments      |
+| Package       | Comments      |
 | ------------- |:-------------:|
-| lrose         | full build    |
+| lrose         | standard full build    |
 | radx          | Radx apps only |
 | cidd          | CIDD apps only, 32-bit build |
 | hcr           | HCR (Hiaper Cloud Radar) build |
 
-To install the **lrose** standard distribution makefiles, perform the following:
+To install the makefiles for the **lrose** standard package, perform the following:
 
 ```
-  cd $LROSE_CORE_DIR/codebase
+  cd lrose-core/codebase
   ./make_bin/install_distro_makefiles.py
 ```
 This is equivalent to the following
