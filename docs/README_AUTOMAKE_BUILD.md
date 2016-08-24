@@ -1,6 +1,21 @@
 # Building using AUTOMAKE and CONFIGURE
 
-### Choose your install location
+### Available package builds
+
+LROSE has the following package options:
+
+| Package       | Comments      |
+| ------------- |:-------------:|
+| lrose         | standard full build - the default |
+| radx          | Radx apps only |
+| hcr           | HCR (Hiaper Cloud Radar) build |
+| cidd          | CIDD display apps only, 32-bit build |
+
+If you want to build the `cidd` package, see:
+
+  [README_CIDD_BUILD.md](./README_CIDD_BUILD.md)
+
+### Choose your install directory (prefix)
 
 The default is: `/usr/local/lrose`
 
@@ -22,12 +37,6 @@ For, say, installing in `/tmp/mybuild`:
   ./build_and_install_netcdf -x /tmp/mybuild
 ```
 
-If you are building the CIDD package, this needs a 32-bit emulation build:
-
-```
-  ./build_and_install_netcdf.m32 -x /tmp/cidd_m32
-```
-
 ### Check out LROSE
 
 ```
@@ -44,15 +53,6 @@ The lower-case version takes preference.
 The codebase contains, by default, upper-case Makefiles throughout the tree. These are **NOT** appropriate for the build.
 
 To get the correct build, you must install the lower-case makefiles relevant to the package you want to build.
-
-The following are the package options:
-
-| Package       | Comments      |
-| ------------- |:-------------:|
-| lrose         | standard full build - the default |
-| radx          | Radx apps only |
-| hcr           | HCR (Hiaper Cloud Radar) build |
-| cidd          | CIDD display apps only, 32-bit build |
 
 To install the makefiles for the **lrose** standard package, perform the following:
 
@@ -80,7 +80,7 @@ To build using automake:
 
 ```
   cd lrose-core
-  ./build/make_auto -p package -x prefix
+  ./build/build_auto -p package -x prefix
 ```
 
 where `prefix` is the location into which you are building.
