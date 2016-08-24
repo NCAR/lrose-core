@@ -117,13 +117,15 @@ fi
 codebaseDir=${runDir}/codebase
 
 # for lrose and hcr, create the 'moc'-able files for Qt apps
-if [ "$package" == "lrose"  -o "$package" == "hcr"]
+echo "package = $package"
+if [ "$package" == "lrose"  -o "$package" == "hcr" ]
 then
   cd $codebaseDir/apps/radar/src/HawkEye
   rm -f moc_*   # remove any old moc_* files before we (re)generate them
   qmake-qt4 -o Makefile.qmake
   make -f Makefile.qmake mocables
 fi
+exit 0
 
 # Build lrose - libraries and binaries
 # ------------------------------------
