@@ -117,7 +117,7 @@ cd codebase
 
 # create project-specific makefiles
 
-./make_bin/install_distro_makefiles.py --distro ${package} --codedir .
+./make_bin/install_package_makefiles.py --package ${package} --codedir .
 
 # create configure.ac, makefile.am files
 # run AutoConf

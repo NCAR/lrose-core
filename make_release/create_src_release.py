@@ -126,7 +126,7 @@ def main():
     # install the distribution-specific makefiles
 
     os.chdir(codebaseDir)
-    shellCmd("./make_bin/install_distro_makefiles.py --distro " + 
+    shellCmd("./make_bin/install_package_makefiles.py --package " + 
                options.package + " --codedir .")
 
     # trim libs and apps to those required by distribution makefiles
