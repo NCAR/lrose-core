@@ -1,26 +1,45 @@
 # Building using AUTOMAKE and CONFIGURE
 
-### Check out the code
+### Chose your install location
 
-git clone https://github.com/NCAR/lrose-netcdf
-git clone https://github.com/NCAR/lrose-core
+The default is:
 
-### Build and install HDF5 and NetCDF support
+```
+  /usr/local/lrose
+```
+### Check out, build and install netcdf support
 
-See https://github.com/NCAR/lrose-netcdf
+```
+  git clone https://github.com/NCAR/lrose-netcdf
+  cd lrose-netcdf
+  ./build_and_install_netcdf
+```
 
-Go into the lrose-netcdf distribution and build from there.
+### Check out LROSE
 
-### Installing the makefile tree
+```
+  git clone https://github.com/NCAR/lrose-core
+  cd lrose-core
+```
 
-First, go to the top-level 'lrose-core' directory.
+### Install the makefile tree
 
 The `make` application can use files named either `Makefile` or `makefile`.
+
 The lower-case version takes preference.
 
-The codebase is checked in with upper-case Makefiles throughout the tree. These are NOT appropriate for the build.
+The codebase contains, by default, upper-case Makefiles throughout the tree. These are NOT appropriate for the build.
 
 To get the correct build, you must install the lower-case makefiles relevant to the distribution you need.
+
+The following are the build makefile options:
+
+| Name          | Comments      |
+| ------------- |:-------------:|
+| lrose         | full build    |
+| radx          | Radx apps only |
+| cidd          | CIDD apps only, 32-bit build |
+| hcr           | HCR (Hiaper Cloud Radar) build |
 
 To install the **lrose** standard distribution makefiles, perform the following:
 
