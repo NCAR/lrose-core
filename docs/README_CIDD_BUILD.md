@@ -56,7 +56,7 @@ Build using automake:
 
 ```
   cd lrose-core
-  ./build/make_auto -p cidd -x /tmp/cidd_m32
+  ./build/build_auto -p cidd -x /tmp/cidd_m32
 ```
 
 ### Copy the binaries to the final install location
@@ -74,4 +74,8 @@ The final install will be in:
 ```
   /usr/local/lrose/bin
 ```
+
+### Required LINUX packages for the CIDD build
+
+
 
