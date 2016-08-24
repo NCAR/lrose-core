@@ -21,7 +21,7 @@ The default is: `/usr/local/lrose`
 
 ### Check out, build and install netcdf support
 
-The default install:
+The following default:
 
 ```
   git clone https://github.com/NCAR/lrose-netcdf
@@ -29,7 +29,7 @@ The default install:
   ./build_and_install_netcdf
 ```
 
-will install in `/usr/local/lrose`
+will build and install netcdf in `/usr/local/lrose`
 
 For, say, installing in `/tmp/mybuild`:
 
