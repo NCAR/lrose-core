@@ -77,7 +77,7 @@ As an example, for the **radx** distribtion, run the following:
 
 --->
 
-### Performing the build
+### Perform the build
 
 To build using automake:
 

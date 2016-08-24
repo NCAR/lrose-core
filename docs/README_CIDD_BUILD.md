@@ -50,7 +50,7 @@ To install the makefiles for the **cidd** package, perform the following:
 ```
 --->
 
-### Performing the build
+### Perform the build
 
 Build using automake:
 
