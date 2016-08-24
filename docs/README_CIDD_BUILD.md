@@ -4,7 +4,7 @@
 
 The CIDD display uses the xview library, which must be compiled with 32-bit emulation.
 
-It is **important** to keep this build/install separate from the main build,
+**It is important** to keep the **cidd** build/install separate from the main build,
 so that you do not mix 32-bit object files with 64-bit executables.
 
 So, for a CIDD build we recommend you use a temporary prefix location, for example:
@@ -15,7 +15,7 @@ After the package has been built into this temporary location, it can be copied 
 
 ### Check out, build and install netcdf support
 
-Build and install into the temporary build area:
+Build and install netcdf into the temporary build area:
 
 ```
   git clone https://github.com/NCAR/lrose-netcdf
