@@ -125,7 +125,6 @@ then
   qmake-qt4 -o Makefile.qmake
   make -f Makefile.qmake mocables
 fi
-exit 0
 
 # Build lrose - libraries and binaries
 # ------------------------------------
