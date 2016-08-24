@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# install the makefiles for a given build
+# install the makefiles for a given package
 #
 #===========================================================================
 
@@ -34,8 +34,8 @@ def main():
     parser.add_option('--codedir',
                       dest='codedir', default=defaultCodeDir,
                       help='Code dir from which we search for makefiles')
-    parser.add_option('--distro',
-                      dest='distro', default="lrose",
+    parser.add_option('--package',
+                      dest='package', default="lrose",
                       help='Name of distribution for which we are building')
 
     (options, args) = parser.parse_args()
@@ -43,7 +43,7 @@ def main():
     if (options.debug == True):
         print >>sys.stderr, "Running %s:" % thisScriptName
         print >>sys.stderr, "  codedir:", options.codedir
-        print >>sys.stderr, "  distro:", options.distro
+        print >>sys.stderr, "  package:", options.package
 
     # go to the code dir
 
@@ -62,9 +62,9 @@ def doInstall():
 
     # search for given makefile name
 
-    distroMakefileName = "makefile" + "." + options.distro
+    packageMakefileName = "makefile" + "." + options.package
     if (options.debug == True):
-        print >>sys.stderr, "Searching for makefiles: ", distroMakefileName
+        print >>sys.stderr, "Searching for makefiles: ", packageMakefileName
 
     # first remove any existing 'makefile' files
 
@@ -85,13 +85,13 @@ def doInstall():
             if (dir == "_makefiles"):
                 dirPath = os.path.join(root, dir)
                 makefilePath = os.path.join(root, "makefile")
-                # check if distro makefile exists
-                distroMakefilePath = os.path.join(dirPath, distroMakefileName)
-                if (os.path.isfile(distroMakefilePath)):
-                    # copy the distro makefile to the root/makefile
+                # check if package makefile exists
+                packageMakefilePath = os.path.join(dirPath, packageMakefileName)
+                if (os.path.isfile(packageMakefilePath)):
+                    # copy the package makefile to the root/makefile
                     if (options.debug):
-                        print >>sys.stderr, "Copying " + distroMakefilePath + " to " + makefilePath
-                    shutil.copy(distroMakefilePath, makefilePath)
+                        print >>sys.stderr, "Copying " + packageMakefilePath + " to " + makefilePath
+                    shutil.copy(packageMakefilePath, makefilePath)
 
     return
 

@@ -32,7 +32,7 @@ The `make` application can use files named either `Makefile` or `makefile`.
 
 The lower-case version takes preference.
 
-The codebase contains, by default, upper-case Makefiles throughout the tree. These are NOT appropriate for the build.
+The codebase contains, by default, upper-case Makefiles throughout the tree. These are **NOT** appropriate for the build.
 
 To get the correct build, you must install the lower-case makefiles relevant to the package you want to build.
 
