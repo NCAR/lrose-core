@@ -76,32 +76,25 @@ As an example, for the **radx** distribtion, run the following:
 
 ### Running autoconf
 
-First, go to the top-level direectory: `lrose-core`
-
-Then run:
+Got to the top-level directory, and run autoconf:
 
 ```
-  ./build/run_autoconf -p package_name
+  cd lrose-core
+  ./build/run_autoconf -p package
 ```
 
-where package_name can be `lrose` (the default), `radx`, `cidd` or `hcr`.
+where package can be `lrose` (the default), `radx`, `cidd` or `hcr`.
 
-### Running configure
-
-First, go to the codebase directory, and run configure:
+### Perform the build
 
 ```
-  cd lrose-core/codebase
-  ./configure --prefix=/tmp/lrose
+  cd lrose-core
+  ./build/build_lrose -p package -x prefix
 ```
 
-where prefix points to the install location, most commonly `/usr/local/lrose`.
+where `prefix` is the location into which you are building.
 
-### Performing the build
+`package` defaults to `lrose`.
 
-Got to the codebase directory, and run the make:
+`prefix` defaults to `/usr/local/lrose`.
 
-```
-  cd lrose-core/codebase
-  make -j 8 install
-```
