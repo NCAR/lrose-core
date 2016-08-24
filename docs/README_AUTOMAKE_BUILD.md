@@ -14,16 +14,18 @@ The default install:
   ./build_and_install_netcdf
 ```
 
-or, say, installing in `/tmp/mybuild`:
+will install in `/usr/local/lrose`.
+
+For, say, installing in `/tmp/mybuild`:
 
 ```
-  ./build_and_install_netcdf /tmp/mybuild
+  ./build_and_install_netcdf -x /tmp/mybuild
 ```
 
 If you are building the CIDD package, this needs a 32-bit emulation build:
 
 ```
-  ./build_and_install_netcdf.m32 /tmp/cidd_m32
+  ./build_and_install_netcdf.m32 -x /tmp/cidd_m32
 ```
 
 ### Check out LROSE
@@ -82,7 +84,7 @@ Then run:
   ./build/run_autoconf -p package_name
 ```
 
-where package_name can be 'lrose' (the default), 'radx', 'cidd' or 'hcr'.
+where package_name can be `lrose` (the default), `radx`, `cidd` or `hcr`.
 
 ### Running configure
 
