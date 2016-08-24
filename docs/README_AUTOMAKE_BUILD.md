@@ -9,12 +9,19 @@ The default is:
 ```
 ### Check out, build and install netcdf support
 
+The default install:
+
 ```
   git clone https://github.com/NCAR/lrose-netcdf
   cd lrose-netcdf
   ./build_and_install_netcdf
 ```
 
+or, say, installing in ```/tmp/mybuild:```
+
+```
+  ./build_and_install_netcdf /tmp/mybuild
+```
 ### Check out LROSE
 
 ```
