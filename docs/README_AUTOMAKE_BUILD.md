@@ -23,8 +23,6 @@ or, say, installing in `/tmp/mybuild`:
 If you are building the CIDD package, this needs a 32-bit emulation build:
 
 ```
-  git clone https://github.com/NCAR/lrose-netcdf
-  cd lrose-netcdf
   ./build_and_install_netcdf.m32 /tmp/cidd_m32
 ```
 
@@ -63,7 +61,6 @@ To install the makefiles for the **lrose** standard package, perform the followi
 This is equivalent to the following
 
 ```
-  cd $LROSE_CORE_DIR/codebase
   ./make_bin/install_package_makefiles.py --package lrose
 ```
 
@@ -72,7 +69,6 @@ If you want to perform a partial build for a sub distribution, you can specify t
 As an example, for the **radx** distribtion, run the following:
 
 ```
-  cd $LROSE_CORE_DIR/codebase
   ./make_bin/install_package_makefiles.py --package radx
 ```
 
