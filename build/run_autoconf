@@ -115,6 +115,14 @@ cd codebase
 /bin/cp ../build/configure.base.shared .
 /bin/cp ../build/Makefile.top ./Makefile
 
+if [ "$package" == "cidd" ]
+then
+# for CIDD, we need m32 build
+  /bin/cp ../build/configure.base.cidd ./configure.base
+  /bin/cp ../build/configure.base.shared.cidd ./configure.base.shared
+fi
+
+
 # create project-specific makefiles
 
 ./make_bin/install_package_makefiles.py --package ${package} --codedir .

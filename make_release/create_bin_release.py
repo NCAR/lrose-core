@@ -186,10 +186,6 @@ def main():
     if (package == "cidd"):
         shellCmd("/bin/cp -f ./cidd/* " + tarDir)
 
-    # strip the binaries
-
-    # shellCmd("strip " + tarDir + "/bin/*")
-
     # make the tar file, copy into run dir
 
     os.chdir(tmpDir)
