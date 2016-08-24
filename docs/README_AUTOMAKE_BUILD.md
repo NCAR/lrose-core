@@ -66,7 +66,7 @@ This is equivalent to the following
   ./make_bin/install_package_makefiles.py --package lrose
 ```
 
-If you want to perform a partial build for a sub distribution, you can specify that on the command line.
+If you want to perform a package-specific build, you can specify that on the command line.
 
 As an example, for the **radx** distribtion, run the following:
 

@@ -1,0 +1,118 @@
+#! /bin/bash
+#
+# Building LROSE and required libraries, using automake
+# =====================================================
+#
+# This requires automake makefile.am files
+#
+# This script must be run from the 'lrose-core/codebase' subdirectory.
+# 
+# By default the libraries and applications will be installed in:
+#
+#   /usr/local/lrose/include
+#   /usr/local/lrose/lib
+#   /usr/local/lrose/bin
+#
+# You can change the install location by specifying it as
+# a single argument to this script.
+#
+# For example:
+#
+#   build_lrose /tmp/lrose
+#
+# will install in:
+#
+#   /tmp/lrose/include
+#   /tmp/lrose/lib
+#   /tmp/lrose/bin
+
+# Delend on HDF5, NETCDF and UDUNITS
+# ----------------------------------
+# Before running this,
+# checkout https://github.com/NCAR/lrose-netcdf
+# build and install hdf5, netcdf, udunits
+
+################################################################################
+
+# set the path
+
+export PATH=${PATH}:.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin:/usr/lib64/qt4/bin:/usr/lib/qt4/bin
+
+# save starting location and script name
+
+runDir=`pwd`
+scriptName=$(basename $0)
+
+# defaults
+
+prefix=/usr/local/lrose
+package=lrose
+debug=true
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Usage: $scriptName [options below]"
+    echo "  -h   :  produce this usage list"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set package"
+    echo "           default is 'lrose'"
+    echo "  -x ? :  set prefix"
+    echo "           default is '/usr/local/lrose'"
+    echo
+}
+
+# Parse command line options.
+while getopts hdp:x: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            package=$OPTARG
+            ;;
+        x)
+            prefix=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  package: $package"
+  echo "  prefix: $prefix"
+  echo "  runDir: $runDir"
+fi
+
+# Remove the switches we parsed above.
+shift `expr $OPTIND - 1`
+
+# install package makefiles
+
+cd $runDir/codebase
+./make_bin/install_package_makefiles.py --package $package
+
+# run autconf
+
+cd $runDir
+./build/run_autoconf -p $package
+
+# perform the build
+
+cd $runDir
+./build/build_lrose -p $package -x $prefix
+
