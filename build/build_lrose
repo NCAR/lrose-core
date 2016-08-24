@@ -116,12 +116,14 @@ then
 fi
 codebaseDir=${runDir}/codebase
 
-# first create the 'moc'-able files for Qt apps
-
-cd $codebaseDir/apps/radar/src/HawkEye
-rm -f moc_*   # remove any old moc_* files before we (re)generate them
-qmake-qt4 -o Makefile.qmake
-make -f Makefile.qmake mocables
+# for lrose and hcr, create the 'moc'-able files for Qt apps
+if [ "$package" == "lrose"  -o "$package" == "hcr"]
+then
+  cd $codebaseDir/apps/radar/src/HawkEye
+  rm -f moc_*   # remove any old moc_* files before we (re)generate them
+  qmake-qt4 -o Makefile.qmake
+  make -f Makefile.qmake mocables
+fi
 
 # Build lrose - libraries and binaries
 # ------------------------------------
@@ -146,19 +148,27 @@ make -k install-strip
 # Install perl lib modules
 #-------------------------
 
-cd $codebaseDir
-cd libs/perl5/src
-mkdir -p ${prefix}/lib/perl5
-/bin/cp *pm ${prefix}/lib/perl5
+if [ "$package" == "lrose" -o "$package" == "hcr" ]
+then
+  cd $codebaseDir
+  cd libs/perl5/src
+  mkdir -p ${prefix}/lib/perl5
+  /bin/cp *pm ${prefix}/lib/perl5
+fi
 
 # Install scripts
 #----------------
 
-cd $codebaseDir/apps/procmap/src/scripts
-./install_scripts.lrose ${prefix}/bin
+if [ "$package" == "lrose" -o "$package" == "hcr" ]
+then
 
-cd $codebaseDir/apps/scripts/src
-./install_scripts.lrose ${prefix}/bin
+  cd $codebaseDir/apps/procmap/src/scripts
+  ./install_scripts.lrose ${prefix}/bin
+
+  cd $codebaseDir/apps/scripts/src
+  ./install_scripts.lrose ${prefix}/bin
+
+fi
 
 # Checking the build
 # ------------------
