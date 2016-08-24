@@ -19,6 +19,15 @@ or, say, installing in `/tmp/mybuild`:
 ```
   ./build_and_install_netcdf /tmp/mybuild
 ```
+
+If you are building the CIDD package, this needs a 32-bit emulation build:
+
+```
+  git clone https://github.com/NCAR/lrose-netcdf
+  cd lrose-netcdf
+  ./build_and_install_netcdf.m32 /tmp/cidd_m32
+```
+
 ### Check out LROSE
 
 ```
