@@ -92,3 +92,63 @@ where `prefix` is the location into which you are building.
 
 `prefix` defaults to `/usr/local/lrose`
 
+
+### Required LINUX packages for the LROSE build
+
+For a full LROSE build under LINUX, you need the following packages:
+
+```
+  tcsh
+  perl
+  perl-Env
+
+  ftp
+  git
+  svn
+  cvs
+  tkcvs
+  emacs
+
+  gcc
+  g++
+  gfortran
+
+  glibc-devel
+  libX11-devel
+  libXext-devel (if available)
+  libpng-devel
+  libtiff-devel
+  jasper-devel
+  zlib-devel
+  libexpat-devel
+  flex-devel
+  fftw3-devel
+  bzip2-devel
+  jasper-devel
+  qt4-devel
+
+  gnuplot
+  ImageMagick-devel
+  ImageMagick-c++-devel
+
+  xrdb
+  Xvfb (virtual X server), specifically xorg-x11-server-Xvfb
+  sshd (ssh logins)
+
+  xorg-x11-fonts-misc
+  xorg-x11-fonts-75dpi
+  xorg-x11-fonts-100dpi
+```
+
+On Redhat-based hosts you can achieve this by running:
+
+```
+yum install -y tcsh perl perl-Env ftp git svn cvs tkcvs emacs \
+gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
+libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel \
+flex-devel fftw3-devel bzip2-devel jasper-devel qt4-devel xrdb \
+Xvfb xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
+gnuplot ImageMagick-devel ImageMagick-c++-devel
+```
+
+
