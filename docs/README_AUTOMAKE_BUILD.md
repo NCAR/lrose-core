@@ -14,7 +14,7 @@ The default install:
   ./build_and_install_netcdf
 ```
 
-will install in `/usr/local/lrose`.
+will install in `/usr/local/lrose`
 
 For, say, installing in `/tmp/mybuild`:
 
@@ -85,7 +85,7 @@ To build using automake:
 
 where `prefix` is the location into which you are building.
 
-`package` defaults to `lrose`.
+`package` defaults to `lrose`
 
-`prefix` defaults to `/usr/local/lrose`.
+`prefix` defaults to `/usr/local/lrose`
 
