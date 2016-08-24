@@ -2,7 +2,7 @@
 
 ### Chose your install location
 
-The default is: ``` /usr/local/lrose ```
+The default is: `/usr/local/lrose`
 
 ### Check out, build and install netcdf support
 
@@ -14,7 +14,7 @@ The default install:
   ./build_and_install_netcdf
 ```
 
-or, say, installing in ```/tmp/mybuild```:
+or, say, installing in `/tmp/mybuild`:
 
 ```
   ./build_and_install_netcdf /tmp/mybuild
