@@ -44,6 +44,7 @@ For, say, installing in `/tmp/mybuild`:
   cd lrose-core
 ```
 
+<!---
 ### Install the makefile tree
 
 The `make` application can use files named either `Makefile` or `makefile`.
@@ -73,6 +74,8 @@ As an example, for the **radx** distribtion, run the following:
 ```
   ./make_bin/install_package_makefiles.py --package radx
 ```
+
+--->
 
 ### Performing the build
 

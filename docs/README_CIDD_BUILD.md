@@ -32,6 +32,7 @@ This will install in `/tmp/cidd_m32`
   cd lrose-core
 ```
 
+<!---
 ### Install the makefile tree
 
 The `make` application can use files named either `Makefile` or `makefile`.
@@ -47,6 +48,7 @@ To install the makefiles for the **cidd** package, perform the following:
 ```
   ./make_bin/install_package_makefiles.py --package cidd
 ```
+--->
 
 ### Performing the build
 
