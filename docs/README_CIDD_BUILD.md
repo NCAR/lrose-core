@@ -29,7 +29,6 @@ This will install in `/tmp/cidd_m32`
 
 ```
   git clone https://github.com/NCAR/lrose-core
-  cd lrose-core
 ```
 
 <!---

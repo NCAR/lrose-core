@@ -41,7 +41,6 @@ For, say, installing in `/tmp/mybuild`:
 
 ```
   git clone https://github.com/NCAR/lrose-core
-  cd lrose-core
 ```
 
 <!---
