@@ -74,22 +74,13 @@ As an example, for the **radx** distribtion, run the following:
   ./make_bin/install_package_makefiles.py --package radx
 ```
 
-### Running autoconf
+### Performing the build
 
-Got to the top-level directory, and run autoconf:
-
-```
-  cd lrose-core
-  ./build/run_autoconf -p package
-```
-
-where package can be `lrose` (the default), `radx`, `cidd` or `hcr`.
-
-### Perform the build
+To build using automake:
 
 ```
   cd lrose-core
-  ./build/build_lrose -p package -x prefix
+  ./build/make_auto -p package -x prefix
 ```
 
 where `prefix` is the location into which you are building.
