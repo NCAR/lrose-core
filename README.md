@@ -1,4 +1,4 @@
-# lrose-core
+# lrose-core **L**:rose:
 
 ## LROSE - The Lidar Radar Open Software Environment
 
