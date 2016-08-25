@@ -9,6 +9,11 @@
 #
 #--------------------------------------------------------------------
 
+# save starting location and script name
+
+runDir=`pwd`
+scriptName=$(basename $0)
+
 # set the path
 
 export PATH=.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin
@@ -19,7 +24,7 @@ export PATH=.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/b
 
 function usage() {
     echo
-    echo "Usage: run_autoconf [options below]"
+    echo "Usage: $scriptName [options below]"
     echo "  -h:  produce this usage list"
     echo "  -d:  turn debugging on"
     echo "  -p ? :  set package"
@@ -69,7 +74,7 @@ done
 
 if [ "$debug" == "true" ]
 then
-  echo "Running run_autoconf"
+  echo "Running $scriptName"
   echo "  package: $package"
   echo "  debug: $debug"
   echo "  verbose: $verbose"
@@ -159,7 +164,7 @@ fi
 
 echo
 echo "  **************************************************"
-echo "  *** Done with run_autoconf ***"
+echo "  *** Done with $scriptName ***"
 echo "  **************************************************"
 echo
 
