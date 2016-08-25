@@ -110,7 +110,7 @@ For the **hcr** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_distro_makefiles.py --distro hcr
+  ./make_bin/install_package_makefiles.py --package hcr
 ```
 
 ### Performing the build
