@@ -1,6 +1,6 @@
 # lrose-core
 
-## **L**:rose: LROSE - The Lidar Radar Open Software Environment
+## **L**:rose: - The Lidar Radar Open Software Environment
 
 This distribution contains the core software for LROSE.
 
