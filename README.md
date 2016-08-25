@@ -1,10 +1,8 @@
-# lrose-core
+# lrose-core ![NCAR SPOL](./docs/images/spol_dynamo.jpg)
 
 ## **L**:rose: - The Lidar Radar Open Software Environment
 
 LROSE is a co-operative project between [Colorado State University (CSU)](http://www.atmos.colostate.edu/) and the [National Center for Atmospheric Research (NCAR)](https://www.eol.ucar.edu/content/lidar-radar-open-software-environment). It is funded by the [National Science Foundation](https://www.nsf.gov).
-
-![NCAR SPOL](./docs/images/spol_dynamo.jpg)
 
 ### LROSE source in GitHub
 
