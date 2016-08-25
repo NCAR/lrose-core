@@ -7,16 +7,16 @@ There are three ways to build LROSE:
 1. Check out the source from GitHub, and use the NCAR build system.
 This is recommended if you are actively involved in developing the code.
 
-See [README_NCAR_BUILD.md](./README_NCAR_BUILD.md).
+... See [README_NCAR_BUILD.md](./README_NCAR_BUILD.md) for details
 
 2. Check out the source from GitHub, and use AUTOMAKE and CONFIGURE for the build.
 This is the more standard approach.
 
-See [README_AUTOMAKE_BUILD.md](./README_AUTOMAKE_BUILD.md).
+... See [README_AUTOMAKE_BUILD.md](./README_AUTOMAKE_BUILD.md) for details
 
 3. Download a pre-configured source distribution, and build from that.
 
-See [README_DOWNLOAD_AND_BUILD.md](./README_DOWNLOAD_AND_BUILD.md).
+... See [README_DOWNLOAD_AND_BUILD.md](./README_DOWNLOAD_AND_BUILD.md) for details
 
 ### Supported operating systems
 
