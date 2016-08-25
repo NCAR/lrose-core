@@ -8,6 +8,12 @@ LROSE is a co-operative project between [Colorado State University (CSU)](http:/
 
 This distribution contains the core software for LROSE.
 
+To download LROSE, run:
+
+```
+git clone https://github.com/NCAR/lrose-core
+```
+
 ### Building LROSE
 
 You can build LROSE using either of the following:
