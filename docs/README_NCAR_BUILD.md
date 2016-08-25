@@ -1,5 +1,22 @@
 ## Building using the NCAR development system
 
+### Available package builds
+
+LROSE has the following package options:
+
+| Package       | Comments      |
+| ------------- |:-------------:|
+| lrose         | standard full build - the default |
+| radx          | Radx apps only |
+| hcr           | HCR (Hiaper Cloud Radar) build |
+| cidd          | CIDD display apps only, 32-bit build |
+
+This document applies to the lrose, radx and hcr package builds.
+
+If you want to build the `cidd` package, see:
+
+  [README_CIDD_BUILD.md](./README_CIDD_BUILD.md)
+
 ### Setting up the environment
 
 The software development system at NCAR/RAL (formerly RAP) and NCAR/EOL makes use of a recursive makefile approach, using environment variables to identify the various directories used during the build.
@@ -90,20 +107,13 @@ This is equivalent to the following
   ./make_bin/install_package_makefiles.py --package lrose
 ```
 
-If you want to perform a partial build for a sub distribution, you can specify that on the command line.
+If you want to perform a specific package distribution, you can specify that on the command line.
 
 For the **radx** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
   ./make_bin/install_package_makefiles.py --package radx
-```
-
-For the **cidd** distribtion, run the following:
-
-```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package cidd
 ```
 
 For the **hcr** distribtion, run the following:
