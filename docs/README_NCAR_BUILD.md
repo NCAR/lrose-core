@@ -81,13 +81,13 @@ To install the **lrose** standard distribution makefiles, perform the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_distro_makefiles.py
+  ./make_bin/install_package_makefiles.py
 ```
 This is equivalent to the following
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_distro_makefiles.py --distro lrose
+  ./make_bin/install_package_makefiles.py --package lrose
 ```
 
 If you want to perform a partial build for a sub distribution, you can specify that on the command line.
@@ -96,14 +96,14 @@ For the **radx** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_distro_makefiles.py --distro radx
+  ./make_bin/install_package_makefiles.py --package radx
 ```
 
 For the **cidd** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_distro_makefiles.py --distro cidd
+  ./make_bin/install_package_makefiles.py --package cidd
 ```
 
 For the **hcr** distribtion, run the following:
