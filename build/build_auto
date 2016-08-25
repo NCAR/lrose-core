@@ -109,7 +109,12 @@ cd $runDir/codebase
 # run autconf
 
 cd $runDir
-./build/run_autoconf -p $package
+if [ "$package" == "cidd" ]
+then
+  ./build/run_autoconf.cidd
+else
+  ./build/run_autoconf -p $package
+fi
 
 # perform the build
 
