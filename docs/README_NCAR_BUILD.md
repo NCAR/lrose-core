@@ -47,21 +47,19 @@ This should point to the top of the distribution, i.e. lrose-core.
 
 ##### Source the environment, depending on the shell you are using:
 
+For sh or bash:
 ```
   cd $LROSE_CORE_DIR
   source build/set_build_env.sh
 ```  
 
-for sh or bash, or
-
+For csh or tcsh:
 ```
   cd $LROSE_CORE_DIR
   source build/set_build_env.csh
 ```
 
-for csh or tcsh.
-
-This will set the following important environnent variables:
+This will set the following important environment variables:
 
 ```
  $RAP_MAKE_INC_DIR: include files used by the makefiles
@@ -71,11 +69,13 @@ This will set the following important environnent variables:
  $RAP_BIN_DIR: the binary install directory
 ```
 
+Several other variables are set as well.
+
 ### Installing HDF5 and NetCDF
 
 To install the correct HDF5 and NetCDF support, you need to download lrose-netcdf:
 
-[https://github.com/NCAR/lrose-netcdf]
+..https://github.com/NCAR/lrose-netcdf
 
 Follow the instructions for performing the build.
 
