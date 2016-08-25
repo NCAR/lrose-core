@@ -1,7 +1,7 @@
 # lrose-core
 
 ![SPOL](./docs/images/spol_dynamo.jpg)
-![HSRL](./docs/images/airborne_bcs1.jpg)
+![HSRL](./docs/images/airborne_bcs1.png)
 
 ## **L**:rose: - The Lidar Radar Open Software Environment
 
