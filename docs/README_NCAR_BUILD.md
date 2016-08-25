@@ -11,7 +11,7 @@ LROSE has the following package options:
 | hcr           | HCR (Hiaper Cloud Radar) build |
 | cidd          | CIDD display apps only, 32-bit build |
 
-This document applies to the lrose, radx and hcr package builds.
+This document applies to the `lrose`, `radx` and `hcr` package builds.
 
 If you want to build the `cidd` package, see:
 
