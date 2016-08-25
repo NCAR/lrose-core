@@ -92,6 +92,22 @@ where `prefix` is the location into which you are building.
 `prefix` defaults to `/usr/local/lrose`
 
 
+### Required LINUX and gcc/g++ versions for LROSE build
+
+Most good, up-to date LINUX distributions should work.
+
+Recommended distributions are:
+
+  * Debian
+  * Ubuntu
+  * RedHat
+  * Centos
+  * Fedora
+
+LROSE expects good support for the c++11 standard.
+
+The gcc/g++ version should be 4.8.5 or later.
+
 ### Required LINUX packages for the LROSE build
 
 For a full LROSE build under LINUX, you need the following packages:
