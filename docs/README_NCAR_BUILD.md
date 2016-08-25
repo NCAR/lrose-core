@@ -75,7 +75,9 @@ Several other variables are set as well.
 
 To install the correct HDF5 and NetCDF support, you need to download lrose-netcdf:
 
-..https://github.com/NCAR/lrose-netcdf
+```
+https://github.com/NCAR/lrose-netcdf
+```
 
 Follow the instructions for performing the build.
 
