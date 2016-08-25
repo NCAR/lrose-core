@@ -71,20 +71,19 @@ This will set the following important environment variables:
 
 Several other variables are set as well.
 
-### Installing HDF5 and NetCDF
+### Installing NetCDF and HDF5 support
 
 To install the correct HDF5 and NetCDF support, you need to download lrose-netcdf:
 
 ```
-https://github.com/NCAR/lrose-netcdf
+  git clone https://github.com/NCAR/lrose-netcdf
 ```
 
-Follow the instructions for performing the build.
-
-Install the build in:
+Thn build and install as follows:
 
 ```
-  $LROSE_INSTALL_DIR
+  cd lrose-netcdf
+  ./build_and_install_netcdf -x $LROSE_INSTALL_DIR
 ```
 
 ### Installing the makefiles
