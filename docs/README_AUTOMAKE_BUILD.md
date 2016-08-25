@@ -1,4 +1,4 @@
-# Building using AUTOMAKE and CONFIGURE
+## Building using AUTOMAKE and CONFIGURE
 
 ### Available package builds
 

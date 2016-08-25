@@ -1,4 +1,4 @@
-# Building using the NCAR development system
+## Building using the NCAR development system
 
 ### Setting up the environment
 

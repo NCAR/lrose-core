@@ -1,4 +1,4 @@
-# Building CIDD using AUTOMAKE and CONFIGURE
+## Building CIDD using AUTOMAKE and CONFIGURE
 
 ### Choose your install directory (prefix)
 
