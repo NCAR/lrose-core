@@ -10,6 +10,7 @@ You can build LROSE using either of the following:
 
   * NCAR development environment build
   * automake configure-based build
+  * download pre-configured source distribution
 
 If you are performing development, it is probably better to have the NCAR development environment.
 
