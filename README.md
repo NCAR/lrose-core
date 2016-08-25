@@ -1,4 +1,6 @@
-# lrose-core ![NCAR SPOL](./docs/images/spol_dynamo.jpg)
+# lrose-core
+
+![NCAR SPOL](./docs/images/spol_dynamo.jpg)
 
 ## **L**:rose: - The Lidar Radar Open Software Environment
 
