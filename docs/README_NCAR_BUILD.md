@@ -93,9 +93,9 @@ The lower-case version takes preference.
 
 The codebase is checked in with upper-case Makefiles throughout the tree.
 
-To get the build you want, you must install the lower-case makefiles relevant to the distribution you need.
+To get the build you want, you must install the lower-case makefiles relevant to the package you need.
 
-To install the **lrose** standard distribution makefiles, perform the following:
+To install the **lrose** standard package makefiles, perform the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
@@ -108,7 +108,7 @@ This is equivalent to the following
   ./make_bin/install_package_makefiles.py --package lrose
 ```
 
-If you want to perform a specific package distribution, you can specify that on the command line.
+If you want to perform a specific package package, you can specify that on the command line.
 
 For the **radx** distribtion, run the following:
 
@@ -117,7 +117,7 @@ For the **radx** distribtion, run the following:
   ./make_bin/install_package_makefiles.py --package radx
 ```
 
-For the **hcr** distribtion, run the following:
+For the **hcr** package, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
