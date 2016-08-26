@@ -1,41 +1,12 @@
 ## Building using AUTOMAKE and CONFIGURE
 
-### Available package builds
-
-LROSE has the following package options:
-
-| Package       | Comments      |
-| ------------- |:-------------:|
-| lrose         | standard full build - the default |
-| radx          | Radx apps only |
-| hcr           | HCR (Hiaper Cloud Radar) build |
-| cidd          | CIDD display apps only, 32-bit build |
-
-If you want to build the `cidd` package, see:
-
-  [README_CIDD_BUILD.md](./README_CIDD_BUILD.md)
-
 ### Choose your install directory (prefix)
 
 The default is: `/usr/local/lrose`
 
-### Check out, build and install netcdf support
+### Check out, build and install **netcdf** support
 
-The following default:
-
-```
-  git clone https://github.com/NCAR/lrose-netcdf
-  cd lrose-netcdf
-  ./build_and_install_netcdf
-```
-
-will build and install netcdf in `/usr/local/lrose`
-
-For, say, installing in `/tmp/mybuild`:
-
-```
-  ./build_and_install_netcdf -x /tmp/mybuild
-```
+See [README_NETCDF_BUILD.md](./README_NETCDF_BUILD.md)
 
 ### Check out LROSE
 

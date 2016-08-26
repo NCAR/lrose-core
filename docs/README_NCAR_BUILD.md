@@ -1,22 +1,5 @@
 ## Building using the NCAR development system
 
-### Available package builds
-
-LROSE has the following package options:
-
-| Package       | Comments      |
-| ------------- |:-------------:|
-| lrose         | standard full build - the default |
-| radx          | Radx apps only |
-| hcr           | HCR (Hiaper Cloud Radar) build |
-| cidd          | CIDD display apps only, 32-bit build |
-
-This document applies to the `lrose`, `radx` and `hcr` package builds.
-
-If you want to build the `cidd` package, see:
-
-  [README_CIDD_BUILD.md](./README_CIDD_BUILD.md)
-
 ### Setting up the environment
 
 The software development system at NCAR/RAL (formerly RAP) and NCAR/EOL makes use of a recursive makefile approach, using environment variables to identify the various directories used during the build.
@@ -71,20 +54,11 @@ This will set the following important environment variables:
 
 Several other variables are set as well.
 
-### Installing NetCDF and HDF5 support
+### Check out, build and install **netcdf** support
 
-To install the correct HDF5 and NetCDF support, you need to download lrose-netcdf:
+See [README_NETCDF_BUILD.md](./README_NETCDF_BUILD.md)
 
-```
-  git clone https://github.com/NCAR/lrose-netcdf
-```
-
-Thn build and install as follows:
-
-```
-  cd lrose-netcdf
-  ./build_and_install_netcdf -x $LROSE_INSTALL_DIR
-```
+Install in $LROSE_INSTALL_DIR
 
 ### Installing the makefiles
 
