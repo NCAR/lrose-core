@@ -177,8 +177,8 @@ def main():
     shellCmd("/bin/cp -f LICENSE.txt " + tarDir)
     shellCmd("/bin/cp -rf release_notes " + tarDir)
     shellCmd("/bin/cp -f docs/README_INSTALL_BIN.txt " + tarDir)
-    shellCmd("/bin/cp -f ./make_release/install_bin_release " + tarDir)
-    shellCmd("/bin/cp -f ./make_release/install_devel_release " + tarDir)
+    shellCmd("/bin/cp -f ./build/install_bin_release " + tarDir)
+    shellCmd("/bin/cp -f ./build/install_devel_release " + tarDir)
     shellCmd("/bin/cp -rf " + tmpDir + "/bin " + tarDir)
     shellCmd("/bin/cp -rf " + tmpDir + "/lib " + tarDir)
     shellCmd("/bin/cp -rf " + tmpDir + "/include " + tarDir)
@@ -385,7 +385,7 @@ def createTarFile():
     for fileName in [ "LICENSE.txt", "README.md" ]:
         os.rename(fileName, os.path.join(tarDir, fileName))
 
-    for dirName in [ "build", "codebase", "docs", "make_release", "release_notes" ]:
+    for dirName in [ "build", "codebase", "docs", "build", "release_notes" ]:
         os.rename(dirName, os.path.join(tarDir, dirName))
 
     if (package == "cidd"):
