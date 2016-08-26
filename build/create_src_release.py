@@ -342,7 +342,8 @@ def createBrewFormula():
 
     os.chdir(coreDir)
 
-    tarUrl = "https://github.com/NCAR/lrose-core/releases/" + tarName
+    tarUrl = "https://github.com/NCAR/lrose-core/releases/download/" + \
+             options.package + "-" + versionStr + "/" + tarName
     formulaName = options.package + ".rb"
     scriptName = "build_" + options.package + "_formula"
     buildDirPath = os.path.join(tarDir, "build")
