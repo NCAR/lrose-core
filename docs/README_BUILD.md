@@ -32,6 +32,8 @@ See [README_AUTOMAKE_BUILD.md](./README_AUTOMAKE_BUILD.md) for details
 3. Download a pre-configured source distribution, and build from that.
 See [README_DOWNLOAD_BUILD.md](./README_DOWNLOAD_BUILD.md) for details
 
+### Building CIDD
+
 To build CIDD, see:
 [README_CIDD_BUILD.md](./README_CIDD_BUILD.md).
 
