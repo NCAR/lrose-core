@@ -184,7 +184,7 @@ def main():
     shellCmd("/bin/cp -rf " + tmpDir + "/include " + tarDir)
 
     if (package == "cidd"):
-        shellCmd("/bin/cp -f ./cidd/* " + tarDir)
+        shellCmd("/bin/cp -rf ./codebase/apps/cidd/src/CIDD/example_scripts " + tarDir)
 
     # make the tar file, copy into run dir
 
