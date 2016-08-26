@@ -21,6 +21,18 @@ To download LROSE, run:
 git clone https://github.com/NCAR/lrose-core
 ```
 
+### Organization of the LROSE repository
+
+| Location      | Description   |
+| ------------- |:-------------:|
+| docs          | README files |
+| build         | build scripts, release scripts and associated files |
+| codebase/apps | application source code |
+| codebase/libs | support library source code |
+| codebase/make_bin | release and build support scripts |
+| codebase/make_include | incude files for NCAR-style make system |
+| release_notes | release notes for the various packages in LROSE |
+
 ### Building LROSE
 
 You can build LROSE using either of the following:
