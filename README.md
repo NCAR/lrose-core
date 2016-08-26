@@ -26,12 +26,12 @@ git clone https://github.com/NCAR/lrose-core
 | Location      | Description   |
 | ------------- |:-------------:|
 | docs          | README files |
+| release_notes | release notes for the various packages in LROSE |
 | build         | build scripts, release scripts and associated files |
 | codebase/apps | application source code |
 | codebase/libs | support library source code |
 | codebase/make_bin | release and build support scripts |
 | codebase/make_include | incude files for NCAR-style make system |
-| release_notes | release notes for the various packages in LROSE |
 
 ### Building LROSE
 
