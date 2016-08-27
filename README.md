@@ -51,6 +51,11 @@ See [README_BUILD.md](./docs/README_BUILD.md) for details.
 
 See [README_INSTALL_BIN.md](./docs/README_INSTALL_BIN.md)
 
+### Createing an LROSE release
+
+See [README_CREATE_RELEASE.md](./docs/README_CREATE_RELEASE.md)
+
+
 
 
 
