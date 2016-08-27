@@ -72,13 +72,13 @@ You create a binary release from a source release.
 
 Generally this is done using the /tmp directory.
 
-We will use the example of the `radx-20160827.src.tgz` source release.
+We will use the example of the `lrose-20160827.src.tgz` source release.
 
 ```
   cd /tmp
-  cp -r ~/releases/radx/radx-20160827.src.tgz .
-  tar xvfz radx-20160827.src.tgz
-  cd radx-20160827.src
+  cp -r ~/releases/lrose/lrose-20160827.src.tgz .
+  tar xvfz lrose-20160827.src.tgz
+  cd lrose-20160827.src
   ./create_bin_release.py
 ```
 
