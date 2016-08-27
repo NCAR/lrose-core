@@ -168,7 +168,6 @@ For a full CIDD build under LINUX, you need the following packages:
   libpng-devel.i686
   libstdc++-devel.i686
   libtiff-devel.i686
-  libexpat-devel.i686
   zlib-devel.i686
   expat-devel.i686
   flex-devel.i686
@@ -195,7 +194,7 @@ yum install -y tcsh perl perl-Env ftp git svn cvs tkcvs emacs \
 gcc gcc-c++ gcc-gfortran \
 glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
 libtiff-devel.i686 libpng-devel.i686 \
-libstdc++-devel.i686 libtiff-devel.i686 libexpat-devel.i686 \
+libstdc++-devel.i686 libtiff-devel.i686 \
 zlib-devel.i686 expat-devel.i686 flex-devel.i686 \
 fftw-devel.i686 bzip2-devel.i686 xrdb Xvfb \
 xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
