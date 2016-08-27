@@ -9,7 +9,6 @@ The default is: `/usr/local/lrose`
 Create a directory for the release:
 
 ```
-  cd
   mkdir release
   cd release
 ```
@@ -29,7 +28,7 @@ For a 64-bit LINUX system, a typical binary release would be:
 ### Untar the release
 
 ```
-  cd lrose_build
+  cd release
   tar xvfz lrose-20160823.x86_64.tgz
 ```
 
@@ -48,7 +47,7 @@ in your user area.
 
 ```
   cd release/lrose-20160823.x86_64
-  install_bin_release 
+  ./install_bin_release 
 ```
 
 will install into
@@ -60,7 +59,7 @@ will install into
 You can specify an alternative, for example:
 
 ```
-  install_bin_release /opt/local
+  ./install_bin_release /opt/local
 ```
 
 will install into
@@ -86,7 +85,8 @@ binary files.
 To do this, use
 
 ```
-  install_devel_release
+  cd release/lrose-20160823.x86_64
+  ./install_devel_release
 ```
 
 This will install in:
@@ -100,7 +100,7 @@ This will install in:
 Or, for example:
 
 ```
-  install_devel_release /opt/local
+  ./install_devel_release /opt/local
 ```
 
 will install in:
