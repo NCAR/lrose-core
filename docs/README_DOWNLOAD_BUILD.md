@@ -41,7 +41,9 @@ A typical source release would be:
 
 The distribution will be unpacked into a subdirectory:
 
+```
   lrose_build/lrose-20160823.src
+```
 
 ### Run the build scripts:
 

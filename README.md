@@ -47,6 +47,12 @@ If you just wish to build and use the software, the automake/configure build is 
 
 See [README_BUILD.md](./docs/README_BUILD.md) for details.
 
+### Installing a binary LROSE release
+
+See [README_INSTALL_BIN.md](./docs/README_INSTALL_BIN.md)
+
+
+
 
 
 
