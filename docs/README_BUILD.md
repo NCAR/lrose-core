@@ -101,9 +101,6 @@ For a full LROSE build under LINUX, you need the following packages:
 
   ftp
   git
-  svn
-  cvs
-  tkcvs
   emacs
 
   gcc
@@ -159,28 +156,25 @@ For a full CIDD build under LINUX, you need the following packages:
 
   ftp
   git
-  svn
-  cvs
-  tkcvs
-  emacs
 
   gcc
   g++
   gfortran
 
-  glibc-devel
-  libX11-devel
-  libXext-devel (if available)
-  libpng-devel
-  libtiff-devel
-  jasper-devel
-  zlib-devel
-  libexpat-devel
-  flex-devel
-  fftw3-devel
-  bzip2-devel
-  jasper-devel
-  qt4-devel
+  glibc-devel.i686
+  libX11-devel.i686
+  libXext-devel.i686 (if available)
+  libjpeg-devel.i686
+  libtiff-devel.i686
+  libpng-devel.i686
+  libstdc++-devel.i686
+  libtiff-devel.i686
+  libexpat-devel.i686
+  zlib-devel.i686
+  libexpat-devel.i686
+  flex-devel.i686
+  fftw3-devel.i686
+  bzip2-devel.i686
 
   gnuplot
   ImageMagick-devel
@@ -199,36 +193,17 @@ On Redhat-based hosts you can achieve this by running:
 
 ```
 yum install -y tcsh perl perl-Env ftp git svn cvs tkcvs emacs \
-gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
-libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel \
-flex-devel fftw3-devel bzip2-devel jasper-devel qt4-devel xrdb \
-Xvfb xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
+gcc gcc-c++ gcc-gfortran \
+glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
+libjpeg-devel.i686 libtiff-devel.i686 libpng-devel.i686 \
+libstdc++-devel.i686 libtiff-devel.i686 libexpat-devel.i686 \
+zlib-devel.i686 libexpat-devel.i686 flex-devel.i686 \
+fftw3-devel.i686 bzip2-devel.i686 xrdb Xvfb \
+xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
 gnuplot ImageMagick-devel ImageMagick-c++-devel
 ```
 
-For 32-bit compatibility, install the following packages:
-
-```
-  glibc-devel.i686
-  libX11-devel.i686
-  libXext-devel.i686
-  libjpeg-devel.i686
-  libpng-devel.i686
-  libstdc++-devel.i686
-  libtiff-devel.i686
-  libexpat-devel.i686
-
-```
-
-On Redhat-based hosts you can achieve this by running:
-
-```
-yum install -y glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
-libjpeg-devel.i686 libpng-devel.i686 libstdc++-devel.i686 \
-libtiff-devel.i686 libexpat-devel.i686
-```
-
-On Debian, you need to run the following:
+On Debian, you need to run the following to get run-time support:
 
 ```
   /usr/bin/dpkg --add-architecture i386
