@@ -19,7 +19,7 @@ LROSE has the following package options:
 
 `cidd` is a special package, that must be built using 32-bit emulation, because the applications are based on the `xview` library that has no 64-bit port. This package includes the CIDD display, and other applications that depend on `xview`.
 
-### Options for building LROSE
+### Options for building LROSE on LINUX
 
 There are three ways to build LROSE:
 
@@ -32,10 +32,15 @@ See [README_AUTOMAKE_BUILD.md](./README_AUTOMAKE_BUILD.md) for details
 3. Download a pre-configured source distribution, and build from that.
 See [README_DOWNLOAD_BUILD.md](./README_DOWNLOAD_BUILD.md) for details
 
-### Building CIDD
+### Building CIDD on LINUX
 
 To build CIDD, see:
 [README_CIDD_BUILD.md](./README_CIDD_BUILD.md).
+
+### Building LROSE on MAC OSX
+
+See:
+[README_OSX_BUILD.md](./README_OSX_BUILD.md).
 
 ### Supported operating systems
 
