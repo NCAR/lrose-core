@@ -1,17 +1,17 @@
-## INSTALLING an LROSE binary distribution
+## INSTALLING an LROSE binary release
 
 ### Choose your install directory (prefix location)
 
 The default is: `/usr/local/lrose`
 
-### Download the LROSE binary distribution
+### Download the LROSE binary release
 
-Create a directory for the distribution:
+Create a directory for the release:
 
 ```
   cd
-  mkdir dist
-  cd dist
+  mkdir release
+  cd release
 ```
 
 Download the binary tar file from:
@@ -26,26 +26,20 @@ For a 64-bit LINUX system, a typical binary release would be:
   lrose-20160823.x84_64.tgz
 ```
 
-### Untar the distribution
+### Untar the release
 
 ```
   cd lrose_build
   tar xvfz lrose-20160823.x86_64.tgz
 ```
 
-The distribution will be unpacked into a subdirectory:
+The release will be unpacked into a subdirectory:
 
 ```
-  dist/lrose-20160823.x86_64
+  release/lrose-20160823.x86_64
 ```
 
-Download the file into a tmp area. For example:
-
-  /tmp/lrose_dist
-
-and install from there.
-
-However, any suitable directory can be used for this purpose.
+Any suitable directory can be used for this purpose.
 
 ### Installing binaries only
 
@@ -53,7 +47,7 @@ You will probably need to be root for this step, unless you install
 in your user area.
 
 ```
-  cd dist/lrose-20160823.x86_64
+  cd release/lrose-20160823.x86_64
   install_bin_release 
 ```
 
