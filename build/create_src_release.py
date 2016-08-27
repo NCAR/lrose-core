@@ -304,7 +304,7 @@ def createTarFile():
     for fileName in [ "LICENSE.txt", "README.md", "ReleaseInfo.txt" ]:
         os.rename(fileName, os.path.join(tarDir, fileName))
         
-    for dirName in [ "build", "codebase", "docs", "build", "release_notes" ]:
+    for dirName in [ "build", "codebase", "docs", "release_notes" ]:
         os.rename(dirName, os.path.join(tarDir, dirName))
 
     if (options.package == "cidd"):
