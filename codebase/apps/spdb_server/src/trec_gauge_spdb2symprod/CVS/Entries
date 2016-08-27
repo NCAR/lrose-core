@@ -1,14 +1,14 @@
-/Makefile/1.4/Tue Aug  2 20:19:50 2016//
-/add_to_buffer.cc/1.4/Tue Aug  2 20:19:50 2016//
-/convert_to_symprod.cc/1.2/Tue Aug  2 20:19:50 2016//
-/convert_utils.cc/1.2/Tue Aug  2 20:19:50 2016//
-/handle_sigpipe.cc/1.2/Tue Aug  2 20:19:50 2016//
-/paramdef.trec_gauge_spdb2symprod/1.5/Tue Aug  2 20:19:50 2016//
-/parse_args.cc/1.2/Tue Aug  2 20:19:50 2016//
-/tidy_and_exit.cc/1.3/Tue Aug  2 20:19:50 2016//
-/trec_gauge_spdb2symprod.cc/1.2/Tue Aug  2 20:19:50 2016//
-/trec_gauge_spdb2symprod.h/1.3/Tue Aug  2 20:19:50 2016//
-/trec_gauge_spdb2symprod.test/1.1/Tue Aug  2 20:19:50 2016//
-/trec_gauge_spdb2symprod_tdrp.c/1.1/Tue Aug  2 20:19:50 2016//
-/trec_gauge_spdb2symprod_tdrp.h/1.1/Tue Aug  2 20:19:50 2016//
+/Makefile/1.4/Sat Aug 27 01:14:21 2016//
+/add_to_buffer.cc/1.4/Sat Aug 27 01:14:21 2016//
+/convert_to_symprod.cc/1.2/Sat Aug 27 01:14:21 2016//
+/convert_utils.cc/1.2/Sat Aug 27 01:14:21 2016//
+/handle_sigpipe.cc/1.2/Sat Aug 27 01:14:21 2016//
+/paramdef.trec_gauge_spdb2symprod/1.5/Sat Aug 27 01:14:21 2016//
+/parse_args.cc/1.2/Sat Aug 27 01:14:21 2016//
+/tidy_and_exit.cc/1.3/Sat Aug 27 01:14:21 2016//
+/trec_gauge_spdb2symprod.cc/1.2/Sat Aug 27 01:14:21 2016//
+/trec_gauge_spdb2symprod.h/1.3/Sat Aug 27 01:14:21 2016//
+/trec_gauge_spdb2symprod.test/1.1/Sat Aug 27 01:14:21 2016//
+/trec_gauge_spdb2symprod_tdrp.c/1.1/Sat Aug 27 01:14:21 2016//
+/trec_gauge_spdb2symprod_tdrp.h/1.1/Sat Aug 27 01:14:21 2016//
 D

@@ -33,7 +33,7 @@
  * 
  *  @date August, 2014
  *
- *  @version $Id: MdvBlender.cc,v 1.19 2016/03/04 02:22:10 dixon Exp $
+ *  @version $Id: MdvBlender.cc,v 1.22 2016/08/23 21:24:39 mccabe Exp $
  *
  */
 
@@ -48,7 +48,6 @@
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
 #include <toolsa/Path.hh>
-#include <iomanip>      // std::setprecision
 
 // Local include files
 #include "MdvBlender.hh"
@@ -73,8 +72,7 @@ const string MdvBlender::_className = "MdvBlender";
 
 MdvBlender::MdvBlender() : 
   _isOK(true),
-  _mdvx1(NULL),
-  _mdvx2(NULL)
+  _mdvs()
 {
 
   // Make sure the singleton wasn't already created.
@@ -104,9 +102,7 @@ MdvBlender::~MdvBlender()
   delete _args;
 
   delete _inputTrigger;
-  for(unsigned int i=0; i< _blenderFieldNames.size(); i++) {
-    delete _blenderFieldNames[i];
-  }
+  delete _blenderFieldNames;
 }
 
 
@@ -173,21 +169,22 @@ int MdvBlender::run()
     cerr << "Running:" << endl;
   } 
 
-  bool moreDataTimes = true;
+  //  bool moreDataTimes = true;
 
-  while(moreDataTimes){
+  //  while(moreDataTimes){
+  while(!_inputTrigger->endOfData()) {
     PMU_auto_register("In main loop");
 
     // GET NEXT RUN TIME
-    if((_params->run_mode == Params::REALTIME) ||
-      (_params->run_mode == Params::ARCHIVE)) {
+    //    if((_params->run_mode == Params::REALTIME) ||
+    //      (_params->run_mode == Params::ARCHIVE)) {
     
       if(_inputTrigger->getTimeNext(_runTime) == -1) {
         cerr << "getTimeNext failed." << endl;
         cerr << _inputTrigger->getErrStr() << endl;
         return false;
       }
-    }    
+      //    }    
     if (_params->run_mode == Params::REALTIME){
       int totalSleep = 0;
       if (_params->trigger_sleep> 0){
@@ -210,19 +207,29 @@ int MdvBlender::run()
     }
 
     /* Do blending */
-    for (int dix = 0; dix < _params->blender_info_n; dix++){
-      if(!_readInputFiles(dix)) {
-        return -1;
-      }
-
-      if(!_doBlend(dix)) {
-        return -3;
-      }
+    if(!_readInputFiles()) {
+      //      _cleanUp();
+      continue;
+      //      return -1;
     }
+
+    if(!_initializeOutputs()) {
+      continue;
+    }
+    
+    if(!_doBlend()) {
+      //      _cleanUp();
+      _cleanupOutputData();
+      continue;
+      //      return -3;
+    }   
 
     if(!_addPassThroughFields()) {
       cerr << "ERROR: Could not add pass through fields" << endl;
-      return -4;
+      _cleanupOutputData();
+      //      _cleanUp();
+      continue;      
+      //      return -4;
     } 
 
     _writeOutput();
@@ -230,19 +237,19 @@ int MdvBlender::run()
     _cleanupOutputData();
 
     //if given a specific runtime, just run once & exit.
-    if(_params->run_mode == Params::RUNTIME){
-      moreDataTimes  = false;
-    }		 
-    else{
-      moreDataTimes = !_inputTrigger->endOfData();
-    }
+    //    if(_params->run_mode == Params::RUNTIME){
+    //      moreDataTimes  = false;
+    //    }		 
+    //    else{
+    //      moreDataTimes = !_inputTrigger->endOfData();
+    //    }
   }
-  delete _mdvx1;
-  delete _mdvx2;
-  delete _out;
+
+  _cleanUp();
 
   return 0;
 }
+
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -252,6 +259,19 @@ int MdvBlender::run()
 //
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
+
+void MdvBlender::_cleanUp(){
+  vector<unsigned int>::iterator it;
+  for(it =_indices.begin(); it < _indices.end(); it++) {
+    unsigned int i = *it;
+    //  for(unsigned int i = 0; i < _mdvs.size(); i++) {
+    delete _mdvs[i];
+  }
+  _mdvs.clear();
+  _indices.clear();
+
+  delete _out;
+}
 
 /////////////////////////////////////////////////////////////////////////
 //
@@ -286,7 +306,6 @@ bool MdvBlender::_initialize(int argc, char **argv)
     cerr << "Problem with TDRP parameters" << endl;
     _isOK = false;
   } 
-
  
   // init process mapper registration
   if(_params->run_mode == Params::REALTIME) {
@@ -318,30 +337,34 @@ bool MdvBlender::_initialize(int argc, char **argv)
       return false;
     }  
   } else if(_params->run_mode == Params::RUNTIME) {
+    cerr << "WARNING: RUNTIME mode has not been throughly tested" << endl;
     _runTime = DateTime::parseDateTime(_params->run_time);
+    
+    if(_inputTrigger->setArchive(_params->trigger_url, _runTime, _runTime)) {
+      cerr << "ERROR - " << endl;
+      cerr << "  setup for runtimee mode failed." << endl;
+      cerr << _inputTrigger->getErrStr() << endl;
+      return false;
+    }  
+
   }
 
-  //initialize the two inputs
-
-  _mdvx1 = new DsMdvx();
-  if(_params->debug >= Params::DEBUG_GARRULOUS) {
-    _mdvx1->setDebug(true);
+  //initialize the inputs
+  for(int i = 0; i < _params->inputs_n; i++) {
+    DsMdvx* mdv = new DsMdvx();
+    mdv->setHeartbeatFunction((DsMdvx::heartbeat_t)PMU_auto_register);    
+    if(_params->debug >= Params::DEBUG_GARRULOUS) {
+      mdv->setDebug(true);
+    }
+    else {
+      mdv->setDebug(false);
+    }
+    mdv->clearRead();
+    _mdvs.push_back(mdv);
   }
-  else {
-    _mdvx1->setDebug(false);
-  }
-  _mdvx1->clearRead();
-
-  _mdvx2 = new DsMdvx();
-  if(_params->debug >= Params::DEBUG_GARRULOUS) {
-    _mdvx2->setDebug(true);
-  }
-  else {
-    _mdvx2->setDebug(false);
-  }
-  _mdvx2->clearRead();
 
   _out = new DsMdvx();
+  _out->setHeartbeatFunction((DsMdvx::heartbeat_t)PMU_auto_register);
 
   if(_params->random_seed < 0) {
     srand(time(NULL));
@@ -366,55 +389,102 @@ bool MdvBlender::_initialize(int argc, char **argv)
 //
 bool MdvBlender::_parseParams()
 {
+  blenderFieldNames_t* bft = new blenderFieldNames_t();
+  vector<string> roundingTemp;
   //output field names
-  for (int ix=0; ix < _params->blender_info_n; ix++){
-    blenderFieldNames_t* bft = new blenderFieldNames_t();
-    std::vector<std::string> roundingTemp;
+  _fillVector(_params->output.field_names, bft->outputFieldNames);
+  _fillVector(_params->output.field_long_names, bft->outputFieldLongNames,false);
+  _fillVector(_params->output.field_units, bft->outputFieldUnits,false);
+  _fillVector(_params->output.rounding, roundingTemp);
 
-    // output file names
-    _fillVector(_params->_blender_info[ix].outputFieldNames, bft->outputFieldNames);
-    _fillVector(_params->_blender_info[ix].outputFieldLongNames, bft->outputFieldLongNames,false);
-    _fillVector(_params->_blender_info[ix].outputFieldUnits, bft->outputFieldUnits,false);
-    _fillVector(_params->_blender_info[ix].input1FieldNames, bft->input1FieldNames);
-    _fillVector(_params->_blender_info[ix].input2FieldNames, bft->input2FieldNames);
-    _fillVector(_params->_blender_info[ix].outputRounding, roundingTemp);
-    bft->input1WeightName = _params->_blender_info[ix].input1WeightField;
-    bft->input1ConstantWeight = _params->_blender_info[ix].input1ConstantWeight;
-    bft->input2WeightName = _params->_blender_info[ix].input2WeightField;
-    bft->input2ConstantWeight = _params->_blender_info[ix].input2ConstantWeight;
-		
-    for(unsigned int rix = 0; rix < roundingTemp.size(); rix++) {
-	    if(roundingTemp[rix] == "ROUND_NONE") { 
-		    bft->outputRounding.push_back(Params::ROUND_NONE);
-	    }
-	    else if(roundingTemp[rix] == "ROUND_UP") { 
-		    bft->outputRounding.push_back(Params::ROUND_UP);
-	    }
-	    else if(roundingTemp[rix] == "ROUND_DOWN") { 
-		    bft->outputRounding.push_back(Params::ROUND_DOWN);
-	    }
-	    else if(roundingTemp[rix] == "ROUND_CLOSEST") { 
-		    bft->outputRounding.push_back(Params::ROUND_CLOSEST);
-	    }
-	    else {
-		    cerr << "Invalid parameter: outputRounding"  << endl;
-		    return false;
-	    }
+  for (int ix=0; ix < _params->inputs_n; ix++){
+    vector<pass_through_t> pts;
+    vector<string> inputs;
+    // input file names
+    _fillVector(_params->_inputs[ix].field_names, inputs);
+    bft->inputFieldNames.push_back(inputs);
+
+   
+    for(int pix = 0; pix < _params->input_pass_throughs_n2; pix++) {
+      if(strlen(_params->__input_pass_throughs[ix][pix]) == 0) {
+	continue;
+      }
+      vector<string> items;
+
+      pass_through_t pt; // = new pass_through_t();
+      _fillVector(_params->__input_pass_throughs[ix][pix], items);
+      pt.inputName = items[0];
+      pt.outputName = items[1];
+      pt.outputLongName = items[2];      
+      pts.push_back(pt);
     }
 
-    if(bft->outputFieldNames.size() !=  bft->outputFieldLongNames.size() ||
-       bft->outputFieldNames.size() !=  bft->outputFieldUnits.size() ||
-       bft->outputFieldNames.size() !=  bft->input1FieldNames.size() ||
-       bft->outputFieldNames.size() !=  bft->input1FieldNames.size() ||
-       bft->outputFieldNames.size() !=  bft->outputRounding.size() ) {
-      cerr << "ERROR: blender_info[" << ix << "] parameter's lists must contain the same number of items.  Exiting..." << endl;
+    bft->inputPassThroughs.push_back(pts);
+      
+    bft->inputWeightNames.push_back(_params->_inputs[ix].weight_field);
+    bft->inputConstantWeights.push_back(_params->_inputs[ix].constant_weight);
+  }
+  
+  for(unsigned int rix = 0; rix < roundingTemp.size(); rix++) {
+    if(roundingTemp[rix] == "ROUND_NONE") { 
+      bft->outputRounding.push_back(Params::ROUND_NONE);
+    }
+    else if(roundingTemp[rix] == "ROUND_UP") { 
+      bft->outputRounding.push_back(Params::ROUND_UP);
+    }
+    else if(roundingTemp[rix] == "ROUND_DOWN") { 
+      bft->outputRounding.push_back(Params::ROUND_DOWN);
+    }
+    else if(roundingTemp[rix] == "ROUND_CLOSEST") { 
+      bft->outputRounding.push_back(Params::ROUND_CLOSEST);
+    }
+    else {
+      cerr << "Invalid parameter: outputRounding"  << endl;
+      return false;
+    }
+  }  
+
+  unsigned int numFields = bft->outputFieldNames.size();
+
+  if(bft->outputFieldLongNames.size() != numFields) {
+    cerr << "ERROR: Incorrect number of output field long names" << endl;
+    _isOK = false;
+    return false;
+  }
+
+  if(bft->outputFieldUnits.size() != numFields) {
+    cerr << "ERROR: Incorrect number of output field units" << endl;
+    _isOK = false;
+    return false;
+  }
+
+  if(bft->outputRounding.size() != numFields) {
+    cerr << "ERROR: Incorrect number of output rounding" << endl;
+    _isOK = false;
+    return false;
+  }
+
+  for(unsigned int i = 0; i < bft->inputFieldNames.size(); i++) {
+    if(bft->inputFieldNames[i].size() != numFields) {
+      int ip1 = i+1;
+      cerr << "ERROR: Incorrect number of input field "
+	   << ip1 << " names" << endl;
       _isOK = false;
       return false;
     }
-
-    _blenderFieldNames.push_back(bft);
-    printBlenderField(bft);
   }
+
+  if(bft->inputPassThroughs.size() != 0 &&
+     bft->inputPassThroughs.size() != bft->inputFieldNames.size()) {
+    cerr << "ERROR: Number of input pass through sections should match " <<
+      "number of inputs" << endl;
+    _isOK = false;
+    return false;
+  }
+  
+  _blenderFieldNames  = bft;
+  printBlenderField(bft);
+ 
 
   return true;
 
@@ -461,70 +531,56 @@ void MdvBlender::_fillVector(string commaSep, vector<string>& vec, bool removeWh
 // Notes:	use isOK method to test success
 //
 //
-bool MdvBlender::_readInputFiles(int bix)
+bool MdvBlender::_readInputFiles()
 {
+  vector< vector<string> > inputFieldNames;
+  
   PMU_force_register("Reading Inputs");
   if(_params->debug >= Params::DEBUG_NORM) {
     cout << "Reading Inputs at " << ctime(&_runTime) << endl;
   }
 
-  _mdvx1->clearReadFields();
-  _mdvx1->setReadTime(Mdvx::READ_FIRST_BEFORE, _params->input1_url,  _params->input1_max_valid_age, _runTime);
+  _indices.clear();
+  
+  for(int i = 0; i < _params->inputs_n; i++) {
+    int ip1 = i+1;
+    _mdvs[i]->clearReadFields();
+    _mdvs[i]->setReadTime(Mdvx::READ_FIRST_BEFORE, _params->_inputs[i].url,  _params->_inputs[i].max_valid_age, _runTime);
+    
+    vector<string> inputFieldNames = _blenderFieldNames->inputFieldNames[i];
+    vector<string>::const_iterator six;
+    for(six = inputFieldNames.begin(); six != inputFieldNames.end(); six++) {
+      _mdvs[i]->addReadField(*six);
+      if(_params->debug >= Params::DEBUG_VERBOSE) {
+        cout << "adding " << *six << endl;
+      }
+    }
+    
+    if(_blenderFieldNames->inputWeightNames[i] != "")  {
+      _mdvs[i]->addReadField(_blenderFieldNames->inputWeightNames[i]);
+    }
 
-  _mdvx2->clearReadFields();
-  _mdvx2->setReadTime(Mdvx::READ_FIRST_BEFORE, _params->input2_url,  _params->input2_max_valid_age, _runTime);
-
-  vector<string>& input1FieldNames = _blenderFieldNames[bix]->input1FieldNames;
-  vector<string>& input2FieldNames = _blenderFieldNames[bix]->input2FieldNames;
-
-  vector<string>::const_iterator six;
-  for(six = input1FieldNames.begin(); six != input1FieldNames.end(); six++) {
-    _mdvx1->addReadField(*six);
-    if(_params->debug >= Params::DEBUG_VERBOSE) {
-      cout << "adding " << *six << endl;
+    _mdvs[i]->setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+    _mdvs[i]->setReadCompressionType(Mdvx::COMPRESSION_NONE);
+    _mdvs[i]->setReadScalingType(Mdvx::SCALING_NONE);
+    
+    if(_mdvs[i]->readVolume() < 0) {
+      if(_params->_inputs[i].required) {
+        cerr << "ERROR: failed to read input " << ip1 << " (" << _params->_inputs[i].url << ")" << endl;
+        cerr << _mdvs[i]->getErrStr() << endl;
+        cerr.flush();
+        return false;
+      } else {
+        cerr << "WARNING: failed to read input " << ip1 << "." << endl;
+	cerr << "Data is not required, so skipping..." << endl;
+      }
+    }
+    else {
+      _indices.push_back(i);
+      cerr << "File found for input " << ip1 << " (" <<  _params->_inputs[i].url << "): " << _mdvs[i]->getPathInUse() << endl;
     }
   }
 
-  if(_blenderFieldNames[bix]->input1WeightName != "")  {
-    _mdvx1->addReadField(_blenderFieldNames[bix]->input1WeightName);
-  }
-
-  for(six = input2FieldNames.begin(); six != input2FieldNames.end(); six++) {
-    _mdvx2->addReadField(*six);
-  }
-
-  if(_blenderFieldNames[bix]->input2WeightName != "")  {
-    _mdvx2->addReadField(_blenderFieldNames[bix]->input2WeightName);
-  }
-
-  _mdvx1->setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-  _mdvx1->setReadCompressionType(Mdvx::COMPRESSION_NONE);
-  _mdvx1->setReadScalingType(Mdvx::SCALING_NONE);
-
-  _mdvx2->setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-  _mdvx2->setReadCompressionType(Mdvx::COMPRESSION_NONE);
-  _mdvx2->setReadScalingType(Mdvx::SCALING_NONE);
-
-
-  if(_mdvx1->readVolume() < 0) {  
-    cerr << "ERROR: failed to read input1. " << endl;
-    cerr << _mdvx1->getErrStr() << endl;
-    cerr.flush();
-    return false;
-  }
-  if(_mdvx2->readVolume() < 0) {  
-    cerr << "ERROR: failed to read input2. " << endl;
-    cerr << _mdvx2->getErrStr() << endl;
-    cerr.flush();
-    return false;
-  }
-  
-  cerr << "File found for input 1 (" <<  _params->input1_url << "): " << _mdvx1->getPathInUse() << endl;
-  cerr << "File found for input 2 (" <<  _params->input2_url << "): " << _mdvx2->getPathInUse() << endl;
-
-  if(!_initializeOutputs()) {
-    return false;
-  }
   return true;
 }
 
@@ -542,11 +598,13 @@ bool MdvBlender::_readInputFiles(int bix)
 //
 bool MdvBlender::_initializeOutputs()
 {
-  switch (_params->output_projection) {      
+  switch (_params->output_projection) {
     case Params::OUTPUT_PROJ_INPUT1: {
-      _outMasterHdr = _mdvx1->getMasterHeader();
-      _outFieldHdr = _mdvx1->getFieldByNum(0)->getFieldHeader();
-      _outVlevelHdr = _mdvx1->getFieldByNum(0)->getVlevelHeader();
+      unsigned int i = *_indices.begin();
+      string name = _blenderFieldNames->inputFieldNames[i][0];
+      _outMasterHdr = _mdvs[i]->getMasterHeader();
+      _outFieldHdr = _mdvs[i]->getFieldByName(name)->getFieldHeader();
+      _outVlevelHdr = _mdvs[i]->getFieldByName(name)->getVlevelHeader();
       _numX = _outFieldHdr.nx;
       _numY = _outFieldHdr.ny;
       _numZ = _outFieldHdr.nz;
@@ -561,13 +619,12 @@ bool MdvBlender::_initializeOutputs()
   return true;
 }
 
-
-bool MdvBlender::_allocateOutputData(int dix, int fix) {
-  vector<string>& outputFieldNames = _blenderFieldNames[dix]->outputFieldNames;
-
-  string inName = _blenderFieldNames[dix]->input1FieldNames[fix];
-  _outVlevelHdr = _mdvx1->getFieldByName(inName)->getVlevelHeader();
-  Mdvx::field_header_t fh = _mdvx1->getFieldByName(inName)->getFieldHeader();
+bool MdvBlender::_allocateOutputData(int fix) {
+  vector<string>& outputFieldNames = _blenderFieldNames->outputFieldNames;
+  unsigned int i = *(_indices.begin());
+  string inName = _blenderFieldNames->inputFieldNames[i][fix];
+  _outVlevelHdr = _mdvs[0]->getFieldByName(inName)->getVlevelHeader();
+  Mdvx::field_header_t fh = _mdvs[i]->getFieldByName(inName)->getFieldHeader();
   unsigned int numX = fh.nx;
   unsigned int numY = fh.ny;
   unsigned int numZ = fh.nz;
@@ -599,32 +656,20 @@ void MdvBlender::printBlenderField(blenderFieldNames_t* bft)
 {
   cerr << "Added blender field:" << endl;
 
-  cerr << "  Input 1 Names:" << endl;
-  for(unsigned int i=0; i< bft->input1FieldNames.size(); i++) {
-    cerr << "    " << bft->input1FieldNames[i] << endl;
-  }
-
-  if(bft->input1WeightName == "") { 
-    cerr << "  Input 1 Constant Weight: " << endl;
-    cerr << "    " << bft->input1ConstantWeight << endl;
-  }
-  else {
-    cerr << "  Input 1 Weight Field: " << endl;
-    cerr << "    " << bft->input1WeightName << endl;
-  }
-
-  cerr << "  Input 2 Names:" << endl;
-  for(unsigned int i=0; i< bft->input2FieldNames.size(); i++) {
-    cerr << "    " << bft->input2FieldNames[i] << endl;
-  }
-
-  if(bft->input2WeightName == "") { 
-    cerr << "  Input 2 Constant Weight: " << endl;
-    cerr << "    " << bft->input2ConstantWeight << endl;
-  }
-  else {
-    cerr << "  Input 2 Weight Field: " << endl;
-    cerr << "    " << bft->input2WeightName << endl;
+  for(unsigned int i = 0; i < bft->inputFieldNames.size(); i++) {
+    int ip1 = i+1;
+    cerr << "  Input " << ip1 <<" Names:" << endl;
+    for(unsigned int j=0; j< bft->inputFieldNames[i].size(); j++) {
+      cerr << "    " << bft->inputFieldNames[i][j] << endl;
+    }
+    if(bft->inputWeightNames[i] == "") { 
+      cerr << "  Input " << ip1 <<" Constant Weight: " << endl;
+      cerr << "    " << bft->inputConstantWeights[i] << endl;
+    }
+    else {
+      cerr << "  Input " << ip1 << " Weight Field: " << endl;
+      cerr << "    " << bft->inputWeightNames[i] << endl;
+    }
   }
 
   cerr << "  Out Names:" << endl;
@@ -662,61 +707,71 @@ bool MdvBlender::_writeOutput()
   _setMasterHeader(masterHeader);
   _out->setMasterHeader(masterHeader);
 
-  if(_out->writeToDir(_params->output_url) != 0) {
+  PMU_force_register( "Writing output" );
+
+  if(_out->writeToDir(_params->output.url) != 0) {
     cerr << "ERROR: " << endl;
     cerr << "Error writing data for time " 
          << utimstr(_outMasterHdr.time_centroid) << " to URL " 
-         << _params->output_url << ":" << _out->getErrStr() << endl;
+         << _params->output.url << ":" << _out->getErrStr() << endl;
     return false;
   } else {
-    string outputPathMsg = string( "Writing to " ) + string( _out->getPathInUse() );
-    cerr << outputPathMsg << endl;
+    string outputPathMsg = string( "Wrote to " ) + string( _out->getPathInUse() );
+    cerr << outputPathMsg << endl << endl;
     PMU_auto_register( outputPathMsg.c_str() );
   } 
 
+  _cleanupOutputData();
   return true;
 }
 
 
 bool MdvBlender::_addPassThroughFields()
 {
-  _mdvx1->clearReadFields();
-  _mdvx1->setReadTime(Mdvx::READ_FIRST_BEFORE, _params->input1_url,  _params->input1_max_valid_age, _runTime);
-  _mdvx2->clearReadFields();
-  _mdvx2->setReadTime(Mdvx::READ_FIRST_BEFORE, _params->input2_url,  _params->input2_max_valid_age, _runTime);
+  PMU_force_register("Adding pass through fields");
+  //  for(unsigned int i = 0; i < _params->input_pass_throughs_n1; i++) {
+  //  for(unsigned int i = 0; i < _blenderFieldNames->inputPassThroughs.size(); i++) {
+  vector<unsigned int>::iterator it;
+  for(it=_indices.begin(); it < _indices.end(); it++) {
+    unsigned int i = *it;
+    _mdvs[i]->clearReadFields();
+    _mdvs[i]->setReadTime(Mdvx::READ_FIRST_BEFORE, _params->_inputs[i].url,  _params->_inputs[i].max_valid_age, _runTime);
 
-  if(_params->input1_pass_throughs_n != 0) {
-    for(int i=0; i<_params->input1_pass_throughs_n; i++) {
-      if(strlen(_params->_input1_pass_throughs[i].inFieldName) != 0) {
-        _mdvx1->addReadField(_params->_input1_pass_throughs[i].inFieldName);
+    //    for(int j=0; j<_params->input_pass_throughs_n2; j++) {
+    for(unsigned int j=0; j<_blenderFieldNames->inputPassThroughs[i].size(); j++) {      
+      if(_blenderFieldNames->inputPassThroughs[i][j].inputName.length() != 0) {
+        _mdvs[i]->addReadField(_blenderFieldNames->inputPassThroughs[i][j].inputName);
       }
     }
 
-    _mdvx1->setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-    _mdvx1->setReadCompressionType(Mdvx::COMPRESSION_NONE);
-    _mdvx1->setReadScalingType(Mdvx::SCALING_NONE);
+    _mdvs[i]->setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+    _mdvs[i]->setReadCompressionType(Mdvx::COMPRESSION_NONE);
+    _mdvs[i]->setReadScalingType(Mdvx::SCALING_NONE);
 
-    if (_mdvx1->readVolume() < 0) {  
-      cerr << "ERROR: failed to read input1. " << endl;
-      cerr << _mdvx1->getErrStr() << endl;
+    if (_mdvs[i]->readVolume() < 0) {  
+      cerr << "ERROR: failed to read input " << i << ". " << endl;
+      cerr << _mdvs[i]->getErrStr() << endl;
       cerr.flush();
       return false;
     }
 
-    for(int i=0; i<_params->input1_pass_throughs_n; i++) {
-      if(strlen(_params->_input1_pass_throughs[i].inFieldName) == 0) { continue; }
-      string fname = _params->_input1_pass_throughs[i].inFieldName;
-      MdvxField* fi = _mdvx1->getFieldByName(fname);
+    for(unsigned int j=0; j<_blenderFieldNames->inputPassThroughs[i].size(); j++) {
+      string fname = _blenderFieldNames->inputPassThroughs[i][j].inputName;
+      if(fname.length() == 0) {
+	continue;
+      }
+
+      MdvxField* fi = _mdvs[i]->getFieldByName(fname);
       MdvxField* field = new MdvxField(*fi);
       if(field == NULL) {
         cerr << "ERROR: Pass through field " 
-             << _params->_input1_pass_throughs[i].inFieldName 
-             << " not found in Input 1" << endl;
+             << _blenderFieldNames->inputPassThroughs[i][j].inputName 
+             << " not found in Input " << i << endl;
         return false;
       }
       Mdvx::field_header_t fh = field->getFieldHeader();
-      STRcopy(fh.field_name_long, _params->_input1_pass_throughs[i].outFieldLongName, MDV_LONG_FIELD_LEN);
-      STRcopy(fh.field_name, _params->_input1_pass_throughs[i].outFieldName, MDV_SHORT_FIELD_LEN);
+      STRcopy(fh.field_name_long, _blenderFieldNames->inputPassThroughs[i][j].outputLongName.c_str(), MDV_LONG_FIELD_LEN);
+      STRcopy(fh.field_name, _blenderFieldNames->inputPassThroughs[i][j].outputName.c_str(), MDV_SHORT_FIELD_LEN);
       field->setFieldHeader(fh);
       _out->addField(field);
       if(_params->debug >= Params::DEBUG_NORM) {
@@ -725,139 +780,95 @@ bool MdvBlender::_addPassThroughFields()
     }
   }
 
-  if(_params->input2_pass_throughs_n != 0) {
-    for(int i=0; i<_params->input2_pass_throughs_n; i++) {
-      if(strlen(_params->_input2_pass_throughs[i].inFieldName) != 0) {
-        _mdvx2->addReadField(_params->_input2_pass_throughs[i].inFieldName);
-      }
-    }
-
-    _mdvx2->setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-    _mdvx2->setReadCompressionType(Mdvx::COMPRESSION_NONE);
-    _mdvx2->setReadScalingType(Mdvx::SCALING_NONE);
-
-    if (_mdvx2->readVolume() < 0) {  
-      cerr << "ERROR: failed to read input2. " << endl;
-      cerr << _mdvx2->getErrStr() << endl;
-      cerr.flush();
-      return false;
-    }
-
-    for(int i=0; i<_params->input2_pass_throughs_n; i++) {
-      if(strlen(_params->_input2_pass_throughs[i].inFieldName) == 0) { continue; }
-      MdvxField* field = new MdvxField(*_mdvx2->getFieldByName(_params->_input2_pass_throughs[i].inFieldName));
-      if(field == NULL) {
-        cerr << "ERROR: Pass through field " 
-             << _params->_input2_pass_throughs[i].inFieldName 
-             << " not found in Input 2" << endl;
-        return false;
-      }
-      Mdvx::field_header_t fh = field->getFieldHeader();
-      STRcopy(fh.field_name_long, _params->_input2_pass_throughs[i].outFieldLongName, MDV_LONG_FIELD_LEN);
-      STRcopy(fh.field_name, _params->_input2_pass_throughs[i].outFieldName, MDV_SHORT_FIELD_LEN);
-      field->setFieldHeader(fh);
-      _out->addField(field);
-    }
-  }
-
   return true;
 }
 
 
-bool MdvBlender::_doBlend(int dix) {
-  bool useInput1Constant;
-  bool useInput2Constant;
-  double input1Constant;
-  double input2Constant;
-  MdvxField* input1WeightField;
-  MdvxField* input2WeightField;
-  const float* input1WeightData;
-  const float* input2WeightData;
-  double w1;
-  double w2;
+bool MdvBlender::_doBlend() {
+  vector<bool> useConstant;
+  vector<double> constants;
+  vector<MdvxField*> weightFields;
+  vector<const float*> weightData;
+  vector<double> w;
+  vector<double> dataPts;
 
-  if(_blenderFieldNames[dix]->input1WeightName == "") {
-    useInput1Constant = true;
-    input1Constant = _blenderFieldNames[dix]->input1ConstantWeight;
-  }
-  else {
-    useInput1Constant = false;
-    input1WeightField = _mdvx1->getFieldByName(_blenderFieldNames[dix]->input1WeightName);
-    input1WeightData = static_cast<const float*>(input1WeightField->getVol());
-  }
-
-  if(_blenderFieldNames[dix]->input2WeightName == "") {
-    useInput2Constant = true;
-    input2Constant = _blenderFieldNames[dix]->input2ConstantWeight;
-  }
-  else {
-    useInput2Constant = false;
-    input2WeightField = _mdvx2->getFieldByName(_blenderFieldNames[dix]->input2WeightName);
-    input2WeightData = static_cast<const float*>(input2WeightField->getVol());
+  PMU_force_register("Blending data");
+  
+  //  unsigned int numInputs = _params->inputs_n;
+  //  for(unsigned int i = 0; i < numInputs; i++) {
+  vector<unsigned int>::iterator it;
+  unsigned int count = 0;
+  for(it=_indices.begin(); it < _indices.end(); it++, count++) {
+    unsigned int i = *it;
+    if(_blenderFieldNames->inputWeightNames[i] == "") {
+      useConstant.push_back(true);
+      constants.push_back(_blenderFieldNames->inputConstantWeights[i]);
+    }
+    else {
+      useConstant.push_back(false);
+      weightFields.push_back(_mdvs[i]->getFieldByName(_blenderFieldNames->inputWeightNames[i]));
+      weightData.push_back(static_cast<const float*>(weightFields[count]->getVol()));
+    }
   }
 
   // if using DITHER mode, loop over grid and determine which input to use
   if(_params->blend_method == Params::BLEND_DITHER) {
-	  //	  _useInputs.clear();
     _numElem = _numX*_numY*_numZ;
     _useInputs = new float[_numElem];
     
-	  for(unsigned int j = 0; j < _numElem; j++) {
-      if(useInput1Constant) {
-        w1 = input1Constant;
+    for(unsigned int j = 0; j < _numElem; j++) {
+      w.clear();
+      for(it=_indices.begin(); it < _indices.end(); it++) {
+	int i = *it;
+        if(useConstant[i]) {
+          w.push_back(constants[i]);
+        }
+        else {
+          w.push_back(weightData[i][j]);
+        }
       }
-      else {
-        w1 = input1WeightData[j];
-      }
-
-      if(useInput2Constant) {
-        w2 = input2Constant;
-      }
-      else {
-        w2 = input2WeightData[j];
-      }
-      //     _useInputs.push_back(_evaluateDither(w1,w2));
-      _useInputs[j] = _evaluateDither(w1,w2);
+      _useInputs[j] = _evaluateDither(w);
     }
-	  if(_params->output_decision) {
-		  _vols["decision"] = _useInputs;
-		  _addFieldToOutput("decision", "dither decision", "1 or 2");
-	  }
+    if(_params->output_decision) {
+      _vols["decision"] = _useInputs;
+      _addFieldToOutput("decision", "dither decision", "1 or 2");
+    }
   }
-
-  for(unsigned int fix=0; fix<_blenderFieldNames[dix]->input1FieldNames.size(); fix++) {
-    if(!_allocateOutputData(dix, fix)) {
-	    continue;
+  
+  for(unsigned int fix=0; fix<_blenderFieldNames->inputFieldNames[0].size(); fix++) {
+    string pmuStr = string("Blending field: ") + _blenderFieldNames->inputFieldNames[0][fix];
+    PMU_force_register(pmuStr.c_str());
+    
+    if(!_allocateOutputData(fix)) {
+      continue;
     }
+    vector<string> inputNames;
+    vector<MdvxField*> inputFields;
+    vector<const float*> inputData;
+    vector<double> miss;
 
-    string input1Name = _blenderFieldNames[dix]->input1FieldNames[fix];
-    MdvxField* input1Field = _mdvx1->getFieldByName(input1Name);
-    const float* input1Data = static_cast<const float*>(input1Field->getVol());
-    double miss1 = input1Field->getFieldHeader().missing_data_value;
+    //    for(int i = 0 ; i < _params->inputs_n; i++) {
+    count = 0;
+    for(it=_indices.begin(); it < _indices.end(); it++, count++) {
+      unsigned int i = *it;
+      inputNames.push_back(_blenderFieldNames->inputFieldNames[i][fix]);
+      inputFields.push_back(_mdvs[i]->getFieldByName(inputNames[count]));
+      inputData.push_back(static_cast<const float*>(inputFields[count]->getVol()));
+      miss.push_back(inputFields[count]->getFieldHeader().missing_data_value);
 
-    string input2Name = _blenderFieldNames[dix]->input2FieldNames[fix];
-    MdvxField* input2Field = _mdvx2->getFieldByName(input2Name);
-    const float* input2Data = static_cast<const float*>(input2Field->getVol());
-    double miss2 = input2Field->getFieldHeader().missing_data_value;
- 
-    // verify dimensions are the same
-    if(!_verifyDimensions(input1Field,input2Field)) {
-      return false;
+      // verify dimensions are the same
+      if(i != 0) {
+        if(!_verifyDimensions(inputFields[0], inputFields[count])) {
+          return false;
+        }
+      }
+
+      if(!useConstant[count]) {
+        if(!_verifyDimensions(inputFields[count],weightFields[count])) {
+          return false;
+        } 
+      }
     }
-
-    if(!useInput1Constant) {
-      if(!_verifyDimensions(input1Field,input1WeightField)) {
-        return false;
-      } 
-    }
-
-    if(!useInput2Constant) {
-      if(!_verifyDimensions(input2Field,input2WeightField)) {
-        return false;
-      } 
-    }
-
-    //    _blender->setRound(_blenderFieldNames[dix]->outputRounding[fix]);    
 
     for(unsigned int j=0; j<_numElem; j++) {
       if(_params->debug >= Params::DEBUG_GARRULOUS) {
@@ -867,49 +878,49 @@ bool MdvBlender::_doBlend(int dix) {
         int x = temp % _numX;
         cerr << "[" << x << "," << y << "," << z << "]:";
       }
+      
       if(_params->blend_method == Params::BLEND_AVERAGE) {
-        if(useInput1Constant) {
-          w1 = input1Constant;
-        }
-        else {
-          w1 = input1WeightData[j];
-        }
-
-        if(useInput2Constant) {
-          w2 = input2Constant;
-        }
-        else {
-          w2 = input2WeightData[j];
-        }
-	      _vols[input1Name][j] = _evaluateAverage(input1Data[j], input2Data[j], w1, w2, miss1, miss2, _blenderFieldNames[dix]->outputRounding[fix]);
+        w.clear();
+        dataPts.clear();
+	//	miss.clear();
+	
+	//	for(int i = 0; i < _params->inputs_n; i++) {
+	count = 0;
+        for(it=_indices.begin(); it < _indices.end(); it++, count++) {
+	  unsigned int i = *it;
+          if(useConstant[count]) {
+            w.push_back(constants[count]);
+          }
+          else {
+            w.push_back(weightData[count][j]);
+          }
+	  dataPts.push_back(inputData[count][j]);
+	  //          miss.push_back(inputFields[i]->getFieldHeader().missing_data_value);
+	}
+ 
+        string name = _blenderFieldNames->outputFieldNames[fix];
+        _vols[name][j] = _evaluateAverage(dataPts, w, miss, _blenderFieldNames->outputRounding[fix]);
       }
       else { // if(_params->blend_method == Params::BLEND_DITHER) {
-	      if(_useInputs[j] == 1) {
-		      if(input1Data[j] != miss1) {
-  		      _vols[input1Name][j] = input1Data[j];
-		      }
-		      else if(input2Data[j] != miss2) {
-   		      _vols[input1Name][j] = input2Data[j];
-		      }
-		      else {
-            _vols[input1Name][j] = Constants::MISSING_DATA_VALUE;
-		      }
-	      }
-	      else { // if useInputs[j] == 2) {
-		      if(input2Data[j] != miss2) {
-  		      _vols[input1Name][j] = input2Data[j];
-		      }
-		      else if(input1Data[j] != miss1) {
-   		      _vols[input1Name][j] = input1Data[j];
-		      }
-		      else {
-            _vols[input1Name][j] = Constants::MISSING_DATA_VALUE;
-		      }
-	      }
+	//        for(int i = 0; i < _params->inputs_n; i++) {
+	count = 0;
+        for(it=_indices.begin(); it < _indices.end(); it++, count++) {
+	  unsigned int i = *it;
+          if(_useInputs[j] == i) {
+            string name = _blenderFieldNames->outputFieldNames[fix];
+            if(inputData[count][j] != miss[count]) {
+              _vols[name][j] = inputData[count][j];
+            }
+            else {
+              _vols[name][j] = Constants::MISSING_DATA_VALUE;
+            }
+          }
+        }
       }
     }
 
-    _addFieldToOutput(_blenderFieldNames[dix]->outputFieldNames[fix],_blenderFieldNames[dix]->outputFieldLongNames[fix], _blenderFieldNames[dix]->outputFieldUnits[fix]);
+    _addFieldToOutput(_blenderFieldNames->outputFieldNames[fix],_blenderFieldNames->outputFieldLongNames[fix], _blenderFieldNames->outputFieldUnits[fix]);
+   
   }
   return true;
 }
@@ -1064,60 +1075,62 @@ bool MdvBlender::_verifyDimensions(MdvxField* input1Field, MdvxField* input2Fiel
 }
 
 
-int MdvBlender::_evaluateDither(double w1, double w2)
+ int MdvBlender::_evaluateDither(vector<double> w)
 {
-	/*
-	if(d1 == miss1 && d2 == miss2) {
-		return Constants::MISSING_DATA_VALUE;
-	}
-  if(d1 == miss1) {
-    return 2;
+  double weightSum = 0;
+  double runningWeight = 0;
+  for(unsigned int i = 0; i < w.size(); i++) {
+    weightSum += w[i];
   }
-  if(d2 == miss2) {
-		return 1;
-  }
-	*/
-	double random = ((double)rand() / RAND_MAX) * (w1+w2);
-	if(_params->debug >= Params::DEBUG_VERBOSE) {
-	  std::cerr << "W1: " << w1 << " W2: " << w2 << " Value: " << random;
-  }
-	if(random < w1) {
-                if(_params->debug >= Params::DEBUG_VERBOSE) {
-			std::cerr << " - Using input 1 data" << std::endl;
+  double random = ((double)rand() / RAND_MAX) * (weightSum);
+  if(_params->debug >= Params::DEBUG_VERBOSE) {
+    for(unsigned int i = 0; i < w.size(); i++) {
+      unsigned int ip1 = i+1;
+      cerr << "W" << ip1 << ": " << w[i] << " ";
     }
-		return 1;
-	}
-	else {
-		if(_params->debug >= Params::DEBUG_VERBOSE) {
-			std::cerr << " - Using input 2 data" << std::endl;
+    cerr << " Value: " << random;
+  }
+  for(unsigned int i = 0; i < w.size(); i++) {
+    unsigned int ip1 = i+1;
+    runningWeight += w[i];
+    if(random < runningWeight) {
+      if(_params->debug >= Params::DEBUG_VERBOSE) {
+        std::cerr << " - Using input " << ip1 << " data" << std::endl;
+      }
+      return i;
     }
-		return 2;
-	}
+  }
+  return w.size()-1;
 }
 
-double MdvBlender::_evaluateAverage(double d1, double d2, double w1, double w2, double miss1, double miss2, Params::round_t round) {
-  if(d1 == miss1 && d2 == miss2) {
-    return Constants::MISSING_DATA_VALUE;
-  }
-  if(d1 == miss1) {
-    return d2;
+ double MdvBlender::_evaluateAverage(vector<double> d, vector<double> w, vector<double> miss, Params::round_t round) {
+  double weightedData = 0;
+  double totalWeights = 0;
+  for(unsigned int i = 0; i < d.size(); i++) {
+    if(d[i] != miss[i]) {
+      weightedData += d[i] * w[i];
+      totalWeights += w[i];
+    }
   }
 
-  if(d2 == miss2) {
-    return d1;
+  if(totalWeights == 0) {
+    return Constants::MISSING_DATA_VALUE;
   }
-  if(_params->debug) {
-    std::cerr << d1 << " * " << w1 << " + " << d2 << " * " << w2 << std::endl;
-  }
+ 
   // add 0.5 to round to closest integer
-  if(round == Params::ROUND_UP) {	
-    return ceil( floor(d1 * w1 + 0.5) + floor(d2 * w2 + 0.5)  );
+  double total = 0;
+  if(round == Params::ROUND_UP) {
+    return ceil(weightedData / totalWeights);
+    //    return ceil( floor(d1 * w1 + 0.5) + floor(d2 * w2 + 0.5)  );
   }
-  else if(round == Params::ROUND_DOWN) {	
-    return floor( floor(d1 * w1 + 0.5) + floor(d2 * w2 + 0.5)  );
+  else if(round == Params::ROUND_DOWN) {
+    return floor(weightedData / totalWeights);
+    //    return floor( floor(d1 * w1 + 0.5) + floor(d2 * w2 + 0.5)  );
   }
-  else if(round == Params::ROUND_CLOSEST) {	
-    return floor( d1 * w1 + d2 * w2 + 0.5 );
+  else if(round == Params::ROUND_CLOSEST) {
+    total = (weightedData + 0.5) / totalWeights;
+    return floor(total);
+    //    return floor( d1 * w1 + d2 * w2 + 0.5 );
   }
-  return d1 * w1 + d2 * w2;
+  return weightedData / totalWeights;
 }

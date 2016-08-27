@@ -105,7 +105,7 @@ RealtimeDirInputManager::RealtimeDirInputManager(InputManager::input_data_t inpu
             cout << "   Roll back time is " << dateTimeObj.getStr() << endl;
             cout << "   Roll back one day to " << inputDir << endl;
             }
-	 }
+      }
 
       cerr << "RealtimeDirInputManager:: Input Directory is " << inputDir << endl;
 
@@ -336,7 +336,7 @@ bool RealtimeDirInputManager::_updateDateSubDirectory()
          //  Always set last argument to zero. When date has changed, we probably
          //  do not want to consider older files.
          // SMUELLER DEVELOPMENT NOTE - What about looking back at startup or run_once mode?
-         _inputDir = new InputDir(inputDir.c_str(), "", 0, getExclusionStr());
+         _inputDir = new InputDir(inputDir.c_str(), "", true, getExclusionStr());
          if(0 == _inputDir) // 0 is NULL
             {
             cerr << "ERROR: " << methodName << endl;

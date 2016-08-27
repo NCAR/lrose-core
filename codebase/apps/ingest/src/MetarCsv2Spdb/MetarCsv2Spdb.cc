@@ -588,7 +588,8 @@ bool MetarCsv2Spdb::_parseHeader(string line)
 
   if(_iObsTime == MISSING_INDEX)
 	{
-		cerr << "Required field 'time' not found in header" << endl;
+	  cerr << "WARNING : Required field (time) \"" << _params.field_names.obs_time_n << "\"  not found in header" << endl;
+	  cerr << "HEADER LINE = <" << line << ">" << endl;
 		return false;
   }
 

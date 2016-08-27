@@ -93,14 +93,14 @@ paramdef enum mode_t
 paramdef string
 {
   p_descr = "Start time";
-  p_help = "run time is in the form <YYYY MM DD HH MM SS>";
+  p_help = "Start time is in the form <YYYY MM DD HH MM SS>";
   p_default = "2005 01 19 18 00 00";
 } start_time;
 
 paramdef string
 {
-  p_descr = "Run time";
-  p_help = "run time is in the form <YYYY MM DD HH MM SS>";
+  p_descr = "End time";
+  p_help = "End time is in the form <YYYY MM DD HH MM SS>";
   p_default = "2005 01 19 18 00 00";
 } end_time;
 
@@ -120,35 +120,6 @@ commentdef
   p_header = "PROCESS I/O PARAMETERS";
   p_text = "Parameters describing the input and output locations.";
 };
-
-
-paramdef string
-{
-  p_descr = "Input1 URL";
-  p_help = "This is the URL for the first input to be blended.";
-  p_default = "mdvp:://localhost::mdv/metar_mapper";
-} input1_url;
-
-paramdef int
-{
-  p_descr = "Input1 maximum valid age";
-  p_help = "units are seconds";
-  p_default = 1800;
-} input1_max_valid_age;
-
-paramdef string
-{
-  p_descr = "Input2 URL";
-  p_help = "This is the URL for the second input to be blended.";
-  p_default = "mdvp:://localhost::mdv/model_metars";
-} input2_url;
-
-paramdef int
-{
-  p_descr = "Input2 maximum valid age";
-  p_help = "units are seconds";
-  p_default = 1800;
-} input2_max_valid_age;
 
 paramdef string
 {
@@ -202,14 +173,6 @@ paramdef enum compression_type_t {
   p_default = COMPRESSION_RLE;
   p_descr = "Set compression type.";
 } compression_type;
-
-
-paramdef string
-{
-  p_descr = "Output URL";
-  p_help = "URL to use for storing results.";
-  p_default = "mdvp:://localhost::mdv/blended_metars";
-} output_url;
 
 paramdef int
 {
@@ -285,35 +248,6 @@ paramdef struct output_grid_t {
 } output_grid;
 
 /***********************************************************************
- * Pass Through Configurarion
- */
-
-commentdef
-{
-  p_header = "Pass Through Configuration";
-  p_text = "Parameters desfining the pass through of inputs.";
-};
-
-typedef struct {
-  string inFieldName;
-  string outFieldName;
-  string outFieldLongName;
-} pass_through_t;
-
-paramdef struct pass_through_t {
-  p_descr = "These fields from INPUT1 will be passed through to the output with only field names changed.";
-  p_help = "";
-  p_default = { {"","",""} };
-} input1_pass_throughs[];
-  
-paramdef struct pass_through_t {
-  p_descr = "These fields from INPUT2 will be passed through to the output with only field names changed.";
-  p_help = "";
-  p_default = { {"","",""} };
-} input2_pass_throughs[];
-  
-
-/***********************************************************************
  * Blender Configurarion
  */ 
 
@@ -323,30 +257,75 @@ commentdef
   p_text = "Parameters desfining the blender process.";
 };
 
+typedef struct {
+  string url;
+  int max_valid_age;
+  string field_names;
+  double constant_weight;
+  string weight_field;
+  boolean required;
+} blender_input_t;
+
+paramdef struct blender_input_t {
+  p_descr = "Define the inputs to blend";
+  p_help = "fieldNames is a comma separated list & must have the same number of elements."
+           "If a weight field is an empty string, the constant weight is used instead."
+	   "All fields in a single struct are tied together"
+	   "(i.e. one probabilistic deicision is made and then applied to all fields in the same blender_info element";
+  p_default = {
+    { "mdvp:://::mdv/input1",
+      3600,
+      "FIELD_ONE,FIELD_TWO",
+      0.5, "WEIGHT_FIELD",
+      TRUE
+    },
+    { "mdvp:://::mdv/input2",
+      3600,
+      "FIELD_ONE,FIELD_TWO",
+      0.5, "WEIGHT_FIELD",
+      TRUE
+    }
+  }
+} inputs[];
+
+paramdef string {
+  p_descr = "These fields from the inputs that will be passed through to the output with only field names changed.";
+  p_help = "Each comma separated list contains the input field name, output field name, and output long field name."
+            "Each group of lists correspond to each input from the inputs parameter";
+ p_default = {
+    {
+     "IN1IN1,IN1OUT1,IN1LONG1",
+     "IN1IN2,IN1OUT2,IN1LONG2",
+     "IN1IN3,IN1OUT3,IN1LONG3"
+     
+    },
+    {
+     "IN2IN1,IN2OUT1,IN1LONG1",
+     "",
+     ""
+    }
+  };
+} input_pass_throughs[][];
 
 typedef struct {
-  string outputFieldNames;
-  string outputFieldLongNames;
-  string outputFieldUnits;
-  string input1WeightField;
-  double input1ConstantWeight;
-  string input1FieldNames;
-  string input2WeightField;
-  double input2ConstantWeight;
-  string input2FieldNames;
-  string outputRounding;
-} blender_info_t;
+  string url;
+  string field_names;
+  string field_long_names;
+  string field_units;
+  string rounding;
+} blender_output_t;
 
-paramdef struct blender_info_t {
-  p_descr = "Define the blending to be done";
-  p_help = "outputFieldNames and inputFieldNames are comma separated lists & must have the same number of elements.  If a weight field is an empty string, the constant weight is used instead. All fields in a single struct are tied together (i.e. one probabilistic deicision is made and then applied to all fields in the same blender_info element";
+paramdef struct blender_output_t {
+  p_descr = "Define the output";
+  p_help = "";
   p_default = {
-    { "CLD_BASE_HGT,CLOUD_COVER", "Cloud Base Height,Cloud Cover", "m MSL,max for GP",
-      "CBH_CONF", 0.5,"CLD_BASE_HGT,CLOUD_COVER", 
-      "", 0.25, "CLD_BASE_HGT,CLOUD_COVER",
-      "ROUND_NONE,ROUND_UP"}
+      "mdvp:://::mdv/blended",
+      "FIELD_ONE,FIELD_TWO",
+      "Field One,Field Two",
+      "none,none",
+      "ROUND_NONE,ROUND_UP"
   };
-} blender_info[];
+} output;
 
 paramdef double
 {

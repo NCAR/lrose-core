@@ -800,7 +800,7 @@ static int Accept( int sd, struct sockaddr * saddp)
 
     /* accept the connection */
     errno = 0;
-    if ((new_sd = accept(sd, (struct sockaddr *) &sadd, &sadd_len)) < 0) {
+    if ((new_sd = accept(sd, (struct sockaddr *) &sadd, (socklen_t*) &sadd_len)) < 0) {
 	ERRprintf(ERR_RESOURCE, "%s: accept failed, errno = %d", 
 		  Application, errno);
 	return -1;

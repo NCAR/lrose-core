@@ -229,7 +229,7 @@ void OutputMdv::addField(const RadxVol &vol,
   }
   for (int i = 0; i < nLevels; i++) {
     vhdr.level[i] = vlevels[i];
-    vhdr.type[i] = Mdvx::VERT_TYPE_Z;
+    vhdr.type[i] = fhdr.vlevel_type;
   }
   
   // create field

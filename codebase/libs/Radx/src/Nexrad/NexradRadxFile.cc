@@ -3125,7 +3125,7 @@ int NexradRadxFile::_writeMsg31(const RadxVol &writeVol,
   bool haveRef = true;
   RadxBuf refBuf;
   NexradData::message_31_field_t refFhdr;
-  if (_loadField(copy, "REF", "REF,DBZ,DBZHC,ZH,Z_HH",
+  if (_loadField(copy, "REF", "REF,DBZ,DBZHC,ZH,Z_HH,DZ",
                  1, 2.0, 66.0, refFhdr, refBuf)) {
     haveRef = false;
   }

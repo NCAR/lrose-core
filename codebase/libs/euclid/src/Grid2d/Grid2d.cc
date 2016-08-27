@@ -27,6 +27,7 @@
  */
 
 #include <euclid/Grid2d.hh>
+#include <toolsa/LogStream.hh>
 #include <cstdio>
 
 //---------------------------------------------------------------------------
@@ -88,6 +89,13 @@ void Grid2d::print(void) const
 {
   printf("Grid2d:%s miss:%.2f npt:%d nx,ny:%d,%d\n",
 	 _name.c_str(), _missing, _npt, _nx, _ny);
+}
+
+//---------------------------------------------------------------------------
+void Grid2d::log(void) const
+{
+  LOG(PRINT) << "\tGrid2d:" << _name << " miss:" << _missing << " npt:"
+	     << _npt << "nx,ny:" << _nx << "," << _ny;
 }
 
 //---------------------------------------------------------------------------

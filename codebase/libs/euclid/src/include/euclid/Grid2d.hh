@@ -101,6 +101,11 @@ public:
   bool valuesEqual(const Grid2d &g) const;
 
   /**
+   * Print out contents to stdout as a log message with time stamp
+   */
+  void log(void) const;
+
+  /**
    * Print out contents to stdout
    */
   void print(void) const;

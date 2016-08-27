@@ -33,7 +33,7 @@
  * 
  *  @date July 2014
  *
- *  @version $Id: MdvBlender.hh,v 1.10 2016/06/23 17:15:16 mccabe Exp $
+ *  @version $Id: MdvBlender.hh,v 1.12 2016/08/23 21:24:39 mccabe Exp $
  */
 
 
@@ -83,22 +83,25 @@ public:
   /** Execution of program */
   int run();
 
-	bool isOK() { return _isOK; }
+  bool isOK() { return _isOK; }
 
-
-	/** parameter structures */
-	struct blenderFieldNames_t {
-		std::vector<std::string> outputFieldNames;
-		std::vector<std::string> outputFieldLongNames;
-		std::vector<std::string> outputFieldUnits;
-		std::vector<std::string> input1FieldNames;
-		std::vector<std::string> input2FieldNames;
-		std::vector<Params::round_t> outputRounding;
-		std::string input1WeightName;
-		std::string input2WeightName;
-		double input1ConstantWeight;
-		double input2ConstantWeight;
-	};
+  /** parameter structures */
+  struct pass_through_t {
+    string inputName;
+    string outputName;
+    string outputLongName;
+  };
+  
+  struct blenderFieldNames_t {
+    std::vector<std::string> outputFieldNames;
+    std::vector<std::string> outputFieldLongNames;
+    std::vector<std::string> outputFieldUnits;
+    std::vector< std::vector<std::string> > inputFieldNames;
+    std::vector<Params::round_t> outputRounding;
+    std::vector<std::string> inputWeightNames;
+    std::vector<double> inputConstantWeights;
+    std::vector<std::vector<pass_through_t> > inputPassThroughs;
+  };
 
 protected:
   
@@ -113,24 +116,23 @@ private:
   // Singleton instance pointer
   static MdvBlender *_instance; 
 
-	bool _isOK;
+  bool _isOK;
 
-	/** Input related data members */
-	DsMdvxInput* _inputTrigger;
-	time_t _runTime;
-	DsMdvx* _mdvx1;
-	DsMdvx* _mdvx2;
-	
-	std::vector<blenderFieldNames_t*> _blenderFieldNames;
+  /** Input related data members */
+  DsMdvxInput* _inputTrigger;
+  time_t _runTime;
+  std::vector<DsMdvx*> _mdvs;
+  vector<unsigned int> _indices;
+  
+  blenderFieldNames_t* _blenderFieldNames;
 
-	/** output related datemembers */
-	DsMdvx* _out;
-	unsigned int _numX;
+  /** output related datemembers */
+  DsMdvx* _out;
+  unsigned int _numX;
   unsigned int _numY;
   unsigned int _numZ;
   unsigned int _numElem;
 
-	//  vector<int> _useInputs;
   float * _useInputs;
 
   // template master, field and vlevel headers -- used to generate output headers
@@ -138,13 +140,13 @@ private:
   Mdvx::field_header_t _outFieldHdr;
   Mdvx::vlevel_header_t _outVlevelHdr;
 
-	std::map<std::string, float *> _vols;
+  std::map<std::string, float *> _vols;
 
-	std::map<std::string,float*> _blenderOutputVolumes;  //key is fieldname
+  std::map<std::string,float*> _blenderOutputVolumes;  //key is fieldname
 
-	Blender* _blender;
+  Blender* _blender;
 
-	/**
+  /**
    * setup the MdvBlender object state 
    * 
    * @param[in] argc number of command line arguments
@@ -152,35 +154,37 @@ private:
    */
   bool _initialize(int argc, char **argv);
 
-	/** setup headers for output & allocate memory */
-	bool _initializeOutputs();
+  void _cleanUp();
+  
+  /** setup headers for output & allocate memory */
+  bool _initializeOutputs();
 
-	/** helper function for _getNextData() */
-	bool _readInputFiles(int bix);
+  /** helper function for _getNextData() */
+  bool _readInputFiles();
 
-	/** parse comma separated param strings into vectors*/
-	bool _parseParams();
+  /** parse comma separated param strings into vectors*/
+  bool _parseParams();
 
-	/** helper for _parseParams() */
-	void _fillVector(std::string commaSep, std::vector<std::string>& vec,
+  /** helper for _parseParams() */
+  void _fillVector(std::string commaSep, std::vector<std::string>& vec,
                    bool removeWhite=true);
 
-	void printBlenderField(blenderFieldNames_t* bft);
-	bool _writeOutput();
-	bool _addPassThroughFields();
-	bool _doBlend(int idx);
-	bool _allocateOutputData(int dix, int fix);
-	void _cleanupOutputData();
-	void _addFieldToOutput(string name, string longName, string units);
+  void printBlenderField(blenderFieldNames_t* bft);
+  bool _writeOutput();
+  bool _addPassThroughFields();
+  bool _doBlend();
+  bool _allocateOutputData(int fix);
+  void _cleanupOutputData();
+  void _addFieldToOutput(string name, string longName, string units);
 
-	void _setMasterHeader(Mdvx::master_header_t& hdr);
+  void _setMasterHeader(Mdvx::master_header_t& hdr);
   void _setFieldHeader(Mdvx::field_header_t& hdr, const string& name,
-			  const string& longName, const string& unit, int fCode, int nx,
-                                 int ny, int nz);
-	bool _verifyDimensions(MdvxField* input1Field, MdvxField* input2Field);
+                       const string& longName, const string& unit,
+		       int fCode, int nx, int ny, int nz);
+  bool _verifyDimensions(MdvxField* input1Field, MdvxField* input2Field);
 
-	double _evaluateAverage(double d1, double d2, double w1, double w2, double miss1, double miss2, Params::round_t round);
-	int _evaluateDither(double w1, double w2);
+  double _evaluateAverage(vector<double> d, vector<double> w, vector<double> miss, Params::round_t round);
+  int _evaluateDither(vector<double> w);
 
   /**  Disallow the constructor (singleton)*/
   MdvBlender();
@@ -188,7 +192,6 @@ private:
   MdvBlender(const MdvBlender &);
   /**  Disallow the assignment operator (singleton)*/
   MdvBlender &operator=(const MdvBlender &);
-
 };
 
 # endif   // MDVBLENDER_H

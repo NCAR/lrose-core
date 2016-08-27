@@ -89,6 +89,7 @@ NoiseLocator::NoiseLocator()
 {
 
   _debug = false;
+  _equalBiasInAllChannels = false;
 
   // create grid if not yet done
   // grid resolution is 0.5 degreed in each dimension (el, az)
