@@ -108,15 +108,10 @@ The `prefix` refers to the directory into which the binary release will be insta
 
 and generally this need not be changed from the default. The binary release is prepared in that directory, before being collected into the final tar file.
 
-By default a source release will be saved in:
+By default a binary release will be saved in:
 
 ```
   $HOME/releases/package_name
-```
-
-To create the release, run the script:
-```
-  ./create_bin_release.py
 ```
 
 The release will be saved as:
@@ -125,7 +120,9 @@ The release will be saved as:
   releaseDir/package-yyyymmdd.x86_64.tgz
 ```
 
-for a 64-bit LINUX build. Here `package` is the package name.
+for a 64-bit LINUX build.
+
+Here `package` is the package name.
 
 For a 32-bit build the name will be:
 ```
