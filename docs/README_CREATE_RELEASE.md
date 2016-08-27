@@ -29,7 +29,7 @@ By default a source release will be saved in:
 
 To create the release, you run the script:
 ```
-  create_src_release
+  create_src_release.py
 ```
 
 The usage is:
@@ -65,4 +65,78 @@ The release will be saved as:
 ```
 
 where `package` is the package name, and `package.rb` is the OSX brew recipe file.
+
+### Creating a binary release
+
+You create a binary release from a source release.
+
+Generally this is done using the /tmp directory.
+
+We will use the example of the `radx-20160827.src.tgz` source release.
+
+```
+  cd /tmp
+  cp -r ~/releases/radx/radx-20160827.src.tgz .
+  tar xvfz radx-20160827.src.tgz
+  cd radx-20160827.src
+  ./create_bin_release.py
+```
+
+The `create_bin_release.py` script is installed at the top level of the release.
+
+The usage is:
+
+```
+Usage: create_bin_release.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  --debug               Set debugging on
+  --verbose             Set verbose debugging on
+  --prefix=PREFIX       Prefix name for install location
+  --releaseDir=RELEASETOPDIR
+                        Top-level release dir
+  --force               force, do not request user to check if it is OK to
+                        proceed
+```
+
+The `prefix` refers to the directory into which the binary release will be installed as it is prepared. This defaults to:
+
+```
+  /tmp/{package}_prepare_release_bin_directory
+```
+
+and generally this need not be changed from the default. The binary release is prepared in that directory, before being collected into the final tar file.
+
+By default a source release will be saved in:
+
+```
+  $HOME/releases/package_name
+```
+
+To create the release, run the script:
+```
+  ./create_bin_release.py
+```
+
+The release will be saved as:
+
+```
+  releaseDir/package-yyyymmdd.x86_64.tgz
+```
+
+for a 64-bit LINUX build. Here `package` is the package name.
+
+For a 32-bit build the name will be:
+```
+  releaseDir/package-yyyymmdd.i686.tgz
+```
+
+For a Mac OSX 64-bit build the name will be:
+```
+  releaseDir/package-yyyymmdd.macosx_64.tgz
+```
+
+
+
 
