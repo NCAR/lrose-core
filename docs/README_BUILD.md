@@ -216,6 +216,7 @@ For 32-bit compatibility, install the following packages:
   libpng-devel.i686
   libstdc++-devel.i686
   libtiff-devel.i686
+  libexpat-devel.i686
 
 ```
 
@@ -224,7 +225,7 @@ On Redhat-based hosts you can achieve this by running:
 ```
 yum install -y glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
 libjpeg-devel.i686 libpng-devel.i686 libstdc++-devel.i686 \
-libtiff-devel.i686
+libtiff-devel.i686 libexpat-devel.i686
 ```
 
 On Debian, you need to run the following:
