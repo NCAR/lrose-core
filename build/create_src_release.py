@@ -446,6 +446,7 @@ def trimToMakefiles(subDir):
     entries = os.listdir(dirPath)
     for entry in entries:
         if (entry == "scripts"):
+            # always keep scripts directories
             continue
         if (os.path.isdir(entry)):
             if (entry not in subNameList):
