@@ -33,6 +33,25 @@ git clone https://github.com/NCAR/lrose-core
 | codebase/make_bin | release and build support scripts |
 | codebase/make_include | incude files for NCAR-style make system |
 
+### Running LROSE on LINUX
+
+To run LROSE on LINUX, you will need a good, up-to date LINUX distribution.
+
+Recommended distributions are:
+
+  * Debian
+  * Ubuntu
+  * RedHat
+  * Centos
+  * Fedora
+  * Suse
+
+The gcc/g++ version should be 4.8.5 or later.
+
+Distributions dated after June 2015 should work.
+
+LROSE builds requires support for the c++11 standard.
+
 ### Building LROSE
 
 You can build LROSE using either of the following:
@@ -51,7 +70,7 @@ See [README_BUILD.md](./docs/README_BUILD.md) for details.
 
 See [README_INSTALL_BIN.md](./docs/README_INSTALL_BIN.md)
 
-### Createing an LROSE release
+### Creating an LROSE release
 
 See [README_CREATE_RELEASE.md](./docs/README_CREATE_RELEASE.md)
 
