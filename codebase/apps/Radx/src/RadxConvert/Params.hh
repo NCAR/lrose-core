@@ -555,6 +555,10 @@ public:
 
   tdrp_bool_t apply_georeference_corrections;
 
+  tdrp_bool_t apply_time_offset;
+
+  double time_offset_secs;
+
   tdrp_bool_t apply_azimuth_offset;
 
   double azimuth_offset;
@@ -712,7 +716,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[153];
+  mutable TDRPtable _table[156];
 
   const char *_className;
 

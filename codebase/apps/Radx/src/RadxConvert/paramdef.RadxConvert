@@ -388,6 +388,22 @@ paramdef boolean {
 } apply_georeference_corrections;
 
 commentdef {
+  p_header = "OPTION TO CORRECT TIME";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply an offset to the ray times.";
+  p_help = "If TRUE, this offset will be ADDED to the existing ray times. This is useful, for example, for correcting time errors, or converting from local time to UTC.";
+} apply_time_offset;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Time offset (secs).";
+  p_help = "See 'apply_time_offset'. This value will be ADDED to the existing ray times.";
+} time_offset_secs;
+
+commentdef {
   p_header = "OPTION TO CORRECT ANTENNA ANGLES";
 }
 

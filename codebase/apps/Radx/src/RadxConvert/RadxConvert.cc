@@ -583,6 +583,16 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     vol.setSiteName(_params.site_name);
   }
     
+  // apply time offsets
+
+  if (_params.apply_time_offset) {
+    if (_params.debug) {
+      cerr << "NOTE: applying time offset (secs): " 
+           << _params.time_offset_secs << endl;
+    }
+    vol.applyTimeOffsetSecs(_params.time_offset_secs);
+  }
+
   // apply angle offsets
 
   if (_params.apply_azimuth_offset) {
