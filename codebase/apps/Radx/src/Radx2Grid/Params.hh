@@ -491,6 +491,10 @@ public:
 
   tdrp_bool_t override_fixed_angle_with_mean_measured_angle;
 
+  tdrp_bool_t apply_time_offset;
+
+  double time_offset_secs;
+
   tdrp_bool_t set_max_range;
 
   double max_range_km;
@@ -778,7 +782,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[189];
+  mutable TDRPtable _table[192];
 
   const char *_className;
 

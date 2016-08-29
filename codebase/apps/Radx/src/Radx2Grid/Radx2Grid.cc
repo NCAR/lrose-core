@@ -411,6 +411,12 @@ int Radx2Grid::_readFile(const string &filePath)
   }
   _readPaths = inFile.getReadPaths();
   
+  // apply time offset
+
+  if (_params.apply_time_offset) {
+    _readVol.applyTimeOffsetSecs(_params.time_offset_secs);
+  }
+
   // apply angle corrections as appropriate
   // side effect - forces el between -180 and 180
   
