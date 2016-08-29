@@ -863,6 +863,13 @@ public:
   
   void reorderSweepsAsInFileAscendingAngle();
 
+  /// Apply a time offset, in seconds to all rays in the volume
+  /// This applies to the rays currently in the volume, not to
+  /// any future reads.
+  /// The offset is ADDED to the ray times.
+  
+  void applyTimeOffsetSecs(double offsetSecs);
+
   /// Apply an azimuth offset to all rays in the volume
   /// This applies to the rays currently in the volume, not to
   /// any future reads

@@ -2632,6 +2632,39 @@ void RadxVol::reorderSweepsAsInFileAscendingAngle()
 }
 
 //////////////////////////////////////////////////////////////////
+/// Apply a time offset, in seconds to all rays in the volume
+/// This applies to the rays currently in the volume, not to
+/// any future reads.
+/// The offset is ADDED to the ray times.
+
+void RadxVol::applyTimeOffsetSecs(double offsetSecs)
+
+{
+
+  for (size_t ii = 0; ii < _rays.size(); ii++) {
+    RadxRay *ray = _rays[ii];
+    RadxTime rayTime = ray->getRadxTime();
+    RadxTime newTime = rayTime + offsetSecs;
+    ray->setTime(newTime);
+  } // ii
+
+  // reload sweep info and volume info,
+  // since these are affected by the times
+  
+  loadSweepInfoFromRays();
+  loadVolumeInfoFromRays();
+
+  // update history
+
+  time_t now = time(NULL);
+  char note[1024];
+  sprintf(note, "Applying time offset (secs): %g, mod time %s\n",
+          offsetSecs, RadxTime::strm(now).c_str());
+  _history += note;
+
+}
+
+//////////////////////////////////////////////////////////////////
 /// Apply an azimuth offset to all rays in the volume
 /// This applies to the rays currently in the volume, not to
 /// any future reads
@@ -2660,7 +2693,7 @@ void RadxVol::applyAzimuthOffset(double offset)
 
   time_t now = time(NULL);
   char note[1024];
-  sprintf(note, "Applying azimuth offset: %g, time %s\n",
+  sprintf(note, "Applying azimuth offset: %g, mod time %s\n",
           offset, RadxTime::strm(now).c_str());
   _history += note;
 
@@ -2691,7 +2724,7 @@ void RadxVol::applyElevationOffset(double offset)
 
   time_t now = time(NULL);
   char note[1024];
-  sprintf(note, "Applying elevation offset: %g, time %s\n",
+  sprintf(note, "Applying elevation offset: %g, mod time %s\n",
           offset, RadxTime::strm(now).c_str());
   _history += note;
 
