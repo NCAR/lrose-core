@@ -136,6 +136,18 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-time_offset")) {
+      
+      if (i < argc - 1) {
+        i++;
+	sprintf(tmp_str, "time_offset_secs = %s;", argv[i]);
+	TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "apply_time_offset = true;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
     } else if (!strcmp(argv[i], "-path") || !strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
@@ -240,6 +252,8 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "           Sets mode to ARCHIVE\n"
+      << "\n"
+      << "  [ -time_offset ? ] set time offset (secs)\n"
       << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"

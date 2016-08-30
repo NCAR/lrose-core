@@ -663,6 +663,18 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-time_offset")) {
+      
+      if (i < argc - 1) {
+        i++;
+	sprintf(tmp_str, "time_offset_secs = %s;", argv[i]);
+	TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "apply_time_offset = true;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
     }
     
   } // i
@@ -891,6 +903,8 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -sweep_max ? ] set max sweep number\n"
       << "     use '-sweep' for setting minimum\n"
+      << "\n"
+      << "  [ -time_offset ? ] set time offset (secs)\n"
       << "\n"
       << "  [ -title ? ] override the title string\n"
       << "\n"
