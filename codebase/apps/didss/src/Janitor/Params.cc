@@ -590,7 +590,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Top level directory - defaults to DATA_DIR or RAP_DATA_DIR if not set.");
     tt->help = tdrpStrDup("The Janitor traverses recursively from this directory downwards.");
     tt->val_offset = (char *) &top_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/junk");
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'once_only'
