@@ -670,7 +670,7 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("AIRCRAFT CALL SIGN");
-    tt->comment_text = tdrpStrDup("For IWRF and CFRADIAL data.");
+    tt->comment_text = tdrpStrDup("For IWRF, CFRADIAL and UDP data.");
     tt++;
     
     // Parameter 'aircraft_callsign'

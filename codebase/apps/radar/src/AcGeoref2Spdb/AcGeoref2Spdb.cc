@@ -43,6 +43,7 @@
 #include <iomanip>
 #include <fstream>
 #include <cerrno>
+#include <cmath>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -52,11 +53,13 @@
 #include <toolsa/TaArray.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/TaStr.hh>
+#include <toolsa/DateTime.hh>
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxVol.hh>
 #include <physics/thermo.h>
+#include <physics/physics.h>
 
 double AcGeoref2Spdb::_missingDbl = NAN;
 
@@ -73,6 +76,7 @@ AcGeoref2Spdb::AcGeoref2Spdb(int argc, char **argv)
   _totalPulseCount = 0;
   _pulseReader = NULL;
   _prevPulseSeqNum = 0;
+  _iwg1FlightTimeStart = -1;
 
   // set programe name
   
@@ -313,7 +317,6 @@ int AcGeoref2Spdb::_runRafIwg1UdpMode()
 
   // open socket
 
-  int iret = 0;
   InputUdp udp;
   if (udp.openUdp(_params.iwg1_udp_port, 
                   _params.debug >= Params::DEBUG_NORM)) {
@@ -342,11 +345,16 @@ int AcGeoref2Spdb::_runRafIwg1UdpMode()
       cerr << "  contents: " << udp.getBuf() << endl;
     }
 
-    _handleIwg1(udp.getBuf(), udp.getLen());
-
+    if (_handleIwg1(udp.getBuf(), udp.getLen())) {
+      cerr << "ERROR - AcGeoref2Spdb::_handleIwg1()" << endl;
+      cerr << "  Cannot parse IWG1 buffer" << endl;
+      cerr << "  buf: " << udp.getBuf() << endl;
+      return -1;
+    }
+    
   } // while
 
-  return iret;
+  return 0;
 
 }
 
@@ -739,8 +747,6 @@ int AcGeoref2Spdb::_processRafNetcdfFile(const string &path)
   // write out to data base
   
   _doWrite();
-
-  return 0;
 
   return 0;
 
@@ -1276,14 +1282,163 @@ int AcGeoref2Spdb::_handleIwg1(const char *buf, int bufLen)
 
 {
 
-  vector<string> toks;
-  TaStr::tokenizeAllowEmpty(buf, ',', toks);
-
-  cerr << "IWG1, ntoks: " << toks.size() << endl;
-  for (size_t ii = 0; ii < toks.size(); ii++) {
-    cerr << "IWG1, ii, tok: " << ii << ": " << toks[ii] << endl;
+  // trim whitespace off the end
+  
+  vector<string> cleanLine;
+  TaStr::tokenize(buf, "\n\r", cleanLine);
+  if (cleanLine.size() < 1) {
+    return -1;
+  }
+  if (_params.debug) {
+    cerr << cleanLine[0] << endl;
   }
 
+  // tokenize into fields
+  
+  vector<string> toks;
+  TaStr::tokenizeAllowEmpty(cleanLine[0], ',', toks);
+  if (toks.size() < 1) {
+    return -1;
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "IWG1, ntoks: " << toks.size() << endl;
+    for (size_t ii = 0; ii < toks.size(); ii++) {
+      cerr << "IWG1, ii, tok: " << ii << ": " << toks[ii] << endl;
+    }
+  }
+
+  // init struct
+  
+  ac_georef_t acGeoref;
+  ac_georef_init(&acGeoref);
+
+  // decode time
+
+  // try yyyymmddThhmmss
+
+  DateTime dtime;
+  int year, month, day, hour, min, sec;
+  if (sscanf(toks[1].c_str(), "%4d%2d%2dT%2d%2d%2d",
+             &year, &month, &day, &hour, &min, &sec) == 6) {
+    dtime.set(year, month, day, hour, min, sec);
+  } else {
+    if (dtime.setFromW3c(toks[1].c_str())) {
+      cerr << "No valid time found" << endl;
+      return -1;
+    }
+  }
+  
+  // fill out struct
+  
+  acGeoref.time_secs_utc = dtime.utime();
+  acGeoref.time_nano_secs = 0;
+
+  acGeoref.longitude = _decodeIwg1Field(toks, 3);
+  acGeoref.latitude =  _decodeIwg1Field(toks, 2);
+
+  acGeoref.altitude_msl_km = _decodeIwg1Field(toks, 4) / 1000.0;
+  acGeoref.altitude_agl_km = (_decodeIwg1Field(toks, 7) * 0.3048) / 1000.0;
+  acGeoref.altitude_pres_m = (_decodeIwg1Field(toks, 6) * 0.3048);
+
+  double gndSpeedMps = _decodeIwg1Field(toks, 8);
+  double trackDirnT = _decodeIwg1Field(toks, 14);
+  if (gndSpeedMps != _missingDbl && trackDirnT != _missingDbl) {
+    acGeoref.ew_velocity_mps = PHYwind_u(gndSpeedMps, trackDirnT) * -1.0;
+    acGeoref.ns_velocity_mps = PHYwind_v(gndSpeedMps, trackDirnT) * -1.0;
+  }
+  acGeoref.vert_velocity_mps = _decodeIwg1Field(toks, 12);
+
+  double windSpeedMps = _decodeIwg1Field(toks, 26);
+  double windDirnT = _decodeIwg1Field(toks, 27);
+  if (windSpeedMps != _missingDbl && windDirnT != _missingDbl) {
+    acGeoref.ew_horiz_wind_mps = PHYwind_u(windSpeedMps, windDirnT);
+    acGeoref.ns_horiz_wind_mps = PHYwind_v(windSpeedMps, windDirnT);
+  }
+  acGeoref.vert_wind_mps = _decodeIwg1Field(toks, 28);
+
+  acGeoref.heading_deg = _decodeIwg1Field(toks, 13);
+  acGeoref.drift_angle_deg = _decodeIwg1Field(toks, 15);
+  acGeoref.track_deg = trackDirnT;
+  acGeoref.roll_deg = _decodeIwg1Field(toks, 17);
+  acGeoref.pitch_deg = _decodeIwg1Field(toks, 16);
+
+  acGeoref.heading_rate_dps = _missingDbl;
+  acGeoref.pitch_rate_dps = _missingDbl;
+  acGeoref.roll_rate_dps = _missingDbl;
+  acGeoref.drive_angle_1_deg = _missingDbl;
+  acGeoref.drive_angle_2_deg = _missingDbl;
+
+  acGeoref.temp_c = _decodeIwg1Field(toks, 20);
+  acGeoref.pressure_hpa = _decodeIwg1Field(toks, 23);
+  double dewPtC = _decodeIwg1Field(toks, 21);
+  acGeoref.rh_percent = PHYrelh(acGeoref.temp_c, dewPtC);
+  double density = PHYprestemp2density(acGeoref.pressure_hpa, 
+                                       acGeoref.temp_c + 273.15);
+  acGeoref.density_kg_m3 = density;
+  acGeoref.angle_of_attack_deg = _decodeIwg1Field(toks, 19);
+  acGeoref.ind_airspeed_mps = _decodeIwg1Field(toks, 10);
+  acGeoref.true_airspeed_mps = _decodeIwg1Field(toks, 9);
+
+  acGeoref.accel_normal = _missingDbl;
+  acGeoref.accel_latitudinal = _missingDbl;
+  acGeoref.accel_longitudinal = _missingDbl;
+  
+  if (_iwg1FlightTimeStart < 0) {
+    if (acGeoref.true_airspeed_mps > 35.0) {
+      _iwg1FlightTimeStart = acGeoref.time_secs_utc;
+    }
+  }
+  if (_iwg1FlightTimeStart >= 0) {
+    acGeoref.flight_time_secs = acGeoref.time_secs_utc - _iwg1FlightTimeStart;
+  } else {
+    acGeoref.flight_time_secs = 0;
+  }
+  
+  string callSign(_params.aircraft_callsign);
+  STRncopy(acGeoref.callsign, callSign.c_str(), AC_GEOREF_NBYTES_CALLSIGN);
+  
+  // add to spdb
+  
+  string callSignLast4(callSign.substr(callSign.size() - 4));
+  si32 dataType = Spdb::hash4CharsToInt32(callSignLast4.c_str());
+  si32 dataType2 = acGeoref.time_nano_secs;
+  time_t validTime = acGeoref.time_secs_utc;
+  ac_georef_t copy = acGeoref;
+  BE_from_ac_georef(&copy);
+  _spdb.addPutChunk(dataType,
+                    validTime,
+                    validTime,
+                    sizeof(ac_georef_t),
+                    &copy,
+                    dataType2);
+
+  // write it out
+
+  _doWrite();
+    
   return 0;
 
 }
+
+/////////////////////////////////////////////////////////////////////////
+// Decode an IWG1 field
+
+double AcGeoref2Spdb::_decodeIwg1Field(const vector<string> &toks,
+                                       int tokNum)
+
+{
+
+  if (tokNum > (int) toks.size() - 1) {
+    return _missingDbl;
+  }
+
+  double val;
+  if (sscanf(toks[tokNum].c_str(), "%lg", &val) != 1) {
+    return _missingDbl;
+  }
+
+  return val;
+
+}
+

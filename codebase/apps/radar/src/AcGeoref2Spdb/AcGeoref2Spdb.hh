@@ -140,6 +140,8 @@ private:
   TaArray<double> _accelLat;
   TaArray<double> _accelLon;
   vector<TaArray<double> > _customFields;
+
+  time_t _iwg1FlightTimeStart;
   
   // writing out
 
@@ -177,6 +179,9 @@ private:
   double _computeSurfaceVel(RadxRay &ray);
 
   int _handleIwg1(const char *buf, int bufLen);
+
+  double _decodeIwg1Field(const vector<string> &toks,
+                          int tokNum);
 
 };
 

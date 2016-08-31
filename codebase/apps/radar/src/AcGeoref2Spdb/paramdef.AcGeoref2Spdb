@@ -75,7 +75,7 @@ paramdef int {
 
 commentdef {
   p_header = "AIRCRAFT CALL SIGN";
-  p_text = "For IWRF and CFRADIAL data.";
+  p_text = "For IWRF, CFRADIAL and UDP data.";
 }
 
 paramdef string {
