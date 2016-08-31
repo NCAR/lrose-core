@@ -176,6 +176,8 @@ private:
 
   double _computeSurfaceVel(RadxRay &ray);
 
+  int _handleIwg1(const char *buf, int bufLen);
+
 };
 
 #endif

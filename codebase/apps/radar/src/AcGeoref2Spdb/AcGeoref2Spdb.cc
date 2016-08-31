@@ -51,6 +51,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
 #include <toolsa/TaXml.hh>
+#include <toolsa/TaStr.hh>
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
 #include <Radx/RadxFile.hh>
@@ -341,6 +342,7 @@ int AcGeoref2Spdb::_runRafIwg1UdpMode()
       cerr << "  contents: " << udp.getBuf() << endl;
     }
 
+    _handleIwg1(udp.getBuf(), udp.getLen());
 
   } // while
 
@@ -1148,6 +1150,7 @@ void AcGeoref2Spdb::_getHcrTempsFromStatusXml(const string &statusXml,
   }
 
 }
+
 /////////////////////////////////////////////////////////////////////////
 // compute surface velocity
 //
@@ -1266,3 +1269,21 @@ double AcGeoref2Spdb::_computeSurfaceVel(RadxRay &ray)
 
 }
 
+/////////////////////////////////////////////////////////////////////////
+// Handle IWG1 packet
+
+int AcGeoref2Spdb::_handleIwg1(const char *buf, int bufLen)
+
+{
+
+  vector<string> toks;
+  TaStr::tokenizeAllowEmpty(buf, ',', toks);
+
+  cerr << "IWG1, ntoks: " << toks.size() << endl;
+  for (size_t ii = 0; ii < toks.size(); ii++) {
+    cerr << "IWG1, ii, tok: " << ii << ": " << toks[ii] << endl;
+  }
+
+  return 0;
+
+}
