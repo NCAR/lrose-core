@@ -190,6 +190,8 @@ int AcGeoref2Spdb::_runIwrfMode()
   
   while (true) {
     
+    PMU_auto_register("Reading IWRF");
+  
     // read next pulse
     
     IwrfTsPulse *pulse = _getNextPulse();
