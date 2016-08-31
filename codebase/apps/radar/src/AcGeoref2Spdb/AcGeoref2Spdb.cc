@@ -190,6 +190,8 @@ int AcGeoref2Spdb::_runIwrfMode()
   
   while (true) {
     
+    PMU_auto_register("Reading IWRF");
+  
     // read next pulse
     
     IwrfTsPulse *pulse = _getNextPulse();
@@ -265,6 +267,7 @@ int AcGeoref2Spdb::_runCfradialMode()
   int iret = 0;
   
   for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
+    PMU_auto_register("Reading CfRadial");
     string inputPath = _args.inputFileList[ii];
     if (_processCfRadialFile(inputPath)) {
       cerr << "ERROR - AcGeoref2Spdb::_runRafNetcdfMode()" << endl;
@@ -296,6 +299,7 @@ int AcGeoref2Spdb::_runRafNetcdfMode()
   int iret = 0;
 
   for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
+    PMU_auto_register("Reading NetCDF");
     string inputPath = _args.inputFileList[ii];
     if (_processRafNetcdfFile(inputPath)) {
       cerr << "ERROR - AcGeoref2Spdb::_runRafNetcdfMode()" << endl;
