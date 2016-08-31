@@ -609,10 +609,10 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_mode");
     tt->descr = tdrpStrDup("Reading the input data.");
-    tt->help = tdrpStrDup("CFRADIAL: read CfRadial files.\n\nIWRF_FILE: read the georeference packets from files containing IWRF time series.\n\nIWRF_FMQ: read the georeference packets from an FMQ containing IWRF time series.\n\nRAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.");
+    tt->help = tdrpStrDup("CFRADIAL: read CfRadial files.\n\nIWRF_FILE: read the georeference packets from files containing IWRF time series.\n\nIWRF_FMQ: read the georeference packets from an FMQ containing IWRF time series.\n\nRAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.\n\nRAF_IWG1_UDP: read NCAR RAF IWG1 packets from UDP.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
-    tt->enum_def.nfields = 4;
+    tt->enum_def.nfields = 5;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("CFRADIAL");
@@ -623,6 +623,8 @@ using namespace std;
       tt->enum_def.fields[2].val = IWRF_FMQ;
       tt->enum_def.fields[3].name = tdrpStrDup("RAF_NETCDF");
       tt->enum_def.fields[3].val = RAF_NETCDF;
+      tt->enum_def.fields[4].name = tdrpStrDup("RAF_IWG1_UDP");
+      tt->enum_def.fields[4].val = RAF_IWG1_UDP;
     tt->single_val.e = IWRF_FILE;
     tt++;
     
@@ -645,9 +647,21 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("seek_to_end_of_input");
     tt->descr = tdrpStrDup("Option to seek to the end of the input FMQ.");
-    tt->help = tdrpStrDup("If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.");
+    tt->help = tdrpStrDup("Applies to input_mode = IWRF_FMQ. If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.");
     tt->val_offset = (char *) &seek_to_end_of_input - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'iwg1_udp_port'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("iwg1_udp_port");
+    tt->descr = tdrpStrDup("Port for reading IWG1 packets via UDP.");
+    tt->help = tdrpStrDup("Applies to input_mode = RAF_IWG1_UDP. On the aircraft, the IWG1 georeference information is broadcast using UDP. This is the UDP port used.");
+    tt->val_offset = (char *) &iwg1_udp_port - &_start_;
+    tt->single_val.i = 7071;
     tt++;
     
     // Parameter 'Comment 3'

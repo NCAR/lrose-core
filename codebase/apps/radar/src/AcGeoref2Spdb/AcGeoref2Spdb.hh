@@ -150,6 +150,7 @@ private:
   int _runIwrfMode();
   int _runCfradialMode();
   int _runRafNetcdfMode();
+  int _runRafIwg1UdpMode();
 
   IwrfTsPulse *_getNextPulse();
 

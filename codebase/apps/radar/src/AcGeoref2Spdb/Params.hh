@@ -61,7 +61,8 @@ public:
     CFRADIAL = 0,
     IWRF_FILE = 1,
     IWRF_FMQ = 2,
-    RAF_NETCDF = 3
+    RAF_NETCDF = 3,
+    RAF_IWG1_UDP = 4
   } input_mode_t;
 
   ///////////////////////////
@@ -361,6 +362,8 @@ public:
 
   tdrp_bool_t seek_to_end_of_input;
 
+  int iwg1_udp_port;
+
   char* aircraft_callsign;
 
   char* cfradial_dbz_field_name;
@@ -435,7 +438,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[48];
+  mutable TDRPtable _table[49];
 
   const char *_className;
 

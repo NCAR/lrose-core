@@ -75,6 +75,8 @@ instance = "test";
 //
 // RAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.
 //
+// RAF_IWG1_UDP: read NCAR RAF IWG1 packets from UDP.
+//
 //
 // Type: enum
 // Options:
@@ -82,9 +84,10 @@ instance = "test";
 //     IWRF_FILE
 //     IWRF_FMQ
 //     RAF_NETCDF
+//     RAF_IWG1_UDP
 //
 
-input_mode = RAF_NETCDF;
+input_mode = RAF_IWG1_UDP;
 
 ///////////// input_fmq_name //////////////////////////
 //
@@ -104,15 +107,29 @@ input_fmq_name = "/tmp/fmq/ts";
 //
 // Option to seek to the end of the input FMQ.
 //
-// If TRUE, the program will seek to the end of the fmq and only read in 
-//   new data. If FALSE, it will start reading from the beginning of the 
-//   FMQ.
+// Applies to input_mode = IWRF_FMQ. If TRUE, the program will seek to 
+//   the end of the fmq and only read in new data. If FALSE, it will start 
+//   reading from the beginning of the FMQ.
 //
 //
 // Type: boolean
 //
 
 seek_to_end_of_input = TRUE;
+
+///////////// iwg1_udp_port ///////////////////////////
+//
+// Port for reading IWG1 packets via UDP.
+//
+// Applies to input_mode = RAF_IWG1_UDP. On the aircraft, the IWG1 
+//   georeference information is broadcast using UDP. This is the UDP port 
+//   used.
+//
+//
+// Type: int
+//
+
+iwg1_udp_port = 7071;
 
 //======================================================================
 //
@@ -136,13 +153,15 @@ aircraft_callsign = "N677F";
 
 //======================================================================
 //
-// CFRADIAL DATA.
+// CFRADIAL DATA FIELDS.
+//
+// Used for computing the surface velocity.
 //
 //======================================================================
  
-///////////// cfradial_field_name /////////////////////
+///////////// cfradial_dbz_field_name /////////////////
 //
-// Field name for reading in CfRadial file.
+// Field name for DBZ in CfRadial file.
 //
 // We need to read in at least 1 field for a valid read operation.
 //
@@ -150,7 +169,89 @@ aircraft_callsign = "N677F";
 // Type: string
 //
 
-cfradial_field_name = "DBZ";
+cfradial_dbz_field_name = "DBZ";
+
+///////////// cfradial_vel_field_name /////////////////
+//
+// Field name for VEL in CfRadial file.
+//
+// We need to read in at least 1 field for a valid read operation.
+//
+//
+// Type: string
+//
+
+cfradial_vel_field_name = "VEL";
+
+///////////// get_hcr_temps_from_cfradial /////////////
+//
+// Option to get the HCR temperatures from the Cfradial files.
+//
+// If true, we get the Cmigits and Tailcone temperatures for the HCR 
+//   from the status XML block in the CfRadial files.
+//
+//
+// Type: boolean
+//
+
+get_hcr_temps_from_cfradial = FALSE;
+
+//======================================================================
+//
+// DETERMINE THE SURFACE VELOCITY FROM CFRADIAL DATA.
+//
+// This applies to HCR data.
+//
+//======================================================================
+ 
+///////////// compute_surface_vel_in_cfradial /////////
+//
+// Option to compute the surface velocity from the data.
+//
+// We find the range to the peak in reflectivity, and then determine the 
+//   radial velocity at that range.
+//
+//
+// Type: boolean
+//
+
+compute_surface_vel_in_cfradial = FALSE;
+
+///////////// min_range_to_surface_km /////////////////
+//
+// Minumum range to the surface (km).
+//
+// We will search for the surface echo in the gates beyound this range.
+//
+//
+// Type: double
+//
+
+min_range_to_surface_km = 0.5;
+
+///////////// min_dbz_for_surface_echo ////////////////
+//
+// Minumum dbz value for a valid surface return.
+//
+// Gates with values below this will not be used.
+//
+//
+// Type: double
+//
+
+min_dbz_for_surface_echo = 20;
+
+///////////// ngates_for_surface_echo /////////////////
+//
+// Number of gates needed for identifying surface echo.
+//
+// We require this number of gates to exceed min_dbz_for_surface_echo.
+//
+//
+// Type: int
+//
+
+ngates_for_surface_echo = 1;
 
 //======================================================================
 //
@@ -380,6 +481,33 @@ nc_varname_lateral_accel = "BLATA";
 //
 
 nc_varname_longitudinal_accel = "BLONGA";
+
+///////////// nc_specify_custom_fields ////////////////
+//
+// Option to specify custom fields to be read in.
+//
+// If TRUE, the program will read in custom fields from the netcdf file, 
+//   and store them in the custom array in the ac_georef_t struct in SPDB.
+//
+//
+// Type: boolean
+//
+
+nc_specify_custom_fields = FALSE;
+
+///////////// nc_varname_custom_fields ////////////////
+//
+// Netcdf variable names for custom fields.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+nc_varname_custom_fields = {
+ "PITCH_IRS2",
+ "PITCH_IRS3"
+};
 
 //======================================================================
 //

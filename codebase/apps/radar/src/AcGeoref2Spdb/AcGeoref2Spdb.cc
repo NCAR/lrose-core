@@ -37,6 +37,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "AcGeoref2Spdb.hh"
+#include "InputUdp.hh"
 #include <map>
 #include <iostream>
 #include <iomanip>
@@ -155,6 +156,10 @@ int AcGeoref2Spdb::Run ()
   } else if (_params.input_mode == Params::RAF_NETCDF) {
     
     return _runRafNetcdfMode();
+
+  } else if (_params.input_mode == Params::RAF_IWG1_UDP) {
+    
+    return _runRafIwg1UdpMode();
 
   } else {
 
@@ -293,6 +298,51 @@ int AcGeoref2Spdb::_runRafNetcdfMode()
       iret = -1;
     }
   }
+
+  return iret;
+
+}
+
+//////////////////////////////////////////////////
+// Run in RAF IWG1 UDP mode
+
+int AcGeoref2Spdb::_runRafIwg1UdpMode()
+  
+{
+
+  // open socket
+
+  int iret = 0;
+  InputUdp udp;
+  if (udp.openUdp(_params.iwg1_udp_port, 
+                  _params.debug >= Params::DEBUG_NORM)) {
+    cerr << "ERROR - AcGeoref2Spdb::_runRafIwg1UdpMode()" << endl;
+    cerr << "  Cannot open UDP, port: " << _params.iwg1_udp_port << endl;
+    return -1;
+  }
+  
+  while (true) {
+
+    if (udp.readPacket() < 0) {
+      // close socket
+      udp.closeUdp();
+      // reopen socket
+      if (udp.openUdp(_params.iwg1_udp_port, 
+                      _params.debug >= Params::DEBUG_NORM)) {
+        cerr << "ERROR - AcGeoref2Spdb::_runRafIwg1UdpMode()" << endl;
+        cerr << "  Cannot open UDP, port: " << _params.iwg1_udp_port << endl;
+        return -1;
+      }
+    }
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Got IWG1 packet:" << endl;
+      cerr << "  len: " << udp.getLen() << endl;
+      cerr << "  contents: " << udp.getBuf() << endl;
+    }
+
+
+  } // while
 
   return iret;
 

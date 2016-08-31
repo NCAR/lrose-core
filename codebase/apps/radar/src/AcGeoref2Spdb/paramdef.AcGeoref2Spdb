@@ -45,13 +45,14 @@ typedef enum {
   CFRADIAL,
   IWRF_FILE,
   IWRF_FMQ,
-  RAF_NETCDF
+  RAF_NETCDF,
+  RAF_IWG1_UDP
 } input_mode_t;
   
 paramdef enum input_mode_t {
   p_default = IWRF_FILE;
   p_descr = "Reading the input data.";
-  p_help = "CFRADIAL: read CfRadial files.\n\nIWRF_FILE: read the georeference packets from files containing IWRF time series.\n\nIWRF_FMQ: read the georeference packets from an FMQ containing IWRF time series.\n\nRAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.";
+  p_help = "CFRADIAL: read CfRadial files.\n\nIWRF_FILE: read the georeference packets from files containing IWRF time series.\n\nIWRF_FMQ: read the georeference packets from an FMQ containing IWRF time series.\n\nRAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.\n\nRAF_IWG1_UDP: read NCAR RAF IWG1 packets from UDP.";
 } input_mode;
 
 paramdef string {
@@ -63,8 +64,14 @@ paramdef string {
 paramdef boolean {
   p_default = TRUE;
   p_descr = "Option to seek to the end of the input FMQ.";
-  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+  p_help = "Applies to input_mode = IWRF_FMQ. If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
 } seek_to_end_of_input;
+
+paramdef int {
+  p_default = 7071;
+  p_descr = "Port for reading IWG1 packets via UDP.";
+  p_help = "Applies to input_mode = RAF_IWG1_UDP. On the aircraft, the IWG1 georeference information is broadcast using UDP. This is the UDP port used.";
+} iwg1_udp_port;
 
 commentdef {
   p_header = "AIRCRAFT CALL SIGN";

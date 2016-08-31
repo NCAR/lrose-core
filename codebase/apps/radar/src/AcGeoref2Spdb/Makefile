@@ -47,13 +47,15 @@ LOC_LIBS = \
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	AcGeoref2Spdb.hh
+	AcGeoref2Spdb.hh \
+	InputUdp.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	Main.cc \
-	AcGeoref2Spdb.cc
+	AcGeoref2Spdb.cc \
+	InputUdp.cc
 
 #
 # tdrp macros
