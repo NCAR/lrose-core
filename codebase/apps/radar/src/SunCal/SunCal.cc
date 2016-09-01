@@ -3699,7 +3699,13 @@ void SunCal::_writeSummaryText(FILE *out)
 int SunCal::_appendToGlobalResults()
 
 {
-  
+
+  // check we have signal
+
+  if (_noiseDbmHc <= 0.0) {
+    return -1;
+  }
+
   // create the directory for the output file
 
   if (ta_makedir_recurse(_params.text_output_dir)) {
