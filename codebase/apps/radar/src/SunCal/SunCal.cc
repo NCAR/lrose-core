@@ -3702,7 +3702,7 @@ int SunCal::_appendToGlobalResults()
 
   // check we have signal
 
-  if (_noiseDbmHc <= 0.0) {
+  if (_noiseDbmHc == 0.0) {
     return -1;
   }
 
