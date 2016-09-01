@@ -3756,8 +3756,6 @@ int SunCal::_appendToGlobalResults()
 
   _appendFloatToFile(out, _meanSunEl);
   _appendFloatToFile(out, _meanSunAz);
-  _appendFloatToFile(out, _sunCentroidAzOffset);
-  _appendFloatToFile(out, _sunCentroidElOffset);
 
   // noise
 
@@ -3867,8 +3865,6 @@ void SunCal::_writeGlobalHeader(FILE *out)
 
   fprintf(out, " %10s", "meanSunEl"); 
   fprintf(out, " %10s", "meanSunAz"); 
-  fprintf(out, " %10s", "sunCentroidAzOffset"); 
-  fprintf(out, " %10s", "sunCentroidElOffset"); 
 
   // noise
   
@@ -3907,8 +3903,6 @@ void SunCal::_writeGlobalHeader(FILE *out)
   // cross-polar power ratio
 
   if (_params.compute_cross_polar_power_ratio) {
-    fprintf(out, " %10s", "XpolPwrHx");
-    fprintf(out, " %10s", "XpolPwrVx");
     fprintf(out, " %10s", "XpolRatio");
     fprintf(out, " %10s", "meanS1S2");
     fprintf(out, " %10s", "zdrCorr");
