@@ -227,7 +227,6 @@ int SpolDishTemp2Spdb::_processFile(const char *file_path)
 
     bool isLabelLine = false;
     for (size_t ii = 0; ii < toks.size(); ii++) {
-      cerr << "ii, tok: " << ii << ", " << toks[ii] << endl;
       if (toks[ii] == "SensorID") {
         idIndex = ii;
         if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -296,6 +295,8 @@ int SpolDishTemp2Spdb::_processFile(const char *file_path)
     obs.addTempC(tempValue);
     obs.assembleAsXml();
     
+    cerr <<(char *) obs.getBufPtr() << endl;
+
     // put to SPDB
     
     DsSpdb spdb;
