@@ -189,13 +189,6 @@ int SpolDishTemp2Spdb::_processFile(const char *file_path)
   sprintf(procmapString, "Processing file <%s>", path.getFile().c_str());
   PMU_force_register(procmapString);
 
-  // create output objects
-
-  DsSpdb spdbDecoded;
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    spdbDecoded.setDebug();
-  }
-
   // Open the file
 
   FILE *fp;
@@ -269,112 +262,64 @@ int SpolDishTemp2Spdb::_processFile(const char *file_path)
       continue;
     }
 
-    double value;
-    if (sscanf(toks[valIndex].c_str(), "%lg", &value) != 1) {
-      cerr << "ERROR - cannot decode value: " << toks[valIndex] << endl;
+    double tempValue;
+    if (sscanf(toks[valIndex].c_str(), "%lg", &tempValue) != 1) {
+      cerr << "ERROR - cannot decode tempValue: " << toks[valIndex] << endl;
       continue;
     }
 
     int year, month, day, hour, min, sec;
     char ampm[16];
     if (sscanf(toks[timeIndex].c_str(), "%d/%d/%d %d:%d:%d %s",
-               &year, &month, &day, &hour, &min, &sec, ampm) != 7) {
+               &month, &day, &year, &hour, &min, &sec, ampm) != 7) {
       cerr << "ERROR - cannot decode datetime: " << toks[timeIndex] << endl;
       continue;
     }
+    if (strcmp(ampm, "PM") == 0) {
+      hour += 12.0;
+    }
+    DateTime dtime(year, month, day, hour, min, sec);
 
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << line;
+      cerr << "time, stationId, tempValue: " 
+           << dtime.asString() << ", " << stationId << ", " << tempValue << endl;
     }
 
-#ifdef JUNK
-    
-  StationLoc &stationLoc = iloc->second;
+    // create weather obs
 
-    if (complete) {
-      
-      MemBuf buf;
-      time_t valid_time;
-      string stationName;
-
-      if (_decodeMetar(file_path, file_time, blockHour, blockMin, blockDate,
-		       metarMessage, reportType, stationName, buf, valid_time) == 0) {
-
-	// add chunks to spdb objects
-
-	int stationId = Spdb::hash4CharsToInt32(stationName.c_str());
-
-	if (_params.write_decoded_metars) {
-	  spdbDecoded.addPutChunk(stationId,
-				  valid_time,
-				  valid_time + _params.expire_seconds,
-				  buf.getLen(), buf.getPtr());
-	}
-      
-	if (_params.write_ascii_metars) {
-
-	  if (_params.dress_raw_metar_text) {
-	    metarMessage = reportType + " " + metarMessage;
-	  }
-
-	  spdbAscii.addPutChunk(stationId,
-				valid_time,
-				valid_time + _params.expire_seconds,
-				metarMessage.size() + 1,
-				metarMessage.c_str());
-	}
-      } /* endif - _decodeMetar(...) == 0) */
-
-      metarMessage = "";
-    } 
-
-  WxObs obs;
-  if (obs.setFromDecodedMetar(metarText, stationName, dcdMetar, valid_time,
-                              lat, lon, alt)) {
-    return -1;
-  }
-
-  // Dress the raw text with the report type and ending character (=)
-
-  if (_params.dress_raw_metar_text) {
-    obs.dressRawMetarText(reportType);
-  }
-
-  if (_params.output_report_type == Params::REPORT_PLUS_METAR_XML) {
-    obs.assembleAsReport(REPORT_PLUS_METAR_XML);
-  } else if (_params.output_report_type == Params::REPORT_PLUS_FULL_XML) {
-    obs.assembleAsReport(REPORT_PLUS_FULL_XML);
-  } else if (_params.output_report_type == Params::XML_ONLY) {
+    WxObs obs;
+    obs.setStationId("SPOL");
+    obs.setLatitude(_params.radar_latitude_deg);
+    obs.setLongitude(_params.radar_longitude_deg);
+    obs.setElevationM(_params.radar_altitude_meters);
+    obs.setObservationTime(dtime.utime());
+    obs.addTempC(tempValue);
     obs.assembleAsXml();
-  } else {
-    return -1;
-  }
-  
-  buf.add(obs.getBufPtr(), obs.getBufLen());
-
-    if (spdbDecoded.put(_params.decoded_output_url,
-                        SPDB_STATION_REPORT_ID,
-                        SPDB_STATION_REPORT_LABEL)) {
+    
+    // put to SPDB
+    
+    DsSpdb spdb;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      spdb.setDebug();
+    }
+    if (spdb.put(_params.output_url,
+                 SPDB_STATION_REPORT_ID,
+                 SPDB_STATION_REPORT_LABEL,
+                 stationId,
+                 dtime.utime(),
+                 dtime.utime() + _params.expire_seconds,
+                 obs.getBufLen(), obs.getBufPtr())) {
       cerr << "ERROR - SpolDishTemp2Spdb::_doPut" << endl;
-      cerr << "  Cannot put decoded metars to: "
-           << _params.decoded_output_url << endl;
-      cerr << "  " << spdbDecoded.getErrStr() << endl;
+      cerr << "  Cannot put temperature data to: "
+           << _params.output_url << endl;
+      cerr << "  " << spdb.getErrStr() << endl;
       iret = -1;
     }
-    spdbDecoded.clearPutChunks();
 
-#endif
-    
   } // while (fgets ...
   
   fclose(fp);
 
-  // write the output
-
-  // if (_doPut(spdbDecoded, spdbAscii)) {
-  //   iret = -1;
-  // }
-  
   return iret;
    
 }
