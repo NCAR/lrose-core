@@ -263,7 +263,9 @@ void WxObs::loadXml(string &xml, bool includeWxStr,
   xml += TaXml::writeStartTag("weather_observation", sil+0);
   
   xml += TaXml::writeString("station_id", sil+1, _station_id);
-  xml += TaXml::writeString("long_name", sil+1, _long_name);
+  if (_long_name.size() > 0) {
+    xml += TaXml::writeString("long_name", sil+1, _long_name);
+  }
   xml += TaXml::writeTime("observation_time", sil+1, _observation_time);
   xml += TaXml::writeDouble("latitude", sil+1, _latitude);
   xml += TaXml::writeDouble("longitude", sil+1, _longitude);
@@ -291,8 +293,14 @@ void WxObs::loadXml(string &xml, bool includeWxStr,
     xml += TaXml::writeBoolean("metar_rem_ts_down", sil+1, _metar_rem_ts_down);
   }
 
-  xml += TaXml::writeBoolean("ceiling_is_minimum", sil+1, _ceiling_is_minimum);
-  xml += TaXml::writeBoolean("visibility_is_minimum", sil+1, _visibility_is_minimum);
+  if (getCeilingKmSize() > 0) {
+    xml += TaXml::writeBoolean("ceiling_is_minimum", sil+1, 
+                               _ceiling_is_minimum);
+  }
+  if (getVisibilityKmSize() > 0) {
+    xml += TaXml::writeBoolean("visibility_is_minimum", sil+1,
+                               _visibility_is_minimum);
+  }
 
   _addFieldAsXml(_temp_c, "temp_c", sil+1, xml);
   _addFieldAsXml(_min_temp_c, "min_temp_c", sil+1, xml);
