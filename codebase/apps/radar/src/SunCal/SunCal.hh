@@ -284,6 +284,7 @@ private:
   
   // sun centroid
 
+  bool _validCentroid;
   double _meanSunEl, _meanSunAz;
   double _sunCentroidAzOffset, _sunCentroidElOffset;
   double _sunCentroidAzOffsetHc, _sunCentroidElOffsetHc;

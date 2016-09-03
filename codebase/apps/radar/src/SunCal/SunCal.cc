@@ -1107,6 +1107,7 @@ void SunCal::_initForAnalysis()
   _sunCentroidAzOffset = 0;
   _sunCentroidElOffset = 0;
   _prevAngleOffset = -999;
+  _validCentroid = false;
 
   _maxPowerDbm = -120;
   _quadPowerDbm = -120;
@@ -2669,6 +2670,8 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
     }
   }
 
+  _validCentroid = true;
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Final estimates for solar centroid:" << endl;
     cerr << "  sunCentroidAzOffset: " << sunCentroidAzOffset << endl;
@@ -3702,7 +3705,7 @@ int SunCal::_appendToGlobalResults()
 
   // check we have signal
 
-  if (_noiseDbmHc == 0.0) {
+  if (!_validCentroid) {
     return -1;
   }
 
