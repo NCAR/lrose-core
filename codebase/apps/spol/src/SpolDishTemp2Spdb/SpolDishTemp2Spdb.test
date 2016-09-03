@@ -201,7 +201,7 @@ radar_altitude_meters = 1742;
 //
 
 // output_url = "spdbp:://localhost:0:$(HOME)/data/spol_temp/spdb";
-output_url = "$(HOME)/data/spol_temp/spdb";
+output_url = "$(DATA_DIR)/spol_temp/spdb";
 
 ///////////// expire_seconds //////////////////////////
 //

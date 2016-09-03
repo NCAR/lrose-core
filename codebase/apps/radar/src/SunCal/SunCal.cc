@@ -4645,6 +4645,13 @@ int SunCal::_retrieveSiteTempFromSpdb(time_t scanTime,
   
   tempC = obs.getTempC();
   timeForTemp = obs.getObservationTime();
+
+  if (_params.debug) {
+    cerr << "Got temp data from URL: " << _params.site_temp_spdb_url << endl;
+    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
+    cerr << "  Search margin (secs): " << _params.site_temp_search_margin_secs << endl;
+    cerr << "  Temp time, tempC: " << DateTime::strm(timeForTemp) << ", " << tempC << endl;
+  }
   
   return 0;
   

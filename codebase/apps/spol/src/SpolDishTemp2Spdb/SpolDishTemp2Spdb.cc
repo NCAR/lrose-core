@@ -310,10 +310,12 @@ int SpolDishTemp2Spdb::_processFile(const char *file_path)
       obs.print(cerr);
     }
 
+    si32 dataType = Spdb::hash4CharsToInt32("SPOL");
+
     if (spdb.put(_params.output_url,
                  SPDB_STATION_REPORT_ID,
                  SPDB_STATION_REPORT_LABEL,
-                 stationId,
+                 dataType,
                  dtime.utime(),
                  dtime.utime() + _params.expire_seconds,
                  obs.getBufLen(), obs.getBufPtr())) {
