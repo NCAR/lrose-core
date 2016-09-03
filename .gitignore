@@ -10,6 +10,11 @@
 ~*
 *~
 
+# cvs
+
+Entries.Log
+Entries.static
+
 # configure
 
 makefile
