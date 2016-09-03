@@ -303,6 +303,13 @@ int SpolDishTemp2Spdb::_processFile(const char *file_path)
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       spdb.setDebug();
     }
+    if (_params.debug) {
+      cerr << "Writing to output url: " << _params.output_url << endl;
+    }
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      obs.print(cerr);
+    }
+
     if (spdb.put(_params.output_url,
                  SPDB_STATION_REPORT_ID,
                  SPDB_STATION_REPORT_LABEL,
