@@ -206,16 +206,18 @@ void RlanLocator::setFields(double *snr,
   }
 
   // compute phase from velocity
-  
+
   if (_velAvail) {
     if (_nyquist < -9990) {
       // estimate the nyquist from the vel
       for (int ii = 0; ii < _nGates; ii++) {
-        double absVel = fabs(vel[ii]);
-        if (_nyquist < absVel) {
-          _nyquist = absVel;
-        }
-      }
+        if (vel[ii] != missingVal) {
+          double absVel = fabs(vel[ii]);
+          if (_nyquist < absVel) {
+            _nyquist = absVel;
+          }
+        } // if (vel[ii] != missingVal)
+      } // ii
     }
     // estimate the phase from the vel
     for (int ii = 0; ii < _nGates; ii++) {

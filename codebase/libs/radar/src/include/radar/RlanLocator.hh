@@ -141,6 +141,13 @@ public:
   const double *getAccumPhaseChange() const { return _accumPhaseChange; }
   const double *getPhaseChangeError() const { return _phaseChangeError; }
 
+  const double *getSnr() const { return _snr; }
+  const double *getVel() const { return _vel; }
+  const double *getWidth() const { return _width; }
+  const double *getNcp() const { return _ncp; }
+  const double *getZdr() const { return _zdr; }
+
+  const double *getPhase() const { return _phase; }
   const double *getSnrSdev() const { return _snrSdev; }
   const double *getZdrSdev() const { return _zdrSdev; }
   const double *getNcpMean() const { return _ncpMean; }
