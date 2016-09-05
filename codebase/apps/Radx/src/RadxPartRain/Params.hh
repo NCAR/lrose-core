@@ -644,6 +644,8 @@ public:
 
   double zdr_attenuation_exponent;
 
+  tdrp_bool_t locate_rlan_interference;
+
   char* pid_thresholds_file_path;
 
   double PID_snr_threshold;
@@ -976,7 +978,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[273];
+  mutable TDRPtable _table[275];
 
   const char *_className;
 

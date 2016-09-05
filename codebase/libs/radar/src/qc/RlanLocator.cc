@@ -126,8 +126,10 @@ void RlanLocator::setRayProps(time_t timeSecs,
                               double elevation, 
                               double azimuth,
                               int nGates,
-                              double startRange,
-                              double gateSpacing)
+                              double startRangeKm,
+                              double gateSpacingKm,
+                              double wavelengthM,
+                              double nyquist /* = -9999.0 */)
                               
 {
 
@@ -137,8 +139,11 @@ void RlanLocator::setRayProps(time_t timeSecs,
   _azimuth = azimuth;
 
   _nGates = nGates;
-  _startRange = startRange;
-  _gateSpacing = gateSpacing;
+  _startRangeKm = startRangeKm;
+  _gateSpacingKm = gateSpacingKm;
+
+  _wavelengthM = wavelengthM;
+  _nyquist = nyquist;
 
   _dbz = _dbz_.alloc(_nGates);
   _dbm = _dbm_.alloc(_nGates);
@@ -204,8 +209,8 @@ void RlanLocator::setFields(double *dbz,
   // compute dbm by removing range correction from DBZ
   
   if (_dbzAvail) {
-    double range = _startRange;
-    for (int ii = 0; ii < _nGates; ii++, range += _gateSpacing) {
+    double range = _startRangeKm;
+    for (int ii = 0; ii < _nGates; ii++, range += _gateSpacingKm) {
       double corr = 20.0 * log10(range);
       _dbm[ii] = _dbz[ii] - corr;
     }
@@ -217,17 +222,18 @@ void RlanLocator::setFields(double *dbz,
   // compute phase from velocity
   
   if (_velAvail) {
-    // estimate the nyquist from the vel
-    double nyquist = 0;
-    for (int ii = 0; ii < _nGates; ii++) {
-      double absVel = fabs(vel[ii]);
-      if (nyquist < absVel) {
-        nyquist = absVel;
+    if (_nyquist < -9990) {
+      // estimate the nyquist from the vel
+      for (int ii = 0; ii < _nGates; ii++) {
+        double absVel = fabs(vel[ii]);
+        if (_nyquist < absVel) {
+          _nyquist = absVel;
+        }
       }
     }
     // estimate the phase from the vel
     for (int ii = 0; ii < _nGates; ii++) {
-      _phase[ii] = (_vel[ii] / nyquist) * M_PI;
+      _phase[ii] = (_vel[ii] / _nyquist) * M_PI;
     }
     _phaseAvail = true;
   } else {

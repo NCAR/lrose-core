@@ -1614,6 +1614,27 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("LOCATING RLAN INTERFERENCE");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'locate_rlan_interference'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("locate_rlan_interference");
+    tt->descr = tdrpStrDup("Option to locate gates with RLAN interference.");
+    tt->help = tdrpStrDup("This particularly applies to C-band. You need to activate this step if you want RLAN to show up in the PID classification.");
+    tt->val_offset = (char *) &locate_rlan_interference - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("COMPUTING PID - HYDROMETEOR PARTICLE ID");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1810,11 +1831,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR PID temperatures - OPTIONAL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1987,11 +2008,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("SMOOTHING OUTPUT PID");
     tt->comment_text = tdrpStrDup("This section gives you the option of smoothing the output pid field in range by applying a median filter.");
     tt++;
@@ -2020,11 +2041,11 @@ using namespace std;
     tt->single_val.i = 7;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("COMPUTING PRECIP RATE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2139,20 +2160,20 @@ using namespace std;
     tt->single_val.d = -10;
     tt++;
     
-    // Parameter 'Comment 14'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
-    tt->comment_hdr = tdrpStrDup("PRECIP COEFFICIENTS");
-    tt->comment_text = tdrpStrDup("Coefficients for the precip equations.");
-    tt++;
-    
     // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 15");
+    tt->comment_hdr = tdrpStrDup("PRECIP COEFFICIENTS");
+    tt->comment_text = tdrpStrDup("Coefficients for the precip equations.");
+    tt++;
+    
+    // Parameter 'Comment 16'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("PRECIP_RATE_ZH");
     tt->comment_text = tdrpStrDup("RATE_ZH = zh_aa * (ZH ** zh_bb)");
     tt++;
@@ -2181,11 +2202,11 @@ using namespace std;
     tt->single_val.d = 0.714;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("PRECIP_RATE_SNOW_ZH");
     tt->comment_text = tdrpStrDup("RATE_SNOW_ZH = zh_aa_snow * (ZH ** zh_bb_snow)");
     tt++;
@@ -2214,11 +2235,11 @@ using namespace std;
     tt->single_val.d = 0.625;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("PRECIP_RATE_Z_ZDR");
     tt->comment_text = tdrpStrDup("RATE_Z_ZDR = zzdr_aa * (ZH ** zzdr_bb) * (ZDR ** zzdr_cc)");
     tt++;
@@ -2259,11 +2280,11 @@ using namespace std;
     tt->single_val.d = -4.86;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("PRECIP_RATE_KDP");
     tt->comment_text = tdrpStrDup("RATE_KDP = sign(KDP) * kdp_aa * (|KDP| ** kdp_bb)");
     tt++;
@@ -2292,11 +2313,11 @@ using namespace std;
     tt->single_val.d = 0.866;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("PRECIP_RATE_KDP_ZDR");
     tt->comment_text = tdrpStrDup("RATE_KDP_ZDR = sign(KDP) * kdpzdr_aa * (|KDP| ** kdpzdr_bb) * (ZDR ** kdpzdr_cc)");
     tt++;
@@ -2337,11 +2358,11 @@ using namespace std;
     tt->single_val.d = -2.86;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("PRECIP RATE BASED ON PID");
     tt->comment_text = tdrpStrDup("The PID-based rate is a wieghted-average of the rates for the various precip types.\nThe weights are derived from the interest values for each PID particle type.\n\t  RATE_LIGHT_RAIN = RATE_ZH\n\t  RATE_MOD_RAIN = RATE_Z_ZDR\n\t  RATE_SNOW = RATE_ZH_SNOW\n\t  RATE_MIXED = RATE_ZH_MIXED\n\n\t  if (kdp > threshold && RATE_KDP is valid)\n\t    RATE_HVY_RAIN = RATE_KDP\n\t    RATE_HAIL = RATE_KDP\n\t  else\n\t    RATE_HVY_RAIN = RATE_ZZDR\n\t    RATE_HAIL = RATE_ZZDR\n\n\t  RATE = 0\n\t  RATE += RATE_LIGHT_RAIN * WT_LIGHT_RAIN\n\t  RATE += RATE_MOD_RAIN * WT_MOD_RAIN\n\t  RATE += RATE_HVY_RAIN * WT_HVY_RAIN\n\t  RATE += RATE_SNOW * WT_SNOW\n\t  RATE += RATE_MIXED * WT_MIXED\n\t  RATE += RATE_HAIL * WT_HAIL\n");
     tt++;
@@ -2358,11 +2379,11 @@ using namespace std;
     tt->single_val.d = 0.3;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("PRECIP_RATE_HYBRID");
     tt->comment_text = tdrpStrDup("The HYBRID rate is based on the PID and the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Hybrid et al, JTech, Vol 26, 2009, 2107 - 2122.\n\n\t  if hail or heavy rain\n\t    if KDP > threhsold and rateKDP is valid\n\t      use RATE_KDP\n\t    else\n\t      use RATE_KDP\n\t  else if snow/ice\n\t    use RATE_ZH_SNOW\n\t  else if mixed precip\n\t    use RATE_ZH_MIXED\n\t  else if rain or SLD\n\t    if dBZ > theshold and KDP > threhsold\n\t      if rateKDP is valid\n\t        use RATE_KDP\n\t      else\n\t        use RATE_ZZDR\n\t    else\n\t      if ZDR >= threshold\n\t        use RATE_Z\n\t      else\n\t        use RATE_ZZDR\n");
     tt++;
@@ -2403,11 +2424,11 @@ using namespace std;
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("PRECIP_RATE_HIDRO");
     tt->comment_text = tdrpStrDup("The HIDRO rate is based on the CSU-HIDRO algorithm. See 'A New Dual-Polarization Radar Rainfall Algorithm: Application to Colorado Precipition Events', Cifelli et al, JTech, Vol 28, 2011, 352 - 364. NOTE - this algorithm is generally only applied to liquid and mixed-phase precip, so you need to run PID for this to work as intended.\n\t  For ice:\n\t    RATE_HIDRO = MISSING\n\t  For hail or mixed:\n\t    if KDP >= threshold and rateKdp is valid\n\t      RATE_HIDRO = RATE_KDP\n\t    else\n\t      RATE_HIDRO = RATE_ZR\n\t  For rain or sld:\n\t    if KDP >= threshold and DBZ >= threhold\n\t      if ZDR >= threshold and rateKdpZdr is valid\n\t        RATE_HIDRO = RATE_KDPZDR\n\t      else if rateKdp is valid\n\t        RATE_HIDRO = RATE_KDP\n\t      else\n\t        RATE_HIDRO = RATE_ZZDR\n\t    else\n\t      if ZDR >= threshold\n\t        RATE_HIDRO = RATE_Z\n\t      else\n\t        RATE_HIDRO = RATE_ZZDR\n");
     tt++;
@@ -2448,11 +2469,11 @@ using namespace std;
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("PRECIP_RATE_BRINGI");
     tt->comment_text = tdrpStrDup("The BRINGI rate is based on the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Bringi et al, JTech, Vol 26, 2009, 2107 - 2122.\n\t  if HAIL or RAIN/HAIL mixture and rateKdp is valid\n\t    RATE_BRINGI = RATE_KDP\n\t  else if dBZ > theshold and KDP > threhsold and rateKdp is valid\n\t    RATE_BRINGI = RATE_KDP\n\t  else\n\t    if ZDR >= threshold\n\t      RATE_BRINGI = RATE_ZZDR\n\t    else\n\t      RATE_BRINGI = RATE_Z\n");
     tt++;
@@ -2493,11 +2514,11 @@ using namespace std;
     tt->single_val.d = 0.1;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("ESTIMATING ZDR BIAS");
     tt->comment_text = tdrpStrDup("ZDR bias can be estimated using data from regions with irregular ice and bragg scattering, with various constraints applied. See below.");
     tt++;
@@ -2598,11 +2619,11 @@ using namespace std;
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("ZDR BIAS IN ICE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2819,11 +2840,11 @@ using namespace std;
       tt->array_vals[5].d = 30;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("ZDR BIAS IN BRAGG");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3052,11 +3073,11 @@ using namespace std;
       tt->array_vals[6].d = 40;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("WRITING ZDR BIAS RESULTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3085,11 +3106,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("/tmp/spdb/zdr_bias");
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("ESTIMATING Z BIAS USING SELF-CONSISTENCY");
     tt->comment_text = tdrpStrDup("The Z bias can be estimated using data from the rain region, i.e. below the freezing level. We use the self-consistency technique to compute z bias based on phidp phase shift in rain. See Vivekanandan, J., G. Zhang, S. M. Ellis, D. Rajopadhyaya, and S. K. Avery, Radar reflectivity calibration using differential propagation phase measurement, Radio Sci., 38(3), 8049, doi:10.1029/2002RS002676, 2003. NOTE: defaults are for S-band.");
     tt++;
@@ -3569,11 +3590,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("/tmp/self_consistency_run_files");
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("RETRIEVING SITE TEMPERATURE FROM SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3626,11 +3647,11 @@ using namespace std;
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 30'
+    // Parameter 'Comment 31'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
+    tt->param_name = tdrpStrDup("Comment 31");
     tt->comment_hdr = tdrpStrDup("SPECIFYING FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3997,11 +4018,11 @@ using namespace std;
       tt->struct_vals[143].d = 0;
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 32'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 32");
     tt->comment_hdr = tdrpStrDup("SPECIFYING COPY-THROUGH FIELDS");
     tt->comment_text = tdrpStrDup("These fields are copied unchanged from the input file to the output file. This is a way of consolidating the output data set.");
     tt++;
@@ -4059,11 +4080,11 @@ using namespace std;
       tt->struct_vals[2].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 32'
+    // Parameter 'Comment 33'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 32");
+    tt->param_name = tdrpStrDup("Comment 33");
     tt->comment_hdr = tdrpStrDup("OUTPUT FILE FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4120,11 +4141,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 33'
+    // Parameter 'Comment 34'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 33");
+    tt->param_name = tdrpStrDup("Comment 34");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4165,11 +4186,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 34'
+    // Parameter 'Comment 35'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 34");
+    tt->param_name = tdrpStrDup("Comment 35");
     tt->comment_hdr = tdrpStrDup("VOLUME OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -528,6 +528,16 @@ paramdef double {
 } zdr_attenuation_exponent;
 
 commentdef {
+  p_header = "LOCATING RLAN INTERFERENCE";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to locate gates with RLAN interference.";
+  p_help = "This particularly applies to C-band. You need to activate this step if you want RLAN to show up in the PID classification.";
+} locate_rlan_interference;
+
+commentdef {
   p_header = "COMPUTING PID - HYDROMETEOR PARTICLE ID";
 }
 

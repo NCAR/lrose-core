@@ -141,7 +141,13 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
   } else {
     _kdp.initializeArrays(_nGates);
   }
-  
+
+  // locate RLAN interference
+
+  if (_params.locate_rlan_interference) {
+    _locateRlan();
+  }
+
   // compute pid
 
   _allocPidArrays();
@@ -797,6 +803,67 @@ void ComputeEngine::_kdpCompute()
 
   } // if (_params.compute_kdp_bringi)
 
+}
+
+//////////////////////////////////////
+// Locate RLAN interference
+
+void ComputeEngine::_locateRlan()
+  
+{
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _rlan.setDebug(true);
+  }
+  _rlan.setNGatesKernel(9);
+  _rlan.setRayProps(_timeSecs,
+                    _nanoSecs,
+                    _elevation,
+                    _azimuth,
+                    _nGates,
+                    _startRangeKm,
+                    _gateSpacingKm,
+                    _wavelengthM,
+                    _nyquist);
+
+#ifdef JUNK
+  
+  // override temp profile if appropriate
+  
+  if (_params.use_soundings_from_spdb) {
+    if (_tempProfile) {
+      const vector<NcarParticleId::TmpPoint> &profile = _tempProfile->getProfile();
+      if (profile.size() > 0) {
+        _pid.setTempProfile(profile);
+      }
+    }
+  }
+
+  // fill temperature array
+  
+  _pid.fillTempArray(_radarHtKm,
+                     _params.override_standard_pseudo_earth_radius,
+                     _params.pseudo_earth_radius_ratio,
+                     _elevation, _nGates,
+                     _startRangeKm,
+                     _gateSpacingKm,
+                     _tempForPid);
+
+  // compute particle ID
+  
+  _pid.computePidBeam(_nGates, _snrArray, _dbzArray, 
+                      _zdrArray, _kdpArray, _ldrArray, 
+                      _rhohvArray, _phidpArray, _tempForPid);
+  
+  // load results
+
+  memcpy(_pidArray, _pid.getPid(), _nGates * sizeof(int));
+  memcpy(_pidArray2, _pid.getPid2(), _nGates * sizeof(int));
+  memcpy(_pidInterest, _pid.getInterest(), _nGates * sizeof(double));
+  memcpy(_pidInterest2, _pid.getInterest2(), _nGates * sizeof(double));
+
+#endif
+  
 }
 
 //////////////////////////////////////

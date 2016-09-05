@@ -93,14 +93,17 @@ public:
   ///////////////////////////////////////////////////////////////
   // set the ray properties
   // must be called before locate()
+  // Set the nyquist if it is known.
   
   void setRayProps(time_t timeSecs, 
                    double nanoSecs,
                    double elevation, 
                    double azimuth,
                    int nGates,
-                   double startRange,
-                   double gateSpacing);
+                   double startRangeKm,
+                   double gateSpacingKm,
+                   double wavelengthM,
+                   double nyquist = -9999.0);
 
   ///////////////////////////////////////////////////////////////
   // set the available fields
@@ -167,8 +170,10 @@ private:
   double _elevation;
   double _azimuth;
   int _nGates;
-  double _startRange;
-  double _gateSpacing;
+  double _startRangeKm;
+  double _gateSpacingKm;
+  double _wavelengthM;
+  double _nyquist;
 
   // arrays for input and computed data
   // and pointers to those arrays
