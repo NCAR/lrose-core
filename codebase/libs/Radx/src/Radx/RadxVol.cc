@@ -3733,6 +3733,58 @@ double RadxVol::_computeSweepFractionInTransition(int sweepIndex)
 
 }
 
+///////////////////////////////////////////////////////////////
+/// Estimate nyquist per sweep from velocity field
+///
+/// If nyquist values are missing, we can estimate the nyquist
+/// finding the max absolute velocity in each sweep.
+
+void RadxVol::estimateSweepNyquistFromVel(const string &velFieldName)
+  
+{
+
+  // estimate nyquist for each sweep
+
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    
+    RadxSweep *sweep = _sweeps[isweep];
+    size_t startIndex = sweep->getStartRayIndex();
+    size_t endIndex = sweep->getEndRayIndex();
+    double maxAbsVel = 0;
+
+    for (size_t iray = startIndex; iray <= endIndex; iray++) {
+      const RadxRay &ray = *_rays[iray];
+      const RadxField *velField = ray.getField(velFieldName);
+      if (velField != NULL) {
+        RadxField velf(*velField);
+        velf.convertToFl32();
+        const Radx::fl32 *vel = velf.getDataFl32();
+        Radx::fl32 miss = velf.getMissingFl32();
+        for (size_t igate = 0; igate < velf.getNPoints(); igate++) {
+          if (vel[igate] != miss) {
+            double absVel = fabs(vel[igate]);
+            if (absVel > maxAbsVel) {
+              maxAbsVel = absVel;
+            }
+          } // if (vel[igate] != miss)
+        } // igate
+      } // if (velField != NULL)
+    } // iray
+
+    if (maxAbsVel > 0) {
+      double estimatedNyquist = maxAbsVel;
+      for (size_t iray = startIndex; iray <= endIndex; iray++) {
+        RadxRay &ray = *_rays[iray];
+        if (ray.getNyquistMps() <= 0) {
+          ray.setNyquistMps(estimatedNyquist);
+        }
+      } // iray
+    } // if (maxAbsVel > 0) 
+    
+  } // isweep
+  
+}
+
 ////////////////////////////////////////////////////////////
 // Constrain the data by specifying fixedAngle limits
 //

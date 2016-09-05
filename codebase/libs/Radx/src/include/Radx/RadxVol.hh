@@ -665,6 +665,13 @@ public:
   
   double computeSweepMedianFixedAngle(const RadxSweep *sweep) const;
   
+  /// Estimate nyquist per sweep from velocity field
+  ///
+  /// If nyquist values are missing, we can estimate the nyquist
+  /// finding the max absolute velocity in each sweep.
+  
+  void estimateSweepNyquistFromVel(const string &velFieldName);
+  
   /// Set the sweep scan modes from ray angles
   ///
   /// Deduce the antenna scan mode from the ray angles in each
