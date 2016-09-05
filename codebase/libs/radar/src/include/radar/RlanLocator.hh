@@ -26,11 +26,12 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2012
+// Sept 2016
 //
 ///////////////////////////////////////////////////////////////
 //
-// Find noise gates in Doppler radar data
+// Find gates contaminated with RLAN interference
+// in dual pol data
 //
 ///////////////////////////////////////////////////////////////
 
@@ -39,9 +40,8 @@
 
 #include <pthread.h>
 #include <vector>
-#include <radar/MomentsFields.hh>
-#include <radar/IwrfCalib.hh>
 #include <radar/InterestMap.hh>
+#include <toolsa/TaArray.hh>
 using namespace std;
 
 class RlanLocator {
@@ -61,81 +61,61 @@ public:
   void setDebug(bool state) { _debug = state; }
 
   //////////////////////////////////////////////////////
-  // set parameters for noise location
+  // set parameters for rlan location
 
-  // set kernel size for noise location
+  // set kernel size for rlan location
   
   void setNGatesKernel(int val) {
     _nGatesKernel = val;
   }
 
-  // Set interest maps for identifying noise
+  // Set interest maps for identifying rlan
   
-  void setInterestMapPhaseChangeErrorForNoise
+  void setInterestMapPhaseChangeErrorForRlan
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestMapDbmSdevForNoise
+  void setInterestMapDbmSdevForRlan
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestMapNcpMeanForNoise
+  void setInterestMapNcpMeanForRlan
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestThresholdForNoise(double val);
-  
-  // Set interest maps for identifying signal
-  
-  void setInterestMapPhaseChangeErrorForSignal
-    (const vector<InterestMap::ImPoint> &pts,
-     double weight);
-  
-  void setInterestMapDbmSdevForSignal
-    (const vector<InterestMap::ImPoint> &pts,
-     double weight);
-  
-  void setInterestThresholdForSignal(double val);
+  void setInterestThresholdForRlan(double val);
   
   ////////////////////////////////////////////////////////////////
-  // set the computation method - defaults to RAY_MEDIAN
+  // set min ngates for computing median
 
-  // for the ray-by-ray method, we compute noise for individual rays
-  // so the noise varies on a ray-by-ray basis
+  void setMinNGatesRayMedian(int minNGatesRayMedian);
 
-  void setComputeRayMedian(int minNGatesRayMedian);
-
-  // for the running-median method, we compute a running median of
-  // the noise which is applied to the rays in sequence
-  // so the estimated noise varies slowly from time to time
-  
-  void setComputeRunningMedian(int nGatesRunningMedian);
-  
-  ////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////
   // set the ray properties
-  // must be called before locate() or computeNoise()
-
-  void setRayProps(int nGates,
-                   const IwrfCalib &calib,
-                   time_t timeSecs, 
+  // must be called before locate()
+  
+  void setRayProps(time_t timeSecs, 
                    double nanoSecs,
                    double elevation, 
-                   double azimuth);
+                   double azimuth,
+                   int nGates,
+                   double startRange,
+                   double gateSpacing);
 
-  //////////////////////////////////////////////////////////
-  // set flag to indicate that the noise bias should be set
-  // to the same value for all channels
-  //
-  // Use Hc if appropriate for computing bias,
-  // and set all channels to Hc bias.
-  // If no Hc, use Vc.
-
-  void setEqualBiasInAllChannels(bool state) {
-    _equalBiasInAllChannels = state;
-  }
+  ///////////////////////////////////////////////////////////////
+  // set the available fields
+  // if field is not available, set to NULL
+  // must be called before locate()
+  
+  void setFields(double *dbz,
+                 double *vel,
+                 double *width,
+                 double *ncp,
+                 double *zdr,
+                 double missingVal);
   
   //////////////////////////////////////////////
-  // perform noise location
+  // perform rlan location
   //
   // mfields: array of Moments Fields computed before
   //          calling this method
@@ -144,69 +124,16 @@ public:
   //
   // The following must be set in mfields prior to calling:
   //
-  //   phase_for_noise
-  //   dbm_for_noise
+  //   phase_for_rlan
+  //   dbm_for_rlan
   //   ncp
   
-  void locate(const MomentsFields *mfields);
+  void locate();
 
-  /////////////////////////////////////////////
-  // Identify the noise, compute mean noise
-  //
-  // Must call setRayProps before any of these methods
-  
-  // Single pol
-  // The following must be set in mfields prior to calling:
-  //   lag0_hc_db
-
-  void computeNoiseSinglePol(MomentsFields *mfields);
-
-  // Alternating mode dual pol, co-pol receiver only
-  // The following must be set in mfields prior to calling:
-  //   lag0_hc_db
-  //   lag0_vc_db
-  
-  void computeNoiseDpAltHvCoOnly(MomentsFields *mfields);
-
-  // Alternating mode dual pol, co/cross receivers
-  // The following must be set in mfields prior to calling:
-  //   lag0_hc_db
-  //   lag0_vc_db
-  //   lag0_hx_db
-  //   lag0_vx_db
-  
-  void computeNoiseDpAltHvCoCross(MomentsFields *mfields);
-
-  // Sim HV mode
-  // The following must be set in mfields prior to calling:
-  //   lag0_hc_db
-  //   lag0_vc_db
-  
-  void computeNoiseDpSimHv(MomentsFields *mfields);
-
-  // Dual pol, H-transmit only
-  // The following must be set in mfields prior to calling:
-  //   lag0_hc_db
-  //   lag0_vx_db
-  
-  void computeNoiseDpHOnly(MomentsFields *mfields);
-
-  // Dual pol, V-transmit only
-  // The following must be set in mfields prior to calling:
-  //   lag0_vc_db
-  //   lag0_hx_db
-  
-  void computeNoiseDpVOnly(MomentsFields *mfields);
-  
-  // add the noise fields to a moments array
-  
-  void addToMoments(MomentsFields *mfields);
-    
   // get results - after running locate
   // these arrays span the gates from 0 to nGates-1
 
-  const vector<bool> &getNoiseFlag() const { return _noiseFlag; }
-  const vector<bool> &getSignalFlag() const { return _signalFlag; }
+  const vector<bool> &getRlanFlag() const { return _rlanFlag; }
 
   const vector<size_t> &getStartGate() const { return _startGate; }
   const vector<size_t> &getEndGate() const { return _endGate; }
@@ -220,15 +147,6 @@ public:
 
   const vector<double> &getDbmSdev() const { return _dbmSdev; }
   const vector<double> &getNcpMean() const { return _ncpMean; }
-
-  double getMedianNoiseDbmHc() const { return _medianNoiseDbmHc; }
-  double getMedianNoiseDbmVc() const { return _medianNoiseDbmVc; }
-  double getMedianNoiseDbmHx() const { return _medianNoiseDbmHx; }
-  double getMedianNoiseDbmVx() const { return _medianNoiseDbmVx; }
-  double getNoiseBiasDbHc() const { return _noiseBiasDbHc; }
-  double getNoiseBiasDbVc() const { return _noiseBiasDbVc; }
-  double getNoiseBiasDbHx() const { return _noiseBiasDbHx; }
-  double getNoiseBiasDbVx() const { return _noiseBiasDbVx; }
 
   ////////////////////////////////////
   // print parameters for debugging
@@ -244,22 +162,50 @@ private:
 
   // ray properties
 
-  int _nGates;
   time_t _timeSecs;
   double _nanoSecs;
   double _elevation;
   double _azimuth;
-  IwrfCalib _calib;
+  int _nGates;
+  double _startRange;
+  double _gateSpacing;
 
-  // flag to indicate that the noise bias should be set
-  // to the same value for all channels
+  // arrays for input and computed data
+  // and pointers to those arrays
 
-  bool _equalBiasInAllChannels;
+  double _missingVal;
+
+  TaArray<double> _dbz_;
+  double *_dbz;
+  bool _dbzAvail;
+  
+  TaArray<double> _dbm_;
+  double *_dbm;
+  bool _dbmAvail;
+  
+  TaArray<double> _vel_;
+  double *_vel;
+  bool _velAvail;
+  
+  TaArray<double> _phase_;
+  double *_phase;
+  bool _phaseAvail;
+  
+  TaArray<double> _width_;
+  double *_width;
+  bool _widthAvail;
+
+  TaArray<double> _ncp_;
+  double *_ncp;
+  bool _ncpAvail;
+
+  TaArray<double> _zdr_;
+  double *_zdr;
+  bool _zdrAvail;
   
   // results
 
-  vector<bool> _noiseFlag;
-  vector<bool> _signalFlag;
+  vector<bool> _rlanFlag;
   vector<size_t> _startGate;
   vector<size_t> _endGate;
   vector<double> _accumPhaseChange;
@@ -267,95 +213,27 @@ private:
   vector<double> _dbmSdev;
   vector<double> _ncpMean;
   
-  double _medianNoiseDbmHc;
-  double _medianNoiseDbmVc;
-  double _medianNoiseDbmHx;
-  double _medianNoiseDbmVx;
-
-  double _noiseBiasDbHc;
-  double _noiseBiasDbVc;
-  double _noiseBiasDbHx;
-  double _noiseBiasDbVx;
-
-  // keeping track of previously-determined noise values
-  // using an elevation/azimuth grid at 0.5 deg resolution
-
-  typedef struct {
-    float noiseHc;
-    float noiseVc;
-    float noiseHx;
-    float noiseVx;
-    time_t time;
-  } noise_val_t;
-
-  int _gridIndexAz;
-  int _gridIndexEl;
-  static noise_val_t **_previousGrid;
-  static pthread_mutex_t _prevGridMutex;
-
-  static const double _gridResEl;
-  static const double _gridResAz;
-  static const int _gridSizeEl = 720;
-  static const int _gridSizeAz = 720;
-
-  typedef struct {
-    int ix;
-    int iy;
-  } search_kernel_t;
-  static search_kernel_t _searchKernel[25];
-
-  // compute method
-  
-  typedef enum {
-    RAY_BY_RAY,
-    RUNNING_MEDIAN
-  } compute_method_t;
-  
   int _minNGatesRayMedian;
 
-  static compute_method_t _computeMethod;
-  static pthread_mutex_t _computeMethodMutex;
-
-  static int _nGatesRunningMedian;
-  static int _nGatesRunningCount;
-  static vector<double> _runningValsDbmHc;
-  static vector<double> _runningValsDbmVc;
-  static vector<double> _runningValsDbmHx;
-  static vector<double> _runningValsDbmVx;
-  static double _runningMedianNoiseDbmHc;
-  static double _runningMedianNoiseDbmVc;
-  static double _runningMedianNoiseDbmHx;
-  static double _runningMedianNoiseDbmVx;
-  static pthread_mutex_t _runningMedianMutex;
-  
-  // fuzzy logic for noise and signal
+  // fuzzy logic for rlan detection
 
   int _nGatesKernel;
 
-  InterestMap *_interestMapPhaseChangeErrorForNoise;
-  InterestMap *_interestMapDbmSdevForNoise;
-  InterestMap *_interestMapNcpMeanForNoise;
-  double _weightPhaseChangeErrorForNoise;
-  double _weightDbmSdevForNoise;
-  double _weightNcpMeanForNoise;
-  double _interestThresholdForNoise;
-
-  InterestMap *_interestMapPhaseChangeErrorForSignal;
-  InterestMap *_interestMapDbmSdevForSignal;
-  double _weightPhaseChangeErrorForSignal;
-  double _weightDbmSdevForSignal;
-  double _interestThresholdForSignal;
+  InterestMap *_interestMapPhaseChangeErrorForRlan;
+  InterestMap *_interestMapDbmSdevForRlan;
+  InterestMap *_interestMapNcpMeanForRlan;
+  double _weightPhaseChangeErrorForRlan;
+  double _weightDbmSdevForRlan;
+  double _weightNcpMeanForRlan;
+  double _interestThresholdForRlan;
 
   // private methods
   
   double _computePhaseChangeError(int startGate, int endGate);
-  void _computeDbmSdev(const MomentsFields *mfields);
-  void _computeNcpMean(const MomentsFields *mfields);
+  void _computeDbmSdev();
+  void _computeNcpMean();
   double _computeMean(const vector<double> &vals);
   double _computeMedian(const vector<double> &vals);
-  int _getSavedNoiseClosestHc(noise_val_t &closest);
-  int _getSavedNoiseClosestVc(noise_val_t &closest);
-
   void _createDefaultInterestMaps();
 
 };

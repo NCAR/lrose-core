@@ -35,51 +35,11 @@
 ///////////////////////////////////////////////////////////////
 
 #include <radar/RlanLocator.hh>
-#include <toolsa/mem.h>
+#include <radar/RadarComplex.hh>
 #include <algorithm>
+#include <ostream>
+#include <cstring>
 using namespace std;
-
-// mutexes
-
-pthread_mutex_t RlanLocator::_prevGridMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t RlanLocator::_computeMethodMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t RlanLocator::_runningMedianMutex = PTHREAD_MUTEX_INITIALIZER;
-
-// method for computing the median noise
-
-RlanLocator::compute_method_t RlanLocator::_computeMethod
-  = RlanLocator::RAY_BY_RAY;
-
-// grid for storing previous noise values
-
-RlanLocator::noise_val_t **RlanLocator::_previousGrid = NULL;
-const double RlanLocator::_gridResEl = 360.0 / _gridSizeEl;
-const double RlanLocator::_gridResAz = 360.0 / _gridSizeAz;
-
-// running median method
-
-int RlanLocator::_nGatesRunningMedian = 2500;
-int RlanLocator::_nGatesRunningCount = 0;
-vector<double> RlanLocator::_runningValsDbmHc;
-vector<double> RlanLocator::_runningValsDbmVc;
-vector<double> RlanLocator::_runningValsDbmHx;
-vector<double> RlanLocator::_runningValsDbmVx;
-double RlanLocator::_runningMedianNoiseDbmHc = -9999;
-double RlanLocator::_runningMedianNoiseDbmVc = -9999;
-double RlanLocator::_runningMedianNoiseDbmHx = -9999;
-double RlanLocator::_runningMedianNoiseDbmVx = -9999;
-
-// search kernel for finding most appropriate previous
-// noise value
-
-RlanLocator::search_kernel_t RlanLocator::_searchKernel[25] =
-  {
-    {0,0},   {-1,0},  {1,0},   {0,1},   {0,-1},
-    {-1,1},  {1,1},   {-1,-1}, {1,-1},  {-2,0},
-    {2,0},   {-2,1},  {2,1},   {0, 2},  {-1,2},
-    {1,2},   {-2,2},  {2,2},   {-2,-1}, {2,-1},
-    {0,-2},  {-1,-2}, {1,-2},  {-2,-2}, {2,-2}
-  };
 
 ///////////////////////////////////////////////////////////////
 // Constructor
@@ -89,27 +49,12 @@ RlanLocator::RlanLocator()
 {
 
   _debug = false;
-  _equalBiasInAllChannels = false;
-
-  // create grid if not yet done
-  // grid resolution is 0.5 degreed in each dimension (el, az)
-  // init to 0
-
-  pthread_mutex_lock(&_prevGridMutex);
-  if (_previousGrid == NULL) {
-    _previousGrid = (noise_val_t **)
-      umalloc2(720, 720, sizeof(noise_val_t));
-    memset(*_previousGrid, 0, 720 * 720 * sizeof(noise_val_t));
-  }
-  pthread_mutex_unlock(&_prevGridMutex);
 
   // create the default interest maps
 
-  _interestMapPhaseChangeErrorForNoise = NULL;
-  _interestMapDbmSdevForNoise = NULL;
-  _interestMapNcpMeanForNoise = NULL;
-  _interestMapPhaseChangeErrorForSignal = NULL;
-  _interestMapDbmSdevForSignal = NULL;
+  _interestMapPhaseChangeErrorForRlan = NULL;
+  _interestMapDbmSdevForRlan = NULL;
+  _interestMapNcpMeanForRlan = NULL;
 
   _createDefaultInterestMaps();
   
@@ -125,68 +70,25 @@ RlanLocator::~RlanLocator()
   
 {
 
-  pthread_mutex_lock(&_prevGridMutex);
-  if (_previousGrid) {
-    ufree2((void **) _previousGrid);
-    _previousGrid = NULL;
+  if (_interestMapPhaseChangeErrorForRlan) {
+    delete _interestMapPhaseChangeErrorForRlan;
   }
-  pthread_mutex_unlock(&_prevGridMutex);
-
-  if (_interestMapPhaseChangeErrorForNoise) {
-    delete _interestMapPhaseChangeErrorForNoise;
+  if (_interestMapDbmSdevForRlan) {
+    delete _interestMapDbmSdevForRlan;
   }
-  if (_interestMapDbmSdevForNoise) {
-    delete _interestMapDbmSdevForNoise;
-  }
-  if (_interestMapNcpMeanForNoise) {
-    delete _interestMapNcpMeanForNoise;
-  }
-  if (_interestMapPhaseChangeErrorForSignal) {
-    delete _interestMapPhaseChangeErrorForSignal;
-  }
-  if (_interestMapDbmSdevForSignal) {
-    delete _interestMapDbmSdevForSignal;
+  if (_interestMapNcpMeanForRlan) {
+    delete _interestMapNcpMeanForRlan;
   }
 
 }
 
 ///////////////////////////////////////////////////////////////
-// for the ray-by-ray method, we compute noise for individual
-// rays so the noise varies on a ray-by-ray basis
+// set min ngates for computing median
 
-void RlanLocator::setComputeRayMedian(int minNGatesRayMedian)
+void RlanLocator::setMinNGatesRayMedian(int minNGatesRayMedian)
 {
   
-  pthread_mutex_lock(&_computeMethodMutex);
-  _computeMethod = RAY_BY_RAY;
   _minNGatesRayMedian = minNGatesRayMedian;
-  pthread_mutex_unlock(&_computeMethodMutex);
-
-}
-
-///////////////////////////////////////////////////////////////
-// for the running-median method, we compute a running median of
-// the noise which is applied to the rays in sequence
-// so the estimated noise varies slowly from time to time
-
-void RlanLocator::setComputeRunningMedian(int nGatesMedian)
-  
-{ 
-  
-  pthread_mutex_lock(&_computeMethodMutex);
-
-  _computeMethod = RUNNING_MEDIAN;
-  _nGatesRunningMedian = nGatesMedian;
-
-  if (nGatesMedian != (int) _runningValsDbmHc.size()) {
-    _runningValsDbmHc.resize(nGatesMedian);
-    _runningValsDbmVc.resize(nGatesMedian);
-    _runningValsDbmHx.resize(nGatesMedian);
-    _runningValsDbmVx.resize(nGatesMedian);
-    _nGatesRunningCount = 0;
-  }
-
-  pthread_mutex_unlock(&_computeMethodMutex);
 
 }
 
@@ -197,85 +99,151 @@ void RlanLocator::printParams(ostream &out)
   
 {
 
-  pthread_mutex_lock(&_computeMethodMutex);
-
-  out << "Performing noise detection:" << endl;
-  out << "  nGatesForNoiseDetection: " << _nGatesKernel << endl;
+  out << "Performing rlan detection:" << endl;
+  out << "  nGatesForRlanDetection: " << _nGatesKernel << endl;
   out << "  minNGatesRayMedian: " << _minNGatesRayMedian << endl;
-  out << "  interestThresholdForNoise: " 
-      << _interestThresholdForNoise << endl;
-  out << "  interestThresholdForSignal: " 
-      << _interestThresholdForSignal << endl;
+  out << "  interestThresholdForRlan: " 
+      << _interestThresholdForRlan << endl;
   
-  if (_interestMapPhaseChangeErrorForNoise) {
-    _interestMapPhaseChangeErrorForNoise->printParams(out);
+  if (_interestMapPhaseChangeErrorForRlan) {
+    _interestMapPhaseChangeErrorForRlan->printParams(out);
   }
-  if (_interestMapDbmSdevForNoise) {
-    _interestMapDbmSdevForNoise->printParams(out);
+  if (_interestMapDbmSdevForRlan) {
+    _interestMapDbmSdevForRlan->printParams(out);
   }
-  if (_interestMapNcpMeanForNoise) {
-    _interestMapNcpMeanForNoise->printParams(out);
+  if (_interestMapNcpMeanForRlan) {
+    _interestMapNcpMeanForRlan->printParams(out);
   }
-
-  if (_interestMapPhaseChangeErrorForSignal) {
-    _interestMapPhaseChangeErrorForSignal->printParams(out);
-  }
-  if (_interestMapDbmSdevForSignal) {
-    _interestMapDbmSdevForSignal->printParams(out);
-  }
-
-  if (_computeMethod == RAY_BY_RAY) {
-    out << "Median method: RAY_BY_RAY" << endl;
-  } else {
-    out << "Median method: RUNNING_MEDIAN" << endl;
-    out << "  nGatesRunningMedian: " << _nGatesRunningMedian << endl;
-  }
-
-  pthread_mutex_unlock(&_computeMethodMutex);
 
 }
 
 ///////////////////////////////////////////////////////////////
 // set the ray properties
-// must be called before locate() or computeNoise()
+// must be called before locate()
 
-void RlanLocator::setRayProps(int nGates,
-                               const IwrfCalib &calib,
-                               time_t timeSecs, 
-                               double nanoSecs,
-                               double elevation, 
-                               double azimuth)
-
+void RlanLocator::setRayProps(time_t timeSecs, 
+                              double nanoSecs,
+                              double elevation, 
+                              double azimuth,
+                              int nGates,
+                              double startRange,
+                              double gateSpacing)
+                              
 {
 
-  _nGates = nGates;
-  _calib = calib;
   _timeSecs = timeSecs;
   _nanoSecs = nanoSecs;
   _elevation = elevation;
   _azimuth = azimuth;
 
-  // compute index for saving data in grid
+  _nGates = nGates;
+  _startRange = startRange;
+  _gateSpacing = gateSpacing;
 
-  _gridIndexAz = (int) (_azimuth / _gridResAz);
-  _gridIndexAz = _gridIndexAz % _gridSizeAz;
-  if (_gridIndexAz < 0) _gridIndexAz += _gridSizeAz;
-  
-  _gridIndexEl = (int) (_elevation / _gridResEl);
-  _gridIndexEl = _gridIndexEl % _gridSizeEl;
-  if (_gridIndexEl < 0) _gridIndexEl += _gridSizeEl;
+  _dbz = _dbz_.alloc(_nGates);
+  _dbm = _dbm_.alloc(_nGates);
+  _vel = _vel_.alloc(_nGates);
+  _phase = _phase_.alloc(_nGates);
+  _width = _width_.alloc(_nGates);
+  _ncp = _ncp_.alloc(_nGates);
+  _zdr = _zdr_.alloc(_nGates);
 
 }
 
 ///////////////////////////////////////////////////////////////
-// locate the noise gates
+// set the available fields
+// if field is not available, set to NULL
+// must be called before locate()
 
-void RlanLocator::locate(const MomentsFields *mfields)
+void RlanLocator::setFields(double *dbz,
+                            double *vel,
+                            double *width,
+                            double *ncp,
+                            double *zdr,
+                            double missingVal)
   
 {
 
-  _noiseFlag.resize(_nGates);
-  _signalFlag.resize(_nGates);
+  _missingVal = missingVal;
+
+  if (dbz != NULL) {
+    memcpy(_dbz, dbz, _nGates * sizeof(double));
+    _dbzAvail = true;
+  } else {
+    _dbzAvail = false;
+  }
+
+  if (vel != NULL) {
+    memcpy(_vel, vel, _nGates * sizeof(double));
+    _velAvail = true;
+  } else {
+    _velAvail = false;
+  }
+
+  if (width != NULL) {
+    memcpy(_width, width, _nGates * sizeof(double));
+    _widthAvail = true;
+  } else {
+    _widthAvail = false;
+  }
+
+  if (ncp != NULL) {
+    memcpy(_ncp, ncp, _nGates * sizeof(double));
+    _ncpAvail = true;
+  } else {
+    _ncpAvail = false;
+  }
+
+  if (zdr != NULL) {
+    memcpy(_zdr, zdr, _nGates * sizeof(double));
+    _zdrAvail = true;
+  } else {
+    _zdrAvail = false;
+  }
+
+  // compute dbm by removing range correction from DBZ
+  
+  if (_dbzAvail) {
+    double range = _startRange;
+    for (int ii = 0; ii < _nGates; ii++, range += _gateSpacing) {
+      double corr = 20.0 * log10(range);
+      _dbm[ii] = _dbz[ii] - corr;
+    }
+    _dbmAvail = true;
+  } else {
+    _dbmAvail = false;
+  }
+
+  // compute phase from velocity
+  
+  if (_velAvail) {
+    // estimate the nyquist from the vel
+    double nyquist = 0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      double absVel = fabs(vel[ii]);
+      if (nyquist < absVel) {
+        nyquist = absVel;
+      }
+    }
+    // estimate the phase from the vel
+    for (int ii = 0; ii < _nGates; ii++) {
+      _phase[ii] = (_vel[ii] / nyquist) * M_PI;
+    }
+    _phaseAvail = true;
+  } else {
+    _phaseAvail = false;
+  }
+
+}
+
+///////////////////////////////////////////////////////////////
+// locate the rlan gates
+
+void RlanLocator::locate()
+  
+{
+
+  _rlanFlag.resize(_nGates);
   _startGate.resize(_nGates);
   _endGate.resize(_nGates);
   _accumPhaseChange.resize(_nGates);
@@ -284,8 +252,7 @@ void RlanLocator::locate(const MomentsFields *mfields)
   _ncpMean.resize(_nGates);
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _noiseFlag[igate] = false;
-    _signalFlag[igate] = false;
+    _rlanFlag[igate] = false;
     _startGate[igate] = 0;
     _endGate[igate] = 0;
     _accumPhaseChange[igate] = -9999;
@@ -297,17 +264,17 @@ void RlanLocator::locate(const MomentsFields *mfields)
   // first compute the absolute phase at each gate, summing up
   // the phase change from the start to end of the ray
   // the units are degrees
-  
-  double prevPhaseSum = RadarComplex::argDeg(mfields[0].phase_for_noise);
-  
-  for (int igate = 1; igate < _nGates; igate++) {
-    RadarComplex_t diff =
-      RadarComplex::conjugateProduct(mfields[igate].phase_for_noise,
-                                     mfields[igate-1].phase_for_noise);
-    double diffDeg = RadarComplex::argDeg(diff);
-    double phaseSum = prevPhaseSum + diffDeg;
-    _accumPhaseChange[igate] = phaseSum;
-    prevPhaseSum = phaseSum;
+
+  if (_phaseAvail) {
+    double prevPhaseSum = RadarComplex::argDeg(_phase[0]);
+    for (int igate = 1; igate < _nGates; igate++) {
+      RadarComplex_t diff =
+        RadarComplex::conjugateProduct(_phase[igate], _phase[igate-1]);
+      double diffDeg = RadarComplex::argDeg(diff);
+      double phaseSum = prevPhaseSum + diffDeg;
+      _accumPhaseChange[igate] = phaseSum;
+      prevPhaseSum = phaseSum;
+    }
   }
   
   // set kernel size for computing phase error
@@ -348,16 +315,18 @@ void RlanLocator::locate(const MomentsFields *mfields)
   
   // compute dbm sdev
 
-  _computeDbmSdev(mfields);
-  _computeNcpMean(mfields);
+  if (_dbmAvail) {
+    _computeDbmSdev();
+  }
+  if (_ncpAvail) {
+    _computeNcpMean();
+  }
 
   // set flags
 
-  double sumWeightsNoise = (_weightPhaseChangeErrorForNoise + 
-                            _weightDbmSdevForNoise +
-                            _weightNcpMeanForNoise);
-  double sumWeightsSignal = (_weightPhaseChangeErrorForSignal + 
-                             _weightDbmSdevForSignal);
+  double sumWeightsRlan = (_weightPhaseChangeErrorForRlan + 
+                            _weightDbmSdevForRlan +
+                            _weightNcpMeanForRlan);
 
   for (int igate = 0; igate < _nGates; igate++) {
 
@@ -365,59 +334,37 @@ void RlanLocator::locate(const MomentsFields *mfields)
     double dbmSdev = _dbmSdev[igate];
     double ncpMean = _ncpMean[igate];
 
-    double sumInterestNoise =
-      (_interestMapPhaseChangeErrorForNoise->getInterest(pce) * 
-       _weightPhaseChangeErrorForNoise) +
-      (_interestMapDbmSdevForNoise->getInterest(dbmSdev) * 
-       _weightDbmSdevForNoise) +
-      (_interestMapNcpMeanForNoise->getInterest(ncpMean) * 
-       _weightNcpMeanForNoise);
+    double sumInterestRlan =
+      (_interestMapPhaseChangeErrorForRlan->getInterest(pce) * 
+       _weightPhaseChangeErrorForRlan) +
+      (_interestMapDbmSdevForRlan->getInterest(dbmSdev) * 
+       _weightDbmSdevForRlan) +
+      (_interestMapNcpMeanForRlan->getInterest(ncpMean) * 
+       _weightNcpMeanForRlan);
     
-    double interestNoise = sumInterestNoise / sumWeightsNoise;
+    double interestRlan = sumInterestRlan / sumWeightsRlan;
 
-    double sumInterestSignal =
-      (_interestMapPhaseChangeErrorForSignal->getInterest(pce) * 
-       _weightPhaseChangeErrorForSignal) +
-      (_interestMapDbmSdevForSignal->getInterest(dbmSdev) * 
-       _weightDbmSdevForSignal);
-
-    double interestSignal = sumInterestSignal / sumWeightsSignal;
-
-    if (interestNoise > _interestThresholdForNoise) {
-      _noiseFlag[igate] = true;
+    if (interestRlan > _interestThresholdForRlan) {
+      _rlanFlag[igate] = true;
     } else {
-      _noiseFlag[igate] = false;
-    }
-
-    if (interestSignal > _interestThresholdForSignal) {
-      _signalFlag[igate] = false;
-    } else {
-      _signalFlag[igate] = true;
+      _rlanFlag[igate] = false;
     }
 
   } // igate
 
-  // for single gates surrounded by noise, set the noise flag
+  // for single gates surrounded by rlan, set the rlan flag
   
   for (int igate = 1; igate < _nGates - 1; igate++) {
-    if (_noiseFlag[igate-1] && _noiseFlag[igate+1]) {
-      _noiseFlag[igate] = true;
+    if (_rlanFlag[igate-1] && _rlanFlag[igate+1]) {
+      _rlanFlag[igate] = true;
     }
   }
  
-  // for single gates surrounded by non-noise, unset the noise flag
+  // for single gates surrounded by non-rlan, unset the rlan flag
   
   for (int igate = 1; igate < _nGates - 1; igate++) {
-    if (!_noiseFlag[igate-1] && !_noiseFlag[igate+1]) {
-      _noiseFlag[igate] = false;
-    }
-  }
- 
-  // for single gates surrounded by non-signal, unset the signal flag
-  
-  for (int igate = 1; igate < _nGates - 1; igate++) {
-    if (!_signalFlag[igate-1] && !_signalFlag[igate+1]) {
-      _signalFlag[igate] = false;
+    if (!_rlanFlag[igate-1] && !_rlanFlag[igate+1]) {
+      _rlanFlag[igate] = false;
     }
   }
  
@@ -454,7 +401,7 @@ double RlanLocator::_computePhaseChangeError(int startGate, int endGate)
 ///////////////////////////////////////////////////////////////
 // compute for DBM SDEV
 
-void RlanLocator::_computeDbmSdev(const MomentsFields *mfields)
+void RlanLocator::_computeDbmSdev()
   
 {
   
@@ -468,9 +415,9 @@ void RlanLocator::_computeDbmSdev(const MomentsFields *mfields)
     
     for (size_t jgate = _startGate[igate]; jgate <= _endGate[igate]; jgate++) {
       
-      double dbm = mfields[jgate].dbm_for_noise;
+      double dbm = _dbm[jgate];
       
-      if (dbm != MomentsFields::missingDouble) {
+      if (dbm != _missingVal) {
         sumDbm += dbm;
         sumDbmSq += (dbm * dbm);
         nDbm++;
@@ -496,7 +443,7 @@ void RlanLocator::_computeDbmSdev(const MomentsFields *mfields)
 ///////////////////////////////////////////////////////////////
 // compute NCP mean
 
-void RlanLocator::_computeNcpMean(const MomentsFields *mfields)
+void RlanLocator::_computeNcpMean()
   
 {
   
@@ -509,9 +456,9 @@ void RlanLocator::_computeNcpMean(const MomentsFields *mfields)
     
     for (size_t jgate = _startGate[igate]; jgate <= _endGate[igate]; jgate++) {
       
-      double ncp = mfields[jgate].ncp;
+      double ncp = _ncp[jgate];
       
-      if (ncp != MomentsFields::missingDouble) {
+      if (ncp != _missingVal) {
         sumNcp += ncp;
         nNcp++;
       }
@@ -528,762 +475,7 @@ void RlanLocator::_computeNcpMean(const MomentsFields *mfields)
 }
 
 ///////////////////////////////////////////////////////////////
-// Identify the noise, compute mean noise
-// Single pol
-//
-// The following must be set in mfields prior to calling:
-//   lag0_hc_db
-
-void RlanLocator::computeNoiseSinglePol(MomentsFields *mfields)
-  
-  
-{
-
-  // initialize
-
-  _medianNoiseDbmHc = _calib.getNoiseDbmHc();
-
-  // locate the noise gates
-  
-  locate(mfields);
-  
-  if (_computeMethod == RAY_BY_RAY) {
-  
-    // compute median noise for ray
-    
-    vector<double> noiseHc;
-    for (int igate = 0; igate < _nGates; igate++) {
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        noiseHc.push_back(mfield.lag0_hc_db);
-      }
-    }
-    
-    // set mean noise if noise was present at a large enough number
-    // of gates, otherwise use the calibrated noise
-    
-    if ((int) noiseHc.size() >= _minNGatesRayMedian) {
-      
-      _medianNoiseDbmHc = _computeMedian(noiseHc);
-      
-      // save the data in a grid
-      
-      pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
-      nval.noiseHc = _medianNoiseDbmHc;
-      pthread_mutex_unlock(&_prevGridMutex);
-      
-    } else {
-      
-      // check for previously saved data
-      
-      noise_val_t prev;
-      if (_getSavedNoiseClosestHc(prev) == 0) {
-        // use previously saved data
-        _medianNoiseDbmHc = prev.noiseHc;
-      }
-      
-    }
-
-  } else {
-
-    // running MEDIAN method
-    
-    pthread_mutex_lock(&_runningMedianMutex);
-    
-    for (int igate = 0; igate < _nGates; igate++) {
-      
-      // add valid gates to the arrays
-      
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        _runningValsDbmHc[_nGatesRunningCount] = mfield.lag0_hc_db;
-        _nGatesRunningCount++;
-      }
-      
-      if (_nGatesRunningCount == _nGatesRunningMedian) {
-        
-        // if reached correct size, compute the medians
-        
-        _runningMedianNoiseDbmHc = _computeMedian(_runningValsDbmHc);
-        _nGatesRunningCount = 0;
-        
-      }
-      
-    } // igate
-    
-    // set the mean to the latest median
-    
-    if (_runningMedianNoiseDbmHc > -9990) {
-      _medianNoiseDbmHc = _runningMedianNoiseDbmHc;
-    }
-
-    pthread_mutex_unlock(&_runningMedianMutex);
-
-  }
-
-  // set the noise bias in the moments
-
-  _noiseBiasDbHc = _medianNoiseDbmHc - _calib.getNoiseDbmHc();
-
-  for (int igate = 0; igate < _nGates; igate++) {
-    MomentsFields &mfield = mfields[igate];
-    mfield.noise_bias_db_hc = _noiseBiasDbHc;
-  }
-  
-}
-
-///////////////////////////////////////////////////////////////
-// Identify the noise, compute median noise
-// Alternating mode dual pol, co-pol receiver only
-//
-// The following must be set in mfields prior to calling:
-//   lag0_hc_db
-//   lag0_vc_db
-
-void RlanLocator::computeNoiseDpAltHvCoOnly(MomentsFields *mfields)
-  
-{
-
-  // initialize
-
-  _medianNoiseDbmHc = _calib.getNoiseDbmHc();
-  _medianNoiseDbmVc = _calib.getNoiseDbmVc();
-
-  // locate the noise gates
-  
-  locate(mfields);
-  
-  if (_computeMethod == RAY_BY_RAY) {
-  
-    // compute median noise for ray
-    
-    vector<double> noiseHc;
-    vector<double> noiseVc;
-    for (int igate = 0; igate < _nGates; igate++) {
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        noiseHc.push_back(mfield.lag0_hc_db);
-        noiseVc.push_back(mfield.lag0_vc_db);
-      }
-    }
-    
-    // set mean noise if noise was present at a large enough number
-    // of gates, otherwise use the calibrated noise
-    
-    if ((int) noiseHc.size() >= _minNGatesRayMedian) {
-      
-      _medianNoiseDbmHc = _computeMedian(noiseHc);
-      _medianNoiseDbmVc = _computeMedian(noiseVc);
-      
-      // save the data in a grid
-      
-      pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
-      nval.noiseHc = _medianNoiseDbmHc;
-      nval.noiseVc = _medianNoiseDbmVc;
-      pthread_mutex_unlock(&_prevGridMutex);
-      
-    } else {
-      
-      // check for previously saved data
-      
-      noise_val_t prev;
-      if (_getSavedNoiseClosestHc(prev) == 0) {
-        // use previously saved data
-        _medianNoiseDbmHc = prev.noiseHc;
-        _medianNoiseDbmVc = prev.noiseVc;
-      }
-      
-    }
-
-  } else {
-
-    // running MEDIAN method
-    
-    pthread_mutex_lock(&_runningMedianMutex);
-    
-    for (int igate = 0; igate < _nGates; igate++) {
-
-      // add valid gates to the arrays
-
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        _runningValsDbmHc[_nGatesRunningCount] = mfield.lag0_hc_db;
-        _runningValsDbmVc[_nGatesRunningCount] = mfield.lag0_vc_db;
-        _nGatesRunningCount++;
-      }
-
-      if (_nGatesRunningCount == _nGatesRunningMedian) {
-        // if reached correct size, compute the medians
-        _runningMedianNoiseDbmHc = _computeMedian(_runningValsDbmHc);
-        _runningMedianNoiseDbmVc = _computeMedian(_runningValsDbmVc);
-        _nGatesRunningCount = 0;
-      }
-
-    } // igate
-    
-    // set the mean to the latest median
-
-    if (_runningMedianNoiseDbmHc > -9990) {
-      _medianNoiseDbmHc = _runningMedianNoiseDbmHc;
-    }
-    if (_runningMedianNoiseDbmVc > -9990) {
-      _medianNoiseDbmVc = _runningMedianNoiseDbmVc;
-    }
-
-    pthread_mutex_unlock(&_runningMedianMutex);
-
-  }
-
-  // set the noise bias in the moments
-
-  _noiseBiasDbHc = _medianNoiseDbmHc - _calib.getNoiseDbmHc();
-  _noiseBiasDbVc = _medianNoiseDbmVc - _calib.getNoiseDbmVc();
-
-  // if required, set equal bias in both channels
-  // use Hc bias as the master
-
-  if (_equalBiasInAllChannels) {
-    _noiseBiasDbVc = _noiseBiasDbHc;
-    _medianNoiseDbmVc = _calib.getNoiseDbmVc() + _noiseBiasDbVc;
-  }
-
-  // set noise moment for each gate
-
-  for (int igate = 0; igate < _nGates; igate++) {
-    MomentsFields &mfield = mfields[igate];
-    mfield.noise_bias_db_hc = _noiseBiasDbHc;
-    mfield.noise_bias_db_vc = _noiseBiasDbVc;
-  }
-  
-}
-
-///////////////////////////////////////////////////////////////
-// Identify the noise, compute median noise
-// Alternating mode dual pol, co/cross receivers
-//
-// The following must be set in mfields prior to calling:
-//   lag0_hc_db
-//   lag0_vc_db
-//   lag0_hx_db
-//   lag0_vx_db
-  
-void RlanLocator::computeNoiseDpAltHvCoCross(MomentsFields *mfields)
-  
-{
-
-  // initialize
-
-  _medianNoiseDbmHc = _calib.getNoiseDbmHc();
-  _medianNoiseDbmHx = _calib.getNoiseDbmHx();
-  _medianNoiseDbmVc = _calib.getNoiseDbmVc();
-  _medianNoiseDbmVx = _calib.getNoiseDbmVx();
-
-  // locate the noise gates
-  
-  locate(mfields);
-  
-  if (_computeMethod == RAY_BY_RAY) {
-  
-    // compute median noise for ray
-    
-    vector<double> noiseHc;
-    vector<double> noiseHx;
-    vector<double> noiseVc;
-    vector<double> noiseVx;
-    for (int igate = 0; igate < _nGates; igate++) {
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        noiseHc.push_back(mfield.lag0_hc_db);
-        noiseHx.push_back(mfield.lag0_hx_db);
-        noiseVc.push_back(mfield.lag0_vc_db);
-        noiseVx.push_back(mfield.lag0_vx_db);
-      }
-    }
-    
-    // set mean noise if noise was present at a large enough number
-    // of gates, otherwise use the calibrated noise
-    
-    if ((int) noiseHc.size() >= _minNGatesRayMedian) {
-      
-      _medianNoiseDbmHc = _computeMedian(noiseHc);
-      _medianNoiseDbmHx = _computeMedian(noiseHx);
-      _medianNoiseDbmVc = _computeMedian(noiseVc);
-      _medianNoiseDbmVx = _computeMedian(noiseVx);
-      
-      // save the data in a grid
-      
-      pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
-      nval.noiseHc = _medianNoiseDbmHc;
-      nval.noiseVc = _medianNoiseDbmVc;
-      nval.noiseHx = _medianNoiseDbmHx;
-      nval.noiseVx = _medianNoiseDbmVx;
-      pthread_mutex_unlock(&_prevGridMutex);
-      
-    } else {
-      
-      // check for previously saved data
-      
-      noise_val_t prev;
-      if (_getSavedNoiseClosestHc(prev) == 0) {
-        // use previously saved data
-        _medianNoiseDbmHc = prev.noiseHc;
-        _medianNoiseDbmVc = prev.noiseVc;
-        _medianNoiseDbmHx = prev.noiseHx;
-        _medianNoiseDbmVx = prev.noiseVx;
-      }
-      
-    }
-
-  } else {
-
-    // running MEDIAN method
-    
-    pthread_mutex_lock(&_runningMedianMutex);
-    
-    for (int igate = 0; igate < _nGates; igate++) {
-
-      // add valid gates to the arrays
-
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        _runningValsDbmHc[_nGatesRunningCount] = mfield.lag0_hc_db;
-        _runningValsDbmVc[_nGatesRunningCount] = mfield.lag0_vc_db;
-        _runningValsDbmHx[_nGatesRunningCount] = mfield.lag0_hx_db;
-        _runningValsDbmVx[_nGatesRunningCount] = mfield.lag0_vx_db;
-        _nGatesRunningCount++;
-      }
-
-      if (_nGatesRunningCount == _nGatesRunningMedian) {
-        // if reached correct size, compute the medians
-        _runningMedianNoiseDbmHc = _computeMedian(_runningValsDbmHc);
-        _runningMedianNoiseDbmVc = _computeMedian(_runningValsDbmVc);
-        _runningMedianNoiseDbmHx = _computeMedian(_runningValsDbmHx);
-        _runningMedianNoiseDbmVx = _computeMedian(_runningValsDbmVx);
-        _nGatesRunningCount = 0;
-      }
-
-    } // igate
-    
-    // set the mean to the latest median
-
-    if (_runningMedianNoiseDbmHc > -9990) {
-      _medianNoiseDbmHc = _runningMedianNoiseDbmHc;
-    }
-    if (_runningMedianNoiseDbmVc > -9990) {
-      _medianNoiseDbmVc = _runningMedianNoiseDbmVc;
-    }
-    if (_runningMedianNoiseDbmHx > -9990) {
-      _medianNoiseDbmHx = _runningMedianNoiseDbmHx;
-    }
-    if (_runningMedianNoiseDbmVx > -9990) {
-      _medianNoiseDbmVx = _runningMedianNoiseDbmVx;
-    }
-
-    pthread_mutex_unlock(&_runningMedianMutex);
-
-  }
-  
-  // set the noise bias in the moments
-
-  _noiseBiasDbHc = _medianNoiseDbmHc - _calib.getNoiseDbmHc();
-  _noiseBiasDbVc = _medianNoiseDbmVc - _calib.getNoiseDbmVc();
-  _noiseBiasDbHx = _medianNoiseDbmHx - _calib.getNoiseDbmHx();
-  _noiseBiasDbVx = _medianNoiseDbmVx - _calib.getNoiseDbmVx();
-
-  // if required, set equal bias in both channels
-  // use Hc bias as the master
-
-  if (_equalBiasInAllChannels) {
-    _noiseBiasDbVc = _noiseBiasDbHc;
-    _medianNoiseDbmVc = _calib.getNoiseDbmVc() + _noiseBiasDbVc;
-    _noiseBiasDbHx = _noiseBiasDbHc;
-    _medianNoiseDbmHx = _calib.getNoiseDbmHx() + _noiseBiasDbHx;
-    _noiseBiasDbVx = _noiseBiasDbHc;
-    _medianNoiseDbmVx = _calib.getNoiseDbmVx() + _noiseBiasDbVx;
-  }
-
-  // set noise moment for each gate
-
-  for (int igate = 0; igate < _nGates; igate++) {
-    MomentsFields &mfield = mfields[igate];
-    mfield.noise_bias_db_hc = _noiseBiasDbHc;
-    mfield.noise_bias_db_vc = _noiseBiasDbVc;
-    mfield.noise_bias_db_hx = _noiseBiasDbHx;
-    mfield.noise_bias_db_vx = _noiseBiasDbVx;
-  }
-  
-}
-
-///////////////////////////////////////////////////////////////
-// Identify the noise, compute median noise
-// Sim HV mode
-//
-// The following must be set in mfields prior to calling:
-//   lag0_hc_db
-//   lag0_vc_db
-  
-void RlanLocator::computeNoiseDpSimHv(MomentsFields *mfields)
-  
-{
-
-  // initialize
-
-  _medianNoiseDbmHc = _calib.getNoiseDbmHc();
-  _medianNoiseDbmVc = _calib.getNoiseDbmVc();
-
-  // locate the noise gates
-  
-  locate(mfields);
-  
-  if (_computeMethod == RAY_BY_RAY) {
-  
-    // compute median noise for ray
-    
-    vector<double> noiseHc;
-    vector<double> noiseVc;
-    for (int igate = 0; igate < _nGates; igate++) {
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        noiseHc.push_back(mfield.lag0_hc_db);
-        noiseVc.push_back(mfield.lag0_vc_db);
-      }
-    }
-    
-    // set mean noise if noise was present at a large enough number
-    // of gates, otherwise use the calibrated noise
-    
-    if ((int) noiseHc.size() >= _minNGatesRayMedian) {
-      
-      _medianNoiseDbmHc = _computeMedian(noiseHc);
-      _medianNoiseDbmVc = _computeMedian(noiseVc);
-      
-      // save the data in a grid
-      
-      pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
-      nval.noiseHc = _medianNoiseDbmHc;
-      nval.noiseVc = _medianNoiseDbmVc;
-      pthread_mutex_unlock(&_prevGridMutex);
-      
-    } else {
-      
-      // check for previously saved data
-      
-      noise_val_t prev;
-      if (_getSavedNoiseClosestHc(prev) == 0) {
-        // use previously saved data
-        _medianNoiseDbmHc = prev.noiseHc;
-      _medianNoiseDbmVc = prev.noiseVc;
-      }
-      
-    }
-
-  } else {
-
-    // running MEDIAN method
-    
-    pthread_mutex_lock(&_runningMedianMutex);
-
-    for (int igate = 0; igate < _nGates; igate++) {
-      // add valid gates to the arrays
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        _runningValsDbmHc[_nGatesRunningCount] = mfield.lag0_hc_db;
-        _runningValsDbmVc[_nGatesRunningCount] = mfield.lag0_vc_db;
-        _nGatesRunningCount++;
-      }
-      if (_nGatesRunningCount == _nGatesRunningMedian) {
-        // if reached correct size, compute the medians
-        _runningMedianNoiseDbmHc = _computeMedian(_runningValsDbmHc);
-        _runningMedianNoiseDbmVc = _computeMedian(_runningValsDbmVc);
-        _nGatesRunningCount = 0;
-      }
-    } // igate
-    
-    // set the mean to the latest median
-    if (_runningMedianNoiseDbmHc > -9990) {
-      _medianNoiseDbmHc = _runningMedianNoiseDbmHc;
-    }
-    if (_runningMedianNoiseDbmVc > -9990) {
-      _medianNoiseDbmVc = _runningMedianNoiseDbmVc;
-    }
-
-    pthread_mutex_unlock(&_runningMedianMutex);
-
-  }
-
-  // set the noise bias in the moments
-
-  _noiseBiasDbHc = _medianNoiseDbmHc - _calib.getNoiseDbmHc();
-  _noiseBiasDbVc = _medianNoiseDbmVc - _calib.getNoiseDbmVc();
-
-  // if required, set equal bias in both channels
-  // use Hc bias as the master
-
-  if (_equalBiasInAllChannels) {
-    _noiseBiasDbVc = _noiseBiasDbHc;
-    _medianNoiseDbmVc = _calib.getNoiseDbmVc() + _noiseBiasDbVc;
-  }
-
-  // set noise moment for each gate
-
-  for (int igate = 0; igate < _nGates; igate++) {
-    MomentsFields &mfield = mfields[igate];
-    mfield.noise_bias_db_hc = _noiseBiasDbHc;
-    mfield.noise_bias_db_vc = _noiseBiasDbVc;
-  }
-  
-}
-
-///////////////////////////////////////////////////////////////
-// Identify the noise, compute median noise
-// Dual pol, H-transmit only
-//
-// The following must be set in mfields prior to calling:
-//   lag0_hc_db
-//   lag0_vx_db
-  
-void RlanLocator::computeNoiseDpHOnly(MomentsFields *mfields)
-  
-{
-
-  // initialize
-
-  _medianNoiseDbmHc = _calib.getNoiseDbmHc();
-  _medianNoiseDbmVx = _calib.getNoiseDbmVx();
-    
-  // locate the noise gates
-  
-  locate(mfields);
-
-  if (_computeMethod == RAY_BY_RAY) {
-  
-    // compute median noise for ray
-    
-    vector<double> noiseHc;
-    vector<double> noiseVx;
-    for (int igate = 0; igate < _nGates; igate++) {
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        noiseHc.push_back(mfield.lag0_hc_db);
-        noiseVx.push_back(mfield.lag0_vx_db);
-      }
-    }
-    
-    // set mean noise if noise was present at a large enough number
-    // of gates, otherwise use the calibrated noise
-    
-    if ((int) noiseHc.size() >= _minNGatesRayMedian) {
-
-      _medianNoiseDbmHc = _computeMedian(noiseHc);
-      _medianNoiseDbmVx = _computeMedian(noiseVx);
-      
-      // save the data in a grid
-      
-      pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
-      nval.noiseHc = _medianNoiseDbmHc;
-      nval.noiseVx = _medianNoiseDbmVx;
-      pthread_mutex_unlock(&_prevGridMutex);
-      
-    } else {
-      
-      // check for previously saved data
-      
-      noise_val_t prev;
-      if (_getSavedNoiseClosestHc(prev) == 0) {
-        // use previously saved data
-        _medianNoiseDbmHc = prev.noiseHc;
-        _medianNoiseDbmVx = prev.noiseVx;
-      }
-      
-    }
-
-  } else {
-    
-    // running MEDIAN method
-    
-    pthread_mutex_lock(&_runningMedianMutex);
-
-    for (int igate = 0; igate < _nGates; igate++) {
-      // add valid gates to the arrays
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        _runningValsDbmHc[_nGatesRunningCount] = mfield.lag0_hc_db;
-        _runningValsDbmVx[_nGatesRunningCount] = mfield.lag0_vx_db;
-        _nGatesRunningCount++;
-      }
-      if (_nGatesRunningCount == _nGatesRunningMedian) {
-        // if reached correct size, compute the medians
-        _runningMedianNoiseDbmHc = _computeMedian(_runningValsDbmHc);
-        _runningMedianNoiseDbmVx = _computeMedian(_runningValsDbmVx);
-        _nGatesRunningCount = 0;
-      }
-    } // igate
-    
-    // set the mean to the latest median
-
-    if (_runningMedianNoiseDbmHc > -9990) {
-      _medianNoiseDbmHc = _runningMedianNoiseDbmHc;
-    }
-    if (_runningMedianNoiseDbmVx > -9990) {
-      _medianNoiseDbmVx = _runningMedianNoiseDbmVx;
-    }
-
-    pthread_mutex_unlock(&_runningMedianMutex);
-
-  }
-
-  // set the noise bias in the moments
-
-  _noiseBiasDbHc = _medianNoiseDbmHc - _calib.getNoiseDbmHc();
-  _noiseBiasDbVx = _medianNoiseDbmVx - _calib.getNoiseDbmVx();
-
-  // if required, set equal bias in both channels
-  // use Hc bias as the master
-
-  if (_equalBiasInAllChannels) {
-    _noiseBiasDbVx = _noiseBiasDbHc;
-    _medianNoiseDbmVx = _calib.getNoiseDbmVx() + _noiseBiasDbVx;
-  }
-
-  // set noise moment for each gate
-
-  for (int igate = 0; igate < _nGates; igate++) {
-    MomentsFields &mfield = mfields[igate];
-    mfield.noise_bias_db_hc = _noiseBiasDbHc;
-    mfield.noise_bias_db_vx = _noiseBiasDbVx;
-  }
-  
-}
-
-///////////////////////////////////////////////////////////////
-// Identify the noise, compute median noise
-// Dual pol, V-transmit only
-//
-// The following must be set in mfields prior to calling:
-//   lag0_vc_db
-//   lag0_hx_db
-  
-void RlanLocator::computeNoiseDpVOnly(MomentsFields *mfields)
-  
-{
-
-  // initialize
-
-  _medianNoiseDbmHx = _calib.getNoiseDbmHx();
-  _medianNoiseDbmVc = _calib.getNoiseDbmVc();
-
-  // locate the noise gates
-  
-  locate(mfields);
-  
-  if (_computeMethod == RAY_BY_RAY) {
-  
-    // compute median noise for ray
-    
-    vector<double> noiseHx;
-    vector<double> noiseVc;
-    for (int igate = 0; igate < _nGates; igate++) {
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        noiseHx.push_back(mfield.lag0_hx_db);
-        noiseVc.push_back(mfield.lag0_vc_db);
-      }
-    }
-    
-    // set mean noise if noise was present at a large enough number
-    // of gates, otherwise use the calibrated noise
-    
-    if ((int) noiseVc.size() >= _minNGatesRayMedian) {
-      
-      _medianNoiseDbmVc = _computeMedian(noiseVc);
-      _medianNoiseDbmHx = _computeMedian(noiseHx);
-      
-      // save the data in a grid
-      
-      pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
-      nval.noiseVc = _medianNoiseDbmVc;
-      nval.noiseHx = _medianNoiseDbmHx;
-      pthread_mutex_unlock(&_prevGridMutex);
-      
-    } else {
-      
-      // check for previously saved data
-      
-      noise_val_t prev;
-      if (_getSavedNoiseClosestVc(prev) == 0) {
-        // use previously saved data
-        _medianNoiseDbmVc = prev.noiseVc;
-        _medianNoiseDbmHx = prev.noiseHx;
-      }
-      
-    }
-
-  } else {
-    
-    // running MEDIAN method
-    
-    pthread_mutex_lock(&_runningMedianMutex);
-
-    for (int igate = 0; igate < _nGates; igate++) {
-      // add valid gates to the arrays
-      const MomentsFields &mfield = mfields[igate];
-      if (_noiseFlag[igate]) {
-        _runningValsDbmVc[_nGatesRunningCount] = mfield.lag0_vc_db;
-        _runningValsDbmHx[_nGatesRunningCount] = mfield.lag0_hx_db;
-        _nGatesRunningCount++;
-      }
-      if (_nGatesRunningCount == _nGatesRunningMedian) {
-        // if reached correct size, compute the medians
-        _runningMedianNoiseDbmVc = _computeMedian(_runningValsDbmVc);
-        _runningMedianNoiseDbmHx = _computeMedian(_runningValsDbmHx);
-        _nGatesRunningCount = 0;
-      }
-    } // igate
-    
-    // set the mean to the latest median
-
-    if (_runningMedianNoiseDbmVc > -9990) {
-      _medianNoiseDbmVc = _runningMedianNoiseDbmVc;
-    }
-    if (_runningMedianNoiseDbmHx > -9990) {
-      _medianNoiseDbmHx = _runningMedianNoiseDbmHx;
-    }
-
-    pthread_mutex_unlock(&_runningMedianMutex);
-
-  }
-
-  // set the noise bias in the moments
-
-  _noiseBiasDbHx = _medianNoiseDbmHx - _calib.getNoiseDbmHx();
-  _noiseBiasDbVc = _medianNoiseDbmVc - _calib.getNoiseDbmVc();
-  
-  // if required, set equal bias in both channels
-  // use Vc bias as the master
-
-  if (_equalBiasInAllChannels) {
-    _noiseBiasDbHx = _noiseBiasDbVc;
-    _medianNoiseDbmHx = _calib.getNoiseDbmHx() + _noiseBiasDbHx;
-  }
-
-  // set noise moment for each gate
-
-  for (int igate = 0; igate < _nGates; igate++) {
-    MomentsFields &mfield = mfields[igate];
-    mfield.noise_bias_db_hx = _noiseBiasDbHx;
-    mfield.noise_bias_db_vc = _noiseBiasDbVc;
-  }
-  
-}
-
-///////////////////////////////////////////////////////////////
-// Compute mean noise, removing outliers
+// Compute mean rlan, removing outliers
   
 double RlanLocator::_computeMean(const vector<double> &vals)
   
@@ -1338,7 +530,7 @@ double RlanLocator::_computeMean(const vector<double> &vals)
 }
 
 ///////////////////////////////////////////////////////////////
-// Compute median noise
+// Compute median rlan
   
 double RlanLocator::_computeMedian(const vector<double> &vals)
 
@@ -1358,88 +550,6 @@ double RlanLocator::_computeMedian(const vector<double> &vals)
 }
 
 ///////////////////////////////////////////////////////////////
-// Get saved noise power closest to current point
-// and within 1 degree.
-//
-// Assumes Hc is active.
-//
-// Returns 0 on success, -1 on failure
-  
-int RlanLocator::_getSavedNoiseClosestHc(noise_val_t &closest)
-  
-{
-
-  // check neighboring locations, starting close and
-  // going out to 2 rows/cols away
-
-  for (int ii = 0; ii < 25; ii++) {
-    
-    int iel = _gridIndexEl + _searchKernel[ii].iy;
-    if (iel < 0) iel += _gridSizeEl;
-    if (iel >= _gridSizeEl) iel -= _gridSizeEl;
-    
-    int iaz = _gridIndexAz + _searchKernel[ii].iy;
-    if (iaz < 0) iaz += _gridSizeAz;
-    if (iaz >= _gridSizeAz) iaz -= _gridSizeAz;
-    
-    pthread_mutex_lock(&_prevGridMutex);
-    noise_val_t prev = _previousGrid[iel][iaz];
-    pthread_mutex_unlock(&_prevGridMutex);
-    if (prev.noiseHc != 0) {
-      closest = prev;
-      return 0;
-    }
-
-  }
-
-  // previous noise not found
-
-  return -1;
-
-}
-
-///////////////////////////////////////////////////////////////
-// Get saved noise power closest to current point
-// and within 1 degree.
-//
-// Assumes Vc is active.
-//
-// Returns 0 on success, -1 on failure
-  
-int RlanLocator::_getSavedNoiseClosestVc(noise_val_t &closest)
-  
-{
-
-  // check neighboring locations, starting close and
-  // going out to 2 rows/cols away
-
-  for (int ii = 0; ii < 25; ii++) {
-    
-    int iel = _gridIndexEl + _searchKernel[ii].iy;
-    if (iel < 0) iel += _gridSizeEl;
-    if (iel >= _gridSizeEl) iel -= _gridSizeEl;
-    
-    int iaz = _gridIndexAz + _searchKernel[ii].iy;
-    if (iaz < 0) iaz += _gridSizeAz;
-    if (iaz >= _gridSizeAz) iaz -= _gridSizeAz;
-    
-    pthread_mutex_lock(&_prevGridMutex);
-    const noise_val_t prev = _previousGrid[iel][iaz];
-    pthread_mutex_unlock(&_prevGridMutex);
-    if (prev.noiseVc != 0) {
-      closest = prev;
-      return 0;
-    }
-
-  }
-
-  // previous noise not found
-
-  return -1;
-
-}
-
-///////////////////////////////////////////////////////////////
 // Create the default interest maps and weights
 
 void RlanLocator::_createDefaultInterestMaps()
@@ -1451,153 +561,79 @@ void RlanLocator::_createDefaultInterestMaps()
   pts.clear();
   pts.push_back(InterestMap::ImPoint(40.0, 0.001));
   pts.push_back(InterestMap::ImPoint(50.0, 1.0));
-  setInterestMapPhaseChangeErrorForNoise(pts, 1.0);
+  setInterestMapPhaseChangeErrorForRlan(pts, 1.0);
   
   pts.clear();
   pts.push_back(InterestMap::ImPoint(0.65, 1.0));
   pts.push_back(InterestMap::ImPoint(0.75, 0.001));
-  setInterestMapDbmSdevForNoise(pts, 1.0);
+  setInterestMapDbmSdevForRlan(pts, 1.0);
 
   pts.clear();
   pts.push_back(InterestMap::ImPoint(0.10, 1.0));
   pts.push_back(InterestMap::ImPoint(0.20, 0.001));
-  setInterestMapNcpMeanForNoise(pts, 1.0);
+  setInterestMapNcpMeanForRlan(pts, 1.0);
 
-  setInterestThresholdForNoise(0.51);
-
-  pts.clear();
-  pts.push_back(InterestMap::ImPoint(10.0, 0.001));
-  pts.push_back(InterestMap::ImPoint(20.0, 1.0));
-  setInterestMapPhaseChangeErrorForSignal(pts, 1.0);
-  
-  pts.clear();
-  pts.push_back(InterestMap::ImPoint(0.75, 1.0));
-  pts.push_back(InterestMap::ImPoint(0.85, 0.001));
-  setInterestMapDbmSdevForSignal(pts, 1.0);
-
-  setInterestThresholdForSignal(0.51);
+  setInterestThresholdForRlan(0.51);
 
 }
 
 ///////////////////////////////////////////////////////////////
-// interest maps for noise
+// interest maps for rlan
 
-void RlanLocator::setInterestMapPhaseChangeErrorForNoise
+void RlanLocator::setInterestMapPhaseChangeErrorForRlan
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
 {
 
-  if (_interestMapPhaseChangeErrorForNoise) {
-    delete _interestMapPhaseChangeErrorForNoise;
+  if (_interestMapPhaseChangeErrorForRlan) {
+    delete _interestMapPhaseChangeErrorForRlan;
   }
 
-  _interestMapPhaseChangeErrorForNoise = new InterestMap
-    ("PhaseChangeErrorForNoise", pts, weight);
+  _interestMapPhaseChangeErrorForRlan = new InterestMap
+    ("PhaseChangeErrorForRlan", pts, weight);
 
-  _weightPhaseChangeErrorForNoise = weight;
+  _weightPhaseChangeErrorForRlan = weight;
 
 }
 
-void RlanLocator::setInterestMapDbmSdevForNoise
+void RlanLocator::setInterestMapDbmSdevForRlan
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
 {
 
-  if (_interestMapDbmSdevForNoise) {
-    delete _interestMapDbmSdevForNoise;
+  if (_interestMapDbmSdevForRlan) {
+    delete _interestMapDbmSdevForRlan;
   }
 
-  _interestMapDbmSdevForNoise = new InterestMap
-    ("DbmSdevForNoise", pts, weight);
+  _interestMapDbmSdevForRlan = new InterestMap
+    ("DbmSdevForRlan", pts, weight);
 
-  _weightDbmSdevForNoise = weight;
+  _weightDbmSdevForRlan = weight;
 
 }
 
-void RlanLocator::setInterestMapNcpMeanForNoise
+void RlanLocator::setInterestMapNcpMeanForRlan
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
 {
 
-  if (_interestMapNcpMeanForNoise) {
-    delete _interestMapNcpMeanForNoise;
+  if (_interestMapNcpMeanForRlan) {
+    delete _interestMapNcpMeanForRlan;
   }
 
-  _interestMapNcpMeanForNoise = new InterestMap
-    ("NcpMeanForNoise", pts, weight);
+  _interestMapNcpMeanForRlan = new InterestMap
+    ("NcpMeanForRlan", pts, weight);
 
-  _weightNcpMeanForNoise = weight;
-
-}
-
-void RlanLocator::setInterestThresholdForNoise(double val)
-  
-{
-  _interestThresholdForNoise = val;
-}
-
-///////////////////////////////////////////////////////////////
-// interest maps for signal
-
-void RlanLocator::setInterestMapPhaseChangeErrorForSignal
-  (const vector<InterestMap::ImPoint> &pts,
-   double weight)
-  
-{
-
-  if (_interestMapPhaseChangeErrorForSignal) {
-    delete _interestMapPhaseChangeErrorForSignal;
-  }
-
-  _interestMapPhaseChangeErrorForSignal = new InterestMap
-    ("PhaseChangeErrorForSignal", pts, weight);
-
-  _weightPhaseChangeErrorForSignal = weight;
+  _weightNcpMeanForRlan = weight;
 
 }
 
-void RlanLocator::setInterestMapDbmSdevForSignal
-  (const vector<InterestMap::ImPoint> &pts,
-   double weight)
+void RlanLocator::setInterestThresholdForRlan(double val)
   
 {
-
-  if (_interestMapDbmSdevForSignal) {
-    delete _interestMapDbmSdevForSignal;
-  }
-
-  _interestMapDbmSdevForSignal = new InterestMap
-    ("DbmSdevForSignal", pts, weight);
-
-  _weightDbmSdevForSignal = weight;
-  
-}
-
-void RlanLocator::setInterestThresholdForSignal(double val)
-  
-{
-  _interestThresholdForSignal = val;
-}
-
-//////////////////////////////////////////
-// add the noise fields to a moments array
-
-void RlanLocator::addToMoments(MomentsFields *mfields)
-  
-{
-  
-  for (int igate = 0; igate < _nGates; igate++) {
-    MomentsFields &mfield = mfields[igate];
-    mfield.noise_flag = _noiseFlag[igate];
-    mfield.signal_flag = _signalFlag[igate];
-    mfield.accum_phase_change = _accumPhaseChange[igate];
-    mfield.phase_change_error = _phaseChangeError[igate];
-    mfield.dbm_sdev = _dbmSdev[igate];
-    mfield.ncp_mean = _ncpMean[igate];
-  }
-  
+  _interestThresholdForRlan = val;
 }
 
