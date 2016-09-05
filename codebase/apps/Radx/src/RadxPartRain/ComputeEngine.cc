@@ -231,6 +231,10 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *sdzdrForPid = _pid.getSdzdr();
   const double *sdphidpForPid = _pid.getSdphidp();
 
+  const double *snrSdevRlan = _rlan.getSnrSdev();
+  const double *ncpMeanRlan = _rlan.getNcpMean();
+  const double *phaseChangeRlan = _rlan.getPhaseChangeError();
+
   // load up output data
 
   double minValidPrecipRate = _params.PRECIP_min_valid_rate;
@@ -260,6 +264,12 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::VEL:
           *datp = _velArray[igate];
+          break;
+        case Params::WIDTH:
+          *datp = _widthArray[igate];
+          break;
+        case Params::NCP:
+          *datp = _ncpArray[igate];
           break;
         case Params::ZDR:
           *datp = _zdrArray[igate];
@@ -518,6 +528,16 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::TEMP_FOR_PID:
           *datp = _tempForPid[igate];
+          break;
+
+        case Params::SNR_SDEV_RLAN:
+          *datp = snrSdevRlan[igate];
+          break;
+        case Params::NCP_MEAN_RLAN:
+          *datp = ncpMeanRlan[igate];
+          break;
+        case Params::PHASE_CHANGE_RLAN:
+          *datp = phaseChangeRlan[igate];
           break;
 
         case Params::ZDRM_IN_ICE:
@@ -811,11 +831,15 @@ void ComputeEngine::_kdpCompute()
 void ComputeEngine::_locateRlan()
   
 {
-  
+
+  // set up RLAN
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _rlan.setDebug(true);
   }
+
   _rlan.setNGatesKernel(9);
+
   _rlan.setRayProps(_timeSecs,
                     _nanoSecs,
                     _elevation,
@@ -825,6 +849,17 @@ void ComputeEngine::_locateRlan()
                     _gateSpacingKm,
                     _wavelengthM,
                     _nyquist);
+
+  _rlan.setFields(_snrArray,
+                  _velArray,
+                  _widthArray,
+                  _ncpArray,
+                  _zdrArray,
+                  missingDbl);
+
+  // locate RLAN interference
+
+  _rlan.locate();
 
 #ifdef JUNK
   
@@ -1055,6 +1090,8 @@ void ComputeEngine::_allocMomentsArrays()
   _snrArray = _snrArray_.alloc(_nGates);
   _dbzArray = _dbzArray_.alloc(_nGates);
   _velArray = _velArray_.alloc(_nGates);
+  _widthArray = _widthArray_.alloc(_nGates);
+  _ncpArray = _ncpArray_.alloc(_nGates);
   _zdrArray = _zdrArray_.alloc(_nGates);
   _zdrmArray = _zdrmArray_.alloc(_nGates);
   _zdpArray = _zdpArray_.alloc(_nGates);
@@ -1222,7 +1259,38 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
       _kdpArray[igate] = missingDbl;
     }
   }
-  
+
+  if (_params.locate_rlan_interference) {
+
+    if (_loadFieldArray(inputRay, _params.VEL_field_name,
+                        true, _velArray)) {
+      return -1;
+    }
+
+    if (_params.WIDTH_available) {
+      if (_loadFieldArray(inputRay, _params.WIDTH_field_name,
+                          true, _widthArray)) {
+        return -1;
+      }
+    } else {
+      for (int igate = 0; igate < _nGates; igate++) {
+        _widthArray[igate] = missingDbl;
+      }
+    }
+    
+    if (_params.NCP_available) {
+      if (_loadFieldArray(inputRay, _params.NCP_field_name,
+                          true, _ncpArray)) {
+        return -1;
+      }
+    } else {
+      for (int igate = 0; igate < _nGates; igate++) {
+        _ncpArray[igate] = missingDbl;
+      }
+    }
+
+  }
+
   return 0;
   
 }

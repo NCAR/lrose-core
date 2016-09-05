@@ -291,6 +291,28 @@ paramdef string {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "Is NCP data available?";
+  p_help = "This field is used for locating RLAN interference. If it is not available, use spectrum width instead.";
+} NCP_available;
+
+paramdef string {
+  p_default = "NCP";
+  p_descr = "Field name for NCP.";
+} NCP_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is WIDTH data available?";
+  p_help = "If NCP is not available, this field is used for locating RLAN interference.";
+} WIDTH_available;
+
+paramdef string {
+  p_default = "WIDTH";
+  p_descr = "Field name for WIDTH.";
+} WIDTH_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Is KDP data available?";
   p_help = "If not, KDP will be computed from PHIDP";
 } KDP_available;
@@ -1544,6 +1566,8 @@ typedef enum {
   SNR,
   DBZ,
   VEL,
+  WIDTH,
+  NCP,
   ZDR,
   ZDRM,
   LDR,
@@ -1606,6 +1630,10 @@ typedef enum {
   SDZDR_FOR_PID,
   SDPHIDP_FOR_PID,
   TEMP_FOR_PID,
+
+  SNR_SDEV_RLAN,
+  NCP_MEAN_RLAN,
+  PHASE_CHANGE_RLAN,
 
   ZDRM_IN_ICE,
   ZDRM_IN_BRAGG,

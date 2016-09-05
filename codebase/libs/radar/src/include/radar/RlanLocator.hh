@@ -75,7 +75,7 @@ public:
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestMapDbmSdevForRlan
+  void setInterestMapSnrSdevForRlan
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
@@ -110,7 +110,7 @@ public:
   // if field is not available, set to NULL
   // must be called before locate()
   
-  void setFields(double *dbz,
+  void setFields(double *snr,
                  double *vel,
                  double *width,
                  double *ncp,
@@ -128,7 +128,7 @@ public:
   // The following must be set in mfields prior to calling:
   //
   //   phase_for_rlan
-  //   dbm_for_rlan
+  //   snr_for_rlan
   //   ncp
   
   void locate();
@@ -136,20 +136,13 @@ public:
   // get results - after running locate
   // these arrays span the gates from 0 to nGates-1
 
-  const vector<bool> &getRlanFlag() const { return _rlanFlag; }
+  const bool *getRlanFlag() const { return _rlanFlag; }
+  
+  const double *getAccumPhaseChange() const { return _accumPhaseChange; }
+  const double *getPhaseChangeError() const { return _phaseChangeError; }
 
-  const vector<size_t> &getStartGate() const { return _startGate; }
-  const vector<size_t> &getEndGate() const { return _endGate; }
-
-  const vector<double> &getAccumPhaseChange() const { 
-    return _accumPhaseChange;
-  }
-  const vector<double> &getPhaseChangeError() const { 
-    return _phaseChangeError; 
-  }
-
-  const vector<double> &getDbmSdev() const { return _dbmSdev; }
-  const vector<double> &getNcpMean() const { return _ncpMean; }
+  const double *getSnrSdev() const { return _snrSdev; }
+  const double *getNcpMean() const { return _ncpMean; }
 
   ////////////////////////////////////
   // print parameters for debugging
@@ -180,13 +173,9 @@ private:
 
   double _missingVal;
 
-  TaArray<double> _dbz_;
-  double *_dbz;
-  bool _dbzAvail;
-  
-  TaArray<double> _dbm_;
-  double *_dbm;
-  bool _dbmAvail;
+  TaArray<double> _snr_;
+  double *_snr;
+  bool _snrAvail;
   
   TaArray<double> _vel_;
   double *_vel;
@@ -210,33 +199,45 @@ private:
   
   // results
 
-  vector<bool> _rlanFlag;
+  TaArray<bool> _rlanFlag_;
+  bool *_rlanFlag;
+
+  TaArray<double> _accumPhaseChange_;
+  double *_accumPhaseChange;
+
+  TaArray<double> _phaseChangeError_;
+  double *_phaseChangeError;
+
+  TaArray<double> _snrSdev_;
+  double *_snrSdev;
+
+  TaArray<double> _ncpMean_;
+  double *_ncpMean;
+
+  int _minNGatesRayMedian;
+
+  // gate limits for computing stats along a ray
+
   vector<size_t> _startGate;
   vector<size_t> _endGate;
-  vector<double> _accumPhaseChange;
-  vector<double> _phaseChangeError;
-  vector<double> _dbmSdev;
-  vector<double> _ncpMean;
-  
-  int _minNGatesRayMedian;
 
   // fuzzy logic for rlan detection
 
   int _nGatesKernel;
 
   InterestMap *_interestMapPhaseChangeErrorForRlan;
-  InterestMap *_interestMapDbmSdevForRlan;
+  InterestMap *_interestMapSnrSdevForRlan;
   InterestMap *_interestMapNcpMeanForRlan;
   double _weightPhaseChangeErrorForRlan;
-  double _weightDbmSdevForRlan;
+  double _weightSnrSdevForRlan;
   double _weightNcpMeanForRlan;
   double _interestThresholdForRlan;
 
   // private methods
   
   double _computePhaseChangeError(int startGate, int endGate);
-  void _computeDbmSdev();
-  void _computeNcpMean();
+  void _computeSdevInRange(const double *vals, double *sdevs);
+  void _computeMeanInRange(const double *vals, double *means);
   double _computeMean(const vector<double> &vals);
   double _computeMedian(const vector<double> &vals);
   void _createDefaultInterestMaps();

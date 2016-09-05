@@ -53,7 +53,7 @@ RlanLocator::RlanLocator()
   // create the default interest maps
 
   _interestMapPhaseChangeErrorForRlan = NULL;
-  _interestMapDbmSdevForRlan = NULL;
+  _interestMapSnrSdevForRlan = NULL;
   _interestMapNcpMeanForRlan = NULL;
 
   _createDefaultInterestMaps();
@@ -73,8 +73,8 @@ RlanLocator::~RlanLocator()
   if (_interestMapPhaseChangeErrorForRlan) {
     delete _interestMapPhaseChangeErrorForRlan;
   }
-  if (_interestMapDbmSdevForRlan) {
-    delete _interestMapDbmSdevForRlan;
+  if (_interestMapSnrSdevForRlan) {
+    delete _interestMapSnrSdevForRlan;
   }
   if (_interestMapNcpMeanForRlan) {
     delete _interestMapNcpMeanForRlan;
@@ -108,8 +108,8 @@ void RlanLocator::printParams(ostream &out)
   if (_interestMapPhaseChangeErrorForRlan) {
     _interestMapPhaseChangeErrorForRlan->printParams(out);
   }
-  if (_interestMapDbmSdevForRlan) {
-    _interestMapDbmSdevForRlan->printParams(out);
+  if (_interestMapSnrSdevForRlan) {
+    _interestMapSnrSdevForRlan->printParams(out);
   }
   if (_interestMapNcpMeanForRlan) {
     _interestMapNcpMeanForRlan->printParams(out);
@@ -145,8 +145,7 @@ void RlanLocator::setRayProps(time_t timeSecs,
   _wavelengthM = wavelengthM;
   _nyquist = nyquist;
 
-  _dbz = _dbz_.alloc(_nGates);
-  _dbm = _dbm_.alloc(_nGates);
+  _snr = _snr_.alloc(_nGates);
   _vel = _vel_.alloc(_nGates);
   _phase = _phase_.alloc(_nGates);
   _width = _width_.alloc(_nGates);
@@ -160,7 +159,7 @@ void RlanLocator::setRayProps(time_t timeSecs,
 // if field is not available, set to NULL
 // must be called before locate()
 
-void RlanLocator::setFields(double *dbz,
+void RlanLocator::setFields(double *snr,
                             double *vel,
                             double *width,
                             double *ncp,
@@ -171,11 +170,11 @@ void RlanLocator::setFields(double *dbz,
 
   _missingVal = missingVal;
 
-  if (dbz != NULL) {
-    memcpy(_dbz, dbz, _nGates * sizeof(double));
-    _dbzAvail = true;
+  if (snr != NULL) {
+    memcpy(_snr, snr, _nGates * sizeof(double));
+    _snrAvail = true;
   } else {
-    _dbzAvail = false;
+    _snrAvail = false;
   }
 
   if (vel != NULL) {
@@ -204,19 +203,6 @@ void RlanLocator::setFields(double *dbz,
     _zdrAvail = true;
   } else {
     _zdrAvail = false;
-  }
-
-  // compute dbm by removing range correction from DBZ
-  
-  if (_dbzAvail) {
-    double range = _startRangeKm;
-    for (int ii = 0; ii < _nGates; ii++, range += _gateSpacingKm) {
-      double corr = 20.0 * log10(range);
-      _dbm[ii] = _dbz[ii] - corr;
-    }
-    _dbmAvail = true;
-  } else {
-    _dbmAvail = false;
   }
 
   // compute phase from velocity
@@ -249,21 +235,22 @@ void RlanLocator::locate()
   
 {
 
-  _rlanFlag.resize(_nGates);
   _startGate.resize(_nGates);
   _endGate.resize(_nGates);
-  _accumPhaseChange.resize(_nGates);
-  _phaseChangeError.resize(_nGates);
-  _dbmSdev.resize(_nGates);
-  _ncpMean.resize(_nGates);
-
+  
+  _rlanFlag = _rlanFlag_.alloc(_nGates);
+  _accumPhaseChange = _accumPhaseChange_.alloc(_nGates);
+  _phaseChangeError = _phaseChangeError_.alloc(_nGates);
+  _snrSdev = _snrSdev_.alloc(_nGates);
+  _ncpMean = _ncpMean_.alloc(_nGates);
+  
   for (int igate = 0; igate < _nGates; igate++) {
     _rlanFlag[igate] = false;
     _startGate[igate] = 0;
     _endGate[igate] = 0;
     _accumPhaseChange[igate] = -9999;
     _phaseChangeError[igate] = -9999;
-    _dbmSdev[igate] = -9999;
+    _snrSdev[igate] = -9999;
     _ncpMean[igate] = -9999;
   }
   
@@ -319,32 +306,32 @@ void RlanLocator::locate()
       _computePhaseChangeError(_startGate[igate], _endGate[igate]);
   }
   
-  // compute dbm sdev
+  // compute snr sdev
 
-  if (_dbmAvail) {
-    _computeDbmSdev();
+  if (_snrAvail) {
+    _computeSdevInRange(_snr, _snrSdev);
   }
   if (_ncpAvail) {
-    _computeNcpMean();
+    _computeMeanInRange(_ncp, _ncpMean);
   }
 
   // set flags
 
   double sumWeightsRlan = (_weightPhaseChangeErrorForRlan + 
-                            _weightDbmSdevForRlan +
+                            _weightSnrSdevForRlan +
                             _weightNcpMeanForRlan);
 
   for (int igate = 0; igate < _nGates; igate++) {
 
     double pce = _phaseChangeError[igate];
-    double dbmSdev = _dbmSdev[igate];
+    double snrSdev = _snrSdev[igate];
     double ncpMean = _ncpMean[igate];
 
     double sumInterestRlan =
       (_interestMapPhaseChangeErrorForRlan->getInterest(pce) * 
        _weightPhaseChangeErrorForRlan) +
-      (_interestMapDbmSdevForRlan->getInterest(dbmSdev) * 
-       _weightDbmSdevForRlan) +
+      (_interestMapSnrSdevForRlan->getInterest(snrSdev) * 
+       _weightSnrSdevForRlan) +
       (_interestMapNcpMeanForRlan->getInterest(ncpMean) * 
        _weightNcpMeanForRlan);
     
@@ -405,9 +392,9 @@ double RlanLocator::_computePhaseChangeError(int startGate, int endGate)
 }
 
 ///////////////////////////////////////////////////////////////
-// compute for DBM SDEV
+// compute SDEV in range
 
-void RlanLocator::_computeDbmSdev()
+void RlanLocator::_computeSdevInRange(const double *vals, double *sdevs)
   
 {
   
@@ -415,29 +402,29 @@ void RlanLocator::_computeDbmSdev()
     
     // compute sums etc. for stats over the kernel space
     
-    double nDbm = 0.0;
-    double sumDbm = 0.0;
-    double sumDbmSq = 0.0;
+    double nVal = 0.0;
+    double sumVal = 0.0;
+    double sumValSq = 0.0;
     
     for (size_t jgate = _startGate[igate]; jgate <= _endGate[igate]; jgate++) {
       
-      double dbm = _dbm[jgate];
+      double val = vals[jgate];
       
-      if (dbm != _missingVal) {
-        sumDbm += dbm;
-        sumDbmSq += (dbm * dbm);
-        nDbm++;
+      if (val != _missingVal) {
+        sumVal += val;
+        sumValSq += (val * val);
+        nVal++;
       }
       
     } // jgate
     
-    if (nDbm > 0) {
-      double meanDbm = sumDbm / nDbm;
-      if (nDbm > 2) {
-        double term1 = sumDbmSq / nDbm;
-        double term2 = meanDbm * meanDbm;
+    if (nVal > 0) {
+      double meanVal = sumVal / nVal;
+      if (nVal > 2) {
+        double term1 = sumValSq / nVal;
+        double term2 = meanVal * meanVal;
         if (term1 >= term2) {
-          _dbmSdev[igate] = sqrt(term1 - term2);
+          sdevs[igate] = sqrt(term1 - term2);
         }
       }
     }
@@ -447,9 +434,9 @@ void RlanLocator::_computeDbmSdev()
 }
 
 ///////////////////////////////////////////////////////////////
-// compute NCP mean
+// compute MEAN in range
 
-void RlanLocator::_computeNcpMean()
+void RlanLocator::_computeMeanInRange(const double *vals, double *means)
   
 {
   
@@ -457,23 +444,23 @@ void RlanLocator::_computeNcpMean()
     
     // compute sums etc. for stats over the kernel space
     
-    double nNcp = 0.0;
-    double sumNcp = 0.0;
+    double nVal = 0.0;
+    double sumVal = 0.0;
     
     for (size_t jgate = _startGate[igate]; jgate <= _endGate[igate]; jgate++) {
       
-      double ncp = _ncp[jgate];
+      double val = vals[jgate];
       
-      if (ncp != _missingVal) {
-        sumNcp += ncp;
-        nNcp++;
+      if (val != _missingVal) {
+        sumVal += val;
+        nVal++;
       }
       
     } // jgate
 
-    if (nNcp > 0) {
-      double meanNcp = sumNcp / nNcp;
-      _ncpMean[igate] = meanNcp;
+    if (nVal > 0) {
+      double meanVal = sumVal / nVal;
+      means[igate] = meanVal;
     }
     
   } // igate
@@ -572,7 +559,7 @@ void RlanLocator::_createDefaultInterestMaps()
   pts.clear();
   pts.push_back(InterestMap::ImPoint(0.65, 1.0));
   pts.push_back(InterestMap::ImPoint(0.75, 0.001));
-  setInterestMapDbmSdevForRlan(pts, 1.0);
+  setInterestMapSnrSdevForRlan(pts, 1.0);
 
   pts.clear();
   pts.push_back(InterestMap::ImPoint(0.10, 1.0));
@@ -603,20 +590,20 @@ void RlanLocator::setInterestMapPhaseChangeErrorForRlan
 
 }
 
-void RlanLocator::setInterestMapDbmSdevForRlan
+void RlanLocator::setInterestMapSnrSdevForRlan
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
 {
 
-  if (_interestMapDbmSdevForRlan) {
-    delete _interestMapDbmSdevForRlan;
+  if (_interestMapSnrSdevForRlan) {
+    delete _interestMapSnrSdevForRlan;
   }
 
-  _interestMapDbmSdevForRlan = new InterestMap
-    ("DbmSdevForRlan", pts, weight);
+  _interestMapSnrSdevForRlan = new InterestMap
+    ("SnrSdevForRlan", pts, weight);
 
-  _weightDbmSdevForRlan = weight;
+  _weightSnrSdevForRlan = weight;
 
 }
 
