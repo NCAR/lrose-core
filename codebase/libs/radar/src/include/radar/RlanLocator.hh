@@ -142,6 +142,7 @@ public:
   const double *getPhaseChangeError() const { return _phaseChangeError; }
 
   const double *getSnrSdev() const { return _snrSdev; }
+  const double *getZdrSdev() const { return _zdrSdev; }
   const double *getNcpMean() const { return _ncpMean; }
 
   ////////////////////////////////////
@@ -210,6 +211,9 @@ private:
 
   TaArray<double> _snrSdev_;
   double *_snrSdev;
+
+  TaArray<double> _zdrSdev_;
+  double *_zdrSdev;
 
   TaArray<double> _ncpMean_;
   double *_ncpMean;

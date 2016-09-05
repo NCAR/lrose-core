@@ -242,6 +242,7 @@ void RlanLocator::locate()
   _accumPhaseChange = _accumPhaseChange_.alloc(_nGates);
   _phaseChangeError = _phaseChangeError_.alloc(_nGates);
   _snrSdev = _snrSdev_.alloc(_nGates);
+  _zdrSdev = _zdrSdev_.alloc(_nGates);
   _ncpMean = _ncpMean_.alloc(_nGates);
   
   for (int igate = 0; igate < _nGates; igate++) {
@@ -251,6 +252,7 @@ void RlanLocator::locate()
     _accumPhaseChange[igate] = -9999;
     _phaseChangeError[igate] = -9999;
     _snrSdev[igate] = -9999;
+    _zdrSdev[igate] = -9999;
     _ncpMean[igate] = -9999;
   }
   
@@ -310,6 +312,9 @@ void RlanLocator::locate()
 
   if (_snrAvail) {
     _computeSdevInRange(_snr, _snrSdev);
+  }
+  if (_zdrAvail) {
+    _computeSdevInRange(_zdr, _zdrSdev);
   }
   if (_ncpAvail) {
     _computeMeanInRange(_ncp, _ncpMean);
