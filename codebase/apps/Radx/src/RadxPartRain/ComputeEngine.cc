@@ -234,7 +234,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *snrSdevRlan = _rlan.getSnrSdev();
   const double *zdrSdevRlan = _rlan.getZdrSdev();
   const double *ncpMeanRlan = _rlan.getNcpMean();
-  const double *phaseChangeRlan = _rlan.getPhaseChangeError();
+  // const double *phaseChangeRlan = _rlan.getPhaseChangeError();
+  const double *phaseChangeRlan = _rlan.getPhase();
 
   // load up output data
 

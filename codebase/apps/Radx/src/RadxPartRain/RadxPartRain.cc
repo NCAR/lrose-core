@@ -418,7 +418,10 @@ int RadxPartRain::_processFile(const string &filePath)
                          _params.radar_longitude_deg,
                          _params.radar_altitude_meters / 1000.0);
   }
-
+  if (_params.locate_rlan_interference) {
+    vol.estimateSweepNyquistFromVel(_params.VEL_field_name);
+  }
+  
   // set radar properties
 
   _wavelengthM = vol.getWavelengthM();
