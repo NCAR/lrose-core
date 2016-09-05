@@ -234,8 +234,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *snrSdevRlan = _rlan.getSnrSdev();
   const double *zdrSdevRlan = _rlan.getZdrSdev();
   const double *ncpMeanRlan = _rlan.getNcpMean();
-  // const double *phaseChangeRlan = _rlan.getPhaseChangeError();
-  const double *phaseChangeRlan = _rlan.getPhase();
+  const double *phaseRlan = _rlan.getPhase();
+  const double *phaseChangeRlan = _rlan.getPhaseChangeError();
 
   // load up output data
 
@@ -540,6 +540,9 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::NCP_MEAN_RLAN:
           *datp = ncpMeanRlan[igate];
+          break;
+        case Params::PHASE_RLAN:
+          *datp = phaseRlan[igate];
           break;
         case Params::PHASE_CHANGE_RLAN:
           *datp = phaseChangeRlan[igate];

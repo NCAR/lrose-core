@@ -221,7 +221,7 @@ void RlanLocator::setFields(double *snr,
     }
     // estimate the phase from the vel
     for (int ii = 0; ii < _nGates; ii++) {
-      _phase[ii] = (_vel[ii] / _nyquist) * M_PI;
+      _phase[ii] = (_vel[ii] / _nyquist) * 180.0;
     }
     _phaseAvail = true;
   } else {
@@ -263,11 +263,9 @@ void RlanLocator::locate()
   // the units are degrees
 
   if (_phaseAvail) {
-    double prevPhaseSum = RadarComplex::argDeg(_phase[0]);
+    double prevPhaseSum = _phase[0];
     for (int igate = 1; igate < _nGates; igate++) {
-      RadarComplex_t diff =
-        RadarComplex::conjugateProduct(_phase[igate], _phase[igate-1]);
-      double diffDeg = RadarComplex::argDeg(diff);
+      double diffDeg = RadarComplex::diffDeg(_phase[igate], _phase[igate-1]);
       double phaseSum = prevPhaseSum + diffDeg;
       _accumPhaseChange[igate] = phaseSum;
       prevPhaseSum = phaseSum;
