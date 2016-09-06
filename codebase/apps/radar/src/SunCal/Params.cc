@@ -750,6 +750,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'print_missing_pulses'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_missing_pulses");
+    tt->descr = tdrpStrDup("Option to print message about missing pulses.");
+    tt->help = tdrpStrDup("Only applies to time series data input. If true, a message will be printed to stderr if a missing pulse is noted in the time series.");
+    tt->val_offset = (char *) &print_missing_pulses - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));

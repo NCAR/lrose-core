@@ -764,7 +764,7 @@ void SunCal::_addPulseToQueue(const IwrfTsPulse *pulse)
   // print missing pulses in verbose mode
 
   if ((pulse->getSeqNum() - _pulseSeqNum) != 1) {
-    if (_params.debug >= Params::DEBUG_VERBOSE && _pulseSeqNum != 0) {
+    if (_params.print_missing_pulses && _pulseSeqNum != 0) {
       cerr << "**** Missing seq num: " << _pulseSeqNum
 	   << " to " <<  pulse->getSeqNum() << " ****" << endl;
     }
@@ -1536,7 +1536,7 @@ int SunCal::_computeMomentsSunDualAlt(MomentsSun *moments,
   moments->powerVc = meanPowerVc;
   moments->powerHx = meanPowerHx;
   moments->powerVx = meanPowerVx;
-  
+
   moments->dbmHc = 10.0 * log10(meanPowerHc);
   moments->dbmVc = 10.0 * log10(meanPowerVc);
   moments->dbmHx = 10.0 * log10(meanPowerHx);
@@ -2230,7 +2230,7 @@ void SunCal::_computeMeanNoise()
       }
       
       MomentsSun *moments = _interpMoments[iaz][iel];
-      
+
       if (moments->dbmHc != MomentsSun::missing &&
           moments->dbmHx != MomentsSun::missing &&
           moments->dbmVc != MomentsSun::missing &&
@@ -2247,7 +2247,7 @@ void SunCal::_computeMeanNoise()
     }
 
   }
-  
+
   if (_nBeamsNoise == 0) {
     _nBeamsNoise = 1;
   }
@@ -2640,6 +2640,9 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
   
   int azCentroidIndex =
     (int) ((sunCentroidAzOffset - _gridMinAz) /  _gridDeltaAz);
+  if (azCentroidIndex < 0 || azCentroidIndex > (_gridNAz - 1)) {
+    return;
+  }
   for (int iel = 0; iel < _gridNEl; iel++) {
     MomentsSun *moments = _interpMoments[azCentroidIndex][iel];
     double dbm = moments->dbm;
@@ -2832,6 +2835,10 @@ void SunCal::_computeSS(const vector<MomentsSun> &selected,
   for (int ii = 0; ii < (int) selected.size(); ii++) {
     
     const MomentsSun &moments = selected[ii];
+
+    if (moments.ratioDbmVcHc < -9990) {
+      continue;
+    }
 
     sumRatioDbmVcHc += moments.ratioDbmVcHc;
     sumRatioDbmVxHx += moments.ratioDbmVxHx;
@@ -3918,11 +3925,11 @@ void SunCal::_writeGlobalHeader(FILE *out)
   }
 
   if (_params.read_xpol_ratio_from_spdb) {
-    fprintf(out, " %10s", "xpolRatioDbFromSpdb");
+    fprintf(out, " %10s", "xRatioDb");
   }
 
   if (_params.read_site_temp_from_spdb) {
-    fprintf(out, " %10s", "siteTempFromSpdb");
+    fprintf(out, " %10s", "siteTemp");
   }
 
   if (_params.compute_test_pulse_powers) {

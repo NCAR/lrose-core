@@ -405,6 +405,8 @@ public:
 
   tdrp_bool_t invert_hv_flag;
 
+  tdrp_bool_t print_missing_pulses;
+
   moments_field_names_t moments_field_names;
 
   tdrp_bool_t scan_mode_rhi;
@@ -554,7 +556,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[105];
+  mutable TDRPtable _table[106];
 
   const char *_className;
 

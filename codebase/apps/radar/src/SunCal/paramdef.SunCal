@@ -114,6 +114,12 @@ paramdef boolean {
   p_help = "Only applies to alternating dual polarization mode. Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the data has the opposite sense, set this to true.";
 } invert_hv_flag;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print message about missing pulses.";
+  p_help = "Only applies to time series data input. If true, a message will be printed to stderr if a missing pulse is noted in the time series.";
+} print_missing_pulses;
+
 commentdef {
   p_header = "FIELD NAMES FOR MOMENTS FILES";
   p_text = "Names of specified fields in the moments files.";
