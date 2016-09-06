@@ -137,17 +137,21 @@ public:
     SDZDR_FOR_PID = 56,
     SDPHIDP_FOR_PID = 57,
     TEMP_FOR_PID = 58,
-    SNR_SDEV_RLAN = 59,
-    ZDR_SDEV_RLAN = 60,
-    NCP_MEAN_RLAN = 61,
-    PHASE_RLAN = 62,
-    PHASE_CHANGE_RLAN = 63,
-    ZDRM_IN_ICE = 64,
-    ZDRM_IN_BRAGG = 65,
-    ZDR_IN_ICE = 66,
-    ZDR_IN_BRAGG = 67,
-    ZDR_FLAG_IN_ICE = 68,
-    ZDR_FLAG_IN_BRAGG = 69
+    SNR_RLAN = 59,
+    SNR_MODE_RLAN = 60,
+    SNR_DMODE_RLAN = 61,
+    ZDR_RLAN = 62,
+    ZDR_MODE_RLAN = 63,
+    ZDR_DMODE_RLAN = 64,
+    NCP_MEAN_RLAN = 65,
+    PHASE_RLAN = 66,
+    PHASE_CHANGE_RLAN = 67,
+    ZDRM_IN_ICE = 68,
+    ZDRM_IN_BRAGG = 69,
+    ZDR_IN_ICE = 70,
+    ZDR_IN_BRAGG = 71,
+    ZDR_FLAG_IN_ICE = 72,
+    ZDR_FLAG_IN_BRAGG = 73
   } output_field_id_t;
 
   typedef enum {

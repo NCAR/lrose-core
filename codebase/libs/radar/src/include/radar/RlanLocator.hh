@@ -148,8 +148,10 @@ public:
   const double *getZdr() const { return _zdr; }
 
   const double *getPhase() const { return _phase; }
-  const double *getSnrSdev() const { return _snrSdev; }
-  const double *getZdrSdev() const { return _zdrSdev; }
+  const double *getSnrMode() const { return _snrMode; }
+  const double *getSnrDMode() const { return _snrDMode; }
+  const double *getZdrMode() const { return _zdrMode; }
+  const double *getZdrDMode() const { return _zdrDMode; }
   const double *getNcpMean() const { return _ncpMean; }
 
   ////////////////////////////////////
@@ -216,11 +218,17 @@ private:
   TaArray<double> _phaseChangeError_;
   double *_phaseChangeError;
 
-  TaArray<double> _snrSdev_;
-  double *_snrSdev;
+  TaArray<double> _snrMode_;
+  double *_snrMode;
 
-  TaArray<double> _zdrSdev_;
-  double *_zdrSdev;
+  TaArray<double> _snrDMode_;
+  double *_snrDMode;
+
+  TaArray<double> _zdrMode_;
+  double *_zdrMode;
+
+  TaArray<double> _zdrDMode_;
+  double *_zdrDMode;
 
   TaArray<double> _ncpMean_;
   double *_ncpMean;
@@ -247,6 +255,8 @@ private:
   // private methods
   
   double _computePhaseChangeError(int startGate, int endGate);
+  void _computeDeltaMode(const string &fieldName,
+                         const double *vals, double *mode, double *dMode);
   void _computeSdevInRange(const double *vals, double *sdevs);
   void _computeMeanInRange(const double *vals, double *means);
   double _computeMean(const vector<double> &vals);

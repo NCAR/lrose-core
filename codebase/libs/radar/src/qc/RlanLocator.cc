@@ -173,6 +173,11 @@ void RlanLocator::setFields(double *snr,
   if (snr != NULL) {
     memcpy(_snr, snr, _nGates * sizeof(double));
     _snrAvail = true;
+    for (int igate = 0; igate < _nGates; igate++) {
+      if (_snr[igate] < -10) {
+        _snr[igate] = missingVal;
+      }
+    }
   } else {
     _snrAvail = false;
   }
@@ -243,8 +248,10 @@ void RlanLocator::locate()
   _rlanFlag = _rlanFlag_.alloc(_nGates);
   _accumPhaseChange = _accumPhaseChange_.alloc(_nGates);
   _phaseChangeError = _phaseChangeError_.alloc(_nGates);
-  _snrSdev = _snrSdev_.alloc(_nGates);
-  _zdrSdev = _zdrSdev_.alloc(_nGates);
+  _snrMode = _snrMode_.alloc(_nGates);
+  _snrDMode = _snrDMode_.alloc(_nGates);
+  _zdrMode = _zdrMode_.alloc(_nGates);
+  _zdrDMode = _zdrDMode_.alloc(_nGates);
   _ncpMean = _ncpMean_.alloc(_nGates);
   
   for (int igate = 0; igate < _nGates; igate++) {
@@ -253,8 +260,10 @@ void RlanLocator::locate()
     _endGate[igate] = 0;
     _accumPhaseChange[igate] = -9999;
     _phaseChangeError[igate] = -9999;
-    _snrSdev[igate] = -9999;
-    _zdrSdev[igate] = -9999;
+    _snrMode[igate] = -9999;
+    _snrDMode[igate] = -9999;
+    _zdrMode[igate] = -9999;
+    _zdrDMode[igate] = -9999;
     _ncpMean[igate] = -9999;
   }
   
@@ -311,10 +320,10 @@ void RlanLocator::locate()
   // compute snr sdev
 
   if (_snrAvail) {
-    _computeSdevInRange(_snr, _snrSdev);
+    _computeDeltaMode("SNR", _snr, _snrMode, _snrDMode);
   }
   if (_zdrAvail) {
-    _computeSdevInRange(_zdr, _zdrSdev);
+    _computeDeltaMode("ZDR", _zdr, _zdrMode, _zdrDMode);
   }
   if (_ncpAvail) {
     _computeMeanInRange(_ncp, _ncpMean);
@@ -329,7 +338,7 @@ void RlanLocator::locate()
   for (int igate = 0; igate < _nGates; igate++) {
 
     double pce = _phaseChangeError[igate];
-    double snrSdev = _snrSdev[igate];
+    double snrSdev = _snrMode[igate];
     double ncpMean = _ncpMean[igate];
 
     double sumInterestRlan =
@@ -394,6 +403,133 @@ double RlanLocator::_computePhaseChangeError(int startGate, int endGate)
 
   return sumAbsError / count;
 
+}
+
+///////////////////////////////////////////////////////////////
+// compute Delta relative to MODE for ray
+
+void RlanLocator::_computeDeltaMode(const string &fieldName,
+                                    const double *vals, double *mode, double *dMode)
+  
+{
+  
+  // initialize
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    mode[igate] = _missingVal;
+    dMode[igate] = _missingVal;
+  }
+
+  // compute min and max
+  
+  double nValid = 0.0;
+  double minVal = 1.0e99;
+  double maxVal = -1.0e99;
+  for (int igate = 0; igate < _nGates; igate++) {
+    double val = vals[igate];
+    if (!isfinite(val)) {
+      return;
+    }
+    if (val != _missingVal) {
+      nValid++;
+      if (val < minVal) {
+        minVal = val;
+      }
+      if (val > maxVal) {
+        maxVal = val;
+      }
+    }
+  } // igate
+  
+  if (nValid < _nGates / 4) {
+    return;
+  }
+  if (maxVal <= minVal) {
+    return;
+  }
+
+  // create histogram with 100 bins
+
+  int nBins = 100;
+  double histDelta = (maxVal - minVal) / (double) (nBins - 1);
+  TaArray<double> hist_;
+  double *hist = hist_.alloc(nBins);
+  memset(hist, 0, nBins * sizeof(double));
+  for (int igate = 0; igate < _nGates; igate++) {
+    double val = vals[igate];
+    if (val != _missingVal) {
+      int bin = (int) ((val - minVal) / histDelta);
+      hist[bin]++;
+    }
+  } // igate
+
+  // find mode bin
+  
+  int modeBin = 0;
+  double maxCount = 0;
+  for (int ibin = 0; ibin < nBins; ibin++) {
+    double count = hist[ibin];
+    if (count > maxCount) {
+      maxCount = count;
+      modeBin = ibin;
+    }
+  }
+
+  // find median
+  
+  // double sumCount = 0.0;
+  // double half = nValid / 2.0;
+  // double median = (maxVal - minVal) / 2.0;
+  // for (int ibin = 0; ibin < nBins; ibin++) {
+  //   double count = hist[ibin];
+  //   if (sumCount + count > half) {
+  //     double frac = (half - sumCount) / count;
+  //     median = ((double) ibin + frac) * histDelta + minVal;
+  //     break;
+  //   }
+  //   sumCount += count;
+  // } // ibin
+
+  // compute mean for vals within that bin and one bin on each side
+
+  double modeLower = minVal + (modeBin - 1) * histDelta;
+  double modeUpper = minVal + (modeBin + 2) * histDelta;
+  double sum = 0.0;
+  double count = 0.0;
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    double val = vals[igate];
+    if (val != _missingVal && val >= modeLower && val <= modeUpper) {
+      sum += val;
+      count++;
+    }
+  } // igate
+  double modeVal = sum / count;
+
+  // vector<double> vvals;
+  // for (int igate = 0; igate < _nGates; igate++) {
+  //   double val = vals[igate];
+  //   if (val != _missingVal) {
+  //     vvals.push_back(val);
+  //   }
+  // }
+  // sort(vvals.begin(), vvals.end());
+  // double mmedian = vvals[vvals.size()/2];
+
+  // set delta from mode
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    double val = vals[igate];
+    if (val != _missingVal) {
+      dMode[igate] = val - modeVal;
+      // dMode[igate] = val - mmedian;
+    } else {
+      dMode[igate] = _missingVal;
+    }
+    mode[igate] = modeVal;
+    // mode[igate] = mmedian;
+  } // igate
+  
 }
 
 ///////////////////////////////////////////////////////////////

@@ -231,8 +231,12 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *sdzdrForPid = _pid.getSdzdr();
   const double *sdphidpForPid = _pid.getSdphidp();
 
-  const double *snrSdevRlan = _rlan.getSnrSdev();
-  const double *zdrSdevRlan = _rlan.getZdrSdev();
+  const double *snrRlan = _rlan.getSnr();
+  const double *snrModeRlan = _rlan.getSnrMode();
+  const double *snrDModeRlan = _rlan.getSnrDMode();
+  const double *zdrRlan = _rlan.getZdr();
+  const double *zdrModeRlan = _rlan.getZdrMode();
+  const double *zdrDModeRlan = _rlan.getZdrDMode();
   const double *ncpMeanRlan = _rlan.getNcpMean();
   const double *phaseRlan = _rlan.getPhase();
   const double *phaseChangeRlan = _rlan.getPhaseChangeError();
@@ -532,11 +536,23 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = _tempForPid[igate];
           break;
 
-        case Params::SNR_SDEV_RLAN:
-          *datp = snrSdevRlan[igate];
+        case Params::SNR_RLAN:
+          *datp = snrRlan[igate];
           break;
-        case Params::ZDR_SDEV_RLAN:
-          *datp = zdrSdevRlan[igate];
+        case Params::SNR_MODE_RLAN:
+          *datp = snrModeRlan[igate];
+          break;
+        case Params::SNR_DMODE_RLAN:
+          *datp = snrDModeRlan[igate];
+          break;
+        case Params::ZDR_RLAN:
+          *datp = zdrRlan[igate];
+          break;
+        case Params::ZDR_MODE_RLAN:
+          *datp = zdrModeRlan[igate];
+          break;
+        case Params::ZDR_DMODE_RLAN:
+          *datp = zdrDModeRlan[igate];
           break;
         case Params::NCP_MEAN_RLAN:
           *datp = ncpMeanRlan[igate];
@@ -1390,6 +1406,9 @@ void ComputeEngine::_computeSnrFromDbz()
   TaArray<double> noiseDbz_;
   double *noiseDbz = noiseDbz_.alloc(_nGates);
   double range = _startRangeKm;
+  if (range == 0) {
+    range = _gateSpacingKm / 10.0;
+  }
   for (int igate = 0; igate < _nGates; igate++, range += _gateSpacingKm) {
     noiseDbz[igate] = _params.noise_dbz_at_100km +
       20.0 * (log10(range) - log10(100.0));
