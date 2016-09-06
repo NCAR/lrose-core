@@ -101,6 +101,15 @@ int Args::parse (int argc, char **argv,
 	iret = -1;
       }
 	
+    } else if (!strcmp(argv[i], "-outurl")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "output_url = %s;", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+	
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
@@ -182,6 +191,7 @@ void Args::_usage(ostream &out,
       << "       [ -f files ] specify input file list.\n"
       << "         forces FILELIST mode\n"
       << "       [ -mode ?] ARCHIVE, REALTIME or FILELIST\n"
+      << "       [ -outurl ?] output URL for SPDB data\n"
       << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "          forces ARCHIVE mode\n"
       << "       [ -verbose ] print verbose debug messages\n"

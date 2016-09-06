@@ -1,0 +1,7 @@
+#! /bin/csh
+
+
+SpolDishTemp2Spdb -debug -outurl ~/projDir/data/spol_temp/spdb -f ~/projDir/data/spol_temp/raw/TempSensor*
+
+SpolDishTemp2Spdb -debug -outurl ~/projDir/data/spol_temp/spdb -f ~/projDir/data/spol_temp/raw/SensorHistory2*
+

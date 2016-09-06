@@ -267,17 +267,25 @@ int SpolDishTemp2Spdb::_processFile(const char *file_path)
       continue;
     }
 
+    DateTime dtime;
     int year, month, day, hour, min, sec;
     char ampm[16];
     if (sscanf(toks[timeIndex].c_str(), "%d/%d/%d %d:%d:%d %s",
-               &month, &day, &year, &hour, &min, &sec, ampm) != 7) {
+               &month, &day, &year, &hour, &min, &sec, ampm) == 7) {
+      if (strcmp(ampm, "PM") == 0) {
+        hour += 12.0;
+      }
+      dtime.set(year, month, day, hour, min, sec);
+    } else if (sscanf(toks[timeIndex].c_str(), "%d/%d/%d %d:%d",
+                      &month, &day, &year, &hour, &min) == 5) {
+      if (year < 100) {
+        year += 2000;
+      }
+      dtime.set(year, month, day, hour, min, 0);
+    } else {
       cerr << "ERROR - cannot decode datetime: " << toks[timeIndex] << endl;
       continue;
     }
-    if (strcmp(ampm, "PM") == 0) {
-      hour += 12.0;
-    }
-    DateTime dtime(year, month, day, hour, min, sec);
 
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "time, stationId, tempValue: " 
@@ -288,6 +296,7 @@ int SpolDishTemp2Spdb::_processFile(const char *file_path)
 
     WxObs obs;
     obs.setStationId("SPOL");
+    obs.setLongName("SPOL");
     obs.setLatitude(_params.radar_latitude_deg);
     obs.setLongitude(_params.radar_longitude_deg);
     obs.setElevationM(_params.radar_altitude_meters);
