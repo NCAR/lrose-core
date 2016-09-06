@@ -31,7 +31,6 @@
 ///////////////////////////////////////////////////////////////
 //
 // Find gates contaminated with RLAN interference
-// in dual pol data
 //
 ///////////////////////////////////////////////////////////////
 
@@ -75,7 +74,7 @@ public:
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestMapSnrSdevForRlan
+  void setInterestMapSnrDModeForRlan
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
@@ -83,13 +82,8 @@ public:
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestThresholdForRlan(double val);
+  void setInterestThreshold(double val);
   
-  ////////////////////////////////////////////////////////////////
-  // set min ngates for computing median
-
-  void setMinNGatesRayMedian(int minNGatesRayMedian);
-
   ///////////////////////////////////////////////////////////////
   // set the ray properties
   // must be called before locate()
@@ -233,8 +227,6 @@ private:
   TaArray<double> _ncpMean_;
   double *_ncpMean;
 
-  int _minNGatesRayMedian;
-
   // gate limits for computing stats along a ray
 
   vector<size_t> _startGate;
@@ -245,12 +237,12 @@ private:
   int _nGatesKernel;
 
   InterestMap *_interestMapPhaseChangeErrorForRlan;
-  InterestMap *_interestMapSnrSdevForRlan;
+  InterestMap *_interestMapSnrDModeForRlan;
   InterestMap *_interestMapNcpMeanForRlan;
   double _weightPhaseChangeErrorForRlan;
-  double _weightSnrSdevForRlan;
+  double _weightSnrDModeForRlan;
   double _weightNcpMeanForRlan;
-  double _interestThresholdForRlan;
+  double _interestThreshold;
 
   // private methods
   

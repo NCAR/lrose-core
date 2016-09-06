@@ -146,12 +146,13 @@ public:
     NCP_MEAN_RLAN = 65,
     PHASE_RLAN = 66,
     PHASE_CHANGE_RLAN = 67,
-    ZDRM_IN_ICE = 68,
-    ZDRM_IN_BRAGG = 69,
-    ZDR_IN_ICE = 70,
-    ZDR_IN_BRAGG = 71,
-    ZDR_FLAG_IN_ICE = 72,
-    ZDR_FLAG_IN_BRAGG = 73
+    RLAN_FLAG = 68,
+    ZDRM_IN_ICE = 69,
+    ZDRM_IN_BRAGG = 70,
+    ZDR_IN_ICE = 71,
+    ZDR_IN_BRAGG = 72,
+    ZDR_FLAG_IN_ICE = 73,
+    ZDR_FLAG_IN_BRAGG = 74
   } output_field_id_t;
 
   typedef enum {

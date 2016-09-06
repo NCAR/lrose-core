@@ -240,6 +240,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *ncpMeanRlan = _rlan.getNcpMean();
   const double *phaseRlan = _rlan.getPhase();
   const double *phaseChangeRlan = _rlan.getPhaseChangeError();
+  const bool *rlanFlag = _rlan.getRlanFlag();
 
   // load up output data
 
@@ -326,7 +327,11 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = zdrSdevForKdp[igate];
           break;
         case Params::VALID_FLAG_FOR_KDP:
-          *datp = validFlagForKdp[igate];
+          if (validFlagForKdp[igate]) {
+            *datp = 1.0;
+          } else {
+            *datp = 0.0;
+          }
           break;
 
         case Params::PHIDP_FOR_KDP:
@@ -562,6 +567,13 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::PHASE_CHANGE_RLAN:
           *datp = phaseChangeRlan[igate];
+          break;
+        case Params::RLAN_FLAG:
+          if (rlanFlag[igate]) {
+            *datp = 1.0;
+          } else {
+            *datp = 0.0;
+          }
           break;
 
         case Params::ZDRM_IN_ICE:

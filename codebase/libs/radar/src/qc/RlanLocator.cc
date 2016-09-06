@@ -53,13 +53,10 @@ RlanLocator::RlanLocator()
   // create the default interest maps
 
   _interestMapPhaseChangeErrorForRlan = NULL;
-  _interestMapSnrSdevForRlan = NULL;
+  _interestMapSnrDModeForRlan = NULL;
   _interestMapNcpMeanForRlan = NULL;
-
   _createDefaultInterestMaps();
-  
   _nGatesKernel = 9;
-  _minNGatesRayMedian = 30;
 
 }
 
@@ -73,22 +70,14 @@ RlanLocator::~RlanLocator()
   if (_interestMapPhaseChangeErrorForRlan) {
     delete _interestMapPhaseChangeErrorForRlan;
   }
-  if (_interestMapSnrSdevForRlan) {
-    delete _interestMapSnrSdevForRlan;
+
+  if (_interestMapSnrDModeForRlan) {
+    delete _interestMapSnrDModeForRlan;
   }
+
   if (_interestMapNcpMeanForRlan) {
     delete _interestMapNcpMeanForRlan;
   }
-
-}
-
-///////////////////////////////////////////////////////////////
-// set min ngates for computing median
-
-void RlanLocator::setMinNGatesRayMedian(int minNGatesRayMedian)
-{
-  
-  _minNGatesRayMedian = minNGatesRayMedian;
 
 }
 
@@ -100,16 +89,14 @@ void RlanLocator::printParams(ostream &out)
 {
 
   out << "Performing rlan detection:" << endl;
-  out << "  nGatesForRlanDetection: " << _nGatesKernel << endl;
-  out << "  minNGatesRayMedian: " << _minNGatesRayMedian << endl;
-  out << "  interestThresholdForRlan: " 
-      << _interestThresholdForRlan << endl;
+  out << "  nGatesKernel: " << _nGatesKernel << endl;
+  out << "  interestThreshold: " << _interestThreshold << endl;
   
   if (_interestMapPhaseChangeErrorForRlan) {
     _interestMapPhaseChangeErrorForRlan->printParams(out);
   }
-  if (_interestMapSnrSdevForRlan) {
-    _interestMapSnrSdevForRlan->printParams(out);
+  if (_interestMapSnrDModeForRlan) {
+    _interestMapSnrDModeForRlan->printParams(out);
   }
   if (_interestMapNcpMeanForRlan) {
     _interestMapNcpMeanForRlan->printParams(out);
@@ -330,28 +317,28 @@ void RlanLocator::locate()
   }
 
   // set flags
-
+  
   double sumWeightsRlan = (_weightPhaseChangeErrorForRlan + 
-                            _weightSnrSdevForRlan +
-                            _weightNcpMeanForRlan);
-
+                           _weightSnrDModeForRlan +
+                           _weightNcpMeanForRlan);
+  
   for (int igate = 0; igate < _nGates; igate++) {
-
+    
     double pce = _phaseChangeError[igate];
-    double snrSdev = _snrMode[igate];
+    double sndDMode = _snrMode[igate];
     double ncpMean = _ncpMean[igate];
 
     double sumInterestRlan =
       (_interestMapPhaseChangeErrorForRlan->getInterest(pce) * 
        _weightPhaseChangeErrorForRlan) +
-      (_interestMapSnrSdevForRlan->getInterest(snrSdev) * 
-       _weightSnrSdevForRlan) +
+      (_interestMapSnrDModeForRlan->getInterest(sndDMode) * 
+       _weightSnrDModeForRlan) +
       (_interestMapNcpMeanForRlan->getInterest(ncpMean) * 
        _weightNcpMeanForRlan);
     
     double interestRlan = sumInterestRlan / sumWeightsRlan;
 
-    if (interestRlan > _interestThresholdForRlan) {
+    if (interestRlan > _interestThreshold) {
       _rlanFlag[igate] = true;
     } else {
       _rlanFlag[igate] = false;
@@ -409,7 +396,8 @@ double RlanLocator::_computePhaseChangeError(int startGate, int endGate)
 // compute Delta relative to MODE for ray
 
 void RlanLocator::_computeDeltaMode(const string &fieldName,
-                                    const double *vals, double *mode, double *dMode)
+                                    const double *vals, 
+                                    double *mode, double *dMode)
   
 {
   
@@ -521,7 +509,7 @@ void RlanLocator::_computeDeltaMode(const string &fieldName,
   for (int igate = 0; igate < _nGates; igate++) {
     double val = vals[igate];
     if (val != _missingVal) {
-      dMode[igate] = val - modeVal;
+      dMode[igate] = fabs(val - modeVal);
       // dMode[igate] = val - mmedian;
     } else {
       dMode[igate] = _missingVal;
@@ -698,16 +686,16 @@ void RlanLocator::_createDefaultInterestMaps()
   setInterestMapPhaseChangeErrorForRlan(pts, 1.0);
   
   pts.clear();
-  pts.push_back(InterestMap::ImPoint(0.65, 1.0));
-  pts.push_back(InterestMap::ImPoint(0.75, 0.001));
-  setInterestMapSnrSdevForRlan(pts, 1.0);
+  pts.push_back(InterestMap::ImPoint(2.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(2.5, 0.001));
+  setInterestMapSnrDModeForRlan(pts, 1.0);
 
   pts.clear();
-  pts.push_back(InterestMap::ImPoint(0.10, 1.0));
+  pts.push_back(InterestMap::ImPoint(0.15, 1.0));
   pts.push_back(InterestMap::ImPoint(0.20, 0.001));
   setInterestMapNcpMeanForRlan(pts, 1.0);
 
-  setInterestThresholdForRlan(0.51);
+  setInterestThreshold(0.51);
 
 }
 
@@ -726,25 +714,25 @@ void RlanLocator::setInterestMapPhaseChangeErrorForRlan
 
   _interestMapPhaseChangeErrorForRlan = new InterestMap
     ("PhaseChangeErrorForRlan", pts, weight);
-
+  
   _weightPhaseChangeErrorForRlan = weight;
-
+  
 }
 
-void RlanLocator::setInterestMapSnrSdevForRlan
+void RlanLocator::setInterestMapSnrDModeForRlan
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
 {
 
-  if (_interestMapSnrSdevForRlan) {
-    delete _interestMapSnrSdevForRlan;
+  if (_interestMapSnrDModeForRlan) {
+    delete _interestMapSnrDModeForRlan;
   }
 
-  _interestMapSnrSdevForRlan = new InterestMap
-    ("SnrSdevForRlan", pts, weight);
+  _interestMapSnrDModeForRlan = new InterestMap
+    ("SnrDModeForRlan", pts, weight);
 
-  _weightSnrSdevForRlan = weight;
+  _weightSnrDModeForRlan = weight;
 
 }
 
@@ -765,9 +753,9 @@ void RlanLocator::setInterestMapNcpMeanForRlan
 
 }
 
-void RlanLocator::setInterestThresholdForRlan(double val)
+void RlanLocator::setInterestThreshold(double val)
   
 {
-  _interestThresholdForRlan = val;
+  _interestThreshold = val;
 }
 
