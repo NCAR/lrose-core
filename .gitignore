@@ -517,6 +517,7 @@ codebase/apps/Radx/src/RadxMon/RadxMon
 codebase/apps/Radx/src/RadxPartRain/RadxPartRain
 codebase/apps/Radx/src/RadxPrint/RadxPrint
 codebase/apps/Radx/src/RadxQpe/RadxQpe
+codebase/apps/Radx/src/RadxQc/RadxQc
 codebase/apps/Radx/src/RadxSunMon/RadxSunMon
 
 codebase/apps/tdrp/src/TdrpTest/TdrpTest
