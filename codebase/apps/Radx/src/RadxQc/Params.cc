@@ -532,7 +532,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("RadxQc reads moments from Radx-supported format files, computes the PID and PRECIP rates and writes out the results to Radx-supported format files.");
+    tt->comment_hdr = tdrpStrDup("RadxQc reads moments from Radx-supported format files, and performs Quality Control operations on the data. It optionally adds QC fields to the output, and optionally censors the input data based on the QC results.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

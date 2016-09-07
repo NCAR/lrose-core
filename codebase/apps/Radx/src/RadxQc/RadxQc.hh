@@ -28,13 +28,14 @@
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2012
+// Sept 2016
 //
 ///////////////////////////////////////////////////////////////
 //
-// RadxQc reads moments from Radx-supported format files, 
-// computes the PID and PRECIP rates and writes out the results 
-// to Radx-supported format files
+// RadxQc reads moments from Radx-supported format files, and
+// performs Quality Control operations on the data. It
+// optionally adds QC fields to the output, and optionally
+// censors the input data based on the QC results.
 //
 ///////////////////////////////////////////////////////////////
 
