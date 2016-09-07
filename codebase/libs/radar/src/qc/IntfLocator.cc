@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// RlanLocator.cc
+// IntfLocator.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -34,7 +34,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <radar/RlanLocator.hh>
+#include <radar/IntfLocator.hh>
 #include <radar/RadarComplex.hh>
 #include <algorithm>
 #include <ostream>
@@ -44,7 +44,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////
 // Constructor
 
-RlanLocator::RlanLocator()
+IntfLocator::IntfLocator()
   
 {
 
@@ -63,7 +63,7 @@ RlanLocator::RlanLocator()
 ///////////////////////////////////////////////////////////////
 // destructor
 
-RlanLocator::~RlanLocator()
+IntfLocator::~IntfLocator()
   
 {
 
@@ -84,7 +84,7 @@ RlanLocator::~RlanLocator()
 ///////////////////////////////////////////////////////////////
 // print parameters for debugging
 
-void RlanLocator::printParams(ostream &out)
+void IntfLocator::printParams(ostream &out)
   
 {
 
@@ -108,7 +108,7 @@ void RlanLocator::printParams(ostream &out)
 // set the ray properties
 // must be called before locate()
 
-void RlanLocator::setRayProps(time_t timeSecs, 
+void IntfLocator::setRayProps(time_t timeSecs, 
                               double nanoSecs,
                               double elevation, 
                               double azimuth,
@@ -146,7 +146,7 @@ void RlanLocator::setRayProps(time_t timeSecs,
 // if field is not available, set to NULL
 // must be called before locate()
 
-void RlanLocator::setFields(double *snr,
+void IntfLocator::setFields(double *snr,
                             double *vel,
                             double *width,
                             double *ncp,
@@ -225,7 +225,7 @@ void RlanLocator::setFields(double *snr,
 ///////////////////////////////////////////////////////////////
 // locate the rlan gates
 
-void RlanLocator::locate()
+void IntfLocator::locate()
   
 {
 
@@ -367,7 +367,7 @@ void RlanLocator::locate()
 ///////////////////////////////////////////////////////////////
 // compute mean phase error in range, for the specified kernel
 
-double RlanLocator::_computePhaseChangeError(int startGate, int endGate)
+double IntfLocator::_computePhaseChangeError(int startGate, int endGate)
   
 {
 
@@ -395,7 +395,7 @@ double RlanLocator::_computePhaseChangeError(int startGate, int endGate)
 ///////////////////////////////////////////////////////////////
 // compute Delta relative to MODE for ray
 
-void RlanLocator::_computeDeltaMode(const string &fieldName,
+void IntfLocator::_computeDeltaMode(const string &fieldName,
                                     const double *vals, 
                                     double *mode, double *dMode)
   
@@ -523,7 +523,7 @@ void RlanLocator::_computeDeltaMode(const string &fieldName,
 ///////////////////////////////////////////////////////////////
 // compute SDEV in range
 
-void RlanLocator::_computeSdevInRange(const double *vals, double *sdevs)
+void IntfLocator::_computeSdevInRange(const double *vals, double *sdevs)
   
 {
   
@@ -565,7 +565,7 @@ void RlanLocator::_computeSdevInRange(const double *vals, double *sdevs)
 ///////////////////////////////////////////////////////////////
 // compute MEAN in range
 
-void RlanLocator::_computeMeanInRange(const double *vals, double *means)
+void IntfLocator::_computeMeanInRange(const double *vals, double *means)
   
 {
   
@@ -599,7 +599,7 @@ void RlanLocator::_computeMeanInRange(const double *vals, double *means)
 ///////////////////////////////////////////////////////////////
 // Compute mean rlan, removing outliers
   
-double RlanLocator::_computeMean(const vector<double> &vals)
+double IntfLocator::_computeMean(const vector<double> &vals)
   
 {
 
@@ -654,7 +654,7 @@ double RlanLocator::_computeMean(const vector<double> &vals)
 ///////////////////////////////////////////////////////////////
 // Compute median rlan
   
-double RlanLocator::_computeMedian(const vector<double> &vals)
+double IntfLocator::_computeMedian(const vector<double> &vals)
 
 {
 
@@ -674,7 +674,7 @@ double RlanLocator::_computeMedian(const vector<double> &vals)
 ///////////////////////////////////////////////////////////////
 // Create the default interest maps and weights
 
-void RlanLocator::_createDefaultInterestMaps()
+void IntfLocator::_createDefaultInterestMaps()
   
 {
 
@@ -702,7 +702,7 @@ void RlanLocator::_createDefaultInterestMaps()
 ///////////////////////////////////////////////////////////////
 // interest maps for rlan
 
-void RlanLocator::setInterestMapPhaseChangeErrorForRlan
+void IntfLocator::setInterestMapPhaseChangeErrorForRlan
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
@@ -719,7 +719,7 @@ void RlanLocator::setInterestMapPhaseChangeErrorForRlan
   
 }
 
-void RlanLocator::setInterestMapSnrDModeForRlan
+void IntfLocator::setInterestMapSnrDModeForRlan
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
@@ -736,7 +736,7 @@ void RlanLocator::setInterestMapSnrDModeForRlan
 
 }
 
-void RlanLocator::setInterestMapNcpMeanForRlan
+void IntfLocator::setInterestMapNcpMeanForRlan
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
@@ -753,7 +753,7 @@ void RlanLocator::setInterestMapNcpMeanForRlan
 
 }
 
-void RlanLocator::setInterestThreshold(double val)
+void IntfLocator::setInterestThreshold(double val)
   
 {
   _interestThreshold = val;

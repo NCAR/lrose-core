@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RlanLocator.hh
+// IntfLocator.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -34,8 +34,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef RlanLocator_H
-#define RlanLocator_H
+#ifndef IntfLocator_H
+#define IntfLocator_H
 
 #include <pthread.h>
 #include <vector>
@@ -43,17 +43,17 @@
 #include <toolsa/TaArray.hh>
 using namespace std;
 
-class RlanLocator {
+class IntfLocator {
   
 public:
 
   // constructor
   
-  RlanLocator();
+  IntfLocator();
 
   // destructor
   
-  ~RlanLocator();
+  ~IntfLocator();
 
   // set debugging state
 

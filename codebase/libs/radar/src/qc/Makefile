@@ -18,10 +18,10 @@ TARGET_FILE = ../libradar.a
 #
 
 HDRS = \
-	../include/radar/RlanLocator.hh
+	../include/radar/IntfLocator.hh
 
 CPPC_SRCS = \
-	RlanLocator.cc
+	IntfLocator.cc
 
 #
 # general targets

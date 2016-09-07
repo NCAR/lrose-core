@@ -231,16 +231,16 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *sdzdrForPid = _pid.getSdzdr();
   const double *sdphidpForPid = _pid.getSdphidp();
 
-  const double *snrRlan = _rlan.getSnr();
-  const double *snrModeRlan = _rlan.getSnrMode();
-  const double *snrDModeRlan = _rlan.getSnrDMode();
-  const double *zdrRlan = _rlan.getZdr();
-  const double *zdrModeRlan = _rlan.getZdrMode();
-  const double *zdrDModeRlan = _rlan.getZdrDMode();
-  const double *ncpMeanRlan = _rlan.getNcpMean();
-  const double *phaseRlan = _rlan.getPhase();
-  const double *phaseChangeRlan = _rlan.getPhaseChangeError();
-  const bool *rlanFlag = _rlan.getRlanFlag();
+  const double *snrRlan = _intf.getSnr();
+  const double *snrModeRlan = _intf.getSnrMode();
+  const double *snrDModeRlan = _intf.getSnrDMode();
+  const double *zdrRlan = _intf.getZdr();
+  const double *zdrModeRlan = _intf.getZdrMode();
+  const double *zdrDModeRlan = _intf.getZdrDMode();
+  const double *ncpMeanRlan = _intf.getNcpMean();
+  const double *phaseRlan = _intf.getPhase();
+  const double *phaseChangeRlan = _intf.getPhaseChangeError();
+  const bool *rlanFlag = _intf.getRlanFlag();
 
   // load up output data
 
@@ -871,12 +871,12 @@ void ComputeEngine::_locateRlan()
   // set up RLAN
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _rlan.setDebug(true);
+    _intf.setDebug(true);
   }
 
-  _rlan.setNGatesKernel(9);
+  _intf.setNGatesKernel(9);
 
-  _rlan.setRayProps(_timeSecs,
+  _intf.setRayProps(_timeSecs,
                     _nanoSecs,
                     _elevation,
                     _azimuth,
@@ -886,7 +886,7 @@ void ComputeEngine::_locateRlan()
                     _wavelengthM,
                     _nyquist);
 
-  _rlan.setFields(_snrArray,
+  _intf.setFields(_snrArray,
                   _velArray,
                   _widthArray,
                   _ncpArray,
@@ -895,7 +895,7 @@ void ComputeEngine::_locateRlan()
 
   // locate RLAN interference
 
-  _rlan.locate();
+  _intf.locate();
 
 #ifdef JUNK
   
