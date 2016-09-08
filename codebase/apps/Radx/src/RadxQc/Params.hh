@@ -73,11 +73,6 @@ public:
   } fir_filter_len_t;
 
   typedef enum {
-    SELF_CON_ZDR_POWER_LAW_METHOD = 0,
-    SELF_CON_ZDR_POLYNOMIAL_METHOD = 1
-  } self_con_method_t;
-
-  typedef enum {
     SNR = 0,
     DBZ = 1,
     VEL = 2,
@@ -90,69 +85,37 @@ public:
     RHOHV_NNC = 9,
     PHIDP = 10,
     KDP = 11,
-    KDP_BRINGI = 12,
-    PSOB = 13,
-    ZDP = 14,
-    PRECIP_RATE_ZH = 15,
-    PRECIP_RATE_ZH_SNOW = 16,
-    PRECIP_RATE_Z_ZDR = 17,
-    PRECIP_RATE_KDP = 18,
-    PRECIP_RATE_KDP_ZDR = 19,
-    PRECIP_RATE_HYBRID = 20,
-    PRECIP_RATE_PID = 21,
-    PRECIP_RATE_HIDRO = 22,
-    PRECIP_RATE_BRINGI = 23,
-    DBZ_ATTEN_CORRECTION = 24,
-    ZDR_ATTEN_CORRECTION = 25,
-    DBZ_ATTEN_CORRECTED = 26,
-    ZDR_ATTEN_CORRECTED = 27,
-    DBZ_FOR_KDP = 28,
-    ZDR_FOR_KDP = 29,
-    RHOHV_FOR_KDP = 30,
-    SNR_FOR_KDP = 31,
-    ZDR_SDEV_FOR_KDP = 32,
-    VALID_FLAG_FOR_KDP = 33,
-    PHIDP_FOR_KDP = 34,
-    PHIDP_MEAN_FOR_KDP = 35,
-    PHIDP_MEAN_UNFOLD_FOR_KDP = 36,
-    PHIDP_SDEV_FOR_KDP = 37,
-    PHIDP_JITTER_FOR_KDP = 38,
-    PHIDP_UNFOLD_FOR_KDP = 39,
-    PHIDP_FILT_FOR_KDP = 40,
-    PHIDP_COND_FOR_KDP = 41,
-    PHIDP_COND_FILT_FOR_KDP = 42,
-    DBZ_FOR_RATE = 43,
-    ZDR_FOR_RATE = 44,
-    KDP_FOR_RATE = 45,
-    PARTICLE_ID = 46,
-    PID_INTEREST = 47,
-    PARTICLE_ID2 = 48,
-    PID_INTEREST2 = 49,
-    DBZ_FOR_PID = 50,
-    ZDR_FOR_PID = 51,
-    LDR_FOR_PID = 52,
-    PHIDP_FOR_PID = 53,
-    RHOHV_FOR_PID = 54,
-    KDP_FOR_PID = 55,
-    SDZDR_FOR_PID = 56,
-    SDPHIDP_FOR_PID = 57,
-    TEMP_FOR_PID = 58,
-    SNR_RLAN = 59,
-    SNR_MODE_RLAN = 60,
-    SNR_DMODE_RLAN = 61,
-    ZDR_RLAN = 62,
-    ZDR_MODE_RLAN = 63,
-    ZDR_DMODE_RLAN = 64,
-    NCP_MEAN_RLAN = 65,
-    PHASE_RLAN = 66,
-    PHASE_CHANGE_RLAN = 67,
-    RLAN_FLAG = 68,
-    ZDRM_IN_ICE = 69,
-    ZDRM_IN_BRAGG = 70,
-    ZDR_IN_ICE = 71,
-    ZDR_IN_BRAGG = 72,
-    ZDR_FLAG_IN_ICE = 73,
-    ZDR_FLAG_IN_BRAGG = 74
+    PSOB = 12,
+    ZDP = 13,
+    DBZ_ATTEN_CORRECTION = 14,
+    ZDR_ATTEN_CORRECTION = 15,
+    DBZ_ATTEN_CORRECTED = 16,
+    ZDR_ATTEN_CORRECTED = 17,
+    DBZ_FOR_KDP = 18,
+    ZDR_FOR_KDP = 19,
+    RHOHV_FOR_KDP = 20,
+    SNR_FOR_KDP = 21,
+    ZDR_SDEV_FOR_KDP = 22,
+    VALID_FLAG_FOR_KDP = 23,
+    PHIDP_FOR_KDP = 24,
+    PHIDP_MEAN_FOR_KDP = 25,
+    PHIDP_MEAN_UNFOLD_FOR_KDP = 26,
+    PHIDP_SDEV_FOR_KDP = 27,
+    PHIDP_JITTER_FOR_KDP = 28,
+    PHIDP_UNFOLD_FOR_KDP = 29,
+    PHIDP_FILT_FOR_KDP = 30,
+    PHIDP_COND_FOR_KDP = 31,
+    PHIDP_COND_FILT_FOR_KDP = 32,
+    SNR_RLAN = 33,
+    SNR_MODE_RLAN = 34,
+    SNR_DMODE_RLAN = 35,
+    ZDR_RLAN = 36,
+    ZDR_MODE_RLAN = 37,
+    ZDR_DMODE_RLAN = 38,
+    NCP_MEAN_RLAN = 39,
+    PHASE_RLAN = 40,
+    PHASE_CHANGE_RLAN = 41,
+    RLAN_FLAG = 42
   } output_field_id_t;
 
   typedef enum {
@@ -556,9 +519,17 @@ public:
 
   double radar_altitude_meters;
 
-  tdrp_bool_t override_standard_pseudo_earth_radius;
+  char* DBZ_field_name;
 
-  double pseudo_earth_radius_ratio;
+  char* VEL_field_name;
+
+  tdrp_bool_t WIDTH_available;
+
+  char* WIDTH_field_name;
+
+  tdrp_bool_t NCP_available;
+
+  char* NCP_field_name;
 
   tdrp_bool_t SNR_available;
 
@@ -566,39 +537,19 @@ public:
 
   double noise_dbz_at_100km;
 
-  char* DBZ_field_name;
-
-  char* VEL_field_name;
+  tdrp_bool_t ZDR_available;
 
   char* ZDR_field_name;
 
-  char* ZDRM_field_name;
+  tdrp_bool_t PHIDP_available;
 
   char* PHIDP_field_name;
 
+  tdrp_bool_t RHOHV_available;
+
   char* RHOHV_field_name;
 
-  char* RHOHV_NNC_field_name;
-
-  tdrp_bool_t NCP_available;
-
-  char* NCP_field_name;
-
-  tdrp_bool_t WIDTH_available;
-
-  char* WIDTH_field_name;
-
-  tdrp_bool_t KDP_available;
-
-  char* KDP_field_name;
-
-  tdrp_bool_t LDR_available;
-
-  char* LDR_field_name;
-
-  tdrp_bool_t RHO_VXHX_available;
-
-  char* RHO_VXHX_field_name;
+  tdrp_bool_t compute_KDP;
 
   fir_filter_len_t KDP_fir_filter_len;
 
@@ -636,22 +587,6 @@ public:
 
   char* KDP_ray_files_dir;
 
-  tdrp_bool_t compute_kdp_bringi;
-
-  fir_filter_len_t KDP_BRINGI_fir_filter_len;
-
-  double KDP_BRINGI_phidp_difference_threshold;
-
-  double KDP_BRINGI_phidp_sdev_threshold;
-
-  double KDP_BRINGI_zdr_sdev_threshold;
-
-  double KDP_BRINGI_rhohv_threshold;
-
-  tdrp_bool_t KDP_BRINGI_apply_median_filter_to_PHIDP;
-
-  int KDP_BRINGI_median_filter_len;
-
   tdrp_bool_t apply_precip_attenuation_correction;
 
   tdrp_bool_t specify_coefficients_for_attenuation_correction;
@@ -665,38 +600,6 @@ public:
   double zdr_attenuation_exponent;
 
   tdrp_bool_t locate_rlan_interference;
-
-  char* pid_thresholds_file_path;
-
-  double PID_snr_threshold;
-
-  double PID_snr_upper_threshold;
-
-  double PID_min_valid_interest;
-
-  tdrp_bool_t PID_apply_median_filter_to_DBZ;
-
-  int PID_DBZ_median_filter_len;
-
-  tdrp_bool_t PID_apply_median_filter_to_ZDR;
-
-  int PID_ZDR_median_filter_len;
-
-  tdrp_bool_t PID_apply_median_filter_to_RHOHV;
-
-  int PID_RHOHV_median_filter_len;
-
-  tdrp_bool_t PID_apply_median_filter_to_LDR;
-
-  int PID_LDR_median_filter_len;
-
-  tdrp_bool_t PID_replace_missing_LDR;
-
-  double PID_LDR_replacement_value;
-
-  int PID_ngates_for_sdev;
-
-  tdrp_bool_t PID_output_particle_interest_fields;
 
   tdrp_bool_t use_soundings_from_spdb;
 
@@ -723,233 +626,6 @@ public:
   tdrp_bool_t apply_median_filter_to_PID;
 
   int PID_median_filter_len;
-
-  double PRECIP_snr_threshold;
-
-  tdrp_bool_t PRECIP_apply_median_filter_to_DBZ;
-
-  int PRECIP_DBZ_median_filter_len;
-
-  tdrp_bool_t PRECIP_apply_median_filter_to_ZDR;
-
-  int PRECIP_ZDR_median_filter_len;
-
-  double PRECIP_min_valid_rate;
-
-  double PRECIP_max_valid_rate;
-
-  double PRECIP_max_valid_dbz;
-
-  double PRECIP_brightband_dbz_correction;
-
-  double zh_aa;
-
-  double zh_bb;
-
-  double zh_aa_snow;
-
-  double zh_bb_snow;
-
-  double zzdr_aa;
-
-  double zzdr_bb;
-
-  double zzdr_cc;
-
-  double kdp_aa;
-
-  double kdp_bb;
-
-  double kdpzdr_aa;
-
-  double kdpzdr_bb;
-
-  double kdpzdr_cc;
-
-  double pid_rate_kdp_threshold;
-
-  double hybrid_dbz_threshold;
-
-  double hybrid_kdp_threshold;
-
-  double hybrid_zdr_threshold;
-
-  double hidro_dbz_threshold;
-
-  double hidro_kdp_threshold;
-
-  double hidro_zdr_threshold;
-
-  double bringi_dbz_threshold;
-
-  double bringi_kdp_threshold;
-
-  double bringi_zdr_threshold;
-
-  tdrp_bool_t estimate_zdr_bias_in_ice;
-
-  tdrp_bool_t estimate_zdr_bias_in_bragg;
-
-  double zdr_bias_max_abs_zdr;
-
-  double zdr_bias_max_abs_zdrm;
-
-  double zdr_bias_min_rhohv_nnc;
-
-  double zdr_bias_min_abs_vel;
-
-  double zdr_bias_max_abs_kdp;
-
-  double zdr_bias_max_phidp_accum;
-
-  int *_zdr_bias_ice_pid_types;
-  int zdr_bias_ice_pid_types_n;
-
-  double zdr_bias_ice_min_range_km;
-
-  double zdr_bias_ice_max_range_km;
-
-  double zdr_bias_ice_min_dbz;
-
-  double zdr_bias_ice_max_dbz;
-
-  double zdr_bias_ice_min_snr;
-
-  double zdr_bias_ice_max_snr;
-
-  double zdr_bias_ice_min_rho_vxhx;
-
-  double zdr_bias_ice_max_rho_vxhx;
-
-  double zdr_bias_ice_min_temp_c;
-
-  double zdr_bias_ice_max_temp_c;
-
-  double zdr_bias_ice_min_elevation_deg;
-
-  double zdr_bias_ice_max_elevation_deg;
-
-  int zdr_bias_ice_min_gate_run;
-
-  int zdr_bias_ice_min_npoints_valid;
-
-  double *_zdr_bias_ice_percentiles;
-  int zdr_bias_ice_percentiles_n;
-
-  tdrp_bool_t zdr_bias_bragg_check_pid;
-
-  int *_zdr_bias_bragg_pid_types;
-  int zdr_bias_bragg_pid_types_n;
-
-  double zdr_bias_bragg_min_range_km;
-
-  double zdr_bias_bragg_max_range_km;
-
-  double zdr_bias_bragg_min_dbz;
-
-  double zdr_bias_bragg_max_dbz;
-
-  double zdr_bias_bragg_min_snr;
-
-  double zdr_bias_bragg_max_snr;
-
-  double zdr_bias_bragg_min_rho_vxhx;
-
-  double zdr_bias_bragg_max_rho_vxhx;
-
-  double zdr_bias_bragg_min_temp_c;
-
-  double zdr_bias_bragg_max_temp_c;
-
-  double zdr_bias_bragg_min_elevation_deg;
-
-  double zdr_bias_bragg_max_elevation_deg;
-
-  int zdr_bias_bragg_min_gate_run;
-
-  int zdr_bias_bragg_min_npoints_valid;
-
-  double *_zdr_bias_bragg_percentiles;
-  int zdr_bias_bragg_percentiles_n;
-
-  tdrp_bool_t zdr_bias_write_results_to_spdb;
-
-  char* zdr_bias_spdb_output_url;
-
-  tdrp_bool_t estimate_z_bias_using_self_consistency;
-
-  int *_self_consistency_pid_types;
-  int self_consistency_pid_types_n;
-
-  double self_consistency_min_snr;
-
-  double self_consistency_max_snr;
-
-  double self_consistency_min_dbz;
-
-  double self_consistency_max_dbz;
-
-  double self_consistency_min_zdr;
-
-  double self_consistency_max_zdr;
-
-  double self_consistency_min_rhohv;
-
-  double self_consistency_min_kdp;
-
-  double self_consistency_max_dbz_at_run_limits;
-
-  double self_consistency_max_kdp_at_run_limits;
-
-  double self_consistency_min_elevation_deg;
-
-  double self_consistency_min_temp_c;
-
-  double self_consistency_max_range_km;
-
-  double self_consistency_min_no_gap_distance_km;
-
-  double self_consistency_min_combined_distance_km;
-
-  int self_consistency_max_gate_gap;
-
-  double self_consistency_min_phidp_accum;
-
-  double self_consistency_dbz_correction;
-
-  double self_consistency_zdrm_correction;
-
-  double self_consistency_max_phase_shift_on_backscatter;
-
-  self_con_method_t self_consisteny_method;
-
-  double self_consistency_kdp_z_expon;
-
-  double self_consistency_kdp_zdr_expon;
-
-  double self_consistency_kdp_coefficient;
-
-  double self_consistency_z_atten_coefficient;
-
-  double self_consistency_zdr_atten_coefficient;
-
-  double self_consistency_polynomial_a0;
-
-  double self_consistency_polynomial_a1;
-
-  double self_consistency_polynomial_a2;
-
-  double self_consistency_polynomial_a3;
-
-  tdrp_bool_t self_consistency_write_results_to_spdb;
-
-  char* self_consistency_spdb_output_url;
-
-  debug_t self_consistency_debug;
-
-  tdrp_bool_t self_consistency_write_run_files;
-
-  char* self_consistency_run_files_dir;
 
   tdrp_bool_t read_site_temp_from_spdb;
 
@@ -998,7 +674,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[279];
+  mutable TDRPtable _table[120];
 
   const char *_className;
 

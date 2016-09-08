@@ -105,17 +105,15 @@ RadxQc::RadxQc(int argc, char **argv)
     }
   }
 
-  // check parameters for consistency
+  // check on params
 
-  if (_params.estimate_zdr_bias_in_ice ||
-      _params.estimate_zdr_bias_in_bragg) {
-    if (_params.KDP_available) {
-      cerr << "ERROR: " << _progName << endl;
-      cerr << "  For estimating ZDR bias, you must set KDP_available to FALSE." << endl;
-      cerr << "  This forces KDP to be recomputed from PHIDP." << endl;
-      cerr << "  A recomputed KDP is required for estimating ZDR bias." << endl;
-      OK = FALSE;
-    }
+  if (_params.compute_KDP && !_params.PHIDP_available) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  Problem with TDRP parameters." << endl;
+    cerr << "  You have compute_KDP set to TRUE" << endl;
+    cerr << "  but PHIDP_available set to FALSE." << endl;
+    cerr << "  PHIDP is required to compute KDP." << endl;
+    OK = FALSE;
   }
 
   // initialize compute object
@@ -457,33 +455,12 @@ int RadxQc::_processFile(const string &filePath)
     }
   }
 
-  // initialize for ZDR bias and self consistency results
-
-  _zdrInIceResults.clear();
-  _zdrInBraggResults.clear();
-  _zdrmInIceResults.clear();
-  _zdrmInBraggResults.clear();
-  _selfConResults.clear();
-
   // compute the derived fields
   
   if (_compute(vol)) {
     cerr << "ERROR - RadxQc::Run" << endl;
     cerr << "  Cannot compute moments" << endl;
     return -1;
-  }
-
-  // optionally compute ZDR bias and write to SPDB
-
-  if (_params.estimate_zdr_bias_in_ice ||
-      _params.estimate_zdr_bias_in_bragg) {
-    _computeZdrBias(vol);
-  }
-
-  // optionally compute Z bias using self consistency and write results to SPDB
-
-  if (_params.estimate_z_bias_using_self_consistency) {
-    _computeSelfConZBias(vol);
   }
 
   // write results to output file
@@ -581,42 +558,37 @@ void RadxQc::_setupRead(RadxFile &file)
 
   // field names
 
+  file.addReadField(_params.DBZ_field_name);
+  file.addReadField(_params.VEL_field_name);
+
+  if (_params.WIDTH_available) {
+    file.addReadField(_params.WIDTH_field_name);
+  }
+
+  if (_params.NCP_available) {
+    file.addReadField(_params.NCP_field_name);
+  }
+
   if (_params.SNR_available) {
     file.addReadField(_params.SNR_field_name);
   }
-  file.addReadField(_params.DBZ_field_name);
-  file.addReadField(_params.ZDR_field_name);
-  file.addReadField(_params.PHIDP_field_name);
-  file.addReadField(_params.RHOHV_field_name);
-  if (_params.LDR_available) {
-    file.addReadField(_params.LDR_field_name);
+
+
+  if (_params.ZDR_available) {
+    file.addReadField(_params.ZDR_field_name);
   }
-  if (_params.RHO_VXHX_available) {
-    file.addReadField(_params.RHO_VXHX_field_name);
+
+  if (_params.PHIDP_available) {
+    file.addReadField(_params.PHIDP_field_name);
   }
-  if (_params.KDP_available) {
-    file.addReadField(_params.KDP_field_name);
+  if (_params.RHOHV_available) {
+    file.addReadField(_params.RHOHV_field_name);
   }
-  if (_params.locate_rlan_interference) {
-    file.addReadField(_params.VEL_field_name);
-    if (_params.NCP_available) {
-      file.addReadField(_params.NCP_field_name);
-    }
-    if (_params.WIDTH_available) {
-      file.addReadField(_params.WIDTH_field_name);
-    }
-  }
+
   if (_params.copy_input_fields_to_output) {
     for (int ii = 0; ii < _params.copy_fields_n; ii++) {
       file.addReadField(_params._copy_fields[ii].input_name);
     }
-  }
-  if (_params.estimate_zdr_bias_in_ice ||
-      _params.estimate_zdr_bias_in_bragg ||
-      _params.estimate_z_bias_using_self_consistency) {
-    file.addReadField(_params.VEL_field_name);
-    file.addReadField(_params.ZDRM_field_name);
-    file.addReadField(_params.RHOHV_NNC_field_name);
   }
 
   if (_params.remove_rays_with_antenna_transitions &&
@@ -970,40 +942,6 @@ int RadxQc::_storeDerivedRay(ComputeThread *thread)
     _derivedRays.push_back(derivedRay);
   }
   
-  // load ZDR bias results
-
-  const vector<double> &threadZdrInIceResults =
-    thread->getComputeEngine()->getZdrInIceResults();
-  for (size_t ii = 0; ii < threadZdrInIceResults.size(); ii++) {
-    _zdrInIceResults.push_back(threadZdrInIceResults[ii]);
-  }
-
-  const vector<double> &threadZdrInBraggResults =
-    thread->getComputeEngine()->getZdrInBraggResults();
-  for (size_t ii = 0; ii < threadZdrInBraggResults.size(); ii++) {
-    _zdrInBraggResults.push_back(threadZdrInBraggResults[ii]);
-  }
-
-  const vector<double> &threadZdrmInIceResults =
-    thread->getComputeEngine()->getZdrmInIceResults();
-  for (size_t ii = 0; ii < threadZdrmInIceResults.size(); ii++) {
-    _zdrmInIceResults.push_back(threadZdrmInIceResults[ii]);
-  }
-
-  const vector<double> &threadZdrmInBraggResults =
-    thread->getComputeEngine()->getZdrmInBraggResults();
-  for (size_t ii = 0; ii < threadZdrmInBraggResults.size(); ii++) {
-    _zdrmInBraggResults.push_back(threadZdrmInBraggResults[ii]);
-  }
-
-  // load self consistency results
-
-  const vector<ComputeEngine::self_con_t> &threadSelfConResults =
-    thread->getComputeEngine()->getSelfConResults();
-  for (size_t ii = 0; ii < threadSelfConResults.size(); ii++) {
-    _selfConResults.push_back(threadSelfConResults[ii]);
-  }
-  
   return 0;
 
 }
@@ -1281,314 +1219,3 @@ int RadxQc::_retrieveSiteTempFromSpdb(const RadxVol &vol,
 
 }
 
-/////////////////////////////////////////////////////////////
-// write zdr bias results to SPDB in XML
-
-void RadxQc::_computeZdrBias(const RadxVol &vol)
-
-{
-
-  // compute the bias stats
-
-  _zdrStatsIce.clear();
-  _zdrStatsBragg.clear();
-
-  _zdrmStatsIce.clear();
-  _zdrmStatsBragg.clear();
-
-  if ((int) _zdrInIceResults.size() > _params.zdr_bias_ice_min_npoints_valid) {
-    _loadZdrResults(_zdrInIceResults,
-                    _zdrStatsIce,
-                    _params.zdr_bias_ice_percentiles_n,
-                    _params._zdr_bias_ice_percentiles);
-  }
-  
-  if ((int) _zdrmInIceResults.size() > _params.zdr_bias_ice_min_npoints_valid) {
-    _loadZdrResults(_zdrmInIceResults,
-                    _zdrmStatsIce,
-                    _params.zdr_bias_ice_percentiles_n,
-                    _params._zdr_bias_ice_percentiles);
-  }
-  
-  if ((int) _zdrInBraggResults.size() > _params.zdr_bias_bragg_min_npoints_valid) {
-    _loadZdrResults(_zdrInBraggResults,
-                    _zdrStatsBragg,
-                    _params.zdr_bias_bragg_percentiles_n,
-                    _params._zdr_bias_bragg_percentiles);
-  }
-  
-  if ((int) _zdrmInBraggResults.size() > _params.zdr_bias_bragg_min_npoints_valid) {
-    _loadZdrResults(_zdrmInBraggResults,
-                    _zdrmStatsBragg,
-                    _params.zdr_bias_bragg_percentiles_n,
-                    _params._zdr_bias_bragg_percentiles);
-  }
-
-  // write results to SPDB
-  
-  if (!_params.zdr_bias_write_results_to_spdb) {
-    return;
-  }
-
-  RadxPath path(vol.getPathInUse());
-  string xml;
-
-  xml += RadxXml::writeStartTag("ZdrBias", 0);
-
-  xml += RadxXml::writeString("file", 1, path.getFile());
-  xml += RadxXml::writeBoolean("is_rhi", 1, vol.checkIsRhi());
-  
-  xml += RadxXml::writeInt("ZdrInIceNpts", 1, (int) _zdrStatsIce.count);
-  xml += RadxXml::writeDouble("ZdrInIceMean", 1, _zdrStatsIce.mean);
-  for (size_t ii = 0; ii < _zdrStatsIce.percentiles.size(); ii++) {
-    double percent = _params._zdr_bias_ice_percentiles[ii];
-    double val = _zdrStatsIce.percentiles[ii];
-    char tag[1024];
-    sprintf(tag, "ZdrInIcePerc%05.2f", percent);
-    xml += RadxXml::writeDouble(tag, 1, val);
-  }
-
-  xml += RadxXml::writeInt("ZdrmInIceNpts", 1, (int) _zdrmStatsIce.count);
-  xml += RadxXml::writeDouble("ZdrmInIceMean", 1, _zdrmStatsIce.mean);
-  for (size_t ii = 0; ii < _zdrmStatsIce.percentiles.size(); ii++) {
-    double percent = _params._zdr_bias_ice_percentiles[ii];
-    double val = _zdrmStatsIce.percentiles[ii];
-    char tag[1024];
-    sprintf(tag, "ZdrmInIcePerc%05.2f", percent);
-    xml += RadxXml::writeDouble(tag, 1, val);
-  }
-
-  xml += RadxXml::writeInt("ZdrInBraggNpts", 1, (int) _zdrStatsBragg.count);
-  xml += RadxXml::writeDouble("ZdrInBraggMean", 1, _zdrStatsBragg.mean);
-  for (size_t ii = 0; ii < _zdrStatsBragg.percentiles.size(); ii++) {
-    double percent = _params._zdr_bias_bragg_percentiles[ii];
-    double val = _zdrStatsBragg.percentiles[ii];
-    char tag[1024];
-    sprintf(tag, "ZdrInBraggPerc%05.2f", percent);
-    xml += RadxXml::writeDouble(tag, 1, val);
-  }
-
-  xml += RadxXml::writeInt("ZdrmInBraggNpts", 1, (int) _zdrmStatsBragg.count);
-  xml += RadxXml::writeDouble("ZdrmInBraggMean", 1, _zdrmStatsBragg.mean);
-  for (size_t ii = 0; ii < _zdrmStatsBragg.percentiles.size(); ii++) {
-    double percent = _params._zdr_bias_bragg_percentiles[ii];
-    double val = _zdrmStatsBragg.percentiles[ii];
-    char tag[1024];
-    sprintf(tag, "ZdrmInBraggPerc%05.2f", percent);
-    xml += RadxXml::writeDouble(tag, 1, val);
-  }
-
-  if (_params.read_site_temp_from_spdb) {
-    xml += RadxXml::writeDouble("TempSite", 1, _siteTempC);
-    RadxTime tempTime(_timeForSiteTemp);
-    xml += RadxXml::writeString("TempTime", 1, tempTime.getW3cStr());
-  }
-  
-  xml += RadxXml::writeEndTag("ZdrBias", 0);
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Writing ZDR bias results to SPDB, url: "
-         << _params.zdr_bias_spdb_output_url << endl;
-  }
-
-  DsSpdb spdb;
-  time_t validTime = vol.getStartTimeSecs();
-  spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
-  if (spdb.put(_params.zdr_bias_spdb_output_url,
-               SPDB_XML_ID, SPDB_XML_LABEL)) {
-    cerr << "ERROR - RadxQc::_computeZdrBias" << endl;
-    cerr << spdb.getErrStr() << endl;
-    return;
-  }
-  
-  if (_params.debug) {
-    cerr << "Wrote ZDR bias results to spdb, url: " 
-         << _params.zdr_bias_spdb_output_url << endl;
-  }
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=====================================" << endl;
-    cerr << xml;
-    cerr << "=====================================" << endl;
-  }
-
-}
-
-//////////////////////////////////
-// load stats for zdr results
-
-void RadxQc::_loadZdrResults(vector<double> &results,
-                                   ZdrStats &stats,
-                                   int nPercentiles,
-                                   double *percentiles)
-
-{
-
-  stats.clear();
-
-  for (size_t ii = 0; ii < results.size(); ii++) {
-    stats.sum += results[ii];
-    stats.count++;
-  }
-  stats.mean = stats.sum / stats.count;
-
-  // sort results vector
-  
-  sort(results.begin(), results.end());
-
-  for (int ii = 0; ii < nPercentiles; ii++) {
-    stats.percentiles.push_back(_computeZdrPerc(results, percentiles[ii]));
-  }
-
-}
-
-/////////////////////////////////////////////////////////////
-// compute a percentile value from the sorted bias data
-
-double RadxQc::_computeZdrPerc(const vector<double> &zdrmResults,
-                                     double percent)
-
-{
-
-  // get center of percentile location in the array
-
-  double nVals = zdrmResults.size();
-  int pos = (int) ((percent / 100.0) * nVals + 0.5);
-  if (pos < 0) {
-    pos = 0;
-  } else if (pos > (int) zdrmResults.size() - 1) {
-    pos = zdrmResults.size() - 1;
-  }
-
-  double percentileVal = zdrmResults[pos];
-
-  // compute mean for 1% on either side
-
-  int nMargin = (int) (nVals / 100.0 + 0.5);
-  int istart = pos - nMargin;
-  if (istart < 0) {
-    istart = 0;
-  }
-  int iend = pos + nMargin;
-  if (iend > (int) zdrmResults.size() - 1) {
-    iend = zdrmResults.size() - 1;
-  }
-
-  double sum = 0.0;
-  double count = 0.0;
-  for (int ii = istart; ii <= iend; ii++) {
-    sum += zdrmResults[ii];
-    count++;
-  }
-
-  if (count > 0) {
-    percentileVal = sum / count;
-  }
-
-  return percentileVal;
-
-}
-
-/////////////////////////////////////////////////////////////
-// write zdr bias results to SPDB in XML
-
-void RadxQc::_computeSelfConZBias(const RadxVol &vol)
-
-{
-
-  if (_selfConResults.size() < 1) {
-    return;
-  }
-
-  // compute the mean bias
-  
-  double volBias = NAN;
-  double sum = 0.0;
-  for (size_t ii = 0; ii < _selfConResults.size(); ii++) {
-    sum += _selfConResults[ii].dbzBias;
-  }
-  volBias = sum / (double) _selfConResults.size();
-
-  if (_params.self_consistency_debug) {
-    cerr << "Time, volBias: " << RadxTime::strm(vol.getStartTimeSecs()) << ", " << volBias << endl;
-  }
-  
-  // prepare to write results to SPDB
-  
-  if (!_params.self_consistency_write_results_to_spdb) {
-    return;
-  }
-
-  // add chunks
-
-  DsSpdb spdb;
-  RadxPath path(vol.getPathInUse());
-
-  for (size_t ii = 0; ii < _selfConResults.size(); ii++) {
-
-    const ComputeEngine::self_con_t &results = _selfConResults[ii];
-    
-    string xml;
-    xml += RadxXml::writeStartTag("SelfConsistency", 0);
-
-    xml += RadxXml::writeString("file", 1, path.getFile());
-    xml += RadxXml::writeBoolean("is_rhi", 1, vol.checkIsRhi());
-    xml += RadxXml::writeString("time", 1, results.rtime.asString(6));
-    xml += RadxXml::writeInt("nResultsVol", 1, _selfConResults.size());
-    xml += RadxXml::writeDouble("volBias", 1, volBias);
-    xml += RadxXml::writeDouble("elevation", 1, results.elevation);
-    xml += RadxXml::writeDouble("azimuth", 1, results.azimuth);
-    xml += RadxXml::writeInt("runStart", 1, results.runStart);
-    xml += RadxXml::writeInt("runEnd", 1, results.runEnd);
-    xml += RadxXml::writeDouble("rangeStart", 1, results.rangeStart);
-    xml += RadxXml::writeDouble("rangeEnd", 1, results.rangeEnd);
-    xml += RadxXml::writeDouble("dbzCorrection", 1, results.dbzCorrection);
-    xml += RadxXml::writeDouble("zdrCorrection", 1, results.zdrCorrection);
-    xml += RadxXml::writeDouble("accumObs", 1, results.accumObs);
-    xml += RadxXml::writeDouble("accumEst", 1, results.accumEst);
-    xml += RadxXml::writeDouble("dbzBias", 1, results.dbzBias);
-    xml += RadxXml::writeDouble("accumCorrelation", 1, results.accumCorrelation);
-
-    if (_params.read_site_temp_from_spdb) {
-      xml += RadxXml::writeDouble("TempSite", 1, _siteTempC);
-      RadxTime tempTime(_timeForSiteTemp);
-      xml += RadxXml::writeString("TempTime", 1, tempTime.getW3cStr());
-    }
-    
-    xml += RadxXml::writeEndTag("SelfConsistency", 0);
-
-    // set data types to force unique storage per run
-
-    int dataType = (int) (results.rtime.getSubSec() * 1.0e9); // from nano secs
-    int dataType2 = results.runStart;
-
-    spdb.addPutChunk(dataType,
-                     results.rtime.utime(),
-                     results.rtime.utime(),
-                     xml.size() + 1,
-                     xml.c_str(),
-                     dataType2);
-    
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "Writing self consistency results to SPDB, url: "
-           << _params.self_consistency_spdb_output_url << endl;
-      cerr << xml << endl;
-    }
-    
-  } // ii
-
-  // do the write
-
-  if (spdb.put(_params.self_consistency_spdb_output_url,
-               SPDB_XML_ID, SPDB_XML_LABEL)) {
-    cerr << "ERROR - RadxQc::_computeSelfConZBias" << endl;
-    cerr << spdb.getErrStr() << endl;
-    return;
-  }
-  
-  if (_params.debug) {
-    cerr << "Wrote self consistency results to spdb, url: " 
-         << _params.self_consistency_spdb_output_url << endl;
-  }
-
-}
-  

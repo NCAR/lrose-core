@@ -48,7 +48,6 @@
 #include <string>
 #include <deque>
 #include <radar/NoiseLocator.hh>
-#include <radar/KdpBringi.hh>
 #include <radar/TempProfile.hh>
 #include <Radx/RadxArray.hh>
 class RadxVol;
@@ -113,39 +112,10 @@ private:
 
   TempProfile _tempProfile;
 
-  // stats for ZDR bias
-
-  class ZdrStats {
-  public:
-    void clear() {
-      count = 0.0;
-      sum = 0.0;
-      mean = NAN;
-      percentiles.clear();
-    }
-    double sum;
-    double count;
-    double mean;
-    vector<double> percentiles;
-  };
-  ZdrStats _zdrmStatsIce;
-  ZdrStats _zdrmStatsBragg;
-  ZdrStats _zdrStatsIce;
-  ZdrStats _zdrStatsBragg;
-  
-  vector<double> _zdrInIceResults;
-  vector<double> _zdrInBraggResults;
-  vector<double> _zdrmInIceResults;
-  vector<double> _zdrmInBraggResults;
-
   // site temp
 
   double _siteTempC;
   time_t _timeForSiteTemp;
-
-  // self consistency
-
-  vector<ComputeEngine::self_con_t> _selfConResults;
 
   // threading
   
@@ -176,18 +146,6 @@ private:
   int _retrieveSiteTempFromSpdb(const RadxVol &vol,
                                 double &tempC,
                                 time_t &timeForTemp);
-
-  void _computeZdrBias(const RadxVol &vol);
-
-  void _loadZdrResults(vector<double> &results,
-                       ZdrStats &stats,
-                       int nPercentiles,
-                       double *percentiles);
-
-  double _computeZdrPerc(const vector<double> &zdrmResults,
-                         double percent);
-
-  void _computeSelfConZBias(const RadxVol &vol);
 
 };
 

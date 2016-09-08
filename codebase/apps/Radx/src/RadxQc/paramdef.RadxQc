@@ -212,25 +212,43 @@ paramdef double {
 } radar_altitude_meters;
 
 commentdef {
-  p_header = "SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the standard 4/3 earth radius model for refraction.";
-  p_help = "If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.";
-} override_standard_pseudo_earth_radius;
-
-paramdef double {
-  p_default = 1.33333333;
-  p_descr = "Ratio for computing the pseudo earth radius for beam height computations.";
-  p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
-} pseudo_earth_radius_ratio;
-
-commentdef {
   p_header = "INPUT FIELD INFORMATION";
   p_text = "Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. KDP is also required internally, but if KDP is not available it will be computed from PHIDP. LDR is optional, and is used for PID only.";
 }
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for DBZ.";
+  p_help = "Horizontally-polarized reflectivity factor.";
+} DBZ_field_name;
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "Field name for radial velocity.";
+  p_help = "This is used in quality checks.";
+} VEL_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is WIDTH data available?";
+  p_help = "If NCP is not available, this field is used for locating RLAN interference.";
+} WIDTH_available;
+
+paramdef string {
+  p_default = "WIDTH";
+  p_descr = "Field name for WIDTH.";
+} WIDTH_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is NCP data available?";
+  p_help = "This field is used for locating RLAN interference. If it is not available, use spectrum width instead.";
+} NCP_available;
+
+paramdef string {
+  p_default = "NCP";
+  p_descr = "Field name for NCP.";
+} NCP_field_name;
 
 paramdef boolean {
   p_default = TRUE;
@@ -250,103 +268,45 @@ paramdef double {
   p_help = "This is used for computing the SNR from the DBZ field. It is only used if SNR_available is FALSE. The SNR will be computed by range-correcting this value and using it as the noise value.";
 } noise_dbz_at_100km;
 
-paramdef string {
-  p_default = "DBZ";
-  p_descr = "Field name for DBZ.";
-  p_help = "Horizontally-polarized reflectivity factor.";
-} DBZ_field_name;
-
-paramdef string {
-  p_default = "VEL";
-  p_descr = "Field name for radial velocity.";
-  p_help = "This is used in quality checks.";
-} VEL_field_name;
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is ZDR data available?";
+} ZDR_available;
 
 paramdef string {
   p_default = "ZDR";
   p_descr = "Field name for ZDR.";
 } ZDR_field_name;
 
-paramdef string {
-  p_default = "ZDRM";
-  p_descr = "Field name for measured ZDR.";
-  p_help = "This is uncorrected (measured) ZDR, which is used in estimation of ZDR bias and in the self-consistency analysis (see below). If ZDRM is not available, set this to the ZDR field name.";
-} ZDRM_field_name;
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is PHIDP data available?";
+} PHIDP_available;
 
 paramdef string {
   p_default = "PHIDP";
   p_descr = "Field name for PHIDP.";
 } PHIDP_field_name;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is RHOHV data available?";
+} RHOHV_available;
+
 paramdef string {
   p_default = "RHOHV";
   p_descr = "Field name for RHOHV.";
 } RHOHV_field_name;
 
-paramdef string {
-  p_default = "RHOHV_NNC";
-  p_descr = "Field name for RHOHV without noise correction.";
-  p_help = "This field is a good quality discriminator since it combines RHOHV and SNR. It is used in estimation of ZDR bias. If it is not available, set this to the RHOHV field.";
-} RHOHV_NNC_field_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Is NCP data available?";
-  p_help = "This field is used for locating RLAN interference. If it is not available, use spectrum width instead.";
-} NCP_available;
-
-paramdef string {
-  p_default = "NCP";
-  p_descr = "Field name for NCP.";
-} NCP_field_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Is WIDTH data available?";
-  p_help = "If NCP is not available, this field is used for locating RLAN interference.";
-} WIDTH_available;
-
-paramdef string {
-  p_default = "WIDTH";
-  p_descr = "Field name for WIDTH.";
-} WIDTH_field_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Is KDP data available?";
-  p_help = "If not, KDP will be computed from PHIDP";
-} KDP_available;
-
-paramdef string {
-  p_default = "KDP";
-  p_descr = "Field name for KDP.";
-} KDP_field_name;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Is LDR data available?";
-} LDR_available;
-
-paramdef string {
-  p_default = "LDR";
-  p_descr = "Field name for LDR.";
-} LDR_field_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Is cross-to-cross correlation field available?";
-} RHO_VXHX_available;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Field name for cross-to-cross correlation.";
-  p_help = "This is used as a quality-control field for some of the algorithms. Typically it is high in weather and clutter, and low in non-weather echoes.";
-} RHO_VXHX_field_name;
-
 commentdef {
   p_header = "COMPUTING KDP";
   p_text = "Parameters for computing KDP. KDP will be computed if KDP_available is FALSE.";
 }
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Compute KDP from PHIDP";
+} compute_KDP;
 
 typedef enum {
   FIR_LEN_125, FIR_LEN_60, FIR_LEN_40, FIR_LEN_30, FIR_LEN_20, FIR_LEN_10
@@ -457,53 +417,6 @@ paramdef string {
   p_descr = "Directory for KDP ray files.";
 } KDP_ray_files_dir;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to compute KDP using the BRINGI method.";
-} compute_kdp_bringi;
-
-paramdef enum fir_filter_len_t {
-  p_default = FIR_LEN_10;
-  p_descr = "Filter length for the FIR filter for PHIDP (gates)";
-  p_help = "When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.";
-} KDP_BRINGI_fir_filter_len;
-
-paramdef double {
-  p_default = 4.0;
-  p_descr = "Sets the threshold for difference of phidp.";
-  p_help = "This is used to test the difference between the unfolded phidp value and the filtered phidp value. If the difference exceeds this value, we use the original value instead of the filtered value. Applies to computation of KDP only";
-} KDP_BRINGI_phidp_difference_threshold;
-
-paramdef double {
-  p_default = 12.0;
-  p_descr = "Sets the threshold for the standard deviation of phidp in range.";
-  p_help = "The sdev of phidp is a good test for weather. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
-} KDP_BRINGI_phidp_sdev_threshold;
-
-paramdef double {
-  p_default = 1.8;
-  p_descr = "Sets the threshold for the standard deviation of zdr in range.";
-  p_help = "The sdev of zdr is a good test for weather. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
-} KDP_BRINGI_zdr_sdev_threshold;
-
-paramdef double {
-  p_default = 0.75;
-  p_descr = "Sets the threshold for rhohv.";
-  p_help = "rhohv is a good test for weather. If rhohv is greater than this value, it is assumed we are in weather. Applies to computation of KDP only.";
-} KDP_BRINGI_rhohv_threshold;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to filter PHIDP with median filter.";
-  p_help = "The filter is applied in range.";
-} KDP_BRINGI_apply_median_filter_to_PHIDP;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Length of median filter for PHIDP - gates.";
-  p_help = "See 'appply_median_filter_to_PHIDP'";
-} KDP_BRINGI_median_filter_len;
-
 commentdef {
   p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";
 }
@@ -560,106 +473,7 @@ paramdef boolean {
 } locate_rlan_interference;
 
 commentdef {
-  p_header = "COMPUTING PID - HYDROMETEOR PARTICLE ID";
-}
-
-paramdef string {
-  p_descr = "File path for fuzzy logic thresholds for PID.";
-  p_help = "This file contains the thresholds and weights for computing particle ID.";
-  p_default = "./s_band_pid_input_steraotables27.input";
-} pid_thresholds_file_path;
-
-paramdef double {
-  p_default = 3.0;
-  p_descr = "Minimum SNR for valid PID.";
-  p_help = "If the SNR at a gate is below this, the PID is censored.";
-} PID_snr_threshold;
-
-paramdef double {
-  p_default = 9999.0;
-  p_descr = "Maximum SNR for valid PID.";
-  p_help = "If the SNR at a gate is above this value, the PID will be set to SATURATED_SNR = 18.";
-} PID_snr_upper_threshold;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Minimum valid interest value for identifying a particle.";
-  p_help = "If the computed interest value is below this, the PID is set to missing.";
-} PID_min_valid_interest;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to filter DBZ with median filter.";
-  p_help = "The filter is computed in range.";
-} PID_apply_median_filter_to_DBZ;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Length of median filter for DBZ - gates.";
-  p_help = "See 'PID_apply_median_filter_to_DBZ'";
-} PID_DBZ_median_filter_len;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to filter ZDR with median filter.";
-  p_help = "The filter is computed in range.";
-} PID_apply_median_filter_to_ZDR;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Length of median filter for ZDR - gates.";
-  p_help = "See 'PID_apply_median_filter_to_ZDR'";
-} PID_ZDR_median_filter_len;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to filter RHOHV with median filter.";
-  p_help = "The filter is computed in range.";
-} PID_apply_median_filter_to_RHOHV;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Length of median filter for RHOHV - gates.";
-  p_help = "See 'PID_apply_median_filter_to_RHOHV'";
-} PID_RHOHV_median_filter_len;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to filter LDR with median filter.";
-  p_help = "The filter is computed in range.";
-} PID_apply_median_filter_to_LDR;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Length of median filter for LDR - gates.";
-  p_help = "See 'PID_apply_median_filter_to_LDR'";
-} PID_LDR_median_filter_len;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "For PID, option to replace missing LDR values with a specified value.";
-  p_help = "When the SNR gets low, LDR is unreliable since there is not sufficient dynamic range to provide an accurate cross-polar power measurement. In these cases, it makes sense to replace LDR with a neutral value, such as 0.0, so that we do not reject gates at which valuable data is available.";
-} PID_replace_missing_LDR;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Value to which LDR will be set if missing.";
-} PID_LDR_replacement_value;
-
-paramdef int {
-  p_default = 9;
-  p_descr = "Number of gates for computing standard deviations.";
-  p_help = "This applies to computing the standard deviation of zdr and phidp.";
-} PID_ngates_for_sdev;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to output the individual interest fields.";
-  p_help = "If TRUE, the interest field for each particle type will be written to the output FMQ, in addition to the list in 'output_fields'.";
-} PID_output_particle_interest_fields;
-
-commentdef {
-  p_header = "SOUNDING INPUT FOR PID temperatures - OPTIONAL";
+  p_header = "SOUNDING INPUT FOR temperatures - OPTIONAL";
 }
 
 paramdef boolean {
@@ -750,788 +564,6 @@ paramdef int {
 } PID_median_filter_len;
 
 commentdef {
-  p_header = "COMPUTING PRECIP RATE";
-}
-
-paramdef double {
-  p_default = 3.0;
-  p_descr = "Minimum SNR for valid PRECIP.";
-  p_help = "If the SNR at a gate is below this, the PRECIP is censored.";
-} PRECIP_snr_threshold;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to filter DBZ with median filter.";
-  p_help = "The filter is computed in rang..";
-} PRECIP_apply_median_filter_to_DBZ;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Length of median filter for DBZ - gates.";
-  p_help = "See 'PRECIP_apply_median_filter_to_DBZ'";
-} PRECIP_DBZ_median_filter_len;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to filter ZDR with median filter.";
-  p_help = "The filter is computed in range.";
-} PRECIP_apply_median_filter_to_ZDR;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Length of median filter for ZDR - gates.";
-  p_help = "See 'PID_PRECIP_apply_median_filter_to_ZDR'";
-} PRECIP_ZDR_median_filter_len;
-
-paramdef double {
-  p_default = 0.1;
-  p_descr = "Minimum valid precip rate (mm/hr).";
-  p_help = "If any computed rate is less than this value, it is set to 0.";
-} PRECIP_min_valid_rate;
-
-paramdef double {
-  p_default = 250.0;
-  p_descr = "Maximum valid precip rate (mm/hr).";
-  p_help = "If any computed rate exceeds this value, it is set to this max.";
-} PRECIP_max_valid_rate;
-
-paramdef double {
-  p_default = 53.0;
-  p_descr = "Maximum valid dbz for computing precip rate.";
-  p_help = "If any dbz exceeds this value, it is set to this max before use. This helps mitigate large DBZ values in hail.";
-} PRECIP_max_valid_dbz;
-
-paramdef double {
-  p_default = -10.0;
-  p_max = 0.0;
-  p_descr = "Correction to be applied in brightband before computing precip rate.";
-  p_help = "This should be negative.";
-} PRECIP_brightband_dbz_correction;
-
-commentdef {
-  p_header = "PRECIP COEFFICIENTS";
-  p_text = "Coefficients for the precip equations.";
-}
-
-commentdef {
-  p_header = "PRECIP_RATE_ZH";
-  p_text = "RATE_ZH = zh_aa * (ZH ** zh_bb)";
-}
-
-paramdef double {
-  p_default = 0.017;
-  p_descr = "Coefficient for PRECIP_RATE_ZH.";
-} zh_aa;
-
-paramdef double {
-  p_default = 0.714;
-  p_descr = "Exponent for PRECIP_RATE_ZH.";
-} zh_bb;
-
-commentdef {
-  p_header = "PRECIP_RATE_SNOW_ZH";
-  p_text = "RATE_SNOW_ZH = zh_aa_snow * (ZH ** zh_bb_snow)";
-}
-
-paramdef double {
-  p_default = 0.0365;
-  p_descr = "Coefficient for PRECIP_RATE_ZH in SNOW.";
-} zh_aa_snow;
-
-paramdef double {
-  p_default = 0.625;
-  p_descr = "Exponent for PRECIP_RATE_ZH in SNOW.";
-} zh_bb_snow;
-
-commentdef {
-  p_header = "PRECIP_RATE_Z_ZDR";
-  p_text = "RATE_Z_ZDR = zzdr_aa * (ZH ** zzdr_bb) * (ZDR ** zzdr_cc)";
-}
-
-paramdef double {
-  p_default = 0.00684;
-  p_descr = "Coefficient for PRECIP_RATE_ZZDR.";
-} zzdr_aa;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "ZH exponent for PRECIP_RATE_ZZDR.";
-} zzdr_bb;
-
-paramdef double {
-  p_default = -4.86;
-  p_descr = "ZDR exponent for PRECIP_RATE_ZZDR.";
-} zzdr_cc;
-
-commentdef {
-  p_header = "PRECIP_RATE_KDP";
-  p_text = "RATE_KDP = sign(KDP) * kdp_aa * (|KDP| ** kdp_bb)";
-}
-
-paramdef double {
-  p_default = 40.6;
-  p_descr = "Coefficient for PRECIP_RATE_KDP.";
-} kdp_aa;
-
-paramdef double {
-  p_default = 0.866;
-  p_descr = "Exponent for PRECIP_RATE_KDP.";
-} kdp_bb;
-
-commentdef {
-  p_header = "PRECIP_RATE_KDP_ZDR";
-  p_text = "RATE_KDP_ZDR = sign(KDP) * kdpzdr_aa * (|KDP| ** kdpzdr_bb) * (ZDR ** kdpzdr_cc)";
-}
-
-paramdef double {
-  p_default = 136;
-  p_descr = "Coefficient for PRECIP_RATE_KDP_ZDR.";
-} kdpzdr_aa;
-
-paramdef double {
-  p_default = 0.968;
-  p_descr = "KDP exponent for PRECIP_RATE_KDP_ZDR.";
-} kdpzdr_bb;
-
-paramdef double {
-  p_default = -2.86;
-  p_descr = "ZDR exponent for PRECIP_RATE_KDP_ZDR.";
-} kdpzdr_cc;
-
-commentdef {
-  p_header = "PRECIP RATE BASED ON PID";
-  p_text =
-    "The PID-based rate is a wieghted-average of the rates for the various precip types.\n"
-    "The weights are derived from the interest values for each PID particle type.\n"
-    "\t  RATE_LIGHT_RAIN = RATE_ZH\n"
-    "\t  RATE_MOD_RAIN = RATE_Z_ZDR\n"
-    "\t  RATE_SNOW = RATE_ZH_SNOW\n"
-    "\t  RATE_MIXED = RATE_ZH_MIXED\n\n"
-    "\t  if (kdp > threshold && RATE_KDP is valid)\n"
-    "\t    RATE_HVY_RAIN = RATE_KDP\n"
-    "\t    RATE_HAIL = RATE_KDP\n"
-    "\t  else\n"
-    "\t    RATE_HVY_RAIN = RATE_ZZDR\n"
-    "\t    RATE_HAIL = RATE_ZZDR\n\n"
-    "\t  RATE = 0\n"
-    "\t  RATE += RATE_LIGHT_RAIN * WT_LIGHT_RAIN\n"
-    "\t  RATE += RATE_MOD_RAIN * WT_MOD_RAIN\n"
-    "\t  RATE += RATE_HVY_RAIN * WT_HVY_RAIN\n"
-    "\t  RATE += RATE_SNOW * WT_SNOW\n"
-    "\t  RATE += RATE_MIXED * WT_MIXED\n"
-    "\t  RATE += RATE_HAIL * WT_HAIL\n";
-}
-paramdef double {
-  p_default = 0.30;
-  p_descr = "Units are deg/km.";
-  p_help = "See notes above for details on use.";
-} pid_rate_kdp_threshold;
-
-commentdef {
-  p_header = "PRECIP_RATE_HYBRID";
-  p_text = "The HYBRID rate is based on the PID and the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Hybrid et al, JTech, Vol 26, 2009, 2107 - 2122.\n\n"
-    "\t  if hail or heavy rain\n"
-    "\t    if KDP > threhsold and rateKDP is valid\n"
-    "\t      use RATE_KDP\n"
-    "\t    else\n"
-    "\t      use RATE_KDP\n"
-    "\t  else if snow/ice\n"
-    "\t    use RATE_ZH_SNOW\n"
-    "\t  else if mixed precip\n"
-    "\t    use RATE_ZH_MIXED\n"
-    "\t  else if rain or SLD\n"
-    "\t    if dBZ > theshold and KDP > threhsold\n"
-    "\t      if rateKDP is valid\n"
-    "\t        use RATE_KDP\n"
-    "\t      else\n"
-    "\t        use RATE_ZZDR\n"
-    "\t    else\n"
-    "\t      if ZDR >= threshold\n"
-    "\t        use RATE_Z\n"
-    "\t      else\n"
-    "\t        use RATE_ZZDR\n";
-}
-
-paramdef double {
-  p_default = 40;
-  p_descr = "Units are dBZ.";
-  p_help = "See notes above for details on use.";
-} hybrid_dbz_threshold;
-
-paramdef double {
-  p_default = 0.30;
-  p_descr = "Units are deg/km.";
-  p_help = "See notes above for details on use.";
-} hybrid_kdp_threshold;
-
-paramdef double {
-  p_default = 0.50;
-  p_descr = "Units are dB.";
-  p_help = "See notes above for details on use.";
-} hybrid_zdr_threshold;
-
-commentdef {
-  p_header = "PRECIP_RATE_HIDRO";
-  p_text = "The HIDRO rate is based on the CSU-HIDRO algorithm. See 'A New Dual-Polarization Radar Rainfall Algorithm: Application to Colorado Precipition Events', Cifelli et al, JTech, Vol 28, 2011, 352 - 364. NOTE - this algorithm is generally only applied to liquid and mixed-phase precip, so you need to run PID for this to work as intended.\n"
-    "\t  For ice:\n"
-    "\t    RATE_HIDRO = MISSING\n"
-    "\t  For hail or mixed:\n"
-    "\t    if KDP >= threshold and rateKdp is valid\n"
-    "\t      RATE_HIDRO = RATE_KDP\n"
-    "\t    else\n"
-    "\t      RATE_HIDRO = RATE_ZR\n"
-    "\t  For rain or sld:\n"
-    "\t    if KDP >= threshold and DBZ >= threhold\n"
-    "\t      if ZDR >= threshold and rateKdpZdr is valid\n"
-    "\t        RATE_HIDRO = RATE_KDPZDR\n"
-    "\t      else if rateKdp is valid\n"
-    "\t        RATE_HIDRO = RATE_KDP\n"
-    "\t      else\n"
-    "\t        RATE_HIDRO = RATE_ZZDR\n"
-    "\t    else\n"
-    "\t      if ZDR >= threshold\n"
-    "\t        RATE_HIDRO = RATE_Z\n"
-    "\t      else\n"
-    "\t        RATE_HIDRO = RATE_ZZDR\n";
-}
-
-paramdef double {
-  p_default = 38;
-  p_descr = "Units are dBZ.";
-  p_help = "See notes above for details on use.";
-} hidro_dbz_threshold;
-
-paramdef double {
-  p_default = 0.3;
-  p_descr = "Units are deg/km.";
-  p_help = "See notes above for details on use.";
-} hidro_kdp_threshold;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Units are dB.";
-  p_help = "See notes above for details on use.";
-} hidro_zdr_threshold;
-
-commentdef {
-  p_header = "PRECIP_RATE_BRINGI";
-  p_text = "The BRINGI rate is based on the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Bringi et al, JTech, Vol 26, 2009, 2107 - 2122.\n"
-    "\t  if HAIL or RAIN/HAIL mixture and rateKdp is valid\n"
-    "\t    RATE_BRINGI = RATE_KDP\n"
-    "\t  else if dBZ > theshold and KDP > threhsold and rateKdp is valid\n"
-    "\t    RATE_BRINGI = RATE_KDP\n"
-    "\t  else\n"
-    "\t    if ZDR >= threshold\n"
-    "\t      RATE_BRINGI = RATE_ZZDR\n"
-    "\t    else\n"
-    "\t      RATE_BRINGI = RATE_Z\n";
-}
-
-paramdef double {
-  p_default = 40;
-  p_descr = "Units are dBZ.";
-  p_help = "See notes above for details on use.";
-} bringi_dbz_threshold;
-
-paramdef double {
-  p_default = 0.15;
-  p_descr = "Units are deg/km.";
-  p_help = "See notes above for details on use.";
-} bringi_kdp_threshold;
-
-paramdef double {
-  p_default = 0.1;
-  p_descr = "Units are dB.";
-  p_help = "See notes above for details on use.";
-} bringi_zdr_threshold;
-
-commentdef {
-  p_header = "ESTIMATING ZDR BIAS";
-  p_text = "ZDR bias can be estimated using data from regions with irregular ice and bragg scattering, with various constraints applied. See below.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to estimate ZDR bias from the irregular ice phase regions.";
-  p_help = "If true, we will try to estimate ZDR bias from returns in regions with irregular ice and snow.";
-} estimate_zdr_bias_in_ice;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to estimate ZDR bias from the bragg regions.";
-  p_help = "If true, we will try to estimate ZDR bias from bragg scattering returns. Generally this is only relevant at S band.";
-} estimate_zdr_bias_in_bragg;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Maximum ZDR for estimating ZDR bias.";
-  p_help = "We set this to a value somewhat greater than the estimated max ZDR calibration error. If we get values outside this range we reject those gates.";
-} zdr_bias_max_abs_zdr;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Maximum ZDRM for estimating ZDR bias.";
-  p_help = "We set this to a value somewhat greater than the estimated max ZDR calibration error. If we get values outside this range we reject those gates.";
-} zdr_bias_max_abs_zdrm;
-
-paramdef double {
-  p_default = 0.98;
-  p_descr = "Minimim RHOHV for estimating ZDR bias.";
-  p_help = "If RHOHV_NNC is avaiable, it is used. If not, the noise-corrected RHOHV is used.";
-} zdr_bias_min_rhohv_nnc;
-
-paramdef double {
-  p_default = 1.5;
-  p_descr = "Minimum absolute velocity for estimating ZDR bias.";
-  p_help = "Setting a minimum vel helps to reduce the influence of side-lobe clutter, especially in Bragg.";
-} zdr_bias_min_abs_vel;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Max KDP for computing ZDR bias.";
-  p_help = "KDP must be well behaved, and not high, in regions where we compute ZDR bias.";
-} zdr_bias_max_abs_kdp;
-
-paramdef double {
-  p_default = 10.0;
-  p_descr = "Maximum PHIDP accumulation along the ray (deg).";
-  p_help = "Significant phase shift can lead to non-zero ZDR values at more distant gates. It is good to screen out these gates.";
-} zdr_bias_max_phidp_accum;
-
-commentdef {
-  p_header = "ZDR BIAS IN ICE";
-}
-
-paramdef int {
-  p_default = { 10, 13 };
-  p_descr = "List of PID types in which ZDR should be close to 0 dB in ice.";
-  p_help = "Generally this is set to 10 = irregular ice, and 13 = snow.";
-} zdr_bias_ice_pid_types[];
-
-paramdef double {
-  p_default = 5.0;
-  p_descr = "Minimum range for estimating ZDR bias in ice.";
-} zdr_bias_ice_min_range_km;
-
-paramdef double {
-  p_default = 120.0;
-  p_descr = "Maximum range for estimating ZDR bias in ice.";
-} zdr_bias_ice_max_range_km;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Minimum DBZ for estimating ZDR bias in ice.";
-} zdr_bias_ice_min_dbz;
-
-paramdef double {
-  p_default = 30.0;
-  p_descr = "Maximum DBZ for estimating ZDR bias in ice.";
-} zdr_bias_ice_max_dbz;
-
-paramdef double {
-  p_default = 10.0;
-  p_descr = "Minimum SNR for estimating ZDR bias in ice (dB).";
-} zdr_bias_ice_min_snr;
-
-paramdef double {
-  p_default = 50.0;
-  p_descr = "Maximum SNR for estimating ZDR bias in ice (dB).";
-} zdr_bias_ice_max_snr;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Minimum RHO VXHX estimating ZDR bias in ice (dB).";
-  p_descr = "Only applies if RHO_VXHX_available is TRUE.";
-} zdr_bias_ice_min_rho_vxhx;
-
-paramdef double {
-  p_default = 0.2;
-  p_descr = "Maximum RHO VXHX estimating ZDR bias in ice (dB).";
-  p_descr = "Only applies if RHO_VXHX_available is TRUE.";
-} zdr_bias_ice_max_rho_vxhx;
-
-paramdef double {
-  p_default = -50.0;
-  p_descr = "Minimum temperature for computing ZDR bias in ice (deg C).";
-  p_help = "We want to ensure that we are in the normal ice phase.";
-} zdr_bias_ice_min_temp_c;
-
-paramdef double {
-  p_default = -5.0;
-  p_descr = "Maximum temperature for computing ZDR bias in ice (deg C).";
-  p_help = "We want to ensure that we are well within the ice phase.";
-} zdr_bias_ice_max_temp_c;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Min elevation angle for ZDR bias in ice (deg).";
-  p_help = "Only elevation angles at or above this will be considered.";
-} zdr_bias_ice_min_elevation_deg;
-
-paramdef double {
-  p_default = 20.0;
-  p_descr = "Max elevation angle for ZDR bias in ice (deg).";
-  p_help = "Only elevation angles at or below this will be considered.";
-} zdr_bias_ice_max_elevation_deg;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Minimum consectutive gates with the correct conditions for ZDR bias in ice.";
-  p_help = "We want to ensure that we are solidly in a region suitable for estimating ZDR bias. We eliminate noisy data by requiring that the conditions persist over a certain number of gates.";
-} zdr_bias_ice_min_gate_run;
-
-paramdef int {
-  p_default = 1000;
-  p_descr = "Minimum number of points in a volume for valid zdr stats in ice.";
-  p_help = "For the results to be valid, we need a certain number of valid results for computing the statistics.";
-} zdr_bias_ice_min_npoints_valid;
-
-paramdef double {
-  p_default = { 17.5, 20, 22.5, 25, 27.5, 30 };
-  p_descr = "Percentiles to write to SPDB output.";
-} zdr_bias_ice_percentiles[];
-
-commentdef {
-  p_header = "ZDR BIAS IN BRAGG";
-}
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to check PID in identifying bragg.";
-  p_help = "If true, we check that the PID at a gate is one of those listed in the array 'zdr_bias_bragg_pid_types'.";
-} zdr_bias_bragg_check_pid;
-
-paramdef int {
-  p_default = { 1 };
-  p_descr = "List of PID types in which ZDR should be close to 0 dB in Bragg.";
-  p_help = "Generally this is set to 1 = cloud drops.";
-} zdr_bias_bragg_pid_types[];
-
-paramdef double {
-  p_default = 4.0;
-  p_descr = "Minimum range for estimating ZDR bias in Bragg.";
-} zdr_bias_bragg_min_range_km;
-
-paramdef double {
-  p_default = 40.0;
-  p_descr = "Maximum range for estimating ZDR bias in Bragg.";
-} zdr_bias_bragg_max_range_km;
-
-paramdef double {
-  p_default = -40.0;
-  p_descr = "Minimum DBZ for estimating ZDR bias in Bragg.";
-} zdr_bias_bragg_min_dbz;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Maximum DBZ for estimating ZDR bias in Bragg.";
-} zdr_bias_bragg_max_dbz;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Minimum SNR for estimating ZDR bias in Bragg (dB).";
-} zdr_bias_bragg_min_snr;
-
-paramdef double {
-  p_default = 50.0;
-  p_descr = "Maximum SNR for estimating ZDR bias in Bragg (dB).";
-} zdr_bias_bragg_max_snr;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Minimum RHO VXHX estimating ZDR bias in bragg (dB).";
-  p_descr = "Only applies if RHO_VXHX_available is TRUE.";
-} zdr_bias_bragg_min_rho_vxhx;
-
-paramdef double {
-  p_default = 0.2;
-  p_descr = "Maximum RHO VXHX estimating ZDR bias in bragg (dB).";
-  p_descr = "Only applies if RHO_VXHX_available is TRUE.";
-} zdr_bias_bragg_max_rho_vxhx;
-
-paramdef double {
-  p_default = -30.0;
-  p_descr = "Minimum temperature for computing ZDR bias (deg C).";
-  p_help = "We want to ensure that we are in the normal bragg region.";
-} zdr_bias_bragg_min_temp_c;
-
-paramdef double {
-  p_default = 20.0;
-  p_descr = "Maximum temperature for computing ZDR bias (deg C).";
-  p_help = "We want to ensure that we are well within the bragg region.";
-} zdr_bias_bragg_max_temp_c;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Min elevation angle for ZDR bias in ice (deg).";
-  p_help = "Only elevation angles at or above this will be considered.";
-} zdr_bias_bragg_min_elevation_deg;
-
-paramdef double {
-  p_default = 30.0;
-  p_descr = "Max elevation angle for ZDR bias in ice (deg).";
-  p_help = "Only elevation angles at or below this will be considered.";
-} zdr_bias_bragg_max_elevation_deg;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "Minimum consectutive gates with the correct conditions for ZDR bias in Bragg.";
-  p_help = "We want to ensure that we are solidly in a region suitable for estimating ZDR bias. We eliminate noisy data by requiring that the conditions persist over a certain number of gates.";
-} zdr_bias_bragg_min_gate_run;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Minimum number of points in a volume for valid zdr stats in bragg.";
-  p_help = "For the results to be valid, we need a certain number of valid results for computing the statistics.";
-} zdr_bias_bragg_min_npoints_valid;
-
-paramdef double {
-  p_default = { 25, 27.5, 30, 32, 33, 35, 40 };
-  p_descr = "Percentiles to write to SPDB output.";
-} zdr_bias_bragg_percentiles[];
-
-commentdef {
-  p_header = "WRITING ZDR BIAS RESULTS";
-}
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to write out ZDR results to SPDB.";
-  p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
-} zdr_bias_write_results_to_spdb;
-
-paramdef string {
-  p_default = "/tmp/spdb/zdr_bias";
-  p_descr = "URL for writing zdr bias results to SPDB XML.";
-  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
-} zdr_bias_spdb_output_url;
-
-commentdef {
-  p_header = "ESTIMATING Z BIAS USING SELF-CONSISTENCY";
-  p_text = "The Z bias can be estimated using data from the rain region, i.e. below the freezing level. We use the self-consistency technique to compute z bias based on phidp phase shift in rain. See Vivekanandan, J., G. Zhang, S. M. Ellis, D. Rajopadhyaya, and S. K. Avery, Radar reflectivity calibration using differential propagation phase measurement, Radio Sci., 38(3), 8049, doi:10.1029/2002RS002676, 2003. NOTE: defaults are for S-band.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to estimate Z bias from self-consistency in the rain region.";
-  p_help = "If true, we will try to estimate Z bias using the self-consistency technique.";
-} estimate_z_bias_using_self_consistency;
-
-paramdef int {
-  p_default = { 1, 2, 3, 4, 5 };
-  p_descr = "List of PID types in which ZDR should be close to 0 dB.";
-  p_help = "Generally this is set to 2 = drizzle, 3 = light rain, 4 = moderate rain and 5 = heavy rain.";
-} self_consistency_pid_types[];
-
-paramdef double {
-  p_default = 10.0;
-  p_descr = "Minimum SNR for valid self_consistency analysis (dB).";
-  p_descr = "Ensure we have good signal.";
-} self_consistency_min_snr;
-
-paramdef double {
-  p_default = 75.0;
-  p_descr = "Maximum SNR for valid self_consistency analysis (dB).";
-  p_help = "Ensure we are not in a saturated environment.";
-} self_consistency_max_snr;
-
-paramdef double {
-  p_default = 25.0;
-  p_descr = "Minimum DBZ for valid self_consistency analysis.";
-} self_consistency_min_dbz;
-
-paramdef double {
-  p_default = 60.0;
-  p_descr = "Maximum DBZ for valid self_consistency analysis.";
-} self_consistency_max_dbz;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Minimum ZDR for valid self_consistency analysis.";
-} self_consistency_min_zdr;
-
-paramdef double {
-  p_default = 3.0;
-  p_descr = "Maximum ZDR for valid self_consistency analysis.";
-} self_consistency_max_zdr;
-
-paramdef double {
-  p_default = 0.98;
-  p_descr = "Minimum RHOHV for valid self_consistency analysis.";
-} self_consistency_min_rhohv;
-
-paramdef double {
-  p_default = -0.1;
-  p_descr = "Minimum KDP for valid self_consistency analysis.";
-} self_consistency_min_kdp;
-
-paramdef double {
-  p_default = 35;
-  p_descr = "Maximum DBZ at the limits of the valid runs.";
-  p_descr = "We do not want heavy rain at the limits of the analysis. Keeping DBZ below this threshold will take care of this problem. Once the runs are identified, we trim the ends until the DBZ falls below the threshold.";
-} self_consistency_max_dbz_at_run_limits;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Maximum KDP at the limits of the valid runs.";
-  p_descr = "We do not want PHIDP to be changing significantly at the limits of the analysis. Keeping KDP below this threshold will take care of this problem. Once the runs are identified, we trim the ends until the KDP falls below the threshold.";
-} self_consistency_max_kdp_at_run_limits;
-
-paramdef double {
-  p_default = 0.45;
-  p_descr = "Min elevation angle for self-consistency analysis.";
-  p_help = "We want to avoid contamination with ground echo etc.";
-} self_consistency_min_elevation_deg;
-
-paramdef double {
-  p_default = 3;
-  p_descr = "Minimum temperature for self-consistency gates (deg C).";
-  p_help = "We want to ensure that we are in the rain phase.";
-} self_consistency_min_temp_c;
-
-paramdef double {
-  p_default = 100.0;
-  p_descr = "Maximum range for self-consistency analysis.";
-  p_help = "Sometimes data at longer ranges can have problems, such as with partial beam filling.";
-} self_consistency_max_range_km;
-
-paramdef double {
-  p_default = 2.5;
-  p_descr = "Minimum run distance without any gaps (km).";
-  p_help = "We want to ensure that we are solidly in a region suitable for self_consistency analysis. We eliminate noisy data by by requiring that the correct conditions persist over a given minimum distance. This minimum run distance cannot have any gaps.";
-} self_consistency_min_no_gap_distance_km;
-
-paramdef double {
-  p_default = 20.0;
-  p_descr = "Minimum combined distance for analysis (km).";
-  p_help = "We combine the initial no-gap runs into a longer analysis run, provided there is only a small gap between them. We perform the analysis over this combined run. See also 'self_consistency_max_gate_gap'";
-} self_consistency_min_combined_distance_km;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Maximum length of gap between no-gap runs (gates).";
-  p_help = "This is the longest acceptable gap when we combine the no-gap runs into our analysis run. Gaps longer than this indicate that the data is not of high enough quality for the analysis.";
-} self_consistency_max_gate_gap;
-
-paramdef double {
-  p_default = 20.0;
-  p_descr = "Minimum PHIDP accumulation along the ray (deg).";
-  p_help = "We need significant phase shift for this method.";
-} self_consistency_min_phidp_accum;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Correction to be applied to DBZ.";
-  p_help = "This allows us to test the sensitivity of the method to DBZ errors.";
-} self_consistency_dbz_correction;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Correction to be applied to ZDRM (dB).";
-  p_help = "We need a reasonably accurate ZDR value for the self-consistency method to work properly. This correction is applied to the ZDRM field before using it for self-consistency.";
-} self_consistency_zdrm_correction;
-
-paramdef double {
-  p_default = 10.0;
-  p_descr = "Max phase shift on back-scatter long the ray (deg).";
-  p_help = "We are looking for phase shift due to propagation rather than from backscatter.";
-} self_consistency_max_phase_shift_on_backscatter;
-
-typedef enum {
-  SELF_CON_ZDR_POWER_LAW_METHOD,
-  SELF_CON_ZDR_POLYNOMIAL_METHOD
-} self_con_method_t;
-
-paramdef enum self_con_method_t {
-  p_default = SELF_CON_ZDR_POWER_LAW_METHOD;
-  p_descr = "Method used to estimate KDP in self consistency method.";
-  p_help = "The ZDR power law method was proposed by Vivekanandan, J., G. Zhang, S. M. Ellis, D. Rajopadhyaya, and S. K. Avery, Radar reflectivity calibration using differential propagation phase measurement, Radio Sci., 38(3), 8049, doi:10.1029/2002RS002676, 2003. The Polynomial method was proposed by Qing Cao, Michael Knight, Alexander Ryzhkov and Pengfei Zhang, 2016: A Novel Physical Consistency-Based Calibration Tool for Polarimetric Weather Radar. Paper 691, AMS Annual Conference, New Orleans, 2016.";
-} self_consisteny_method;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Z exponent for estimating KDP from Z and ZDR.";
-  p_help = "SELF_CON_ZDR_POWER_LAW_METHOD. See equation 16: Vivek et al.";
-} self_consistency_kdp_z_expon;
-
-paramdef double {
-  p_default = -2.05;
-  p_descr = "ZDR exponent for estimating KDP from Z and ZDR.";
-  p_help = "SELF_CON_ZDR_POWER_LAW_METHOD. See equation 16: Vivek et al.";
-} self_consistency_kdp_zdr_expon;
-
-paramdef double {
-  p_default = 3.32e-5;
-  p_descr = "Coefficient for estimating KDP from Z and ZDR.";
-  p_help = "SELF_CON_ZDR_POWER_LAW_METHOD. See equation 16: Vivek et al.";
-} self_consistency_kdp_coefficient;
-
-paramdef double {
-  p_default = 0.02;
-  p_descr = "Coefficient for estimating Z attenutation from KDP.";
-  p_help = "SELF_CON_ZDR_POWER_LAW_METHOD. See equation 16: Vivek et al.";
-} self_consistency_z_atten_coefficient;
-
-paramdef double {
-  p_default = 0.0038;
-  p_descr = "Coefficient for estimating ZDR attenutation from KDP.";
-  p_help = "SELF_CON_ZDR_POWER_LAW_METHOD. See equation 16: Vivek et al.";
-} self_consistency_zdr_atten_coefficient;
-
-paramdef double {
-  p_default = 3.19;
-  p_descr = "Polynomial coefficent a0. C-band: 6.7; S-band: 3.19";
-  p_help = "SELF_CON_ZDR_POLYNOMIAL_METHOD. See equation 4: Qing et al.";
-} self_consistency_polynomial_a0;
-
-paramdef double {
-  p_default = -2.16;
-  p_descr = "Polynomial coefficent a1. C-band: -4.42; S-band: -2.16";
-  p_help = "SELF_CON_ZDR_POLYNOMIAL_METHOD. See equation 4: Qing et al.";
-} self_consistency_polynomial_a1;
-
-paramdef double {
-  p_default = 0.795;
-  p_descr = "Polynomial coefficent a2. C-band: 2.16; S-band: 0.795";
-  p_help = "SELF_CON_ZDR_POLYNOMIAL_METHOD. See equation 4: Qing et al.";
-} self_consistency_polynomial_a2;
-
-paramdef double {
-  p_default = -0.119;
-  p_descr = "Polynomial coefficent a3. C-band: -0.404; S-band: -0.119";
-  p_help = "SELF_CON_ZDR_POLYNOMIAL_METHOD. See equation 4: Qing et al.";
-} self_consistency_polynomial_a3;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to write out Z bias results to SPDB.";
-  p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
-} self_consistency_write_results_to_spdb;
-
-paramdef string {
-  p_default = "/tmp/spdb/self_consistency";
-  p_descr = "URL for writing z bias results to SPDB XML.";
-  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
-} self_consistency_spdb_output_url;
-
-paramdef enum debug_t {
-  p_default = DEBUG_OFF;
-  p_descr = "Debug option for self-consistency code";
-  p_help = "Set the level of debugging you want.";
-} self_consistency_debug;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write run files to debug self_consistency computation."; 
-  p_help = "The self-consistency method works by identifying runs along rays, which have a significant phipd change, and the correct conditions such as all rain, good rhohv etc. We can optionally save the run data to files so that we can then plot them for debugging purposes.";
-} self_consistency_write_run_files;
-
-paramdef string {
-  p_default = "/tmp/self_consistency_run_files";
-  p_descr = "Directory for self_consistency run files.";
-} self_consistency_run_files_dir;
-
-commentdef {
   p_header = "RETRIEVING SITE TEMPERATURE FROM SPDB";
 };
 
@@ -1575,19 +607,8 @@ typedef enum {
   RHOHV_NNC,
   PHIDP,
   KDP,
-  KDP_BRINGI,
   PSOB,
   ZDP,
-
-  PRECIP_RATE_ZH,
-  PRECIP_RATE_ZH_SNOW,
-  PRECIP_RATE_Z_ZDR,
-  PRECIP_RATE_KDP,
-  PRECIP_RATE_KDP_ZDR,
-  PRECIP_RATE_HYBRID,
-  PRECIP_RATE_PID,
-  PRECIP_RATE_HIDRO,
-  PRECIP_RATE_BRINGI,
 
   DBZ_ATTEN_CORRECTION,
   ZDR_ATTEN_CORRECTION,
@@ -1611,26 +632,6 @@ typedef enum {
   PHIDP_COND_FOR_KDP,
   PHIDP_COND_FILT_FOR_KDP,
 
-  DBZ_FOR_RATE,
-  ZDR_FOR_RATE,
-  KDP_FOR_RATE,
-
-  PARTICLE_ID,
-  PID_INTEREST,
-
-  PARTICLE_ID2,
-  PID_INTEREST2,
-
-  DBZ_FOR_PID,
-  ZDR_FOR_PID,
-  LDR_FOR_PID,
-  PHIDP_FOR_PID,
-  RHOHV_FOR_PID,
-  KDP_FOR_PID,
-  SDZDR_FOR_PID,
-  SDPHIDP_FOR_PID,
-  TEMP_FOR_PID,
-
   SNR_RLAN,
   SNR_MODE_RLAN,
   SNR_DMODE_RLAN,
@@ -1640,15 +641,7 @@ typedef enum {
   NCP_MEAN_RLAN,
   PHASE_RLAN,
   PHASE_CHANGE_RLAN,
-  RLAN_FLAG,
-
-  ZDRM_IN_ICE,
-  ZDRM_IN_BRAGG,
-  ZDR_IN_ICE,
-  ZDR_IN_BRAGG,
-
-  ZDR_FLAG_IN_ICE,
-  ZDR_FLAG_IN_BRAGG
+  RLAN_FLAG
 
 } output_field_id_t;
 
@@ -1772,102 +765,6 @@ paramdef struct output_field_t {
       scaling = OUTPUT_SCALING_DYNAMIC,
       scale = 0.001,
       offset = 0.0
-    }
-    ,
-    {
-      id = PARTICLE_ID,
-      name = "PID",
-      long_name = "particle_id",
-      standard_name = "hydrometeor_type",
-      units = "",
-      encoding = OUTPUT_ENCODING_INT16,
-      scaling = OUTPUT_SCALING_SPECIFIED,
-      scale = 1,
-      offset = 0
-    }
-    ,
-    {
-      id = TEMP_FOR_PID,
-      name = "TEMP_FOR_PID",
-      long_name = "temperature_for_computing_pid",
-      standard_name = "temperature",
-      units = "C",
-      encoding = OUTPUT_ENCODING_INT16,
-      scaling = OUTPUT_SCALING_SPECIFIED,
-      scale = 0.01,
-      offset = 0
-    }
-    ,
-    {
-      id = PRECIP_RATE_ZH,
-      name = "RATE_ZH",
-      long_name = "precip_rate_from_z",
-      standard_name = "precip_rate_from_z",
-      units = "mm/hr",
-      encoding = OUTPUT_ENCODING_INT16,
-      scaling = OUTPUT_SCALING_SPECIFIED,
-      scale = 0.01,
-      offset = 0
-    }
-    ,
-    {
-      id = PRECIP_RATE_Z_ZDR,
-      name = "RATE_Z_ZDR",
-      long_name = "precip_rate_from_z_and_zdr",
-      standard_name = "precip_rate_from_z_and_zdr",
-      units = "mm/hr",
-      encoding = OUTPUT_ENCODING_INT16,
-      scaling = OUTPUT_SCALING_SPECIFIED,
-      scale = 0.01,
-      offset = 0
-    }
-    ,
-    {
-      id = PRECIP_RATE_KDP,
-      name = "RATE_KDP",
-      long_name = "precip_rate_from_kdp",
-      standard_name = "precip_rate_from_kdp",
-      units = "mm/hr",
-      encoding = OUTPUT_ENCODING_INT16,
-      scaling = OUTPUT_SCALING_SPECIFIED,
-      scale = 0.01,
-      offset = 0
-    }
-    ,
-    {
-      id = PRECIP_RATE_KDP_ZDR,
-      name = "RATE_KDP_ZDR",
-      long_name = "precip_rate_from_kdp_and_zdr",
-      standard_name = "precip_rate_from_kdp_and_zdr",
-      units = "mm/hr",
-      encoding = OUTPUT_ENCODING_INT16,
-      scaling = OUTPUT_SCALING_SPECIFIED,
-      scale = 0.01,
-      offset = 0
-    }
-    ,
-    {
-      id = PRECIP_RATE_HYBRID,
-      name = "RATE_HYBRID",
-      long_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
-      standard_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
-      units = "mm/hr",
-      encoding = OUTPUT_ENCODING_INT16,
-      scaling = OUTPUT_SCALING_SPECIFIED,
-      scale = 0.01,
-      offset = 0
-    }
-    ,
-    {
-      id = PRECIP_RATE_PID,
-      name = "RATE_PID",
-      long_name = "precip_rate_based_on_pid",
-      standard_name = "precip_rate_based_on_pid",
-      units = "mm/hr",
-      encoding = OUTPUT_ENCODING_INT16,
-      scaling = OUTPUT_SCALING_SPECIFIED,
-      scale = 0.01,
-      offset = 0
     }
   };
   p_descr = "Indicate which fields should be written to the output file.";

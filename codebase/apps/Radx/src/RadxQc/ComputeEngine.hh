@@ -40,9 +40,6 @@
 
 #include "Params.hh"
 #include <radar/KdpFilt.hh>
-#include <radar/KdpBringi.hh>
-#include <radar/PrecipRate.hh>
-#include <radar/NcarParticleId.hh>
 #include <radar/TempProfile.hh>
 #include <radar/AtmosAtten.hh>
 #include <radar/IntfLocator.hh>
@@ -57,24 +54,6 @@ class ComputeEngine {
   
 public:
   
-  // struct for self-consistency results
-
-  typedef struct {
-    RadxTime rtime;
-    double elevation;
-    double azimuth;
-    int runStart;
-    int runEnd;
-    double dbzCorrection;
-    double zdrCorrection;
-    double rangeStart;
-    double rangeEnd;
-    double accumObs;
-    double accumEst;
-    double dbzBias;
-    double accumCorrelation;
-  } self_con_t;
-
   // constructor
   
   ComputeEngine(const Params &params, int id);
@@ -95,17 +74,6 @@ public:
                    double radarHtKm,
                    double wavelengthM,
                    const TempProfile *tempProfile);
-
-  // after calling compute, retrieve the zdrm bias array
-  
-  const vector<double> &getZdrInIceResults() const { return _zdrInIceResults; }
-  const vector<double> &getZdrInBraggResults() const { return _zdrInBraggResults; }
-  const vector<double> &getZdrmInIceResults() const { return _zdrmInIceResults; }
-  const vector<double> &getZdrmInBraggResults() const { return _zdrmInBraggResults; }
-
-  // after calling compute, retrieve the self consistency results
-
-  const vector<self_con_t> &getSelfConResults() const { return _selfConResults; }
 
   bool OK;
   
@@ -145,7 +113,6 @@ private:
   RadxArray<double> _zdrmArray_;
   RadxArray<double> _zdpArray_;
   RadxArray<double> _kdpArray_;
-  RadxArray<double> _kdpBringiArray_;
   RadxArray<double> _kdpConstrainedArray_;
   RadxArray<double> _kdpWithPsobArray_;
   RadxArray<double> _ldrArray_;
@@ -163,46 +130,11 @@ private:
   double *_zdrmArray;
   double *_zdpArray;
   double *_kdpArray;
-  double *_kdpBringiArray;
   double *_ldrArray;
   double *_rhohvArray;
   double *_rhohvNncArray;
   double *_phidpArray;
   double *_rhoVxHxArray;
-
-  // arrays for computing KDP, PID and PRECIP
-
-  RadxArray<double> _rateZ_;
-  RadxArray<double> _rateZSnow_;
-  RadxArray<double> _rateZZdr_;
-  RadxArray<double> _rateKdp_;
-  RadxArray<double> _rateKdpZdr_;
-  RadxArray<double> _rateHybrid_;
-  RadxArray<double> _ratePid_;
-  RadxArray<double> _rateHidro_;
-  RadxArray<double> _rateBringi_;
-
-  RadxArray<int> _pidArray_;
-  RadxArray<int> _pidArray2_;
-  RadxArray<double> _pidInterest_;
-  RadxArray<double> _pidInterest2_;
-  RadxArray<double> _tempForPid_;
-
-  double *_rateZ;
-  double *_rateZSnow;
-  double *_rateZZdr;
-  double *_rateKdp;
-  double *_rateKdpZdr;
-  double *_rateHybrid;
-  double *_ratePid;
-  double *_rateHidro;
-  double *_rateBringi;
-
-  int *_pidArray;
-  int *_pidArray2;
-  double *_pidInterest;
-  double *_pidInterest2;
-  double *_tempForPid;
 
   // atmospheric attenuation
 
@@ -211,54 +143,14 @@ private:
   // kdp
 
   KdpFilt _kdp;
-  KdpBringi _kdpBringi;
 
-  // pid
+  // interference
 
   IntfLocator _intf;
-  NcarParticleId _pid;
   const TempProfile *_tempProfile;
 
-  // precip rate
-
-  PrecipRate _rate;
-
-  // ZDR bias
-  
-  RadxArray<double> _zdrInIce_;
-  double *_zdrInIce;
-  RadxArray<double> _zdrInBragg_;
-  double *_zdrInBragg;
-
-  RadxArray<double> _zdrmInIce_;
-  double *_zdrmInIce;
-  RadxArray<double> _zdrmInBragg_;
-  double *_zdrmInBragg;
-  
-  RadxArray<int> _zdrFlagInIce_;
-  int *_zdrFlagInIce;
-  RadxArray<int> _zdrFlagInBragg_;
-  int *_zdrFlagInBragg;
-
-  vector<double> _zdrInIceResults;
-  vector<double> _zdrInBraggResults;
-  vector<double> _zdrmInIceResults;
-  vector<double> _zdrmInBraggResults;
-
-  // self consistency
-
-  int _selfConMinNoGapNGates;
-  int _selfConMinCombinedNGates;
-  vector<self_con_t> _selfConResults;
-
-  RadxArray<double> _kdpFromFilt_;
-  double *_kdpFromFilt;
-
-  RadxArray<double> _kdpEst_;
-  double *_kdpEst;
-
   // debug printing
-
+  
   static pthread_mutex_t _debugPrintMutex;
 
   // private methods
@@ -274,17 +166,7 @@ private:
 
   void _locateRlan();
 
-  int _pidInit();
-  void _pidCompute();
-  
-  void _precipInit();
-  void _precipCompute();
-
   void _allocMomentsArrays();
-  void _allocPidArrays();
-  void _allocPrecipArrays();
-  void _allocZdrBiasArrays();
-  void _allocSelfConArrays();
 
   int _loadMomentsArrays(RadxRay *inputRay);
   int _loadFieldArray(RadxRay *inputRay,
@@ -297,35 +179,6 @@ private:
   void _computeSnrFromDbz();
 
   void _censorNonPrecip(RadxField &field);
-
-  void _accumForZdrBiasInIce();
-  void _accumForZdrBiasInBragg();
-
-  void _runSelfConsistencyCheck();
-  void _doCheckSelfConsistency(int gateStart, int gateEnd);
-
-  double _computeKdpPowerLaw(double zz,
-                             double zdrLin,
-                             double aa, double bb, double cc);
-  
-  double _computeKdpPolynomial(double zz,
-                               double zdrDb,
-                               double a0, double a1, double a2, double a3);
-  
-  void _writeSelfConRunDataToFile(int runStart,
-                                  int runEnd,
-                                  double rangeStart,
-                                  double rangeEnd,
-                                  double phidpAccumObs,
-                                  double phidpAccumEst,
-                                  double dbzBias,
-                                  double accumCorrelation,
-                                  const double *dbzCorr,
-                                  const double *zdrCorr,
-                                  const double *zdrTerm,
-                                  const double *phidpEst);
-
-  double _getPlotVal(double val, double valIfMissing);
 
 };
 

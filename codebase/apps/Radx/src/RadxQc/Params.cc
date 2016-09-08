@@ -946,41 +946,80 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_hdr = tdrpStrDup("INPUT FIELD INFORMATION");
+    tt->comment_text = tdrpStrDup("Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. KDP is also required internally, but if KDP is not available it will be computed from PHIDP. LDR is optional, and is used for PID only.");
     tt++;
     
-    // Parameter 'override_standard_pseudo_earth_radius'
+    // Parameter 'DBZ_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("DBZ_field_name");
+    tt->descr = tdrpStrDup("Field name for DBZ.");
+    tt->help = tdrpStrDup("Horizontally-polarized reflectivity factor.");
+    tt->val_offset = (char *) &DBZ_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
+    tt++;
+    
+    // Parameter 'VEL_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("VEL_field_name");
+    tt->descr = tdrpStrDup("Field name for radial velocity.");
+    tt->help = tdrpStrDup("This is used in quality checks.");
+    tt->val_offset = (char *) &VEL_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL");
+    tt++;
+    
+    // Parameter 'WIDTH_available'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_standard_pseudo_earth_radius");
-    tt->descr = tdrpStrDup("Option to override the standard 4/3 earth radius model for refraction.");
-    tt->help = tdrpStrDup("If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.");
-    tt->val_offset = (char *) &override_standard_pseudo_earth_radius - &_start_;
+    tt->param_name = tdrpStrDup("WIDTH_available");
+    tt->descr = tdrpStrDup("Is WIDTH data available?");
+    tt->help = tdrpStrDup("If NCP is not available, this field is used for locating RLAN interference.");
+    tt->val_offset = (char *) &WIDTH_available - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'pseudo_earth_radius_ratio'
-    // ctype is 'double'
+    // Parameter 'WIDTH_field_name'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("pseudo_earth_radius_ratio");
-    tt->descr = tdrpStrDup("Ratio for computing the pseudo earth radius for beam height computations.");
-    tt->help = tdrpStrDup("For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.");
-    tt->val_offset = (char *) &pseudo_earth_radius_ratio - &_start_;
-    tt->single_val.d = 1.33333;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("WIDTH_field_name");
+    tt->descr = tdrpStrDup("Field name for WIDTH.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &WIDTH_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("WIDTH");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'NCP_available'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("INPUT FIELD INFORMATION");
-    tt->comment_text = tdrpStrDup("Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. KDP is also required internally, but if KDP is not available it will be computed from PHIDP. LDR is optional, and is used for PID only.");
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("NCP_available");
+    tt->descr = tdrpStrDup("Is NCP data available?");
+    tt->help = tdrpStrDup("This field is used for locating RLAN interference. If it is not available, use spectrum width instead.");
+    tt->val_offset = (char *) &NCP_available - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'NCP_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("NCP_field_name");
+    tt->descr = tdrpStrDup("Field name for NCP.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &NCP_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("NCP");
     tt++;
     
     // Parameter 'SNR_available'
@@ -1019,28 +1058,16 @@ using namespace std;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'DBZ_field_name'
-    // ctype is 'char*'
+    // Parameter 'ZDR_available'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("DBZ_field_name");
-    tt->descr = tdrpStrDup("Field name for DBZ.");
-    tt->help = tdrpStrDup("Horizontally-polarized reflectivity factor.");
-    tt->val_offset = (char *) &DBZ_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("DBZ");
-    tt++;
-    
-    // Parameter 'VEL_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("VEL_field_name");
-    tt->descr = tdrpStrDup("Field name for radial velocity.");
-    tt->help = tdrpStrDup("This is used in quality checks.");
-    tt->val_offset = (char *) &VEL_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL");
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ZDR_available");
+    tt->descr = tdrpStrDup("Is ZDR data available?");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ZDR_available - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'ZDR_field_name'
@@ -1055,16 +1082,16 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("ZDR");
     tt++;
     
-    // Parameter 'ZDRM_field_name'
-    // ctype is 'char*'
+    // Parameter 'PHIDP_available'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ZDRM_field_name");
-    tt->descr = tdrpStrDup("Field name for measured ZDR.");
-    tt->help = tdrpStrDup("This is uncorrected (measured) ZDR, which is used in estimation of ZDR bias and in the self-consistency analysis (see below). If ZDRM is not available, set this to the ZDR field name.");
-    tt->val_offset = (char *) &ZDRM_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("ZDRM");
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("PHIDP_available");
+    tt->descr = tdrpStrDup("Is PHIDP data available?");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &PHIDP_available - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'PHIDP_field_name'
@@ -1079,6 +1106,18 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("PHIDP");
     tt++;
     
+    // Parameter 'RHOHV_available'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("RHOHV_available");
+    tt->descr = tdrpStrDup("Is RHOHV data available?");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &RHOHV_available - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'RHOHV_field_name'
     // ctype is 'char*'
     
@@ -1091,145 +1130,25 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("RHOHV");
     tt++;
     
-    // Parameter 'RHOHV_NNC_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("RHOHV_NNC_field_name");
-    tt->descr = tdrpStrDup("Field name for RHOHV without noise correction.");
-    tt->help = tdrpStrDup("This field is a good quality discriminator since it combines RHOHV and SNR. It is used in estimation of ZDR bias. If it is not available, set this to the RHOHV field.");
-    tt->val_offset = (char *) &RHOHV_NNC_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("RHOHV_NNC");
-    tt++;
-    
-    // Parameter 'NCP_available'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("NCP_available");
-    tt->descr = tdrpStrDup("Is NCP data available?");
-    tt->help = tdrpStrDup("This field is used for locating RLAN interference. If it is not available, use spectrum width instead.");
-    tt->val_offset = (char *) &NCP_available - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'NCP_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("NCP_field_name");
-    tt->descr = tdrpStrDup("Field name for NCP.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &NCP_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("NCP");
-    tt++;
-    
-    // Parameter 'WIDTH_available'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("WIDTH_available");
-    tt->descr = tdrpStrDup("Is WIDTH data available?");
-    tt->help = tdrpStrDup("If NCP is not available, this field is used for locating RLAN interference.");
-    tt->val_offset = (char *) &WIDTH_available - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'WIDTH_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("WIDTH_field_name");
-    tt->descr = tdrpStrDup("Field name for WIDTH.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &WIDTH_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("WIDTH");
-    tt++;
-    
-    // Parameter 'KDP_available'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_available");
-    tt->descr = tdrpStrDup("Is KDP data available?");
-    tt->help = tdrpStrDup("If not, KDP will be computed from PHIDP");
-    tt->val_offset = (char *) &KDP_available - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("KDP_field_name");
-    tt->descr = tdrpStrDup("Field name for KDP.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("KDP");
-    tt++;
-    
-    // Parameter 'LDR_available'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("LDR_available");
-    tt->descr = tdrpStrDup("Is LDR data available?");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &LDR_available - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'LDR_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("LDR_field_name");
-    tt->descr = tdrpStrDup("Field name for LDR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &LDR_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("LDR");
-    tt++;
-    
-    // Parameter 'RHO_VXHX_available'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("RHO_VXHX_available");
-    tt->descr = tdrpStrDup("Is cross-to-cross correlation field available?");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &RHO_VXHX_available - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'RHO_VXHX_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("RHO_VXHX_field_name");
-    tt->descr = tdrpStrDup("Field name for cross-to-cross correlation.");
-    tt->help = tdrpStrDup("This is used as a quality-control field for some of the algorithms. Typically it is high in weather and clutter, and low in non-weather echoes.");
-    tt->val_offset = (char *) &RHO_VXHX_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP. KDP will be computed if KDP_available is FALSE.");
+    tt++;
+    
+    // Parameter 'compute_KDP'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_KDP");
+    tt->descr = tdrpStrDup("Compute KDP from PHIDP");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &compute_KDP - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'KDP_fir_filter_len'
@@ -1464,123 +1383,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
     tt++;
     
-    // Parameter 'compute_kdp_bringi'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_kdp_bringi");
-    tt->descr = tdrpStrDup("Option to compute KDP using the BRINGI method.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &compute_kdp_bringi - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_fir_filter_len'
-    // ctype is '_fir_filter_len_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_fir_filter_len");
-    tt->descr = tdrpStrDup("Filter length for the FIR filter for PHIDP (gates)");
-    tt->help = tdrpStrDup("When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.");
-    tt->val_offset = (char *) &KDP_BRINGI_fir_filter_len - &_start_;
-    tt->enum_def.name = tdrpStrDup("fir_filter_len_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FIR_LEN_125");
-      tt->enum_def.fields[0].val = FIR_LEN_125;
-      tt->enum_def.fields[1].name = tdrpStrDup("FIR_LEN_60");
-      tt->enum_def.fields[1].val = FIR_LEN_60;
-      tt->enum_def.fields[2].name = tdrpStrDup("FIR_LEN_40");
-      tt->enum_def.fields[2].val = FIR_LEN_40;
-      tt->enum_def.fields[3].name = tdrpStrDup("FIR_LEN_30");
-      tt->enum_def.fields[3].val = FIR_LEN_30;
-      tt->enum_def.fields[4].name = tdrpStrDup("FIR_LEN_20");
-      tt->enum_def.fields[4].val = FIR_LEN_20;
-      tt->enum_def.fields[5].name = tdrpStrDup("FIR_LEN_10");
-      tt->enum_def.fields[5].val = FIR_LEN_10;
-    tt->single_val.e = FIR_LEN_10;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_phidp_difference_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_phidp_difference_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for difference of phidp.");
-    tt->help = tdrpStrDup("This is used to test the difference between the unfolded phidp value and the filtered phidp value. If the difference exceeds this value, we use the original value instead of the filtered value. Applies to computation of KDP only");
-    tt->val_offset = (char *) &KDP_BRINGI_phidp_difference_threshold - &_start_;
-    tt->single_val.d = 4;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_phidp_sdev_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_phidp_sdev_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of phidp in range.");
-    tt->help = tdrpStrDup("The sdev of phidp is a good test for weather. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_BRINGI_phidp_sdev_threshold - &_start_;
-    tt->single_val.d = 12;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_zdr_sdev_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_zdr_sdev_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of zdr in range.");
-    tt->help = tdrpStrDup("The sdev of zdr is a good test for weather. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_BRINGI_zdr_sdev_threshold - &_start_;
-    tt->single_val.d = 1.8;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_rhohv_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_rhohv_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for rhohv.");
-    tt->help = tdrpStrDup("rhohv is a good test for weather. If rhohv is greater than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_BRINGI_rhohv_threshold - &_start_;
-    tt->single_val.d = 0.75;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_apply_median_filter_to_PHIDP'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_apply_median_filter_to_PHIDP");
-    tt->descr = tdrpStrDup("Option to filter PHIDP with median filter.");
-    tt->help = tdrpStrDup("The filter is applied in range.");
-    tt->val_offset = (char *) &KDP_BRINGI_apply_median_filter_to_PHIDP - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_median_filter_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_median_filter_len");
-    tt->descr = tdrpStrDup("Length of median filter for PHIDP - gates.");
-    tt->help = tdrpStrDup("See 'appply_median_filter_to_PHIDP'");
-    tt->val_offset = (char *) &KDP_BRINGI_median_filter_len - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1657,11 +1464,11 @@ using namespace std;
     tt->single_val.d = 0.84;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("LOCATING RLAN INTERFERENCE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1678,213 +1485,12 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("COMPUTING PID - HYDROMETEOR PARTICLE ID");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'pid_thresholds_file_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("pid_thresholds_file_path");
-    tt->descr = tdrpStrDup("File path for fuzzy logic thresholds for PID.");
-    tt->help = tdrpStrDup("This file contains the thresholds and weights for computing particle ID.");
-    tt->val_offset = (char *) &pid_thresholds_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("./s_band_pid_input_steraotables27.input");
-    tt++;
-    
-    // Parameter 'PID_snr_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PID_snr_threshold");
-    tt->descr = tdrpStrDup("Minimum SNR for valid PID.");
-    tt->help = tdrpStrDup("If the SNR at a gate is below this, the PID is censored.");
-    tt->val_offset = (char *) &PID_snr_threshold - &_start_;
-    tt->single_val.d = 3;
-    tt++;
-    
-    // Parameter 'PID_snr_upper_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PID_snr_upper_threshold");
-    tt->descr = tdrpStrDup("Maximum SNR for valid PID.");
-    tt->help = tdrpStrDup("If the SNR at a gate is above this value, the PID will be set to SATURATED_SNR = 18.");
-    tt->val_offset = (char *) &PID_snr_upper_threshold - &_start_;
-    tt->single_val.d = 9999;
-    tt++;
-    
-    // Parameter 'PID_min_valid_interest'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PID_min_valid_interest");
-    tt->descr = tdrpStrDup("Minimum valid interest value for identifying a particle.");
-    tt->help = tdrpStrDup("If the computed interest value is below this, the PID is set to missing.");
-    tt->val_offset = (char *) &PID_min_valid_interest - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'PID_apply_median_filter_to_DBZ'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PID_apply_median_filter_to_DBZ");
-    tt->descr = tdrpStrDup("Option to filter DBZ with median filter.");
-    tt->help = tdrpStrDup("The filter is computed in range.");
-    tt->val_offset = (char *) &PID_apply_median_filter_to_DBZ - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'PID_DBZ_median_filter_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("PID_DBZ_median_filter_len");
-    tt->descr = tdrpStrDup("Length of median filter for DBZ - gates.");
-    tt->help = tdrpStrDup("See 'PID_apply_median_filter_to_DBZ'");
-    tt->val_offset = (char *) &PID_DBZ_median_filter_len - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'PID_apply_median_filter_to_ZDR'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PID_apply_median_filter_to_ZDR");
-    tt->descr = tdrpStrDup("Option to filter ZDR with median filter.");
-    tt->help = tdrpStrDup("The filter is computed in range.");
-    tt->val_offset = (char *) &PID_apply_median_filter_to_ZDR - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'PID_ZDR_median_filter_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("PID_ZDR_median_filter_len");
-    tt->descr = tdrpStrDup("Length of median filter for ZDR - gates.");
-    tt->help = tdrpStrDup("See 'PID_apply_median_filter_to_ZDR'");
-    tt->val_offset = (char *) &PID_ZDR_median_filter_len - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'PID_apply_median_filter_to_RHOHV'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PID_apply_median_filter_to_RHOHV");
-    tt->descr = tdrpStrDup("Option to filter RHOHV with median filter.");
-    tt->help = tdrpStrDup("The filter is computed in range.");
-    tt->val_offset = (char *) &PID_apply_median_filter_to_RHOHV - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'PID_RHOHV_median_filter_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("PID_RHOHV_median_filter_len");
-    tt->descr = tdrpStrDup("Length of median filter for RHOHV - gates.");
-    tt->help = tdrpStrDup("See 'PID_apply_median_filter_to_RHOHV'");
-    tt->val_offset = (char *) &PID_RHOHV_median_filter_len - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'PID_apply_median_filter_to_LDR'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PID_apply_median_filter_to_LDR");
-    tt->descr = tdrpStrDup("Option to filter LDR with median filter.");
-    tt->help = tdrpStrDup("The filter is computed in range.");
-    tt->val_offset = (char *) &PID_apply_median_filter_to_LDR - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'PID_LDR_median_filter_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("PID_LDR_median_filter_len");
-    tt->descr = tdrpStrDup("Length of median filter for LDR - gates.");
-    tt->help = tdrpStrDup("See 'PID_apply_median_filter_to_LDR'");
-    tt->val_offset = (char *) &PID_LDR_median_filter_len - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'PID_replace_missing_LDR'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PID_replace_missing_LDR");
-    tt->descr = tdrpStrDup("For PID, option to replace missing LDR values with a specified value.");
-    tt->help = tdrpStrDup("When the SNR gets low, LDR is unreliable since there is not sufficient dynamic range to provide an accurate cross-polar power measurement. In these cases, it makes sense to replace LDR with a neutral value, such as 0.0, so that we do not reject gates at which valuable data is available.");
-    tt->val_offset = (char *) &PID_replace_missing_LDR - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'PID_LDR_replacement_value'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PID_LDR_replacement_value");
-    tt->descr = tdrpStrDup("Value to which LDR will be set if missing.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PID_LDR_replacement_value - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'PID_ngates_for_sdev'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("PID_ngates_for_sdev");
-    tt->descr = tdrpStrDup("Number of gates for computing standard deviations.");
-    tt->help = tdrpStrDup("This applies to computing the standard deviation of zdr and phidp.");
-    tt->val_offset = (char *) &PID_ngates_for_sdev - &_start_;
-    tt->single_val.i = 9;
-    tt++;
-    
-    // Parameter 'PID_output_particle_interest_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PID_output_particle_interest_fields");
-    tt->descr = tdrpStrDup("Option to output the individual interest fields.");
-    tt->help = tdrpStrDup("If TRUE, the interest field for each particle type will be written to the output FMQ, in addition to the list in 'output_fields'.");
-    tt->val_offset = (char *) &PID_output_particle_interest_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 12'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
-    tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR PID temperatures - OPTIONAL");
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR temperatures - OPTIONAL");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -2056,11 +1662,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("SMOOTHING OUTPUT PID");
     tt->comment_text = tdrpStrDup("This section gives you the option of smoothing the output pid field in range by applying a median filter.");
     tt++;
@@ -2089,1560 +1695,11 @@ using namespace std;
     tt->single_val.i = 7;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
-    tt->comment_hdr = tdrpStrDup("COMPUTING PRECIP RATE");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'PRECIP_snr_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_snr_threshold");
-    tt->descr = tdrpStrDup("Minimum SNR for valid PRECIP.");
-    tt->help = tdrpStrDup("If the SNR at a gate is below this, the PRECIP is censored.");
-    tt->val_offset = (char *) &PRECIP_snr_threshold - &_start_;
-    tt->single_val.d = 3;
-    tt++;
-    
-    // Parameter 'PRECIP_apply_median_filter_to_DBZ'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_apply_median_filter_to_DBZ");
-    tt->descr = tdrpStrDup("Option to filter DBZ with median filter.");
-    tt->help = tdrpStrDup("The filter is computed in rang..");
-    tt->val_offset = (char *) &PRECIP_apply_median_filter_to_DBZ - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'PRECIP_DBZ_median_filter_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_DBZ_median_filter_len");
-    tt->descr = tdrpStrDup("Length of median filter for DBZ - gates.");
-    tt->help = tdrpStrDup("See 'PRECIP_apply_median_filter_to_DBZ'");
-    tt->val_offset = (char *) &PRECIP_DBZ_median_filter_len - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'PRECIP_apply_median_filter_to_ZDR'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_apply_median_filter_to_ZDR");
-    tt->descr = tdrpStrDup("Option to filter ZDR with median filter.");
-    tt->help = tdrpStrDup("The filter is computed in range.");
-    tt->val_offset = (char *) &PRECIP_apply_median_filter_to_ZDR - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'PRECIP_ZDR_median_filter_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_ZDR_median_filter_len");
-    tt->descr = tdrpStrDup("Length of median filter for ZDR - gates.");
-    tt->help = tdrpStrDup("See 'PID_PRECIP_apply_median_filter_to_ZDR'");
-    tt->val_offset = (char *) &PRECIP_ZDR_median_filter_len - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'PRECIP_min_valid_rate'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_min_valid_rate");
-    tt->descr = tdrpStrDup("Minimum valid precip rate (mm/hr).");
-    tt->help = tdrpStrDup("If any computed rate is less than this value, it is set to 0.");
-    tt->val_offset = (char *) &PRECIP_min_valid_rate - &_start_;
-    tt->single_val.d = 0.1;
-    tt++;
-    
-    // Parameter 'PRECIP_max_valid_rate'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_max_valid_rate");
-    tt->descr = tdrpStrDup("Maximum valid precip rate (mm/hr).");
-    tt->help = tdrpStrDup("If any computed rate exceeds this value, it is set to this max.");
-    tt->val_offset = (char *) &PRECIP_max_valid_rate - &_start_;
-    tt->single_val.d = 250;
-    tt++;
-    
-    // Parameter 'PRECIP_max_valid_dbz'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_max_valid_dbz");
-    tt->descr = tdrpStrDup("Maximum valid dbz for computing precip rate.");
-    tt->help = tdrpStrDup("If any dbz exceeds this value, it is set to this max before use. This helps mitigate large DBZ values in hail.");
-    tt->val_offset = (char *) &PRECIP_max_valid_dbz - &_start_;
-    tt->single_val.d = 53;
-    tt++;
-    
-    // Parameter 'PRECIP_brightband_dbz_correction'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_brightband_dbz_correction");
-    tt->descr = tdrpStrDup("Correction to be applied in brightband before computing precip rate.");
-    tt->help = tdrpStrDup("This should be negative.");
-    tt->val_offset = (char *) &PRECIP_brightband_dbz_correction - &_start_;
-    tt->has_max = TRUE;
-    tt->max_val.d = 0;
-    tt->single_val.d = -10;
-    tt++;
-    
-    // Parameter 'Comment 15'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
-    tt->comment_hdr = tdrpStrDup("PRECIP COEFFICIENTS");
-    tt->comment_text = tdrpStrDup("Coefficients for the precip equations.");
-    tt++;
-    
-    // Parameter 'Comment 16'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_ZH");
-    tt->comment_text = tdrpStrDup("RATE_ZH = zh_aa * (ZH ** zh_bb)");
-    tt++;
-    
-    // Parameter 'zh_aa'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zh_aa");
-    tt->descr = tdrpStrDup("Coefficient for PRECIP_RATE_ZH.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zh_aa - &_start_;
-    tt->single_val.d = 0.017;
-    tt++;
-    
-    // Parameter 'zh_bb'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zh_bb");
-    tt->descr = tdrpStrDup("Exponent for PRECIP_RATE_ZH.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zh_bb - &_start_;
-    tt->single_val.d = 0.714;
-    tt++;
-    
-    // Parameter 'Comment 17'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_SNOW_ZH");
-    tt->comment_text = tdrpStrDup("RATE_SNOW_ZH = zh_aa_snow * (ZH ** zh_bb_snow)");
-    tt++;
-    
-    // Parameter 'zh_aa_snow'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zh_aa_snow");
-    tt->descr = tdrpStrDup("Coefficient for PRECIP_RATE_ZH in SNOW.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zh_aa_snow - &_start_;
-    tt->single_val.d = 0.0365;
-    tt++;
-    
-    // Parameter 'zh_bb_snow'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zh_bb_snow");
-    tt->descr = tdrpStrDup("Exponent for PRECIP_RATE_ZH in SNOW.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zh_bb_snow - &_start_;
-    tt->single_val.d = 0.625;
-    tt++;
-    
-    // Parameter 'Comment 18'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_Z_ZDR");
-    tt->comment_text = tdrpStrDup("RATE_Z_ZDR = zzdr_aa * (ZH ** zzdr_bb) * (ZDR ** zzdr_cc)");
-    tt++;
-    
-    // Parameter 'zzdr_aa'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zzdr_aa");
-    tt->descr = tdrpStrDup("Coefficient for PRECIP_RATE_ZZDR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zzdr_aa - &_start_;
-    tt->single_val.d = 0.00684;
-    tt++;
-    
-    // Parameter 'zzdr_bb'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zzdr_bb");
-    tt->descr = tdrpStrDup("ZH exponent for PRECIP_RATE_ZZDR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zzdr_bb - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'zzdr_cc'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zzdr_cc");
-    tt->descr = tdrpStrDup("ZDR exponent for PRECIP_RATE_ZZDR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zzdr_cc - &_start_;
-    tt->single_val.d = -4.86;
-    tt++;
-    
-    // Parameter 'Comment 19'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_KDP");
-    tt->comment_text = tdrpStrDup("RATE_KDP = sign(KDP) * kdp_aa * (|KDP| ** kdp_bb)");
-    tt++;
-    
-    // Parameter 'kdp_aa'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("kdp_aa");
-    tt->descr = tdrpStrDup("Coefficient for PRECIP_RATE_KDP.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &kdp_aa - &_start_;
-    tt->single_val.d = 40.6;
-    tt++;
-    
-    // Parameter 'kdp_bb'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("kdp_bb");
-    tt->descr = tdrpStrDup("Exponent for PRECIP_RATE_KDP.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &kdp_bb - &_start_;
-    tt->single_val.d = 0.866;
-    tt++;
-    
-    // Parameter 'Comment 20'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_KDP_ZDR");
-    tt->comment_text = tdrpStrDup("RATE_KDP_ZDR = sign(KDP) * kdpzdr_aa * (|KDP| ** kdpzdr_bb) * (ZDR ** kdpzdr_cc)");
-    tt++;
-    
-    // Parameter 'kdpzdr_aa'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("kdpzdr_aa");
-    tt->descr = tdrpStrDup("Coefficient for PRECIP_RATE_KDP_ZDR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &kdpzdr_aa - &_start_;
-    tt->single_val.d = 136;
-    tt++;
-    
-    // Parameter 'kdpzdr_bb'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("kdpzdr_bb");
-    tt->descr = tdrpStrDup("KDP exponent for PRECIP_RATE_KDP_ZDR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &kdpzdr_bb - &_start_;
-    tt->single_val.d = 0.968;
-    tt++;
-    
-    // Parameter 'kdpzdr_cc'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("kdpzdr_cc");
-    tt->descr = tdrpStrDup("ZDR exponent for PRECIP_RATE_KDP_ZDR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &kdpzdr_cc - &_start_;
-    tt->single_val.d = -2.86;
-    tt++;
-    
-    // Parameter 'Comment 21'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
-    tt->comment_hdr = tdrpStrDup("PRECIP RATE BASED ON PID");
-    tt->comment_text = tdrpStrDup("The PID-based rate is a wieghted-average of the rates for the various precip types.\nThe weights are derived from the interest values for each PID particle type.\n\t  RATE_LIGHT_RAIN = RATE_ZH\n\t  RATE_MOD_RAIN = RATE_Z_ZDR\n\t  RATE_SNOW = RATE_ZH_SNOW\n\t  RATE_MIXED = RATE_ZH_MIXED\n\n\t  if (kdp > threshold && RATE_KDP is valid)\n\t    RATE_HVY_RAIN = RATE_KDP\n\t    RATE_HAIL = RATE_KDP\n\t  else\n\t    RATE_HVY_RAIN = RATE_ZZDR\n\t    RATE_HAIL = RATE_ZZDR\n\n\t  RATE = 0\n\t  RATE += RATE_LIGHT_RAIN * WT_LIGHT_RAIN\n\t  RATE += RATE_MOD_RAIN * WT_MOD_RAIN\n\t  RATE += RATE_HVY_RAIN * WT_HVY_RAIN\n\t  RATE += RATE_SNOW * WT_SNOW\n\t  RATE += RATE_MIXED * WT_MIXED\n\t  RATE += RATE_HAIL * WT_HAIL\n");
-    tt++;
-    
-    // Parameter 'pid_rate_kdp_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("pid_rate_kdp_threshold");
-    tt->descr = tdrpStrDup("Units are deg/km.");
-    tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &pid_rate_kdp_threshold - &_start_;
-    tt->single_val.d = 0.3;
-    tt++;
-    
-    // Parameter 'Comment 22'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_HYBRID");
-    tt->comment_text = tdrpStrDup("The HYBRID rate is based on the PID and the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Hybrid et al, JTech, Vol 26, 2009, 2107 - 2122.\n\n\t  if hail or heavy rain\n\t    if KDP > threhsold and rateKDP is valid\n\t      use RATE_KDP\n\t    else\n\t      use RATE_KDP\n\t  else if snow/ice\n\t    use RATE_ZH_SNOW\n\t  else if mixed precip\n\t    use RATE_ZH_MIXED\n\t  else if rain or SLD\n\t    if dBZ > theshold and KDP > threhsold\n\t      if rateKDP is valid\n\t        use RATE_KDP\n\t      else\n\t        use RATE_ZZDR\n\t    else\n\t      if ZDR >= threshold\n\t        use RATE_Z\n\t      else\n\t        use RATE_ZZDR\n");
-    tt++;
-    
-    // Parameter 'hybrid_dbz_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("hybrid_dbz_threshold");
-    tt->descr = tdrpStrDup("Units are dBZ.");
-    tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &hybrid_dbz_threshold - &_start_;
-    tt->single_val.d = 40;
-    tt++;
-    
-    // Parameter 'hybrid_kdp_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("hybrid_kdp_threshold");
-    tt->descr = tdrpStrDup("Units are deg/km.");
-    tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &hybrid_kdp_threshold - &_start_;
-    tt->single_val.d = 0.3;
-    tt++;
-    
-    // Parameter 'hybrid_zdr_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("hybrid_zdr_threshold");
-    tt->descr = tdrpStrDup("Units are dB.");
-    tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &hybrid_zdr_threshold - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'Comment 23'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_HIDRO");
-    tt->comment_text = tdrpStrDup("The HIDRO rate is based on the CSU-HIDRO algorithm. See 'A New Dual-Polarization Radar Rainfall Algorithm: Application to Colorado Precipition Events', Cifelli et al, JTech, Vol 28, 2011, 352 - 364. NOTE - this algorithm is generally only applied to liquid and mixed-phase precip, so you need to run PID for this to work as intended.\n\t  For ice:\n\t    RATE_HIDRO = MISSING\n\t  For hail or mixed:\n\t    if KDP >= threshold and rateKdp is valid\n\t      RATE_HIDRO = RATE_KDP\n\t    else\n\t      RATE_HIDRO = RATE_ZR\n\t  For rain or sld:\n\t    if KDP >= threshold and DBZ >= threhold\n\t      if ZDR >= threshold and rateKdpZdr is valid\n\t        RATE_HIDRO = RATE_KDPZDR\n\t      else if rateKdp is valid\n\t        RATE_HIDRO = RATE_KDP\n\t      else\n\t        RATE_HIDRO = RATE_ZZDR\n\t    else\n\t      if ZDR >= threshold\n\t        RATE_HIDRO = RATE_Z\n\t      else\n\t        RATE_HIDRO = RATE_ZZDR\n");
-    tt++;
-    
-    // Parameter 'hidro_dbz_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("hidro_dbz_threshold");
-    tt->descr = tdrpStrDup("Units are dBZ.");
-    tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &hidro_dbz_threshold - &_start_;
-    tt->single_val.d = 38;
-    tt++;
-    
-    // Parameter 'hidro_kdp_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("hidro_kdp_threshold");
-    tt->descr = tdrpStrDup("Units are deg/km.");
-    tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &hidro_kdp_threshold - &_start_;
-    tt->single_val.d = 0.3;
-    tt++;
-    
-    // Parameter 'hidro_zdr_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("hidro_zdr_threshold");
-    tt->descr = tdrpStrDup("Units are dB.");
-    tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &hidro_zdr_threshold - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'Comment 24'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_BRINGI");
-    tt->comment_text = tdrpStrDup("The BRINGI rate is based on the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Bringi et al, JTech, Vol 26, 2009, 2107 - 2122.\n\t  if HAIL or RAIN/HAIL mixture and rateKdp is valid\n\t    RATE_BRINGI = RATE_KDP\n\t  else if dBZ > theshold and KDP > threhsold and rateKdp is valid\n\t    RATE_BRINGI = RATE_KDP\n\t  else\n\t    if ZDR >= threshold\n\t      RATE_BRINGI = RATE_ZZDR\n\t    else\n\t      RATE_BRINGI = RATE_Z\n");
-    tt++;
-    
-    // Parameter 'bringi_dbz_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("bringi_dbz_threshold");
-    tt->descr = tdrpStrDup("Units are dBZ.");
-    tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &bringi_dbz_threshold - &_start_;
-    tt->single_val.d = 40;
-    tt++;
-    
-    // Parameter 'bringi_kdp_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("bringi_kdp_threshold");
-    tt->descr = tdrpStrDup("Units are deg/km.");
-    tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &bringi_kdp_threshold - &_start_;
-    tt->single_val.d = 0.15;
-    tt++;
-    
-    // Parameter 'bringi_zdr_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("bringi_zdr_threshold");
-    tt->descr = tdrpStrDup("Units are dB.");
-    tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &bringi_zdr_threshold - &_start_;
-    tt->single_val.d = 0.1;
-    tt++;
-    
-    // Parameter 'Comment 25'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
-    tt->comment_hdr = tdrpStrDup("ESTIMATING ZDR BIAS");
-    tt->comment_text = tdrpStrDup("ZDR bias can be estimated using data from regions with irregular ice and bragg scattering, with various constraints applied. See below.");
-    tt++;
-    
-    // Parameter 'estimate_zdr_bias_in_ice'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("estimate_zdr_bias_in_ice");
-    tt->descr = tdrpStrDup("Option to estimate ZDR bias from the irregular ice phase regions.");
-    tt->help = tdrpStrDup("If true, we will try to estimate ZDR bias from returns in regions with irregular ice and snow.");
-    tt->val_offset = (char *) &estimate_zdr_bias_in_ice - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'estimate_zdr_bias_in_bragg'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("estimate_zdr_bias_in_bragg");
-    tt->descr = tdrpStrDup("Option to estimate ZDR bias from the bragg regions.");
-    tt->help = tdrpStrDup("If true, we will try to estimate ZDR bias from bragg scattering returns. Generally this is only relevant at S band.");
-    tt->val_offset = (char *) &estimate_zdr_bias_in_bragg - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'zdr_bias_max_abs_zdr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_max_abs_zdr");
-    tt->descr = tdrpStrDup("Maximum ZDR for estimating ZDR bias.");
-    tt->help = tdrpStrDup("We set this to a value somewhat greater than the estimated max ZDR calibration error. If we get values outside this range we reject those gates.");
-    tt->val_offset = (char *) &zdr_bias_max_abs_zdr - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'zdr_bias_max_abs_zdrm'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_max_abs_zdrm");
-    tt->descr = tdrpStrDup("Maximum ZDRM for estimating ZDR bias.");
-    tt->help = tdrpStrDup("We set this to a value somewhat greater than the estimated max ZDR calibration error. If we get values outside this range we reject those gates.");
-    tt->val_offset = (char *) &zdr_bias_max_abs_zdrm - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'zdr_bias_min_rhohv_nnc'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_min_rhohv_nnc");
-    tt->descr = tdrpStrDup("Minimim RHOHV for estimating ZDR bias.");
-    tt->help = tdrpStrDup("If RHOHV_NNC is avaiable, it is used. If not, the noise-corrected RHOHV is used.");
-    tt->val_offset = (char *) &zdr_bias_min_rhohv_nnc - &_start_;
-    tt->single_val.d = 0.98;
-    tt++;
-    
-    // Parameter 'zdr_bias_min_abs_vel'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_min_abs_vel");
-    tt->descr = tdrpStrDup("Minimum absolute velocity for estimating ZDR bias.");
-    tt->help = tdrpStrDup("Setting a minimum vel helps to reduce the influence of side-lobe clutter, especially in Bragg.");
-    tt->val_offset = (char *) &zdr_bias_min_abs_vel - &_start_;
-    tt->single_val.d = 1.5;
-    tt++;
-    
-    // Parameter 'zdr_bias_max_abs_kdp'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_max_abs_kdp");
-    tt->descr = tdrpStrDup("Max KDP for computing ZDR bias.");
-    tt->help = tdrpStrDup("KDP must be well behaved, and not high, in regions where we compute ZDR bias.");
-    tt->val_offset = (char *) &zdr_bias_max_abs_kdp - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'zdr_bias_max_phidp_accum'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_max_phidp_accum");
-    tt->descr = tdrpStrDup("Maximum PHIDP accumulation along the ray (deg).");
-    tt->help = tdrpStrDup("Significant phase shift can lead to non-zero ZDR values at more distant gates. It is good to screen out these gates.");
-    tt->val_offset = (char *) &zdr_bias_max_phidp_accum - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'Comment 26'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
-    tt->comment_hdr = tdrpStrDup("ZDR BIAS IN ICE");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_pid_types'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_pid_types");
-    tt->descr = tdrpStrDup("List of PID types in which ZDR should be close to 0 dB in ice.");
-    tt->help = tdrpStrDup("Generally this is set to 10 = irregular ice, and 13 = snow.");
-    tt->array_offset = (char *) &_zdr_bias_ice_pid_types - &_start_;
-    tt->array_n_offset = (char *) &zdr_bias_ice_pid_types_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(int);
-    tt->array_n = 2;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].i = 10;
-      tt->array_vals[1].i = 13;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_min_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_min_range_km");
-    tt->descr = tdrpStrDup("Minimum range for estimating ZDR bias in ice.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_ice_min_range_km - &_start_;
-    tt->single_val.d = 5;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_max_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_max_range_km");
-    tt->descr = tdrpStrDup("Maximum range for estimating ZDR bias in ice.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_ice_max_range_km - &_start_;
-    tt->single_val.d = 120;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_min_dbz'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_min_dbz");
-    tt->descr = tdrpStrDup("Minimum DBZ for estimating ZDR bias in ice.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_ice_min_dbz - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_max_dbz'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_max_dbz");
-    tt->descr = tdrpStrDup("Maximum DBZ for estimating ZDR bias in ice.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_ice_max_dbz - &_start_;
-    tt->single_val.d = 30;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_min_snr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_min_snr");
-    tt->descr = tdrpStrDup("Minimum SNR for estimating ZDR bias in ice (dB).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_ice_min_snr - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_max_snr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_max_snr");
-    tt->descr = tdrpStrDup("Maximum SNR for estimating ZDR bias in ice (dB).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_ice_max_snr - &_start_;
-    tt->single_val.d = 50;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_min_rho_vxhx'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_min_rho_vxhx");
-    tt->descr = tdrpStrDup("Minimum RHO VXHX estimating ZDR bias in ice (dB).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_ice_min_rho_vxhx - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_max_rho_vxhx'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_max_rho_vxhx");
-    tt->descr = tdrpStrDup("Maximum RHO VXHX estimating ZDR bias in ice (dB).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_ice_max_rho_vxhx - &_start_;
-    tt->single_val.d = 0.2;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_min_temp_c'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_min_temp_c");
-    tt->descr = tdrpStrDup("Minimum temperature for computing ZDR bias in ice (deg C).");
-    tt->help = tdrpStrDup("We want to ensure that we are in the normal ice phase.");
-    tt->val_offset = (char *) &zdr_bias_ice_min_temp_c - &_start_;
-    tt->single_val.d = -50;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_max_temp_c'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_max_temp_c");
-    tt->descr = tdrpStrDup("Maximum temperature for computing ZDR bias in ice (deg C).");
-    tt->help = tdrpStrDup("We want to ensure that we are well within the ice phase.");
-    tt->val_offset = (char *) &zdr_bias_ice_max_temp_c - &_start_;
-    tt->single_val.d = -5;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_min_elevation_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_min_elevation_deg");
-    tt->descr = tdrpStrDup("Min elevation angle for ZDR bias in ice (deg).");
-    tt->help = tdrpStrDup("Only elevation angles at or above this will be considered.");
-    tt->val_offset = (char *) &zdr_bias_ice_min_elevation_deg - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_max_elevation_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_max_elevation_deg");
-    tt->descr = tdrpStrDup("Max elevation angle for ZDR bias in ice (deg).");
-    tt->help = tdrpStrDup("Only elevation angles at or below this will be considered.");
-    tt->val_offset = (char *) &zdr_bias_ice_max_elevation_deg - &_start_;
-    tt->single_val.d = 20;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_min_gate_run'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_min_gate_run");
-    tt->descr = tdrpStrDup("Minimum consectutive gates with the correct conditions for ZDR bias in ice.");
-    tt->help = tdrpStrDup("We want to ensure that we are solidly in a region suitable for estimating ZDR bias. We eliminate noisy data by requiring that the conditions persist over a certain number of gates.");
-    tt->val_offset = (char *) &zdr_bias_ice_min_gate_run - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_min_npoints_valid'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_min_npoints_valid");
-    tt->descr = tdrpStrDup("Minimum number of points in a volume for valid zdr stats in ice.");
-    tt->help = tdrpStrDup("For the results to be valid, we need a certain number of valid results for computing the statistics.");
-    tt->val_offset = (char *) &zdr_bias_ice_min_npoints_valid - &_start_;
-    tt->single_val.i = 1000;
-    tt++;
-    
-    // Parameter 'zdr_bias_ice_percentiles'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_ice_percentiles");
-    tt->descr = tdrpStrDup("Percentiles to write to SPDB output.");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_zdr_bias_ice_percentiles - &_start_;
-    tt->array_n_offset = (char *) &zdr_bias_ice_percentiles_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(double);
-    tt->array_n = 6;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].d = 17.5;
-      tt->array_vals[1].d = 20;
-      tt->array_vals[2].d = 22.5;
-      tt->array_vals[3].d = 25;
-      tt->array_vals[4].d = 27.5;
-      tt->array_vals[5].d = 30;
-    tt++;
-    
-    // Parameter 'Comment 27'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
-    tt->comment_hdr = tdrpStrDup("ZDR BIAS IN BRAGG");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_check_pid'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_check_pid");
-    tt->descr = tdrpStrDup("Option to check PID in identifying bragg.");
-    tt->help = tdrpStrDup("If true, we check that the PID at a gate is one of those listed in the array 'zdr_bias_bragg_pid_types'.");
-    tt->val_offset = (char *) &zdr_bias_bragg_check_pid - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_pid_types'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_pid_types");
-    tt->descr = tdrpStrDup("List of PID types in which ZDR should be close to 0 dB in Bragg.");
-    tt->help = tdrpStrDup("Generally this is set to 1 = cloud drops.");
-    tt->array_offset = (char *) &_zdr_bias_bragg_pid_types - &_start_;
-    tt->array_n_offset = (char *) &zdr_bias_bragg_pid_types_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(int);
-    tt->array_n = 1;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].i = 1;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_min_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_min_range_km");
-    tt->descr = tdrpStrDup("Minimum range for estimating ZDR bias in Bragg.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_bragg_min_range_km - &_start_;
-    tt->single_val.d = 4;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_max_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_max_range_km");
-    tt->descr = tdrpStrDup("Maximum range for estimating ZDR bias in Bragg.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_bragg_max_range_km - &_start_;
-    tt->single_val.d = 40;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_min_dbz'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_min_dbz");
-    tt->descr = tdrpStrDup("Minimum DBZ for estimating ZDR bias in Bragg.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_bragg_min_dbz - &_start_;
-    tt->single_val.d = -40;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_max_dbz'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_max_dbz");
-    tt->descr = tdrpStrDup("Maximum DBZ for estimating ZDR bias in Bragg.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_bragg_max_dbz - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_min_snr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_min_snr");
-    tt->descr = tdrpStrDup("Minimum SNR for estimating ZDR bias in Bragg (dB).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_bragg_min_snr - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_max_snr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_max_snr");
-    tt->descr = tdrpStrDup("Maximum SNR for estimating ZDR bias in Bragg (dB).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_bragg_max_snr - &_start_;
-    tt->single_val.d = 50;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_min_rho_vxhx'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_min_rho_vxhx");
-    tt->descr = tdrpStrDup("Minimum RHO VXHX estimating ZDR bias in bragg (dB).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_bragg_min_rho_vxhx - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_max_rho_vxhx'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_max_rho_vxhx");
-    tt->descr = tdrpStrDup("Maximum RHO VXHX estimating ZDR bias in bragg (dB).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_bias_bragg_max_rho_vxhx - &_start_;
-    tt->single_val.d = 0.2;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_min_temp_c'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_min_temp_c");
-    tt->descr = tdrpStrDup("Minimum temperature for computing ZDR bias (deg C).");
-    tt->help = tdrpStrDup("We want to ensure that we are in the normal bragg region.");
-    tt->val_offset = (char *) &zdr_bias_bragg_min_temp_c - &_start_;
-    tt->single_val.d = -30;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_max_temp_c'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_max_temp_c");
-    tt->descr = tdrpStrDup("Maximum temperature for computing ZDR bias (deg C).");
-    tt->help = tdrpStrDup("We want to ensure that we are well within the bragg region.");
-    tt->val_offset = (char *) &zdr_bias_bragg_max_temp_c - &_start_;
-    tt->single_val.d = 20;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_min_elevation_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_min_elevation_deg");
-    tt->descr = tdrpStrDup("Min elevation angle for ZDR bias in ice (deg).");
-    tt->help = tdrpStrDup("Only elevation angles at or above this will be considered.");
-    tt->val_offset = (char *) &zdr_bias_bragg_min_elevation_deg - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_max_elevation_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_max_elevation_deg");
-    tt->descr = tdrpStrDup("Max elevation angle for ZDR bias in ice (deg).");
-    tt->help = tdrpStrDup("Only elevation angles at or below this will be considered.");
-    tt->val_offset = (char *) &zdr_bias_bragg_max_elevation_deg - &_start_;
-    tt->single_val.d = 30;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_min_gate_run'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_min_gate_run");
-    tt->descr = tdrpStrDup("Minimum consectutive gates with the correct conditions for ZDR bias in Bragg.");
-    tt->help = tdrpStrDup("We want to ensure that we are solidly in a region suitable for estimating ZDR bias. We eliminate noisy data by requiring that the conditions persist over a certain number of gates.");
-    tt->val_offset = (char *) &zdr_bias_bragg_min_gate_run - &_start_;
-    tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_min_npoints_valid'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_min_npoints_valid");
-    tt->descr = tdrpStrDup("Minimum number of points in a volume for valid zdr stats in bragg.");
-    tt->help = tdrpStrDup("For the results to be valid, we need a certain number of valid results for computing the statistics.");
-    tt->val_offset = (char *) &zdr_bias_bragg_min_npoints_valid - &_start_;
-    tt->single_val.i = 400;
-    tt++;
-    
-    // Parameter 'zdr_bias_bragg_percentiles'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_bragg_percentiles");
-    tt->descr = tdrpStrDup("Percentiles to write to SPDB output.");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_zdr_bias_bragg_percentiles - &_start_;
-    tt->array_n_offset = (char *) &zdr_bias_bragg_percentiles_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(double);
-    tt->array_n = 7;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].d = 25;
-      tt->array_vals[1].d = 27.5;
-      tt->array_vals[2].d = 30;
-      tt->array_vals[3].d = 32;
-      tt->array_vals[4].d = 33;
-      tt->array_vals[5].d = 35;
-      tt->array_vals[6].d = 40;
-    tt++;
-    
-    // Parameter 'Comment 28'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
-    tt->comment_hdr = tdrpStrDup("WRITING ZDR BIAS RESULTS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'zdr_bias_write_results_to_spdb'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_write_results_to_spdb");
-    tt->descr = tdrpStrDup("Option to write out ZDR results to SPDB.");
-    tt->help = tdrpStrDup("The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.");
-    tt->val_offset = (char *) &zdr_bias_write_results_to_spdb - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'zdr_bias_spdb_output_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("zdr_bias_spdb_output_url");
-    tt->descr = tdrpStrDup("URL for writing zdr bias results to SPDB XML.");
-    tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
-    tt->val_offset = (char *) &zdr_bias_spdb_output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/spdb/zdr_bias");
-    tt++;
-    
-    // Parameter 'Comment 29'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
-    tt->comment_hdr = tdrpStrDup("ESTIMATING Z BIAS USING SELF-CONSISTENCY");
-    tt->comment_text = tdrpStrDup("The Z bias can be estimated using data from the rain region, i.e. below the freezing level. We use the self-consistency technique to compute z bias based on phidp phase shift in rain. See Vivekanandan, J., G. Zhang, S. M. Ellis, D. Rajopadhyaya, and S. K. Avery, Radar reflectivity calibration using differential propagation phase measurement, Radio Sci., 38(3), 8049, doi:10.1029/2002RS002676, 2003. NOTE: defaults are for S-band.");
-    tt++;
-    
-    // Parameter 'estimate_z_bias_using_self_consistency'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("estimate_z_bias_using_self_consistency");
-    tt->descr = tdrpStrDup("Option to estimate Z bias from self-consistency in the rain region.");
-    tt->help = tdrpStrDup("If true, we will try to estimate Z bias using the self-consistency technique.");
-    tt->val_offset = (char *) &estimate_z_bias_using_self_consistency - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'self_consistency_pid_types'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_pid_types");
-    tt->descr = tdrpStrDup("List of PID types in which ZDR should be close to 0 dB.");
-    tt->help = tdrpStrDup("Generally this is set to 2 = drizzle, 3 = light rain, 4 = moderate rain and 5 = heavy rain.");
-    tt->array_offset = (char *) &_self_consistency_pid_types - &_start_;
-    tt->array_n_offset = (char *) &self_consistency_pid_types_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(int);
-    tt->array_n = 5;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].i = 1;
-      tt->array_vals[1].i = 2;
-      tt->array_vals[2].i = 3;
-      tt->array_vals[3].i = 4;
-      tt->array_vals[4].i = 5;
-    tt++;
-    
-    // Parameter 'self_consistency_min_snr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_min_snr");
-    tt->descr = tdrpStrDup("Minimum SNR for valid self_consistency analysis (dB).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_consistency_min_snr - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'self_consistency_max_snr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_max_snr");
-    tt->descr = tdrpStrDup("Maximum SNR for valid self_consistency analysis (dB).");
-    tt->help = tdrpStrDup("Ensure we are not in a saturated environment.");
-    tt->val_offset = (char *) &self_consistency_max_snr - &_start_;
-    tt->single_val.d = 75;
-    tt++;
-    
-    // Parameter 'self_consistency_min_dbz'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_min_dbz");
-    tt->descr = tdrpStrDup("Minimum DBZ for valid self_consistency analysis.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_consistency_min_dbz - &_start_;
-    tt->single_val.d = 25;
-    tt++;
-    
-    // Parameter 'self_consistency_max_dbz'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_max_dbz");
-    tt->descr = tdrpStrDup("Maximum DBZ for valid self_consistency analysis.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_consistency_max_dbz - &_start_;
-    tt->single_val.d = 60;
-    tt++;
-    
-    // Parameter 'self_consistency_min_zdr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_min_zdr");
-    tt->descr = tdrpStrDup("Minimum ZDR for valid self_consistency analysis.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_consistency_min_zdr - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'self_consistency_max_zdr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_max_zdr");
-    tt->descr = tdrpStrDup("Maximum ZDR for valid self_consistency analysis.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_consistency_max_zdr - &_start_;
-    tt->single_val.d = 3;
-    tt++;
-    
-    // Parameter 'self_consistency_min_rhohv'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_min_rhohv");
-    tt->descr = tdrpStrDup("Minimum RHOHV for valid self_consistency analysis.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_consistency_min_rhohv - &_start_;
-    tt->single_val.d = 0.98;
-    tt++;
-    
-    // Parameter 'self_consistency_min_kdp'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_min_kdp");
-    tt->descr = tdrpStrDup("Minimum KDP for valid self_consistency analysis.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_consistency_min_kdp - &_start_;
-    tt->single_val.d = -0.1;
-    tt++;
-    
-    // Parameter 'self_consistency_max_dbz_at_run_limits'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_max_dbz_at_run_limits");
-    tt->descr = tdrpStrDup("Maximum DBZ at the limits of the valid runs.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_consistency_max_dbz_at_run_limits - &_start_;
-    tt->single_val.d = 35;
-    tt++;
-    
-    // Parameter 'self_consistency_max_kdp_at_run_limits'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_max_kdp_at_run_limits");
-    tt->descr = tdrpStrDup("Maximum KDP at the limits of the valid runs.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_consistency_max_kdp_at_run_limits - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'self_consistency_min_elevation_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_min_elevation_deg");
-    tt->descr = tdrpStrDup("Min elevation angle for self-consistency analysis.");
-    tt->help = tdrpStrDup("We want to avoid contamination with ground echo etc.");
-    tt->val_offset = (char *) &self_consistency_min_elevation_deg - &_start_;
-    tt->single_val.d = 0.45;
-    tt++;
-    
-    // Parameter 'self_consistency_min_temp_c'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_min_temp_c");
-    tt->descr = tdrpStrDup("Minimum temperature for self-consistency gates (deg C).");
-    tt->help = tdrpStrDup("We want to ensure that we are in the rain phase.");
-    tt->val_offset = (char *) &self_consistency_min_temp_c - &_start_;
-    tt->single_val.d = 3;
-    tt++;
-    
-    // Parameter 'self_consistency_max_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_max_range_km");
-    tt->descr = tdrpStrDup("Maximum range for self-consistency analysis.");
-    tt->help = tdrpStrDup("Sometimes data at longer ranges can have problems, such as with partial beam filling.");
-    tt->val_offset = (char *) &self_consistency_max_range_km - &_start_;
-    tt->single_val.d = 100;
-    tt++;
-    
-    // Parameter 'self_consistency_min_no_gap_distance_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_min_no_gap_distance_km");
-    tt->descr = tdrpStrDup("Minimum run distance without any gaps (km).");
-    tt->help = tdrpStrDup("We want to ensure that we are solidly in a region suitable for self_consistency analysis. We eliminate noisy data by by requiring that the correct conditions persist over a given minimum distance. This minimum run distance cannot have any gaps.");
-    tt->val_offset = (char *) &self_consistency_min_no_gap_distance_km - &_start_;
-    tt->single_val.d = 2.5;
-    tt++;
-    
-    // Parameter 'self_consistency_min_combined_distance_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_min_combined_distance_km");
-    tt->descr = tdrpStrDup("Minimum combined distance for analysis (km).");
-    tt->help = tdrpStrDup("We combine the initial no-gap runs into a longer analysis run, provided there is only a small gap between them. We perform the analysis over this combined run. See also 'self_consistency_max_gate_gap'");
-    tt->val_offset = (char *) &self_consistency_min_combined_distance_km - &_start_;
-    tt->single_val.d = 20;
-    tt++;
-    
-    // Parameter 'self_consistency_max_gate_gap'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_max_gate_gap");
-    tt->descr = tdrpStrDup("Maximum length of gap between no-gap runs (gates).");
-    tt->help = tdrpStrDup("This is the longest acceptable gap when we combine the no-gap runs into our analysis run. Gaps longer than this indicate that the data is not of high enough quality for the analysis.");
-    tt->val_offset = (char *) &self_consistency_max_gate_gap - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'self_consistency_min_phidp_accum'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_min_phidp_accum");
-    tt->descr = tdrpStrDup("Minimum PHIDP accumulation along the ray (deg).");
-    tt->help = tdrpStrDup("We need significant phase shift for this method.");
-    tt->val_offset = (char *) &self_consistency_min_phidp_accum - &_start_;
-    tt->single_val.d = 20;
-    tt++;
-    
-    // Parameter 'self_consistency_dbz_correction'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_dbz_correction");
-    tt->descr = tdrpStrDup("Correction to be applied to DBZ.");
-    tt->help = tdrpStrDup("This allows us to test the sensitivity of the method to DBZ errors.");
-    tt->val_offset = (char *) &self_consistency_dbz_correction - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'self_consistency_zdrm_correction'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_zdrm_correction");
-    tt->descr = tdrpStrDup("Correction to be applied to ZDRM (dB).");
-    tt->help = tdrpStrDup("We need a reasonably accurate ZDR value for the self-consistency method to work properly. This correction is applied to the ZDRM field before using it for self-consistency.");
-    tt->val_offset = (char *) &self_consistency_zdrm_correction - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'self_consistency_max_phase_shift_on_backscatter'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_max_phase_shift_on_backscatter");
-    tt->descr = tdrpStrDup("Max phase shift on back-scatter long the ray (deg).");
-    tt->help = tdrpStrDup("We are looking for phase shift due to propagation rather than from backscatter.");
-    tt->val_offset = (char *) &self_consistency_max_phase_shift_on_backscatter - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'self_consisteny_method'
-    // ctype is '_self_con_method_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("self_consisteny_method");
-    tt->descr = tdrpStrDup("Method used to estimate KDP in self consistency method.");
-    tt->help = tdrpStrDup("The ZDR power law method was proposed by Vivekanandan, J., G. Zhang, S. M. Ellis, D. Rajopadhyaya, and S. K. Avery, Radar reflectivity calibration using differential propagation phase measurement, Radio Sci., 38(3), 8049, doi:10.1029/2002RS002676, 2003. The Polynomial method was proposed by Qing Cao, Michael Knight, Alexander Ryzhkov and Pengfei Zhang, 2016: A Novel Physical Consistency-Based Calibration Tool for Polarimetric Weather Radar. Paper 691, AMS Annual Conference, New Orleans, 2016.");
-    tt->val_offset = (char *) &self_consisteny_method - &_start_;
-    tt->enum_def.name = tdrpStrDup("self_con_method_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("SELF_CON_ZDR_POWER_LAW_METHOD");
-      tt->enum_def.fields[0].val = SELF_CON_ZDR_POWER_LAW_METHOD;
-      tt->enum_def.fields[1].name = tdrpStrDup("SELF_CON_ZDR_POLYNOMIAL_METHOD");
-      tt->enum_def.fields[1].val = SELF_CON_ZDR_POLYNOMIAL_METHOD;
-    tt->single_val.e = SELF_CON_ZDR_POWER_LAW_METHOD;
-    tt++;
-    
-    // Parameter 'self_consistency_kdp_z_expon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_kdp_z_expon");
-    tt->descr = tdrpStrDup("Z exponent for estimating KDP from Z and ZDR.");
-    tt->help = tdrpStrDup("SELF_CON_ZDR_POWER_LAW_METHOD. See equation 16: Vivek et al.");
-    tt->val_offset = (char *) &self_consistency_kdp_z_expon - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'self_consistency_kdp_zdr_expon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_kdp_zdr_expon");
-    tt->descr = tdrpStrDup("ZDR exponent for estimating KDP from Z and ZDR.");
-    tt->help = tdrpStrDup("SELF_CON_ZDR_POWER_LAW_METHOD. See equation 16: Vivek et al.");
-    tt->val_offset = (char *) &self_consistency_kdp_zdr_expon - &_start_;
-    tt->single_val.d = -2.05;
-    tt++;
-    
-    // Parameter 'self_consistency_kdp_coefficient'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_kdp_coefficient");
-    tt->descr = tdrpStrDup("Coefficient for estimating KDP from Z and ZDR.");
-    tt->help = tdrpStrDup("SELF_CON_ZDR_POWER_LAW_METHOD. See equation 16: Vivek et al.");
-    tt->val_offset = (char *) &self_consistency_kdp_coefficient - &_start_;
-    tt->single_val.d = 3.32e-05;
-    tt++;
-    
-    // Parameter 'self_consistency_z_atten_coefficient'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_z_atten_coefficient");
-    tt->descr = tdrpStrDup("Coefficient for estimating Z attenutation from KDP.");
-    tt->help = tdrpStrDup("SELF_CON_ZDR_POWER_LAW_METHOD. See equation 16: Vivek et al.");
-    tt->val_offset = (char *) &self_consistency_z_atten_coefficient - &_start_;
-    tt->single_val.d = 0.02;
-    tt++;
-    
-    // Parameter 'self_consistency_zdr_atten_coefficient'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_zdr_atten_coefficient");
-    tt->descr = tdrpStrDup("Coefficient for estimating ZDR attenutation from KDP.");
-    tt->help = tdrpStrDup("SELF_CON_ZDR_POWER_LAW_METHOD. See equation 16: Vivek et al.");
-    tt->val_offset = (char *) &self_consistency_zdr_atten_coefficient - &_start_;
-    tt->single_val.d = 0.0038;
-    tt++;
-    
-    // Parameter 'self_consistency_polynomial_a0'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_polynomial_a0");
-    tt->descr = tdrpStrDup("Polynomial coefficent a0. C-band: 6.7; S-band: 3.19");
-    tt->help = tdrpStrDup("SELF_CON_ZDR_POLYNOMIAL_METHOD. See equation 4: Qing et al.");
-    tt->val_offset = (char *) &self_consistency_polynomial_a0 - &_start_;
-    tt->single_val.d = 3.19;
-    tt++;
-    
-    // Parameter 'self_consistency_polynomial_a1'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_polynomial_a1");
-    tt->descr = tdrpStrDup("Polynomial coefficent a1. C-band: -4.42; S-band: -2.16");
-    tt->help = tdrpStrDup("SELF_CON_ZDR_POLYNOMIAL_METHOD. See equation 4: Qing et al.");
-    tt->val_offset = (char *) &self_consistency_polynomial_a1 - &_start_;
-    tt->single_val.d = -2.16;
-    tt++;
-    
-    // Parameter 'self_consistency_polynomial_a2'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_polynomial_a2");
-    tt->descr = tdrpStrDup("Polynomial coefficent a2. C-band: 2.16; S-band: 0.795");
-    tt->help = tdrpStrDup("SELF_CON_ZDR_POLYNOMIAL_METHOD. See equation 4: Qing et al.");
-    tt->val_offset = (char *) &self_consistency_polynomial_a2 - &_start_;
-    tt->single_val.d = 0.795;
-    tt++;
-    
-    // Parameter 'self_consistency_polynomial_a3'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_polynomial_a3");
-    tt->descr = tdrpStrDup("Polynomial coefficent a3. C-band: -0.404; S-band: -0.119");
-    tt->help = tdrpStrDup("SELF_CON_ZDR_POLYNOMIAL_METHOD. See equation 4: Qing et al.");
-    tt->val_offset = (char *) &self_consistency_polynomial_a3 - &_start_;
-    tt->single_val.d = -0.119;
-    tt++;
-    
-    // Parameter 'self_consistency_write_results_to_spdb'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_write_results_to_spdb");
-    tt->descr = tdrpStrDup("Option to write out Z bias results to SPDB.");
-    tt->help = tdrpStrDup("The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.");
-    tt->val_offset = (char *) &self_consistency_write_results_to_spdb - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'self_consistency_spdb_output_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_spdb_output_url");
-    tt->descr = tdrpStrDup("URL for writing z bias results to SPDB XML.");
-    tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
-    tt->val_offset = (char *) &self_consistency_spdb_output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/spdb/self_consistency");
-    tt++;
-    
-    // Parameter 'self_consistency_debug'
-    // ctype is '_debug_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_debug");
-    tt->descr = tdrpStrDup("Debug option for self-consistency code");
-    tt->help = tdrpStrDup("Set the level of debugging you want.");
-    tt->val_offset = (char *) &self_consistency_debug - &_start_;
-    tt->enum_def.name = tdrpStrDup("debug_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("DEBUG_OFF");
-      tt->enum_def.fields[0].val = DEBUG_OFF;
-      tt->enum_def.fields[1].name = tdrpStrDup("DEBUG_NORM");
-      tt->enum_def.fields[1].val = DEBUG_NORM;
-      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_VERBOSE");
-      tt->enum_def.fields[2].val = DEBUG_VERBOSE;
-      tt->enum_def.fields[3].name = tdrpStrDup("DEBUG_EXTRA");
-      tt->enum_def.fields[3].val = DEBUG_EXTRA;
-    tt->single_val.e = DEBUG_OFF;
-    tt++;
-    
-    // Parameter 'self_consistency_write_run_files'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_write_run_files");
-    tt->descr = tdrpStrDup("Option to write run files to debug self_consistency computation.");
-    tt->help = tdrpStrDup("The self-consistency method works by identifying runs along rays, which have a significant phipd change, and the correct conditions such as all rain, good rhohv etc. We can optionally save the run data to files so that we can then plot them for debugging purposes.");
-    tt->val_offset = (char *) &self_consistency_write_run_files - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'self_consistency_run_files_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("self_consistency_run_files_dir");
-    tt->descr = tdrpStrDup("Directory for self_consistency run files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_consistency_run_files_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/self_consistency_run_files");
-    tt++;
-    
-    // Parameter 'Comment 30'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("RETRIEVING SITE TEMPERATURE FROM SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3695,11 +1752,11 @@ using namespace std;
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("SPECIFYING FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3717,7 +1774,7 @@ using namespace std;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 16;
+    tt->array_n = 8;
     tt->struct_def.name = tdrpStrDup("output_field_t");
     tt->struct_def.nfields = 9;
     tt->struct_def.fields = (struct_field_t *)
@@ -3728,7 +1785,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 75;
+        tt->struct_def.fields[0].enum_def.nfields = 43;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -3755,132 +1812,68 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[10].val = PHIDP;
         tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("KDP");
         tt->struct_def.fields[0].enum_def.fields[11].val = KDP;
-        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("KDP_BRINGI");
-        tt->struct_def.fields[0].enum_def.fields[12].val = KDP_BRINGI;
-        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("PSOB");
-        tt->struct_def.fields[0].enum_def.fields[13].val = PSOB;
-        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("ZDP");
-        tt->struct_def.fields[0].enum_def.fields[14].val = ZDP;
-        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("PRECIP_RATE_ZH");
-        tt->struct_def.fields[0].enum_def.fields[15].val = PRECIP_RATE_ZH;
-        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("PRECIP_RATE_ZH_SNOW");
-        tt->struct_def.fields[0].enum_def.fields[16].val = PRECIP_RATE_ZH_SNOW;
-        tt->struct_def.fields[0].enum_def.fields[17].name = tdrpStrDup("PRECIP_RATE_Z_ZDR");
-        tt->struct_def.fields[0].enum_def.fields[17].val = PRECIP_RATE_Z_ZDR;
-        tt->struct_def.fields[0].enum_def.fields[18].name = tdrpStrDup("PRECIP_RATE_KDP");
-        tt->struct_def.fields[0].enum_def.fields[18].val = PRECIP_RATE_KDP;
-        tt->struct_def.fields[0].enum_def.fields[19].name = tdrpStrDup("PRECIP_RATE_KDP_ZDR");
-        tt->struct_def.fields[0].enum_def.fields[19].val = PRECIP_RATE_KDP_ZDR;
-        tt->struct_def.fields[0].enum_def.fields[20].name = tdrpStrDup("PRECIP_RATE_HYBRID");
-        tt->struct_def.fields[0].enum_def.fields[20].val = PRECIP_RATE_HYBRID;
-        tt->struct_def.fields[0].enum_def.fields[21].name = tdrpStrDup("PRECIP_RATE_PID");
-        tt->struct_def.fields[0].enum_def.fields[21].val = PRECIP_RATE_PID;
-        tt->struct_def.fields[0].enum_def.fields[22].name = tdrpStrDup("PRECIP_RATE_HIDRO");
-        tt->struct_def.fields[0].enum_def.fields[22].val = PRECIP_RATE_HIDRO;
-        tt->struct_def.fields[0].enum_def.fields[23].name = tdrpStrDup("PRECIP_RATE_BRINGI");
-        tt->struct_def.fields[0].enum_def.fields[23].val = PRECIP_RATE_BRINGI;
-        tt->struct_def.fields[0].enum_def.fields[24].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[24].val = DBZ_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[25].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[25].val = ZDR_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[26].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[26].val = DBZ_ATTEN_CORRECTED;
-        tt->struct_def.fields[0].enum_def.fields[27].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[27].val = ZDR_ATTEN_CORRECTED;
-        tt->struct_def.fields[0].enum_def.fields[28].name = tdrpStrDup("DBZ_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[28].val = DBZ_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[29].name = tdrpStrDup("ZDR_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[29].val = ZDR_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[30].name = tdrpStrDup("RHOHV_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[30].val = RHOHV_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[31].name = tdrpStrDup("SNR_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[31].val = SNR_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[32].name = tdrpStrDup("ZDR_SDEV_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[32].val = ZDR_SDEV_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[33].name = tdrpStrDup("VALID_FLAG_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[33].val = VALID_FLAG_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[34].name = tdrpStrDup("PHIDP_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[34].val = PHIDP_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[35].name = tdrpStrDup("PHIDP_MEAN_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[35].val = PHIDP_MEAN_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[36].name = tdrpStrDup("PHIDP_MEAN_UNFOLD_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[36].val = PHIDP_MEAN_UNFOLD_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[37].name = tdrpStrDup("PHIDP_SDEV_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[37].val = PHIDP_SDEV_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[38].name = tdrpStrDup("PHIDP_JITTER_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[38].val = PHIDP_JITTER_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[39].name = tdrpStrDup("PHIDP_UNFOLD_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[39].val = PHIDP_UNFOLD_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[40].name = tdrpStrDup("PHIDP_FILT_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[40].val = PHIDP_FILT_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("PHIDP_COND_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[41].val = PHIDP_COND_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[42].name = tdrpStrDup("PHIDP_COND_FILT_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[42].val = PHIDP_COND_FILT_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[43].name = tdrpStrDup("DBZ_FOR_RATE");
-        tt->struct_def.fields[0].enum_def.fields[43].val = DBZ_FOR_RATE;
-        tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("ZDR_FOR_RATE");
-        tt->struct_def.fields[0].enum_def.fields[44].val = ZDR_FOR_RATE;
-        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("KDP_FOR_RATE");
-        tt->struct_def.fields[0].enum_def.fields[45].val = KDP_FOR_RATE;
-        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("PARTICLE_ID");
-        tt->struct_def.fields[0].enum_def.fields[46].val = PARTICLE_ID;
-        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("PID_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[47].val = PID_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("PARTICLE_ID2");
-        tt->struct_def.fields[0].enum_def.fields[48].val = PARTICLE_ID2;
-        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("PID_INTEREST2");
-        tt->struct_def.fields[0].enum_def.fields[49].val = PID_INTEREST2;
-        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("DBZ_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[50].val = DBZ_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("ZDR_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[51].val = ZDR_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("LDR_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[52].val = LDR_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("PHIDP_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[53].val = PHIDP_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("RHOHV_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[54].val = RHOHV_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[55].name = tdrpStrDup("KDP_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[55].val = KDP_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[56].name = tdrpStrDup("SDZDR_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[56].val = SDZDR_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("SDPHIDP_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[57].val = SDPHIDP_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("TEMP_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[58].val = TEMP_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("SNR_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[59].val = SNR_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[60].name = tdrpStrDup("SNR_MODE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[60].val = SNR_MODE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[61].name = tdrpStrDup("SNR_DMODE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[61].val = SNR_DMODE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[62].name = tdrpStrDup("ZDR_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[62].val = ZDR_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[63].name = tdrpStrDup("ZDR_MODE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[63].val = ZDR_MODE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("ZDR_DMODE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[64].val = ZDR_DMODE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("NCP_MEAN_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[65].val = NCP_MEAN_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[66].name = tdrpStrDup("PHASE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[66].val = PHASE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[67].name = tdrpStrDup("PHASE_CHANGE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[67].val = PHASE_CHANGE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[68].name = tdrpStrDup("RLAN_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[68].val = RLAN_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[69].name = tdrpStrDup("ZDRM_IN_ICE");
-        tt->struct_def.fields[0].enum_def.fields[69].val = ZDRM_IN_ICE;
-        tt->struct_def.fields[0].enum_def.fields[70].name = tdrpStrDup("ZDRM_IN_BRAGG");
-        tt->struct_def.fields[0].enum_def.fields[70].val = ZDRM_IN_BRAGG;
-        tt->struct_def.fields[0].enum_def.fields[71].name = tdrpStrDup("ZDR_IN_ICE");
-        tt->struct_def.fields[0].enum_def.fields[71].val = ZDR_IN_ICE;
-        tt->struct_def.fields[0].enum_def.fields[72].name = tdrpStrDup("ZDR_IN_BRAGG");
-        tt->struct_def.fields[0].enum_def.fields[72].val = ZDR_IN_BRAGG;
-        tt->struct_def.fields[0].enum_def.fields[73].name = tdrpStrDup("ZDR_FLAG_IN_ICE");
-        tt->struct_def.fields[0].enum_def.fields[73].val = ZDR_FLAG_IN_ICE;
-        tt->struct_def.fields[0].enum_def.fields[74].name = tdrpStrDup("ZDR_FLAG_IN_BRAGG");
-        tt->struct_def.fields[0].enum_def.fields[74].val = ZDR_FLAG_IN_BRAGG;
+        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("PSOB");
+        tt->struct_def.fields[0].enum_def.fields[12].val = PSOB;
+        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("ZDP");
+        tt->struct_def.fields[0].enum_def.fields[13].val = ZDP;
+        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[14].val = DBZ_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[15].val = ZDR_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[16].val = DBZ_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[17].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[17].val = ZDR_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[18].name = tdrpStrDup("DBZ_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[18].val = DBZ_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[19].name = tdrpStrDup("ZDR_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[19].val = ZDR_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[20].name = tdrpStrDup("RHOHV_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[20].val = RHOHV_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[21].name = tdrpStrDup("SNR_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[21].val = SNR_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[22].name = tdrpStrDup("ZDR_SDEV_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[22].val = ZDR_SDEV_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[23].name = tdrpStrDup("VALID_FLAG_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[23].val = VALID_FLAG_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[24].name = tdrpStrDup("PHIDP_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[24].val = PHIDP_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[25].name = tdrpStrDup("PHIDP_MEAN_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[25].val = PHIDP_MEAN_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[26].name = tdrpStrDup("PHIDP_MEAN_UNFOLD_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[26].val = PHIDP_MEAN_UNFOLD_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[27].name = tdrpStrDup("PHIDP_SDEV_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[27].val = PHIDP_SDEV_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[28].name = tdrpStrDup("PHIDP_JITTER_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[28].val = PHIDP_JITTER_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[29].name = tdrpStrDup("PHIDP_UNFOLD_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[29].val = PHIDP_UNFOLD_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[30].name = tdrpStrDup("PHIDP_FILT_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[30].val = PHIDP_FILT_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[31].name = tdrpStrDup("PHIDP_COND_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[31].val = PHIDP_COND_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[32].name = tdrpStrDup("PHIDP_COND_FILT_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[32].val = PHIDP_COND_FILT_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[33].name = tdrpStrDup("SNR_RLAN");
+        tt->struct_def.fields[0].enum_def.fields[33].val = SNR_RLAN;
+        tt->struct_def.fields[0].enum_def.fields[34].name = tdrpStrDup("SNR_MODE_RLAN");
+        tt->struct_def.fields[0].enum_def.fields[34].val = SNR_MODE_RLAN;
+        tt->struct_def.fields[0].enum_def.fields[35].name = tdrpStrDup("SNR_DMODE_RLAN");
+        tt->struct_def.fields[0].enum_def.fields[35].val = SNR_DMODE_RLAN;
+        tt->struct_def.fields[0].enum_def.fields[36].name = tdrpStrDup("ZDR_RLAN");
+        tt->struct_def.fields[0].enum_def.fields[36].val = ZDR_RLAN;
+        tt->struct_def.fields[0].enum_def.fields[37].name = tdrpStrDup("ZDR_MODE_RLAN");
+        tt->struct_def.fields[0].enum_def.fields[37].val = ZDR_MODE_RLAN;
+        tt->struct_def.fields[0].enum_def.fields[38].name = tdrpStrDup("ZDR_DMODE_RLAN");
+        tt->struct_def.fields[0].enum_def.fields[38].val = ZDR_DMODE_RLAN;
+        tt->struct_def.fields[0].enum_def.fields[39].name = tdrpStrDup("NCP_MEAN_RLAN");
+        tt->struct_def.fields[0].enum_def.fields[39].val = NCP_MEAN_RLAN;
+        tt->struct_def.fields[0].enum_def.fields[40].name = tdrpStrDup("PHASE_RLAN");
+        tt->struct_def.fields[0].enum_def.fields[40].val = PHASE_RLAN;
+        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("PHASE_CHANGE_RLAN");
+        tt->struct_def.fields[0].enum_def.fields[41].val = PHASE_CHANGE_RLAN;
+        tt->struct_def.fields[0].enum_def.fields[42].name = tdrpStrDup("RLAN_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[42].val = RLAN_FLAG;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -3941,7 +1934,7 @@ using namespace std;
       tt->struct_def.fields[8].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[8].rel_offset = 
         (char *) &_output_fields->offset - (char *) _output_fields;
-    tt->n_struct_vals = 144;
+    tt->n_struct_vals = 72;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = SNR;
@@ -4016,85 +2009,13 @@ using namespace std;
       tt->struct_vals[69].e = OUTPUT_SCALING_DYNAMIC;
       tt->struct_vals[70].d = 0.001;
       tt->struct_vals[71].d = 0;
-      tt->struct_vals[72].e = PARTICLE_ID;
-      tt->struct_vals[73].s = tdrpStrDup("PID");
-      tt->struct_vals[74].s = tdrpStrDup("particle_id");
-      tt->struct_vals[75].s = tdrpStrDup("hydrometeor_type");
-      tt->struct_vals[76].s = tdrpStrDup("");
-      tt->struct_vals[77].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[78].e = OUTPUT_SCALING_SPECIFIED;
-      tt->struct_vals[79].d = 1;
-      tt->struct_vals[80].d = 0;
-      tt->struct_vals[81].e = TEMP_FOR_PID;
-      tt->struct_vals[82].s = tdrpStrDup("TEMP_FOR_PID");
-      tt->struct_vals[83].s = tdrpStrDup("temperature_for_computing_pid");
-      tt->struct_vals[84].s = tdrpStrDup("temperature");
-      tt->struct_vals[85].s = tdrpStrDup("C");
-      tt->struct_vals[86].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[87].e = OUTPUT_SCALING_SPECIFIED;
-      tt->struct_vals[88].d = 0.01;
-      tt->struct_vals[89].d = 0;
-      tt->struct_vals[90].e = PRECIP_RATE_ZH;
-      tt->struct_vals[91].s = tdrpStrDup("RATE_ZH");
-      tt->struct_vals[92].s = tdrpStrDup("precip_rate_from_z");
-      tt->struct_vals[93].s = tdrpStrDup("precip_rate_from_z");
-      tt->struct_vals[94].s = tdrpStrDup("mm/hr");
-      tt->struct_vals[95].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[96].e = OUTPUT_SCALING_SPECIFIED;
-      tt->struct_vals[97].d = 0.01;
-      tt->struct_vals[98].d = 0;
-      tt->struct_vals[99].e = PRECIP_RATE_Z_ZDR;
-      tt->struct_vals[100].s = tdrpStrDup("RATE_Z_ZDR");
-      tt->struct_vals[101].s = tdrpStrDup("precip_rate_from_z_and_zdr");
-      tt->struct_vals[102].s = tdrpStrDup("precip_rate_from_z_and_zdr");
-      tt->struct_vals[103].s = tdrpStrDup("mm/hr");
-      tt->struct_vals[104].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[105].e = OUTPUT_SCALING_SPECIFIED;
-      tt->struct_vals[106].d = 0.01;
-      tt->struct_vals[107].d = 0;
-      tt->struct_vals[108].e = PRECIP_RATE_KDP;
-      tt->struct_vals[109].s = tdrpStrDup("RATE_KDP");
-      tt->struct_vals[110].s = tdrpStrDup("precip_rate_from_kdp");
-      tt->struct_vals[111].s = tdrpStrDup("precip_rate_from_kdp");
-      tt->struct_vals[112].s = tdrpStrDup("mm/hr");
-      tt->struct_vals[113].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[114].e = OUTPUT_SCALING_SPECIFIED;
-      tt->struct_vals[115].d = 0.01;
-      tt->struct_vals[116].d = 0;
-      tt->struct_vals[117].e = PRECIP_RATE_KDP_ZDR;
-      tt->struct_vals[118].s = tdrpStrDup("RATE_KDP_ZDR");
-      tt->struct_vals[119].s = tdrpStrDup("precip_rate_from_kdp_and_zdr");
-      tt->struct_vals[120].s = tdrpStrDup("precip_rate_from_kdp_and_zdr");
-      tt->struct_vals[121].s = tdrpStrDup("mm/hr");
-      tt->struct_vals[122].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[123].e = OUTPUT_SCALING_SPECIFIED;
-      tt->struct_vals[124].d = 0.01;
-      tt->struct_vals[125].d = 0;
-      tt->struct_vals[126].e = PRECIP_RATE_HYBRID;
-      tt->struct_vals[127].s = tdrpStrDup("RATE_HYBRID");
-      tt->struct_vals[128].s = tdrpStrDup("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
-      tt->struct_vals[129].s = tdrpStrDup("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
-      tt->struct_vals[130].s = tdrpStrDup("mm/hr");
-      tt->struct_vals[131].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[132].e = OUTPUT_SCALING_SPECIFIED;
-      tt->struct_vals[133].d = 0.01;
-      tt->struct_vals[134].d = 0;
-      tt->struct_vals[135].e = PRECIP_RATE_PID;
-      tt->struct_vals[136].s = tdrpStrDup("RATE_PID");
-      tt->struct_vals[137].s = tdrpStrDup("precip_rate_based_on_pid");
-      tt->struct_vals[138].s = tdrpStrDup("precip_rate_based_on_pid");
-      tt->struct_vals[139].s = tdrpStrDup("mm/hr");
-      tt->struct_vals[140].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[141].e = OUTPUT_SCALING_SPECIFIED;
-      tt->struct_vals[142].d = 0.01;
-      tt->struct_vals[143].d = 0;
     tt++;
     
-    // Parameter 'Comment 32'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 32");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("SPECIFYING COPY-THROUGH FIELDS");
     tt->comment_text = tdrpStrDup("These fields are copied unchanged from the input file to the output file. This is a way of consolidating the output data set.");
     tt++;
@@ -4152,11 +2073,11 @@ using namespace std;
       tt->struct_vals[2].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 33'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 33");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("OUTPUT FILE FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4213,11 +2134,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 34'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 34");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4258,11 +2179,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 35'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 35");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("VOLUME OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
