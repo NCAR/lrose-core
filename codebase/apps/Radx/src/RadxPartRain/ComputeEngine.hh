@@ -45,7 +45,6 @@
 #include <radar/NcarParticleId.hh>
 #include <radar/TempProfile.hh>
 #include <radar/AtmosAtten.hh>
-#include <radar/IntfLocator.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxTime.hh>
 class RadxRay;
@@ -139,8 +138,6 @@ private:
   RadxArray<double> _snrArray_;
   RadxArray<double> _dbzArray_;
   RadxArray<double> _velArray_;
-  RadxArray<double> _widthArray_;
-  RadxArray<double> _ncpArray_;
   RadxArray<double> _zdrArray_;
   RadxArray<double> _zdrmArray_;
   RadxArray<double> _zdpArray_;
@@ -157,8 +154,6 @@ private:
   double *_snrArray;
   double *_dbzArray;
   double *_velArray;
-  double *_widthArray;
-  double *_ncpArray;
   double *_zdrArray;
   double *_zdrmArray;
   double *_zdpArray;
@@ -215,7 +210,6 @@ private:
 
   // pid
 
-  IntfLocator _intf;
   NcarParticleId _pid;
   const TempProfile *_tempProfile;
 
@@ -271,8 +265,6 @@ private:
     
   void _kdpInit();
   void _kdpCompute();
-
-  void _locateRlan();
 
   int _pidInit();
   void _pidCompute();

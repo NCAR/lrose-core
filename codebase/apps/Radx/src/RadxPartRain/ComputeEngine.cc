@@ -142,12 +142,6 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
     _kdp.initializeArrays(_nGates);
   }
 
-  // locate RLAN interference
-
-  if (_params.locate_rlan_interference) {
-    _locateRlan();
-  }
-
   // compute pid
 
   _allocPidArrays();
@@ -231,17 +225,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *sdzdrForPid = _pid.getSdzdr();
   const double *sdphidpForPid = _pid.getSdphidp();
 
-  const double *snrRlan = _intf.getSnr();
-  const double *snrModeRlan = _intf.getSnrMode();
-  const double *snrDModeRlan = _intf.getSnrDMode();
-  const double *zdrRlan = _intf.getZdr();
-  const double *zdrModeRlan = _intf.getZdrMode();
-  const double *zdrDModeRlan = _intf.getZdrDMode();
-  const double *ncpMeanRlan = _intf.getNcpMean();
-  const double *phaseRlan = _intf.getPhase();
-  const double *phaseChangeRlan = _intf.getPhaseChangeError();
-  const bool *rlanFlag = _intf.getRlanFlag();
-
   // load up output data
 
   double minValidPrecipRate = _params.PRECIP_min_valid_rate;
@@ -271,12 +254,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::VEL:
           *datp = _velArray[igate];
-          break;
-        case Params::WIDTH:
-          *datp = _widthArray[igate];
-          break;
-        case Params::NCP:
-          *datp = _ncpArray[igate];
           break;
         case Params::ZDR:
           *datp = _zdrArray[igate];
@@ -539,41 +516,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::TEMP_FOR_PID:
           *datp = _tempForPid[igate];
-          break;
-
-        case Params::SNR_RLAN:
-          *datp = snrRlan[igate];
-          break;
-        case Params::SNR_MODE_RLAN:
-          *datp = snrModeRlan[igate];
-          break;
-        case Params::SNR_DMODE_RLAN:
-          *datp = snrDModeRlan[igate];
-          break;
-        case Params::ZDR_RLAN:
-          *datp = zdrRlan[igate];
-          break;
-        case Params::ZDR_MODE_RLAN:
-          *datp = zdrModeRlan[igate];
-          break;
-        case Params::ZDR_DMODE_RLAN:
-          *datp = zdrDModeRlan[igate];
-          break;
-        case Params::NCP_MEAN_RLAN:
-          *datp = ncpMeanRlan[igate];
-          break;
-        case Params::PHASE_RLAN:
-          *datp = phaseRlan[igate];
-          break;
-        case Params::PHASE_CHANGE_RLAN:
-          *datp = phaseChangeRlan[igate];
-          break;
-        case Params::RLAN_FLAG:
-          if (rlanFlag[igate]) {
-            *datp = 1.0;
-          } else {
-            *datp = 0.0;
-          }
           break;
 
         case Params::ZDRM_IN_ICE:
@@ -862,82 +804,6 @@ void ComputeEngine::_kdpCompute()
 }
 
 //////////////////////////////////////
-// Locate RLAN interference
-
-void ComputeEngine::_locateRlan()
-  
-{
-
-  // set up RLAN
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _intf.setDebug(true);
-  }
-
-  _intf.setNGatesKernel(9);
-
-  _intf.setRayProps(_timeSecs,
-                    _nanoSecs,
-                    _elevation,
-                    _azimuth,
-                    _nGates,
-                    _startRangeKm,
-                    _gateSpacingKm,
-                    _wavelengthM,
-                    _nyquist);
-
-  _intf.setFields(_snrArray,
-                  _velArray,
-                  _widthArray,
-                  _ncpArray,
-                  _zdrArray,
-                  missingDbl);
-
-  // locate RLAN interference
-
-  _intf.locate();
-
-#ifdef JUNK
-  
-  // override temp profile if appropriate
-  
-  if (_params.use_soundings_from_spdb) {
-    if (_tempProfile) {
-      const vector<NcarParticleId::TmpPoint> &profile = _tempProfile->getProfile();
-      if (profile.size() > 0) {
-        _pid.setTempProfile(profile);
-      }
-    }
-  }
-
-  // fill temperature array
-  
-  _pid.fillTempArray(_radarHtKm,
-                     _params.override_standard_pseudo_earth_radius,
-                     _params.pseudo_earth_radius_ratio,
-                     _elevation, _nGates,
-                     _startRangeKm,
-                     _gateSpacingKm,
-                     _tempForPid);
-
-  // compute particle ID
-  
-  _pid.computePidBeam(_nGates, _snrArray, _dbzArray, 
-                      _zdrArray, _kdpArray, _ldrArray, 
-                      _rhohvArray, _phidpArray, _tempForPid);
-  
-  // load results
-
-  memcpy(_pidArray, _pid.getPid(), _nGates * sizeof(int));
-  memcpy(_pidArray2, _pid.getPid2(), _nGates * sizeof(int));
-  memcpy(_pidInterest, _pid.getInterest(), _nGates * sizeof(double));
-  memcpy(_pidInterest2, _pid.getInterest2(), _nGates * sizeof(double));
-
-#endif
-  
-}
-
-//////////////////////////////////////
 // initialize pid computations
   
 int ComputeEngine::_pidInit()
@@ -1126,8 +992,6 @@ void ComputeEngine::_allocMomentsArrays()
   _snrArray = _snrArray_.alloc(_nGates);
   _dbzArray = _dbzArray_.alloc(_nGates);
   _velArray = _velArray_.alloc(_nGates);
-  _widthArray = _widthArray_.alloc(_nGates);
-  _ncpArray = _ncpArray_.alloc(_nGates);
   _zdrArray = _zdrArray_.alloc(_nGates);
   _zdrmArray = _zdrmArray_.alloc(_nGates);
   _zdpArray = _zdpArray_.alloc(_nGates);
@@ -1294,37 +1158,6 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
     for (int igate = 0; igate < _nGates; igate++) {
       _kdpArray[igate] = missingDbl;
     }
-  }
-
-  if (_params.locate_rlan_interference) {
-
-    if (_loadFieldArray(inputRay, _params.VEL_field_name,
-                        true, _velArray)) {
-      return -1;
-    }
-
-    if (_params.WIDTH_available) {
-      if (_loadFieldArray(inputRay, _params.WIDTH_field_name,
-                          true, _widthArray)) {
-        return -1;
-      }
-    } else {
-      for (int igate = 0; igate < _nGates; igate++) {
-        _widthArray[igate] = missingDbl;
-      }
-    }
-    
-    if (_params.NCP_available) {
-      if (_loadFieldArray(inputRay, _params.NCP_field_name,
-                          true, _ncpArray)) {
-        return -1;
-      }
-    } else {
-      for (int igate = 0; igate < _nGates; igate++) {
-        _ncpArray[igate] = missingDbl;
-      }
-    }
-
   }
 
   return 0;

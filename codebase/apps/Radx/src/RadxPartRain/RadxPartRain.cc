@@ -418,10 +418,7 @@ int RadxPartRain::_processFile(const string &filePath)
                          _params.radar_longitude_deg,
                          _params.radar_altitude_meters / 1000.0);
   }
-  if (_params.locate_rlan_interference) {
-    vol.estimateSweepNyquistFromVel(_params.VEL_field_name);
-  }
-  
+
   // set radar properties
 
   _wavelengthM = vol.getWavelengthM();
@@ -595,15 +592,6 @@ void RadxPartRain::_setupRead(RadxFile &file)
   }
   if (_params.KDP_available) {
     file.addReadField(_params.KDP_field_name);
-  }
-  if (_params.locate_rlan_interference) {
-    file.addReadField(_params.VEL_field_name);
-    if (_params.NCP_available) {
-      file.addReadField(_params.NCP_field_name);
-    }
-    if (_params.WIDTH_available) {
-      file.addReadField(_params.WIDTH_field_name);
-    }
   }
   if (_params.copy_input_fields_to_output) {
     for (int ii = 0; ii < _params.copy_fields_n; ii++) {

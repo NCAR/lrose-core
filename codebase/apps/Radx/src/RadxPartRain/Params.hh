@@ -81,78 +81,66 @@ public:
     SNR = 0,
     DBZ = 1,
     VEL = 2,
-    WIDTH = 3,
-    NCP = 4,
-    ZDR = 5,
-    ZDRM = 6,
-    LDR = 7,
-    RHOHV = 8,
-    RHOHV_NNC = 9,
-    PHIDP = 10,
-    KDP = 11,
-    KDP_BRINGI = 12,
-    PSOB = 13,
-    ZDP = 14,
-    PRECIP_RATE_ZH = 15,
-    PRECIP_RATE_ZH_SNOW = 16,
-    PRECIP_RATE_Z_ZDR = 17,
-    PRECIP_RATE_KDP = 18,
-    PRECIP_RATE_KDP_ZDR = 19,
-    PRECIP_RATE_HYBRID = 20,
-    PRECIP_RATE_PID = 21,
-    PRECIP_RATE_HIDRO = 22,
-    PRECIP_RATE_BRINGI = 23,
-    DBZ_ATTEN_CORRECTION = 24,
-    ZDR_ATTEN_CORRECTION = 25,
-    DBZ_ATTEN_CORRECTED = 26,
-    ZDR_ATTEN_CORRECTED = 27,
-    DBZ_FOR_KDP = 28,
-    ZDR_FOR_KDP = 29,
-    RHOHV_FOR_KDP = 30,
-    SNR_FOR_KDP = 31,
-    ZDR_SDEV_FOR_KDP = 32,
-    VALID_FLAG_FOR_KDP = 33,
-    PHIDP_FOR_KDP = 34,
-    PHIDP_MEAN_FOR_KDP = 35,
-    PHIDP_MEAN_UNFOLD_FOR_KDP = 36,
-    PHIDP_SDEV_FOR_KDP = 37,
-    PHIDP_JITTER_FOR_KDP = 38,
-    PHIDP_UNFOLD_FOR_KDP = 39,
-    PHIDP_FILT_FOR_KDP = 40,
-    PHIDP_COND_FOR_KDP = 41,
-    PHIDP_COND_FILT_FOR_KDP = 42,
-    DBZ_FOR_RATE = 43,
-    ZDR_FOR_RATE = 44,
-    KDP_FOR_RATE = 45,
-    PARTICLE_ID = 46,
-    PID_INTEREST = 47,
-    PARTICLE_ID2 = 48,
-    PID_INTEREST2 = 49,
-    DBZ_FOR_PID = 50,
-    ZDR_FOR_PID = 51,
-    LDR_FOR_PID = 52,
-    PHIDP_FOR_PID = 53,
-    RHOHV_FOR_PID = 54,
-    KDP_FOR_PID = 55,
-    SDZDR_FOR_PID = 56,
-    SDPHIDP_FOR_PID = 57,
-    TEMP_FOR_PID = 58,
-    SNR_RLAN = 59,
-    SNR_MODE_RLAN = 60,
-    SNR_DMODE_RLAN = 61,
-    ZDR_RLAN = 62,
-    ZDR_MODE_RLAN = 63,
-    ZDR_DMODE_RLAN = 64,
-    NCP_MEAN_RLAN = 65,
-    PHASE_RLAN = 66,
-    PHASE_CHANGE_RLAN = 67,
-    RLAN_FLAG = 68,
-    ZDRM_IN_ICE = 69,
-    ZDRM_IN_BRAGG = 70,
-    ZDR_IN_ICE = 71,
-    ZDR_IN_BRAGG = 72,
-    ZDR_FLAG_IN_ICE = 73,
-    ZDR_FLAG_IN_BRAGG = 74
+    ZDR = 3,
+    ZDRM = 4,
+    LDR = 5,
+    RHOHV = 6,
+    RHOHV_NNC = 7,
+    PHIDP = 8,
+    KDP = 9,
+    KDP_BRINGI = 10,
+    PSOB = 11,
+    ZDP = 12,
+    PRECIP_RATE_ZH = 13,
+    PRECIP_RATE_ZH_SNOW = 14,
+    PRECIP_RATE_Z_ZDR = 15,
+    PRECIP_RATE_KDP = 16,
+    PRECIP_RATE_KDP_ZDR = 17,
+    PRECIP_RATE_HYBRID = 18,
+    PRECIP_RATE_PID = 19,
+    PRECIP_RATE_HIDRO = 20,
+    PRECIP_RATE_BRINGI = 21,
+    DBZ_ATTEN_CORRECTION = 22,
+    ZDR_ATTEN_CORRECTION = 23,
+    DBZ_ATTEN_CORRECTED = 24,
+    ZDR_ATTEN_CORRECTED = 25,
+    DBZ_FOR_KDP = 26,
+    ZDR_FOR_KDP = 27,
+    RHOHV_FOR_KDP = 28,
+    SNR_FOR_KDP = 29,
+    ZDR_SDEV_FOR_KDP = 30,
+    VALID_FLAG_FOR_KDP = 31,
+    PHIDP_FOR_KDP = 32,
+    PHIDP_MEAN_FOR_KDP = 33,
+    PHIDP_MEAN_UNFOLD_FOR_KDP = 34,
+    PHIDP_SDEV_FOR_KDP = 35,
+    PHIDP_JITTER_FOR_KDP = 36,
+    PHIDP_UNFOLD_FOR_KDP = 37,
+    PHIDP_FILT_FOR_KDP = 38,
+    PHIDP_COND_FOR_KDP = 39,
+    PHIDP_COND_FILT_FOR_KDP = 40,
+    DBZ_FOR_RATE = 41,
+    ZDR_FOR_RATE = 42,
+    KDP_FOR_RATE = 43,
+    PARTICLE_ID = 44,
+    PID_INTEREST = 45,
+    PARTICLE_ID2 = 46,
+    PID_INTEREST2 = 47,
+    DBZ_FOR_PID = 48,
+    ZDR_FOR_PID = 49,
+    LDR_FOR_PID = 50,
+    PHIDP_FOR_PID = 51,
+    RHOHV_FOR_PID = 52,
+    KDP_FOR_PID = 53,
+    SDZDR_FOR_PID = 54,
+    SDPHIDP_FOR_PID = 55,
+    TEMP_FOR_PID = 56,
+    ZDRM_IN_ICE = 57,
+    ZDRM_IN_BRAGG = 58,
+    ZDR_IN_ICE = 59,
+    ZDR_IN_BRAGG = 60,
+    ZDR_FLAG_IN_ICE = 61,
+    ZDR_FLAG_IN_BRAGG = 62
   } output_field_id_t;
 
   typedef enum {
@@ -580,14 +568,6 @@ public:
 
   char* RHOHV_NNC_field_name;
 
-  tdrp_bool_t NCP_available;
-
-  char* NCP_field_name;
-
-  tdrp_bool_t WIDTH_available;
-
-  char* WIDTH_field_name;
-
   tdrp_bool_t KDP_available;
 
   char* KDP_field_name;
@@ -663,8 +643,6 @@ public:
   double zdr_attenuation_coefficient;
 
   double zdr_attenuation_exponent;
-
-  tdrp_bool_t locate_rlan_interference;
 
   char* pid_thresholds_file_path;
 
@@ -998,7 +976,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[279];
+  mutable TDRPtable _table[273];
 
   const char *_className;
 
