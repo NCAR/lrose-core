@@ -81,6 +81,10 @@ public:
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
+  void setRlanInterestMapWidthMean
+    (const vector<InterestMap::ImPoint> &pts,
+     double weight);
+  
   void setRlanInterestThreshold(double val);
 
   // set radar props
@@ -109,7 +113,7 @@ public:
   ///////////////////////////////////////////////////////////////
   // set the fields as available
   
-  void setDbzField(double *vals);
+  void setDbzField(double *vals, double noiseDbzAt100km);
   void setVelField(double *vals, double nyquist = -9999.0);
   void setWidthField(double *vals);
   void setNcpField(double *vals);
@@ -119,18 +123,15 @@ public:
   //////////////////////////////////////////////
   // perform rlan location
   //
-  // mfields: array of Moments Fields computed before
-  //          calling this method
+  // Must call setRayProps first, and set the fields.
   //
-  // Must call setRayProps first
+  // Min fields required:
   //
-  // The following must be set in mfields prior to calling:
-  //
-  //   phase_for_rlan
-  //   snr_for_rlan
-  //   ncp
+  //   vel
+  //   ncp or width
+  //   snr or dbz
   
-  void rlanLocate();
+  int rlanLocate();
 
   // get input fields - after setting ray props and fields
 
@@ -146,6 +147,8 @@ public:
   // these arrays span the gates from 0 to nGates-1
 
   const bool *getRlanFlag() const { return _rlanFlag; }
+  const bool *getNoiseFlag() const { return _noiseFlag; }
+  const bool *getSignalFlag() const { return _signalFlag; }
   
   const double *getAccumPhaseChange() const { return _accumPhaseChange; }
   const double *getPhaseNoise() const { return _phaseNoise; }
@@ -155,6 +158,12 @@ public:
   const double *getZdrMode() const { return _zdrMode; }
   const double *getZdrDMode() const { return _zdrDMode; }
   const double *getNcpMean() const { return _ncpMean; }
+  const double *getWidthMean() const { return _widthMean; }
+
+  const double *getPhaseNoiseInterest() const { return _phaseNoiseInterest; }
+  const double *getNcpMeanInterest() const { return _ncpMeanInterest; }
+  const double *getWidthMeanInterest() const { return _widthMeanInterest; }
+  const double *getSnrDModeInterest() const { return _snrDModeInterest; }
 
   ////////////////////////////////////
   // print parameters for debugging
@@ -226,6 +235,12 @@ private:
   TaArray<bool> _rlanFlag_;
   bool *_rlanFlag;
 
+  TaArray<bool> _noiseFlag_;
+  bool *_noiseFlag;
+
+  TaArray<bool> _signalFlag_;
+  bool *_signalFlag;
+
   TaArray<double> _accumPhaseChange_;
   double *_accumPhaseChange;
 
@@ -247,6 +262,21 @@ private:
   TaArray<double> _ncpMean_;
   double *_ncpMean;
 
+  TaArray<double> _widthMean_;
+  double *_widthMean;
+
+  TaArray<double> _phaseNoiseInterest_;
+  double *_phaseNoiseInterest;
+
+  TaArray<double> _ncpMeanInterest_;
+  double *_ncpMeanInterest;
+
+  TaArray<double> _widthMeanInterest_;
+  double *_widthMeanInterest;
+
+  TaArray<double> _snrDModeInterest_;
+  double *_snrDModeInterest;
+
   // gate limits for computing stats along a ray
 
   vector<size_t> _startGate;
@@ -257,15 +287,19 @@ private:
   int _nGatesKernel;
 
   InterestMap *_rlanInterestMapPhaseNoise;
-  InterestMap *_rlanInterestMapSnrDMode;
   InterestMap *_rlanInterestMapNcpMean;
+  InterestMap *_rlanInterestMapWidthMean;
+  InterestMap *_rlanInterestMapSnrDMode;
+
   double _rlanWeightPhaseNoise;
   double _rlanWeightSnrDMode;
   double _rlanWeightNcpMean;
+  double _rlanWeightWidthMean;
   double _rlanInterestThreshold;
 
   // private methods
   
+  void _computeSnrFromDbz(double noiseDbzAt100km);
   double _computePhaseNoise(int startGate, int endGate);
   void _computeDeltaMode(const string &fieldName,
                          const double *vals, double *mode, double *dMode);

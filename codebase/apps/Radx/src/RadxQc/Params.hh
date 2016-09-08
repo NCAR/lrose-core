@@ -113,9 +113,16 @@ public:
     ZDR_MODE_RLAN = 37,
     ZDR_DMODE_RLAN = 38,
     NCP_MEAN_RLAN = 39,
-    PHASE_RLAN = 40,
-    PHASE_NOISE_RLAN = 41,
-    RLAN_FLAG = 42
+    WIDTH_MEAN_RLAN = 40,
+    PHASE_RLAN = 41,
+    PHASE_NOISE_RLAN = 42,
+    RLAN_FLAG = 43,
+    NOISE_FLAG = 44,
+    SIGNAL_FLAG = 45,
+    PHASE_NOISE_INTEREST_RLAN = 46,
+    NCP_MEAN_INTEREST_RLAN = 47,
+    WIDTH_MEAN_INTEREST_RLAN = 48,
+    SNR_DMODE_INTEREST_RLAN = 49
   } output_field_id_t;
 
   typedef enum {

@@ -116,6 +116,17 @@ RadxQc::RadxQc(int argc, char **argv)
     OK = FALSE;
   }
 
+  if (_params.locate_rlan_interference) {
+    if (!_params.NCP_available && !_params.WIDTH_available) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Problem with TDRP parameters." << endl;
+      cerr << "  You have locate_rlan_interference set to TRUE" << endl;
+      cerr << "  but neither WIDTH or NCP is avaiable." << endl;
+      cerr << "  You need either NCP or WIDTH for RLAN location." << endl;
+      OK = FALSE;
+    }
+  }
+
   // initialize compute object
 
   pthread_mutex_init(&_debugPrintMutex, NULL);

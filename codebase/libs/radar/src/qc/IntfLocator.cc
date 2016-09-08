@@ -55,6 +55,7 @@ IntfLocator::IntfLocator()
   _rlanInterestMapPhaseNoise = NULL;
   _rlanInterestMapSnrDMode = NULL;
   _rlanInterestMapNcpMean = NULL;
+  _rlanInterestMapWidthMean = NULL;
 
   _createDefaultInterestMaps();
   _nGatesKernel = 9;
@@ -84,6 +85,10 @@ IntfLocator::~IntfLocator()
     delete _rlanInterestMapNcpMean;
   }
 
+  if (_rlanInterestMapWidthMean) {
+    delete _rlanInterestMapWidthMean;
+  }
+
 }
 
 ///////////////////////////////////////////////////////////////
@@ -105,6 +110,9 @@ void IntfLocator::printParams(ostream &out)
   }
   if (_rlanInterestMapNcpMean) {
     _rlanInterestMapNcpMean->printParams(out);
+  }
+  if (_rlanInterestMapWidthMean) {
+    _rlanInterestMapWidthMean->printParams(out);
   }
 
 }
@@ -154,10 +162,20 @@ void IntfLocator::setRayProps(time_t timeSecs,
 // set the available fields
 // must be called after setRayProps()
 
-void IntfLocator::setDbzField(double *vals)
+void IntfLocator::setDbzField(double *vals,
+                              double noiseDbzAt100km)
 {
+
+  // set DBZ field
+
   memcpy(_dbz, vals, _nGates * sizeof(double));
   _dbzAvail = true;
+
+  // compute SNR from DBZ
+
+  _computeSnrFromDbz(noiseDbzAt100km);
+  _snrAvail = true;
+
 }
 
 void IntfLocator::setVelField(double *vals,
@@ -219,17 +237,61 @@ void IntfLocator::setZdrField(double *vals)
   _zdrAvail = true;
 }
 
+//////////////////////////////////////////////////////////////
+// Compute the SNR field from the DBZ field
+
+void IntfLocator::_computeSnrFromDbz(double noiseDbzAt100km)
+
+{
+
+  // compute noise at each gate
+
+  TaArray<double> noiseDbz_;
+  double *noiseDbz = noiseDbz_.alloc(_nGates);
+  double range = _startRangeKm;
+  if (range == 0) {
+    range = _gateSpacingKm / 10.0;
+  }
+  for (int igate = 0; igate < _nGates; igate++, range += _gateSpacingKm) {
+    noiseDbz[igate] = noiseDbzAt100km + 20.0 * (log10(range) - log10(100.0));
+  }
+
+  // compute snr from dbz
+  
+  double *snr = _snr;
+  const double *dbz = _dbz;
+  for (int igate = 0; igate < _nGates; igate++, snr++, dbz++) {
+    if (*dbz != _missingVal) {
+      *snr = *dbz - noiseDbz[igate];
+    } else {
+      *snr = -20;
+    }
+  }
+
+}
+
 ///////////////////////////////////////////////////////////////
 // locate the rlan gates
+//
+// Returns 0 on success, -1 on failure
 
-void IntfLocator::rlanLocate()
+int IntfLocator::rlanLocate()
   
 {
+
+  if (!_ncpAvail && !_widthAvail) {
+    cerr << "ERROR - IntfLocator::rlanLocate()" << endl;
+    cerr << "  Neither NCP or WIDTH is available" << endl;
+    cerr << "  Cannot locate RLAN interference" << endl;
+    return -1;
+  }
 
   _startGate.resize(_nGates);
   _endGate.resize(_nGates);
   
   _rlanFlag = _rlanFlag_.alloc(_nGates);
+  _noiseFlag = _noiseFlag_.alloc(_nGates);
+  _signalFlag = _signalFlag_.alloc(_nGates);
   _accumPhaseChange = _accumPhaseChange_.alloc(_nGates);
   _phaseNoise = _phaseNoise_.alloc(_nGates);
   _snrMode = _snrMode_.alloc(_nGates);
@@ -237,9 +299,17 @@ void IntfLocator::rlanLocate()
   _zdrMode = _zdrMode_.alloc(_nGates);
   _zdrDMode = _zdrDMode_.alloc(_nGates);
   _ncpMean = _ncpMean_.alloc(_nGates);
+  _widthMean = _widthMean_.alloc(_nGates);
+
+  _phaseNoiseInterest = _phaseNoiseInterest_.alloc(_nGates);
+  _ncpMeanInterest = _ncpMeanInterest_.alloc(_nGates);
+  _widthMeanInterest = _widthMeanInterest_.alloc(_nGates);
+  _snrDModeInterest = _snrDModeInterest_.alloc(_nGates);
   
   for (int igate = 0; igate < _nGates; igate++) {
     _rlanFlag[igate] = false;
+    _noiseFlag[igate] = false;
+    _signalFlag[igate] = false;
     _startGate[igate] = 0;
     _endGate[igate] = 0;
     _accumPhaseChange[igate] = -9999;
@@ -249,6 +319,11 @@ void IntfLocator::rlanLocate()
     _zdrMode[igate] = -9999;
     _zdrDMode[igate] = -9999;
     _ncpMean[igate] = -9999;
+    _widthMean[igate] = -9999;
+    _phaseNoiseInterest[igate] = -9999;
+    _ncpMeanInterest[igate] = -9999;
+    _widthMeanInterest[igate] = -9999;
+    _snrDModeInterest[igate] = -9999;
   }
   
   // first compute the absolute phase at each gate, summing up
@@ -273,7 +348,10 @@ void IntfLocator::rlanLocate()
   kernelSize = kernelHalf * 2 + 1;
 
   if ((int) _nGates < kernelSize) {
-    return;
+    cerr << "ERROR - IntfLocator::rlanLocate()" << endl;
+    cerr << "  nGates too small: " << _nGates << endl;
+    cerr << "  nGates must exceed kernelSize: " << kernelSize << endl;
+    return -1;
   }
 
   // set up gate limits
@@ -311,27 +389,52 @@ void IntfLocator::rlanLocate()
   }
   if (_ncpAvail) {
     _computeMeanInRange(_ncp, _ncpMean);
+  } else {
+    _computeMeanInRange(_width, _widthMean);
+  }
+
+  // compute interest
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    
+    _phaseNoiseInterest[igate] =
+      _rlanInterestMapPhaseNoise->getInterest(_phaseNoise[igate]);
+
+    _ncpMeanInterest[igate] =
+      _rlanInterestMapNcpMean->getInterest(_ncpMean[igate]);
+
+    _widthMeanInterest[igate] =
+      _rlanInterestMapWidthMean->getInterest(_widthMean[igate]);
+
+    _snrDModeInterest[igate] =
+      _rlanInterestMapSnrDMode->getInterest(_snrDMode[igate]);
+
   }
 
   // set flags
   
-  double sumWeightsRlan = (_rlanWeightPhaseNoise + 
-                           _rlanWeightSnrDMode +
-                           _rlanWeightNcpMean);
+  double sumWeightsRlan = 1.0;
+  if (_ncpAvail) {
+    sumWeightsRlan = (_rlanWeightPhaseNoise + 
+                      _rlanWeightSnrDMode +
+                      _rlanWeightNcpMean);
+  } else {
+    sumWeightsRlan = (_rlanWeightPhaseNoise + 
+                      _rlanWeightSnrDMode +
+                      _rlanWeightWidthMean);
+  }
   
   for (int igate = 0; igate < _nGates; igate++) {
     
-    double phaseNoise = _phaseNoise[igate];
-    double sndDMode = _snrMode[igate];
-    double ncpMean = _ncpMean[igate];
-
     double sumInterestRlan =
-      (_rlanInterestMapPhaseNoise->getInterest(phaseNoise) * 
-       _rlanWeightPhaseNoise) +
-      (_rlanInterestMapSnrDMode->getInterest(sndDMode) * 
-       _rlanWeightSnrDMode) +
-      (_rlanInterestMapNcpMean->getInterest(ncpMean) * 
-       _rlanWeightNcpMean);
+      (_phaseNoiseInterest[igate] * _rlanWeightPhaseNoise) +
+      (_snrDModeInterest[igate] * _rlanWeightSnrDMode);
+
+    if (_ncpAvail) {
+      sumInterestRlan += (_ncpMeanInterest[igate] * _rlanWeightNcpMean);
+    } else {
+      sumInterestRlan += (_widthMeanInterest[igate] * _rlanWeightWidthMean);
+    }
     
     double interestRlan = sumInterestRlan / sumWeightsRlan;
 
@@ -358,6 +461,8 @@ void IntfLocator::rlanLocate()
       _rlanFlag[igate] = false;
     }
   }
+
+  return 0;
  
 }
 
@@ -692,6 +797,11 @@ void IntfLocator::_createDefaultInterestMaps()
   pts.push_back(InterestMap::ImPoint(0.20, 0.001));
   setRlanInterestMapNcpMean(pts, 1.0);
 
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(4.0, 0.001));
+  pts.push_back(InterestMap::ImPoint(5.0, 1.0));
+  setRlanInterestMapWidthMean(pts, 1.0);
+
   setRlanInterestThreshold(0.51);
 
 }
@@ -747,6 +857,23 @@ void IntfLocator::setRlanInterestMapNcpMean
     ("NcpMean", pts, weight);
 
   _rlanWeightNcpMean = weight;
+
+}
+
+void IntfLocator::setRlanInterestMapWidthMean
+  (const vector<InterestMap::ImPoint> &pts,
+   double weight)
+  
+{
+
+  if (_rlanInterestMapWidthMean) {
+    delete _rlanInterestMapWidthMean;
+  }
+
+  _rlanInterestMapWidthMean = new InterestMap
+    ("WidthMean", pts, weight);
+
+  _rlanWeightWidthMean = weight;
 
 }
 

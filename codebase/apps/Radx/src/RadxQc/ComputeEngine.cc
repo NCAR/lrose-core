@@ -186,9 +186,18 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *zdrModeRlan = _intf.getZdrMode();
   const double *zdrDModeRlan = _intf.getZdrDMode();
   const double *ncpMeanRlan = _intf.getNcpMean();
+  const double *widthMeanRlan = _intf.getWidthMean();
   const double *phaseRlan = _intf.getPhase();
   const double *phaseNoiseRlan = _intf.getPhaseNoise();
+
   const bool *rlanFlag = _intf.getRlanFlag();
+  const bool *noiseFlag = _intf.getNoiseFlag();
+  const bool *signalFlag = _intf.getSignalFlag();
+  
+  const double *phaseNoiseInterest = _intf.getPhaseNoiseInterest();
+  const double *ncpMeanInterest = _intf.getNcpMeanInterest();
+  const double *widthMeanInterest = _intf.getWidthMeanInterest();
+  const double *snrDModeInterest = _intf.getSnrDModeInterest();
 
   // load up output data
 
@@ -347,18 +356,49 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::NCP_MEAN_RLAN:
           *datp = ncpMeanRlan[igate];
           break;
+        case Params::WIDTH_MEAN_RLAN:
+          *datp = widthMeanRlan[igate];
+          break;
         case Params::PHASE_RLAN:
           *datp = phaseRlan[igate];
           break;
         case Params::PHASE_NOISE_RLAN:
           *datp = phaseNoiseRlan[igate];
           break;
+
         case Params::RLAN_FLAG:
           if (rlanFlag[igate]) {
             *datp = 1.0;
           } else {
             *datp = 0.0;
           }
+          break;
+        case Params::NOISE_FLAG:
+          if (noiseFlag[igate]) {
+            *datp = 1.0;
+          } else {
+            *datp = 0.0;
+          }
+          break;
+        case Params::SIGNAL_FLAG:
+          if (signalFlag[igate]) {
+            *datp = 1.0;
+          } else {
+            *datp = 0.0;
+          }
+          break;
+
+        case Params::PHASE_NOISE_INTEREST_RLAN:
+          *datp = phaseNoiseInterest[igate];
+          break;
+        case Params::NCP_MEAN_INTEREST_RLAN:
+          *datp = ncpMeanInterest[igate];
+          break;
+        case Params::WIDTH_MEAN_INTEREST_RLAN:
+          *datp = widthMeanInterest[igate];
+          break;
+        case Params::SNR_DMODE_INTEREST_RLAN:
+          *datp = snrDModeInterest[igate];
           break;
 
       } // switch
@@ -539,12 +579,18 @@ void ComputeEngine::_locateRlan()
                     _gateSpacingKm);
 
   _intf.setFieldMissingVal(missingDbl);
-
-  _intf.setDbzField(_dbzArray);
+  
   _intf.setVelField(_velArray, _nyquist);
-  _intf.setWidthField(_widthArray);
-  _intf.setNcpField(_ncpArray);
-  _intf.setSnrField(_snrArray);
+  if (_params.NCP_available) {
+    _intf.setNcpField(_ncpArray);
+  } else {
+    _intf.setWidthField(_widthArray);
+  }
+  if (_params.SNR_available) {
+    _intf.setSnrField(_snrArray);
+  } else {
+    _intf.setDbzField(_dbzArray, _params.noise_dbz_at_100km);
+  }
   _intf.setZdrField(_zdrArray);
 
   // locate RLAN interference
