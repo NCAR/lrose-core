@@ -1053,7 +1053,7 @@ using namespace std;
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("noise_dbz_at_100km");
     tt->descr = tdrpStrDup("The noise value, represented as dBZ at a range of 100km.");
-    tt->help = tdrpStrDup("This is used for computing the SNR from the DBZ field. It is only used if SNR_available is FALSE. The SNR will be computed by range-correcting this value and using it as the noise value.");
+    tt->help = tdrpStrDup("This is used if SNR_available is set to FALSE. It is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.");
     tt->val_offset = (char *) &noise_dbz_at_100km - &_start_;
     tt->single_val.d = 0;
     tt++;
@@ -1130,15 +1130,6 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("RHOHV");
     tt++;
     
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("COMPUTING KDP");
-    tt->comment_text = tdrpStrDup("Parameters for computing KDP. KDP will be computed if KDP_available is FALSE.");
-    tt++;
-    
     // Parameter 'compute_KDP'
     // ctype is 'tdrp_bool_t'
     
@@ -1146,7 +1137,7 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("compute_KDP");
     tt->descr = tdrpStrDup("Compute KDP from PHIDP");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("If KDP is not available, it can be computed from PHIDP.");
     tt->val_offset = (char *) &compute_KDP - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -1383,11 +1374,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1464,11 +1455,11 @@ using namespace std;
     tt->single_val.d = 0.84;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("LOCATING RLAN INTERFERENCE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1485,11 +1476,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR temperatures - OPTIONAL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1662,44 +1653,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("SMOOTHING OUTPUT PID");
-    tt->comment_text = tdrpStrDup("This section gives you the option of smoothing the output pid field in range by applying a median filter.");
-    tt++;
-    
-    // Parameter 'apply_median_filter_to_PID'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_median_filter_to_PID");
-    tt->descr = tdrpStrDup("Option to filter PID with median filter.");
-    tt->help = tdrpStrDup("The filter is computed in range, and affects both rain rate and PID.");
-    tt->val_offset = (char *) &apply_median_filter_to_PID - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'PID_median_filter_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("PID_median_filter_len");
-    tt->descr = tdrpStrDup("Length of median filter for PID - gates.");
-    tt->help = tdrpStrDup("See 'appply_median_filter_to_PID'");
-    tt->val_offset = (char *) &PID_median_filter_len - &_start_;
-    tt->single_val.i = 7;
-    tt++;
-    
-    // Parameter 'Comment 12'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("RETRIEVING SITE TEMPERATURE FROM SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1752,11 +1710,11 @@ using namespace std;
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("SPECIFYING FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1870,8 +1828,8 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[39].val = NCP_MEAN_RLAN;
         tt->struct_def.fields[0].enum_def.fields[40].name = tdrpStrDup("PHASE_RLAN");
         tt->struct_def.fields[0].enum_def.fields[40].val = PHASE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("PHASE_CHANGE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[41].val = PHASE_CHANGE_RLAN;
+        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("PHASE_NOISE_RLAN");
+        tt->struct_def.fields[0].enum_def.fields[41].val = PHASE_NOISE_RLAN;
         tt->struct_def.fields[0].enum_def.fields[42].name = tdrpStrDup("RLAN_FLAG");
         tt->struct_def.fields[0].enum_def.fields[42].val = RLAN_FLAG;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
@@ -2011,11 +1969,11 @@ using namespace std;
       tt->struct_vals[71].d = 0;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("SPECIFYING COPY-THROUGH FIELDS");
     tt->comment_text = tdrpStrDup("These fields are copied unchanged from the input file to the output file. This is a way of consolidating the output data set.");
     tt++;
@@ -2073,11 +2031,11 @@ using namespace std;
       tt->struct_vals[2].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OUTPUT FILE FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2134,11 +2092,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2179,11 +2137,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("VOLUME OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

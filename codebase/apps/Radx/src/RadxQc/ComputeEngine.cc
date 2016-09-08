@@ -187,7 +187,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *zdrDModeRlan = _intf.getZdrDMode();
   const double *ncpMeanRlan = _intf.getNcpMean();
   const double *phaseRlan = _intf.getPhase();
-  const double *phaseChangeRlan = _intf.getPhaseChangeError();
+  const double *phaseNoiseRlan = _intf.getPhaseNoise();
   const bool *rlanFlag = _intf.getRlanFlag();
 
   // load up output data
@@ -350,8 +350,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::PHASE_RLAN:
           *datp = phaseRlan[igate];
           break;
-        case Params::PHASE_CHANGE_RLAN:
-          *datp = phaseChangeRlan[igate];
+        case Params::PHASE_NOISE_RLAN:
+          *datp = phaseNoiseRlan[igate];
           break;
         case Params::RLAN_FLAG:
           if (rlanFlag[igate]) {
@@ -527,6 +527,8 @@ void ComputeEngine::_locateRlan()
   }
 
   _intf.setNGatesKernel(9);
+  _intf.setWavelengthM(_wavelengthM);
+  _intf.setRadarHtM(_radarHtKm * 1000.0);
 
   _intf.setRayProps(_timeSecs,
                     _nanoSecs,
@@ -534,20 +536,20 @@ void ComputeEngine::_locateRlan()
                     _azimuth,
                     _nGates,
                     _startRangeKm,
-                    _gateSpacingKm,
-                    _wavelengthM,
-                    _nyquist);
+                    _gateSpacingKm);
 
-  _intf.setFields(_snrArray,
-                  _velArray,
-                  _widthArray,
-                  _ncpArray,
-                  _zdrArray,
-                  missingDbl);
+  _intf.setFieldMissingVal(missingDbl);
+
+  _intf.setDbzField(_dbzArray);
+  _intf.setVelField(_velArray, _nyquist);
+  _intf.setWidthField(_widthArray);
+  _intf.setNcpField(_ncpArray);
+  _intf.setSnrField(_snrArray);
+  _intf.setZdrField(_zdrArray);
 
   // locate RLAN interference
 
-  _intf.locate();
+  _intf.rlanLocate();
 
 }
 
@@ -587,6 +589,33 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
     return -1;
   }
 
+  if (_loadFieldArray(inputRay, _params.VEL_field_name,
+                      true, _velArray)) {
+    return -1;
+  }
+
+  if (_params.WIDTH_available) {
+    if (_loadFieldArray(inputRay, _params.WIDTH_field_name,
+                        true, _widthArray)) {
+      return -1;
+    }
+  } else {
+    for (int igate = 0; igate < _nGates; igate++) {
+      _widthArray[igate] = missingDbl;
+    }
+  }
+
+  if (_params.NCP_available) {
+    if (_loadFieldArray(inputRay, _params.NCP_field_name,
+                        true, _ncpArray)) {
+      return -1;
+    }
+  } else {
+    for (int igate = 0; igate < _nGates; igate++) {
+      _ncpArray[igate] = missingDbl;
+    }
+  }
+  
   if (_params.SNR_available) {
     if (_loadFieldArray(inputRay, _params.SNR_field_name,
                         true, _snrArray)) {
@@ -596,59 +625,42 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
     _computeSnrFromDbz();
   }
   
-  if (_loadFieldArray(inputRay, _params.ZDR_field_name,
-                      true, _zdrArray)) {
-    return -1;
-  }
 
-  if (_loadFieldArray(inputRay, _params.VEL_field_name,
-                      true, _velArray)) {
-    return -1;
-  }
-
-  if (_loadFieldArray(inputRay, _params.PHIDP_field_name,
-                      true, _phidpArray)) {
-    return -1;
-  }
-  
-  if (_loadFieldArray(inputRay, _params.RHOHV_field_name,
-                      true, _rhohvArray)) {
-    return -1;
-  }
-  
-  for (int igate = 0; igate < _nGates; igate++) {
-    _kdpArray[igate] = missingDbl;
-  }
-
-  if (_params.locate_rlan_interference) {
-
-    if (_loadFieldArray(inputRay, _params.VEL_field_name,
-                        true, _velArray)) {
+  if (_params.ZDR_available) {
+    if (_loadFieldArray(inputRay, _params.ZDR_field_name,
+                        true, _zdrArray)) {
       return -1;
     }
-
-    if (_params.WIDTH_available) {
-      if (_loadFieldArray(inputRay, _params.WIDTH_field_name,
-                          true, _widthArray)) {
-        return -1;
-      }
-    } else {
-      for (int igate = 0; igate < _nGates; igate++) {
-        _widthArray[igate] = missingDbl;
-      }
+  } else {
+    for (int igate = 0; igate < _nGates; igate++) {
+      _zdrArray[igate] = missingDbl;
     }
-    
-    if (_params.NCP_available) {
-      if (_loadFieldArray(inputRay, _params.NCP_field_name,
-                          true, _ncpArray)) {
-        return -1;
-      }
-    } else {
-      for (int igate = 0; igate < _nGates; igate++) {
-        _ncpArray[igate] = missingDbl;
-      }
-    }
+  }
 
+  if (_params.PHIDP_available) {
+    if (_loadFieldArray(inputRay, _params.PHIDP_field_name,
+                        true, _phidpArray)) {
+      return -1;
+    }
+  } else {
+    for (int igate = 0; igate < _nGates; igate++) {
+      _phidpArray[igate] = missingDbl;
+    }
+  }
+
+  if (_params.RHOHV_available) {
+    if (_loadFieldArray(inputRay, _params.RHOHV_field_name,
+                        true, _rhohvArray)) {
+      return -1;
+    }
+  } else {
+    for (int igate = 0; igate < _nGates; igate++) {
+      _rhohvArray[igate] = missingDbl;
+    }
+  }
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    _kdpArray[igate] = missingDbl;
   }
 
   return 0;

@@ -60,29 +60,33 @@ public:
   void setDebug(bool state) { _debug = state; }
 
   //////////////////////////////////////////////////////
-  // set parameters for rlan location
 
-  // set kernel size for rlan location
-  
+  // set size of kernel for computing stats
+
   void setNGatesKernel(int val) {
     _nGatesKernel = val;
   }
 
-  // Set interest maps for identifying rlan
-  
-  void setInterestMapPhaseChangeErrorForRlan
+  // set interest maps for rlan location
+
+  void setRlanInterestMapPhaseNoise
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestMapSnrDModeForRlan
+  void setRlanInterestMapSnrDMode
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestMapNcpMeanForRlan
+  void setRlanInterestMapNcpMean
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestThreshold(double val);
+  void setRlanInterestThreshold(double val);
+
+  // set radar props
+
+  void setRadarHtM(double val) { _radarHtM = val; }
+  void setWavelengthM(double val) { _wavelengthM = val; }
   
   ///////////////////////////////////////////////////////////////
   // set the ray properties
@@ -95,22 +99,23 @@ public:
                    double azimuth,
                    int nGates,
                    double startRangeKm,
-                   double gateSpacingKm,
-                   double wavelengthM,
-                   double nyquist = -9999.0);
+                   double gateSpacingKm);
 
   ///////////////////////////////////////////////////////////////
-  // set the available fields
-  // if field is not available, set to NULL
-  // must be called before locate()
+  // set the missing value for fields
   
-  void setFields(double *snr,
-                 double *vel,
-                 double *width,
-                 double *ncp,
-                 double *zdr,
-                 double missingVal);
+  void setFieldMissingVal(double val) { _missingVal = val; }
   
+  ///////////////////////////////////////////////////////////////
+  // set the fields as available
+  
+  void setDbzField(double *vals);
+  void setVelField(double *vals, double nyquist = -9999.0);
+  void setWidthField(double *vals);
+  void setNcpField(double *vals);
+  void setSnrField(double *vals);
+  void setZdrField(double *vals);
+
   //////////////////////////////////////////////
   // perform rlan location
   //
@@ -125,7 +130,17 @@ public:
   //   snr_for_rlan
   //   ncp
   
-  void locate();
+  void rlanLocate();
+
+  // get input fields - after setting ray props and fields
+
+  const double *getDbz() const { return _dbz; }
+  const double *getVel() const { return _vel; }
+  const double *getPhase() const { return _phase; }
+  const double *getWidth() const { return _width; }
+  const double *getNcp() const { return _ncp; }
+  const double *getSnr() const { return _snr; }
+  const double *getZdr() const { return _zdr; }
 
   // get results - after running locate
   // these arrays span the gates from 0 to nGates-1
@@ -133,15 +148,8 @@ public:
   const bool *getRlanFlag() const { return _rlanFlag; }
   
   const double *getAccumPhaseChange() const { return _accumPhaseChange; }
-  const double *getPhaseChangeError() const { return _phaseChangeError; }
-
-  const double *getSnr() const { return _snr; }
-  const double *getVel() const { return _vel; }
-  const double *getWidth() const { return _width; }
-  const double *getNcp() const { return _ncp; }
-  const double *getZdr() const { return _zdr; }
-
-  const double *getPhase() const { return _phase; }
+  const double *getPhaseNoise() const { return _phaseNoise; }
+  
   const double *getSnrMode() const { return _snrMode; }
   const double *getSnrDMode() const { return _snrDMode; }
   const double *getZdrMode() const { return _zdrMode; }
@@ -160,6 +168,11 @@ private:
   
   bool _debug;
 
+  // radar properties
+
+  double _radarHtM;
+  double _wavelengthM;
+
   // ray properties
 
   time_t _timeSecs;
@@ -167,19 +180,22 @@ private:
   double _elevation;
   double _azimuth;
   int _nGates;
+
   double _startRangeKm;
   double _gateSpacingKm;
-  double _wavelengthM;
+
   double _nyquist;
+
+  // field missing value
+
+  double _missingVal;
 
   // arrays for input and computed data
   // and pointers to those arrays
 
-  double _missingVal;
-
-  TaArray<double> _snr_;
-  double *_snr;
-  bool _snrAvail;
+  TaArray<double> _dbz_;
+  double *_dbz;
+  bool _dbzAvail;
   
   TaArray<double> _vel_;
   double *_vel;
@@ -197,6 +213,10 @@ private:
   double *_ncp;
   bool _ncpAvail;
 
+  TaArray<double> _snr_;
+  double *_snr;
+  bool _snrAvail;
+  
   TaArray<double> _zdr_;
   double *_zdr;
   bool _zdrAvail;
@@ -209,8 +229,8 @@ private:
   TaArray<double> _accumPhaseChange_;
   double *_accumPhaseChange;
 
-  TaArray<double> _phaseChangeError_;
-  double *_phaseChangeError;
+  TaArray<double> _phaseNoise_;
+  double *_phaseNoise;
 
   TaArray<double> _snrMode_;
   double *_snrMode;
@@ -236,17 +256,17 @@ private:
 
   int _nGatesKernel;
 
-  InterestMap *_interestMapPhaseChangeErrorForRlan;
-  InterestMap *_interestMapSnrDModeForRlan;
-  InterestMap *_interestMapNcpMeanForRlan;
-  double _weightPhaseChangeErrorForRlan;
-  double _weightSnrDModeForRlan;
-  double _weightNcpMeanForRlan;
-  double _interestThreshold;
+  InterestMap *_rlanInterestMapPhaseNoise;
+  InterestMap *_rlanInterestMapSnrDMode;
+  InterestMap *_rlanInterestMapNcpMean;
+  double _rlanWeightPhaseNoise;
+  double _rlanWeightSnrDMode;
+  double _rlanWeightNcpMean;
+  double _rlanInterestThreshold;
 
   // private methods
   
-  double _computePhaseChangeError(int startGate, int endGate);
+  double _computePhaseNoise(int startGate, int endGate);
   void _computeDeltaMode(const string &fieldName,
                          const double *vals, double *mode, double *dMode);
   void _computeSdevInRange(const double *vals, double *sdevs);

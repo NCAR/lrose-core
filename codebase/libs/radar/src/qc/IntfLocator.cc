@@ -52,11 +52,16 @@ IntfLocator::IntfLocator()
 
   // create the default interest maps
 
-  _interestMapPhaseChangeErrorForRlan = NULL;
-  _interestMapSnrDModeForRlan = NULL;
-  _interestMapNcpMeanForRlan = NULL;
+  _rlanInterestMapPhaseNoise = NULL;
+  _rlanInterestMapSnrDMode = NULL;
+  _rlanInterestMapNcpMean = NULL;
+
   _createDefaultInterestMaps();
   _nGatesKernel = 9;
+
+  _radarHtM = -9999.0;
+  _wavelengthM = -9999.0;
+  _nyquist = -9999.0;
 
 }
 
@@ -67,16 +72,16 @@ IntfLocator::~IntfLocator()
   
 {
 
-  if (_interestMapPhaseChangeErrorForRlan) {
-    delete _interestMapPhaseChangeErrorForRlan;
+  if (_rlanInterestMapPhaseNoise) {
+    delete _rlanInterestMapPhaseNoise;
   }
 
-  if (_interestMapSnrDModeForRlan) {
-    delete _interestMapSnrDModeForRlan;
+  if (_rlanInterestMapSnrDMode) {
+    delete _rlanInterestMapSnrDMode;
   }
 
-  if (_interestMapNcpMeanForRlan) {
-    delete _interestMapNcpMeanForRlan;
+  if (_rlanInterestMapNcpMean) {
+    delete _rlanInterestMapNcpMean;
   }
 
 }
@@ -90,16 +95,16 @@ void IntfLocator::printParams(ostream &out)
 
   out << "Performing rlan detection:" << endl;
   out << "  nGatesKernel: " << _nGatesKernel << endl;
-  out << "  interestThreshold: " << _interestThreshold << endl;
+  out << "  rlanInterestThreshold: " << _rlanInterestThreshold << endl;
   
-  if (_interestMapPhaseChangeErrorForRlan) {
-    _interestMapPhaseChangeErrorForRlan->printParams(out);
+  if (_rlanInterestMapPhaseNoise) {
+    _rlanInterestMapPhaseNoise->printParams(out);
   }
-  if (_interestMapSnrDModeForRlan) {
-    _interestMapSnrDModeForRlan->printParams(out);
+  if (_rlanInterestMapSnrDMode) {
+    _rlanInterestMapSnrDMode->printParams(out);
   }
-  if (_interestMapNcpMeanForRlan) {
-    _interestMapNcpMeanForRlan->printParams(out);
+  if (_rlanInterestMapNcpMean) {
+    _rlanInterestMapNcpMean->printParams(out);
   }
 
 }
@@ -114,12 +119,10 @@ void IntfLocator::setRayProps(time_t timeSecs,
                               double azimuth,
                               int nGates,
                               double startRangeKm,
-                              double gateSpacingKm,
-                              double wavelengthM,
-                              double nyquist /* = -9999.0 */)
-                              
+                              double gateSpacingKm)
+  
 {
-
+  
   _timeSecs = timeSecs;
   _nanoSecs = nanoSecs;
   _elevation = elevation;
@@ -129,103 +132,97 @@ void IntfLocator::setRayProps(time_t timeSecs,
   _startRangeKm = startRangeKm;
   _gateSpacingKm = gateSpacingKm;
 
-  _wavelengthM = wavelengthM;
-  _nyquist = nyquist;
+  _dbzAvail = false;
+  _velAvail = false;
+  _phaseAvail = false;
+  _widthAvail = false;
+  _ncpAvail = false;
+  _snrAvail = false;
+  _zdrAvail = false;
 
-  _snr = _snr_.alloc(_nGates);
+  _dbz = _dbz_.alloc(_nGates);
   _vel = _vel_.alloc(_nGates);
   _phase = _phase_.alloc(_nGates);
   _width = _width_.alloc(_nGates);
   _ncp = _ncp_.alloc(_nGates);
+  _snr = _snr_.alloc(_nGates);
   _zdr = _zdr_.alloc(_nGates);
 
 }
 
 ///////////////////////////////////////////////////////////////
 // set the available fields
-// if field is not available, set to NULL
-// must be called before locate()
+// must be called after setRayProps()
 
-void IntfLocator::setFields(double *snr,
-                            double *vel,
-                            double *width,
-                            double *ncp,
-                            double *zdr,
-                            double missingVal)
-  
+void IntfLocator::setDbzField(double *vals)
+{
+  memcpy(_dbz, vals, _nGates * sizeof(double));
+  _dbzAvail = true;
+}
+
+void IntfLocator::setVelField(double *vals,
+                              double nyquist  /* = -9999.0 */)
 {
 
-  _missingVal = missingVal;
-
-  if (snr != NULL) {
-    memcpy(_snr, snr, _nGates * sizeof(double));
-    _snrAvail = true;
-    for (int igate = 0; igate < _nGates; igate++) {
-      if (_snr[igate] < -10) {
-        _snr[igate] = missingVal;
-      }
-    }
-  } else {
-    _snrAvail = false;
-  }
-
-  if (vel != NULL) {
-    memcpy(_vel, vel, _nGates * sizeof(double));
-    _velAvail = true;
-  } else {
-    _velAvail = false;
-  }
-
-  if (width != NULL) {
-    memcpy(_width, width, _nGates * sizeof(double));
-    _widthAvail = true;
-  } else {
-    _widthAvail = false;
-  }
-
-  if (ncp != NULL) {
-    memcpy(_ncp, ncp, _nGates * sizeof(double));
-    _ncpAvail = true;
-  } else {
-    _ncpAvail = false;
-  }
-
-  if (zdr != NULL) {
-    memcpy(_zdr, zdr, _nGates * sizeof(double));
-    _zdrAvail = true;
-  } else {
-    _zdrAvail = false;
-  }
-
+  memcpy(_vel, vals, _nGates * sizeof(double));
+  _velAvail = true;
+  
   // compute phase from velocity
-
-  if (_velAvail) {
-    if (_nyquist < -9990) {
-      // estimate the nyquist from the vel
-      for (int ii = 0; ii < _nGates; ii++) {
-        if (vel[ii] != missingVal) {
-          double absVel = fabs(vel[ii]);
-          if (_nyquist < absVel) {
-            _nyquist = absVel;
-          }
-        } // if (vel[ii] != missingVal)
-      } // ii
-    }
-    // estimate the phase from the vel
+  
+  if (_nyquist < -9990) {
+    // estimate the nyquist from the vel
     for (int ii = 0; ii < _nGates; ii++) {
+      if (_vel[ii] != _missingVal) {
+        double absVel = fabs(_vel[ii]);
+        if (_nyquist < absVel) {
+          _nyquist = absVel;
+        }
+      } // if (vel[ii] != _missingVal)
+    } // ii
+  }
+  
+  // estimate the phase from the vel
+  for (int ii = 0; ii < _nGates; ii++) {
+    if (_vel[ii] != _missingVal) {
       _phase[ii] = (_vel[ii] / _nyquist) * 180.0;
+    } else {
+      _phase[ii] = _missingVal;
     }
+  }
+  if (_nyquist > 0) {
     _phaseAvail = true;
-  } else {
-    _phaseAvail = false;
   }
 
+}
+
+void IntfLocator::setWidthField(double *vals)
+{
+  memcpy(_width, vals, _nGates * sizeof(double));
+  _widthAvail = true;
+}
+
+void IntfLocator::setNcpField(double *vals)
+{
+  memcpy(_ncp, vals, _nGates * sizeof(double));
+  _ncpAvail = true;
+}
+
+void IntfLocator::setSnrField(double *vals)
+{
+  memcpy(_snr, vals, _nGates * sizeof(double));
+  _snrAvail = true;
+}
+
+void IntfLocator::setZdrField(double *vals)
+{
+  memcpy(_zdr, vals, _nGates * sizeof(double));
+  _zdrAvail = true;
 }
 
 ///////////////////////////////////////////////////////////////
 // locate the rlan gates
 
-void IntfLocator::locate()
+void IntfLocator::rlanLocate()
   
 {
 
@@ -234,7 +231,7 @@ void IntfLocator::locate()
   
   _rlanFlag = _rlanFlag_.alloc(_nGates);
   _accumPhaseChange = _accumPhaseChange_.alloc(_nGates);
-  _phaseChangeError = _phaseChangeError_.alloc(_nGates);
+  _phaseNoise = _phaseNoise_.alloc(_nGates);
   _snrMode = _snrMode_.alloc(_nGates);
   _snrDMode = _snrDMode_.alloc(_nGates);
   _zdrMode = _zdrMode_.alloc(_nGates);
@@ -246,7 +243,7 @@ void IntfLocator::locate()
     _startGate[igate] = 0;
     _endGate[igate] = 0;
     _accumPhaseChange[igate] = -9999;
-    _phaseChangeError[igate] = -9999;
+    _phaseNoise[igate] = -9999;
     _snrMode[igate] = -9999;
     _snrDMode[igate] = -9999;
     _zdrMode[igate] = -9999;
@@ -297,11 +294,11 @@ void IntfLocator::locate()
     _endGate[igate] = iend;
   }
 
-  // compute phase change error
+  // compute phase noisiness relative to a constant phase slope
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _phaseChangeError[igate] =
-      _computePhaseChangeError(_startGate[igate], _endGate[igate]);
+    _phaseNoise[igate] =
+      _computePhaseNoise(_startGate[igate], _endGate[igate]);
   }
   
   // compute snr sdev
@@ -318,27 +315,27 @@ void IntfLocator::locate()
 
   // set flags
   
-  double sumWeightsRlan = (_weightPhaseChangeErrorForRlan + 
-                           _weightSnrDModeForRlan +
-                           _weightNcpMeanForRlan);
+  double sumWeightsRlan = (_rlanWeightPhaseNoise + 
+                           _rlanWeightSnrDMode +
+                           _rlanWeightNcpMean);
   
   for (int igate = 0; igate < _nGates; igate++) {
     
-    double pce = _phaseChangeError[igate];
+    double phaseNoise = _phaseNoise[igate];
     double sndDMode = _snrMode[igate];
     double ncpMean = _ncpMean[igate];
 
     double sumInterestRlan =
-      (_interestMapPhaseChangeErrorForRlan->getInterest(pce) * 
-       _weightPhaseChangeErrorForRlan) +
-      (_interestMapSnrDModeForRlan->getInterest(sndDMode) * 
-       _weightSnrDModeForRlan) +
-      (_interestMapNcpMeanForRlan->getInterest(ncpMean) * 
-       _weightNcpMeanForRlan);
+      (_rlanInterestMapPhaseNoise->getInterest(phaseNoise) * 
+       _rlanWeightPhaseNoise) +
+      (_rlanInterestMapSnrDMode->getInterest(sndDMode) * 
+       _rlanWeightSnrDMode) +
+      (_rlanInterestMapNcpMean->getInterest(ncpMean) * 
+       _rlanWeightNcpMean);
     
     double interestRlan = sumInterestRlan / sumWeightsRlan;
 
-    if (interestRlan > _interestThreshold) {
+    if (interestRlan > _rlanInterestThreshold) {
       _rlanFlag[igate] = true;
     } else {
       _rlanFlag[igate] = false;
@@ -365,9 +362,9 @@ void IntfLocator::locate()
 }
 
 ///////////////////////////////////////////////////////////////
-// compute mean phase error in range, for the specified kernel
+// compute phase noisiness relative to a constant phase slope
 
-double IntfLocator::_computePhaseChangeError(int startGate, int endGate)
+double IntfLocator::_computePhaseNoise(int startGate, int endGate)
   
 {
 
@@ -377,18 +374,18 @@ double IntfLocator::_computePhaseChangeError(int startGate, int endGate)
   double slope = (phaseEnd - phaseStart) / dGates;
   
   double linearPhase = phaseStart + slope;
-  double sumAbsError = 0.0;
+  double sumAbsNoise = 0.0;
   double count = 0.0;
   
   for (int igate = startGate + 1; igate < endGate; 
        igate++, linearPhase += slope) {
     double phase = _accumPhaseChange[igate];
-    double absError = fabs(phase - linearPhase);
-    sumAbsError += absError;
+    double absNoise = fabs(phase - linearPhase);
+    sumAbsNoise += absNoise;
     count++;
   }
 
-  return sumAbsError / count;
+  return sumAbsNoise / count;
 
 }
 
@@ -683,79 +680,79 @@ void IntfLocator::_createDefaultInterestMaps()
   pts.clear();
   pts.push_back(InterestMap::ImPoint(40.0, 0.001));
   pts.push_back(InterestMap::ImPoint(50.0, 1.0));
-  setInterestMapPhaseChangeErrorForRlan(pts, 1.0);
+  setRlanInterestMapPhaseNoise(pts, 1.0);
   
   pts.clear();
   pts.push_back(InterestMap::ImPoint(2.0, 1.0));
   pts.push_back(InterestMap::ImPoint(2.5, 0.001));
-  setInterestMapSnrDModeForRlan(pts, 1.0);
+  setRlanInterestMapSnrDMode(pts, 1.0);
 
   pts.clear();
   pts.push_back(InterestMap::ImPoint(0.15, 1.0));
   pts.push_back(InterestMap::ImPoint(0.20, 0.001));
-  setInterestMapNcpMeanForRlan(pts, 1.0);
+  setRlanInterestMapNcpMean(pts, 1.0);
 
-  setInterestThreshold(0.51);
+  setRlanInterestThreshold(0.51);
 
 }
 
 ///////////////////////////////////////////////////////////////
 // interest maps for rlan
 
-void IntfLocator::setInterestMapPhaseChangeErrorForRlan
+void IntfLocator::setRlanInterestMapPhaseNoise
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
 {
 
-  if (_interestMapPhaseChangeErrorForRlan) {
-    delete _interestMapPhaseChangeErrorForRlan;
+  if (_rlanInterestMapPhaseNoise) {
+    delete _rlanInterestMapPhaseNoise;
   }
 
-  _interestMapPhaseChangeErrorForRlan = new InterestMap
-    ("PhaseChangeErrorForRlan", pts, weight);
+  _rlanInterestMapPhaseNoise = new InterestMap
+    ("PhaseNoise", pts, weight);
   
-  _weightPhaseChangeErrorForRlan = weight;
+  _rlanWeightPhaseNoise = weight;
   
 }
 
-void IntfLocator::setInterestMapSnrDModeForRlan
+void IntfLocator::setRlanInterestMapSnrDMode
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
 {
 
-  if (_interestMapSnrDModeForRlan) {
-    delete _interestMapSnrDModeForRlan;
+  if (_rlanInterestMapSnrDMode) {
+    delete _rlanInterestMapSnrDMode;
   }
 
-  _interestMapSnrDModeForRlan = new InterestMap
-    ("SnrDModeForRlan", pts, weight);
+  _rlanInterestMapSnrDMode = new InterestMap
+    ("SnrDMode", pts, weight);
 
-  _weightSnrDModeForRlan = weight;
+  _rlanWeightSnrDMode = weight;
 
 }
 
-void IntfLocator::setInterestMapNcpMeanForRlan
+void IntfLocator::setRlanInterestMapNcpMean
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
 {
 
-  if (_interestMapNcpMeanForRlan) {
-    delete _interestMapNcpMeanForRlan;
+  if (_rlanInterestMapNcpMean) {
+    delete _rlanInterestMapNcpMean;
   }
 
-  _interestMapNcpMeanForRlan = new InterestMap
-    ("NcpMeanForRlan", pts, weight);
+  _rlanInterestMapNcpMean = new InterestMap
+    ("NcpMean", pts, weight);
 
-  _weightNcpMeanForRlan = weight;
+  _rlanWeightNcpMean = weight;
 
 }
 
-void IntfLocator::setInterestThreshold(double val)
+void IntfLocator::setRlanInterestThreshold(double val)
   
 {
-  _interestThreshold = val;
+  _rlanInterestThreshold = val;
 }
 

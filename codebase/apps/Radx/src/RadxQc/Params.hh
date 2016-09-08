@@ -114,7 +114,7 @@ public:
     ZDR_DMODE_RLAN = 38,
     NCP_MEAN_RLAN = 39,
     PHASE_RLAN = 40,
-    PHASE_CHANGE_RLAN = 41,
+    PHASE_NOISE_RLAN = 41,
     RLAN_FLAG = 42
   } output_field_id_t;
 
@@ -623,10 +623,6 @@ public:
 
   tdrp_bool_t sounding_use_wet_bulb_temp;
 
-  tdrp_bool_t apply_median_filter_to_PID;
-
-  int PID_median_filter_len;
-
   tdrp_bool_t read_site_temp_from_spdb;
 
   char* site_temp_spdb_url;
@@ -674,7 +670,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[120];
+  mutable TDRPtable _table[116];
 
   const char *_className;
 

@@ -265,7 +265,7 @@ paramdef string {
 paramdef double {
   p_default = 0.0;
   p_descr = "The noise value, represented as dBZ at a range of 100km.";
-  p_help = "This is used for computing the SNR from the DBZ field. It is only used if SNR_available is FALSE. The SNR will be computed by range-correcting this value and using it as the noise value.";
+  p_help = "This is used if SNR_available is set to FALSE. It is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.";
 } noise_dbz_at_100km;
 
 paramdef boolean {
@@ -298,14 +298,10 @@ paramdef string {
   p_descr = "Field name for RHOHV.";
 } RHOHV_field_name;
 
-commentdef {
-  p_header = "COMPUTING KDP";
-  p_text = "Parameters for computing KDP. KDP will be computed if KDP_available is FALSE.";
-}
-
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Compute KDP from PHIDP";
+  p_help = "If KDP is not available, it can be computed from PHIDP.";
 } compute_KDP;
 
 typedef enum {
@@ -547,23 +543,6 @@ paramdef boolean {
 } sounding_use_wet_bulb_temp;
 
 commentdef {
-  p_header = "SMOOTHING OUTPUT PID";
-  p_text = "This section gives you the option of smoothing the output pid field in range by applying a median filter.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to filter PID with median filter.";
-  p_help = "The filter is computed in range, and affects both rain rate and PID.";
-} apply_median_filter_to_PID;
-
-paramdef int {
-  p_default = 7;
-  p_descr = "Length of median filter for PID - gates.";
-  p_help = "See 'appply_median_filter_to_PID'";
-} PID_median_filter_len;
-
-commentdef {
   p_header = "RETRIEVING SITE TEMPERATURE FROM SPDB";
 };
 
@@ -640,7 +619,7 @@ typedef enum {
   ZDR_DMODE_RLAN,
   NCP_MEAN_RLAN,
   PHASE_RLAN,
-  PHASE_CHANGE_RLAN,
+  PHASE_NOISE_RLAN,
   RLAN_FLAG
 
 } output_field_id_t;
