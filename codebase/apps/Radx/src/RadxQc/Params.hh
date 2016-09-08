@@ -163,6 +163,11 @@ public:
   // struct typedefs
 
   typedef struct {
+    double value;
+    double interest;
+  } interest_map_point_t;
+
+  typedef struct {
     double min_val;
     double max_val;
   } data_range_t;
@@ -608,6 +613,28 @@ public:
 
   tdrp_bool_t locate_rlan_interference;
 
+  interest_map_point_t *_rlan_phase_noise_interest_map;
+  int rlan_phase_noise_interest_map_n;
+
+  double rlan_phase_noise_weight;
+
+  interest_map_point_t *_rlan_ncp_mean_interest_map;
+  int rlan_ncp_mean_interest_map_n;
+
+  double rlan_ncp_mean_weight;
+
+  interest_map_point_t *_rlan_width_mean_interest_map;
+  int rlan_width_mean_interest_map_n;
+
+  double rlan_width_mean_weight;
+
+  interest_map_point_t *_rlan_snr_dmode_interest_map;
+  int rlan_snr_dmode_interest_map_n;
+
+  double rlan_snr_dmode_weight;
+
+  double rlan_interest_threshold;
+
   tdrp_bool_t use_soundings_from_spdb;
 
   char* sounding_spdb_url;
@@ -677,7 +704,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[116];
+  mutable TDRPtable _table[126];
 
   const char *_className;
 

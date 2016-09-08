@@ -62,6 +62,52 @@ ComputeEngine::ComputeEngine(const Params &params,
 
   _kdpInit();
 
+  // set up interest maps
+
+  if (_convertInterestParamsToVector
+      ("rlan_phase_noise",
+       _params._rlan_phase_noise_interest_map,
+       _params.rlan_phase_noise_interest_map_n,
+       _rlanImapPhaseNoise)) {
+    OK = false;
+  } else {
+    _intf.setRlanInterestMapPhaseNoise(_rlanImapPhaseNoise,
+                                       _params.rlan_phase_noise_weight);
+  }
+
+  if (_convertInterestParamsToVector
+      ("rlan_ncp_mean",
+       _params._rlan_ncp_mean_interest_map,
+       _params.rlan_ncp_mean_interest_map_n,
+       _rlanImapNcpMean)) {
+    OK = false;
+  } else {
+    _intf.setRlanInterestMapNcpMean(_rlanImapNcpMean,
+                                    _params.rlan_ncp_mean_weight);
+  }
+
+  if (_convertInterestParamsToVector
+      ("rlan_width_mean",
+       _params._rlan_width_mean_interest_map,
+       _params.rlan_width_mean_interest_map_n,
+       _rlanImapWidthMean)) {
+    OK = false;
+  } else {
+    _intf.setRlanInterestMapWidthMean(_rlanImapWidthMean,
+                                      _params.rlan_width_mean_weight);
+  }
+
+  if (_convertInterestParamsToVector
+      ("rlan_snr_dmode",
+       _params._rlan_snr_dmode_interest_map,
+       _params.rlan_snr_dmode_interest_map_n,
+       _rlanImapSnrDMode)) {
+    OK = false;
+  } else {
+    _intf.setRlanInterestMapSnrDMode(_rlanImapSnrDMode,
+                                     _params.rlan_snr_dmode_weight);
+  }
+
 }
 
 // destructor
@@ -840,6 +886,39 @@ void ComputeEngine::_censorNonPrecip(RadxField &field)
   //     field.setGateToMissing(ii);
   //   }
   // } // ii
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// Convert interest map points to vector
+//
+// Returns 0 on success, -1 on failure
+
+int ComputeEngine::_convertInterestParamsToVector(const string &label,
+                                                  const Params::interest_map_point_t *map,
+                                                  int nPoints,
+                                                  vector<InterestMap::ImPoint> &pts)
+  
+{
+  
+  pts.clear();
+  
+  double prevVal = -1.0e99;
+  for (int ii = 0; ii < nPoints; ii++) {
+    if (map[ii].value <= prevVal) {
+      pthread_mutex_lock(&_debugPrintMutex);
+      cerr << "ERROR - ComputeEngine:_convertInterestParamsToVector" << endl;
+      cerr << "  Map label: " << label << endl;
+      cerr << "  Map values must increase monotonically" << endl;
+      pthread_mutex_unlock(&_debugPrintMutex);
+      return -1;
+    }
+    InterestMap::ImPoint pt(map[ii].value, map[ii].interest);
+    pts.push_back(pt);
+    prevVal = map[ii].value;
+  } // ii
+  
+  return 0;
 
 }
 

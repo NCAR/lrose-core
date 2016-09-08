@@ -469,6 +469,66 @@ paramdef boolean {
 } locate_rlan_interference;
 
 commentdef {
+  p_header = "INTEREST MAPS and WEIGHTS for RLAN DETECTION";
+  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.";
+};
+
+typedef struct {
+  double value;
+  double interest;
+} interest_map_point_t;
+
+paramdef struct interest_map_point_t {
+  p_default = {{35.0, 0.001}, {45.0, 1.0}};
+  p_descr = "RLAN interest mapping for phase noise.";
+} rlan_phase_noise_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "RLAN weight for interest for phase noise.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} rlan_phase_noise_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.1, 1.0}, {0.2, 0.001}};
+  p_descr = "RLAN interest mapping for mean of ncp.";
+} rlan_ncp_mean_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for mean of ncp.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} rlan_ncp_mean_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.1, 1.0}, {0.2, 0.001}};
+  p_descr = "RLAN interest mapping for mean of width.";
+} rlan_width_mean_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for mean of width.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} rlan_width_mean_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.1, 1.0}, {0.2, 0.001}};
+  p_descr = "RLAN interest mapping for delta mode of snr.";
+} rlan_snr_dmode_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for delta mode of snr.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} rlan_snr_dmode_weight;
+
+paramdef double {
+  p_default = 0.51;
+  p_descr = "Threshold interest value for identifying RLAN interference.";
+  p_help = "If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.";
+} rlan_interest_threshold;
+
+commentdef {
   p_header = "SOUNDING INPUT FOR temperatures - OPTIONAL";
 }
 

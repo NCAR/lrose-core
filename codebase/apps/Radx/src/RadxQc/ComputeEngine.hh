@@ -45,6 +45,8 @@
 #include <radar/IntfLocator.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxTime.hh>
+#include <radar/InterestMap.hh>
+
 class RadxRay;
 class RadxField;
 #include <pthread.h>
@@ -149,6 +151,13 @@ private:
   IntfLocator _intf;
   const TempProfile *_tempProfile;
 
+  // interest maps
+  
+  vector<InterestMap::ImPoint> _rlanImapPhaseNoise;
+  vector<InterestMap::ImPoint> _rlanImapNcpMean;
+  vector<InterestMap::ImPoint> _rlanImapWidthMean;
+  vector<InterestMap::ImPoint> _rlanImapSnrDMode;
+
   // debug printing
   
   static pthread_mutex_t _debugPrintMutex;
@@ -179,6 +188,11 @@ private:
   void _computeSnrFromDbz();
 
   void _censorNonPrecip(RadxField &field);
+
+  int _convertInterestParamsToVector(const string &label,
+                                     const Params::interest_map_point_t *map,
+                                     int nPoints,
+                                     vector<InterestMap::ImPoint> &pts);
 
 };
 
