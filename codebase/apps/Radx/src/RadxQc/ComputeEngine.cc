@@ -71,10 +71,10 @@ ComputeEngine::ComputeEngine(const Params &params,
        _rlanImapPhaseNoise)) {
     OK = false;
   } else {
-    _intf.setRlanInterestMapPhaseNoise(_rlanImapPhaseNoise,
-                                       _params.rlan_phase_noise_weight);
+    _intf.setInterestMapPhaseNoise(_rlanImapPhaseNoise,
+                                   _params.rlan_phase_noise_weight);
   }
-
+  
   if (_convertInterestParamsToVector
       ("rlan_ncp_mean",
        _params._rlan_ncp_mean_interest_map,
@@ -82,10 +82,10 @@ ComputeEngine::ComputeEngine(const Params &params,
        _rlanImapNcpMean)) {
     OK = false;
   } else {
-    _intf.setRlanInterestMapNcpMean(_rlanImapNcpMean,
-                                    _params.rlan_ncp_mean_weight);
+    _intf.setInterestMapNcpMean(_rlanImapNcpMean,
+                                _params.rlan_ncp_mean_weight);
   }
-
+  
   if (_convertInterestParamsToVector
       ("rlan_width_mean",
        _params._rlan_width_mean_interest_map,
@@ -93,10 +93,10 @@ ComputeEngine::ComputeEngine(const Params &params,
        _rlanImapWidthMean)) {
     OK = false;
   } else {
-    _intf.setRlanInterestMapWidthMean(_rlanImapWidthMean,
-                                      _params.rlan_width_mean_weight);
+    _intf.setInterestMapWidthMean(_rlanImapWidthMean,
+                                  _params.rlan_width_mean_weight);
   }
-
+  
   if (_convertInterestParamsToVector
       ("rlan_snr_dmode",
        _params._rlan_snr_dmode_interest_map,
@@ -104,8 +104,19 @@ ComputeEngine::ComputeEngine(const Params &params,
        _rlanImapSnrDMode)) {
     OK = false;
   } else {
-    _intf.setRlanInterestMapSnrDMode(_rlanImapSnrDMode,
-                                     _params.rlan_snr_dmode_weight);
+    _intf.setInterestMapSnrDMode(_rlanImapSnrDMode,
+                                 _params.rlan_snr_dmode_weight);
+  }
+
+  if (_convertInterestParamsToVector
+      ("rlan_snr_sdev",
+       _params._rlan_snr_sdev_interest_map,
+       _params.rlan_snr_sdev_interest_map_n,
+       _rlanImapSnrSdev)) {
+    OK = false;
+  } else {
+    _intf.setInterestMapSnrSdev(_rlanImapSnrSdev,
+                                 _params.rlan_snr_sdev_weight);
   }
 
 }
@@ -228,9 +239,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *snrRlan = _intf.getSnr();
   const double *snrModeRlan = _intf.getSnrMode();
   const double *snrDModeRlan = _intf.getSnrDMode();
-  const double *zdrRlan = _intf.getZdr();
-  const double *zdrModeRlan = _intf.getZdrMode();
-  const double *zdrDModeRlan = _intf.getZdrDMode();
+  const double *snrSdevRlan = _intf.getSnrSdev();
   const double *ncpMeanRlan = _intf.getNcpMean();
   const double *widthMeanRlan = _intf.getWidthMean();
   const double *phaseRlan = _intf.getPhase();
@@ -238,12 +247,12 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   const bool *rlanFlag = _intf.getRlanFlag();
   const bool *noiseFlag = _intf.getNoiseFlag();
-  const bool *signalFlag = _intf.getSignalFlag();
   
   const double *phaseNoiseInterest = _intf.getPhaseNoiseInterest();
   const double *ncpMeanInterest = _intf.getNcpMeanInterest();
   const double *widthMeanInterest = _intf.getWidthMeanInterest();
   const double *snrDModeInterest = _intf.getSnrDModeInterest();
+  const double *snrSdevInterest = _intf.getSnrSdevInterest();
 
   // load up output data
 
@@ -282,17 +291,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::ZDR:
           *datp = _zdrArray[igate];
           break;
-        case Params::ZDRM:
-          *datp = _zdrmArray[igate];
-          break;
-        case Params::LDR:
-          *datp = _ldrArray[igate];
-          break;
         case Params::RHOHV:
           *datp = _rhohvArray[igate];
-          break;
-        case Params::RHOHV_NNC:
-          *datp = _rhohvNncArray[igate];
           break;
         case Params::PHIDP:
           *datp = _phidpArray[igate];
@@ -390,14 +390,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::SNR_DMODE_RLAN:
           *datp = snrDModeRlan[igate];
           break;
-        case Params::ZDR_RLAN:
-          *datp = zdrRlan[igate];
-          break;
-        case Params::ZDR_MODE_RLAN:
-          *datp = zdrModeRlan[igate];
-          break;
-        case Params::ZDR_DMODE_RLAN:
-          *datp = zdrDModeRlan[igate];
+        case Params::SNR_SDEV_RLAN:
+          *datp = snrSdevRlan[igate];
           break;
         case Params::NCP_MEAN_RLAN:
           *datp = ncpMeanRlan[igate];
@@ -426,13 +420,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
             *datp = 0.0;
           }
           break;
-        case Params::SIGNAL_FLAG:
-          if (signalFlag[igate]) {
-            *datp = 1.0;
-          } else {
-            *datp = 0.0;
-          }
-          break;
 
         case Params::PHASE_NOISE_INTEREST_RLAN:
           *datp = phaseNoiseInterest[igate];
@@ -445,6 +432,9 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::SNR_DMODE_INTEREST_RLAN:
           *datp = snrDModeInterest[igate];
+          break;
+        case Params::SNR_SDEV_INTEREST_RLAN:
+          *datp = snrSdevInterest[igate];
           break;
 
       } // switch
@@ -627,17 +617,18 @@ void ComputeEngine::_locateRlan()
   _intf.setFieldMissingVal(missingDbl);
   
   _intf.setVelField(_velArray, _nyquist);
+
   if (_params.NCP_available) {
     _intf.setNcpField(_ncpArray);
   } else {
     _intf.setWidthField(_widthArray);
   }
+
   if (_params.SNR_available) {
     _intf.setSnrField(_snrArray);
   } else {
     _intf.setDbzField(_dbzArray, _params.noise_dbz_at_100km);
   }
-  _intf.setZdrField(_zdrArray);
 
   // locate RLAN interference
 
@@ -658,14 +649,10 @@ void ComputeEngine::_allocMomentsArrays()
   _widthArray = _widthArray_.alloc(_nGates);
   _ncpArray = _ncpArray_.alloc(_nGates);
   _zdrArray = _zdrArray_.alloc(_nGates);
-  _zdrmArray = _zdrmArray_.alloc(_nGates);
   _zdpArray = _zdpArray_.alloc(_nGates);
   _kdpArray = _kdpArray_.alloc(_nGates);
-  _ldrArray = _ldrArray_.alloc(_nGates);
   _rhohvArray = _rhohvArray_.alloc(_nGates);
-  _rhohvNncArray = _rhohvNncArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
-  _rhoVxHxArray = _rhoVxHxArray_.alloc(_nGates);
 
 }
 

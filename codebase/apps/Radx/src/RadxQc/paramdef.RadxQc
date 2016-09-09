@@ -470,7 +470,7 @@ paramdef boolean {
 
 commentdef {
   p_header = "INTEREST MAPS and WEIGHTS for RLAN DETECTION";
-  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.";
+  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.\n\nFor locating RLAN, we use the gate-to-gate phase_noise, ncp_mean (or width_mean if ncp is not available) and snr_dmode.\n\nFor locating NOISE, we use the gate-to-gate phase_noise, ncp_mean (or width_mean if ncp is not available) and snr_sdev.";
 };
 
 typedef struct {
@@ -522,11 +522,28 @@ paramdef double {
   p_help = "The relative weighting applied when computing the fuzzy sum.";
 } rlan_snr_dmode_weight;
 
+paramdef struct interest_map_point_t {
+  p_default = {{0.65, 1.0}, {0.75, 0.001}};
+  p_descr = "RLAN interest mapping for delta mode of snr.";
+} rlan_snr_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for sdev of snr.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} rlan_snr_sdev_weight;
+
 paramdef double {
   p_default = 0.51;
   p_descr = "Threshold interest value for identifying RLAN interference.";
   p_help = "If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.";
 } rlan_interest_threshold;
+
+paramdef double {
+  p_default = 0.51;
+  p_descr = "Threshold interest value for identifying noise-only gates.";
+  p_help = "If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.";
+} noise_interest_threshold;
 
 commentdef {
   p_header = "SOUNDING INPUT FOR temperatures - OPTIONAL";
@@ -640,10 +657,7 @@ typedef enum {
   WIDTH,
   NCP,
   ZDR,
-  ZDRM,
-  LDR,
   RHOHV,
-  RHOHV_NNC,
   PHIDP,
   KDP,
   PSOB,
@@ -674,20 +688,18 @@ typedef enum {
   SNR_RLAN,
   SNR_MODE_RLAN,
   SNR_DMODE_RLAN,
-  ZDR_RLAN,
-  ZDR_MODE_RLAN,
-  ZDR_DMODE_RLAN,
+  SNR_SDEV_RLAN,
   NCP_MEAN_RLAN,
   WIDTH_MEAN_RLAN,
   PHASE_RLAN,
   PHASE_NOISE_RLAN,
-  RLAN_FLAG,
-  NOISE_FLAG,
-  SIGNAL_FLAG,
   PHASE_NOISE_INTEREST_RLAN,
   NCP_MEAN_INTEREST_RLAN,
   WIDTH_MEAN_INTEREST_RLAN,
-  SNR_DMODE_INTEREST_RLAN
+  SNR_DMODE_INTEREST_RLAN,
+  SNR_SDEV_INTEREST_RLAN,
+  RLAN_FLAG,
+  NOISE_FLAG
 
 } output_field_id_t;
 
@@ -746,18 +758,6 @@ paramdef struct output_field_t {
       name = "ZDR",
       long_name = "calibrated_log_differential_reflectivity",
       standard_name = "log_differential_reflectivity",
-      units = "dB",
-      encoding = OUTPUT_ENCODING_INT16,
-      scaling = OUTPUT_SCALING_DYNAMIC,
-      scale = 0.01,
-      offset = 0.0
-    }
-    ,
-    {
-      id = LDR,
-      name = "LDR",
-      long_name = "linear_depolarization_ratio_h_channel",
-      standard_name = "log_linear_depolarization_ratio_h",
       units = "dB",
       encoding = OUTPUT_ENCODING_INT16,
       scaling = OUTPUT_SCALING_DYNAMIC,

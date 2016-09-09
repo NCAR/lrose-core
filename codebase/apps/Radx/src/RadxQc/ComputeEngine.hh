@@ -112,16 +112,10 @@ private:
   RadxArray<double> _widthArray_;
   RadxArray<double> _ncpArray_;
   RadxArray<double> _zdrArray_;
-  RadxArray<double> _zdrmArray_;
   RadxArray<double> _zdpArray_;
-  RadxArray<double> _kdpArray_;
-  RadxArray<double> _kdpConstrainedArray_;
-  RadxArray<double> _kdpWithPsobArray_;
-  RadxArray<double> _ldrArray_;
   RadxArray<double> _rhohvArray_;
-  RadxArray<double> _rhohvNncArray_;
   RadxArray<double> _phidpArray_;
-  RadxArray<double> _rhoVxHxArray_;
+  RadxArray<double> _kdpArray_;
 
   double *_snrArray;
   double *_dbzArray;
@@ -129,14 +123,10 @@ private:
   double *_widthArray;
   double *_ncpArray;
   double *_zdrArray;
-  double *_zdrmArray;
   double *_zdpArray;
-  double *_kdpArray;
-  double *_ldrArray;
   double *_rhohvArray;
-  double *_rhohvNncArray;
   double *_phidpArray;
-  double *_rhoVxHxArray;
+  double *_kdpArray;
 
   // atmospheric attenuation
 
@@ -157,6 +147,7 @@ private:
   vector<InterestMap::ImPoint> _rlanImapNcpMean;
   vector<InterestMap::ImPoint> _rlanImapWidthMean;
   vector<InterestMap::ImPoint> _rlanImapSnrDMode;
+  vector<InterestMap::ImPoint> _rlanImapSnrSdev;
 
   // debug printing
   

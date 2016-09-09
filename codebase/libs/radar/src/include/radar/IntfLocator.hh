@@ -30,7 +30,8 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Find gates contaminated with RLAN interference
+// (a) Locate gates contaminated with RLAN interference
+// (b) Locate gates with noise and no signal
 //
 ///////////////////////////////////////////////////////////////
 
@@ -69,23 +70,28 @@ public:
 
   // set interest maps for rlan location
 
-  void setRlanInterestMapPhaseNoise
+  void setInterestMapPhaseNoise
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setRlanInterestMapSnrDMode
+  void setInterestMapNcpMean
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setRlanInterestMapNcpMean
+  void setInterestMapWidthMean
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setRlanInterestMapWidthMean
+  void setInterestMapSnrDMode
+    (const vector<InterestMap::ImPoint> &pts,
+     double weight);
+  
+  void setInterestMapSnrSdev
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
   void setRlanInterestThreshold(double val);
+  void setNoiseInterestThreshold(double val);
 
   // set radar props
 
@@ -118,7 +124,6 @@ public:
   void setWidthField(double *vals);
   void setNcpField(double *vals);
   void setSnrField(double *vals);
-  void setZdrField(double *vals);
 
   //////////////////////////////////////////////
   // perform rlan location
@@ -141,22 +146,19 @@ public:
   const double *getWidth() const { return _width; }
   const double *getNcp() const { return _ncp; }
   const double *getSnr() const { return _snr; }
-  const double *getZdr() const { return _zdr; }
 
   // get results - after running locate
   // these arrays span the gates from 0 to nGates-1
 
   const bool *getRlanFlag() const { return _rlanFlag; }
   const bool *getNoiseFlag() const { return _noiseFlag; }
-  const bool *getSignalFlag() const { return _signalFlag; }
   
   const double *getAccumPhaseChange() const { return _accumPhaseChange; }
   const double *getPhaseNoise() const { return _phaseNoise; }
   
   const double *getSnrMode() const { return _snrMode; }
   const double *getSnrDMode() const { return _snrDMode; }
-  const double *getZdrMode() const { return _zdrMode; }
-  const double *getZdrDMode() const { return _zdrDMode; }
+  const double *getSnrSdev() const { return _snrSdev; }
   const double *getNcpMean() const { return _ncpMean; }
   const double *getWidthMean() const { return _widthMean; }
 
@@ -164,6 +166,7 @@ public:
   const double *getNcpMeanInterest() const { return _ncpMeanInterest; }
   const double *getWidthMeanInterest() const { return _widthMeanInterest; }
   const double *getSnrDModeInterest() const { return _snrDModeInterest; }
+  const double *getSnrSdevInterest() const { return _snrSdevInterest; }
 
   ////////////////////////////////////
   // print parameters for debugging
@@ -226,10 +229,6 @@ private:
   double *_snr;
   bool _snrAvail;
   
-  TaArray<double> _zdr_;
-  double *_zdr;
-  bool _zdrAvail;
-  
   // results
 
   TaArray<bool> _rlanFlag_;
@@ -237,9 +236,6 @@ private:
 
   TaArray<bool> _noiseFlag_;
   bool *_noiseFlag;
-
-  TaArray<bool> _signalFlag_;
-  bool *_signalFlag;
 
   TaArray<double> _accumPhaseChange_;
   double *_accumPhaseChange;
@@ -253,11 +249,8 @@ private:
   TaArray<double> _snrDMode_;
   double *_snrDMode;
 
-  TaArray<double> _zdrMode_;
-  double *_zdrMode;
-
-  TaArray<double> _zdrDMode_;
-  double *_zdrDMode;
+  TaArray<double> _snrSdev_;
+  double *_snrSdev;
 
   TaArray<double> _ncpMean_;
   double *_ncpMean;
@@ -276,6 +269,9 @@ private:
 
   TaArray<double> _snrDModeInterest_;
   double *_snrDModeInterest;
+  
+  TaArray<double> _snrSdevInterest_;
+  double *_snrSdevInterest;
 
   // gate limits for computing stats along a ray
 
@@ -286,27 +282,28 @@ private:
 
   int _nGatesKernel;
 
-  InterestMap *_rlanInterestMapPhaseNoise;
-  InterestMap *_rlanInterestMapNcpMean;
-  InterestMap *_rlanInterestMapWidthMean;
-  InterestMap *_rlanInterestMapSnrDMode;
+  InterestMap *_interestMapPhaseNoise;
+  InterestMap *_interestMapNcpMean;
+  InterestMap *_interestMapWidthMean;
+  InterestMap *_interestMapSnrDMode;
+  InterestMap *_interestMapSnrSdev;
 
-  double _rlanWeightPhaseNoise;
-  double _rlanWeightSnrDMode;
-  double _rlanWeightNcpMean;
-  double _rlanWeightWidthMean;
+  double _weightPhaseNoise;
+  double _weightNcpMean;
+  double _weightWidthMean;
+  double _weightSnrDMode;
+  double _weightSnrSdev;
+
   double _rlanInterestThreshold;
+  double _noiseInterestThreshold;
 
   // private methods
   
   void _computeSnrFromDbz(double noiseDbzAt100km);
   double _computePhaseNoise(int startGate, int endGate);
-  void _computeDeltaMode(const string &fieldName,
-                         const double *vals, double *mode, double *dMode);
+  void _computeDeltaMode(const double *vals, double *mode, double *dMode);
   void _computeSdevInRange(const double *vals, double *sdevs);
   void _computeMeanInRange(const double *vals, double *means);
-  double _computeMean(const vector<double> &vals);
-  double _computeMedian(const vector<double> &vals);
   void _createDefaultInterestMaps();
 
 };

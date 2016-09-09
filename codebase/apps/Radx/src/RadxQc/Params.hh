@@ -79,50 +79,45 @@ public:
     WIDTH = 3,
     NCP = 4,
     ZDR = 5,
-    ZDRM = 6,
-    LDR = 7,
-    RHOHV = 8,
-    RHOHV_NNC = 9,
-    PHIDP = 10,
-    KDP = 11,
-    PSOB = 12,
-    ZDP = 13,
-    DBZ_ATTEN_CORRECTION = 14,
-    ZDR_ATTEN_CORRECTION = 15,
-    DBZ_ATTEN_CORRECTED = 16,
-    ZDR_ATTEN_CORRECTED = 17,
-    DBZ_FOR_KDP = 18,
-    ZDR_FOR_KDP = 19,
-    RHOHV_FOR_KDP = 20,
-    SNR_FOR_KDP = 21,
-    ZDR_SDEV_FOR_KDP = 22,
-    VALID_FLAG_FOR_KDP = 23,
-    PHIDP_FOR_KDP = 24,
-    PHIDP_MEAN_FOR_KDP = 25,
-    PHIDP_MEAN_UNFOLD_FOR_KDP = 26,
-    PHIDP_SDEV_FOR_KDP = 27,
-    PHIDP_JITTER_FOR_KDP = 28,
-    PHIDP_UNFOLD_FOR_KDP = 29,
-    PHIDP_FILT_FOR_KDP = 30,
-    PHIDP_COND_FOR_KDP = 31,
-    PHIDP_COND_FILT_FOR_KDP = 32,
-    SNR_RLAN = 33,
-    SNR_MODE_RLAN = 34,
-    SNR_DMODE_RLAN = 35,
-    ZDR_RLAN = 36,
-    ZDR_MODE_RLAN = 37,
-    ZDR_DMODE_RLAN = 38,
-    NCP_MEAN_RLAN = 39,
-    WIDTH_MEAN_RLAN = 40,
-    PHASE_RLAN = 41,
-    PHASE_NOISE_RLAN = 42,
+    RHOHV = 6,
+    PHIDP = 7,
+    KDP = 8,
+    PSOB = 9,
+    ZDP = 10,
+    DBZ_ATTEN_CORRECTION = 11,
+    ZDR_ATTEN_CORRECTION = 12,
+    DBZ_ATTEN_CORRECTED = 13,
+    ZDR_ATTEN_CORRECTED = 14,
+    DBZ_FOR_KDP = 15,
+    ZDR_FOR_KDP = 16,
+    RHOHV_FOR_KDP = 17,
+    SNR_FOR_KDP = 18,
+    ZDR_SDEV_FOR_KDP = 19,
+    VALID_FLAG_FOR_KDP = 20,
+    PHIDP_FOR_KDP = 21,
+    PHIDP_MEAN_FOR_KDP = 22,
+    PHIDP_MEAN_UNFOLD_FOR_KDP = 23,
+    PHIDP_SDEV_FOR_KDP = 24,
+    PHIDP_JITTER_FOR_KDP = 25,
+    PHIDP_UNFOLD_FOR_KDP = 26,
+    PHIDP_FILT_FOR_KDP = 27,
+    PHIDP_COND_FOR_KDP = 28,
+    PHIDP_COND_FILT_FOR_KDP = 29,
+    SNR_RLAN = 30,
+    SNR_MODE_RLAN = 31,
+    SNR_DMODE_RLAN = 32,
+    SNR_SDEV_RLAN = 33,
+    NCP_MEAN_RLAN = 34,
+    WIDTH_MEAN_RLAN = 35,
+    PHASE_RLAN = 36,
+    PHASE_NOISE_RLAN = 37,
+    PHASE_NOISE_INTEREST_RLAN = 38,
+    NCP_MEAN_INTEREST_RLAN = 39,
+    WIDTH_MEAN_INTEREST_RLAN = 40,
+    SNR_DMODE_INTEREST_RLAN = 41,
+    SNR_SDEV_INTEREST_RLAN = 42,
     RLAN_FLAG = 43,
-    NOISE_FLAG = 44,
-    SIGNAL_FLAG = 45,
-    PHASE_NOISE_INTEREST_RLAN = 46,
-    NCP_MEAN_INTEREST_RLAN = 47,
-    WIDTH_MEAN_INTEREST_RLAN = 48,
-    SNR_DMODE_INTEREST_RLAN = 49
+    NOISE_FLAG = 44
   } output_field_id_t;
 
   typedef enum {
@@ -633,7 +628,14 @@ public:
 
   double rlan_snr_dmode_weight;
 
+  interest_map_point_t *_rlan_snr_sdev_interest_map;
+  int rlan_snr_sdev_interest_map_n;
+
+  double rlan_snr_sdev_weight;
+
   double rlan_interest_threshold;
+
+  double noise_interest_threshold;
 
   tdrp_bool_t use_soundings_from_spdb;
 
@@ -704,7 +706,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[126];
+  mutable TDRPtable _table[129];
 
   const char *_className;
 
