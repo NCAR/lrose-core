@@ -2292,10 +2292,10 @@ using namespace std;
       tt->struct_def.fields[1].rel_offset = 
         (char *) &_copy_fields->output_name - (char *) _copy_fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[2].fname = tdrpStrDup("censor_non_precip");
+      tt->struct_def.fields[2].fname = tdrpStrDup("censor_rlan");
       tt->struct_def.fields[2].ptype = BOOL_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_copy_fields->censor_non_precip - (char *) _copy_fields;
+        (char *) &_copy_fields->censor_rlan - (char *) _copy_fields;
     tt->n_struct_vals = 3;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));

@@ -467,8 +467,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
       if (inField != NULL) {
         RadxField *outField = new RadxField(*inField);
         outField->setName(cfield.output_name);
-        if (cfield.censor_non_precip) {
-          _censorNonPrecip(*outField);
+        if (cfield.censor_rlan) {
+          _censorRlan(*outField);
         }
         derivedRay->addField(outField);
       }
@@ -857,23 +857,18 @@ void ComputeEngine::_computeSnrFromDbz()
 }
 
 //////////////////////////////////////////////////////////////
-// Censor gates with non-precip particle types
+// Censor gates with RLAN present
 
-void ComputeEngine::_censorNonPrecip(RadxField &field)
+void ComputeEngine::_censorRlan(RadxField &field)
 
 {
 
-  // const int *pid = _pid.getPid();
-  // for (int ii = 0; ii < _nGates; ii++) {
-  //   int ptype = pid[ii];
-  //   if (ptype == NcarParticleId::FLYING_INSECTS ||
-  //       ptype == NcarParticleId::SECOND_TRIP ||
-  //       ptype == NcarParticleId::GROUND_CLUTTER ||
-  //       ptype < NcarParticleId::CLOUD ||
-  //       ptype > NcarParticleId::SATURATED_SNR) {
-  //     field.setGateToMissing(ii);
-  //   }
-  // } // ii
+  const bool *rlanFlag = _intf.getRlanFlag();
+  for (int ii = 0; ii < _nGates; ii++) {
+    if (rlanFlag[ii]) {
+      field.setGateToMissing(ii);
+    }
+  } // ii
 
 }
 

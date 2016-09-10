@@ -830,7 +830,7 @@ paramdef boolean {
 typedef struct {
   string input_name; 
   string output_name;
-  boolean censor_non_precip;
+  boolean censor_rlan;
 } copy_field_t;
 
 paramdef struct copy_field_t {
@@ -838,7 +838,7 @@ paramdef struct copy_field_t {
     {
       input_name = "VEL",
       output_name = "VEL",
-      censor_non_precip = FALSE
+      censor_rlan = FALSE
     }
   };
   p_descr = "These fields are copied through unchanged to the output file.";

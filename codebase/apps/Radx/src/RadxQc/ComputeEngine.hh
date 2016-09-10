@@ -178,8 +178,8 @@ private:
 
   void _computeSnrFromDbz();
 
-  void _censorNonPrecip(RadxField &field);
-
+  void _censorRlan(RadxField &field);
+  
   int _convertInterestParamsToVector(const string &label,
                                      const Params::interest_map_point_t *map,
                                      int nPoints,

@@ -182,7 +182,7 @@ public:
   typedef struct {
     char* input_name;
     char* output_name;
-    tdrp_bool_t censor_non_precip;
+    tdrp_bool_t censor_rlan;
   } copy_field_t;
 
   ///////////////////////////
