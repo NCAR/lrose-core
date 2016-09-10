@@ -620,7 +620,8 @@ void ComputeEngine::_locateRlan()
 
   if (_params.NCP_available) {
     _intf.setNcpField(_ncpArray);
-  } else {
+  }
+  if (_params.WIDTH_available) {
     _intf.setWidthField(_widthArray);
   }
 

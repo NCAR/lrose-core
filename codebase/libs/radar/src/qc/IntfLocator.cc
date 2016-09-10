@@ -432,7 +432,8 @@ int IntfLocator::rlanLocate()
 
   if (_ncpAvail) {
     _computeMeanInRange(_ncp, _ncpMean);
-  } else {
+  }
+  if (_widthAvail) {
     _computeMeanInRange(_width, _widthMean);
   }
 
@@ -772,12 +773,12 @@ void IntfLocator::_createDefaultInterestMaps()
   vector<InterestMap::ImPoint> pts;
 
   pts.clear();
-  pts.push_back(InterestMap::ImPoint(40.0, 0.001));
-  pts.push_back(InterestMap::ImPoint(50.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(35.0, 0.001));
+  pts.push_back(InterestMap::ImPoint(45.0, 1.0));
   setInterestMapPhaseNoise(pts, 1.0);
   
   pts.clear();
-  pts.push_back(InterestMap::ImPoint(0.15, 1.0));
+  pts.push_back(InterestMap::ImPoint(0.10, 1.0));
   pts.push_back(InterestMap::ImPoint(0.20, 0.001));
   setInterestMapNcpMean(pts, 1.0);
 

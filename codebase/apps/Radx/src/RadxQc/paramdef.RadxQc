@@ -501,7 +501,7 @@ paramdef double {
 } rlan_ncp_mean_weight;
 
 paramdef struct interest_map_point_t {
-  p_default = {{0.1, 1.0}, {0.2, 0.001}};
+  p_default = {{4.0, 0.001}, {5.0, 1.0}};
   p_descr = "RLAN interest mapping for mean of width.";
 } rlan_width_mean_interest_map[];
 
@@ -512,7 +512,7 @@ paramdef double {
 } rlan_width_mean_weight;
 
 paramdef struct interest_map_point_t {
-  p_default = {{0.1, 1.0}, {0.2, 0.001}};
+  p_default = {{2.0, 1.0}, {2.5, 0.001}};
   p_descr = "RLAN interest mapping for delta mode of snr.";
 } rlan_snr_dmode_interest_map[];
 

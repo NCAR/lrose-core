@@ -1614,10 +1614,10 @@ using namespace std;
     tt->n_struct_vals = 4;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0.1;
-      tt->struct_vals[1].d = 1;
-      tt->struct_vals[2].d = 0.2;
-      tt->struct_vals[3].d = 0.001;
+      tt->struct_vals[0].d = 4;
+      tt->struct_vals[1].d = 0.001;
+      tt->struct_vals[2].d = 5;
+      tt->struct_vals[3].d = 1;
     tt++;
     
     // Parameter 'rlan_width_mean_weight'
@@ -1663,9 +1663,9 @@ using namespace std;
     tt->n_struct_vals = 4;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0.1;
+      tt->struct_vals[0].d = 2;
       tt->struct_vals[1].d = 1;
-      tt->struct_vals[2].d = 0.2;
+      tt->struct_vals[2].d = 2.5;
       tt->struct_vals[3].d = 0.001;
     tt++;
     
