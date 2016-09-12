@@ -754,13 +754,13 @@ void ComputeEngine::_locateSeaClutter()
   }
 
   if (_params.RHOHV_available) {
-    _seaclut.setRhohvField(_ncpArray);
+    _seaclut.setRhohvField(_rhohvArray);
   }
   if (_params.PHIDP_available) {
-    _seaclut.setPhidpField(_widthArray);
+    _seaclut.setPhidpField(_phidpArray);
   }
   if (_params.ZDR_available) {
-    _seaclut.setZdrField(_widthArray);
+    _seaclut.setZdrField(_zdrArray);
   }
 
 
