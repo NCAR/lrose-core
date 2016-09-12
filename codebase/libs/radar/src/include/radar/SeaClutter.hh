@@ -69,7 +69,7 @@ public:
 
   // only include gates that exceed a given SNR threshold
   
-  void setSnrThreshold(double val);
+  void setMinSnrDb(double val) { _minSnrDb = val; }
 
   // set interest maps for sea clutter location
 
@@ -133,7 +133,7 @@ public:
   //   phidp
   //   zdr
  
-  int clutLocate();
+  int locate();
 
   // get input fields - after setting ray props and fields
 
@@ -246,6 +246,7 @@ private:
   // fuzzy logic for clutter detection
 
   int _nGatesKernel;
+  double _minSnrDb;
 
   InterestMap *_interestMapRhohvMean;
   InterestMap *_interestMapPhidpSdev;

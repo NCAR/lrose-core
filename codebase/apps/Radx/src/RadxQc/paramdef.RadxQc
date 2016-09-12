@@ -524,7 +524,7 @@ paramdef double {
 
 paramdef struct interest_map_point_t {
   p_default = {{0.65, 1.0}, {0.75, 0.001}};
-  p_descr = "RLAN interest mapping for delta mode of snr.";
+  p_descr = "RLAN interest mapping for sdev of snr.";
 } rlan_snr_sdev_interest_map[];
 
 paramdef double {
@@ -544,6 +544,66 @@ paramdef double {
   p_descr = "Threshold interest value for identifying noise-only gates.";
   p_help = "If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.";
 } noise_interest_threshold;
+
+commentdef {
+  p_header = "LOCATING SEA CLUTTER";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to locate gates with sea clutter.";
+  p_help = "You need to activate this step if you want sea clutter to show up in the PID classification.";
+} locate_sea_clutter;
+
+commentdef {
+  p_header = "INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION";
+  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.";
+};
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min SNR for sea clutter (dB).";
+  p_help = "Only locate sea clutter if SNR exceeds this value.";
+} seaclut_min_snr_db;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.35, 1.0}, {0.4, 0.001}};
+  p_descr = "SEA CLUTTER interest mapping for rhohv mean.";
+} seaclut_rhohv_mean_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "SEA CLUTTER weight for interest for rhohv mean.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} seaclut_rhohv_mean_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{40.0, 0.001}, {45.0, 1.0}};
+  p_descr = "SEA CLUTTER interest mapping for sdev of phidp.";
+} seaclut_phidp_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for sdev of phidp.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} seaclut_phidp_sdev_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{1.5, 0.001}, {2.5, 1.0}};
+  p_descr = "SEA CLUTTER interest mapping for sdev of zdr.";
+} seaclut_zdr_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for sdev of zdr.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} seaclut_zdr_sdev_weight;
+
+paramdef double {
+  p_default = 0.51;
+  p_descr = "Threshold interest value for identifying sea clutter.";
+  p_help = "If the fuzzy interest value exceeds this threshold, sea clutter is assumed to exist at that gate.";
+} seaclut_interest_threshold;
 
 commentdef {
   p_header = "SOUNDING INPUT FOR temperatures - OPTIONAL";
@@ -699,7 +759,16 @@ typedef enum {
   SNR_DMODE_INTEREST_RLAN,
   SNR_SDEV_INTEREST_RLAN,
   RLAN_FLAG,
-  NOISE_FLAG
+  NOISE_FLAG,
+
+  SNR_MEAN_SEACLUT,
+  RHOHV_MEAN_SEACLUT,
+  PHIDP_SDEV_SEACLUT,
+  ZDR_SDEV_SEACLUT,
+  RHOHV_MEAN_INTEREST_SEACLUT,
+  PHIDP_SDEV_INTEREST_SEACLUT,
+  ZDR_SDEV_INTEREST_SEACLUT,
+  SEACLUT_FLAG
 
 } output_field_id_t;
 

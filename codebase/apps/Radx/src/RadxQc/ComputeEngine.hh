@@ -43,6 +43,7 @@
 #include <radar/TempProfile.hh>
 #include <radar/AtmosAtten.hh>
 #include <radar/IntfLocator.hh>
+#include <radar/SeaClutter.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxTime.hh>
 #include <radar/InterestMap.hh>
@@ -136,18 +137,25 @@ private:
 
   KdpFilt _kdp;
 
-  // interference
+  // RLAN interference
 
   IntfLocator _intf;
   const TempProfile *_tempProfile;
-
-  // interest maps
-  
   vector<InterestMap::ImPoint> _rlanImapPhaseNoise;
   vector<InterestMap::ImPoint> _rlanImapNcpMean;
   vector<InterestMap::ImPoint> _rlanImapWidthMean;
   vector<InterestMap::ImPoint> _rlanImapSnrDMode;
   vector<InterestMap::ImPoint> _rlanImapSnrSdev;
+
+  // sea clutter
+
+  SeaClutter _seaclut;
+  vector<InterestMap::ImPoint> _seaclutImapRhohvMean;
+  vector<InterestMap::ImPoint> _seaclutImapPhidpSdev;
+  vector<InterestMap::ImPoint> _seaclutImapZdrSdev;
+
+  // interest maps
+  
 
   // debug printing
   
@@ -165,6 +173,7 @@ private:
   void _kdpCompute();
 
   void _locateRlan();
+  void _locateSeaClutter();
 
   void _allocMomentsArrays();
 
@@ -179,6 +188,8 @@ private:
   void _computeSnrFromDbz();
 
   void _censorRlan(RadxField &field);
+
+  void _censorSeaClutter(RadxField &field);
   
   int _convertInterestParamsToVector(const string &label,
                                      const Params::interest_map_point_t *map,

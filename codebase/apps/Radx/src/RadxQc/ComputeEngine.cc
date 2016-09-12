@@ -62,7 +62,7 @@ ComputeEngine::ComputeEngine(const Params &params,
 
   _kdpInit();
 
-  // set up interest maps
+  // set up interest maps for RLAN interference
 
   if (_convertInterestParamsToVector
       ("rlan_phase_noise",
@@ -119,6 +119,43 @@ ComputeEngine::ComputeEngine(const Params &params,
                                  _params.rlan_snr_sdev_weight);
   }
 
+  // set up interest maps for sea clutter
+
+  if (_convertInterestParamsToVector
+      ("seaclut_rhohv_mean",
+       _params._seaclut_rhohv_mean_interest_map,
+       _params.seaclut_rhohv_mean_interest_map_n,
+       _seaclutImapRhohvMean)) {
+    OK = false;
+  } else {
+    _seaclut.setInterestMapRhohvMean(_seaclutImapRhohvMean,
+                                     _params.seaclut_rhohv_mean_weight);
+  }
+  
+  if (_convertInterestParamsToVector
+      ("seaclut_phidp_sdev",
+       _params._seaclut_phidp_sdev_interest_map,
+       _params.seaclut_phidp_sdev_interest_map_n,
+       _seaclutImapPhidpSdev)) {
+    OK = false;
+  } else {
+    _seaclut.setInterestMapPhidpSdev(_seaclutImapPhidpSdev,
+                                     _params.seaclut_phidp_sdev_weight);
+  }
+  
+  if (_convertInterestParamsToVector
+      ("seaclut_zdr_sdev",
+       _params._seaclut_zdr_sdev_interest_map,
+       _params.seaclut_zdr_sdev_interest_map_n,
+       _seaclutImapZdrSdev)) {
+    OK = false;
+  } else {
+    _seaclut.setInterestMapZdrSdev(_seaclutImapZdrSdev,
+                                   _params.seaclut_phidp_sdev_weight);
+  }
+
+  _seaclut.setMinSnrDb(_params.seaclut_min_snr_db);
+  
 }
 
 // destructor
@@ -191,6 +228,12 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
     _locateRlan();
   }
 
+  // locate sea clutter
+
+  if (_params.locate_sea_clutter) {
+    _locateSeaClutter();
+  }
+
   // load output fields into the moments ray
   
   _loadOutputFields(inputRay, derivedRay);
@@ -245,14 +288,25 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *phaseRlan = _intf.getPhase();
   const double *phaseNoiseRlan = _intf.getPhaseNoise();
 
+  const double *phaseNoiseInterestRlan = _intf.getPhaseNoiseInterest();
+  const double *ncpMeanInterestRlan = _intf.getNcpMeanInterest();
+  const double *widthMeanInterestRlan = _intf.getWidthMeanInterest();
+  const double *snrDModeInterestRlan = _intf.getSnrDModeInterest();
+  const double *snrSdevInterestRlan = _intf.getSnrSdevInterest();
+
   const bool *rlanFlag = _intf.getRlanFlag();
   const bool *noiseFlag = _intf.getNoiseFlag();
   
-  const double *phaseNoiseInterest = _intf.getPhaseNoiseInterest();
-  const double *ncpMeanInterest = _intf.getNcpMeanInterest();
-  const double *widthMeanInterest = _intf.getWidthMeanInterest();
-  const double *snrDModeInterest = _intf.getSnrDModeInterest();
-  const double *snrSdevInterest = _intf.getSnrSdevInterest();
+  const double *snrMeanSeaclut = _seaclut.getSnrMean();
+  const double *rhohvMeanSeaclut = _seaclut.getRhohvMean();
+  const double *phidpSdevSeaclut = _seaclut.getPhidpSdev();
+  const double *zdrSdevSeaclut = _seaclut.getZdrSdev();
+
+  const double *rhohvMeanInterestSeaclut = _seaclut.getRhohvMeanInterest();
+  const double *phidpSdevInterestSeaclut = _seaclut.getPhidpSdevInterest();
+  const double *zdrSdevInterestSeaclut = _seaclut.getZdrSdevInterest();
+
+  const bool *seaclutFlag = _seaclut.getClutFlag();
 
   // load up output data
 
@@ -422,19 +476,48 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
 
         case Params::PHASE_NOISE_INTEREST_RLAN:
-          *datp = phaseNoiseInterest[igate];
+          *datp = phaseNoiseInterestRlan[igate];
           break;
         case Params::NCP_MEAN_INTEREST_RLAN:
-          *datp = ncpMeanInterest[igate];
+          *datp = ncpMeanInterestRlan[igate];
           break;
         case Params::WIDTH_MEAN_INTEREST_RLAN:
-          *datp = widthMeanInterest[igate];
+          *datp = widthMeanInterestRlan[igate];
           break;
         case Params::SNR_DMODE_INTEREST_RLAN:
-          *datp = snrDModeInterest[igate];
+          *datp = snrDModeInterestRlan[igate];
           break;
         case Params::SNR_SDEV_INTEREST_RLAN:
-          *datp = snrSdevInterest[igate];
+          *datp = snrSdevInterestRlan[igate];
+          break;
+
+        case Params::SNR_MEAN_SEACLUT:
+          *datp = snrMeanSeaclut[igate];
+          break;
+        case Params::RHOHV_MEAN_SEACLUT:
+          *datp = rhohvMeanSeaclut[igate];
+          break;
+        case Params::PHIDP_SDEV_SEACLUT:
+          *datp = phidpSdevSeaclut[igate];
+          break;
+        case Params::ZDR_SDEV_SEACLUT:
+          *datp = zdrSdevSeaclut[igate];
+          break;
+        case Params::RHOHV_MEAN_INTEREST_SEACLUT:
+          *datp = rhohvMeanInterestSeaclut[igate];
+          break;
+        case Params::PHIDP_SDEV_INTEREST_SEACLUT:
+          *datp = phidpSdevInterestSeaclut[igate];
+          break;
+        case Params::ZDR_SDEV_INTEREST_SEACLUT:
+          *datp = zdrSdevInterestSeaclut[igate];
+          break;
+        case Params::SEACLUT_FLAG:
+          if (seaclutFlag[igate]) {
+            *datp = 1.0;
+          } else {
+            *datp = 0.0;
+          }
           break;
 
       } // switch
@@ -634,6 +717,56 @@ void ComputeEngine::_locateRlan()
   // locate RLAN interference
 
   _intf.rlanLocate();
+
+}
+
+//////////////////////////////////////
+// Locate Sea Clutter
+
+void ComputeEngine::_locateSeaClutter()
+  
+{
+
+  // set up RLAN
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _seaclut.setDebug(true);
+  }
+
+  _seaclut.setNGatesKernel(9);
+  _seaclut.setWavelengthM(_wavelengthM);
+  _seaclut.setRadarHtM(_radarHtKm * 1000.0);
+
+  _seaclut.setRayProps(_timeSecs,
+                       _nanoSecs,
+                       _elevation,
+                       _azimuth,
+                       _nGates,
+                       _startRangeKm,
+                       _gateSpacingKm);
+  
+  _seaclut.setFieldMissingVal(missingDbl);
+  
+  if (_params.SNR_available) {
+    _seaclut.setSnrField(_snrArray);
+  } else {
+    _seaclut.setDbzField(_dbzArray, _params.noise_dbz_at_100km);
+  }
+
+  if (_params.RHOHV_available) {
+    _seaclut.setRhohvField(_ncpArray);
+  }
+  if (_params.PHIDP_available) {
+    _seaclut.setPhidpField(_widthArray);
+  }
+  if (_params.ZDR_available) {
+    _seaclut.setZdrField(_widthArray);
+  }
+
+
+  // locate RLAN interference
+
+  _seaclut.locate();
 
 }
 

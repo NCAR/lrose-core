@@ -1687,7 +1687,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("rlan_snr_sdev_interest_map");
-    tt->descr = tdrpStrDup("RLAN interest mapping for delta mode of snr.");
+    tt->descr = tdrpStrDup("RLAN interest mapping for sdev of snr.");
     tt->help = tdrpStrDup("");
     tt->array_offset = (char *) &_rlan_snr_sdev_interest_map - &_start_;
     tt->array_n_offset = (char *) &rlan_snr_sdev_interest_map_n - &_start_;
@@ -1759,6 +1759,207 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("LOCATING SEA CLUTTER");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'locate_sea_clutter'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("locate_sea_clutter");
+    tt->descr = tdrpStrDup("Option to locate gates with sea clutter.");
+    tt->help = tdrpStrDup("You need to activate this step if you want sea clutter to show up in the PID classification.");
+    tt->val_offset = (char *) &locate_sea_clutter - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
+    tt->comment_hdr = tdrpStrDup("INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION");
+    tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.");
+    tt++;
+    
+    // Parameter 'seaclut_min_snr_db'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_min_snr_db");
+    tt->descr = tdrpStrDup("Min SNR for sea clutter (dB).");
+    tt->help = tdrpStrDup("Only locate sea clutter if SNR exceeds this value.");
+    tt->val_offset = (char *) &seaclut_min_snr_db - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'seaclut_rhohv_mean_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_rhohv_mean_interest_map");
+    tt->descr = tdrpStrDup("SEA CLUTTER interest mapping for rhohv mean.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_seaclut_rhohv_mean_interest_map - &_start_;
+    tt->array_n_offset = (char *) &seaclut_rhohv_mean_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_seaclut_rhohv_mean_interest_map->value - (char *) _seaclut_rhohv_mean_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_seaclut_rhohv_mean_interest_map->interest - (char *) _seaclut_rhohv_mean_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0.35;
+      tt->struct_vals[1].d = 1;
+      tt->struct_vals[2].d = 0.4;
+      tt->struct_vals[3].d = 0.001;
+    tt++;
+    
+    // Parameter 'seaclut_rhohv_mean_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_rhohv_mean_weight");
+    tt->descr = tdrpStrDup("SEA CLUTTER weight for interest for rhohv mean.");
+    tt->help = tdrpStrDup("The relative weighting applied when computing the fuzzy sum.");
+    tt->val_offset = (char *) &seaclut_rhohv_mean_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'seaclut_phidp_sdev_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_phidp_sdev_interest_map");
+    tt->descr = tdrpStrDup("SEA CLUTTER interest mapping for sdev of phidp.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_seaclut_phidp_sdev_interest_map - &_start_;
+    tt->array_n_offset = (char *) &seaclut_phidp_sdev_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_seaclut_phidp_sdev_interest_map->value - (char *) _seaclut_phidp_sdev_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_seaclut_phidp_sdev_interest_map->interest - (char *) _seaclut_phidp_sdev_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 40;
+      tt->struct_vals[1].d = 0.001;
+      tt->struct_vals[2].d = 45;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'seaclut_phidp_sdev_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_phidp_sdev_weight");
+    tt->descr = tdrpStrDup("Weight for interest for sdev of phidp.");
+    tt->help = tdrpStrDup("The relative weighting applied when computing the fuzzy sum.");
+    tt->val_offset = (char *) &seaclut_phidp_sdev_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'seaclut_zdr_sdev_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_zdr_sdev_interest_map");
+    tt->descr = tdrpStrDup("SEA CLUTTER interest mapping for sdev of zdr.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_seaclut_zdr_sdev_interest_map - &_start_;
+    tt->array_n_offset = (char *) &seaclut_zdr_sdev_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_seaclut_zdr_sdev_interest_map->value - (char *) _seaclut_zdr_sdev_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_seaclut_zdr_sdev_interest_map->interest - (char *) _seaclut_zdr_sdev_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 1.5;
+      tt->struct_vals[1].d = 0.001;
+      tt->struct_vals[2].d = 2.5;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'seaclut_zdr_sdev_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_zdr_sdev_weight");
+    tt->descr = tdrpStrDup("Weight for interest for sdev of zdr.");
+    tt->help = tdrpStrDup("The relative weighting applied when computing the fuzzy sum.");
+    tt->val_offset = (char *) &seaclut_zdr_sdev_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'seaclut_interest_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_interest_threshold");
+    tt->descr = tdrpStrDup("Threshold interest value for identifying sea clutter.");
+    tt->help = tdrpStrDup("If the fuzzy interest value exceeds this threshold, sea clutter is assumed to exist at that gate.");
+    tt->val_offset = (char *) &seaclut_interest_threshold - &_start_;
+    tt->single_val.d = 0.51;
+    tt++;
+    
+    // Parameter 'Comment 12'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR temperatures - OPTIONAL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1931,11 +2132,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("RETRIEVING SITE TEMPERATURE FROM SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1988,11 +2189,11 @@ using namespace std;
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("SPECIFYING FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2021,7 +2222,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 45;
+        tt->struct_def.fields[0].enum_def.nfields = 53;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -2114,6 +2315,22 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[43].val = RLAN_FLAG;
         tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("NOISE_FLAG");
         tt->struct_def.fields[0].enum_def.fields[44].val = NOISE_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("SNR_MEAN_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[45].val = SNR_MEAN_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("RHOHV_MEAN_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[46].val = RHOHV_MEAN_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("PHIDP_SDEV_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[47].val = PHIDP_SDEV_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("ZDR_SDEV_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[48].val = ZDR_SDEV_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("RHOHV_MEAN_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[49].val = RHOHV_MEAN_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("PHIDP_SDEV_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[50].val = PHIDP_SDEV_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("ZDR_SDEV_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[51].val = ZDR_SDEV_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("SEACLUT_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[52].val = SEACLUT_FLAG;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -2242,11 +2459,11 @@ using namespace std;
       tt->struct_vals[62].d = 0;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("SPECIFYING COPY-THROUGH FIELDS");
     tt->comment_text = tdrpStrDup("These fields are copied unchanged from the input file to the output file. This is a way of consolidating the output data set.");
     tt++;
@@ -2304,11 +2521,11 @@ using namespace std;
       tt->struct_vals[2].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("OUTPUT FILE FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2365,11 +2582,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2410,11 +2627,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("VOLUME OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

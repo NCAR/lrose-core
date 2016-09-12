@@ -60,6 +60,7 @@ SeaClutter::SeaClutter()
   
   _radarHtM = -9999.0;
   _wavelengthM = -9999.0;
+  _minSnrDb = 0.0;
 
 }
 
@@ -243,7 +244,7 @@ void SeaClutter::_computeSnrFromDbz(double noiseDbzAt100km)
 //
 // Returns 0 on success, -1 on failure
 
-int SeaClutter::clutLocate()
+int SeaClutter::locate()
   
 {
 
@@ -376,7 +377,7 @@ int SeaClutter::clutLocate()
       (_zdrSdevInterest[igate] * _weightZdrSdev);
 
     double interestClut = sumInterestClut / sumWeightsClut;
-    if (interestClut > _clutInterestThreshold) {
+    if (interestClut > _clutInterestThreshold && _snrMean[igate] >= _minSnrDb) {
       _clutFlag[igate] = true;
     } else {
       _clutFlag[igate] = false;
