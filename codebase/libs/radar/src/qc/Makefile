@@ -21,7 +21,8 @@ HDRS = \
 	../include/radar/IntfLocator.hh
 
 CPPC_SRCS = \
-	IntfLocator.cc
+	IntfLocator.cc \
+	SeaClutter.cc
 
 #
 # general targets

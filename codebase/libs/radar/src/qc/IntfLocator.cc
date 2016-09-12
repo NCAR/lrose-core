@@ -30,7 +30,8 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Find noise gates in Doppler radar data
+// (a) Locate gates contaminated with RLAN interference
+// (b) Locate gates with noise and no signal
 //
 ///////////////////////////////////////////////////////////////
 
@@ -228,7 +229,7 @@ void IntfLocator::setVelField(double *vals,
 }
 
 ///////////////////////////////////////////////////////////////
-// set the DBZ field
+// set the NCP field
 // must be called after setRayProps()
 
 void IntfLocator::setNcpField(double *vals)
