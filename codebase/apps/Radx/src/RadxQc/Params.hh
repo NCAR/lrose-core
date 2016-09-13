@@ -190,7 +190,7 @@ public:
   typedef struct {
     char* input_name;
     char* output_name;
-    tdrp_bool_t censor_rlan;
+    tdrp_bool_t apply_censoring;
   } copy_field_t;
 
   ///////////////////////////
@@ -704,6 +704,10 @@ public:
   copy_field_t *_copy_fields;
   int copy_fields_n;
 
+  tdrp_bool_t apply_rlan_censoring;
+
+  tdrp_bool_t apply_seaclutter_censoring;
+
   output_format_t output_format;
 
   netcdf_style_t netcdf_style;
@@ -735,7 +739,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[140];
+  mutable TDRPtable _table[142];
 
   const char *_className;
 

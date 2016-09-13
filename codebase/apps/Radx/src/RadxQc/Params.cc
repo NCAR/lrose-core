@@ -2487,7 +2487,7 @@ using namespace std;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("copy_fields");
     tt->descr = tdrpStrDup("These fields are copied through unchanged to the output file.");
-    tt->help = tdrpStrDup("You can change the name of the field on output.");
+    tt->help = tdrpStrDup("You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app. See censoring control parameters below.");
     tt->array_offset = (char *) &_copy_fields - &_start_;
     tt->array_n_offset = (char *) &copy_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -2509,16 +2509,40 @@ using namespace std;
       tt->struct_def.fields[1].rel_offset = 
         (char *) &_copy_fields->output_name - (char *) _copy_fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[2].fname = tdrpStrDup("censor_rlan");
+      tt->struct_def.fields[2].fname = tdrpStrDup("apply_censoring");
       tt->struct_def.fields[2].ptype = BOOL_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_copy_fields->censor_rlan - (char *) _copy_fields;
+        (char *) &_copy_fields->apply_censoring - (char *) _copy_fields;
     tt->n_struct_vals = 3;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("VEL");
       tt->struct_vals[1].s = tdrpStrDup("VEL");
       tt->struct_vals[2].b = pFALSE;
+    tt++;
+    
+    // Parameter 'apply_rlan_censoring'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("apply_rlan_censoring");
+    tt->descr = tdrpStrDup("Option to censor rlan interference in fields that are copied through.");
+    tt->help = tdrpStrDup("Only applies for fields for which 'apply_censoring' is set to TRUE.");
+    tt->val_offset = (char *) &apply_rlan_censoring - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'apply_seaclutter_censoring'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("apply_seaclutter_censoring");
+    tt->descr = tdrpStrDup("Option to censor sea clutter in fields that are copied through.");
+    tt->help = tdrpStrDup("Only applies for fields for which 'apply_censoring' is set to TRUE.");
+    tt->val_offset = (char *) &apply_seaclutter_censoring - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 16'

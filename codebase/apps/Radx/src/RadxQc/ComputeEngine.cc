@@ -550,8 +550,13 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
       if (inField != NULL) {
         RadxField *outField = new RadxField(*inField);
         outField->setName(cfield.output_name);
-        if (cfield.censor_rlan) {
-          _censorRlan(*outField);
+        if (cfield.apply_censoring) {
+          if (_params.apply_rlan_censoring) {
+            _censorRlan(*outField);
+          }
+          if (_params.apply_seaclutter_censoring) {
+            _censorSeaClutter(*outField);
+          }
         }
         derivedRay->addField(outField);
       }
@@ -999,6 +1004,22 @@ void ComputeEngine::_censorRlan(RadxField &field)
   const bool *rlanFlag = _intf.getRlanFlag();
   for (int ii = 0; ii < _nGates; ii++) {
     if (rlanFlag[ii]) {
+      field.setGateToMissing(ii);
+    }
+  } // ii
+
+}
+
+//////////////////////////////////////////////////////////////
+// Censor gates with sea clutter present
+
+void ComputeEngine::_censorSeaClutter(RadxField &field)
+  
+{
+
+  const bool *clutFlag = _seaclut.getClutFlag();
+  for (int ii = 0; ii < _nGates; ii++) {
+    if (clutFlag[ii]) {
       field.setGateToMissing(ii);
     }
   } // ii

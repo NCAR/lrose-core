@@ -899,7 +899,7 @@ paramdef boolean {
 typedef struct {
   string input_name; 
   string output_name;
-  boolean censor_rlan;
+  boolean apply_censoring;
 } copy_field_t;
 
 paramdef struct copy_field_t {
@@ -907,12 +907,24 @@ paramdef struct copy_field_t {
     {
       input_name = "VEL",
       output_name = "VEL",
-      censor_rlan = FALSE
+      apply_censoring = FALSE
     }
   };
   p_descr = "These fields are copied through unchanged to the output file.";
-  p_help = "You can change the name of the field on output.";
+  p_help = "You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app. See censoring control parameters below.";
 } copy_fields[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to censor rlan interference in fields that are copied through.";
+  p_help = "Only applies for fields for which 'apply_censoring' is set to TRUE.";
+} apply_rlan_censoring;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to censor sea clutter in fields that are copied through.";
+  p_help = "Only applies for fields for which 'apply_censoring' is set to TRUE.";
+} apply_seaclutter_censoring;
 
 commentdef {
   p_header = "OUTPUT FILE FORMAT";
