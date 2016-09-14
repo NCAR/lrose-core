@@ -43,6 +43,7 @@ commentdef {
 
 typedef enum {
   CFRADIAL,
+  RADX_FMQ,
   IWRF_FILE,
   IWRF_FMQ,
   RAF_NETCDF,
@@ -57,7 +58,7 @@ paramdef enum input_mode_t {
 
 paramdef string {
   p_default = "/tmp/fmq/ts";
-  p_descr = "FMQ name. For IWRF_FMQ only.";
+  p_descr = "FMQ name. For IWRF_FMQ or RADX_FMQ only.";
   p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
 } input_fmq_name;
 
@@ -67,11 +68,27 @@ paramdef boolean {
   p_help = "Applies to input_mode = IWRF_FMQ. If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
 } seek_to_end_of_input;
 
+commentdef {
+  p_header = "IWG1 UDP mode";
+}
+
 paramdef int {
   p_default = 7071;
   p_descr = "Port for reading IWG1 packets via UDP.";
   p_help = "Applies to input_mode = RAF_IWG1_UDP. On the aircraft, the IWG1 georeference information is broadcast using UDP. This is the UDP port used.";
 } iwg1_udp_port;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to read multi-cast udp packets.";
+  p_help = "If true, you must set the multicast group as well.";
+} udp_is_multicast;
+
+paramdef string {
+  p_default = "239.0.0.10";
+  p_descr = "Group for multicast packets";
+  p_help = "Multicast packets are sometimes required to get through a firewall.";
+} udp_multicast_group;
 
 commentdef {
   p_header = "AIRCRAFT CALL SIGN";
@@ -135,6 +152,18 @@ paramdef int {
   p_descr = "Number of gates needed for identifying surface echo.";
   p_help = "We require this number of gates to exceed min_dbz_for_surface_echo.";
 } ngates_for_surface_echo;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print surface velocity information to stdout.";
+  p_help = "If true, the surface velocity estimates, as well as estimated antenna pointing angles, will be printed to stdout at regular intervals.";
+} print_surface_velocity_data;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Number of seconds between printing information on surface velocity.";
+  p_help = "The data will be averaged over this time period and then printed to stdout.";
+} surface_velocity_print_period_secs;
 
 commentdef {
   p_header = "NETCDF DATA";
@@ -268,8 +297,14 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "spdbp:://localhost::spdb/ac_georef";
+  p_default = "spdbp:://localhost::/tmp/spdb/ac_georef";
   p_descr = "Output SPDB URL for georef data.";
   p_help = "The format is spdbp::params//host:port:dir. Normally params is an empty string, and port is an empty string, so that the default behavior will occur.";
 } output_spdb_url;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Number of SPDB chunks per write.";
+  p_help = "We package up the SPDB data chunks, and write them together once the number of chunks reaches this threshold.";
+} spdb_nchunks_per_write;
 

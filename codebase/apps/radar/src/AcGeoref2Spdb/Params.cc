@@ -612,19 +612,21 @@ using namespace std;
     tt->help = tdrpStrDup("CFRADIAL: read CfRadial files.\n\nIWRF_FILE: read the georeference packets from files containing IWRF time series.\n\nIWRF_FMQ: read the georeference packets from an FMQ containing IWRF time series.\n\nRAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.\n\nRAF_IWG1_UDP: read NCAR RAF IWG1 packets from UDP.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
-    tt->enum_def.nfields = 5;
+    tt->enum_def.nfields = 6;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("CFRADIAL");
       tt->enum_def.fields[0].val = CFRADIAL;
-      tt->enum_def.fields[1].name = tdrpStrDup("IWRF_FILE");
-      tt->enum_def.fields[1].val = IWRF_FILE;
-      tt->enum_def.fields[2].name = tdrpStrDup("IWRF_FMQ");
-      tt->enum_def.fields[2].val = IWRF_FMQ;
-      tt->enum_def.fields[3].name = tdrpStrDup("RAF_NETCDF");
-      tt->enum_def.fields[3].val = RAF_NETCDF;
-      tt->enum_def.fields[4].name = tdrpStrDup("RAF_IWG1_UDP");
-      tt->enum_def.fields[4].val = RAF_IWG1_UDP;
+      tt->enum_def.fields[1].name = tdrpStrDup("RADX_FMQ");
+      tt->enum_def.fields[1].val = RADX_FMQ;
+      tt->enum_def.fields[2].name = tdrpStrDup("IWRF_FILE");
+      tt->enum_def.fields[2].val = IWRF_FILE;
+      tt->enum_def.fields[3].name = tdrpStrDup("IWRF_FMQ");
+      tt->enum_def.fields[3].val = IWRF_FMQ;
+      tt->enum_def.fields[4].name = tdrpStrDup("RAF_NETCDF");
+      tt->enum_def.fields[4].val = RAF_NETCDF;
+      tt->enum_def.fields[5].name = tdrpStrDup("RAF_IWG1_UDP");
+      tt->enum_def.fields[5].val = RAF_IWG1_UDP;
     tt->single_val.e = IWRF_FILE;
     tt++;
     
@@ -634,7 +636,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_fmq_name");
-    tt->descr = tdrpStrDup("FMQ name. For IWRF_FMQ only.");
+    tt->descr = tdrpStrDup("FMQ name. For IWRF_FMQ or RADX_FMQ only.");
     tt->help = tdrpStrDup("Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.");
     tt->val_offset = (char *) &input_fmq_name - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/fmq/ts");
@@ -652,6 +654,15 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("IWG1 UDP mode");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'iwg1_udp_port'
     // ctype is 'int'
     
@@ -664,11 +675,35 @@ using namespace std;
     tt->single_val.i = 7071;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'udp_is_multicast'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("udp_is_multicast");
+    tt->descr = tdrpStrDup("Option to read multi-cast udp packets.");
+    tt->help = tdrpStrDup("If true, you must set the multicast group as well.");
+    tt->val_offset = (char *) &udp_is_multicast - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'udp_multicast_group'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("udp_multicast_group");
+    tt->descr = tdrpStrDup("Group for multicast packets");
+    tt->help = tdrpStrDup("Multicast packets are sometimes required to get through a firewall.");
+    tt->val_offset = (char *) &udp_multicast_group - &_start_;
+    tt->single_val.s = tdrpStrDup("239.0.0.10");
+    tt++;
+    
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("AIRCRAFT CALL SIGN");
     tt->comment_text = tdrpStrDup("For IWRF, CFRADIAL and UDP data.");
     tt++;
@@ -685,11 +720,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("CFRADIAL DATA FIELDS");
     tt->comment_text = tdrpStrDup("Used for computing the surface velocity.");
     tt++;
@@ -730,11 +765,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("DETERMINE THE SURFACE VELOCITY FROM CFRADIAL DATA");
     tt->comment_text = tdrpStrDup("This applies to HCR data.");
     tt++;
@@ -787,11 +822,35 @@ using namespace std;
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'print_surface_velocity_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_surface_velocity_data");
+    tt->descr = tdrpStrDup("Option to print surface velocity information to stdout.");
+    tt->help = tdrpStrDup("If true, the surface velocity estimates, as well as estimated antenna pointing angles, will be printed to stdout at regular intervals.");
+    tt->val_offset = (char *) &print_surface_velocity_data - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'surface_velocity_print_period_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("surface_velocity_print_period_secs");
+    tt->descr = tdrpStrDup("Number of seconds between printing information on surface velocity.");
+    tt->help = tdrpStrDup("The data will be averaged over this time period and then printed to stdout.");
+    tt->val_offset = (char *) &surface_velocity_print_period_secs - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("NETCDF DATA");
     tt->comment_text = tdrpStrDup("Set the NetCDF variable names for the fields to be read in. If a field is not available. set the name to an empty string.");
     tt++;
@@ -1092,11 +1151,11 @@ using namespace std;
       tt->array_vals[1].s = tdrpStrDup("PITCH_IRS3");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1110,7 +1169,19 @@ using namespace std;
     tt->descr = tdrpStrDup("Output SPDB URL for georef data.");
     tt->help = tdrpStrDup("The format is spdbp::params//host:port:dir. Normally params is an empty string, and port is an empty string, so that the default behavior will occur.");
     tt->val_offset = (char *) &output_spdb_url - &_start_;
-    tt->single_val.s = tdrpStrDup("spdbp:://localhost::spdb/ac_georef");
+    tt->single_val.s = tdrpStrDup("spdbp:://localhost::/tmp/spdb/ac_georef");
+    tt++;
+    
+    // Parameter 'spdb_nchunks_per_write'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spdb_nchunks_per_write");
+    tt->descr = tdrpStrDup("Number of SPDB chunks per write.");
+    tt->help = tdrpStrDup("We package up the SPDB data chunks, and write them together once the number of chunks reaches this threshold.");
+    tt->val_offset = (char *) &spdb_nchunks_per_write - &_start_;
+    tt->single_val.i = 20;
     tt++;
     
     // trailing entry has param_name set to NULL

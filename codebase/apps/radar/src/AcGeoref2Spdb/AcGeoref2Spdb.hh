@@ -54,6 +54,7 @@
 #include <radar/IwrfCalib.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxRay.hh>
+#include <Radx/RadxTime.hh>
 #include <rapformats/ac_georef.hh>
 #include <Spdb/DsSpdb.hh>
 #include <NcUtils/NetcdfCxxFile.hh>
@@ -146,6 +147,12 @@ private:
   // writing out
 
   DsSpdb _spdb;
+
+  // printing surface velocity data
+
+  RadxTime _timeLastVelPrint;
+  double _velStatsCount;
+  ac_georef_t _velStatsSum;
   
   // methods
 
@@ -153,6 +160,7 @@ private:
   int _runCfradialMode();
   int _runRafNetcdfMode();
   int _runRafIwg1UdpMode();
+  int _runRadxFmqMode();
 
   IwrfTsPulse *_getNextPulse();
 
@@ -162,6 +170,7 @@ private:
   void _convertFromRadxGeoref(const RadxGeoref &radxGeoref,
                               ac_georef_t &acGeoref);
   int _processCfRadialFile(const string &path);
+  void _handleRay(const RadxRay &ray, double cmigitsTemp, double tailconeTemp);
   int _processRafNetcdfFile(const string &path);
   int _readGlobalAttr();
   int _readTimes();
@@ -176,12 +185,14 @@ private:
                                  double &cmigitsTemp, 
                                  double &tailconeTemp);
 
-  double _computeSurfaceVel(RadxRay &ray);
+  double _computeSurfaceVel(const RadxRay &ray);
 
   int _handleIwg1(const char *buf, int bufLen);
 
   double _decodeIwg1Field(const vector<string> &toks,
                           int tokNum);
+
+  void _printSurfVelStats(const ac_georef_t &georef);
 
 };
 

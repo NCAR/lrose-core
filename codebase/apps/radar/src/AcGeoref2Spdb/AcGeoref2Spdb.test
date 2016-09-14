@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for AcGeoref2Spdb
+ * TDRP params for ./AcGeoref2Spdb
  **********************************************************************/
 
 //======================================================================
@@ -81,6 +81,7 @@ instance = "test";
 // Type: enum
 // Options:
 //     CFRADIAL
+//     RADX_FMQ
 //     IWRF_FILE
 //     IWRF_FMQ
 //     RAF_NETCDF
@@ -91,7 +92,7 @@ input_mode = RAF_IWG1_UDP;
 
 ///////////// input_fmq_name //////////////////////////
 //
-// FMQ name. For IWRF_FMQ only.
+// FMQ name. For IWRF_FMQ or RADX_FMQ only.
 //
 // Path to FMQ files. There are 2 files, one with a .buf extension and 
 //   one with a .stat extention. This path does not include the 
@@ -117,6 +118,12 @@ input_fmq_name = "/tmp/fmq/ts";
 
 seek_to_end_of_input = TRUE;
 
+//======================================================================
+//
+// IWG1 UDP mode.
+//
+//======================================================================
+ 
 ///////////// iwg1_udp_port ///////////////////////////
 //
 // Port for reading IWG1 packets via UDP.
@@ -131,11 +138,35 @@ seek_to_end_of_input = TRUE;
 
 iwg1_udp_port = 7071;
 
+///////////// udp_is_multicast ////////////////////////
+//
+// Option to read multi-cast udp packets.
+//
+// If true, you must set the multicast group as well.
+//
+//
+// Type: boolean
+//
+
+udp_is_multicast = TRUE;
+
+///////////// udp_multicast_group /////////////////////
+//
+// Group for multicast packets.
+//
+// Multicast packets are sometimes required to get through a firewall.
+//
+//
+// Type: string
+//
+
+udp_multicast_group = "239.0.0.10";
+
 //======================================================================
 //
 // AIRCRAFT CALL SIGN.
 //
-// For IWRF and CFRADIAL data.
+// For IWRF, CFRADIAL and UDP data.
 //
 //======================================================================
  
@@ -252,6 +283,32 @@ min_dbz_for_surface_echo = 20;
 //
 
 ngates_for_surface_echo = 1;
+
+///////////// print_surface_velocity_data /////////////
+//
+// Option to print surface velocity information to stdout.
+//
+// If true, the surface velocity estimates, as well as estimated antenna 
+//   pointing angles, will be printed to stdout at regular intervals.
+//
+//
+// Type: boolean
+//
+
+print_surface_velocity_data = FALSE;
+
+///////////// surface_velocity_print_period_secs //////
+//
+// Number of seconds between printing information on surface velocity.
+//
+// The data will be averaged over this time period and then printed to 
+//   stdout.
+//
+//
+// Type: double
+//
+
+surface_velocity_print_period_secs = 2;
 
 //======================================================================
 //
@@ -528,4 +585,17 @@ nc_varname_custom_fields = {
 //
 
 output_spdb_url = "/tmp/spdb/ac_georef";
+
+///////////// spdb_nchunks_per_write //////////////////
+//
+// Number of SPDB chunks per write.
+//
+// We package up the SPDB data chunks, and write them together once the 
+//   number of chunks reaches this threshold.
+//
+//
+// Type: int
+//
+
+spdb_nchunks_per_write = 20;
 
