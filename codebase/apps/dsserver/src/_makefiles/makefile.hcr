@@ -41,6 +41,7 @@ SUB_DIRS = \
          Rhi2Symprod \
          SigAirMet2Symprod \
          SpdbQuery \
+         SpdbXml2Table \
          SunCal2Symprod \
          SyncDataMap \
          TestDataMap \
