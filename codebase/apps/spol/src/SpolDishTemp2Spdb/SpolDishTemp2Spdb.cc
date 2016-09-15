@@ -273,7 +273,13 @@ int SpolDishTemp2Spdb::_processFile(const char *file_path)
     if (sscanf(toks[timeIndex].c_str(), "%d/%d/%d %d:%d:%d %s",
                &month, &day, &year, &hour, &min, &sec, ampm) == 7) {
       if (strcmp(ampm, "PM") == 0) {
-        hour += 12.0;
+        if (hour != 12) {
+          hour += 12;
+        }
+      } else if (strcmp(ampm, "AM") == 0) {
+        if (hour == 12) {
+          hour = 0;
+        }
       }
       dtime.set(year, month, day, hour, min, sec);
     } else if (sscanf(toks[timeIndex].c_str(), "%d/%d/%d %d:%d",
