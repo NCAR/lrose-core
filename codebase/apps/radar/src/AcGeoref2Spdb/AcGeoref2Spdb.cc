@@ -1576,7 +1576,8 @@ void AcGeoref2Spdb::_printSurfVelStats(const ac_georef_t &georef)
 
   double timeSincePrint = printTime - _timeLastVelPrint;
 
-  if (timeSincePrint > _params.surface_velocity_print_period_secs) {
+  if (timeSincePrint > _params.surface_velocity_print_period_secs &&
+      _velStatsCount > 0) {
 
     double meanLongitude = _velStatsSum.longitude / _velStatsCount;
     double meanLatitude = _velStatsSum.latitude / _velStatsCount;
@@ -1631,6 +1632,10 @@ void AcGeoref2Spdb::_printSurfVelStats(const ac_georef_t &georef)
     cout << "================================" << endl;
     
     _timeLastVelPrint = printTime;
+
+    // clear
+    MEM_zero(_velStatsSum);
+    _velStatsCount = 0;
 
   }
 
