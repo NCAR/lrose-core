@@ -598,6 +598,73 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
+    tt->comment_hdr = tdrpStrDup("OPERATIONS MODE");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'product_type'
+    // ctype is '_product_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("product_type");
+    tt->descr = tdrpStrDup("Type of product that is produced.");
+    tt->help = tdrpStrDup("TIME_SERIES_TABLE: produced a text table, one line per primary observation. Results are written to stdout. Each line contains data from both data sets, along with differences between them. The start and end times are specified on the command line.\n\nSINGLE_PERIOD_ARCHIVE: analyze a single specified time period, in archive mode. Print the results in for that single period to stdout. The start time is specified on the command line.\n\nSINGLE_PERIOD_REALTIME: in realtime mode, analyze single time periods. Print the results in for that single period to stdout. Sleep and repeat.");
+    tt->val_offset = (char *) &product_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("product_type_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("TIME_SERIES_TABLE");
+      tt->enum_def.fields[0].val = TIME_SERIES_TABLE;
+      tt->enum_def.fields[1].name = tdrpStrDup("SINGLE_PERIOD_ARCHIVE");
+      tt->enum_def.fields[1].val = SINGLE_PERIOD_ARCHIVE;
+      tt->enum_def.fields[2].name = tdrpStrDup("SINGLE_PERIOD_REALTIME");
+      tt->enum_def.fields[2].val = SINGLE_PERIOD_REALTIME;
+    tt->single_val.e = TIME_SERIES_TABLE;
+    tt++;
+    
+    // Parameter 'start_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("start_time");
+    tt->descr = tdrpStrDup("Start time in yyyy mm dd hh mm ss");
+    tt->help = tdrpStrDup("Applies to TIME_SERIES_TABLE and SINGLE_PERIOD_ARCHIVE product types.");
+    tt->val_offset = (char *) &start_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2016 09 16 16 00 00");
+    tt++;
+    
+    // Parameter 'end_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("end_time");
+    tt->descr = tdrpStrDup("End time in yyyy mm dd hh mm ss");
+    tt->help = tdrpStrDup("Applies to TIME_SERIES_TABLE product type.");
+    tt->val_offset = (char *) &end_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2016 09 16 16 00 00");
+    tt++;
+    
+    // Parameter 'period_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("period_secs");
+    tt->descr = tdrpStrDup("Period for analysis (secs).");
+    tt->help = tdrpStrDup("Mean values are computed over this period. Applies to SINGLE_PERIOD_REALTIME and SINGLE_PERIOD_ARCHIVE product types.");
+    tt->val_offset = (char *) &period_secs - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("DATA INPUT");
     tt->comment_text = tdrpStrDup("We specify a primary and secondary data set. The primary set is read in first, and then data from the secondary data set is matched in time to the entries in the primary.");
     tt++;
@@ -626,11 +693,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("/tmp/spdb/ac_georef/cfradial_10hz");
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("DATA ANALYSIS");
     tt->comment_text = tdrpStrDup("Data is written to stdout in ASCII column format.");
     tt++;
@@ -671,11 +738,11 @@ using namespace std;
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("AIRCRAFT WEIGHT CALCULATIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -728,11 +795,11 @@ using namespace std;
     tt->single_val.d = 20000;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;

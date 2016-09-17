@@ -88,6 +88,8 @@ private:
   static double _missingDbl;
   int _lineCount;
 
+  time_t _startTime, _endTime;
+
   double _takeoffWtKg;
   double _aircraftWtKg;
   double _fuelRateClimbKgPerSec;
@@ -96,9 +98,21 @@ private:
   double _initialClimbSecs;
   double _topOfClimbAltitudeM;
   
+  vector<ac_georef_t> _georefsPrimary;
+  vector<ac_georef_t> _georefsSecondary;
+
   // methods
 
-  int _processTimeBlock(time_t startTime, time_t endTime);
+  int _runTimeSeriesTable();
+  int _runSinglePeriodArchive();
+  int _runSinglePeriodRealtime();
+
+  int _retrieveTimeBlock(time_t startTime, time_t endTime);
+  int _produceTimeSeriesTable();
+  int _produceSinglePeriodProduct();
+
+  void _computeMeanGeorefs(const vector<ac_georef_t> &vals,
+                           ac_georef_t &mean);
 
   void _analyzeGeorefPair(const ac_georef_t &georefPrim,
                           const ac_georef_t &georefSec,

@@ -57,6 +57,12 @@ public:
     DEBUG_EXTRA = 3
   } debug_t;
 
+  typedef enum {
+    TIME_SERIES_TABLE = 0,
+    SINGLE_PERIOD_ARCHIVE = 1,
+    SINGLE_PERIOD_REALTIME = 2
+  } product_type_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -348,6 +354,14 @@ public:
 
   char* instance;
 
+  product_type_t product_type;
+
+  char* start_time;
+
+  char* end_time;
+
+  double period_secs;
+
   char* primary_spdb_url;
 
   char* secondary_spdb_url;
@@ -379,7 +393,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[22];
+  mutable TDRPtable _table[27];
 
   const char *_className;
 

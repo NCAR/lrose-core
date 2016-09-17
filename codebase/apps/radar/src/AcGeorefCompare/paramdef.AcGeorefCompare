@@ -38,6 +38,40 @@ paramdef string {
 } instance;
 
 commentdef {
+  p_header = "OPERATIONS MODE";
+}
+
+typedef enum {
+  TIME_SERIES_TABLE,
+  SINGLE_PERIOD_ARCHIVE,
+  SINGLE_PERIOD_REALTIME
+} product_type_t;
+  
+paramdef enum product_type_t {
+  p_default = TIME_SERIES_TABLE;
+  p_descr = "Type of product that is produced.";
+  p_help = "TIME_SERIES_TABLE: produced a text table, one line per primary observation. Results are written to stdout. Each line contains data from both data sets, along with differences between them. The start and end times are specified on the command line.\n\nSINGLE_PERIOD_ARCHIVE: analyze a single specified time period, in archive mode. Print the results in for that single period to stdout. The start time is specified on the command line.\n\nSINGLE_PERIOD_REALTIME: in realtime mode, analyze single time periods. Print the results in for that single period to stdout. Sleep and repeat.";
+} product_type;
+
+paramdef string {
+  p_default = "2016 09 16 16 00 00";
+  p_descr = "Start time in yyyy mm dd hh mm ss";
+  p_help = "Applies to TIME_SERIES_TABLE and SINGLE_PERIOD_ARCHIVE product types.";
+} start_time;
+
+paramdef string {
+  p_default = "2016 09 16 16 00 00";
+  p_descr = "End time in yyyy mm dd hh mm ss";
+  p_help = "Applies to TIME_SERIES_TABLE product type.";
+} end_time;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Period for analysis (secs).";
+  p_help = "Mean values are computed over this period. Applies to SINGLE_PERIOD_REALTIME and SINGLE_PERIOD_ARCHIVE product types.";
+} period_secs;
+
+commentdef {
   p_header = "DATA INPUT";
   p_text = "We specify a primary and secondary data set. The primary set is read in first, and then data from the secondary data set is matched in time to the entries in the primary.";
 }

@@ -64,8 +64,6 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
   int iret = 0;
   char tmp_str[256];
-  startTime = DateTime::NEVER;
-  endTime = DateTime::NEVER;
 
   // loop through args
   
@@ -108,28 +106,42 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
       
+    } else if (!strcmp(argv[i], "-product_type")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "product_type = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
-	startTime = DateTime::parseDateTime(argv[++i]);
-	if (startTime == DateTime::NEVER) {
-	  iret = -1;
-	}
+	sprintf(tmp_str, "start_time = \"%s\";", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
       }
-	
+      
     } else if (!strcmp(argv[i], "-end")) {
       
       if (i < argc - 1) {
-	endTime = DateTime::parseDateTime(argv[++i]);
-	if (endTime == DateTime::NEVER) {
-	  iret = -1;
-	}
+	sprintf(tmp_str, "end_time = \"%s\";", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
       }
 	
+    } else if (!strcmp(argv[i], "-period_secs")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "period_secs = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
     } // if
     
   } // i
@@ -150,15 +162,22 @@ void Args::_usage(string &prog_name, ostream &out)
       << "  [ --, -h, -help, -man ] produce this list.\n"
       << "  [ -d, -debug ] print debug messages\n"
       << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
-      << "       Required argument\n"
+      << "     Applies to TIME_SERIES_TABLE product_type\n"
       << "  [ -instance ?] instance for registering with procmap\n"
+      << "  [ -product_type ?] set the product type\n"
+      << "     TIME_SERIES_TABLE\n"
+      << "     SINGLE_PERIOD_ARCHIVE\n"
+      << "     SINGLE_PERIOD_REALTIME\n"
+      << "     Use -print_params to see more details\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
-      << "       Required argument\n"
+      << "     Applies to TIME_SERIES_TABLE product_type\n"
+      << "            and SINGLE_PERIOD_ARCHIVE product_type\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "  [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;
 
-  out << "NOTE: -start and -end are required" << endl;
+  out << "NOTE: -start and -end are required for TIME_SERIES_TABLE" << endl;
+  out << "      -start is required for SINGLE_PERIOD_ARCHIVE" << endl;
   out << endl;
 
   Params::usage(out);

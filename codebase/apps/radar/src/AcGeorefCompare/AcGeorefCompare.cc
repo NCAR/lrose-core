@@ -45,6 +45,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
+#include <toolsa/mem.h>
 #include <toolsa/DateTime.hh>
 #include <rapformats/ac_georef.hh>
 
@@ -95,15 +96,27 @@ AcGeorefCompare::AcGeorefCompare(int argc, char **argv)
 
   // check command line args
 
-  if (_args.startTime == DateTime::NEVER) {
-    cerr << "ERROR - Args::parse()" << endl;
-    cerr << "  You must specify start time using '-start' on the command line" << endl;
-    isOK = false;
+  _startTime = DateTime::NEVER;
+  _endTime = DateTime::NEVER;
+  
+  _startTime = DateTime::parseDateTime(_params.start_time);
+  if (_params.product_type == Params::TIME_SERIES_TABLE ||
+      _params.product_type == Params::SINGLE_PERIOD_ARCHIVE) {
+    if (_startTime == DateTime::NEVER) {
+      cerr << "ERROR - AcGeorefCompare" << endl;
+      cerr << "  For product type TIME_SERIES_TABLE or SINGLE_PERIOD_ARCHIVE\n" << endl;
+      cerr << "  you must specify start time using '-start' on the command line" << endl;
+      isOK = false;
+    }
   }
-  if (_args.endTime == DateTime::NEVER) {
-    cerr << "ERROR - Args::parse()" << endl;
-    cerr << "  You must specify end time using '-end' on the command line" << endl;
-    isOK = false;
+  _endTime = DateTime::parseDateTime(_params.end_time);
+  if (_params.product_type == Params::TIME_SERIES_TABLE) {
+    if (_endTime == DateTime::NEVER) {
+      cerr << "ERROR - AcGeorefCompare" << endl;
+      cerr << "  For product type TIME_SERIES_TABLE\n" << endl;
+      cerr << "  you must specify end time using '-end' on the command line" << endl;
+      isOK = false;
+    }
   }
 
   // initialize aircraft weight computations
@@ -137,22 +150,43 @@ AcGeorefCompare::~AcGeorefCompare()
 int AcGeorefCompare::Run ()
 {
 
+  if (_params.product_type == Params::TIME_SERIES_TABLE) {
+    return _runTimeSeriesTable();
+  } else if (_params.product_type == Params::SINGLE_PERIOD_ARCHIVE) {
+    return _runSinglePeriodArchive();
+  } else if (_params.product_type == Params::SINGLE_PERIOD_REALTIME) {
+    return _runSinglePeriodRealtime();
+  } else {
+    return -1;
+  }
+
+}
+
+//////////////////////////////////////////////////
+// Run in time series table mode
+
+int AcGeorefCompare::_runTimeSeriesTable()
+{
+
   int iret = 0;
 
   // analyze data in time blocks
 
-  time_t blockStartTime = _args.startTime;
+  time_t blockStartTime = _startTime;
   time_t blockEndTime = blockStartTime + _params.time_block_secs;
 
-  while (blockStartTime < _args.endTime) {
+  while (blockStartTime < _endTime) {
 
-    if (blockEndTime > _args.endTime) {
-      blockEndTime = _args.endTime;
+    if (blockEndTime > _endTime) {
+      blockEndTime = _endTime;
     }
-
-    if (_processTimeBlock(blockStartTime, blockEndTime)) {
+    
+    if (_retrieveTimeBlock(blockStartTime, blockEndTime) == 0) {
+      if (_produceTimeSeriesTable()) {
+        iret = -1;
+      }
+    } else {
       iret = -1;
-      break;
     }
 
     blockStartTime += _params.time_block_secs;
@@ -165,13 +199,53 @@ int AcGeorefCompare::Run ()
 }
 
 //////////////////////////////////////////////////
-// Process a block of time
+// Run in single period archive mode
 
-int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
+int AcGeorefCompare::_runSinglePeriodArchive()
+{
+
+  // get the data
+
+  time_t endTime = _startTime + _params.period_secs;
+  
+  if (_retrieveTimeBlock(_startTime, endTime)) {
+    cerr << "ERROR - AcGeorefCompare::_runSinglePeriodArchive()" << endl;
+    cerr << "  Cannot retieve data for period:" << endl;
+    cerr << "    start time: " << DateTime::strm(_startTime) << endl;
+    cerr << "    end   time: " << DateTime::strm(endTime) << endl;
+    return -1;
+  }
+
+  if (_produceSinglePeriodProduct()) {
+    cerr << "ERROR - AcGeorefCompare::_runSinglePeriodArchive()" << endl;
+    cerr << "  Cannot produce single period product" << endl;
+    cerr << "    start time: " << DateTime::strm(_startTime) << endl;
+    cerr << "    end   time: " << DateTime::strm(endTime) << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Run in single period realtime mode
+
+int AcGeorefCompare::_runSinglePeriodRealtime()
+{
+  cerr << "_runSinglePeriodRealtime() not yet implemented" << endl;
+  return 0;
+}
+
+
+//////////////////////////////////////////////////
+// Retrieve data for a block of time
+
+int AcGeorefCompare::_retrieveTimeBlock(time_t startTime, time_t endTime)
 {
 
   if (_params.debug) {
-    cerr << "====>> Processing time block <<====" << endl;
+    cerr << "====>> Retrieving time block <<====" << endl;
     cerr << "  startTime: " << DateTime::strm(startTime) << endl;
     cerr << "  endTime: " << DateTime::strm(endTime) << endl;
   }
@@ -181,13 +255,13 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
   DsSpdb spdbPrim;
   
   if(spdbPrim.getInterval(_params.primary_spdb_url,
-                             startTime, endTime) < 0) {
-    cerr << "ERROR - AcGeorefCompare::_processTimeBlock" << endl;
+                          startTime, endTime) < 0) {
+    cerr << "ERROR - AcGeorefCompare::_retrieveTimeBlock" << endl;
     cerr << "  Cannot read data from primary URL: " << _params.primary_spdb_url << endl;
     return -1;
   }
   if (spdbPrim.getProdId() != SPDB_AC_GEOREF_ID) {
-    cerr << "ERROR - AcGeorefCompare::_processTimeBlock" << endl;
+    cerr << "ERROR - AcGeorefCompare::_retrieveTimeBlock" << endl;
     cerr << "  Primary URL does not hold ac_georef data" << endl;
     cerr << "  Product found: " << spdbPrim.getProdLabel() << endl;
     return -1;
@@ -195,10 +269,10 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
 
   const vector<Spdb::chunk_t> &chunksPrim = spdbPrim.getChunks();
   size_t nChunksPrim = chunksPrim.size();
-
+  
   // store the primary chunks
 
-  vector<ac_georef_t> georefsPrim;
+  _georefsPrimary.clear();
   ac_georef_t prevPrim;
   double psecs = 1.0 / _params.primary_frequency_hz;
 
@@ -207,7 +281,7 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
     // check for correct chunk len
 
     if (chunksPrim[iprim].len != sizeof(ac_georef_t)) {
-      cerr << "WARNING - AcGeorefCompare::_processTimeBlock" << endl;
+      cerr << "WARNING - AcGeorefCompare::_retrieveTimeBlock" << endl;
       cerr << "  Bad chunk length found in primary data: " << chunksPrim[iprim].len << endl;
       cerr << "  Should be: " << sizeof(ac_georef_t) << endl;
       cerr << "  Ignoring chunk" << endl;
@@ -238,7 +312,7 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
         ac_georef_print(stderr, "", &georefPrim);
         cerr << "===========================================" << endl;
       }
-      georefsPrim.push_back(georefPrim);
+      _georefsPrimary.push_back(georefPrim);
       prevPrim = georefPrim;
     } else {
       if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -250,11 +324,11 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
 
   } // iprim
   
-  if (georefsPrim.size() < 1) {
+  if (_georefsPrimary.size() < 1) {
     if (_params.debug) {
       cerr << "==>> no primary georefs found for this time period" << endl;
     }
-    return 0;
+    return -1;
   }
 
   // read secondary URL
@@ -263,12 +337,12 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
   
   if(spdbSec.getInterval(_params.secondary_spdb_url,
                          startTime, endTime) < 0) {
-    cerr << "ERROR - AcGeorefCompare::_processTimeBlock" << endl;
+    cerr << "ERROR - AcGeorefCompare::_retrieveTimeBlock" << endl;
     cerr << "  Cannot read data from secondary URL: " << _params.secondary_spdb_url << endl;
     return -1;
   }
   if (spdbSec.getProdId() != SPDB_AC_GEOREF_ID) {
-    cerr << "ERROR - AcGeorefCompare::_processTimeBlock" << endl;
+    cerr << "ERROR - AcGeorefCompare::_retrieveTimeBlock" << endl;
     cerr << "  Secondary URL does not hold ac_georef data" << endl;
     cerr << "  Product found: " << spdbSec.getProdLabel() << endl;
     return -1;
@@ -278,14 +352,14 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
   size_t nChunksSec = chunksSec.size();
 
   // store the secondary chunks
-
-  vector<ac_georef_t> georefsSec;
+  
+  _georefsSecondary.clear();
   for(size_t isec = 0; isec < nChunksSec; isec++) {
 
     // check for correct chunk len
 
     if (chunksSec[isec].len != sizeof(ac_georef_t)) {
-      cerr << "WARNING - AcGeorefCompare::_processTimeBlock" << endl;
+      cerr << "WARNING - AcGeorefCompare::_retrieveTimeBlock" << endl;
       cerr << "  Bad chunk length found in secondary data: " << chunksSec[isec].len << endl;
       cerr << "  Should be: " << sizeof(ac_georef_t) << endl;
       cerr << "  Ignoring chunk" << endl;
@@ -296,7 +370,7 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
 
     ac_georef_t georefSec(*((ac_georef_t *) chunksSec[isec].data));
     BE_to_ac_georef(&georefSec);
-    georefsSec.push_back(georefSec);
+    _georefsSecondary.push_back(georefSec);
 
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "=========== SECONDARY GEOREF ==========" << endl;
@@ -306,19 +380,29 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
     
   } // isec
 
-  if (georefsSec.size() < 1) {
+  if (_georefsSecondary.size() < 1) {
     if (_params.debug) {
       cerr << "==>> no secondary georefs found for this time period" << endl;
     }
-    return 0;
+    return -1;
   }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
+// Produce a time series table, for data previously retrieved
+
+int AcGeorefCompare::_produceTimeSeriesTable()
+{
 
   // loop through the primary chunks
 
   size_t isecLoc = 0;
-  for (size_t iprim = 0; iprim < georefsPrim.size(); iprim++) {
+  for (size_t iprim = 0; iprim < _georefsPrimary.size(); iprim++) {
 
-    const ac_georef_t &georefPrim = georefsPrim[iprim];
+    const ac_georef_t &georefPrim = _georefsPrimary[iprim];
     DateTime timePrim(georefPrim.time_secs_utc,
                       true,
                       georefPrim.time_nano_secs / 1.0e9);
@@ -326,9 +410,9 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
     // find the closest secondary georef in time
 
     double timeDiff = 1.0e99;
-    for (size_t isec = isecLoc; isec < georefsSec.size(); isec++) {
+    for (size_t isec = isecLoc; isec < _georefsSecondary.size(); isec++) {
       
-      const ac_georef_t &georefSec = georefsSec[isec];
+      const ac_georef_t &georefSec = _georefsSecondary[isec];
       DateTime timeSec(georefSec.time_secs_utc,
                        true,
                        georefSec.time_nano_secs / 1.0e9);
@@ -351,7 +435,7 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
       continue;
     }
 
-    const ac_georef_t &georefSec = georefsSec[isecLoc];
+    const ac_georef_t &georefSec = _georefsSecondary[isecLoc];
     
     // analyze georefs
 
@@ -363,6 +447,121 @@ int AcGeorefCompare::_processTimeBlock(time_t startTime, time_t endTime)
 
 }
 
+///////////////////////////////////////////////////////////////
+// Produce a single period product
+
+int AcGeorefCompare::_produceSinglePeriodProduct()
+{
+
+  // loop through the primary chunks
+
+  size_t isecLoc = 0;
+  for (size_t iprim = 0; iprim < _georefsPrimary.size(); iprim++) {
+
+    const ac_georef_t &georefPrim = _georefsPrimary[iprim];
+    DateTime timePrim(georefPrim.time_secs_utc,
+                      true,
+                      georefPrim.time_nano_secs / 1.0e9);
+
+    // find the closest secondary georef in time
+
+    double timeDiff = 1.0e99;
+    for (size_t isec = isecLoc; isec < _georefsSecondary.size(); isec++) {
+      
+      const ac_georef_t &georefSec = _georefsSecondary[isec];
+      DateTime timeSec(georefSec.time_secs_utc,
+                       true,
+                       georefSec.time_nano_secs / 1.0e9);
+      double tDiff = fabs(timeSec - timePrim);
+      if (tDiff < timeDiff) {
+        isecLoc = isec;
+        timeDiff = tDiff;
+      } else {
+        // difference increasing, break out
+        break;
+      }
+      
+    } // isec
+
+    if (timeDiff > _params.max_time_diff_secs) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "Time difference secs too great: " << timeDiff << endl;
+        cerr << "  Ignoring this pair" << endl;
+      }
+      continue;
+    }
+
+    const ac_georef_t &georefSec = _georefsSecondary[isecLoc];
+    
+    // analyze georefs
+
+    _analyzeGeorefPair(georefPrim, georefSec, timePrim, timeDiff);
+
+  } // iprim
+  
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////
+// Compute a mean of a vector of georefs observations
+
+void AcGeorefCompare::_computeMeanGeorefs(const vector<ac_georef_t> &vals,
+                                          ac_georef_t &mean)
+  
+{
+
+  ac_georef_t sum;
+  MEM_zero(mean);
+  MEM_zero(sum);
+  double count = 0.0;
+
+  if (vals.size() < 1) {
+    return;
+  }
+
+  for (size_t ii = 0; ii < vals.size(); ii++) {
+    const ac_georef_t &georef = vals[ii];
+    sum.time_secs_utc += georef.time_secs_utc;
+    sum.time_nano_secs += georef.time_nano_secs;
+    sum.longitude += georef.longitude;
+    sum.latitude += georef.latitude;
+    sum.altitude_msl_km += georef.altitude_msl_km;
+    sum.ew_velocity_mps += georef.ew_velocity_mps;
+    sum.ns_velocity_mps += georef.ns_velocity_mps;
+    sum.vert_velocity_mps += georef.vert_velocity_mps;
+    sum.heading_deg += georef.heading_deg;
+    sum.drift_angle_deg += georef.drift_angle_deg;
+    sum.track_deg += georef.track_deg;
+    sum.roll_deg += georef.roll_deg;
+    sum.pitch_deg += georef.pitch_deg;
+    sum.temp_c += georef.temp_c;
+    for (size_t ii = 0; ii < AC_GEOREF_N_CUSTOM; ii++) {
+      sum.custom[ii] += georef.custom[ii];
+    }
+    count++;
+  }
+  
+  mean.time_secs_utc = sum.time_secs_utc / count;
+  mean.time_nano_secs = sum.time_nano_secs / count;
+  mean.longitude = sum.longitude / count;
+  mean.latitude = sum.latitude / count;
+  mean.altitude_msl_km = sum.altitude_msl_km / count;
+  mean.ew_velocity_mps = sum.ew_velocity_mps / count;
+  mean.ns_velocity_mps = sum.ns_velocity_mps / count;
+  mean.vert_velocity_mps = sum.vert_velocity_mps / count;
+  mean.heading_deg = sum.heading_deg / count;
+  mean.drift_angle_deg = sum.drift_angle_deg / count;
+  mean.track_deg = sum.track_deg / count;
+  mean.roll_deg = sum.roll_deg / count;
+  mean.pitch_deg = sum.pitch_deg / count;
+  mean.temp_c = sum.temp_c / count;
+  for (size_t ii = 0; ii < AC_GEOREF_N_CUSTOM; ii++) {
+    mean.custom[ii] = sum.custom[ii] / count;
+  }
+
+}
+  
 //////////////////////////////////////////////////
 // Analyze georef pair for differences
 
