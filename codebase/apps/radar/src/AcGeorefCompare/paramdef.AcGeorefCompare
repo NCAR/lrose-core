@@ -69,7 +69,13 @@ paramdef double {
   p_default = 2.0;
   p_descr = "Period for analysis (secs).";
   p_help = "Mean values are computed over this period. Applies to SINGLE_PERIOD_REALTIME and SINGLE_PERIOD_ARCHIVE product types.";
-} period_secs;
+} single_period_secs;
+
+paramdef double {
+  p_default = 1;
+  p_descr = "Sleep time in realtime mode (secs).";
+  p_help = "The program repeatedly, sleeping between data retrieval. The end time is the current time, and the start time is the end time minus single_period_secs.";
+} realtime_sleep_secs;
 
 commentdef {
   p_header = "DATA INPUT";
@@ -136,13 +142,13 @@ paramdef double {
 } top_of_climb_altitude_ft;
 
 commentdef {
-  p_header = "OUTPUT DETAILS";
+  p_header = "TIME SERIES TABLE DETAILS";
 };
 
 paramdef boolean {
   p_default = true;
   p_descr = "If true, write a commented header at the start of the output.";
-} write_commented_header;
+} print_commented_header;
 
 paramdef string {
   p_default = "#";
@@ -154,4 +160,59 @@ paramdef string {
   p_default = " ";
   p_descr = "Delimiter between columns.";
 } column_delimiter;
+
+commentdef {
+  p_header = "SINGLE PERIOD OUTPUT DETAILS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, write the single period statistics to stdout.";
+} print_single_period_stats;
+
+paramdef string {
+  p_default = "primary";
+  p_descr = "Label for primary column in printout.";
+} primary_label;
+
+paramdef string {
+  p_default = "secondary";
+  p_descr = "Label for secondary column in printout.";
+} secondary_label;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, write the custom variables for primary data set.";
+} print_primary_custom_variables;
+
+paramdef string {
+  p_default = { "custom0", "custom1", "custom2", "custom3", "custom4",
+                "custom5", "custom6", "custom7", "custom8", "custom9" };
+  p_descr = "Labels for primary custom variables.";
+  p_help = "If the label is left empty, the variable is not printed.";
+} primary_custom_labels[10];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, write the custom variables for secondary data set.";
+} print_secondary_custom_variables;
+
+paramdef string {
+  p_default = { "custom0", "custom1", "custom2", "custom3", "custom4",
+                "custom5", "custom6", "custom7", "custom8", "custom9" };
+  p_descr = "Labels for secondary custom variables.";
+  p_help = "If the label is left empty, the variable is not printed.";
+} secondary_custom_labels[10];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, print the surface velocity stats for HCR.";
+  p_help = "The estimated pitch and roll angle errors will also be printed.";
+} print_surface_velocity_stats;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Index of surface velocity in the custom variables.";
+  p_help = "The surface velocity will be in the secondary data set.";
+} surface_velocity_custom_index;
 

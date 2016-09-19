@@ -360,7 +360,9 @@ public:
 
   char* end_time;
 
-  double period_secs;
+  double single_period_secs;
+
+  double realtime_sleep_secs;
 
   char* primary_spdb_url;
 
@@ -380,11 +382,31 @@ public:
 
   double top_of_climb_altitude_ft;
 
-  tdrp_bool_t write_commented_header;
+  tdrp_bool_t print_commented_header;
 
   char* comment_character;
 
   char* column_delimiter;
+
+  tdrp_bool_t print_single_period_stats;
+
+  char* primary_label;
+
+  char* secondary_label;
+
+  tdrp_bool_t print_primary_custom_variables;
+
+  char* *_primary_custom_labels;
+  int primary_custom_labels_n;
+
+  tdrp_bool_t print_secondary_custom_variables;
+
+  char* *_secondary_custom_labels;
+  int secondary_custom_labels_n;
+
+  tdrp_bool_t print_surface_velocity_stats;
+
+  int surface_velocity_custom_index;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -393,7 +415,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[27];
+  mutable TDRPtable _table[38];
 
   const char *_className;
 

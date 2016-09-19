@@ -88,7 +88,8 @@ private:
   static double _missingDbl;
   int _lineCount;
 
-  time_t _startTime, _endTime;
+  time_t _requestedStartTime, _requestedEndTime;
+  time_t _periodStartTime, _periodEndTime;
 
   double _takeoffWtKg;
   double _aircraftWtKg;
@@ -111,17 +112,40 @@ private:
   int _produceTimeSeriesTable();
   int _produceSinglePeriodProduct();
 
-  void _computeMeanGeorefs(const vector<ac_georef_t> &vals,
+  void _computeGeorefsMean(const vector<ac_georef_t> &vals,
                            ac_georef_t &mean);
 
-  void _analyzeGeorefPair(const ac_georef_t &georefPrim,
-                          const ac_georef_t &georefSec,
-                          const DateTime &timePrim,
-                          double timeDiff);
+  void _computeGeorefsDiffs(const ac_georef_t &primaryMean,
+                            const ac_georef_t &secondaryMean,
+                            ac_georef_t &diffs);
 
+  void _printTimeSeriesEntry(const ac_georef_t &georefPrim,
+                             const ac_georef_t &georefSec,
+                             const DateTime &timePrim,
+                             double timeDiff);
+                                            
   string _formatVal(double val, const char * format);
 
-  void _writeCommentedHeader(FILE *out);
+  void _printCommentedHeader(FILE *out);
+  
+  void _printPeriodStats(const ac_georef_t &primaryMean,
+                        const ac_georef_t &secondaryMean,
+                        const ac_georef_t &diffs,
+                        FILE *out);
+
+  void _printStats(const string &label,
+                   double primaryVal,
+                   double secondaryVal,
+                   double diff,
+                   FILE *out);
+
+  void _printLatLonStats(const string &label,
+                         double primaryVal,
+                         double secondaryVal,
+                         double diff,
+                         FILE *out);
+
+  bool _valIsMissing(double val);
 
 };
 

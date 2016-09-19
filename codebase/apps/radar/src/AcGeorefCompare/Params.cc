@@ -648,16 +648,28 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("2016 09 16 16 00 00");
     tt++;
     
-    // Parameter 'period_secs'
+    // Parameter 'single_period_secs'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("period_secs");
+    tt->param_name = tdrpStrDup("single_period_secs");
     tt->descr = tdrpStrDup("Period for analysis (secs).");
     tt->help = tdrpStrDup("Mean values are computed over this period. Applies to SINGLE_PERIOD_REALTIME and SINGLE_PERIOD_ARCHIVE product types.");
-    tt->val_offset = (char *) &period_secs - &_start_;
+    tt->val_offset = (char *) &single_period_secs - &_start_;
     tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'realtime_sleep_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("realtime_sleep_secs");
+    tt->descr = tdrpStrDup("Sleep time in realtime mode (secs).");
+    tt->help = tdrpStrDup("The program repeatedly, sleeping between data retrieval. The end time is the current time, and the start time is the end time minus single_period_secs.");
+    tt->val_offset = (char *) &realtime_sleep_secs - &_start_;
+    tt->single_val.d = 1;
     tt++;
     
     // Parameter 'Comment 3'
@@ -800,19 +812,19 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OUTPUT DETAILS");
+    tt->comment_hdr = tdrpStrDup("TIME SERIES TABLE DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'write_commented_header'
+    // Parameter 'print_commented_header'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_commented_header");
+    tt->param_name = tdrpStrDup("print_commented_header");
     tt->descr = tdrpStrDup("If true, write a commented header at the start of the output.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &write_commented_header - &_start_;
+    tt->val_offset = (char *) &print_commented_header - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
@@ -838,6 +850,155 @@ using namespace std;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &column_delimiter - &_start_;
     tt->single_val.s = tdrpStrDup(" ");
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("SINGLE PERIOD OUTPUT DETAILS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'print_single_period_stats'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_single_period_stats");
+    tt->descr = tdrpStrDup("If true, write the single period statistics to stdout.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &print_single_period_stats - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'primary_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("primary_label");
+    tt->descr = tdrpStrDup("Label for primary column in printout.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &primary_label - &_start_;
+    tt->single_val.s = tdrpStrDup("primary");
+    tt++;
+    
+    // Parameter 'secondary_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("secondary_label");
+    tt->descr = tdrpStrDup("Label for secondary column in printout.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &secondary_label - &_start_;
+    tt->single_val.s = tdrpStrDup("secondary");
+    tt++;
+    
+    // Parameter 'print_primary_custom_variables'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_primary_custom_variables");
+    tt->descr = tdrpStrDup("If true, write the custom variables for primary data set.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &print_primary_custom_variables - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'primary_custom_labels'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("primary_custom_labels");
+    tt->descr = tdrpStrDup("Labels for primary custom variables.");
+    tt->help = tdrpStrDup("If the label is left empty, the variable is not printed.");
+    tt->array_offset = (char *) &_primary_custom_labels - &_start_;
+    tt->array_n_offset = (char *) &primary_custom_labels_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = TRUE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 10;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("custom0");
+      tt->array_vals[1].s = tdrpStrDup("custom1");
+      tt->array_vals[2].s = tdrpStrDup("custom2");
+      tt->array_vals[3].s = tdrpStrDup("custom3");
+      tt->array_vals[4].s = tdrpStrDup("custom4");
+      tt->array_vals[5].s = tdrpStrDup("custom5");
+      tt->array_vals[6].s = tdrpStrDup("custom6");
+      tt->array_vals[7].s = tdrpStrDup("custom7");
+      tt->array_vals[8].s = tdrpStrDup("custom8");
+      tt->array_vals[9].s = tdrpStrDup("custom9");
+    tt++;
+    
+    // Parameter 'print_secondary_custom_variables'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_secondary_custom_variables");
+    tt->descr = tdrpStrDup("If true, write the custom variables for secondary data set.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &print_secondary_custom_variables - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'secondary_custom_labels'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("secondary_custom_labels");
+    tt->descr = tdrpStrDup("Labels for secondary custom variables.");
+    tt->help = tdrpStrDup("If the label is left empty, the variable is not printed.");
+    tt->array_offset = (char *) &_secondary_custom_labels - &_start_;
+    tt->array_n_offset = (char *) &secondary_custom_labels_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = TRUE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 10;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("custom0");
+      tt->array_vals[1].s = tdrpStrDup("custom1");
+      tt->array_vals[2].s = tdrpStrDup("custom2");
+      tt->array_vals[3].s = tdrpStrDup("custom3");
+      tt->array_vals[4].s = tdrpStrDup("custom4");
+      tt->array_vals[5].s = tdrpStrDup("custom5");
+      tt->array_vals[6].s = tdrpStrDup("custom6");
+      tt->array_vals[7].s = tdrpStrDup("custom7");
+      tt->array_vals[8].s = tdrpStrDup("custom8");
+      tt->array_vals[9].s = tdrpStrDup("custom9");
+    tt++;
+    
+    // Parameter 'print_surface_velocity_stats'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_surface_velocity_stats");
+    tt->descr = tdrpStrDup("If true, print the surface velocity stats for HCR.");
+    tt->help = tdrpStrDup("The estimated pitch and roll angle errors will also be printed.");
+    tt->val_offset = (char *) &print_surface_velocity_stats - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'surface_velocity_custom_index'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("surface_velocity_custom_index");
+    tt->descr = tdrpStrDup("Index of surface velocity in the custom variables.");
+    tt->help = tdrpStrDup("The surface velocity will be in the secondary data set.");
+    tt->val_offset = (char *) &surface_velocity_custom_index - &_start_;
+    tt->single_val.i = 1;
     tt++;
     
     // trailing entry has param_name set to NULL

@@ -46,6 +46,7 @@
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
 #include <toolsa/mem.h>
+#include <toolsa/umisc.h>
 #include <toolsa/DateTime.hh>
 #include <rapformats/ac_georef.hh>
 
@@ -96,25 +97,26 @@ AcGeorefCompare::AcGeorefCompare(int argc, char **argv)
 
   // check command line args
 
-  _startTime = DateTime::NEVER;
-  _endTime = DateTime::NEVER;
+  _requestedStartTime = DateTime::NEVER;
+  _requestedEndTime = DateTime::NEVER;
   
-  _startTime = DateTime::parseDateTime(_params.start_time);
+  _requestedStartTime = DateTime::parseDateTime(_params.start_time);
+  _requestedEndTime = DateTime::parseDateTime(_params.end_time);
+
   if (_params.product_type == Params::TIME_SERIES_TABLE ||
       _params.product_type == Params::SINGLE_PERIOD_ARCHIVE) {
-    if (_startTime == DateTime::NEVER) {
+    if (_requestedStartTime == DateTime::NEVER) {
       cerr << "ERROR - AcGeorefCompare" << endl;
       cerr << "  For product type TIME_SERIES_TABLE or SINGLE_PERIOD_ARCHIVE\n" << endl;
       cerr << "  you must specify start time using '-start' on the command line" << endl;
+      cerr << "  or set a valid time in the params file" << endl;
       isOK = false;
     }
-  }
-  _endTime = DateTime::parseDateTime(_params.end_time);
-  if (_params.product_type == Params::TIME_SERIES_TABLE) {
-    if (_endTime == DateTime::NEVER) {
+    if (_requestedEndTime == DateTime::NEVER) {
       cerr << "ERROR - AcGeorefCompare" << endl;
-      cerr << "  For product type TIME_SERIES_TABLE\n" << endl;
+      cerr << "  For product type TIME_SERIES_TABLE or SINGLE_PERIOD_ARCHIVE\n" << endl;
       cerr << "  you must specify end time using '-end' on the command line" << endl;
+      cerr << "  or set a valid time in the params file" << endl;
       isOK = false;
     }
   }
@@ -172,13 +174,13 @@ int AcGeorefCompare::_runTimeSeriesTable()
 
   // analyze data in time blocks
 
-  time_t blockStartTime = _startTime;
+  time_t blockStartTime = _requestedStartTime;
   time_t blockEndTime = blockStartTime + _params.time_block_secs;
 
-  while (blockStartTime < _endTime) {
+  while (blockStartTime < _requestedEndTime) {
 
-    if (blockEndTime > _endTime) {
-      blockEndTime = _endTime;
+    if (blockEndTime > _requestedEndTime) {
+      blockEndTime = _requestedEndTime;
     }
     
     if (_retrieveTimeBlock(blockStartTime, blockEndTime) == 0) {
@@ -204,26 +206,34 @@ int AcGeorefCompare::_runTimeSeriesTable()
 int AcGeorefCompare::_runSinglePeriodArchive()
 {
 
-  // get the data
-
-  time_t endTime = _startTime + _params.period_secs;
+  _periodStartTime = _requestedStartTime;
+  _periodEndTime = _periodStartTime + _params.single_period_secs;
   
-  if (_retrieveTimeBlock(_startTime, endTime)) {
-    cerr << "ERROR - AcGeorefCompare::_runSinglePeriodArchive()" << endl;
-    cerr << "  Cannot retieve data for period:" << endl;
-    cerr << "    start time: " << DateTime::strm(_startTime) << endl;
-    cerr << "    end   time: " << DateTime::strm(endTime) << endl;
-    return -1;
-  }
+  while (_periodEndTime < _requestedEndTime + _params.single_period_secs) {
 
-  if (_produceSinglePeriodProduct()) {
-    cerr << "ERROR - AcGeorefCompare::_runSinglePeriodArchive()" << endl;
-    cerr << "  Cannot produce single period product" << endl;
-    cerr << "    start time: " << DateTime::strm(_startTime) << endl;
-    cerr << "    end   time: " << DateTime::strm(endTime) << endl;
-    return -1;
-  }
+    // get the data
+    
+    if (_retrieveTimeBlock(_periodStartTime, _periodEndTime)) {
+      cerr << "ERROR - AcGeorefCompare::_runSinglePeriodArchive()" << endl;
+      cerr << "  Cannot retieve data for period:" << endl;
+      cerr << "    start time: " << DateTime::strm(_periodStartTime) << endl;
+      cerr << "    end   time: " << DateTime::strm(_periodEndTime) << endl;
+      return -1;
+    }
+    
+    if (_produceSinglePeriodProduct()) {
+      cerr << "ERROR - AcGeorefCompare::_runSinglePeriodArchive()" << endl;
+      cerr << "  Cannot produce single period product" << endl;
+      cerr << "    start time: " << DateTime::strm(_periodStartTime) << endl;
+      cerr << "    end   time: " << DateTime::strm(_periodEndTime) << endl;
+      return -1;
+    }
 
+    _periodStartTime += _params.single_period_secs;
+    _periodEndTime += _params.single_period_secs;
+
+  }
+    
   return 0;
 
 }
@@ -233,8 +243,36 @@ int AcGeorefCompare::_runSinglePeriodArchive()
 
 int AcGeorefCompare::_runSinglePeriodRealtime()
 {
-  cerr << "_runSinglePeriodRealtime() not yet implemented" << endl;
+
+  while (true) {
+
+    PMU_auto_register("getting data");
+
+    _periodEndTime = time(NULL);
+    _periodStartTime = _periodEndTime - _params.single_period_secs;
+
+    // get the data
+    
+    if (_retrieveTimeBlock(_periodStartTime, _periodEndTime)) {
+      cerr << "ERROR - AcGeorefCompare::_runSinglePeriodArchive()" << endl;
+      cerr << "  Cannot retieve data for period:" << endl;
+      cerr << "    start time: " << DateTime::strm(_periodStartTime) << endl;
+      cerr << "    end   time: " << DateTime::strm(_periodEndTime) << endl;
+    } else {
+      if (_produceSinglePeriodProduct()) {
+        cerr << "ERROR - AcGeorefCompare::_runSinglePeriodArchive()" << endl;
+        cerr << "  Cannot produce single period product" << endl;
+        cerr << "    start time: " << DateTime::strm(_periodStartTime) << endl;
+        cerr << "    end   time: " << DateTime::strm(_periodEndTime) << endl;
+      }
+    }
+
+    umsleep(_params.realtime_sleep_secs * 1000);
+    
+  } // while
+    
   return 0;
+
 }
 
 
@@ -439,7 +477,7 @@ int AcGeorefCompare::_produceTimeSeriesTable()
     
     // analyze georefs
 
-    _analyzeGeorefPair(georefPrim, georefSec, timePrim, timeDiff);
+    _printTimeSeriesEntry(georefPrim, georefSec, timePrim, timeDiff);
 
   } // iprim
   
@@ -453,52 +491,23 @@ int AcGeorefCompare::_produceTimeSeriesTable()
 int AcGeorefCompare::_produceSinglePeriodProduct()
 {
 
-  // loop through the primary chunks
+  // compute the means
 
-  size_t isecLoc = 0;
-  for (size_t iprim = 0; iprim < _georefsPrimary.size(); iprim++) {
-
-    const ac_georef_t &georefPrim = _georefsPrimary[iprim];
-    DateTime timePrim(georefPrim.time_secs_utc,
-                      true,
-                      georefPrim.time_nano_secs / 1.0e9);
-
-    // find the closest secondary georef in time
-
-    double timeDiff = 1.0e99;
-    for (size_t isec = isecLoc; isec < _georefsSecondary.size(); isec++) {
-      
-      const ac_georef_t &georefSec = _georefsSecondary[isec];
-      DateTime timeSec(georefSec.time_secs_utc,
-                       true,
-                       georefSec.time_nano_secs / 1.0e9);
-      double tDiff = fabs(timeSec - timePrim);
-      if (tDiff < timeDiff) {
-        isecLoc = isec;
-        timeDiff = tDiff;
-      } else {
-        // difference increasing, break out
-        break;
-      }
-      
-    } // isec
-
-    if (timeDiff > _params.max_time_diff_secs) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "Time difference secs too great: " << timeDiff << endl;
-        cerr << "  Ignoring this pair" << endl;
-      }
-      continue;
-    }
-
-    const ac_georef_t &georefSec = _georefsSecondary[isecLoc];
+  ac_georef_t primaryMean;
+  _computeGeorefsMean(_georefsPrimary, primaryMean);
     
-    // analyze georefs
+  ac_georef_t secondaryMean;
+  _computeGeorefsMean(_georefsSecondary, secondaryMean);
 
-    _analyzeGeorefPair(georefPrim, georefSec, timePrim, timeDiff);
+  // compute the diffs
+    
+  ac_georef_t diffs;
+  _computeGeorefsDiffs(primaryMean, secondaryMean, diffs);
 
-  } // iprim
-  
+  // print to stdout
+
+  _printPeriodStats(primaryMean, secondaryMean, diffs, stdout);
+
   return 0;
 
 }
@@ -506,19 +515,25 @@ int AcGeorefCompare::_produceSinglePeriodProduct()
 //////////////////////////////////////////////////////
 // Compute a mean of a vector of georefs observations
 
-void AcGeorefCompare::_computeMeanGeorefs(const vector<ac_georef_t> &vals,
+void AcGeorefCompare::_computeGeorefsMean(const vector<ac_georef_t> &vals,
                                           ac_georef_t &mean)
   
 {
 
-  ac_georef_t sum;
-  MEM_zero(mean);
-  MEM_zero(sum);
-  double count = 0.0;
+  // set all to missing
 
+  ac_georef_init(&mean);
   if (vals.size() < 1) {
     return;
   }
+
+  // initialize for summing
+  
+  ac_georef_t sum;
+  MEM_zero(sum);
+  double count = 0.0;
+
+  // sum up
 
   for (size_t ii = 0; ii < vals.size(); ii++) {
     const ac_georef_t &georef = vals[ii];
@@ -541,7 +556,9 @@ void AcGeorefCompare::_computeMeanGeorefs(const vector<ac_georef_t> &vals,
     }
     count++;
   }
-  
+
+  // compute mean
+
   mean.time_secs_utc = sum.time_secs_utc / count;
   mean.time_nano_secs = sum.time_nano_secs / count;
   mean.longitude = sum.longitude / count;
@@ -562,13 +579,206 @@ void AcGeorefCompare::_computeMeanGeorefs(const vector<ac_georef_t> &vals,
 
 }
   
-//////////////////////////////////////////////////
-// Analyze georef pair for differences
+//////////////////////////////////////////////////////
+// Compute diffs of 2 georefs: primary - secondary
 
-void AcGeorefCompare::_analyzeGeorefPair(const ac_georef_t &georefPrim,
-                                         const ac_georef_t &georefSec,
-                                         const DateTime &timePrim,
-                                         double timeDiff)
+void AcGeorefCompare::_computeGeorefsDiffs(const ac_georef_t &primaryMean,
+                                           const ac_georef_t &secondaryMean,
+                                           ac_georef_t &diffs)
+
+  
+{
+
+  ac_georef_init(&diffs);
+  
+  fl64 missingFl64 = (fl64) AC_GEOREF_MISSING_VAL;
+  fl32 missingFl32 = (fl32) AC_GEOREF_MISSING_VAL;
+
+  if (primaryMean.longitude != missingFl64 &&
+      secondaryMean.longitude != missingFl64) {
+    diffs.longitude =
+      primaryMean.longitude - secondaryMean.longitude;
+  }
+  if (primaryMean.latitude != missingFl64 &&
+      secondaryMean.latitude != missingFl64) {
+    diffs.latitude =
+      primaryMean.latitude - secondaryMean.latitude;
+  }
+  if (primaryMean.altitude_msl_km != missingFl32 &&
+      secondaryMean.altitude_msl_km != missingFl32) {
+    diffs.altitude_msl_km =
+      primaryMean.altitude_msl_km - secondaryMean.altitude_msl_km;
+  }
+  if (primaryMean.altitude_agl_km != missingFl32 &&
+      secondaryMean.altitude_agl_km != missingFl32) {
+    diffs.altitude_agl_km =
+      primaryMean.altitude_agl_km - secondaryMean.altitude_agl_km;
+  }
+  if (primaryMean.altitude_pres_m != missingFl32 &&
+      secondaryMean.altitude_pres_m != missingFl32) {
+    diffs.altitude_pres_m =
+      primaryMean.altitude_pres_m - secondaryMean.altitude_pres_m;
+  }
+  if (primaryMean.ew_velocity_mps != missingFl32 &&
+      secondaryMean.ew_velocity_mps != missingFl32) {
+    diffs.ew_velocity_mps =
+      primaryMean.ew_velocity_mps - secondaryMean.ew_velocity_mps;
+  }
+  if (primaryMean.ns_velocity_mps != missingFl32 &&
+      secondaryMean.ns_velocity_mps != missingFl32) {
+    diffs.ns_velocity_mps =
+      primaryMean.ns_velocity_mps - secondaryMean.ns_velocity_mps;
+  }
+  if (primaryMean.vert_velocity_mps != missingFl32 &&
+      secondaryMean.vert_velocity_mps != missingFl32) {
+    diffs.vert_velocity_mps =
+      primaryMean.vert_velocity_mps - secondaryMean.vert_velocity_mps;
+  }
+  if (primaryMean.ew_horiz_wind_mps != missingFl32 &&
+      secondaryMean.ew_horiz_wind_mps != missingFl32) {
+    diffs.ew_horiz_wind_mps =
+      primaryMean.ew_horiz_wind_mps - secondaryMean.ew_horiz_wind_mps;
+  }
+  if (primaryMean.ns_horiz_wind_mps != missingFl32 &&
+      secondaryMean.ns_horiz_wind_mps != missingFl32) {
+    diffs.ns_horiz_wind_mps =
+      primaryMean.ns_horiz_wind_mps - secondaryMean.ns_horiz_wind_mps;
+  }
+  if (primaryMean.vert_wind_mps != missingFl32 &&
+      secondaryMean.vert_wind_mps != missingFl32) {
+    diffs.vert_wind_mps =
+      primaryMean.vert_wind_mps - secondaryMean.vert_wind_mps;
+  }
+  if (primaryMean.heading_deg != missingFl32 &&
+      secondaryMean.heading_deg != missingFl32) {
+    diffs.heading_deg =
+      primaryMean.heading_deg - secondaryMean.heading_deg;
+  }
+  if (primaryMean.drift_angle_deg != missingFl32 &&
+      secondaryMean.drift_angle_deg != missingFl32) {
+    diffs.drift_angle_deg =
+      primaryMean.drift_angle_deg - secondaryMean.drift_angle_deg;
+  }
+  if (primaryMean.track_deg != missingFl32 &&
+      secondaryMean.track_deg != missingFl32) {
+    diffs.track_deg =
+      primaryMean.track_deg - secondaryMean.track_deg;
+  }
+  if (primaryMean.roll_deg != missingFl32 &&
+      secondaryMean.roll_deg != missingFl32) {
+    diffs.roll_deg =
+      primaryMean.roll_deg - secondaryMean.roll_deg;
+  }
+  if (primaryMean.pitch_deg != missingFl32 &&
+      secondaryMean.pitch_deg != missingFl32) {
+    diffs.pitch_deg =
+      primaryMean.pitch_deg - secondaryMean.pitch_deg;
+  }
+  if (primaryMean.heading_rate_dps != missingFl32 &&
+      secondaryMean.heading_rate_dps != missingFl32) {
+    diffs.heading_rate_dps =
+      primaryMean.heading_rate_dps - secondaryMean.heading_rate_dps;
+  }
+  if (primaryMean.pitch_rate_dps != missingFl32 &&
+      secondaryMean.pitch_rate_dps != missingFl32) {
+    diffs.pitch_rate_dps =
+      primaryMean.pitch_rate_dps - secondaryMean.pitch_rate_dps;
+  }
+  if (primaryMean.roll_rate_dps != missingFl32 &&
+      secondaryMean.roll_rate_dps != missingFl32) {
+    diffs.roll_rate_dps =
+      primaryMean.roll_rate_dps - secondaryMean.roll_rate_dps;
+  }
+  if (primaryMean.drive_angle_1_deg != missingFl32 &&
+      secondaryMean.drive_angle_1_deg != missingFl32) {
+    diffs.drive_angle_1_deg =
+      primaryMean.drive_angle_1_deg - secondaryMean.drive_angle_1_deg;
+  }
+  if (primaryMean.drive_angle_2_deg != missingFl32 &&
+      secondaryMean.drive_angle_2_deg != missingFl32) {
+    diffs.drive_angle_2_deg =
+      primaryMean.drive_angle_2_deg - secondaryMean.drive_angle_2_deg;
+  }
+  if (primaryMean.temp_c != missingFl32 &&
+      secondaryMean.temp_c != missingFl32) {
+    diffs.temp_c =
+      primaryMean.temp_c - secondaryMean.temp_c;
+  }
+  if (primaryMean.pressure_hpa != missingFl32 &&
+      secondaryMean.pressure_hpa != missingFl32) {
+    diffs.pressure_hpa =
+      primaryMean.pressure_hpa - secondaryMean.pressure_hpa;
+  }
+  if (primaryMean.rh_percent != missingFl32 &&
+      secondaryMean.rh_percent != missingFl32) {
+    diffs.rh_percent =
+      primaryMean.rh_percent - secondaryMean.rh_percent;
+  }
+  if (primaryMean.density_kg_m3 != missingFl32 &&
+      secondaryMean.density_kg_m3 != missingFl32) {
+    diffs.density_kg_m3 =
+      primaryMean.density_kg_m3 - secondaryMean.density_kg_m3;
+  }
+  if (primaryMean.angle_of_attack_deg != missingFl32 &&
+      secondaryMean.angle_of_attack_deg != missingFl32) {
+    diffs.angle_of_attack_deg =
+      primaryMean.angle_of_attack_deg - secondaryMean.angle_of_attack_deg;
+  }
+  if (primaryMean.ind_airspeed_mps != missingFl32 &&
+      secondaryMean.ind_airspeed_mps != missingFl32) {
+    diffs.ind_airspeed_mps =
+      primaryMean.ind_airspeed_mps - secondaryMean.ind_airspeed_mps;
+  }
+  if (primaryMean.true_airspeed_mps != missingFl32 &&
+      secondaryMean.true_airspeed_mps != missingFl32) {
+    diffs.true_airspeed_mps =
+      primaryMean.true_airspeed_mps - secondaryMean.true_airspeed_mps;
+  }
+  if (primaryMean.accel_normal != missingFl32 &&
+      secondaryMean.accel_normal != missingFl32) {
+    diffs.accel_normal =
+      primaryMean.accel_normal - secondaryMean.accel_normal;
+  }
+  if (primaryMean.accel_latitudinal != missingFl32 &&
+      secondaryMean.accel_latitudinal != missingFl32) {
+    diffs.accel_latitudinal =
+      primaryMean.accel_latitudinal - secondaryMean.accel_latitudinal;
+  }
+  if (primaryMean.accel_longitudinal != missingFl32 &&
+      secondaryMean.accel_longitudinal != missingFl32) {
+    diffs.accel_longitudinal =
+      primaryMean.accel_longitudinal - secondaryMean.accel_longitudinal;
+  }
+  if (primaryMean.flight_time_secs != missingFl32 &&
+      secondaryMean.flight_time_secs != missingFl32) {
+    diffs.flight_time_secs =
+      primaryMean.flight_time_secs - secondaryMean.flight_time_secs;
+  }
+
+  for (int ii = 0; ii < AC_GEOREF_N_UNUSED; ii++) {
+    if (primaryMean.unused[ii] != missingFl32 &&
+        secondaryMean.unused[ii] != missingFl32) {
+      diffs.unused[ii] =
+        primaryMean.unused[ii] - secondaryMean.unused[ii];
+    }
+  }
+  for (int ii = 0; ii < AC_GEOREF_N_CUSTOM; ii++) {
+    if (primaryMean.custom[ii] != missingFl32 &&
+        secondaryMean.custom[ii] != missingFl32) {
+      diffs.custom[ii] =
+        primaryMean.custom[ii] - secondaryMean.custom[ii];
+    }
+  }
+
+}
+
+//////////////////////////////////////////////////
+// write entry in time series table
+
+void AcGeorefCompare::_printTimeSeriesEntry(const ac_georef_t &georefPrim,
+                                            const ac_georef_t &georefSec,
+                                            const DateTime &timePrim,
+                                            double timeDiff)
 
 {
 
@@ -780,8 +990,8 @@ void AcGeorefCompare::_analyzeGeorefPair(const ac_georef_t &georefPrim,
   ostr += _formatVal(trackDiff, "%12.6f");
 
   if (_lineCount == 0) {
-    if (_params.write_commented_header) {
-      _writeCommentedHeader(stdout);
+    if (_params.print_commented_header) {
+      _printCommentedHeader(stdout);
     }
   }
 
@@ -808,10 +1018,10 @@ string AcGeorefCompare::_formatVal(double val, const char * format)
 
 }
 
-///////////////////////////////////////
-// write a commented header to stdout
+///////////////////////////////////////////
+// write a commented header to output file
 
-void AcGeorefCompare::_writeCommentedHeader(FILE *out)
+void AcGeorefCompare::_printCommentedHeader(FILE *out)
 
 {
 
@@ -907,3 +1117,212 @@ void AcGeorefCompare::_writeCommentedHeader(FILE *out)
 
 }
   
+///////////////////////////////////////////
+// write stats for period of analysis
+
+void AcGeorefCompare::_printPeriodStats(const ac_georef_t &primary,
+                                        const ac_georef_t &secondary,
+                                        const ac_georef_t &diffs,
+                                        FILE *out)
+  
+{
+
+  // headings
+
+  fprintf(out,
+          "========================= AC_GEOREF STATS "
+          "=============================\n");
+
+  fprintf(out, "       startTime: %s", DateTime::strm(_periodStartTime).c_str());
+  fprintf(out, "      endTime: %s\n", DateTime::strm(_periodEndTime).c_str());
+
+  // primary custom variables
+
+  if (_params.print_primary_custom_variables) {
+    fprintf(stdout, "----- PRIMARY CUSTOM VARIABLES ------\n");
+    for (int ii = 0; ii < AC_GEOREF_N_CUSTOM; ii++) {
+      if (strlen(_params._primary_custom_labels[ii]) > 0) {
+        fprintf(out, "%20s %16.3f\n",
+                _params._primary_custom_labels[ii],
+                primary.custom[ii]);
+      }
+    }
+    fprintf(stdout, "-------------------------------------\n");
+  }
+
+  // secondary custom variables
+
+  if (_params.print_secondary_custom_variables) {
+    fprintf(stdout, "---- SECONDARY CUSTOM VARIABLES -----\n");
+    for (int ii = 0; ii < AC_GEOREF_N_CUSTOM; ii++) {
+      if (strlen(_params._secondary_custom_labels[ii]) > 0) {
+        fprintf(out, "%20s %16.3f\n",
+                _params._secondary_custom_labels[ii],
+                secondary.custom[ii]);
+      }
+    }
+    fprintf(stdout, "-------------------------------------\n");
+  }
+
+  // differences table
+
+  fprintf(out, "%20s %16s %16s %16s\n",
+          "VarName", _params.primary_label, _params.secondary_label, "Diff");
+
+  _printLatLonStats("longitude", primary.longitude,
+                    secondary.longitude, diffs.longitude, out);
+  _printLatLonStats("latitude", primary.latitude,
+                    secondary.latitude, diffs.latitude, out);
+  _printStats("altitude_msl_km", primary.altitude_msl_km,
+              secondary.altitude_msl_km, diffs.altitude_msl_km, out);
+  _printStats("altitude_agl_km", primary.altitude_agl_km,
+              secondary.altitude_agl_km, diffs.altitude_agl_km, out);
+  _printStats("altitude_pres_m", primary.altitude_pres_m,
+              secondary.altitude_pres_m, diffs.altitude_pres_m, out);
+  _printStats("ew_velocity_mps", primary.ew_velocity_mps,
+              secondary.ew_velocity_mps, diffs.ew_velocity_mps, out);
+  _printStats("ns_velocity_mps", primary.ns_velocity_mps,
+              secondary.ns_velocity_mps, diffs.ns_velocity_mps, out);
+  _printStats("vert_velocity_mps", primary.vert_velocity_mps,
+              secondary.vert_velocity_mps, diffs.vert_velocity_mps, out);
+  _printStats("ew_horiz_wind_mps", primary.ew_horiz_wind_mps,
+              secondary.ew_horiz_wind_mps, diffs.ew_horiz_wind_mps, out);
+  _printStats("ns_horiz_wind_mps", primary.ns_horiz_wind_mps,
+              secondary.ns_horiz_wind_mps, diffs.ns_horiz_wind_mps, out);
+  _printStats("vert_wind_mps", primary.vert_wind_mps,
+              secondary.vert_wind_mps, diffs.vert_wind_mps, out);
+  _printStats("heading_deg", primary.heading_deg,
+              secondary.heading_deg, diffs.heading_deg, out);
+  _printStats("drift_angle_deg", primary.drift_angle_deg,
+              secondary.drift_angle_deg, diffs.drift_angle_deg, out);
+  _printStats("track_deg", primary.track_deg,
+              secondary.track_deg, diffs.track_deg, out);
+  _printStats("roll_deg", primary.roll_deg,
+              secondary.roll_deg, diffs.roll_deg, out);
+  _printStats("pitch_deg", primary.pitch_deg,
+              secondary.pitch_deg, diffs.pitch_deg, out);
+  _printStats("heading_rate_dps", primary.heading_rate_dps,
+              secondary.heading_rate_dps, diffs.heading_rate_dps, out);
+  _printStats("pitch_rate_dps", primary.pitch_rate_dps,
+              secondary.pitch_rate_dps, diffs.pitch_rate_dps, out);
+  _printStats("roll_rate_dps", primary.roll_rate_dps,
+              secondary.roll_rate_dps, diffs.roll_rate_dps, out);
+  _printStats("drive_angle_1_deg", primary.drive_angle_1_deg,
+              secondary.drive_angle_1_deg, diffs.drive_angle_1_deg, out);
+  _printStats("drive_angle_2_deg", primary.drive_angle_2_deg,
+              secondary.drive_angle_2_deg, diffs.drive_angle_2_deg, out);
+  _printStats("temp_c", primary.temp_c,
+              secondary.temp_c, diffs.temp_c, out);
+  _printStats("pressure_hpa", primary.pressure_hpa,
+              secondary.pressure_hpa, diffs.pressure_hpa, out);
+  _printStats("rh_percent", primary.rh_percent,
+              secondary.rh_percent, diffs.rh_percent, out);
+  _printStats("density_kg_m3", primary.density_kg_m3,
+              secondary.density_kg_m3, diffs.density_kg_m3, out);
+  _printStats("angle_of_attack_deg", primary.angle_of_attack_deg,
+              secondary.angle_of_attack_deg, diffs.angle_of_attack_deg, out);
+  _printStats("ind_airspeed_mps", primary.ind_airspeed_mps,
+              secondary.ind_airspeed_mps, diffs.ind_airspeed_mps, out);
+  _printStats("true_airspeed_mps", primary.true_airspeed_mps,
+              secondary.true_airspeed_mps, diffs.true_airspeed_mps, out);
+  _printStats("accel_normal", primary.accel_normal,
+              secondary.accel_normal, diffs.accel_normal, out);
+  _printStats("accel_latitudinal", primary.accel_latitudinal,
+              secondary.accel_latitudinal, diffs.accel_latitudinal, out);
+  _printStats("accel_longitudinal", primary.accel_longitudinal,
+              secondary.accel_longitudinal, diffs.accel_longitudinal, out);
+  _printStats("flight_time_secs", primary.flight_time_secs,
+              secondary.flight_time_secs, diffs.flight_time_secs, out);
+
+  // surface velocity statistics
+
+  if (_params.print_surface_velocity_stats) {
+
+    double surfaceVel = secondary.custom[_params.surface_velocity_custom_index];
+    double gndSpeed = sqrt(secondary.ew_velocity_mps * secondary.ew_velocity_mps + 
+                           secondary.ns_velocity_mps * secondary.ns_velocity_mps);
+    double drift = secondary.drift_angle_deg;
+    double crossSpeed = gndSpeed * sin(drift * DEG_TO_RAD);
+
+    double tiltErrorDeg = -asin(surfaceVel / gndSpeed) * RAD_TO_DEG;
+    double rotErrorDeg = asin(surfaceVel / crossSpeed) * RAD_TO_DEG;
+    
+    fprintf(stdout, "------ SURFACE VELOCITY STATS -------\n");
+    fprintf(out, "%20s %16.3f\n", "drift (deg)", drift);
+    fprintf(out, "%20s %16.3f\n", "groundSpeed (m/s)", gndSpeed);
+    fprintf(out, "%20s %16.3f\n", "crossSpeed (m/s)", crossSpeed);
+    fprintf(out, "%20s %16.3f\n", "surface vel (m/s)", surfaceVel);
+    fprintf(out, "%20s %16.3f\n", "tilt error (deg)", tiltErrorDeg);
+    fprintf(out, "%20s %16.3f\n", "rot  error (deg)", rotErrorDeg);
+    fprintf(stdout, "-------------------------------------\n");
+
+  }
+
+  fprintf(out,
+          "=========================================="
+          "=============================\n");
+
+}
+
+
+///////////////////////////////////////////
+// write a single diff line to output file
+
+void AcGeorefCompare::_printStats(const string &label,
+                                  double primaryVal,
+                                  double secondaryVal,
+                                  double diff,
+                                  FILE *out)
+
+{
+
+  if (_valIsMissing(primaryVal) && _valIsMissing(secondaryVal)) {
+    return;
+  }
+
+  fprintf(out, "%20s %16.3f %16.3f %16.3f\n",
+          label.c_str(), primaryVal, secondaryVal, diff);
+}
+
+
+///////////////////////////////////////////
+// write a diff line for latlon precision
+
+void AcGeorefCompare::_printLatLonStats(const string &label,
+                                        double primaryVal,
+                                        double secondaryVal,
+                                        double diff,
+                                        FILE *out)
+
+{
+  
+  if (_valIsMissing(primaryVal) && _valIsMissing(secondaryVal)) {
+    return;
+  }
+
+  fprintf(out, "%20s %16.6f %16.6f %16.6f\n",
+          label.c_str(), primaryVal, secondaryVal, diff);
+}
+
+
+///////////////////////////////////////////
+// check if value is missing
+
+bool AcGeorefCompare::_valIsMissing(double val)
+
+{
+  if (val > AC_GEOREF_MISSING_VAL - 0.01 && val < AC_GEOREF_MISSING_VAL + 0.01) {
+    return true;
+  }
+  if (isnan(val)) {
+    return true;
+  }
+  if (!isfinite(val)) {
+    return true;
+  }
+  if (val == 0.0) {
+    return true;
+  }
+  return false;
+}
+
