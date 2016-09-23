@@ -622,6 +622,8 @@ public:
 
   double grid_origin_lon;
 
+  tdrp_bool_t auto_remap_flat_to_latlon;
+
   double grid_lat1;
 
   double grid_lat2;
@@ -782,7 +784,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[192];
+  mutable TDRPtable _table[193];
 
   const char *_className;
 

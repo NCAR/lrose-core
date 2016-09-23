@@ -248,10 +248,11 @@ void OutputMdv::addField(const RadxVol &vol,
                        Mdvx::COMPRESSION_GZIP);
     }
   }
-  
-  // if (_params.output_format == Params::ZEBRA_NETCDF) {
-  //   fld->autoRemap2Latlon(_remapLut);
-  // }
+
+  if (_params.auto_remap_flat_to_latlon &&
+      _params.grid_projection == Params::PROJ_FLAT) {
+    fld->autoRemap2Latlon(_remapLut);
+  }
 
   // set strings
   

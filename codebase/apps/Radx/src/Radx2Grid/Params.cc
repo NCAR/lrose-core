@@ -1853,6 +1853,18 @@ using namespace std;
     tt->single_val.d = 0;
     tt++;
     
+    // Parameter 'auto_remap_flat_to_latlon'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("auto_remap_flat_to_latlon");
+    tt->descr = tdrpStrDup("Option to grid to a PROJ_FLAT projection, and then automatically remap to a latlon projection on output.");
+    tt->help = tdrpStrDup("If TRUE, before writing the file, the app will choose a latlon grid that matches the FLAT grid extent and rsolution, and automatically remap to a PROJ_LATLON projection.");
+    tt->val_offset = (char *) &auto_remap_flat_to_latlon - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'grid_lat1'
     // ctype is 'double'
     

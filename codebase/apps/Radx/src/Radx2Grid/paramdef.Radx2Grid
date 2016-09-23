@@ -666,6 +666,12 @@ paramdef double {
   p_help = "This applies to all projections except LATLON. Not used if 'center_grid_on_radar' is true.";
 } grid_origin_lon;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to grid to a PROJ_FLAT projection, and then automatically remap to a latlon projection on output.";
+  p_help = "If TRUE, before writing the file, the app will choose a latlon grid that matches the FLAT grid extent and rsolution, and automatically remap to a PROJ_LATLON projection.";
+} auto_remap_flat_to_latlon;
+
 paramdef double {
   p_default = 0.0;
   p_descr = "Grid reference latitude 1.";
