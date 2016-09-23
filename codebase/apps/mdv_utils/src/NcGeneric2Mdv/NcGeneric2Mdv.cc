@@ -1151,6 +1151,12 @@ MdvxField *NcGeneric2Mdv::_createMdvxField
 
 {
 
+  // check max levels
+
+  if (nz > MDV_MAX_VLEVELS) {
+    nz = MDV_MAX_VLEVELS;
+  }
+
   // set up MdvxField headers
 
   Mdvx::field_header_t fhdr;
@@ -1196,7 +1202,7 @@ MdvxField *NcGeneric2Mdv::_createMdvxField
 
   // create MdvxField object
   // converting data to encoding and compression types
-  
+
   MdvxField *field = new MdvxField(fhdr, vhdr, vals);
   field->convertType
     ((Mdvx::encoding_type_t) _params.output_encoding_type,
