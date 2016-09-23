@@ -148,12 +148,30 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
     }
   }
 
+  // check nz does not exceed max allowable
+
+  if (_fhdr.nz > MDV_MAX_VLEVELS) {
+
+    cerr << "WARNING - MdvxField::MdvxField" << endl;
+    cerr << "  Field name: " << _fhdr.field_name << endl;
+    cerr << "    nz: " << _fhdr.nz << endl;
+    cerr << "  This exceeds max allowable value: " << MDV_MAX_VLEVELS << endl;
+    cerr << "  Will be adjusted to: " << MDV_MAX_VLEVELS << endl;
+    _fhdr.nz = MDV_MAX_VLEVELS;
+    _fhdr.volume_size =
+      _fhdr.nx * _fhdr.ny * _fhdr.nz * _fhdr.data_element_nbytes;
+
+  }
+
+  // add vol data
+
   if (vol_data != NULL) {
 
     // Check for NaN, infinity values.
     _check_finite(vol_data);
-    
+
     _volBuf.add(vol_data, _fhdr.volume_size);
+
     if (compute_min_and_max) {
       computeMinAndMax(true);
     }
