@@ -175,6 +175,7 @@ codebase/apps/hydro/src/RainGage/RainGage
 codebase/apps/hydro/src/RateAccum/RateAccum
 codebase/apps/hydro/src/Shape2Map/Shape2Map
 
+codebase/apps/ingest/src/AcData2Spdb/AcData2Spdb
 codebase/apps/ingest/src/AcTrack2Polygon/AcTrack2Polygon
 codebase/apps/ingest/src/AcarsNc2GenPt/AcarsNc2GenPt
 codebase/apps/ingest/src/Awos2Spdb/Awos2Spdb
