@@ -355,16 +355,16 @@ int OutputFmq::writeBeam(const Beam &beam, int volNum, int sweepNum)
   // get a lock on the busy mutex
 
   pthread_mutex_lock(&_busy);
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "-->> OutputFmq::writeBeam, az: " << beam.getAz() 
-	 << " el: " << beam.getEl() 
-	 << " nSamples: " << beam.getNSamplesEffective() << endl;
-  } else if (_params.debug) {
-    if ((_nBeamsWritten % 30) == 0)
-      cerr << "-->> OutputFmq::writeBeam, az: " << beam.getAz() 
-	   << " el: " << beam.getEl()
-	   << " nSamples: " << beam.getNSamplesEffective() << endl;
+  
+  bool printBeamDebug = (_params.debug >= Params::DEBUG_VERBOSE);
+  DateTime beamTime(beam.getTimeSecs(), true, beam.getNanoSecs() / 1.0e9);
+  if (_params.debug && ((_nBeamsWritten % 30) == 0)) {
+    printBeamDebug = true;
+  }
+  if (printBeamDebug) {
+    fprintf(stderr,
+            "-->> OutputFmq::writeBeam, time: %s, az: %6.2f, el %5.2f, nSamples: %3d\n",
+            beamTime.asString(3).c_str(), beam.getAz(), beam.getEl(), beam.getNSamplesEffective());
   }
 
   // put georeference if applicable
