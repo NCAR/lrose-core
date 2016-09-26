@@ -447,7 +447,7 @@ Beam *BeamReader::getNextBeam()
             _az, startAz, endAz, _beamAzRate,
             _nSamples, nSamplesEffective);
   }
-  
+
   // reset end of vol flag
   
   _endOfSweepFlag = false;
@@ -815,6 +815,8 @@ int BeamReader::_finalizeNonIndexedBeam()
 
   _az = _conditionAz(_pulseQueue[_midIndex]->getAz());
   _el = _conditionEl(_pulseQueue[_midIndex]->getEl());
+
+  cerr << "77777777777777777777 _az = " << _az << endl;
 
   _computeBeamAzRate(0, _nSamples);
   _computeBeamElRate(0, _nSamples);
@@ -1817,13 +1819,29 @@ int BeamReader::_findBeamCenterPpi()
   
 {
 
+  // set elevation
+
+  _el = _conditionEl(_pulseQueue[0]->getEl());
+
+  // initialize azimuth
+
   _az = 0.0;
-  
+
   // compute azimuths which need to straddle the center of the beam
   
   double midAz1 = _pulseQueue[1]->getAz();
   double midAz2 = _pulseQueue[0]->getAz();
-  _el = _conditionEl(_pulseQueue[0]->getEl());
+
+  // check that delta azimuth is reasonable
+
+  double deltaAz = fabs(midAz2 - midAz1);
+  if (deltaAz > 180.0) {
+    deltaAz = fabs(deltaAz - 360.0);
+  }
+
+  if (deltaAz > _indexedResolution) {
+    return -1;
+  }
   
   // set resolution in azimuth, rounded suitably
   
@@ -1838,7 +1856,7 @@ int BeamReader::_findBeamCenterPpi()
   if (_azIndex == nAz) {
     _azIndex = 0;
   }
-
+  
   // check for duplicate index with previous one
   
   if (_azIndex == _prevAzIndex) {
@@ -1893,7 +1911,7 @@ int BeamReader::_findBeamCenterPpi()
     }
     
   }
-  
+
   return -1;
 
 }
@@ -1906,14 +1924,29 @@ int BeamReader::_findBeamCenterPpi()
 int BeamReader::_findBeamCenterRhi()
   
 {
-  
+
+  // initialize azimuth
+
+  _az = _conditionAz(_pulseQueue[0]->getAz());
+
+  // initialize elevation
+
   _el = 0.0;
   
   // compute elevations which need to straddle the center of the beam
   
   double midEl1 = _conditionEl(_pulseQueue[1]->getEl());
   double midEl2 = _conditionEl(_pulseQueue[0]->getEl());
-  _az = _conditionAz(_pulseQueue[0]->getAz());
+
+  // check that delta elevation is reasonable
+
+  double deltaEl = fabs(midEl2 - midEl1);
+  if (deltaEl > 180.0) {
+    deltaEl = fabs(deltaEl - 360.0);
+  }
+  if (deltaEl > _indexedResolution) {
+    return -1;
+  }
 
   // set resolution in elevation
   
