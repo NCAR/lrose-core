@@ -816,8 +816,6 @@ int BeamReader::_finalizeNonIndexedBeam()
   _az = _conditionAz(_pulseQueue[_midIndex]->getAz());
   _el = _conditionEl(_pulseQueue[_midIndex]->getEl());
 
-  cerr << "77777777777777777777 _az = " << _az << endl;
-
   _computeBeamAzRate(0, _nSamples);
   _computeBeamElRate(0, _nSamples);
 
