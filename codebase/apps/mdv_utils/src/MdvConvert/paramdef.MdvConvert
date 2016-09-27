@@ -231,13 +231,14 @@ paramdef boolean {
 typedef enum {
   OUTPUT_FORMAT_MDV,
   OUTPUT_FORMAT_XML,
-  OUTPUT_FORMAT_NCF
+  OUTPUT_FORMAT_NCF,
+  OUTPUT_FORMAT_CEDRIC
 } output_format_t;
 
 paramdef enum output_format_t {
   p_default = OUTPUT_FORMAT_MDV;
   p_descr = "Specify format of file on output.";
-  p_help = "FORMAT_MDV: normal MDV formal. FORMAT_XML: XML format. XML format writes out 2 files: *.mdv.xml and *.mdv.buf. The xml file contains the meta-data. The buf file contains the binary fields.\nNOTE: only COMPRESSION_NONE and COMPRESSION_GZIP_VOL are supported in XML. FORMAT_NCF: write file in netCDF CF format. Extension will be .nc.";
+  p_help = "FORMAT_MDV: normal MDV formal.\n\nFORMAT_XML: XML format. XML format writes out 2 files: *.mdv.xml and *.mdv.buf. The xml file contains the meta-data. The buf file contains the binary fields.\n\nNOTE: only COMPRESSION_NONE and COMPRESSION_GZIP_VOL are supported in XML.\n\nFORMAT_NCF: write file in netCDF CF format. Extension will be .nc.\n\nFORMAT_CEDRIC: Write out in Cedric format.";
 } output_format;
 
 paramdef boolean {
@@ -780,4 +781,56 @@ paramdef boolean {
   p_help = "If true, MDV chunks will be included as byte binary variables.";
 } ncf_output_mdv_chunks;
 
+commentdef {
+  p_header = "DETAILS FOR CEDRIC OUTPUT CONVERSION.";
+  p_text = "Parameters for writing out CEDRIC files. CEDRIC is an NCAR package for performing radar-type analyses such as dual-Doppler wind field estimation."; 
+}
+paramdef int {
+  p_default = 0;
+  p_descr = "Volume number for CEDRIC conversion.";
+} cedric_volume_number;
+
+paramdef string {
+  p_default = "CED-VOL";
+  p_descr = "Volume name for CEDRIC conversion.";
+} cedric_volume_name;
+
+paramdef string {
+  p_default = "RADAR";
+  p_descr = "Radar name for CEDRIC conversion.";
+} cedric_radar_name;
+
+paramdef string {
+  p_default = "PROJECT";
+  p_descr = "Project name for CEDRIC conversion.";
+} cedric_project_name;
+
+paramdef string {
+  p_default = "PROGRAM";
+  p_descr = "Program name for CEDRIC conversion.";
+} cedric_program_name;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Nyquist velocity for CEDRIC conversion.";
+  p_help = "Included as metadata in CEDRIC files. CEDRIC was written for radar data, so we need to supply radar meta-data, even if this is simulated.";
+} cedric_nyquist_velocity;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of gates CEDRIC conversion.";
+  p_help = "Included as metadata in CEDRIC files. CEDRIC was written for radar data, so we need to supply radar meta-data, even if this is simulated.";
+} cedric_ngates_beam;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Gate spacing CEDRIC conversion (km).";
+  p_help = "Included as metadata in CEDRIC files. CEDRIC was written for radar data, so we need to supply radar meta-data, even if this is simulated.";
+} cedric_gate_spacing_km;
+
+paramdef double {
+  p_default = { 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 7.5, 10.0, 12.5, 15.0, 20.0 };
+  p_descr = "Elevation angles for CEDRIC conversion (deg).";
+  p_help = "Included as metadata in CEDRIC files. CEDRIC was written for radar data, so we need to supply radar meta-data, even if this is simulated.";
+} cedric_elevation_angles[];
 

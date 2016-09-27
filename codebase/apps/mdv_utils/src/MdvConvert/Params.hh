@@ -70,7 +70,8 @@ public:
   typedef enum {
     OUTPUT_FORMAT_MDV = 0,
     OUTPUT_FORMAT_XML = 1,
-    OUTPUT_FORMAT_NCF = 2
+    OUTPUT_FORMAT_NCF = 2,
+    OUTPUT_FORMAT_CEDRIC = 3
   } output_format_t;
 
   typedef enum {
@@ -670,6 +671,25 @@ public:
 
   tdrp_bool_t ncf_output_mdv_chunks;
 
+  int cedric_volume_number;
+
+  char* cedric_volume_name;
+
+  char* cedric_radar_name;
+
+  char* cedric_project_name;
+
+  char* cedric_program_name;
+
+  double cedric_nyquist_velocity;
+
+  int cedric_ngates_beam;
+
+  double cedric_gate_spacing_km;
+
+  double *_cedric_elevation_angles;
+  int cedric_elevation_angles_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -677,7 +697,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[100];
+  mutable TDRPtable _table[110];
 
   const char *_className;
 
