@@ -698,6 +698,8 @@ public:
 
   debug_t debug;
 
+  int beam_count_for_debug_print;
+
   char* instance;
 
   tdrp_bool_t use_multiple_threads;
@@ -1121,6 +1123,8 @@ public:
 
   tdrp_bool_t set_end_of_sweep_when_antenna_changes_direction;
 
+  double required_delta_angle_for_antenna_direction_change;
+
   int max_sweeps_in_vol_for_antenna_direction_change;
 
   transition_method_t transition_method;
@@ -1152,7 +1156,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[244];
+  mutable TDRPtable _table[246];
 
   const char *_className;
 

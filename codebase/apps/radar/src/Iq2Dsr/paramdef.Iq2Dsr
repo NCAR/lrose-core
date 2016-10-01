@@ -26,6 +26,12 @@ paramdef enum debug_t {
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
+paramdef int {
+  p_default = 30;
+  p_descr = "Interval at which beam data is printed in debug mode.";
+  p_help = "We print out beam details in debug mode - this is the number of beams between each print.";
+} beam_count_for_debug_print;
+
 paramdef string {
   p_default = "test";
   p_descr = "Process instance";
@@ -2009,6 +2015,12 @@ paramdef boolean {
   p_descr = "Option to determine change in sweep from antenna direction change.";
   p_help = "We monitor the antenna movement direction. When this changes, we set the end of sweep flag.";
 } set_end_of_sweep_when_antenna_changes_direction;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "The required angle difference for detecting direction change (deg).";
+  p_help = "We examine the antenna angles for reversal in motion direction. The antenna must move by at least this amount for deducing the direction.";
+} required_delta_angle_for_antenna_direction_change;
 
 paramdef int {
   p_default = 32;

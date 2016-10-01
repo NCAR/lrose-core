@@ -569,6 +569,18 @@ using namespace std;
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
+    // Parameter 'beam_count_for_debug_print'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("beam_count_for_debug_print");
+    tt->descr = tdrpStrDup("Interval at which beam data is printed in debug mode.");
+    tt->help = tdrpStrDup("We print out beam details in debug mode - this is the number of beams between each print.");
+    tt->val_offset = (char *) &beam_count_for_debug_print - &_start_;
+    tt->single_val.i = 30;
+    tt++;
+    
     // Parameter 'instance'
     // ctype is 'char*'
     
@@ -4995,6 +5007,18 @@ using namespace std;
     tt->help = tdrpStrDup("We monitor the antenna movement direction. When this changes, we set the end of sweep flag.");
     tt->val_offset = (char *) &set_end_of_sweep_when_antenna_changes_direction - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'required_delta_angle_for_antenna_direction_change'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("required_delta_angle_for_antenna_direction_change");
+    tt->descr = tdrpStrDup("The required angle difference for detecting direction change (deg).");
+    tt->help = tdrpStrDup("We examine the antenna angles for reversal in motion direction. The antenna must move by at least this amount for deducing the direction.");
+    tt->val_offset = (char *) &required_delta_angle_for_antenna_direction_change - &_start_;
+    tt->single_val.d = 0.25;
     tt++;
     
     // Parameter 'max_sweeps_in_vol_for_antenna_direction_change'

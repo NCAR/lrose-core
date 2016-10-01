@@ -509,7 +509,9 @@ int Iq2Dsr::_processBeamSingleThreaded(Beam *beam)
 
   // write out beam
 
-  if (_fmq->writeBeam(*beam, _currentVolNum, _currentSweepNum)) {
+  beam->setVolNum(_currentVolNum);
+  beam->setSweepNum(_currentSweepNum);
+  if (_fmq->writeBeam(*beam)) {
     cerr << "ERROR - Iq2Dsr::_processFile" << endl;
     cerr << "  Cannot write the beam data to output FMQ" << endl;
     return -1;
@@ -764,7 +766,7 @@ int Iq2Dsr::writeBeams()
     
     // get the beam from the thread
 
-    const Beam *beam = thread->getBeam();
+    Beam *beam = thread->getBeam();
     
     // write the sweep and volume flags
     
@@ -776,7 +778,9 @@ int Iq2Dsr::writeBeams()
     
     // write beam to FMQ
 
-    if (_fmq->writeBeam(*beam, _currentVolNum, _currentSweepNum)) {
+    beam->setVolNum(_currentVolNum);
+    beam->setSweepNum(_currentSweepNum);
+    if (_fmq->writeBeam(*beam)) {
       cerr << "ERROR - Iq2Dsr::_writeBeams" << endl;
       cerr << "  Cannot write the beam data to output FMQ" << endl;
       _writeThread->setReturnCode(-1);
@@ -1038,6 +1042,9 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
   } else if (deltaAngle < -180) {
     deltaAngle += 360.0;
   }
+  if (fabs(deltaAngle) < _params.required_delta_angle_for_antenna_direction_change) {
+    return;
+  }
   _prevAngle = angle;
 
   // check for dirn change
@@ -1052,7 +1059,7 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
   } else {
     _motionDirn = -1.0;
   }
-
+  
   // do nothing if the direction of motion has not changed
   
   if (!dirnChange && !_endOfVolFlag) {
@@ -1066,6 +1073,15 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
 
   if (dirnChange && _params.debug) {
     cerr << "Dirn change, end of sweep num: " << _currentSweepNum << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "    el, az, angle, prevAngle, deltaAngle, _motionDirn, dirnChange: "
+           << beam->getEl() << ", " << beam->getAz() << ", "
+           << angle << ", "
+           << _prevAngle << ", "
+           << deltaAngle << ", "
+           << _motionDirn << ", "
+           << dirnChange << endl;
+    }
   }
 
   // increment sweep number

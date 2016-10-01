@@ -348,7 +348,7 @@ int OutputFmq::writeStatusXml(const Beam &beam)
 //
 // Returns 0 on success, -1 on failure
 
-int OutputFmq::writeBeam(const Beam &beam, int volNum, int sweepNum)
+int OutputFmq::writeBeam(const Beam &beam)
 
 {
 
@@ -357,14 +357,19 @@ int OutputFmq::writeBeam(const Beam &beam, int volNum, int sweepNum)
   pthread_mutex_lock(&_busy);
   
   bool printBeamDebug = (_params.debug >= Params::DEBUG_VERBOSE);
-  DateTime beamTime(beam.getTimeSecs(), true, beam.getNanoSecs() / 1.0e9);
-  if (_params.debug && ((_nBeamsWritten % 30) == 0)) {
+  if (_params.debug &&
+      ((_nBeamsWritten % _params.beam_count_for_debug_print) == 0)) {
     printBeamDebug = true;
   }
   if (printBeamDebug) {
+    DateTime beamTime(beam.getTimeSecs(), true, beam.getNanoSecs() / 1.0e9);
     fprintf(stderr,
-            "-->> OutputFmq::writeBeam, time: %s, az: %6.2f, el %5.2f, nSamples: %3d\n",
-            beamTime.asString(3).c_str(), beam.getAz(), beam.getEl(), beam.getNSamplesEffective());
+            "-->> OutputFmq::writeBeam, time: %s, vol: %.3d, sweep: %.3d, "
+            "az: %6.3f, el %5.3f, nSamples: %3d\n",
+            beamTime.asString(3).c_str(), 
+            beam.getVolNum(), beam.getSweepNum(),
+            beam.getAz(), beam.getEl(),
+            beam.getNSamplesEffective());
   }
 
   // put georeference if applicable
@@ -394,8 +399,8 @@ int OutputFmq::writeBeam(const Beam &beam, int volNum, int sweepNum)
   double dtime = beam.getDoubleTime();
   double partialSecs = fmod(dtime, 1.0);
   dsBeam.nanoSecs = (int) (partialSecs * 1.0e9 + 0.5);
-  dsBeam.volumeNum = volNum;
-  dsBeam.tiltNum = sweepNum;
+  dsBeam.volumeNum = beam.getVolNum();
+  dsBeam.tiltNum = beam.getSweepNum();
   dsBeam.elevation = beam.getEl();
   dsBeam.azimuth = beam.getAz();
   dsBeam.targetElev = beam.getTargetEl();

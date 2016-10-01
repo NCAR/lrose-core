@@ -108,6 +108,9 @@ public:
   void setCalib(const IwrfCalib &calib);
   void setStatusXml(const string &statusXml);
 
+  void setSweepNum(int val) { _sweepNum = val; }
+  void setVolNum(int val) { _volNum = val; }
+
   // get methods
 
   int getNSamples() const { return _nSamples; }
