@@ -704,7 +704,15 @@ int Dsr2Radx::_processVol()
   // trim sweeps with too few rays
 
   if (_params.check_min_rays_in_sweep) {
+    size_t nraysVolBefore = _vol.getNRays();
     _vol.removeSweepsWithTooFewRays(_params.min_rays_in_sweep);
+    if (nraysVolBefore != _vol.getNRays()) {
+      if (_params.debug) {
+        cerr << "NOTE: removed sweeps with nrays < " << _params.min_rays_in_sweep << endl;
+        cerr << "  nrays in vol before removal: " << nraysVolBefore << endl;
+        cerr << "  nrays in vol after  removal: " << _vol.getNRays() << endl;
+      }
+    }
   }
 
   // apply angle offsets
