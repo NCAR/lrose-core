@@ -774,7 +774,8 @@ int Dsr2Radx::_doWrite()
     }
 
     string outputDir = dset.output_dir;
-    
+
+    bool doWrite = true;
     if (_params.separate_output_dirs_by_scan_type) {
       outputDir += PATH_DELIM;
       if (_isSolarScan) {
@@ -784,22 +785,62 @@ int Dsr2Radx::_doWrite()
         switch (_scanMode) {
           case SCAN_MODE_RHI:
             outputDir += _params.rhi_subdir;
+            if (!_params.write_rhi_files) {
+              doWrite = false;
+            }
             break;
           case SCAN_MODE_SECTOR:
             outputDir += _params.sector_subdir;
+            if (!_params.write_sector_files) {
+              doWrite = false;
+            }
             break;
           case SCAN_MODE_VERT:
             outputDir += _params.vert_subdir;
+            if (!_params.write_vert_files) {
+              doWrite = false;
+            }
             break;
           case SCAN_MODE_SUNSCAN:
           case SCAN_MODE_SUNSCAN_RHI:
             outputDir += _params.sun_subdir;
+            if (!_params.write_sun_files) {
+              doWrite = false;
+            }
             break;
           case SCAN_MODE_PPI:
           default:
             outputDir += _params.surveillance_subdir;
+            if (!_params.write_surveillance_files) {
+              doWrite = false;
+            }
         }
       }
+    }
+    if (!doWrite) {
+      if (_params.debug) {
+        cerr << "NOTE - Dsr2Radx::_doWrite()" << _vol.getNRays() << endl;
+        cerr << "  Skipping writing file for outputDir: " << outputDir << endl;
+        switch (_scanMode) {
+          case SCAN_MODE_RHI:
+            cerr << "  parameter write_rhi_files is false" << endl;
+            break;
+          case SCAN_MODE_SECTOR:
+            cerr << "  parameter write_sector_files is false" << endl;
+            break;
+          case SCAN_MODE_VERT:
+            cerr << "  parameter write_vert_files is false" << endl;
+            break;
+          case SCAN_MODE_SUNSCAN:
+          case SCAN_MODE_SUNSCAN_RHI:
+            cerr << "  parameter write_sun_files is false" << endl;
+            break;
+          case SCAN_MODE_PPI:
+          default:
+            cerr << "  parameter write_surveillance_files is false" << endl;
+        }
+      }
+      continue;
     }
     
     // check nrays in vol for volume-type formats

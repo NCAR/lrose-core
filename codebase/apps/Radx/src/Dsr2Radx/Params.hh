@@ -574,21 +574,31 @@ public:
 
   tdrp_bool_t separate_output_dirs_by_scan_type;
 
+  tdrp_bool_t write_surveillance_files;
+
   char* surveillance_subdir;
+
+  tdrp_bool_t write_sector_files;
 
   char* sector_subdir;
 
+  tdrp_bool_t write_rhi_files;
+
   char* rhi_subdir;
 
+  tdrp_bool_t write_vert_files;
+
   char* vert_subdir;
-
-  char* sun_subdir;
-
-  char* solar_scan_name;
 
   double min_elevation_for_vert_files;
 
   double min_vert_fraction_for_vert_files;
+
+  tdrp_bool_t write_sun_files;
+
+  char* sun_subdir;
+
+  char* solar_scan_name;
 
   char* output_filename_prefix;
 
@@ -657,7 +667,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[148];
+  mutable TDRPtable _table[153];
 
   const char *_className;
 

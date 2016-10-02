@@ -1909,6 +1909,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'write_surveillance_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_surveillance_files");
+    tt->descr = tdrpStrDup("Option to write out files for surveillance mode.");
+    tt->help = tdrpStrDup("Only applies if 'separate_output_dirs_by_scan_type' is true.");
+    tt->val_offset = (char *) &write_surveillance_files - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'surveillance_subdir'
     // ctype is 'char*'
     
@@ -1916,9 +1928,21 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("surveillance_subdir");
     tt->descr = tdrpStrDup("The directory path for surveillance scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is surveillance, this subdirectory will be created under the ouput dir.");
+    tt->help = tdrpStrDup("See 'separate_output_dirs_by_scan_type'. If the scan mode is surveillance, this subdirectory will be created under the ouput dir.");
     tt->val_offset = (char *) &surveillance_subdir - &_start_;
     tt->single_val.s = tdrpStrDup("sur");
+    tt++;
+    
+    // Parameter 'write_sector_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_sector_files");
+    tt->descr = tdrpStrDup("Option to write out files for sector mode.");
+    tt->help = tdrpStrDup("Only applies if 'separate_output_dirs_by_scan_type' is true.");
+    tt->val_offset = (char *) &write_sector_files - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'sector_subdir'
@@ -1928,9 +1952,21 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("sector_subdir");
     tt->descr = tdrpStrDup("The directory path for sector scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is sector, this subdirectory will be created under the ouput dir.");
+    tt->help = tdrpStrDup("See 'separate_output_dirs_by_scan_type'. If the scan mode is sector, this subdirectory will be created under the ouput dir.");
     tt->val_offset = (char *) &sector_subdir - &_start_;
     tt->single_val.s = tdrpStrDup("sec");
+    tt++;
+    
+    // Parameter 'write_rhi_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_rhi_files");
+    tt->descr = tdrpStrDup("Option to write out files for rhi mode.");
+    tt->help = tdrpStrDup("Only applies if 'separate_output_dirs_by_scan_type' is true.");
+    tt->val_offset = (char *) &write_rhi_files - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'rhi_subdir'
@@ -1940,9 +1976,21 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("rhi_subdir");
     tt->descr = tdrpStrDup("The directory path for rhi files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is rhi, this subdirectory will be created under the ouput dir.");
+    tt->help = tdrpStrDup("See 'separate_output_dirs_by_scan_type'. If the scan mode is rhi, this subdirectory will be created under the ouput dir.");
     tt->val_offset = (char *) &rhi_subdir - &_start_;
     tt->single_val.s = tdrpStrDup("rhi");
+    tt++;
+    
+    // Parameter 'write_vert_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_vert_files");
+    tt->descr = tdrpStrDup("Option to write out files for vertical pointing mode.");
+    tt->help = tdrpStrDup("Only applies if 'separate_output_dirs_by_scan_type' is true.");
+    tt->val_offset = (char *) &write_vert_files - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'vert_subdir'
@@ -1952,33 +2000,9 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("vert_subdir");
     tt->descr = tdrpStrDup("The directory path for vert scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is vert, this subdirectory will be created under the ouput dir.");
+    tt->help = tdrpStrDup("See 'separate_output_dirs_by_scan_type'. If the scan mode is vert, this subdirectory will be created under the ouput dir.");
     tt->val_offset = (char *) &vert_subdir - &_start_;
     tt->single_val.s = tdrpStrDup("vert");
-    tt++;
-    
-    // Parameter 'sun_subdir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("sun_subdir");
-    tt->descr = tdrpStrDup("The directory path for sun scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is sun, this subdirectory will be created under the ouput dir.");
-    tt->val_offset = (char *) &sun_subdir - &_start_;
-    tt->single_val.s = tdrpStrDup("sun");
-    tt++;
-    
-    // Parameter 'solar_scan_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("solar_scan_name");
-    tt->descr = tdrpStrDup("Optionally specify the scan name for the solar scan.");
-    tt->help = tdrpStrDup("If the scan name from the antenna controller matches this string, it will be assumed that this is a solar scan.");
-    tt->val_offset = (char *) &solar_scan_name - &_start_;
-    tt->single_val.s = tdrpStrDup("Solar");
     tt++;
     
     // Parameter 'min_elevation_for_vert_files'
@@ -2003,6 +2027,42 @@ using namespace std;
     tt->help = tdrpStrDup("If the fraction of the data with elevation angles above the specified min_elevation exceeds this fraction,  the volume will be considered to be from vertically-pointing operations.");
     tt->val_offset = (char *) &min_vert_fraction_for_vert_files - &_start_;
     tt->single_val.d = 0.9;
+    tt++;
+    
+    // Parameter 'write_sun_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_sun_files");
+    tt->descr = tdrpStrDup("Option to write out files for sun scan mode.");
+    tt->help = tdrpStrDup("Only applies if 'separate_output_dirs_by_scan_type' is true.");
+    tt->val_offset = (char *) &write_sun_files - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'sun_subdir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("sun_subdir");
+    tt->descr = tdrpStrDup("The directory path for sun scan files.");
+    tt->help = tdrpStrDup("See 'separate_output_dirs_by_scan_type'. If the scan mode is sun, this subdirectory will be created under the ouput dir.");
+    tt->val_offset = (char *) &sun_subdir - &_start_;
+    tt->single_val.s = tdrpStrDup("sun");
+    tt++;
+    
+    // Parameter 'solar_scan_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("solar_scan_name");
+    tt->descr = tdrpStrDup("Optionally specify the scan name for the solar scan.");
+    tt->help = tdrpStrDup("If the scan name from the antenna controller matches this string, it will be assumed that this is a solar scan.");
+    tt->val_offset = (char *) &solar_scan_name - &_start_;
+    tt->single_val.s = tdrpStrDup("Solar");
     tt++;
     
     // Parameter 'Comment 23'
@@ -2126,7 +2186,7 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("write_individual_ldata_info");
     tt->descr = tdrpStrDup("Option to write latest_data_info for each data set.");
-    tt->help = tdrpStrDup("Writes a latest_data_info file for each data set written, including the separate directories for surveillance, sector and RHI as appropriate. If write_master_ldata_info is true, you may consider turning this off.");
+    tt->help = tdrpStrDup("Writes a latest_data_info file for each data set written, including the separate directories for surveillance, sector, rhi etc. as appropriate. If write_master_ldata_info is true, you may consider turning this off.");
     tt->val_offset = (char *) &write_individual_ldata_info - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
