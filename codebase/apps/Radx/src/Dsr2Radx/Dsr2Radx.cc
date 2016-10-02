@@ -593,7 +593,7 @@ int Dsr2Radx::_processVol()
   }
 
   // load the current scan mode - PPI or RHI
-
+  
   _loadCurrentScanMode();
 
   // set the sweep numbers in the input rays, if needed
@@ -623,9 +623,9 @@ int Dsr2Radx::_processVol()
   }
 
   // set the volume info from the rays
-  
-  _vol.loadVolumeInfoFromRays();
 
+  _vol.loadVolumeInfoFromRays();
+  
   // set the sweep numbers from the rays
 
   if (_params.increment_sweep_num_when_pol_mode_changes) {
@@ -819,7 +819,7 @@ int Dsr2Radx::_doWrite()
     }
     if (!doWrite) {
       if (_params.debug) {
-        cerr << "NOTE - Dsr2Radx::_doWrite()" << _vol.getNRays() << endl;
+        cerr << "NOTE - Dsr2Radx::_doWrite(), nrays: " << _vol.getNRays() << endl;
         cerr << "  Skipping writing file for outputDir: " << outputDir << endl;
         switch (_scanMode) {
           case SCAN_MODE_RHI:
@@ -849,17 +849,17 @@ int Dsr2Radx::_doWrite()
         dset.format == Params::OUTPUT_FORMAT_CFRADIAL) {
       if ((int) _vol.getNRays() < _params.min_rays_in_vol) {
         if (_params.debug) {
-          cerr << "NOTE - Dsr2Radx::_doWrite()" << _vol.getNRays() << endl;
+          cerr << "NOTE - Dsr2Radx::_doWrite(), nrays: " << _vol.getNRays() << endl;
           cerr << "  dataType: " << dataType << endl;
           cerr << "  outputDir: " << outputDir << endl;
-          cerr << "  too few rays, will not be saved: " << _vol.getNRays() << endl;
+          cerr << "  too few rays, will not be saved" << endl;
         }
         continue;
       }
     }
 
     // write out
-    
+
     if (_outFile->writeToDir(_vol,
                              outputDir,
                              _params.append_day_dir_to_output_dir,
