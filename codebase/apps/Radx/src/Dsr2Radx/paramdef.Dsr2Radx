@@ -266,12 +266,13 @@ paramdef boolean {
 
 commentdef {
   p_header = "OUTPUT GATE GEOMETRY";
+  p_text = "You can only choose one range geometry remapping option. If none are picked, all rays which do not match the predominant geometry will be discarded.";
 }
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to convert all rays to predominant geometry.";
-  p_help = "If true, all rays will be converted to the predominant gate geometry - i.e. start_range and gate_spacing. If false, all rays which do not match the predominant geometry will be discarded.";
+  p_help = "If true, all rays will be converted to the predominant gate geometry - i.e. start_range and gate_spacing.";
 } convert_to_predominant_gate_geometry;
 
 paramdef boolean {

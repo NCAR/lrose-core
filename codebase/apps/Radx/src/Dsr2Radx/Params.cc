@@ -1087,7 +1087,7 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT GATE GEOMETRY");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("You can only choose one range geometry remapping option. If none are picked, all rays which do not match the predominant geometry will be discarded.");
     tt++;
     
     // Parameter 'convert_to_predominant_gate_geometry'
@@ -1097,7 +1097,7 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("convert_to_predominant_gate_geometry");
     tt->descr = tdrpStrDup("Option to convert all rays to predominant geometry.");
-    tt->help = tdrpStrDup("If true, all rays will be converted to the predominant gate geometry - i.e. start_range and gate_spacing. If false, all rays which do not match the predominant geometry will be discarded.");
+    tt->help = tdrpStrDup("If true, all rays will be converted to the predominant gate geometry - i.e. start_range and gate_spacing.");
     tt->val_offset = (char *) &convert_to_predominant_gate_geometry - &_start_;
     tt->single_val.b = pTRUE;
     tt++;

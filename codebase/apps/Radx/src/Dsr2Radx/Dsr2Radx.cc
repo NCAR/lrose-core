@@ -691,14 +691,14 @@ int Dsr2Radx::_processVol()
 
   // convert to common geometry
 
-  if (_params.convert_to_predominant_gate_geometry) {
-    _vol.remapToPredomGeom();
-  } else if (_params.convert_to_finest_gate_geometry) {
-    _vol.remapToFinestGeom();
-  } else if (_params.convert_to_specified_gate_geometry) {
+  if (_params.convert_to_specified_gate_geometry) {
     _vol.remapRangeGeom(_params.specified_start_range_km,
                         _params.specified_gate_spacing_km,
                         _params.interpolate_to_specified_gate_geometry);
+  } else if (_params.convert_to_predominant_gate_geometry) {
+    _vol.remapToPredomGeom();
+  } else if (_params.convert_to_finest_gate_geometry) {
+    _vol.remapToFinestGeom();
   } else {
     _vol.filterOnPredomGeom();
   }
