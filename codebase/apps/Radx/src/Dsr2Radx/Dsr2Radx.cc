@@ -154,6 +154,28 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
     Radx::setMissingSi08(_params.missing_field_si08);
   }
 
+  // check params
+
+  int nGeomOptions = 0;
+  if (_params.convert_to_specified_gate_geometry) {
+    nGeomOptions++;
+  }
+  if (_params.convert_to_predominant_gate_geometry) {
+    nGeomOptions++;
+  }
+  if (_params.convert_to_finest_gate_geometry) {
+    nGeomOptions++;
+  }
+  if (nGeomOptions > 1) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  Problem with TDRP parameters" << endl;
+    cerr << "  You can only set one of the following to true:" << endl;
+    cerr << "    convert_to_specified_gate_geometry" << endl;
+    cerr << "    convert_to_predominant_gate_geometry" << endl;
+    cerr << "    convert_to_finest_gate_geometry" << endl;
+    isOK = false;
+  }
+  
   // set up output file object
 
   _outFile = new RadxFile();
