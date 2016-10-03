@@ -482,6 +482,16 @@ public:
 
   tdrp_bool_t convert_to_predominant_gate_geometry;
 
+  tdrp_bool_t convert_to_finest_gate_geometry;
+
+  tdrp_bool_t convert_to_specified_gate_geometry;
+
+  double specified_start_range_km;
+
+  double specified_gate_spacing_km;
+
+  tdrp_bool_t interpolate_to_specified_gate_geometry;
+
   tdrp_bool_t find_sweep_numbers_using_histogram;
 
   tdrp_bool_t use_target_angles_for_hist;
@@ -667,7 +677,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[153];
+  mutable TDRPtable _table[158];
 
   const char *_className;
 

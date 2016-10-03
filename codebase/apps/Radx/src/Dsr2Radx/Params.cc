@@ -1086,7 +1086,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("CONVERTING ALL RAYS TO SAME GATE GEOMETRY");
+    tt->comment_hdr = tdrpStrDup("OUTPUT GATE GEOMETRY");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1100,6 +1100,66 @@ using namespace std;
     tt->help = tdrpStrDup("If true, all rays will be converted to the predominant gate geometry - i.e. start_range and gate_spacing. If false, all rays which do not match the predominant geometry will be discarded.");
     tt->val_offset = (char *) &convert_to_predominant_gate_geometry - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'convert_to_finest_gate_geometry'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("convert_to_finest_gate_geometry");
+    tt->descr = tdrpStrDup("Option to convert all rays to finest range gate spacing.");
+    tt->help = tdrpStrDup("If true, all rays will be converted to the finest gate spacing.");
+    tt->val_offset = (char *) &convert_to_finest_gate_geometry - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'convert_to_specified_gate_geometry'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("convert_to_specified_gate_geometry");
+    tt->descr = tdrpStrDup("Option to convert all rays to a specified gate geometry.");
+    tt->help = tdrpStrDup("See 'specified_start_range_k', 'specified_gate_spacing_km' and 'interpolate_to_specified_gate_geometry'.");
+    tt->val_offset = (char *) &convert_to_specified_gate_geometry - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'specified_start_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("specified_start_range_km");
+    tt->descr = tdrpStrDup("Start range for specified remapping (km).");
+    tt->help = tdrpStrDup("See 'convert_to_specified_gate_geometry'.");
+    tt->val_offset = (char *) &specified_start_range_km - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'specified_gate_spacing_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("specified_gate_spacing_km");
+    tt->descr = tdrpStrDup("Gate spacing for specified remapping (km).");
+    tt->help = tdrpStrDup("See 'convert_to_specified_gate_geometry'.");
+    tt->val_offset = (char *) &specified_gate_spacing_km - &_start_;
+    tt->single_val.d = 0.2;
+    tt++;
+    
+    // Parameter 'interpolate_to_specified_gate_geometry'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("interpolate_to_specified_gate_geometry");
+    tt->descr = tdrpStrDup("Option to use interpolation when converting to the specified gate geometry.");
+    tt->help = tdrpStrDup("If false, nearest neighbor mapping is used. See 'convert_to_specified_gate_geometry'.");
+    tt->val_offset = (char *) &interpolate_to_specified_gate_geometry - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 8'
