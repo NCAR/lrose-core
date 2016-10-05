@@ -383,6 +383,8 @@ public:
 
   double min_dbz_for_surface_echo;
 
+  double max_nadir_error_for_surface_vel;
+
   int ngates_for_surface_echo;
 
   tdrp_bool_t print_surface_velocity_data;
@@ -449,7 +451,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[55];
+  mutable TDRPtable _table[56];
 
   const char *_className;
 

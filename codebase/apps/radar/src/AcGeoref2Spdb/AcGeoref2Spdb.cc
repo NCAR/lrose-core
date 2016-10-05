@@ -1275,14 +1275,18 @@ double AcGeoref2Spdb::_computeSurfaceVel(const RadxRay &ray)
   // cannot compute gnd vel if not pointing down
   
   double elev = ray.getElevationDeg();
-  if (elev > -85 || elev < -95) {
+
+  if ((elev > -90 + _params.max_nadir_error_for_surface_vel) ||
+      (elev < -90 - _params.max_nadir_error_for_surface_vel)) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Bad elevation for finding surface, time, elev(deg): "
            << ray.getRadxTime().asString() << ", "
            << elev << endl;
+      cerr << "Max allowable error from nadir: " 
+           << _params.max_nadir_error_for_surface_vel << endl;
     }
     return surfaceVel;
-  }
+   }
 
   // get dbz field
 
@@ -1499,6 +1503,8 @@ int AcGeoref2Spdb::_handleIwg1(const char *buf, int bufLen)
   string callSign(_params.aircraft_callsign);
   STRncopy(acGeoref.callsign, callSign.c_str(), AC_GEOREF_NBYTES_CALLSIGN);
   
+  ac_georef_print(stderr, " ", &acGeoref);
+
   // add to spdb
   
   string callSignLast4(callSign.substr(callSign.size() - 4));

@@ -147,6 +147,12 @@ paramdef double {
   p_help = "Gates with values below this will not be used.";
 } min_dbz_for_surface_echo;
 
+paramdef double {
+  p_default = 5;
+  p_descr = "Maximum error from nadir pointing for computing surface velocity (deg).";
+  p_help = "We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).";
+} max_nadir_error_for_surface_vel;
+
 paramdef int {
   p_default = 1;
   p_descr = "Number of gates needed for identifying surface echo.";
