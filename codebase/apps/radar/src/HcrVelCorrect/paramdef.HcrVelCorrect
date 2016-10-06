@@ -302,7 +302,7 @@ paramdef int {
 } output_fmq_data_mapper_report_interval;
 
 commentdef {
-  p_header = "FIR FILTERING";
+  p_header = "FIR FILTERING FOR VELOCITY ESTIMATES";
 }
 
 paramdef double {
