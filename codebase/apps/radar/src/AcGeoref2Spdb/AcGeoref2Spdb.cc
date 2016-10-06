@@ -125,12 +125,12 @@ AcGeoref2Spdb::AcGeoref2Spdb(int argc, char **argv)
 
   // set up the surface velocity filtering
   
-  _surfVel.initFilters(_params.stage1_filter_n,
-                       _params._stage1_filter,
-                       _params.spike_filter_n,
-                       _params._spike_filter,
-                       _params.final_filter_n,
-                       _params._final_filter);
+  _surfVel.initFilters(_params.surface_vel_stage1_filter_n,
+                       _params._surface_vel_stage1_filter,
+                       _params.surface_vel_spike_filter_n,
+                       _params._surface_vel_spike_filter,
+                       _params.surface_vel_final_filter_n,
+                       _params._surface_vel_final_filter);
 
   if (_params.debug) {
     _surfVel.setDebug(true);
@@ -145,7 +145,8 @@ AcGeoref2Spdb::AcGeoref2Spdb(int argc, char **argv)
   _surfVel.setMinRangeToSurfaceKm(_params.min_range_to_surface_km);
   _surfVel.setMinDbzForSurfaceEcho(_params.min_dbz_for_surface_echo);
   _surfVel.setNGatesForSurfaceEcho(_params.ngates_for_surface_echo);
-  _surfVel.setSpikeFilterDifferenceThreshold(_params.spike_filter_difference_threshold);
+  _surfVel.setSpikeFilterDifferenceThreshold
+    (_params.surface_vel_spike_filter_difference_threshold);
   
   // init process mapper registration
   

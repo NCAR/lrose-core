@@ -1205,28 +1205,28 @@ using namespace std;
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'spike_filter_difference_threshold'
+    // Parameter 'surface_vel_spike_filter_difference_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("spike_filter_difference_threshold");
+    tt->param_name = tdrpStrDup("surface_vel_spike_filter_difference_threshold");
     tt->descr = tdrpStrDup("Threshold for removing spikes in the original data and resetting the value to that form the short filter.");
     tt->help = tdrpStrDup("We apply both the stage-1 and spike filters to the time series of surface velocity. If the absolute difference between the two exceeds this threshold, then the conditioned data is set to the output from the stage-1 filter. If the absolute difference is below this threshold then the original data point is retained. After this step the final filter it applied to the conditioned data to compute the final filtered value.");
-    tt->val_offset = (char *) &spike_filter_difference_threshold - &_start_;
+    tt->val_offset = (char *) &surface_vel_spike_filter_difference_threshold - &_start_;
     tt->single_val.d = 0.11;
     tt++;
     
-    // Parameter 'stage1_filter'
+    // Parameter 'surface_vel_stage1_filter'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("stage1_filter");
+    tt->param_name = tdrpStrDup("surface_vel_stage1_filter");
     tt->descr = tdrpStrDup("Coefficients for stage-1 FIR filter.");
     tt->help = tdrpStrDup("Initial filtering step. This is normally a 21-point FIR filter.");
-    tt->array_offset = (char *) &_stage1_filter - &_start_;
-    tt->array_n_offset = (char *) &stage1_filter_n - &_start_;
+    tt->array_offset = (char *) &_surface_vel_stage1_filter - &_start_;
+    tt->array_n_offset = (char *) &surface_vel_stage1_filter_n - &_start_;
     tt->is_private = TRUE;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
@@ -1257,16 +1257,16 @@ using namespace std;
       tt->array_vals[20].d = 0.016977;
     tt++;
     
-    // Parameter 'spike_filter'
+    // Parameter 'surface_vel_spike_filter'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("spike_filter");
+    tt->param_name = tdrpStrDup("surface_vel_spike_filter");
     tt->descr = tdrpStrDup("Coefficients for spike FIR filter.");
     tt->help = tdrpStrDup("Applying this filter onces is equivalent to applying the stage-1 filter five times in succession on a time series. Normally this will have 101 entries.");
-    tt->array_offset = (char *) &_spike_filter - &_start_;
-    tt->array_n_offset = (char *) &spike_filter_n - &_start_;
+    tt->array_offset = (char *) &_surface_vel_spike_filter - &_start_;
+    tt->array_n_offset = (char *) &surface_vel_spike_filter_n - &_start_;
     tt->is_private = TRUE;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
@@ -1377,16 +1377,16 @@ using namespace std;
       tt->array_vals[100].d = 1.41027e-09;
     tt++;
     
-    // Parameter 'final_filter'
+    // Parameter 'surface_vel_final_filter'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("final_filter");
+    tt->param_name = tdrpStrDup("surface_vel_final_filter");
     tt->descr = tdrpStrDup("Coefficients for final FIR filter.");
     tt->help = tdrpStrDup("Before applying this filter, we first compute the conditioned time series. We compute the difference between the results of the stage-1 and spike filters - if this difference exceeds spike_filter_difference_threshold we use the spike filter result. Otherwise we use the stage-1 result.");
-    tt->array_offset = (char *) &_final_filter - &_start_;
-    tt->array_n_offset = (char *) &final_filter_n - &_start_;
+    tt->array_offset = (char *) &_surface_vel_final_filter - &_start_;
+    tt->array_n_offset = (char *) &surface_vel_final_filter_n - &_start_;
     tt->is_private = TRUE;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;

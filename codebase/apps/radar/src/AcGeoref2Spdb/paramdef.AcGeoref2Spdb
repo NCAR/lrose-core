@@ -322,7 +322,7 @@ paramdef double {
   p_default = 0.11;
   p_descr = "Threshold for removing spikes in the original data and resetting the value to that form the short filter.";
   p_help = "We apply both the stage-1 and spike filters to the time series of surface velocity. If the absolute difference between the two exceeds this threshold, then the conditioned data is set to the output from the stage-1 filter. If the absolute difference is below this threshold then the original data point is retained. After this step the final filter it applied to the conditioned data to compute the final filtered value.";
-} spike_filter_difference_threshold;
+} surface_vel_spike_filter_difference_threshold;
 
 paramdef double {
   p_default = {
@@ -351,7 +351,7 @@ paramdef double {
   p_descr = "Coefficients for stage-1 FIR filter.";
   p_help =  "Initial filtering step. This is normally a 21-point FIR filter.";
   p_private = TRUE;
-} stage1_filter[];
+} surface_vel_stage1_filter[];
 
 paramdef double {
   p_default = {
@@ -460,7 +460,7 @@ paramdef double {
   p_descr = "Coefficients for spike FIR filter.";
   p_help =  "Applying this filter onces is equivalent to applying the stage-1 filter five times in succession on a time series. Normally this will have 101 entries.";
   p_private = TRUE;
-} spike_filter[];
+} surface_vel_spike_filter[];
 
 paramdef double {
   p_default = {
@@ -509,5 +509,5 @@ paramdef double {
   p_descr = "Coefficients for final FIR filter.";
   p_help =  "Before applying this filter, we first compute the conditioned time series. We compute the difference between the results of the stage-1 and spike filters - if this difference exceeds spike_filter_difference_threshold we use the spike filter result. Otherwise we use the stage-1 result.";
   p_private = TRUE;
-} final_filter[];
+} surface_vel_final_filter[];
 

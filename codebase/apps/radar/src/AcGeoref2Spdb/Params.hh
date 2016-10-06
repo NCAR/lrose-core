@@ -444,16 +444,16 @@ public:
 
   int spdb_nchunks_per_write;
 
-  double spike_filter_difference_threshold;
+  double surface_vel_spike_filter_difference_threshold;
 
-  double *_stage1_filter;
-  int stage1_filter_n;
+  double *_surface_vel_stage1_filter;
+  int surface_vel_stage1_filter_n;
 
-  double *_spike_filter;
-  int spike_filter_n;
+  double *_surface_vel_spike_filter;
+  int surface_vel_spike_filter_n;
 
-  double *_final_filter;
-  int final_filter_n;
+  double *_surface_vel_final_filter;
+  int surface_vel_final_filter_n;
 
   char _end_; // end of data region
               // needed for zeroing out data
