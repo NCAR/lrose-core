@@ -99,10 +99,11 @@ public:
   
   int processRay(RadxRay *ray);
 
-  // get surface velocity
-  // Condition: assumes processRay returns 0
+  // get results, on condition that processRay() returns success, i.e. 0
   
-  double getSurfaceVelocity();
+  bool velocityIsValid() const { return _velIsValid; }
+  double getSurfaceVelocity() const { return _surfaceVel; }
+  RadxRay *getFiltRay() { return _filtRay; }
 
 protected:
 private:
@@ -157,12 +158,18 @@ private:
 
   double *_dbzMax;
   double *_rangeToSurface;
-  double *_surfaceVel;
+  double *_surfaceVelArray;
 
   double *_filteredStage1;
   double *_filteredSpike;
   double *_filteredCond;
   double *_filteredFinal;
+
+  // results
+  
+  bool _velIsValid;
+  double _surfaceVel;
+  RadxRay *_filtRay;
 
   // methods
 
