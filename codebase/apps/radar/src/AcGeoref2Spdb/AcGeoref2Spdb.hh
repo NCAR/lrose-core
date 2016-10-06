@@ -52,6 +52,7 @@
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
 #include <radar/IwrfCalib.hh>
+#include <radar/FindSurfaceVel.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxTime.hh>
@@ -150,6 +151,7 @@ private:
 
   // printing surface velocity data
 
+  FindSurfaceVel _surfVel;
   RadxTime _timeLastVelPrint;
   double _velStatsCount;
   ac_georef_t _velStatsSum;
@@ -192,7 +194,7 @@ private:
   double _decodeIwg1Field(const vector<string> &toks,
                           int tokNum);
 
-  void _printSurfVelStats(const ac_georef_t &georef);
+  void _printSurfVelStats(const RadxRay &ray, const ac_georef_t &georef);
 
 };
 

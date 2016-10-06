@@ -444,6 +444,17 @@ public:
 
   int spdb_nchunks_per_write;
 
+  double spike_filter_difference_threshold;
+
+  double *_stage1_filter;
+  int stage1_filter_n;
+
+  double *_spike_filter;
+  int spike_filter_n;
+
+  double *_final_filter;
+  int final_filter_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -451,7 +462,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[56];
+  mutable TDRPtable _table[61];
 
   const char *_className;
 
