@@ -71,8 +71,9 @@ Iq2Dsr::Iq2Dsr(int argc, char **argv)
   _endOfVolFlag = false;
   _endOfSweepFlag = false;
 
-  _startOfVolPending = false;
   _startOfSweepPending = false;
+  _startOfVolPending = false;
+  _endOfVolPending = false;
 
   _antennaTransition = false;
 
@@ -814,37 +815,50 @@ void Iq2Dsr::_handleSweepAndVolChange(const Beam *beam)
   
 {
 
-  _endOfVolFlag = false;
-  _endOfSweepFlag = false;
+  // initialize end of sweep and volume flags
 
-  if (!_params.use_sweep_info_from_time_series) {
+  if (_params.use_volume_info_from_time_series) {
     _endOfVolFlag = beam->getEndOfVolFlag();
-    _endOfSweepFlag = beam->getEndOfSweepFlag();
+    if (_endOfVolFlag) {
+      _endOfVolPending = true;
+    }
+  } else {
+    _endOfVolFlag = false;
   }
 
-  // send scan mode change
+  if (_params.use_sweep_info_from_time_series) {
+    _endOfSweepFlag = beam->getEndOfSweepFlag();
+  } else {
+    _endOfSweepFlag = false;
+  }
+
+  // scan mode change
   
   _beamScanMode = beam->getScanMode();
   if (_currentScanMode != _beamScanMode) {
     _fmq->putNewScanType(_beamScanMode, beam->getTimeSecs());
     _currentScanMode = _beamScanMode;
+    if (_params.set_end_of_sweep_when_antenna_changes_direction) {
+      _endOfVolPending = true;
+    }
     if (_params.debug) {
-      cerr << "Scan mode change to: " << _currentScanMode << endl;
+      cerr << "Scan mode change to: " << iwrf_scan_mode_to_str(_currentScanMode) << endl;
     }
   }
 
-  if (!_params.use_sweep_info_from_time_series) {
-    // have to guess
-    _guessEndOfVol(beam);
+  if (!_params.use_volume_info_from_time_series) {
+    // have to deduce the end of volume condition
+    _deduceEndOfVol(beam);
     return;
   }
   
-  // set from beam
+  // set vol and sweep num from beam
 
   _prevVolNum = _beamVolNum;
   _beamVolNum = beam->getVolNum();
   if (_prevVolNum != _beamVolNum) {
     _endOfVolFlag = true;
+    _endOfVolPending = true;
   }
 
   _prevSweepNum = _beamSweepNum;
@@ -950,14 +964,15 @@ void Iq2Dsr::_putEndOfVol(time_t latestTime)
 }
 
 ////////////////////////////////////////////////////////////////////////
-// Guess at end of vol condition
+// Deduce end of vol condition
 
-void Iq2Dsr::_guessEndOfVol(const Beam *beam)
+void Iq2Dsr::_deduceEndOfVol(const Beam *beam)
   
 {
   
   // set tilt number to missing
 
+  _endOfVolFlag = false;
   _currentSweepNum = -1;
   
   // set elev stats
@@ -1086,6 +1101,11 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
 
   // increment sweep number
 
+  if (_endOfVolPending) {
+    _endOfVolFlag = true;
+    _endOfVolPending = false;
+  }
+
   if (!_endOfVolFlag) {
     _currentSweepNum++;
   }
@@ -1115,6 +1135,7 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
     }
     _nBeamsThisVol = 0;
     _currentSweepNum = 0;
+    _endOfVolFlag = false;
   }
   
   // start of sweep

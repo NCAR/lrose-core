@@ -11,7 +11,6 @@
 /Helpers.cc/1.3/Thu Aug 11 22:50:44 2016//
 /Helpers.hh/1.3/Thu Aug 11 22:50:44 2016//
 /Implementation_notes/1.1/Thu Aug 11 22:50:44 2016//
-/Iq2Dsr.hh/1.43/Thu Aug 11 22:50:44 2016//
 /Iq2Dsr.test/1.11/Thu Aug 11 22:50:44 2016//
 /Main.cc/1.9/Thu Aug 11 22:50:44 2016//
 /Makefile/1.35/Thu Aug 11 22:50:44 2016//
@@ -29,10 +28,11 @@
 /startup_cal.xml/1.4/Thu Aug 11 22:50:44 2016//
 /BeamReader.cc/1.116/Mon Sep 26 21:38:41 2016//
 /Beam.hh/1.79/Sat Oct  1 23:33:04 2016//
-/Iq2Dsr.cc/1.80/Sat Oct  1 23:47:52 2016//
-/OutputFmq.cc/1.132/Sat Oct  1 23:51:23 2016//
 /OutputFmq.hh/1.27/Sat Oct  1 23:34:08 2016//
-/Params.cc/1.194/Sat Oct  1 23:51:24 2016//
-/Params.hh/1.185/Sat Oct  1 23:51:24 2016//
-/paramdef.Iq2Dsr/1.185/Sat Oct  1 23:50:14 2016//
+/Iq2Dsr.cc/1.81/Fri Oct  7 20:39:23 2016//
+/Iq2Dsr.hh/1.44/Fri Oct  7 18:16:41 2016//
+/OutputFmq.cc/1.133/Fri Oct  7 19:59:05 2016//
+/Params.cc/1.195/Fri Oct  7 18:06:29 2016//
+/Params.hh/1.186/Fri Oct  7 18:06:29 2016//
+/paramdef.Iq2Dsr/1.186/Fri Oct  7 18:06:24 2016//
 D

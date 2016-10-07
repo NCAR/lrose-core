@@ -3898,80 +3898,6 @@ using namespace std;
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'set_end_of_vol_from_elev_angle'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_end_of_vol_from_elev_angle");
-    tt->descr = tdrpStrDup("Option to set the end of vol flag based on elevation angle.");
-    tt->help = tdrpStrDup("If true, the program will look for changes in antenna angle to compute the end of volume.");
-    tt->val_offset = (char *) &set_end_of_vol_from_elev_angle - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'vol_starts_at_bottom'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vol_starts_at_bottom");
-    tt->descr = tdrpStrDup("Flag to indicate that elevation angles increase in the volume.");
-    tt->help = tdrpStrDup("If the volume starts at the top, i.e. elevations decrease during the volume, set this to FALSE.");
-    tt->val_offset = (char *) &vol_starts_at_bottom - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'elev_change_for_end_of_vol'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("elev_change_for_end_of_vol");
-    tt->descr = tdrpStrDup("Change in elevation which triggers and end of volume.");
-    tt->help = tdrpStrDup("If the elevation angle changes by this amount, and end of volume flag will be set.");
-    tt->val_offset = (char *) &elev_change_for_end_of_vol - &_start_;
-    tt->has_min = TRUE;
-    tt->min_val.d = 0.1;
-    tt->single_val.d = 1.5;
-    tt++;
-    
-    // Parameter 'min_beams_per_vol'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_beams_per_vol");
-    tt->descr = tdrpStrDup("Min number of beams per volume.");
-    tt->help = tdrpStrDup("Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume. Only used for set_end_of_vol_from_elev_angle.");
-    tt->val_offset = (char *) &min_beams_per_vol - &_start_;
-    tt->single_val.i = 360;
-    tt++;
-    
-    // Parameter 'set_end_of_vol_on_prf_change'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_end_of_vol_on_prf_change");
-    tt->descr = tdrpStrDup("Option to set the end-of-vol flag when the PRF changes.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_end_of_vol_on_prf_change - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'set_end_of_vol_on_pulse_width_change'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_end_of_vol_on_pulse_width_change");
-    tt->descr = tdrpStrDup("Option to set the end-of-vol flag when the pulse width changes.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_end_of_vol_on_pulse_width_change - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'output_fields'
     // ctype is '_output_field_t'
     
@@ -4960,8 +4886,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 23");
-    tt->comment_hdr = tdrpStrDup("SWEEP INFORMATION");
-    tt->comment_text = tdrpStrDup("Option to read volume and tilt numbers from sweep information in the incoming pulse data.");
+    tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
+    tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
     tt++;
     
     // Parameter 'use_sweep_info_from_time_series'
@@ -4973,16 +4899,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Option to read sweep info from time series data.");
     tt->help = tdrpStrDup("If not, we need to guess at the sweep information.");
     tt->val_offset = (char *) &use_sweep_info_from_time_series - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 24'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
-    tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
-    tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'delay_tilt_start_msg_during_ant_trans'
@@ -5031,6 +4948,101 @@ using namespace std;
     tt->help = tdrpStrDup("Used to trigger end of volume if sweep number gets too high. Only applies if set_end_of_sweep_when_antenna_changes_direction is true.");
     tt->val_offset = (char *) &max_sweeps_in_vol_for_antenna_direction_change - &_start_;
     tt->single_val.i = 32;
+    tt++;
+    
+    // Parameter 'Comment 24'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 24");
+    tt->comment_hdr = tdrpStrDup("VOLUME TRANSITIONS");
+    tt->comment_text = tdrpStrDup("We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.");
+    tt++;
+    
+    // Parameter 'use_volume_info_from_time_series'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_volume_info_from_time_series");
+    tt->descr = tdrpStrDup("Option to read volume info from time series data.");
+    tt->help = tdrpStrDup("If not, we need to deduce the end of volume conditions. The options that follow only apply if this parameter is set to false.");
+    tt->val_offset = (char *) &use_volume_info_from_time_series - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'set_end_of_vol_from_elev_angle'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_end_of_vol_from_elev_angle");
+    tt->descr = tdrpStrDup("Option to set the end of vol flag based on elevation angle.");
+    tt->help = tdrpStrDup("If true, the program will look for changes in antenna angle to compute the end of volume. Only applies if 'use_volume_info_from_time_series' is false.");
+    tt->val_offset = (char *) &set_end_of_vol_from_elev_angle - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'vol_starts_at_bottom'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("vol_starts_at_bottom");
+    tt->descr = tdrpStrDup("Flag to indicate that elevation angles increase in the volume.");
+    tt->help = tdrpStrDup("If the volume starts at the top, i.e. elevations decrease during the volume, set this to FALSE. Only applies if 'use_volume_info_from_time_series' is false.");
+    tt->val_offset = (char *) &vol_starts_at_bottom - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'elev_change_for_end_of_vol'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("elev_change_for_end_of_vol");
+    tt->descr = tdrpStrDup("Change in elevation which triggers and end of volume.");
+    tt->help = tdrpStrDup("If the elevation angle changes by this amount, and end of volume flag will be set. Only applies if 'use_volume_info_from_time_series' is false.");
+    tt->val_offset = (char *) &elev_change_for_end_of_vol - &_start_;
+    tt->has_min = TRUE;
+    tt->min_val.d = 0.1;
+    tt->single_val.d = 1.5;
+    tt++;
+    
+    // Parameter 'min_beams_per_vol'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_beams_per_vol");
+    tt->descr = tdrpStrDup("Min number of beams per volume.");
+    tt->help = tdrpStrDup("Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume. Only used for set_end_of_vol_from_elev_angle.");
+    tt->val_offset = (char *) &min_beams_per_vol - &_start_;
+    tt->single_val.i = 360;
+    tt++;
+    
+    // Parameter 'set_end_of_vol_on_prf_change'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_end_of_vol_on_prf_change");
+    tt->descr = tdrpStrDup("Option to set the end-of-vol flag when the PRF changes.");
+    tt->help = tdrpStrDup("Only applies if 'use_volume_info_from_time_series' is false.");
+    tt->val_offset = (char *) &set_end_of_vol_on_prf_change - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'set_end_of_vol_on_pulse_width_change'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_end_of_vol_on_pulse_width_change");
+    tt->descr = tdrpStrDup("Option to set the end-of-vol flag when the pulse width changes.");
+    tt->help = tdrpStrDup("Only applies if 'use_volume_info_from_time_series' is false.");
+    tt->val_offset = (char *) &set_end_of_vol_on_pulse_width_change - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 25'

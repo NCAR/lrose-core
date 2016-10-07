@@ -1102,18 +1102,6 @@ public:
 
   int beam_wait_msecs;
 
-  tdrp_bool_t set_end_of_vol_from_elev_angle;
-
-  tdrp_bool_t vol_starts_at_bottom;
-
-  double elev_change_for_end_of_vol;
-
-  int min_beams_per_vol;
-
-  tdrp_bool_t set_end_of_vol_on_prf_change;
-
-  tdrp_bool_t set_end_of_vol_on_pulse_width_change;
-
   output_field_t *_output_fields;
   int output_fields_n;
 
@@ -1126,6 +1114,20 @@ public:
   double required_delta_angle_for_antenna_direction_change;
 
   int max_sweeps_in_vol_for_antenna_direction_change;
+
+  tdrp_bool_t use_volume_info_from_time_series;
+
+  tdrp_bool_t set_end_of_vol_from_elev_angle;
+
+  tdrp_bool_t vol_starts_at_bottom;
+
+  double elev_change_for_end_of_vol;
+
+  int min_beams_per_vol;
+
+  tdrp_bool_t set_end_of_vol_on_prf_change;
+
+  tdrp_bool_t set_end_of_vol_on_pulse_width_change;
 
   transition_method_t transition_method;
 
@@ -1156,7 +1158,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[246];
+  mutable TDRPtable _table[247];
 
   const char *_className;
 
