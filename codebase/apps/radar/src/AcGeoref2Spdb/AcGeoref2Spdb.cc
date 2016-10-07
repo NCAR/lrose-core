@@ -686,7 +686,7 @@ void AcGeoref2Spdb::_handleRay(const RadxRay &ray,
     acGeoref.temp_c = cmigitsTemp;
     acGeoref.custom[0] = tailconeTemp;
   }
-
+  
   // optionally add in surface vel
   if (_params.compute_surface_vel_in_cfradial) {
     double surfaceVel = _computeSurfaceVel(ray);
@@ -1291,6 +1291,21 @@ void AcGeoref2Spdb::_getHcrTempsFromStatusXml(const string &statusXml,
 double AcGeoref2Spdb::_computeSurfaceVel(const RadxRay &ray)
   
 {
+  
+  RadxRay *tmpRay = new RadxRay(ray);
+  tmpRay->addClient();
+  double surfVel = -9999.0;
+  
+  if (_surfVel.processRay(tmpRay) == 0) {
+    if (_surfVel.velocityIsValid()) {
+      surfVel = _surfVel.getSurfaceVelocity();
+    }
+  }
+
+  RadxRay::deleteIfUnused(tmpRay);
+  return surfVel;
+
+#ifdef INITIAL_VERSION
 
   // init
   
@@ -1402,6 +1417,8 @@ double AcGeoref2Spdb::_computeSurfaceVel(const RadxRay &ray)
   }
 
   return surfaceVel;
+
+#endif
 
 }
 
@@ -1582,15 +1599,6 @@ void AcGeoref2Spdb::_printSurfVelStats(const RadxRay &ray, const ac_georef_t &ge
   
 {
 
-  RadxRay *tmpRay = new RadxRay(ray);
-  double surfVel = -9999.0;
-  
-  if (_surfVel.processRay(tmpRay) == 0) {
-    if (_surfVel.velocityIsValid()) {
-      surfVel = _surfVel.getSurfaceVelocity();
-    }
-  }
-  
   // accumulate for stats
   
   RadxTime printTime(georef.time_secs_utc, georef.time_nano_secs / 1.0e9);
@@ -1635,15 +1643,15 @@ void AcGeoref2Spdb::_printSurfVelStats(const RadxRay &ray, const ac_georef_t &ge
     double meanPitch = _velStatsSum.pitch_deg / _velStatsCount;
     // double meanTemp = _velStatsSum.temp_c / _velStatsCount;
     // double meanTailconeTemp = _velStatsSum.custom[0] / _velStatsCount;
-    // double meanSurfVel = _velStatsSum.custom[1] / _velStatsCount;
+    double meanSurfVel = _velStatsSum.custom[1] / _velStatsCount;
     double meanAz = _velStatsSum.custom[2] / _velStatsCount;
     double meanEl = _velStatsSum.custom[3] / _velStatsCount;
     double meanRotation = _velStatsSum.custom[4] / _velStatsCount;
     double meanTilt = _velStatsSum.custom[5] / _velStatsCount;
 
-    double tiltErrorDeg = -asin(surfVel / meanGndSpeed) * RAD_TO_DEG;
+    double tiltErrorDeg = -asin(meanSurfVel / meanGndSpeed) * RAD_TO_DEG;
     double meanCrossSpeed = meanGndSpeed * sin(meanDrift * DEG_TO_RAD);
-    double rotErrorDeg = asin(surfVel / meanCrossSpeed) * RAD_TO_DEG;
+    double rotErrorDeg = asin(meanSurfVel / meanCrossSpeed) * RAD_TO_DEG;
 
     // double estTilt = meanPitch + meanTilt + tiltErrorDeg;
     // double estRot = meanRotation + rotErrorDeg;
@@ -1666,7 +1674,7 @@ void AcGeoref2Spdb::_printSurfVelStats(const RadxRay &ray, const ac_georef_t &ge
     fprintf(stdout, "Rotation       (deg): %10.3f\n", meanRotation);
     fprintf(stdout, "Azimuth        (deg): %10.3f\n", meanAz);
     fprintf(stdout, "Elevation      (deg): %10.3f\n", meanEl);
-    fprintf(stdout, "Surf vel       (m/s): %10.3f\n", surfVel);
+    fprintf(stdout, "Surf vel       (m/s): %10.3f\n", meanSurfVel);
     fprintf(stdout, "velErrorAsTilt (deg): %10.3f\n", tiltErrorDeg);
     fprintf(stdout, "velErrorAsRot  (deg): %10.3f\n", rotErrorDeg);
     cout << "================================" << endl;
