@@ -1744,6 +1744,30 @@ string iwrf_scan_mode_to_str(int scan_mode)
 
 }
 
+string iwrf_scan_mode_to_short_str(int scan_mode)
+
+{
+  
+  switch (scan_mode) {
+    case IWRF_SCAN_MODE_SECTOR: return "SECTOR";
+    case IWRF_SCAN_MODE_COPLANE: return "COPLANE";
+    case IWRF_SCAN_MODE_RHI: return "RHI";
+    case IWRF_SCAN_MODE_VERTICAL_POINTING: return "VERT";
+    case IWRF_SCAN_MODE_IDLE: return "IDLE";
+    case IWRF_SCAN_MODE_AZ_SUR_360: return "AZ_SUR";
+    case IWRF_SCAN_MODE_EL_SUR_360: return "EL_SUR";
+    case IWRF_SCAN_MODE_SUNSCAN: return "SUN";
+    case IWRF_SCAN_MODE_POINTING: return "POINT";
+    case IWRF_SCAN_MODE_FOLLOW_VEHICLE: return "VEHICLE";
+    case IWRF_SCAN_MODE_EL_SURV: return "EL_SUR";
+    case IWRF_SCAN_MODE_MANPPI: return "MANPPI";
+    case IWRF_SCAN_MODE_MANRHI: return "MANRHI";
+    case IWRF_SCAN_MODE_SUNSCAN_RHI: return "SUN_RHI";
+    default: return "UNKNOWN";
+  }
+
+}
+
 // string representation of follow_mode
 
 string iwrf_follow_mode_to_str(int follow_mode)
