@@ -157,7 +157,7 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
   // check params
 
   int nGeomOptions = 0;
-  if (_params.convert_to_specified_gate_geometry) {
+  if (_params.convert_to_specified_output_gate_geometry) {
     nGeomOptions++;
   }
   if (_params.convert_to_predominant_gate_geometry) {
@@ -170,7 +170,7 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
     cerr << "ERROR: " << _progName << endl;
     cerr << "  Problem with TDRP parameters" << endl;
     cerr << "  You can only set one of the following to true:" << endl;
-    cerr << "    convert_to_specified_gate_geometry" << endl;
+    cerr << "    convert_to_specified_output_gate_geometry" << endl;
     cerr << "    convert_to_predominant_gate_geometry" << endl;
     cerr << "    convert_to_finest_gate_geometry" << endl;
     isOK = false;
@@ -729,10 +729,10 @@ int Dsr2Radx::_processVol()
 
   // convert to common geometry
 
-  if (_params.convert_to_specified_gate_geometry) {
-    _vol.remapRangeGeom(_params.specified_start_range_km,
-                        _params.specified_gate_spacing_km,
-                        _params.interpolate_to_specified_gate_geometry);
+  if (_params.convert_to_specified_output_gate_geometry) {
+    _vol.remapRangeGeom(_params.output_start_range_km,
+                        _params.output_gate_spacing_km,
+                        _params.interpolate_to_output_gate_geometry);
   } else if (_params.convert_to_predominant_gate_geometry) {
     _vol.remapToPredomGeom();
   } else if (_params.convert_to_finest_gate_geometry) {

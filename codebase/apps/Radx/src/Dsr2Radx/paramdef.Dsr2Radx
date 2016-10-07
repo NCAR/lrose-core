@@ -297,25 +297,25 @@ paramdef boolean {
   p_default = false;
   p_descr = "Option to convert all rays to a specified gate geometry.";
   p_help = "See 'specified_start_range_k', 'specified_gate_spacing_km' and 'interpolate_to_specified_gate_geometry'.";
-} convert_to_specified_gate_geometry;
+} convert_to_specified_output_gate_geometry;
 
 paramdef double {
   p_default = 0.1;
   p_descr = "Start range for specified remapping (km).";
   p_help = "See 'convert_to_specified_gate_geometry'.";
-} specified_start_range_km;
+} output_start_range_km;
 
 paramdef double {
   p_default = 0.2;
   p_descr = "Gate spacing for specified remapping (km).";
   p_help = "See 'convert_to_specified_gate_geometry'.";
-} specified_gate_spacing_km;
+} output_gate_spacing_km;
 
 paramdef boolean {
   p_default = false;
   p_descr = "Option to use interpolation when converting to the specified gate geometry.";
   p_help = "If false, nearest neighbor mapping is used. See 'convert_to_specified_gate_geometry'.";
-} interpolate_to_specified_gate_geometry;
+} interpolate_to_output_gate_geometry;
 
 commentdef {
   p_header = "COMPUTING THE SWEEP ANGLE HISTOGRAM";

@@ -489,13 +489,13 @@ public:
 
   tdrp_bool_t convert_to_finest_gate_geometry;
 
-  tdrp_bool_t convert_to_specified_gate_geometry;
+  tdrp_bool_t convert_to_specified_output_gate_geometry;
 
-  double specified_start_range_km;
+  double output_start_range_km;
 
-  double specified_gate_spacing_km;
+  double output_gate_spacing_km;
 
-  tdrp_bool_t interpolate_to_specified_gate_geometry;
+  tdrp_bool_t interpolate_to_output_gate_geometry;
 
   tdrp_bool_t find_sweep_numbers_using_histogram;
 
