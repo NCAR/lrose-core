@@ -947,7 +947,7 @@ using namespace std;
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("specified_min_elev");
     tt->descr = tdrpStrDup("Minimum valid elevation for rays (deg).");
-    tt->help = tdrpStrDup("If the elevation is below this value, the ray is ignored.");
+    tt->help = tdrpStrDup("If the elevation is below this value, the ray is ignored. Applies only if filter_using_elev is true.");
     tt->val_offset = (char *) &specified_min_elev - &_start_;
     tt->single_val.d = -10;
     tt++;
@@ -959,7 +959,7 @@ using namespace std;
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("specified_max_elev");
     tt->descr = tdrpStrDup("Maximum valid elevation for rays (deg).");
-    tt->help = tdrpStrDup("If the elevation is above this value, the ray is ignored.");
+    tt->help = tdrpStrDup("If the elevation is above this value, the ray is ignored. Applies only if filter_using_elev is true.");
     tt->val_offset = (char *) &specified_max_elev - &_start_;
     tt->single_val.d = 90;
     tt++;
@@ -983,7 +983,7 @@ using namespace std;
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("specified_min_sweep_number");
     tt->descr = tdrpStrDup("Minimum valid sweep number for rays.");
-    tt->help = tdrpStrDup("If the sweep number is below this value, the ray is ignored.");
+    tt->help = tdrpStrDup("If the sweep number is below this value, the ray is ignored. Applies only if filter_using_sweep_number is true.");
     tt->val_offset = (char *) &specified_min_sweep_number - &_start_;
     tt->single_val.i = 0;
     tt++;
@@ -995,9 +995,42 @@ using namespace std;
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("specified_max_sweep_number");
     tt->descr = tdrpStrDup("Maximum valid sweep number for rays.");
-    tt->help = tdrpStrDup("If the sweep number is above this value, the ray is ignored.");
+    tt->help = tdrpStrDup("If the sweep number is above this value, the ray is ignored. Applies only if filter_using_sweep_number is true.");
     tt->val_offset = (char *) &specified_max_sweep_number - &_start_;
     tt->single_val.i = 999;
+    tt++;
+    
+    // Parameter 'filter_using_sweep_number_list'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("filter_using_sweep_number_list");
+    tt->descr = tdrpStrDup("Option to filter data based on sweep numbers in the list.");
+    tt->help = tdrpStrDup("If TRUE, the program will use only ray data with a sweep number that is in the specified list.");
+    tt->val_offset = (char *) &filter_using_sweep_number_list - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'specified_sweep_number_list'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("specified_sweep_number_list");
+    tt->descr = tdrpStrDup("List of valid sweep numbers.");
+    tt->help = tdrpStrDup("If the sweep number is not in this list, the ray is ignored. Applies only if filter_using_sweep_number_list is true.");
+    tt->array_offset = (char *) &_specified_sweep_number_list - &_start_;
+    tt->array_n_offset = (char *) &specified_sweep_number_list_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(int);
+    tt->array_n = 3;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].i = 0;
+      tt->array_vals[1].i = 1;
+      tt->array_vals[2].i = 2;
     tt++;
     
     // Parameter 'Comment 6'

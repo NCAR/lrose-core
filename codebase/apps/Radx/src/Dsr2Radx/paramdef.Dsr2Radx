@@ -197,13 +197,13 @@ paramdef boolean {
 paramdef double {
   p_default = -10.0;
   p_descr = "Minimum valid elevation for rays (deg).";
-  p_help = "If the elevation is below this value, the ray is ignored.";
+  p_help = "If the elevation is below this value, the ray is ignored. Applies only if filter_using_elev is true.";
 } specified_min_elev;
 
 paramdef double {
   p_default = 90.0;
   p_descr = "Maximum valid elevation for rays (deg).";
-  p_help = "If the elevation is above this value, the ray is ignored.";
+  p_help = "If the elevation is above this value, the ray is ignored. Applies only if filter_using_elev is true.";
 } specified_max_elev;
 
 paramdef boolean {
@@ -215,14 +215,26 @@ paramdef boolean {
 paramdef int {
   p_default = 0;
   p_descr = "Minimum valid sweep number for rays.";
-  p_help = "If the sweep number is below this value, the ray is ignored.";
+  p_help = "If the sweep number is below this value, the ray is ignored. Applies only if filter_using_sweep_number is true.";
 } specified_min_sweep_number;
 
 paramdef int {
   p_default = 999;
   p_descr = "Maximum valid sweep number for rays.";
-  p_help = "If the sweep number is above this value, the ray is ignored.";
+  p_help = "If the sweep number is above this value, the ray is ignored. Applies only if filter_using_sweep_number is true.";
 } specified_max_sweep_number;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter data based on sweep numbers in the list.";
+  p_help = "If TRUE, the program will use only ray data with a sweep number that is in the specified list.";
+} filter_using_sweep_number_list;
+
+paramdef int {
+  p_default = { 0, 1, 2 };
+  p_descr = "List of valid sweep numbers.";
+  p_help = "If the sweep number is not in this list, the ray is ignored. Applies only if filter_using_sweep_number_list is true.";
+} specified_sweep_number_list[];
 
 commentdef {
   p_header = "FILTER DATA BASED ON ANTENNA or SCAN STATE";

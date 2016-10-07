@@ -468,6 +468,11 @@ public:
 
   int specified_max_sweep_number;
 
+  tdrp_bool_t filter_using_sweep_number_list;
+
+  int *_specified_sweep_number_list;
+  int specified_sweep_number_list_n;
+
   tdrp_bool_t filter_antenna_stationary;
 
   double min_angle_change_for_moving_antenna;
@@ -677,7 +682,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[158];
+  mutable TDRPtable _table[160];
 
   const char *_className;
 

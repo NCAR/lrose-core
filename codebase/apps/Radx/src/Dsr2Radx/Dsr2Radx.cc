@@ -175,6 +175,22 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
     cerr << "    convert_to_finest_gate_geometry" << endl;
     isOK = false;
   }
+
+  int nSweepFilterOptions = 0;
+  if (_params.filter_using_sweep_number) {
+    nSweepFilterOptions++;
+  }
+  if (_params.filter_using_sweep_number_list) {
+    nSweepFilterOptions++;
+  }
+  if (nSweepFilterOptions > 1) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  Problem with TDRP parameters" << endl;
+    cerr << "  You can only set one of the following to true:" << endl;
+    cerr << "    filter_using_sweep_number" << endl;
+    cerr << "    filter_using_sweep_number_list" << endl;
+    isOK = false;
+  }
   
   // set up output file object
 
@@ -1688,6 +1704,8 @@ bool Dsr2Radx::_acceptRay(const RadxRay *ray)
 
 {
 
+  // check gate geometry
+
   if (_params.filter_using_gate_spacing) {
     double diff = fabs(_params.specified_gate_spacing - ray->getGateSpacingKm());
     if (diff > _smallVal) {
@@ -1702,6 +1720,8 @@ bool Dsr2Radx::_acceptRay(const RadxRay *ray)
     }
   }
 
+  // check elevation
+
   if (_params.filter_using_elev) {
     double elev = ray->getElevationDeg();
     if (elev < _params.specified_min_elev ||
@@ -1710,10 +1730,25 @@ bool Dsr2Radx::_acceptRay(const RadxRay *ray)
     }
   }
   
+  // check sweep number
+
   if (_params.filter_using_sweep_number) {
     int sweepNum = ray->getSweepNumber();
     if (sweepNum < _params.specified_min_sweep_number ||
         sweepNum > _params.specified_max_sweep_number) {
+      return false;
+    }
+  }
+  
+  if (_params.filter_using_sweep_number_list) {
+    int sweepNum = ray->getSweepNumber();
+    bool inList = false;
+    for (int ii = 0; ii < _params.specified_sweep_number_list_n; ii++) {
+      if (sweepNum == _params._specified_sweep_number_list[ii]) {
+        inList = true;
+      }
+    }
+    if (!inList) {
       return false;
     }
   }
