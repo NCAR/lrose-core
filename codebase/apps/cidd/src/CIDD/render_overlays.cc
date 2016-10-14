@@ -61,7 +61,6 @@ void calc_local_over_coords()
     Geo_feat_polyline_t *poly;
     Geo_feat_icon_t    *ic;
 
-
     switch(gd.display_projection) {
     default : 
 
@@ -73,6 +72,7 @@ void calc_local_over_coords()
       min_lon = 360.0;
       max_lat = -180.0;
       min_lat = 180.0;
+
 
       // Check each corner of the projection + 2 center points, top, bottom
       // Lower left
@@ -128,7 +128,7 @@ void calc_local_over_coords()
 	  max_lat = 180.0;
       }
 
-	  if(gd.debug)  printf("----> Overlay lon,lat Clip box: %g, %g -  %g, %g/n",
+	  if(gd.debug)  printf("----> Overlay lon,lat Clip box: %g, %g to  %g, %g\n",
 			  min_lon,min_lat,max_lon,max_lat);
 
       for(i=0; i < gd.num_map_overlays; i++) {        /* For Each Overlay */
