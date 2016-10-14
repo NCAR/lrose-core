@@ -104,7 +104,7 @@ shift `expr $OPTIND - 1`
 # install package makefiles
 
 cd $runDir/codebase
-./make_bin/install_package_makefiles.py --package $package
+./make_bin/install_package_makefiles.py --package $package --codedir .
 
 # run autconf
 
