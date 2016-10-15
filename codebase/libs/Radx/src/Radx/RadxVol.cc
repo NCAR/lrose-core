@@ -5558,7 +5558,7 @@ int RadxVol::loadPseudoRhis()
     
   } // iray
 
-  // sort the RHIs
+  // sort the RHIs in elevation
 
   for (size_t ii = 0; ii < _pseudoRhis.size(); ii++) {
     _pseudoRhis[ii]->sortRaysByElevation();
