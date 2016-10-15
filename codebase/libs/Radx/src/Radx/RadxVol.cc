@@ -4030,9 +4030,9 @@ void RadxVol::sortSweepRaysByAzimuth()
       sortedRayPtrs.insert(rptr);
     }
     
-    // add sortedRays array in time-sorted order
+    // add sortedRays array in az-sorted order
     
-    for (set<RayPtr, SortByRayTime>::iterator ii = sortedRayPtrs.begin();
+    for (set<RayPtr, SortByRayAzimuth>::iterator ii = sortedRayPtrs.begin();
          ii != sortedRayPtrs.end(); ii++) {
       sortedRays.push_back(ii->ptr);
     }
@@ -5473,17 +5473,95 @@ int RadxVol::loadPseudoRhis()
     return -1;
   }
 
+  // trim surveillance to 360 deg sweeps
+
+  if (sweepMode != Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE) {
+    trimSurveillanceSweepsTo360Deg();
+  }
+
   // get the sweep with lowest elevation angle
   
-  const RadxSweep *lowestSweep = _sweeps[0];
-  double minElev = lowestSweep->getFixedAngleDeg();
+  size_t lowSweepIndex = 0;
+  const RadxSweep *lowSweep = _sweeps[0];
+  double minElev = lowSweep->getFixedAngleDeg();
   for (size_t isweep = 1; isweep < _sweeps.size(); isweep++) {
     const RadxSweep *sweep = _sweeps[isweep];
     double elev = sweep->getFixedAngleDeg();
     if (elev < minElev) {
-      lowestSweep = sweep;
+      lowSweep = sweep;
+      lowSweepIndex = isweep;
       minElev = elev;
     }
+  }
+  if (lowSweep->getNRays() < 10) {
+    if (_debug) {
+      cerr << "WARNING - RadxVol::loadPseudoRhis()" << endl;
+      cerr << "  Low sweep has too few rays, nRays: lowSweep->getNRays()" << endl;
+      cerr << "  Cannot determine pseudo RHIs" << endl;
+    }
+    return -1;
+  }
+
+  // compute mean delta azimuth for low sweep
+
+  size_t lowSweepStartRayIndex = lowSweep->getStartRayIndex();
+  size_t lowSweepEndRayIndex = lowSweep->getEndRayIndex();
+  double prevAz = _rays[lowSweepStartRayIndex]->getAzimuthDeg();
+  double sumDeltaAz = 0.0;
+  double count = 0.0;
+  for (size_t iray = lowSweepStartRayIndex + 1; iray <= lowSweepEndRayIndex; iray++) {
+    double az = _rays[iray]->getAzimuthDeg();
+    double deltaAz = fabs(az - prevAz);
+    if (deltaAz > 180.0) {
+      deltaAz = fabs(deltaAz - 360.0);
+    }
+    sumDeltaAz += deltaAz;
+    count++;
+  } // iray
+  double meanDeltaAz = sumDeltaAz / count;
+
+  // compute azimuth margin for finding RHI rays
+
+  double azMargin = meanDeltaAz * 2.5;
+  
+  // go through the low sweep, adding rays to pseudo RHIs
+  
+  for (size_t iray = lowSweepStartRayIndex + 1; iray <= lowSweepEndRayIndex; iray++) {
+    RadxRay *lowRay = _rays[iray];
+    PseudoRhi *rhi = new PseudoRhi;
+    rhi->addRay(lowRay);
+    _pseudoRhis.push_back(rhi);
+    for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+      if (isweep == lowSweepIndex) {
+        // low sweep, ignore
+        break;
+      }
+      RadxSweep *sweep = _sweeps[isweep];
+      RadxRay *bestRay = NULL;
+      double minDeltaAz = 9999.0;
+      for (size_t jray = sweep->getStartRayIndex(); 
+           jray <= sweep->getEndRayIndex(); jray++) {
+        RadxRay *ray = _rays[jray];
+        double deltaAz = fabs(lowRay->getAzimuthDeg() - ray->getAzimuthDeg());
+        if (deltaAz > 180.0) {
+          deltaAz = fabs(deltaAz - 360.0);
+        }
+        if (deltaAz < azMargin && deltaAz < minDeltaAz) {
+          bestRay = ray;
+          minDeltaAz = deltaAz;
+        }
+      } // jray
+      if (bestRay != NULL) {
+        rhi->addRay(bestRay);
+      }
+    } // isweep;
+    
+  } // iray
+
+  // sort the RHIs
+
+  for (size_t ii = 0; ii < _pseudoRhis.size(); ii++) {
+    _pseudoRhis[ii]->sortRaysByElevation();
   }
 
   return 0;

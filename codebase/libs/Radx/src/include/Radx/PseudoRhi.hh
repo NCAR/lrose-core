@@ -104,6 +104,12 @@ public:
   
   void computeMaxNGates() const;
   
+  /// Sort the rays by elevation angle, lowest to highest.
+  /// Also sets the az of lowest ray,
+  /// mean azimuth and max nGates.
+  
+  void sortRaysByElevation();
+
   //@}
 
   //////////////////////////////////////////////////////////////////
@@ -187,6 +193,18 @@ private:
   PseudoRhi & _copy(const PseudoRhi &rhs);
   void _clearRays();
   
+  /// sorting rays by time or azimuth
+
+  class RayPtr {
+  public:
+    RadxRay *ptr;
+    RayPtr(RadxRay *p) : ptr(p) {}
+  };
+  class SortByRayElevation {
+  public:
+    bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
+  };
+
 };
 
 #endif

@@ -37,6 +37,7 @@
 #include <Radx/PseudoRhi.hh>
 #include <Radx/RadxRay.hh>
 #include <cmath>
+#include <set>
 using namespace std;
 
 //////////////
@@ -296,5 +297,53 @@ void PseudoRhi::computeMeanAzimuthFromRays()
 
   _meanAzimuth = atan2(sumy, sumx) * Radx::RadToDeg;
 
+}
+
+//////////////////////////////////////////////////////////  
+/// Sort the rays by elevation angle, lowest to highest
+/// Also sets the az of lowest ray,
+/// mean azimuth and max nGates.
+
+void PseudoRhi::sortRaysByElevation()
+{
+
+  // sanity check
+  
+  if (_rays.size() < 2) {
+    return;
+  }
+
+  // create set with sorted ray pointers
+    
+  set<RayPtr, SortByRayElevation> sortedRayPtrs;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RayPtr rptr(_rays[iray]);
+    sortedRayPtrs.insert(rptr);
+  }
+    
+  // add sortedRays array in elev-sorted order
+  
+  vector<RadxRay *> sortedRays;
+  for (set<RayPtr, SortByRayElevation>::iterator ii = sortedRayPtrs.begin();
+       ii != sortedRayPtrs.end(); ii++) {
+    sortedRays.push_back(ii->ptr);
+  }
+    
+  // set _rays to sorted vector
+  
+  _rays = sortedRays;
+  _lowLevelAzimuth = _rays[0]->getAzimuthDeg();
+  computeMeanAzimuthFromRays();
+  computeMaxNGates();
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Compare rays by elevation
+
+bool PseudoRhi::SortByRayElevation::operator()
+  (const RayPtr &lhs, const RayPtr &rhs) const
+{
+  return lhs.ptr->getElevationDeg() < rhs.ptr->getElevationDeg();
 }
 
