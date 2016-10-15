@@ -91,15 +91,16 @@ public:
   //////////////////////////////////////////////////////////////////
   //@{
 
-  /// Compute the mean angle from the rays
+  /// Compute the mean azimuth angle from the rays
+  /// After calling, make call to getMeanAzimuth().
 
-  void computeMeanAngleFromRays();
+  void computeMeanAzimuthFromRays();
 
   /// compute the max number of gates
   /// Also determines if number of gates vary by ray.
   /// After this call, use the following to get the results:
-  ///   size_t getMaxNGates() - see RadxPacking.
-  ///   bool nGatesVary() - see RadxPacking
+  ///   size_t getMaxNGates()
+  ///   bool nGatesVary()
   
   void computeMaxNGates() const;
   
@@ -108,6 +109,15 @@ public:
   //////////////////////////////////////////////////////////////////
   /// \name get methods:
   //@{
+
+  /// get member values
+
+  double getLowLevelAzimuth() const { return _lowLevelAzimuth; }
+  double getMeanAzimuth() const { return _meanAzimuth; }
+
+  size_t getMaxNGates() const { return _maxNGates; }
+  bool getNGatesVary() const { return _nGatesVary; }
+
   /// Get vector of rays.
 
   inline const vector<RadxRay *> &getRays() const { return _rays; }

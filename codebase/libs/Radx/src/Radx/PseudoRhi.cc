@@ -135,6 +135,7 @@ void PseudoRhi::_clearRays()
   // delete rays
 
   for (size_t ii = 0; ii < _rays.size(); ii++) {
+    // delete if not used, reduce reference count
     RadxRay::deleteIfUnused(_rays[ii]);
   }
   _rays.clear();
@@ -155,7 +156,7 @@ void PseudoRhi::addRay(RadxRay *ray)
   
 {
   _rays.push_back(ray);
-  ray->addClient();  // take responsibility for ray memory
+  ray->addClient();  // add reference count for ray memory
 }
 
 ////////////////////////////////////////////////////////////////
@@ -269,9 +270,9 @@ void PseudoRhi::printWithFieldData(ostream &out) const
 }
   
 //////////////////////////////////////////////////////////  
-/// Compute the mean angle from the rays
+/// Compute the mean azimuth from the rays
 
-void PseudoRhi::computeMeanAngleFromRays()
+void PseudoRhi::computeMeanAzimuthFromRays()
 
 {
   
