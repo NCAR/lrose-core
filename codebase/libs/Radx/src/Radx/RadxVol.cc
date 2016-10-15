@@ -44,6 +44,7 @@
 #include <Radx/RadxRcalib.hh>
 #include <Radx/RadxAngleHist.hh>
 #include <Radx/RadxGeoref.hh>
+#include <Radx/PseudoRhi.hh>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -418,6 +419,7 @@ void RadxVol::clear()
   clearCfactors();
   clearFrequency();
   clearPacking();
+  clearPseudoRhis();
 
 }
 
@@ -5435,6 +5437,73 @@ void RadxVol::countGeorefsNotMissing(RadxGeoref &count) const
   }
 
 }
+
+///////////////////////////////////////////////////////////////
+/// Load up pseudo RHIs, by analyzing the rays in the volume.
+/// Only relevant for surveillance and sector ppi-type volumes.
+/// Returns 0 on success
+/// Returns -1 on error - i.e. if not ppi-type scan.
+/// After success, you can call getPseudoRhis().
+
+int RadxVol::loadPseudoRhis()
+
+{
+
+  // initialize
+
+  clearPseudoRhis();
+
+  // check scan type
+
+  Radx::SweepMode_t sweepMode = getPredomSweepModeFromAngles();
+  if (sweepMode != Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE &&
+      sweepMode != Radx::SWEEP_MODE_SECTOR) {
+    if (_debug) {
+      cerr << "WARNING - RadxVol::loadPseudoRhis()" << endl;
+      cerr << "  Sweep mode invalid: " << Radx::sweepModeToStr(sweepMode) << endl;
+    }
+    return -1;
+  }
+
+  if (_sweeps.size() < 1) {
+    if (_debug) {
+      cerr << "WARNING - RadxVol::loadPseudoRhis()" << endl;
+      cerr << "  No sweeps found" << endl;
+    }
+    return -1;
+  }
+
+  // get the sweep with lowest elevation angle
+  
+  const RadxSweep *lowestSweep = _sweeps[0];
+  double minElev = lowestSweep->getFixedAngleDeg();
+  for (size_t isweep = 1; isweep < _sweeps.size(); isweep++) {
+    const RadxSweep *sweep = _sweeps[isweep];
+    double elev = sweep->getFixedAngleDeg();
+    if (elev < minElev) {
+      lowestSweep = sweep;
+      minElev = elev;
+    }
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
+/// clear vector of pseudo RHIs
+
+void RadxVol::clearPseudoRhis()
+
+{
+
+  for (size_t ii = 0; ii < _pseudoRhis.size(); ii++) {
+    delete _pseudoRhis[ii];
+  }
+  _pseudoRhis.clear();
+
+}
+
 ////////////////////////////////////////////  
 /// Set up angle search, for a given sweep
 /// Return 0 on success, -1 on failure

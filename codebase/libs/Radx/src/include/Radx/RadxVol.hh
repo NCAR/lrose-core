@@ -49,6 +49,7 @@ class RadxRcalib;
 class RadxFile;
 class RadxCfactors;
 class RadxGeoref;
+class PseudoRhi;
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////
@@ -948,6 +949,23 @@ public:
   
   void countGeorefsNotMissing(RadxGeoref &count) const;
 
+  /// Load up pseudo RHIs, by analyzing the rays in the volume.
+  /// Only relevant for surveillance and sector ppi-type volumes.
+  /// Returns 0 on success.
+  /// Returns -1 on error - i.e. if not ppi-type scan.
+  /// After success, you can call getPseudoRhis(),
+  ///                and clearPseudoRhis().
+
+  int loadPseudoRhis();
+
+  /// get vector of pseudo RHIs, after calling loadPseudoRhis()
+
+  const vector<PseudoRhi *> &getPseudoRhis() const { return _pseudoRhis; }
+
+  /// clear vector of pseudo RHIs
+
+  void clearPseudoRhis();
+
   //@}
 
   //////////////////////////////////////////////////////////////////
@@ -1320,7 +1338,7 @@ public:
   bool checkIsSurveillance(size_t startRayIndex, size_t endRayIndex) const;
 
   /// check if rays are predominantly in SECTOR mode.
-  /// Returns true if surveillance, false otherwise
+  /// Returns true if sector, false otherwise
 
   bool checkIsSector() const;
 
@@ -1695,6 +1713,10 @@ private:
   // correction factors
 
   RadxCfactors *_cfactors;
+
+  // pseudo RHIs
+
+  vector<PseudoRhi *> _pseudoRhis;
 
   // searching for angle match between sweeps
 
