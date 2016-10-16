@@ -74,19 +74,19 @@ bool Filt2d::filter(const FiltInfoInput &inp, FiltInfoOutput &out) const
   switch (_f.filter)
   {
   case FiltAlgParams::ELLIP:
-    out.smooth2(_nr, _ntheta);
+    out.smooth(_nr, _ntheta);
     break;
   case FiltAlgParams::DILATE:
-    out.dilate2(_nr, _ntheta);
+    out.dilate(_nr, _ntheta);
     break;
   case FiltAlgParams::SDEV:
-    out.sdev2(_nr, _ntheta);
+    out.sdev(_nr, _ntheta);
     break;
   case FiltAlgParams::TEXTURE_X:
-    out.texture2X(_nr, _ntheta);
+    out.texture(_nr, _ntheta, true);
     break;
   case FiltAlgParams::TEXTURE_Y:
-    out.texture2Y(_nr, _ntheta);
+    out.texture(_nr, _ntheta, false);
     break;
   default:
     LOG(ERROR) << "wrong filter";

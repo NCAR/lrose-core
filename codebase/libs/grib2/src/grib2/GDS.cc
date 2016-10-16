@@ -27,11 +27,10 @@
 // Used wgrib by Wesley Ebisuzaki at NOAA as
 // reference (http://wesley.wwb.noaa.gov/wgrib.html)
 // 
-// $Id: GDS.cc,v 1.17 2016/06/21 21:03:52 jcraig Exp $
+// $Id: GDS.cc,v 1.18 2016/09/14 15:13:42 jcraig Exp $
 //
 //////////////////////////////////////////////////
-#include <euclid/PjgLc1Calc.hh>
-#include <euclid/PjgGrib.hh>
+#include <iostream>
 #include <grib2/GDS.hh>
 #include <grib2/LatLonProj.hh>
 #include <grib2/PolarStereoProj.hh>

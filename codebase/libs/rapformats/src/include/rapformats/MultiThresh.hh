@@ -92,6 +92,7 @@ public:
    * @param[in] verbose  True to print more stuff
    */
   void print(int leadTime, bool verbose=false) const;
+  std::string sprint(int leadTime, bool verbose) const;
 
   /**
    * @return true if input names match local state in the same order

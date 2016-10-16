@@ -244,6 +244,36 @@ void MultiThresh::print(int leadTime, bool verbose) const
 
 
 //------------------------------------------------------------------
+std::string MultiThresh::sprint(int leadTime, bool verbose) const
+{
+  char buf[10000];
+  sprintf(buf, "lt:%08d ", leadTime);
+  for (size_t i=0; i<_thresh.size(); ++i)
+  {
+    sprintf(buf+strlen(buf), "%s ", _thresh[i].sprint().c_str());
+  }
+  sprintf(buf+strlen(buf), "bias:%10.8lf ", _bias);
+  if (_coldstart)
+  {
+    sprintf(buf+strlen(buf), "Coldstart");
+  }
+  else
+  {
+    sprintf(buf+strlen(buf), "ObsTime:%s",
+	    DateTime::strn(_generatingTime).c_str());
+    if (verbose)
+    {
+      sprintf(buf+strlen(buf), " ObsValue:%.8lf", _obsValue);
+      sprintf(buf+strlen(buf), " FcstValue:%.8lf", _fcstValue);
+    }
+  }
+
+  string s = buf;
+  return s;
+}
+
+
+//------------------------------------------------------------------
 bool MultiThresh::namesOk(const std::vector<std::string> &names,
 			  bool printErrors) const
 {

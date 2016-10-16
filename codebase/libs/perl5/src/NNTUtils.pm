@@ -1105,6 +1105,19 @@ sub expandPath
         $outputDir = $rap_data_dir . '/' . $outputDir;
     }
 
+    #
+    # Replace a '.' or a './' with a fully qualified path
+    #
+    if ( $outputDir =~ /^\./ ) {
+      if ( $outputDir =~ /^\.\// ) {
+	substr( $outputDir, 0, 2 ) = getcwd();
+      }
+      else {
+	substr( $outputDir, 0, 1 ) = getcwd();
+      }
+    }
+    
+
     return( $outputDir );
 }
 
