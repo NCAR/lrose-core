@@ -453,12 +453,19 @@ paramdef boolean
   p_default = FALSE;
 } low_dbz_threshold_spdb_archive_rerun;
 
-paramdef boolean
+typedef enum {
+  EXACT, PARTITION, INTERPOLATE
+} lookup_t;
+
+paramdef enum lookup_t
 {
-  p_descr = "Assume partitioned lead times in dynamic low dbz threshold data";
-  p_help = "If TRUE, the data in the low_dbz_threshold_spdb_url can be assumed to be partitioned into lead times at a lower resolution than the local lead time resolution, where partitions are evenly spaced lead time ranges, that is to say dt = lt1-lt0 = lt2-lt1 = lt3-lt2,..., and the partitions are then [lt0, lt1), [lt1,lt2), [ltn,ltn+dt).  lt0,lt1,...ltn are the lead times found the low_dbz_threshold_spdb_url.  If FALSE, the lead times must match the data lead times exactly";
-  p_default = FALSE;
-} low_dbz_threshold_spdb_is_partitioned;
+  p_default = {EXACT};
+  p_descr = "low_dbz_threshold_url lookup mode";
+  p_help = 
+  "EXACT = thresholds URL must have exactly matching lead times as the data\n"
+  "PARTITION = the data in the low_dbz_threshold_spdb_url can be assumed to be partitioned into lead times at a lower resolution than the local lead time resolution, where partitions are evenly spaced lead time ranges, that is to say dt = lt1-lt0 = lt2-lt1 = lt3-lt2,..., and the partitions are then [lt0, lt1), [lt1,lt2), [ltn,ltn+dt).  lt0,lt1,...ltn are the lead times found the low_dbz_threshold_spdb_url.\n"
+  "INTERPOLATE = the data in the low_deb_threshold_spdb_url can be at a lower resolution than the lookup lead times, and then threshold values are then computed using linear interpolation";
+} low_dbz_threshold_spdb_lookup_mode;
 
 commentdef {
   p_header = "DATA OUTPUT.";

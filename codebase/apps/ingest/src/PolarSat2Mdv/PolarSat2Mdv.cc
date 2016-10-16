@@ -20,6 +20,9 @@ const float PolarSat2Mdv::EPSILON = .0000000001;
 const float PolarSat2Mdv::VERY_LARGE_NUM = 1000000000;
 const float PolarSat2Mdv::VERY_SMALL_NUM = -1000000000;
 const int   PolarSat2Mdv::NUM_SPARSE_PTS_CROSS_TRACK = 3;
+const int   PolarSat2Mdv::NUM_GRING_PTS = 9;
+const string PolarSat2Mdv::GRING_LAT_ATT_NAME = string("g_ring_latitude");
+const string PolarSat2Mdv::GRING_LON_ATT_NAME = string("g_ring_longitude");
 
 PolarSat2Mdv::PolarSat2Mdv(int argc, char **argv):
 _progName("PolarSat2Mdv"),
@@ -243,10 +246,13 @@ int PolarSat2Mdv::Run()
 	{ 
 	  if (_processData(inputPath))
 	  {
-	    cerr << "PolarSat2Mdv::Run(): Errors in processing file: " <<  inputPath << endl;
+	    cerr << "PolarSat2Mdv::Run(): Errors in processing file or satellite path does not overlap the domain of interest specified by the user: " <<  inputPath << endl;
+	     if( _haveDataInMdvArray)
+	       {
+		 _writeMdv();
+	       }
+	     timeBetweenFiles = 0;
 	  }
-	  
-	  timeBetweenFiles = 0;
 	}
 	else
 	{
@@ -262,18 +268,33 @@ int PolarSat2Mdv::Run()
 	    }
 	    _writeMdv();
 	  }
+          else
+          {
+             PMU_auto_register("Sleep");
+
+	     if(_params.debug == Params::DEBUG_NORM)
+	       {
+                 cerr << " PolarSat2Mdv::Run(): Waiting...Time between files: " << timeBetweenFiles << endl;
+	       }
+
+             sleep(_params.sleep_secs);
+     
+             timeBetweenFiles+=_params.sleep_secs;
+          }
 	}
       } // if have file or too much time has passed
     else if (_params.mode == Params::REALTIME)
     {
+       PMU_auto_register("Run");
+
       //
       // We do not have a file in realtime so track the time
       //
       sleep(_params.sleep_secs);
       
-      timeBetweenFiles+=10;
+      timeBetweenFiles+=_params.sleep_secs;
       
-      if(_params.debug == Params::DEBUG_VERBOSE)
+      if(_params.debug == Params::DEBUG_NORM)
       {
 	cerr << " PolarSat2Mdv::Run(): Waiting...Time between files: " << timeBetweenFiles << endl;
       }
@@ -285,6 +306,10 @@ int PolarSat2Mdv::Run()
       //
       if (inputPath == NULL)
       {
+	if( _haveDataInMdvArray)
+	  {
+	    _writeMdv();
+	  }
 	if(_params.debug)
 	{
 	  cerr << " PolarSat2Mdv::Run(): No more archive files found. Exiting\n";
@@ -440,6 +465,30 @@ int PolarSat2Mdv::_readNetcdf(char *filename)
   // Open the file. 
   // 
   NcFile ncFile(filename, NcFile::read);
+
+
+  if (_params.check_domain_before_process)
+  {
+    //
+    // Get g-ring data to determine swath boundaries and processing
+    //
+    NcGroupAtt latGRingAtt =  ncFile.getAtt(GRING_LAT_ATT_NAME);
+    
+    NcGroupAtt lonGRingAtt =  ncFile.getAtt(GRING_LON_ATT_NAME);
+    
+    float latGRingData [NUM_GRING_PTS];
+
+    float lonGRingData [NUM_GRING_PTS];
+    
+    latGRingAtt.getValues( latGRingData);
+    
+    lonGRingAtt.getValues( lonGRingData);
+    
+    if (!_satPathOverlapsDomain(latGRingData, lonGRingData))
+    {
+	return 1;
+    }
+  }
 
   //
   // Get start time
@@ -893,8 +942,7 @@ void PolarSat2Mdv::_startPtBearingDist2LatLon(float startLatDeg, float startLonD
   // 
   endLatDeg = 90.0 - c*180/MYPI;
 
-  // cos(b) = cos(a) * cos(c)  + sin(a) * sin(c) * cos(B)
-  // so  cos(B) = (cos(b) - cos(a) * cos(c))/ sin(a) * sin(c)
+ 
   float B;
 
   if ( sin (a)*sin(c) < EPSILON)
@@ -903,6 +951,10 @@ void PolarSat2Mdv::_startPtBearingDist2LatLon(float startLatDeg, float startLonD
   }
   else
   {
+    //
+    // cos(b) = cos(a) * cos(c)  + sin(a) * sin(c) * cos(B)
+    // so  cos(B) = (cos(b) - cos(a) * cos(c))/ sin(a) * sin(c)
+    //
     float cosB = (cos(b) -  cos(a)*cos(c))/(sin (a)*sin(c));
    
     //
@@ -1103,24 +1155,6 @@ void PolarSat2Mdv::_mapSatData2MdvArray()
 
     if ( _latitudes[i] != GEO_MISSING &&  _longitudes[i] != GEO_MISSING )
     {
-      // for debuggubg 
-      if ( _latitudes[i] < minLat)
-      {
-	minLat = _latitudes[i];
-      }
-      if ( _latitudes[i] > maxLat)
-      {
-	maxLat =  _latitudes[i];
-      }
-      if ( _longitudes[i] < minLon)
-      {
-	minLon = _longitudes[i];
-      }
-      if ( _longitudes[i] > maxLon)
-      {
-	maxLon =  _longitudes[i];
-      }
-
       //
       // Map sat data location to mdv array postion
       //
@@ -1129,7 +1163,7 @@ void PolarSat2Mdv::_mapSatData2MdvArray()
       {
 	if (_params.debug == Params::DEBUG_VERBOSE)
 	{
-	  cerr << "WARNING: PolarSat2Mdv::_createMdv:" <<  endl;
+	  cerr << "DEBUG: PolarSat2Mdv::_createMdv:" <<  endl;
 	  cerr << "Data point outside of output grid." << endl;
 	  cerr << "lat = " << _latitudes[i]
 	       << ", lon = " << _longitudes[i] << endl;
@@ -1143,17 +1177,6 @@ void PolarSat2Mdv::_mapSatData2MdvArray()
     //
     _mdvDataVals[mdv_data_index] = _satDataVals[i];
   }// end for
-
-  if (_params.debug)
-  {
-    cerr  << "PolarSat2Mdv::_createMdv: sat file minLat: " << minLat << endl;
-   
-    cerr  << "PolarSat2Mdv::_createMdv: sat file maxLat: " << maxLat << endl;
-    
-    cerr  << "PolarSat2Mdv::_createMdv: sat file minLon: " << minLon << endl;
-    
-    cerr  << "PolarSat2Mdv::_createMdv: sat file maxLon: " << maxLon << endl;
-  }
 
   _haveDataInMdvArray = true;
 }
@@ -1233,6 +1256,122 @@ void PolarSat2Mdv::_setFieldHdr()
   
   strncpy(_field_hdr.units,  _params.sat_data_units, MDV_UNITS_LEN); 
 }
- 
+   
+bool PolarSat2Mdv::_satPathOverlapsDomain(float *latGRingData, float *lonGRingData)
+{
+  // 
+  // initialize variables for determining min and max g-ring values for 
+  // latitude and longitude
+  //
+  float gRingMinLat = 90;
+  float gRingMaxLat = -90;
+  float gRingMinLon = 180;
+  float gRingMaxLon = -180;
+  float gRingMaxNegLon = -180;
   
+  if (_params.debug)
+  {
+    cerr << "PolarSat2Mdv::_satPathOverlapsDomain:G-ring lon and lat pairs " << endl;
+  }
 
+  //
+  // Determine max and min lats and lons of sat track
+  //
+  if (_params.debug)
+    {
+      cerr << "PolarSat2Mdv::_satPathOverlapsDomain: lat,lon pairs: " << endl;
+    }
+  for (int i = 0; i < 9; i++)
+  {
+    if ( lonGRingData[i] < gRingMinLon)
+      gRingMinLon = lonGRingData[i];
+    if(  lonGRingData[i] > gRingMaxLon)
+      gRingMaxLon = lonGRingData[i];
+    
+    if ( latGRingData[i] < gRingMinLat)
+      gRingMinLat = latGRingData[i];
+    if(  latGRingData[i] > gRingMaxLat)
+      gRingMaxLat = latGRingData[i];
+    
+    if (lonGRingData[i] < 0 && lonGRingData[i] >  gRingMaxNegLon)
+      gRingMaxNegLon = lonGRingData[i]; 
+
+    if (_params.debug)
+    {
+      cerr << latGRingData[i] <<"," << lonGRingData[i] << endl;
+    }
+  }
+  
+  //
+  // Find the max and min lon of the domain of interest specified by the user
+  //
+  double lowerLeftLat, lowerLeftLon, upperRightLat, upperRightLon;
+
+  _outputProj.getLL(lowerLeftLat, lowerLeftLon);
+
+  _outputProj.getUR(upperRightLat, upperRightLon);
+
+  if (_params.debug)
+  {
+    cerr << "PolarSat2Mdv::_satPathOverlapsDomain:domain of interest min and max lat lon pairs:" << endl;
+    cerr << lowerLeftLat << "," << lowerLeftLon << endl; 
+    cerr << upperRightLat << "," <<  upperRightLon << endl;
+  }
+  
+  //
+  // If the min latitude of domain of interest > max latitude of the satellite path
+  // or if the max latitude of the domain of interest < min latitude of the satellite path 
+  // then the regions of satellite path and domain of interest will not intersect.
+  //
+  if( gRingMaxLat < lowerLeftLat  || gRingMinLat > upperRightLat)
+  {
+    if (_params.debug)
+    {
+      cerr << "PolarSat2Mdv::_satPathOverlapsDomain: Latitudes of domain of interest and satellite "
+	   << "path do not overlap" << endl;
+    }
+    
+    return false;
+  }
+  else // check longitudes
+  {
+
+    float gRingLonDiff = gRingMaxLon - gRingMinLon;
+    if ( 0 < gRingLonDiff && gRingLonDiff < 180 )
+    {
+      if (  gRingMaxLon < lowerLeftLon ||  gRingMinLon > upperRightLon)
+      {	
+	if (_params.debug)
+	  {
+	    cerr << "PolarSat2Mdv::_satPathOverlapsDomain: Longitudes of domain of interest and satellite "
+		 << "path do not overlap" << endl;
+	  }
+	return false;
+      }
+      //
+      // If satellite is away from the poles and spans the -180 meridian
+      // sat path spans 180th meridian therefore satellite path longitudes are 
+      // the union of  gRingMaxLon<lon<180  
+      // and -180<lon<gRingMaxNegLon
+      //
+      else if( (-80 <  gRingMinLat && gRingMaxLat < 80) &&
+	       ((0 <  upperRightLon &&  upperRightLon <  gRingMaxLon) || 
+		(0 > lowerLeftLon &&  lowerLeftLon > gRingMaxNegLon)))
+	{
+	  if (_params.debug)
+	    {
+	      cerr << "PolarSat2Mdv::_satPathOverlapsDomain: Longitudes of domain of interest and satellite "
+		   << "path do not overlap" << endl;
+	    }
+	  return false;
+	}
+    }
+  }
+  
+  if(_params.debug)
+    {
+      cerr << "PolarSat2Mdv::_satPathOverlapsDomain: Domains overlap" << endl;
+    }
+  
+  return true;
+}

@@ -72,6 +72,12 @@ paramdef int {
   p_help = "The app checks for new data at this interval.";
 } time_between_checks_secs;
 
+paramdef int {
+  p_default = 180;
+  p_descr = "Search margin for finding the closest MDV data (secs)";
+  p_help = "Normally 0 will work, but it is good to widen the search a bit so as not to miss data with a non-standard time stamp.";
+} mdv_search_margin_secs;
+
 paramdef string {
   p_default = "mdv/input";
   p_descr = "Input URL for MDV data.";

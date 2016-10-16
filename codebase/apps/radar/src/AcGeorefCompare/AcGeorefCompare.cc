@@ -254,13 +254,13 @@ int AcGeorefCompare::_runSinglePeriodRealtime()
     // get the data
     
     if (_retrieveTimeBlock(_periodStartTime, _periodEndTime)) {
-      cerr << "ERROR - AcGeorefCompare::_runSinglePeriodArchive()" << endl;
+      cerr << "ERROR - AcGeorefCompare::_runSinglePeriodRealtime()" << endl;
       cerr << "  Cannot retieve data for period:" << endl;
       cerr << "    start time: " << DateTime::strm(_periodStartTime) << endl;
       cerr << "    end   time: " << DateTime::strm(_periodEndTime) << endl;
     } else {
       if (_produceSinglePeriodProduct()) {
-        cerr << "ERROR - AcGeorefCompare::_runSinglePeriodArchive()" << endl;
+        cerr << "ERROR - AcGeorefCompare::_runSinglePeriodRealtime()" << endl;
         cerr << "  Cannot produce single period product" << endl;
         cerr << "    start time: " << DateTime::strm(_periodStartTime) << endl;
         cerr << "    end   time: " << DateTime::strm(_periodEndTime) << endl;
@@ -797,6 +797,14 @@ void AcGeorefCompare::_printTimeSeriesEntry(const ac_georef_t &georefPrim,
 
   double lon = georefPrim.longitude;
   double lat = georefPrim.latitude;
+
+  double altKm = georefPrim.altitude_msl_km;
+  double roll = georefPrim.roll_deg;
+  double pitch = georefPrim.pitch_deg;
+  double heading = georefPrim.heading_deg;
+  double track = georefPrim.track_deg;
+  double drift = georefPrim.drift_angle_deg;
+
   double altPresM = georefPrim.altitude_pres_m;
   double altGpsM = georefPrim.altitude_msl_km * 1000.0;
   double flightTime = georefPrim.flight_time_secs;
@@ -809,10 +817,6 @@ void AcGeorefCompare::_printTimeSeriesEntry(const ac_georef_t &georefPrim,
   double aoa = georefPrim.angle_of_attack_deg;
   double ias = georefPrim.ind_airspeed_mps;
   double tas = georefPrim.true_airspeed_mps;
-  
-  double pitch = georefPrim.pitch_deg;
-  double roll = georefPrim.roll_deg;
-  double drift = georefPrim.drift_angle_deg;
   
   double accelNorm = georefPrim.accel_normal;
   double accelLat = georefPrim.accel_latitudinal;
@@ -829,9 +833,16 @@ void AcGeorefCompare::_printTimeSeriesEntry(const ac_georef_t &georefPrim,
   double custom8 = georefPrim.custom[8];
   double custom9 = georefPrim.custom[9];
 
+  double lonSec = georefSec.longitude;
+  double latSec = georefSec.latitude;
+
+  double altKmSec = georefSec.altitude_msl_km;
   double rollSec = georefSec.roll_deg;
   double pitchSec = georefSec.pitch_deg;
+  double headingSec = georefSec.heading_deg;
+  double trackSec = georefSec.track_deg;
   double driftSec = georefSec.drift_angle_deg;
+
   double vertVelSec = georefSec.vert_velocity_mps;
 
   double tempSec = georefSec.temp_c;
@@ -851,18 +862,19 @@ void AcGeorefCompare::_printTimeSeriesEntry(const ac_georef_t &georefPrim,
   double lonDiff = georefPrim.longitude - georefSec.longitude;
   double latDiff = georefPrim.latitude - georefSec.latitude;
   
-  double altDiff = georefPrim.altitude_msl_km - georefSec.altitude_msl_km;
+  double altKmDiff = altKm - altKmSec;
+  double rollDiff = georefPrim.roll_deg - georefSec.roll_deg;
+  double pitchDiff = georefPrim.pitch_deg - georefSec.pitch_deg;
+  double hdgDiff = georefPrim.heading_deg - georefSec.heading_deg;
+  double driftDiff = georefPrim.drift_angle_deg - georefSec.drift_angle_deg;
+  double trackDiff = georefPrim.track_deg - georefSec.track_deg;
+
   double ewVelDiff = georefPrim.ew_velocity_mps - georefSec.ew_velocity_mps;
   double nsVelDiff = georefPrim.ns_velocity_mps - georefSec.ns_velocity_mps;
   double vertVelDiff = georefPrim.vert_velocity_mps - georefSec.vert_velocity_mps;
   double ewWindDiff = georefPrim.ew_horiz_wind_mps - georefSec.ew_horiz_wind_mps;
   double nsWindDiff = georefPrim.ns_horiz_wind_mps - georefSec.ns_horiz_wind_mps;
   double vertWindDiff = georefPrim.vert_wind_mps - georefSec.vert_wind_mps;
-  double pitchDiff = georefPrim.pitch_deg - georefSec.pitch_deg;
-  double rollDiff = georefPrim.roll_deg - georefSec.roll_deg;
-  double hdgDiff = georefPrim.heading_deg - georefSec.heading_deg;
-  double driftDiff = georefPrim.drift_angle_deg - georefSec.drift_angle_deg;
-  double trackDiff = georefPrim.track_deg - georefSec.track_deg;
 
   if (hdgDiff < -180) {
     hdgDiff += 360.0;
@@ -918,6 +930,13 @@ void AcGeorefCompare::_printTimeSeriesEntry(const ac_georef_t &georefPrim,
 
   ostr += _formatVal(lon, "%15.9f");
   ostr += _formatVal(lat, "%15.9f");
+  ostr += _formatVal(altKm, "%12.6f");
+
+  ostr += _formatVal(pitch, "%12.6f");
+  ostr += _formatVal(roll, "%12.6f");
+  ostr += _formatVal(heading, "%12.6f");
+  ostr += _formatVal(track, "%12.6f");
+  ostr += _formatVal(drift, "%12.6f");
 
   ostr += _formatVal(altPresM, "%12.6f");
   ostr += _formatVal(altGpsM, "%12.6f");
@@ -934,10 +953,6 @@ void AcGeorefCompare::_printTimeSeriesEntry(const ac_georef_t &georefPrim,
   ostr += _formatVal(ias, "%12.6f");
   ostr += _formatVal(tas, "%12.6f");
 
-  ostr += _formatVal(pitch, "%12.6f");
-  ostr += _formatVal(roll, "%12.6f");
-  ostr += _formatVal(drift, "%12.6f");
-
   ostr += _formatVal(accelNorm, "%12.6f");
   ostr += _formatVal(accelLat, "%12.6f");
   ostr += _formatVal(accelLon, "%12.6f");
@@ -953,9 +968,16 @@ void AcGeorefCompare::_printTimeSeriesEntry(const ac_georef_t &georefPrim,
   ostr += _formatVal(custom8, "%12.6f");
   ostr += _formatVal(custom9, "%12.6f");
 
-  ostr += _formatVal(rollSec, "%12.6f");
+  ostr += _formatVal(lonSec, "%15.9f");
+  ostr += _formatVal(latSec, "%15.9f");
+  ostr += _formatVal(altKmSec, "%12.6f");
+
   ostr += _formatVal(pitchSec, "%12.6f");
+  ostr += _formatVal(rollSec, "%12.6f");
+  ostr += _formatVal(headingSec, "%12.6f");
+  ostr += _formatVal(trackSec, "%12.6f");
   ostr += _formatVal(driftSec, "%12.6f");
+
   ostr += _formatVal(vertVelSec, "%12.6f");
 
   ostr += _formatVal(tempSec, "%12.6f");
@@ -974,7 +996,13 @@ void AcGeorefCompare::_printTimeSeriesEntry(const ac_georef_t &georefPrim,
 
   ostr += _formatVal(lonDiff, "%12.6f");
   ostr += _formatVal(latDiff, "%12.6f");
-  ostr += _formatVal(altDiff, "%12.6f");
+  ostr += _formatVal(altKmDiff, "%12.6f");
+
+  ostr += _formatVal(pitchDiff, "%12.6f");
+  ostr += _formatVal(rollDiff, "%12.6f");
+  ostr += _formatVal(hdgDiff, "%12.6f");
+  ostr += _formatVal(trackDiff, "%12.6f");
+  ostr += _formatVal(driftDiff, "%12.6f");
 
   ostr += _formatVal(ewVelDiff, "%12.6f");
   ostr += _formatVal(nsVelDiff, "%12.6f");
@@ -982,12 +1010,6 @@ void AcGeorefCompare::_printTimeSeriesEntry(const ac_georef_t &georefPrim,
   ostr += _formatVal(ewWindDiff, "%12.6f");
   ostr += _formatVal(nsWindDiff, "%12.6f");
   ostr += _formatVal(vertWindDiff, "%12.6f");
-
-  ostr += _formatVal(pitchDiff, "%12.6f");
-  ostr += _formatVal(rollDiff, "%12.6f");
-  ostr += _formatVal(hdgDiff, "%12.6f");
-  ostr += _formatVal(driftDiff, "%12.6f");
-  ostr += _formatVal(trackDiff, "%12.6f");
 
   if (_lineCount == 0) {
     if (_params.print_commented_header) {
@@ -1046,11 +1068,20 @@ void AcGeorefCompare::_printCommentedHeader(FILE *out)
   
   fprintf(out, "lon%s", delim);
   fprintf(out, "lat%s", delim);
+
+  fprintf(out, "altKm%s", delim);
+  fprintf(out, "pitch%s", delim);
+  fprintf(out, "roll%s", delim);
+  fprintf(out, "heading%s", delim);
+  fprintf(out, "track%s", delim);
+  fprintf(out, "drift%s", delim);
+
   fprintf(out, "altPresM%s", delim);
   fprintf(out, "altGpsM%s", delim);
+
   fprintf(out, "flightTime%s", delim);
   fprintf(out, "weightKg%s", delim);
-
+  
   fprintf(out, "temp%s", delim);
   fprintf(out, "pressure%s", delim);
   fprintf(out, "rh%s", delim);
@@ -1059,10 +1090,6 @@ void AcGeorefCompare::_printCommentedHeader(FILE *out)
   fprintf(out, "aoa%s", delim);
   fprintf(out, "ias%s", delim);
   fprintf(out, "tas%s", delim);
-
-  fprintf(out, "pitch%s", delim);
-  fprintf(out, "roll%s", delim);
-  fprintf(out, "drift%s", delim);
 
   fprintf(out, "accelNorm%s", delim);
   fprintf(out, "accelLat%s", delim);
@@ -1079,9 +1106,16 @@ void AcGeorefCompare::_printCommentedHeader(FILE *out)
   fprintf(out, "custom8%s", delim);
   fprintf(out, "custom9%s", delim);
 
-  fprintf(out, "rollSec%s", delim);
+  fprintf(out, "lonSec%s", delim);
+  fprintf(out, "latSec%s", delim);
+  fprintf(out, "altKmSec%s", delim);
+
   fprintf(out, "pitchSec%s", delim);
+  fprintf(out, "rollSec%s", delim);
+  fprintf(out, "headingSec%s", delim);
+  fprintf(out, "trackSec%s", delim);
   fprintf(out, "driftSec%s", delim);
+
   fprintf(out, "vertVelSec%s", delim);
 
   fprintf(out, "tempSec%s", delim);
@@ -1098,7 +1132,13 @@ void AcGeorefCompare::_printCommentedHeader(FILE *out)
 
   fprintf(out, "lonDiff%s", delim);
   fprintf(out, "latDiff%s", delim);
-  fprintf(out, "altDiff%s", delim);
+  fprintf(out, "altKmDiff%s", delim);
+
+  fprintf(out, "pitchDiff%s", delim);
+  fprintf(out, "rollDiff%s", delim);
+  fprintf(out, "hdgDiff%s", delim);
+  fprintf(out, "trackDiff%s", delim);
+  fprintf(out, "driftDiff%s", delim);
 
   fprintf(out, "ewVelDiff%s", delim);
   fprintf(out, "nsVelDiff%s", delim);
@@ -1107,13 +1147,8 @@ void AcGeorefCompare::_printCommentedHeader(FILE *out)
   fprintf(out, "nsWindDiff%s", delim);
   fprintf(out, "vertWindDiff%s", delim);
 
-  fprintf(out, "pitchDiff%s", delim);
-  fprintf(out, "rollDiff%s", delim);
-  fprintf(out, "hdgDiff%s", delim);
-  fprintf(out, "driftDiff%s", delim);
-  fprintf(out, "trackDiff");
-
   fprintf(out, "\n");
+  fflush(out);
 
 }
   
@@ -1261,6 +1296,8 @@ void AcGeorefCompare::_printPeriodStats(const ac_georef_t &primary,
   fprintf(out,
           "=========================================="
           "=============================\n");
+
+  fflush(out);
 
 }
 

@@ -1247,21 +1247,35 @@ int SunCal::_performAnalysis(bool force)
 
   // compute sun centroid
 
+  _widthRatioElAzHc = MomentsSun::missing;
+  _widthRatioElAzVc = MomentsSun::missing;
+  _widthRatioElAzDiffHV = MomentsSun::missing;
+
   if (!_params.specify_fixed_target_location) {
     _computeSunCentroid(channelHc);
     if (_dualPol) {
       _computeSunCentroid(channelVc);
       _computeSunCentroid(channelMeanc);
+      if (_widthRatioElAzHc != MomentsSun::missing &&
+          _widthRatioElAzVc != MomentsSun::missing) {
+        _widthRatioElAzDiffHV = _widthRatioElAzHc - _widthRatioElAzVc;
+      }
     }
   }
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug) {
     cerr << "============================" << endl;
     if (_dualPol) {
       cerr << "_sunCentroidAzOffsetHc: " << _sunCentroidAzOffsetHc << endl;
       cerr << "_sunCentroidElOffsetHc: " << _sunCentroidElOffsetHc << endl;
       cerr << "_sunCentroidAzOffsetVc: " << _sunCentroidAzOffsetVc << endl;
       cerr << "_sunCentroidElOffsetVc: " << _sunCentroidElOffsetVc << endl;
+      cerr << "Stats for ellipses at -3dB: "
+           << "widthRatioElAzHc, widthRatioElAzVc, widthRatioElAzDiffHV: "
+           << _widthRatioElAzHc << ", "
+           << _widthRatioElAzVc << ", "
+           << _widthRatioElAzDiffHV << endl;
+
     }
     cerr << "_sunCentroidAzOffset: " << _sunCentroidAzOffset << endl;
     cerr << "_sunCentroidElOffset: " << _sunCentroidElOffset << endl;
@@ -1278,6 +1292,9 @@ int SunCal::_performAnalysis(bool force)
 
   if (_dualPol) {
     _computeSSUsingSolidAngle();
+    if (_params.compute_ellipse_hv_power_diffs) {
+      _computeEllipsePowerDiffsUsingSolidAngle();
+    }
   }
 
   // get the xpol ratio and temp data from SPDB as approptiate
@@ -1321,29 +1338,33 @@ int SunCal::_performAnalysis(bool force)
 
   PMU_auto_register("writing results");
 
-  if (_params.write_text_files) {
-    if (_writeGriddedTextFiles()) {
-      return -1;
-    }
-    if (_writeSummaryText()) {
-      return -1;
-    }
-  }
+  if (_validCentroid || !_params.only_write_for_valid_centroid) {
 
-  if (_params.append_to_global_results_file) {
-    _appendToGlobalResults();
-  }
-
-  if (_params.write_mdv_files) {
-    if (_writeToMdv()) {
-      return -1;
+    if (_params.write_text_files) {
+      if (_writeGriddedTextFiles()) {
+        return -1;
+      }
+      if (_writeSummaryText()) {
+        return -1;
+      }
     }
-  }
-
-  if (_params.write_summary_to_spdb) {
-    if (_writeSummaryToSpdb()) {
-      return -1;
+    
+    if (_params.append_to_global_results_file) {
+      _appendToGlobalResults();
     }
+    
+    if (_params.write_mdv_files) {
+      if (_writeToMdv()) {
+        return -1;
+      }
+    }
+    
+    if (_params.write_summary_to_spdb) {
+      if (_writeSummaryToSpdb()) {
+        return -1;
+      }
+    }
+
   }
 
   // initialize for next analysis
@@ -2596,6 +2617,8 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
   // if possible, fit parabola to elevation at solar peak
   // to refine the azimuth centroid
 
+  _validCentroid = true;
+  
   vector<double> azArray;
   vector<double> azDbm;
 
@@ -2618,17 +2641,23 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
     }
   }
   
-  double ccAz, bbAz, aaAz, errEstAz, rSqAz;
+  double widthAz3Db = MomentsSun::missing;
   if (_quadFit((int) azArray.size(),
                azArray, azDbm,
-               ccAz, bbAz, aaAz,
-               errEstAz, rSqAz) == 0) {
-    double rootTerm = bbAz * bbAz - 4.0 * aaAz * ccAz;
-    if (rSqAz > 0.9 && rootTerm >= 0) {
+               _ccAz, _bbAz, _aaAz,
+               _errEstAz, _rSqAz) == 0) {
+    double rootTerm = _bbAz * _bbAz - 4.0 * _aaAz * _ccAz;
+    double rootTerm2 = _bbAz * _bbAz - 2.0 * _aaAz * _ccAz;
+    if (_rSqAz > 0.9 && rootTerm >= 0) {
       // good fit, real roots, so override centroid
-      double root1 = (-bbAz - sqrt(rootTerm)) / (2.0 * aaAz); 
-      double root2 = (-bbAz + sqrt(rootTerm)) / (2.0 * aaAz);
+      double root1 = (-_bbAz - sqrt(rootTerm)) / (2.0 * _aaAz); 
+      double root2 = (-_bbAz + sqrt(rootTerm)) / (2.0 * _aaAz);
       sunCentroidAzOffset = (root1 + root2) / 2.0;
+      if (rootTerm2 >= 0) {
+        widthAz3Db = -(sqrt(rootTerm2) / _aaAz);
+      }
+    } else {
+      _validCentroid = false;
     }
   }
   
@@ -2659,40 +2688,62 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
     }
   }
   
-  double ccEl, bbEl, aaEl, errEstEl, rSqEl;
+  double widthEl3Db = MomentsSun::missing;
   if (_quadFit((int) elArray.size(),
                elArray, elDbm,
-               ccEl, bbEl, aaEl,
-               errEstEl, rSqEl) == 0) {
-    double rootTerm = bbEl * bbEl - 4.0 * aaEl * ccEl;
-    if (rSqEl > 0.9 && rootTerm >= 0) {
+               _ccEl, _bbEl, _aaEl,
+               _errEstEl, _rSqEl) == 0) {
+    double rootTerm = _bbEl * _bbEl - 4.0 * _aaEl * _ccEl;
+    double rootTerm2 = _bbEl * _bbEl - 2.0 * _aaEl * _ccEl;
+    if (_rSqEl > 0.9 && rootTerm >= 0) {
       // good fit, real roots, so override centroid
-      double root1 = (-bbEl - sqrt(rootTerm)) / (2.0 * aaEl); 
-      double root2 = (-bbEl + sqrt(rootTerm)) / (2.0 * aaEl);
+      double root1 = (-_bbEl - sqrt(rootTerm)) / (2.0 * _aaEl); 
+      double root2 = (-_bbEl + sqrt(rootTerm)) / (2.0 * _aaEl);
       sunCentroidElOffset = (root1 + root2) / 2.0;
+      if (rootTerm2 >= 0) {
+        widthEl3Db = -(sqrt(rootTerm2) / _aaEl);
+      }
+    } else {
+      _validCentroid = false;
     }
   }
 
-  _validCentroid = true;
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  double widthRatio = MomentsSun::missing;
+  if (widthEl3Db != MomentsSun::missing && widthAz3Db != MomentsSun::missing) {
+    widthRatio = widthEl3Db / widthAz3Db;
+  }
+  
+  if (_params.debug) {
     cerr << "Final estimates for solar centroid:" << endl;
     cerr << "  sunCentroidAzOffset: " << sunCentroidAzOffset << endl;
     cerr << "  sunCentroidElOffset: " << sunCentroidElOffset << endl;
+    cerr << "  parabolaWidthAz: " << widthAz3Db << endl;
+    cerr << "  parabolaWidthEl: " << widthEl3Db << endl;
+    cerr << "  parabolaWidthRatio: " << widthRatio << endl;
   }
 
-  double quadPowerDbm = (ccAz + ccEl) / 2.0 - 200.0;
+  double quadPowerDbm = (_ccAz + _ccEl) / 2.0 - 200.0;
 
   switch (channel) {
   case channelHc:
     _quadPowerDbmHc = quadPowerDbm;
     _sunCentroidAzOffsetHc = sunCentroidAzOffset;
     _sunCentroidElOffsetHc = sunCentroidElOffset;
+    _widthRatioElAzHc = widthRatio;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "===>>> CHANNEL HC widthEl3Db, widthAz3Db, ratio: "
+           << widthEl3Db << ", " << widthAz3Db << ", " << widthRatio << endl;
+    }
     break;
   case channelVc:
     _quadPowerDbmVc = quadPowerDbm;
     _sunCentroidAzOffsetVc = sunCentroidAzOffset;
     _sunCentroidElOffsetVc = sunCentroidElOffset;
+    _widthRatioElAzVc = widthRatio;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "===>>> CHANNEL VC widthEl3Db, widthAz3Db, ratio: "
+           << widthEl3Db << ", " << widthAz3Db << ", " << widthRatio << endl;
+    }
     break;
   default:
     _quadPowerDbm = quadPowerDbm;
@@ -2968,6 +3019,73 @@ void SunCal::_computeSS(const vector<MomentsSun> &selected,
     stats.SdevOfMean = stats.sdevSS / sqrt((double) nn);
   }
 
+}
+
+/////////////////////////////////////////////////
+// compute ellipse power differences using solid angle
+    
+void SunCal::_computeEllipsePowerDiffsUsingSolidAngle()
+  
+{
+
+  double maxAngle = _params.solid_angle_for_ellipse_power_diffs;
+  double searchRadius = maxAngle / 2.0;
+
+  // find points within the required solid angle
+  // for computing the ellipse power diffs
+  
+  vector<MomentsSun> selectedEl;
+  vector<MomentsSun> selectedAz;
+    
+  int elCentroidIndex = (int) ((_sunCentroidElOffset - _gridMinEl) / _gridDeltaEl + 0.5);
+  int azCentroidIndex = (int) ((_sunCentroidAzOffset - _gridMinAz) / _gridDeltaAz + 0.5);
+
+  double minEl = _sunCentroidElOffset - searchRadius;
+  double maxEl = _sunCentroidElOffset + searchRadius;
+  int minElIndex = (int) ((minEl - _gridMinEl) / _gridDeltaEl + 0.5);
+  int maxElIndex = (int) ((maxEl - _gridMinEl) / _gridDeltaEl + 0.5);
+  if (minElIndex < 0) {
+    minElIndex = 0;
+  }
+  if (maxElIndex > _gridNEl - 1) {
+    maxElIndex = _gridNEl - 1;
+  }
+  for (int iel = minElIndex; iel <= maxElIndex; iel++) {
+    MomentsSun *moments = _interpMoments[azCentroidIndex][iel];
+    selectedEl.push_back(*moments);
+  } // iel
+  
+  double minAz = _sunCentroidAzOffset - searchRadius;
+  double maxAz = _sunCentroidAzOffset + searchRadius;
+  int minAzIndex = (int) ((minAz - _gridMinAz) / _gridDeltaAz + 0.5);
+  int maxAzIndex = (int) ((maxAz - _gridMinAz) / _gridDeltaAz + 0.5);
+  if (minAzIndex < 0) {
+    minAzIndex = 0;
+  }
+  if (maxAzIndex > _gridNAz - 1) {
+    maxAzIndex = _gridNAz - 1;
+  }
+  for (int iaz = minAzIndex; iaz <= maxAzIndex; iaz++) {
+    MomentsSun *moments = _interpMoments[iaz][elCentroidIndex];
+    selectedAz.push_back(*moments);
+  } // iaz
+  
+  // compute ratios using the selected points
+  
+  Stats statsEl, statsAz;
+  _computeSS(selectedEl, maxAngle, statsEl);
+  _computeSS(selectedAz, maxAngle, statsAz);
+  
+  _zdrDiffElAz = -(statsEl.meanRatioDbmVcHc - statsAz.meanRatioDbmVcHc);
+
+  if (_params.debug) {
+    cerr << "==>> Computing ZDR diff along el and az, at sun axes" << endl;
+    cerr << "  el.meanRatioDbmVcHc,  az.meanRatioDbmVcHc, zdrDiffElAz: "
+         << statsEl.meanRatioDbmVcHc << ", "
+         << statsAz.meanRatioDbmVcHc << ", "
+         << _zdrDiffElAz << endl;
+  }
+  
 }
 
 /////////////////////////////////////////////////
@@ -3614,6 +3732,11 @@ void SunCal::_writeSummaryText(FILE *out)
   fprintf(out, "  Mc Sun centroid offset el (deg): %10.4f\n", _sunCentroidElOffset); 
   fprintf(out, "\n");
 
+  fprintf(out, "  widthRatioElAzHc               : %10.4f\n", _widthRatioElAzHc); 
+  fprintf(out, "  widthRatioElAzVc               : %10.4f\n", _widthRatioElAzVc); 
+  fprintf(out, "  widthRatioElAzDiffHV           : %10.4f\n", _widthRatioElAzDiffHV); 
+  fprintf(out, "  zdrDiffElAz                (dB): %10.4f\n", _zdrDiffElAz); 
+
   if (_params.compute_cross_polar_power_ratio) {
     fprintf(out, "========== cross polar ratio ==========\n");
     fprintf(out, "  nXpolPoints: %d\n", _nXpolPoints);
@@ -3709,12 +3832,6 @@ void SunCal::_writeSummaryText(FILE *out)
 int SunCal::_appendToGlobalResults()
 
 {
-
-  // check we have signal
-
-  if (!_validCentroid) {
-    return -1;
-  }
 
   // create the directory for the output file
 
@@ -3844,6 +3961,15 @@ int SunCal::_appendToGlobalResults()
     }
   }
 
+  // ellipse ratios
+
+  if (_params.compute_ellipse_hv_power_diffs) {
+    _appendFloatToFile(out, _widthRatioElAzHc, 16); 
+    _appendFloatToFile(out, _widthRatioElAzVc, 16); 
+    _appendFloatToFile(out, _widthRatioElAzDiffHV, 20); 
+    _appendFloatToFile(out, _zdrDiffElAz, 12); 
+  }
+
   fprintf(out, "\n");
   fclose(out);
 
@@ -3855,13 +3981,15 @@ int SunCal::_appendToGlobalResults()
 ///////////////////////////////////
 // write out floating point value
 
-void SunCal::_appendFloatToFile(FILE *out, double val)
+void SunCal::_appendFloatToFile(FILE *out, double val, int width /* = 10 */)
 
 {
+  char format[32];
+  sprintf(format, " %%%d.4f", width);
   if (isfinite(val)) {
-    fprintf(out, " %10.4f", val);
+    fprintf(out, format, val);
   } else {
-    fprintf(out, " %10.4f", -9999.0);
+    fprintf(out, format, -9999.0);
   }
 }
 
@@ -3947,6 +4075,15 @@ void SunCal::_writeGlobalHeader(FILE *out)
     fprintf(out, " %10s", "XmitPowerH");
     fprintf(out, " %10s", "XmitPowerV");
     fprintf(out, " %10s", "XmitHVDiff");
+  }
+
+  // ellipse ratios
+
+  if (_params.compute_ellipse_hv_power_diffs) {
+    fprintf(out, " %16s", "widthRatioElAzHc"); 
+    fprintf(out, " %16s", "widthRatioElAzVc"); 
+    fprintf(out, " %20s", "widthRatioElAzDiffHV"); 
+    fprintf(out, " %12s", "zdrDiffElAz"); 
   }
 
   fprintf(out, "\n");
@@ -4489,6 +4626,7 @@ int SunCal::_writeSummaryToSpdb()
   xml += TaXml::writeTime("CalTime", 1, (time_t) _calTime);
   xml += TaXml::writeInt("VolumeNumber", 1, _volNum);
 
+  xml += TaXml::writeBoolean("validCentroid", 1, _validCentroid);
   xml += TaXml::writeDouble("meanSunEl", 1, _meanSunEl);
   xml += TaXml::writeDouble("meanSunAz", 1, _meanSunAz);
 
@@ -4515,6 +4653,11 @@ int SunCal::_writeSummaryToSpdb()
   xml += TaXml::writeDouble("zdrCorr", 1, _zdrCorr);
   xml += TaXml::writeDouble("meanXmitPowerHDbm", 1, _meanXmitPowerHDbm);
   xml += TaXml::writeDouble("meanXmitPowerVDbm", 1, _meanXmitPowerVDbm);
+
+  xml += TaXml::writeDouble("widthRatioElAzHc", 1, _widthRatioElAzHc);
+  xml += TaXml::writeDouble("widthRatioElAzVc", 1, _widthRatioElAzVc);
+  xml += TaXml::writeDouble("widthRatioElAzDiffHV", 1, _widthRatioElAzDiffHV);
+  xml += TaXml::writeDouble("zdrDiffElAz", 1, _zdrDiffElAz);
 
   if (_params.read_xpol_ratio_from_spdb) {
     xml += TaXml::writeDouble("xpolRatioDbFromSpdb", 1, _xpolRatioDbFromSpdb);

@@ -951,6 +951,18 @@ using namespace std;
     tt->single_val.i = 10;
     tt++;
     
+    // Parameter 'check_domain_before_process'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_domain_before_process");
+    tt->descr = tdrpStrDup("Option to check the bounds of the satellite path g-ring data with the bounds of the user defined grip and test for overlap before processing");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &check_domain_before_process - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

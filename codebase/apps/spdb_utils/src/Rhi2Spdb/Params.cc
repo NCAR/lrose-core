@@ -616,6 +616,18 @@ using namespace std;
     tt->single_val.i = 5;
     tt++;
     
+    // Parameter 'mdv_search_margin_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("mdv_search_margin_secs");
+    tt->descr = tdrpStrDup("Search margin for finding the closest MDV data (secs)");
+    tt->help = tdrpStrDup("Normally 0 will work, but it is good to widen the search a bit so as not to miss data with a non-standard time stamp.");
+    tt->val_offset = (char *) &mdv_search_margin_secs - &_start_;
+    tt->single_val.i = 180;
+    tt++;
+    
     // Parameter 'input_url'
     // ctype is 'char*'
     

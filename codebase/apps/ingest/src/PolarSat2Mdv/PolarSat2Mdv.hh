@@ -18,7 +18,8 @@
 /**
  * @file PolarSat2Mdv.hh
  * @brief Converts satellite NetCDF file of known format to Mdv.This is not
- *         a general netCDF file converter.
+ *         a general netCDF file converter (assumptions about the file contents
+ *         are made)
  *        
  *        See http://www.nws.noaa.gov/om/notification/tin12-45viirsaaa.htm for 
  *        file details
@@ -79,7 +80,7 @@ public:
   ~PolarSat2Mdv();
 
   /**
-   * Run For each data trigger, process input data
+   * For each data trigger process input data
    */
   int Run();
 
@@ -135,6 +136,21 @@ private:
    * data of different cross track dimension.
    */
   const static int   NUM_SPARSE_PTS_CROSS_TRACK;
+
+  /**
+   * Number of G-ring points
+   */
+  const static int NUM_GRING_PTS;
+
+  /**
+   * Name of the global attribute specifying latitudes of g-ring points
+   */
+  const static string GRING_LAT_ATT_NAME;
+
+  /**
+   * Name of the global attribute specifying longitudes of g-ring points
+   */
+  const static string GRING_LON_ATT_NAME;
 
   /**
    * Used in debug messages
@@ -340,6 +356,16 @@ private:
    * Map satellite data to user specified projection
    */
   void _mapSatData2MdvArray();  
+
+  /**
+   * Using the g-ring latitude, longitude pairs, determine whether the path of 
+   * the satellite and user specified domain of interest overlap. Note that the 
+   * g-ring points specify the boundary of the satellite path
+   * @param[in] gRingLat  Array of g-ring latitudes of satellite path  
+   * @param[in] gRingLon  Array of g-ring longitudes of satellite path
+   */
+  bool _satPathOverlapsDomain( float *gRingLat, float *gRingLon);
+
 };
 
 #endif

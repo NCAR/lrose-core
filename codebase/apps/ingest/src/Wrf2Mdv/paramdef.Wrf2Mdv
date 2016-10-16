@@ -283,6 +283,7 @@ commentdef
     "W_FIELD, P_FIELD, PB_FIELD\n"
     "PHB_FIELD, PH_FIELD, DNW_FIELD,\n"
     "MUB_FIELD, MU_FIELD, REFL_10CM_FIELD\n"
+    "QNRAIN_FIELD, QNCLOUD_FIELD\n"
     "\t\n"
     "======= raw WRF 3-d fields - on dot (corner) points =====\n"
     "\t\n"
@@ -351,6 +352,7 @@ typedef enum
   W_FIELD, P_FIELD, PB_FIELD,
   PHB_FIELD, PH_FIELD, DNW_FIELD,
   MUB_FIELD, MU_FIELD, REFL_10CM_FIELD,
+  QNRAIN_FIELD, QNCLOUD_FIELD,
 
   // raw WRF 3-d fields, on cross (corner) points
 
@@ -478,6 +480,8 @@ paramdef struct afield_name_map_t
   { MUB_FIELD, "MUB", "base state dry air mass in column" },
   { MU_FIELD, "MU", "perturbation dry air mass in column" },
   { REFL_10CM_FIELD, "dbz", "Radar Reflectivity" },
+  { QNRAIN_FIELD, "nRain", "number concentration of rain" },
+  { QNCLOUD_FIELD, "nCloud", "number concentration of cloud" },
   { ITFADEF_FIELD, "ITFADEF", "Turbulence severity - ITFA"},
   { TK_FIELD, "TK", "Temperature"},
   { TC_FIELD, "Temp", "Temperature"},

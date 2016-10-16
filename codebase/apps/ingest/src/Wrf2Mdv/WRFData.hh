@@ -289,7 +289,21 @@ public:
     
     return _ice;
   }
-  
+
+    inline fl32 ***getNRain()
+  {
+    _loadNRain();
+    
+    return _nRain;
+  }
+
+  inline fl32 ***getNCloud()
+  {
+    _loadNCloud();
+    
+    return _nCloud;
+  }
+
   inline fl32 ***getSnow()
   {
     _loadSnowMixingRatio();
@@ -1151,6 +1165,8 @@ protected:
   fl32 ***_rnw;     // Rain Water Mixing Ratio Kg/Kg
   fl32 ***_ice;     // Cloud Ice Mixing Ratio Kg/Kg
   fl32 ***_snow;    // Falling Snow Mixing Ratio Kg/Kg
+  fl32 ***_nRain;     // number concentration of Rain (unitless)
+  fl32 ***_nCloud;    // number concentration of Cloud (unitless)
   fl32 ***_graupel; // Falling Greaupel Mixing Ratio Kg/Kg
   fl32 ***_ww;      // Vertical Velovity m/s
   fl32 ***_pp;      // Perturbation Presure (in Pa)
@@ -1360,6 +1376,8 @@ protected:
   void _loadSnowMixingRatio();	// _snow
   void _loadIceMixingRatio();	// _ice
   void _loadGraupelMixingRatio();   // _graupel
+  void _loadNRain();              // _nRain
+  void _loadNCloud();           // _nCloud
 
   void _loadPertPres();		// _pp
   void _loadBSP();		// _pb

@@ -121,13 +121,21 @@ void ThresholdManager::set_dynamically(const time_t &gt, int lt)
 		    _params.low_dbz_threshold_spdb_lookback_seconds,
 		    _params.low_dbz_threshold_spdb_lookahead_seconds))
   {
-    if (_params.low_dbz_threshold_spdb_is_partitioned)
+    switch (_params.low_dbz_threshold_spdb_lookup_mode)
     {
-      good = A.getPartitionedThreshold(lt, threshold);
-    }
-    else
-    {
+    case Params::EXACT:
       good = A.getThreshold(lt, threshold);
+      break;
+    case Params::PARTITION:
+      good = A.getPartitionedThreshold(lt, threshold);
+      break;
+    case Params::INTERPOLATE:
+      good = A.getLeadtimeInterpolatedThreshold(lt, threshold);
+      break;
+    default:
+      cerr << "Bad lookup mode " << _params.low_dbz_threshold_spdb_lookup_mode;
+      good = false;
+      break;
     }
     if (!good)
     {
@@ -167,13 +175,17 @@ void ThresholdManager::_set_hist_intervals(void)
 
   int nIntervals = (int)
 	      ((_threshold_high - _threshold_low) / (_hist_interval) + 1);
-  if (nIntervals > 100) {
-    cerr << "WARNING - _set_hist_intervals" << endl;
-    cerr << "  Too many dbz intervals: " << nIntervals << endl;
-    cerr << "  Requested dbz_hist_interval: "
+  if (nIntervals > 100)
+  {
+    double new_hist_interval = (_threshold_high - _threshold_low) / 100.0;
+    if (_params.debug >= Params::DEBUG_EXTRA)
+    {
+      cerr << "WARNING - _set_hist_intervals" << endl;
+      cerr << "  Too many dbz intervals: " << nIntervals << endl;
+      cerr << "  Requested dbz_hist_interval: "
          << _hist_interval << endl;
-    _hist_interval =
-      (_threshold_high - _threshold_low) / 100.0;
-    cerr << "  Resetting dbz_hist_interval to: " << _hist_interval << endl;
+      cerr << "  Resetting dbz_hist_interval to: " << new_hist_interval << endl;
+    }
+    _hist_interval = new_hist_interval;
   }
 }

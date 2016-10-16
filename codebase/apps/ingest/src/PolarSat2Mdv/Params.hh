@@ -419,6 +419,8 @@ public:
 
   int sleep_secs;
 
+  tdrp_bool_t check_domain_before_process;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -426,7 +428,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[28];
+  mutable TDRPtable _table[29];
 
   const char *_className;
 
