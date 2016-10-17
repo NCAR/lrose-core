@@ -382,9 +382,9 @@ void GausLatLonProj::getGaussianLats(fl32 **lats)
   // convergence criterion for iteration of cos latitude
   float xlim = 1.0E-7;
 
-  double cosc[nlat];
-  double sinc[nlat];
-  double colat[nlat];
+  double *cosc = new double[nlat];
+  double *sinc = new double[nlat];
+  double *colat = new double[nlat];
 
   // initialise arrays
   for(int i = 0; i < nlat; i++)
@@ -485,6 +485,10 @@ void GausLatLonProj::getGaussianLats(fl32 **lats)
       (*lats)[count-i] = tmp;
     }
   }
+
+  delete[] cosc;
+  delete[] sinc;
+  delete[] colat;
 
 }
 
