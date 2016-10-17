@@ -1298,7 +1298,7 @@ int DsDataFile::_get_range_fcast(const string & dataDir,
     
     // skip the leading "f_"
     
-    if (sscanf(genEnt->d_name, "f_%8d", &leadSecs) != 1) {
+    if (sscanf(genEnt->d_name, "f_%8u", &leadSecs) != 1) {
       if (_isVerbose) {
 	cerr << "    Could not get lead secs info "
 	     << "from file name." << endl;
@@ -1550,7 +1550,7 @@ int DsDataFile::_get_fcasts_in_range_gendir(const string & dataDir,
  
     // Skip files which are not of the form f_ssssssss.mdv
     
-    if (sscanf(genEnt->d_name, "f_%8d", &leadSecs) != 1) {
+    if (sscanf(genEnt->d_name, "f_%8u", &leadSecs) != 1) {
       if (_isVerbose) {
 	cerr << "    Could not get lead secs info "
 	     << "from file: " << genEnt->d_name << endl;
@@ -1900,7 +1900,7 @@ int DsDataFile::_get_latest_scan_leadtimes(const string &dayDirPath,
     
     // Skip files which are not of the form f_ssssssss.ext
     
-    if (sscanf(genEnt->d_name, "f_%8d", &leadSecs) != 1) {
+    if (sscanf(genEnt->d_name, "f_%8u", &leadSecs) != 1) {
       if (_isVerbose) {
 	cerr << "    Could not get lead secs info "
 	     << "from file: " << genEnt->d_name << endl;
