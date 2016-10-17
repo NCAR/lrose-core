@@ -36,7 +36,6 @@ using namespace std;
 #include <dirent.h>
 #include <cstdio>
 #include <errno.h>
-extern int errno;
 
 #include <string.h>
 using namespace std;
