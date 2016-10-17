@@ -960,9 +960,9 @@ int DtfMwave::new_kep_anl__()
   float c1,c2,c3,cmu,c13,c23,tke0,time,exp0,ce1,ce2,cu,a1,
       b1,b2,cc2,cc3,e1,e2,rfc,b;
 
-  float epn[klev];
-  float epr[klev];
-  float rfx[klev];
+  float *epn = new float[klev];
+  float *epr = new float[klev];
+  float *rfx = new float[klev];
 
   memset(epn,0, sizeof(float) * klev);
   memset(epr,0, sizeof(float) * klev);
@@ -1062,6 +1062,10 @@ int DtfMwave::new_kep_anl__()
       tke_kh__[0] = tke_sfc__;
     }
   
+  delete[] epn;
+  delete[] epr;
+  delete[] rfx;
+
   return 0;
   
 } /* new_kep_anl__ */
@@ -1285,9 +1289,9 @@ int DtfMwave::sn_gwriflux__(int *nxp, int *nyp)
     ubs, dzl, sum, 
     tau_tke__, dzl2;
   
-  float dsig[klev];
-  float rho[klev];
-  float tau[klev + 1];
+  float *dsig = new float[klev];
+  float *rho = new float[klev];
+  float *tau = new float[klev + 1];
 
   memset(dsig,0, sizeof(float) * klev);
   memset(rho,0, sizeof(float) * klev);
@@ -1433,6 +1437,10 @@ int DtfMwave::sn_gwriflux__(int *nxp, int *nyp)
       
     }
   
+  delete[] dsig;
+  delete[] rho;
+  delete[] tau;
+
   return 0;
   
 } /* sn_gwriflux__ */
@@ -1471,9 +1479,9 @@ int DtfMwave::we_gwriflux__(int *nxp, int *nyp)
     ubs, dzl, sum, tau_tke__, dzl2;
   
 
-  float dsig[klev];
-  float rho[klev];
-  float tau[klev +1];
+  float *dsig = new float[klev];
+  float *rho = new float[klev];
+  float *tau = new float[klev +1];
 
   memset(dsig,0, sizeof(float) * klev);
   memset(rho,0, sizeof(float) * klev);
@@ -1625,6 +1633,10 @@ int DtfMwave::we_gwriflux__(int *nxp, int *nyp)
 	}
     }
 
+  delete[] dsig;
+  delete[] rho;
+  delete[] tau;
+
   return 0;
   
 } /* we_gwriflux__ */
@@ -1774,16 +1786,16 @@ int DtfMwave::mwave_(float terasmWE, float terasmSN, float tercnvWE,
     tercnvwe = tercnvWE;
     tercnvsn = tercnvSN;
  
-    float dden[klev];
-    float relh[klev];
-    float hght[klev];
-    float ubar[klev];
-    float vbar[klev];
-    float tmpk[klev];
-    float bvsq[klev];
-    float a[klev];
-    float bvsqs[klev];
-    float thetaes[klev];
+    float *dden = new float[klev];
+    float *relh = new float[klev];
+    float *hght = new float[klev];
+    float *ubar = new float[klev];
+    float *vbar = new float[klev];
+    float *tmpk = new float[klev];
+    float *bvsq = new float[klev];
+    float *a = new float[klev];
+    float *bvsqs = new float[klev];
+    float *thetaes = new float[klev];
 
     /*     --- initializations */
     i__1 =  klev;
@@ -2316,7 +2328,17 @@ int DtfMwave::mwave_(float terasmWE, float terasmSN, float tercnvWE,
       
     }/* abvtop */
     
-  
+    delete[] dden;
+    delete[] relh;
+    delete[] hght;
+    delete[] ubar;
+    delete[] vbar;
+    delete[] tmpk;
+    delete[] bvsq;
+    delete[] a;
+    delete[] bvsqs;
+    delete[] thetaes;
+
     return 0;
 
 } /* mwave_ */
