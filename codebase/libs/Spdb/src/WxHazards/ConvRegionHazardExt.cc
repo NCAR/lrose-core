@@ -189,7 +189,7 @@ void ConvRegionHazardExt::print(FILE *stream) const
   fprintf(stream, "   speed = %f\n", _speed);
   fprintf(stream, "   direction = %f\n", _direction);
   fprintf(stream, "   centroid lat = %f lon = %f\n", _centroid_lat, _centroid_lon);
-  fprintf(stream, "   polygon: sequence number = %d\%dn", _simple_track_num, _complex_track_num);
+  fprintf(stream, "   polygon: sequence number = %d,%d\n", _simple_track_num, _complex_track_num);
   fprintf(stream, "            points:\n");
   
   for (WorldPoint2D *point = _polygon->getFirstPoint();
