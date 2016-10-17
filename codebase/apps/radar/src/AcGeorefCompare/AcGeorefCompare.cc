@@ -1351,10 +1351,10 @@ bool AcGeorefCompare::_valIsMissing(double val)
   if (val > AC_GEOREF_MISSING_VAL - 0.01 && val < AC_GEOREF_MISSING_VAL + 0.01) {
     return true;
   }
-  if (isnan(val)) {
+  if (std::isnan(val)) {
     return true;
   }
-  if (!isfinite(val)) {
+  if (!std::isfinite(val)) {
     return true;
   }
   if (val == 0.0) {
