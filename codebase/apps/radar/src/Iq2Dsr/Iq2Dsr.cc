@@ -81,6 +81,7 @@ Iq2Dsr::Iq2Dsr(int argc, char **argv)
   _inTransition = false;
   _prevAngle = 0.0;
   _motionDirn = 0.0;
+  _nRaysInSweep = 0;
 
   _volMinEl = 180.0;
   _volMaxEl = -180.0;
@@ -1042,6 +1043,7 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
   // no transitions in this mode, we change sweep number instanteously
 
   _antennaTransition = false;
+  _nRaysInSweep++;
   
   // compute angle change
 
@@ -1075,6 +1077,12 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
     _motionDirn = -1.0;
   }
   
+  // do nothing if number of rays is too small
+  
+  if (_nRaysInSweep < _params.min_rays_in_sweep_for_antenna_direction_change) {
+    return;
+  }
+  
   // do nothing if the direction of motion has not changed
   
   if (!dirnChange && !_endOfVolFlag) {
@@ -1089,7 +1097,8 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
   if (dirnChange && _params.debug) {
     cerr << "Dirn change, end of sweep num: " << _currentSweepNum << endl;
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "    el, az, angle, prevAngle, deltaAngle, _motionDirn, dirnChange: "
+      cerr << "    nrays, el, az, angle, prevAngle, deltaAngle, _motionDirn, dirnChange: "
+           << _nRaysInSweep << ", "
            << beam->getEl() << ", " << beam->getAz() << ", "
            << angle << ", "
            << _prevAngle << ", "
@@ -1098,6 +1107,7 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
            << dirnChange << endl;
     }
   }
+  _nRaysInSweep = 0;
 
   // increment sweep number
 

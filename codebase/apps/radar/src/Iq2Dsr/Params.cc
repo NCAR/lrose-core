@@ -4938,6 +4938,18 @@ using namespace std;
     tt->single_val.d = 0.25;
     tt++;
     
+    // Parameter 'min_rays_in_sweep_for_antenna_direction_change'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_rays_in_sweep_for_antenna_direction_change");
+    tt->descr = tdrpStrDup("Min number of rays in a sweep when finding end of sweep from dirn change.");
+    tt->help = tdrpStrDup("If the number of rays is less than this at the time of a direction change, a change in sweep number is not triggered.");
+    tt->val_offset = (char *) &min_rays_in_sweep_for_antenna_direction_change - &_start_;
+    tt->single_val.i = 45;
+    tt++;
+    
     // Parameter 'max_sweeps_in_vol_for_antenna_direction_change'
     // ctype is 'int'
     

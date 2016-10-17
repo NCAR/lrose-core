@@ -1113,6 +1113,8 @@ public:
 
   double required_delta_angle_for_antenna_direction_change;
 
+  int min_rays_in_sweep_for_antenna_direction_change;
+
   int max_sweeps_in_vol_for_antenna_direction_change;
 
   tdrp_bool_t use_volume_info_from_time_series;
@@ -1158,7 +1160,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[247];
+  mutable TDRPtable _table[248];
 
   const char *_className;
 

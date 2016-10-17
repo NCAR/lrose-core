@@ -1983,6 +1983,12 @@ paramdef double {
 } required_delta_angle_for_antenna_direction_change;
 
 paramdef int {
+  p_default = 45;
+  p_descr = "Min number of rays in a sweep when finding end of sweep from dirn change.";
+  p_help = "If the number of rays is less than this at the time of a direction change, a change in sweep number is not triggered.";
+} min_rays_in_sweep_for_antenna_direction_change;
+
+paramdef int {
   p_default = 32;
   p_descr = "Max number of sweeps in volume when finding end of sweep from dirn change.";
   p_help = "Used to trigger end of volume if sweep number gets too high. Only applies if set_end_of_sweep_when_antenna_changes_direction is true.";

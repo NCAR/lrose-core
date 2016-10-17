@@ -172,6 +172,7 @@ private:
   bool _inTransition;
   double _prevAngle;
   double _motionDirn;
+  int _nRaysInSweep;
   
   // end of vol decision
 
