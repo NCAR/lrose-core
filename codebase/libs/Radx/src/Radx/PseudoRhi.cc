@@ -105,7 +105,7 @@ PseudoRhi &PseudoRhi::_copy(const PseudoRhi &rhs)
   
   // rays
   
-  clearRays();
+  _clearRays();
   for (size_t ii = 0; ii < rhs._rays.size(); ii++) {
     RadxRay *ray = new RadxRay(*rhs._rays[ii]);
     addRay(ray);
