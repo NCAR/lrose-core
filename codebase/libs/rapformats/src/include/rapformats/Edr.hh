@@ -125,8 +125,8 @@ public:
     si32 computedAirspeed;           // Delta MDCRS specific data
     // Used 1 of the spare ints to store Delta's is767 flag (0 = FALSE, 1 = TRUE);
     si32 is767;
-    si32 spareInts[NUM_SPARE_INTS - 4];
-
+    // si32 spareInts[NUM_SPARE_INTS - 4]; - illegal 0-length array
+    
     char aircraftRegNum[TAILNUM_NAME_LEN];
     char encodedAircraftRegNum[TAILNUM_NAME_LEN];
     char flightNum[FLIGHTNUM_NAME_LEN];
