@@ -195,10 +195,10 @@ public:
 
   // static data members
 
-  static const short XLAT_16L[256];
+  static const unsigned short XLAT_16L[256];
   static const char TestRadial[];
   static const char A2NXlat[49];
-  static const char absolute[160];
+  static const unsigned char absolute[160];
   static const char Delta[256];
   static const char SixLevelEncode[64];
 

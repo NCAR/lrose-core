@@ -17,8 +17,6 @@
 /Map.h/1.4/Thu Aug 11 22:50:41 2016//
 /MapCont.cc/1.4/Thu Aug 11 22:50:41 2016//
 /MapCont.h/1.3/Thu Aug 11 22:50:41 2016//
-/Params.cc/1.4/Mon Aug 29 17:16:16 2016//
-/Params.hh/1.2/Mon Aug 29 17:16:16 2016//
 /RegionCont.cc/1.12/Thu Aug 11 22:50:41 2016//
 /RegionCont.h/1.7/Thu Aug 11 22:50:41 2016//
 /Regression.cc/1.10/Thu Aug 11 22:50:41 2016//
@@ -29,4 +27,6 @@
 /VerifyGrid.h/1.9/Thu Aug 11 22:50:41 2016//
 /VerifyGrid.test/1.19/Thu Aug 11 22:50:41 2016//
 /paramdef.VerifyGrid/1.20/Thu Aug 11 22:50:41 2016//
+/Params.cc/1.4/Tue Oct 18 00:35:28 2016//
+/Params.hh/1.2/Tue Oct 18 00:35:28 2016//
 D

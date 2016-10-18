@@ -339,6 +339,7 @@ codebase/apps/procmap/src/procmap_register/procmap_register
 codebase/apps/procmap/src/procmap_unregister/procmap_unregister
 codebase/apps/procmap/src/test_procmap/test_procmap
 
+codebase/apps/radar/src/AcGeorefCompare/AcGeorefCompare
 codebase/apps/radar/src/AcGeoref2Spdb/AcGeoref2Spdb
 codebase/apps/radar/src/AltCpCompute/AltCpCompute
 codebase/apps/radar/src/CP2Udp2Fmq/CP2Udp2Fmq

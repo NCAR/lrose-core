@@ -46,7 +46,7 @@ using namespace std;
 #define  PI  3.14159265358979323846  /* pi *//* copy from math.h */
 #define  DEG2RAD (PI/180.0)
 
-const short sRadl::XLAT_16L[256] = {
+const unsigned short sRadl::XLAT_16L[256] = {
   0xff,   0xff,   0xff,   0xff,   0xff,   0xff,   0xff,   0xff,
   0xff,   0xff,   0xff,   0xff,   0xff,   0xff,   0xff,   0xff,
   0xff,   0xff,   0xff,   0xff,   0xff,   0xff,   0xff,   0xff,
@@ -94,7 +94,7 @@ const char sRadl::A2NXlat[49] = {
   0x60,0x61,0x62,0x63,0x64,0x65,0x66
 };
 
-const char sRadl::absolute[160] = {
+const unsigned char sRadl::absolute[160] = {
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
   'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
   '\"','\'','*', ',', ':', ';', '=', '\?',
@@ -197,7 +197,7 @@ void sRadl::Clear()
 
 {
 
-  az = az1 = az2 = el = el1 = el1 = el2 = 0;
+  az = az1 = az2 = el = el1 = el2 = 0;
   startrng = rngres = data_size = undefinedrng = 0;
   mode = INDEX;
   if (data) memset(data, 0, buffsize);

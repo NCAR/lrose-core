@@ -447,7 +447,7 @@ void DataSet::_execScriptAllArgs(const LdataInfo &ldata,
 
   // set up execvp args - this is a null-terminated array of strings
   
-  const char *args[argVec.size() + 1];
+  const char **args = new const char*[argVec.size() + 1];
   for (size_t ii = 0; ii < argVec.size(); ii++) {
     args[ii] = argVec[ii].c_str();
   }
@@ -463,6 +463,7 @@ void DataSet::_execScriptAllArgs(const LdataInfo &ldata,
   // execute the command
   
   execvp(args[0], (char **) args);
+  delete[] args;
   
 }
 
@@ -615,7 +616,7 @@ void DataSet::_execScriptSpecifiedArgs(const LdataInfo &ldata,
 
   // set up execvp args - this is a null-terminated array of strings
   
-  const char *args[argVec.size() + 1];
+  const char **args = new const char*[argVec.size() + 1];
   for (size_t ii = 0; ii < argVec.size(); ii++) {
     args[ii] = argVec[ii].c_str();
   }
@@ -631,6 +632,7 @@ void DataSet::_execScriptSpecifiedArgs(const LdataInfo &ldata,
   // execute the command
   
   execvp(args[0], (char **) args);
+  delete[] args;
   
 }
 

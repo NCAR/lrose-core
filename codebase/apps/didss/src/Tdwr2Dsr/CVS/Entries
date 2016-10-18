@@ -2,8 +2,6 @@
 /Args.hh/1.3/Thu Aug 11 22:50:41 2016//
 /Main.cc/1.3/Thu Aug 11 22:50:41 2016//
 /Makefile/1.8/Thu Aug 11 22:50:41 2016//
-/Params.cc/1.12/Thu Aug 11 22:50:41 2016//
-/Params.hh/1.11/Thu Aug 11 22:50:41 2016//
 /TDWRadial.cc/1.9/Thu Aug 11 22:50:41 2016//
 /TDWRadial.hh/1.7/Thu Aug 11 22:50:41 2016//
 /TapeMsg.cc/1.5/Thu Aug 11 22:50:41 2016//
@@ -16,4 +14,6 @@
 /paramdef.Tdwr2Dsr/1.11/Thu Aug 11 22:50:41 2016//
 /tdwr.c/1.2/Thu Aug 11 22:50:41 2016//
 /tdwr.h/1.6/Thu Aug 11 22:50:41 2016//
+/Params.cc/1.12/Tue Oct 18 00:35:28 2016//
+/Params.hh/1.11/Tue Oct 18 00:35:28 2016//
 D
