@@ -1,0 +1,182 @@
+#! /bin/bash
+#
+# Building LROSE and required libraries
+# =====================================
+#
+# This use the NCAR make system.
+#
+# This script must be run from the 'lrose-core/codebase' subdirectory.
+#
+# $LROSE_CORE_DIR must be set to the git/lrose-core path.
+# 
+# The libraries and applications will be installed in:
+#
+#   $LROSE_INSTALL_DIR/include
+#   $LROSE_INSTALL_DIR/lib
+#   $LROSE_INSTALL_DIR/bin
+#
+# Depends on HDF5, NETCDF and UDUNITS
+# ----------------------------------
+#
+# Before running this, run the following:
+#  cd ~/git
+#  git clone https://github.com/NCAR/lrose-netcdf
+#  cd lrose-netcdf
+#  build_and_install_netcdf -x $LROSE_INSTALL_DIR
+
+################################################################################
+
+# set the path
+
+export PATH=${PATH}:.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin:/usr/lib64/qt4/bin:/usr/lib/qt4/bin
+
+# save starting location and script name
+
+runDir=`pwd`
+scriptName=$(basename $0)
+
+# defaults
+
+prefix=${LROSE_INSTALL_DIR}
+package=lrose
+debug=true
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Usage: $scriptName [options below]"
+    echo "  -h   :  produce this usage list"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set package"
+    echo "           default is 'lrose'"
+    echo "  -x ? :  set prefix"
+    echo "           default is '/usr/local/lrose'"
+    echo
+}
+
+# Parse command line options.
+while getopts hdp:x: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            package=$OPTARG
+            ;;
+        x)
+            prefix=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  package: $package"
+  echo "  prefix: $prefix"
+  echo "  runDir: $runDir"
+fi
+
+# Remove the switches we parsed above.
+shift `expr $OPTIND - 1`
+
+# set RPATH to be locatable relative to $ORIGIN, via LDFLAGS
+
+LROSE_INSTALL_DIR=${prefix}
+
+# check we are in the correct place - i.e. have codebase below us
+
+ls codebase 2>&1 1> /dev/null
+if [ $? -ne 0 ]
+then
+  echo "runDir incorrect: $runDir"
+  echo "  Should have codebase in this directory"
+  exit 1
+fi
+codebaseDir=${runDir}/codebase
+
+# Build lrose - libraries and binaries
+# ------------------------------------
+
+cd $codebaseDir
+./make_bin/install_package_makefiles.py --package $package
+
+cd $codebaseDir/libs/tdrp/src
+make -j 8 opt
+make install
+
+cd $codebaseDir/apps/tdrp/src/tdrp_gen
+make -j 8 opt
+make install
+
+cd $codebaseDir/libs
+make -j 8 install_include
+make -j 8 opt
+make -j 8 install
+
+cd $codebaseDir/apps
+make -j 8 opt
+make -j 8 install
+
+# Install perl lib modules
+#-------------------------
+
+if [ "$package" == "lrose" -o "$package" == "hcr" ]
+then
+  cd $codebaseDir
+  cd libs/perl5/src
+  mkdir -p ${prefix}/lib/perl5
+  /bin/cp *pm ${prefix}/lib/perl5
+fi
+
+# Install scripts
+#----------------
+
+if [ "$package" == "lrose" -o "$package" == "hcr" ]
+then
+
+  cd $codebaseDir/apps/procmap/src/scripts
+  ./install_scripts.lrose ${prefix}/bin
+
+  cd $codebaseDir/apps/scripts/src
+  ./install_scripts.lrose ${prefix}/bin
+
+fi
+
+# Checking the build
+# ------------------
+
+cd $runDir
+echo
+echo "============= Checking libs for $package ============="
+
+./codebase/make_bin/check_libs.py \
+  --listPath ./build/libs_check_list.${package} \
+  --libDir ${prefix}/lib \
+  --label $package --maxAge 3600
+
+echo "===================================================="
+
+echo
+echo "============= checking apps for $package ============="
+
+./codebase/make_bin/check_apps.py \
+  --listPath ./build/apps_check_list.${package} \
+  --appDir ${prefix}/bin \
+  --label $package --maxAge 3600
+
+echo "=================================================="
+
