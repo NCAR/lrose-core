@@ -29,7 +29,7 @@
 
 #include <math.h>
 
-double gamma(double xx)
+double gamma_(double xx)
 
 {
   double x,tmp,ser,gammln;
