@@ -37,6 +37,8 @@
 #ifndef BeamHeight_HH
 #define BeamHeight_HH
 
+#include <toolsa/TaArray2D.hh>
+
 using namespace std;
 
 class BeamHeight {
@@ -68,7 +70,6 @@ public:
   // Call getGndRangeKm() to get ground range after calling computeHtKm().
   
   double computeHtKm(double elDeg, double slantRangeKm) const;
-  
   double getGndRangeKm() const { return _gndRangeKm; }
 
   // compute elevation angle for given ground distance and ht.
@@ -78,13 +79,35 @@ public:
   // computeElevationdeg().
   
   double computeElevationDeg(double htKm, double gndRangeKm);
-  
   double getSlantRangeKm() const { return _slantRangeKm; }
+
+  ////////////////////////////////////////////////////////////////////////
+  // Initialize the height cache, if desired.
+  // Provide the size and geometric details of the cache.
+  //
+  // When the cache is in use, we store computed heights in the cache to
+  // improve performance. Subsequence requests for elev/range coords
+  // that have been used previously will return the previously computed
+  // heights.
+  // If using the cache, it is important to use a sufficiently fine
+  // granularity to provide results of the desired accuracy.
+
+  void initHtCache(size_t nElev, double startElevDeg, double deltaElevDeg,
+                   size_t nRange, double startRangeKm, double deltaRangeKm);
+
+  // initialize a previously allocated cache to missing
+  
+  void setHtCacheToMissing();
+  
+  // Free the cache, set cache pointer to NULL
+  
+  void freeHtCache();
 
 protected:
 private:
 
   static const double _earthRadiusKm;
+  static const double _htMissing;
   double _pseudoRadiusRatio;
   double _pseudoRadiusKm;
   double _pseudoRadiusKmSq;
@@ -92,9 +115,22 @@ private:
 
   double _instHtKm;
   double _htKm;
-  double _gndRangeKm;
-  double _slantRangeKm;
+  mutable double _gndRangeKm;
+  mutable double _slantRangeKm;
 
+  // cache
+
+  mutable TaArray2D<double> _htCache_;
+  mutable double **_htCache;
+  mutable double _htCacheStartElevDeg;
+  mutable double _htCacheDeltaElevDeg;
+  mutable double _htCacheNRange;
+  mutable double _htCacheStartRangeKm;
+  mutable double _htCacheDeltaRangeKm;
+
+  // private functions
+
+  double _computeHtKm(double elDeg, double slantRangeKm) const;
   double _fx(double elRad);
   double _ht(double elRad);
   
