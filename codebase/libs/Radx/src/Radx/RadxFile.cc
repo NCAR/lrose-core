@@ -57,6 +57,7 @@
 #include <Radx/UfRadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
+#include <Radx/RadxSweep.hh>
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
@@ -1308,7 +1309,7 @@ int RadxFile::aggregateFromPaths(const vector<string> &paths,
   // sanity check
 
   if (paths.size() < 1) {
-    _addErrStr("ERROR - GenericRadxFile::aggregateFromPaths");
+    _addErrStr("ERROR - RadxFile::aggregateFromPaths");
     _addErrStr("  No files specified");
     return -1;
   }
@@ -1316,16 +1317,27 @@ int RadxFile::aggregateFromPaths(const vector<string> &paths,
   // read from first path
   
   if (readFromPath(paths[0], vol)) {
-    _addErrStr("ERROR - GenericRadxFile::aggregateFromPaths");
+    _addErrStr("ERROR - RadxFile::aggregateFromPaths");
     return -1;
   }
   
-  // set sweep number to 0
+  // set sweep numbers
 
-  const vector<RadxRay *> &rays = vol.getRays();
-  for (size_t iray = 0; iray < rays.size(); iray++) {
-    rays[iray]->setSweepNumber(0);
-  } // iray
+  int sweepNum = 1;
+  {
+    const vector<RadxSweep *> &sweeps = vol.getSweeps();
+    const vector<RadxRay *> &rays = vol.getRays();
+    for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
+      RadxSweep *sweep = sweeps[isweep];
+      sweep->setSweepNumber(sweepNum);
+      for (size_t iray = sweep->getStartRayIndex();
+           iray <= sweep->getEndRayIndex(); iray++) {
+        RadxRay *ray = rays[iray];
+        ray->setSweepNumber(sweepNum);
+      } // iray
+      sweepNum++;
+    } // isweep
+  }
   
   // read remaining paths, aggregating as we go
   
@@ -1335,18 +1347,25 @@ int RadxFile::aggregateFromPaths(const vector<string> &paths,
     // read in latest
 
     if (readFromPath(paths[ipath], latestVol)) {
-      _addErrStr("ERROR - GenericRadxFile::aggregateFromPaths");
+      _addErrStr("ERROR - RadxFile::aggregateFromPaths");
       return -1;
     }
 
     // aggregate
     
-    const vector<RadxRay *> &latestRays = latestVol.getRays();
-    for (size_t iray = 0; iray < latestRays.size(); iray++) {
-      RadxRay *ray = latestRays[iray];
-      ray->setSweepNumber(ipath);
-      vol.addRay(ray);
-    } // iray
+    const vector<RadxSweep *> &sweeps = latestVol.getSweeps();
+    const vector<RadxRay *> &rays = latestVol.getRays();
+    for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
+      RadxSweep *sweep = sweeps[isweep];
+      sweep->setSweepNumber(sweepNum);
+      for (size_t iray = sweep->getStartRayIndex();
+           iray <= sweep->getEndRayIndex(); iray++) {
+        RadxRay *ray = rays[iray];
+        ray->setSweepNumber(sweepNum);
+        vol.addRay(ray);
+      } // iray
+      sweepNum++;
+    } // isweep
 
     latestVol.clear();
     
