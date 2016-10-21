@@ -521,6 +521,7 @@ codebase/apps/Radx/src/RadxPrint/RadxPrint
 codebase/apps/Radx/src/RadxQpe/RadxQpe
 codebase/apps/Radx/src/RadxQc/RadxQc
 codebase/apps/Radx/src/RadxSunMon/RadxSunMon
+codebase/apps/Radx/src/RadxBeamBlock/RadxBeamBlock
 
 codebase/apps/tdrp/src/TdrpTest/TdrpTest
 codebase/apps/tdrp/src/tdrp_gen/tdrp_gen
