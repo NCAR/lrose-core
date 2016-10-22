@@ -539,12 +539,6 @@ paramdef double {
   p_help = "If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.";
 } rlan_interest_threshold;
 
-paramdef double {
-  p_default = 0.51;
-  p_descr = "Threshold interest value for identifying noise-only gates.";
-  p_help = "If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.";
-} noise_interest_threshold;
-
 commentdef {
   p_header = "LOCATING SEA CLUTTER";
 }
@@ -759,7 +753,6 @@ typedef enum {
   SNR_DMODE_INTEREST_RLAN,
   SNR_SDEV_INTEREST_RLAN,
   RLAN_FLAG,
-  NOISE_FLAG,
 
   SNR_MEAN_SEACLUT,
   RHOHV_MEAN_SEACLUT,

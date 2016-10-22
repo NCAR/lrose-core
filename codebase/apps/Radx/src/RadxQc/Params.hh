@@ -117,15 +117,14 @@ public:
     SNR_DMODE_INTEREST_RLAN = 41,
     SNR_SDEV_INTEREST_RLAN = 42,
     RLAN_FLAG = 43,
-    NOISE_FLAG = 44,
-    SNR_MEAN_SEACLUT = 45,
-    RHOHV_MEAN_SEACLUT = 46,
-    PHIDP_SDEV_SEACLUT = 47,
-    ZDR_SDEV_SEACLUT = 48,
-    RHOHV_MEAN_INTEREST_SEACLUT = 49,
-    PHIDP_SDEV_INTEREST_SEACLUT = 50,
-    ZDR_SDEV_INTEREST_SEACLUT = 51,
-    SEACLUT_FLAG = 52
+    SNR_MEAN_SEACLUT = 44,
+    RHOHV_MEAN_SEACLUT = 45,
+    PHIDP_SDEV_SEACLUT = 46,
+    ZDR_SDEV_SEACLUT = 47,
+    RHOHV_MEAN_INTEREST_SEACLUT = 48,
+    PHIDP_SDEV_INTEREST_SEACLUT = 49,
+    ZDR_SDEV_INTEREST_SEACLUT = 50,
+    SEACLUT_FLAG = 51
   } output_field_id_t;
 
   typedef enum {
@@ -643,8 +642,6 @@ public:
 
   double rlan_interest_threshold;
 
-  double noise_interest_threshold;
-
   tdrp_bool_t locate_sea_clutter;
 
   double seaclut_min_snr_db;
@@ -739,7 +736,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[142];
+  mutable TDRPtable _table[141];
 
   const char *_className;
 

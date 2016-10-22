@@ -107,6 +107,7 @@ ComputeEngine::ComputeEngine(const Params &params,
     _intf.setInterestMapSnrDMode(_rlanImapSnrDMode,
                                  _params.rlan_snr_dmode_weight);
   }
+  _intf.setRlanInterestThreshold(_params.rlan_interest_threshold);
 
   if (_convertInterestParamsToVector
       ("rlan_snr_sdev",
@@ -295,7 +296,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *snrSdevInterestRlan = _intf.getSnrSdevInterest();
 
   const bool *rlanFlag = _intf.getRlanFlag();
-  const bool *noiseFlag = _intf.getNoiseFlag();
   
   const double *snrMeanSeaclut = _seaclut.getSnrMean();
   const double *rhohvMeanSeaclut = _seaclut.getRhohvMean();
@@ -462,13 +462,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
         case Params::RLAN_FLAG:
           if (rlanFlag[igate]) {
-            *datp = 1.0;
-          } else {
-            *datp = 0.0;
-          }
-          break;
-        case Params::NOISE_FLAG:
-          if (noiseFlag[igate]) {
             *datp = 1.0;
           } else {
             *datp = 0.0;
