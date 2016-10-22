@@ -5509,6 +5509,7 @@ int RadxVol::loadPseudoRhis()
   double prevAz = _rays[lowSweepStartRayIndex]->getAzimuthDeg();
   double sumDeltaAz = 0.0;
   double count = 0.0;
+
   for (size_t iray = lowSweepStartRayIndex + 1; iray <= lowSweepEndRayIndex; iray++) {
     double az = _rays[iray]->getAzimuthDeg();
     double deltaAz = fabs(az - prevAz);
@@ -5517,6 +5518,7 @@ int RadxVol::loadPseudoRhis()
     }
     sumDeltaAz += deltaAz;
     count++;
+    prevAz = az;
   } // iray
   double meanDeltaAz = sumDeltaAz / count;
 
@@ -5526,15 +5528,15 @@ int RadxVol::loadPseudoRhis()
   
   // go through the low sweep, adding rays to pseudo RHIs
   
-  for (size_t iray = lowSweepStartRayIndex + 1; iray <= lowSweepEndRayIndex; iray++) {
+  for (size_t iray = lowSweepStartRayIndex; iray <= lowSweepEndRayIndex; iray++) {
     RadxRay *lowRay = _rays[iray];
     PseudoRhi *rhi = new PseudoRhi;
     rhi->addRay(lowRay);
     _pseudoRhis.push_back(rhi);
     for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
       if (isweep == lowSweepIndex) {
-        // low sweep, ignore
-        break;
+        // low sweep, ignore this one, already added
+        continue;
       }
       RadxSweep *sweep = _sweeps[isweep];
       RadxRay *bestRay = NULL;
