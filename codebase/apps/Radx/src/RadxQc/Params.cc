@@ -1053,7 +1053,7 @@ using namespace std;
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("noise_dbz_at_100km");
     tt->descr = tdrpStrDup("The noise value, represented as dBZ at a range of 100km.");
-    tt->help = tdrpStrDup("This is used if SNR_available is set to FALSE. It is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.");
+    tt->help = tdrpStrDup("Used to fill in missing reflectivity data for the vertical gradient of reflectivity in identifying sea clutter and AP. Also used if SNR_available is set to FALSE. It is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.");
     tt->val_offset = (char *) &noise_dbz_at_100km - &_start_;
     tt->single_val.d = 0;
     tt++;

@@ -1478,13 +1478,20 @@ int RadxQc::_computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay)
     if (igateUpper > (int) upperRay.getNGates() - 1) {
       igateUpper = upperRay.getNGates() - 1;
     }
-
-    dbzGrad[igate] = Radx::missingFl32;
-    if (dbzUpper[igateUpper] != dbzUpperMissing && dbzLower[igate] != dbzLowerMissing) {
-      double dbzDiff = dbzUpper[igateUpper] - dbzLower[igate];
-      double htDiff = htUpper[igateUpper] - htLower[igate];
-      dbzGrad[igate] = dbzDiff / htDiff;
+    
+    double noiseDbz = _params.noise_dbz_at_100km + 20.0 * (log10(range) - 2.0);
+    double dbzU = dbzUpper[igateUpper];
+    if (dbzU == dbzUpperMissing) {
+      dbzU = noiseDbz;
     }
+    double dbzL = dbzLower[igate];
+    if (dbzL == dbzLowerMissing) {
+      dbzL = noiseDbz;
+    }
+
+    double dbzDiff = dbzU - dbzL;
+    double htDiff = htUpper[igateUpper] - htLower[igate];
+    dbzGrad[igate] = dbzDiff / htDiff;
 
   } // igate
 
