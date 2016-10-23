@@ -312,11 +312,18 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   const bool *seaclutFlag = _seaclut.getClutFlag();
 
-  RadxField *rayHtField = inputRay->getField("RayHtMsl");
+  RadxField *rayHtField = inputRay->getField(_params.ray_height_field_name);
   const Radx::fl32 *rayHt = NULL;
   if (rayHtField != NULL) {
     rayHtField->convertToFl32();
     rayHt = rayHtField->getDataFl32();
+  }
+  RadxField *dbzGradientField =
+    inputRay->getField(_params.dbz_vertical_gradient_field_name);
+  const Radx::fl32 *dbzGradient = NULL;
+  if (dbzGradientField != NULL) {
+    dbzGradientField->convertToFl32();
+    dbzGradient = dbzGradientField->getDataFl32();
   }
 
   // load up output data
@@ -502,6 +509,12 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
             *datp = rayHt[igate];
           }
           break;
+        case Params::DBZ_GRADIENT:
+          if (dbzGradient != NULL) {
+            *datp = dbzGradient[igate];
+          }
+          break;
+
         case Params::SNR_MEAN_SEACLUT:
           *datp = snrMeanSeaclut[igate];
           break;

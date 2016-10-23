@@ -118,14 +118,15 @@ public:
     SNR_SDEV_INTEREST_RLAN = 42,
     RLAN_FLAG = 43,
     RAY_HEIGHT = 44,
-    SNR_MEAN_SEACLUT = 45,
-    RHOHV_MEAN_SEACLUT = 46,
-    PHIDP_SDEV_SEACLUT = 47,
-    ZDR_SDEV_SEACLUT = 48,
-    RHOHV_MEAN_INTEREST_SEACLUT = 49,
-    PHIDP_SDEV_INTEREST_SEACLUT = 50,
-    ZDR_SDEV_INTEREST_SEACLUT = 51,
-    SEACLUT_FLAG = 52
+    DBZ_GRADIENT = 45,
+    SNR_MEAN_SEACLUT = 46,
+    RHOHV_MEAN_SEACLUT = 47,
+    PHIDP_SDEV_SEACLUT = 48,
+    ZDR_SDEV_SEACLUT = 49,
+    RHOHV_MEAN_INTEREST_SEACLUT = 50,
+    PHIDP_SDEV_INTEREST_SEACLUT = 51,
+    ZDR_SDEV_INTEREST_SEACLUT = 52,
+    SEACLUT_FLAG = 53
   } output_field_id_t;
 
   typedef enum {
@@ -698,6 +699,10 @@ public:
 
   int site_temp_search_margin_secs;
 
+  char* dbz_vertical_gradient_field_name;
+
+  char* ray_height_field_name;
+
   output_field_t *_output_fields;
   int output_fields_n;
 
@@ -741,7 +746,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[143];
+  mutable TDRPtable _table[145];
 
   const char *_className;
 

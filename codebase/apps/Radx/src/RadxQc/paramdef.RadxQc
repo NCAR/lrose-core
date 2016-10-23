@@ -715,6 +715,18 @@ commentdef {
   p_header = "SPECIFYING FIELD NAMES AND OUTPUT ENCODING";
 }
 
+paramdef string {
+  p_default = "DbzVertGradient";
+  p_descr = "Field name for computed vertical dbz gradient (dB/km).";
+  p_help = "For sea clutter identification, we need to compute the vertical gradient of reflectivity. This is the name of the gradient field, in dB/km.";
+} dbz_vertical_gradient_field_name;
+
+paramdef string {
+  p_default = "RayHtMsl";
+  p_descr = "Field name for computed ray height (km).";
+  p_help = "In order to compute the vertical gradient of reflectivity for sea clutter, we need to compute the beam height at each gate. This is the name of the ray height field, in km MSL.";
+} ray_height_field_name;
+
 typedef enum {
   
   SNR,
@@ -767,6 +779,8 @@ typedef enum {
   RLAN_FLAG,
 
   RAY_HEIGHT,
+  DBZ_GRADIENT,
+
   SNR_MEAN_SEACLUT,
   RHOHV_MEAN_SEACLUT,
   PHIDP_SDEV_SEACLUT,

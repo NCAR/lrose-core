@@ -2011,10 +2011,22 @@ output_fields = {
   ,
   {
     id = RAY_HEIGHT,
-    name = "RAY_HEIGHT",
+    name = "ray_ht",
     long_name = "height_of_ray_msl",
     standard_name = "height_above_reference_ellipsoid",
     units = "km",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBZ_GRADIENT,
+    name = "dbz_gradient",
+    long_name = "gradient_of_dbz_with_height",
+    standard_name = "gradient_of_dbz_with_height",
+    units = "dB/km",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
     scale = 0.01,

@@ -2210,6 +2210,30 @@ using namespace std;
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'dbz_vertical_gradient_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("dbz_vertical_gradient_field_name");
+    tt->descr = tdrpStrDup("Field name for computed vertical dbz gradient (dB/km).");
+    tt->help = tdrpStrDup("For sea clutter identification, we need to compute the vertical gradient of reflectivity. This is the name of the gradient field, in dB/km.");
+    tt->val_offset = (char *) &dbz_vertical_gradient_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DbzVertGradient");
+    tt++;
+    
+    // Parameter 'ray_height_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ray_height_field_name");
+    tt->descr = tdrpStrDup("Field name for computed ray height (km).");
+    tt->help = tdrpStrDup("In order to compute the vertical gradient of reflectivity for sea clutter, we need to compute the beam height at each gate. This is the name of the ray height field, in km MSL.");
+    tt->val_offset = (char *) &ray_height_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("RayHtMsl");
+    tt++;
+    
     // Parameter 'output_fields'
     // ctype is '_output_field_t'
     
@@ -2234,7 +2258,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 53;
+        tt->struct_def.fields[0].enum_def.nfields = 54;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -2327,22 +2351,24 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[43].val = RLAN_FLAG;
         tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("RAY_HEIGHT");
         tt->struct_def.fields[0].enum_def.fields[44].val = RAY_HEIGHT;
-        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("SNR_MEAN_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[45].val = SNR_MEAN_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("RHOHV_MEAN_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[46].val = RHOHV_MEAN_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("PHIDP_SDEV_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[47].val = PHIDP_SDEV_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("ZDR_SDEV_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[48].val = ZDR_SDEV_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("RHOHV_MEAN_INTEREST_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[49].val = RHOHV_MEAN_INTEREST_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("PHIDP_SDEV_INTEREST_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[50].val = PHIDP_SDEV_INTEREST_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("ZDR_SDEV_INTEREST_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[51].val = ZDR_SDEV_INTEREST_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("SEACLUT_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[52].val = SEACLUT_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("DBZ_GRADIENT");
+        tt->struct_def.fields[0].enum_def.fields[45].val = DBZ_GRADIENT;
+        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("SNR_MEAN_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[46].val = SNR_MEAN_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("RHOHV_MEAN_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[47].val = RHOHV_MEAN_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("PHIDP_SDEV_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[48].val = PHIDP_SDEV_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("ZDR_SDEV_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[49].val = ZDR_SDEV_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("RHOHV_MEAN_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[50].val = RHOHV_MEAN_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("PHIDP_SDEV_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[51].val = PHIDP_SDEV_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("ZDR_SDEV_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[52].val = ZDR_SDEV_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("SEACLUT_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[53].val = SEACLUT_FLAG;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
