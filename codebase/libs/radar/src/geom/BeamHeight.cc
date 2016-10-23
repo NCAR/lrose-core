@@ -248,7 +248,18 @@ void BeamHeight::initHtCache(size_t nElev,
 {
 
   if (nElev == 0 || nRange == 0) {
+    // zero size
     freeHtCache();
+    return;
+  }
+
+  if (nElev == _htCacheNElev &&
+      nRange == _htCacheNRange &&
+      fabs(startElevDeg - _htCacheStartElevDeg) < 0.001 &&
+      fabs(deltaElevDeg - _htCacheDeltaElevDeg) < 0.001 &&
+      fabs(startRangeKm - _htCacheStartRangeKm) < 0.001 &&
+      fabs(deltaRangeKm - _htCacheDeltaRangeKm) < 0.001) {
+    // no change
     return;
   }
 
@@ -263,6 +274,15 @@ void BeamHeight::initHtCache(size_t nElev,
       _htCache[ielev][irange] = _htMissing;
     } // irange
   } // ielev
+
+  // save details
+
+  _htCacheNElev = nElev;
+  _htCacheStartElevDeg = startElevDeg;
+  _htCacheDeltaElevDeg = deltaElevDeg;
+  _htCacheNRange = nRange;
+  _htCacheStartRangeKm = startRangeKm;
+  _htCacheDeltaRangeKm = deltaRangeKm;
 
 }
 
@@ -293,5 +313,11 @@ void BeamHeight::freeHtCache()
   }
   _htCache_.free();
   _htCache = NULL;
+  _htCacheNElev = 0;
+  _htCacheStartElevDeg = 0;
+  _htCacheDeltaElevDeg = 0;
+  _htCacheNRange = 0;
+  _htCacheStartRangeKm = 0;
+  _htCacheDeltaRangeKm = 0;
 }
 

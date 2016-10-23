@@ -119,12 +119,13 @@ private:
   mutable double _slantRangeKm;
 
   // cache
-
+  
   mutable TaArray2D<double> _htCache_;
   mutable double **_htCache;
+  mutable size_t _htCacheNElev;
   mutable double _htCacheStartElevDeg;
   mutable double _htCacheDeltaElevDeg;
-  mutable double _htCacheNRange;
+  mutable size_t _htCacheNRange;
   mutable double _htCacheStartRangeKm;
   mutable double _htCacheDeltaRangeKm;
 
