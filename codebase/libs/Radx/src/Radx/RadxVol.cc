@@ -3735,6 +3735,55 @@ double RadxVol::_computeSweepFractionInTransition(int sweepIndex)
 
 }
 
+///////////////////////////////////////////
+// compute the geometry limits from rays
+
+void RadxVol::computeGeomLimitsFromRays(double &minElev,
+                                        double &maxElev,
+                                        double &minRange,
+                                        double &maxRange)
+  
+{
+
+  if (_rays.size() < 1) {
+    return;
+  }
+
+  const RadxRay &ray0 = *_rays[0];
+
+  minElev = ray0.getElevationDeg();
+  maxElev = ray0.getElevationDeg();
+  minRange = ray0.getStartRangeKm();
+  maxRange = minRange + ray0.getNGates() * ray0.getGateSpacingKm();
+
+  // loop through rays, accumulating geometry information
+  
+  for (size_t iray = 1; iray < _rays.size(); iray++) {
+
+    const RadxRay &ray = *_rays[iray];
+
+    double elev = ray.getElevationDeg();
+    double startRange = ray.getStartRangeKm();
+    double gateSpacing = ray.getGateSpacingKm();
+    double endRange = startRange + ray.getNGates() * gateSpacing;
+    
+    if (elev < minElev) {
+      minElev = elev;
+    }
+    if (elev > maxElev) {
+      maxElev = elev;
+    }
+    if (startRange < minRange) {
+      minRange = startRange;
+    }
+    if (endRange > maxRange) {
+      maxRange = endRange;
+    }
+    
+  } // iray
+
+}
+
 ///////////////////////////////////////////////////////////////
 /// Estimate nyquist per sweep from velocity field
 ///
