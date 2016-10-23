@@ -49,6 +49,7 @@
 #include <deque>
 #include <radar/NoiseLocator.hh>
 #include <radar/TempProfile.hh>
+#include <radar/BeamHeight.hh>
 #include <Radx/RadxArray.hh>
 class RadxVol;
 class RadxFile;
@@ -107,6 +108,7 @@ private:
 
   double _radarHtKm;
   double _wavelengthM;
+  BeamHeight _beamHt;
 
   // temperature profile from sounding, if appropriate
 
@@ -146,6 +148,9 @@ private:
   int _retrieveSiteTempFromSpdb(const RadxVol &vol,
                                 double &tempC,
                                 time_t &timeForTemp);
+
+  int _prepareForDbzGradient(RadxVol &vol);
+  int _addHeightField(RadxVol &vol);
 
 };
 

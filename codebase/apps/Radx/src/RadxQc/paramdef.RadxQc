@@ -549,6 +549,18 @@ paramdef boolean {
   p_help = "You need to activate this step if you want sea clutter to show up in the PID classification.";
 } locate_sea_clutter;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the standard 4/3 earth radius model for refraction.";
+  p_help = "If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.";
+} override_standard_pseudo_earth_radius;
+
+paramdef double {
+  p_default = 1.33333333;
+  p_descr = "Ratio for computing the pseudo earth radius for beam height computations.";
+  p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
+} pseudo_earth_radius_ratio;
+
 commentdef {
   p_header = "INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION";
   p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.";
@@ -754,6 +766,7 @@ typedef enum {
   SNR_SDEV_INTEREST_RLAN,
   RLAN_FLAG,
 
+  RAY_HEIGHT,
   SNR_MEAN_SEACLUT,
   RHOHV_MEAN_SEACLUT,
   PHIDP_SDEV_SEACLUT,

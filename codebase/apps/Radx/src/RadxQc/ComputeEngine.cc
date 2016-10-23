@@ -122,43 +122,47 @@ ComputeEngine::ComputeEngine(const Params &params,
 
   // set up interest maps for sea clutter
 
-  if (_convertInterestParamsToVector
-      ("seaclut_rhohv_mean",
-       _params._seaclut_rhohv_mean_interest_map,
-       _params.seaclut_rhohv_mean_interest_map_n,
-       _seaclutImapRhohvMean)) {
-    OK = false;
-  } else {
-    _seaclut.setInterestMapRhohvMean(_seaclutImapRhohvMean,
-                                     _params.seaclut_rhohv_mean_weight);
-  }
-  
-  if (_convertInterestParamsToVector
-      ("seaclut_phidp_sdev",
-       _params._seaclut_phidp_sdev_interest_map,
-       _params.seaclut_phidp_sdev_interest_map_n,
-       _seaclutImapPhidpSdev)) {
-    OK = false;
-  } else {
-    _seaclut.setInterestMapPhidpSdev(_seaclutImapPhidpSdev,
+  if (_params.locate_sea_clutter) {
+
+    if (_convertInterestParamsToVector
+        ("seaclut_rhohv_mean",
+         _params._seaclut_rhohv_mean_interest_map,
+         _params.seaclut_rhohv_mean_interest_map_n,
+         _seaclutImapRhohvMean)) {
+      OK = false;
+    } else {
+      _seaclut.setInterestMapRhohvMean(_seaclutImapRhohvMean,
+                                       _params.seaclut_rhohv_mean_weight);
+    }
+    
+    if (_convertInterestParamsToVector
+        ("seaclut_phidp_sdev",
+         _params._seaclut_phidp_sdev_interest_map,
+         _params.seaclut_phidp_sdev_interest_map_n,
+         _seaclutImapPhidpSdev)) {
+      OK = false;
+    } else {
+      _seaclut.setInterestMapPhidpSdev(_seaclutImapPhidpSdev,
+                                       _params.seaclut_phidp_sdev_weight);
+    }
+    
+    if (_convertInterestParamsToVector
+        ("seaclut_zdr_sdev",
+         _params._seaclut_zdr_sdev_interest_map,
+         _params.seaclut_zdr_sdev_interest_map_n,
+         _seaclutImapZdrSdev)) {
+      OK = false;
+    } else {
+      _seaclut.setInterestMapZdrSdev(_seaclutImapZdrSdev,
                                      _params.seaclut_phidp_sdev_weight);
-  }
-  
-  if (_convertInterestParamsToVector
-      ("seaclut_zdr_sdev",
-       _params._seaclut_zdr_sdev_interest_map,
-       _params.seaclut_zdr_sdev_interest_map_n,
-       _seaclutImapZdrSdev)) {
-    OK = false;
-  } else {
-    _seaclut.setInterestMapZdrSdev(_seaclutImapZdrSdev,
-                                   _params.seaclut_phidp_sdev_weight);
-  }
+    }
+    
+    _seaclut.setMinSnrDb(_params.seaclut_min_snr_db);
+    
+  } // if (params.locate_sea_clutter)
 
-  _seaclut.setMinSnrDb(_params.seaclut_min_snr_db);
-  
 }
-
+  
 // destructor
 
 ComputeEngine::~ComputeEngine()
@@ -308,6 +312,13 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   const bool *seaclutFlag = _seaclut.getClutFlag();
 
+  RadxField *rayHtField = inputRay->getField("RayHtMsl");
+  const Radx::fl32 *rayHt = NULL;
+  if (rayHtField != NULL) {
+    rayHtField->convertToFl32();
+    rayHt = rayHtField->getDataFl32();
+  }
+
   // load up output data
 
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
@@ -318,10 +329,12 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
     
     TaArray<Radx::fl32> data_;
     Radx::fl32 *data = data_.alloc(derivedRay->getNGates());
+    for (size_t igate = 0; igate < derivedRay->getNGates(); igate++) {
+      data[igate] = Radx::missingFl32;
+    }
     Radx::fl32 *datp = data;
     
-    for (int igate = 0; igate < (int) derivedRay->getNGates(); 
-         igate++, datp++) {
+    for (size_t igate = 0; igate < derivedRay->getNGates();  igate++, datp++) {
       
       switch (ofld.id) {
 
@@ -484,6 +497,11 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = snrSdevInterestRlan[igate];
           break;
 
+        case Params::RAY_HEIGHT:
+          if (rayHt != NULL) {
+            *datp = rayHt[igate];
+          }
+          break;
         case Params::SNR_MEAN_SEACLUT:
           *datp = snrMeanSeaclut[igate];
           break;

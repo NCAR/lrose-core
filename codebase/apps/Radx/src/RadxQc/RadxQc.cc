@@ -466,6 +466,25 @@ int RadxQc::_processFile(const string &filePath)
     }
   }
 
+  // for sea clutter, prepare to compute the reflectivity gradient
+
+  if (_params.locate_sea_clutter) {
+    // remap to a constant geometry
+    vol.remapToPredomGeom();
+    // compute the height at each gate
+    if (_addHeightField(vol)) {
+      cerr << "ERROR - RadxQc::Run" << endl;
+      cerr << "  Cannot add MSL height field" << endl;
+      return -1;
+    }
+    // prepare for dbz gradient by computing pseudo RHIs
+    if (_prepareForDbzGradient(vol)) {
+      cerr << "ERROR - RadxQc::Run" << endl;
+      cerr << "  Cannot prepare for dbz gradient" << endl;
+      return -1;
+    }
+  }
+
   // compute the derived fields
   
   if (_compute(vol)) {
@@ -1175,8 +1194,8 @@ int RadxQc::_retrieveTempProfile(const RadxVol &vol)
 // retrieve site temp from SPDB for volume time
 
 int RadxQc::_retrieveSiteTempFromSpdb(const RadxVol &vol,
-                                          double &tempC,
-                                          time_t &timeForTemp)
+                                      double &tempC,
+                                      time_t &timeForTemp)
   
 {
 
@@ -1225,6 +1244,98 @@ int RadxQc::_retrieveSiteTempFromSpdb(const RadxVol &vol,
 
   tempC = obs.getTempC();
   timeForTemp = obs.getObservationTime();
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////////
+// for sea clutter, add field with MSL height at each gate
+
+int RadxQc::_addHeightField(RadxVol &vol)
+  
+{
+
+  // initialize the beam height class
+
+  if (_params.override_standard_pseudo_earth_radius) {
+    _beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
+  }
+  _beamHt.setInstrumentHtKm(vol.getAltitudeKm());
+
+#ifdef NOTNOW  
+  double minElev, maxElev, minRange, maxRange;
+  vol.computeGeomLimitsFromRays(minElev, maxElev, minRange, maxRange);
+  
+  cerr << "11111111 minElev: " << minElev << endl;
+  cerr << "11111111 maxElev: " << maxElev << endl;
+  cerr << "11111111 minRange: " << minRange << endl;
+  cerr << "11111111 maxRange: " << maxRange << endl;
+
+  double elevRes = 0.01;
+  minElev = ((int) (minElev / elevRes)) * elevRes;
+  int nElev = (int) ((maxElev - minElev) / elevRes) + 1;
+
+  double startRangeKm, gateSpacingKm;
+  vol.getPredomRayGeom(startRangeKm, gateSpacingKm);
+  double rangeRes = gateSpacingKm;
+  minRange = startRangeKm;
+  int nRange = (int) ((maxRange - minRange) / rangeRes) + 1;
+
+  cerr << "11111111 elevRes: " << elevRes << endl;
+  cerr << "11111111 nElev: " << nElev << endl;
+
+  cerr << "11111111 rangeRes: " << rangeRes << endl;
+  cerr << "11111111 minRange: " << minRange << endl;
+  cerr << "11111111 nRange: " << nRange << endl;
+
+  _beamHt.initHtCache(nElev, minElev, elevRes,
+                      nRange, minRange, rangeRes);
+#endif
+
+  const vector<RadxRay *> rays = vol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    RadxRay &ray = *rays[iray];
+    double elev = ray.getElevationDeg();
+    double startRange = ray.getStartRangeKm();
+    double gateSpacing = ray.getGateSpacingKm();
+    double range = startRange;
+    fl32 *htKm = new fl32[ray.getNGates()];
+    for (size_t igate = 0; igate < ray.getNGates(); igate++, range += gateSpacing) {
+      htKm[igate] = _beamHt.computeHtKm(elev, range);
+    }
+    RadxField *htField = new RadxField("RayHtMsl", "km");
+    htField->setLongName("height_of_ray_msl");
+    htField->setStandardName("height_above_reference_ellipsoid");
+    htField->setMissingFl32(Radx::missingFl32);
+    htField->addDataFl32(ray.getNGates(), htKm);
+    ray.addField(htField);
+    delete[] htKm;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////////////
+// for sea clutter, prepare to compute the reflectivity gradient
+
+int RadxQc::_prepareForDbzGradient(RadxVol &vol)
+  
+{
+
+  // locate the pseudo RHIs
+
+  if (vol.loadPseudoRhis()) {
+    cerr << "ERROR - RadxQc::_prepareForDbzGradient" << endl;
+    cerr << "  Cannot load pseudo RHIs" << endl;
+    return -1;
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "===>> In _prepareForDbzGradient" << endl;
+    cerr << "===>> n pseudo RHIs: " << vol.getPseudoRhis().size() << endl;
+  }
 
   return 0;
 
