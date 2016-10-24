@@ -605,11 +605,35 @@ paramdef double {
   p_help = "The relative weighting applied when computing the fuzzy sum.";
 } seaclut_zdr_sdev_weight;
 
+paramdef struct interest_map_point_t {
+  p_default = {{-15.0, 1.0}, {-5.0, 0.0}};
+  p_descr = "SEA CLUTTER interest mapping for gradient of dbz in polar elevation space.";
+  p_help = "The reflectivity gradient is computed with respect to elevation, i.e. the change in reflectivity with change in elevation angle. The units are db/deg.";
+} seaclut_dbz_elev_gradient_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for elevation gradient of dbz.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} seaclut_dbz_elev_gradient_weight;
+
 paramdef double {
   p_default = 0.51;
   p_descr = "Threshold interest value for identifying sea clutter.";
   p_help = "If the fuzzy interest value exceeds this threshold, sea clutter is assumed to exist at that gate.";
 } seaclut_interest_threshold;
+
+paramdef string {
+  p_default = "DbzElevGradient";
+  p_descr = "Field name for computed vertical dbz gradient in polar elevation space (dB/deg).";
+  p_help = "For sea clutter identification, we need to compute the vertical gradient of reflectivity. This is the name of that gradient field, in dB/deg.";
+} dbz_elevation_gradient_field_name;
+
+paramdef string {
+  p_default = "RayHtMsl";
+  p_descr = "Field name for computed ray height (km).";
+  p_help = "In order to compute the vertical gradient of reflectivity for sea clutter, we need to compute the beam height at each gate. This is the name of the ray height field, in km MSL.";
+} ray_height_field_name;
 
 commentdef {
   p_header = "SOUNDING INPUT FOR temperatures - OPTIONAL";
@@ -715,18 +739,6 @@ commentdef {
   p_header = "SPECIFYING FIELD NAMES AND OUTPUT ENCODING";
 }
 
-paramdef string {
-  p_default = "DbzVertGradient";
-  p_descr = "Field name for computed vertical dbz gradient (dB/km).";
-  p_help = "For sea clutter identification, we need to compute the vertical gradient of reflectivity. This is the name of the gradient field, in dB/km.";
-} dbz_vertical_gradient_field_name;
-
-paramdef string {
-  p_default = "RayHtMsl";
-  p_descr = "Field name for computed ray height (km).";
-  p_help = "In order to compute the vertical gradient of reflectivity for sea clutter, we need to compute the beam height at each gate. This is the name of the ray height field, in km MSL.";
-} ray_height_field_name;
-
 typedef enum {
   
   SNR,
@@ -779,15 +791,16 @@ typedef enum {
   RLAN_FLAG,
 
   RAY_HEIGHT,
-  DBZ_GRADIENT,
 
   SNR_MEAN_SEACLUT,
   RHOHV_MEAN_SEACLUT,
   PHIDP_SDEV_SEACLUT,
   ZDR_SDEV_SEACLUT,
+  DBZ_ELEV_GRADIENT_SEACLUT,
   RHOHV_MEAN_INTEREST_SEACLUT,
   PHIDP_SDEV_INTEREST_SEACLUT,
   ZDR_SDEV_INTEREST_SEACLUT,
+  DBZ_ELEV_GRADIENT_INTEREST_SEACLUT,
   SEACLUT_FLAG
 
 } output_field_id_t;

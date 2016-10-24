@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for RadxQc
+ * TDRP params for ./RadxQc
  **********************************************************************/
 
 //======================================================================
@@ -302,7 +302,7 @@ set_ngates_constant = FALSE;
 // Type: boolean
 //
 
-set_fixed_angle_limits = TRUE;
+set_fixed_angle_limits = FALSE;
 
 ///////////// lower_fixed_angle_limit /////////////////
 //
@@ -521,9 +521,11 @@ SNR_field_name = "SNRHC_F";
 //
 // The noise value, represented as dBZ at a range of 100km.
 //
-// This is used if SNR_available is set to FALSE. It is used for 
-//   computing the SNR from the DBZ field. The SNR will be computed by 
-//   range-correcting this value and using it as the noise value.
+// Used to fill in missing reflectivity data for the vertical gradient 
+//   of reflectivity in identifying sea clutter and AP. Also used if 
+//   SNR_available is set to FALSE. It is used for computing the SNR from 
+//   the DBZ field. The SNR will be computed by range-correcting this 
+//   value and using it as the noise value.
 //
 //
 // Type: double
@@ -1183,6 +1185,35 @@ rlan_interest_threshold = 0.51;
 
 locate_sea_clutter = TRUE;
 
+///////////// override_standard_pseudo_earth_radius ///
+//
+// Option to override the standard 4/3 earth radius model for 
+//   refraction.
+//
+// If true, the standard 4/3 earth radius will be overridden. The US NWS 
+//   NEXRAD system uses 1.21 instead of 1.333.
+//
+//
+// Type: boolean
+//
+
+override_standard_pseudo_earth_radius = FALSE;
+
+///////////// pseudo_earth_radius_ratio ///////////////
+//
+// Ratio for computing the pseudo earth radius for beam height 
+//   computations.
+//
+// For standard refraction this is 4/3. For super refraction it will be 
+//   less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 
+//   1.21.
+//
+//
+// Type: double
+//
+
+pseudo_earth_radius_ratio = 1.33333;
+
 //======================================================================
 //
 // INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION.
@@ -1243,7 +1274,7 @@ seaclut_rhohv_mean_interest_map = {
 // Type: double
 //
 
-seaclut_rhohv_mean_weight = 1;
+seaclut_rhohv_mean_weight = 0.5;
 
 ///////////// seaclut_phidp_sdev_interest_map /////////
 //
@@ -1299,12 +1330,12 @@ seaclut_phidp_sdev_weight = 1;
 
 seaclut_zdr_sdev_interest_map = {
   {
-    value = 1.5,
+    value = 0.7,
     interest = 0.001
   }
   ,
   {
-    value = 2.5,
+    value = 1.2,
     interest = 1
   }
 };
@@ -1319,7 +1350,50 @@ seaclut_zdr_sdev_interest_map = {
 // Type: double
 //
 
-seaclut_zdr_sdev_weight = 1;
+seaclut_zdr_sdev_weight = 0.2;
+
+///////////// seaclut_dbz_elev_gradient_interest_map //
+//
+// SEA CLUTTER interest mapping for gradient of dbz in polar elevation 
+//   space.
+//
+// The reflectivity gradient is computed with respect to elevation, i.e. 
+//   the change in reflectivity with change in elevation angle. The units 
+//   are db/deg.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+seaclut_dbz_elev_gradient_interest_map = {
+  {
+    value = -15,
+    interest = 1
+  }
+  ,
+  {
+    value = -5,
+    interest = 0
+  }
+};
+
+///////////// seaclut_dbz_elev_gradient_weight ////////
+//
+// Weight for interest for elevation gradient of dbz.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+seaclut_dbz_elev_gradient_weight = 1;
 
 ///////////// seaclut_interest_threshold //////////////
 //
@@ -1333,6 +1407,35 @@ seaclut_zdr_sdev_weight = 1;
 //
 
 seaclut_interest_threshold = 0.51;
+
+///////////// dbz_elevation_gradient_field_name ///////
+//
+// Field name for computed vertical dbz gradient in polar elevation 
+//   space (dB/deg).
+//
+// For sea clutter identification, we need to compute the vertical 
+//   gradient of reflectivity. This is the name of that gradient field, in 
+//   dB/deg.
+//
+//
+// Type: string
+//
+
+dbz_elevation_gradient_field_name = "DbzElevGradient";
+
+///////////// ray_height_field_name ///////////////////
+//
+// Field name for computed ray height (km).
+//
+// In order to compute the vertical gradient of reflectivity for sea 
+//   clutter, we need to compute the beam height at each gate. This is the 
+//   name of the ray height field, in km MSL.
+//
+//
+// Type: string
+//
+
+ray_height_field_name = "RayHtMsl";
 
 //======================================================================
 //
@@ -1619,13 +1722,16 @@ site_temp_search_margin_secs = 3600;
 //          SNR_DMODE_INTEREST_RLAN
 //          SNR_SDEV_INTEREST_RLAN
 //          RLAN_FLAG
+//          RAY_HEIGHT
 //          SNR_MEAN_SEACLUT
 //          RHOHV_MEAN_SEACLUT
 //          PHIDP_SDEV_SEACLUT
 //          ZDR_SDEV_SEACLUT
+//          DBZ_ELEV_GRADIENT_SEACLUT
 //          RHOHV_MEAN_INTEREST_SEACLUT
 //          PHIDP_SDEV_INTEREST_SEACLUT
 //          ZDR_SDEV_INTEREST_SEACLUT
+//          DBZ_ELEV_GRADIENT_INTEREST_SEACLUT
 //          SEACLUT_FLAG
 //      string name;
 //      string long_name;
@@ -1864,66 +1970,6 @@ output_fields = {
     scale = 0.01,
     offset = 0
   }
-  // ,
-  // {
-  //   id = PHASE_NOISE_INTEREST_RLAN,
-  //   name = "PHASE_NOISE_INTEREST_RLAN",
-  //   long_name = "phase_noise_interest_for_rlan",
-  //   standard_name = "phase_noise_interest_for_rlan",
-  //   units = "",
-  //   encoding = OUTPUT_ENCODING_INT16,
-  //   scaling = OUTPUT_SCALING_DYNAMIC,
-  //   scale = 0.01,
-  //   offset = 0
-  // }
-  // ,
-  // {
-  //   id = NCP_MEAN_INTEREST_RLAN,
-  //   name = "NCP_MEAN_INTEREST_RLAN",
-  //   long_name = "ncp_mean_interest_for_rlan",
-  //   standard_name = "ncp_mean_interest_for_rlan",
-  //   units = "",
-  //   encoding = OUTPUT_ENCODING_INT16,
-  //   scaling = OUTPUT_SCALING_DYNAMIC,
-  //   scale = 0.01,
-  //   offset = 0
-  // }
-  // ,
-  // {
-  //   id = WIDTH_MEAN_INTEREST_RLAN,
-  //   name = "WIDTH_MEAN_INTEREST_RLAN",
-  //   long_name = "width_mean_interest_for_rlan",
-  //   standard_name = "width_mean_interest_for_rlan",
-  //   units = "",
-  //   encoding = OUTPUT_ENCODING_INT16,
-  //   scaling = OUTPUT_SCALING_DYNAMIC,
-  //   scale = 0.01,
-  //   offset = 0
-  // }
-  // ,
-  // {
-  //   id = SNR_DMODE_INTEREST_RLAN,
-  //   name = "SNR_DMODE_INTEREST_RLAN",
-  //   long_name = "snr_dmode_interest_for_rlan",
-  //   standard_name = "snr_dmode_interest_for_rlan",
-  //   units = "",
-  //   encoding = OUTPUT_ENCODING_INT16,
-  //   scaling = OUTPUT_SCALING_DYNAMIC,
-  //   scale = 0.01,
-  //   offset = 0
-  // }
-  // ,
-  // {
-  //   id = SNR_SDEV_INTEREST_RLAN,
-  //   name = "SNR_SDEV_INTEREST_RLAN",
-  //   long_name = "snr_sdev_interest_for_rlan",
-  //   standard_name = "snr_sdev_interest_for_rlan",
-  //   units = "",
-  //   encoding = OUTPUT_ENCODING_INT16,
-  //   scaling = OUTPUT_SCALING_DYNAMIC,
-  //   scale = 0.01,
-  //   offset = 0
-  // }
   ,
   {
     id = SNR_MEAN_SEACLUT,
@@ -1972,42 +2018,6 @@ output_fields = {
     scale = 0.01,
     offset = 0
   }
-  // ,
-  // {
-  //   id = RHOHV_MEAN_INTEREST_SEACLUT,
-  //   name = "RHOHV_MEAN_INTEREST_SEACLUT",
-  //   long_name = "rhohv_mean_interest_for_seaclut",
-  //   standard_name = "rhohv_mean_interest_for_seaclut",
-  //   units = "",
-  //   encoding = OUTPUT_ENCODING_INT16,
-  //   scaling = OUTPUT_SCALING_DYNAMIC,
-  //   scale = 0.01,
-  //   offset = 0
-  // }
-  // ,
-  // {
-  //   id = PHIDP_SDEV_INTEREST_SEACLUT,
-  //   name = "PHIDP_SDEV_INTEREST_SEACLUT",
-  //   long_name = "phidp_sdev_interest_for_seaclut",
-  //   standard_name = "phidp_sdev_interest_for_seaclut",
-  //   units = "",
-  //   encoding = OUTPUT_ENCODING_INT16,
-  //   scaling = OUTPUT_SCALING_DYNAMIC,
-  //   scale = 0.01,
-  //   offset = 0
-  // }
-  // ,
-  // {
-  //   id = ZDR_SDEV_INTEREST_SEACLUT,
-  //   name = "ZDR_SDEV_INTEREST_SEACLUT",
-  //   long_name = "zdr_sdev_interest_for_seaclut",
-  //   standard_name = "zdr_sdev_interest_for_seaclut",
-  //   units = "",
-  //   encoding = OUTPUT_ENCODING_INT16,
-  //   scaling = OUTPUT_SCALING_DYNAMIC,
-  //   scale = 0.01,
-  //   offset = 0
-  // }
   ,
   {
     id = RAY_HEIGHT,
@@ -2022,11 +2032,11 @@ output_fields = {
   }
   ,
   {
-    id = DBZ_GRADIENT,
-    name = "dbz_gradient",
-    long_name = "gradient_of_dbz_with_height",
-    standard_name = "gradient_of_dbz_with_height",
-    units = "dB/km",
+    id = DBZ_ELEV_GRADIENT_SEACLUT,
+    name = "dbz_elev_gradient",
+    long_name = "gradient_of_dbz_with_elevation_angle",
+    standard_name = "gradient_of_dbz_with_elevation_angle",
+    units = "dB/deg",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
     scale = 0.01,
@@ -2038,6 +2048,114 @@ output_fields = {
     name = "SEACLUT_FLAG",
     long_name = "flag_for_sea_clutter",
     standard_name = "flag_for_sea_clutter",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PHASE_NOISE_INTEREST_RLAN,
+    name = "PHASE_NOISE_INTEREST_RLAN",
+    long_name = "phase_noise_interest_for_rlan",
+    standard_name = "phase_noise_interest_for_rlan",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = NCP_MEAN_INTEREST_RLAN,
+    name = "NCP_MEAN_INTEREST_RLAN",
+    long_name = "ncp_mean_interest_for_rlan",
+    standard_name = "ncp_mean_interest_for_rlan",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = WIDTH_MEAN_INTEREST_RLAN,
+    name = "WIDTH_MEAN_INTEREST_RLAN",
+    long_name = "width_mean_interest_for_rlan",
+    standard_name = "width_mean_interest_for_rlan",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNR_DMODE_INTEREST_RLAN,
+    name = "SNR_DMODE_INTEREST_RLAN",
+    long_name = "snr_dmode_interest_for_rlan",
+    standard_name = "snr_dmode_interest_for_rlan",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNR_SDEV_INTEREST_RLAN,
+    name = "SNR_SDEV_INTEREST_RLAN",
+    long_name = "snr_sdev_interest_for_rlan",
+    standard_name = "snr_sdev_interest_for_rlan",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = RHOHV_MEAN_INTEREST_SEACLUT,
+    name = "RHOHV_MEAN_INTEREST_SEACLUT",
+    long_name = "rhohv_mean_interest_for_seaclut",
+    standard_name = "rhohv_mean_interest_for_seaclut",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PHIDP_SDEV_INTEREST_SEACLUT,
+    name = "PHIDP_SDEV_INTEREST_SEACLUT",
+    long_name = "phidp_sdev_interest_for_seaclut",
+    standard_name = "phidp_sdev_interest_for_seaclut",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = ZDR_SDEV_INTEREST_SEACLUT,
+    name = "ZDR_SDEV_INTEREST_SEACLUT",
+    long_name = "zdr_sdev_interest_for_seaclut",
+    standard_name = "zdr_sdev_interest_for_seaclut",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBZ_ELEV_GRADIENT_INTEREST_SEACLUT,
+    name = "DBZ_ELEV_GRADIENT_INTEREST_SEACLUT",
+    long_name = "dbz_elev_gradient_interest_for_seaclut",
+    standard_name = "dbz_elev_gradient_interest_for_seaclut",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2063,7 +2181,7 @@ output_fields = {
 // Type: boolean
 //
 
-copy_input_fields_to_output = FALSE;
+copy_input_fields_to_output = TRUE;
 
 ///////////// copy_fields /////////////////////////////
 //

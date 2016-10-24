@@ -117,7 +117,7 @@ ComputeEngine::ComputeEngine(const Params &params,
     OK = false;
   } else {
     _intf.setInterestMapSnrSdev(_rlanImapSnrSdev,
-                                 _params.rlan_snr_sdev_weight);
+                                _params.rlan_snr_sdev_weight);
   }
 
   // set up interest maps for sea clutter
@@ -131,8 +131,9 @@ ComputeEngine::ComputeEngine(const Params &params,
          _seaclutImapRhohvMean)) {
       OK = false;
     } else {
-      _seaclut.setInterestMapRhohvMean(_seaclutImapRhohvMean,
-                                       _params.seaclut_rhohv_mean_weight);
+      _seaclut.setInterestMapRhohvMean
+        (_seaclutImapRhohvMean,
+         _params.seaclut_rhohv_mean_weight);
     }
     
     if (_convertInterestParamsToVector
@@ -142,8 +143,9 @@ ComputeEngine::ComputeEngine(const Params &params,
          _seaclutImapPhidpSdev)) {
       OK = false;
     } else {
-      _seaclut.setInterestMapPhidpSdev(_seaclutImapPhidpSdev,
-                                       _params.seaclut_phidp_sdev_weight);
+      _seaclut.setInterestMapPhidpSdev
+        (_seaclutImapPhidpSdev,
+         _params.seaclut_phidp_sdev_weight);
     }
     
     if (_convertInterestParamsToVector
@@ -153,8 +155,21 @@ ComputeEngine::ComputeEngine(const Params &params,
          _seaclutImapZdrSdev)) {
       OK = false;
     } else {
-      _seaclut.setInterestMapZdrSdev(_seaclutImapZdrSdev,
-                                     _params.seaclut_phidp_sdev_weight);
+      _seaclut.setInterestMapZdrSdev
+        (_seaclutImapZdrSdev,
+         _params.seaclut_zdr_sdev_weight);
+    }
+    
+    if (_convertInterestParamsToVector
+        ("seaclut_dbz_elev_gradient",
+         _params._seaclut_dbz_elev_gradient_interest_map,
+         _params.seaclut_dbz_elev_gradient_interest_map_n,
+         _seaclutImapDbzElevGradient)) {
+      OK = false;
+    } else {
+      _seaclut.setInterestMapDbzElevGradient
+        (_seaclutImapDbzElevGradient,
+         _params.seaclut_dbz_elev_gradient_weight);
     }
     
     _seaclut.setMinSnrDb(_params.seaclut_min_snr_db);
@@ -172,10 +187,10 @@ ComputeEngine::~ComputeEngine()
 }
 
 //////////////////////////////////////////////////
-// compute the moments for given covariance ray
-// storing results in moments ray
+// compute for given input ray
+// storing results in derived ray
 //
-// Creates moments ray and returns it.
+// Creates derived ray and returns it.
 // It must be freed by caller.
 //
 // Returns NULL on error.
@@ -309,6 +324,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *rhohvMeanInterestSeaclut = _seaclut.getRhohvMeanInterest();
   const double *phidpSdevInterestSeaclut = _seaclut.getPhidpSdevInterest();
   const double *zdrSdevInterestSeaclut = _seaclut.getZdrSdevInterest();
+  const double *dbzElevGradientInterestSeaclut = _seaclut.getDbzElevGradientInterest();
 
   const bool *seaclutFlag = _seaclut.getClutFlag();
 
@@ -319,7 +335,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
     rayHt = rayHtField->getDataFl32();
   }
   RadxField *dbzGradientField =
-    inputRay->getField(_params.dbz_vertical_gradient_field_name);
+    inputRay->getField(_params.dbz_elevation_gradient_field_name);
   const Radx::fl32 *dbzGradient = NULL;
   if (dbzGradientField != NULL) {
     dbzGradientField->convertToFl32();
@@ -509,7 +525,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
             *datp = rayHt[igate];
           }
           break;
-        case Params::DBZ_GRADIENT:
+        case Params::DBZ_ELEV_GRADIENT_SEACLUT:
           if (dbzGradient != NULL) {
             *datp = dbzGradient[igate];
           }
@@ -535,6 +551,9 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::ZDR_SDEV_INTEREST_SEACLUT:
           *datp = zdrSdevInterestSeaclut[igate];
+          break;
+        case Params::DBZ_ELEV_GRADIENT_INTEREST_SEACLUT:
+          *datp = dbzElevGradientInterestSeaclut[igate];
           break;
         case Params::SEACLUT_FLAG:
           if (seaclutFlag[igate]) {
@@ -785,13 +804,22 @@ void ComputeEngine::_locateSeaClutter()
   if (_params.RHOHV_available) {
     _seaclut.setRhohvField(_rhohvArray);
   }
+
   if (_params.PHIDP_available) {
     _seaclut.setPhidpField(_phidpArray);
   }
+
   if (_params.ZDR_available) {
     _seaclut.setZdrField(_zdrArray);
   }
 
+  if (_params.ZDR_available) {
+    _seaclut.setZdrField(_zdrArray);
+  }
+  
+  if (_dbzElevGradientAvail) {
+    _seaclut.setDbzElevGradientField(_dbzElevGradientArray);
+  }
 
   // locate RLAN interference
 
@@ -816,6 +844,7 @@ void ComputeEngine::_allocMomentsArrays()
   _kdpArray = _kdpArray_.alloc(_nGates);
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
+  _dbzElevGradientArray = _dbzElevGradientArray_.alloc(_nGates);
 
 }
 
@@ -903,6 +932,13 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
 
   for (int igate = 0; igate < _nGates; igate++) {
     _kdpArray[igate] = missingDbl;
+  }
+  
+  if (_loadFieldArray(inputRay, _params.dbz_elevation_gradient_field_name,
+                      false, _dbzElevGradientArray) == 0) {
+    _dbzElevGradientAvail = true;
+  } else {
+    _dbzElevGradientAvail = false;
   }
 
   return 0;

@@ -126,6 +126,10 @@ private:
   deque<ComputeThread *> _availThreads;
   pthread_mutex_t _debugPrintMutex;
   
+  // checking timing performance
+
+  struct timeval _timeA;
+
   // private methods
   
   int _runFilelist();
@@ -155,6 +159,7 @@ private:
   int _computeDbzGradient(PseudoRhi &rhi);
   int _computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay);
   void _copyDbzGradient(const RadxRay &lowerRay, RadxRay &upperRay);
+  void _printRunTime(const string& str);
   
 };
 

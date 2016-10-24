@@ -164,6 +164,8 @@ RadxQc::RadxQc(int argc, char **argv)
 
   }
 
+  _printRunTime("Start ...");
+
 }
 
 //////////////////////////////////////
@@ -361,6 +363,7 @@ int RadxQc::_processFile(const string &filePath)
 {
 
   PMU_auto_register("Processing file");
+  _printRunTime("Start of _processFile()");
   
   // check file name
   
@@ -420,6 +423,7 @@ int RadxQc::_processFile(const string &filePath)
     return -1;
   }
   _readPaths = inFile.getReadPaths();
+  _printRunTime("After file read");
 
   // override radar location if requested
 
@@ -470,6 +474,8 @@ int RadxQc::_processFile(const string &filePath)
 
   if (_params.locate_sea_clutter) {
 
+    _printRunTime("Start of sea clutter prep");
+
     // remap to a constant geometry
     vol.remapToPredomGeom();
 
@@ -487,23 +493,29 @@ int RadxQc::_processFile(const string &filePath)
       return -1;
     }
 
+    _printRunTime("End   of sea clutter prep");
+
   } // if (_params.locate_sea_clutter)
 
   // compute the derived fields
   
+  _printRunTime("Before compute()");
   if (_compute(vol)) {
     cerr << "ERROR - RadxQc::Run" << endl;
     cerr << "  Cannot compute moments" << endl;
     return -1;
   }
+  _printRunTime("After compute()");
 
   // write results to output file
 
+  _printRunTime("Before file write");
   if (_params.write_output_volume) {
     if (_writeVol(vol)) {
       return -1;
     }
   }
+  _printRunTime("After file write");
 
   return 0;
 
@@ -1267,15 +1279,9 @@ int RadxQc::_addHeightField(RadxVol &vol)
   }
   _beamHt.setInstrumentHtKm(vol.getAltitudeKm());
 
-#ifdef NOTNOW  
   double minElev, maxElev, minRange, maxRange;
   vol.computeGeomLimitsFromRays(minElev, maxElev, minRange, maxRange);
   
-  cerr << "11111111 minElev: " << minElev << endl;
-  cerr << "11111111 maxElev: " << maxElev << endl;
-  cerr << "11111111 minRange: " << minRange << endl;
-  cerr << "11111111 maxRange: " << maxRange << endl;
-
   double elevRes = 0.01;
   minElev = ((int) (minElev / elevRes)) * elevRes;
   int nElev = (int) ((maxElev - minElev) / elevRes) + 1;
@@ -1286,16 +1292,9 @@ int RadxQc::_addHeightField(RadxVol &vol)
   minRange = startRangeKm;
   int nRange = (int) ((maxRange - minRange) / rangeRes) + 1;
 
-  cerr << "11111111 elevRes: " << elevRes << endl;
-  cerr << "11111111 nElev: " << nElev << endl;
-
-  cerr << "11111111 rangeRes: " << rangeRes << endl;
-  cerr << "11111111 minRange: " << minRange << endl;
-  cerr << "11111111 nRange: " << nRange << endl;
-
   _beamHt.initHtCache(nElev, minElev, elevRes,
                       nRange, minRange, rangeRes);
-#endif
+  // #endif
 
   const vector<RadxRay *> rays = vol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
@@ -1436,11 +1435,11 @@ int RadxQc::_computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay)
   const Radx::fl32 *dbzUpper = dbzFieldUpper->getDataFl32();
   Radx::fl32 dbzUpperMissing = dbzFieldUpper->getMissingFl32();
 
-  htFieldLower->convertToFl32();
-  const Radx::fl32 *htLower = htFieldLower->getDataFl32();
+  // htFieldLower->convertToFl32();
+  // const Radx::fl32 *htLower = htFieldLower->getDataFl32();
 
-  htFieldUpper->convertToFl32();
-  const Radx::fl32 *htUpper = htFieldUpper->getDataFl32();
+  // htFieldUpper->convertToFl32();
+  // const Radx::fl32 *htUpper = htFieldUpper->getDataFl32();
 
   // create gradient field
 
@@ -1449,6 +1448,7 @@ int RadxQc::_computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay)
 
   double cosLower = cos(lowerRay.getElevationDeg() * DEG_TO_RAD);
   double cosUpper = cos(upperRay.getElevationDeg() * DEG_TO_RAD);
+  double deltaElev = upperRay.getElevationDeg() - lowerRay.getElevationDeg();
 
   // loop through the range gates in the lower ray
 
@@ -1490,16 +1490,19 @@ int RadxQc::_computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay)
     }
 
     double dbzDiff = dbzU - dbzL;
-    double htDiff = htUpper[igateUpper] - htLower[igate];
-    dbzGrad[igate] = dbzDiff / htDiff;
+    // double htDiff = htUpper[igateUpper] - htLower[igate];
+    // dbzGrad[igate] = dbzDiff / htDiff;
+    // dbzGrad[igate] = dbzDiff;
+    dbzGrad[igate] = dbzDiff / deltaElev;
+    // dbzGrad[igate] = (dbzDiff / deltaElev) / lowerRay.getElevationDeg();
 
   } // igate
 
   // create and add field
   
-  RadxField *gradField = new RadxField(_params.dbz_vertical_gradient_field_name, "dB/km");
-  gradField->setLongName("gradient_of_dbz_with_height");
-  gradField->setStandardName("gradient_of_dbz_with_height");
+  RadxField *gradField = new RadxField(_params.dbz_elevation_gradient_field_name, "dB/deg");
+  gradField->setLongName("gradient_of_dbz_with_elevation");
+  gradField->setStandardName("gradient_of_dbz_with_elevation");
   gradField->setMissingFl32(Radx::missingFl32);
   gradField->addDataFl32(lowerRay.getNGates(), dbzGrad);
   lowerRay.addField(gradField);
@@ -1516,12 +1519,29 @@ void RadxQc::_copyDbzGradient(const RadxRay &lowerRay, RadxRay &upperRay)
   
 {
 
-  const RadxField *gradFieldLower = lowerRay.getField(_params.dbz_vertical_gradient_field_name);
+  const RadxField *gradFieldLower = lowerRay.getField(_params.dbz_elevation_gradient_field_name);
   if (gradFieldLower != NULL) {
     RadxField *gradFieldUpper = new RadxField(*gradFieldLower);
     gradFieldUpper->setNGates(upperRay.getNGates());
     upperRay.addField(gradFieldUpper);
   }
 
+}
+
+///////////////////////////////////////////////////////////////////
+// Print the elapsed run time since the previous call, in seconds.
+
+void RadxQc::_printRunTime(const string& str)
+{
+  if (!_params.debug) {
+    return;
+  }
+  struct timeval tvb;
+  gettimeofday(&tvb, NULL);
+  double deltaSec = tvb.tv_sec - _timeA.tv_sec
+    + 1.e-6 * (tvb.tv_usec - _timeA.tv_usec);
+  cerr << "TIMING, task: " << str << ", secs used: " << deltaSec << endl;
+  _timeA.tv_sec = tvb.tv_sec;
+  _timeA.tv_usec = tvb.tv_usec;
 }
 

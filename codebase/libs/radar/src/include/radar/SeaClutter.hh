@@ -73,15 +73,27 @@ public:
 
   // set interest maps for sea clutter location
 
+  // mean rhohv in range
+
   void setInterestMapRhohvMean
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
-  
+
+  // standard deviation of zdr in range
+
   void setInterestMapZdrSdev
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
+  // standard deviation of phidp in range
+
   void setInterestMapPhidpSdev
+    (const vector<InterestMap::ImPoint> &pts,
+     double weight);
+  
+  // gradient of reflectivity in elevation polar space
+
+  void setInterestMapDbzElevGradient
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
@@ -120,7 +132,8 @@ public:
   void setRhohvField(double *vals);
   void setPhidpField(double *vals);
   void setZdrField(double *vals);
-
+  void setDbzElevGradientField(double *vals);
+  
   //////////////////////////////////////////////
   // perform clutter location
   //
@@ -142,6 +155,7 @@ public:
   const double *getRhohv() const { return _rhohv; }
   const double *getPhidp() const { return _phidp; }
   const double *getZdr() const { return _zdr; }
+  const double *getDbzElevGradient() const { return _dbzElevGradient; }
   
   // get results - after running locate
   // these arrays span the gates from 0 to nGates-1
@@ -156,6 +170,7 @@ public:
   const double *getRhohvMeanInterest() const { return _rhohvMeanInterest; }
   const double *getPhidpSdevInterest() const { return _phidpSdevInterest; }
   const double *getZdrSdevInterest() const { return _zdrSdevInterest; }
+  const double *getDbzElevGradientInterest() const { return _dbzElevGradientInterest; }
 
   ////////////////////////////////////
   // print parameters for debugging
@@ -212,6 +227,10 @@ private:
   double *_zdr;
   bool _zdrAvail;
 
+  TaArray<double> _dbzElevGradient_;
+  double *_dbzElevGradient;
+  bool _dbzElevGradientAvail;
+
   // results
 
   TaArray<bool> _clutFlag_;
@@ -238,6 +257,9 @@ private:
   TaArray<double> _zdrSdevInterest_;
   double *_zdrSdevInterest;
 
+  TaArray<double> _dbzElevGradientInterest_;
+  double *_dbzElevGradientInterest;
+
   // gate limits for computing stats along a ray
 
   vector<size_t> _startGate;
@@ -251,11 +273,13 @@ private:
   InterestMap *_interestMapRhohvMean;
   InterestMap *_interestMapPhidpSdev;
   InterestMap *_interestMapZdrSdev;
-
+  InterestMap *_interestMapDbzElevGradient;
+  
   double _weightRhohvMean;
   double _weightPhidpSdev;
   double _weightZdrSdev;
-
+  double _weightDbzElevGradient;
+  
   double _clutInterestThreshold;
 
   // private methods

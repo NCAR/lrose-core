@@ -65,15 +65,15 @@ public:
   
   ~ComputeEngine();
 
-  // compute the moments for given covariance ray
-  // storing results in moments ray
+  // compute for given input ray
+  // storing results in derived ray
   //
-  // Creates moments ray and returns it.
+  // Creates derived ray and returns it.
   // It must be freed by caller.
   //
   // Returns NULL on error.
   
-  RadxRay *compute(RadxRay *covRay,
+  RadxRay *compute(RadxRay *inputRay,
                    double radarHtKm,
                    double wavelengthM,
                    const TempProfile *tempProfile);
@@ -117,6 +117,7 @@ private:
   RadxArray<double> _rhohvArray_;
   RadxArray<double> _phidpArray_;
   RadxArray<double> _kdpArray_;
+  RadxArray<double> _dbzElevGradientArray_;
 
   double *_snrArray;
   double *_dbzArray;
@@ -128,6 +129,9 @@ private:
   double *_rhohvArray;
   double *_phidpArray;
   double *_kdpArray;
+  double *_dbzElevGradientArray;
+
+  bool _dbzElevGradientAvail;
 
   // atmospheric attenuation
 
@@ -153,6 +157,7 @@ private:
   vector<InterestMap::ImPoint> _seaclutImapRhohvMean;
   vector<InterestMap::ImPoint> _seaclutImapPhidpSdev;
   vector<InterestMap::ImPoint> _seaclutImapZdrSdev;
+  vector<InterestMap::ImPoint> _seaclutImapDbzElevGradient;
 
   // interest maps
   
