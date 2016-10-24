@@ -169,6 +169,18 @@ public:
   
   virtual bool isSupported(const string &path);
     
+  ////////////////////////////////////////////////////////////
+  // Check if path is a NetCDF file
+  // Returns true if file is NetCDF, or false otherwise
+  
+  bool isNetCDF(const string &path);
+
+  ////////////////////////////////////////////////////////////
+  // Check if path is an HDF5 file
+  // Returns true if file is HDF5, or false otherwise
+  
+  bool isHdf5(const string &path);
+
   //////////////////////////////////////////////////////////////
   /// \name Get methods:
   //@{
@@ -905,6 +917,18 @@ protected:
   void _initForRead(const string &path,
                     RadxVol &vol);
 
+  /// Read in data file from netCDF file
+
+  int _readFromPathNetCDF(const string &path, RadxVol &vol);
+  
+  /// Read in data file from HDF5 file
+
+  int _readFromPathHdf5(const string &path, RadxVol &vol);
+  
+  /// Read in data file from other types
+
+  int _readFromPathOther(const string &path, RadxVol &vol);
+  
   /// add integer value to error string, with label
 
   void _addErrInt(string label, int iarg,
@@ -925,6 +949,27 @@ protected:
 
   int _doReadRaysInInterval(const string &dir,
                             RadxVol &vol);
+
+  /// print native for netCDF
+
+  int _printNativeNetCDF(const string &path, ostream &out,
+                         bool printRays, bool printData);
+
+  /// print native for Hdf5
+
+  int _printNativeHdf5(const string &path, ostream &out,
+                       bool printRays, bool printData);
+  
+  /// print native for other types
+
+  int _printNativeOther(const string &path, ostream &out,
+                        bool printRays, bool printData);
+  
+  /// check is supported for various file classes
+
+  bool _isSupportedNetCDF(const string &path);
+  bool _isSupportedHdf5(const string &path);
+  bool _isSupportedOther(const string &path);
 
 private:
 

@@ -57,6 +57,7 @@
 #include <Radx/UfRadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
+#include <Radx/Hdf5Utils.hh>
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
@@ -104,18 +105,132 @@ void RadxFile::clear()
 bool RadxFile::isSupported(const string &path)
 
 {
-  
-  // try CF radial first
 
+  if (isNetCDF(path)) {
+
+    // netCDF files
+  
+    if (_isSupportedNetCDF(path)) {
+      return true;
+    }
+
+  } else if (isHdf5(path)) {
+
+    // netCDF files
+    
+    if (_isSupportedHdf5(path)) {
+      return true;
+    }
+
+  }
+
+  // all other types
+
+  if (_isSupportedOther(path)) {
+    return true;
+  }
+
+  return false;
+
+}
+
+/////////////////////////////////////////////////////////
+// Check if specified netcdf file is supported by Radx
+// Returns true if supported, false otherwise
+
+bool RadxFile::_isSupportedNetCDF(const string &path)
+
+{
+
+  // try CF radial first
   {
     NcfRadxFile file;
     if (file.isCfRadial(path)) {
       return true;
     }
   }
+  
+  // try Foray NetCDF
+  {
+    ForayNcRadxFile file;
+    if (file.isForayNc(path)) {
+      return true;
+    }
+  }
+  
+  // try DOE netcdf
+  {
+    DoeNcRadxFile file;
+    if (file.isDoeNc(path)) {
+      return true;
+    }
+  }
+  
+  // try NOXP netcdf
+  {
+    NoxpNcRadxFile file;
+    if (file.isNoxpNc(path)) {
+      return true;
+    }
+  }
+  
+  // try NEXRAD CMD NetCDF
+  {
+    NexradCmdRadxFile file;
+    if (file.isNexradCmd(path)) {
+      return true;
+    }
+  }
+  
+  // try D3R netcdf
+  {
+    D3rNcRadxFile file;
+    if (file.isD3rNc(path)) {
+      return true;
+    }
+  }
+    
+  return false;
+
+}
+
+/////////////////////////////////////////////////////////
+// Check if specified hdf5 file is supported by Radx
+// Returns true if supported, false otherwise
+
+bool RadxFile::_isSupportedHdf5(const string &path)
+
+{
+
+  // try ODIM HDF5
+  {
+    OdimHdf5RadxFile file;
+    if (file.isOdimHdf5(path)) {
+      return true;
+    }
+  }
+  
+  // try GAMIC HDF5
+  {
+    GamicHdf5RadxFile file;
+    if (file.isGamicHdf5(path)) {
+      return true;
+    }
+  }
+  
+  return false;
+
+}
+
+/////////////////////////////////////////////////////////
+// Check if non netcdf or hdf5 file is supported by Radx
+// Returns true if supported, false otherwise
+
+bool RadxFile::_isSupportedOther(const string &path)
+  
+{
 
   // try Dorade next
-
   {
     DoradeRadxFile file;
     if (file.isDorade(path)) {
@@ -124,7 +239,6 @@ bool RadxFile::isSupported(const string &path)
   }
 
   // try UF next
-
   {
     UfRadxFile file;
     if (file.isUf(path)) {
@@ -132,17 +246,7 @@ bool RadxFile::isSupported(const string &path)
     }
   }
 
-  // try Foray NetCDF
-  
-  {
-    ForayNcRadxFile file;
-    if (file.isForayNc(path)) {
-      return true;
-    }
-  }
-
   // try NEXRAD ARCHIVE 2
-  
   {
     NexradRadxFile file;
     if (file.isNexrad(path)) {
@@ -151,7 +255,6 @@ bool RadxFile::isSupported(const string &path)
   }
 
   // try SIGMET RAW 
-  
   {
     SigmetRadxFile file;
     if (file.isSigmet(path)) {
@@ -160,7 +263,6 @@ bool RadxFile::isSupported(const string &path)
   }
 
   // try Gematronik
-  
   {
     GemRadxFile file;
     if (file.isGematronik(path)) {
@@ -169,7 +271,6 @@ bool RadxFile::isSupported(const string &path)
   }
 
   // try Leosphere LIDAR
-  
   {
     LeoRadxFile file;
     if (file.isLeosphere(path)) {
@@ -177,44 +278,7 @@ bool RadxFile::isSupported(const string &path)
     }
   }
 
-  // try DOE netcdf
-  
-  {
-    DoeNcRadxFile file;
-    if (file.isDoeNc(path)) {
-      return true;
-    }
-  }
-
-  // try NOXP netcdf
-  
-  {
-    NoxpNcRadxFile file;
-    if (file.isNoxpNc(path)) {
-      return true;
-    }
-  }
-
-  // try ODIM HDF5
-  
-  {
-    OdimHdf5RadxFile file;
-    if (file.isOdimHdf5(path)) {
-      return true;
-    }
-  }
-
-  // try GAMIC HDF5
-  
-  {
-    GamicHdf5RadxFile file;
-    if (file.isGamicHdf5(path)) {
-      return true;
-    }
-  }
-
   // try Rapic
-  
   {
     RapicRadxFile file;
     if (file.isRapic(path)) {
@@ -223,7 +287,6 @@ bool RadxFile::isSupported(const string &path)
   }
 
   // try Nids
-  
   {
     NidsRadxFile file;
     if (file.isNids(path)) {
@@ -232,7 +295,6 @@ bool RadxFile::isSupported(const string &path)
   }
 
   // try HRD - hurricane research division
-  
   {
     HrdRadxFile file;
     if (file.isHrd(path)) {
@@ -241,7 +303,6 @@ bool RadxFile::isSupported(const string &path)
   }
 
   // try TDWR - terminal Doppler weather radar
-  
   {
     TdwrRadxFile file;
     if (file.isTdwr(path)) {
@@ -249,17 +310,7 @@ bool RadxFile::isSupported(const string &path)
     }
   }
 
-  // try NEXRAD CMD NetCDF
-  
-  {
-    NexradCmdRadxFile file;
-    if (file.isNexradCmd(path)) {
-      return true;
-    }
-  }
-
   // try TWOLF LIDAR
-  
   {
     TwolfRadxFile file;
     if (file.isTwolf(path)) {
@@ -267,22 +318,47 @@ bool RadxFile::isSupported(const string &path)
     }
   }
 
-  // try D3R netcdf
-  
-  {
-    D3rNcRadxFile file;
-    if (file.isD3rNc(path)) {
-      return true;
-    }
-  }
-
   // try NSSL MRD - NSSL data from NOAA tail radars
-  
   {
     NsslMrdRadxFile file;
     if (file.isNsslMrd(path)) {
       return true;
     }
+  }
+
+  return false;
+
+}
+
+////////////////////////////////////////////////////////////
+// Check if path is a NetCDF file
+// Returns true if file is NetCDF, or false otherwise
+
+bool RadxFile::isNetCDF(const string &path)
+{
+
+  NetcdfClassic ncf;
+  if (ncf.openRead(path) == 0) {
+    // open succeeded, so must be netcdf
+    ncf.close();
+    return true;
+  }
+
+  // could not open as netcdf
+
+  return false;
+
+}
+
+////////////////////////////////////////////////////////////
+// Check if path is an HDF5 file
+// Returns true if file is HDF5, or false otherwise
+
+bool RadxFile::isHdf5(const string &path)
+{
+
+  if (H5File::isHdf5(path)) {
+    return true;
   }
 
   return false;
@@ -825,6 +901,49 @@ int RadxFile::readFromPath(const string &path,
 
   clearErrStr();
 
+  // first check for NetCDF
+
+  if (isNetCDF(path)) {
+    if (_readFromPathNetCDF(path, vol) == 0) {
+      return 0;
+    }
+  }
+
+  // then check for HDF5
+
+  if (isHdf5(path)) {
+    if (_readFromPathHdf5(path, vol) == 0) {
+      return 0;
+    }
+  }
+
+  // else fall through to other file types
+
+  if (_readFromPathOther(path, vol) == 0) {
+    return 0;
+  }
+
+  // do not recognize file type
+  
+  _addErrStr("ERROR - RadxFile::readFromPath");
+  _addErrStr("  File format not recognized: ", path);
+  return -1;
+
+}
+
+/////////////////////////////////////////////////////////
+// Read in data file from specified netCDF path,
+// load up volume object.
+// Returns 0 on success, -1 on failure
+// Use getErrStr() if error occurs
+
+int RadxFile::_readFromPathNetCDF(const string &path,
+                                  RadxVol &vol)
+  
+{
+
+  clearErrStr();
+
   // try CF radial first
 
   {
@@ -848,8 +967,204 @@ int RadxFile::readFromPath(const string &path,
     }
   }
 
-  // try Dorade next
+  // try Foray NetCDF next
 
+  {
+    ForayNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isForayNc(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read Foray NC file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try DOE netcdf next
+
+  {
+    DoeNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isDoeNc(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read DOE NC file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try NOXP netcdf next
+
+  {
+    NoxpNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isNoxpNc(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read NOXP NC file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try D3R netcdf next
+
+  {
+    D3rNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isD3rNc(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read D3R NC file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try NEXRAD CMD next
+  
+  {
+    NexradCmdRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isNexradCmd(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read NEXRAD CMD file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // do not recognize file type
+  
+  return -1;
+
+}
+
+/////////////////////////////////////////////////////////
+// Read in data file from specified HDF5 path,
+// load up volume object.
+// Returns 0 on success, -1 on failure
+// Use getErrStr() if error occurs
+
+int RadxFile::_readFromPathHdf5(const string &path,
+                                RadxVol &vol)
+  
+{
+
+  clearErrStr();
+
+  // try ODIM HDF5 next
+
+  {
+    OdimHdf5RadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isOdimHdf5(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read ODIM HDF5 file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try GAMIC HDF5 next
+
+  {
+    GamicHdf5RadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isGamicHdf5(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read GAMIC HDF5 file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // do not recognize file type
+  
+  return -1;
+
+}
+
+/////////////////////////////////////////////////////////
+// Read in data file from non netcdf and hdf5 files
+// load up volume object.
+// Returns 0 on success, -1 on failure
+
+int RadxFile::_readFromPathOther(const string &path,
+                                 RadxVol &vol)
+
+{
+
+  // try Dorade next
+  
   {
     DoradeRadxFile file;
     file.copyReadDirectives(*this);
@@ -957,121 +1272,6 @@ int RadxFile::readFromPath(const string &path,
         if (_debug) {
           cerr << "INFO: RadxFile::readFromPath" << endl;
           cerr << "  Read GEMATRONIK VOL file, path: " << _pathInUse << endl;
-        }
-      }
-      return iret;
-    }
-  }
-
-  // try DOE netcdf next
-
-  {
-    DoeNcRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isDoeNc(path)) {
-      int iret = file.readFromPath(path, vol);
-      if (_verbose) file.print(cerr);
-      _errStr = file.getErrStr();
-      _dirInUse = file.getDirInUse();
-      _pathInUse = file.getPathInUse();
-      vol.setPathInUse(_pathInUse);
-      _readPaths = file.getReadPaths();
-      if (iret == 0) {
-        if (_debug) {
-          cerr << "INFO: RadxFile::readFromPath" << endl;
-          cerr << "  Read DOE NC file, path: " << _pathInUse << endl;
-        }
-      }
-      return iret;
-    }
-  }
-
-  // try NOXP netcdf next
-
-  {
-    NoxpNcRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isNoxpNc(path)) {
-      int iret = file.readFromPath(path, vol);
-      if (_verbose) file.print(cerr);
-      _errStr = file.getErrStr();
-      _dirInUse = file.getDirInUse();
-      _pathInUse = file.getPathInUse();
-      vol.setPathInUse(_pathInUse);
-      _readPaths = file.getReadPaths();
-      if (iret == 0) {
-        if (_debug) {
-          cerr << "INFO: RadxFile::readFromPath" << endl;
-          cerr << "  Read NOXP NC file, path: " << _pathInUse << endl;
-        }
-      }
-      return iret;
-    }
-  }
-
-  // try ODIM HDF5 next
-
-  {
-    OdimHdf5RadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isOdimHdf5(path)) {
-      int iret = file.readFromPath(path, vol);
-      if (_verbose) file.print(cerr);
-      _errStr = file.getErrStr();
-      _dirInUse = file.getDirInUse();
-      _pathInUse = file.getPathInUse();
-      vol.setPathInUse(_pathInUse);
-      _readPaths = file.getReadPaths();
-      if (iret == 0) {
-        if (_debug) {
-          cerr << "INFO: RadxFile::readFromPath" << endl;
-          cerr << "  Read ODIM HDF5 file, path: " << _pathInUse << endl;
-        }
-      }
-      return iret;
-    }
-  }
-
-  // try GAMIC HDF5 next
-
-  {
-    GamicHdf5RadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isGamicHdf5(path)) {
-      int iret = file.readFromPath(path, vol);
-      if (_verbose) file.print(cerr);
-      _errStr = file.getErrStr();
-      _dirInUse = file.getDirInUse();
-      _pathInUse = file.getPathInUse();
-      vol.setPathInUse(_pathInUse);
-      _readPaths = file.getReadPaths();
-      if (iret == 0) {
-        if (_debug) {
-          cerr << "INFO: RadxFile::readFromPath" << endl;
-          cerr << "  Read GAMIC HDF5 file, path: " << _pathInUse << endl;
-        }
-      }
-      return iret;
-    }
-  }
-
-  // try Foray NetCDF next
-
-  {
-    ForayNcRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isForayNc(path)) {
-      int iret = file.readFromPath(path, vol);
-      if (_verbose) file.print(cerr);
-      _errStr = file.getErrStr();
-      _dirInUse = file.getDirInUse();
-      _pathInUse = file.getPathInUse();
-      vol.setPathInUse(_pathInUse);
-      _readPaths = file.getReadPaths();
-      if (iret == 0) {
-        if (_debug) {
-          cerr << "INFO: RadxFile::readFromPath" << endl;
-          cerr << "  Read Foray NC file, path: " << _pathInUse << endl;
         }
       }
       return iret;
@@ -1193,29 +1393,6 @@ int RadxFile::readFromPath(const string &path,
     }
   }
   
-  // try NEXRAD CMD next
-  
-  {
-    NexradCmdRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isNexradCmd(path)) {
-      int iret = file.readFromPath(path, vol);
-      if (_verbose) file.print(cerr);
-      _errStr = file.getErrStr();
-      _dirInUse = file.getDirInUse();
-      _pathInUse = file.getPathInUse();
-      vol.setPathInUse(_pathInUse);
-      _readPaths = file.getReadPaths();
-      if (iret == 0) {
-        if (_debug) {
-          cerr << "INFO: RadxFile::readFromPath" << endl;
-          cerr << "  Read NEXRAD CMD file, path: " << _pathInUse << endl;
-        }
-      }
-      return iret;
-    }
-  }
-
   // try TWOLF next
 
   {
@@ -1239,31 +1416,7 @@ int RadxFile::readFromPath(const string &path,
     }
   }
 
-  // try D3R netcdf next
-
-  {
-    D3rNcRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isD3rNc(path)) {
-      int iret = file.readFromPath(path, vol);
-      if (_verbose) file.print(cerr);
-      _errStr = file.getErrStr();
-      _dirInUse = file.getDirInUse();
-      _pathInUse = file.getPathInUse();
-      vol.setPathInUse(_pathInUse);
-      _readPaths = file.getReadPaths();
-      if (iret == 0) {
-        if (_debug) {
-          cerr << "INFO: RadxFile::readFromPath" << endl;
-          cerr << "  Read D3R NC file, path: " << _pathInUse << endl;
-        }
-      }
-      return iret;
-    }
-  }
-
   // try NSSL MRD - NSSL data from NOAA tail radars
-  
 
   {
     NsslMrdRadxFile file;
@@ -1286,10 +1439,6 @@ int RadxFile::readFromPath(const string &path,
     }
   }
 
-  // do not recognize file type
-  
-  _addErrStr("ERROR - RadxFile::readFromPath");
-  _addErrStr("  File format not recognized: ", path);
   return -1;
 
 }
@@ -2136,7 +2285,7 @@ string RadxFile::getFileNameModeAsString() const
 }
 
 ////////////////////////////////////////////////////////////
-// Print native data in uf file
+// Print native data in file
 // Returns 0 on success, -1 on failure
 // Use getErrStr() if error occurs
 
@@ -2145,8 +2294,34 @@ int RadxFile::printNative(const string &path, ostream &out,
   
 {
 
-  // try CF radial
+  // try netcdf first
 
+  if (isNetCDF(path)) {
+    return _printNativeNetCDF(path, out, printRays, printData);
+  }
+  
+  // try hdf5 next
+  
+  if (isHdf5(path)) {
+    return _printNativeHdf5(path, out, printRays, printData);
+  }
+
+  // fall through to other types
+  
+  return _printNativeOther(path, out, printRays, printData);
+  
+}
+
+////////////////////////////////////////////////////////////
+// Print native data in netcdf file
+// Returns 0 on success, -1 on failure
+
+int RadxFile::_printNativeNetCDF(const string &path, ostream &out,
+                                 bool printRays, bool printData)
+  
+{
+
+  // try CF radial
   {
     NcfRadxFile file;
     file.copyReadDirectives(*this);
@@ -2158,9 +2333,125 @@ int RadxFile::printNative(const string &path, ostream &out,
       return iret;
     }
   }
+  
+  // try Foray NetCDF next
+  {
+    ForayNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isForayNc(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try DOE netcdf next
+  {
+    DoeNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isDoeNc(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try NOXP netcdf next
+  {
+    NoxpNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isNoxpNc(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try D3R netcdf next
+  {
+    D3rNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isD3rNc(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try NEXRAD CMD next
+  {
+    NexradCmdRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isNexradCmd(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  return -1;
 
+}
+
+////////////////////////////////////////////////////////////
+// Print native data in hdf5 file
+// Returns 0 on success, -1 on failure
+
+int RadxFile::_printNativeHdf5(const string &path, ostream &out,
+                               bool printRays, bool printData)
+  
+{
+
+  // try ODIM HDF5 next
+  {
+    OdimHdf5RadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isOdimHdf5(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try GAMIC HDF5 next
+  {
+    GamicHdf5RadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isGamicHdf5(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  return -1;
+
+}
+
+////////////////////////////////////////////////////////////
+// Print native data in other file types
+// Returns 0 on success, -1 on failure
+
+int RadxFile::_printNativeOther(const string &path, ostream &out,
+                                bool printRays, bool printData)
+  
+{
+  
   // try Dorade first
-
   {
     DoradeRadxFile file;
     file.copyReadDirectives(*this);
@@ -2174,7 +2465,6 @@ int RadxFile::printNative(const string &path, ostream &out,
   }
 
   // try UF next
-
   {
     UfRadxFile file;
     file.copyReadDirectives(*this);
@@ -2188,7 +2478,6 @@ int RadxFile::printNative(const string &path, ostream &out,
   }
 
   // try NEXRAD next
-
   {
     NexradRadxFile file;
     file.copyReadDirectives(*this);
@@ -2202,7 +2491,6 @@ int RadxFile::printNative(const string &path, ostream &out,
   }
 
   // try SIGMET RAW next
-
   {
     SigmetRadxFile file;
     file.copyReadDirectives(*this);
@@ -2216,7 +2504,6 @@ int RadxFile::printNative(const string &path, ostream &out,
   }
 
   // try GEMATRONIK next
-
   {
     GemRadxFile file;
     file.copyReadDirectives(*this);
@@ -2229,64 +2516,7 @@ int RadxFile::printNative(const string &path, ostream &out,
     }
   }
 
-  // try DOE netcdf next
-
-  {
-    DoeNcRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isDoeNc(path)) {
-      int iret = file.printNative(path, out, printRays, printData);
-      if (iret) {
-        _errStr = file.getErrStr();
-      }
-      return iret;
-    }
-  }
-
-  // try NOXP netcdf next
-
-  {
-    NoxpNcRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isNoxpNc(path)) {
-      int iret = file.printNative(path, out, printRays, printData);
-      if (iret) {
-        _errStr = file.getErrStr();
-      }
-      return iret;
-    }
-  }
-
-  // try ODIM HDF5 next
-
-  {
-    OdimHdf5RadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isOdimHdf5(path)) {
-      int iret = file.printNative(path, out, printRays, printData);
-      if (iret) {
-        _errStr = file.getErrStr();
-      }
-      return iret;
-    }
-  }
-
-  // try GAMIC HDF5 next
-
-  {
-    GamicHdf5RadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isGamicHdf5(path)) {
-      int iret = file.printNative(path, out, printRays, printData);
-      if (iret) {
-        _errStr = file.getErrStr();
-      }
-      return iret;
-    }
-  }
-
   // try LEOSPHERE next
-
   {
     LeoRadxFile file;
     file.copyReadDirectives(*this);
@@ -2300,7 +2530,6 @@ int RadxFile::printNative(const string &path, ostream &out,
   }
 
   // try RAPIC next
-
   {
     RapicRadxFile file;
     file.copyReadDirectives(*this);
@@ -2314,7 +2543,6 @@ int RadxFile::printNative(const string &path, ostream &out,
   }
 
   // try NIDS next
-
   {
     NidsRadxFile file;
     file.copyReadDirectives(*this);
@@ -2328,7 +2556,6 @@ int RadxFile::printNative(const string &path, ostream &out,
   }
 
   // try HRD next
-
   {
     HrdRadxFile file;
     file.copyReadDirectives(*this);
@@ -2342,7 +2569,6 @@ int RadxFile::printNative(const string &path, ostream &out,
   }
 
   // try TDWR next
-
   {
     TdwrRadxFile file;
     file.copyReadDirectives(*this);
@@ -2355,22 +2581,8 @@ int RadxFile::printNative(const string &path, ostream &out,
     }
   }
 
-  // try NEXRAD CMD next
-
-  {
-    NexradCmdRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isNexradCmd(path)) {
-      int iret = file.printNative(path, out, printRays, printData);
-      if (iret) {
-        _errStr = file.getErrStr();
-      }
-      return iret;
-    }
-  }
 
   // try TWOLF next
-
   {
     TwolfRadxFile file;
     file.copyReadDirectives(*this);
@@ -2383,22 +2595,7 @@ int RadxFile::printNative(const string &path, ostream &out,
     }
   }
 
-  // try D3R netcdf next
-
-  {
-    D3rNcRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isD3rNc(path)) {
-      int iret = file.printNative(path, out, printRays, printData);
-      if (iret) {
-        _errStr = file.getErrStr();
-      }
-      return iret;
-    }
-  }
-
   // try NSSL MRD - NSSL data from NOAA tail radars
-
   {
     NsslMrdRadxFile file;
     file.copyReadDirectives(*this);
