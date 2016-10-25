@@ -89,6 +89,7 @@
 #include <ctime>
 #include <string>
 #include <vector>
+#include <Radx/RadxTime.hh>
 using namespace std;
 
 class RadxXml {
@@ -338,10 +339,11 @@ public:
                         vector<attribute> &attributes);
   
   /////////////////////////////////////////////
-  // read time
-  // will decode either yyyy-mm-ddThh:mm:ss or unix time
-  // in secs since 1970
-  // methods return 0 on success, -1 on failure
+  // read time from a string
+  // fill out time_t &val
+  // will decode either yyyy-mm-ddThh:mm:ss or
+  // unix time in secs since 1970
+  // returns 0 on success, -1 on failure
   
   // time from a string
   
@@ -358,6 +360,32 @@ public:
   static int readTime(const string &xmlBuf,
                       const string &tag,
                       time_t &val,
+                      vector<attribute> &attributes);
+  
+  /////////////////////////////////////////////
+  // read time
+  // fill out RadxTime &val
+  // will decode:
+  //   yyyy-mm-ddThh:mm:ss or
+  //   yyyy-mm-ddThh:mm:ss.frac or
+  //   unix time in secs since 1970
+  // returns 0 on success, -1 on failure
+  
+  // time from a string
+  
+  static int readTime(const string &valStr, RadxTime &val);
+    
+  // time from xml buffer, given a tag
+  
+  static int readTime(const string &xmlBuf,
+                      const string &tag,
+                      RadxTime &val);
+  
+  // time with attributes from xml buffer, given a tag
+  
+  static int readTime(const string &xmlBuf,
+                      const string &tag,
+                      RadxTime &val,
                       vector<attribute> &attributes);
   
   ////////////////////////////////////////////////////////////////
