@@ -107,7 +107,6 @@ void IntfLocator::printParams(ostream &out)
   out << "Performing rlan detection:" << endl;
   out << "  nGatesKernel: " << _nGatesKernel << endl;
   out << "  rlanInterestThreshold: " << _rlanInterestThreshold << endl;
-  out << "  noiseInterestThreshold: " << _noiseInterestThreshold << endl;
   
   if (_interestMapPhaseNoise) {
     _interestMapPhaseNoise->printParams(out);
@@ -341,7 +340,6 @@ int IntfLocator::rlanLocate()
   _endGate.resize(_nGates);
   
   _rlanFlag = _rlanFlag_.alloc(_nGates);
-  _noiseFlag = _noiseFlag_.alloc(_nGates);
   _accumPhaseChange = _accumPhaseChange_.alloc(_nGates);
   _phaseNoise = _phaseNoise_.alloc(_nGates);
   _ncpMean = _ncpMean_.alloc(_nGates);
@@ -358,7 +356,6 @@ int IntfLocator::rlanLocate()
   
   for (int igate = 0; igate < _nGates; igate++) {
     _rlanFlag[igate] = false;
-    _noiseFlag[igate] = false;
     _startGate[igate] = 0;
     _endGate[igate] = 0;
     _accumPhaseChange[igate] = -9999;
@@ -479,16 +476,10 @@ int IntfLocator::rlanLocate()
       (_phaseNoiseInterest[igate] * _weightPhaseNoise) +
       (_snrDModeInterest[igate] * _weightSnrDMode);
 
-    double sumInterestNoise =
-      (_phaseNoiseInterest[igate] * _weightPhaseNoise) +
-      (_snrSdevInterest[igate] * _weightSnrSdev);
-
     if (_ncpAvail) {
       sumInterestRlan += (_ncpMeanInterest[igate] * _weightNcpMean);
-      sumInterestNoise += (_ncpMeanInterest[igate] * _weightNcpMean);
     } else {
       sumInterestRlan += (_widthMeanInterest[igate] * _weightWidthMean);
-      sumInterestNoise += (_widthMeanInterest[igate] * _weightWidthMean);
     }
     
     double interestRlan = sumInterestRlan / sumWeightsRlan;
@@ -496,13 +487,6 @@ int IntfLocator::rlanLocate()
       _rlanFlag[igate] = true;
     } else {
       _rlanFlag[igate] = false;
-    }
-
-    double interestNoise = sumInterestNoise / sumWeightsNoise;
-    if (interestNoise > _noiseInterestThreshold) {
-      _noiseFlag[igate] = true;
-    } else {
-      _noiseFlag[igate] = false;
     }
 
   } // igate
@@ -520,22 +504,6 @@ int IntfLocator::rlanLocate()
   for (int igate = 1; igate < _nGates - 1; igate++) {
     if (!_rlanFlag[igate-1] && !_rlanFlag[igate+1]) {
       _rlanFlag[igate] = false;
-    }
-  }
-
-  // for single gates surrounded by noise, set the noise flag
-  
-  for (int igate = 1; igate < _nGates - 1; igate++) {
-    if (_noiseFlag[igate-1] && _noiseFlag[igate+1]) {
-      _noiseFlag[igate] = true;
-    }
-  }
- 
-  // for single gates surrounded by non-noise, unset the noise flag
-  
-  for (int igate = 1; igate < _nGates - 1; igate++) {
-    if (!_noiseFlag[igate-1] && !_noiseFlag[igate+1]) {
-      _noiseFlag[igate] = false;
     }
   }
 
@@ -799,7 +767,6 @@ void IntfLocator::_createDefaultInterestMaps()
   setInterestMapSnrSdev(pts, 1.0);
 
   setRlanInterestThreshold(0.51);
-  setNoiseInterestThreshold(0.51);
 
 }
 
@@ -884,13 +851,5 @@ void IntfLocator::setInterestMapSnrDMode
 void IntfLocator::setRlanInterestThreshold(double val)
 {
   _rlanInterestThreshold = val;
-}
-
-//////////////////////////////////////////////////////////
-// set combined interest threshold for noise and no signal
-
-void IntfLocator::setNoiseInterestThreshold(double val)
-{
-  _noiseInterestThreshold = val;
 }
 

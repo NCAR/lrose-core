@@ -309,7 +309,12 @@ void PseudoRhi::sortRaysByElevation()
 
   // sanity check
   
-  if (_rays.size() < 2) {
+  if (_rays.size() < 1) {
+    return;
+  } else if (_rays.size() < 2) {
+    _lowLevelAzimuth = _rays[0]->getAzimuthDeg();
+    computeMeanAzimuthFromRays();
+    computeMaxNGates();
     return;
   }
 

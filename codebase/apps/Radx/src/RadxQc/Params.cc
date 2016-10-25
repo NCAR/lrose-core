@@ -1053,7 +1053,7 @@ using namespace std;
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("noise_dbz_at_100km");
     tt->descr = tdrpStrDup("The noise value, represented as dBZ at a range of 100km.");
-    tt->help = tdrpStrDup("This is used if SNR_available is set to FALSE. It is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.");
+    tt->help = tdrpStrDup("Used to fill in missing reflectivity data for the vertical gradient of reflectivity in identifying sea clutter and AP. Also used if SNR_available is set to FALSE. It is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.");
     tt->val_offset = (char *) &noise_dbz_at_100km - &_start_;
     tt->single_val.d = 0;
     tt++;
@@ -1742,18 +1742,6 @@ using namespace std;
     tt->single_val.d = 0.51;
     tt++;
     
-    // Parameter 'noise_interest_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("noise_interest_threshold");
-    tt->descr = tdrpStrDup("Threshold interest value for identifying noise-only gates.");
-    tt->help = tdrpStrDup("If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.");
-    tt->val_offset = (char *) &noise_interest_threshold - &_start_;
-    tt->single_val.d = 0.51;
-    tt++;
-    
     // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1773,6 +1761,30 @@ using namespace std;
     tt->help = tdrpStrDup("You need to activate this step if you want sea clutter to show up in the PID classification.");
     tt->val_offset = (char *) &locate_sea_clutter - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'override_standard_pseudo_earth_radius'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_standard_pseudo_earth_radius");
+    tt->descr = tdrpStrDup("Option to override the standard 4/3 earth radius model for refraction.");
+    tt->help = tdrpStrDup("If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.");
+    tt->val_offset = (char *) &override_standard_pseudo_earth_radius - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'pseudo_earth_radius_ratio'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("pseudo_earth_radius_ratio");
+    tt->descr = tdrpStrDup("Ratio for computing the pseudo earth radius for beam height computations.");
+    tt->help = tdrpStrDup("For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.");
+    tt->val_offset = (char *) &pseudo_earth_radius_ratio - &_start_;
+    tt->single_val.d = 1.33333;
     tt++;
     
     // Parameter 'Comment 11'
@@ -1943,6 +1955,55 @@ using namespace std;
     tt->single_val.d = 1;
     tt++;
     
+    // Parameter 'seaclut_dbz_elev_gradient_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_dbz_elev_gradient_interest_map");
+    tt->descr = tdrpStrDup("SEA CLUTTER interest mapping for gradient of dbz in polar elevation space.");
+    tt->help = tdrpStrDup("The reflectivity gradient is computed with respect to elevation, i.e. the change in reflectivity with change in elevation angle. The units are db/deg.");
+    tt->array_offset = (char *) &_seaclut_dbz_elev_gradient_interest_map - &_start_;
+    tt->array_n_offset = (char *) &seaclut_dbz_elev_gradient_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_seaclut_dbz_elev_gradient_interest_map->value - (char *) _seaclut_dbz_elev_gradient_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_seaclut_dbz_elev_gradient_interest_map->interest - (char *) _seaclut_dbz_elev_gradient_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = -15;
+      tt->struct_vals[1].d = 1;
+      tt->struct_vals[2].d = -5;
+      tt->struct_vals[3].d = 0;
+    tt++;
+    
+    // Parameter 'seaclut_dbz_elev_gradient_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_dbz_elev_gradient_weight");
+    tt->descr = tdrpStrDup("Weight for interest for elevation gradient of dbz.");
+    tt->help = tdrpStrDup("The relative weighting applied when computing the fuzzy sum.");
+    tt->val_offset = (char *) &seaclut_dbz_elev_gradient_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
     // Parameter 'seaclut_interest_threshold'
     // ctype is 'double'
     
@@ -1953,6 +2014,30 @@ using namespace std;
     tt->help = tdrpStrDup("If the fuzzy interest value exceeds this threshold, sea clutter is assumed to exist at that gate.");
     tt->val_offset = (char *) &seaclut_interest_threshold - &_start_;
     tt->single_val.d = 0.51;
+    tt++;
+    
+    // Parameter 'dbz_elevation_gradient_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("dbz_elevation_gradient_field_name");
+    tt->descr = tdrpStrDup("Field name for computed vertical dbz gradient in polar elevation space (dB/deg).");
+    tt->help = tdrpStrDup("For sea clutter identification, we need to compute the vertical gradient of reflectivity. This is the name of that gradient field, in dB/deg.");
+    tt->val_offset = (char *) &dbz_elevation_gradient_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DbzElevGradient");
+    tt++;
+    
+    // Parameter 'ray_height_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ray_height_field_name");
+    tt->descr = tdrpStrDup("Field name for computed ray height (km).");
+    tt->help = tdrpStrDup("In order to compute the vertical gradient of reflectivity for sea clutter, we need to compute the beam height at each gate. This is the name of the ray height field, in km MSL.");
+    tt->val_offset = (char *) &ray_height_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("RayHtMsl");
     tt++;
     
     // Parameter 'Comment 12'
@@ -2222,7 +2307,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 53;
+        tt->struct_def.fields[0].enum_def.nfields = 55;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -2313,8 +2398,8 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[42].val = SNR_SDEV_INTEREST_RLAN;
         tt->struct_def.fields[0].enum_def.fields[43].name = tdrpStrDup("RLAN_FLAG");
         tt->struct_def.fields[0].enum_def.fields[43].val = RLAN_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("NOISE_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[44].val = NOISE_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("RAY_HEIGHT");
+        tt->struct_def.fields[0].enum_def.fields[44].val = RAY_HEIGHT;
         tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("SNR_MEAN_SEACLUT");
         tt->struct_def.fields[0].enum_def.fields[45].val = SNR_MEAN_SEACLUT;
         tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("RHOHV_MEAN_SEACLUT");
@@ -2323,14 +2408,18 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[47].val = PHIDP_SDEV_SEACLUT;
         tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("ZDR_SDEV_SEACLUT");
         tt->struct_def.fields[0].enum_def.fields[48].val = ZDR_SDEV_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("RHOHV_MEAN_INTEREST_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[49].val = RHOHV_MEAN_INTEREST_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("PHIDP_SDEV_INTEREST_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[50].val = PHIDP_SDEV_INTEREST_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("ZDR_SDEV_INTEREST_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[51].val = ZDR_SDEV_INTEREST_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("SEACLUT_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[52].val = SEACLUT_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("DBZ_ELEV_GRADIENT_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[49].val = DBZ_ELEV_GRADIENT_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("RHOHV_MEAN_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[50].val = RHOHV_MEAN_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("PHIDP_SDEV_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[51].val = PHIDP_SDEV_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("ZDR_SDEV_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[52].val = ZDR_SDEV_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("DBZ_ELEV_GRADIENT_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[53].val = DBZ_ELEV_GRADIENT_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("SEACLUT_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[54].val = SEACLUT_FLAG;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;

@@ -55,6 +55,7 @@ SeaClutter::SeaClutter()
   _interestMapRhohvMean = NULL;
   _interestMapPhidpSdev = NULL;
   _interestMapZdrSdev = NULL;
+  _interestMapDbzElevGradient = NULL;
 
   _createDefaultInterestMaps();
   _nGatesKernel = 9;
@@ -84,6 +85,10 @@ SeaClutter::~SeaClutter()
     delete _interestMapZdrSdev;
   }
 
+  if (_interestMapDbzElevGradient) {
+    delete _interestMapDbzElevGradient;
+  }
+
 }
 
 ///////////////////////////////////////////////////////////////
@@ -105,6 +110,9 @@ void SeaClutter::printParams(ostream &out)
   }
   if (_interestMapZdrSdev) {
     _interestMapZdrSdev->printParams(out);
+  }
+  if (_interestMapDbzElevGradient) {
+    _interestMapDbzElevGradient->printParams(out);
   }
 
 }
@@ -137,12 +145,14 @@ void SeaClutter::setRayProps(time_t timeSecs,
   _rhohvAvail = false;
   _phidpAvail = false;
   _zdrAvail = false;
+  _dbzElevGradientAvail = false;
 
   _snr = _snr_.alloc(_nGates);
   _dbz = _dbz_.alloc(_nGates);
   _phidp = _phidp_.alloc(_nGates);
   _rhohv = _rhohv_.alloc(_nGates);
   _zdr = _zdr_.alloc(_nGates);
+  _dbzElevGradient = _dbzElevGradient_.alloc(_nGates);
 
 }
 
@@ -205,6 +215,16 @@ void SeaClutter::setZdrField(double *vals)
 {
   memcpy(_zdr, vals, _nGates * sizeof(double));
   _zdrAvail = true;
+}
+
+///////////////////////////////////////////////////////////////
+// set the DBZ ELEV GRADIEND field
+// must be called after setRayProps()
+
+void SeaClutter::setDbzElevGradientField(double *vals)
+{
+  memcpy(_dbzElevGradient, vals, _nGates * sizeof(double));
+  _dbzElevGradientAvail = true;
 }
 
 //////////////////////////////////////////////////////////////
@@ -296,6 +316,7 @@ int SeaClutter::locate()
   _rhohvMeanInterest = _rhohvMeanInterest_.alloc(_nGates);
   _phidpSdevInterest = _phidpSdevInterest_.alloc(_nGates);
   _zdrSdevInterest = _zdrSdevInterest_.alloc(_nGates);
+  _dbzElevGradientInterest = _dbzElevGradientInterest_.alloc(_nGates);
   
   for (int igate = 0; igate < _nGates; igate++) {
     _clutFlag[igate] = false;
@@ -308,6 +329,7 @@ int SeaClutter::locate()
     _rhohvMeanInterest[igate] = -9999;
     _phidpSdevInterest[igate] = -9999;
     _zdrSdevInterest[igate] = -9999;
+    _dbzElevGradientInterest[igate] = -9999;
   }
   
   // set kernel size for computing phase error
@@ -361,12 +383,16 @@ int SeaClutter::locate()
 
     _zdrSdevInterest[igate] =
       _interestMapZdrSdev->getInterest(_zdrSdev[igate]);
+
+    _dbzElevGradientInterest[igate] =
+      _interestMapDbzElevGradient->getInterest(_dbzElevGradient[igate]);
     
   }
 
   // compute sum weights
-
-  double sumWeightsClut = _weightRhohvMean + _weightPhidpSdev + _weightZdrSdev;
+  
+  double sumWeightsClut = (_weightRhohvMean + _weightPhidpSdev +
+                           _weightZdrSdev + _weightDbzElevGradient);
   
   // set flags
   
@@ -375,7 +401,8 @@ int SeaClutter::locate()
     double sumInterestClut =
       (_rhohvMeanInterest[igate] * _weightRhohvMean) +
       (_phidpSdevInterest[igate] * _weightPhidpSdev) +
-      (_zdrSdevInterest[igate] * _weightZdrSdev);
+      (_zdrSdevInterest[igate] * _weightZdrSdev) +
+      (_dbzElevGradientInterest[igate] * _weightDbzElevGradient);
 
     double interestClut = sumInterestClut / sumWeightsClut;
     if (interestClut > _clutInterestThreshold && _snrMean[igate] >= _minSnrDb) {
@@ -494,7 +521,7 @@ void SeaClutter::_createDefaultInterestMaps()
   pts.clear();
   pts.push_back(InterestMap::ImPoint(0.35, 1.0));
   pts.push_back(InterestMap::ImPoint(0.40, 0.001));
-  setInterestMapRhohvMean(pts, 1.0);
+  setInterestMapRhohvMean(pts, 0.5);
 
   pts.clear();
   pts.push_back(InterestMap::ImPoint(40.0, 0.001));
@@ -505,6 +532,11 @@ void SeaClutter::_createDefaultInterestMaps()
   pts.push_back(InterestMap::ImPoint(1.5, 0.001));
   pts.push_back(InterestMap::ImPoint(2.5, 1.0));
   setInterestMapZdrSdev(pts, 1.0);
+  
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(-15, 1.0));
+  pts.push_back(InterestMap::ImPoint(-5, 0.001));
+  setInterestMapDbzElevGradient(pts, 1.0);
   
   setClutInterestThreshold(0.51);
 
@@ -553,6 +585,21 @@ void SeaClutter::setInterestMapZdrSdev
   }
   _interestMapZdrSdev = new InterestMap("ZdrSdev", pts, weight);
   _weightZdrSdev = weight;
+}
+
+/////////////////////////////////////////////////////////
+// set interest map and weight for zdr sdev
+
+void SeaClutter::setInterestMapDbzElevGradient
+  (const vector<InterestMap::ImPoint> &pts,
+   double weight)
+  
+{
+  if (_interestMapDbzElevGradient) {
+    delete _interestMapDbzElevGradient;
+  }
+  _interestMapDbzElevGradient = new InterestMap("DbzElevGradient", pts, weight);
+  _weightDbzElevGradient = weight;
 }
 
 /////////////////////////////////////////////////////////

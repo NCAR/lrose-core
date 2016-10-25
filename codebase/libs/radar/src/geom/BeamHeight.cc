@@ -43,6 +43,7 @@
 using namespace std;
 
 const double BeamHeight::_earthRadiusKm = 6375.636;
+const double BeamHeight::_htMissing = -9999.0;
 
 // Constructor
 
@@ -54,6 +55,7 @@ BeamHeight::BeamHeight()
   _gndRangeKm = 0.0;
   _slantRangeKm = 0.0;
   setPseudoRadiusRatio(4.0 / 3.0); // standard ratio
+  _htCache = NULL;
   
 }
 
@@ -72,10 +74,16 @@ void BeamHeight::setPseudoRadiusRatio(double ratio)
 
 {
   
+  if (_pseudoRadiusRatio == ratio) {
+    return;
+  }
   _pseudoRadiusRatio = ratio;
   _pseudoRadiusKm = _earthRadiusKm * _pseudoRadiusRatio;
   _pseudoRadiusKmSq = _pseudoRadiusKm * _pseudoRadiusKm;
   _pseudoDiamKm = _pseudoRadiusKm * 2.0;
+  if (_htCache != NULL) {
+    setHtCacheToMissing();
+  }
 
 }
 
@@ -130,6 +138,49 @@ double BeamHeight::computeElevationDeg(double htKm, double gndRangeKm)
 double BeamHeight::computeHtKm(double elDeg, double slantRangeKm) const
 {
 
+  if (_htCache == NULL) {
+    // no active cache, compute and return
+    return _computeHtKm(elDeg, slantRangeKm);
+  }
+
+  // find location in cache
+
+  int iel = (int) ((elDeg - _htCacheStartElevDeg) / _htCacheDeltaElevDeg + 0.5);
+  if (iel < 0 || iel >= _htCache_.sizeMajor()) {
+    // outside valid range of cache, compute on the fly
+    return _computeHtKm(elDeg, slantRangeKm);
+  }
+  int irng = (int) ((elDeg - _htCacheStartElevDeg) / _htCacheDeltaElevDeg + 0.5);
+  if (irng < 0 || irng >= _htCache_.sizeMinor()) {
+    // outside valid range of cache, compute on the fly
+    return _computeHtKm(elDeg, slantRangeKm);
+  }
+
+  // if cached value is no missing, use it
+
+  double cachedHt = _htCache[iel][irng];
+  if (cachedHt != _htMissing) {
+    return cachedHt;
+  }
+
+  // cached value is missing, so compute it now
+
+  double htKm = _computeHtKm(elDeg, slantRangeKm);
+  _htCache[iel][irng] = htKm;
+
+  // compute gnd range
+
+  _gndRangeKm  = slantRangeKm * cos(elDeg * DEG_TO_RAD);
+
+  // return computed value
+
+  return htKm;
+  
+}
+
+double BeamHeight::_computeHtKm(double elDeg, double slantRangeKm) const
+{
+
 
   double elRad = elDeg * DEG_TO_RAD;
   
@@ -140,6 +191,7 @@ double BeamHeight::computeHtKm(double elDeg, double slantRangeKm) const
   double term2 = slantRangeKm * _pseudoDiamKm * sinEl;
   
   double htKm = _instHtKm - _pseudoRadiusKm + sqrt(term1 + term2);
+  _gndRangeKm  = slantRangeKm * cosEl;
 
   return htKm;
 
@@ -174,5 +226,98 @@ double BeamHeight::_ht(double elRad)
   
   return htKm;
 
+}
+
+////////////////////////////////////////////////////////////////////////
+// Initialize the cache, if desired.
+//
+// If the cache is in use, we store computed heights in the cache to
+// improve performance. Subsequence requests for elev/range coords
+// that have been used previously will return the previously computed
+// heights.
+// If using the cache, it is important to use a sufficiently fine
+// granularity to provide results of the desired accuracy.
+
+void BeamHeight::initHtCache(size_t nElev, 
+                             double startElevDeg,
+                             double deltaElevDeg,
+                             size_t nRange, 
+                             double startRangeKm,
+                             double deltaRangeKm)
+
+{
+
+  if (nElev == 0 || nRange == 0) {
+    // zero size
+    freeHtCache();
+    return;
+  }
+
+  if (nElev == _htCacheNElev &&
+      nRange == _htCacheNRange &&
+      fabs(startElevDeg - _htCacheStartElevDeg) < 0.001 &&
+      fabs(deltaElevDeg - _htCacheDeltaElevDeg) < 0.001 &&
+      fabs(startRangeKm - _htCacheStartRangeKm) < 0.001 &&
+      fabs(deltaRangeKm - _htCacheDeltaRangeKm) < 0.001) {
+    // no change
+    return;
+  }
+
+  // allocate space
+
+  _htCache = _htCache_.alloc(nElev, nRange);
+
+  // initialze to missing
+
+  for (size_t ielev = 0; ielev < nElev; ielev++) {
+    for (size_t irange = 0; irange < nRange; irange++) {
+      _htCache[ielev][irange] = _htMissing;
+    } // irange
+  } // ielev
+
+  // save details
+
+  _htCacheNElev = nElev;
+  _htCacheStartElevDeg = startElevDeg;
+  _htCacheDeltaElevDeg = deltaElevDeg;
+  _htCacheNRange = nRange;
+  _htCacheStartRangeKm = startRangeKm;
+  _htCacheDeltaRangeKm = deltaRangeKm;
+
+}
+
+//////////////////////////////////////////////////////
+// initialize a previously allocated cache to missing
+
+void BeamHeight::setHtCacheToMissing()
+
+{
+  if (_htCache == NULL) {
+    return;
+  }
+  int size1D = _htCache_.size1D();
+  double *dat1D = _htCache_.dat1D();
+  for (int ii = 0; ii < size1D; ii++, dat1D++) {
+    *dat1D = _htMissing;
+  }
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// Free the cache, set cache pointer to NULL
+
+void BeamHeight::freeHtCache()
+{
+  if (_htCache == NULL) {
+    return;
+  }
+  _htCache_.free();
+  _htCache = NULL;
+  _htCacheNElev = 0;
+  _htCacheStartElevDeg = 0;
+  _htCacheDeltaElevDeg = 0;
+  _htCacheNRange = 0;
+  _htCacheStartRangeKm = 0;
+  _htCacheDeltaRangeKm = 0;
 }
 

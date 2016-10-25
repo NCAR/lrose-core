@@ -3735,6 +3735,55 @@ double RadxVol::_computeSweepFractionInTransition(int sweepIndex)
 
 }
 
+///////////////////////////////////////////
+// compute the geometry limits from rays
+
+void RadxVol::computeGeomLimitsFromRays(double &minElev,
+                                        double &maxElev,
+                                        double &minRange,
+                                        double &maxRange)
+  
+{
+
+  if (_rays.size() < 1) {
+    return;
+  }
+
+  const RadxRay &ray0 = *_rays[0];
+
+  minElev = ray0.getElevationDeg();
+  maxElev = ray0.getElevationDeg();
+  minRange = ray0.getStartRangeKm();
+  maxRange = minRange + ray0.getNGates() * ray0.getGateSpacingKm();
+
+  // loop through rays, accumulating geometry information
+  
+  for (size_t iray = 1; iray < _rays.size(); iray++) {
+
+    const RadxRay &ray = *_rays[iray];
+
+    double elev = ray.getElevationDeg();
+    double startRange = ray.getStartRangeKm();
+    double gateSpacing = ray.getGateSpacingKm();
+    double endRange = startRange + ray.getNGates() * gateSpacing;
+    
+    if (elev < minElev) {
+      minElev = elev;
+    }
+    if (elev > maxElev) {
+      maxElev = elev;
+    }
+    if (startRange < minRange) {
+      minRange = startRange;
+    }
+    if (endRange > maxRange) {
+      maxRange = endRange;
+    }
+    
+  } // iray
+
+}
+
 ///////////////////////////////////////////////////////////////
 /// Estimate nyquist per sweep from velocity field
 ///
@@ -5509,6 +5558,7 @@ int RadxVol::loadPseudoRhis()
   double prevAz = _rays[lowSweepStartRayIndex]->getAzimuthDeg();
   double sumDeltaAz = 0.0;
   double count = 0.0;
+
   for (size_t iray = lowSweepStartRayIndex + 1; iray <= lowSweepEndRayIndex; iray++) {
     double az = _rays[iray]->getAzimuthDeg();
     double deltaAz = fabs(az - prevAz);
@@ -5517,6 +5567,7 @@ int RadxVol::loadPseudoRhis()
     }
     sumDeltaAz += deltaAz;
     count++;
+    prevAz = az;
   } // iray
   double meanDeltaAz = sumDeltaAz / count;
 
@@ -5526,15 +5577,15 @@ int RadxVol::loadPseudoRhis()
   
   // go through the low sweep, adding rays to pseudo RHIs
   
-  for (size_t iray = lowSweepStartRayIndex + 1; iray <= lowSweepEndRayIndex; iray++) {
+  for (size_t iray = lowSweepStartRayIndex; iray <= lowSweepEndRayIndex; iray++) {
     RadxRay *lowRay = _rays[iray];
     PseudoRhi *rhi = new PseudoRhi;
     rhi->addRay(lowRay);
     _pseudoRhis.push_back(rhi);
     for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
       if (isweep == lowSweepIndex) {
-        // low sweep, ignore
-        break;
+        // low sweep, ignore this one, already added
+        continue;
       }
       RadxSweep *sweep = _sweeps[isweep];
       RadxRay *bestRay = NULL;

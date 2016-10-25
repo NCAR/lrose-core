@@ -916,7 +916,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("set_max_output_value");
-    tt->descr = tdrpStrDup("Max value to output to grid. This only applies to values that goabove the max_value after applying the function. If the value is above the max_value prior to applying the funcition this will have NO effect.");
+    tt->descr = tdrpStrDup("Max value to output to grid. This only applies to values that go above the max_value after applying the function. If the value is above the max_value prior to applying the function this will have NO effect.");
     tt->help = tdrpStrDup("Set all newly computed values greater than max_value to the max_value defined below.");
     tt->val_offset = (char *) &set_max_output_value - &_start_;
     tt->single_val.b = pFALSE;

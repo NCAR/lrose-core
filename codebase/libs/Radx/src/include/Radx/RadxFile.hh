@@ -725,8 +725,8 @@ public:
   // Returns 0 on success, -1 on failure
   // Use getErrStr() if error occurs
   
-  virtual int aggregateFromPaths(const vector<string> &paths,
-                                 RadxVol &vol);
+  int aggregateFromPaths(const vector<string> &paths,
+                         RadxVol &vol);
   
   /////////////////////////////////////////////////////////
   /// Read in data file from specified directory.

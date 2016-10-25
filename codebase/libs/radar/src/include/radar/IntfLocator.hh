@@ -30,8 +30,7 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// (a) Locate gates contaminated with RLAN interference
-// (b) Locate gates with noise and no signal
+// Locate gates contaminated with RLAN interference
 //
 ///////////////////////////////////////////////////////////////
 
@@ -91,7 +90,6 @@ public:
      double weight);
   
   void setRlanInterestThreshold(double val);
-  void setNoiseInterestThreshold(double val);
 
   // set radar props
 
@@ -151,7 +149,6 @@ public:
   // these arrays span the gates from 0 to nGates-1
 
   const bool *getRlanFlag() const { return _rlanFlag; }
-  const bool *getNoiseFlag() const { return _noiseFlag; }
   
   const double *getAccumPhaseChange() const { return _accumPhaseChange; }
   const double *getPhaseNoise() const { return _phaseNoise; }
@@ -234,9 +231,6 @@ private:
   TaArray<bool> _rlanFlag_;
   bool *_rlanFlag;
 
-  TaArray<bool> _noiseFlag_;
-  bool *_noiseFlag;
-
   TaArray<double> _accumPhaseChange_;
   double *_accumPhaseChange;
 
@@ -295,7 +289,6 @@ private:
   double _weightSnrSdev;
 
   double _rlanInterestThreshold;
-  double _noiseInterestThreshold;
 
   // private methods
   

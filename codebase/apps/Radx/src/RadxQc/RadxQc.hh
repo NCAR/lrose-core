@@ -49,7 +49,9 @@
 #include <deque>
 #include <radar/NoiseLocator.hh>
 #include <radar/TempProfile.hh>
+#include <radar/BeamHeight.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/PseudoRhi.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -107,6 +109,7 @@ private:
 
   double _radarHtKm;
   double _wavelengthM;
+  BeamHeight _beamHt;
 
   // temperature profile from sounding, if appropriate
 
@@ -123,6 +126,10 @@ private:
   deque<ComputeThread *> _availThreads;
   pthread_mutex_t _debugPrintMutex;
   
+  // checking timing performance
+
+  struct timeval _timeA;
+
   // private methods
   
   int _runFilelist();
@@ -147,6 +154,13 @@ private:
                                 double &tempC,
                                 time_t &timeForTemp);
 
+  int _addHeightField(RadxVol &vol);
+  int _computeDbzGradient(RadxVol &vol);
+  int _computeDbzGradient(PseudoRhi &rhi);
+  int _computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay);
+  void _copyDbzGradient(const RadxRay &lowerRay, RadxRay &upperRay);
+  void _printRunTime(const string& str);
+  
 };
 
 #endif

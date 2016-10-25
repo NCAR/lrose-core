@@ -650,6 +650,13 @@ public:
   
   void computeSweepFixedAnglesFromRays();
 
+  /// compute the geometry limits from rays
+
+  void computeGeomLimitsFromRays(double &minElev,
+                                 double &maxElev,
+                                 double &minRange,
+                                 double &maxRange);
+  
   /// Compute sweep scan rates from ray data - in deg/sec.
   ///
   /// This is done using the angle information on the rays.

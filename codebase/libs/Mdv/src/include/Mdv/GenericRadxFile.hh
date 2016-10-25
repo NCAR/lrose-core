@@ -118,15 +118,6 @@ public:
   virtual int readFromPath(const string &path,
                            RadxVol &vol);
 
-  //////////////////////////////////////////////////////////
-  // Read in data file from a series of specified paths and
-  // aggregate into a single volume object.
-  // Returns 0 on success, -1 on failure
-  // Use getErrStr() if error occurs
-  
-  virtual int aggregateFromPaths(const vector<string> &paths,
-                                 RadxVol &vol);
-  
   //@}
 
   ////////////////////////

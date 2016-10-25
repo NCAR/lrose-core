@@ -265,7 +265,7 @@ paramdef string {
 paramdef double {
   p_default = 0.0;
   p_descr = "The noise value, represented as dBZ at a range of 100km.";
-  p_help = "This is used if SNR_available is set to FALSE. It is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.";
+  p_help = "Used to fill in missing reflectivity data for the vertical gradient of reflectivity in identifying sea clutter and AP. Also used if SNR_available is set to FALSE. It is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.";
 } noise_dbz_at_100km;
 
 paramdef boolean {
@@ -539,12 +539,6 @@ paramdef double {
   p_help = "If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.";
 } rlan_interest_threshold;
 
-paramdef double {
-  p_default = 0.51;
-  p_descr = "Threshold interest value for identifying noise-only gates.";
-  p_help = "If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.";
-} noise_interest_threshold;
-
 commentdef {
   p_header = "LOCATING SEA CLUTTER";
 }
@@ -554,6 +548,18 @@ paramdef boolean {
   p_descr = "Option to locate gates with sea clutter.";
   p_help = "You need to activate this step if you want sea clutter to show up in the PID classification.";
 } locate_sea_clutter;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the standard 4/3 earth radius model for refraction.";
+  p_help = "If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.";
+} override_standard_pseudo_earth_radius;
+
+paramdef double {
+  p_default = 1.33333333;
+  p_descr = "Ratio for computing the pseudo earth radius for beam height computations.";
+  p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
+} pseudo_earth_radius_ratio;
 
 commentdef {
   p_header = "INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION";
@@ -599,11 +605,35 @@ paramdef double {
   p_help = "The relative weighting applied when computing the fuzzy sum.";
 } seaclut_zdr_sdev_weight;
 
+paramdef struct interest_map_point_t {
+  p_default = {{-15.0, 1.0}, {-5.0, 0.0}};
+  p_descr = "SEA CLUTTER interest mapping for gradient of dbz in polar elevation space.";
+  p_help = "The reflectivity gradient is computed with respect to elevation, i.e. the change in reflectivity with change in elevation angle. The units are db/deg.";
+} seaclut_dbz_elev_gradient_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for elevation gradient of dbz.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} seaclut_dbz_elev_gradient_weight;
+
 paramdef double {
   p_default = 0.51;
   p_descr = "Threshold interest value for identifying sea clutter.";
   p_help = "If the fuzzy interest value exceeds this threshold, sea clutter is assumed to exist at that gate.";
 } seaclut_interest_threshold;
+
+paramdef string {
+  p_default = "DbzElevGradient";
+  p_descr = "Field name for computed vertical dbz gradient in polar elevation space (dB/deg).";
+  p_help = "For sea clutter identification, we need to compute the vertical gradient of reflectivity. This is the name of that gradient field, in dB/deg.";
+} dbz_elevation_gradient_field_name;
+
+paramdef string {
+  p_default = "RayHtMsl";
+  p_descr = "Field name for computed ray height (km).";
+  p_help = "In order to compute the vertical gradient of reflectivity for sea clutter, we need to compute the beam height at each gate. This is the name of the ray height field, in km MSL.";
+} ray_height_field_name;
 
 commentdef {
   p_header = "SOUNDING INPUT FOR temperatures - OPTIONAL";
@@ -759,15 +789,18 @@ typedef enum {
   SNR_DMODE_INTEREST_RLAN,
   SNR_SDEV_INTEREST_RLAN,
   RLAN_FLAG,
-  NOISE_FLAG,
+
+  RAY_HEIGHT,
 
   SNR_MEAN_SEACLUT,
   RHOHV_MEAN_SEACLUT,
   PHIDP_SDEV_SEACLUT,
   ZDR_SDEV_SEACLUT,
+  DBZ_ELEV_GRADIENT_SEACLUT,
   RHOHV_MEAN_INTEREST_SEACLUT,
   PHIDP_SDEV_INTEREST_SEACLUT,
   ZDR_SDEV_INTEREST_SEACLUT,
+  DBZ_ELEV_GRADIENT_INTEREST_SEACLUT,
   SEACLUT_FLAG
 
 } output_field_id_t;
