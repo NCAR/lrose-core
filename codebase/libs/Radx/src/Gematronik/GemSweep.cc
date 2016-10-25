@@ -76,8 +76,8 @@ GemSweep::GemSweep(const GemSweep &orig, int num,
   _startTime = orig._startTime;
   _fieldName = orig._fieldName;
 
-  _elev = orig._elev;
-  _nAz = orig._nAz;
+  _fixedAngle = orig._fixedAngle;
+  _nAngles = orig._nAngles;
   _nSamples = orig._nSamples;
   _nGates = orig._nGates;
   _startRange = orig._startRange;
@@ -135,9 +135,9 @@ void GemSweep::clear()
   _startTime = 0;
   _fieldName = "unknown";
 
-  _elev = 0;
+  _fixedAngle = 0;
   _nSamples = Radx::missingMetaInt;
-  _nAz = 0;
+  _nAngles = 0;
   _nGates = 0;
   _startRange = 0.0;
   _gateSpacing = 0.0;
@@ -174,7 +174,7 @@ void GemSweep::clear()
   _dataByteWidth = 0;
   _anglesByteWidth = 0;
 
-  _azAngles.clear();
+  _angles.clear();
 
   if (_fieldData != NULL) {
     delete [] _fieldData;
@@ -195,8 +195,8 @@ void GemSweep::print(ostream &out) const
   out << "  Start time: " << RadxTime::strm(_startTime) << endl;
   out << "  FieldName: " << _fieldName << endl;
 
-  out << "  elev: " << _elev << endl;
-  out << "  nAz: " << _nAz << endl;
+  out << "  fixedAngle: " << _fixedAngle << endl;
+  out << "  nAngles: " << _nAngles << endl;
   out << "  nSamples: " << _nSamples << endl;
   out << "  nGates: " << _nGates << endl;
   out << "  startRange: " << _startRange << endl;
@@ -271,12 +271,12 @@ int GemSweep::decodeInfoXml(const string &xmlBuf)
     }
   }
 
-  // elevation angle
+  // fixed angle
 
-  if (RadxXml::readDouble(sliceBuf, "posangle", _elev)) {
+  if (RadxXml::readDouble(sliceBuf, "posangle", _fixedAngle)) {
     cerr << "ERROR - GemSweep::decodeXml" << endl;
     cerr << "  Sweep num: " << _num << endl;
-    cerr << "  Cannot set elevation angle <posangle>" << endl;
+    cerr << "  Cannot set fixed angle <posangle>" << endl;
     return -1;
   }
 
@@ -387,7 +387,7 @@ int GemSweep::decodeInfoXml(const string &xmlBuf)
     cerr << "  Cannot find type attr for data" << endl;
     return -1;
   }
-  if (RadxXml::readIntAttr(attributes, "rays", _nAz)) {
+  if (RadxXml::readIntAttr(attributes, "rays", _nAngles)) {
     cerr << "ERROR - GemSweep::decodeXml" << endl;
     cerr << "  Cannot find rays attr for data" << endl;
     return -1;
@@ -478,45 +478,45 @@ int GemSweep::_decodeDateTime(const vector<RadxXml::attribute> &attributes,
 ////////////////////////////////////////
 // set the angle array from a GemBlob
 
-int GemSweep::setAzAngles(const GemBlob &blob)
+int GemSweep::setAngles(const GemBlob &blob)
 
 {
 
-  _azAngles.clear();
+  _angles.clear();
 
   int nBytesAvail = blob.getSize();
-  int nBytesNeeded = _nAz * _anglesByteWidth;
+  int nBytesNeeded = _nAngles * _anglesByteWidth;
   if (nBytesNeeded != nBytesAvail) {
-    cerr << "ERROR - GemSweep::setAzAngle" << endl;
+    cerr << "ERROR - GemSweep::setAngles" << endl;
     cerr << "  Cannot set angles, nbytes do not match" << endl;
     cerr << "  nBytesNeeded: " << nBytesNeeded << endl;
     cerr << "  nBytesAvail: " << nBytesAvail << endl;
-    cerr << "  elev angle: " << _elev << endl;
+    cerr << "  fixed angle: " << _fixedAngle << endl;
     return -1;
   }
 
   if (_anglesByteWidth == 2) {
     const Radx::ui16 *shorts = (Radx::ui16 *) blob.getData();
-    Radx::ui16 *copy = new Radx::ui16[_nAz];
+    Radx::ui16 *copy = new Radx::ui16[_nAngles];
     memcpy(copy, shorts, nBytesNeeded);
     ByteOrder::swap16(copy, nBytesNeeded);
-    for (int ii = 0; ii < _nAz; ii++) {
-      double az = (double) copy[ii] * (360.0 / 65536.0);
-      _azAngles.push_back(az);
+    for (int ii = 0; ii < _nAngles; ii++) {
+      double angle = (double) copy[ii] * (360.0 / 65536.0);
+      _angles.push_back(angle);
     }
     delete[] copy;
   } else {
     const Radx::ui08 *bytes = (Radx::ui08 *) blob.getData();
-    for (int ii = 0; ii < _nAz; ii++) {
-      double az = (double) bytes[ii] * (360.0 / 256);
-      _azAngles.push_back(az);
+    for (int ii = 0; ii < _nAngles; ii++) {
+      double angle = (double) bytes[ii] * (360.0 / 256);
+      _angles.push_back(angle);
     }
   }
 
   if (_verbose) {
-    cerr << "Sweep elev: " << _elev << ", azimuths: ";
-    for (int ii = 0; ii < (int) _azAngles.size(); ii++) {
-      cerr << " " << _azAngles[ii];
+    cerr << "Sweep fixed angle: " << _fixedAngle << ", angles: ";
+    for (int ii = 0; ii < (int) _angles.size(); ii++) {
+      cerr << " " << _angles[ii];
     }
     cerr << endl;
   }
@@ -537,7 +537,7 @@ int GemSweep::setFieldData(const GemBlob &blob)
     _fieldData = NULL;
   }
 
-  int nPts = _nAz * _nGates;
+  int nPts = _nAngles * _nGates;
   int nBytesAvail = blob.getSize();
   int nBytesNeeded = nPts * _dataByteWidth;
   if (nBytesNeeded != nBytesAvail) {
@@ -545,7 +545,7 @@ int GemSweep::setFieldData(const GemBlob &blob)
     cerr << "  Cannot set field data, nbytes do not match" << endl;
     cerr << "  nBytesNeeded: " << nBytesNeeded << endl;
     cerr << "  nBytesAvail: " << nBytesAvail << endl;
-    cerr << "  elev angle: " << _elev << endl;
+    cerr << "  fixed angle: " << _fixedAngle << endl;
     return -1;
   }
 

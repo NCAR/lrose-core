@@ -58,7 +58,7 @@ public:
 
   // set particular fields
   
-  int setAzAngles(const GemBlob &blob);
+  int setAngles(const GemBlob &blob);
   int setFieldData(const GemBlob &blob);
 
   // get methods
@@ -69,8 +69,8 @@ public:
 
   int getNSamples() const { return _nSamples; }
 
-  double getElev() const { return _elev; }
-  int getNAz() const { return _nAz; }
+  double getFixedAngle() const { return _fixedAngle; }
+  int getNAngles() const { return _nAngles; }
   int getNGates() const { return _nGates; }
   double getStartRange() const { return _startRange; }
   double getGateSpacing() const { return _gateSpacing; }
@@ -116,7 +116,7 @@ public:
   int getDataByteWidth() const { return _dataByteWidth; }
   int getAnglesByteWidth() const { return _anglesByteWidth; }
   
-  const vector<double> &getAzAngles() const { return _azAngles; };
+  const vector<double> &getAngles() const { return _angles; };
   const Radx::ui08 *getFieldData() const { return _fieldData; }
 
   // print
@@ -135,8 +135,9 @@ private:
   time_t _startTime;
   string _fieldName;
 
-  double _elev;
-  int _nAz;
+  double _fixedAngle;
+  int _nAngles;
+  vector<double> _angles;
   int _nSamples;
   int _nGates;
   double _startRange;
@@ -172,7 +173,6 @@ private:
   int _dataByteWidth;
   int _anglesByteWidth;
 
-  vector<double> _azAngles;
   Radx::ui08 *_fieldData;
 
   vector<double> _pulseWidths;

@@ -72,6 +72,9 @@ public:
 
   time_t getFileTime() const { return _fileTime; }
   time_t getVolTime() const { return _volTime; }
+  const string &getVolType() const { return _volType; }
+  bool getIsRhi() const { return _isRhi; }
+  bool getIsSector() const { return _isSector; }
   
   double getRadarAlt() const { return _radarAlt; }
   double getRadarLat() const { return _radarLat; }
@@ -119,9 +122,16 @@ private:
   string _standardName;
   string _longName;
   string _units;
-
+  
   time_t _fileTime;
   time_t _volTime;
+  string _volType;
+
+  double _startAzi;
+  double _stopAzi;
+  
+  bool _isSector;
+  bool _isRhi;
 
   double _radarAlt;
   double _radarLat;
@@ -134,9 +144,11 @@ private:
 
   string _scanName;
   time_t _scanTime;
+
   int _scanNumEle;
   double _scanFirstEle;
   double _scanLastEle;
+
   string _polarization;
   double _pulseWidthUs;
   double _antennaSpeed;

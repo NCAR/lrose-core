@@ -180,7 +180,7 @@ private:
 
   RadxTime _fileTime;
   int _nSweeps;
-  int _nAz;
+  int _nAngles;
   int _nGates;
 
   vector<RadxRay *> _rays;
