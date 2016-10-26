@@ -63,7 +63,7 @@
 #include <cstring>
 #include <cstdio>
 #include <sys/stat.h>
-sing namespace std;
+using namespace std;
 
 const char *RadxFile::PATH_SEPARATOR = "/";
 
