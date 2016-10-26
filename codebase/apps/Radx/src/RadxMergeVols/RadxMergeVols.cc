@@ -267,20 +267,10 @@ int RadxMergeVols::_processFile(const string &primaryPath)
 
   // Search for secondary files
   
-  for (int ii = 0; ii < _params.secondary_datasets_n; ii++) {
+  for (int idata = 0; idata < _params.secondary_datasets_n; idata++) {
 
-    const Params::secondary_dataset_t &secondary = _params._secondary_datasets[ii];
+    const Params::secondary_dataset_t &secondary = _params._secondary_datasets[idata];
     
-    //   OutputGroup group;
-    //   group.dir = dataset.dir;
-    //   group.fileTimeOffset = dataset.file_match_time_offset_sec;
-    //   group.fileTimeTolerance = dataset.file_match_time_tolerance_sec;
-    //   _secondaryGroups.push_back(group);
-    
-    // for (size_t igroup = 0; igroup < _secondaryGroups.size(); igroup++) {
-    
-    //   _activeGroup = _secondaryGroups[igroup];
-
     time_t searchTime = primaryTime + secondary.file_match_time_offset_sec;
     
     RadxTimeList tlist;
@@ -343,7 +333,7 @@ int RadxMergeVols::_processFile(const string &primaryPath)
       return -1;
     }
 
-  } // igroup
+  } // idata
 
   // finalize the volume
 
@@ -575,9 +565,20 @@ int RadxMergeVols::_mergeVol(RadxVol &primaryVol,
 
   // add secondary rays to primary vol
 
-  const vector<RadxRay *> &rays = secondaryVol.getRays();
-  for (size_t iray = 0; iray < rays.size(); iray++) {
-    RadxRay *copyRay = new RadxRay(*rays[iray]);
+  int maxSweepNum = 0;
+  const vector<RadxRay *> &pRays = primaryVol.getRays();
+  for (size_t iray = 0; iray < pRays.size(); iray++) {
+    const RadxRay &pRay = *pRays[iray];
+    if (pRay.getSweepNumber() > maxSweepNum) {
+      maxSweepNum = pRay.getSweepNumber();
+    }
+  } // iray
+
+  const vector<RadxRay *> &sRays = secondaryVol.getRays();
+  for (size_t iray = 0; iray < sRays.size(); iray++) {
+    RadxRay *copyRay = new RadxRay(*sRays[iray]);
+    int sweepNum = copyRay->getSweepNumber() + maxSweepNum + 1;
+    copyRay->setSweepNumber(sweepNum);
     primaryVol.addRay(copyRay);
   } // iray
 
