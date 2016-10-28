@@ -172,7 +172,7 @@ public:
 
 protected:
 private:
-
+ 
   // netcdf file
   
   NetcdfClassic _file;
@@ -181,19 +181,19 @@ private:
 
   NcDim *_azimuthDim;
   NcDim *_gateDim;
+  size_t _nAzimuthsInFile;
+  size_t _nGatesInFile;
 
   // times
   
   RadxTime _startTime;
   vector<double> _dTimes;
   time_t _refTimeSecsFile;
-  size_t _nTimesInFile;
   bool _rayTimesIncrease;
   
   // range
 
   vector<double> _rangeKm;
-  size_t _nRangeInFile;
   bool _gateSpacingIsConstant;
   RadxRangeGeom _geom;
   RadxRemap _remap;
@@ -205,9 +205,9 @@ private:
   NcVar *_beamWidthVar;
   NcVar *_gateWidthVar;
 
-  vector<double> _azimuths;
-  vector<double> _beamWidths;
-  vector<double> _gateWidths;
+  vector<float> _azimuths;
+  vector<float> _beamWidths;
+  vector<float> _gateWidths;
   
   // global attributes
 
@@ -281,16 +281,16 @@ private:
   void _clearRayVariables();
   int _readTimes();
   int _readRayVariables();
-  int _createRays(const string &path);
-  int _readFieldVariables(bool metaOnly);
+  int _createRays();
+  void _setRangeArray();
 
   int _readRayVar(NcVar* &var, const string &name, 
-                  vector<double> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
-                  vector<int> &vals, bool required = true);
+                  vector<float> &vals, bool required = true);
   
   NcVar* _getRayVar(const string &name, bool required);
   
+  int _readFieldVariable(bool metaOnly);
+
   int _addFl64FieldToRays(NcVar* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,

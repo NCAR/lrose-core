@@ -68,7 +68,7 @@ EdgeNcRadxFile::EdgeNcRadxFile() : RadxFile()
 
 EdgeNcRadxFile::~EdgeNcRadxFile()
 
-{
+{ 
   clear();
 }
 
@@ -196,31 +196,27 @@ bool EdgeNcRadxFile::isEdgeNc(const string &path)
     return false;
   }
 
-  // check existence of some variables
+  // check existence of some global attributes
 
-  NcVar *baseTimeVar = _file.getNcFile()->get_var("base_time");
-  if (baseTimeVar == NULL) {
-    _file.close();
-    if (_verbose) {
-      cerr << "DEBUG - not EdgeNc file" << endl;
-      cerr << "  base_time variable missing" << endl;
-    }
-    return false;
+  int iret = 0;
+  if (_file.readGlobAttr("TypeName", _TypeName_attr) ||
+      _file.readGlobAttr("DataType", _DataType_attr) ||
+      _file.readGlobAttr("Time", _FractionalTime_attr) ||
+      _file.readGlobAttr("radarName-value", _radarName_value_attr) ||
+      _file.readGlobAttr("ConversionPlugin", _ConversionPlugin_attr)) {
+    iret = -1;
   }
-
-  NcVar *qcTimeVar = _file.getNcFile()->get_var("qc_time");
-  if (qcTimeVar == NULL) {
-    _file.close();
-    if (_verbose) {
-      cerr << "DEBUG - not EdgeNc file" << endl;
-      cerr << "  qc_time variable missing" << endl;
-    }
-    return false;
-  }
-
-  // file has the correct dimensions, so it is a EdgeNc file
-
   _file.close();
+
+  if (iret) {
+    if (_verbose) {
+      cerr << "DEBUG - not EdgeNc file" << endl;
+    }
+    return false;
+  }
+  
+  // file has the correct dimensions and attributes, so it is an EdgeNc file
+  
   return true;
 
 }
@@ -429,9 +425,9 @@ int EdgeNcRadxFile::readFromPath(const string &path,
   
   // clear tmp rays
 
-  _nTimesInFile = 0;
+  _nAzimuthsInFile = 0;
+  _nGatesInFile = 0;
   _rays.clear();
-  _nRangeInFile = 0;
 
   // open file
 
@@ -471,29 +467,6 @@ int EdgeNcRadxFile::readFromPath(const string &path,
     return -1;
   }
 
-  // read range variable
-  // the range array size will be the max of the arrays found in
-  // the files
-  
-  if (_readRangeVariable()) {
-    _addErrStr(errStr);
-    return -1;
-  }
-  
-  // read position variables - lat/lon/alt
-  
-  if (_readPositionVariables()) {
-    _addErrStr(errStr);
-    return -1;
-  }
-
-  // read in sweep variables
-
-  if (_readSweepVariables()) {
-    _addErrStr(errStr);
-    return -1;
-  }
-
   // read in ray variables
 
   if (_readRayVariables()) {
@@ -501,11 +474,15 @@ int EdgeNcRadxFile::readFromPath(const string &path,
     return -1;
   }
 
+  // set up the range array
+
+  _setRangeArray();
+
   if (_readMetadataOnly) {
 
     // read field variables
     
-    if (_readFieldVariables(true)) {
+    if (_readFieldVariable(true)) {
       _addErrStr(errStr);
       return -1;
     }
@@ -514,14 +491,14 @@ int EdgeNcRadxFile::readFromPath(const string &path,
 
     // create the rays to be read in, filling out the metadata
     
-    if (_createRays(path)) {
+    if (_createRays()) {
       _addErrStr(errStr);
       return -1;
     }
     
     // add field variables to file rays
     
-    if (_readFieldVariables(false)) {
+    if (_readFieldVariable(false)) {
       _addErrStr(errStr);
       return -1;
     }
@@ -532,34 +509,6 @@ int EdgeNcRadxFile::readFromPath(const string &path,
 
   _file.close();
   
-  // add file rays to main rays
-  
-  _raysValid.clear();
-  for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
-    
-    RadxRay *ray = _raysToRead[ii].ray;
-    
-    // check if we should keep this ray or discard it
-    
-    bool keep = true;
-    if (_readRemoveRaysAllMissing) {
-      if (ray->checkDataAllMissing()) {
-        keep = false;
-      }
-    }
-
-    // add to main vector if we are keeping it
-
-    if (keep) {
-      _raysValid.push_back(ray);
-    } else {
-      delete ray;
-    }
-
-  }
-  
-  _raysToRead.clear();
-  
   // append to read paths
   
   _readPaths.push_back(path);
@@ -569,10 +518,6 @@ int EdgeNcRadxFile::readFromPath(const string &path,
   if (_loadReadVolume()) {
     return -1;
   }
-  
-  // compute fixed angles as mean angle from sweeps
-  
-  _computeFixedAngles();
   
   // set format as read
 
@@ -599,13 +544,13 @@ int EdgeNcRadxFile::_readDimensions()
   int iret = 0;
   iret |= _file.readDim("Azimuth", _azimuthDim);
   if (iret == 0) {
-    _nTimesInFile = _azimuthDim->size();
+    _nAzimuthsInFile = _azimuthDim->size();
   }
 
-  _nRangeInFile = 0;
+  _nGatesInFile = 0;
   iret |= _file.readDim("Gate", _gateDim);
   if (iret == 0) {
-    _nRangeInFile = _gateDim->size();
+    _nGatesInFile = _gateDim->size();
   }
   
   _nGatesVary = false;
@@ -657,6 +602,7 @@ int EdgeNcRadxFile::_readGlobalAttributes()
 
   _startTime.set(_Time_attr);
   _startTime.setSubSec(_FractionalTime_attr);
+  _refTimeSecsFile = _startTime.utime();
   
   _title = _TypeName_attr;
   _institution = "";
@@ -678,7 +624,7 @@ int EdgeNcRadxFile::_readGlobalAttributes()
   _maxRangeKm =  _MaximumRange_value_attr;
 
   _elevationFixedAngle = _Elevation_attr;
-  _prf = (double) _PRF_value_attr;
+  _prfHz = (double) _PRF_value_attr;
   _pulseWidthUs = _PulseWidth_value_attr;
 
   _missingDataValue = _MissingData_attr;
@@ -723,7 +669,7 @@ int EdgeNcRadxFile::_readTimes()
   // set the time array
   
   _dTimes.clear();
-  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+  for (size_t ii = 0; ii < _nAzimuthsInFile; ii++) {
     _dTimes.push_back(0.0);
   }
 
@@ -732,160 +678,41 @@ int EdgeNcRadxFile::_readTimes()
 }
 
 ///////////////////////////////////
-// read the range variable
+// set the range array variable
 
-int EdgeNcRadxFile::_readRangeVariable()
+void EdgeNcRadxFile::_setRangeArray()
 
 {
 
-  _rangeVar = _file.getNcFile()->get_var("range");
-  if (_rangeVar == NULL || _rangeVar->num_vals() < 1) {
-    _addErrStr("ERROR - EdgeNcRadxFile::_readRangeVariable");
-    _addErrStr("  Cannot read range");
-    _addErrStr(_file.getNcError()->get_errmsg());
-    return -1;
-  }
-
-  // get units
+  // get range units
 
   double kmPerUnit = 1.0; // default - units in km
-  NcAtt* unitsAtt = _rangeVar->get_att("units");
+  NcAtt* unitsAtt = _gateWidthVar->get_att("Units");
   if (unitsAtt != NULL) {
     string units = NetcdfClassic::asString(unitsAtt);
-    if (units == "m") {
+    if (units == "m" || units == "Meters") {
       kmPerUnit = 0.001;
     }
     delete unitsAtt;
   }
 
   // set range vector
-
-  _rangeKm.clear();
-  _nRangeInFile = _rangeVar->num_vals();
-  RadxArray<double> rangeVals_;
-  double *rangeVals = rangeVals_.alloc(_nRangeInFile);
-  if (_rangeVar->get(rangeVals, _nRangeInFile)) {
-    double *rr = rangeVals;
-    for (size_t ii = 0; ii < _nRangeInFile; ii++, rr++) {
-      _rangeKm.push_back(*rr * kmPerUnit);
-    }
-  }
   
+  double gateSpacingKm = _gateWidths[0] * kmPerUnit;
+  double startRangeKm = gateSpacingKm / 2.0;
+  _rangeKm.clear();
+  double range = startRangeKm;
+  for (size_t ii = 0; ii < _nGatesInFile; ii++, range += gateSpacingKm) {
+    _rangeKm.push_back(range);
+  }
+
   // set the geometry from the range vector
   
   _remap.computeRangeLookup(_rangeKm);
   _gateSpacingIsConstant = _remap.getGateSpacingIsConstant();
   _geom.setRangeGeom(_remap.getStartRangeKm(), _remap.getGateSpacingKm());
 
-  return 0;
-
 }
-
-#ifdef JUNK
-
-///////////////////////////////////
-// read the position variables
-
-int EdgeNcRadxFile::_readPositionVariables()
-
-{
-
-  // find latitude, longitude, altitude
-
-  int iret = 0;
-  if (_file.readDoubleVar(_latitudeVar, "lat", _latitudeDeg, 0, true)) {
-    _addErrStr("ERROR - EdgeNcRadxFile::_readPositionVariables");
-    _addErrStr("  Cannot read latitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
-    iret = -1;
-  }
-
-  if (_file.readDoubleVar(_longitudeVar, "lon", _longitudeDeg, 0, true)) {
-    _addErrStr("ERROR - EdgeNcRadxFile::_readPositionVariables");
-    _addErrStr("  Cannot read longitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
-    iret = -1;
-  }
-
-  if (_file.readDoubleVar(_altitudeVar, "alt", _altitudeKm, 0, true)) {
-    _addErrStr("ERROR - EdgeNcRadxFile::_readPositionVariables");
-    _addErrStr("  Cannot read altitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
-    iret = -1;
-  }
-  NcAtt* unitsAtt = _altitudeVar->get_att("units");
-  if (unitsAtt != NULL) {
-    string units = NetcdfClassic::asString(unitsAtt);
-    if (units == "m") {
-      _altitudeKm /= 1000.0;
-    }
-    delete unitsAtt;
-  }
-  
-  return iret;
-
-}
-
-///////////////////////////////////
-// read the sweep meta-data
-
-int EdgeNcRadxFile::_readSweepVariables()
-
-{
-
-  // create vector for the sweeps
-
-  size_t nSweepsInFile = _sweepDim->size();
-
-  // initialize
-
-  vector<int> sweepTypes, sweepStartIndexes, sweepLengths;
-  
-  int iret = 0;
-  
-  _readSweepVar(_sweepTypeVar, "sweep_type", sweepTypes);
-  if (sweepTypes.size() != nSweepsInFile) {
-    iret = -1;
-  }
-
-  _readSweepVar(_sweepStartIndexVar, "sweep_start_index", sweepStartIndexes);
-  if (sweepStartIndexes.size() != nSweepsInFile) {
-    iret = -1;
-  }
-
-  _readSweepVar(_sweepLengthVar, "sweep_length", sweepLengths);
-  if (sweepLengths.size() != nSweepsInFile) {
-    iret = -1;
-  }
-
-  if (iret) {
-    return -1;
-  }
-
-  _sweeps.clear();
-  for (size_t ii = 0; ii < nSweepsInFile; ii++) {
-    RadxSweep *sweep = new RadxSweep;
-    sweep->setSweepNumber(ii);
-    if (sweepTypes[ii] == 0) {
-      sweep->setSweepMode(Radx::SWEEP_MODE_VERTICAL_POINTING);
-    } else if (sweepTypes[ii] == 1) {
-      sweep->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-    } else if (sweepTypes[ii] == 2) {
-      sweep->setSweepMode(Radx::SWEEP_MODE_RHI);
-    } else if (sweepTypes[ii] == 3) {
-      sweep->setSweepMode(Radx::SWEEP_MODE_COPLANE);
-    }
-    sweep->setStartRayIndex(sweepStartIndexes[ii]);
-    int endIndex = sweepStartIndexes[ii] + sweepLengths[ii] - 1;
-    sweep->setEndRayIndex(endIndex);
-    _sweeps.push_back(sweep);
-  } // ii
-
-  return 0;
-
-}
-
-#endif
 
 ///////////////////////////////////
 // clear the ray variables
@@ -895,12 +722,8 @@ void EdgeNcRadxFile::_clearRayVariables()
 {
 
   _azimuths.clear();
-  _elevations.clear();
   _beamWidths.clear();
   _gateWidths.clear();
-  _noiseDbms.clear();
-  _pedestalOpModes.clear();
-  _polarizations.clear();
 
 }
 
@@ -945,46 +768,24 @@ int EdgeNcRadxFile::_readRayVariables()
 // create the rays to be read in
 // and set meta data
 
-int EdgeNcRadxFile::_createRays(const string &path)
+int EdgeNcRadxFile::_createRays()
 
 {
-
-  // compile a list of the rays to be read in, using the list of
-  // sweeps to read
-
-  vector<RayInfo> raysToRead;
-  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
-    RadxSweep *sweep = _sweeps[isweep];
-    for (size_t ii = sweep->getStartRayIndex();
-         ii <= sweep->getEndRayIndex(); ii++) {
-      // add ray to list to be read
-      RayInfo info;
-      info.indexInFile = ii;
-      info.sweep = sweep;
-      raysToRead.push_back(info);
-    } // ii
-  } // isweep
-
+  
   // create the rays
 
-  _raysToRead.clear();
+  _rays.clear();
   
-  for (size_t ii = 0; ii < raysToRead.size(); ii++) {
+  for (size_t iray = 0; iray < _nAzimuthsInFile; iray++) {
     
-    RayInfo rayInfo = raysToRead[ii];
-    size_t rayIndex = rayInfo.indexInFile;
-    RadxSweep *sweep = rayInfo.sweep;
-
     // new ray
-
+    
     RadxRay *ray = new RadxRay;
-    rayInfo.ray = ray;
-
     ray->copyRangeGeom(_geom);
     
     // set time
     
-    double rayTimeDouble = _dTimes[rayIndex];
+    double rayTimeDouble = _dTimes[iray];
     time_t rayUtimeSecs = _refTimeSecsFile + (time_t) rayTimeDouble;
     double rayIntSecs;
     double rayFracSecs = modf(rayTimeDouble, &rayIntSecs);
@@ -993,48 +794,27 @@ int EdgeNcRadxFile::_createRays(const string &path)
     
     // sweep info
     
-    ray->setSweepNumber(sweep->getSweepNumber());
-    ray->setAzimuthDeg(_azimuths[rayIndex]);
-    ray->setElevationDeg(_elevations[rayIndex]);
-    
-    if (_pedestalOpModes.size() > rayIndex) {
-      int opMode = _pedestalOpModes[rayIndex];
-      Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_NOT_SET;
-      switch (opMode) {
-        case 2: sweepMode = Radx::SWEEP_MODE_IDLE; break;
-        case 3: sweepMode = Radx::SWEEP_MODE_POINTING; break;
-        case 7: sweepMode = Radx::SWEEP_MODE_RHI; break;
-        case 8: sweepMode = Radx::SWEEP_MODE_SECTOR; break;
-        case 9: sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE; break;
-      }
-      ray->setSweepMode(sweepMode);
-    }
-    
-    if (_polarizations.size() > rayIndex) {
-      // int pol = _polarizations[rayIndex];
-      ray->setPolarizationMode(Radx::POL_MODE_HV_SIM);
-    }
-    
-    if (_noiseDbms.size() > rayIndex) {
-      double noiseDbm = _noiseDbms[rayIndex];
-      ray->setEstimatedNoiseDbmHc(noiseDbm);
-      ray->setEstimatedNoiseDbmVc(noiseDbm);
-    }
+    ray->setSweepNumber(0);
+    ray->setAzimuthDeg(_azimuths[iray]);
+    ray->setElevationDeg(_elevationFixedAngle);
+    ray->setFixedAngleDeg(_elevationFixedAngle);
+    ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+    ray->setPolarizationMode(Radx::POL_MODE_HORIZONTAL);
     
     // add to ray vector
+    
+    _rays.push_back(ray);
 
-    _raysToRead.push_back(rayInfo);
-
-  } // ii
+  } // iray
 
   return 0;
 
 }
 
 ////////////////////////////////////////////
-// read the field variables
+// read the field variable
 
-int EdgeNcRadxFile::_readFieldVariables(bool metaOnly)
+int EdgeNcRadxFile::_readFieldVariable(bool metaOnly)
 
 {
 
@@ -1053,9 +833,9 @@ int EdgeNcRadxFile::_readFieldVariables(bool metaOnly)
       continue;
     }
     // check that we have the correct dimensions
-    NcDim* timeDim = var->get_dim(0);
-    NcDim* rangeDim = var->get_dim(1);
-    if (timeDim != _azimuthDim || rangeDim != _gateDim) {
+    NcDim* azDim = var->get_dim(0);
+    NcDim* gateDim = var->get_dim(1);
+    if (azDim != _azimuthDim || gateDim != _gateDim) {
       continue;
     }
     
@@ -1065,7 +845,7 @@ int EdgeNcRadxFile::_readFieldVariables(bool metaOnly)
     if (ftype != ncDouble && ftype != ncFloat) {
       // not a valid type
       if (_verbose) {
-        cerr << "DEBUG - EdgeNcRadxFile::_readFieldVariables" << endl;
+        cerr << "DEBUG - EdgeNcRadxFile::_readFieldVariable" << endl;
         cerr << "  -->> rejecting field: " << fieldName << endl;
         cerr << "  -->> Should be float or double: " << fieldName << endl;
       }
@@ -1089,42 +869,30 @@ int EdgeNcRadxFile::_readFieldVariables(bool metaOnly)
     
     // set names, units, etc
     
-    string name = var->name();
+    string name = _fieldName;
+    string standardName = _fieldName;
+    string longName = var->name();
     
-    string standardName;
-    NcAtt *standardNameAtt = var->get_att("standard_name");
-    if (standardNameAtt != NULL) {
-      standardName = NetcdfClassic::asString(standardNameAtt);
-      delete standardNameAtt;
-    }
-    
-    string longName;
-    NcAtt *longNameAtt = var->get_att("long_name");
-    if (longNameAtt != NULL) {
-      longName = NetcdfClassic::asString(longNameAtt);
-      delete longNameAtt;
-    }
-
     string units;
-    NcAtt *unitsAtt = var->get_att("units");
+    NcAtt *unitsAtt = var->get_att("Units");
     if (unitsAtt != NULL) {
       units = NetcdfClassic::asString(unitsAtt);
       delete unitsAtt;
     }
 
     // folding
-
+    
     bool fieldFolds = false;
     float foldLimitLower = Radx::missingMetaFloat;
     float foldLimitUpper = Radx::missingMetaFloat;
-    if (name.find("DopplerVelocity") != string::npos) {
+    if (_fieldName.find("Velocity") != string::npos) {
       fieldFolds = true;
       foldLimitLower = _nyquistMps * -1.0;
       foldLimitUpper = _nyquistMps;
     }
     
     // if metadata only, don't read in fields
-
+    
     if (metaOnly) {
       bool fieldAlreadyAdded = false;
       for (size_t ii = 0; ii < _readVol->getNFields(); ii++) {
@@ -1188,10 +956,10 @@ int EdgeNcRadxFile::_readFieldVariables(bool metaOnly)
 }
 
 ///////////////////////////////////
-// read a ray variable - double
+// read a ray variable - float
 
 int EdgeNcRadxFile::_readRayVar(NcVar* &var, const string &name,
-                                vector<double> &vals, bool required)
+                                vector<float> &vals, bool required)
 
 {
 
@@ -1202,8 +970,8 @@ int EdgeNcRadxFile::_readRayVar(NcVar* &var, const string &name,
   var = _getRayVar(name, required);
   if (var == NULL) {
     if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaDouble);
+      for (size_t ii = 0; ii < _nAzimuthsInFile; ii++) {
+        vals.push_back(Radx::missingMetaFloat);
       }
       clearErrStr();
       return 0;
@@ -1215,70 +983,17 @@ int EdgeNcRadxFile::_readRayVar(NcVar* &var, const string &name,
 
   // load up data
 
-  double *data = new double[_nTimesInFile];
-  double *dd = data;
+  float *data = new float[_nAzimuthsInFile];
+  float *dd = data;
   int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
+  if (var->get(data, _nAzimuthsInFile)) {
+    for (size_t ii = 0; ii < _nAzimuthsInFile; ii++, dd++) {
       vals.push_back(*dd);
     }
   } else {
     if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaDouble);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - EdgeNcRadxFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
-      iret = -1;
-    }
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////
-// read a ray variable - integer
-
-int EdgeNcRadxFile::_readRayVar(NcVar* &var, const string &name,
-                                vector<int> &vals, bool required)
-
-{
-
-  vals.clear();
-
-  // get var
-  
-  var = _getRayVar(name, required);
-  if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - EdgeNcRadxFile::_readRayVar");
-      return -1;
-    }
-  }
-
-  // load up data
-
-  int *data = new int[_nTimesInFile];
-  int *dd = data;
-  int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
-    }
-  } else {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaInt);
+      for (size_t ii = 0; ii < _nAzimuthsInFile; ii++) {
+        vals.push_back(Radx::missingMetaFloat);
       }
       clearErrStr();
     } else {
@@ -1357,9 +1072,9 @@ int EdgeNcRadxFile::_addFl64FieldToRays(NcVar* var,
 {
 
   // get data from array
-
-  Radx::fl64 *data = new Radx::fl64[_nTimesInFile * _nRangeInFile];
-  int iret = !var->get(data, _nTimesInFile, _nRangeInFile);
+  
+  Radx::fl64 *data = new Radx::fl64[_nAzimuthsInFile * _nGatesInFile];
+  int iret = !var->get(data, _nAzimuthsInFile, _nGatesInFile);
   if (iret) {
     delete[] data;
     return -1;
@@ -1376,28 +1091,17 @@ int EdgeNcRadxFile::_addFl64FieldToRays(NcVar* var,
 
   // load field on rays
 
-  for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
+  for (size_t iray = 0; iray < _nAzimuthsInFile; iray++) {
     
-    size_t rayIndex = _raysToRead[ii].indexInFile;
+    RadxRay *ray = _rays[iray];
 
-    if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - EdgeNcRadxFile::_addSi16FieldToRays" << endl;
-      cerr << "  Trying to access ray beyond data" << endl;
-      cerr << "  Trying to read ray index: " << rayIndex << endl;
-      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
-      cerr << "  skipping ...." << endl;
-      continue;
-    }
+    int startIndex = iray * _nGatesInFile;
     
-    int nGates = _nRangeInFile;
-    int startIndex = rayIndex * _nRangeInFile;
+    RadxField *field = ray->addField(name, units, _nGatesInFile,
+                                     missingVal,
+                                     data + startIndex,
+                                     true);
     
-    RadxField *field =
-      _raysToRead[ii].ray->addField(name, units, nGates,
-                                    missingVal,
-                                    data + startIndex,
-                                    true);
-
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
@@ -1436,51 +1140,40 @@ int EdgeNcRadxFile::_addFl32FieldToRays(NcVar* var,
 {
 
   // get data from array
-
-  Radx::fl32 *data = new Radx::fl32[_nTimesInFile * _nRangeInFile];
-  int iret = !var->get(data, _nTimesInFile, _nRangeInFile);
+  
+  Radx::fl32 *data = new Radx::fl32[_nAzimuthsInFile * _nGatesInFile];
+  int iret = !var->get(data, _nAzimuthsInFile, _nGatesInFile);
   if (iret) {
     delete[] data;
     return -1;
   }
 
   // set missing value
-  
+
   Radx::fl32 missingVal = Radx::missingFl32;
   NcAtt *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
   }
-  
+
   // load field on rays
 
-  for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
+  for (size_t iray = 0; iray < _nAzimuthsInFile; iray++) {
     
-    size_t rayIndex = _raysToRead[ii].indexInFile;
+    RadxRay *ray = _rays[iray];
 
-    if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - EdgeNcRadxFile::_addSi16FieldToRays" << endl;
-      cerr << "  Trying to access ray beyond data" << endl;
-      cerr << "  Trying to read ray index: " << rayIndex << endl;
-      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
-      cerr << "  skipping ...." << endl;
-      continue;
-    }
+    int startIndex = iray * _nGatesInFile;
     
-    int nGates = _nRangeInFile;
-    int startIndex = rayIndex * _nRangeInFile;
-
-    RadxField *field =
-      _raysToRead[ii].ray->addField(name, units, nGates,
-                                    missingVal,
-                                    data + startIndex,
-                                    true);
+    RadxField *field = ray->addField(name, units, _nGatesInFile,
+                                     missingVal,
+                                     data + startIndex,
+                                     true);
     
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
-
+    
     if (fieldFolds &&
         foldLimitLower != Radx::missingMetaFloat &&
         foldLimitUpper != Radx::missingMetaFloat) {
@@ -1512,7 +1205,7 @@ int EdgeNcRadxFile::_loadReadVolume()
   _readVol->setPlatformType(_platformType);
   _readVol->setPrimaryAxis(_primaryAxis);
 
-  _readVol->addFrequencyHz(_frequencyGhz * 1.0e9);
+  // _readVol->addFrequencyHz(_frequencyGhz * 1.0e9);
 
   _readVol->setTitle(_title);
   _readVol->setSource(_source);
@@ -1526,42 +1219,25 @@ int EdgeNcRadxFile::_loadReadVolume()
   _readVol->setScanId(_scanId);
   _readVol->setInstrumentName(_instrumentName);
 
-  _readVol->setLatitudeDeg(_latitudeDeg);
-  _readVol->setLongitudeDeg(_longitudeDeg);
+  _readVol->setLatitudeDeg(_latitude);
+  _readVol->setLongitudeDeg(_longitude);
   _readVol->setAltitudeKm(_altitudeKm);
 
   _readVol->copyRangeGeom(_geom);
 
-  for (int ii = 0; ii < (int) _raysValid.size(); ii++) {
-    _raysValid[ii]->setVolumeNumber(_volumeNumber);
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    _rays[iray]->setVolumeNumber(_volumeNumber);
   }
 
   // add rays to vol - they will be freed by vol
-
-  for (size_t ii = 0; ii < _raysValid.size(); ii++) {
-
-    // fake angles for testing
-    // double el = 0.5;
-    // double az = ii * 0.5;
-    // while (az > 360) {
-    //   az -= 360;
-    // }
-    // _raysValid[ii]->setElevationDeg(el);
-    // _raysValid[ii]->setAzimuthDeg(az);
-    // _raysValid[ii]->setFixedAngleDeg(el);
-    // _raysValid[ii]->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-
-    _readVol->addRay(_raysValid[ii]);
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    _readVol->addRay(_rays[iray]);
   }
 
   if (_readSetMaxRange) {
     _readVol->setMaxRangeKm(_readMaxRangeKm);
   }
-  
-  // memory responsibility has passed to the volume object, so clear
-  // the vectors without deleting the objects to which they point
-
-  _raysValid.clear();
   
   // load the sweep information from the rays
 
@@ -1589,6 +1265,12 @@ int EdgeNcRadxFile::_loadReadVolume()
     }
   }
 
+  // optionally remove all rays with missing data
+
+  if (_readRemoveRaysAllMissing) {
+    _readVol->removeRaysWithDataAllMissing();
+  }
+  
   // load the volume information from the rays
 
   _readVol->loadVolumeInfoFromRays();
@@ -1598,45 +1280,6 @@ int EdgeNcRadxFile::_loadReadVolume()
   _readVol->checkForIndexedRays();
 
   return 0;
-
-}
-
-/////////////////////////////////////////////////////////////
-// Compute the fixed angles by averaging the elevation angles
-// on the sweeps
-
-void EdgeNcRadxFile::_computeFixedAngles()
-  
-{
-
-  for (size_t isweep = 0; isweep < _readVol->getNSweeps(); isweep++) {
-
-    RadxSweep &sweep = *_readVol->getSweeps()[isweep];
-
-    double sumElev = 0.0;
-    double count = 0.0;
-
-    for (size_t iray = sweep.getStartRayIndex();
-         iray <= sweep.getEndRayIndex(); iray++) {
-      const RadxRay &ray = *_readVol->getRays()[iray];
-      sumElev += ray.getElevationDeg();
-      count++;
-    }
-
-    double meanElev = sumElev / count;
-    double fixedAngle = ((int) (meanElev * 100.0 + 0.5)) / 100.0;
-
-    sweep.setFixedAngleDeg(fixedAngle);
-      
-    for (size_t iray = sweep.getStartRayIndex();
-         iray <= sweep.getEndRayIndex(); iray++) {
-      RadxRay &ray = *_readVol->getRays()[iray];
-      ray.setFixedAngleDeg(fixedAngle);
-    }
-
-  } // isweep
-
-  _readVol->loadFixedAnglesFromSweepsToRays();
 
 }
 
