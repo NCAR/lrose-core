@@ -38,6 +38,7 @@
 #include <Radx/D3rNcRadxFile.hh>
 #include <Radx/DoeNcRadxFile.hh>
 #include <Radx/DoradeRadxFile.hh>
+#include <Radx/EdgeNcRadxFile.hh>
 #include <Radx/ForayNcRadxFile.hh>
 #include <Radx/GamicHdf5RadxFile.hh>
 #include <Radx/GemRadxFile.hh>
@@ -187,6 +188,14 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
   {
     D3rNcRadxFile file;
     if (file.isD3rNc(path)) {
+      return true;
+    }
+  }
+    
+  // try EEC Edge netcdf
+  {
+    EdgeNcRadxFile file;
+    if (file.isEdgeNc(path)) {
       return true;
     }
   }
@@ -499,7 +508,8 @@ int RadxFile::writeToDir(const RadxVol &vol,
       _fileFormat == FILE_FORMAT_NEXRAD_CMD ||
       _fileFormat == FILE_FORMAT_LEOSPHERE ||
       _fileFormat == FILE_FORMAT_TWOLF ||
-      _fileFormat == FILE_FORMAT_HRD) {
+      _fileFormat == FILE_FORMAT_HRD ||
+      _fileFormat == FILE_FORMAT_EDGE_NC) {
 
     // CF radial
     
@@ -737,7 +747,8 @@ int RadxFile::writeToPath(const RadxVol &vol,
       _fileFormat == FILE_FORMAT_NEXRAD_CMD ||
       _fileFormat == FILE_FORMAT_LEOSPHERE ||
       _fileFormat == FILE_FORMAT_TWOLF ||
-      _fileFormat == FILE_FORMAT_HRD) {
+      _fileFormat == FILE_FORMAT_HRD ||
+      _fileFormat == FILE_FORMAT_EDGE_NC) {
 
     // CF radial
     
@@ -1077,6 +1088,29 @@ int RadxFile::_readFromPathNetCDF(const string &path,
         if (_debug) {
           cerr << "INFO: RadxFile::readFromPath" << endl;
           cerr << "  Read NEXRAD CMD file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try EEC Edge netcdf next
+
+  {
+    EdgeNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isEdgeNc(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read DOE NC file, path: " << _pathInUse << endl;
         }
       }
       return iret;
@@ -2410,6 +2444,19 @@ int RadxFile::_printNativeNetCDF(const string &path, ostream &out,
     NexradCmdRadxFile file;
     file.copyReadDirectives(*this);
     if (file.isNexradCmd(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try EEC Edge netcdf next
+  {
+    EdgeNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isEdgeNc(path)) {
       int iret = file.printNative(path, out, printRays, printData);
       if (iret) {
         _errStr = file.getErrStr();

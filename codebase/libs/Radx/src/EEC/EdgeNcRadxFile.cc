@@ -749,7 +749,7 @@ int EdgeNcRadxFile::_readRayVariables()
     iret = -1;
   }
   
-  _readRayVar(_gateWidthVar, "Gatewidth", _gateWidths);
+  _readRayVar(_gateWidthVar, "GateWidth", _gateWidths);
   if ((int) _gateWidths.size() != _azimuthDim->size()) {
     _addErrStr("ERROR - Gatewidth variable required");
     iret = -1;
@@ -1082,12 +1082,7 @@ int EdgeNcRadxFile::_addFl64FieldToRays(NcVar* var,
 
   // set missing value
 
-  Radx::fl64 missingVal = Radx::missingFl64;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
-  if (missingValueAtt != NULL) {
-    missingVal = missingValueAtt->as_double(0);
-    delete missingValueAtt;
-  }
+  Radx::fl64 missingVal = _missingDataValue;
 
   // load field on rays
 
@@ -1150,12 +1145,7 @@ int EdgeNcRadxFile::_addFl32FieldToRays(NcVar* var,
 
   // set missing value
 
-  Radx::fl32 missingVal = Radx::missingFl32;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
-  if (missingValueAtt != NULL) {
-    missingVal = missingValueAtt->as_double(0);
-    delete missingValueAtt;
-  }
+  Radx::fl32 missingVal = _missingDataValue;
 
   // load field on rays
 
