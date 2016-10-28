@@ -45,9 +45,11 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/RadxReadDir.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
+#include <algorithm>
 using namespace std;
 
 //////////////
@@ -59,6 +61,7 @@ EdgeNcRadxFile::EdgeNcRadxFile() : RadxFile()
 
   _ncFormat = NETCDF_CLASSIC;
   _readVol = NULL;
+  _volumeNumber = 0;
   clear();
 
 }
@@ -136,7 +139,6 @@ void EdgeNcRadxFile::clear()
   _rayTimesIncrease = true;
   _refTimeSecsFile = 0;
 
-  _volumeNumber = 0;
   _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
   _platformType = Radx::PLATFORM_TYPE_FIXED;
   _primaryAxis = Radx::PRIMARY_AXIS_Z;
@@ -187,6 +189,7 @@ bool EdgeNcRadxFile::isEdgeNc(const string &path)
 
   // read dimensions
   
+  _firstFileInSweep = true;
   if (_readDimensions()) {
     _file.close();
     if (_verbose) {
@@ -405,33 +408,102 @@ int EdgeNcRadxFile::printNative(const string &path, ostream &out,
 
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
+// Also reads in paths for other fields in sweep, and other
+// files in same volume if aggregation is on.
 //
 // Returns 0 on success, -1 on failure
 //
 // Use getErrStr() if error occurs
 
-int EdgeNcRadxFile::readFromPath(const string &path,
+int EdgeNcRadxFile::readFromPath(const string &primaryPath,
                                  RadxVol &vol)
   
 {
 
-  _initForRead(path, vol);
-  
+  _initForRead(primaryPath, vol);
+
+  // read in primary path
+
   if (_debug) {
-    cerr << "Reading path: " << path << endl;
+    cerr << "Reading primary path: " << primaryPath << endl;
   }
 
-  string errStr("ERROR - EdgeNcRadxFile::readFromPath");
-  
-  // clear tmp rays
+  _firstFileInSweep = true;
+  if (_readSweep(primaryPath)) {
+    return -1;
+  }
 
-  _nAzimuthsInFile = 0;
-  _nGatesInFile = 0;
-  _rays.clear();
+  // get secondary files for other fields from same sweep
+  
+  vector<string> secondaryPaths;
+  _getSecondaryFieldPaths(primaryPath, secondaryPaths);
+
+  // read in secondary paths
+
+  _firstFileInSweep = false;
+  if (!_readTimesOnly) {
+    for (size_t ii = 0; ii < secondaryPaths.size(); ii++) {
+      if (_debug) {
+        cerr << "Reading secondary path: " << secondaryPaths[ii] << endl;
+      }
+      if (_readSweep(secondaryPaths[ii])) {
+        return -1;
+      }
+    } // ii
+  } // if (!_readTimesOnly)
+
+  // load the rays into the volume
+  
+  _addRaysToVolume();
+  
+  // finalize the read volume
+  
+  if (_finalizeReadVolume()) {
+    return -1;
+  }
+  
+  // set format as read
+
+  _fileFormat = FILE_FORMAT_EDGE_NC;
+
+  // clean up
+
+  _clearRayVariables();
+  _dTimes.clear();
+
+  // increment volume number
+
+  _volumeNumber++;
+  return 0;
+
+} 
+
+////////////////////////////////////////////////////////////
+// Read in data for a sweep, from a file.
+// Returns 0 on success, -1 on failure
+
+int EdgeNcRadxFile::_readSweep(const string &sweepPath)
+  
+{
+
+  string errStr("ERROR - EdgeNcRadxFile::_readSweep");
+
+  if (_debug) {
+    cerr << "  reading sweep path: " << sweepPath << endl;
+    cerr << "  firstFileInSweep: " << (_firstFileInSweep?"Y":"N") << endl;
+  }
+  
+  // intialize
+
+  if (_firstFileInSweep) {
+    _rays.clear();
+    _nAzimuthsInFile = 0;
+    _nGatesInFile = 0;
+  }
 
   // open file
 
-  if (_file.openRead(path)) {
+  if (_file.openRead(sweepPath)) {
     _addErrStr(_file.getErrStr());
     return -1;
   }
@@ -469,14 +541,18 @@ int EdgeNcRadxFile::readFromPath(const string &path,
 
   // read in ray variables
 
-  if (_readRayVariables()) {
-    _addErrStr(errStr);
-    return -1;
+  if (_firstFileInSweep) {
+
+    if (_readRayVariables()) {
+      _addErrStr(errStr);
+      return -1;
+    }
+
+    // set up the range array
+    
+    _setRangeArray();
+
   }
-
-  // set up the range array
-
-  _setRangeArray();
 
   if (_readMetadataOnly) {
 
@@ -489,11 +565,12 @@ int EdgeNcRadxFile::readFromPath(const string &path,
     
   } else {
 
-    // create the rays to be read in, filling out the metadata
-    
-    if (_createRays()) {
-      _addErrStr(errStr);
-      return -1;
+    if (_firstFileInSweep) {
+      // create the rays to be read in, filling out the metadata
+      if (_createRays()) {
+        _addErrStr(errStr);
+        return -1;
+      }
     }
     
     // add field variables to file rays
@@ -511,23 +588,8 @@ int EdgeNcRadxFile::readFromPath(const string &path,
   
   // append to read paths
   
-  _readPaths.push_back(path);
-
-  // load the data into the read volume
-
-  if (_loadReadVolume()) {
-    return -1;
-  }
+  _readPaths.push_back(sweepPath);
   
-  // set format as read
-
-  _fileFormat = FILE_FORMAT_EDGE_NC;
-
-  // clean up
-
-  _clearRayVariables();
-  _dTimes.clear();
-
   return 0;
 
 }
@@ -544,13 +606,30 @@ int EdgeNcRadxFile::_readDimensions()
   int iret = 0;
   iret |= _file.readDim("Azimuth", _azimuthDim);
   if (iret == 0) {
-    _nAzimuthsInFile = _azimuthDim->size();
+    if (_firstFileInSweep) {
+      _nAzimuthsInFile = _azimuthDim->size();
+    } else {
+      if ((int) _nAzimuthsInFile != _azimuthDim->size()) {
+        _addErrStr("ERROR - EdgeNcRadxFile::_file.readDimensions");
+        _addErrInt("  nAzimuths changed from: ", (int) _nAzimuthsInFile);
+        _addErrInt("                      to: ", _azimuthDim->size());
+        return -1;
+      }
+    }
   }
 
-  _nGatesInFile = 0;
   iret |= _file.readDim("Gate", _gateDim);
   if (iret == 0) {
-    _nGatesInFile = _gateDim->size();
+    if (_firstFileInSweep) {
+      _nGatesInFile = _gateDim->size();
+    } else {
+      if ((int) _nGatesInFile != _gateDim->size()) {
+        _addErrStr("ERROR - EdgeNcRadxFile::_file.readDimensions");
+        _addErrInt("  nGates changed from: ", _nGatesInFile);
+        _addErrInt("                      to: ", _gateDim->size());
+        return -1;
+      }
+    }
   }
   
   _nGatesVary = false;
@@ -1181,9 +1260,9 @@ int EdgeNcRadxFile::_addFl32FieldToRays(NcVar* var,
 }
 
 /////////////////////////////////////////////////////////
-// load up the read volume with the data from this object
+// initialize the read volume from the primary data
 
-int EdgeNcRadxFile::_loadReadVolume()
+void EdgeNcRadxFile::_initializeReadVolume()
   
 {
 
@@ -1196,7 +1275,7 @@ int EdgeNcRadxFile::_loadReadVolume()
   _readVol->setPrimaryAxis(_primaryAxis);
 
   // _readVol->addFrequencyHz(_frequencyGhz * 1.0e9);
-
+  
   _readVol->setTitle(_title);
   _readVol->setSource(_source);
   _readVol->setHistory(_history);
@@ -1215,6 +1294,17 @@ int EdgeNcRadxFile::_loadReadVolume()
 
   _readVol->copyRangeGeom(_geom);
 
+}
+
+/////////////////////////////////////////////////////////
+// add rays to volume
+
+void EdgeNcRadxFile::_addRaysToVolume()
+  
+{
+
+  // set volume number
+
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     _rays[iray]->setVolumeNumber(_volumeNumber);
   }
@@ -1224,6 +1314,15 @@ int EdgeNcRadxFile::_loadReadVolume()
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     _readVol->addRay(_rays[iray]);
   }
+
+}
+
+/////////////////////////////////////////////////////////
+// finalize the read volume
+
+int EdgeNcRadxFile::_finalizeReadVolume()
+  
+{
 
   if (_readSetMaxRange) {
     _readVol->setMaxRangeKm(_readMaxRangeKm);
@@ -1238,7 +1337,7 @@ int EdgeNcRadxFile::_loadReadVolume()
   if (_readFixedAngleLimitsSet) {
     if (_readVol->constrainByFixedAngle(_readMinFixedAngle, _readMaxFixedAngle,
                                         _readStrictAngleLimits)) {
-      _addErrStr("ERROR - EdgeNcRadxFile::_loadReadVolume");
+      _addErrStr("ERROR - EdgeNcRadxFile::_finalizeReadVolume");
       _addErrStr("  No data found within fixed angle limits");
       _addErrDbl("  min fixed angle: ", _readMinFixedAngle);
       _addErrDbl("  max fixed angle: ", _readMaxFixedAngle);
@@ -1247,14 +1346,14 @@ int EdgeNcRadxFile::_loadReadVolume()
   } else if (_readSweepNumLimitsSet) {
     if (_readVol->constrainBySweepNum(_readMinSweepNum, _readMaxSweepNum,
                                       _readStrictAngleLimits)) {
-      _addErrStr("ERROR - EdgeNcRadxFile::_loadReadVolume");
+      _addErrStr("ERROR - EdgeNcRadxFile::_finalizeReadVolume");
       _addErrStr("  No data found within sweep num limits");
       _addErrInt("  min sweep num: ", _readMinSweepNum);
       _addErrInt("  max sweep num: ", _readMaxSweepNum);
       return -1;
     }
   }
-
+  
   // optionally remove all rays with missing data
 
   if (_readRemoveRaysAllMissing) {
@@ -1271,5 +1370,98 @@ int EdgeNcRadxFile::_loadReadVolume()
 
   return 0;
 
+}
+
+/////////////////////////////////////////////////////////////////
+// get list of field paths for the volume for the specified path
+
+void EdgeNcRadxFile::_getSecondaryFieldPaths(const string &primaryPath,
+                                             vector<string> &secondaryPaths)
+  
+{
+  
+  // init
+
+  vector<string> fileNames;
+  vector<string> fieldNames;
+  secondaryPaths.clear();
+  
+  // decompose the path to get the date/time prefix for the primary path
+  
+  RadxPath ppath(primaryPath);
+  const string &dir = ppath.getDirectory();
+  const string &fileName = ppath.getFile();
+  const string &ext = ppath.getExt();
+
+  // find the last '-' in the file name
+
+  size_t prefixLen = fileName.find_last_of('-') + 1;
+  string prefix(fileName.substr(0, prefixLen));
+  
+  // load up array of file names that match the prefix
+  
+  RadxReadDir rdir;
+  if (rdir.open(dir.c_str()) == 0) {
+    
+    // Loop thru directory looking for the data file names
+    // or forecast directories
+    
+    struct dirent *dp;
+    for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
+      
+      string dName(dp->d_name);
+      
+      // exclude dir entries beginning with '.'
+      
+      if (dName[0] == '.') {
+	continue;
+      }
+
+      // make sure we have files with correct extension
+      
+      if (dName.find(ext) == string::npos) {
+	continue;
+      }
+      
+      string dStr(dName.substr(0, prefixLen));
+      
+      if (dStr == prefix) {
+        // get field name from file name
+        size_t pos = dName.find('.', prefixLen);
+        if (pos != string::npos) {
+          fileNames.push_back(dName);
+        } // if (pos ...
+      } // if (dStr ...
+      
+    } // dp
+    
+    rdir.close();
+
+  } // if (rdir ...
+
+  // sort the file names
+
+  sort(fileNames.begin(), fileNames.end());
+
+  // load up the secondary paths and field names
+
+  for (size_t ii = 0; ii < fileNames.size(); ii++) {
+    
+    const string &fileName = fileNames[ii];
+
+    size_t pos = fileName.find('.', prefixLen);
+    string fieldName = fileName.substr(prefixLen, pos - prefixLen);
+    fieldNames.push_back(fieldName);
+    
+    string dPath(dir);
+    dPath += RadxPath::RADX_PATH_DELIM;
+    dPath += fileName;
+
+    if (dPath != primaryPath) {
+      secondaryPaths.push_back(dPath);
+    }
+
+  } // ii
+  
 }
 

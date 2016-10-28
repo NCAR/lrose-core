@@ -266,7 +266,8 @@ private:
 
   double _missingDataValue;
   double _rangeFoldedValue;
-  
+
+  bool _firstFileInSweep;
   int _volumeNumber;
   Radx::InstrumentType_t _instrumentType;
   Radx::PlatformType_t _platformType;
@@ -276,6 +277,7 @@ private:
 
   vector<RadxRay *> _rays;
 
+  int _readSweep(const string &sweepPath);
   int _readDimensions();
   int _readGlobalAttributes();
   void _clearRayVariables();
@@ -302,7 +304,13 @@ private:
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
 
-  int _loadReadVolume();
+  void _initializeReadVolume();
+  void _addRaysToVolume();
+  int _finalizeReadVolume();
+
+  void _getSecondaryFieldPaths(const string &primaryPath,
+                               vector<string> &secondaryPaths);
+  
 
 };
 
