@@ -276,8 +276,8 @@ private:
   // rays to be added to volume
 
   vector<RadxRay *> _rays;
-
-  int _readSweep(const string &sweepPath);
+  
+  int _readSweepField(const string &sweepPath);
   int _readDimensions();
   int _readGlobalAttributes();
   void _clearRayVariables();

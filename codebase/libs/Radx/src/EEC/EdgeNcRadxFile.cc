@@ -429,7 +429,7 @@ int EdgeNcRadxFile::readFromPath(const string &primaryPath,
   }
 
   _firstFileInSweep = true;
-  if (_readSweep(primaryPath)) {
+  if (_readSweepField(primaryPath)) {
     return -1;
   }
 
@@ -446,7 +446,7 @@ int EdgeNcRadxFile::readFromPath(const string &primaryPath,
       if (_debug) {
         cerr << "Reading secondary path: " << secondaryPaths[ii] << endl;
       }
-      if (_readSweep(secondaryPaths[ii])) {
+      if (_readSweepField(secondaryPaths[ii])) {
         return -1;
       }
     } // ii
@@ -482,7 +482,7 @@ int EdgeNcRadxFile::readFromPath(const string &primaryPath,
 // Read in data for a sweep, from a file.
 // Returns 0 on success, -1 on failure
 
-int EdgeNcRadxFile::_readSweep(const string &sweepPath)
+int EdgeNcRadxFile::_readSweepField(const string &sweepPath)
   
 {
 
