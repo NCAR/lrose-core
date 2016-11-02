@@ -189,7 +189,7 @@ bool EdgeNcRadxFile::isEdgeNc(const string &path)
 
   // read dimensions
   
-  _firstFileInSweep = true;
+  _firstFieldInSweep = true;
   if (_readDimensions()) {
     _file.close();
     if (_verbose) {
@@ -428,7 +428,7 @@ int EdgeNcRadxFile::readFromPath(const string &primaryPath,
     cerr << "Reading primary path: " << primaryPath << endl;
   }
 
-  _firstFileInSweep = true;
+  _firstFieldInSweep = true;
   if (_readSweepField(primaryPath)) {
     return -1;
   }
@@ -440,7 +440,7 @@ int EdgeNcRadxFile::readFromPath(const string &primaryPath,
 
   // read in secondary paths
 
-  _firstFileInSweep = false;
+  _firstFieldInSweep = false;
   if (!_readTimesOnly) {
     for (size_t ii = 0; ii < secondaryPaths.size(); ii++) {
       if (_debug) {
@@ -490,12 +490,12 @@ int EdgeNcRadxFile::_readSweepField(const string &sweepPath)
 
   if (_debug) {
     cerr << "  reading sweep path: " << sweepPath << endl;
-    cerr << "  firstFileInSweep: " << (_firstFileInSweep?"Y":"N") << endl;
+    cerr << "  firstFileInSweep: " << (_firstFieldInSweep?"Y":"N") << endl;
   }
   
   // intialize
 
-  if (_firstFileInSweep) {
+  if (_firstFieldInSweep) {
     _rays.clear();
     _nAzimuthsInFile = 0;
     _nGatesInFile = 0;
@@ -541,7 +541,7 @@ int EdgeNcRadxFile::_readSweepField(const string &sweepPath)
 
   // read in ray variables
 
-  if (_firstFileInSweep) {
+  if (_firstFieldInSweep) {
 
     if (_readRayVariables()) {
       _addErrStr(errStr);
@@ -565,7 +565,7 @@ int EdgeNcRadxFile::_readSweepField(const string &sweepPath)
     
   } else {
 
-    if (_firstFileInSweep) {
+    if (_firstFieldInSweep) {
       // create the rays to be read in, filling out the metadata
       if (_createRays()) {
         _addErrStr(errStr);
@@ -606,7 +606,7 @@ int EdgeNcRadxFile::_readDimensions()
   int iret = 0;
   iret |= _file.readDim("Azimuth", _azimuthDim);
   if (iret == 0) {
-    if (_firstFileInSweep) {
+    if (_firstFieldInSweep) {
       _nAzimuthsInFile = _azimuthDim->size();
     } else {
       if ((int) _nAzimuthsInFile != _azimuthDim->size()) {
@@ -620,7 +620,7 @@ int EdgeNcRadxFile::_readDimensions()
 
   iret |= _file.readDim("Gate", _gateDim);
   if (iret == 0) {
-    if (_firstFileInSweep) {
+    if (_firstFieldInSweep) {
       _nGatesInFile = _gateDim->size();
     } else {
       if ((int) _nGatesInFile != _gateDim->size()) {

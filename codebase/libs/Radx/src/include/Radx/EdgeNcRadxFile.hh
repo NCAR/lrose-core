@@ -267,7 +267,7 @@ private:
   double _missingDataValue;
   double _rangeFoldedValue;
 
-  bool _firstFileInSweep;
+  bool _firstFieldInSweep;
   int _volumeNumber;
   Radx::InstrumentType_t _instrumentType;
   Radx::PlatformType_t _platformType;
