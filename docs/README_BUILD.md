@@ -69,7 +69,7 @@ Recommended distributions are:
 
 LROSE builds requires support for the c++11 standard.
 
-The gcc/g++ version should be 4.8.5 or later.
+The gcc/g++ version should be 4.8.4 or later.
 
 Distributions dated after June 2015 should work.
 
