@@ -591,7 +591,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
       
     } // ii
     
-  } // if (_needPid ...
+  } // if (_params.PID_output_particle_interest_fields) ...
 
   // copy fields through as required
 
