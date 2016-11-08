@@ -899,7 +899,7 @@ public:
 
   double self_consistency_max_phase_shift_on_backscatter;
 
-  self_con_method_t self_consisteny_method;
+  self_con_method_t self_consistency_method;
 
   double self_consistency_kdp_z_expon;
 

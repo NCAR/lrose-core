@@ -3369,15 +3369,15 @@ using namespace std;
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'self_consisteny_method'
+    // Parameter 'self_consistency_method'
     // ctype is '_self_con_method_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("self_consisteny_method");
+    tt->param_name = tdrpStrDup("self_consistency_method");
     tt->descr = tdrpStrDup("Method used to estimate KDP in self consistency method.");
     tt->help = tdrpStrDup("The ZDR power law method was proposed by Vivekanandan, J., G. Zhang, S. M. Ellis, D. Rajopadhyaya, and S. K. Avery, Radar reflectivity calibration using differential propagation phase measurement, Radio Sci., 38(3), 8049, doi:10.1029/2002RS002676, 2003. The Polynomial method was proposed by Qing Cao, Michael Knight, Alexander Ryzhkov and Pengfei Zhang, 2016: A Novel Physical Consistency-Based Calibration Tool for Polarimetric Weather Radar. Paper 691, AMS Annual Conference, New Orleans, 2016.");
-    tt->val_offset = (char *) &self_consisteny_method - &_start_;
+    tt->val_offset = (char *) &self_consistency_method - &_start_;
     tt->enum_def.name = tdrpStrDup("self_con_method_t");
     tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)

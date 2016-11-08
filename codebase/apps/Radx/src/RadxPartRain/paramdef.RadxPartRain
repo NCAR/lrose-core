@@ -1414,7 +1414,7 @@ paramdef enum self_con_method_t {
   p_default = SELF_CON_ZDR_POWER_LAW_METHOD;
   p_descr = "Method used to estimate KDP in self consistency method.";
   p_help = "The ZDR power law method was proposed by Vivekanandan, J., G. Zhang, S. M. Ellis, D. Rajopadhyaya, and S. K. Avery, Radar reflectivity calibration using differential propagation phase measurement, Radio Sci., 38(3), 8049, doi:10.1029/2002RS002676, 2003. The Polynomial method was proposed by Qing Cao, Michael Knight, Alexander Ryzhkov and Pengfei Zhang, 2016: A Novel Physical Consistency-Based Calibration Tool for Polarimetric Weather Radar. Paper 691, AMS Annual Conference, New Orleans, 2016.";
-} self_consisteny_method;
+} self_consistency_method;
 
 paramdef double {
   p_default = 1.0;

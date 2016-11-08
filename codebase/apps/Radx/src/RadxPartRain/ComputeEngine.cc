@@ -2114,7 +2114,8 @@ void ComputeEngine::_doCheckSelfConsistency(int runStart, int runEnd)
   double phidpAccumEst = 0.0;
   double kdpEst = 0.0;
   for (int ii = 0; ii < runLen; ii++) {
-    if (_params.self_consisteny_method == Params::SELF_CON_ZDR_POWER_LAW_METHOD) {
+    if (_params.self_consistency_method ==
+        Params::SELF_CON_ZDR_POWER_LAW_METHOD) {
       kdpEst = _computeKdpPowerLaw(zzLin[ii], zdrLin[ii], aa, bb, cc);
     } else {
       kdpEst = _computeKdpPolynomial(zzLin[ii], zdr[ii], a0, a1, a2, a3);
