@@ -48,6 +48,7 @@
 #include <Spdb/DsSpdb.hh>
 #include <rapmath/trig.h>
 #include <Radx/RadxVol.hh>
+#include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <Mdv/GenericRadxFile.hh>
@@ -435,7 +436,7 @@ int RadxQc::_processFile(const string &filePath)
   if (_params.locate_rlan_interference) {
     vol.estimateSweepNyquistFromVel(_params.VEL_field_name);
   }
-  
+
   // set radar properties
 
   _wavelengthM = vol.getWavelengthM();
@@ -478,15 +479,16 @@ int RadxQc::_processFile(const string &filePath)
 
     // remap to a constant geometry
     vol.remapToPredomGeom();
-
+    
     // compute the height at each gate
     if (_addHeightField(vol)) {
       cerr << "ERROR - RadxQc::Run" << endl;
       cerr << "  Cannot add MSL height field" << endl;
       return -1;
     }
-
+    
     // prepare for dbz gradient by computing pseudo RHIs
+   // compute dbz gradient
     if (_computeDbzGradient(vol)) {
       cerr << "ERROR - RadxQc::Run" << endl;
       cerr << "  Cannot compute for dbz gradient" << endl;
@@ -1328,55 +1330,101 @@ int RadxQc::_computeDbzGradient(RadxVol &vol)
   
 {
 
-  // load the pseudo RHIs, sorted in elevation order
+  // reorder the sweeps in ascending order
   
-  if (vol.loadPseudoRhis()) {
-    cerr << "ERROR - RadxQc::_computeDbzGradient" << endl;
-    cerr << "  Cannot load pseudo RHIs" << endl;
+  vol.reorderSweepsAscendingAngle();
+
+  // need at leat 2 sweeps
+  
+  const vector<RadxSweep *> &sweeps = vol.getSweeps();
+  if (sweeps.size() < 2) {
     return -1;
   }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "===>> In _computeDbzGradient" << endl;
-    cerr << "===>> n pseudo RHIs: " << vol.getPseudoRhis().size() << endl;
-  }
-
-  // loop through the pseudo RHIs, computing reflectivity gradient
-
-  const vector<PseudoRhi *> &rhis = vol.getPseudoRhis();
-  for (size_t irhi = 0; irhi < rhis.size(); irhi++) {
-    if (_computeDbzGradient(*rhis[irhi])) {
-      return -1;
-    }
-  }
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////////////////////////
-// compute the reflectivity gradient for a pseudo RHI
-
-int RadxQc::_computeDbzGradient(PseudoRhi &rhi)
+  vector<RadxRay *> &rays = vol.getRays();
   
-{
+  // loop through the sweeps from lowest to highest
+  // except for last one
   
-  // get rays in the RHI
-  
-  vector<RadxRay *> &rays = rhi.getRays();
-  
-  // loop through pairs of rays, computing the gradient
-  // this fills all but the top ray
-  
-  for (size_t iray = 0; iray < rays.size() - 1; iray++) {
-    if (_computeDbzGradient(*rays[iray], *rays[iray+1])) {
-      return -1;
-    }
-  } // iray
+  for (size_t isweep = 0; isweep < sweeps.size() - 1; isweep++) {
+    
+    const RadxSweep *lowerSweep = sweeps[isweep];
+    const RadxSweep *upperSweep = sweeps[isweep + 1];
 
-  // copy the gradient field from the next from top ray to the top ray
+    size_t lowerSweepStartRayIndex = lowerSweep->getStartRayIndex();
+    size_t lowerSweepEndRayIndex = lowerSweep->getEndRayIndex();
 
-  _copyDbzGradient(*rays[rays.size()-2], *rays[rays.size()-1]);
+    size_t upperSweepStartRayIndex = upperSweep->getStartRayIndex();
+    size_t upperSweepEndRayIndex = upperSweep->getEndRayIndex();
+
+    // compute mean delta azimuth for low sweep
+    // from this, compute azimuth margin for finding RHI rays
+    
+    double prevAz = rays[lowerSweepStartRayIndex]->getAzimuthDeg();
+    double sumDeltaAz = 0.0;
+    double count = 0.0;
+    for (size_t iray = lowerSweepStartRayIndex + 1; iray <= lowerSweepEndRayIndex; iray++) {
+      double az = rays[iray]->getAzimuthDeg();
+      double deltaAz = fabs(az - prevAz);
+      if (deltaAz > 180.0) {
+        deltaAz = fabs(deltaAz - 360.0);
+      }
+      sumDeltaAz += deltaAz;
+      count++;
+      prevAz = az;
+    } // iray
+    double meanDeltaAz = sumDeltaAz / count;
+    double azMargin = meanDeltaAz * 2.5;
+    
+    // loop through rays in lower sweep
+    
+    for (size_t lray = lowerSweepStartRayIndex; 
+         lray <= lowerSweepEndRayIndex; lray++) {
+
+      RadxRay *lowerRay = rays[lray];
+      double lowerAz = lowerRay->getAzimuthDeg();
+
+      // find the matching ray in the upper sweep
+      // this is the ray with the closest azimuth
+
+      double minDiff = 9999;
+      RadxRay *upperMatch = NULL;
+      
+      for (size_t uray = upperSweepStartRayIndex; 
+           uray <= upperSweepEndRayIndex; uray++) {
+        
+        RadxRay *upperRay = rays[uray];
+        double upperAz = upperRay->getAzimuthDeg();
+        
+        double azDiff = fabs(lowerAz - upperAz);
+        if (azDiff > 180.0) {
+          azDiff = fabs(azDiff - 360.0);
+        }
+        if (azDiff < minDiff) {
+          minDiff = azDiff;
+          // check for valid azimuth difference
+          if (minDiff <= azMargin) {
+            upperMatch = upperRay;
+          }
+        }
+        
+      } // uray
+
+      if (upperMatch != NULL) {
+        if (_computeDbzGradient(*lowerRay, *upperMatch)) {
+          // cannot find expected fields
+          return -1;
+        }
+      }
+      
+      if (isweep == sweeps.size() - 2) {
+        // for upper sweeps, copy the gradient field from
+        // the next from top ray to the top ray
+        _copyDbzGradient(*lowerRay, *upperMatch);
+      }
+  
+    } // lray
+
+  } // isweep
   
   return 0;
 
@@ -1435,14 +1483,11 @@ int RadxQc::_computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay)
   const Radx::fl32 *dbzUpper = dbzFieldUpper->getDataFl32();
   Radx::fl32 dbzUpperMissing = dbzFieldUpper->getMissingFl32();
 
-  // htFieldLower->convertToFl32();
+  htFieldLower->convertToFl32();
   // const Radx::fl32 *htLower = htFieldLower->getDataFl32();
 
-  // htFieldUpper->convertToFl32();
+  htFieldUpper->convertToFl32();
   // const Radx::fl32 *htUpper = htFieldUpper->getDataFl32();
-
-  // create gradient field
-
 
   // compute the elevation angle cosines, so that we can correct for range
 
@@ -1490,12 +1535,8 @@ int RadxQc::_computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay)
     }
 
     double dbzDiff = dbzU - dbzL;
-    // double htDiff = htUpper[igateUpper] - htLower[igate];
-    // dbzGrad[igate] = dbzDiff / htDiff;
-    // dbzGrad[igate] = dbzDiff;
     dbzGrad[igate] = dbzDiff / deltaElev;
-    // dbzGrad[igate] = (dbzDiff / deltaElev) / lowerRay.getElevationDeg();
-
+    
   } // igate
 
   // create and add field

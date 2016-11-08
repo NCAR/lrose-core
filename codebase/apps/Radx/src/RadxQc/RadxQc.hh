@@ -51,7 +51,6 @@
 #include <radar/TempProfile.hh>
 #include <radar/BeamHeight.hh>
 #include <Radx/RadxArray.hh>
-#include <Radx/PseudoRhi.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -156,7 +155,6 @@ private:
 
   int _addHeightField(RadxVol &vol);
   int _computeDbzGradient(RadxVol &vol);
-  int _computeDbzGradient(PseudoRhi &rhi);
   int _computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay);
   void _copyDbzGradient(const RadxRay &lowerRay, RadxRay &upperRay);
   void _printRunTime(const string& str);
