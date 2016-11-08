@@ -607,6 +607,41 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   } // ifield
 
+  // if required, output individual PID particle interest fields
+
+  if (_params.PID_output_particle_interest_fields) {
+    
+    const vector<NcarParticleId::Particle*> plist = _pid.getParticleList();
+    for (size_t ii = 0; ii < plist.size(); ii++) {
+
+      const NcarParticleId::Particle *particle = plist[ii];
+      string fieldName = particle->label;
+      fieldName += "_interest";
+
+      // fill data array
+      
+      TaArray<Radx::fl32> data_;
+      Radx::fl32 *data = data_.alloc(derivedRay->getNGates());
+
+      const double *interest = particle->gateInterest;
+      for (int igate = 0; igate < (int) derivedRay->getNGates(); igate++) {
+        data[igate] = interest[igate];
+      } // igate
+      
+      // create field
+      
+      RadxField *field = new RadxField(fieldName, "");
+      field->setTypeFl32(missingDbl);
+      field->addDataFl32(derivedRay->getNGates(), data);
+      
+      // add to ray
+      
+      derivedRay->addField(field);
+      
+    } // ii
+    
+  } // if (_params.PID_output_particle_interest_fields) ...
+  
   // copy fields through as required
 
   if (_params.copy_input_fields_to_output) {
