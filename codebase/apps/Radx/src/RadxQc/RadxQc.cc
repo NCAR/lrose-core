@@ -471,7 +471,7 @@ int RadxQc::_processFile(const string &filePath)
     }
   }
 
-  // for sea clutter, prepare to compute the reflectivity gradient
+  // prepare for identification of sea clutter
 
   if (_params.locate_sea_clutter) {
 
@@ -631,6 +631,10 @@ void RadxQc::_setupRead(RadxFile &file)
   }
   if (_params.RHOHV_available) {
     file.addReadField(_params.RHOHV_field_name);
+  }
+
+  if (_params.LDR_available) {
+    file.addReadField(_params.LDR_field_name);
   }
 
   if (_params.copy_input_fields_to_output) {

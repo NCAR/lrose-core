@@ -40,6 +40,7 @@
 
 #include "Params.hh"
 #include <radar/KdpFilt.hh>
+#include <radar/NcarParticleId.hh>
 #include <radar/TempProfile.hh>
 #include <radar/AtmosAtten.hh>
 #include <radar/IntfLocator.hh>
@@ -105,7 +106,7 @@ private:
   double _startRangeKm, _gateSpacingKm;
   double _nyquist;
   
-  // input arrays for moments
+  // input arrays for moments and derived products
 
   RadxArray<double> _snrArray_;
   RadxArray<double> _dbzArray_;
@@ -114,10 +115,15 @@ private:
   RadxArray<double> _ncpArray_;
   RadxArray<double> _zdrArray_;
   RadxArray<double> _zdpArray_;
+  RadxArray<double> _ldrArray_;
   RadxArray<double> _rhohvArray_;
   RadxArray<double> _phidpArray_;
   RadxArray<double> _kdpArray_;
   RadxArray<double> _dbzElevGradientArray_;
+
+  RadxArray<int> _pidArray_;
+  RadxArray<double> _pidInterest_;
+  RadxArray<double> _tempForPid_;
 
   double *_snrArray;
   double *_dbzArray;
@@ -126,10 +132,15 @@ private:
   double *_ncpArray;
   double *_zdrArray;
   double *_zdpArray;
+  double *_ldrArray;
   double *_rhohvArray;
   double *_phidpArray;
   double *_kdpArray;
   double *_dbzElevGradientArray;
+
+  int *_pidArray;
+  double *_pidInterest;
+  double *_tempForPid;
 
   bool _dbzElevGradientAvail;
 
@@ -141,10 +152,13 @@ private:
 
   KdpFilt _kdp;
 
+  // temperature profile
+
+  const TempProfile *_tempProfile;
+
   // RLAN interference
 
   IntfLocator _intf;
-  const TempProfile *_tempProfile;
   vector<InterestMap::ImPoint> _rlanImapPhaseNoise;
   vector<InterestMap::ImPoint> _rlanImapNcpMean;
   vector<InterestMap::ImPoint> _rlanImapWidthMean;
@@ -159,8 +173,9 @@ private:
   vector<InterestMap::ImPoint> _seaclutImapZdrSdev;
   vector<InterestMap::ImPoint> _seaclutImapDbzElevGradient;
 
-  // interest maps
-  
+  // pid
+
+  NcarParticleId _pid;
 
   // debug printing
   
@@ -180,8 +195,11 @@ private:
   void _locateRlan();
   void _locateSeaClutter();
 
+  int _pidInit();
+  void _pidCompute();
+  void _allocPidArrays();
+  
   void _allocMomentsArrays();
-
   int _loadMomentsArrays(RadxRay *inputRay);
   int _loadFieldArray(RadxRay *inputRay,
                       const string &fieldName,
@@ -196,6 +214,8 @@ private:
 
   void _censorSeaClutter(RadxField &field);
   
+  void _censorOnPid(RadxField &field);
+
   int _convertInterestParamsToVector(const string &label,
                                      const Params::interest_map_point_t *map,
                                      int nPoints,

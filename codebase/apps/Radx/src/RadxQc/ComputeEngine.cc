@@ -254,6 +254,13 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
     _locateSeaClutter();
   }
 
+  // compute pid
+
+  _allocPidArrays();
+  if (_params.compute_pid) {
+    _pidCompute();
+  }
+  
   // load output fields into the moments ray
   
   _loadOutputFields(inputRay, derivedRay);
@@ -380,6 +387,9 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::ZDR:
           *datp = _zdrArray[igate];
+          break;
+        case Params::LDR:
+          *datp = _ldrArray[igate];
           break;
         case Params::RHOHV:
           *datp = _rhohvArray[igate];
@@ -563,6 +573,21 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           }
           break;
 
+        case Params::TEMP_FOR_PID:
+          *datp = _tempForPid[igate];
+          break;
+
+        case Params::PARTICLE_ID:
+          {
+            int pid = _pidArray[igate];
+            if (pid > 0) {
+              *datp = pid;
+            } else {
+              *datp = missingDbl;
+            }
+          }
+          break;
+
       } // switch
 
     } // igate
@@ -599,6 +624,9 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           }
           if (_params.apply_seaclutter_censoring) {
             _censorSeaClutter(*outField);
+          }
+          if (_params.apply_pid_censoring) {
+            _censorOnPid(*outField);
           }
         }
         derivedRay->addField(outField);
@@ -813,10 +841,6 @@ void ComputeEngine::_locateSeaClutter()
     _seaclut.setZdrField(_zdrArray);
   }
 
-  if (_params.ZDR_available) {
-    _seaclut.setZdrField(_zdrArray);
-  }
-  
   if (_dbzElevGradientAvail) {
     _seaclut.setDbzElevGradientField(_dbzElevGradientArray);
   }
@@ -824,6 +848,113 @@ void ComputeEngine::_locateSeaClutter()
   // locate RLAN interference
 
   _seaclut.locate();
+
+}
+
+//////////////////////////////////////
+// initialize pid computations
+  
+int ComputeEngine::_pidInit()
+  
+{
+
+  _pid.setSnrThresholdDb(_params.PID_snr_threshold);
+  _pid.setSnrUpperThresholdDb(_params.PID_snr_upper_threshold);
+
+  if (_params.PID_apply_median_filter_to_DBZ) {
+    _pid.setApplyMedianFilterToDbz(_params.PID_DBZ_median_filter_len);
+  }
+  if (_params.PID_apply_median_filter_to_ZDR) {
+    _pid.setApplyMedianFilterToZdr(_params.PID_ZDR_median_filter_len);
+  }
+
+  if (_params.PID_apply_median_filter_to_LDR) {
+    _pid.setApplyMedianFilterToLdr(_params.PID_LDR_median_filter_len);
+  }
+  if (_params.PID_replace_missing_LDR) {
+    _pid.setReplaceMissingLdr(_params.PID_LDR_replacement_value);
+  }
+
+  if (_params.PID_apply_median_filter_to_RHOHV) {
+    _pid.setApplyMedianFilterToRhohv(_params.PID_RHOHV_median_filter_len);
+  }
+  if (_params.apply_median_filter_to_PID) {
+    _pid.setApplyMedianFilterToPid(_params.PID_median_filter_len);
+  }
+
+  _pid.setNgatesSdev(_params.PID_ngates_for_sdev);
+  _pid.setMinValidInterest(_params.PID_min_valid_interest);
+  
+  _pid.setMissingDouble(missingDbl);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _pid.setDebug(true);
+  }
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    _pid.setVerbose(true);
+  }
+  if (_pid.readThresholdsFromFile(_params.pid_thresholds_file_path)) {
+    cerr << "ERROR - RadxPartRain::ComputeEngine::_run" << endl;
+    cerr << "  Cannot read in pid thresholds from file: "
+         << _params.pid_thresholds_file_path << endl;
+    cerr << "  PID will not be computed" << endl;
+    return -1;
+  }
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////
+// compute PID
+
+void ComputeEngine::_pidCompute()
+  
+{
+  
+  // override temp profile if appropriate
+  
+  if (_params.use_soundings_from_spdb) {
+    if (_tempProfile) {
+      const vector<NcarParticleId::TmpPoint> &profile = _tempProfile->getProfile();
+      if (profile.size() > 0) {
+        _pid.setTempProfile(profile);
+      }
+    }
+  }
+
+  // fill temperature array
+  
+  _pid.fillTempArray(_radarHtKm,
+                     _params.override_standard_pseudo_earth_radius,
+                     _params.pseudo_earth_radius_ratio,
+                     _elevation, _nGates,
+                     _startRangeKm,
+                     _gateSpacingKm,
+                     _tempForPid);
+
+  // compute particle ID
+  
+  _pid.computePidBeam(_nGates, _snrArray, _dbzArray, 
+                      _zdrArray, _kdpArray, _ldrArray, 
+                      _rhohvArray, _phidpArray, _tempForPid);
+  
+  // load results
+
+  memcpy(_pidArray, _pid.getPid(), _nGates * sizeof(int));
+  memcpy(_pidInterest, _pid.getInterest(), _nGates * sizeof(double));
+  
+}
+
+//////////////////////////////////////
+// alloc arrays for PID
+  
+void ComputeEngine::_allocPidArrays()
+  
+{
+
+  _pidArray = _pidArray_.alloc(_nGates);
+  _pidInterest = _pidInterest_.alloc(_nGates);
+  _tempForPid = _tempForPid_.alloc(_nGates);
 
 }
 
@@ -840,6 +971,7 @@ void ComputeEngine::_allocMomentsArrays()
   _widthArray = _widthArray_.alloc(_nGates);
   _ncpArray = _ncpArray_.alloc(_nGates);
   _zdrArray = _zdrArray_.alloc(_nGates);
+  _ldrArray = _ldrArray_.alloc(_nGates);
   _zdpArray = _zdpArray_.alloc(_nGates);
   _kdpArray = _kdpArray_.alloc(_nGates);
   _rhohvArray = _rhohvArray_.alloc(_nGates);
@@ -905,6 +1037,17 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
   } else {
     for (int igate = 0; igate < _nGates; igate++) {
       _zdrArray[igate] = missingDbl;
+    }
+  }
+
+  if (_params.LDR_available) {
+    if (_loadFieldArray(inputRay, _params.LDR_field_name,
+                        true, _ldrArray)) {
+      return -1;
+    }
+  } else {
+    for (int igate = 0; igate < _nGates; igate++) {
+      _ldrArray[igate] = missingDbl;
     }
   }
 
@@ -1083,6 +1226,30 @@ void ComputeEngine::_censorSeaClutter(RadxField &field)
       field.setGateToMissing(ii);
     }
   } // ii
+
+}
+
+//////////////////////////////////////////////////////////////
+// Censor gates with given particle types
+
+void ComputeEngine::_censorOnPid(RadxField &field)
+
+{
+
+  const int *pid = _pid.getPid();
+  for (int igate = 0; igate < _nGates; igate++) {
+    int ptype = pid[igate];
+    bool censor = false;
+    for (int jj = 0; jj < _params.pid_vals_for_censoring_n; jj++) {
+      if (ptype == _params._pid_vals_for_censoring[jj]) {
+        censor = true;
+        break;
+      }
+    }
+    if (censor) {
+      field.setGateToMissing(igate);
+    }
+  } // igate
 
 }
 

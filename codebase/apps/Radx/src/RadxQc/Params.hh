@@ -79,55 +79,58 @@ public:
     WIDTH = 3,
     NCP = 4,
     ZDR = 5,
-    RHOHV = 6,
-    PHIDP = 7,
-    KDP = 8,
-    PSOB = 9,
-    ZDP = 10,
-    DBZ_ATTEN_CORRECTION = 11,
-    ZDR_ATTEN_CORRECTION = 12,
-    DBZ_ATTEN_CORRECTED = 13,
-    ZDR_ATTEN_CORRECTED = 14,
-    DBZ_FOR_KDP = 15,
-    ZDR_FOR_KDP = 16,
-    RHOHV_FOR_KDP = 17,
-    SNR_FOR_KDP = 18,
-    ZDR_SDEV_FOR_KDP = 19,
-    VALID_FLAG_FOR_KDP = 20,
-    PHIDP_FOR_KDP = 21,
-    PHIDP_MEAN_FOR_KDP = 22,
-    PHIDP_MEAN_UNFOLD_FOR_KDP = 23,
-    PHIDP_SDEV_FOR_KDP = 24,
-    PHIDP_JITTER_FOR_KDP = 25,
-    PHIDP_UNFOLD_FOR_KDP = 26,
-    PHIDP_FILT_FOR_KDP = 27,
-    PHIDP_COND_FOR_KDP = 28,
-    PHIDP_COND_FILT_FOR_KDP = 29,
-    SNR_RLAN = 30,
-    SNR_MODE_RLAN = 31,
-    SNR_DMODE_RLAN = 32,
-    SNR_SDEV_RLAN = 33,
-    NCP_MEAN_RLAN = 34,
-    WIDTH_MEAN_RLAN = 35,
-    PHASE_RLAN = 36,
-    PHASE_NOISE_RLAN = 37,
-    PHASE_NOISE_INTEREST_RLAN = 38,
-    NCP_MEAN_INTEREST_RLAN = 39,
-    WIDTH_MEAN_INTEREST_RLAN = 40,
-    SNR_DMODE_INTEREST_RLAN = 41,
-    SNR_SDEV_INTEREST_RLAN = 42,
-    RLAN_FLAG = 43,
-    RAY_HEIGHT = 44,
-    SNR_MEAN_SEACLUT = 45,
-    RHOHV_MEAN_SEACLUT = 46,
-    PHIDP_SDEV_SEACLUT = 47,
-    ZDR_SDEV_SEACLUT = 48,
-    DBZ_ELEV_GRADIENT_SEACLUT = 49,
-    RHOHV_MEAN_INTEREST_SEACLUT = 50,
-    PHIDP_SDEV_INTEREST_SEACLUT = 51,
-    ZDR_SDEV_INTEREST_SEACLUT = 52,
-    DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 53,
-    SEACLUT_FLAG = 54
+    LDR = 6,
+    RHOHV = 7,
+    PHIDP = 8,
+    KDP = 9,
+    PSOB = 10,
+    ZDP = 11,
+    DBZ_ATTEN_CORRECTION = 12,
+    ZDR_ATTEN_CORRECTION = 13,
+    DBZ_ATTEN_CORRECTED = 14,
+    ZDR_ATTEN_CORRECTED = 15,
+    DBZ_FOR_KDP = 16,
+    ZDR_FOR_KDP = 17,
+    RHOHV_FOR_KDP = 18,
+    SNR_FOR_KDP = 19,
+    ZDR_SDEV_FOR_KDP = 20,
+    VALID_FLAG_FOR_KDP = 21,
+    PHIDP_FOR_KDP = 22,
+    PHIDP_MEAN_FOR_KDP = 23,
+    PHIDP_MEAN_UNFOLD_FOR_KDP = 24,
+    PHIDP_SDEV_FOR_KDP = 25,
+    PHIDP_JITTER_FOR_KDP = 26,
+    PHIDP_UNFOLD_FOR_KDP = 27,
+    PHIDP_FILT_FOR_KDP = 28,
+    PHIDP_COND_FOR_KDP = 29,
+    PHIDP_COND_FILT_FOR_KDP = 30,
+    SNR_RLAN = 31,
+    SNR_MODE_RLAN = 32,
+    SNR_DMODE_RLAN = 33,
+    SNR_SDEV_RLAN = 34,
+    NCP_MEAN_RLAN = 35,
+    WIDTH_MEAN_RLAN = 36,
+    PHASE_RLAN = 37,
+    PHASE_NOISE_RLAN = 38,
+    PHASE_NOISE_INTEREST_RLAN = 39,
+    NCP_MEAN_INTEREST_RLAN = 40,
+    WIDTH_MEAN_INTEREST_RLAN = 41,
+    SNR_DMODE_INTEREST_RLAN = 42,
+    SNR_SDEV_INTEREST_RLAN = 43,
+    RLAN_FLAG = 44,
+    RAY_HEIGHT = 45,
+    SNR_MEAN_SEACLUT = 46,
+    RHOHV_MEAN_SEACLUT = 47,
+    PHIDP_SDEV_SEACLUT = 48,
+    ZDR_SDEV_SEACLUT = 49,
+    DBZ_ELEV_GRADIENT_SEACLUT = 50,
+    RHOHV_MEAN_INTEREST_SEACLUT = 51,
+    PHIDP_SDEV_INTEREST_SEACLUT = 52,
+    ZDR_SDEV_INTEREST_SEACLUT = 53,
+    DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 54,
+    SEACLUT_FLAG = 55,
+    PARTICLE_ID = 56,
+    TEMP_FOR_PID = 57
   } output_field_id_t;
 
   typedef enum {
@@ -558,6 +561,10 @@ public:
 
   char* ZDR_field_name;
 
+  tdrp_bool_t LDR_available;
+
+  char* LDR_field_name;
+
   tdrp_bool_t PHIDP_available;
 
   char* PHIDP_field_name;
@@ -679,6 +686,44 @@ public:
 
   char* ray_height_field_name;
 
+  tdrp_bool_t compute_pid;
+
+  char* pid_thresholds_file_path;
+
+  double PID_snr_threshold;
+
+  double PID_snr_upper_threshold;
+
+  double PID_min_valid_interest;
+
+  tdrp_bool_t PID_apply_median_filter_to_DBZ;
+
+  int PID_DBZ_median_filter_len;
+
+  tdrp_bool_t PID_apply_median_filter_to_ZDR;
+
+  int PID_ZDR_median_filter_len;
+
+  tdrp_bool_t PID_apply_median_filter_to_RHOHV;
+
+  int PID_RHOHV_median_filter_len;
+
+  tdrp_bool_t PID_apply_median_filter_to_LDR;
+
+  int PID_LDR_median_filter_len;
+
+  tdrp_bool_t PID_replace_missing_LDR;
+
+  double PID_LDR_replacement_value;
+
+  int PID_ngates_for_sdev;
+
+  tdrp_bool_t PID_output_particle_interest_fields;
+
+  tdrp_bool_t apply_median_filter_to_PID;
+
+  int PID_median_filter_len;
+
   tdrp_bool_t use_soundings_from_spdb;
 
   char* sounding_spdb_url;
@@ -721,6 +766,11 @@ public:
 
   tdrp_bool_t apply_seaclutter_censoring;
 
+  tdrp_bool_t apply_pid_censoring;
+
+  int *_pid_vals_for_censoring;
+  int pid_vals_for_censoring_n;
+
   output_format_t output_format;
 
   netcdf_style_t netcdf_style;
@@ -752,7 +802,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[147];
+  mutable TDRPtable _table[171];
 
   const char *_className;
 

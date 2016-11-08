@@ -280,6 +280,17 @@ paramdef string {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "Is LDR data available for PID?";
+} LDR_available;
+
+paramdef string {
+  p_default = "LDR";
+  p_descr = "Field name for LDR.";
+  p_help = "Used in PID computations, if available.";
+} LDR_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Is PHIDP data available?";
 } PHIDP_available;
 
@@ -465,7 +476,7 @@ commentdef {
 paramdef boolean {
   p_default = false;
   p_descr = "Option to locate gates with RLAN interference.";
-  p_help = "This particularly applies to C-band. You need to activate this step if you want RLAN to show up in the PID classification.";
+  p_help = "This particularly applies to C-band.";
 } locate_rlan_interference;
 
 commentdef {
@@ -546,7 +557,6 @@ commentdef {
 paramdef boolean {
   p_default = false;
   p_descr = "Option to locate gates with sea clutter.";
-  p_help = "You need to activate this step if you want sea clutter to show up in the PID classification.";
 } locate_sea_clutter;
 
 paramdef boolean {
@@ -636,7 +646,123 @@ paramdef string {
 } ray_height_field_name;
 
 commentdef {
-  p_header = "SOUNDING INPUT FOR temperatures - OPTIONAL";
+  p_header = "COMPUTING PID - HYDROMETEOR PARTICLE ID";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute PID classification.";
+} compute_pid;
+
+paramdef string {
+  p_descr = "File path for fuzzy logic thresholds for PID.";
+  p_help = "This file contains the thresholds and weights for computing particle ID.";
+  p_default = "./s_band_pid_input_steraotables27.input";
+} pid_thresholds_file_path;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Minimum SNR for valid PID.";
+  p_help = "If the SNR at a gate is below this, the PID is censored.";
+} PID_snr_threshold;
+
+paramdef double {
+  p_default = 9999.0;
+  p_descr = "Maximum SNR for valid PID.";
+  p_help = "If the SNR at a gate is above this value, the PID will be set to SATURATED_SNR = 18.";
+} PID_snr_upper_threshold;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minimum valid interest value for identifying a particle.";
+  p_help = "If the computed interest value is below this, the PID is set to missing.";
+} PID_min_valid_interest;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter DBZ with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_DBZ;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for DBZ - gates.";
+  p_help = "See 'PID_apply_median_filter_to_DBZ'";
+} PID_DBZ_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter ZDR with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_ZDR;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for ZDR - gates.";
+  p_help = "See 'PID_apply_median_filter_to_ZDR'";
+} PID_ZDR_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter RHOHV with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_RHOHV;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for RHOHV - gates.";
+  p_help = "See 'PID_apply_median_filter_to_RHOHV'";
+} PID_RHOHV_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter LDR with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_LDR;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for LDR - gates.";
+  p_help = "See 'PID_apply_median_filter_to_LDR'";
+} PID_LDR_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "For PID, option to replace missing LDR values with a specified value.";
+  p_help = "When the SNR gets low, LDR is unreliable since there is not sufficient dynamic range to provide an accurate cross-polar power measurement. In these cases, it makes sense to replace LDR with a neutral value, such as 0.0, so that we do not reject gates at which valuable data is available.";
+} PID_replace_missing_LDR;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Value to which LDR will be set if missing.";
+} PID_LDR_replacement_value;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Number of gates for computing standard deviations.";
+  p_help = "This applies to computing the standard deviation of zdr and phidp.";
+} PID_ngates_for_sdev;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to output the individual interest fields.";
+  p_help = "If TRUE, the interest field for each particle type will be written to the output FMQ, in addition to the list in 'output_fields'.";
+} PID_output_particle_interest_fields;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter PID with median filter.";
+  p_help = "The filter is computed in range, and affects both rain rate and PID.";
+} apply_median_filter_to_PID;
+
+paramdef int {
+  p_default = 7;
+  p_descr = "Length of median filter for PID - gates.";
+  p_help = "See 'appply_median_filter_to_PID'";
+} PID_median_filter_len;
+
+commentdef {
+  p_header = "SOUNDING INPUT FOR PID temperature profile - OPTIONAL";
 }
 
 paramdef boolean {
@@ -706,7 +832,7 @@ paramdef double {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to use wet bulb temperature profile.";
-  p_help = "If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. This is thought to more closely track the temperature of melting ice.";
+  p_help = "If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. Applies to PID estimation. This is thought to more closely track the temperature of melting ice.";
 } sounding_use_wet_bulb_temp;
 
 commentdef {
@@ -747,6 +873,7 @@ typedef enum {
   WIDTH,
   NCP,
   ZDR,
+  LDR,
   RHOHV,
   PHIDP,
   KDP,
@@ -801,7 +928,10 @@ typedef enum {
   PHIDP_SDEV_INTEREST_SEACLUT,
   ZDR_SDEV_INTEREST_SEACLUT,
   DBZ_ELEV_GRADIENT_INTEREST_SEACLUT,
-  SEACLUT_FLAG
+  SEACLUT_FLAG,
+
+  PARTICLE_ID,
+  TEMP_FOR_PID
 
 } output_field_id_t;
 
@@ -958,6 +1088,18 @@ paramdef boolean {
   p_descr = "Option to censor sea clutter in fields that are copied through.";
   p_help = "Only applies for fields for which 'apply_censoring' is set to TRUE.";
 } apply_seaclutter_censoring;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to censor based on PID results.";
+  p_help = "Only applies for fields for which 'apply_censoring' is set to TRUE.";
+} apply_pid_censoring;
+
+paramdef int {
+  p_default = { 15, 16, 17, 18, 19 };
+  p_descr = "PID values for which output should be censored.";
+  p_help = "Only applies for fields for which 'apply_censoring' is set to TRUE.";
+} pid_vals_for_censoring[];
 
 commentdef {
   p_header = "OUTPUT FILE FORMAT";
