@@ -2627,7 +2627,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 59;
+        tt->struct_def.fields[0].enum_def.nfields = 60;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -2748,6 +2748,8 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[57].val = TEMP_FOR_PID;
         tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("PID_CENSOR_FLAG");
         tt->struct_def.fields[0].enum_def.fields[58].val = PID_CENSOR_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("INPUT_FIELDS_CENSOR_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[59].val = INPUT_FIELDS_CENSOR_FLAG;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -2881,6 +2883,86 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 16");
+    tt->comment_hdr = tdrpStrDup("CENSORING BASED ON INPUT FIELD VALUES");
+    tt->comment_text = tdrpStrDup("You have the option of censoring the value of data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise.");
+    tt++;
+    
+    // Parameter 'censoring_input_fields'
+    // ctype is '_censoring_input_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("censoring_input_fields");
+    tt->descr = tdrpStrDup("Fields to be used for censoring.");
+    tt->help = tdrpStrDup("Specify the fields to be used to determine whether a gate should be censored. The name refers to the input data field names. Valid field values lie in the range from min_valid_value to max_valid_value inclusive. If the value of a field at a gate lies within this range, it is considered valid. Each specified field is examined at each gate, and is flagged as valid if its value lies in the valid range. These field flags are then combined as follows: first, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true. The combined_or flag is then combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true. If this final flag is true, then the data at the gate is regarded as valid and is retained. If the final flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.");
+    tt->array_offset = (char *) &_censoring_input_fields - &_start_;
+    tt->array_n_offset = (char *) &censoring_input_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(censoring_input_field_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("censoring_input_field_t");
+    tt->struct_def.nfields = 4;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("input_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_censoring_input_fields->input_name - (char *) _censoring_input_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("min_valid_value");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_censoring_input_fields->min_valid_value - (char *) _censoring_input_fields;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("max_valid_value");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_censoring_input_fields->max_valid_value - (char *) _censoring_input_fields;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("logical_t");
+      tt->struct_def.fields[3].fname = tdrpStrDup("combination_method");
+      tt->struct_def.fields[3].ptype = ENUM_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_censoring_input_fields->combination_method - (char *) _censoring_input_fields;
+        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("logical_t");
+        tt->struct_def.fields[3].enum_def.nfields = 2;
+        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("LOGICAL_AND");
+        tt->struct_def.fields[3].enum_def.fields[0].val = LOGICAL_AND;
+        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("LOGICAL_OR");
+        tt->struct_def.fields[3].enum_def.fields[1].val = LOGICAL_OR;
+    tt->n_struct_vals = 8;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("SNR");
+      tt->struct_vals[1].d = 0;
+      tt->struct_vals[2].d = 1000;
+      tt->struct_vals[3].e = LOGICAL_OR;
+      tt->struct_vals[4].s = tdrpStrDup("NCP");
+      tt->struct_vals[5].d = 0.15;
+      tt->struct_vals[6].d = 1000;
+      tt->struct_vals[7].e = LOGICAL_OR;
+    tt++;
+    
+    // Parameter 'input_field_censoring_min_valid_run'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("input_field_censoring_min_valid_run");
+    tt->descr = tdrpStrDup("Minimum valid run of non-censored gates.");
+    tt->help = tdrpStrDup("Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.");
+    tt->val_offset = (char *) &input_field_censoring_min_valid_run - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'Comment 17'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("SPECIFYING FIELDS FOR CENSORING");
     tt->comment_text = tdrpStrDup("These fields are copied from the input file, censored according to the output rules, and written to the output file.");
     tt++;
@@ -2897,50 +2979,55 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'censored_fields'
-    // ctype is '_censored_field_t'
+    // Parameter 'censored_output_fields'
+    // ctype is '_censored_output_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("censored_fields");
+    tt->param_name = tdrpStrDup("censored_output_fields");
     tt->descr = tdrpStrDup("Fields to be copied from input and written to output.");
     tt->help = tdrpStrDup("These fields are copied from the input, optionally censored, and written to the output file. You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app.");
-    tt->array_offset = (char *) &_censored_fields - &_start_;
-    tt->array_n_offset = (char *) &censored_fields_n - &_start_;
+    tt->array_offset = (char *) &_censored_output_fields - &_start_;
+    tt->array_n_offset = (char *) &censored_output_fields_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(censored_field_t);
+    tt->array_elem_size = sizeof(censored_output_field_t);
     tt->array_n = 1;
-    tt->struct_def.name = tdrpStrDup("censored_field_t");
-    tt->struct_def.nfields = 5;
+    tt->struct_def.name = tdrpStrDup("censored_output_field_t");
+    tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
       tt->struct_def.fields[0].fname = tdrpStrDup("input_name");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_censored_fields->input_name - (char *) _censored_fields;
+        (char *) &_censored_output_fields->input_name - (char *) _censored_output_fields;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("output_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_censored_fields->output_name - (char *) _censored_fields;
+        (char *) &_censored_output_fields->output_name - (char *) _censored_output_fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[2].fname = tdrpStrDup("apply_rlan_censoring");
       tt->struct_def.fields[2].ptype = BOOL_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_censored_fields->apply_rlan_censoring - (char *) _censored_fields;
+        (char *) &_censored_output_fields->apply_rlan_censoring - (char *) _censored_output_fields;
       tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[3].fname = tdrpStrDup("apply_seaclut_censoring");
       tt->struct_def.fields[3].ptype = BOOL_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_censored_fields->apply_seaclut_censoring - (char *) _censored_fields;
+        (char *) &_censored_output_fields->apply_seaclut_censoring - (char *) _censored_output_fields;
       tt->struct_def.fields[4].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[4].fname = tdrpStrDup("apply_pid_censoring");
       tt->struct_def.fields[4].ptype = BOOL_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_censored_fields->apply_pid_censoring - (char *) _censored_fields;
-    tt->n_struct_vals = 5;
+        (char *) &_censored_output_fields->apply_pid_censoring - (char *) _censored_output_fields;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[5].fname = tdrpStrDup("apply_input_field_censoring");
+      tt->struct_def.fields[5].ptype = BOOL_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_censored_output_fields->apply_input_field_censoring - (char *) _censored_output_fields;
+    tt->n_struct_vals = 6;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("VEL");
@@ -2948,13 +3035,14 @@ using namespace std;
       tt->struct_vals[2].b = pFALSE;
       tt->struct_vals[3].b = pFALSE;
       tt->struct_vals[4].b = pFALSE;
+      tt->struct_vals[5].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("OUTPUT FILE FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3011,11 +3099,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3056,11 +3144,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("VOLUME OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

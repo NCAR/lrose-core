@@ -57,19 +57,23 @@ ComputeEngine::ComputeEngine(const Params &params,
 {
 
   OK = true;
+  _nWarnCensorPrint = 0;
   
   // initialize kdp, pid
+  // set up interest maps etc
 
   _kdpInit();
-
+  
   if (_pidInit()) {
     OK = false;
   }
 
-  // set up interest maps for RLAN interference
+  if (_rlanInit()) {
+    OK = false;
+  }
 
-  if (_params.locate_rlan_interference) {
-    _rlanInit();
+  if (_seaclutInit()) {
+    OK = false;
   }
 
 }
@@ -126,6 +130,10 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
   _allocMomentsArrays();
   _loadMomentsArrays(inputRay);
   
+  // set flag for input field censoring
+
+  _setInputCensoringFlag(*inputRay);
+
   // compute ZDP
 
   _computeZdpArray();
@@ -493,6 +501,14 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
 
 
+        case Params::INPUT_FIELDS_CENSOR_FLAG:
+          if (_inputCensorFlag[igate]) {
+            *datp = 1.0;
+          } else {
+            *datp = 0.0;
+          }
+          break;
+
       } // switch
 
     } // igate
@@ -551,21 +567,25 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   if (_params.write_censored_fields_to_output) {
 
-    for (int ii = 0; ii < _params.censored_fields_n; ii++) {
-      const Params::censored_field_t &cfield = _params._censored_fields[ii];
-      string inName = cfield.input_name;
+    for (int ii = 0; ii < _params.censored_output_fields_n; ii++) {
+      const Params::censored_output_field_t &cField =
+        _params._censored_output_fields[ii];
+      string inName = cField.input_name;
       RadxField *inField = inputRay->getField(inName);
       if (inField != NULL) {
         RadxField *outField = new RadxField(*inField);
-        outField->setName(cfield.output_name);
-        if (cfield.apply_rlan_censoring) {
+        outField->setName(cField.output_name);
+        if (cField.apply_rlan_censoring) {
           _censorRlan(*outField);
         }
-        if (cfield.apply_seaclut_censoring) {
+        if (cField.apply_seaclut_censoring) {
           _censorSeaClutter(*outField);
         }
-        if (cfield.apply_pid_censoring) {
+        if (cField.apply_pid_censoring) {
           _censorOnPid(*outField);
+        }
+        if (cField.apply_input_field_censoring) {
+          _censorOnInputFields(*outField);
         }
         derivedRay->addField(outField);
       }
@@ -689,9 +709,11 @@ void ComputeEngine::_kdpCompute()
 //////////////////////////////////////
 // Initialize RLAN interference
 
-void ComputeEngine::_rlanInit()
+int ComputeEngine::_rlanInit()
   
 {
+
+  int iret = 0;
 
   _intf.setMinRaySnr(_params.rlan_min_ray_snr_db);
   _intf.setMinRayFraction(_params.rlan_min_ray_fraction);
@@ -704,7 +726,7 @@ void ComputeEngine::_rlanInit()
        _params._rlan_phase_noise_interest_map,
        _params.rlan_phase_noise_interest_map_n,
        _rlanImapPhaseNoise)) {
-    OK = false;
+    iret = -1;
   } else {
     _intf.setInterestMapPhaseNoise(_rlanImapPhaseNoise,
                                    _params.rlan_phase_noise_weight);
@@ -715,7 +737,7 @@ void ComputeEngine::_rlanInit()
        _params._rlan_ncp_mean_interest_map,
        _params.rlan_ncp_mean_interest_map_n,
        _rlanImapNcpMean)) {
-    OK = false;
+    iret = -1;
   } else {
     _intf.setInterestMapNcpMean(_rlanImapNcpMean,
                                 _params.rlan_ncp_mean_weight);
@@ -726,7 +748,7 @@ void ComputeEngine::_rlanInit()
        _params._rlan_width_mean_interest_map,
        _params.rlan_width_mean_interest_map_n,
        _rlanImapWidthMean)) {
-    OK = false;
+    iret = -1;
   } else {
     _intf.setInterestMapWidthMean(_rlanImapWidthMean,
                                   _params.rlan_width_mean_weight);
@@ -737,7 +759,7 @@ void ComputeEngine::_rlanInit()
        _params._rlan_snr_dmode_interest_map,
        _params.rlan_snr_dmode_interest_map_n,
        _rlanImapSnrDMode)) {
-    OK = false;
+    iret = -1;
   } else {
     _intf.setInterestMapSnrDMode(_rlanImapSnrDMode,
                                  _params.rlan_snr_dmode_weight);
@@ -749,11 +771,13 @@ void ComputeEngine::_rlanInit()
        _params._rlan_zdr_sdev_interest_map,
        _params.rlan_zdr_sdev_interest_map_n,
        _rlanImapZdrSdev)) {
-    OK = false;
+    iret = -1;
   } else {
     _intf.setInterestMapZdrSdev(_rlanImapZdrSdev,
                                 _params.rlan_zdr_sdev_weight);
   }
+
+  return iret;
 
 }
 
@@ -812,16 +836,18 @@ void ComputeEngine::_locateRlan()
 //////////////////////////////////////
 // Initialize Sea Clutter
 
-void ComputeEngine::_seaclutInit()
+int ComputeEngine::_seaclutInit()
   
 {
   
+  int iret = 0;
+
   if (_convertInterestParamsToVector
       ("seaclut_rhohv_mean",
        _params._seaclut_rhohv_mean_interest_map,
        _params.seaclut_rhohv_mean_interest_map_n,
        _seaclutImapRhohvMean)) {
-    OK = false;
+    iret = -1;
   } else {
     _seaclut.setInterestMapRhohvMean
       (_seaclutImapRhohvMean,
@@ -833,7 +859,7 @@ void ComputeEngine::_seaclutInit()
        _params._seaclut_phidp_sdev_interest_map,
        _params.seaclut_phidp_sdev_interest_map_n,
        _seaclutImapPhidpSdev)) {
-    OK = false;
+    iret = -1;
   } else {
     _seaclut.setInterestMapPhidpSdev
       (_seaclutImapPhidpSdev,
@@ -845,7 +871,7 @@ void ComputeEngine::_seaclutInit()
        _params._seaclut_zdr_sdev_interest_map,
        _params.seaclut_zdr_sdev_interest_map_n,
        _seaclutImapZdrSdev)) {
-    OK = false;
+    iret = -1;
   } else {
     _seaclut.setInterestMapZdrSdev
       (_seaclutImapZdrSdev,
@@ -857,7 +883,7 @@ void ComputeEngine::_seaclutInit()
        _params._seaclut_dbz_elev_gradient_interest_map,
        _params.seaclut_dbz_elev_gradient_interest_map_n,
        _seaclutImapDbzElevGradient)) {
-    OK = false;
+    iret = -1;
   } else {
     _seaclut.setInterestMapDbzElevGradient
       (_seaclutImapDbzElevGradient,
@@ -865,6 +891,8 @@ void ComputeEngine::_seaclutInit()
   }
   
   _seaclut.setMinSnrDb(_params.seaclut_min_snr_db);
+
+  return iret;
 
 }
 
@@ -958,6 +986,8 @@ int ComputeEngine::_pidInit()
   _pid.setMinValidInterest(_params.PID_min_valid_interest);
   
   _pid.setMissingDouble(missingDbl);
+
+  _pid.setDebug(false);
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _pid.setDebug(true);
   }
@@ -1335,6 +1365,187 @@ void ComputeEngine::_censorOnPid(RadxField &field)
 
 }
 
+////////////////////////////////////////////////////////////////////
+// set censoring flag based on input fields in a ray
+
+void ComputeEngine::_setInputCensoringFlag(RadxRay &inputRay)
+  
+{
+
+  // allocate as needed
+
+  _inputCensorFlag = _inputCensorFlag_.alloc(_nGates);
+
+  // check if we need input censoring
+  
+  bool applyInputCensoring = false;
+  if (_params.write_censored_fields_to_output) {
+    for (int ii = 0; ii < _params.censored_output_fields_n; ii++) {
+      if (_params._censored_output_fields[ii].apply_input_field_censoring) {
+        applyInputCensoring = true;
+      }
+    }
+  }
+
+  // if no input censoring, set flag to false everywhere
+  // and return
+
+  if (!applyInputCensoring) {
+    for (int igate = 0; igate < _nGates; igate++) {
+      _inputCensorFlag[igate] = false;
+    }
+    return;
+  }
+
+  // initialize censoring flags to true to
+  // turn censoring ON everywhere
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    _inputCensorFlag[igate] = true;
+  }
+
+  // create temporary field copies for input data
+  
+  vector<RadxField *> inFields;
+  for (int ifield = 0; ifield < _params.censoring_input_fields_n; ifield++) {
+    
+    const Params::censoring_input_field_t &inField =
+      _params._censoring_input_fields[ifield];
+    
+    string inName = inField.input_name;
+    RadxField *field = inputRay.getField(inName);
+    if (field != NULL) {
+      field->convertToFl32();
+    }
+    inFields.push_back(field);
+    
+  } // ifield
+
+  // check OR fields
+  // if any of these have VALID data, we turn censoring OFF
+
+  int orFieldCount = 0;
+
+  for (int ifield = 0; ifield < _params.censoring_input_fields_n; ifield++) {
+    
+    const Params::censoring_input_field_t &cfld =
+      _params._censoring_input_fields[ifield];
+    if (cfld.combination_method != Params::LOGICAL_OR) {
+      continue;
+    }
+
+    RadxField *field = inFields[ifield];
+    if (field == NULL) {
+      // field missing, do not censor
+      if (_nWarnCensorPrint % 360 == 0) {
+        cerr << "WARNING - input censoring field missing: " << cfld.input_name << endl;
+        cerr << "  Censoring will not be applied for this field." << endl;
+      }
+      _nWarnCensorPrint++;
+      for (int igate = 0; igate < _nGates; igate++) {
+        _inputCensorFlag[igate] = false;
+      }
+      continue;
+    }
+    
+    orFieldCount++;
+    
+    double minValidVal = cfld.min_valid_value;
+    double maxValidVal = cfld.max_valid_value;
+    
+    const Radx::fl32 *fdata = (const Radx::fl32 *) field->getData();
+    for (int igate = 0; igate < _nGates; igate++) {
+      double val = fdata[igate];
+      if (val >= minValidVal && val <= maxValidVal) {
+        _inputCensorFlag[igate] = false;
+      }
+    }
+    
+  } // ifield
+
+  // if no OR fields were found, turn off ALL censoring at this stage
+
+  if (orFieldCount == 0) {
+    for (int igate = 0; igate < _nGates; igate++) {
+      _inputCensorFlag[igate] = false;
+    }
+  }
+
+  // check AND fields
+  // if any of these have INVALID data, we turn censoring ON
+
+  for (int ifield = 0; ifield < _params.censoring_input_fields_n; ifield++) {
+    
+    const Params::censoring_input_field_t &cfld =
+      _params._censoring_input_fields[ifield];
+    if (cfld.combination_method != Params::LOGICAL_AND) {
+      continue;
+    }
+    
+    RadxField *field = inFields[ifield];
+    if (field == NULL) {
+      continue;
+    }
+    
+    double minValidVal = cfld.min_valid_value;
+    double maxValidVal = cfld.max_valid_value;
+    
+    const Radx::fl32 *fdata = (const Radx::fl32 *) field->getData();
+    for (int igate = 0; igate < _nGates; igate++) {
+      double val = fdata[igate];
+      if (val < minValidVal || val > maxValidVal) {
+        _inputCensorFlag[igate] = true;
+      }
+    }
+    
+  } // ifield
+
+  // check that uncensored runs meet the minimum length
+  // those which do not are censored
+
+  int minValidRun = _params.input_field_censoring_min_valid_run;
+  if (minValidRun > 1) {
+    int runLength = 0;
+    bool doCheck = false;
+    for (int igate = 0; igate < _nGates; igate++) {
+      if (!_inputCensorFlag[igate]) {
+        doCheck = false;
+        runLength++;
+      } else {
+        doCheck = true;
+      }
+      // last gate?
+      if (igate == _nGates - 1) doCheck = true;
+      // check run length
+      if (doCheck) {
+        if (runLength < minValidRun) {
+          // clear the run which is too short
+          for (int jgate = igate - runLength; jgate < igate; jgate++) {
+            _inputCensorFlag[jgate] = true;
+          } // jgate
+        }
+        runLength = 0;
+      } // if (doCheck ...
+    } // igate
+  }
+
+}
+
+//////////////////////////////////////////////////////////////
+// Censor gates based on input field values
+
+void ComputeEngine::_censorOnInputFields(RadxField &field)
+
+{
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (_inputCensorFlag[igate]) {
+      field.setGateToMissing(igate);
+    }
+  } // igate
+
+}
+
 ////////////////////////////////////////////////////////////////////////
 // Convert interest map points to vector
 //
@@ -1367,4 +1578,5 @@ int ComputeEngine::_convertInterestParamsToVector(const string &label,
   return 0;
 
 }
+
 

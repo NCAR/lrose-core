@@ -972,6 +972,8 @@ typedef enum {
   TEMP_FOR_PID,
   PID_CENSOR_FLAG,
 
+  INPUT_FIELDS_CENSOR_FLAG
+
 } output_field_id_t;
 
 typedef enum {
@@ -1089,6 +1091,37 @@ paramdef struct output_field_t {
 } output_fields[];
 
 commentdef {
+  p_header = "CENSORING BASED ON INPUT FIELD VALUES";
+  p_text = "You have the option of censoring the value of data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise.";
+}
+
+typedef enum {
+  LOGICAL_AND, LOGICAL_OR
+} logical_t;
+
+typedef struct {
+  string input_name;
+  double min_valid_value;
+  double max_valid_value;
+  logical_t combination_method;
+} censoring_input_field_t;
+
+paramdef struct censoring_input_field_t {
+  p_default = {
+    { "SNR", 0.0, 1000.0, LOGICAL_OR },
+    { "NCP", 0.15, 1000.0, LOGICAL_OR }
+  };
+  p_descr = "Fields to be used for censoring.";
+  p_help = "Specify the fields to be used to determine whether a gate should be censored. The name refers to the input data field names. Valid field values lie in the range from min_valid_value to max_valid_value inclusive. If the value of a field at a gate lies within this range, it is considered valid. Each specified field is examined at each gate, and is flagged as valid if its value lies in the valid range. These field flags are then combined as follows: first, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true. The combined_or flag is then combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true. If this final flag is true, then the data at the gate is regarded as valid and is retained. If the final flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.";
+} censoring_input_fields[];
+  
+paramdef int {
+  p_default = 1;
+  p_descr = "Minimum valid run of non-censored gates.";
+  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
+} input_field_censoring_min_valid_run;
+
+commentdef {
   p_header = "SPECIFYING FIELDS FOR CENSORING";
   p_text = "These fields are copied from the input file, censored according to the output rules, and written to the output file.";
 }
@@ -1104,21 +1137,23 @@ typedef struct {
   boolean apply_rlan_censoring;
   boolean apply_seaclut_censoring;
   boolean apply_pid_censoring;
-} censored_field_t;
+  boolean apply_input_field_censoring;
+} censored_output_field_t;
 
-paramdef struct censored_field_t {
+paramdef struct censored_output_field_t {
   p_default = {
     {
       input_name = "VEL",
       output_name = "VEL",
       apply_rlan_censoring = FALSE,
       apply_seaclut_censoring = FALSE,
-      apply_pid_censoring = FALSE
+      apply_pid_censoring = FALSE,
+      apply_input_field_censoring = FALSE
     }
   };
   p_descr = "Fields to be copied from input and written to output.";
   p_help = "These fields are copied from the input, optionally censored, and written to the output file. You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app.";
-} censored_fields[];
+} censored_output_fields[];
 
 commentdef {
   p_header = "OUTPUT FILE FORMAT";

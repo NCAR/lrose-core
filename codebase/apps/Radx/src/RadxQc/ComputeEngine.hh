@@ -121,11 +121,6 @@ private:
   RadxArray<double> _kdpArray_;
   RadxArray<double> _dbzElevGradientArray_;
 
-  RadxArray<int> _pidArray_;
-  RadxArray<double> _pidInterest_;
-  RadxArray<double> _tempForPid_;
-  RadxArray<bool> _pidCensorFlag_;
-
   double *_snrArray;
   double *_dbzArray;
   double *_velArray;
@@ -139,12 +134,18 @@ private:
   double *_kdpArray;
   double *_dbzElevGradientArray;
 
+  RadxArray<int> _pidArray_;
+  RadxArray<double> _pidInterest_;
+  RadxArray<double> _tempForPid_;
+  RadxArray<bool> _pidCensorFlag_;
+  RadxArray<bool> _inputCensorFlag_;
+
   int *_pidArray;
   double *_pidInterest;
   double *_tempForPid;
   bool *_pidCensorFlag;
-
-  bool _dbzElevGradientAvail;
+  bool *_inputCensorFlag;
+  int _nWarnCensorPrint;
 
   // atmospheric attenuation
 
@@ -174,6 +175,7 @@ private:
   vector<InterestMap::ImPoint> _seaclutImapPhidpSdev;
   vector<InterestMap::ImPoint> _seaclutImapZdrSdev;
   vector<InterestMap::ImPoint> _seaclutImapDbzElevGradient;
+  bool _dbzElevGradientAvail;
 
   // pid
 
@@ -194,12 +196,12 @@ private:
   void _kdpInit();
   void _kdpCompute();
 
-  void _rlanInit();
+  int _rlanInit();
   void _locateRlan();
 
-  void _seaclutInit();
+  int _seaclutInit();
   void _locateSeaClutter();
-
+  
   int _pidInit();
   void _pidCompute();
   void _allocPidArrays();
@@ -220,6 +222,9 @@ private:
   void _censorSeaClutter(RadxField &field);
   
   void _censorOnPid(RadxField &field);
+
+  void _setInputCensoringFlag(RadxRay &ray);
+  void _censorOnInputFields(RadxField &field);
 
   int _convertInterestParamsToVector(const string &label,
                                      const Params::interest_map_point_t *map,

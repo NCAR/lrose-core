@@ -131,7 +131,8 @@ public:
     SEACLUT_FLAG = 55,
     PARTICLE_ID = 56,
     TEMP_FOR_PID = 57,
-    PID_CENSOR_FLAG = 58
+    PID_CENSOR_FLAG = 58,
+    INPUT_FIELDS_CENSOR_FLAG = 59
   } output_field_id_t;
 
   typedef enum {
@@ -145,6 +146,11 @@ public:
     OUTPUT_SCALING_DYNAMIC = 0,
     OUTPUT_SCALING_SPECIFIED = 1
   } output_scaling_t;
+
+  typedef enum {
+    LOGICAL_AND = 0,
+    LOGICAL_OR = 1
+  } logical_t;
 
   typedef enum {
     OUTPUT_FORMAT_CFRADIAL = 0,
@@ -195,11 +201,19 @@ public:
 
   typedef struct {
     char* input_name;
+    double min_valid_value;
+    double max_valid_value;
+    logical_t combination_method;
+  } censoring_input_field_t;
+
+  typedef struct {
+    char* input_name;
     char* output_name;
     tdrp_bool_t apply_rlan_censoring;
     tdrp_bool_t apply_seaclut_censoring;
     tdrp_bool_t apply_pid_censoring;
-  } censored_field_t;
+    tdrp_bool_t apply_input_field_censoring;
+  } censored_output_field_t;
 
   ///////////////////////////
   // Member functions
@@ -769,10 +783,15 @@ public:
   output_field_t *_output_fields;
   int output_fields_n;
 
+  censoring_input_field_t *_censoring_input_fields;
+  int censoring_input_fields_n;
+
+  int input_field_censoring_min_valid_run;
+
   tdrp_bool_t write_censored_fields_to_output;
 
-  censored_field_t *_censored_fields;
-  int censored_fields_n;
+  censored_output_field_t *_censored_output_fields;
+  int censored_output_fields_n;
 
   output_format_t output_format;
 
@@ -805,7 +824,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[171];
+  mutable TDRPtable _table[174];
 
   const char *_className;
 
