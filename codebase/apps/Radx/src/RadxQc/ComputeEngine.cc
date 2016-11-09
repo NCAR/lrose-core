@@ -718,6 +718,7 @@ int ComputeEngine::_rlanInit()
   _intf.setMinRaySnr(_params.rlan_min_ray_snr_db);
   _intf.setMinRayFraction(_params.rlan_min_ray_fraction);
   _intf.setMinRaySnrForZdr(_params.rlan_min_ray_snr_for_zdr_sdev_db);
+  _intf.setMaxElevDeg(_params.rlan_max_elev_deg);
 
   // set up interest maps for RLAN interference
 
@@ -891,6 +892,7 @@ int ComputeEngine::_seaclutInit()
   }
   
   _seaclut.setMinSnrDb(_params.seaclut_min_snr_db);
+  _seaclut.setMaxElevDeg(_params.seaclut_max_elev_deg);
 
   return iret;
 

@@ -673,6 +673,8 @@ public:
 
   double rlan_min_ray_fraction;
 
+  double rlan_max_elev_deg;
+
   double rlan_interest_threshold;
 
   tdrp_bool_t locate_sea_clutter;
@@ -708,6 +710,8 @@ public:
   char* dbz_elevation_gradient_field_name;
 
   char* ray_height_field_name;
+
+  double seaclut_max_elev_deg;
 
   tdrp_bool_t compute_pid;
 
@@ -824,7 +828,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[174];
+  mutable TDRPtable _table[176];
 
   const char *_className;
 

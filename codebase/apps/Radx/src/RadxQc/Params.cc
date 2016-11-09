@@ -1790,6 +1790,18 @@ using namespace std;
     tt->single_val.d = 0.5;
     tt++;
     
+    // Parameter 'rlan_max_elev_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rlan_max_elev_deg");
+    tt->descr = tdrpStrDup("Max elevation angle for rlan interference (deg).");
+    tt->help = tdrpStrDup("Above this angle the rlan flag will not be set.");
+    tt->val_offset = (char *) &rlan_max_elev_deg - &_start_;
+    tt->single_val.d = 2.5;
+    tt++;
+    
     // Parameter 'rlan_interest_threshold'
     // ctype is 'double'
     
@@ -2098,6 +2110,18 @@ using namespace std;
     tt->help = tdrpStrDup("In order to compute the vertical gradient of reflectivity for sea clutter, we need to compute the beam height at each gate. This is the name of the ray height field, in km MSL.");
     tt->val_offset = (char *) &ray_height_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("RayHtMsl");
+    tt++;
+    
+    // Parameter 'seaclut_max_elev_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("seaclut_max_elev_deg");
+    tt->descr = tdrpStrDup("Max elevation angle for sea clutter (deg).");
+    tt->help = tdrpStrDup("Above this angle the clutter flag will not be set.");
+    tt->val_offset = (char *) &seaclut_max_elev_deg - &_start_;
+    tt->single_val.d = 2.5;
     tt++;
     
     // Parameter 'Comment 12'

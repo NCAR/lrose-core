@@ -577,6 +577,12 @@ paramdef double {
 } rlan_min_ray_fraction;
 
 paramdef double {
+  p_default = 2.5;
+  p_descr = "Max elevation angle for rlan interference (deg).";
+  p_help = "Above this angle the rlan flag will not be set.";
+} rlan_max_elev_deg;
+
+paramdef double {
   p_default = 0.51;
   p_descr = "Threshold interest value for identifying RLAN interference.";
   p_help = "If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.";
@@ -676,6 +682,12 @@ paramdef string {
   p_descr = "Field name for computed ray height (km).";
   p_help = "In order to compute the vertical gradient of reflectivity for sea clutter, we need to compute the beam height at each gate. This is the name of the ray height field, in km MSL.";
 } ray_height_field_name;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "Max elevation angle for sea clutter (deg).";
+  p_help = "Above this angle the clutter flag will not be set.";
+} seaclut_max_elev_deg;
 
 commentdef {
   p_header = "COMPUTING PID - HYDROMETEOR PARTICLE ID";
