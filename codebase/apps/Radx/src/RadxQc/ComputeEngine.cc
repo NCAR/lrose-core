@@ -58,123 +58,19 @@ ComputeEngine::ComputeEngine(const Params &params,
 
   OK = true;
   
-  // initialize moments, kdp, pid and precip objects
+  // initialize kdp, pid
 
   _kdpInit();
 
+  if (_pidInit()) {
+    OK = false;
+  }
+
   // set up interest maps for RLAN interference
 
-  if (_convertInterestParamsToVector
-      ("rlan_phase_noise",
-       _params._rlan_phase_noise_interest_map,
-       _params.rlan_phase_noise_interest_map_n,
-       _rlanImapPhaseNoise)) {
-    OK = false;
-  } else {
-    _intf.setInterestMapPhaseNoise(_rlanImapPhaseNoise,
-                                   _params.rlan_phase_noise_weight);
+  if (_params.locate_rlan_interference) {
+    _rlanInit();
   }
-  
-  if (_convertInterestParamsToVector
-      ("rlan_ncp_mean",
-       _params._rlan_ncp_mean_interest_map,
-       _params.rlan_ncp_mean_interest_map_n,
-       _rlanImapNcpMean)) {
-    OK = false;
-  } else {
-    _intf.setInterestMapNcpMean(_rlanImapNcpMean,
-                                _params.rlan_ncp_mean_weight);
-  }
-  
-  if (_convertInterestParamsToVector
-      ("rlan_width_mean",
-       _params._rlan_width_mean_interest_map,
-       _params.rlan_width_mean_interest_map_n,
-       _rlanImapWidthMean)) {
-    OK = false;
-  } else {
-    _intf.setInterestMapWidthMean(_rlanImapWidthMean,
-                                  _params.rlan_width_mean_weight);
-  }
-  
-  if (_convertInterestParamsToVector
-      ("rlan_snr_dmode",
-       _params._rlan_snr_dmode_interest_map,
-       _params.rlan_snr_dmode_interest_map_n,
-       _rlanImapSnrDMode)) {
-    OK = false;
-  } else {
-    _intf.setInterestMapSnrDMode(_rlanImapSnrDMode,
-                                 _params.rlan_snr_dmode_weight);
-  }
-  _intf.setRlanInterestThreshold(_params.rlan_interest_threshold);
-
-  if (_convertInterestParamsToVector
-      ("rlan_snr_sdev",
-       _params._rlan_snr_sdev_interest_map,
-       _params.rlan_snr_sdev_interest_map_n,
-       _rlanImapSnrSdev)) {
-    OK = false;
-  } else {
-    _intf.setInterestMapSnrSdev(_rlanImapSnrSdev,
-                                _params.rlan_snr_sdev_weight);
-  }
-
-  // set up interest maps for sea clutter
-
-  if (_params.locate_sea_clutter) {
-
-    if (_convertInterestParamsToVector
-        ("seaclut_rhohv_mean",
-         _params._seaclut_rhohv_mean_interest_map,
-         _params.seaclut_rhohv_mean_interest_map_n,
-         _seaclutImapRhohvMean)) {
-      OK = false;
-    } else {
-      _seaclut.setInterestMapRhohvMean
-        (_seaclutImapRhohvMean,
-         _params.seaclut_rhohv_mean_weight);
-    }
-    
-    if (_convertInterestParamsToVector
-        ("seaclut_phidp_sdev",
-         _params._seaclut_phidp_sdev_interest_map,
-         _params.seaclut_phidp_sdev_interest_map_n,
-         _seaclutImapPhidpSdev)) {
-      OK = false;
-    } else {
-      _seaclut.setInterestMapPhidpSdev
-        (_seaclutImapPhidpSdev,
-         _params.seaclut_phidp_sdev_weight);
-    }
-    
-    if (_convertInterestParamsToVector
-        ("seaclut_zdr_sdev",
-         _params._seaclut_zdr_sdev_interest_map,
-         _params.seaclut_zdr_sdev_interest_map_n,
-         _seaclutImapZdrSdev)) {
-      OK = false;
-    } else {
-      _seaclut.setInterestMapZdrSdev
-        (_seaclutImapZdrSdev,
-         _params.seaclut_zdr_sdev_weight);
-    }
-    
-    if (_convertInterestParamsToVector
-        ("seaclut_dbz_elev_gradient",
-         _params._seaclut_dbz_elev_gradient_interest_map,
-         _params.seaclut_dbz_elev_gradient_interest_map_n,
-         _seaclutImapDbzElevGradient)) {
-      OK = false;
-    } else {
-      _seaclut.setInterestMapDbzElevGradient
-        (_seaclutImapDbzElevGradient,
-         _params.seaclut_dbz_elev_gradient_weight);
-    }
-    
-    _seaclut.setMinSnrDb(_params.seaclut_min_snr_db);
-    
-  } // if (params.locate_sea_clutter)
 
 }
   
@@ -309,7 +205,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *snrRlan = _intf.getSnr();
   const double *snrModeRlan = _intf.getSnrMode();
   const double *snrDModeRlan = _intf.getSnrDMode();
-  const double *snrSdevRlan = _intf.getSnrSdev();
+  const double *zdrSdevRlan = _intf.getZdrSdev();
   const double *ncpMeanRlan = _intf.getNcpMean();
   const double *widthMeanRlan = _intf.getWidthMean();
   const double *phaseRlan = _intf.getPhase();
@@ -319,7 +215,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *ncpMeanInterestRlan = _intf.getNcpMeanInterest();
   const double *widthMeanInterestRlan = _intf.getWidthMeanInterest();
   const double *snrDModeInterestRlan = _intf.getSnrDModeInterest();
-  const double *snrSdevInterestRlan = _intf.getSnrSdevInterest();
+  const double *zdrSdevInterestRlan = _intf.getZdrSdevInterest();
 
   const bool *rlanFlag = _intf.getRlanFlag();
   
@@ -490,8 +386,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::SNR_DMODE_RLAN:
           *datp = snrDModeRlan[igate];
           break;
-        case Params::SNR_SDEV_RLAN:
-          *datp = snrSdevRlan[igate];
+        case Params::ZDR_SDEV_RLAN:
+          *datp = zdrSdevRlan[igate];
           break;
         case Params::NCP_MEAN_RLAN:
           *datp = ncpMeanRlan[igate];
@@ -526,8 +422,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::SNR_DMODE_INTEREST_RLAN:
           *datp = snrDModeInterestRlan[igate];
           break;
-        case Params::SNR_SDEV_INTEREST_RLAN:
-          *datp = snrSdevInterestRlan[igate];
+        case Params::ZDR_SDEV_INTEREST_RLAN:
+          *datp = zdrSdevInterestRlan[igate];
           break;
 
         case Params::RAY_HEIGHT:
@@ -784,6 +680,77 @@ void ComputeEngine::_kdpCompute()
 }
 
 //////////////////////////////////////
+// Initialize RLAN interference
+
+void ComputeEngine::_rlanInit()
+  
+{
+
+  _intf.setMinRaySnr(_params.rlan_min_ray_snr_db);
+  _intf.setMinRayFraction(_params.rlan_min_ray_fraction);
+  _intf.setMinRaySnrForZdr(_params.rlan_min_ray_snr_for_zdr_sdev_db);
+
+  // set up interest maps for RLAN interference
+
+  if (_convertInterestParamsToVector
+      ("rlan_phase_noise",
+       _params._rlan_phase_noise_interest_map,
+       _params.rlan_phase_noise_interest_map_n,
+       _rlanImapPhaseNoise)) {
+    OK = false;
+  } else {
+    _intf.setInterestMapPhaseNoise(_rlanImapPhaseNoise,
+                                   _params.rlan_phase_noise_weight);
+  }
+  
+  if (_convertInterestParamsToVector
+      ("rlan_ncp_mean",
+       _params._rlan_ncp_mean_interest_map,
+       _params.rlan_ncp_mean_interest_map_n,
+       _rlanImapNcpMean)) {
+    OK = false;
+  } else {
+    _intf.setInterestMapNcpMean(_rlanImapNcpMean,
+                                _params.rlan_ncp_mean_weight);
+  }
+  
+  if (_convertInterestParamsToVector
+      ("rlan_width_mean",
+       _params._rlan_width_mean_interest_map,
+       _params.rlan_width_mean_interest_map_n,
+       _rlanImapWidthMean)) {
+    OK = false;
+  } else {
+    _intf.setInterestMapWidthMean(_rlanImapWidthMean,
+                                  _params.rlan_width_mean_weight);
+  }
+  
+  if (_convertInterestParamsToVector
+      ("rlan_snr_dmode",
+       _params._rlan_snr_dmode_interest_map,
+       _params.rlan_snr_dmode_interest_map_n,
+       _rlanImapSnrDMode)) {
+    OK = false;
+  } else {
+    _intf.setInterestMapSnrDMode(_rlanImapSnrDMode,
+                                 _params.rlan_snr_dmode_weight);
+  }
+  _intf.setRlanInterestThreshold(_params.rlan_interest_threshold);
+
+  if (_convertInterestParamsToVector
+      ("rlan_zdr_sdev",
+       _params._rlan_zdr_sdev_interest_map,
+       _params.rlan_zdr_sdev_interest_map_n,
+       _rlanImapZdrSdev)) {
+    OK = false;
+  } else {
+    _intf.setInterestMapZdrSdev(_rlanImapZdrSdev,
+                                _params.rlan_zdr_sdev_weight);
+  }
+
+}
+
+//////////////////////////////////////
 // Locate RLAN interference
 
 void ComputeEngine::_locateRlan()
@@ -825,9 +792,72 @@ void ComputeEngine::_locateRlan()
     _intf.setDbzField(_dbzArray, _params.noise_dbz_at_100km);
   }
 
+  if (_params.ZDR_available) {
+    _intf.setZdrField(_zdrArray);
+  }
+
   // locate RLAN interference
 
   _intf.rlanLocate();
+
+}
+
+//////////////////////////////////////
+// Initialize Sea Clutter
+
+void ComputeEngine::_seaclutInit()
+  
+{
+  
+  if (_convertInterestParamsToVector
+      ("seaclut_rhohv_mean",
+       _params._seaclut_rhohv_mean_interest_map,
+       _params.seaclut_rhohv_mean_interest_map_n,
+       _seaclutImapRhohvMean)) {
+    OK = false;
+  } else {
+    _seaclut.setInterestMapRhohvMean
+      (_seaclutImapRhohvMean,
+       _params.seaclut_rhohv_mean_weight);
+  }
+  
+  if (_convertInterestParamsToVector
+      ("seaclut_phidp_sdev",
+       _params._seaclut_phidp_sdev_interest_map,
+       _params.seaclut_phidp_sdev_interest_map_n,
+       _seaclutImapPhidpSdev)) {
+    OK = false;
+  } else {
+    _seaclut.setInterestMapPhidpSdev
+      (_seaclutImapPhidpSdev,
+       _params.seaclut_phidp_sdev_weight);
+  }
+  
+  if (_convertInterestParamsToVector
+      ("seaclut_zdr_sdev",
+       _params._seaclut_zdr_sdev_interest_map,
+       _params.seaclut_zdr_sdev_interest_map_n,
+       _seaclutImapZdrSdev)) {
+    OK = false;
+  } else {
+    _seaclut.setInterestMapZdrSdev
+      (_seaclutImapZdrSdev,
+       _params.seaclut_zdr_sdev_weight);
+  }
+  
+  if (_convertInterestParamsToVector
+      ("seaclut_dbz_elev_gradient",
+       _params._seaclut_dbz_elev_gradient_interest_map,
+       _params.seaclut_dbz_elev_gradient_interest_map_n,
+       _seaclutImapDbzElevGradient)) {
+    OK = false;
+  } else {
+    _seaclut.setInterestMapDbzElevGradient
+      (_seaclutImapDbzElevGradient,
+       _params.seaclut_dbz_elev_gradient_weight);
+  }
+  
+  _seaclut.setMinSnrDb(_params.seaclut_min_snr_db);
 
 }
 

@@ -490,8 +490,9 @@ typedef struct {
 } interest_map_point_t;
 
 paramdef struct interest_map_point_t {
-  p_default = {{35.0, 0.001}, {45.0, 1.0}};
+  p_default = {{35.0, 0.0001}, {45.0, 1.0}};
   p_descr = "RLAN interest mapping for phase noise.";
+  p_help = "The phase noise is a measure of the variability of phase with range.";
 } rlan_phase_noise_interest_map[];
 
 paramdef double {
@@ -501,8 +502,9 @@ paramdef double {
 } rlan_phase_noise_weight;
 
 paramdef struct interest_map_point_t {
-  p_default = {{0.1, 1.0}, {0.2, 0.001}};
+  p_default = {{0.1, 1.0}, {0.2, 0.0001}};
   p_descr = "RLAN interest mapping for mean of ncp.";
+  p_help = "NCP should be used instead of width, if available.";
 } rlan_ncp_mean_interest_map[];
 
 paramdef double {
@@ -512,18 +514,19 @@ paramdef double {
 } rlan_ncp_mean_weight;
 
 paramdef struct interest_map_point_t {
-  p_default = {{4.0, 0.001}, {5.0, 1.0}};
+  p_default = {{4.0, 0.0001}, {5.0, 1.0}};
   p_descr = "RLAN interest mapping for mean of width.";
+  p_help = "WIDTH should be used if NCP is not available.";
 } rlan_width_mean_interest_map[];
 
 paramdef double {
   p_default = 1.0;
   p_descr = "Weight for interest for mean of width.";
-  p_help = "The relative weighting applied when computing the fuzzy sum.";
+  p_help = "Set to 0 if NCP is available.";
 } rlan_width_mean_weight;
 
 paramdef struct interest_map_point_t {
-  p_default = {{2.0, 1.0}, {2.5, 0.001}};
+  p_default = {{2.0, 1.0}, {2.5, 0.0001}};
   p_descr = "RLAN interest mapping for delta mode of snr.";
 } rlan_snr_dmode_interest_map[];
 
@@ -533,16 +536,45 @@ paramdef double {
   p_help = "The relative weighting applied when computing the fuzzy sum.";
 } rlan_snr_dmode_weight;
 
+// paramdef struct interest_map_point_t {
+//   p_default = {{0.65, 1.0}, {0.75, 0.0001}};
+//   p_descr = "RLAN interest mapping for sdev of snr.";
+// } rlan_snr_sdev_interest_map[];
+
+// paramdef double {
+//   p_default = 1.0;
+//   p_descr = "Weight for interest for sdev of snr.";
+//   p_help = "The relative weighting applied when computing the fuzzy sum.";
+// } rlan_snr_sdev_weight;
+
 paramdef struct interest_map_point_t {
-  p_default = {{0.65, 1.0}, {0.75, 0.001}};
-  p_descr = "RLAN interest mapping for sdev of snr.";
-} rlan_snr_sdev_interest_map[];
+  p_default = {{0.5, 1.0}, {1.0, 0.0001}};
+  p_descr = "RLAN interest mapping for sdev of zdr.";
+} rlan_zdr_sdev_interest_map[];
 
 paramdef double {
   p_default = 1.0;
-  p_descr = "Weight for interest for sdev of snr.";
+  p_descr = "Weight for interest for sdev of zdr.";
   p_help = "The relative weighting applied when computing the fuzzy sum.";
-} rlan_snr_sdev_weight;
+} rlan_zdr_sdev_weight;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min SNR (dB) for identifying RLAN interference.";
+  p_help = "The ray SNR is computed as a mean for all gates, including gates with missing SNR. If the SNR at a gate is missing, it is set to -20 dB.";
+} rlan_min_ray_snr_db;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Min SNR (dB) for using ZDR SDEV in identifying RLAN interference.";
+  p_help = "If the mean ray SNR falls below this threshold, the ZDR SDEV will not be used. ZDR is noisy at low SNR, so it only makes sense to use ZDR SDEV at higher SNRs.";
+} rlan_min_ray_snr_for_zdr_sdev_db;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Min fraction of ray with RLAN interference.";
+  p_help = "After running the algorithm, we compute the fraction of the ray where RLAN was found. If that fraction falls below this minimum, the entire ray is cleared of RLAN flags.";
+} rlan_min_ray_fraction;
 
 paramdef double {
   p_default = 0.51;
@@ -583,7 +615,7 @@ paramdef double {
 } seaclut_min_snr_db;
 
 paramdef struct interest_map_point_t {
-  p_default = {{0.35, 1.0}, {0.4, 0.001}};
+  p_default = {{0.35, 1.0}, {0.4, 0.0001}};
   p_descr = "SEA CLUTTER interest mapping for rhohv mean.";
 } seaclut_rhohv_mean_interest_map[];
 
@@ -594,7 +626,7 @@ paramdef double {
 } seaclut_rhohv_mean_weight;
 
 paramdef struct interest_map_point_t {
-  p_default = {{40.0, 0.001}, {45.0, 1.0}};
+  p_default = {{40.0, 0.0001}, {45.0, 1.0}};
   p_descr = "SEA CLUTTER interest mapping for sdev of phidp.";
 } seaclut_phidp_sdev_interest_map[];
 
@@ -605,7 +637,7 @@ paramdef double {
 } seaclut_phidp_sdev_weight;
 
 paramdef struct interest_map_point_t {
-  p_default = {{1.5, 0.001}, {2.5, 1.0}};
+  p_default = {{1.5, 0.0001}, {2.5, 1.0}};
   p_descr = "SEA CLUTTER interest mapping for sdev of zdr.";
 } seaclut_zdr_sdev_interest_map[];
 
@@ -905,7 +937,7 @@ typedef enum {
   SNR_RLAN,
   SNR_MODE_RLAN,
   SNR_DMODE_RLAN,
-  SNR_SDEV_RLAN,
+  ZDR_SDEV_RLAN,
   NCP_MEAN_RLAN,
   WIDTH_MEAN_RLAN,
   PHASE_RLAN,
@@ -914,7 +946,7 @@ typedef enum {
   NCP_MEAN_INTEREST_RLAN,
   WIDTH_MEAN_INTEREST_RLAN,
   SNR_DMODE_INTEREST_RLAN,
-  SNR_SDEV_INTEREST_RLAN,
+  ZDR_SDEV_INTEREST_RLAN,
   RLAN_FLAG,
 
   RAY_HEIGHT,

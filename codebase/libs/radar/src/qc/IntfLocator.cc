@@ -41,6 +41,7 @@
 #include <ostream>
 #include <cstring>
 using namespace std;
+const double IntfLocator::_missingVal = -9999.0;
 
 ///////////////////////////////////////////////////////////////
 // Constructor
@@ -57,14 +58,19 @@ IntfLocator::IntfLocator()
   _interestMapNcpMean = NULL;
   _interestMapWidthMean = NULL;
   _interestMapSnrDMode = NULL;
-  _interestMapSnrSdev = NULL;
+  _interestMapZdrSdev = NULL;
+
+  setMinRaySnr(2.5);
+  setMinRayFraction(0.5);
+  setMinRaySnrForZdr(5.0);
 
   _createDefaultInterestMaps();
+  
   _nGatesKernel = 9;
   
-  _radarHtM = -9999.0;
-  _wavelengthM = -9999.0;
-  _nyquist = -9999.0;
+  _radarHtM = _missingVal;
+  _wavelengthM = _missingVal;
+  _nyquist = _missingVal;
 
 }
 
@@ -91,8 +97,12 @@ IntfLocator::~IntfLocator()
     delete _interestMapSnrDMode;
   }
 
-  if (_interestMapSnrSdev) {
-    delete _interestMapSnrSdev;
+  // if (_interestMapSnrSdev) {
+  //   delete _interestMapSnrSdev;
+  // }
+
+  if (_interestMapZdrSdev) {
+    delete _interestMapZdrSdev;
   }
 
 }
@@ -107,6 +117,10 @@ void IntfLocator::printParams(ostream &out)
   out << "Performing rlan detection:" << endl;
   out << "  nGatesKernel: " << _nGatesKernel << endl;
   out << "  rlanInterestThreshold: " << _rlanInterestThreshold << endl;
+  out << "  minRaySnr: " << _minRaySnr << endl;
+  out << "  minRayFraction: " << _minRayFraction << endl;
+  out << "  minRaySnrForZdr: " << _minRaySnrForZdr << endl;
+  out << "  zdrAvail: " << (_zdrAvail?"Y":"N") << endl;
   
   if (_interestMapPhaseNoise) {
     _interestMapPhaseNoise->printParams(out);
@@ -120,8 +134,11 @@ void IntfLocator::printParams(ostream &out)
   if (_interestMapSnrDMode) {
     _interestMapSnrDMode->printParams(out);
   }
-  if (_interestMapSnrSdev) {
-    _interestMapSnrSdev->printParams(out);
+  // if (_interestMapSnrSdev) {
+  //   _interestMapSnrSdev->printParams(out);
+  // }
+  if (_interestMapZdrSdev) {
+    _interestMapZdrSdev->printParams(out);
   }
 
 }
@@ -155,6 +172,7 @@ void IntfLocator::setRayProps(time_t timeSecs,
   _widthAvail = false;
   _ncpAvail = false;
   _snrAvail = false;
+  _zdrAvail = false;
 
   _dbz = _dbz_.alloc(_nGates);
   _vel = _vel_.alloc(_nGates);
@@ -162,6 +180,7 @@ void IntfLocator::setRayProps(time_t timeSecs,
   _width = _width_.alloc(_nGates);
   _ncp = _ncp_.alloc(_nGates);
   _snr = _snr_.alloc(_nGates);
+  _zdr = _zdr_.alloc(_nGates);
 
 }
 
@@ -202,22 +221,22 @@ void IntfLocator::setVelField(double *vals,
   
   if (_nyquist < -9990) {
     for (int ii = 0; ii < _nGates; ii++) {
-      if (_vel[ii] != _missingVal) {
+      if (_vel[ii] != _fieldMissingVal) {
         double absVel = fabs(_vel[ii]);
         if (_nyquist < absVel) {
           _nyquist = absVel;
         }
-      } // if (vel[ii] != _missingVal)
+      } // if (vel[ii] != _fieldMissingVal)
     } // ii
   }
   
   // estimate the phase from the vel
 
   for (int ii = 0; ii < _nGates; ii++) {
-    if (_vel[ii] != _missingVal) {
+    if (_vel[ii] != _fieldMissingVal) {
       _phase[ii] = (_vel[ii] / _nyquist) * 180.0;
     } else {
-      _phase[ii] = _missingVal;
+      _phase[ii] = _fieldMissingVal;
     }
   }
 
@@ -258,6 +277,16 @@ void IntfLocator::setSnrField(double *vals)
   _snrAvail = true;
 }
 
+///////////////////////////////////////////////////////////////
+// set the ZDR field, if available
+// must be called after setRayProps()
+
+void IntfLocator::setZdrField(double *vals)
+{
+  memcpy(_zdr, vals, _nGates * sizeof(double));
+  _zdrAvail = true;
+}
+
 //////////////////////////////////////////////////////////////
 // Compute the SNR field from the DBZ field
 
@@ -282,7 +311,7 @@ void IntfLocator::_computeSnrFromDbz(double noiseDbzAt100km)
   double *snr = _snr;
   const double *dbz = _dbz;
   for (int igate = 0; igate < _nGates; igate++, snr++, dbz++) {
-    if (*dbz != _missingVal) {
+    if (*dbz != _fieldMissingVal) {
       *snr = *dbz - noiseDbz[igate];
     } else {
       *snr = -20;
@@ -336,6 +365,16 @@ int IntfLocator::rlanLocate()
     return -1;
   }
 
+  // compute ray mean SNR
+
+  _rayMeanSnr = _computeRayMeanSnr();
+  bool useZdrSdev = false;
+  if (_zdrAvail && _rayMeanSnr >= _minRaySnrForZdr) {
+    useZdrSdev = true;
+  }
+
+  // initialize arrays for stats
+
   _startGate.resize(_nGates);
   _endGate.resize(_nGates);
   
@@ -346,30 +385,34 @@ int IntfLocator::rlanLocate()
   _widthMean = _widthMean_.alloc(_nGates);
   _snrMode = _snrMode_.alloc(_nGates);
   _snrDMode = _snrDMode_.alloc(_nGates);
-  _snrSdev = _snrSdev_.alloc(_nGates);
+  // _snrSdev = _snrSdev_.alloc(_nGates);
+  _zdrSdev = _zdrSdev_.alloc(_nGates);
 
   _phaseNoiseInterest = _phaseNoiseInterest_.alloc(_nGates);
   _ncpMeanInterest = _ncpMeanInterest_.alloc(_nGates);
   _widthMeanInterest = _widthMeanInterest_.alloc(_nGates);
   _snrDModeInterest = _snrDModeInterest_.alloc(_nGates);
-  _snrSdevInterest = _snrSdevInterest_.alloc(_nGates);
+  // _snrSdevInterest = _snrSdevInterest_.alloc(_nGates);
+  _zdrSdevInterest = _zdrSdevInterest_.alloc(_nGates);
   
   for (int igate = 0; igate < _nGates; igate++) {
     _rlanFlag[igate] = false;
     _startGate[igate] = 0;
     _endGate[igate] = 0;
-    _accumPhaseChange[igate] = -9999;
-    _phaseNoise[igate] = -9999;
-    _snrMode[igate] = -9999;
-    _snrDMode[igate] = -9999;
-    _snrSdev[igate] = -9999;
-    _ncpMean[igate] = -9999;
-    _widthMean[igate] = -9999;
-    _phaseNoiseInterest[igate] = -9999;
-    _ncpMeanInterest[igate] = -9999;
-    _widthMeanInterest[igate] = -9999;
-    _snrDModeInterest[igate] = -9999;
-    _snrSdevInterest[igate] = -9999;
+    _accumPhaseChange[igate] = _missingVal;
+    _phaseNoise[igate] = _missingVal;
+    _snrMode[igate] = _missingVal;
+    _snrDMode[igate] = _missingVal;
+    // _snrSdev[igate] = _missingVal;
+    _zdrSdev[igate] = _missingVal;
+    _ncpMean[igate] = _missingVal;
+    _widthMean[igate] = _missingVal;
+    _phaseNoiseInterest[igate] = _missingVal;
+    _ncpMeanInterest[igate] = _missingVal;
+    _widthMeanInterest[igate] = _missingVal;
+    _snrDModeInterest[igate] = _missingVal;
+    // _snrSdevInterest[igate] = _missingVal;
+    _zdrSdevInterest[igate] = _missingVal;
   }
   
   // first compute the absolute phase at each gate, summing up
@@ -425,7 +468,12 @@ int IntfLocator::rlanLocate()
   
   // compute snr sdev and delta mode
   
-  _computeSdevInRange(_snr, _snrSdev);
+  // _computeSdevInRange(_snr, _snrSdev);
+
+  if (useZdrSdev) {
+    _computeSdevInRange(_zdr, _zdrSdev);
+  }
+
   _computeDeltaMode(_snr, _snrMode, _snrDMode);
 
   if (_ncpAvail) {
@@ -451,21 +499,26 @@ int IntfLocator::rlanLocate()
     _snrDModeInterest[igate] =
       _interestMapSnrDMode->getInterest(_snrDMode[igate]);
 
-    _snrSdevInterest[igate] =
-      _interestMapSnrSdev->getInterest(_snrSdev[igate]);
+    // _snrSdevInterest[igate] =
+    //   _interestMapSnrSdev->getInterest(_snrSdev[igate]);
+
+    if (useZdrSdev) {
+      _zdrSdevInterest[igate] =
+        _interestMapZdrSdev->getInterest(_zdrSdev[igate]);
+    }
 
   }
 
   // compute sum weights
 
-  double sumWeightsRlan = _weightPhaseNoise + _weightSnrDMode;
-  double sumWeightsNoise = _weightPhaseNoise + _weightSnrSdev;
+  double sumWeights = _weightPhaseNoise + _weightSnrDMode;
   if (_ncpAvail) {
-    sumWeightsRlan += _weightNcpMean;
-    sumWeightsNoise += _weightNcpMean;
+    sumWeights += _weightNcpMean;
   } else {
-    sumWeightsRlan += _weightWidthMean;
-    sumWeightsNoise += _weightWidthMean;
+    sumWeights += _weightWidthMean;
+  }
+  if (useZdrSdev) {
+    sumWeights += _weightZdrSdev;
   }
   
   // set flags
@@ -482,7 +535,11 @@ int IntfLocator::rlanLocate()
       sumInterestRlan += (_widthMeanInterest[igate] * _weightWidthMean);
     }
     
-    double interestRlan = sumInterestRlan / sumWeightsRlan;
+    if (useZdrSdev) {
+      sumInterestRlan += (_zdrSdevInterest[igate] * _weightZdrSdev);
+    }
+
+    double interestRlan = sumInterestRlan / sumWeights;
     if (interestRlan > _rlanInterestThreshold) {
       _rlanFlag[igate] = true;
     } else {
@@ -503,6 +560,25 @@ int IntfLocator::rlanLocate()
   
   for (int igate = 1; igate < _nGates - 1; igate++) {
     if (!_rlanFlag[igate-1] && !_rlanFlag[igate+1]) {
+      _rlanFlag[igate] = false;
+    }
+  }
+
+  // compute the fraction of gates where flag is set
+
+  int nGatesSet = 0;
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (_rlanFlag[igate]) {
+      nGatesSet++;
+    }
+  }
+  double fractionSet = (double) nGatesSet / (double) _nGates;
+
+  // if fraction is too low, or ray snr is too low, clear all gates
+
+  if (_rayMeanSnr < _minRaySnr ||
+      fractionSet < _minRayFraction) {
+    for (int igate = 0; igate < _nGates; igate++) {
       _rlanFlag[igate] = false;
     }
   }
@@ -550,8 +626,8 @@ void IntfLocator::_computeDeltaMode(const double *vals,
   // initialize
   
   for (int igate = 0; igate < _nGates; igate++) {
-    mode[igate] = _missingVal;
-    dMode[igate] = _missingVal;
+    mode[igate] = _fieldMissingVal;
+    dMode[igate] = _fieldMissingVal;
   }
 
   // compute min and max
@@ -564,7 +640,7 @@ void IntfLocator::_computeDeltaMode(const double *vals,
     if (!isfinite(val)) {
       return;
     }
-    if (val != _missingVal) {
+    if (val != _fieldMissingVal) {
       nValid++;
       if (val < minVal) {
         minVal = val;
@@ -591,7 +667,7 @@ void IntfLocator::_computeDeltaMode(const double *vals,
   memset(hist, 0, nBins * sizeof(double));
   for (int igate = 0; igate < _nGates; igate++) {
     double val = vals[igate];
-    if (val != _missingVal) {
+    if (val != _fieldMissingVal) {
       int bin = (int) ((val - minVal) / histDelta);
       hist[bin]++;
     }
@@ -633,7 +709,7 @@ void IntfLocator::_computeDeltaMode(const double *vals,
 
   for (int igate = 0; igate < _nGates; igate++) {
     double val = vals[igate];
-    if (val != _missingVal && val >= modeLower && val <= modeUpper) {
+    if (val != _fieldMissingVal && val >= modeLower && val <= modeUpper) {
       sum += val;
       count++;
     }
@@ -644,11 +720,11 @@ void IntfLocator::_computeDeltaMode(const double *vals,
 
   for (int igate = 0; igate < _nGates; igate++) {
     double val = vals[igate];
-    if (val != _missingVal) {
+    if (val != _fieldMissingVal) {
       dMode[igate] = fabs(val - modeVal);
       // dMode[igate] = val - median;
     } else {
-      dMode[igate] = _missingVal;
+      dMode[igate] = _fieldMissingVal;
     }
     mode[igate] = modeVal;
     // mode[igate] = median;
@@ -675,7 +751,7 @@ void IntfLocator::_computeSdevInRange(const double *vals, double *sdevs)
       
       double val = vals[jgate];
       
-      if (val != _missingVal) {
+      if (val != _fieldMissingVal) {
         sumVal += val;
         sumValSq += (val * val);
         nVal++;
@@ -716,7 +792,7 @@ void IntfLocator::_computeMeanInRange(const double *vals, double *means)
       
       double val = vals[jgate];
       
-      if (val != _missingVal) {
+      if (val != _fieldMissingVal) {
         sumVal += val;
         nVal++;
       }
@@ -733,6 +809,31 @@ void IntfLocator::_computeMeanInRange(const double *vals, double *means)
 }
 
 ///////////////////////////////////////////////////////////////
+// compute ray mean for SNR
+
+double IntfLocator::_computeRayMeanSnr()
+  
+{
+  
+  double sum = 0.0;
+  double count = 0.0;
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    double val = _snr[igate];
+    if (val == _fieldMissingVal) {
+      sum += -20.0;
+    } else {
+      sum += val;
+    }
+    count++;
+  }
+
+  double mean = sum / count;
+  return mean;
+
+}
+
+///////////////////////////////////////////////////////////////
 // Create the default interest maps and weights
 
 void IntfLocator::_createDefaultInterestMaps()
@@ -742,29 +843,34 @@ void IntfLocator::_createDefaultInterestMaps()
   vector<InterestMap::ImPoint> pts;
 
   pts.clear();
-  pts.push_back(InterestMap::ImPoint(35.0, 0.001));
+  pts.push_back(InterestMap::ImPoint(35.0, 0.0001));
   pts.push_back(InterestMap::ImPoint(45.0, 1.0));
   setInterestMapPhaseNoise(pts, 1.0);
   
   pts.clear();
   pts.push_back(InterestMap::ImPoint(0.10, 1.0));
-  pts.push_back(InterestMap::ImPoint(0.20, 0.001));
+  pts.push_back(InterestMap::ImPoint(0.20, 0.0001));
   setInterestMapNcpMean(pts, 1.0);
 
   pts.clear();
-  pts.push_back(InterestMap::ImPoint(4.0, 0.001));
+  pts.push_back(InterestMap::ImPoint(4.0, 0.0001));
   pts.push_back(InterestMap::ImPoint(5.0, 1.0));
   setInterestMapWidthMean(pts, 1.0);
 
   pts.clear();
   pts.push_back(InterestMap::ImPoint(2.0, 1.0));
-  pts.push_back(InterestMap::ImPoint(2.5, 0.001));
+  pts.push_back(InterestMap::ImPoint(2.5, 0.0001));
   setInterestMapSnrDMode(pts, 1.0);
 
+  // pts.clear();
+  // pts.push_back(InterestMap::ImPoint(0.65, 1.0));
+  // pts.push_back(InterestMap::ImPoint(0.75, 0.0001));
+  // setInterestMapSnrSdev(pts, 1.0);
+
   pts.clear();
-  pts.push_back(InterestMap::ImPoint(0.65, 1.0));
-  pts.push_back(InterestMap::ImPoint(0.75, 0.001));
-  setInterestMapSnrSdev(pts, 1.0);
+  pts.push_back(InterestMap::ImPoint(0.5, 1.0));
+  pts.push_back(InterestMap::ImPoint(1.0, 0.0001));
+  setInterestMapZdrSdev(pts, 1.0);
 
   setRlanInterestThreshold(0.51);
 
@@ -818,17 +924,17 @@ void IntfLocator::setInterestMapWidthMean
 /////////////////////////////////////////////////////////
 // set interest map and weight for snr sdev
 
-void IntfLocator::setInterestMapSnrSdev
-  (const vector<InterestMap::ImPoint> &pts,
-   double weight)
+// void IntfLocator::setInterestMapSnrSdev
+//   (const vector<InterestMap::ImPoint> &pts,
+//    double weight)
   
-{
-  if (_interestMapSnrSdev) {
-    delete _interestMapSnrSdev;
-  }
-  _interestMapSnrSdev = new InterestMap("SnrSdev", pts, weight);
-  _weightSnrSdev = weight;
-}
+// {
+//   if (_interestMapSnrSdev) {
+//     delete _interestMapSnrSdev;
+//   }
+//   _interestMapSnrSdev = new InterestMap("SnrSdev", pts, weight);
+//   _weightSnrSdev = weight;
+// }
 
 /////////////////////////////////////////////////////////
 // set interest map and weight for snr delta from mode
@@ -843,6 +949,21 @@ void IntfLocator::setInterestMapSnrDMode
   }
   _interestMapSnrDMode = new InterestMap("SnrDMode", pts, weight);
   _weightSnrDMode = weight;
+}
+
+/////////////////////////////////////////////////////////
+// set interest map and weight for zdr sdev
+
+void IntfLocator::setInterestMapZdrSdev
+  (const vector<InterestMap::ImPoint> &pts,
+   double weight)
+  
+{
+  if (_interestMapZdrSdev) {
+    delete _interestMapZdrSdev;
+  }
+  _interestMapZdrSdev = new InterestMap("ZdrSdev", pts, weight);
+  _weightZdrSdev = weight;
 }
 
 /////////////////////////////////////////////////////////

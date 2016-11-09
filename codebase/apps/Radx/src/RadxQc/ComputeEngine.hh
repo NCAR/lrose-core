@@ -163,7 +163,7 @@ private:
   vector<InterestMap::ImPoint> _rlanImapNcpMean;
   vector<InterestMap::ImPoint> _rlanImapWidthMean;
   vector<InterestMap::ImPoint> _rlanImapSnrDMode;
-  vector<InterestMap::ImPoint> _rlanImapSnrSdev;
+  vector<InterestMap::ImPoint> _rlanImapZdrSdev;
 
   // sea clutter
 
@@ -192,7 +192,10 @@ private:
   void _kdpInit();
   void _kdpCompute();
 
+  void _rlanInit();
   void _locateRlan();
+
+  void _seaclutInit();
   void _locateSeaClutter();
 
   int _pidInit();

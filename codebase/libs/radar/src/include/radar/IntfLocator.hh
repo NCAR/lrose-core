@@ -66,6 +66,17 @@ public:
   void setNGatesKernel(int val) {
     _nGatesKernel = val;
   }
+  
+  // set processing parameters
+
+  // min valid SNR as a mean along the ray
+  void setMinRaySnr(double val) { _minRaySnr = val; }
+
+  // min fraction of ray flagged as interference
+  void setMinRayFraction(double val) { _minRayFraction = val; }
+
+  // min valid ray snr if using ZDR standard deviation
+  void setMinRaySnrForZdr(double val) { _minRaySnrForZdr = val; }
 
   // set interest maps for rlan location
 
@@ -85,7 +96,11 @@ public:
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestMapSnrSdev
+  // void setInterestMapSnrSdev
+  //   (const vector<InterestMap::ImPoint> &pts,
+  //    double weight);
+  
+  void setInterestMapZdrSdev
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
@@ -112,7 +127,7 @@ public:
   ///////////////////////////////////////////////////////////////
   // set the missing value for fields
   
-  void setFieldMissingVal(double val) { _missingVal = val; }
+  void setFieldMissingVal(double val) { _fieldMissingVal = val; }
   
   ///////////////////////////////////////////////////////////////
   // set the fields as available
@@ -122,6 +137,7 @@ public:
   void setWidthField(double *vals);
   void setNcpField(double *vals);
   void setSnrField(double *vals);
+  void setZdrField(double *vals);
 
   //////////////////////////////////////////////
   // perform rlan location
@@ -144,7 +160,8 @@ public:
   const double *getWidth() const { return _width; }
   const double *getNcp() const { return _ncp; }
   const double *getSnr() const { return _snr; }
-
+  const double *getZdr() const { return _zdr; }
+  
   // get results - after running locate
   // these arrays span the gates from 0 to nGates-1
 
@@ -155,16 +172,18 @@ public:
   
   const double *getSnrMode() const { return _snrMode; }
   const double *getSnrDMode() const { return _snrDMode; }
-  const double *getSnrSdev() const { return _snrSdev; }
+  // const double *getSnrSdev() const { return _snrSdev; }
+  const double *getZdrSdev() const { return _zdrSdev; }
   const double *getNcpMean() const { return _ncpMean; }
   const double *getWidthMean() const { return _widthMean; }
-
+  
   const double *getPhaseNoiseInterest() const { return _phaseNoiseInterest; }
   const double *getNcpMeanInterest() const { return _ncpMeanInterest; }
   const double *getWidthMeanInterest() const { return _widthMeanInterest; }
   const double *getSnrDModeInterest() const { return _snrDModeInterest; }
-  const double *getSnrSdevInterest() const { return _snrSdevInterest; }
-
+  // const double *getSnrSdevInterest() const { return _snrSdevInterest; }
+  const double *getZdrSdevInterest() const { return _zdrSdevInterest; }
+  
   ////////////////////////////////////
   // print parameters for debugging
   
@@ -192,12 +211,20 @@ private:
 
   double _startRangeKm;
   double _gateSpacingKm;
-
   double _nyquist;
 
-  // field missing value
+  double _rayMeanSnr;
 
-  double _missingVal;
+  // processing parameters
+
+  double _minRaySnr; // min valid ray snr
+  double _minRayFraction; // min fraction of ray flagged as interference
+  double _minRaySnrForZdr; // min valid ray snr if using ZDR standard deviation
+
+  // missing values
+
+  static const double _missingVal;
+  double _fieldMissingVal;
 
   // arrays for input and computed data
   // and pointers to those arrays
@@ -226,6 +253,10 @@ private:
   double *_snr;
   bool _snrAvail;
   
+  TaArray<double> _zdr_;
+  double *_zdr;
+  bool _zdrAvail;
+  
   // results
 
   TaArray<bool> _rlanFlag_;
@@ -243,8 +274,11 @@ private:
   TaArray<double> _snrDMode_;
   double *_snrDMode;
 
-  TaArray<double> _snrSdev_;
-  double *_snrSdev;
+  // TaArray<double> _snrSdev_;
+  // double *_snrSdev;
+
+  TaArray<double> _zdrSdev_;
+  double *_zdrSdev;
 
   TaArray<double> _ncpMean_;
   double *_ncpMean;
@@ -264,8 +298,11 @@ private:
   TaArray<double> _snrDModeInterest_;
   double *_snrDModeInterest;
   
-  TaArray<double> _snrSdevInterest_;
-  double *_snrSdevInterest;
+  // TaArray<double> _snrSdevInterest_;
+  // double *_snrSdevInterest;
+
+  TaArray<double> _zdrSdevInterest_;
+  double *_zdrSdevInterest;
 
   // gate limits for computing stats along a ray
 
@@ -280,13 +317,15 @@ private:
   InterestMap *_interestMapNcpMean;
   InterestMap *_interestMapWidthMean;
   InterestMap *_interestMapSnrDMode;
-  InterestMap *_interestMapSnrSdev;
+  // InterestMap *_interestMapSnrSdev;
+  InterestMap *_interestMapZdrSdev;
 
   double _weightPhaseNoise;
   double _weightNcpMean;
   double _weightWidthMean;
   double _weightSnrDMode;
-  double _weightSnrSdev;
+  // double _weightSnrSdev;
+  double _weightZdrSdev;
 
   double _rlanInterestThreshold;
 
@@ -297,6 +336,7 @@ private:
   void _computeDeltaMode(const double *vals, double *mode, double *dMode);
   void _computeSdevInRange(const double *vals, double *sdevs);
   void _computeMeanInRange(const double *vals, double *means);
+  double _computeRayMeanSnr();
   void _createDefaultInterestMaps();
 
 };

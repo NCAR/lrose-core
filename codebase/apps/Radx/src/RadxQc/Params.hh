@@ -107,7 +107,7 @@ public:
     SNR_RLAN = 31,
     SNR_MODE_RLAN = 32,
     SNR_DMODE_RLAN = 33,
-    SNR_SDEV_RLAN = 34,
+    ZDR_SDEV_RLAN = 34,
     NCP_MEAN_RLAN = 35,
     WIDTH_MEAN_RLAN = 36,
     PHASE_RLAN = 37,
@@ -116,7 +116,7 @@ public:
     NCP_MEAN_INTEREST_RLAN = 40,
     WIDTH_MEAN_INTEREST_RLAN = 41,
     SNR_DMODE_INTEREST_RLAN = 42,
-    SNR_SDEV_INTEREST_RLAN = 43,
+    ZDR_SDEV_INTEREST_RLAN = 43,
     RLAN_FLAG = 44,
     RAY_HEIGHT = 45,
     SNR_MEAN_SEACLUT = 46,
@@ -645,10 +645,16 @@ public:
 
   double rlan_snr_dmode_weight;
 
-  interest_map_point_t *_rlan_snr_sdev_interest_map;
-  int rlan_snr_sdev_interest_map_n;
+  interest_map_point_t *_rlan_zdr_sdev_interest_map;
+  int rlan_zdr_sdev_interest_map_n;
 
-  double rlan_snr_sdev_weight;
+  double rlan_zdr_sdev_weight;
+
+  double rlan_min_ray_snr_db;
+
+  double rlan_min_ray_snr_for_zdr_sdev_db;
+
+  double rlan_min_ray_fraction;
 
   double rlan_interest_threshold;
 
@@ -802,7 +808,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[171];
+  mutable TDRPtable _table[174];
 
   const char *_className;
 
