@@ -60,6 +60,7 @@ IntfLocator::IntfLocator()
   _interestMapSnrDMode = NULL;
   _interestMapZdrSdev = NULL;
 
+  setMaxElevDeg(3.0);
   setMinRaySnr(2.5);
   setMinRayFraction(0.5);
   setMinRaySnrForZdr(5.0);
@@ -414,7 +415,7 @@ int IntfLocator::rlanLocate()
     // _snrSdevInterest[igate] = _missingVal;
     _zdrSdevInterest[igate] = _missingVal;
   }
-  
+
   // first compute the absolute phase at each gate, summing up
   // the phase change from the start to end of the ray
   // the units are degrees
@@ -574,9 +575,11 @@ int IntfLocator::rlanLocate()
   }
   double fractionSet = (double) nGatesSet / (double) _nGates;
 
-  // if fraction is too low, or ray snr is too low, clear all gates
+  // if elevation angle is too high,
+  // fraction is too low, or ray snr is too low, clear all gates
 
-  if (_rayMeanSnr < _minRaySnr ||
+  if (_elevation > _maxElevDeg ||
+      _rayMeanSnr < _minRaySnr ||
       fractionSet < _minRayFraction) {
     for (int igate = 0; igate < _nGates; igate++) {
       _rlanFlag[igate] = false;

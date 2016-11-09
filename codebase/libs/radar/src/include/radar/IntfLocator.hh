@@ -69,6 +69,9 @@ public:
   
   // set processing parameters
 
+  // max elevation angle for interference
+  void setMaxElevDeg(double val) { _maxElevDeg = val; }
+
   // min valid SNR as a mean along the ray
   void setMinRaySnr(double val) { _minRaySnr = val; }
 
@@ -217,6 +220,7 @@ private:
 
   // processing parameters
 
+  double _maxElevDeg; // max elevation angle for interference
   double _minRaySnr; // min valid ray snr
   double _minRayFraction; // min fraction of ray flagged as interference
   double _minRaySnrForZdr; // min valid ray snr if using ZDR standard deviation

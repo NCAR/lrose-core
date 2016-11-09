@@ -67,6 +67,10 @@ public:
     _nGatesKernel = val;
   }
 
+  // max elevation angle for sea clutter
+
+  void setMaxElevDeg(double val) { _maxElevDeg = val; }
+
   // only include gates that exceed a given SNR threshold
   
   void setMinSnrDb(double val) { _minSnrDb = val; }
@@ -269,6 +273,7 @@ private:
 
   int _nGatesKernel;
   double _minSnrDb;
+  double _maxElevDeg; // max elevation angle for sea clutter
 
   InterestMap *_interestMapRhohvMean;
   InterestMap *_interestMapPhidpSdev;

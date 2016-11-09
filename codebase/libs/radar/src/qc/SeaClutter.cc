@@ -57,6 +57,8 @@ SeaClutter::SeaClutter()
   _interestMapZdrSdev = NULL;
   _interestMapDbzElevGradient = NULL;
 
+  setMaxElevDeg(3.0);
+
   _createDefaultInterestMaps();
   _nGatesKernel = 9;
   
@@ -122,12 +124,12 @@ void SeaClutter::printParams(ostream &out)
 // must be called before locate()
 
 void SeaClutter::setRayProps(time_t timeSecs, 
-                              double nanoSecs,
-                              double elevation, 
-                              double azimuth,
-                              int nGates,
-                              double startRangeKm,
-                              double gateSpacingKm)
+                             double nanoSecs,
+                             double elevation, 
+                             double azimuth,
+                             int nGates,
+                             double startRangeKm,
+                             double gateSpacingKm)
   
 {
   
@@ -425,6 +427,14 @@ int SeaClutter::locate()
   
   for (int igate = 1; igate < _nGates - 1; igate++) {
     if (!_clutFlag[igate-1] && !_clutFlag[igate+1]) {
+      _clutFlag[igate] = false;
+    }
+  }
+
+  // if elevation angle is too high, clear flag
+
+  if (_elevation > _maxElevDeg) {
+    for (int igate = 0; igate < _nGates; igate++) {
       _clutFlag[igate] = false;
     }
   }
