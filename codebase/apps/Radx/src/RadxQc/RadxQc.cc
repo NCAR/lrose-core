@@ -637,9 +637,9 @@ void RadxQc::_setupRead(RadxFile &file)
     file.addReadField(_params.LDR_field_name);
   }
 
-  if (_params.copy_input_fields_to_output) {
-    for (int ii = 0; ii < _params.copy_fields_n; ii++) {
-      file.addReadField(_params._copy_fields[ii].input_name);
+  if (_params.write_censored_fields_to_output) {
+    for (int ii = 0; ii < _params.censored_fields_n; ii++) {
+      file.addReadField(_params._censored_fields[ii].input_name);
     }
   }
 

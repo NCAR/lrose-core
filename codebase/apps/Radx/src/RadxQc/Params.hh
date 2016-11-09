@@ -130,7 +130,8 @@ public:
     DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 54,
     SEACLUT_FLAG = 55,
     PARTICLE_ID = 56,
-    TEMP_FOR_PID = 57
+    TEMP_FOR_PID = 57,
+    PID_CENSOR_FLAG = 58
   } output_field_id_t;
 
   typedef enum {
@@ -195,8 +196,10 @@ public:
   typedef struct {
     char* input_name;
     char* output_name;
-    tdrp_bool_t apply_censoring;
-  } copy_field_t;
+    tdrp_bool_t apply_rlan_censoring;
+    tdrp_bool_t apply_seaclut_censoring;
+    tdrp_bool_t apply_pid_censoring;
+  } censored_field_t;
 
   ///////////////////////////
   // Member functions
@@ -730,6 +733,9 @@ public:
 
   int PID_median_filter_len;
 
+  int *_PID_censoring_flag_vals;
+  int PID_censoring_flag_vals_n;
+
   tdrp_bool_t use_soundings_from_spdb;
 
   char* sounding_spdb_url;
@@ -763,19 +769,10 @@ public:
   output_field_t *_output_fields;
   int output_fields_n;
 
-  tdrp_bool_t copy_input_fields_to_output;
+  tdrp_bool_t write_censored_fields_to_output;
 
-  copy_field_t *_copy_fields;
-  int copy_fields_n;
-
-  tdrp_bool_t apply_rlan_censoring;
-
-  tdrp_bool_t apply_seaclutter_censoring;
-
-  tdrp_bool_t apply_pid_censoring;
-
-  int *_pid_vals_for_censoring;
-  int pid_vals_for_censoring_n;
+  censored_field_t *_censored_fields;
+  int censored_fields_n;
 
   output_format_t output_format;
 
@@ -808,7 +805,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[174];
+  mutable TDRPtable _table[171];
 
   const char *_className;
 

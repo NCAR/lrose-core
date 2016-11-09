@@ -483,6 +483,15 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
             }
           }
           break;
+          
+        case Params::PID_CENSOR_FLAG:
+          if (_pidCensorFlag[igate]) {
+            *datp = 1.0;
+          } else {
+            *datp = 0.0;
+          }
+          break;
+
 
       } // switch
 
@@ -540,25 +549,23 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   
   // copy fields through as required
 
-  if (_params.copy_input_fields_to_output) {
+  if (_params.write_censored_fields_to_output) {
 
-    for (int ii = 0; ii < _params.copy_fields_n; ii++) {
-      const Params::copy_field_t &cfield = _params._copy_fields[ii];
+    for (int ii = 0; ii < _params.censored_fields_n; ii++) {
+      const Params::censored_field_t &cfield = _params._censored_fields[ii];
       string inName = cfield.input_name;
       RadxField *inField = inputRay->getField(inName);
       if (inField != NULL) {
         RadxField *outField = new RadxField(*inField);
         outField->setName(cfield.output_name);
-        if (cfield.apply_censoring) {
-          if (_params.apply_rlan_censoring) {
-            _censorRlan(*outField);
-          }
-          if (_params.apply_seaclutter_censoring) {
-            _censorSeaClutter(*outField);
-          }
-          if (_params.apply_pid_censoring) {
-            _censorOnPid(*outField);
-          }
+        if (cfield.apply_rlan_censoring) {
+          _censorRlan(*outField);
+        }
+        if (cfield.apply_seaclut_censoring) {
+          _censorSeaClutter(*outField);
+        }
+        if (cfield.apply_pid_censoring) {
+          _censorOnPid(*outField);
         }
         derivedRay->addField(outField);
       }
@@ -1007,6 +1014,24 @@ void ComputeEngine::_pidCompute()
 
   memcpy(_pidArray, _pid.getPid(), _nGates * sizeof(int));
   memcpy(_pidInterest, _pid.getInterest(), _nGates * sizeof(double));
+
+  // set censoring flag
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    bool setFlag = false;
+    int pidVal = _pidArray[igate];
+    for (int ii = 0; ii < _params.PID_censoring_flag_vals_n; ii++) {
+      if (pidVal == _params._PID_censoring_flag_vals[ii]) {
+        setFlag = true;
+        break;
+      }
+    } // ii
+    if (setFlag) {
+      _pidCensorFlag[igate] = true;
+    } else {
+      _pidCensorFlag[igate] = false;
+    }
+  } // igate
   
 }
 
@@ -1020,6 +1045,7 @@ void ComputeEngine::_allocPidArrays()
   _pidArray = _pidArray_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
   _tempForPid = _tempForPid_.alloc(_nGates);
+  _pidCensorFlag = _pidCensorFlag_.alloc(_nGates);
 
 }
 
@@ -1270,11 +1296,11 @@ void ComputeEngine::_censorRlan(RadxField &field)
 {
 
   const bool *rlanFlag = _intf.getRlanFlag();
-  for (int ii = 0; ii < _nGates; ii++) {
-    if (rlanFlag[ii]) {
-      field.setGateToMissing(ii);
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (rlanFlag[igate]) {
+      field.setGateToMissing(igate);
     }
-  } // ii
+  } // igate
 
 }
 
@@ -1286,11 +1312,11 @@ void ComputeEngine::_censorSeaClutter(RadxField &field)
 {
 
   const bool *clutFlag = _seaclut.getClutFlag();
-  for (int ii = 0; ii < _nGates; ii++) {
-    if (clutFlag[ii]) {
-      field.setGateToMissing(ii);
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (clutFlag[igate]) {
+      field.setGateToMissing(igate);
     }
-  } // ii
+  } // igate
 
 }
 
@@ -1301,17 +1327,8 @@ void ComputeEngine::_censorOnPid(RadxField &field)
 
 {
 
-  const int *pid = _pid.getPid();
   for (int igate = 0; igate < _nGates; igate++) {
-    int ptype = pid[igate];
-    bool censor = false;
-    for (int jj = 0; jj < _params.pid_vals_for_censoring_n; jj++) {
-      if (ptype == _params._pid_vals_for_censoring[jj]) {
-        censor = true;
-        break;
-      }
-    }
-    if (censor) {
+    if (_pidCensorFlag[igate]) {
       field.setGateToMissing(igate);
     }
   } // igate

@@ -124,6 +124,7 @@ private:
   RadxArray<int> _pidArray_;
   RadxArray<double> _pidInterest_;
   RadxArray<double> _tempForPid_;
+  RadxArray<bool> _pidCensorFlag_;
 
   double *_snrArray;
   double *_dbzArray;
@@ -141,6 +142,7 @@ private:
   int *_pidArray;
   double *_pidInterest;
   double *_tempForPid;
+  bool *_pidCensorFlag;
 
   bool _dbzElevGradientAvail;
 

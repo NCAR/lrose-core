@@ -2337,6 +2337,29 @@ using namespace std;
     tt->single_val.i = 7;
     tt++;
     
+    // Parameter 'PID_censoring_flag_vals'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("PID_censoring_flag_vals");
+    tt->descr = tdrpStrDup("PID values for which output should be censored.");
+    tt->help = tdrpStrDup("List of PID values, for which the PID censoring flag will be set.");
+    tt->array_offset = (char *) &_PID_censoring_flag_vals - &_start_;
+    tt->array_n_offset = (char *) &PID_censoring_flag_vals_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(int);
+    tt->array_n = 5;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].i = 15;
+      tt->array_vals[1].i = 16;
+      tt->array_vals[2].i = 17;
+      tt->array_vals[3].i = 18;
+      tt->array_vals[4].i = 19;
+    tt++;
+    
     // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -2604,7 +2627,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 58;
+        tt->struct_def.fields[0].enum_def.nfields = 59;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -2723,6 +2746,8 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[56].val = PARTICLE_ID;
         tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("TEMP_FOR_PID");
         tt->struct_def.fields[0].enum_def.fields[57].val = TEMP_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("PID_CENSOR_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[58].val = PID_CENSOR_FLAG;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -2856,120 +2881,73 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 16");
-    tt->comment_hdr = tdrpStrDup("SPECIFYING COPY-THROUGH FIELDS");
-    tt->comment_text = tdrpStrDup("These fields are copied unchanged from the input file to the output file. This is a way of consolidating the output data set.");
+    tt->comment_hdr = tdrpStrDup("SPECIFYING FIELDS FOR CENSORING");
+    tt->comment_text = tdrpStrDup("These fields are copied from the input file, censored according to the output rules, and written to the output file.");
     tt++;
     
-    // Parameter 'copy_input_fields_to_output'
+    // Parameter 'write_censored_fields_to_output'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("copy_input_fields_to_output");
-    tt->descr = tdrpStrDup("Option to copy input fields unchanged to the output file.");
+    tt->param_name = tdrpStrDup("write_censored_fields_to_output");
+    tt->descr = tdrpStrDup("Option to write censored fields to the output file.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &copy_input_fields_to_output - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &write_censored_fields_to_output - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'copy_fields'
-    // ctype is '_copy_field_t'
+    // Parameter 'censored_fields'
+    // ctype is '_censored_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("copy_fields");
-    tt->descr = tdrpStrDup("These fields are copied through unchanged to the output file.");
-    tt->help = tdrpStrDup("You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app. See censoring control parameters below.");
-    tt->array_offset = (char *) &_copy_fields - &_start_;
-    tt->array_n_offset = (char *) &copy_fields_n - &_start_;
+    tt->param_name = tdrpStrDup("censored_fields");
+    tt->descr = tdrpStrDup("Fields to be copied from input and written to output.");
+    tt->help = tdrpStrDup("These fields are copied from the input, optionally censored, and written to the output file. You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app.");
+    tt->array_offset = (char *) &_censored_fields - &_start_;
+    tt->array_n_offset = (char *) &censored_fields_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(copy_field_t);
+    tt->array_elem_size = sizeof(censored_field_t);
     tt->array_n = 1;
-    tt->struct_def.name = tdrpStrDup("copy_field_t");
-    tt->struct_def.nfields = 3;
+    tt->struct_def.name = tdrpStrDup("censored_field_t");
+    tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
       tt->struct_def.fields[0].fname = tdrpStrDup("input_name");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_copy_fields->input_name - (char *) _copy_fields;
+        (char *) &_censored_fields->input_name - (char *) _censored_fields;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("output_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_copy_fields->output_name - (char *) _copy_fields;
+        (char *) &_censored_fields->output_name - (char *) _censored_fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[2].fname = tdrpStrDup("apply_censoring");
+      tt->struct_def.fields[2].fname = tdrpStrDup("apply_rlan_censoring");
       tt->struct_def.fields[2].ptype = BOOL_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_copy_fields->apply_censoring - (char *) _copy_fields;
-    tt->n_struct_vals = 3;
+        (char *) &_censored_fields->apply_rlan_censoring - (char *) _censored_fields;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[3].fname = tdrpStrDup("apply_seaclut_censoring");
+      tt->struct_def.fields[3].ptype = BOOL_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_censored_fields->apply_seaclut_censoring - (char *) _censored_fields;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[4].fname = tdrpStrDup("apply_pid_censoring");
+      tt->struct_def.fields[4].ptype = BOOL_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_censored_fields->apply_pid_censoring - (char *) _censored_fields;
+    tt->n_struct_vals = 5;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("VEL");
       tt->struct_vals[1].s = tdrpStrDup("VEL");
       tt->struct_vals[2].b = pFALSE;
-    tt++;
-    
-    // Parameter 'apply_rlan_censoring'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_rlan_censoring");
-    tt->descr = tdrpStrDup("Option to censor rlan interference in fields that are copied through.");
-    tt->help = tdrpStrDup("Only applies for fields for which 'apply_censoring' is set to TRUE.");
-    tt->val_offset = (char *) &apply_rlan_censoring - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'apply_seaclutter_censoring'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_seaclutter_censoring");
-    tt->descr = tdrpStrDup("Option to censor sea clutter in fields that are copied through.");
-    tt->help = tdrpStrDup("Only applies for fields for which 'apply_censoring' is set to TRUE.");
-    tt->val_offset = (char *) &apply_seaclutter_censoring - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'apply_pid_censoring'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_pid_censoring");
-    tt->descr = tdrpStrDup("Option to censor based on PID results.");
-    tt->help = tdrpStrDup("Only applies for fields for which 'apply_censoring' is set to TRUE.");
-    tt->val_offset = (char *) &apply_pid_censoring - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'pid_vals_for_censoring'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("pid_vals_for_censoring");
-    tt->descr = tdrpStrDup("PID values for which output should be censored.");
-    tt->help = tdrpStrDup("Only applies for fields for which 'apply_censoring' is set to TRUE.");
-    tt->array_offset = (char *) &_pid_vals_for_censoring - &_start_;
-    tt->array_n_offset = (char *) &pid_vals_for_censoring_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(int);
-    tt->array_n = 5;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].i = 15;
-      tt->array_vals[1].i = 16;
-      tt->array_vals[2].i = 17;
-      tt->array_vals[3].i = 18;
-      tt->array_vals[4].i = 19;
+      tt->struct_vals[3].b = pFALSE;
+      tt->struct_vals[4].b = pFALSE;
     tt++;
     
     // Parameter 'Comment 17'

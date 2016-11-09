@@ -793,6 +793,12 @@ paramdef int {
   p_help = "See 'appply_median_filter_to_PID'";
 } PID_median_filter_len;
 
+paramdef int {
+  p_default = { 15, 16, 17, 18, 19 };
+  p_descr = "PID values for which output should be censored.";
+  p_help = "List of PID values, for which the PID censoring flag will be set.";
+} PID_censoring_flag_vals[];
+
 commentdef {
   p_header = "SOUNDING INPUT FOR PID temperature profile - OPTIONAL";
 }
@@ -963,7 +969,8 @@ typedef enum {
   SEACLUT_FLAG,
 
   PARTICLE_ID,
-  TEMP_FOR_PID
+  TEMP_FOR_PID,
+  PID_CENSOR_FLAG,
 
 } output_field_id_t;
 
@@ -1082,56 +1089,36 @@ paramdef struct output_field_t {
 } output_fields[];
 
 commentdef {
-  p_header = "SPECIFYING COPY-THROUGH FIELDS";
-  p_text = "These fields are copied unchanged from the input file to the output file. This is a way of consolidating the output data set.";
+  p_header = "SPECIFYING FIELDS FOR CENSORING";
+  p_text = "These fields are copied from the input file, censored according to the output rules, and written to the output file.";
 }
 
 paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to copy input fields unchanged to the output file.";
-} copy_input_fields_to_output;
+  p_default = TRUE;
+  p_descr = "Option to write censored fields to the output file.";
+} write_censored_fields_to_output;
 
 typedef struct {
   string input_name; 
   string output_name;
-  boolean apply_censoring;
-} copy_field_t;
+  boolean apply_rlan_censoring;
+  boolean apply_seaclut_censoring;
+  boolean apply_pid_censoring;
+} censored_field_t;
 
-paramdef struct copy_field_t {
+paramdef struct censored_field_t {
   p_default = {
     {
       input_name = "VEL",
       output_name = "VEL",
-      apply_censoring = FALSE
+      apply_rlan_censoring = FALSE,
+      apply_seaclut_censoring = FALSE,
+      apply_pid_censoring = FALSE
     }
   };
-  p_descr = "These fields are copied through unchanged to the output file.";
-  p_help = "You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app. See censoring control parameters below.";
-} copy_fields[];
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to censor rlan interference in fields that are copied through.";
-  p_help = "Only applies for fields for which 'apply_censoring' is set to TRUE.";
-} apply_rlan_censoring;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to censor sea clutter in fields that are copied through.";
-  p_help = "Only applies for fields for which 'apply_censoring' is set to TRUE.";
-} apply_seaclutter_censoring;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to censor based on PID results.";
-  p_help = "Only applies for fields for which 'apply_censoring' is set to TRUE.";
-} apply_pid_censoring;
-
-paramdef int {
-  p_default = { 15, 16, 17, 18, 19 };
-  p_descr = "PID values for which output should be censored.";
-  p_help = "Only applies for fields for which 'apply_censoring' is set to TRUE.";
-} pid_vals_for_censoring[];
+  p_descr = "Fields to be copied from input and written to output.";
+  p_help = "These fields are copied from the input, optionally censored, and written to the output file. You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app.";
+} censored_fields[];
 
 commentdef {
   p_header = "OUTPUT FILE FORMAT";
