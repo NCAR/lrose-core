@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for RadxQc
+ * TDRP params for ./RadxQc
  **********************************************************************/
 
 //======================================================================
@@ -1205,7 +1205,7 @@ rlan_min_ray_snr_db = 0;
 // Type: double
 //
 
-rlan_min_ray_snr_for_zdr_sdev_db = 8;
+rlan_min_ray_snr_for_zdr_sdev_db = 7.5;
 
 ///////////// rlan_min_ray_fraction ///////////////////
 //
@@ -1219,7 +1219,19 @@ rlan_min_ray_snr_for_zdr_sdev_db = 8;
 // Type: double
 //
 
-rlan_min_ray_fraction = 0.4;
+rlan_min_ray_fraction = 0.3;
+
+///////////// rlan_max_elev_deg ///////////////////////
+//
+// Max elevation angle for rlan interference (deg).
+//
+// Above this angle the rlan flag will not be set.
+//
+//
+// Type: double
+//
+
+rlan_max_elev_deg = 2.25;
 
 ///////////// rlan_interest_threshold /////////////////
 //
@@ -1502,6 +1514,18 @@ dbz_elevation_gradient_field_name = "DbzElevGradient";
 
 ray_height_field_name = "RayHtMsl";
 
+///////////// seaclut_max_elev_deg ////////////////////
+//
+// Max elevation angle for sea clutter (deg).
+//
+// Above this angle the clutter flag will not be set.
+//
+//
+// Type: double
+//
+
+seaclut_max_elev_deg = 2.5;
+
 //======================================================================
 //
 // COMPUTING PID - HYDROMETEOR PARTICLE ID.
@@ -1529,7 +1553,6 @@ compute_pid = TRUE;
 // Type: string
 //
 
-// pid_thresholds_file_path = "$(HOME)/case_studies/alg/params/pid_thresholds.test";
 pid_thresholds_file_path = "./pid_thresholds.test";
 
 ///////////// PID_snr_threshold ///////////////////////
@@ -1753,11 +1776,12 @@ PID_median_filter_len = 7;
 //
 
 PID_censoring_flag_vals = {
- 15,
- 16,
- 17,
- 18,
- 19
+  // 15, // insects
+  // 16, // 2nd trip
+  17, // clutter residue
+  // 18, saturated
+  19, // misc_1 - e.g.UAE echoes
+  // 20  // misc_2
 };
 
 //======================================================================
