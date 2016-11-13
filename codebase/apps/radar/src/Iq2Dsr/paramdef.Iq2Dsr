@@ -137,6 +137,12 @@ paramdef boolean {
 } change_velocity_sign_staggered;
 
 paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use the pulse width in the ts_processing headers.";
+  p_help = "The default mode is to use the pulse width from the pulse headers. However, for some radar systems the pulse width is correct in the ts_processing headers, but not correct in the pulse headers. So this option allows you to override the pulse width in the pulse headers by copying it over from the ts_processing header.";
+} use_pulse_width_from_ts_proc;
+
+paramdef boolean {
   p_default = false;
   p_descr = "Option to override the prt in the time series.";
   p_help = "If false, we will use the prt in the time series. If true, primary_prt_secs will be used instead.";

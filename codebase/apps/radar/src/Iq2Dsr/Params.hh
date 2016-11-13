@@ -730,6 +730,8 @@ public:
 
   tdrp_bool_t change_velocity_sign_staggered;
 
+  tdrp_bool_t use_pulse_width_from_ts_proc;
+
   tdrp_bool_t override_primary_prt;
 
   double primary_prt_secs;
@@ -1160,7 +1162,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[248];
+  mutable TDRPtable _table[249];
 
   const char *_className;
 

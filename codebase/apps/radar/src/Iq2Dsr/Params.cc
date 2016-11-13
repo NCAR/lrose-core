@@ -795,6 +795,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'use_pulse_width_from_ts_proc'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_pulse_width_from_ts_proc");
+    tt->descr = tdrpStrDup("Option to use the pulse width in the ts_processing headers.");
+    tt->help = tdrpStrDup("The default mode is to use the pulse width from the pulse headers. However, for some radar systems the pulse width is correct in the ts_processing headers, but not correct in the pulse headers. So this option allows you to override the pulse width in the pulse headers by copying it over from the ts_processing header.");
+    tt->val_offset = (char *) &use_pulse_width_from_ts_proc - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'override_primary_prt'
     // ctype is 'tdrp_bool_t'
     

@@ -196,6 +196,10 @@ BeamReader::BeamReader(const string &prog_name,
     _pulseReader->setCohereIqToBurst(true);
   }
 
+  if (_params.use_pulse_width_from_ts_proc) {
+    _pulseReader->setCopyPulseWidthFromTsProc(true);
+  }
+
   if (_params.check_radar_id) {
     _pulseReader->setRadarId(_params.radar_id);
   }
@@ -1038,7 +1042,7 @@ IwrfTsPulse *BeamReader::_getNextPulse()
       // end of data
       return NULL;
     }
-    
+
     if (pulse->get_end_of_sweep()) {
       // set end of sweep flag, used for next beam
       _endOfSweepFlag = true;
