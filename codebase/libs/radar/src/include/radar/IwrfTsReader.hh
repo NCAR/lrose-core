@@ -100,6 +100,11 @@ public:
     _cohereIqToBurst = state;
   }
 
+  // set to copy pulse width from ts_proc in info
+
+  void setCopyPulseWidthFromTsProc(bool val)
+  { _copyPulseWidthFromTsProc = val; }
+
   // set the acceptable time difference between a georef
   // measurement and a pulse for it to be considered
   // suitable for use with a pulse
@@ -182,6 +187,8 @@ protected:
   int _msecsWait; // millisecs to wait in non-blocking mode
   bool _cohereIqToBurst; // cohere IQ data to burst
   bool _sigmetLegacyUnpacking;
+  bool _copyPulseWidthFromTsProc; /* copy pulse width metadata
+                                   * from info to pulse header */
 
   // status etc
 
@@ -202,6 +209,7 @@ protected:
   
   void _setEventFlags(IwrfTsPulse &pulse);
   void _setPlatformGeoref(IwrfTsPulse &pulse);
+  void _updatePulse(IwrfTsPulse &pulse);
 
 private:
   

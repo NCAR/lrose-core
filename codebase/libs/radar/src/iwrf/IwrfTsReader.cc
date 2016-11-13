@@ -58,6 +58,7 @@ IwrfTsReader::IwrfTsReader(IwrfDebug_t debug) :
   _nonBlocking = false;
   _msecsWait = 0;
   _cohereIqToBurst = false;
+  _copyPulseWidthFromTsProc = false;
   _timedOut = false;
   _endOfFile = false;
   _georefTimeMarginSecs = 1.0;
@@ -184,6 +185,22 @@ void IwrfTsReader::_setPlatformGeoref(IwrfTsPulse &pulse)
   double dtime = fabs(gtime - ptime);
   if (dtime <= _georefTimeMarginSecs) {
     pulse.setPlatformGeoref(georef);
+  }
+
+}
+
+//////////////////////////////////////////////////////////////////
+// update the pulse data and metadata as appropriate
+
+void IwrfTsReader::_updatePulse(IwrfTsPulse &pulse)
+
+{
+  
+  if (_cohereIqToBurst) {
+    pulse.cohereIqToBurstPhase();
+  }
+  if (_copyPulseWidthFromTsProc) {
+    pulse.copyPulseWidthFromTsProc();
   }
 
 }
@@ -321,9 +338,7 @@ IwrfTsPulse*
       if (convertToFloats) {
 	pulse->convertToFL32();
       }
-      if (_cohereIqToBurst) {
-        pulse->cohereIqToBurstPhase();
-      }
+      _updatePulse(*pulse);
       if (_debug >= IWRF_DEBUG_VERBOSE) {
         pulse->printHeader(stderr);
       }
@@ -768,12 +783,7 @@ IwrfTsPulse*
 			     _opsInfo.getTsProcessing(),
 			     pulse->getHdr());
 	pulse->setRvp8Hdr(pulse->getHdr());
-	// if (convertToFloats) {
-	//   pulse->convertToFL32();
-	// }
-        if (_cohereIqToBurst) {
-          pulse->cohereIqToBurstPhase();
-        }
+        _updatePulse(*pulse);
 	_pktSeqNumPrevPulse = _pktSeqNumLatestPulse;
 	_pktSeqNumLatestPulse = pulse->getPktSeqNum();
 	_pulseSeqNumLatestPulse = pulse->getPulseSeqNum();
@@ -1042,12 +1052,7 @@ IwrfTsPulse*
 			     _opsInfo.getTsProcessing(),
 			     pulse->getHdr());
 	pulse->setRvp8Hdr(pulse->getHdr());
-	// if (convertToFloats) {
-	//   pulse->convertToFL32();
-	// }
-        if (_cohereIqToBurst) {
-          pulse->cohereIqToBurstPhase();
-        }
+        _updatePulse(*pulse);
 	_pktSeqNumPrevPulse = _pktSeqNumLatestPulse;
 	_pktSeqNumLatestPulse = pulse->getPktSeqNum();
 	_pulseSeqNumLatestPulse = pulse->getPulseSeqNum();

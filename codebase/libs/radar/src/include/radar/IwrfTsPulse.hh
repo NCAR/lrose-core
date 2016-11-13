@@ -158,6 +158,10 @@ public:
 
   void cohereIqToBurstPhase();
 
+  // copy the pulse width from the ts_proc in the info
+  
+  void copyPulseWidthFromTsProc();
+
   // assemble header and data into a single buffer
 
   void assemble(MemBuf &buf) const;
