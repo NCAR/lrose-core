@@ -1276,8 +1276,13 @@ IwrfTsPulse *BeamReader::_doReadNextPulse()
     
     // set the PRT on this latest pulse, and next PRT on prev pulse
     
-    _prevPulse->set_prt_next(dSecs);
-    latest->set_prt(dSecs);
+    if (_params.prt_is_for_previous_interval) {
+      _prevPulse->set_prt_next(dSecs);
+      latest->set_prt(dSecs);
+    } else {
+      latest->set_prt_next(dSecs);
+      _prevPulse->set_prt(dSecs);
+    }
 
   }
 
