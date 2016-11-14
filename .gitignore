@@ -23,6 +23,7 @@ makefile
 makefile.in
 makefile.am
 __makefile.template
+.libs
 
 codebase/Makefile.top
 codebase/VERSION
