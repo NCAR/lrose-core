@@ -97,10 +97,7 @@ shift `expr $OPTIND - 1`
 
 # set RPATH to be locatable relative to $ORIGIN, via LDFLAGS
 
-LROSE_INSTALL_DIR=${prefix}
-
-# check we are in the correct place - i.e. have codebase below us
-
+export LROSE_INSTALL_DIR=${prefix}
 
 # Build lrose - libraries and binaries
 # ------------------------------------
