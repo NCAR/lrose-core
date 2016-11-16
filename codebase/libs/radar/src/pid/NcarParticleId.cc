@@ -81,8 +81,8 @@ NcarParticleId::NcarParticleId()
   _bgs = new Particle("bgs", "Flying_Insects", FLYING_INSECTS);
   _trip2 = new Particle("trip2", "Second_trip", SECOND_TRIP);
   _gcl = new Particle("gcl", "Ground_Clutter", GROUND_CLUTTER);
-  _misc1 = new Particle("misc1", "Miscellaneous_1", MISC_1);
-  _misc2 = new Particle("misc2", "Miscellaneous_2", MISC_2);
+  _chaff = new Particle("chaff", "Miscellaneous_1", CHAFF);
+  _misc = new Particle("misc", "Miscellaneous_2", MISC);
 
   // add to vector
   
@@ -103,8 +103,8 @@ NcarParticleId::NcarParticleId()
   _particleList.push_back(_bgs);
   _particleList.push_back(_trip2);
   _particleList.push_back(_gcl);
-  _particleList.push_back(_misc1);
-  _particleList.push_back(_misc2);
+  _particleList.push_back(_chaff);
+  _particleList.push_back(_misc);
 
   // default weights
   
