@@ -44,6 +44,7 @@
 #include <vector>
 #include <toolsa/TaArray.hh>
 #include <radar/PidImapManager.hh>
+#include <radar/PhidpProc.hh>
 using namespace std;
 
 ////////////////////////
@@ -671,6 +672,10 @@ private:
   bool _verbose;            /**< Flag to indicate whether verbose messages should be printed */
   double _wavelengthCm;     /**< The wavelength (cm) of the radar beam */
 
+  // range geometry
+  double _startRangeKm;
+  double _gateSpacingKm;
+
   // particle types
   Particle* _cl;    /**< Cloud particle type */
   Particle* _drz;   /**< Drizzle particle type */
@@ -806,6 +811,10 @@ private:
                                        the pid value is set to missing i.e. 0 */
 
   string _thresholdsFilePath;     /**< File path for thresholds file */
+
+  // compute phidp standard deviation
+
+  PhidpProc _phidpProc;
 
   // allocate the required arrays
 

@@ -106,17 +106,6 @@ RadxQc::RadxQc(int argc, char **argv)
     }
   }
 
-  // check on params
-
-  if (_params.compute_KDP && !_params.PHIDP_available) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "  Problem with TDRP parameters." << endl;
-    cerr << "  You have compute_KDP set to TRUE" << endl;
-    cerr << "  but PHIDP_available set to FALSE." << endl;
-    cerr << "  PHIDP is required to compute KDP." << endl;
-    OK = FALSE;
-  }
-
   if (_params.locate_rlan_interference) {
     if (!_params.NCP_available && !_params.WIDTH_available) {
       cerr << "ERROR: " << _progName << endl;

@@ -309,11 +309,10 @@ paramdef string {
   p_descr = "Field name for RHOHV.";
 } RHOHV_field_name;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Compute KDP from PHIDP";
-  p_help = "If KDP is not available, it can be computed from PHIDP.";
-} compute_KDP;
+commentdef {
+  p_header = "COMPUTE KDP";
+  p_help = "KDP is computed from PHIDP. So this only applied if PHIDP_available is TRUE.";
+}
 
 typedef enum {
   FIR_LEN_125, FIR_LEN_60, FIR_LEN_40, FIR_LEN_30, FIR_LEN_20, FIR_LEN_10
@@ -694,7 +693,7 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to compute PID classification.";
 } compute_pid;
 

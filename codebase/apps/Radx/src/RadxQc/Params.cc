@@ -1154,16 +1154,13 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("RHOHV");
     tt++;
     
-    // Parameter 'compute_KDP'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_KDP");
-    tt->descr = tdrpStrDup("Compute KDP from PHIDP");
-    tt->help = tdrpStrDup("If KDP is not available, it can be computed from PHIDP.");
-    tt->val_offset = (char *) &compute_KDP - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("COMPUTE KDP");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'KDP_fir_filter_len'
@@ -1398,11 +1395,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1479,11 +1476,11 @@ using namespace std;
     tt->single_val.d = 0.84;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("LOCATING RLAN INTERFERENCE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1500,11 +1497,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("INTEREST MAPS and WEIGHTS for RLAN DETECTION");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.\n\nFor locating RLAN, we use the gate-to-gate phase_noise, ncp_mean (or width_mean if ncp is not available) and snr_dmode.\n\nFor locating NOISE, we use the gate-to-gate phase_noise, ncp_mean (or width_mean if ncp is not available) and snr_sdev.");
     tt++;
@@ -1814,11 +1811,11 @@ using namespace std;
     tt->single_val.d = 0.51;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("LOCATING SEA CLUTTER");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1859,11 +1856,11 @@ using namespace std;
     tt->single_val.d = 1.33333;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.");
     tt++;
@@ -2124,11 +2121,11 @@ using namespace std;
     tt->single_val.d = 2.5;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("COMPUTING PID - HYDROMETEOR PARTICLE ID");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2142,7 +2139,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Option to compute PID classification.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &compute_pid - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'pid_thresholds_file_path'
@@ -2384,11 +2381,11 @@ using namespace std;
       tt->array_vals[4].i = 19;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR PID temperature profile - OPTIONAL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2561,11 +2558,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("RETRIEVING SITE TEMPERATURE FROM SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2618,11 +2615,11 @@ using namespace std;
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("SPECIFYING FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2904,11 +2901,11 @@ using namespace std;
       tt->struct_vals[62].d = 0;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("CENSORING BASED ON INPUT FIELD VALUES");
     tt->comment_text = tdrpStrDup("You have the option of censoring the value of data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise.");
     tt++;
@@ -2984,11 +2981,11 @@ using namespace std;
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("SPECIFYING FIELDS FOR CENSORING");
     tt->comment_text = tdrpStrDup("These fields are copied from the input file, censored according to the output rules, and written to the output file.");
     tt++;
@@ -3112,11 +3109,11 @@ using namespace std;
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("OUTPUT FILE FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3173,11 +3170,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3218,11 +3215,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("VOLUME OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

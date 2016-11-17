@@ -591,8 +591,6 @@ public:
 
   char* RHOHV_field_name;
 
-  tdrp_bool_t compute_KDP;
-
   fir_filter_len_t KDP_fir_filter_len;
 
   int KDP_n_filt_iterations_unfolded;

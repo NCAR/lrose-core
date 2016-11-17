@@ -62,6 +62,9 @@ NcarParticleId::NcarParticleId()
   _debug = false;
   _verbose = false;
 
+  _startRangeKm = 0.0;
+  _gateSpacingKm = 0.0;
+
   // create particle types
 
   _cl = new Particle("cl", "Cloud", CLOUD);
@@ -457,9 +460,16 @@ void NcarParticleId::computePidBeam(int nGates,
   
   FilterUtils::computeSdevInRange(_zdr, _sdzdr, nGates,
                                   _ngatesSdev, _missingDouble);
-  FilterUtils::computeSdevInRange(_phidp, _sdphidp, nGates,
-                                  _ngatesSdev, _missingDouble);
+
+  // sdev of phidp is a special case since we
+  // need to compute it around the circle
   
+  _phidpProc.setRangeGeometry(_startRangeKm, _gateSpacingKm);
+  _phidpProc.computePhidpSdev(nGates, _ngatesSdev,
+                              _phidp, _missingDouble);
+  memcpy(_sdphidp, _phidpProc.getPhidpSdev(),
+         nGates * sizeof(double));
+
   // apply median filter as appropriate
   
   if (_applyMedianFilterToDbz) {
@@ -1004,6 +1014,9 @@ void NcarParticleId::fillTempArray(double radarHtKm,
   
 {
   
+  _startRangeKm = startRangeKm;
+  _gateSpacingKm = gateSpacingKm;
+
   BeamHeight beamHt;
   beamHt.setInstrumentHtKm(radarHtKm);
   if (setPseudoRadiusRatio) {

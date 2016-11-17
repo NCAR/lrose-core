@@ -140,7 +140,7 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
   
   // compute kdp if needed
   
-  if (_params.compute_KDP) {
+  if (_params.PHIDP_available) {
     _kdpCompute();
   } else {
     _kdp.initializeArrays(_nGates);

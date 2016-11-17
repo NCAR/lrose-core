@@ -380,7 +380,7 @@ int SeaClutter::locate()
                               _phidp, _missingVal);
   memcpy(_phidpSdev, _phidpProc.getPhidpSdev(),
          _nGates * sizeof(double));
-
+  
   // compute interest fields
   
   for (int igate = 0; igate < _nGates; igate++) {

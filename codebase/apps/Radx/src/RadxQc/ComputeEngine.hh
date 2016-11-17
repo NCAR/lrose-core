@@ -45,6 +45,7 @@
 #include <radar/AtmosAtten.hh>
 #include <radar/IntfLocator.hh>
 #include <radar/SeaClutter.hh>
+#include <radar/PhidpProc.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxTime.hh>
 #include <radar/InterestMap.hh>
@@ -153,9 +154,10 @@ private:
 
   AtmosAtten _atmos;
 
-  // kdp
+  // kdp and phidp
 
   KdpFilt _kdp;
+  PhidpProc _phidp;
 
   // temperature profile
 
