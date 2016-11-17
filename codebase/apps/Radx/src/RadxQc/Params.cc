@@ -3064,6 +3064,30 @@ using namespace std;
       tt->struct_vals[5].b = pFALSE;
     tt++;
     
+    // Parameter 'censoring_ignore_isolated_gates'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("censoring_ignore_isolated_gates");
+    tt->descr = tdrpStrDup("Option to ignore isolated gates of censoring surrounded by good data.");
+    tt->help = tdrpStrDup("If true, we will ignore isolated censoring gates if surrounded by non-censored gates. Single censor gates will be ignored. 2 consecutive censored gates are ignored if surrounded by 2 good gates on either side. And so on.");
+    tt->val_offset = (char *) &censoring_ignore_isolated_gates - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'censoring_max_isolated_ngates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("censoring_max_isolated_ngates");
+    tt->descr = tdrpStrDup("Max length of censor flag run to be ignored (gates).");
+    tt->help = tdrpStrDup("See 'censoring_ignore_isolated_gates'.");
+    tt->val_offset = (char *) &censoring_max_isolated_ngates - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
     // Parameter 'censoring_fill_in_gaps'
     // ctype is 'tdrp_bool_t'
     
@@ -3071,20 +3095,20 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("censoring_fill_in_gaps");
     tt->descr = tdrpStrDup("Option to fill in small gaps in the censoring flag.");
-    tt->help = tdrpStrDup("If true, we will in small gaps in the censoring flag. A single gate is filled in if surrounded by good data. 2 consecutive censored gates are filled in if surrounded by 2 censored gates on either side. And so on.");
+    tt->help = tdrpStrDup("If true, we will fill in small gaps in the censoring flag. A single gate is filled in. 2 consecutive censored gates are filled in if surrounded by 2 censored gates on either side. And so on up to censoring_max_fill_gap_length.");
     tt->val_offset = (char *) &censoring_fill_in_gaps - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'censoring_max_fill_gap_length'
+    // Parameter 'censoring_max_fill_ngates'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("censoring_max_fill_gap_length");
+    tt->param_name = tdrpStrDup("censoring_max_fill_ngates");
     tt->descr = tdrpStrDup("Max length of gaps filled (gates).");
     tt->help = tdrpStrDup("See 'censoring_fill_in_gaps'.");
-    tt->val_offset = (char *) &censoring_max_fill_gap_length - &_start_;
+    tt->val_offset = (char *) &censoring_max_fill_ngates - &_start_;
     tt->single_val.i = 3;
     tt++;
     

@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./RadxQc
+ * TDRP params for RadxQc
  **********************************************************************/
 
 //======================================================================
@@ -2859,14 +2859,41 @@ censored_output_fields = {
   }
 };
 
+///////////// censoring_ignore_isolated_gates /////////
+//
+// Option to ignore isolated gates of censoring surrounded by good data.
+//
+// If true, we will ignore isolated censoring gates if surrounded by 
+//   non-censored gates. Single censor gates will be ignored. 2 
+//   consecutive censored gates are ignored if surrounded by 2 good gates 
+//   on either side. And so on.
+//
+//
+// Type: boolean
+//
+
+censoring_ignore_isolated_gates = TRUE;
+
+///////////// censoring_max_isolated_ngates ///////////
+//
+// Max length of censor flag run to be ignored (gates).
+//
+// See 'censoring_ignore_isolated_gates'.
+//
+//
+// Type: int
+//
+
+censoring_max_isolated_ngates = 2;
+
 ///////////// censoring_fill_in_gaps //////////////////
 //
 // Option to fill in small gaps in the censoring flag.
 //
-// If true, we will in small gaps in the censoring flag. A single gate 
-//   is filled in if surrounded by good data. 2 consecutive censored gates 
-//   are filled in if surrounded by 2 censored gates on either side. And 
-//   so on.
+// If true, we will fill in small gaps in the censoring flag. A single 
+//   gate is filled in. 2 consecutive censored gates are filled in if 
+//   surrounded by 2 censored gates on either side. And so on up to 
+//   censoring_max_fill_gap_length.
 //
 //
 // Type: boolean
@@ -2874,7 +2901,7 @@ censored_output_fields = {
 
 censoring_fill_in_gaps = TRUE;
 
-///////////// censoring_max_fill_gap_length ///////////
+///////////// censoring_max_fill_ngates ///////////////
 //
 // Max length of gaps filled (gates).
 //
@@ -2884,7 +2911,7 @@ censoring_fill_in_gaps = TRUE;
 // Type: int
 //
 
-censoring_max_fill_gap_length = 3;
+censoring_max_fill_ngates = 3;
 
 //======================================================================
 //

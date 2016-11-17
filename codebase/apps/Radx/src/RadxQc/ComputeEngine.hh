@@ -232,6 +232,7 @@ private:
                                      vector<InterestMap::ImPoint> &pts);
 
   void _fillInCensorGaps();
+  void _ignoreShortCensorRuns();
 
 };
 

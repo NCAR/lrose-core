@@ -798,9 +798,13 @@ public:
   censored_output_field_t *_censored_output_fields;
   int censored_output_fields_n;
 
+  tdrp_bool_t censoring_ignore_isolated_gates;
+
+  int censoring_max_isolated_ngates;
+
   tdrp_bool_t censoring_fill_in_gaps;
 
-  int censoring_max_fill_gap_length;
+  int censoring_max_fill_ngates;
 
   output_format_t output_format;
 
@@ -833,7 +837,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[178];
+  mutable TDRPtable _table[180];
 
   const char *_className;
 

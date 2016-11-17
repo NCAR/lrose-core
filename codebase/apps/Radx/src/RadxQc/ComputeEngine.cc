@@ -607,6 +607,9 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         _censorOnInputFields();
       }
 
+      if (_params.censoring_ignore_isolated_gates) {
+        _ignoreShortCensorRuns();
+      }
       if (_params.censoring_fill_in_gaps) {
         _fillInCensorGaps();
       }
@@ -1630,13 +1633,11 @@ void ComputeEngine::_fillInCensorGaps()
   int *countSet = new int[_nGates];
   int *countNot = new int[_nGates];
   
-  /*
-   * compute the running count of gates which have the flag set and
-   * those which do not
-   *
-   * Go forward through the gates, counting up the number of gates set
-   * or not set and assigning that number to the arrays as we go.
-   */
+  // compute the running count of gates which have the flag set and
+  // those which do not
+  //
+  // Go forward through the gates, counting up the number of gates set
+  // or not set and assigning that number to the arrays as we go.
 
   int nSet = 0;
   int nNot = 0;
@@ -1653,11 +1654,9 @@ void ComputeEngine::_fillInCensorGaps()
     countNot[igate] = nNot;
   }
 
-  /*
-   * Go in reverse through the gates, taking the max non-zero
-   * values and copying them across the set or not-set regions.
-   * This makes all the counts equal in the gaps and set areas.
-   */
+  // Go in reverse through the gates, taking the max non-zero
+  // values and copying them across the set or not-set regions.
+  // This makes all the counts equal in the gaps and set areas.
 
   for (int igate = _nGates - 2; igate >= 0; igate--) {
     if (countSet[igate] != 0 &&
@@ -1670,19 +1669,17 @@ void ComputeEngine::_fillInCensorGaps()
     }
   }
 
-  /*
-   * fill in gaps
-   */
+  // fill in gaps
 
   for (int igate = 1; igate < _nGates - 1; igate++) {
-    /*
-     * is the gap small enough?
-     */
+    
+    // is the gap small enough?
+
     nNot = countNot[igate];
-    if (nNot > 0 && nNot <= _params.censoring_max_fill_gap_length) {
-      /*
-       * is it surrounded by regions at least as large as the gap?
-       */
+    if (nNot > 0 && nNot <= _params.censoring_max_fill_ngates) {
+      
+      // is it surrounded by regions at least as large as the gap?
+
       int minGateCheck = igate - nNot;
       if (minGateCheck < 0) {
         minGateCheck = 0;
@@ -1698,7 +1695,7 @@ void ComputeEngine::_fillInCensorGaps()
           nAdjacentBelow = nSet;
           break;
         }
-      } /* jgate */
+      } // jgate
       int nAdjacentAbove = 0;
       for (int jgate = igate + 1; jgate <= maxGateCheck; jgate++) {
         nSet = countSet[jgate];
@@ -1706,7 +1703,7 @@ void ComputeEngine::_fillInCensorGaps()
           nAdjacentAbove = nSet;
           break;
         }
-      } /* jgate */
+      } // jgate
       int minAdjacent = nAdjacentBelow;
       minAdjacent = MIN(minAdjacent, nAdjacentAbove);
 
@@ -1714,7 +1711,102 @@ void ComputeEngine::_fillInCensorGaps()
         _combinedCensorFlag[igate] = true;
       }
     }
-  } /* igate */
+  } // igate
+
+  delete[] countSet;
+  delete[] countNot;
+
+}
+
+///////////////////////////////////////////////////////////////
+// ignore short runs of censoring
+
+void ComputeEngine::_ignoreShortCensorRuns()
+{
+
+  
+  int *countSet = new int[_nGates];
+  int *countNot = new int[_nGates];
+  
+  // compute the running count of gates which have the flag set and
+  // those which do not
+  //
+  // Go forward through the gates, counting up the number of gates set
+  // or not set and assigning that number to the arrays as we go.
+
+  int nSet = 0;
+  int nNot = 0;
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (_combinedCensorFlag[igate]) {
+      nSet++;
+      nNot = 0;
+    } else {
+      nSet = 0;
+      nNot++;
+    }
+    countSet[igate] = nSet;
+    countNot[igate] = nNot;
+  }
+
+  // Go in reverse through the gates, taking the max non-zero
+  // values and copying them across the set or not-set regions.
+  // This makes all the counts equal in the gaps and set areas.
+
+  for (int igate = _nGates - 2; igate >= 0; igate--) {
+    if (countSet[igate] != 0 &&
+        countSet[igate] < countSet[igate+1]) {
+      countSet[igate] = countSet[igate+1];
+    }
+    if (countNot[igate] != 0 &&
+        countNot[igate] < countNot[igate+1]) {
+      countNot[igate] = countNot[igate+1];
+    }
+  }
+
+  // remove isolated gates
+
+  for (int igate = 1; igate < _nGates - 1; igate++) {
+    
+    // is the count small enough?
+
+    nSet = countSet[igate];
+    if (nSet > 0 && nSet <= _params.censoring_max_isolated_ngates) {
+      
+      // is it surrounded by regions at least as large?
+      
+      int minGateCheck = igate - nSet;
+      if (minGateCheck < 0) {
+        minGateCheck = 0;
+      }
+      int maxGateCheck = igate + nSet;
+      if (maxGateCheck > _nGates - 1) {
+        maxGateCheck = _nGates - 1;
+      }
+      int nAdjacentBelow = 0;
+      for (int jgate = igate - 1; jgate >= minGateCheck; jgate--) {
+        nNot = countNot[jgate];
+        if (nNot != 0) {
+          nAdjacentBelow = nNot;
+          break;
+        }
+      } // jgate
+      int nAdjacentAbove = 0;
+      for (int jgate = igate + 1; jgate <= maxGateCheck; jgate++) {
+        nNot = countNot[jgate];
+        if (nNot != 0) {
+          nAdjacentAbove = nNot;
+          break;
+        }
+      } // jgate
+      int minAdjacent = nAdjacentBelow;
+      minAdjacent = MIN(minAdjacent, nAdjacentAbove);
+      
+      if (minAdjacent >= nSet) {
+        _combinedCensorFlag[igate] = false;
+      }
+    }
+  } // igate
 
   delete[] countSet;
   delete[] countNot;

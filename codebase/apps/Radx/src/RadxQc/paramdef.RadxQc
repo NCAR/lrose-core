@@ -1169,15 +1169,27 @@ paramdef struct censored_output_field_t {
 
 paramdef boolean {
   p_default = TRUE;
+  p_descr = "Option to ignore isolated gates of censoring surrounded by good data.";
+  p_help = "If true, we will ignore isolated censoring gates if surrounded by non-censored gates. Single censor gates will be ignored. 2 consecutive censored gates are ignored if surrounded by 2 good gates on either side. And so on.";
+} censoring_ignore_isolated_gates;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Max length of censor flag run to be ignored (gates).";
+  p_help = "See 'censoring_ignore_isolated_gates'.";
+} censoring_max_isolated_ngates;
+
+paramdef boolean {
+  p_default = TRUE;
   p_descr = "Option to fill in small gaps in the censoring flag.";
-  p_help = "If true, we will in small gaps in the censoring flag. A single gate is filled in if surrounded by good data. 2 consecutive censored gates are filled in if surrounded by 2 censored gates on either side. And so on.";
+  p_help = "If true, we will fill in small gaps in the censoring flag. A single gate is filled in. 2 consecutive censored gates are filled in if surrounded by 2 censored gates on either side. And so on up to censoring_max_fill_gap_length.";
 } censoring_fill_in_gaps;
 
 paramdef int {
   p_default = 3;
   p_descr = "Max length of gaps filled (gates).";
   p_help = "See 'censoring_fill_in_gaps'.";
-} censoring_max_fill_gap_length;
+} censoring_max_fill_ngates;
 
 commentdef {
   p_header = "OUTPUT FILE FORMAT";
